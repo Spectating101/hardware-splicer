@@ -1,0 +1,101 @@
+{
+  "detection_summary": {
+    "total_components": 47,
+    "components_by_type": {
+      "ic_chip": 8,
+      "capacitor": 12,
+      "resistor": 27
+    },
+    "average_confidence": 0.85,
+    "detection_quality": "high"
+  },
+  "functionality_analysis": {
+    "components": [
+      {
+        "id": "ic_chip_1",
+        "type": "ic_chip",
+        "capabilities": ["arduino_projects", "iot_devices", "educational_electronics"],
+        "reuse_value": "high",
+        "difficulty": "beginner",
+        "detection_confidence": 0.92,
+        "bbox": [100, 150, 200, 250]
+      },
+      {
+        "id": "capacitor_1",
+        "type": "capacitor",
+        "capabilities": ["power_filtering", "audio_circuits", "voltage_regulation"],
+        "reuse_value": "medium",
+        "difficulty": "beginner",
+        "detection_confidence": 0.88,
+        "bbox": [300, 200, 350, 250]
+      },
+      {
+        "id": "resistor_1",
+        "type": "resistor",
+        "capabilities": ["current_limiting", "voltage_division", "biasing"],
+        "reuse_value": "low",
+        "difficulty": "beginner",
+        "detection_confidence": 0.85,
+        "bbox": [400, 300, 450, 350]
+      }
+    ],
+    "capabilities": [
+      "arduino_projects",
+      "iot_devices",
+      "educational_electronics",
+      "power_filtering",
+      "audio_circuits",
+      "voltage_regulation",
+      "current_limiting",
+      "voltage_division",
+      "biasing"
+    ],
+    "component_counts": {
+      "ic_chip": 8,
+      "capacitor": 12,
+      "resistor": 27
+    },
+    "total_components": 47,
+    "project_potential": "excellent"
+  },
+  "project_recommendations": [
+    {
+      "project_id": "weather_station",
+      "name": "Arduino Weather Station",
+      "description": "Monitor temperature, humidity, and pressure",
+      "difficulty": "beginner",
+      "time_estimate": "2-4 hours",
+      "score": 0.8,
+      "components_available": ["microcontroller"],
+      "components_needed": ["microcontroller", "sensor", "display"],
+      "instructions": "Connect sensors to Arduino, upload code, display readings"
+    },
+    {
+      "project_id": "audio_amplifier",
+      "name": "Simple Audio Amplifier",
+      "description": "Amplify audio signals for speakers",
+      "difficulty": "intermediate",
+      "time_estimate": "4-6 hours",
+      "score": 0.7,
+      "components_available": ["capacitor"],
+      "components_needed": ["op_amp", "capacitor", "speaker"],
+      "instructions": "Build amplifier circuit, test with audio source"
+    },
+    {
+      "project_id": "led_controller",
+      "name": "LED Pattern Controller",
+      "description": "Control multiple LEDs with patterns",
+      "difficulty": "beginner",
+      "time_estimate": "1-2 hours",
+      "score": 0.6,
+      "components_available": ["microcontroller", "resistor"],
+      "components_needed": ["microcontroller", "led", "resistor"],
+      "instructions": "Connect LEDs to microcontroller, program patterns"
+    }
+  ],
+  "analysis_metadata": {
+    "total_processing_time": "1.8 seconds",
+    "detection_quality": "high",
+    "project_potential": "excellent"
+  }
+} 

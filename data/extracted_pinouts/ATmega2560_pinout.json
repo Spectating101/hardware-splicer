@@ -1,0 +1,31 @@
+{
+  "ic_name": "ATmega2560",
+  "pins": [
+    {
+      "pin": 86,
+      "name": "PIN86",
+      "function": "Unknown"
+    },
+    {
+      "pin": 86,
+      "name": "PIN86",
+      "function": "Unknown"
+    },
+    {
+      "pin": 54,
+      "name": "PIN54",
+      "function": "Unknown"
+    },
+    {
+      "pin": 86,
+      "name": "PIN86",
+      "function": "Unknown"
+    },
+    {
+      "pin": 54,
+      "name": "PIN54",
+      "function": "Unknown"
+    }
+  ],
+  "total_pins": 5
+}

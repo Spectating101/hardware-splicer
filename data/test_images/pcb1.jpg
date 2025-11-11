@@ -1,0 +1,73 @@
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Page Not Found - PCBWay</title>
+
+    <style>
+        body, div, h2, p {
+            margin: 0;
+            padding: 0;
+        }
+
+        #maintain {
+            width: 960px;
+            height: 270px;
+            position: relative;
+            margin: 200px auto 0;
+            background: url(/img/images/maintaining.png) no-repeat 50% 0;
+        }
+
+            #maintain .content {
+                position: absolute;
+                left: 442px;
+                top: 100px;
+                line-height: 1.35;
+                font-size: 12px;
+                color: #333;
+                font-family: Roboto-Regular, Roboto, Helvetica Neue, Helvetica, Tahoma, Arial, sans-serif;
+            }
+
+            #maintain h2 {
+                font-size: 24px;
+                font-weight: 700;
+            }
+
+            #maintain p {
+                margin-top: 10px;
+                font-size: 14px;
+            }
+
+        #actions {
+            margin-top: 20px;
+        }
+
+        .button-primary {
+            display: inline-block;
+            height: 36px;
+            line-height: 36px;
+            padding: 0 15px;
+            border-radius: 3px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #FFF;
+            background-color: #00a63f;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="maintain">
+        <div class="content">
+            <h2>Oops, page not found!</h2>
+            <p>This page cannot currently be displayed. Our engineers are working hard to fix this problem. Please check back later...</p>
+            <div id="actions">
+                <a href="/" class="button-primary">Back to homepage </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

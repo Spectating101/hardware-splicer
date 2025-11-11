@@ -1,0 +1,14 @@
+names:
+- ic_chip
+- capacitor
+- resistor
+- connector
+- transformer
+- diode
+- led
+- transistor
+nc: 8
+path: data/pcb_dataset
+test: images/test
+train: images/train
+val: images/val

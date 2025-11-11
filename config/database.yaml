@@ -1,0 +1,5 @@
+database: circuit_ai
+host: localhost
+password: secure_password
+port: 5432
+user: circuit_ai_user

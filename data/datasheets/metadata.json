@@ -1,0 +1,24 @@
+{
+  "CH340G": {
+    "part_number": "CH340G",
+    "manufacturer": "WCH",
+    "datasheet_url": "https://wch-ic.com/downloads/CH340DS1_PDF.html",
+    "local_path": null,
+    "key_specs": {
+      "Operating Voltage": "3.3V - 5V",
+      "Interface": "USB to UART",
+      "Baud Rate": "Up to 2Mbps",
+      "Package": "SOP-16"
+    },
+    "common_issues": [
+      "Overheating (indicates short circuit)",
+      "Driver issues on macOS",
+      "ESD damage"
+    ],
+    "replacement_parts": [
+      "CH340C",
+      "CP2102",
+      "FT232RL"
+    ]
+  }
+}

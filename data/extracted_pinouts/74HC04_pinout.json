@@ -1,0 +1,66 @@
+{
+  "ic_name": "74HC04",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Unknown"
+    },
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Unknown"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Unknown"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Unknown"
+    },
+    {
+      "pin": 5,
+      "name": "PIN5",
+      "function": "Unknown"
+    },
+    {
+      "pin": 5,
+      "name": "PIN5",
+      "function": "Unknown"
+    },
+    {
+      "pin": 6,
+      "name": "PIN6",
+      "function": "Unknown"
+    },
+    {
+      "pin": 6,
+      "name": "PIN6",
+      "function": "Unknown"
+    }
+  ],
+  "total_pins": 12
+}

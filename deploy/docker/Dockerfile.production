@@ -1,0 +1,81 @@
+# Circuit.AI - Production Docker Container
+# Multi-stage build for optimal image size and security
+
+# Stage 1: Base Python image with system dependencies
+FROM python:3.11-slim AS base
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN useradd -m -u 1000 circuitai && \
+    mkdir -p /app && \
+    chown -R circuitai:circuitai /app
+
+WORKDIR /app
+
+# Stage 2: Dependencies
+FROM base AS dependencies
+
+# Copy requirements first for better layer caching
+COPY --chown=circuitai:circuitai requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Stage 3: Application
+FROM dependencies AS application
+
+# Copy application code
+COPY --chown=circuitai:circuitai . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p \
+    data/uploads \
+    data/annotated \
+    data/cache \
+    data/knowledge_base \
+    models/yolo \
+    logs \
+    && chown -R circuitai:circuitai /app
+
+# Switch to non-root user
+USER circuitai
+
+# Set environment variables
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    HOST=0.0.0.0 \
+    PORT=8000 \
+    WORKERS=4 \
+    LOG_LEVEL=info \
+    ENVIRONMENT=production
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Use gunicorn for production with uvicorn workers
+CMD ["gunicorn", "src.api.main:app", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--workers", "4", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "120", \
+     "--keep-alive", "5", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "--log-level", "info"]

@@ -1,0 +1,31 @@
+{
+  "ic_name": "PIC16F877A",
+  "pins": [
+    {
+      "pin": 38,
+      "name": "PIN38",
+      "function": "PORTD is a bidirectional I/O port or Parallel Slave\nPort when interfacing to a microprocessor bus.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data.\nDigital I/O.\nParallel Slave Port data."
+    },
+    {
+      "pin": 25,
+      "name": "PIN25",
+      "function": "PORTE is a bidirectional I/O port.\nDigital I/O.\nRead control for Parallel Slave Port.\nAnalog input 5.\nDigital I/O.\nWrite control for Parallel Slave Port.\nAnalog input 6.\nDigital I/O.\nChip select control for Parallel Slave Port.\nAnalog input 7."
+    },
+    {
+      "pin": 6,
+      "name": "PIN6",
+      "function": "Ground reference for logic and I/O pins."
+    },
+    {
+      "pin": 7,
+      "name": "PIN7",
+      "function": "Positive supply for logic and I/O pins."
+    },
+    {
+      "pin": 13,
+      "name": "PIN13",
+      "function": "These pins are not internally connected. These pins\nshould be left unconnected."
+    }
+  ],
+  "total_pins": 5
+}

@@ -1,0 +1,77 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+venv3/
+ENV/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Models (too large)
+*.pt
+*.onnx
+*.torchscript
+models/pcb/*.onnx
+models/pcb/*.pt
+
+# Training Runs (too large)
+pcb_runs/
+runs/
+
+# Data & Datasets (too large)
+data/uploads/*
+data/cache/*
+data/stackexchange/*
+data/manuals/*
+data/knowledge_base/*
+data/processed/*
+datasets/
+downloads/
+*.zip
+*.7z
+*.gz
+ElectroCom61*
+archive.zip
+logs/
+pcb_runs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak

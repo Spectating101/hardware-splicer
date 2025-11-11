@@ -1,0 +1,96 @@
+{
+  "ic_name": "ESP32",
+  "pins": [
+    {
+      "pin": 32,
+      "name": "ADC1_CH4",
+      "function": "Unknown"
+    },
+    {
+      "pin": 32,
+      "name": "ADC1_CH5",
+      "function": "Unknown"
+    },
+    {
+      "pin": 1,
+      "name": "ADC1_CH6",
+      "function": "Unknown"
+    },
+    {
+      "pin": 2,
+      "name": "ADC1_CH7",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "ADC2_CH0",
+      "function": "Unknown"
+    },
+    {
+      "pin": 0,
+      "name": "ADC2_CH1",
+      "function": "Unknown"
+    },
+    {
+      "pin": 2,
+      "name": "ADC2_CH2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 27,
+      "name": "ADC2_CH7",
+      "function": "Unknown"
+    },
+    {
+      "pin": 25,
+      "name": "ADC2_CH8",
+      "function": "Unknown"
+    },
+    {
+      "pin": 26,
+      "name": "ADC2_CH9",
+      "function": "Unknown"
+    },
+    {
+      "pin": 25,
+      "name": "DAC_1",
+      "function": "Two8-bitDACs"
+    },
+    {
+      "pin": 26,
+      "name": "DAC_2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "TOUCH0",
+      "function": "Capacitivetouchsensors"
+    },
+    {
+      "pin": 0,
+      "name": "TOUCH1",
+      "function": "Unknown"
+    },
+    {
+      "pin": 2,
+      "name": "TOUCH2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 27,
+      "name": "TOUCH7",
+      "function": "Unknown"
+    },
+    {
+      "pin": 32,
+      "name": "TOUCH8",
+      "function": "Unknown"
+    },
+    {
+      "pin": 32,
+      "name": "TOUCH9",
+      "function": "Unknown"
+    }
+  ],
+  "total_pins": 18
+}

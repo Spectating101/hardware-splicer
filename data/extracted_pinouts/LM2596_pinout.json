@@ -1,0 +1,31 @@
+{
+  "ic_name": "LM2596",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "This is the positive input supply for the IC switching regulator. A suitable input bypass\ncapacitor must be present at this pin to minimize voltage transients and to supply the\nswitching currents required by the regulator."
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Internal switch. The voltage at this pin switches between approximately (+V \u2212 V ) and\nIN SAT\napproximately \u22120.5 V, with a duty cycle of V / V . To minimize coupling to sensitive\nOUT IN\ncircuitry, the PCB copper area connected to this pin must be kept to a minimum."
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Circuit ground"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Senses the regulated output voltage to complete the feedback loop."
+    },
+    {
+      "pin": 5,
+      "name": "PIN5",
+      "function": "Allows the switching regulator circuit to be shut down using logic signals thus dropping\nthe total input supply current to approximately 80 \u00b5A. Pulling this pin below a threshold\nvoltage of approximately 1.3 V turns the regulator on, and pulling this pin above 1.3 V (up\nto a maximum of 25 V) shuts the regulator down. If this shutdown feature is not required,\nthe ON/OFF pin can be wired to the ground pin or it can be left open. In either case, the\nregulator will be in the ON condition."
+    }
+  ],
+  "total_pins": 5
+}

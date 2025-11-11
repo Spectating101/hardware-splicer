@@ -1,0 +1,101 @@
+{
+  "ic_name": "CP2102",
+  "pins": [
+    {
+      "pin": 6,
+      "name": "V\nDD",
+      "function": "3.0\u20133.6V Power Supply Voltage Input.\n3.3V Voltage Regulator Output.\nSee \"10. Voltage Regulator\" on page 19."
+    },
+    {
+      "pin": 3,
+      "name": "GND",
+      "function": "Ground"
+    },
+    {
+      "pin": 9,
+      "name": "RST",
+      "function": "Device Reset. Open-drain output of internal POR or V monitor. An\nDD\nexternal source can initiate a system reset by driving this pin low for\nat least 15\u00b5s."
+    },
+    {
+      "pin": 7,
+      "name": "REGIN",
+      "function": "5V Regulator Input. This pin is the input to the on-chip voltage regu-\nlator."
+    },
+    {
+      "pin": 8,
+      "name": "VBUS",
+      "function": "VBUS Sense Input. This pin should be connected to the VBUS signal\nof a USB network. A 5V signal on this pin indicates a USB network\nconnection."
+    },
+    {
+      "pin": 18,
+      "name": "NC1 /\nV 2\nPP",
+      "function": "This pin should be left unconnected or tied to V . This pin is unused\nDD\non the CP2102 and may be connected to the Vpp programming\ncapacitor to maintain board compatibility with the CP2109.\nV Programming Supply Voltage\nPP"
+    },
+    {
+      "pin": 4,
+      "name": "D+",
+      "function": "USB D+"
+    },
+    {
+      "pin": 5,
+      "name": "D\u2013",
+      "function": "USB D\u2013"
+    },
+    {
+      "pin": 26,
+      "name": "TXD",
+      "function": "Asynchronous data output (UART Transmit)"
+    },
+    {
+      "pin": 25,
+      "name": "RXD",
+      "function": "Asynchronous data input (UART Receive)"
+    },
+    {
+      "pin": 233,
+      "name": "CTS",
+      "function": "Clear To Send control input (active low)"
+    },
+    {
+      "pin": 243,
+      "name": "RTS",
+      "function": "Ready to Send control output (active low)"
+    },
+    {
+      "pin": 273,
+      "name": "DSR",
+      "function": "Data Set Ready control input (active low)"
+    },
+    {
+      "pin": 283,
+      "name": "DTR",
+      "function": "Data Terminal Ready control output (active low)"
+    },
+    {
+      "pin": 13,
+      "name": "DCD",
+      "function": "Data Carrier Detect control input (active low)"
+    },
+    {
+      "pin": 23,
+      "name": "RI",
+      "function": "Ring Indicator control input (active low)"
+    },
+    {
+      "pin": 123,
+      "name": "SUSPEND",
+      "function": "This pin is driven high when the CP2102/9 enters the USB suspend\nstate."
+    },
+    {
+      "pin": 113,
+      "name": "SUSPEND",
+      "function": "This pin is driven low when the CP2102/9 enters the USB suspend\nstate."
+    },
+    {
+      "pin": 10,
+      "name": "NC",
+      "function": "These pins should be left unconnected or tied to V .\nDD"
+    }
+  ],
+  "total_pins": 19
+}
