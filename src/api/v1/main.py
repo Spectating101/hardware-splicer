@@ -19,7 +19,8 @@ from ...vision.loader import get_detector, preprocess_image, postprocess_detecti
 from .auth import verify_api_key, get_current_user
 from .models import (
     AnalysisRequest, AnalysisResponse, ComponentInfo, ProjectTemplate,
-    ErrorResponse, SuccessResponse, BatchAnalysisRequest, BatchAnalysisResponse
+    ErrorResponse, SuccessResponse, BatchAnalysisRequest, BatchAnalysisResponse,
+    Component, AnalysisMetadata
 )
 from .rate_limiting import rate_limit
 from .metrics import REQUEST_COUNT, ANALYZE_LATENCY, BATCH_ANALYZE_LATENCY
@@ -658,6 +659,157 @@ async def analyze_pcb_yolo(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Analysis failed"
+        )
+
+
+@app.post("/detect-components", response_model=AnalysisResponse)
+@rate_limit(requests_per_minute=30, requests_per_hour=500)
+async def detect_pcb_components(
+    file: UploadFile = File(...),
+    confidence: float = 0.5,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Detect PCB components using Circuit-AI trained YOLOv8 model.
+    
+    This endpoint uses the trained real_pcb_v1 model which detects:
+    - Cap1, Cap2, Cap3, Cap4 (Capacitors)
+    - MOSFET (Transistor)
+    - Mov (Metal Oxide Varistor)
+    - Resistor, Resestor
+    - Transformer
+    """
+    try:
+        # Validate file
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must be an image"
+            )
+        
+        # Read image as PIL Image for enhanced detector
+        image_data = await file.read()
+        try:
+            img_pil = Image.open(io.BytesIO(image_data))
+            img_array = np.array(img_pil)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to process image: {str(e)}"
+            )
+        
+        # Import enhanced detector which now uses trained model
+        from ...vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
+        
+        # Initialize detector (loads trained model on first use)
+        detector = EnhancedComponentDetector()
+        
+        # Run detection
+        start_time = time.perf_counter()
+        detections = detector.detect_components(
+            img_array,
+            methods=[DetectionMethod.YOLO],
+            enable_ocr=False,
+            enable_quality_assessment=True
+        )
+        inference_time = time.perf_counter() - start_time
+        
+        # Filter by confidence
+        detections = [d for d in detections if d.confidence >= confidence]
+        
+        # Generate analysis ID
+        analysis_id = str(uuid.uuid4())
+        timestamp = datetime.now(timezone.utc).isoformat()
+        
+        # Component class mappings for better descriptions
+        component_mappings = {
+            "Cap1": {"name": "Capacitor Type 1", "function": "Energy storage in electronic circuits", "value": 0.10},
+            "Cap2": {"name": "Capacitor Type 2", "function": "Energy storage in electronic circuits", "value": 0.15},
+            "Cap3": {"name": "Capacitor Type 3", "function": "Energy storage in electronic circuits", "value": 0.20},
+            "Cap4": {"name": "Capacitor Type 4", "function": "Energy storage in electronic circuits", "value": 0.25},
+            "MOSFET": {"name": "MOSFET Transistor", "function": "Switching and amplification in power electronics", "value": 0.50},
+            "Mov": {"name": "Metal Oxide Varistor", "function": "Surge protection and voltage regulation", "value": 0.30},
+            "Resistor": {"name": "Resistor", "function": "Current limiting and voltage division", "value": 0.05},
+            "Resestor": {"name": "Resistor (Variant)", "function": "Current limiting and voltage division", "value": 0.05},
+            "Transformer": {"name": "Transformer", "function": "Voltage and impedance transformation", "value": 1.50},
+        }
+        
+        # Create response components
+        components = []
+        total_value = 0.0
+        
+        for detection in detections:
+            class_name = detection.class_name
+            mapping = component_mappings.get(class_name, {"name": class_name, "function": "Unknown component", "value": 0.10})
+            
+            # Calculate center coordinates
+            bbox = detection.bbox  # [x1, y1, x2, y2]
+            center_x = (bbox[0] + bbox[2]) / 2
+            center_y = (bbox[1] + bbox[3]) / 2
+            
+            component = Component(
+                type=class_name,
+                name=mapping["name"],
+                confidence=float(detection.confidence),
+                bbox=list(bbox),
+                center={"x": center_x, "y": center_y},
+                value=mapping["value"],
+                function=mapping["function"],
+                specifications={
+                    "detection_method": "YOLOv8m",
+                    "model": "real_pcb_v1",
+                    "class": class_name
+                },
+                educational_value="High",
+                reuse_value="High"
+            )
+            components.append(component)
+            total_value += mapping["value"]
+        
+        # Track usage
+        usage_tracker.track_request(
+            user_id=current_user.get("user_id"),
+            endpoint="detect-components",
+            success=True,
+            analysis_time=inference_time,
+            components_detected=len(components)
+        )
+        
+        return AnalysisResponse(
+            success=True,
+            analysis_id=analysis_id,
+            components=components,
+            total_value=total_value,
+            analysis_time=inference_time,
+            timestamp=timestamp,
+            metadata=AnalysisMetadata(
+                analysis_id=analysis_id,
+                user_id=current_user.get("user_id"),
+                timestamp=timestamp,
+                processing_time=inference_time,
+                file_name=file.filename,
+                file_size=len(image_data),
+                backend_used="Circuit-AI YOLOv8m real_pcb_v1",
+                ocr_enabled=False
+            )
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Component detection error: {e}", exc_info=True)
+        
+        usage_tracker.track_request(
+            user_id=current_user.get("user_id"),
+            endpoint="detect-components",
+            success=False,
+            analysis_time=0.0,
+            components_detected=0
+        )
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Detection failed: {str(e)}"
         )
 
 if __name__ == "__main__":

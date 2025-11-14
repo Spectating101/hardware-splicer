@@ -4,10 +4,11 @@ Circuit.AI Usage Tracking Service
 Tracks API usage, enforces quotas, and manages billing.
 """
 
+from __future__ import annotations
 import redis
 import json
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from loguru import logger
 import os
 

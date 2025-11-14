@@ -59,11 +59,17 @@ class EnhancedComponentDetector:
         # Initialize models
         self._initialize_models()
         
-        # Component database
+        # Component database - Updated for Circuit-AI trained model
         self.component_classes = [
-            'ic_chip', 'capacitor', 'resistor', 'connector',
-            'transformer', 'diode', 'led', 'transistor',
-            'inductor', 'crystal', 'switch', 'relay'
+            'Cap1',           # 0 - Capacitor type 1
+            'Cap2',           # 1 - Capacitor type 2
+            'Cap3',           # 2 - Capacitor type 3
+            'Cap4',           # 3 - Capacitor type 4
+            'MOSFET',         # 4 - MOSFET transistor
+            'Mov',            # 5 - MOV (Metal Oxide Varistor)
+            'Resestor',       # 6 - Resistor (note: typo in dataset)
+            'Resistor',       # 7 - Resistor
+            'Transformer'     # 8 - Transformer
         ]
         
         # Quality assessment parameters
@@ -81,12 +87,22 @@ class EnhancedComponentDetector:
     
     def _initialize_models(self):
         """Initialize detection models."""
-        # YOLO model
+        # Try loading trained PCB model first, fall back to pretrained
         if YOLO_AVAILABLE:
             try:
-                self.models['yolo'] = YOLO('yolov8n.pt')
+                # Load trained Circuit-AI PCB component detection model
+                import os
+                trained_model_path = 'pcb_runs/real_pcb_v1/weights/best.pt'
+                if os.path.exists(trained_model_path):
+                    self.models['yolo'] = YOLO(trained_model_path)
+                    logger.info("✅ Loaded trained Circuit-AI PCB model (real_pcb_v1)")
+                else:
+                    # Fallback to pretrained model
+                    self.models['yolo'] = YOLO('yolov8n.pt')
+                    logger.info("⚠️  Trained model not found, using pretrained YOLOv8n")
+                
                 self.models['yolo'].to(self.device)
-                logger.info("YOLO model loaded successfully")
+                logger.info(f"YOLO model loaded on {self.device}")
             except Exception as e:
                 logger.warning(f"Failed to load YOLO model: {e}")
         
