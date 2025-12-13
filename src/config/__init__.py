@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     # Auth
     api_key: Optional[str] = None
+    jwt_secret: Optional[str] = None
 
     # Storage
     upload_dir: str = "data/uploads"

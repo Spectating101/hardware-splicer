@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 import time
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import io
 from typing import Dict, Any, List, Optional
 from loguru import logger
@@ -40,6 +40,51 @@ app = FastAPI(
 # Security scheme
 security = HTTPBearer()
 
+# Upload validation settings
+MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10MB
+MAX_IMAGE_DIMENSION = 8000           # 8K max dimension to prevent memory exhaustion
+MOBILE_OPTIMIZED_DIMENSION = 4096    # Downscale large handheld captures for stability
+
+# Basic image validation helper to avoid oversized or malformed uploads
+def _validate_image_upload(contents: bytes, filename: Optional[str] = None) -> Image.Image:
+    if not contents:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty"
+        )
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size must be less than 10MB"
+        )
+    try:
+        image = Image.open(io.BytesIO(contents))
+        image.verify()  # validate header without fully decoding
+        # Re-open to a clean handle, fix orientation, and normalize mode
+        image = ImageOps.exif_transpose(Image.open(io.BytesIO(contents)))
+        image = image.convert("RGB")
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or corrupted image file"
+        )
+    
+    width, height = image.size
+    if width > MAX_IMAGE_DIMENSION or height > MAX_IMAGE_DIMENSION:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Image dimensions exceed {MAX_IMAGE_DIMENSION}px"
+        )
+
+    # Downscale oversized handheld captures to keep memory and latency stable
+    max_dim = max(width, height)
+    if max_dim > MOBILE_OPTIMIZED_DIMENSION:
+        scale = MOBILE_OPTIMIZED_DIMENSION / float(max_dim)
+        new_size = (int(width * scale), int(height * scale))
+        image = image.resize(new_size, Image.Resampling.LANCZOS if hasattr(Image, "Resampling") else Image.LANCZOS)
+
+    return image
+
 # Add CORS middleware
 # Configure allowed origins from environment or use safe defaults
 allowed_origins = settings.cors_origins if hasattr(settings, 'cors_origins') else [
@@ -65,6 +110,16 @@ app.include_router(billing_router)
 
 # Global model cache
 _yolo_model = None
+_enhanced_detector_singleton: Optional[Any] = None
+
+
+def get_enhanced_detector():
+    """Lazy-load and cache the enhanced detector to avoid reloading models per request."""
+    global _enhanced_detector_singleton
+    if _enhanced_detector_singleton is None:
+        from ...vision.enhanced_detector import EnhancedComponentDetector
+        _enhanced_detector_singleton = EnhancedComponentDetector()
+    return _enhanced_detector_singleton
 
 # Health check endpoint
 @app.get("/health", response_model=SuccessResponse)
@@ -109,17 +164,11 @@ async def analyze_pcb(
                 detail="File must be an image (PNG, JPG, JPEG)"
             )
         
-        # Validate file size (10MB limit)
-        if file.size and file.size > 10 * 1024 * 1024:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail="File size must be less than 10MB"
-            )
-        
-        # Read and process image
+        # Read and process image with safety checks
         contents = await file.read()
-        image = Image.open(io.BytesIO(contents))
+        image = _validate_image_upload(contents, file.filename)
         image_np = np.array(image)
+        file_size = len(contents)
         
         # Generate analysis ID
         analysis_id = str(uuid.uuid4())
@@ -146,7 +195,7 @@ async def analyze_pcb(
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "processing_time": round(elapsed, 4),
             "file_name": file.filename,
-            "file_size": file.size,
+            "file_size": file_size,
             "backend_used": backend or "enhanced",
             "ocr_enabled": enable_ocr
         }
@@ -210,7 +259,7 @@ async def analyze_batch(
                 # Decode base64 image
                 import base64
                 image_bytes = base64.b64decode(item.content_base64)
-                image = Image.open(io.BytesIO(image_bytes))
+                image = _validate_image_upload(image_bytes, item.filename)
                 image_np = np.array(image)
                 
                 # Analyze
@@ -577,6 +626,7 @@ async def analyze_pcb_yolo(
         
         # Read image data
         image_data = await file.read()
+        _validate_image_upload(image_data, file.filename)
         
         # Preprocess image
         img = preprocess_image(image_data)
@@ -689,20 +739,14 @@ async def detect_pcb_components(
         
         # Read image as PIL Image for enhanced detector
         image_data = await file.read()
-        try:
-            img_pil = Image.open(io.BytesIO(image_data))
-            img_array = np.array(img_pil)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to process image: {str(e)}"
-            )
+        img_pil = _validate_image_upload(image_data, file.filename)
+        img_array = np.array(img_pil)
         
         # Import enhanced detector which now uses trained model
-        from ...vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
+        from ...vision.enhanced_detector import DetectionMethod
         
-        # Initialize detector (loads trained model on first use)
-        detector = EnhancedComponentDetector()
+        # Reuse cached detector (loads trained model on first use)
+        detector = get_enhanced_detector()
         
         # Run detection
         start_time = time.perf_counter()

@@ -9,6 +9,9 @@ from enum import Enum
 import time
 from concurrent.futures import ThreadPoolExecutor
 import threading
+import sys
+import os # Added for knowledge base loading
+
 
 try:
     from ultralytics import YOLO
@@ -46,7 +49,7 @@ class ComponentDetection:
 class EnhancedComponentDetector:
     """Enhanced component detector with multi-model ensemble and advanced features."""
     
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, knowledge_base_path: str = None):
         self.config = config or {}
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.models = {}
@@ -56,6 +59,15 @@ class EnhancedComponentDetector:
             'custom': 0.1
         }
         
+        self.knowledge_base_path = knowledge_base_path
+        self.knowledge = None
+        if self.knowledge_base_path:
+            # Dynamically load CircuitKnowledgeBase
+            # Need to add the parent dir of src to path for this import to work
+            sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..')) # Path to Circuit-AI/src
+            from circuit_agent import CircuitKnowledgeBase
+            self.knowledge = CircuitKnowledgeBase(knowledge_path=self.knowledge_base_path)
+
         # Initialize models
         self._initialize_models()
         
@@ -69,7 +81,8 @@ class EnhancedComponentDetector:
             'Mov',            # 5 - MOV (Metal Oxide Varistor)
             'Resestor',       # 6 - Resistor (note: typo in dataset)
             'Resistor',       # 7 - Resistor
-            'Transformer'     # 8 - Transformer
+            'Transformer',     # 8 - Transformer
+            'Arduino Uno'     # 9 - Arduino Uno Board (added for detection)
         ]
         
         # Quality assessment parameters
@@ -79,6 +92,20 @@ class EnhancedComponentDetector:
             'max_aspect_ratio': 10.0,
             'min_text_confidence': 0.5
         }
+
+        # Per-class minimum confidence (tuned for PCB parts; extend as new labels are added)
+        self.class_conf_thresholds = {
+            'Cap1': 0.25,
+            'Cap2': 0.25,
+            'Cap3': 0.25,
+            'Cap4': 0.25,
+            'MOSFET': 0.3,
+            'Mov': 0.3,
+            'Resistor': 0.25,
+            'Resestor': 0.25,
+            'Transformer': 0.35,
+            'Arduino Uno': 0.6 # High confidence for board detection
+        }
         
         # Thread pool for parallel processing
         self.executor = ThreadPoolExecutor(max_workers=4)
@@ -87,41 +114,37 @@ class EnhancedComponentDetector:
     
     def _initialize_models(self):
         """Initialize detection models."""
-        # Try loading trained PCB model first, fall back to pretrained
         if YOLO_AVAILABLE:
             try:
                 # Load trained Circuit-AI PCB component detection model
-                import os
-                trained_model_path = 'pcb_runs/real_pcb_v1/weights/best.pt'
+                trained_model_path = os.path.join(os.path.dirname(__file__), '../../pcb_runs/real_pcb_v1/weights/best.pt')
                 if os.path.exists(trained_model_path):
                     self.models['yolo'] = YOLO(trained_model_path)
                     logger.info("✅ Loaded trained Circuit-AI PCB model (real_pcb_v1)")
                 else:
-                    # Fallback to pretrained model
                     self.models['yolo'] = YOLO('yolov8n.pt')
-                    logger.info("⚠️  Trained model not found, using pretrained YOLOv8n")
+                    logger.warning("⚠️  Trained model not found, using pretrained YOLOv8n")
                 
                 self.models['yolo'].to(self.device)
                 logger.info(f"YOLO model loaded on {self.device}")
             except Exception as e:
                 logger.warning(f"Failed to load YOLO model: {e}")
         
-        # Custom model (placeholder for future implementation)
         self.models['custom'] = None
-        
         logger.info(f"Initialized {len(self.models)} detection models")
     
     def detect_components(self, image: np.ndarray, 
                          methods: List[DetectionMethod] = None,
                          enable_ocr: bool = True,
-                         enable_quality_assessment: bool = True) -> List[ComponentDetection]:
+                         enable_quality_assessment: bool = True,
+                         mobile_optimized: bool = False) -> List[ComponentDetection]:
         """Detect components using multiple methods."""
         if methods is None:
             methods = [DetectionMethod.ENSEMBLE]
-        
+
+        image = self._normalize_image(image, mobile_optimized)
         all_detections = []
         
-        # Run detections in parallel
         futures = []
         for method in methods:
             if method == DetectionMethod.ENSEMBLE:
@@ -141,7 +164,6 @@ class EnhancedComponentDetector:
                     self.executor.submit(self._detect_with_custom, image)
                 )
         
-        # Collect results
         for future in futures:
             try:
                 detections = future.result(timeout=30)
@@ -149,14 +171,11 @@ class EnhancedComponentDetector:
             except Exception as e:
                 logger.error(f"Detection method failed: {e}")
         
-        # Post-process detections
+        all_detections = self._apply_class_thresholds(all_detections)
         if enable_quality_assessment:
             all_detections = self._assess_quality(all_detections)
         
-        # Remove duplicates and merge overlapping detections
         all_detections = self._merge_detections(all_detections)
-        
-        # Sort by confidence
         all_detections.sort(key=lambda x: x.confidence, reverse=True)
         
         logger.info(f"Detected {len(all_detections)} components using {len(methods)} methods")
@@ -166,21 +185,19 @@ class EnhancedComponentDetector:
         """Ensemble detection using multiple methods."""
         detections = []
         
-        # YOLO detection
-        if 'yolo' in self.models:
+        if 'yolo' not in self.models:
+            logger.warning("YOLO model not loaded for ensemble detection.")
+        else:
             yolo_detections = self._detect_with_yolo(image)
             detections.extend(yolo_detections)
         
-        # Classical detection
         classical_detections = self._detect_with_classical(image)
         detections.extend(classical_detections)
         
-        # Custom detection
         if self.models['custom']:
             custom_detections = self._detect_with_custom(image)
             detections.extend(custom_detections)
         
-        # OCR enrichment
         if enable_ocr and OCR_AVAILABLE:
             self._enrich_with_ocr(image, detections)
         
@@ -203,7 +220,6 @@ class EnhancedComponentDetector:
                         confidence = box.conf[0].item()
                         class_id = int(box.cls[0].item())
                         
-                        # Map class ID to component type
                         class_name = self._map_class_id_to_name(class_id)
                         
                         detection = ComponentDetection(
@@ -213,11 +229,10 @@ class EnhancedComponentDetector:
                             method=DetectionMethod.YOLO,
                             metadata={
                                 'class_id': class_id,
-                                'model': 'yolov8n'
+                                'model': self.models['yolo'].model.yaml.get('name', 'yolov8')
                             }
                         )
                         
-                        # Calculate additional properties
                         self._calculate_detection_properties(detection)
                         detections.append(detection)
             
@@ -232,34 +247,22 @@ class EnhancedComponentDetector:
         detections = []
         
         try:
-            # Convert to grayscale
             gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-            
-            # Edge detection
             edges = cv2.Canny(gray, 50, 150)
-            
-            # Find contours
             contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             
             for contour in contours:
-                # Filter by area
                 area = cv2.contourArea(contour)
                 if area < self.quality_thresholds['min_area']:
                     continue
                 
-                # Get bounding box
                 x, y, w, h = cv2.boundingRect(contour)
                 x1, y1, x2, y2 = x, y, x + w, y + h
-                
-                # Calculate aspect ratio
                 aspect_ratio = w / h if h > 0 else 0
                 if aspect_ratio > self.quality_thresholds['max_aspect_ratio']:
                     continue
                 
-                # Classify component based on shape and size
                 class_name = self._classify_by_shape(contour, area, aspect_ratio)
-                
-                # Calculate confidence based on contour properties
                 confidence = self._calculate_classical_confidence(contour, area, aspect_ratio)
                 
                 detection = ComponentDetection(
@@ -274,7 +277,6 @@ class EnhancedComponentDetector:
                     }
                 )
                 
-                # Calculate additional properties
                 self._calculate_detection_properties(detection)
                 detections.append(detection)
             
@@ -286,8 +288,6 @@ class EnhancedComponentDetector:
     
     def _detect_with_custom(self, image: np.ndarray) -> List[ComponentDetection]:
         """Detect components using custom model (placeholder)."""
-        # This would implement custom detection logic
-        # For now, return empty list
         return []
     
     def _enrich_with_ocr(self, image: np.ndarray, detections: List[ComponentDetection]):
@@ -297,14 +297,12 @@ class EnhancedComponentDetector:
         
         try:
             for detection in detections:
-                # Extract ROI
                 x1, y1, x2, y2 = [int(coord) for coord in detection.bbox]
                 roi = image[y1:y2, x1:x2]
                 
                 if roi.size == 0:
                     continue
                 
-                # Perform OCR
                 try:
                     text = pytesseract.image_to_string(roi, config='--psm 6')
                     text = text.strip()
@@ -312,6 +310,9 @@ class EnhancedComponentDetector:
                     if text:
                         detection.text_content = text
                         detection.metadata['ocr_confidence'] = 0.8  # Placeholder
+                        normalized = self._normalize_part_number(text)
+                        if normalized:
+                            detection.metadata['part_number'] = normalized
                 except Exception as e:
                     logger.debug(f"OCR failed for detection: {e}")
                     
@@ -336,19 +337,15 @@ class EnhancedComponentDetector:
         """Calculate quality score for a detection."""
         score = detection.confidence
         
-        # Penalize very small detections
         if detection.area and detection.area < 200:
             score *= 0.8
         
-        # Penalize extreme aspect ratios
         if detection.aspect_ratio and detection.aspect_ratio > 5.0:
             score *= 0.9
         
-        # Bonus for text content
         if detection.text_content:
             score *= 1.1
         
-        # Method-specific adjustments
         if detection.method == DetectionMethod.ENSEMBLE:
             score *= 1.05
         
@@ -359,7 +356,6 @@ class EnhancedComponentDetector:
         if not detections:
             return []
         
-        # Sort by confidence
         detections.sort(key=lambda x: x.confidence, reverse=True)
         
         merged = []
@@ -372,7 +368,6 @@ class EnhancedComponentDetector:
             merged_group = [detection]
             used.add(i)
             
-            # Find overlapping detections
             for j, other in enumerate(detections[i+1:], i+1):
                 if j in used:
                     continue
@@ -381,7 +376,6 @@ class EnhancedComponentDetector:
                     merged_group.append(other)
                     used.add(j)
             
-            # Merge the group
             if len(merged_group) > 1:
                 merged_detection = self._merge_detection_group(merged_group)
                 merged.append(merged_detection)
@@ -396,7 +390,6 @@ class EnhancedComponentDetector:
         x1_1, y1_1, x2_1, y2_1 = det1.bbox
         x1_2, y1_2, x2_2, y2_2 = det2.bbox
         
-        # Calculate intersection
         x1_i = max(x1_1, x1_2)
         y1_i = max(y1_1, y1_2)
         x2_i = min(x2_1, x2_2)
@@ -407,9 +400,8 @@ class EnhancedComponentDetector:
         
         intersection = (x2_i - x1_i) * (y2_i - y1_i)
         area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
-        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2) 
         
-        # Calculate IoU
         union = area1 + area2 - intersection
         iou = intersection / union if union > 0 else 0
         
@@ -417,10 +409,8 @@ class EnhancedComponentDetector:
     
     def _merge_detection_group(self, detections: List[ComponentDetection]) -> ComponentDetection:
         """Merge a group of overlapping detections."""
-        # Use the highest confidence detection as base
         base = max(detections, key=lambda x: x.confidence)
         
-        # Calculate weighted average bbox
         total_weight = sum(d.confidence for d in detections)
         weighted_bbox = [0, 0, 0, 0]
         
@@ -429,7 +419,6 @@ class EnhancedComponentDetector:
             for i in range(4):
                 weighted_bbox[i] += detection.bbox[i] * weight
         
-        # Create merged detection
         merged = ComponentDetection(
             bbox=weighted_bbox,
             class_name=base.class_name,
@@ -441,7 +430,6 @@ class EnhancedComponentDetector:
             }
         )
         
-        # Calculate additional properties
         self._calculate_detection_properties(merged)
         
         return merged
@@ -450,16 +438,51 @@ class EnhancedComponentDetector:
         """Calculate additional properties for a detection."""
         x1, y1, x2, y2 = detection.bbox
         
-        # Center point
         detection.center = ((x1 + x2) / 2, (y1 + y2) / 2)
-        
-        # Area
         detection.area = (x2 - x1) * (y2 - y1)
         
-        # Aspect ratio
         width = x2 - x1
         height = y2 - y1
         detection.aspect_ratio = width / height if height > 0 else 0
+
+    def _normalize_image(self, image: np.ndarray, mobile_optimized: bool) -> np.ndarray:
+        """Ensure image is RGB uint8 and optionally downscale for mobile captures."""
+        img = image
+        if img.dtype != np.uint8:
+            img = np.clip(img, 0, 255).astype(np.uint8)
+        if img.ndim == 2:
+            img = np.stack([img] * 3, axis=-1)
+        elif img.ndim == 3 and img.shape[2] == 4:
+            img = img[:, :, :3]
+
+        if mobile_optimized:
+            max_dim = max(img.shape[0], img.shape[1])
+            mobile_dim = 4096
+            if max_dim > mobile_dim:
+                scale = mobile_dim / float(max_dim)
+                new_h = int(img.shape[0] * scale)
+                new_w = int(img.shape[1] * scale)
+                img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        return img
+
+    def _apply_class_thresholds(self, detections: List[ComponentDetection]) -> List[ComponentDetection]:
+        """Filter detections using per-class confidence thresholds."""
+        filtered = []
+        for det in detections:
+            threshold = self.class_conf_thresholds.get(det.class_name, self.quality_thresholds['min_confidence'])
+            if det.confidence >= threshold:
+                filtered.append(det)
+        return filtered
+
+    def _normalize_part_number(self, text: str) -> Optional[str]:
+        """Normalize OCR text into a likely part number token."""
+        candidate = text.upper().replace("\n", " ").replace("\r", " ")
+        tokens = [t.strip() for t in candidate.split(" ") if len(t.strip()) >= 3]
+        if not tokens:
+            return None
+        longest = max(tokens, key=len)
+        normalized = "".join(ch for ch in longest if ch.isalnum() or ch in ("-", "_"))
+        return normalized or None
     
     def _map_class_id_to_name(self, class_id: int) -> str:
         """Map YOLO class ID to component name."""
@@ -469,7 +492,6 @@ class EnhancedComponentDetector:
     
     def _classify_by_shape(self, contour: np.ndarray, area: float, aspect_ratio: float) -> str:
         """Classify component based on shape and size."""
-        # Simple classification based on shape properties
         if aspect_ratio > 3.0:
             return 'resistor'
         elif aspect_ratio < 0.5:
@@ -481,18 +503,14 @@ class EnhancedComponentDetector:
     
     def _calculate_classical_confidence(self, contour: np.ndarray, area: float, aspect_ratio: float) -> float:
         """Calculate confidence for classical detection."""
-        # Base confidence on contour properties
         confidence = 0.5
         
-        # Adjust based on area
         if 100 <= area <= 5000:
             confidence += 0.2
         
-        # Adjust based on aspect ratio
         if 0.2 <= aspect_ratio <= 5.0:
             confidence += 0.2
         
-        # Adjust based on contour complexity
         if len(contour) > 10:
             confidence += 0.1
         
@@ -509,17 +527,14 @@ class EnhancedComponentDetector:
                 'methods_used': []
             }
         
-        # Count by type
         components_by_type = {}
         for detection in detections:
             comp_type = detection.class_name
             components_by_type[comp_type] = components_by_type.get(comp_type, 0) + 1
         
-        # Calculate statistics
         confidences = [d.confidence for d in detections]
         average_confidence = sum(confidences) / len(confidences)
         
-        # Determine quality
         if average_confidence > 0.8:
             quality = 'high'
         elif average_confidence > 0.6:
@@ -527,7 +542,6 @@ class EnhancedComponentDetector:
         else:
             quality = 'low'
         
-        # Methods used
         methods_used = list(set(d.method.value for d in detections))
         
         return {
@@ -547,7 +561,6 @@ class EnhancedComponentDetector:
         for detection in detections:
             x1, y1, x2, y2 = [int(coord) for coord in detection.bbox]
             
-            # Choose color based on confidence
             if detection.confidence > 0.8:
                 color = (0, 255, 0)  # Green
             elif detection.confidence > 0.6:
@@ -555,10 +568,8 @@ class EnhancedComponentDetector:
             else:
                 color = (255, 0, 0)  # Red
             
-            # Draw bounding box
             cv2.rectangle(img_copy, (x1, y1), (x2, y2), color, 2)
             
-            # Draw label
             if show_labels:
                 label_parts = [detection.class_name]
                 if show_confidence:
@@ -566,21 +577,55 @@ class EnhancedComponentDetector:
                 
                 label = " ".join(label_parts)
                 
-                # Calculate text position
                 text_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
                 text_x = x1
                 text_y = max(y1 - 10, text_size[1])
                 
-                # Draw text background
                 cv2.rectangle(img_copy, 
                             (text_x, text_y - text_size[1] - 5),
                             (text_x + text_size[0], text_y + 5),
                             color, -1)
                 
-                # Draw text
                 cv2.putText(img_copy, label, (text_x, text_y),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         
+        return img_copy
+
+    def draw_pinout_overlay(self, image: np.ndarray, board_detection: ComponentDetection, board_info: Dict[str, Any]) -> np.ndarray:
+        """
+        Draws pinout labels and locations on an image for a detected board.
+        Assumes the board is upright and orientation is not rotated for simplicity.
+        """
+        img_copy = image.copy()
+        
+        x1_img, y1_img, x2_img, y2_img = [int(coord) for coord in board_detection.bbox]
+        board_width_px = x2_img - x1_img
+        board_height_px = y2_img - y1_img
+
+        board_width_mm = board_info.get('bbox_mm', {}).get('x')
+        board_height_mm = board_info.get('bbox_mm', {}).get('y')
+
+        if not board_width_mm or not board_height_mm:
+            logger.warning(f"Board dimensions (bbox_mm) not found for {board_info.get('name')}. Cannot draw precise pinout.")
+            return img_copy
+
+        px_per_mm_x = board_width_px / board_width_mm
+        px_per_mm_y = board_height_px / board_height_mm
+        
+        headers = board_info.get('headers', [])
+        for header in headers:
+            for pin in header.get('pins', []):
+                pin_name = pin.get('name')
+                pin_x_mm = pin.get('x_mm')
+                pin_y_mm = pin.get('y_mm')
+
+                if pin_name and pin_x_mm is not None and pin_y_mm is not None:
+                    pin_x_px = int(x1_img + pin_x_mm * px_per_mm_x)
+                    pin_y_px = int(y2_img - pin_y_mm * px_per_mm_y) # Flip Y-axis
+                    
+                    cv2.circle(img_copy, (pin_x_px, pin_y_px), radius=4, color=(0, 255, 255), thickness=-1) # Yellow
+                    cv2.putText(img_copy, pin_name, (pin_x_px + 7, pin_y_px + 5), 
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
         return img_copy
 
 # Global enhanced detector instance

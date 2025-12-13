@@ -265,8 +265,11 @@ class ComponentDetector:
             processed = image[:, :, :3]
         else:
             processed = np.stack([image] * 3, axis=-1)
-        # Normalize copy for models; keep uint8 for classical/OCR
-        return processed
+        # Normalize copy for models; classical/OCR paths will convert back to uint8 as needed
+        processed = processed.astype(np.float32)
+        if processed.max() > 1.0:
+            processed /= 255.0
+        return np.clip(processed, 0.0, 1.0)
     
     def get_detection_summary(self, detections: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate summary of detected components."""

@@ -4,16 +4,27 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from loguru import logger
 from pathlib import Path
+from src.config import settings
 
 
 class CircuitDatabase:
     """Database manager for Circuit.AI analysis results."""
     
-    def __init__(self, db_path: str = "data/circuit_ai.db"):
+    def __init__(self, db_path: Optional[str] = None):
         """Initialize database connection."""
-        self.db_path = db_path
+        self.database_url = db_path or settings.database_url
+        self.db_path = self._resolve_db_path(self.database_url)
         self._ensure_db_directory()
         self._init_database()
+
+    def _resolve_db_path(self, database_url: str) -> str:
+        """Resolve SQLite file path from configured database URL."""
+        if database_url.startswith("sqlite:///"):
+            return database_url.replace("sqlite:///", "", 1)
+        if database_url.startswith("sqlite://"):
+            return database_url.replace("sqlite://", "", 1)
+        logger.warning(f"Non-SQLite database_url detected ({database_url}); falling back to local SQLite store")
+        return "data/circuit_ai.db"
     
     def _ensure_db_directory(self):
         """Ensure database directory exists."""
@@ -29,8 +40,14 @@ class CircuitDatabase:
                 if schema_path.exists():
                     with open(schema_path, 'r') as f:
                         schema = f.read()
-                    conn.executescript(schema)
-                    logger.info("Database initialized with schema")
+                    try:
+                        # The bundled schema targets PostgreSQL; fall back to SQLite-safe tables on error
+                        conn.executescript(schema)
+                        logger.info("Database initialized with schema")
+                    except sqlite3.Error as e:
+                        conn.rollback()
+                        logger.warning(f"Schema not compatible with SQLite ({e}); using basic SQLite schema instead")
+                        self._create_basic_tables(conn)
                 else:
                     logger.warning("Schema file not found, creating basic tables")
                     self._create_basic_tables(conn)
@@ -227,44 +244,44 @@ class CircuitDatabase:
                     bbox = component.get("bbox", [0, 0, 0, 0])
                     capabilities = json.dumps(component.get("capabilities", []))
                     
-                conn.execute("""
-                        INSERT INTO component_detections 
-                        (pcb_analysis_id, component_type, confidence, bbox_x1, bbox_y1, bbox_x2, bbox_y2, 
-                         center_x, center_y, reuse_value, difficulty, capabilities, market_value, educational_value, ocr_text, part_number)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        analysis_id,
-                        component.get("type", "unknown"),
-                        component.get("detection_confidence", 0.0),
-                        bbox[0] if len(bbox) > 0 else 0,
-                        bbox[1] if len(bbox) > 1 else 0,
-                        bbox[2] if len(bbox) > 2 else 0,
-                        bbox[3] if len(bbox) > 3 else 0,
-                        component.get("center", [0, 0])[0] if component.get("center") else 0,
-                        component.get("center", [0, 0])[1] if component.get("center") else 0,
-                        component.get("reuse_value", "unknown"),
-                        component.get("difficulty", "unknown"),
-                        capabilities,
-                        component.get("market_value", 0.0),
-                        component.get("educational_value", ""),
-                        component.get("ocr_text", ""),
-                        component.get("part_number", "")
-                    ))
+                    conn.execute("""
+                            INSERT INTO component_detections 
+                            (pcb_analysis_id, component_type, confidence, bbox_x1, bbox_y1, bbox_x2, bbox_y2, 
+                             center_x, center_y, reuse_value, difficulty, capabilities, market_value, educational_value, ocr_text, part_number)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (
+                            analysis_id,
+                            component.get("type", "unknown"),
+                            component.get("detection_confidence", 0.0),
+                            bbox[0] if len(bbox) > 0 else 0,
+                            bbox[1] if len(bbox) > 1 else 0,
+                            bbox[2] if len(bbox) > 2 else 0,
+                            bbox[3] if len(bbox) > 3 else 0,
+                            component.get("center", [0, 0])[0] if component.get("center") else 0,
+                            component.get("center", [0, 0])[1] if component.get("center") else 0,
+                            component.get("reuse_value", "unknown"),
+                            component.get("difficulty", "unknown"),
+                            capabilities,
+                            component.get("market_value", 0.0),
+                            component.get("educational_value", ""),
+                            component.get("ocr_text", ""),
+                            component.get("part_number", "")
+                        ))
                 
                 # Store project recommendations
                 recommendations = analysis_data.get("project_recommendations", [])
                 for rec in recommendations:
                     conn.execute("""
-                        INSERT INTO project_recommendations 
-                        (pcb_analysis_id, project_id, score, components_available, components_needed)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        analysis_id,
-                        rec.get("project_id", ""),
-                        rec.get("score", 0.0),
-                        json.dumps(rec.get("components_available", [])),
-                        json.dumps(rec.get("components_needed", []))
-                    ))
+                            INSERT INTO project_recommendations 
+                            (pcb_analysis_id, project_id, score, components_available, components_needed)
+                            VALUES (?, ?, ?, ?, ?)
+                        """, (
+                            analysis_id,
+                            rec.get("project_id", ""),
+                            rec.get("score", 0.0),
+                            json.dumps(rec.get("components_available", [])),
+                            json.dumps(rec.get("components_needed", []))
+                        ))
                 
                 conn.commit()
                 logger.info(f"Analysis result stored with ID: {analysis_id}")

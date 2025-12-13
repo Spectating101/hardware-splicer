@@ -1,0 +1,108 @@
+{
+  "name": "Arduino Uno R3",
+  "id": "arduino_uno_r3",
+  "type": "microcontroller",
+  "microcontroller": "ATmega328P",
+  "operating_voltage": "5V",
+  "input_voltage": {
+    "recommended": "7-12V",
+    "limits": "6-20V"
+  },
+  "digital_io_pins": 14,
+  "pwm_pins": [3, 5, 6, 9, 10, 11],
+  "analog_input_pins": 6,
+  "dc_current_per_io": "20mA",
+  "dc_current_3v3": "50mA",
+  "flash_memory": "32KB",
+  "sram": "2KB",
+  "eeprom": "1KB",
+  "clock_speed": "16MHz",
+  "pinout": {
+    "digital": {
+      "0": {"name": "RX", "function": "Serial receive, digital I/O"},
+      "1": {"name": "TX", "function": "Serial transmit, digital I/O"},
+      "2-12": {"function": "Digital I/O"},
+      "13": {"name": "LED_BUILTIN", "function": "Built-in LED, digital I/O"},
+      "3,5,6,9,10,11": {"function": "PWM output"}
+    },
+    "analog": {
+      "A0-A5": {"function": "Analog input, can also be used as digital I/O"}
+    },
+    "power": {
+      "VIN": "External power input (7-12V)",
+      "5V": "Regulated 5V output",
+      "3.3V": "Regulated 3.3V output (max 50mA)",
+      "GND": "Ground pins (multiple)",
+      "IOREF": "I/O reference voltage"
+    }
+  },
+  "common_issues": [
+    "Serial conflict on pins 0 and 1 during upload",
+    "PWM frequency may cause LED flickering",
+    "Limited SRAM can cause stack overflow",
+    "Pin 13 has built-in LED causing high load"
+  ],
+  "getting_started": {
+    "blink_led": "Pin 13 has built-in LED, perfect for first test",
+    "serial_monitor": "115200 or 9600 baud rate for debugging",
+    "power_options": "USB (5V) or external DC jack (7-12V)"
+  },
+  "bbox_mm": {"x": 68.6, "y": 53.4, "z": 15.0},
+  "mounts": [
+    {"x": 14.0, "y": 2.5, "diameter": 3.2, "type": "m3_hole"},
+    {"x": 66.1, "y": 7.6, "diameter": 3.2, "type": "m3_hole"},
+    {"x": 66.1, "y": 35.5, "diameter": 3.2, "type": "m3_hole"},
+    {"x": 15.2, "y": 50.8, "diameter": 3.2, "type": "m3_hole"}
+  ],
+  "io_ports": [
+    {"type": "usb_b", "x": -6.0, "y": 35.0, "z": 5.0, "width": 12.0, "height": 11.0, "access": "front"},
+    {"type": "dc_barrel", "x": -2.0, "y": 3.0, "z": 5.0, "width": 9.0, "height": 11.0, "access": "front"}
+  ],
+  "keepouts": [
+    {"x": 0, "y": 0, "z": 0, "width": 68.6, "height": 53.4, "depth": 2.0}
+  ],
+  "functional_goals": [
+    {"type": "enclosure", "priority": "high", "description": "Protective case for Arduino Uno"}
+  ],
+  "headers": [
+    {"id": "digital_pwm_side", "type": "digital", "orientation": "top_right", "pins": [
+      {"name": "D13", "x_mm": 65.5, "y_mm": 49.5},
+      {"name": "GND", "x_mm": 65.5, "y_mm": 47.0},
+      {"name": "AREF", "x_mm": 65.5, "y_mm": 44.5},
+      {"name": "SDA", "x_mm": 65.5, "y_mm": 42.0},
+      {"name": "SCL", "x_mm": 65.5, "y_mm": 39.5},
+      {"name": "D12", "x_mm": 65.5, "y_mm": 37.0},
+      {"name": "D11", "x_mm": 65.5, "y_mm": 34.5},
+      {"name": "D10", "x_mm": 65.5, "y_mm": 32.0},
+      {"name": "D9", "x_mm": 65.5, "y_mm": 29.5},
+      {"name": "D8", "x_mm": 65.5, "y_mm": 27.0}
+    ]},
+    {"id": "digital_low_side", "type": "digital", "orientation": "top_left", "pins": [
+      {"name": "D0", "x_mm": 43.5, "y_mm": 49.5},
+      {"name": "D1", "x_mm": 43.5, "y_mm": 47.0},
+      {"name": "D2", "x_mm": 43.5, "y_mm": 44.5},
+      {"name": "D3", "x_mm": 43.5, "y_mm": 42.0},
+      {"name": "D4", "x_mm": 43.5, "y_mm": 39.5},
+      {"name": "D5", "x_mm": 43.5, "y_mm": 37.0},
+      {"name": "D6", "x_mm": 43.5, "y_mm": 34.5},
+      {"name": "D7", "x_mm": 43.5, "y_mm": 32.0}
+    ]},
+    {"id": "analog_side", "type": "analog", "orientation": "bottom_right", "pins": [
+      {"name": "A0", "x_mm": 65.5, "y_mm": 5.0},
+      {"name": "A1", "x_mm": 65.5, "y_mm": 7.5},
+      {"name": "A2", "x_mm": 65.5, "y_mm": 10.0},
+      {"name": "A3", "x_mm": 65.5, "y_mm": 12.5},
+      {"name": "A4", "x_mm": 65.5, "y_mm": 15.0},
+      {"name": "A5", "x_mm": 65.5, "y_mm": 17.5}
+    ]},
+    {"id": "power_side", "type": "power", "orientation": "bottom_left", "pins": [
+      {"name": "IOREF", "x_mm": 43.5, "y_mm": 19.5},
+      {"name": "RESET", "x_mm": 43.5, "y_mm": 17.0},
+      {"name": "3V3", "x_mm": 43.5, "y_mm": 14.5},
+      {"name": "5V", "x_mm": 43.5, "y_mm": 12.0},
+      {"name": "GND_1", "x_mm": 43.5, "y_mm": 9.5},
+      {"name": "GND_2", "x_mm": 43.5, "y_mm": 7.0},
+      {"name": "VIN", "x_mm": 43.5, "y_mm": 4.5}
+    ]}
+  ]
+}

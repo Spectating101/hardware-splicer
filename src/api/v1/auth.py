@@ -8,6 +8,8 @@ import jwt
 from loguru import logger
 import os
 
+from src.config import settings
+
 # Security scheme
 security = HTTPBearer()
 
@@ -19,12 +21,17 @@ TEST_API_KEYS = set(os.getenv("TEST_API_KEYS", "").split(",")) if os.getenv("TES
 _ACTIVE_API_KEYS: Dict[str, Dict] = {}
 _RATE_LIMIT_STORAGE: Dict[str, List[datetime]] = {}
 
-# JWT secret from environment (MUST be set in production)
-JWT_SECRET = os.getenv("JWT_SECRET", "change-me-in-production-immediately")
-if JWT_SECRET == "change-me-in-production-immediately" and not os.getenv("DEBUG"):
-    logger.warning("⚠️ JWT_SECRET is not configured! This is insecure in production!")
+# JWT secret handling with fail-fast protection in non-debug
+DEFAULT_JWT_SECRET = "change-me-in-production-immediately"
+JWT_SECRET = os.getenv("JWT_SECRET") or settings.jwt_secret or DEFAULT_JWT_SECRET
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
+
+if JWT_SECRET == DEFAULT_JWT_SECRET:
+    if settings.debug:
+        logger.warning("⚠️ JWT_SECRET is not configured; using insecure default for debug only")
+    else:
+        raise RuntimeError("JWT_SECRET is not configured. Set JWT_SECRET env var or settings.jwt_secret for production.")
 
 def verify_api_key(api_key: str) -> Optional[Dict]:
     """

@@ -1,0 +1,40 @@
+{
+  "ics": [
+    {
+      "id": "ne555",
+      "keywords": ["ne555", "lm555", "555 timer", "na555"],
+      "description": "Precision Timer IC",
+      "pinout_hint": "Pin 1: GND, Pin 8: VCC. Notch indicates Pin 1."
+    },
+    {
+      "id": "lm358",
+      "keywords": ["lm358", "lm358n"],
+      "description": "Dual Operational Amplifier (Op-Amp)",
+      "pinout_hint": "Pin 4: GND, Pin 8: VCC. Output A: Pin 1."
+    },
+    {
+      "id": "lm317",
+      "keywords": ["lm317", "lm317t"],
+      "description": "Adjustable Voltage Regulator",
+      "pinout_hint": "Front View (Legs down): Adj, Output, Input."
+    },
+    {
+      "id": "lm7805",
+      "keywords": ["lm7805", "7805", "l7805"],
+      "description": "5V Linear Voltage Regulator",
+      "pinout_hint": "Front View: Input, Ground, Output."
+    },
+    {
+      "id": "atmega328p",
+      "keywords": ["atmega328", "mega328", "328p"],
+      "description": "8-bit AVR Microcontroller (Arduino Uno Core)",
+      "pinout_hint": "Pin 7: VCC, Pin 8: GND. Check datasheet for pin mapping."
+    },
+    {
+      "id": "esp8266",
+      "keywords": ["esp8266", "esp-12", "esp-01"],
+      "description": "Wi-Fi Microcontroller",
+      "pinout_hint": "3.3V Logic! Do not connect to 5V directly."
+    }
+  ]
+}

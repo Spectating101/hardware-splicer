@@ -7,7 +7,7 @@ Provides multi-model component detection with:
 - Ensemble approaches
 """
 
-from src.vision.enhanced_detector import (
+from .enhanced_detector import (
     ComponentDetection,
     DetectionMethod,
     EnhancedComponentDetector
