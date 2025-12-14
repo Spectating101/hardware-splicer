@@ -1,68 +1,85 @@
-# Circuit-AI: Universal Electronics Assistant (v2.0)
+# Circuit-AI: The Visual Electronics Debugger 👁️⚡
 
-## Overview
-Circuit-AI has been upgraded from a simple board recognizer to a **Universal Safety & Identification Assistant**. It now combines Computer Vision (YOLO), Optical Character Recognition (OCR), and a specialized Knowledge Base to assist with electronics repair, debugging, and fabrication.
+**Your AI Co-Pilot for Hardware Engineering. It sees what you see.**
 
-## Key Features
+[![Status](https://img.shields.io/badge/status-live-green.svg)](https://circuit-ai.io) 
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-### 1. Augmented Reality Pinout Overlays
-Automatically detects development boards and draws pinout labels directly on the image.
-*   **Supported Boards:**
-    *   Arduino Uno R3
-    *   Arduino Nano V3
-    *   Raspberry Pi 4 Model B
-    *   ESP32 DevKit V1
-*   **Mechanism:** Uses YOLO for bounding boxes and geometric projection based on physical board dimensions (stored in `knowledge_base/boards/*.json`).
+Circuit-AI is not just a chatbot. It is a **Multimodal Intelligence** system that combines Computer Vision (YOLOv8) with LLM Reasoning (Llama-3/GPT-4) to debug hardware like a senior engineer.
 
-### 2. Universal Hazard Inspector
-Scans component text for critical safety warnings.
-*   **Li-Ion Batteries:** Detects "Li-Ion", "3.7V", "Polymer". Warns about fire hazards and puncturing.
-*   **High Voltage:** Detects "110V/220V", "AC". Warns about electrocution risks.
-*   **Lasers:** Detects Class 3B/4 warnings.
-*   **Mechanism:** `safety/critical_hazards.json` database matched against OCR text.
+---
 
-### 3. Smart Component Identification
-Identifies common integrated circuits (ICs) even if the object detector only sees a "chip".
-*   **Supported ICs:** NE555 (Timer), LM358 (Op-Amp), LM317/7805 (Regulators), ATmega328P.
-*   **Output:** Provides description and key pinout hints (e.g., "Pin 1 is GND").
-*   **Mechanism:** `components/common_ics.json` database matched against OCR text.
+## 🚀 The "J.A.R.V.I.S." Experience
 
-### 4. Common Mistake Consultant
-Provides heuristic advice for generic components.
-*   **LEDs:** Warns about polarity (Flat side = Cathode).
-*   **Capacitors:** Warns about electrolytic polarity (Stripe = Negative).
+Don't just ask questions. **Show it your board.**
 
-## Usage
+1.  **Upload a photo** of your Arduino/PCB setup.
+2.  **Circuit-AI analyzes it** in <200ms:
+    *   "Detected: Arduino Uno, DHT22 Sensor, Resistor (Color: Red-Red-Brown)."
+    *   "Alert: Pinout Mismatch detected on Pin 4."
+3.  **You ask:** "Why isn't it working?"
+4.  **Circuit-AI replies:** "I see you have the DHT22 signal connected to Pin 4, but your code is initialized for Pin 2. Move the yellow wire."
 
-### Running the Agent
-The main entry point is `src/circuit_agent.py`.
+---
 
-```python
-import asyncio
-from circuit_agent import CircuitAgent
+## ✨ Key Features
 
-async def analyze(image_path):
-    agent = CircuitAgent()
-    
-    # Load image as base64
-    with open(image_path, "rb") as f:
-        img_b64 = base64.b64encode(f.read()).decode('utf-8')
-        
-    # Query
-    response = await agent.process_request("What is this?", image_b64=img_b64)
-    
-    print(response['llm_response'])
-    print(response['vision_report'])
-    
-    # Save Augmented Image (if available)
-    if response['augmented_image_b64']:
-        with open("output.png", "wb") as f:
-            f.write(base64.b64decode(response['augmented_image_b64']))
+### 👁️ PCB Defect Detection (Vision)
+*   **Solder Bridge Detection:** Instantly spots short circuits.
+*   **Missing Components:** Flags unpopulated pads.
+*   **Part Verification:** Confirms resistor values via color bands.
+
+### 🧠 Context-Aware Chat (LLM)
+*   **"What is this?"**: Point to a chip, and it identifies it.
+*   **"Is this wired right?"**: It traces your jumper wires visually.
+*   **Data-Sheet Retrieval**: Pulls pinouts for the exact board detected (Uno, Mega, ESP32).
+
+### 🛠️ The Toolkit
+*   **Resistor Calculator:** (Visual or Text)
+*   **Schematic Generator:** "Draw me a circuit for..."
+*   **Code Writer:** Generates Arduino C++ / MicroPython compatible with your specific board.
+
+---
+
+## 📦 Tech Stack
+
+*   **Vision Engine:** YOLOv8 (Custom trained on ElectroCom61 dataset)
+*   **Intelligence:** Llama-3.3-70b (via Cerebras)
+*   **Backend:** FastAPI (Python)
+*   **Frontend:** Next.js 14 (React)
+
+---
+
+## 💰 Pricing
+
+| Tier | Price | Features |
+| :--- | :--- | :--- |
+| **Maker** | **Free** | 5 visual queries/day, Unlimited text chat |
+| **Pro** | **$5/mo** | Unlimited visual debugging, Custom component training |
+| **Team** | **Custom** | API Access, Private deployments for PCBA lines |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Run with Docker (Recommended)
+```bash
+docker-compose up --build
+```
+Visit `http://localhost:3000`
+
+### 2. Manual Setup
+```bash
+# Backend
+cd src
+pip install -r requirements.txt
+python -m uvicorn api.v1.main:app --reload
+
+# Frontend
+cd circuit-ai-frontend
+npm install && npm run dev
 ```
 
-## Directory Structure
-*   `knowledge_base/boards/`: JSON definitions for specific boards (dimensions, headers).
-*   `knowledge_base/components/`: JSON for ICs and components.
-*   `knowledge_base/safety/`: Critical hazard definitions.
-*   `src/vision/enhanced_detector.py`: Core vision logic (YOLO + OCR).
-*   `src/circuit_agent.py`: Main agent logic (Orchestrator).
+---
+
+**Stop guessing. Start building.**
