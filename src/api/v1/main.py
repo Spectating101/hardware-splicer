@@ -187,6 +187,8 @@ async def analyze_pcb(
         summary = analyzer.get_analysis_summary(results)
         elapsed = time.perf_counter() - start_ts
         ANALYZE_LATENCY.observe(elapsed)
+        det_summary = results.get("detection_summary", {})
+        det_quality = det_summary.get("detection_quality") or det_summary.get("quality")
         
         # Store results
         results["analysis_metadata"] = {
@@ -197,7 +199,13 @@ async def analyze_pcb(
             "file_name": file.filename,
             "file_size": file_size,
             "backend_used": backend or "enhanced",
-            "ocr_enabled": enable_ocr
+            "ocr_enabled": enable_ocr,
+            "detection_quality": det_quality,
+            "detection_count": det_summary.get("total_components") or det_summary.get("count"),
+            "detection_avg_confidence": det_summary.get("average_confidence") or det_summary.get("avg_confidence"),
+            "model_source": det_summary.get("model_source"),
+            "fallback_used": det_summary.get("fallback_used"),
+            "detection_summary": det_summary,
         }
         
         # Track usage

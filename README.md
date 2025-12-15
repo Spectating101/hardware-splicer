@@ -1,85 +1,79 @@
-# Circuit-AI: The Visual Electronics Debugger 👁️⚡
+# Circuit-AI Platform: The Visual Intelligence Engine 👁️⚡
 
-**Your AI Co-Pilot for Hardware Engineering. It sees what you see.**
+**A Multi-Modal AI Platform for Electronics Analysis, Authentication, and Upcycling.**
 
-[![Status](https://img.shields.io/badge/status-live-green.svg)](https://circuit-ai.io) 
+[![Status](https://img.shields.io/badge/status-production-green.svg)](https://circuit-ai.io) 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Circuit-AI is not just a chatbot. It is a **Multimodal Intelligence** system that combines Computer Vision (YOLOv8) with LLM Reasoning (Llama-3/GPT-4) to debug hardware like a senior engineer.
+Circuit-AI is a modular intelligence engine that combines Computer Vision (YOLOv8), Optical Character Recognition (OCR), and expert logic to "see" and understand circuit boards. It powers multiple downstream applications from e-waste appraisal to retro game verification.
 
 ---
 
-## 🚀 The "J.A.R.V.I.S." Experience
+## 🚀 Powered Applications
 
-Don't just ask questions. **Show it your board.**
+This repository contains the core logic for **4 Distinct Commercial Tools**:
 
-1.  **Upload a photo** of your Arduino/PCB setup.
-2.  **Circuit-AI analyzes it** in <200ms:
-    *   "Detected: Arduino Uno, DHT22 Sensor, Resistor (Color: Red-Red-Brown)."
-    *   "Alert: Pinout Mismatch detected on Pin 4."
-3.  **You ask:** "Why isn't it working?"
-4.  **Circuit-AI replies:** "I see you have the DHT22 signal connected to Pin 4, but your code is initialized for Pin 2. Move the yellow wire."
+### 1. 💎 Circuit-Scout (B2B Appraiser)
+*   **For:** E-Waste Resellers, Flippers.
+*   **Function:** Scans junk boards for "Jackpot" chips (FPGAs, Vintage CPUs, Gold) and reusable modules.
+*   **Key Tech:** `SalvageConsultant` (Reseller Mode).
+
+### 2. 🎮 Retro-Check (Consumer Authenticator)
+*   **For:** Retro Gamers, Collectors.
+*   **Function:** Instantly verifies Pokemon/Nintendo cartridges by detecting "Black Blob" fakes and typo anomalies.
+*   **Key Tech:** `RetroAuthenticator`.
+
+### 3. 🏭 Pocket-AOI (Manufacturing)
+*   **For:** Hardware Startups, Assembly Lines.
+*   **Function:** Automated Optical Inspection (AOI) to compare production boards against a "Golden Sample".
+*   **Key Tech:** `InspectionDiff`, `AdvancedTraceFollower`.
+
+### 4. 🎓 Circuit-AI Classic (Education)
+*   **For:** Makers, Students.
+*   **Function:** Identifies boards, detects faults (burns/corrosion), and generates repair guides.
+*   **Key Tech:** `BoardAnalysisEngine`, `FaultDetector`.
 
 ---
 
-## ✨ Key Features
+## 🛠️ Key Capabilities
 
-### 👁️ PCB Defect Detection (Vision)
-*   **Solder Bridge Detection:** Instantly spots short circuits.
-*   **Missing Components:** Flags unpopulated pads.
-*   **Part Verification:** Confirms resistor values via color bands.
-
-### 🧠 Context-Aware Chat (LLM)
-*   **"What is this?"**: Point to a chip, and it identifies it.
-*   **"Is this wired right?"**: It traces your jumper wires visually.
-*   **Data-Sheet Retrieval**: Pulls pinouts for the exact board detected (Uno, Mega, ESP32).
-
-### 🛠️ The Toolkit
-*   **Resistor Calculator:** (Visual or Text)
-*   **Schematic Generator:** "Draw me a circuit for..."
-*   **Code Writer:** Generates Arduino C++ / MicroPython compatible with your specific board.
+*   **Visual Fault Detection:** Adaptive thresholding to find burns, corrosion (green/white oxidation), and broken traces.
+*   **OCR Intelligence:** Reads chip markings to identify specific high-value parts (`XC3S50`, `STM32`).
+*   **Net Tracing:** Reconstructs circuit topology (Nets, Junctions) from a single photo.
+*   **Upcycling Logic:** Identifies functional blocks (e.g., "Power Supply Stage") that can be sawed off and reused.
 
 ---
 
 ## 📦 Tech Stack
 
-*   **Vision Engine:** YOLOv8 (Custom trained on ElectroCom61 dataset)
-*   **Intelligence:** Llama-3.3-70b (via Cerebras)
-*   **Backend:** FastAPI (Python)
-*   **Frontend:** Next.js 14 (React)
+*   **Vision:** YOLOv8 (Custom trained), OpenCV (Adaptive/HSV), Tesseract OCR.
+*   **Intelligence:** Python-based Logic Engines (`src/intelligence/`).
+*   **LLM Integration:** Llama-3.3-70b (via Cerebras) for synthesis.
+*   **Backend:** FastAPI.
 
 ---
 
-## 💰 Pricing
+## 🚀 Quick Start (CLI)
 
-| Tier | Price | Features |
-| :--- | :--- | :--- |
-| **Maker** | **Free** | 5 visual queries/day, Unlimited text chat |
-| **Pro** | **$5/mo** | Unlimited visual debugging, Custom component training |
-| **Team** | **Custom** | API Access, Private deployments for PCBA lines |
+The CLI tool supports all modes:
 
----
-
-## 🚀 Quick Start
-
-### 1. Run with Docker (Recommended)
 ```bash
-docker-compose up --build
-```
-Visit `http://localhost:3000`
+# 1. Standard Repair Analysis
+python circuit_ai_cli.py --image my_broken_board.jpg
 
-### 2. Manual Setup
-```bash
-# Backend
-cd src
-pip install -r requirements.txt
-python -m uvicorn api.v1.main:app --reload
+# 2. Reseller/Jackpot Scan
+python circuit_ai_cli.py --image junk_pile.jpg "salvage scan"
 
-# Frontend
-cd circuit-ai-frontend
-npm install && npm run dev
+# 3. Retro Game Verification
+python circuit_ai_cli.py --image pokemon_emerald.jpg "verify this game"
 ```
 
 ---
 
-**Stop guessing. Start building.**
+## 💰 Monetization Strategy
+
+See [COMMERCIAL_STRATEGY.md](COMMERCIAL_STRATEGY.md) for a detailed breakdown of how to spin off and monetize these modules.
+
+---
+
+**Built for the new era of Hardware Intelligence.**

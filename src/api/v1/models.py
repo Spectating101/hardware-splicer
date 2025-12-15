@@ -66,6 +66,11 @@ class AnalysisMetadata(BaseModel):
     file_size: Optional[int] = Field(None, description="File size in bytes")
     backend_used: str = Field(..., description="Backend used for analysis")
     ocr_enabled: bool = Field(..., description="Whether OCR was enabled")
+    detection_quality: Optional[str] = Field(None, description="Detection quality band (none/low/medium/high)")
+    detection_count: Optional[int] = Field(None, description="Number of detections")
+    detection_avg_confidence: Optional[float] = Field(None, description="Average detection confidence")
+    model_source: Optional[str] = Field(None, description="Detector model source (trained/fallback)")
+    fallback_used: Optional[bool] = Field(None, description="Whether a fallback model was used")
 
 class AnalysisResponse(BaseModel):
     """Response model for PCB analysis."""

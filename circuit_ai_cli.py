@@ -60,6 +60,11 @@ def main():
             
             print("\n🤖 Analysis Result:")
             print(response.get("vision_report", "No visual insights."))
+            if response.get("detection_summary"):
+                print("\n📊 Detection Summary:")
+                summary = response["detection_summary"]
+                print(f"  Count: {summary.get('count')} | Avg conf: {summary.get('avg_confidence'):.2f} | Quality: {summary.get('quality')}")
+                print(f"  Model: {summary.get('model_source')} | Fallback: {summary.get('fallback_used')}")
             print("\n💬 Answer:")
             print(response.get("llm_response", "No response."))
             
