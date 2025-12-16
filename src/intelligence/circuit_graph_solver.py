@@ -31,7 +31,7 @@ class CircuitGraphSolver:
         }
     }
 
-    def __init__(self):
+    def __init__(self, enable_library_matching: bool = True):
         logger.info("CircuitGraphSolver initialized (Pro Mode)")
         # Very simple library of known boards/modules (component signatures)
         self.library = {
@@ -39,6 +39,7 @@ class CircuitGraphSolver:
             "esp32_devkit": {"components": ["esp32", "antenna", "connector"], "aspect_range": (1.7, 2.2)},
             "power_stage": {"components": ["transformer", "cap4", "mosfet"], "aspect_range": (0.8, 1.5)},
         }
+        self.enable_library_matching = enable_library_matching
 
     def build_graph(self, detections: List[Any], net_data: Dict[str, Any]) -> nx.Graph:
         """
@@ -194,7 +195,7 @@ class CircuitGraphSolver:
             "isolated_components": isolated,
             "topology_confidence": topo_conf,
             "topology_uncertainty": uncertainty_band,
-            "library_matches": self._match_library(detections)
+            "library_matches": self._match_library(detections) if self.enable_library_matching else []
         }
 
     def _graph_stats(self, G: nx.Graph) -> Dict[str, Any]:

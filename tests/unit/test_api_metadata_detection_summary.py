@@ -33,7 +33,7 @@ def test_analyze_metadata_includes_detection_summary(monkeypatch):
         return {"user_id": "test"}
     app.dependency_overrides[auth_module.get_current_user] = dummy_user
     # Stub analyzer to avoid heavy model loads
-    def fake_analyze_pcb(image_np, backend=None, enable_ocr=None):
+def fake_analyze_pcb(image_np, backend=None, enable_ocr=None):
         return {"detections": [], "detection_summary": {"total_components": 0, "detection_quality": "low"}}
     monkeypatch.setattr(main_module.analyzer, "analyze_pcb", fake_analyze_pcb)
     monkeypatch.setattr(main_module.analyzer, "get_analysis_summary", lambda results: {"total_value": 0.0})

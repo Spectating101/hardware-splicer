@@ -98,7 +98,11 @@ OUTPUT FORMAT:
                     if neighbor_part != target_node:
                         # Get component class/type
                         part_type = G.nodes[neighbor_part].get('cls', 'Unknown')
-                        connected_parts.append(part_type)
+                        edge_conf = G.get_edge_data(net, neighbor_part, {}).get("confidence")
+                        if edge_conf is not None:
+                            connected_parts.append(f"{part_type} (conf {edge_conf:.2f})")
+                        else:
+                            connected_parts.append(part_type)
                 
                 if connected_parts:
                     local_netlist += f"  - Connected via Net '{net}' to: {', '.join(connected_parts)}\n"

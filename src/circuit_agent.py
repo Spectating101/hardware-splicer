@@ -24,6 +24,7 @@ from intelligence.inspection_diff import InspectionDiff
 from intelligence.retro_authenticator import RetroAuthenticator
 from intelligence.datasheet_auditor import DatasheetAuditor
 from intelligence.spectral_circuit_analyzer import SpectralCircuitAnalyzer
+from intelligence.circuit_graph_solver import CircuitGraphSolver
 
 # --- Configuration ---
 DEFAULT_KNOWLEDGE_PATH = os.path.join(os.path.dirname(__file__), '../knowledge_base')
@@ -117,6 +118,7 @@ class CircuitAgent:
         self.retro_verifier = RetroAuthenticator()
         self.datasheet_auditor = DatasheetAuditor()
         self.spectral_analyzer = SpectralCircuitAnalyzer()
+        self.graph_solver = CircuitGraphSolver(enable_library_matching=True)
         
         self.cerebras_client = None
         if LLM_ENABLED and CEREBRAS_API_KEY:
