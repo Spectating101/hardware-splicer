@@ -189,6 +189,9 @@ async def analyze_pcb(
         ANALYZE_LATENCY.observe(elapsed)
         det_summary = results.get("detection_summary", {})
         det_quality = det_summary.get("detection_quality") or det_summary.get("quality")
+        quality_warning = None
+        if det_quality in (None, "none", "low"):
+            quality_warning = "Detection quality low; results may be unreliable."
         
         # Store results
         results["analysis_metadata"] = {
@@ -206,6 +209,10 @@ async def analyze_pcb(
             "model_source": det_summary.get("model_source"),
             "fallback_used": det_summary.get("fallback_used"),
             "detection_summary": det_summary,
+            "quality_warning": quality_warning,
+            "topology_uncertainty": results.get("graph", {}).get("topology_uncertainty"),
+            "topology_confidence": results.get("graph", {}).get("topology_confidence"),
+            "library_matches": results.get("graph", {}).get("library_matches"),
         }
         
         # Track usage

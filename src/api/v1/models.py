@@ -71,6 +71,9 @@ class AnalysisMetadata(BaseModel):
     detection_avg_confidence: Optional[float] = Field(None, description="Average detection confidence")
     model_source: Optional[str] = Field(None, description="Detector model source (trained/fallback)")
     fallback_used: Optional[bool] = Field(None, description="Whether a fallback model was used")
+    topology_uncertainty: Optional[str] = Field(None, description="Topology uncertainty band (low/medium/high)")
+    topology_confidence: Optional[float] = Field(None, description="Topology confidence score (0-1)")
+    library_matches: Optional[List[Dict[str, Any]]] = Field(None, description="Library match hints (name, score, missing components)")
 
 class AnalysisResponse(BaseModel):
     """Response model for PCB analysis."""

@@ -467,6 +467,26 @@ class EnhancedComponentDetector:
                 cv2.putText(img_copy, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         return img_copy
 
+    def draw_graph_edges(self, image: np.ndarray, connections: List[dict], detections: List[ComponentDetection]) -> np.ndarray:
+        """Draw net-to-component edges with confidence overlay."""
+        img_copy = image.copy()
+        if not connections or not detections:
+            return img_copy
+        # map component names to bbox centers
+        comp_centers = {d.class_name: d.center for d in detections if d.center}
+        for conn in connections:
+            net = conn.get("net")
+            comps = conn.get("components", [])
+            for comp in comps:
+                comp_name = comp.get("component") or comp.get("component_name") or comp.get("component_id") or comp.get("component")
+                conf = comp.get("confidence", 0.0)
+                if comp_name in comp_centers:
+                    cx, cy = comp_centers[comp_name]
+                    # draw small circle and confidence
+                    cv2.circle(img_copy, (int(cx), int(cy)), 4, (255, 0, 255), -1)
+                    cv2.putText(img_copy, f"{conf:.2f}", (int(cx)+5, int(cy)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 0, 255), 1)
+        return img_copy
+
     def draw_pinout_overlay(self, image: np.ndarray, board_detection: ComponentDetection, board_info: Dict[str, Any]) -> np.ndarray:
         """Draws pinout labels and locations on an image for a detected board."""
         img_copy = image.copy()

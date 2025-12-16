@@ -65,6 +65,14 @@ def main():
                 summary = response["detection_summary"]
                 print(f"  Count: {summary.get('count')} | Avg conf: {summary.get('avg_confidence'):.2f} | Quality: {summary.get('quality')}")
                 print(f"  Model: {summary.get('model_source')} | Fallback: {summary.get('fallback_used')}")
+            if response.get("graph"):
+                g = response["graph"]
+                print("\n🧭 Topology:")
+                if g.get("topology_uncertainty"):
+                    print(f"  Uncertainty: {g.get('topology_uncertainty')} (conf {g.get('topology_confidence', 0):.2f})")
+                if g.get("library_matches"):
+                    matches = ", ".join(f"{m['name']} ({m['score']})" for m in g["library_matches"])
+                    print(f"  Library matches: {matches}")
             print("\n💬 Answer:")
             print(response.get("llm_response", "No response."))
             
