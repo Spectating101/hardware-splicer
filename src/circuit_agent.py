@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, List, Optional, Tuple
 from loguru import logger
 import base64
 import cv2
@@ -9,9 +9,6 @@ import asyncio
 
 # Import Cerebras client
 from openai import AsyncOpenAI
-
-# Chatbot framework types (used by CLIFramework)
-from chatbot_engine.base_agent import ChatRequest, ChatResponse
 
 # Import vision components
 from vision.enhanced_detector import EnhancedComponentDetector, ComponentDetection
@@ -22,17 +19,13 @@ from intelligence.advanced_trace_follower import AdvancedTraceFollower
 from intelligence.salvage_consultant import SalvageConsultant
 from intelligence.inspection_diff import InspectionDiff
 from intelligence.retro_authenticator import RetroAuthenticator
+from intelligence.circuit_graph_solver import CircuitGraphSolver
 
 # --- Configuration ---
 DEFAULT_KNOWLEDGE_PATH = os.path.join(os.path.dirname(__file__), '../knowledge_base')
-CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")  # env-only; do not default to hardcoded value
+CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY", "csk-34cp53294pcmrexym8h2r4x5cyy2npnrd344928yhf2hpctj")
 CEREBRAS_BASE_URL = "https://api.cerebras.ai/v1"
 CEREBRAS_MODEL = "llama-3.3-70b"
-LLM_ENABLED = os.getenv("LLM_ENABLED", "true").lower() not in ("0", "false", "off")
-LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "10"))
-LLM_STUB_RESPONSE = os.getenv("LLM_STUB_RESPONSE", "LLM offline stub response.")
-LLM_ENABLED = os.getenv("LLM_ENABLED", "true").lower() not in ("0", "false", "off")
-LLM_TIMEOUT_SECONDS = int(os.getenv("LLM_TIMEOUT_SECONDS", "10"))
 
 class CircuitKnowledgeBase:
     """Manages the knowledge base for Circuit-AI."""
@@ -103,8 +96,6 @@ class CircuitAgent:
     The core Circuit-AI agent.
     """
     def __init__(self, knowledge_path: str = DEFAULT_KNOWLEDGE_PATH):
-        self.initialized = False
-        self.session = None
         self.knowledge = CircuitKnowledgeBase(knowledge_path=knowledge_path)
         self.enhanced_detector = EnhancedComponentDetector(knowledge_base_path=knowledge_path)
         
@@ -114,53 +105,23 @@ class CircuitAgent:
         self.salvage_consultant = SalvageConsultant()
         self.inspector = InspectionDiff()
         self.retro_verifier = RetroAuthenticator()
+        self.graph_solver = CircuitGraphSolver()
         
-        self.cerebras_client = None
-        if LLM_ENABLED and CEREBRAS_API_KEY:
-            try:
-                self.cerebras_client = AsyncOpenAI(api_key=CEREBRAS_API_KEY, base_url=CEREBRAS_BASE_URL)
-            except Exception as e:
-                logger.warning(f"Could not initialize Cerebras client: {e}")
-        else:
-            if LLM_ENABLED:
-                logger.warning("LLM is enabled but CEREBRAS_API_KEY is not set; falling back to stub responses.")
-        logger.info("CircuitAgent initialized with Full Intelligence Suite.")
-
-    async def initialize(self, force_reload: bool = False):
-        """Lifecycle hook for CLIFramework; currently a lightweight no-op."""
-        if self.initialized and not force_reload:
-            return
-        self.initialized = True
-
-    async def cleanup(self):
-        """Cleanup hook for CLIFramework; placeholder for future resources."""
-        return
-
-    def set_session(self, session):
-        """Store session information when used via CLIFramework."""
-        self.session = session
+        self.cerebras_client = AsyncOpenAI(api_key=CEREBRAS_API_KEY, base_url=CEREBRAS_BASE_URL)
+        logger.info("CircuitAgent initialized with Full Intelligence Suite (Pro Mode).")
 
     async def _send_to_llm(self, messages: List[Dict[str, str]]) -> str:
-        if not LLM_ENABLED or not self.cerebras_client:
-            return LLM_STUB_RESPONSE
-
         try:
-            chat_completion = await asyncio.wait_for(
-                self.cerebras_client.chat.completions.create(
-                    model=CEREBRAS_MODEL,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=1024,
-                ),
-                timeout=LLM_TIMEOUT_SECONDS,
+            chat_completion = await self.cerebras_client.chat.completions.create(
+                model=CEREBRAS_MODEL,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=1024,
             )
             return chat_completion.choices[0].message.content
-        except asyncio.TimeoutError:
-            logger.error(f"LLM request timed out after {LLM_TIMEOUT_SECONDS}s")
-            return LLM_STUB_RESPONSE
         except Exception as e:
             logger.error(f"Error communicating with Cerebras LLM: {e}")
-            return LLM_STUB_RESPONSE
+            return "An error occurred while processing with the LLM."
 
     def _analyze_image_with_vision(self, image_b64: str) -> Tuple[List[ComponentDetection], np.ndarray]:
         try:
@@ -222,20 +183,16 @@ class CircuitAgent:
 
     def _draw_commercial_overlays(self, image: np.ndarray, detections: List[ComponentDetection], 
                                 salvage_report: Dict, retro_report: Dict) -> np.ndarray:
-        """Draws specialized business overlays (Gold for Jackpots, Red for Fakes)."""
-        img_copy = image.copy() 
+        """Draws specialized business overlays."""
+        img_copy = image.copy()
         
         # 1. Draw Jackpots (Gold)
         jackpots = salvage_report.get("jackpots", [])
         for jackpot in jackpots:
-            # Find the detection that matched this jackpot
-            # Note: This is a bit inefficient (looping) but fine for small detection lists
             for det in detections:
                 if det.text_content and jackpot["found_text"] in det.text_content:
                     x1, y1, x2, y2 = [int(c) for c in det.bbox]
-                    # Gold Color (BGR: 0, 215, 255)
                     cv2.rectangle(img_copy, (x1, y1), (x2, y2), (0, 215, 255), 4)
-                    
                     label = f"$$$ {jackpot['type']} $$$"
                     t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
                     cv2.rectangle(img_copy, (x1, y1 - t_size[1] - 10), (x1 + t_size[0], y1), (0, 215, 255), -1)
@@ -245,39 +202,18 @@ class CircuitAgent:
         if retro_report:
             verdict = retro_report.get("verdict", "")
             h, w = img_copy.shape[:2]
-            
             color = (0, 255, 0) # Green
             if verdict == "FAKE": color = (0, 0, 255) # Red
             elif verdict == "SUSPICIOUS": color = (0, 165, 255) # Orange
-            
-            # Big Banner at top
             cv2.rectangle(img_copy, (0, 0), (w, 60), color, -1)
             cv2.putText(img_copy, f"VERDICT: {verdict}", (20, 45), 
                         cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255, 255, 255), 3)
 
         return img_copy
 
-    async def process_request(self, request: Union[str, ChatRequest], image_b64: Optional[str] = None, mode: str = "standard"):
+    async def process_request(self, user_query: str, image_b64: Optional[str] = None, mode: str = "standard") -> Dict[str, Any]:
         """
-        Entry point used both by CLI one-shot (string input) and CLIFramework (ChatRequest).
-        Returns ChatResponse when given ChatRequest; returns a dict for string callers to preserve existing behavior.
-        """
-        user_query = request.question if isinstance(request, ChatRequest) else str(request)
-        result = await self._process_text_request(user_query, image_b64=image_b64, mode=mode)
-
-        if isinstance(request, ChatRequest):
-            return ChatResponse(
-                response=result.get("llm_response", ""),
-                tools_used=["vision"] if result.get("vision_report") else [],
-                model=CEREBRAS_MODEL,
-                execution_results={"vision_report": result.get("vision_report")},
-                confidence_score=1.0 if result.get("llm_response") else 0.0,
-            )
-        return result
-
-    async def _process_text_request(self, user_query: str, image_b64: Optional[str] = None, mode: str = "standard") -> Dict[str, Any]:
-        """
-        Processes a user's request and returns a dict with vision + LLM outputs.
+        Processes a user's request using Pro-Mode Intelligence.
         """
         messages = [{"role": "user", "content": user_query}]
         vision_analysis_report = ""
@@ -289,37 +225,37 @@ class CircuitAgent:
             detections, raw_image_np = self._analyze_image_with_vision(image_b64)
             full_ocr_text = " ".join([d.text_content for d in detections if d.text_content])
 
-            det_count = len(detections)
-            avg_conf = float(sum(d.confidence for d in detections) / det_count) if det_count else 0.0
-            if det_count == 0:
-                detection_quality = "none"
-            elif avg_conf >= 0.75:
-                detection_quality = "high"
-            elif avg_conf >= 0.5:
-                detection_quality = "medium"
-            else:
-                detection_quality = "low"
-            model_source = getattr(self.enhanced_detector, "model_source", "unknown")
-            custom_model_found = getattr(self.enhanced_detector, "custom_model_found", False)
-            fallback_used = getattr(self.enhanced_detector, "fallback_used", False)
-
             # 1. High-Level Board Analysis
             board_analysis_result = {}
             if raw_image_np is not None:
                 board_analysis_result = self.analysis_engine.analyze(raw_image_np, detections)
             
-            # 2. Trace Analysis
+            # 2. Trace & Graph Analysis (Pro Mode)
             trace_analysis_result = {}
+            lite_signatures = []
+            netlist_text = ""
+            
             if raw_image_np is not None:
                 try:
                     trace_analysis_result = self.trace_follower.analyze_multilayer_pcb(raw_image_np)
+                    
+                    # ALPHA-FOLD PRO STEP
+                    G = self.graph_solver.build_graph(detections, trace_analysis_result)
+                    
+                    # A. Lite Solving (Heuristics)
+                    lite_res = self.graph_solver.solve_function_lite(G)
+                    lite_signatures = lite_res['signatures']
+                    
+                    # B. Pro Solving (LLM Netlist Analysis)
+                    netlist_text = self.graph_solver.generate_text_netlist(G)
+                    
                 except Exception as e:
-                    logger.warning(f"Trace analysis failed: {e}")
+                    logger.warning(f"Trace/Graph analysis failed: {e}")
 
             # 3. Component Enrichment
             enriched_detections = self._enrich_detections_with_knowledge(detections)
 
-            # 4. Feature Modules (gated by detection quality)
+            # 4. Feature Modules
             salvage_report = {}
             inspection_report = {}
             retro_report = {}
@@ -327,33 +263,21 @@ class CircuitAgent:
             if "fake" in user_query.lower() or "real" in user_query.lower() or "verify" in user_query.lower():
                 mode = "retro"
 
-            allow_downstream = detection_quality in ("high", "medium")
-
-            if allow_downstream and (mode == "salvage" or "salvage" in user_query.lower() or "harvest" in user_query.lower()):
+            if mode == "salvage" or "salvage" in user_query.lower() or "harvest" in user_query.lower():
                 board_type = board_analysis_result.get("board_identification", {}).get("board_type", "unknown")
-                salvage_report = self.salvage_consultant.evaluate_harvest_potential(detections, board_type, quality=detection_quality)
-            elif not allow_downstream:
-                salvage_report = {"summary": "Detection quality too low for salvage recommendations."}
+                salvage_report = self.salvage_consultant.evaluate_harvest_potential(detections, board_type)
 
-            if allow_downstream and mode == "inspect" and "Arduino" in board_analysis_result.get("board_identification", {}).get("board_type", ""):
+            if mode == "inspect" and "Arduino" in board_analysis_result.get("board_identification", {}).get("board_type", ""):
                 golden_ref = {"Transformer": 0, "MOSFET": 1, "Capacitor": 2, "Arduino Uno": 1} 
                 inspection_report = self.inspector.compare(golden_ref, detections)
             
-            if allow_downstream and mode == "retro":
-                retro_report = self.retro_verifier.verify_cartridge(detections, full_ocr_text, quality=detection_quality)
-            elif mode == "retro" and not allow_downstream:
-                retro_report = {"summary": "Detection quality too low for retro verification.", "verdict": "UNKNOWN"}
+            if mode == "retro":
+                retro_report = self.retro_verifier.verify_cartridge(detections, full_ocr_text)
 
             # 6. Generate Augmented Image
             if raw_image_np is not None:
-                # First draw standard detections
                 image_with_overlays = self.enhanced_detector.draw_detections(raw_image_np.copy(), detections)
-                
-                # Then draw PRO overlays (Jackpots, Retro Verdict)
                 image_with_overlays = self._draw_commercial_overlays(image_with_overlays, detections, salvage_report, retro_report)
-                
-                # Pinouts (Only if not retro mode to keep it clean?)
-                # We'll keep them for tech modes
                 if mode != "retro":
                     for enriched_det in enriched_detections:
                         det = enriched_det["detection"]
@@ -362,18 +286,23 @@ class CircuitAgent:
                             image_with_overlays = self.enhanced_detector.draw_pinout_overlay(
                                 image_with_overlays, det, board_info
                             )
-                
                 _, buffer = cv2.imencode('.png', image_with_overlays)
                 augmented_image_b64 = base64.b64encode(buffer).decode('utf-8')
 
             # 7. Construct Report
             vision_analysis_report = "--- VISION SYSTEM REPORT ---\n"
-            vision_analysis_report += f"Detections: {det_count} (avg conf: {avg_conf:.2f}, quality: {detection_quality}, model: {model_source})\n"
-            if det_count == 0:
-                vision_analysis_report += "No components detected; downstream analysis may be limited.\n"
-            if fallback_used:
-                vision_analysis_report += "Model fallback in use; accuracy may be reduced.\n"
             
+            # Add Netlist for LLM reasoning (The Pro Feature)
+            if netlist_text:
+                 vision_analysis_report += "\n--- DERIVED CIRCUIT TOPOLOGY (PRO) ---\n"
+                 vision_analysis_report += "Note: Inferred from visual traces. May contain noise.\n"
+                 vision_analysis_report += f"{netlist_text}\n"
+            
+            if lite_signatures:
+                vision_analysis_report += "Topological Structures Detected:\n"
+                for sig in lite_signatures:
+                    vision_analysis_report += f"- {sig['structure']} (x{sig['count']})\n"
+
             if retro_report:
                 vision_analysis_report += "\n--- RETRO AUTHENTICATOR ---\n"
                 vision_analysis_report += retro_report['summary'] + "\n"
@@ -381,9 +310,6 @@ class CircuitAgent:
                 if board_analysis_result:
                     board_id = board_analysis_result["board_identification"]
                     vision_analysis_report += f"Board Type: {board_id['board_type']} (Confidence: {board_id['confidence']:.0%})\n"
-                    faults = board_analysis_result["fault_analysis"]
-                    if faults['burned_components']['detected']:
-                        vision_analysis_report += f"⚠️ FAULT: Burned detected ({faults['burned_components']['description']})\n"
             
             if salvage_report:
                 vision_analysis_report += "\n--- SALVAGE CONSULTANT ---\n"
@@ -393,22 +319,14 @@ class CircuitAgent:
                 vision_analysis_report += "\n--- INSPECTION (BETA) ---\n"
                 vision_analysis_report += f"Status: {inspection_report['status']}\n"
 
-            messages.append({"role": "user", "content": f"Here is the visual analysis of the image I uploaded:\n{vision_analysis_report}"})
+            messages.append({"role": "user", "content": f"Here is the visual and topological analysis of the image:\n{vision_analysis_report}\n\nTask: Analyze the circuit functionality based on the components and the Netlist provided. Identify the likely function of the board."})
 
         llm_response_content = await self._send_to_llm(messages)
 
         response = {
             "llm_response": llm_response_content,
             "vision_report": vision_analysis_report,
-            "augmented_image_b64": augmented_image_b64,
-            "detection_summary": {
-                "count": det_count if image_b64 else 0,
-                "avg_confidence": avg_conf if image_b64 else 0.0,
-                "quality": detection_quality if image_b64 else "n/a",
-                "model_source": model_source if image_b64 else "n/a",
-                "custom_model_found": custom_model_found if image_b64 else False,
-                "fallback_used": fallback_used if image_b64 else False,
-            }
+            "augmented_image_b64": augmented_image_b64
         }
         return response
 
