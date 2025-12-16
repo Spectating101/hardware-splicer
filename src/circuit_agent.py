@@ -393,9 +393,6 @@ class CircuitAgent:
             if graph_inference:
                 motifs = ", ".join(f"{s['structure']} (x{s['count']})" for s in graph_inference)
                 vision_analysis_report += f"Structural motifs: {motifs}\n"
-            if graph_result and graph_result.get("gnn_signatures"):
-                gnn_motifs = ", ".join(f"{m['structure']} ({m['probability']:.2f})" for m in graph_result.get("gnn_signatures"))
-                vision_analysis_report += f"GNN motifs: {gnn_motifs}\n"
             if graph_result and graph_result.get("library_matches"):
                 libs = ", ".join(f"{m['name']} ({m['score']})" for m in graph_result.get("library_matches"))
                 vision_analysis_report += f"Library matches: {libs}\n"
@@ -432,7 +429,6 @@ class CircuitAgent:
             "graph": {
                 "stats": graph_stats,
                 "signatures": graph_inference,
-                "gnn_signatures": graph_result.get("gnn_signatures", []) if image_b64 else [],
                 "connections": graph_connections,
                 "netlist_text": netlist_text,
                 "library_matches": graph_result.get("library_matches", []),

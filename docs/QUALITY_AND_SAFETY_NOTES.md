@@ -18,6 +18,9 @@
 - API responses include detection metadata in `metadata`: `detection_quality`, `detection_count`, `detection_avg_confidence`, `model_source`, `fallback_used`, the full `detection_summary`, plus topology uncertainty/confidence and library matches.
 - Uncertainty bands are returned for topology (`low/medium/high`) so downstream clients can decide to trust, retry, or ask for a better image.
 
+## Dependencies
+- GNN motif classifier removed to keep dependencies lean (avoids torch/torch_geometric weight). Spectral/heuristic topology remains.
+
 ## Secret Hygiene
 - Config files no longer contain embedded keys. A pre-commit hook with gitleaks is added to block new secret leaks (`.pre-commit-config.yaml`).
 

@@ -11,7 +11,6 @@ import networkx as nx
 from loguru import logger
 import itertools
 import math
-from .gnn_motif_classifier import GNNSignatureClassifier
 
 class CircuitGraphSolver:
     """
@@ -34,8 +33,6 @@ class CircuitGraphSolver:
 
     def __init__(self):
         logger.info("CircuitGraphSolver initialized (Pro Mode)")
-        self.gnn_classifier = GNNSignatureClassifier()
-        self.gnn_available = self.gnn_classifier.is_available()
         # Very simple library of known boards/modules (component signatures)
         self.library = {
             "arduino_uno": {"components": ["microcontroller", "resistor", "capacitor", "connector"], "aspect_range": (1.2, 1.6)},
@@ -181,12 +178,6 @@ class CircuitGraphSolver:
             }
 
         signatures = self.solve_function_lite(G)
-        gnn_signatures = []
-        if self.gnn_available:
-            try:
-                gnn_signatures = self.gnn_classifier.predict(G)
-            except Exception as e:
-                logger.warning(f"GNN motif prediction failed: {e}")
         stats = self._graph_stats(G)
         connections = self._extract_connections(G)
         netlist_text = self.generate_text_netlist(G)
@@ -197,7 +188,6 @@ class CircuitGraphSolver:
         return {
             "graph": G,
             "signatures": signatures.get("signatures", []),
-            "gnn_signatures": gnn_signatures,
             "netlist_text": netlist_text,
             "stats": stats,
             "connections": connections,
