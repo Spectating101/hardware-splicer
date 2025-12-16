@@ -20,6 +20,8 @@
 
 ## Dependencies
 - GNN motif classifier removed to keep dependencies lean (avoids torch/torch_geometric weight). Spectral/heuristic topology remains.
+- Golden image smoke test scaffold exists (`tests/smoke/test_golden_image.py`); set `GOLDEN_IMAGE_PATH` to enable.
+- Labeled-set eval harness added (`scripts/eval_labeled.py`) to run your own CSV + image folder locally.
 
 ## Secret Hygiene
 - Config files no longer contain embedded keys. A pre-commit hook with gitleaks is added to block new secret leaks (`.pre-commit-config.yaml`).
