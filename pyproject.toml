@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circuit-ai"
+version = "0.1.0"
+description = "Circuit-AI: Vision + spectral intelligence for PCB analysis"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Circuit-AI Team"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "loguru",
+    "opencv-python",
+    "Pillow",
+    "numpy",
+    "torch",
+    "ultralytics",
+    "pytesseract",
+    "networkx",
+    "scipy",
+]
+
+[project.scripts]
+circuit-ai-cli = "circuit_ai_cli:main"
+circuit-ai-api = "src.api.v1.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools]
+packages = ["circuit_ai", "src"]

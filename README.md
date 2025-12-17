@@ -41,6 +41,7 @@ This repository contains the core logic for **4 Distinct Commercial Tools**:
 *   **OCR Intelligence:** Reads chip markings to identify specific high-value parts (`XC3S50`, `STM32`).
 *   **Net Tracing:** Reconstructs circuit topology (Nets, Junctions) from a single photo.
 *   **Upcycling Logic:** Identifies functional blocks (e.g., "Power Supply Stage") that can be sawed off and reused.
+*   **Topology Confidence:** Spectral/graph analysis with uncertainty bands and library matching hints.
 
 ---
 
@@ -50,6 +51,7 @@ This repository contains the core logic for **4 Distinct Commercial Tools**:
 *   **Intelligence:** Python-based Logic Engines (`src/intelligence/`).
 *   **LLM Integration:** Llama-3.3-70b (via Cerebras) for synthesis.
 *   **Backend:** FastAPI.
+*   **Packaging:** `pyproject.toml` / `setup.cfg` with console scripts (`circuit-ai-cli`, `circuit-ai-api`).
 
 ---
 
@@ -66,6 +68,12 @@ python circuit_ai_cli.py --image junk_pile.jpg "salvage scan"
 
 # 3. Retro Game Verification
 python circuit_ai_cli.py --image pokemon_emerald.jpg "verify this game"
+```
+
+Or install the package locally:
+```bash
+pip install .
+circuit-ai-cli --image my_board.jpg
 ```
 
 ---
