@@ -24,7 +24,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-sys.path.insert(0, str(SRC))
+for path in (str(ROOT), str(SRC)):
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 from circuit_agent import CircuitAgent  # noqa: E402
 

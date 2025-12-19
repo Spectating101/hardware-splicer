@@ -31,6 +31,3 @@ circuit-ai-api = "src.api.v1.main:app"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools]
-packages = ["circuit_ai", "src"]

@@ -16,7 +16,17 @@ for path in (ROOT, SRC):
 
 from circuit_agent import CircuitAgent
 
-GOLDEN_IMAGE_PATH = os.getenv("GOLDEN_IMAGE_PATH", "")
+# Default to a real sample in the repo so the smoke test can run out of the box.
+DEFAULT_GOLDEN = os.path.join(
+    ROOT,
+    "datasets",
+    "ElectroCom61 A Multiclass Dataset for Detection of Electronic Components",
+    "ElectroCom-61_v2",
+    "test",
+    "images",
+    "IMG_20240228_122819_jpg.rf.549f931f79ce6af1acb40d1d98720cd7.jpg",
+)
+GOLDEN_IMAGE_PATH = os.getenv("GOLDEN_IMAGE_PATH", DEFAULT_GOLDEN)
 
 
 @pytest.mark.asyncio

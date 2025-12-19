@@ -10,6 +10,12 @@ This guide outlines the steps required to establish and maintain production read
 ## 1. Establish a Baseline
 Create your own small labeled set (at least 5–10 images per target use case) and record results. Keep a simple JSON/CSV of expected outcomes for reproducibility.
 
+You can start with the included `tests/data/sample_labels.csv` (points at a few ElectroCom-61 test images) and run:
+```
+python scripts/eval_labeled.py --images "datasets/ElectroCom61 A Multiclass Dataset for Detection of Electronic Components/ElectroCom-61_v2/test/images" --labels tests/data/sample_labels.csv --mode standard --output eval_results.csv
+```
+Replace the labels/filenames with your own for real metrics.
+
 ---
 
 ## 2. Golden Image Smoke Test
@@ -29,6 +35,7 @@ To prevent regressions (updates breaking the vision system), you must establish 
     }
     ```
 3.  **Run Test:** Create a CI script that fails if the system finds *fewer* items than expected.
+4.  **Built-in Smoke:** `tests/smoke/test_golden_image.py` defaults to a sample PCB in `datasets/ElectroCom-61_v2/test/images/...122819...jpg`. Set `GOLDEN_IMAGE_PATH` to your own golden photo to make the test meaningful.
 
 ---
 
