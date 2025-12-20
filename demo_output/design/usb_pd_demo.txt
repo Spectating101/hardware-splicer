@@ -1,0 +1,76 @@
+### Block Diagram
+
+The proposed circuit architecture consists of the following major blocks:
+- **Input**: USB-C PD port
+- **Power Management**: Controller for PD protocol and power conversion (e.g., buck converter)
+- **Output**: 12V/3A regulated power supply
+- **Protection**: Overcurrent protection (OCP), overvoltage protection (OVP), and undervoltage protection (UVP)
+- **Indicator**: Optional, for status indication (e.g., power good, fault)
+
+Signal/Power Flow:
+- USB-C PD signal lines communicate with the controller.
+- The controller manages the power conversion stage based on PD negotiation.
+- The output is regulated to 12V and protected by OCP, OVP, and UVP circuitry.
+
+### BOM (Major Parts)
+
+- **USB-C PD Controller**: e.g., STMicroelectronics STM32G0B1, for PD protocol handling and power management
+- **Buck Converter**: e.g., Texas Instruments TPS63050, for efficient step-down conversion
+- **Power MOSFETs**: e.g., Infineon IRF7413, for high current handling
+- **Protection ICs**: e.g., Texas Instruments TPS2594 for OCP and OVP
+- **Voltage Regulator**: Integrated within the buck converter or a separate LDO for lower noise applications
+- **Inductor**: e.g., Würth Elektronik 744778121, for the buck converter
+- **Capacitors**: e.g., TDK C3216X7R1E106M, for input/output filtering and decoupling
+
+### Topology Sketch
+
+- The USB-C PD controller manages communication and controls the buck converter.
+- The buck converter steps down the input voltage (up to 20V from USB-C PD) to 12V, using power MOSFETs and an inductor.
+- Protection ICs monitor the output for overcurrent, overvoltage, and undervoltage conditions, disconnecting the load or reducing the output voltage as needed.
+- Critical components include the controller, buck converter, and protection ICs, which ensure safe and regulated power delivery.
+
+### Safety/EMC Considerations and Test Plan
+
+- **Electrical Safety**: Ensure isolation between input and output, use protective components (e.g., TVS diodes) for transient voltage suppression.
+- **Thermal Safety**: Monitor component temperatures, especially the buck converter and MOSFETs, to prevent overheating.
+- **EMC**: Use appropriate filtering and shielding to minimize EMI and ensure compliance with relevant standards (e.g., FCC Part 15, EN 55032).
+- **Test Plan**: Includes functional testing (output voltage regulation, current limiting), safety testing (overvoltage, overcurrent protection), and EMC testing.
+
+### Netlist (JSON)
+
+```json
+{
+  "components": [
+    {"ref": "U1", "type": "USB-C PD Controller", "value": "STM32G0B1", "notes": "Manages PD protocol and power conversion"},
+    {"ref": "U2", "type": "Buck Converter", "value": "TPS63050", "notes": "Efficient step-down conversion"},
+    {"ref": "Q1", "type": "Power MOSFET", "value": "IRF7413", "notes": "High current handling"},
+    {"ref": "R1", "type": "Resistor", "value": "1kΩ", "notes": "Current sensing"},
+    {"ref": "L1", "type": "Inductor", "value": "10uH", "notes": "Buck converter inductor"},
+    {"ref": "C1", "type": "Capacitor", "value": "10uF", "notes": "Output filtering"}
+  ],
+  "nets": [
+    {"name": "V_IN", "nodes": ["U1.VIN", "U2.VIN"]},
+    {"name": "V_OUT", "nodes": ["U2.VOUT", "R1.1"]},
+    {"name": "GND", "nodes": ["U1.GND", "U2.GND", "Q1.D"]}
+  ]
+}
+```
+
+### NGSpice Stub
+
+```spice
+* USB-C PD Trigger Circuit
+V1 V_IN 0 DC 20V
+U1 V_IN 0 V_OUT 0 STM32G0B1
+U2 V_IN 0 V_OUT 0 TPS63050
+Q1 V_OUT 0 GND GND IRF7413
+R1 V_OUT GND 1kΩ
+L1 V_OUT GND 10uH
+C1 V_OUT GND 10uF
+* Analysis
+.tran 1m 10m
+.print tran V(V_OUT)
+.end
+```
+
+This design provides a basic architecture for a USB-C

@@ -1,0 +1,12 @@
+* USB-C PD Trigger Circuit
+V1 V_IN 0 DC 20V
+U1 V_IN 0 V_OUT 0 STM32G0B1
+U2 V_IN 0 V_OUT 0 TPS63050
+Q1 V_OUT 0 GND GND IRF7413
+R1 V_OUT GND 1kΩ
+L1 V_OUT GND 10uH
+C1 V_OUT GND 10uF
+* Analysis
+.tran 1m 10m
+.print tran V(V_OUT)
+.end

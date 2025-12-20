@@ -1,0 +1,74 @@
+### 1. Block Diagram
+
+The proposed circuit architecture for the 2S Li-ion BMS with USB-C input and 2A load includes the following major blocks:
+- **USB-C Power Delivery (PD) Controller**: Handles USB-C input and negotiates power delivery.
+- **Li-ion Charger**: Charges the 2S Li-ion battery pack.
+- **Battery Management System (BMS)**: Monitors and controls the battery pack, including over/under-voltage protection, cell balancing, and thermal safety.
+- **Load Switch**: Controls the power supply to the load.
+- **Voltage and Current Monitoring**: Monitors the voltage and current of the battery pack and the load.
+
+Signal/Power Flow:
+- USB-C input → USB-C PD Controller → Li-ion Charger → 2S Li-ion Battery Pack
+- 2S Li-ion Battery Pack → BMS → Load Switch → Load
+- Voltage and Current Monitoring → BMS
+
+### 2. BOM (Major Parts with Rough Specs)
+
+- **USB-C PD Controller**: e.g., STMicroelectronics STM32G0B1 - 32-bit MCU with USB-C PD
+- **Li-ion Charger**: e.g., Texas Instruments BQ25750 - 2S Li-ion Charger
+- **BMS**: e.g., Texas Instruments BQ76940 - 2S Li-ion BMS
+- **Load Switch**: e.g., NXP PCA9456 - Power Switch
+- **Voltage and Current Monitoring**: e.g., Texas Instruments INA230 - Current and Voltage Monitor
+- **2S Li-ion Battery Pack**: Custom pack with 2 Li-ion cells in series
+- **Thermal Sensor**: e.g., NXP LM75A - Temperature Sensor
+
+### 3. Topology Sketch
+
+The USB-C PD Controller connects to the Li-ion Charger, which then connects to the 2S Li-ion Battery Pack. The BMS monitors the battery pack and controls the Load Switch, which supplies power to the load. The Voltage and Current Monitoring circuit monitors the battery pack and the load, sending data to the BMS.
+
+Critical Components:
+- **Protection Devices**: Over-voltage protection (OVP), under-voltage protection (UVP), and over-current protection (OCP) devices, such as fuses and TVS diodes.
+- **Regulation Components**: Voltage regulators, such as LDOs, to regulate the voltage supplied to the BMS and other components.
+
+### 4. Safety/EMC Considerations and Test Plan
+
+- **Safety Considerations**:
+  - Over/under-voltage protection
+  - Thermal safety (over-temperature protection)
+  - Short-circuit protection
+- **EMC Considerations**:
+  - EMI filtering on the USB-C input
+  - Shielding of the PCB to reduce radiated emissions
+- **Test Plan**:
+  - Functional testing: Verify the BMS functions correctly, including charging, discharging, and protection features.
+  - Safety testing: Verify the over/under-voltage protection, thermal safety, and short-circuit protection features.
+  - EMC testing: Verify the device meets the relevant EMC standards.
+
+### 5. Machine-Readable Netlist as JSON
+
+```json
+{
+  "components": [
+    {"ref": "U1", "type": "USB-C PD Controller", "value": "STM32G0B1", "notes": "Handles USB-C input and negotiates power delivery"},
+    {"ref": "U2", "type": "Li-ion Charger", "value": "BQ25750", "notes": "Charges the 2S Li-ion battery pack"},
+    {"ref": "U3", "type": "BMS", "value": "BQ76940", "notes": "Monitors and controls the battery pack"},
+    {"ref": "Q1", "type": "Load Switch", "value": "PCA9456", "notes": "Controls the power supply to the load"},
+    {"ref": "R1", "type": "Resistor", "value": "1k", "notes": "Current sense resistor"}
+  ],
+  "nets": [
+    {"name": "VUSB", "nodes": ["U1.VUSB", "U2.VIN"]},
+    {"name": "VBAT", "nodes": ["U2.VOUT", "U3.VIN"]},
+    {"name": "VLOAD", "nodes": ["Q1.D", "R1.A"]}
+  ]
+}
+```
+
+### 6. Minimal NGSpice-Compatible Stub
+
+```spice
+* 2S Li-ion BMS with USB-C input and 2A load
+V1 VUSB 0 DC 5V
+U1 VUSB 0 VBAT 0 STM32G0B1
+U2 VBAT 0 VOUT 0 BQ25750
+U3 VOUT 0 VLOAD 0 BQ76940
+Q1

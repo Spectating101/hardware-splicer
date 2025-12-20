@@ -79,6 +79,8 @@ circuit-ai-cli --image my_board.jpg
 ### Helper scripts
 - `scripts/design_assistant.py` — LLM co-designer; returns a design narrative plus machine-readable netlist JSON and an NGSpice stub.
 - `scripts/aruco_scan.py` — detect ArUco markers in an image for bench/robot calibration; outputs marker IDs and pixel coordinates as JSON.
+- `scripts/splicer_bridge.py` — optional bridge to the adjacent `3d-splicer` repo; submits a board spec to generate a 3D case if that service is running.
+- `scripts/demo_bundle.py` — generates a quick demo pack (vision run on a sample PCB + design-assistant output with netlist/Spice) into a folder for sharing.
 
 ---
 

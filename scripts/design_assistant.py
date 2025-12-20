@@ -63,6 +63,7 @@ Keep it concise and actionable for an engineer to implement in KiCad/Altium.
 
     # Try to extract artifacts
     out_prefix = Path(args.out_prefix)
+    out_prefix.parent.mkdir(parents=True, exist_ok=True)
     json_block = extract_code_block(llm_text, "json")
     spice_block = extract_code_block(llm_text, "spice") or extract_code_block(llm_text, "cir")
 

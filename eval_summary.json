@@ -1,0 +1,8 @@
+{
+  "total": 10,
+  "avg_detection_count": 16.7,
+  "quality_counts": {
+    "high": 10
+  },
+  "board_match_accuracy": 0.4
+}

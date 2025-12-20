@@ -20,7 +20,10 @@ import os
 import sys
 import base64
 import asyncio
+import json
 from pathlib import Path
+from collections import Counter
+from statistics import mean
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
@@ -31,7 +34,7 @@ for path in (str(ROOT), str(SRC)):
 from circuit_agent import CircuitAgent  # noqa: E402
 
 
-async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path):
+async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path, summary_path: Path | None = None):
     agent = CircuitAgent(knowledge_path="knowledge_base")
     rows = []
     for fname, label in labels.items():
@@ -70,6 +73,42 @@ async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path):
         writer.writerows(rows)
     print(f"Wrote results to {output}")
 
+    # Lightweight summary metrics
+    if rows:
+        quality_counts = Counter([r.get("detection_quality", "none") for r in rows])
+        det_counts = [r["detection_count"] for r in rows if r.get("detection_count") is not None]
+        avg_det = mean(det_counts) if det_counts else 0
+        # crude board match: label substring inside predicted board_type
+        # simple normalization for both labels and predicted board types
+        def norm(s: str) -> str:
+            s = s.lower().replace("_", " ").replace("-", " ").strip()
+            if "power distribution" in s or "power supply" in s or "psu" in s:
+                return "power supply"
+            if "dev board" in s or "devboard" in s:
+                return "dev board"
+            if "generic pcb board" in s:
+                return "generic"
+            return s
+
+        matches = 0
+        for r in rows:
+            bt_raw = r.get("board_type") or ""
+            lbl_raw = r.get("label") or ""
+            bt_norm = norm(bt_raw)
+            lbl_norm = norm(lbl_raw)
+            if lbl_norm and bt_norm and (lbl_norm in bt_norm or bt_norm in lbl_norm):
+                matches += 1
+        summary = {
+            "total": len(rows),
+            "avg_detection_count": avg_det,
+            "quality_counts": quality_counts,
+            "board_match_accuracy": matches / len(rows) if rows else 0.0,
+        }
+        print("Summary:", summary)
+        if summary_path:
+            summary_path.write_text(json.dumps(summary, indent=2))
+            print(f"Wrote summary to {summary_path}")
+
 
 def load_labels(path: Path) -> dict:
     labels = {}
@@ -86,11 +125,13 @@ def main():
     ap.add_argument("--labels", required=True, help="CSV with filename,label")
     ap.add_argument("--mode", default="standard", choices=["standard", "salvage", "retro"])
     ap.add_argument("--output", default="eval_results.csv")
+    ap.add_argument("--summary-out", default=None, help="Optional JSON summary output path")
     args = ap.parse_args()
 
     images_dir = Path(args.images)
     labels = load_labels(Path(args.labels))
-    asyncio.run(evaluate(images_dir, labels, args.mode, Path(args.output)))
+    summary_path = Path(args.summary_out) if args.summary_out else None
+    asyncio.run(evaluate(images_dir, labels, args.mode, Path(args.output), summary_path))
 
 
 if __name__ == "__main__":

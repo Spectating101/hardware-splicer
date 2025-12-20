@@ -3,6 +3,7 @@ import os
 from typing import Dict, Any, List, Optional, Tuple, Union
 from loguru import logger
 import base64
+from collections import Counter
 import cv2
 import numpy as np
 import asyncio
@@ -276,6 +277,7 @@ class CircuitAgent:
                 detection_quality = "medium"
             else:
                 detection_quality = "low"
+            class_counts = Counter([d.class_name for d in detections])
             detection_summary = {
                 "count": det_count,
                 "avg_confidence": avg_conf,
@@ -283,6 +285,7 @@ class CircuitAgent:
                 "model_source": getattr(self.enhanced_detector, "model_source", "unknown"),
                 "fallback_used": getattr(self.enhanced_detector, "fallback_used", False),
                 "custom_model_found": getattr(self.enhanced_detector, "custom_model_found", False),
+                "class_counts": dict(class_counts),
             }
 
             # 1. High-Level Board Analysis
@@ -423,9 +426,40 @@ class CircuitAgent:
 
         llm_response_content = await self._send_to_llm(messages)
 
+        # Build inspection checklist (text + structured) using board type and detected classes
+        def _generate_checklist(board_type: str, class_counts: dict, quality: str):
+            steps = []
+            bt = (board_type or "").lower()
+            def add_step(title, risk, reason):
+                steps.append({"title": title, "risk": risk, "reason": reason})
+            if quality in ("none", "low"):
+                add_step("Re-capture image", "high", "Detection quality low; re-shoot before acting.")
+            add_step("Visual sweep for burns/corrosion", "medium", "Baseline check for carbonization or green/white oxidation.")
+            if "connector" in class_counts:
+                add_step("Inspect connectors for bent/loose pins", "medium", "Intermittent faults often originate at connectors.")
+            if "mov" in class_counts or "transformer" in class_counts or "power" in bt:
+                add_step("Check surge path (MOV/fuse/transformer primary)", "high", "Power boards often fail at surge protection or primary windings.")
+            if "ic_chip" in class_counts or "mosfet" in class_counts:
+                add_step("Check regulators/FETs for shorts/overheat signs", "high", "Power semis are common failure points.")
+            if "capacitor" in class_counts:
+                add_step("Inspect capacitors for bulge/leak", "medium", "Electrolytics and SMD caps fail visibly.")
+            return steps
+
+        checklist_steps = []
+        bt_for_checklist = ""
+        if image_b64 and board_analysis_result:
+            bt_for_checklist = board_analysis_result.get("board_identification", {}).get("board_type", "")
+            checklist_steps = _generate_checklist(bt_for_checklist, detection_summary.get("class_counts", {}), detection_summary.get("quality", ""))
+
+        checklist_text = ""
+        if checklist_steps:
+            checklist_text = "--- INSPECTION CHECKLIST ---\n"
+            for i, step in enumerate(checklist_steps, 1):
+                checklist_text += f"{i}. {step['title']} (risk: {step['risk']}) - {step['reason']}\n"
+
         response = {
             "llm_response": llm_response_content,
-            "vision_report": vision_analysis_report,
+            "vision_report": vision_analysis_report + (("\n" + checklist_text) if checklist_text else ""),
             "augmented_image_b64": augmented_image_b64,
             "detection_summary": detection_summary if image_b64 else {"count": 0, "avg_confidence": 0.0, "quality": "n/a", "model_source": getattr(self.enhanced_detector, "model_source", "unknown"), "fallback_used": getattr(self.enhanced_detector, "fallback_used", False)},
             "graph": {
@@ -436,6 +470,11 @@ class CircuitAgent:
                 "library_matches": graph_result.get("library_matches", []),
                 "topology_confidence": graph_result.get("topology_confidence", 0.0),
             } if image_b64 else {}
+            ,
+            "inspection_checklist": {
+                "board_type": bt_for_checklist,
+                "steps": checklist_steps,
+            } if checklist_steps else {}
         }
         if isinstance(request, ChatRequest):
             return ChatResponse(
