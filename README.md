@@ -76,6 +76,10 @@ pip install .
 circuit-ai-cli --image my_board.jpg
 ```
 
+### Helper scripts
+- `scripts/design_assistant.py` — LLM co-designer; returns a design narrative plus machine-readable netlist JSON and an NGSpice stub.
+- `scripts/aruco_scan.py` — detect ArUco markers in an image for bench/robot calibration; outputs marker IDs and pixel coordinates as JSON.
+
 ---
 
 ## 💰 Monetization Strategy

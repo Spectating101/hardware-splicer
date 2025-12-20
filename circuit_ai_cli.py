@@ -42,7 +42,7 @@ def main():
     print("="*70)
 
     # Create agent
-    agent = CircuitAgent(knowledge_base_path="knowledge_base")
+    agent = CircuitAgent(knowledge_path="knowledge_base")
 
     # Handle One-Shot Mode (Image + Query)
     if args.image:
