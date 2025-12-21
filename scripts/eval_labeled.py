@@ -34,7 +34,7 @@ for path in (str(ROOT), str(SRC)):
 from circuit_agent import CircuitAgent  # noqa: E402
 
 
-async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path, summary_path: Path | None = None):
+async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path, summary_path: Path | None = None, max_size: int = 2000):
     agent = CircuitAgent(knowledge_path="knowledge_base")
     rows = []
     for fname, label in labels.items():
@@ -42,8 +42,23 @@ async def evaluate(images_dir: Path, labels: dict, mode: str, output: Path, summ
         if not image_path.exists():
             print(f"Skipping missing file: {fname}")
             continue
-        with open(image_path, "rb") as f:
-            img_str = base64.b64encode(f.read()).decode()
+        # Resize large images to a max dimension to avoid timeouts
+        import cv2
+        import numpy as np
+        img = cv2.imread(str(image_path))
+        if img is None:
+            print(f"Skipping unreadable file: {fname}")
+            continue
+        h, w = img.shape[:2]
+        scale = 1.0
+        if max(h, w) > max_size:
+            scale = max_size / float(max(h, w))
+            img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+        success, buf = cv2.imencode(".jpg", img)
+        if not success:
+            print(f"Skipping encode failure: {fname}")
+            continue
+        img_str = base64.b64encode(buf.tobytes()).decode()
         resp = await agent.process_request("evaluate", image_b64=img_str, mode=mode)
         det = resp.get("detection_summary", {})
         row = {
@@ -126,12 +141,13 @@ def main():
     ap.add_argument("--mode", default="standard", choices=["standard", "salvage", "retro"])
     ap.add_argument("--output", default="eval_results.csv")
     ap.add_argument("--summary-out", default=None, help="Optional JSON summary output path")
+    ap.add_argument("--max-size", type=int, default=2000, help="Max image dimension to avoid timeouts")
     args = ap.parse_args()
 
     images_dir = Path(args.images)
     labels = load_labels(Path(args.labels))
     summary_path = Path(args.summary_out) if args.summary_out else None
-    asyncio.run(evaluate(images_dir, labels, args.mode, Path(args.output), summary_path))
+    asyncio.run(evaluate(images_dir, labels, args.mode, Path(args.output), summary_path, max_size=args.max_size))
 
 
 if __name__ == "__main__":

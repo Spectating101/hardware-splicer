@@ -67,14 +67,13 @@ Keep it concise and actionable for an engineer to implement in KiCad/Altium.
     json_block = extract_code_block(llm_text, "json")
     spice_block = extract_code_block(llm_text, "spice") or extract_code_block(llm_text, "cir")
 
+    # Write artifacts
     if json_block:
         json_path = out_prefix.with_suffix(".netlist.json")
         try:
-            # Validate JSON before writing prettified
             parsed = json.loads(json_block)
             json_path.write_text(json.dumps(parsed, indent=2))
         except Exception:
-            # Write raw if parsing fails
             json_path.write_text(json_block)
         print(f"\n📄 Saved netlist JSON -> {json_path}")
 
@@ -82,6 +81,15 @@ Keep it concise and actionable for an engineer to implement in KiCad/Altium.
         spice_path = out_prefix.with_suffix(".spice.cir")
         spice_path.write_text(spice_block)
         print(f"📄 Saved NGSpice stub -> {spice_path}")
+
+        # Auto-run NGSpice if available for a quick sanity check
+        if shutil.which("ngspice"):
+            import subprocess
+            try:
+                run = subprocess.run(["ngspice", "-b", "-o", str(out_prefix.with_suffix(".spice.log")), str(spice_path)], timeout=20)
+                print(f"🔎 NGSpice run exit code: {run.returncode} (log: {out_prefix.with_suffix('.spice.log')})")
+            except Exception as e:
+                print(f"⚠️ NGSpice run failed/skipped: {e}")
 
     txt_path = out_prefix.with_suffix(".txt")
     txt_path.write_text(llm_text)

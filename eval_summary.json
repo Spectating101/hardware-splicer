@@ -1,8 +1,8 @@
 {
-  "total": 10,
-  "avg_detection_count": 16.7,
+  "total": 6,
+  "avg_detection_count": 46.833333333333336,
   "quality_counts": {
-    "high": 10
+    "high": 6
   },
-  "board_match_accuracy": 0.4
+  "board_match_accuracy": 0.16666666666666666
 }
