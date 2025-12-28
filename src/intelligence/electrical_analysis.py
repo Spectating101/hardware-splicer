@@ -66,7 +66,7 @@ class ElectricalAnalyzer:
 
         This is pure electrical calculation - no ML needed.
         """
-        from src.intelligence.component_knowledge import estimate_power_consumption
+        from intelligence.component_knowledge import estimate_power_consumption
 
         total_power = 0.0
         component_power = {}
@@ -120,7 +120,7 @@ class ElectricalAnalyzer:
 
         Determines what voltages are present and safe to tap.
         """
-        from src.intelligence.component_knowledge import estimate_power_consumption
+        from intelligence.component_knowledge import estimate_power_consumption
 
         rails = []
 

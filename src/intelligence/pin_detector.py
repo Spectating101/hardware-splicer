@@ -21,7 +21,7 @@ try:
 except ImportError:
     TESSERACT_AVAILABLE = False
 
-from src.intelligence.pinout_database import pinout_database, PinoutDatabase, PackageType
+from intelligence.pinout_database import pinout_database, PinoutDatabase, PackageType
 
 
 class PinOrientation(Enum):

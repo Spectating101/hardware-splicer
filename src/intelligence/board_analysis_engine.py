@@ -7,8 +7,8 @@ Answers: "What is this board?" and "What's wrong with it?"
 
 from typing import List, Dict
 from loguru import logger
-from src.intelligence.board_classifier import BoardClassifier
-from src.intelligence.fault_detector import FaultDetector
+from intelligence.board_classifier import BoardClassifier
+from intelligence.fault_detector import FaultDetector
 import numpy as np
 
 
@@ -155,7 +155,7 @@ WARNINGS:
 if __name__ == "__main__":
     from pathlib import Path
     from PIL import Image
-    from src.vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
+    from vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
     
     # Load test image
     test_images = list(Path('datasets/real_pcb_archive/test/images').glob('*.jpg'))

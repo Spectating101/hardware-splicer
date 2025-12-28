@@ -23,9 +23,9 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 import networkx as nx
 
-from src.intelligence.pinout_database import pinout_database, PinDefinition
-from src.intelligence.pin_detector import pin_detector, ICDetectionResult, DetectedPin
-from src.intelligence.trace_analyzer import trace_analyzer
+from intelligence.pinout_database import pinout_database, PinDefinition
+from intelligence.pin_detector import pin_detector, ICDetectionResult, DetectedPin
+from intelligence.trace_analyzer import trace_analyzer
 
 
 @dataclass

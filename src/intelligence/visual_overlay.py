@@ -18,8 +18,8 @@ from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
-from src.intelligence.pin_detector import ICDetectionResult, DetectedPin
-from src.intelligence.connection_mapper import CircuitSchematic, PinConnection
+from intelligence.pin_detector import ICDetectionResult, DetectedPin
+from intelligence.connection_mapper import CircuitSchematic, PinConnection
 
 
 class OverlayType(Enum):

@@ -19,12 +19,12 @@ from typing import List, Dict, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 
-from src.intelligence.connection_mapper import CircuitSchematic, PinConnection
-from src.intelligence.pinout_database import pinout_database
-from src.intelligence.repair_guidance import repair_guidance, RepairProcedure
-from src.intelligence.safety_validator import safety_validator
-from src.intelligence.electrical_analysis import electrical_analyzer
-from src.intelligence.common_fault_database import common_fault_database
+from intelligence.connection_mapper import CircuitSchematic, PinConnection
+from intelligence.pinout_database import pinout_database
+from intelligence.repair_guidance import repair_guidance, RepairProcedure
+from intelligence.safety_validator import safety_validator
+from intelligence.electrical_analysis import electrical_analyzer
+from intelligence.common_fault_database import common_fault_database
 
 
 class ConversationState(Enum):

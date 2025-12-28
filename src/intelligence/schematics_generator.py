@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 from typing import List, Dict, Tuple
 from dataclasses import dataclass
 
-from src.intelligence.connection_mapper import CircuitSchematic, PinConnection
+from intelligence.connection_mapper import CircuitSchematic, PinConnection
 
 
 @dataclass

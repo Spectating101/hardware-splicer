@@ -15,8 +15,8 @@ import numpy as np
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 
-from src.intelligence.connection_mapper import CircuitSchematic, PinConnection
-from src.intelligence.pinout_database import pinout_database, PinType
+from intelligence.connection_mapper import CircuitSchematic, PinConnection
+from intelligence.pinout_database import pinout_database, PinType
 
 
 @dataclass

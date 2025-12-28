@@ -134,7 +134,7 @@ if __name__ == "__main__":
     from pathlib import Path
     import numpy as np
     from PIL import Image
-    from src.vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
+    from vision.enhanced_detector import EnhancedComponentDetector, DetectionMethod
     
     # Load test image
     test_images = list(Path('datasets/real_pcb_archive/test/images').glob('*.jpg'))

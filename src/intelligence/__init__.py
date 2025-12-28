@@ -12,7 +12,7 @@ Provides deep circuit understanding beyond component detection:
 - Safety validation
 """
 
-from src.intelligence.circuit_analyzer import (
+from .circuit_analyzer import (
     CircuitIntelligenceAnalyzer,
     CircuitTopology,
     FunctionalBlock,
@@ -20,19 +20,19 @@ from src.intelligence.circuit_analyzer import (
     circuit_intelligence
 )
 
-from src.intelligence.repair_guidance import repair_guidance
-from src.intelligence.modification_planner import modification_planner
-from src.intelligence.trace_analyzer import trace_analyzer
-from src.intelligence.value_extraction import value_extractor
-from src.intelligence.safety_validator import safety_validator
-from src.intelligence.pinout_database import pinout_database
-from src.intelligence.pin_detector import pin_detector
-from src.intelligence.connection_mapper import connection_mapper
-from src.intelligence.visual_overlay import visual_overlay_renderer
-from src.intelligence.interactive_repair_chatbot import interactive_repair_chatbot
-from src.intelligence.advanced_trace_follower import advanced_trace_follower
-from src.intelligence.resistor_color_decoder import resistor_color_decoder
-from src.intelligence.capacitor_value_reader import capacitor_value_reader
+from .repair_guidance import repair_guidance
+from .modification_planner import modification_planner
+from .trace_analyzer import trace_analyzer
+from .value_extraction import value_extractor
+from .safety_validator import safety_validator
+from .pinout_database import pinout_database
+from .pin_detector import pin_detector
+from .connection_mapper import connection_mapper
+from .visual_overlay import visual_overlay_renderer
+from .interactive_repair_chatbot import interactive_repair_chatbot
+from .advanced_trace_follower import advanced_trace_follower
+from .resistor_color_decoder import resistor_color_decoder
+from .capacitor_value_reader import capacitor_value_reader
 
 __all__ = [
     'CircuitIntelligenceAnalyzer',

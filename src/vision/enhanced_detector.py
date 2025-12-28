@@ -82,7 +82,21 @@ class EnhancedComponentDetector:
 
         # Initialize models
         self._initialize_models()
-        
+
+        # Initialize defect detector (Dum-E upgrade)
+        try:
+            from .defect_detector import DefectDetector
+            from ..intelligence.defect_scorer import DefectScorer
+            self.defect_detector = DefectDetector(use_classical_fallback=True)
+            self.defect_scorer = DefectScorer()
+            self.defect_detection_enabled = True
+            logger.info("Defect detection module initialized (Dum-E vision)")
+        except ImportError as e:
+            logger.warning(f"Defect detection not available: {e}")
+            self.defect_detector = None
+            self.defect_scorer = None
+            self.defect_detection_enabled = False
+
         # Component database - Updated for Circuit-AI trained model
         self.component_classes = [
             'Cap1',           # 0 - Capacitor type 1
@@ -194,9 +208,100 @@ class EnhancedComponentDetector:
         
         all_detections = self._merge_detections(all_detections)
         all_detections.sort(key=lambda x: x.confidence, reverse=True)
-        
+
         return all_detections
-    
+
+    def detect_components_and_defects(
+        self,
+        image: np.ndarray,
+        methods: List[DetectionMethod] = None,
+        enable_ocr: bool = True,
+        enable_quality_assessment: bool = True,
+        enable_defect_detection: bool = True,
+        mobile_optimized: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Comprehensive PCB inspection: components + defects.
+
+        This is the Dum-E vision pipeline - detects components AND assesses quality.
+
+        Args:
+            image: Input PCB image
+            methods: Detection methods to use
+            enable_ocr: Extract part numbers via OCR
+            enable_quality_assessment: Assess component detection quality
+            enable_defect_detection: Run defect detection (solder, damage, etc.)
+            mobile_optimized: Optimize for mobile/edge devices
+
+        Returns:
+            Dictionary with:
+                - components: List[ComponentDetection]
+                - defects: List[DefectDetection]
+                - quality_score: float (0-1, overall board quality)
+                - pass_fail: bool
+                - quality_assessment: QualityAssessment object
+        """
+        # Step 1: Detect components (existing functionality)
+        components = self.detect_components(
+            image=image,
+            methods=methods,
+            enable_ocr=enable_ocr,
+            enable_quality_assessment=enable_quality_assessment,
+            mobile_optimized=mobile_optimized
+        )
+
+        result = {
+            "components": components,
+            "defects": [],
+            "quality_score": 1.0,
+            "pass_fail": True,
+            "quality_assessment": None
+        }
+
+        # Step 2: Defect detection (Dum-E upgrade)
+        if enable_defect_detection and self.defect_detection_enabled:
+            try:
+                logger.debug("Running defect detection...")
+
+                # Convert component detections to format expected by defect detector
+                component_dicts = [
+                    {
+                        "bbox": comp.bbox,
+                        "class_name": comp.class_name,
+                        "confidence": comp.confidence
+                    }
+                    for comp in components
+                ]
+
+                # Run defect detection
+                defects = self.defect_detector.detect_defects(
+                    image,
+                    component_detections=component_dicts,
+                    confidence_threshold=0.5
+                )
+
+                result["defects"] = defects
+
+                # Step 3: Quality scoring
+                if defects and self.defect_scorer:
+                    quality_assessment = self.defect_scorer.score(defects)
+                    result["quality_score"] = quality_assessment.overall_score
+                    result["pass_fail"] = quality_assessment.pass_fail
+                    result["quality_assessment"] = quality_assessment
+
+                    logger.info(
+                        f"Quality assessment: {quality_assessment.overall_score:.2f} "
+                        f"({quality_assessment.defect_count} defects, "
+                        f"Pass: {quality_assessment.pass_fail})"
+                    )
+
+            except Exception as e:
+                logger.error(f"Defect detection failed: {e}")
+                # Don't fail the whole pipeline if defect detection breaks
+                result["defect_detection_error"] = str(e)
+
+        return result
+
     def _detect_ensemble(self, image: np.ndarray, enable_ocr: bool) -> List[ComponentDetection]:
         """Ensemble detection using multiple methods."""
         detections = []
