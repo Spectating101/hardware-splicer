@@ -22,6 +22,13 @@ if cite_agent_path.exists():
 
 from groq import Groq
 
+# Load .env.local if it exists
+from pathlib import Path
+env_file = Path(__file__).parent.parent.parent / ".env.local"
+if env_file.exists():
+    from dotenv import load_dotenv
+    load_dotenv(env_file)
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,22 +56,57 @@ class LLMIntentParser:
             use_llm: If False, falls back to keyword matching (for testing)
         """
         self.use_llm = use_llm
+        self.provider = None
 
         if use_llm:
-            # Try to get Groq API key
-            self.api_key = os.getenv('GROQ_API_KEY') or os.getenv('GROQ_API_KEY_1')
+            # Try Cerebras first (from .env.local)
+            cerebras_key = (os.getenv('CEREBRAS_API_KEY') or
+                          os.getenv('CEREBRAS_API_KEY_1') or
+                          os.getenv('CEREBRAS_API_KEY_2'))
+            if cerebras_key:
+                try:
+                    from openai import OpenAI
+                    self.client = OpenAI(
+                        api_key=cerebras_key,
+                        base_url="https://api.cerebras.ai/v1"
+                    )
+                    self.provider = 'cerebras'
+                    logger.info("LLM-based intent parser initialized with Cerebras")
+                except Exception as e:
+                    logger.warning(f"Cerebras initialization failed: {e}")
 
-            if not self.api_key:
-                logger.warning("No GROQ_API_KEY found - falling back to keyword matching")
+            # Try Groq as fallback
+            if not self.provider:
+                groq_key = os.getenv('GROQ_API_KEY') or os.getenv('GROQ_API_KEY_1')
+                if groq_key:
+                    try:
+                        self.client = Groq(api_key=groq_key)
+                        self.provider = 'groq'
+                        logger.info("LLM-based intent parser initialized with Groq")
+                    except Exception as e:
+                        logger.warning(f"Groq initialization failed: {e}")
+
+            # Try Gemini as last resort
+            if not self.provider:
+                gemini_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
+                if gemini_key:
+                    try:
+                        import google.generativeai as genai
+                        genai.configure(api_key=gemini_key)
+                        self.client = genai.GenerativeModel('gemini-1.5-flash')
+                        self.provider = 'gemini'
+                        logger.info("LLM-based intent parser initialized with Gemini")
+                    except Exception as e:
+                        logger.warning(f"Gemini initialization failed: {e}")
+
+            # No LLM available
+            if not self.provider:
+                logger.warning("No LLM API key found - falling back to keyword matching")
                 self.use_llm = False
-            else:
-                self.client = Groq(api_key=self.api_key)
-                logger.info("LLM-based intent parser initialized with Groq")
 
-        # Fallback keyword parser
-        if not self.use_llm:
-            from intelligence.intent_parser import IntentParser
-            self.fallback_parser = IntentParser()
+        # Always initialize fallback keyword parser
+        from intelligence.intent_parser import IntentParser
+        self.fallback_parser = IntentParser()
 
     def parse(self, user_request: str) -> DesignIntent:
         """
@@ -142,17 +184,37 @@ Think about:
 Respond with ONLY valid JSON, no explanation outside the JSON.
 """
 
-        response = self.client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  # Smart model
-            messages=[
-                {"role": "system", "content": "You are an expert hardware design assistant. Always respond with valid JSON only."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,  # Low temperature for consistent parsing
-            max_tokens=500
-        )
+        # Call appropriate provider
+        if self.provider == 'cerebras':
+            response = self.client.chat.completions.create(
+                model="llama-3.3-70b",
+                messages=[
+                    {"role": "system", "content": "You are an expert hardware design assistant. Always respond with valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=500
+            )
+            result_text = response.choices[0].message.content.strip()
 
-        result_text = response.choices[0].message.content.strip()
+        elif self.provider == 'groq':
+            response = self.client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an expert hardware design assistant. Always respond with valid JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.3,
+                max_tokens=500
+            )
+            result_text = response.choices[0].message.content.strip()
+
+        elif self.provider == 'gemini':
+            response = self.client.generate_content(prompt)
+            result_text = response.text.strip()
+
+        else:
+            raise ValueError("No LLM provider available")
 
         # Parse JSON (LLM should return valid JSON)
         try:
@@ -161,6 +223,10 @@ Respond with ONLY valid JSON, no explanation outside the JSON.
             # Try to extract JSON if LLM added markdown
             if "```json" in result_text:
                 result_text = result_text.split("```json")[1].split("```")[0].strip()
+                result = json.loads(result_text)
+            elif "```" in result_text:
+                # Handle plain ``` without json tag
+                result_text = result_text.split("```")[1].split("```")[0].strip()
                 result = json.loads(result_text)
             else:
                 raise ValueError(f"LLM didn't return valid JSON: {result_text}")
