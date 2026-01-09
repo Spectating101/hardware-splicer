@@ -68,6 +68,17 @@ archive.zip
 logs/
 pcb_runs/
 
+# Generated outputs
+output/
+demo_output/
+test_output/
+generated_code/
+generated_designs/
+
+# Local caches (runtime/scrapers)
+data/*_cache/
+data/*cache*/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -75,3 +86,8 @@ Thumbs.db
 # Temporary
 *.tmp
 *.bak
+
+# Rust
+target/
+**/target/
+.cargo/

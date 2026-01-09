@@ -26,8 +26,8 @@ dependencies = [
 ]
 
 [project.scripts]
-circuit-ai-cli = "circuit_ai_cli:main"
-circuit-ai-api = "src.api.v1.main:app"
+circuit-ai-cli = "src.cli:main"
+circuit-ai-api = "src.api.v1.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

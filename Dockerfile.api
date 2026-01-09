@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+
+# System deps for common CV stacks (opencv/torch runtime may still need more depending on base).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+# Copy only the python backend + minimal assets used by defaults.
+COPY src /app/src
+COPY yolov8n.pt /app/yolov8n.pt
+
+EXPOSE 8000
+
+CMD ["gunicorn", "src.api.v1.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "65"]
+

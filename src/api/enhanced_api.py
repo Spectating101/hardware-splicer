@@ -8,6 +8,8 @@ from PIL import Image
 import io
 import json
 import uuid
+import tempfile
+import os
 from datetime import datetime
 from loguru import logger
 
@@ -17,18 +19,22 @@ from src.services.cache_service import cache_service, analysis_cache
 from src.services.queue_service import queue_service
 from src.vision.enhanced_detector import enhanced_detector
 
+# Import Intelligence Tools
+from src.intelligence.parser import KiCadParser
+from src.intelligence.analyzer import CircuitAnalyzer
+from src.intelligence.bom import BomGenerator
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Circuit.AI Enhanced API",
     description="Advanced Component Intelligence Platform with Real-time Analysis",
-    version="2.0.0"
+    version="2.1.0"
 )
 
 # Add CORS middleware
-# Configure allowed origins from environment or use safe defaults
 from src.config import settings
 
-allowed_origins = settings.cors_origins if hasattr(settings, 'cors_origins') else [
+allowed_origins = settings.cors_origins if hasattr(settings, "cors_origins") else [
     "http://localhost:3000",      # Local development
     "http://localhost:8000",      # Local backend
 ]
@@ -105,11 +111,13 @@ async def root():
     """Root endpoint with enhanced API information."""
     return {
         "message": "Circuit.AI Enhanced Component Intelligence Platform",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "features": [
             "Real-time WebSocket analysis progress",
             "Enhanced computer vision with multi-model ensemble",
             "Advanced LLM-powered functionality mapping",
+            "Netlist Analysis (ERC)",
+            "BOM Generation",
             "Intelligent project recommendations",
             "Educational content generation",
             "Repair recommendations",
@@ -118,6 +126,8 @@ async def root():
         ],
         "endpoints": {
             "analyze": "/analyze - Upload PCB image for enhanced analysis",
+            "analyze_netlist": "/analyze/netlist - Upload KiCad netlist for ERC",
+            "generate_bom": "/generate/bom - Upload KiCad netlist for BOM CSV",
             "batch_analyze": "/batch_analyze - Submit batch analysis job",
             "job_status": "/job/{job_id} - Get batch job status",
             "websocket": "/ws/{client_id} - Real-time WebSocket connection",
@@ -174,6 +184,70 @@ async def analyze_pcb(
         
     except Exception as e:
         logger.error(f"Analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/analyze/netlist")
+async def analyze_netlist(file: UploadFile = File(...)):
+    """Analyze KiCad Netlist for Electrical Rule Checks (ERC)."""
+    try:
+        content = await file.read()
+        
+        # Create temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".net") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+            
+        try:
+            parser = KiCadParser(tmp_path)
+            data = parser.parse()
+            analyzer = CircuitAnalyzer(data)
+            
+            stats = analyzer.get_stats()
+            floating_nets = analyzer.find_single_node_nets()
+            
+            return {
+                "status": "success",
+                "stats": stats,
+                "issues": {
+                    "floating_nets": floating_nets,
+                    "count": len(floating_nets)
+                },
+                "passed": len(floating_nets) == 0
+            }
+        finally:
+            os.unlink(tmp_path)
+            
+    except Exception as e:
+        logger.error(f"Netlist analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/generate/bom")
+async def generate_bom(file: UploadFile = File(...)):
+    """Generate Bill of Materials (BOM) CSV from KiCad Netlist."""
+    try:
+        content = await file.read()
+        
+        # Create temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".net") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+            
+        try:
+            parser = KiCadParser(tmp_path)
+            data = parser.parse()
+            bom_gen = BomGenerator(data)
+            csv_content = bom_gen.generate_csv()
+            
+            return StreamingResponse(
+                io.StringIO(csv_content),
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename=bom.csv"}
+            )
+        finally:
+            os.unlink(tmp_path)
+            
+    except Exception as e:
+        logger.error(f"BOM generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/batch_analyze")

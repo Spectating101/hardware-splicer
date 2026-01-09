@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     
     # Detection pipeline
     # Options: "demo" (enhanced demo), "classical" (OpenCV), "yolo" (model), "remote" (HTTP)
-    detection_backend: str = "classical"
+    detection_backend: str = "yolo"
     enable_ocr: bool = True
     ocr_lang: str = "eng"
 

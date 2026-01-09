@@ -1,0 +1,11 @@
+{
+  "microcontroller": "esp32",
+  "components": ["oled_ssd1306"],
+  "power_source": {"type": "usb", "voltage_v": 5.0, "current_limit_a": 0.5},
+  "scenario": "max",
+  "pcb": {
+    "vin_trace": {"length_m": 0.2, "width_m": 0.00003, "copper_oz": 1.0},
+    "ldo_dropout_v": 0.3,
+    "ldo_max_current_a": 1.0
+  }
+}

@@ -20,19 +20,41 @@ from .circuit_analyzer import (
     circuit_intelligence
 )
 
-from .repair_guidance import repair_guidance
-from .modification_planner import modification_planner
-from .trace_analyzer import trace_analyzer
-from .value_extraction import value_extractor
-from .safety_validator import safety_validator
-from .pinout_database import pinout_database
-from .pin_detector import pin_detector
-from .connection_mapper import connection_mapper
-from .visual_overlay import visual_overlay_renderer
-from .interactive_repair_chatbot import interactive_repair_chatbot
-from .advanced_trace_follower import advanced_trace_follower
-from .resistor_color_decoder import resistor_color_decoder
-from .capacitor_value_reader import capacitor_value_reader
+# Conditional imports - only import if files exist
+try:
+    from .modification_planner import modification_planner
+except ImportError:
+    modification_planner = None
+
+try:
+    from .safety_validator import safety_validator
+except ImportError:
+    safety_validator = None
+
+try:
+    from .pin_detector import pin_detector
+except ImportError:
+    pin_detector = None
+
+try:
+    from .connection_mapper import connection_mapper
+except ImportError:
+    connection_mapper = None
+
+try:
+    from .interactive_repair_chatbot import interactive_repair_chatbot
+except ImportError:
+    interactive_repair_chatbot = None
+
+try:
+    from .advanced_trace_follower import advanced_trace_follower
+except ImportError:
+    advanced_trace_follower = None
+
+try:
+    from .capacitor_value_reader import capacitor_value_reader
+except ImportError:
+    capacitor_value_reader = None
 
 __all__ = [
     'CircuitIntelligenceAnalyzer',
