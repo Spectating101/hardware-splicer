@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(python:*)",
+      "Bash(source:*)",
+      "Bash(tee:*)",
+      "Bash(find:*)",
+      "Bash(python3:*)",
+      "Bash(top:*)",
+      "Bash(ps:*)",
+      "Bash(pip install:*)",
+      "Bash(timeout 60 python scripts/test_complete_system.py)",
+      "Bash(timeout 60 python:*)",
+      "Bash(chmod:*)",
+      "Bash(awk:*)",
+      "Bash(timeout 300 python scripts/data_collection/scrape_datasheets.py)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

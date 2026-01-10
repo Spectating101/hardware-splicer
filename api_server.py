@@ -1063,6 +1063,199 @@ def validate_kicad_workflow():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/v2/manufacture/bom', methods=['POST'])
+def generate_bom():
+    """
+    Generate Bill of Materials (BOM) from KiCAD netlist
+
+    Request (multipart/form-data or JSON):
+    - netlist_path: Path to .net file or file upload
+    - include_pricing: Boolean (optional, default: false)
+    - format: "json" or "csv" (optional, default: "json")
+
+    Returns:
+    {
+        "status": "success",
+        "summary": {
+            "total_components": 15,
+            "unique_parts": 7,
+            "parts_with_digikey_numbers": 5,
+            "estimated_total_cost": 12.50
+        },
+        "items": [
+            {
+                "references": ["R1", "R2"],
+                "value": "10K",
+                "footprint": "Resistor_SMD:R_0805",
+                "quantity": 2,
+                "part_number": "RMCF0805FT10K0CT-ND",
+                "supplier": "DigiKey",
+                "unit_price": 0.10,
+                "total_price": 0.20
+            },
+            ...
+        ]
+    }
+    """
+    try:
+        from engines.bom_generator import BOMGenerator
+
+        # Handle both JSON and multipart form data
+        if request.is_json:
+            data = request.get_json()
+            netlist_path = data.get('netlist_path')
+            include_pricing = data.get('include_pricing', False)
+            output_format = data.get('format', 'json')
+        else:
+            # Handle file upload
+            if 'netlist_file' not in request.files:
+                return jsonify({'error': 'netlist_path or netlist_file required'}), 400
+
+            # Save uploaded file temporarily
+            file = request.files['netlist_file']
+            temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+            temp_dir.mkdir(exist_ok=True)
+            netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+            file.save(str(netlist_path))
+
+            include_pricing = request.form.get('include_pricing', 'false').lower() == 'true'
+            output_format = request.form.get('format', 'json')
+
+        if not netlist_path:
+            return jsonify({'error': 'netlist_path required'}), 400
+
+        # Generate BOM
+        generator = BOMGenerator()
+        bom = generator.generate_bom(str(netlist_path), include_pricing=include_pricing)
+
+        # Return appropriate format
+        if output_format == 'csv':
+            csv_content = generator.export_csv(bom)
+            return csv_content, 200, {
+                'Content-Type': 'text/csv',
+                'Content-Disposition': 'attachment; filename=bom.csv'
+            }
+        else:
+            return jsonify(bom)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/manufacture/gerber', methods=['POST'])
+def generate_gerber():
+    """
+    Generate Gerber files from KiCAD PCB
+
+    Request (multipart/form-data or JSON):
+    - pcb_path: Path to .kicad_pcb file or file upload
+    - quantity: PCB quantity for cost estimation (optional, default: 5)
+
+    Returns:
+    {
+        "status": "success",
+        "pcb_info": {
+            "name": "my_board",
+            "dimensions": "100mm x 80mm",
+            "layers": 2,
+            "thickness": "1.6mm"
+        },
+        "gerber_files": [...],
+        "zip_url": "/download/gerbers/my_board-gerbers.zip",
+        "manufacturing_ready": true,
+        "cost_estimates": {
+            "JLCPCB": {"price_usd": 2.00, "lead_time_days": "2-5"},
+            ...
+        }
+    }
+    """
+    try:
+        from engines.gerber_generator import GerberGenerator
+
+        # Handle both JSON and multipart form data
+        if request.is_json:
+            data = request.get_json()
+            pcb_path = data.get('pcb_path')
+            quantity = data.get('quantity', 5)
+        else:
+            # Handle file upload
+            if 'pcb_file' not in request.files:
+                return jsonify({'error': 'pcb_path or pcb_file required'}), 400
+
+            # Save uploaded file temporarily
+            file = request.files['pcb_file']
+            temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+            temp_dir.mkdir(exist_ok=True)
+            pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+            file.save(str(pcb_path))
+
+            quantity = int(request.form.get('quantity', 5))
+
+        if not pcb_path:
+            return jsonify({'error': 'pcb_path required'}), 400
+
+        # Generate Gerber package
+        generator = GerberGenerator()
+        package = generator.generate_gerber_package(str(pcb_path))
+
+        # Create ZIP file
+        temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'gerbers'
+        temp_dir.mkdir(parents=True, exist_ok=True)
+        zip_filename = f"{package['pcb_info']['name']}-gerbers.zip"
+        zip_path = temp_dir / zip_filename
+        generator.create_gerber_zip(package, str(zip_path))
+
+        # Get cost estimates
+        pcb_info = generator.extract_pcb_info(str(pcb_path))
+        cost_estimates = generator.estimate_manufacturing_cost(pcb_info, quantity)
+
+        # Format response
+        response = {
+            'status': package['status'],
+            'pcb_info': package['pcb_info'],
+            'gerber_files': [
+                {
+                    'filename': layer.filename,
+                    'layer_type': layer.layer_type,
+                    'description': layer.description,
+                    'size_bytes': len(layer.content)
+                }
+                for layer in package['gerber_files']
+            ],
+            'zip_file': str(zip_path),
+            'zip_size_kb': zip_path.stat().st_size / 1024,
+            'manufacturing_ready': package['manufacturing_ready'],
+            'cost_estimates': cost_estimates['estimates'],
+            'compatible_fabs': package['compatible_fabs']
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/manufacture/download-gerber/<filename>', methods=['GET'])
+def download_gerber(filename):
+    """Download generated Gerber ZIP file"""
+    try:
+        temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'gerbers'
+        file_path = temp_dir / filename
+
+        if not file_path.exists():
+            return jsonify({'error': 'File not found'}), 404
+
+        return send_file(
+            file_path,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ============================================================================
 # V1 API - ORIGINAL ENDPOINTS
 # ============================================================================
