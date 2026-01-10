@@ -20,7 +20,7 @@ from intelligence.learning_paths import LearningPathGenerator
 from integrations.pricing_service import UnifiedPricingService
 from engines.unified_workflow import UnifiedWorkflowEngine, UserProfile, UserLevel
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 # Initialize services
 validator = CircuitValidator()
@@ -1262,7 +1262,12 @@ def download_gerber(filename):
 
 @app.route('/', methods=['GET'])
 def index():
-    """API documentation"""
+    """Landing page or API documentation"""
+    # Serve landing page for browser requests, JSON for API clients
+    if 'text/html' in request.headers.get('Accept', ''):
+        return app.send_static_file('index.html')
+
+    # Return JSON API docs for curl/API clients
     return jsonify({
         'service': 'Circuit-AI API',
         'version': '0.4.0',
@@ -1426,4 +1431,7 @@ if __name__ == '__main__':
     print("=" * 70)
     print()
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'True').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)
