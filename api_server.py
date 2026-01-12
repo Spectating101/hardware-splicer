@@ -942,7 +942,7 @@ def validate_kicad_workflow():
     Professional KiCAD validation workflow
 
     Request (multipart/form-data or JSON):
-    - kicad_file: Path to .net file or file upload
+    - kicad_file: Path to .net or .kicad_pcb file, or file upload
     - hints: JSON hints (optional - will auto-generate if missing)
 
     Hints schema:
@@ -1000,7 +1000,9 @@ def validate_kicad_workflow():
             file = request.files['kicad_file']
             temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
             temp_dir.mkdir(exist_ok=True)
-            kicad_file = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+            orig_suffix = Path(file.filename or "").suffix.lower()
+            suffix = ".kicad_pcb" if orig_suffix == ".kicad_pcb" else ".net"
+            kicad_file = temp_dir / f"{uuid.uuid4().hex[:8]}{suffix}"
             file.save(str(kicad_file))
 
             hints = request.form.get('hints')
@@ -1056,6 +1058,16 @@ def validate_kicad_workflow():
                 'issues': []
             }
             response['manufacturing_ready'] = True
+
+        # Optional: include geometry for `.kicad_pcb` inputs (enables 2.5D/3D viewer)
+        try:
+            if str(kicad_file).lower().endswith(".kicad_pcb"):
+                from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+
+                response["pcb_geometry"] = extract_pcb_geometry(str(kicad_file))
+        except Exception:
+            # Geometry is best-effort; validation results should still return.
+            pass
 
         return jsonify(response)
 

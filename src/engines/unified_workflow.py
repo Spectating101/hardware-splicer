@@ -263,7 +263,7 @@ class UnifiedWorkflowEngine:
                 next_steps=[
                     f"Error processing KiCAD file: {str(e)}",
                     "Check file format",
-                    "Ensure it's a valid KiCAD netlist (.net)"
+                    "Ensure it's a valid KiCAD netlist (.net) or PCB file (.kicad_pcb)"
                 ],
                 estimated_cost=0.0,
                 estimated_time_hours=0.0

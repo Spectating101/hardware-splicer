@@ -82,13 +82,13 @@ circuit-ai-app/
 **Main Endpoint:**
 ```typescript
 POST /api/v2/workflow/validate-kicad
-// Upload KiCAD file → Get validation results + 3D data
+// Upload KiCad `.kicad_pcb` (preferred) or `.net` → Get validation results (+ optional geometry)
 ```
 
 **Response includes:**
-- `components[]` - Component positions for 3D rendering
-- `traces[]` - Trace paths for 3D rendering
-- `issues[]` - Validation problems to display
+- `validation.issues[]` - Validation problems to display
+- `pcb_geometry.footprints[]` - Footprint refs + 2D positions (only for `.kicad_pcb`)
+- `pcb_geometry.segments[]` - Copper segment geometry (only for `.kicad_pcb`)
 
 **See API_DOCUMENTATION.md for complete API reference.**
 

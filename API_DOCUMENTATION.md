@@ -88,18 +88,51 @@ curl http://localhost:5000/api/health
 
 **Endpoint:** `POST /api/v2/workflow/validate-kicad`
 
-**Purpose:** Upload KiCAD netlist and get validation results
+**Purpose:** Upload a KiCad design (`.net` or `.kicad_pcb`) and get validation results.
 
 **Request:**
 ```bash
 curl -X POST http://localhost:5000/api/v2/workflow/validate-kicad \
-  -F "kicad_file=@my_board.kicad_pcb"
+  -F "kicad_file=@my_board.kicad_pcb" \
+  -F 'hints={"sources":[{"name":"VUSB","net":"VBUS","volts":5.0,"gnd":"GND","max_current_a":0.5}],"loads_cc":[{"name":"ESP32","net":"+3V3","amps":0.24,"gnd":"GND"}],"voltage_constraints":[{"name":"RAIL_3V3","net":"+3V3","gnd":"GND","min_v":3.0,"max_v":3.6,"severity":"error"}]}'
 ```
 
 **Request (multipart/form-data):**
-- `kicad_file`: File upload (`.kicad_pcb` or `.net` format)
+- `kicad_file`: File upload (`.kicad_pcb` or `.net`)
+- `hints` (optional): JSON string (power sources/loads/constraints)
 
-**Response:**
+**Response (current implementation):**
+```json
+{
+  "status": "validation_passed",
+  "next_steps": [
+    "Design validated successfully!",
+    "Generate Gerber files",
+    "Generate BOM",
+    "Order PCB from JLCPCB"
+  ],
+  "validation": {
+    "issues_count": 0,
+    "critical": 0,
+    "errors": 0,
+    "warnings": 0,
+    "issues": []
+  },
+  "manufacturing_ready": true,
+  "pcb_geometry": {
+    "board": { "bbox_mm": null },
+    "nets": [],
+    "footprints": [],
+    "segments": []
+  }
+}
+```
+
+Notes:
+- `pcb_geometry` is only included when the uploaded file is a `.kicad_pcb`.
+- When uploading a `.net`, you still get validation results but no placement/trace geometry in the response.
+
+**Response (planned UI payload):**
 ```json
 {
   "success": true,

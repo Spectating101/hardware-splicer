@@ -1,6 +1,10 @@
-"""Compile a KiCad S-expression netlist into `CircuitNetlist` + constraints.
+"""Compile a KiCad design into `CircuitNetlist` + constraints.
 
-KiCad netlists contain connectivity but not necessarily electrical models for ICs.
+Supported inputs:
+- KiCad 6+ S-expression netlists (`.net`)
+- KiCad PCB files (`.kicad_pcb`) with pad net assignments
+
+Both contain connectivity but not necessarily electrical models for ICs.
 High-ROI approach:
 - Deterministically compile what we can (resistors) from connectivity + values.
 - Accept a small JSON "hints" object for power sources, current limits, and loads.
@@ -38,6 +42,7 @@ from src.engines.netlist import (
 )
 from src.engines.power_tree_validator import PowerTreeConstraints, SourceCurrentLimit
 from src.engines.kicad_parser import KiCadParser
+from src.engines.kicad_sexp import parse_sexp_file, sexp_find_all
 
 
 @dataclass(frozen=True)
@@ -96,25 +101,111 @@ def _normalize_net(net: str) -> str:
     return n
 
 
+def _parse_kicad_pcb_components_and_pinmap(kicad_pcb_path: str) -> tuple[Dict[str, Dict[str, Any]], Dict[str, Dict[str, str]]]:
+    """Parse `.kicad_pcb` into (components, pinmap) compatible with compilation.
+
+    Returns:
+      components: ref -> {value, footprint}
+      pinmap: ref -> pad_name -> net_name
+    """
+    ast = parse_sexp_file(kicad_pcb_path)
+
+    # Nets: (net <id> "<name>")
+    nets_by_id: Dict[int, str] = {}
+    for n in sexp_find_all(ast, "net"):
+        if len(n) >= 3 and isinstance(n[1], int) and isinstance(n[2], str):
+            nets_by_id[n[1]] = n[2]
+        elif len(n) >= 2 and isinstance(n[1], int):
+            nets_by_id[n[1]] = ""
+
+    def first_child(node: list, head: str) -> list | None:
+        for c in node:
+            if isinstance(c, list) and c and c[0] == head:
+                return c
+        return None
+
+    def fp_text(fp: list, kind: str) -> str | None:
+        for c in fp:
+            if not isinstance(c, list) or len(c) < 3:
+                continue
+            if c[0] != "fp_text":
+                continue
+            if str(c[1]) == kind and isinstance(c[2], str):
+                return c[2]
+        return None
+
+    def fp_prop(fp: list, name: str) -> str | None:
+        for c in fp:
+            if not isinstance(c, list) or len(c) < 3:
+                continue
+            if c[0] != "property":
+                continue
+            if isinstance(c[1], str) and c[1] == name and isinstance(c[2], str):
+                return c[2]
+        return None
+
+    components: Dict[str, Dict[str, Any]] = {}
+    pinmap: Dict[str, Dict[str, str]] = {}
+
+    for fp in sexp_find_all(ast, "footprint"):
+        footprint_name = fp[1] if len(fp) >= 2 and isinstance(fp[1], str) else "Unknown"
+        ref = fp_prop(fp, "Reference") or fp_text(fp, "reference") or ""
+        if not ref:
+            continue
+        value = fp_prop(fp, "Value") or fp_text(fp, "value") or ""
+
+        components[ref] = {"value": value, "footprint": footprint_name}
+
+        pads: Dict[str, str] = {}
+        for pad in sexp_find_all(fp, "pad"):
+            if len(pad) < 2:
+                continue
+            pad_name = pad[1]
+            if not isinstance(pad_name, (str, int, float)):
+                continue
+            pad_name_s = str(pad_name)
+            net = first_child(pad, "net")
+            if not net or len(net) < 2 or not isinstance(net[1], int):
+                continue
+
+            if len(net) >= 3 and isinstance(net[2], str) and net[2]:
+                net_name = net[2]
+            else:
+                net_name = nets_by_id.get(net[1]) or ""
+
+            if net_name:
+                pads[pad_name_s] = _normalize_net(net_name)
+
+        if pads:
+            pinmap[ref] = pads
+
+    return components, pinmap
+
+
 def compile_kicad_netlist(
     netlist_path: str,
     hints: Optional[Dict[str, Any]] = None,
 ) -> KiCadCompiled:
     hints = hints or {}
-    parsed = KiCadParser(netlist_path).parse()
+    pinmap: Dict[str, Dict[str, str]] = {}
+    if str(netlist_path).lower().endswith(".kicad_pcb"):
+        components, pinmap = _parse_kicad_pcb_components_and_pinmap(netlist_path)
+        parsed = {"components": components, "nets": {}}
+    else:
+        parsed = KiCadParser(netlist_path).parse()
 
     components: Dict[str, Dict[str, Any]] = parsed.get("components") or {}
     nets: Dict[str, Dict[str, Any]] = parsed.get("nets") or {}
 
-    # Build ref -> pin -> net map
-    pinmap: Dict[str, Dict[str, str]] = {}
-    for net_name, net_data in nets.items():
-        for node in net_data.get("nodes", []) or []:
-            ref = node.get("ref")
-            pin = node.get("pin")
-            if not ref or not pin:
-                continue
-            pinmap.setdefault(ref, {})[pin] = _normalize_net(net_name)
+    # Build ref -> pin -> net map (for `.net` inputs)
+    if not pinmap:
+        for net_name, net_data in nets.items():
+            for node in net_data.get("nodes", []) or []:
+                ref = node.get("ref")
+                pin = node.get("pin")
+                if not ref or not pin:
+                    continue
+                pinmap.setdefault(ref, {})[pin] = _normalize_net(net_name)
 
     net = CircuitNetlist()
 
