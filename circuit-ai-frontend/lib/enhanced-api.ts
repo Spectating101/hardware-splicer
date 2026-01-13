@@ -409,8 +409,8 @@ class EnhancedApiClient {
     return `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  // Clear all cache
-  clearCache(): void {
+  // Clear all in-memory cache (client-side)
+  clearLocalCache(): void {
     this.cache.clear();
   }
 

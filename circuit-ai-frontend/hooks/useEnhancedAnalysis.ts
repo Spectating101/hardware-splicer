@@ -32,7 +32,7 @@ export function useEnhancedAnalysis(options: UseEnhancedAnalysisOptions = {}) {
     { step: 'finalizing', message: 'Finalizing analysis results...', duration: 800 }
   ];
 
-  const analyzeImage = useCallback(async (file: File, options: {
+  const analyzeImage = useCallback(async (file: File, params: {
     backend?: string;
     enableOcr?: boolean;
     enableQualityAssessment?: boolean;
@@ -54,10 +54,10 @@ export function useEnhancedAnalysis(options: UseEnhancedAnalysisOptions = {}) {
 
       // Start real-time analysis with WebSocket support
       const analysisResult = await enhancedApiClient.analyzePCB(file, {
-        backend: options.backend || 'ensemble',
-        enableOcr: options.enableOcr ?? true,
-        enableQualityAssessment: options.enableQualityAssessment ?? true,
-        enableCaching: options.enableCaching ?? true,
+        backend: params.backend || 'ensemble',
+        enableOcr: params.enableOcr ?? true,
+        enableQualityAssessment: params.enableQualityAssessment ?? true,
+        enableCaching: params.enableCaching ?? true,
         onProgress: (progressData: AnalysisProgress) => {
           setProgress(progressData);
           options.onProgress?.(progressData);

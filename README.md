@@ -128,6 +128,16 @@ This repository contains the core logic for **4 Distinct Commercial Tools**:
 
 ## 🚀 Quick Start
 
+### CAD Demo UI
+1. Start the API: `python3 api_server.py` (serves `http://localhost:5000`)
+2. Start the frontend: `cd circuit-ai-frontend && npm run dev` (serves `http://localhost:3000`)
+3. Open the workspace: `http://localhost:3000/cad` (click `Demo Board` to preview without backend)
+
+### Frontend Routes
+- Home: `http://localhost:3000/`
+- CAD workspace: `http://localhost:3000/cad`
+- Marketing page: `http://localhost:3000/marketing`
+
 ### V2 API - Unified Workflows
 
 Start the API server:

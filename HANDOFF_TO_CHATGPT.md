@@ -103,6 +103,14 @@ cd circuit-ai-app
 npm install electron three @react-three/fiber antd axios zustand
 ```
 
+### Demo UI (already in repo)
+There is a viewport-first CAD demo page in the existing frontend:
+- Open `http://localhost:3000/cad`
+- Click `Demo Board` (no backend required), or `Open` + `Validate` (requires Flask API running on `http://localhost:5000`)
+
+Notes:
+- The CAD UI is project-first (create/select a project, then import KiCad or load demo).
+
 ### 2. Electron Config (15 min)
 - Create `src/main/index.ts`
 - Update `package.json` with Electron scripts

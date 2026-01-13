@@ -198,19 +198,22 @@ export default function DemoPage() {
             </div>
 
             {/* Current Step */}
-            {isRunning && currentStep < demoSteps.length && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                    <demoSteps[currentStep].icon className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-medium">{demoSteps[currentStep].title}</div>
-                    <div className="text-sm text-gray-600">{demoSteps[currentStep].description}</div>
-                  </div>
-                </div>
-              </div>
-            )}
+	            {isRunning && currentStep < demoSteps.length && (
+	              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+	                <div className="flex items-center gap-3">
+	                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+	                    {(() => {
+	                      const Icon = demoSteps[currentStep].icon
+	                      return <Icon className="w-4 h-4 text-white" />
+	                    })()}
+	                  </div>
+	                  <div>
+	                    <div className="font-medium">{demoSteps[currentStep].title}</div>
+	                    <div className="text-sm text-gray-600">{demoSteps[currentStep].description}</div>
+	                  </div>
+	                </div>
+	              </div>
+	            )}
 
             {/* Completion */}
             {!isRunning && progress >= 100 && (

@@ -129,10 +129,10 @@ export default function APIKeysPage() {
               <h1 className="text-3xl font-bold text-slate-900">API Keys</h1>
               <p className="text-slate-600 mt-1">Manage your Circuit.AI API keys and access</p>
             </div>
-            <Button 
-              onClick={() => document.getElementById('create-key-modal')?.showModal()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
+	            <Button 
+	              onClick={() => (document.getElementById('create-key-modal') as HTMLDialogElement | null)?.showModal()}
+	              className="bg-blue-600 hover:bg-blue-700 text-white"
+	            >
               <Plus className="w-4 h-4 mr-2" />
               Create API Key
             </Button>
@@ -270,10 +270,10 @@ export default function APIKeysPage() {
                 <p className="text-slate-600 mb-4">
                   Create your first API key to start using the Circuit.AI API
                 </p>
-                <Button 
-                  onClick={() => document.getElementById('create-key-modal')?.showModal()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                >
+	                  <Button
+	                    onClick={() => (document.getElementById('create-key-modal') as HTMLDialogElement | null)?.showModal()}
+	                    className="bg-blue-600 hover:bg-blue-700 text-white"
+	                  >
                   <Plus className="w-4 h-4 mr-2" />
                   Create API Key
                 </Button>

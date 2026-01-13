@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,16 +23,16 @@ export default function MarketingPage() {
   -H "Content-Type: multipart/form-data" \\
   -F "image=@pcb_image.jpg"`;
 
-  const pythonExample = `import circuitai
-
-client = circuitai.Client(api_key="YOUR_API_KEY")
-
-# Analyze a PCB image
-result = client.analyze_pcb("pcb_image.jpg")
-
-print(f"Found {len(result.components)} components")
-for component in result.components:
-    print(f"- {component.name}: ${component.value}")`;
+	const pythonExample = `import circuitai
+	
+	client = circuitai.Client(api_key="YOUR_API_KEY")
+	
+	# Analyze a PCB image
+	result = client.analyze_pcb("pcb_image.jpg")
+	
+	print(f"Found {len(result.components)} components")
+	for component in result.components:
+	    print(f"- {component.name}: ${"$"}{component.value}")`;
 
   return (
     <div className="min-h-screen bg-slate-50">

@@ -71,11 +71,11 @@ client = circuitai.Client(api_key="${apiKey || 'YOUR_API_KEY'}")
 # Analyze a PCB image
 result = client.analyze_pcb("${selectedFile.name}")
 
-print(f"Found {len(result.components)} components")
-for component in result.components:
-    print(f"- {component.name}: {component.confidence:.2f}")
-    print(f"  Value: ${component.value}")
-    print(f"  Function: {component.function}")`;
+	    print(f"Found {len(result.components)} components")
+	    for component in result.components:
+	        print(f"- {component.name}: {component.confidence:.2f}")
+	    print(f"  Value: ${"$"}{component.value}")
+	    print(f"  Function: {component.function}")`;
   };
 
   return (

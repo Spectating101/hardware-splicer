@@ -135,7 +135,7 @@ export default function PricingPage() {
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
-                    {typeof plan.price.monthly === 'number' ? (
+                    {typeof plan.price.monthly === 'number' && typeof plan.price.annual === 'number' ? (
                       <div className="flex items-baseline justify-center">
                         <span className="text-4xl font-bold text-slate-900">
                           ${isAnnual ? plan.price.annual / 12 : plan.price.monthly}
@@ -149,7 +149,7 @@ export default function PricingPage() {
                         {plan.price.monthly}
                       </div>
                     )}
-                    {isAnnual && typeof plan.price.monthly === 'number' && (
+                    {isAnnual && typeof plan.price.monthly === 'number' && typeof plan.price.annual === 'number' && (
                       <p className="text-sm text-slate-500 mt-1">
                         Billed annually (${plan.price.annual}/year)
                       </p>
