@@ -32,6 +32,11 @@ npm install
 npm run build
 ```
 
+### Authentication (API Key)
+
+If the Circuit-AI backend requires an API key, set:
+- `CIRCUIT_AI_API_KEY` (sent as `Authorization: Bearer ...`)
+
 ### Install in Claude Desktop
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):

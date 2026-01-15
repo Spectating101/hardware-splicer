@@ -9,11 +9,14 @@ from pathlib import Path
 from functools import wraps
 from datetime import datetime, timezone
 import hashlib
+import json
 import os
+import secrets
 import sqlite3
 import sys
 import tempfile
 import uuid
+from typing import Optional, Dict, Any, Tuple, Set
 
 sys.path.insert(0, 'src')
 
@@ -31,7 +34,7 @@ app = Flask(__name__, static_folder='static', static_url_path='/static')
 # Monetization hooks: API keys + daily quotas (v2 endpoints)
 # ============================================================================
 
-def _configured_api_keys() -> set[str]:
+def _configured_api_keys() -> Set[str]:
     raw = (os.environ.get("CIRCUIT_AI_API_KEYS") or "").strip()
     if not raw:
         return set()
@@ -42,10 +45,12 @@ def _configured_api_keys() -> set[str]:
 def _api_key_required() -> bool:
     if (os.environ.get("CIRCUIT_AI_REQUIRE_API_KEY") or "").strip().lower() in ("1", "true", "yes", "on"):
         return True
-    return bool(_configured_api_keys())
+    if _configured_api_keys():
+        return True
+    return _has_any_active_db_key()
 
 
-def _extract_api_key() -> str | None:
+def _extract_api_key() -> Optional[str]:
     auth = (request.headers.get("Authorization") or "").strip()
     if auth.lower().startswith("bearer "):
         token = auth[7:].strip()
@@ -58,7 +63,7 @@ def _extract_api_key() -> str | None:
     return q or None
 
 
-def _quota_limit(action: str) -> int:
+def _quota_limit_env(action: str) -> int:
     action_u = (action or "").upper()
     env_key = f"CIRCUIT_AI_QUOTA_{action_u}_PER_DAY"
     raw = (os.environ.get(env_key) or "").strip()
@@ -80,24 +85,101 @@ def _key_hash(api_key: str) -> str:
     return hashlib.sha256(api_key.encode("utf-8")).hexdigest()[:32]
 
 
-def _check_and_increment_usage(api_key: str, action: str) -> tuple[bool, int, int]:
+def _open_usage_db() -> sqlite3.Connection:
+    db_path = _usage_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    return sqlite3.connect(str(db_path))
+
+
+def _init_usage_schema(con: sqlite3.Connection) -> None:
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, key_hash TEXT NOT NULL, action TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(day, key_hash, action))"
+    )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS api_keys (key_hash TEXT PRIMARY KEY, label TEXT, plan TEXT, quotas_json TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL)"
+    )
+
+
+def _has_any_active_db_key() -> bool:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        row = con.execute("SELECT 1 FROM api_keys WHERE active=1 LIMIT 1").fetchone()
+        return bool(row)
+    except Exception:
+        return False
+    finally:
+        con.close()
+
+
+def _get_db_key_record(key_hash: str) -> Optional[Dict[str, Any]]:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        row = con.execute(
+            "SELECT key_hash, label, plan, quotas_json, active, created_at FROM api_keys WHERE key_hash=?",
+            (key_hash,),
+        ).fetchone()
+        if not row:
+            return None
+        quotas_json = row[3] or ""
+        quotas: Dict[str, Any] = {}
+        if quotas_json:
+            try:
+                quotas = json.loads(quotas_json)
+            except Exception:
+                quotas = {}
+        return {
+            "key_hash": row[0],
+            "label": row[1],
+            "plan": row[2],
+            "quotas": quotas,
+            "active": bool(row[4]),
+            "created_at": row[5],
+        }
+    finally:
+        con.close()
+
+
+def _validate_api_key(api_key: str) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
+    """
+    Returns (valid, key_hash, db_record).
+    """
+    allow = _configured_api_keys()
+    if allow:
+        return (api_key in allow, _key_hash(api_key), None)
+
+    kh = _key_hash(api_key)
+    rec = _get_db_key_record(kh)
+    if not rec or not rec.get("active"):
+        return (False, kh, rec)
+    return (True, kh, rec)
+
+
+def _quota_limit_for_key(action: str, db_record: Optional[Dict[str, Any]]) -> int:
+    if db_record and isinstance(db_record.get("quotas"), dict):
+        quotas = db_record["quotas"]
+        # Support both action-specific and default quotas
+        if action in quotas and str(quotas[action]).isdigit():
+            return int(quotas[action])
+        if "default" in quotas and str(quotas["default"]).isdigit():
+            return int(quotas["default"])
+    return _quota_limit_env(action)
+
+
+def _check_and_increment_usage(api_key: str, action: str, db_record: Optional[Dict[str, Any]]) -> Tuple[bool, int, int]:
     """
     Returns (allowed, remaining, limit).
     """
-    limit = _quota_limit(action)
+    limit = _quota_limit_for_key(action, db_record)
     if limit <= 0:
         return False, 0, limit
 
     day = datetime.now(timezone.utc).date().isoformat()
     kh = _key_hash(api_key)
-    db_path = _usage_db_path()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-
-    con = sqlite3.connect(str(db_path))
+    con = _open_usage_db()
     try:
-        con.execute(
-            "CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, key_hash TEXT NOT NULL, action TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(day, key_hash, action))"
-        )
+        _init_usage_schema(con)
         row = con.execute("SELECT count FROM usage WHERE day=? AND key_hash=? AND action=?", (day, kh, action)).fetchone()
         used = int(row[0]) if row else 0
         if used >= limit:
@@ -124,15 +206,15 @@ def require_api_key(action: str):
             if not api_key:
                 return jsonify({"error": "missing_api_key"}), 401
 
-            allowed_keys = _configured_api_keys()
-            if allowed_keys and api_key not in allowed_keys:
+            valid, kh, rec = _validate_api_key(api_key)
+            if not valid:
                 return jsonify({"error": "invalid_api_key"}), 403
 
-            ok, remaining, limit = _check_and_increment_usage(api_key, action)
+            ok, remaining, limit = _check_and_increment_usage(api_key, action, rec)
             if not ok:
                 return jsonify({"error": "quota_exceeded", "action": action, "limit_per_day": limit}), 429
 
-            g.circuit_ai_api_key_hash = _key_hash(api_key)
+            g.circuit_ai_api_key_hash = kh
             out = fn(*args, **kwargs)
             resp = make_response(out)
             resp.headers["X-CircuitAI-Quota-Limit"] = str(limit)
@@ -143,6 +225,101 @@ def require_api_key(action: str):
 
     return decorator
 
+# Admin endpoints for issuing/revoking keys.
+def _admin_token() -> str:
+    return (os.environ.get("CIRCUIT_AI_ADMIN_TOKEN") or "").strip()
+
+
+def _extract_admin_token() -> Optional[str]:
+    auth = (request.headers.get("Authorization") or "").strip()
+    if auth.lower().startswith("bearer "):
+        token = auth[7:].strip()
+        return token or None
+    x = (request.headers.get("X-Admin-Token") or "").strip()
+    return x or None
+
+
+def require_admin(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        expected = _admin_token()
+        if not expected:
+            return jsonify({"error": "admin_disabled"}), 404
+        token = _extract_admin_token()
+        if not token:
+            return jsonify({"error": "missing_admin_token"}), 401
+        if token != expected:
+            return jsonify({"error": "invalid_admin_token"}), 403
+        return fn(*args, **kwargs)
+
+    return wrapper
+
+
+@app.route("/api/v2/admin/keys", methods=["GET"])
+@require_admin
+def admin_list_keys():
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        rows = con.execute(
+            "SELECT key_hash, label, plan, active, created_at FROM api_keys ORDER BY created_at DESC"
+        ).fetchall()
+        return jsonify(
+            {
+                "ok": True,
+                "keys": [
+                    {"key_hash": r[0], "label": r[1], "plan": r[2], "active": bool(r[3]), "created_at": r[4]}
+                    for r in rows
+                ],
+            }
+        )
+    finally:
+        con.close()
+
+
+@app.route("/api/v2/admin/keys", methods=["POST"])
+@require_admin
+def admin_create_key():
+    payload = request.get_json(silent=True) or {}
+    label = str(payload.get("label") or "").strip() or "unnamed"
+    plan = str(payload.get("plan") or "").strip() or "default"
+    quotas = payload.get("quotas") if isinstance(payload.get("quotas"), dict) else {}
+    active = bool(payload.get("active", True))
+
+    api_key = "cai_" + secrets.token_urlsafe(24)
+    kh = _key_hash(api_key)
+    now = datetime.now(timezone.utc).isoformat()
+
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT OR REPLACE INTO api_keys(key_hash, label, plan, quotas_json, active, created_at) VALUES(?,?,?,?,?,?)",
+            (kh, label, plan, json.dumps(quotas), 1 if active else 0, now),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    # Return the raw key only at creation time.
+    return jsonify({"ok": True, "api_key": api_key, "key_hash": kh, "label": label, "plan": plan, "active": active})
+
+
+@app.route("/api/v2/admin/keys/<key_hash>/revoke", methods=["POST"])
+@require_admin
+def admin_revoke_key(key_hash: str):
+    kh = (key_hash or "").strip()
+    if not kh:
+        return jsonify({"error": "key_hash_required"}), 400
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute("UPDATE api_keys SET active=0 WHERE key_hash=?", (kh,))
+        con.commit()
+        return jsonify({"ok": True, "key_hash": kh, "active": False})
+    finally:
+        con.close()
+
 # Small helper endpoint for debugging quotas/keys during rollout.
 @app.route("/api/v2/usage", methods=["GET"])
 @require_api_key("usage")
@@ -151,7 +328,7 @@ def usage():
         {
             "ok": True,
             "key_hash": getattr(g, "circuit_ai_api_key_hash", None),
-            "quota_default_per_day": _quota_limit("default"),
+            "quota_default_per_day": _quota_limit_env("default"),
             "usage_db": str(_usage_db_path()),
         }
     )

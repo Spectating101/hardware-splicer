@@ -11,12 +11,19 @@
 
 ## Authentication
 
-Currently no authentication required for testing. Will add API key authentication later.
+v2 endpoints support API key authentication (recommended for MCP/CI monetization).
 
-**Future format:**
+Send either header:
 ```http
 Authorization: Bearer YOUR_API_KEY
 ```
+or:
+```http
+X-API-Key: YOUR_API_KEY
+```
+
+**Admin (issue/revoke keys):**
+- Set `CIRCUIT_AI_ADMIN_TOKEN`, then call `POST /api/v2/admin/keys` with `Authorization: Bearer <ADMIN_TOKEN>`.
 
 ---
 

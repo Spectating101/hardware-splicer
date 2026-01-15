@@ -43,6 +43,20 @@ The v2 API represents a **complete platform integration** that bridges education
 
 ## V2 API Endpoints
 
+## Authentication (v2)
+
+If API keys are enabled (see `.env.example`), send one of:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+or:
+
+```http
+X-API-Key: YOUR_API_KEY
+```
+
 ### 1. POST `/api/v2/workflow/beginner`
 
 **Complete beginner workflow with learning path recommendations and project selection.**
