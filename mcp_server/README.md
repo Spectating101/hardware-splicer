@@ -37,6 +37,27 @@ npm run build
 If the Circuit-AI backend requires an API key, set:
 - `CIRCUIT_AI_API_KEY` (sent as `Authorization: Bearer ...`)
 
+---
+
+## Pricing / Keys (for operators)
+
+This MCP server is designed to be monetized with **API keys + daily quotas**.
+
+Recommended early model: **prepaid credits** (simpler than subscriptions).
+- Hobby: validation-only
+- Builder: validation + limited BOM
+- Pro: validation + BOM + Gerbers
+
+Key management endpoints live on the Circuit-AI backend:
+- `POST /api/v2/admin/keys/issue` (plan preset: `free|paid`)
+- `GET /api/v2/admin/keys` (list)
+- `POST /api/v2/admin/keys/<key_hash>/revoke` (revoke)
+
+Buyer flow (minimal marketing):
+1) Buyer pays (invoice / payment link).
+2) You issue a key (admin endpoint).
+3) Buyer pastes the key into their MCP config.
+
 ### Install in Claude Desktop
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):

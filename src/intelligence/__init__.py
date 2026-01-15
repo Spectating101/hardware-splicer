@@ -12,13 +12,28 @@ Provides deep circuit understanding beyond component detection:
 - Safety validation
 """
 
-from .circuit_analyzer import (
-    CircuitIntelligenceAnalyzer,
-    CircuitTopology,
-    FunctionalBlock,
-    ComponentRelationship,
-    circuit_intelligence
-)
+"""
+Keep package import lightweight.
+
+This repo has optional "heavy" submodules (numpy/scipy/sklearn/cv2, OCR, etc).
+The web API (`api_server.py`) only needs specific submodules (e.g. `circuit_validator`)
+and should not fail at import time when optional deps are missing.
+"""
+
+try:
+    from .circuit_analyzer import (
+        CircuitIntelligenceAnalyzer,
+        CircuitTopology,
+        FunctionalBlock,
+        ComponentRelationship,
+        circuit_intelligence,
+    )
+except Exception:
+    CircuitIntelligenceAnalyzer = None
+    CircuitTopology = None
+    FunctionalBlock = None
+    ComponentRelationship = None
+    circuit_intelligence = None
 
 # Conditional imports - only import if files exist
 try:
@@ -57,22 +72,16 @@ except ImportError:
     capacitor_value_reader = None
 
 __all__ = [
-    'CircuitIntelligenceAnalyzer',
-    'CircuitTopology',
-    'FunctionalBlock',
-    'ComponentRelationship',
-    'circuit_intelligence',
-    'repair_guidance',
-    'modification_planner',
-    'trace_analyzer',
-    'value_extractor',
-    'safety_validator',
-    'pinout_database',
-    'pin_detector',
-    'connection_mapper',
-    'visual_overlay_renderer',
-    'interactive_repair_chatbot',
-    'advanced_trace_follower',
-    'resistor_color_decoder',
-    'capacitor_value_reader'
+    "CircuitIntelligenceAnalyzer",
+    "CircuitTopology",
+    "FunctionalBlock",
+    "ComponentRelationship",
+    "circuit_intelligence",
+    "modification_planner",
+    "safety_validator",
+    "pin_detector",
+    "connection_mapper",
+    "interactive_repair_chatbot",
+    "advanced_trace_follower",
+    "capacitor_value_reader",
 ]

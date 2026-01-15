@@ -18,7 +18,13 @@ import tempfile
 import uuid
 from typing import Optional, Dict, Any, Tuple, Set
 
-sys.path.insert(0, 'src')
+# Ensure both styles of imports work across the codebase:
+# - `from intelligence...` (requires `src` on sys.path)
+# - `from src.engines...` (requires repo root on sys.path, where `src/` is a package)
+REPO_ROOT = Path(__file__).resolve().parent
+SRC_DIR = REPO_ROOT / "src"
+sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(0, str(SRC_DIR))
 
 from intelligence.circuit_validator import CircuitValidator
 from integrations.fritzing_integration import FritzingPartsLibrary, FritzingFileGenerator
