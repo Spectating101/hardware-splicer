@@ -4,8 +4,13 @@ Circuit-AI Web API
 Minimal Flask API for circuit validation and Fritzing export
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, make_response, g
 from pathlib import Path
+from functools import wraps
+from datetime import datetime, timezone
+import hashlib
+import os
+import sqlite3
 import sys
 import tempfile
 import uuid
@@ -21,6 +26,135 @@ from integrations.pricing_service import UnifiedPricingService
 from engines.unified_workflow import UnifiedWorkflowEngine, UserProfile, UserLevel
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+
+# ============================================================================
+# Monetization hooks: API keys + daily quotas (v2 endpoints)
+# ============================================================================
+
+def _configured_api_keys() -> set[str]:
+    raw = (os.environ.get("CIRCUIT_AI_API_KEYS") or "").strip()
+    if not raw:
+        return set()
+    parts = [p.strip() for p in raw.replace("\n", ",").split(",")]
+    return {p for p in parts if p}
+
+
+def _api_key_required() -> bool:
+    if (os.environ.get("CIRCUIT_AI_REQUIRE_API_KEY") or "").strip().lower() in ("1", "true", "yes", "on"):
+        return True
+    return bool(_configured_api_keys())
+
+
+def _extract_api_key() -> str | None:
+    auth = (request.headers.get("Authorization") or "").strip()
+    if auth.lower().startswith("bearer "):
+        token = auth[7:].strip()
+        if token:
+            return token
+    x_api_key = (request.headers.get("X-API-Key") or "").strip()
+    if x_api_key:
+        return x_api_key
+    q = (request.args.get("api_key") or "").strip()
+    return q or None
+
+
+def _quota_limit(action: str) -> int:
+    action_u = (action or "").upper()
+    env_key = f"CIRCUIT_AI_QUOTA_{action_u}_PER_DAY"
+    raw = (os.environ.get(env_key) or "").strip()
+    if raw.isdigit():
+        return int(raw)
+    default_raw = (os.environ.get("CIRCUIT_AI_QUOTA_DEFAULT_PER_DAY") or "200").strip()
+    return int(default_raw) if default_raw.isdigit() else 200
+
+
+def _usage_db_path() -> Path:
+    # Use a tmp db by default; deploys can override for persistence.
+    raw = (os.environ.get("CIRCUIT_AI_USAGE_DB") or "").strip()
+    if raw:
+        return Path(raw)
+    return Path(tempfile.gettempdir()) / "circuit-ai-usage.sqlite"
+
+
+def _key_hash(api_key: str) -> str:
+    return hashlib.sha256(api_key.encode("utf-8")).hexdigest()[:32]
+
+
+def _check_and_increment_usage(api_key: str, action: str) -> tuple[bool, int, int]:
+    """
+    Returns (allowed, remaining, limit).
+    """
+    limit = _quota_limit(action)
+    if limit <= 0:
+        return False, 0, limit
+
+    day = datetime.now(timezone.utc).date().isoformat()
+    kh = _key_hash(api_key)
+    db_path = _usage_db_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+
+    con = sqlite3.connect(str(db_path))
+    try:
+        con.execute(
+            "CREATE TABLE IF NOT EXISTS usage (day TEXT NOT NULL, key_hash TEXT NOT NULL, action TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(day, key_hash, action))"
+        )
+        row = con.execute("SELECT count FROM usage WHERE day=? AND key_hash=? AND action=?", (day, kh, action)).fetchone()
+        used = int(row[0]) if row else 0
+        if used >= limit:
+            return False, 0, limit
+        new_used = used + 1
+        con.execute(
+            "INSERT INTO usage(day, key_hash, action, count) VALUES(?,?,?,?) ON CONFLICT(day, key_hash, action) DO UPDATE SET count=excluded.count",
+            (day, kh, action, new_used),
+        )
+        con.commit()
+        return True, max(0, limit - new_used), limit
+    finally:
+        con.close()
+
+
+def require_api_key(action: str):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            if not _api_key_required():
+                return fn(*args, **kwargs)
+
+            api_key = _extract_api_key()
+            if not api_key:
+                return jsonify({"error": "missing_api_key"}), 401
+
+            allowed_keys = _configured_api_keys()
+            if allowed_keys and api_key not in allowed_keys:
+                return jsonify({"error": "invalid_api_key"}), 403
+
+            ok, remaining, limit = _check_and_increment_usage(api_key, action)
+            if not ok:
+                return jsonify({"error": "quota_exceeded", "action": action, "limit_per_day": limit}), 429
+
+            g.circuit_ai_api_key_hash = _key_hash(api_key)
+            out = fn(*args, **kwargs)
+            resp = make_response(out)
+            resp.headers["X-CircuitAI-Quota-Limit"] = str(limit)
+            resp.headers["X-CircuitAI-Quota-Remaining"] = str(remaining)
+            return resp
+
+        return wrapper
+
+    return decorator
+
+# Small helper endpoint for debugging quotas/keys during rollout.
+@app.route("/api/v2/usage", methods=["GET"])
+@require_api_key("usage")
+def usage():
+    return jsonify(
+        {
+            "ok": True,
+            "key_hash": getattr(g, "circuit_ai_api_key_hash", None),
+            "quota_default_per_day": _quota_limit("default"),
+            "usage_db": str(_usage_db_path()),
+        }
+    )
 
 # Initialize services
 validator = CircuitValidator()
@@ -749,6 +883,7 @@ def get_market_pricing(project_name):
 # ============================================================================
 
 @app.route('/api/v2/workflow/beginner', methods=['POST'])
+@require_api_key("workflow_beginner")
 def beginner_workflow():
     """
     Complete beginner workflow
@@ -834,6 +969,7 @@ def beginner_workflow():
 
 
 @app.route('/api/v2/workflow/complete', methods=['POST'])
+@require_api_key("workflow_complete")
 def complete_workflow():
     """
     End-to-end complete workflow
@@ -937,6 +1073,7 @@ def complete_workflow():
 
 
 @app.route('/api/v2/workflow/validate-kicad', methods=['POST'])
+@require_api_key("validate_kicad")
 def validate_kicad_workflow():
     """
     Professional KiCAD validation workflow
@@ -1076,6 +1213,7 @@ def validate_kicad_workflow():
 
 
 @app.route('/api/v2/manufacture/bom', methods=['POST'])
+@require_api_key("manufacture_bom")
 def generate_bom():
     """
     Generate Bill of Materials (BOM) from KiCAD netlist
@@ -1155,6 +1293,7 @@ def generate_bom():
 
 
 @app.route('/api/v2/manufacture/gerber', methods=['POST'])
+@require_api_key("manufacture_gerber")
 def generate_gerber():
     """
     Generate Gerber files from KiCAD PCB
@@ -1248,6 +1387,7 @@ def generate_gerber():
 
 
 @app.route('/api/v2/manufacture/download-gerber/<filename>', methods=['GET'])
+@require_api_key("download_gerber")
 def download_gerber(filename):
     """Download generated Gerber ZIP file"""
     try:

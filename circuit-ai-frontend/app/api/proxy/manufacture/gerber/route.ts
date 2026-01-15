@@ -4,6 +4,9 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || "http://localhost:5000";
+  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
+
   const inbound = await req.formData();
   const file = inbound.get("pcb_file");
   const quantity = inbound.get("quantity");
@@ -16,9 +19,11 @@ export async function POST(req: Request) {
   outbound.set("pcb_file", file, file.name);
   if (typeof quantity === "string") outbound.set("quantity", quantity);
 
-  const res = await fetch("http://localhost:5000/api/v2/manufacture/gerber", {
+  const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const res = await fetch(`${apiBaseUrl}/api/v2/manufacture/gerber`, {
     method: "POST",
     body: outbound,
+    headers,
   });
 
   const text = await res.text();
@@ -29,4 +34,3 @@ export async function POST(req: Request) {
     return new NextResponse(text, { status: res.status, headers: { "content-type": "text/plain" } });
   }
 }
-

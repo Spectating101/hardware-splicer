@@ -4,8 +4,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || "http://localhost:5000";
+  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
   try {
-    const res = await fetch("http://localhost:5000/api/health", { method: "GET" });
+    const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+    const res = await fetch(`${apiBaseUrl}/api/health`, { method: "GET", headers });
     const text = await res.text();
     try {
       const json = JSON.parse(text);
@@ -17,4 +20,3 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: String(e?.message || e) }, { status: 502 });
   }
 }
-
