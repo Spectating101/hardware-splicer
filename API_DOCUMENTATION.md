@@ -24,6 +24,7 @@ X-API-Key: YOUR_API_KEY
 
 **Admin (issue/revoke keys):**
 - Set `CIRCUIT_AI_ADMIN_TOKEN`, then call `POST /api/v2/admin/keys` with `Authorization: Bearer <ADMIN_TOKEN>`.
+- Convenience issue endpoint: `POST /api/v2/admin/keys/issue` with `{ "plan": "free" | "paid" }`.
 
 ---
 

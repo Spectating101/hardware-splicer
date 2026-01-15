@@ -166,6 +166,18 @@ def _quota_limit_for_key(action: str, db_record: Optional[Dict[str, Any]]) -> in
             return int(quotas["default"])
     return _quota_limit_env(action)
 
+def _plan_presets() -> Dict[str, Dict[str, int]]:
+    """
+    Two-tier presets for quick monetization experiments.
+    Values are per-key, per-day quotas.
+    """
+    return {
+        # Free: validate only, small cap.
+        "free": {"default": 10, "validate_kicad": 10, "manufacture_bom": 0, "manufacture_gerber": 0, "download_gerber": 0},
+        # Paid: full workflow, higher cap.
+        "paid": {"default": 200, "validate_kicad": 200, "manufacture_bom": 50, "manufacture_gerber": 25, "download_gerber": 50},
+    }
+
 
 def _check_and_increment_usage(api_key: str, action: str, db_record: Optional[Dict[str, Any]]) -> Tuple[bool, int, int]:
     """
@@ -275,6 +287,41 @@ def admin_list_keys():
         )
     finally:
         con.close()
+
+@app.route("/api/v2/admin/keys/issue", methods=["POST"])
+@require_admin
+def admin_issue_key():
+    """
+    Convenience endpoint: issue a key using a simple free/paid preset.
+    Body:
+      { "plan": "free" | "paid", "label": "optional label", "active": true }
+    """
+    payload = request.get_json(silent=True) or {}
+    plan = str(payload.get("plan") or "free").strip().lower()
+    label = str(payload.get("label") or "").strip() or f"{plan}-user"
+    active = bool(payload.get("active", True))
+
+    presets = _plan_presets()
+    if plan not in presets:
+        return jsonify({"error": "invalid_plan", "allowed": sorted(presets.keys())}), 400
+
+    api_key = "cai_" + secrets.token_urlsafe(24)
+    kh = _key_hash(api_key)
+    now = datetime.now(timezone.utc).isoformat()
+    quotas = presets[plan]
+
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT OR REPLACE INTO api_keys(key_hash, label, plan, quotas_json, active, created_at) VALUES(?,?,?,?,?,?)",
+            (kh, label, plan, json.dumps(quotas), 1 if active else 0, now),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    return jsonify({"ok": True, "api_key": api_key, "key_hash": kh, "label": label, "plan": plan, "active": active, "quotas": quotas})
 
 
 @app.route("/api/v2/admin/keys", methods=["POST"])
