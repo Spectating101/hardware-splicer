@@ -58,6 +58,10 @@ Buyer flow (minimal marketing):
 2) You issue a key (admin endpoint).
 3) Buyer pastes the key into their MCP config.
 
+If Stripe isn’t available in your country, you can still monetize:
+- Collect payment via PayPal/Wise/bank transfer.
+- Issue keys with `POST /api/v2/admin/fulfill` (records fulfillment; can email setup if configured).
+
 ### Install in Claude Desktop
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):

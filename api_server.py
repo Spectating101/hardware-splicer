@@ -17,6 +17,7 @@ import sys
 import tempfile
 import uuid
 from typing import Optional, Dict, Any, Tuple, Set
+import textwrap
 
 # Ensure both styles of imports work across the codebase:
 # - `from intelligence...` (requires `src` on sys.path)
@@ -104,6 +105,15 @@ def _init_usage_schema(con: sqlite3.Connection) -> None:
     con.execute(
         "CREATE TABLE IF NOT EXISTS api_keys (key_hash TEXT PRIMARY KEY, label TEXT, plan TEXT, quotas_json TEXT, active INTEGER NOT NULL, created_at TEXT NOT NULL)"
     )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS stripe_events (event_id TEXT PRIMARY KEY, processed_at TEXT NOT NULL)"
+    )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS fulfillments (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, source TEXT NOT NULL, customer_email TEXT, plan TEXT, status TEXT NOT NULL, key_hash TEXT)"
+    )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS support_tickets (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_email TEXT, subject TEXT, message TEXT, status TEXT NOT NULL)"
+    )
 
 
 def _has_any_active_db_key() -> bool:
@@ -174,13 +184,19 @@ def _quota_limit_for_key(action: str, db_record: Optional[Dict[str, Any]]) -> in
 
 def _plan_presets() -> Dict[str, Dict[str, int]]:
     """
-    Two-tier presets for quick monetization experiments.
+    Presets for quick monetization experiments.
     Values are per-key, per-day quotas.
     """
     return {
         # Free: validate only, small cap.
         "free": {"default": 10, "validate_kicad": 10, "manufacture_bom": 0, "manufacture_gerber": 0, "download_gerber": 0},
-        # Paid: full workflow, higher cap.
+        # Hobby: validation-only but higher than free.
+        "hobby": {"default": 40, "validate_kicad": 40, "manufacture_bom": 0, "manufacture_gerber": 0, "download_gerber": 0},
+        # Builder: validation + limited BOM.
+        "builder": {"default": 80, "validate_kicad": 80, "manufacture_bom": 10, "manufacture_gerber": 0, "download_gerber": 10},
+        # Pro: full workflow, moderate cap.
+        "pro": {"default": 200, "validate_kicad": 200, "manufacture_bom": 50, "manufacture_gerber": 25, "download_gerber": 50},
+        # Back-compat alias.
         "paid": {"default": 200, "validate_kicad": 200, "manufacture_bom": 50, "manufacture_gerber": 25, "download_gerber": 50},
     }
 
@@ -328,6 +344,428 @@ def admin_issue_key():
         con.close()
 
     return jsonify({"ok": True, "api_key": api_key, "key_hash": kh, "label": label, "plan": plan, "active": active, "quotas": quotas})
+
+
+def _stripe_secret_key() -> str:
+    return (os.environ.get("CIRCUIT_AI_STRIPE_SECRET_KEY") or os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+
+
+def _stripe_webhook_secret() -> str:
+    return (os.environ.get("CIRCUIT_AI_STRIPE_WEBHOOK_SECRET") or os.environ.get("STRIPE_WEBHOOK_SECRET") or "").strip()
+
+
+def _sendgrid_api_key() -> str:
+    return (os.environ.get("CIRCUIT_AI_SENDGRID_API_KEY") or "").strip()
+
+
+def _support_from_email() -> str:
+    return (os.environ.get("CIRCUIT_AI_SUPPORT_FROM_EMAIL") or "").strip()
+
+
+def _support_bcc_email() -> str:
+    return (os.environ.get("CIRCUIT_AI_SUPPORT_BCC_EMAIL") or "").strip()
+
+
+def _stripe_price_plan_map() -> Dict[str, str]:
+    """
+    Map Stripe Price IDs to plan presets.
+    Configure env vars like:
+      CIRCUIT_AI_STRIPE_PRICE_HOBBY=price_...
+      CIRCUIT_AI_STRIPE_PRICE_BUILDER=price_...
+      CIRCUIT_AI_STRIPE_PRICE_PRO=price_...
+    """
+    out: Dict[str, str] = {}
+    for plan in ("hobby", "builder", "pro"):
+        pid = (os.environ.get(f"CIRCUIT_AI_STRIPE_PRICE_{plan.upper()}") or "").strip()
+        if pid:
+            out[pid] = plan
+    return out
+
+
+def _record_fulfillment(source: str, customer_email: Optional[str], plan: Optional[str], status: str, key_hash: Optional[str]) -> str:
+    fid = "ful_" + secrets.token_urlsafe(12)
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT INTO fulfillments(id, created_at, source, customer_email, plan, status, key_hash) VALUES(?,?,?,?,?,?,?)",
+            (fid, datetime.now(timezone.utc).isoformat(), source, customer_email, plan, status, key_hash),
+        )
+        con.commit()
+    finally:
+        con.close()
+    return fid
+
+
+def _stripe_event_seen(event_id: str) -> bool:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        row = con.execute("SELECT 1 FROM stripe_events WHERE event_id=? LIMIT 1", (event_id,)).fetchone()
+        return bool(row)
+    finally:
+        con.close()
+
+
+def _mark_stripe_event_seen(event_id: str) -> None:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT OR REPLACE INTO stripe_events(event_id, processed_at) VALUES(?,?)",
+            (event_id, datetime.now(timezone.utc).isoformat()),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+
+def _issue_key_direct(plan: str, label: str, active: bool) -> Tuple[str, str, Dict[str, int]]:
+    presets = _plan_presets()
+    if plan not in presets:
+        raise ValueError(f"invalid_plan: {plan}")
+    api_key = "cai_" + secrets.token_urlsafe(24)
+    kh = _key_hash(api_key)
+    now = datetime.now(timezone.utc).isoformat()
+    quotas = presets[plan]
+
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT OR REPLACE INTO api_keys(key_hash, label, plan, quotas_json, active, created_at) VALUES(?,?,?,?,?,?)",
+            (kh, label, plan, json.dumps(quotas), 1 if active else 0, now),
+        )
+        con.commit()
+    finally:
+        con.close()
+    return api_key, kh, quotas
+
+
+def _send_email_sendgrid(to_email: str, subject: str, text_body: str) -> bool:
+    api_key = _sendgrid_api_key()
+    from_email = _support_from_email()
+    if not api_key or not from_email:
+        return False
+
+    payload = {
+        "personalizations": [{"to": [{"email": to_email}], "bcc": [{"email": _support_bcc_email()}] if _support_bcc_email() else []}],
+        "from": {"email": from_email},
+        "subject": subject,
+        "content": [{"type": "text/plain", "value": text_body}],
+    }
+
+    try:
+        import requests  # already a runtime dep
+
+        resp = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=15,
+        )
+        return 200 <= resp.status_code < 300
+    except Exception:
+        return False
+
+
+@app.route("/api/v2/webhooks/stripe", methods=["POST"])
+def stripe_webhook():
+    """
+    Stripe webhook for automated fulfillment.
+
+    Behavior:
+    - On `checkout.session.completed`, detect purchased plan (via price id mapping),
+      issue a key, and email setup instructions.
+    - If email delivery is not configured, record a pending fulfillment for manual handling.
+    """
+    secret = _stripe_webhook_secret()
+    sk = _stripe_secret_key()
+    if not secret or not sk:
+        return jsonify({"ok": False, "error": "stripe_not_configured"}), 404
+
+    sig_header = request.headers.get("Stripe-Signature", "")
+    payload = request.get_data(as_text=False) or b""
+    try:
+        import stripe
+
+        stripe.api_key = sk
+        event = stripe.Webhook.construct_event(payload=payload, sig_header=sig_header, secret=secret)
+    except Exception as e:
+        return jsonify({"ok": False, "error": "invalid_signature", "detail": str(e)}), 400
+
+    event_id = str(event.get("id") or "")
+    if event_id and _stripe_event_seen(event_id):
+        return jsonify({"ok": True, "status": "duplicate_ignored"})
+    if event_id:
+        _mark_stripe_event_seen(event_id)
+
+    if event.get("type") != "checkout.session.completed":
+        return jsonify({"ok": True, "status": "ignored", "type": event.get("type")})
+
+    session = event["data"]["object"]
+    session_id = session.get("id")
+
+    customer_email = None
+    if isinstance(session.get("customer_details"), dict):
+        customer_email = session["customer_details"].get("email")
+    customer_email = (customer_email or "").strip().lower() or None
+
+    price_plan = _stripe_price_plan_map()
+    plan = None
+    try:
+        line_items = stripe.checkout.Session.list_line_items(session_id, limit=10)
+        for li in getattr(line_items, "data", []) or []:
+            price = li.get("price") if isinstance(li, dict) else getattr(li, "price", None)
+            price_id = None
+            if isinstance(price, dict):
+                price_id = price.get("id")
+            else:
+                price_id = getattr(price, "id", None)
+            if price_id and price_id in price_plan:
+                plan = price_plan[price_id]
+                break
+    except Exception:
+        plan = None
+
+    plan = plan or "pro"
+    label = customer_email or f"stripe-{session_id}"
+
+    if not customer_email:
+        fid = _record_fulfillment("stripe", None, plan, "pending_manual_missing_email", None)
+        return jsonify({"ok": True, "status": "pending_manual", "reason": "missing_email", "fulfillment_id": fid})
+
+    # If we can't send email, don't create a key we can't deliver.
+    if not _sendgrid_api_key() or not _support_from_email():
+        fid = _record_fulfillment("stripe", customer_email, plan, "pending_manual_email_not_configured", None)
+        return jsonify({"ok": True, "status": "pending_manual", "reason": "email_not_configured", "fulfillment_id": fid})
+
+    api_key, key_hash, quotas = _issue_key_direct(plan=plan, label=label, active=True)
+
+    body = textwrap.dedent(
+        f"""\
+        Your Circuit-AI API key is ready.
+
+        API URL:
+          {request.host_url.strip().rstrip('/')}
+
+        API Key:
+          {api_key}
+
+        Claude Desktop MCP config snippet:
+        {{
+          "mcpServers": {{
+            "circuit-ai": {{
+              "command": "node",
+              "args": ["/ABS/PATH/TO/Circuit-AI/mcp_server/dist/index.js"],
+              "env": {{
+                "CIRCUIT_AI_API_URL": "{request.host_url.strip().rstrip('/')}",
+                "CIRCUIT_AI_API_KEY": "{api_key}"
+              }}
+            }}
+          }}
+        }}
+
+        Smoke test:
+          curl -sS {request.host_url.strip().rstrip('/')}/api/v2/usage -H "Authorization: Bearer {api_key}"
+
+        Quotas (per day):
+          {json.dumps(quotas, indent=2)}
+        """
+    ).strip() + "\n"
+
+    sent = _send_email_sendgrid(
+        to_email=customer_email,
+        subject="Your Circuit-AI API Key",
+        text_body=body,
+    )
+
+    status = "delivered_email" if sent else "delivery_failed"
+    fid = _record_fulfillment("stripe", customer_email, plan, status, key_hash)
+    return jsonify({"ok": True, "status": status, "fulfillment_id": fid})
+
+
+@app.route("/api/v2/support/tickets", methods=["POST"])
+def create_support_ticket():
+    """
+    Basic support intake:
+    - stores ticket in SQLite
+    - optionally emails support + auto-acks the customer (SendGrid)
+    """
+    payload = request.get_json(silent=True) or {}
+    email = (payload.get("email") or "").strip().lower()
+    subject = (payload.get("subject") or "Circuit-AI Support").strip()
+    message = (payload.get("message") or "").strip()
+    if not email or not message:
+        return jsonify({"ok": False, "error": "email_and_message_required"}), 400
+
+    tid = "tkt_" + secrets.token_urlsafe(10)
+    now = datetime.now(timezone.utc).isoformat()
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(
+            "INSERT INTO support_tickets(id, created_at, customer_email, subject, message, status) VALUES(?,?,?,?,?,?)",
+            (tid, now, email, subject, message, "open"),
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    # Optional email notifications.
+    if _sendgrid_api_key() and _support_from_email():
+        _send_email_sendgrid(
+            to_email=email,
+            subject=f"[Circuit-AI] Ticket received: {subject}",
+            text_body=(
+                "We received your support request.\n\n"
+                f"Ticket: {tid}\n\n"
+                "If this is an onboarding/setup issue, please include:\n"
+                "- your OS (macOS/Windows/Linux)\n"
+                "- the error message\n"
+                "- whether you are using Claude Desktop or VSCode\n"
+            ),
+        )
+
+    return jsonify({"ok": True, "ticket_id": tid})
+
+
+@app.route("/api/v2/admin/ops", methods=["GET"])
+@require_admin
+def admin_ops_overview():
+    """
+    Minimal operator view for:
+    - pending fulfillments (e.g. Stripe paid but email not configured)
+    - open support tickets
+    """
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        fulf = con.execute(
+            "SELECT id, created_at, source, customer_email, plan, status, key_hash FROM fulfillments ORDER BY created_at DESC LIMIT 200"
+        ).fetchall()
+        tickets = con.execute(
+            "SELECT id, created_at, customer_email, subject, status FROM support_tickets ORDER BY created_at DESC LIMIT 200"
+        ).fetchall()
+        return jsonify(
+            {
+                "ok": True,
+                "fulfillments": [
+                    {
+                        "id": r[0],
+                        "created_at": r[1],
+                        "source": r[2],
+                        "customer_email": r[3],
+                        "plan": r[4],
+                        "status": r[5],
+                        "key_hash": r[6],
+                    }
+                    for r in fulf
+                ],
+                "tickets": [
+                    {"id": r[0], "created_at": r[1], "customer_email": r[2], "subject": r[3], "status": r[4]}
+                    for r in tickets
+                ],
+            }
+        )
+    finally:
+        con.close()
+
+
+@app.route("/api/v2/admin/fulfill", methods=["POST"])
+@require_admin
+def admin_fulfill_manual_purchase():
+    """
+    Manual fulfillment endpoint (for non-Stripe payments).
+
+    Use this when you collect payment via PayPal/Wise/bank transfer and want
+    a single API call that:
+    - issues a key for a plan preset
+    - records a fulfillment row
+    - optionally emails the buyer the setup snippet (if SendGrid configured)
+
+    Body:
+      {
+        "plan": "hobby" | "builder" | "pro" | "free",
+        "email": "buyer@example.com",
+        "label": "optional label",
+        "payment_ref": "optional reference/invoice id",
+        "active": true
+      }
+    """
+    payload = request.get_json(silent=True) or {}
+    plan = str(payload.get("plan") or "pro").strip().lower()
+    email = (payload.get("email") or "").strip().lower()
+    label = str(payload.get("label") or "").strip() or (email or f"manual-{plan}")
+    payment_ref = str(payload.get("payment_ref") or "").strip()
+    active = bool(payload.get("active", True))
+
+    if not email:
+        return jsonify({"ok": False, "error": "email_required"}), 400
+
+    try:
+        api_key, key_hash, quotas = _issue_key_direct(plan=plan, label=label, active=active)
+    except Exception as e:
+        return jsonify({"ok": False, "error": "issue_failed", "detail": str(e)}), 400
+
+    base_url = request.host_url.strip().rstrip("/")
+    body = textwrap.dedent(
+        f"""\
+        Your Circuit-AI API key is ready.
+
+        API URL:
+          {base_url}
+
+        API Key:
+          {api_key}
+
+        Claude Desktop MCP config snippet:
+        {{
+          "mcpServers": {{
+            "circuit-ai": {{
+              "command": "node",
+              "args": ["/ABS/PATH/TO/Circuit-AI/mcp_server/dist/index.js"],
+              "env": {{
+                "CIRCUIT_AI_API_URL": "{base_url}",
+                "CIRCUIT_AI_API_KEY": "{api_key}"
+              }}
+            }}
+          }}
+        }}
+
+        Smoke test:
+          curl -sS {base_url}/api/v2/usage -H "Authorization: Bearer {api_key}"
+
+        Quotas (per day):
+          {json.dumps(quotas, indent=2)}
+        """
+    ).strip() + "\n"
+
+    # Record fulfillment (include payment_ref in status if provided).
+    status = "delivered_manual"
+    if payment_ref:
+        status = f"delivered_manual:{payment_ref}"
+    fid = _record_fulfillment("manual", email, plan, status, key_hash)
+
+    emailed = False
+    if _sendgrid_api_key() and _support_from_email():
+        emailed = _send_email_sendgrid(to_email=email, subject="Your Circuit-AI API Key", text_body=body)
+        if emailed:
+            _record_fulfillment("manual", email, plan, "delivered_email", key_hash)
+
+    return jsonify(
+        {
+            "ok": True,
+            "fulfillment_id": fid,
+            "emailed": emailed,
+            "plan": plan,
+            "key_hash": key_hash,
+            "api_key": api_key,
+            "base_url": base_url,
+            "quotas": quotas,
+            "mcp_env": {"CIRCUIT_AI_API_URL": base_url, "CIRCUIT_AI_API_KEY": api_key},
+        }
+    )
 
 
 @app.route("/api/v2/admin/keys", methods=["POST"])
@@ -1415,7 +1853,11 @@ def validate_kicad_workflow():
                 ]
             }
 
-            response['manufacturing_ready'] = (len(critical) == 0 and len(errors) == 0)
+            # FIXED: Handle validation_partial status (circuit solver failed, but geometric validation ran)
+            if result.status == 'validation_partial':
+                response['manufacturing_ready'] = False  # Circuit solver failed - needs electrical review
+            else:
+                response['manufacturing_ready'] = (len(critical) == 0 and len(errors) == 0)
         else:
             response['validation'] = {
                 'issues_count': 0,
@@ -1424,17 +1866,32 @@ def validate_kicad_workflow():
                 'warnings': 0,
                 'issues': []
             }
-            response['manufacturing_ready'] = True
+            # FIXED: Don't set manufacturing_ready=True if validation failed
+            # If status is "error", the circuit solver crashed - not safe to manufacture
+            if result.status in ['error', 'validation_failed']:
+                response['manufacturing_ready'] = False
+            else:
+                response['manufacturing_ready'] = True
 
         # Optional: include geometry for `.kicad_pcb` inputs (enables 2.5D/3D viewer)
         try:
             if str(kicad_file).lower().endswith(".kicad_pcb"):
                 from src.engines.kicad_pcb_geometry import extract_pcb_geometry
-
                 response["pcb_geometry"] = extract_pcb_geometry(str(kicad_file))
         except Exception:
             # Geometry is best-effort; validation results should still return.
             pass
+
+        # Optional: Add AI-powered design insights (separate from geometry)
+        if "pcb_geometry" in response:
+            from src.engines.llm_validator import get_llm_design_insights, get_fallback_insights
+
+            llm_insights = get_llm_design_insights(response["pcb_geometry"])
+            if llm_insights:
+                response["ai_insights"] = llm_insights
+            else:
+                # Fallback to rule-based insights
+                response["ai_insights"] = get_fallback_insights(response["pcb_geometry"])
 
         return jsonify(response)
 

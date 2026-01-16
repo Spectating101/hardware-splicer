@@ -479,3 +479,49 @@ async def shutdown_event():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# --- RECONCILIATION PATCH (Gemini) ---
+# This aligns the Backend with the Frontend's expected routes
+
+@app.post("/validate-kicad")
+async def validate_kicad_proxy(
+    kicad_file: UploadFile = File(...),
+    hints: Optional[str] = Form(None)
+):
+    """
+    Proxy endpoint to match Frontend expectations.
+    Redirects to the internal analyzer logic.
+    """
+    logger.info(f"Received KiCad validation request: {kicad_file.filename}")
+    
+    # 1. Save temp file
+    content = await kicad_file.read()
+    temp_path = f"/tmp/{uuid.uuid4()}.kicad_pcb"
+    with open(temp_path, "wb") as f:
+        f.write(content)
+        
+    try:
+        # 2. Use Intelligence Engine
+        parser = KiCadParser(temp_path)
+        geometry = parser.parse()
+        
+        analyzer = CircuitAnalyzer(geometry)
+        issues = analyzer.analyze()
+        
+        return JSONResponse({
+            "status": "done",
+            "manufacturing_ready": len(issues) == 0,
+            "pcb_geometry": geometry,
+            "validation": {"issues": issues},
+            "next_steps": ["Review Issues", "Export Gerber"] if issues else ["Ready for Fab"]
+        })
+    except Exception as e:
+        logger.error(f"Validation failed: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+@app.get("/api/proxy/health")
+async def health_check_proxy():
+    return {"status": "ok", "service": "circuit-ai-backend"}

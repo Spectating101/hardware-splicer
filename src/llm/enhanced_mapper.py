@@ -46,11 +46,11 @@ class ProjectRecommendation:
     estimated_cost: float
     time_required: str
     skills_developed: List[str]
-    tutorial_url: Optional[str] = None
     score: float
     category: str
     popularity: int
     rating: float
+    tutorial_url: Optional[str] = None
     tags: List[str] = None
 
 class EnhancedFunctionalMapper:

@@ -254,17 +254,78 @@ class UnifiedWorkflowEngine:
             )
 
         except Exception as e:
+            # Circuit solver failed - try geometric validation as fallback
+            geometric_issues = []
+            next_steps = []
+            error_type = type(e).__name__
+
+            # Try geometric validation for .kicad_pcb files
+            if str(kicad_file).lower().endswith(".kicad_pcb"):
+                try:
+                    from engines.geometric_validator import validate_pcb_geometry, add_hints_recommendation
+
+                    geometric_issues_raw = validate_pcb_geometry(str(kicad_file))
+                    # Convert to SimulationIssue format
+                    for gi in geometric_issues_raw:
+                        if SimulationIssue:  # Only if available
+                            geometric_issues.append(
+                                SimulationIssue(
+                                    severity=gi.severity,
+                                    component=gi.component,
+                                    issue=gi.issue,
+                                    explanation=gi.explanation,
+                                    physics_data=gi.physics_data or {},
+                                    solution=gi.solution
+                                )
+                            )
+
+                    hints_recommendations = add_hints_recommendation(str(kicad_file))
+
+                    if "Singular matrix" in str(e) or "SingularMatrixError" in error_type:
+                        next_steps = [
+                            "⚠ Circuit solver failed - incomplete electrical model",
+                            "✓ Performed basic geometric validation instead",
+                            "💡 To enable full power analysis, provide hints with electrical parameters:",
+                        ] + hints_recommendations + [
+                            "📐 Geometric checks passed" if not geometric_issues else f"📐 Found {len(geometric_issues)} geometric issues to review"
+                        ]
+                    else:
+                        next_steps = [
+                            f"Error during circuit analysis: {str(e)}",
+                            "Basic geometric validation completed",
+                            "Check file format and try again"
+                        ]
+
+                except Exception:
+                    # Geometric validation also failed
+                    next_steps = [
+                        f"Error processing KiCAD file: {str(e)}",
+                        "Check file format",
+                        "Ensure it's a valid KiCAD netlist (.net) or PCB file (.kicad_pcb)"
+                    ]
+            else:
+                # For .net files, can't do geometric validation
+                if "Singular matrix" in str(e) or "SingularMatrixError" in error_type:
+                    next_steps = [
+                        "⚠ Circuit solver failed - netlist has incomplete electrical model",
+                        "💡 Provide 'hints' parameter with power sources and loads",
+                        "Example: {\"sources\": [{\"name\": \"USB\", \"net\": \"VBUS\", \"volts\": 5.0}]}",
+                        "Or upload .kicad_pcb file for geometric validation"
+                    ]
+                else:
+                    next_steps = [
+                        f"Error processing KiCAD file: {str(e)}",
+                        "Check file format",
+                        "Ensure it's a valid KiCAD netlist (.net) or PCB file (.kicad_pcb)"
+                    ]
+
             return WorkflowResult(
-                status="error",
+                status="validation_partial" if geometric_issues else "error",
                 project=None,
                 instructions=None,
-                validation_issues=[],
+                validation_issues=geometric_issues,
                 manufacturing_files=None,
-                next_steps=[
-                    f"Error processing KiCAD file: {str(e)}",
-                    "Check file format",
-                    "Ensure it's a valid KiCAD netlist (.net) or PCB file (.kicad_pcb)"
-                ],
+                next_steps=next_steps,
                 estimated_cost=0.0,
                 estimated_time_hours=0.0
             )

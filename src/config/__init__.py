@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
 import os
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -63,10 +64,22 @@ class Settings(BaseSettings):
     debug: bool = True
     
     class Config:
-        env_file = ".env"
+        # Prioritize .env.local over .env
+        # If .env.local exists, use it; otherwise fall back to .env
+        env_file = ".env.local" if Path(".env.local").exists() else ".env"
         case_sensitive = False
         extra = "ignore"  # Allow and ignore extra environment variables
 
 
 # Global settings instance
 settings = Settings()
+
+# Debug: Log which API keys are configured
+import logging
+logger = logging.getLogger(__name__)
+if settings.cerebras_api_key:
+    logger.debug(f"Cerebras API key configured: {settings.cerebras_api_key[:10]}...")
+if settings.openai_api_key:
+    logger.debug(f"OpenAI API key configured: {settings.openai_api_key[:10]}...")
+if settings.cohere_api_key:
+    logger.debug(f"Cohere API key configured: {settings.cohere_api_key[:10]}...")
