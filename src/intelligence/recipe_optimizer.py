@@ -86,6 +86,7 @@ class ComponentPriceDatabase:
             'dht11': ComponentPrice('dht11', 'DHT11 Temp/Humidity', 2.0, 1.0, 'medium'),
             'hc_sr04': ComponentPrice('hc_sr04', 'HC-SR04 Ultrasonic', 3.0, 1.5, 'medium'),
             'mpu6050': ComponentPrice('mpu6050', 'MPU6050 Gyro', 5.0, 3.0, 'medium'),
+            'soil_moisture': ComponentPrice('soil_moisture', 'Capacitive Soil Moisture Sensor', 4.0, 2.0, 'high'),
 
             # Displays
             'oled_ssd1306': ComponentPrice('oled_ssd1306', '0.96" OLED Display', 6.0, 4.0, 'high'),
@@ -94,6 +95,7 @@ class ComponentPriceDatabase:
             # Actuators
             'servo_sg90': ComponentPrice('servo_sg90', 'SG90 Micro Servo', 3.0, 1.5, 'high'),
             'relay': ComponentPrice('relay', '5V Relay Module', 2.0, 1.0, 'high'),
+            'buzzer': ComponentPrice('buzzer', 'Piezo Buzzer', 1.0, 0.5, 'medium'),
 
             # Basic components
             'led': ComponentPrice('led', '5mm LED', 0.10, 0.05, 'low'),
@@ -147,16 +149,17 @@ class ProjectRecipeDatabase:
             {
                 'name': 'Smart Plant Monitor',
                 'category': ProjectCategory.HOME_AUTOMATION,
-                'description': 'Monitors soil moisture, temperature, and light. Sends notifications when plant needs water.',
+                'description': 'Monitors soil moisture, temperature, and humidity. Displays readings on OLED and provides watering recommendations.',
                 'difficulty': 'easy',
-                'required_components': ['arduino_nano', 'dht22', 'oled_ssd1306'],
-                'optional_components': ['led', 'resistor', 'battery_holder'],
-                'build_time_hours': 1.5,
-                'market_price_low': 25.0,
-                'market_price_high': 45.0,
-                'tags': ['plants', 'gardening', 'automation'],
-                'etsy_comparable': 'Plant Watering Monitor',
-                'ebay_search': 'Arduino Plant Monitor'
+                'required_components': ['esp32', 'soil_moisture', 'oled_ssd1306'],
+                'optional_components': ['dht22', 'led', 'resistor', 'battery_holder'],
+                'build_time_hours': 2.5,
+                'market_price_low': 45.0,
+                'market_price_high': 65.0,
+                'tags': ['plants', 'gardening', 'automation', 'sensors'],
+                'etsy_comparable': 'Smart Plant Monitor',
+                'ebay_search': 'ESP32 Plant Watering Monitor',
+                'notes': 'Popular on Etsy $40-60, Amazon $50-70. High demand from plant enthusiasts.'
             },
 
             {
@@ -605,6 +608,17 @@ class ProjectRecipeDatabase:
         # Sort by match percentage
         return sorted(matching, key=lambda x: x['match_percent'], reverse=True)
 
+    def get_by_name(self, project_name: str) -> Optional[Dict]:
+        """Get a specific project recipe by name"""
+        for recipe in self.recipes:
+            if recipe['name'].lower() == project_name.lower():
+                return recipe
+        return None
+
+    def get_all(self) -> List[Dict]:
+        """Get all available project recipes"""
+        return self.recipes.copy()
+
 
 class RecipeOptimizer:
     """Optimizes project recipes based on inventory and value"""
@@ -716,6 +730,38 @@ class RecipeOptimizer:
         sorted_recipes = sorted(project_recipes, key=lambda x: x.roi_percent, reverse=True)
 
         return sorted_recipes[:top_n]
+
+    def get_project_by_name(self, project_name: str, inventory: List[Dict] = None) -> Optional[ProjectRecipe]:
+        """
+        Get a specific project by name, regardless of inventory match
+
+        Args:
+            project_name: Name of the project to retrieve
+            inventory: Optional user inventory for cost calculations
+
+        Returns:
+            ProjectRecipe object or None if not found
+        """
+        if inventory is None:
+            inventory = []
+
+        # Get project template
+        template = self.recipe_db.get_by_name(project_name)
+        if not template:
+            return None
+
+        # Calculate economics
+        available_ids = [item['id'] for item in inventory]
+
+        # Add match info if not already present
+        if 'match_percent' not in template:
+            required = set(template['required_components'])
+            available = set(available_ids)
+            match_count = len(required & available)
+            template['match_percent'] = (match_count / len(required)) * 100 if required else 0
+            template['missing'] = list(required - available)
+
+        return self._calculate_recipe_economics(template, inventory, available_ids)
 
     def _calculate_recipe_economics(
         self,

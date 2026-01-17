@@ -345,17 +345,11 @@ class UnifiedWorkflowEngine:
         6. Generate manufacturing files if valid
         """
 
-        # Step 1: Get project details
-        recipes = self.recipe_optimizer.generate_recipes(
-            user.inventory,
-            top_n=50  # Search all
+        # Step 1: Get project details by name
+        project = self.recipe_optimizer.get_project_by_name(
+            project_name,
+            inventory=user.inventory
         )
-
-        project = None
-        for recipe in recipes:
-            if recipe.name == project_name:
-                project = recipe
-                break
 
         if not project:
             return WorkflowResult(
@@ -366,8 +360,8 @@ class UnifiedWorkflowEngine:
                 manufacturing_files=None,
                 next_steps=[
                     f"Project '{project_name}' not found",
-                    "Check available projects",
-                    "Or provide different inventory"
+                    "Available projects can be listed via /api/instructions endpoint",
+                    "Or check the project name spelling"
                 ],
                 estimated_cost=0.0,
                 estimated_time_hours=0.0

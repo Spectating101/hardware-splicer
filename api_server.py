@@ -1636,6 +1636,59 @@ def beginner_workflow():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/v2/projects/catalog', methods=['GET'])
+@require_api_key("catalog")
+def get_projects_catalog():
+    """
+    Get comprehensive catalog of all available projects with economics
+
+    Returns detailed information about each project including:
+    - Build cost and time estimates
+    - Market pricing and ROI
+    - Difficulty level
+    - Required components
+    - Brief description
+    """
+    try:
+        # Get all project templates from recipe database
+        all_templates = recipe_optimizer.recipe_db.get_all()
+
+        catalog = []
+        for template in all_templates:
+            # Calculate economics for each project (no inventory required)
+            project = recipe_optimizer.get_project_by_name(template['name'], inventory=[])
+
+            if project:
+                catalog.append({
+                    'name': project.name,
+                    'description': project.description,
+                    'difficulty': project.difficulty,
+                    'category': project.category.value if hasattr(project.category, 'value') else str(project.category),
+                    'build_time_hours': project.build_time_hours,
+                    'economics': {
+                        'parts_cost': project.parts_cost,
+                        'market_price_low': project.market_price_low,
+                        'market_price_high': project.market_price_high,
+                        'profit_margin': project.profit_margin,
+                        'roi_percent': project.roi_percent
+                    },
+                    'required_components': project.required_components,
+                    'optional_components': project.optional_components
+                })
+
+        # Sort by ROI (highest first)
+        catalog.sort(key=lambda x: x['economics']['roi_percent'], reverse=True)
+
+        return jsonify({
+            'projects': catalog,
+            'count': len(catalog),
+            'sorted_by': 'roi_percent (descending)'
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/v2/workflow/complete', methods=['POST'])
 @require_api_key("workflow_complete")
 def complete_workflow():
