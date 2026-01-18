@@ -114,6 +114,10 @@ class BuildInstructionsGenerator:
             'Automatic Blind Controller': self._generate_blind_controller_instructions,
             'IoT Smart Relay Controller': self._generate_smart_relay_instructions,
             'Smart Doorbell': self._generate_smart_doorbell_instructions,
+            'Energy Monitor': self._generate_energy_monitor_instructions,
+            'Soil Moisture Monitor': self._generate_soil_moisture_instructions,
+            'Door Open Alarm': self._generate_door_alarm_instructions,
+            'Water Level Alarm': self._generate_water_level_instructions,
             # Add more as needed
         }
 
@@ -3507,6 +3511,1567 @@ void handleReset() {
                 'Consider battery backup for power outages',
                 'Include privacy notice if using camera',
                 'Follow local regulations for outdoor electronics'
+            ]
+        }
+
+    def _generate_energy_monitor_instructions(self) -> Dict:
+        """Instructions for Energy Monitor (ESP32 + SCT-013 Current Sensor)"""
+        return {
+            'project_name': 'Energy Monitor',
+            'difficulty': 'hard',
+            'build_time': '4-5 hours',
+            'skill_level': 'Advanced',
+            'tools_needed': [
+                'Soldering iron and solder',
+                'Wire strippers',
+                'Multimeter',
+                'Screwdriver',
+                'Breadboard (for prototyping)',
+                'Electrical tape',
+                'Heat shrink tubing (optional)',
+                '3.5mm audio jack breakout (or DIY)'
+            ],
+            'components': [
+                {'name': 'ESP32 Development Board', 'quantity': 1, 'cost': 8.0, 'where_to_buy': 'AliExpress, Amazon'},
+                {'name': 'SCT-013 30A Non-Invasive Current Sensor', 'quantity': 1, 'cost': 7.0, 'where_to_buy': 'Amazon, eBay'},
+                {'name': '10kΩ Resistor', 'quantity': 2, 'cost': 0.1, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': '10µF Capacitor', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': '3.5mm Audio Jack', 'quantity': 1, 'cost': 0.5, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'Micro USB Cable', 'quantity': 1, 'cost': 2.0, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'Enclosure (optional)', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'Amazon, 3D print'}
+            ],
+            'market_analysis': {
+                'build_cost': 20.7,
+                'market_price_low': 35.0,
+                'market_price_high': 65.0,
+                'profit_margin': '69-214%',
+                'comparable_products': [
+                    'Kill A Watt P3 - $40-50',
+                    'Emporia Vue - $50-80',
+                    'Sense Energy Monitor - $299',
+                    'IoTaWatt - $150'
+                ]
+            },
+            'steps': [
+                {
+                    'number': 1,
+                    'title': 'Understanding the Current Sensor',
+                    'description': 'The SCT-013 is a non-invasive current transformer (CT) that clamps around a live wire without cutting it. It outputs a small AC voltage proportional to the current flowing through the wire. We will convert this to a safe DC voltage for the ESP32.',
+                    'time': '5 minutes',
+                    'components': ['SCT-013 sensor'],
+                    'warnings': [
+                        '⚠️ DANGER: Working with AC mains voltage (120V/220V) can be LETHAL',
+                        '⚠️ Only clamp sensor around ONE wire (hot OR neutral, not both)',
+                        '⚠️ Turn off circuit breaker before accessing main panel',
+                        '⚠️ If unsure, hire a licensed electrician',
+                        '⚠️ The sensor itself is safe, but installation requires care'
+                    ]
+                },
+                {
+                    'number': 2,
+                    'title': 'Build Voltage Divider Circuit',
+                    'description': 'The SCT-013 outputs 0-1V AC. We need to bias this to 1.65V DC (half of 3.3V) so the ESP32 ADC can read both positive and negative swings. Build a voltage divider with two 10kΩ resistors to create 1.65V reference, then add the AC signal on top.',
+                    'time': '15 minutes',
+                    'components': ['2x 10kΩ resistors', '10µF capacitor', 'Breadboard'],
+                    'wiring': [
+                        '1. ESP32 3.3V → First 10kΩ resistor',
+                        '2. First 10kΩ resistor → Junction (this is 1.65V reference)',
+                        '3. Junction → Second 10kΩ resistor → ESP32 GND',
+                        '4. Junction → 10µF capacitor → 3.5mm jack tip (SCT-013 signal)',
+                        '5. 3.5mm jack sleeve (SCT-013 ground) → ESP32 GND',
+                        '6. Junction → ESP32 GPIO34 (ADC1_CH6)'
+                    ],
+                    'tips': [
+                        'Use a breadboard first to test before soldering',
+                        'Capacitor blocks DC, passes AC signal',
+                        'GPIO34 is a good ADC pin on ESP32',
+                        'Double-check resistor values with multimeter'
+                    ]
+                },
+                {
+                    'number': 3,
+                    'title': 'Connect SCT-013 Sensor',
+                    'description': 'Plug the SCT-013 into the 3.5mm audio jack. Verify connections with multimeter - you should see ~1.65V on GPIO34 with no load.',
+                    'time': '5 minutes',
+                    'components': ['SCT-013 sensor', '3.5mm jack'],
+                    'tips': [
+                        'SCT-013 has a 3.5mm plug output (some models)',
+                        'Polarity does not matter for AC measurement',
+                        'Test voltage should be stable at 1.65V'
+                    ]
+                },
+                {
+                    'number': 4,
+                    'title': 'Upload Calibration Sketch',
+                    'description': 'Before full code, upload a simple sketch to read ADC values and verify the sensor is working. Open Arduino IDE, select ESP32 board, and upload the test code.',
+                    'time': '10 minutes',
+                    'components': ['ESP32', 'USB cable', 'Computer'],
+                    'code_snippet': '''
+// Simple ADC test
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  int adc = analogRead(34);
+  float voltage = adc * (3.3 / 4095.0);
+  Serial.print("ADC: ");
+  Serial.print(adc);
+  Serial.print(" Voltage: ");
+  Serial.println(voltage);
+  delay(100);
+}
+''',
+                    'tips': [
+                        'Install ESP32 board support in Arduino IDE',
+                        'Select "ESP32 Dev Module" as board',
+                        'Check serial monitor at 115200 baud',
+                        'Should see ADC ~2048 and voltage ~1.65V with no load'
+                    ]
+                },
+                {
+                    'number': 5,
+                    'title': 'Install Required Libraries',
+                    'description': 'Install necessary libraries for WiFi and web server functionality.',
+                    'time': '5 minutes',
+                    'components': ['Computer with Arduino IDE'],
+                    'tips': [
+                        'WiFi library is built-in for ESP32',
+                        'WebServer library is built-in',
+                        'No external libraries needed'
+                    ]
+                },
+                {
+                    'number': 6,
+                    'title': 'Upload Main Energy Monitor Code',
+                    'description': 'Upload the complete energy monitoring code that calculates RMS current, power, and energy consumption over time. Configure WiFi credentials in the code.',
+                    'time': '10 minutes',
+                    'components': ['ESP32', 'Computer'],
+                    'tips': [
+                        'Update WiFi SSID and password in code',
+                        'Calibration value may need adjustment',
+                        'Code calculates true RMS current',
+                        'Power = Voltage * Current (assuming power factor ~1)'
+                    ]
+                },
+                {
+                    'number': 7,
+                    'title': 'Install Current Sensor on Wire',
+                    'description': '⚠️ DANGER STEP - Turn off circuit breaker. Open main panel (or appliance cord). Identify the HOT wire (usually black). Clamp SCT-013 around ONLY the hot wire. Close panel. Turn breaker back on.',
+                    'time': '20 minutes',
+                    'components': ['SCT-013 installed'],
+                    'warnings': [
+                        '⚠️ TURN OFF CIRCUIT BREAKER FIRST',
+                        '⚠️ Use voltage tester to confirm power is OFF',
+                        '⚠️ Clamp around ONE wire only (hot wire)',
+                        '⚠️ Do not clamp around both hot and neutral (will read 0)',
+                        '⚠️ Ensure sensor is fully closed (clicks shut)',
+                        '⚠️ If measuring an appliance, you can clamp around the cord externally',
+                        '⚠️ Never open a live panel without proper training'
+                    ],
+                    'tips': [
+                        'For testing, use a desk lamp or space heater cord (safer)',
+                        'Can clamp around extension cord',
+                        'Direction of clamp may affect positive/negative reading (does not matter for RMS)',
+                        'Ensure 3.5mm cable has slack, will not pull loose'
+                    ]
+                },
+                {
+                    'number': 8,
+                    'title': 'Calibrate the Sensor',
+                    'description': 'With a known load (e.g., 100W light bulb), check the readings. US 120V system: 100W / 120V = 0.833A. Adjust calibration constant in code until readings match.',
+                    'time': '15 minutes',
+                    'components': ['Known wattage appliance (e.g., 60W or 100W bulb)'],
+                    'tips': [
+                        'SCT-013-030 has 30A max, outputs 1V at 30A',
+                        'Calibration = (30A / 1V) * (3.3V / 4095 ADC)',
+                        'Typical value ~0.0242',
+                        'Fine-tune by comparing to Kill-A-Watt meter if available'
+                    ]
+                },
+                {
+                    'number': 9,
+                    'title': 'Access Web Dashboard',
+                    'description': 'Connect to ESP32 WiFi network or note its IP address from serial monitor. Open browser and go to http://[ESP32_IP]. You should see real-time current, power, and cumulative energy.',
+                    'time': '5 minutes',
+                    'components': ['Smartphone or computer with browser'],
+                    'tips': [
+                        'Dashboard auto-refreshes every 2 seconds',
+                        'Energy resets when ESP32 reboots',
+                        'Can log data to SD card or cloud for persistence (advanced)'
+                    ]
+                },
+                {
+                    'number': 10,
+                    'title': 'Mount and Finalize',
+                    'description': 'Place ESP32 in enclosure. Secure sensor to wire with zip ties. Route cables neatly. Add labels. Optionally power ESP32 from a phone charger for standalone operation.',
+                    'time': '20 minutes',
+                    'components': ['Enclosure', 'Zip ties', 'Labels'],
+                    'tips': [
+                        '3D print an enclosure or use project box',
+                        'Ensure ventilation for ESP32 heat',
+                        'Use cable management for clean install',
+                        'Consider battery backup (power bank) for data continuity'
+                    ]
+                },
+                {
+                    'number': 11,
+                    'title': 'Test and Monitor',
+                    'description': 'Turn on various appliances and watch real-time updates. Verify readings make sense (e.g., hair dryer = 1200-1800W, LED bulb = 10-15W). Monitor for 24 hours to validate stability.',
+                    'time': '1-24 hours',
+                    'components': ['Various appliances'],
+                    'tips': [
+                        'Compare to appliance rated power (usually within 10-20%)',
+                        'Power factor can cause discrepancies for motors/transformers',
+                        'Energy accumulation should be consistent over time'
+                    ]
+                }
+            ],
+            'total_build_time': '4-5 hours (plus 24hr testing)',
+            'estimated_cost': '$20.70',
+            'code_template': '''
+/*
+ * ESP32 Energy Monitor with SCT-013 Current Sensor
+ * Real-time home electricity monitoring
+ * Non-invasive installation
+ */
+
+#include <WiFi.h>
+#include <WebServer.h>
+
+// WiFi credentials
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+// Hardware pins
+const int CURRENT_SENSOR_PIN = 34;  // ADC1_CH6
+
+// Calibration (adjust after testing)
+const float VOLTAGE = 120.0;  // US standard (use 220.0 for EU)
+const float CALIBRATION = 30.0;  // 30A / 1V for SCT-013-030
+
+// Energy tracking
+float totalEnergy = 0.0;  // kWh
+unsigned long lastTime = 0;
+
+WebServer server(80);
+
+void setup() {
+  Serial.begin(115200);
+
+  // Configure ADC
+  analogReadResolution(12);  // 12-bit resolution (0-4095)
+  analogSetAttenuation(ADC_11db);  // 0-3.3V range
+
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Setup web server
+  server.on("/", handleRoot);
+  server.on("/data", handleData);
+  server.begin();
+  Serial.println("Web server started");
+
+  lastTime = millis();
+}
+
+void loop() {
+  server.handleClient();
+
+  // Calculate energy every second
+  unsigned long currentTime = millis();
+  if (currentTime - lastTime >= 1000) {
+    float current = readCurrent();
+    float power = VOLTAGE * current;  // Watts
+    float energyIncrement = (power / 1000.0) * ((currentTime - lastTime) / 3600000.0);  // kWh
+    totalEnergy += energyIncrement;
+    lastTime = currentTime;
+
+    // Debug output
+    Serial.print("Current: ");
+    Serial.print(current, 2);
+    Serial.print(" A, Power: ");
+    Serial.print(power, 1);
+    Serial.print(" W, Energy: ");
+    Serial.print(totalEnergy, 4);
+    Serial.println(" kWh");
+  }
+}
+
+float readCurrent() {
+  const int numSamples = 1000;
+  unsigned long sum = 0;
+
+  // Read samples over ~1 AC cycle (60Hz = 16.7ms, 50Hz = 20ms)
+  for (int i = 0; i < numSamples; i++) {
+    int adc = analogRead(CURRENT_SENSOR_PIN);
+    // Remove DC bias (1.65V = 2048 at 12-bit)
+    int centered = adc - 2048;
+    sum += (unsigned long)(centered * centered);
+  }
+
+  // Calculate RMS
+  float rms = sqrt(sum / (float)numSamples);
+
+  // Convert to current
+  float voltage = rms * (3.3 / 4095.0);  // ADC to voltage
+  float current = voltage * CALIBRATION;  // Voltage to current
+
+  return current;
+}
+
+void handleRoot() {
+  float current = readCurrent();
+  float power = VOLTAGE * current;
+
+  String html = "<!DOCTYPE html><html><head>";
+  html += "<meta charset='UTF-8'>";
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+  html += "<title>Energy Monitor</title>";
+  html += "<style>";
+  html += "body { font-family: Arial; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }";
+  html += ".container { max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; }";
+  html += "h1 { font-size: 2.5em; margin-bottom: 10px; }";
+  html += ".metric { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 20px; margin: 15px 0; }";
+  html += ".value { font-size: 3em; font-weight: bold; margin: 10px 0; }";
+  html += ".unit { font-size: 1.2em; opacity: 0.8; }";
+  html += ".label { font-size: 1.5em; margin-bottom: 10px; }";
+  html += "</style>";
+  html += "<script>";
+  html += "setInterval(function() { location.reload(); }, 2000);";  // Auto-refresh every 2 seconds
+  html += "</script>";
+  html += "</head><body>";
+  html += "<div class='container'>";
+  html += "<h1>⚡ Energy Monitor</h1>";
+
+  html += "<div class='metric'>";
+  html += "<div class='label'>Current</div>";
+  html += "<div class='value'>" + String(current, 2) + "</div>";
+  html += "<div class='unit'>Amps</div>";
+  html += "</div>";
+
+  html += "<div class='metric'>";
+  html += "<div class='label'>Power</div>";
+  html += "<div class='value'>" + String(power, 0) + "</div>";
+  html += "<div class='unit'>Watts</div>";
+  html += "</div>";
+
+  html += "<div class='metric'>";
+  html += "<div class='label'>Total Energy</div>";
+  html += "<div class='value'>" + String(totalEnergy, 3) + "</div>";
+  html += "<div class='unit'>kWh</div>";
+  html += "</div>";
+
+  html += "<p style='opacity:0.6; margin-top:30px;'>IP: " + WiFi.localIP().toString() + "</p>";
+  html += "</div></body></html>";
+
+  server.send(200, "text/html", html);
+}
+
+void handleData() {
+  float current = readCurrent();
+  float power = VOLTAGE * current;
+
+  String json = "{";
+  json += "\\"current\\":" + String(current, 2) + ",";
+  json += "\\"power\\":" + String(power, 1) + ",";
+  json += "\\"energy\\":" + String(totalEnergy, 4);
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+''',
+            'business_notes': {
+                'marketability': 'HIGH - Rising energy costs make this very attractive. Commercial solutions are $100-300. Your $35-65 version offers 70-80% savings. Huge market: homeowners, renters, small businesses.',
+                'target_audience': 'Eco-conscious homeowners, DIY enthusiasts, energy-conscious renters, electricians, energy auditors',
+                'upsell_opportunities': [
+                    'Multi-channel version (monitor multiple circuits) - add $15/channel, sell for +$30/channel',
+                    'Cloud logging with historical graphs (Firebase/ThingSpeak) - add $0, sell for +$20',
+                    'Solar panel monitoring mode - add $5, sell for +$35',
+                    'Integration with Home Assistant/MQTT - add $0, sell for +$15',
+                    'Battery backup with real-time clock - add $8, sell for +$25',
+                    'Professional installation service - charge $50-100'
+                ],
+                'manufacturing_notes': [
+                    'Design custom PCB for bias circuit (costs $2, looks professional)',
+                    'Use screw terminals for easy sensor connection',
+                    '3D print enclosure with DIN rail mount for electrical panels',
+                    'Include calibration certificate for professional credibility',
+                    'Pre-program with default WiFi or AP mode for easy setup'
+                ],
+                'competitive_advantages': [
+                    'Kill A Watt measures only plug-in devices ($45), yours measures whole house',
+                    'Sense Energy Monitor is $299 + pro install, yours is $40-65 DIY',
+                    'Open source - can be customized and expanded',
+                    'No monthly fees or cloud dependence',
+                    'Real-time web interface accessible on local network',
+                    'Educational value - learn about electricity and electronics'
+                ]
+            },
+            'next_steps': [
+                'Add data logging to SD card for long-term analysis',
+                'Integrate with Home Assistant via MQTT',
+                'Add cost calculation based on local electricity rates',
+                'Create mobile app for better UX',
+                'Add alerts for high usage (email/SMS)',
+                'Support multiple sensors for whole-home monitoring',
+                'Add solar panel monitoring (bidirectional current)',
+                'Battery backup with RTC to preserve energy totals during outages'
+            ],
+            'safety_notes': [
+                '⚠️ DANGER: Working with AC mains (120V/220V) can be LETHAL - turn off breakers first',
+                '⚠️ Hire licensed electrician if you are not trained to open electrical panels',
+                '⚠️ The sensor itself is non-invasive and safe - installation is the risk',
+                '⚠️ Always use a voltage tester to confirm power is OFF before opening panels',
+                '⚠️ Clamp sensor around ONE wire only (hot wire), not both hot and neutral',
+                '⚠️ Ensure sensor is fully closed (clicks) for accurate readings and safety',
+                '⚠️ For beginners: test on an appliance cord or extension cord first (much safer)',
+                '⚠️ Never work alone when accessing electrical panels',
+                '⚠️ Follow all local electrical codes and regulations',
+                '⚠️ Consider liability insurance if selling to others',
+                '⚠️ Include comprehensive safety warnings in product documentation'
+            ]
+        }
+
+    def _generate_soil_moisture_instructions(self) -> Dict:
+        """Instructions for Soil Moisture Monitor (Arduino Nano + Capacitive Sensor)"""
+        return {
+            'project_name': 'Soil Moisture Monitor',
+            'difficulty': 'easy',
+            'build_time': '1-2 hours',
+            'skill_level': 'Beginner',
+            'tools_needed': [
+                'Soldering iron (optional)',
+                'Screwdriver',
+                'Wire strippers (optional)',
+                'USB cable for programming'
+            ],
+            'components': [
+                {'name': 'Arduino Nano', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'AliExpress, Amazon'},
+                {'name': 'Capacitive Soil Moisture Sensor v1.2', 'quantity': 1, 'cost': 4.0, 'where_to_buy': 'Amazon, eBay'},
+                {'name': 'LED (Red)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'LED (Yellow)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'LED (Green)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': '220Ω Resistor', 'quantity': 3, 'cost': 0.15, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'Buzzer (optional)', 'quantity': 1, 'cost': 1.0, 'where_to_buy': 'Amazon, Local electronics'},
+                {'name': 'Mini USB Cable', 'quantity': 1, 'cost': 1.5, 'where_to_buy': 'Amazon'},
+                {'name': 'Jumper wires', 'quantity': 5, 'cost': 0.5, 'where_to_buy': 'Amazon'}
+            ],
+            'market_analysis': {
+                'build_cost': 10.45,
+                'market_price_low': 12.0,
+                'market_price_high': 24.0,
+                'profit_margin': '15-130%',
+                'comparable_products': [
+                    'Xiaomi Mi Flora - $15-25',
+                    'XLUX Soil Moisture Meter - $10-15',
+                    'Generic Arduino Soil Sensor - $12-18'
+                ]
+            },
+            'steps': [
+                {
+                    'number': 1,
+                    'title': 'Understand the Capacitive Sensor',
+                    'description': 'Capacitive soil moisture sensors measure the dielectric constant of soil, which changes with water content. Unlike resistive sensors, they do not corrode. The sensor outputs an analog voltage (0-3V) proportional to moisture level.',
+                    'time': '5 minutes',
+                    'components': ['Capacitive sensor'],
+                    'tips': [
+                        'Capacitive sensors last much longer than resistive types',
+                        'Do not submerge the electronics part, only the prongs',
+                        'Sensor needs calibration for different soil types'
+                    ]
+                },
+                {
+                    'number': 2,
+                    'title': 'Wire the Sensor to Arduino',
+                    'description': 'Connect the capacitive sensor to the Arduino Nano. Sensor has 3 pins: VCC (red), GND (black), and AOUT (yellow/blue).',
+                    'time': '10 minutes',
+                    'components': ['Arduino Nano', 'Capacitive sensor', 'Jumper wires'],
+                    'wiring': [
+                        '1. Sensor VCC (red) → Arduino 5V',
+                        '2. Sensor GND (black) → Arduino GND',
+                        '3. Sensor AOUT (analog output) → Arduino A0'
+                    ],
+                    'tips': [
+                        'Use jumper wires or solder for permanent connections',
+                        'Double-check polarity - reversed power can damage sensor',
+                        'Keep wiring neat for reliability'
+                    ]
+                },
+                {
+                    'number': 3,
+                    'title': 'Add LED Indicators',
+                    'description': 'Wire 3 LEDs (red, yellow, green) to indicate moisture levels: red = dry, yellow = moderate, green = wet. Each LED needs a 220Ω current-limiting resistor.',
+                    'time': '15 minutes',
+                    'components': ['3x LEDs', '3x 220Ω resistors'],
+                    'wiring': [
+                        '1. Red LED anode (+) → 220Ω resistor → Arduino D2',
+                        '2. Red LED cathode (-) → Arduino GND',
+                        '3. Yellow LED anode → 220Ω resistor → Arduino D3',
+                        '4. Yellow LED cathode → Arduino GND',
+                        '5. Green LED anode → 220Ω resistor → Arduino D4',
+                        '6. Green LED cathode → Arduino GND'
+                    ],
+                    'tips': [
+                        'LED longer leg is anode (+), shorter is cathode (-)',
+                        'Resistor can go on either side of LED',
+                        'Test each LED individually if unsure'
+                    ]
+                },
+                {
+                    'number': 4,
+                    'title': 'Optional: Add Buzzer Alert',
+                    'description': 'Connect a buzzer to alert when soil is too dry. Buzzer will beep when red LED is on.',
+                    'time': '5 minutes',
+                    'components': ['Buzzer (optional)'],
+                    'wiring': [
+                        '1. Buzzer positive (+) → Arduino D5',
+                        '2. Buzzer negative (-) → Arduino GND'
+                    ],
+                    'tips': [
+                        'Active buzzer = just apply voltage, passive = needs tone signal',
+                        'Code uses tone() function for melodic alert',
+                        'Can be disabled in code if too annoying'
+                    ]
+                },
+                {
+                    'number': 5,
+                    'title': 'Upload Calibration Sketch',
+                    'description': 'Before uploading the main code, run a calibration sketch to determine dry and wet values for your specific sensor and soil type.',
+                    'time': '10 minutes',
+                    'components': ['Arduino with sensor connected'],
+                    'code_snippet': '''
+// Calibration sketch
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  int value = analogRead(A0);
+  Serial.print("Sensor value: ");
+  Serial.println(value);
+  delay(1000);
+}
+// 1. Place sensor in DRY soil, note value (typically 500-700)
+// 2. Water soil thoroughly, note WET value (typically 250-350)
+''',
+                    'tips': [
+                        'Test in actual soil, not water (different readings)',
+                        'Dry value = sensor in air or dry soil',
+                        'Wet value = sensor in saturated soil',
+                        'Write down these values for main code'
+                    ]
+                },
+                {
+                    'number': 6,
+                    'title': 'Upload Main Code',
+                    'description': 'Upload the complete moisture monitoring code with your calibration values. Code will display moisture level via LEDs and optional buzzer alert.',
+                    'time': '10 minutes',
+                    'components': ['Computer with Arduino IDE'],
+                    'tips': [
+                        'Update DRY_VALUE and WET_VALUE in code with your calibration',
+                        'Select "Arduino Nano" and correct COM port in IDE',
+                        'If upload fails, try "Old Bootloader" processor option',
+                        'Serial monitor shows real-time moisture percentage'
+                    ]
+                },
+                {
+                    'number': 7,
+                    'title': 'Test the System',
+                    'description': 'Insert sensor into plant soil. Observe LED indicators. Test by watering plant and watching LEDs change from red → yellow → green.',
+                    'time': '15 minutes',
+                    'components': ['Potted plant'],
+                    'tips': [
+                        'Allow 2-3 minutes after watering for reading to stabilize',
+                        'Sensor should be inserted 2-3 inches deep',
+                        'Do not leave sensor in soil when not in use (corrosion)',
+                        'For multiple plants, use multiple sensors'
+                    ]
+                },
+                {
+                    'number': 8,
+                    'title': 'Power Options',
+                    'description': 'Choose power source: USB power bank for portable, USB wall adapter for permanent installation, or 9V battery with barrel jack.',
+                    'time': '5 minutes',
+                    'components': ['Power source of choice'],
+                    'tips': [
+                        'USB power bank = 1-2 weeks runtime',
+                        'Wall adapter = permanent installation',
+                        '9V battery = 1-2 days only (not recommended)',
+                        'Solar panel + rechargeable battery = best for outdoor'
+                    ]
+                },
+                {
+                    'number': 9,
+                    'title': 'Enclosure and Mounting',
+                    'description': 'Place Arduino and LEDs in weatherproof enclosure if used outdoors. Mount near plant pot or in garden.',
+                    'time': '10 minutes',
+                    'components': ['Enclosure (optional)'],
+                    'tips': [
+                        'Drill holes for sensor cable and LEDs',
+                        'Use hot glue to secure LEDs in holes',
+                        'Silicone sealant for waterproofing',
+                        'Label LEDs: red = WATER ME, green = OK'
+                    ]
+                },
+                {
+                    'number': 10,
+                    'title': 'Usage and Maintenance',
+                    'description': 'Check the LEDs daily or enable buzzer alerts. Water when red LED illuminates. Clean sensor monthly with soft cloth.',
+                    'time': 'Ongoing',
+                    'components': ['Completed system'],
+                    'tips': [
+                        'Sensor accuracy degrades if left in soil 24/7',
+                        'Remove and clean every 2-4 weeks',
+                        'Recalibrate if readings seem off',
+                        'Consider multiple sensors for garden monitoring'
+                    ]
+                }
+            ],
+            'total_build_time': '1-2 hours',
+            'estimated_cost': '$10.45',
+            'code_template': '''
+/*
+ * Soil Moisture Monitor
+ * Displays moisture level with 3 LEDs
+ * Optional buzzer alert when dry
+ */
+
+// Calibration values (UPDATE THESE)
+const int DRY_VALUE = 600;   // Sensor value in dry soil
+const int WET_VALUE = 300;   // Sensor value in wet soil
+
+// Hardware pins
+const int MOISTURE_PIN = A0;
+const int RED_LED = 2;
+const int YELLOW_LED = 3;
+const int GREEN_LED = 4;
+const int BUZZER = 5;  // Optional
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(RED_LED, OUTPUT);
+  pinMode(YELLOW_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+
+  Serial.println("Soil Moisture Monitor Started");
+  Serial.print("Dry value: ");
+  Serial.println(DRY_VALUE);
+  Serial.print("Wet value: ");
+  Serial.println(WET_VALUE);
+}
+
+void loop() {
+  int sensorValue = analogRead(MOISTURE_PIN);
+
+  // Convert to percentage (0% = dry, 100% = wet)
+  int moisture = map(sensorValue, DRY_VALUE, WET_VALUE, 0, 100);
+  moisture = constrain(moisture, 0, 100);
+
+  // Print to serial
+  Serial.print("Sensor: ");
+  Serial.print(sensorValue);
+  Serial.print(" | Moisture: ");
+  Serial.print(moisture);
+  Serial.println("%");
+
+  // Turn off all LEDs
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(YELLOW_LED, LOW);
+  digitalWrite(GREEN_LED, LOW);
+  noTone(BUZZER);
+
+  // Set LEDs based on moisture level
+  if (moisture < 30) {
+    // DRY - Water needed
+    digitalWrite(RED_LED, HIGH);
+    // Alert every 10 seconds
+    tone(BUZZER, 1000, 200);  // 1kHz beep for 200ms
+  }
+  else if (moisture < 60) {
+    // MODERATE - OK for now
+    digitalWrite(YELLOW_LED, HIGH);
+  }
+  else {
+    // WET - Good moisture
+    digitalWrite(GREEN_LED, HIGH);
+  }
+
+  delay(2000);  // Check every 2 seconds
+}
+''',
+            'business_notes': {
+                'marketability': 'MEDIUM - Simple product but competitive market. Best sold as part of smart home garden system or multi-sensor package.',
+                'target_audience': 'Indoor plant enthusiasts, gardeners, greenhouse operators, forgetful plant owners',
+                'upsell_opportunities': [
+                    'WiFi version with app notifications (ESP8266) - add $5, sell for +$15',
+                    'Multi-plant monitor (4-8 sensors) - add $15, sell for +$40',
+                    'Solar powered outdoor version - add $10, sell for +$25',
+                    'Auto-watering system integration (add pump) - add $15, sell for +$50',
+                    'Data logging with SD card - add $3, sell for +$15',
+                    'Custom enclosure with plant identification labels - add $2, sell for +$10'
+                ],
+                'manufacturing_notes': [
+                    'Solder all connections for reliability',
+                    'Use heat shrink tubing on sensor connections',
+                    'Pre-calibrate for common potting soil',
+                    'Include calibration instructions card',
+                    'Package with small potted plant as gift set'
+                ],
+                'competitive_advantages': [
+                    'Much cheaper than Xiaomi Mi Flora ($25)',
+                    'No app/Bluetooth required - instant visual feedback',
+                    'Capacitive sensor = long lifespan vs. resistive',
+                    'Customizable thresholds for different plants',
+                    'Educational - teaches electronics and plant care'
+                ]
+            },
+            'next_steps': [
+                'Add WiFi (ESP8266) for smartphone notifications',
+                'Multiple sensors for garden-wide monitoring',
+                'Integration with automatic watering pump',
+                'Temperature and light sensors for complete plant health',
+                'Data logging to track watering history',
+                'OLED display showing moisture percentage',
+                'Solar panel for outdoor/remote installations'
+            ],
+            'safety_notes': [
+                'Low voltage (5V) - very safe',
+                'Do not submerge Arduino or electronics in water',
+                'Only sensor prongs should touch soil',
+                'Ensure good insulation if used outdoors',
+                'Buzzer can be loud - disable if annoying',
+                'Sensor is not food-safe - for ornamental plants only'
+            ]
+        }
+
+    def _generate_door_alarm_instructions(self) -> Dict:
+        """Instructions for Door Open Alarm (Arduino Nano + Reed Switch + Buzzer)"""
+        return {
+            'project_name': 'Door Open Alarm',
+            'difficulty': 'easy',
+            'build_time': '1-2 hours',
+            'skill_level': 'Beginner',
+            'tools_needed': [
+                'Soldering iron (optional)',
+                'Screwdriver',
+                'Drill (for mounting)',
+                'Double-sided tape or screws'
+            ],
+            'components': [
+                {'name': 'Arduino Nano', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'AliExpress, Amazon'},
+                {'name': 'Reed Switch (magnetic door sensor)', 'quantity': 1, 'cost': 1.5, 'where_to_buy': 'Amazon, eBay'},
+                {'name': 'Buzzer (active or passive)', 'quantity': 1, 'cost': 1.0, 'where_to_buy': 'Amazon'},
+                {'name': 'LED (Red)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon'},
+                {'name': '220Ω Resistor', 'quantity': 1, 'cost': 0.05, 'where_to_buy': 'Amazon'},
+                {'name': '9V Battery + Connector', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'Amazon'},
+                {'name': 'Small project box', 'quantity': 1, 'cost': 2.0, 'where_to_buy': 'Amazon'},
+                {'name': 'Jumper wires', 'quantity': 5, 'cost': 0.5, 'where_to_buy': 'Amazon'}
+            ],
+            'market_analysis': {
+                'build_cost': 11.15,
+                'market_price_low': 15.0,
+                'market_price_high': 35.0,
+                'profit_margin': '35-214%',
+                'comparable_products': [
+                    'GE Personal Security Window/Door Alarm - $8-12 (single unit)',
+                    'SABRE Door Alarm - $15-20',
+                    'Doberman Security Door Alarm - $10-18',
+                    'Ring Contact Sensor - $20 (requires hub)'
+                ]
+            },
+            'steps': [
+                {
+                    'number': 1,
+                    'title': 'Understand Reed Switch Operation',
+                    'description': 'A reed switch is a magnetic sensor with two metal contacts in a glass tube. When a magnet approaches, contacts close (completing circuit). When magnet moves away, contacts open. Perfect for detecting door/window opening.',
+                    'time': '5 minutes',
+                    'components': ['Reed switch'],
+                    'tips': [
+                        'Reed switch = sensor on door frame',
+                        'Magnet = attached to door itself',
+                        'Gap of 1-2cm maximum for reliable operation',
+                        'Test with multimeter in continuity mode'
+                    ]
+                },
+                {
+                    'number': 2,
+                    'title': 'Wire Reed Switch to Arduino',
+                    'description': 'Connect reed switch between Arduino digital pin and ground. Use internal pull-up resistor to detect open/closed state.',
+                    'time': '10 minutes',
+                    'components': ['Arduino Nano', 'Reed switch', 'Jumper wires'],
+                    'wiring': [
+                        '1. Reed switch terminal 1 → Arduino D2',
+                        '2. Reed switch terminal 2 → Arduino GND',
+                        '3. (Internal pull-up resistor enabled in code)'
+                    ],
+                    'tips': [
+                        'Reed switch has no polarity - either way works',
+                        'INPUT_PULLUP mode: LOW when closed, HIGH when open',
+                        'Can extend wires if needed for door installation',
+                        'Use shielded cable for long runs to prevent false triggers'
+                    ]
+                },
+                {
+                    'number': 3,
+                    'title': 'Add Buzzer and LED',
+                    'description': 'Connect buzzer for audio alarm and LED for visual indicator.',
+                    'time': '10 minutes',
+                    'components': ['Buzzer', 'LED', '220Ω resistor'],
+                    'wiring': [
+                        '1. Buzzer positive (+) → Arduino D3',
+                        '2. Buzzer negative (-) → Arduino GND',
+                        '3. LED anode (+) → 220Ω resistor → Arduino D4',
+                        '4. LED cathode (-) → Arduino GND'
+                    ],
+                    'tips': [
+                        'Active buzzer = simpler, passive = more tones',
+                        'Code uses tone() for siren effect',
+                        'LED indicates system armed/triggered',
+                        'Buzzer can be loud - adjust volume in code'
+                    ]
+                },
+                {
+                    'number': 4,
+                    'title': 'Add Arming Button (Optional)',
+                    'description': 'Add a push button to arm/disarm alarm. This prevents false alarms during normal use.',
+                    'time': '5 minutes',
+                    'components': ['Push button (optional)'],
+                    'wiring': [
+                        '1. Button terminal 1 → Arduino D5',
+                        '2. Button terminal 2 → Arduino GND',
+                        '3. (Internal pull-up resistor enabled in code)'
+                    ],
+                    'tips': [
+                        'Press button = toggle armed state',
+                        'LED blinks when armed',
+                        'Can use magnetic key switch instead for security',
+                        'Advanced: add keypad for PIN code'
+                    ]
+                },
+                {
+                    'number': 5,
+                    'title': 'Upload the Code',
+                    'description': 'Upload door alarm code with entry delay, alarm duration, and arming features.',
+                    'time': '10 minutes',
+                    'components': ['Computer with Arduino IDE'],
+                    'tips': [
+                        'Select "Arduino Nano" in board manager',
+                        'Try "Old Bootloader" if upload fails',
+                        'Serial monitor shows door status for debugging',
+                        'Customize delay times in code'
+                    ]
+                },
+                {
+                    'number': 6,
+                    'title': 'Test on Breadboard',
+                    'description': 'Before final assembly, test the system. Move magnet near/far from reed switch. Verify buzzer sounds and LED lights when door opens.',
+                    'time': '10 minutes',
+                    'components': ['All components on breadboard'],
+                    'tips': [
+                        'Door closed = magnet near switch = no alarm',
+                        'Door opens = magnet moves away = ALARM',
+                        'Test arming button if included',
+                        'Adjust sensitivity if needed (magnet distance)'
+                    ]
+                },
+                {
+                    'number': 7,
+                    'title': 'Install Battery Power',
+                    'description': 'Connect 9V battery to Arduino VIN and GND for portable operation. Alarm will work without USB cable.',
+                    'time': '5 minutes',
+                    'components': ['9V battery', 'Battery connector'],
+                    'wiring': [
+                        '1. Battery red (+) → Arduino VIN',
+                        '2. Battery black (-) → Arduino GND'
+                    ],
+                    'tips': [
+                        '9V battery lasts 1-3 days depending on alarm usage',
+                        'Use 3x AA battery pack (4.5V) for longer life',
+                        'Add power switch to conserve battery',
+                        'Consider rechargeable battery for permanent install'
+                    ],
+                    'warnings': [
+                        '⚠️ Never connect both USB and battery simultaneously (use one or the other)'
+                    ]
+                },
+                {
+                    'number': 8,
+                    'title': 'Mount in Enclosure',
+                    'description': 'Place Arduino, buzzer, and LED in project box. Drill holes for wires and LED. Secure with hot glue or screws.',
+                    'time': '15 minutes',
+                    'components': ['Project box', 'Hot glue or screws'],
+                    'tips': [
+                        'LED visible through front hole',
+                        'Buzzer facing out for maximum volume',
+                        'Label box: "ALARM SYSTEM - DO NOT TAMPER"',
+                        'Add ventilation holes for heat dissipation'
+                    ]
+                },
+                {
+                    'number': 9,
+                    'title': 'Install on Door',
+                    'description': 'Mount reed switch on door frame. Mount magnet on door aligned with switch (within 1-2cm gap when closed). Mount main unit nearby.',
+                    'time': '20 minutes',
+                    'components': ['Double-sided tape or screws'],
+                    'tips': [
+                        'Test alignment with multimeter before mounting',
+                        'Switch on stationary frame, magnet on moving door',
+                        'Use screws for security, tape for temporary/rental',
+                        'Hide wires along frame with cable clips',
+                        'Position unit where buzzer is most effective'
+                    ],
+                    'warnings': [
+                        'Ensure magnet and switch align when door is closed',
+                        'Gap too large = false alarms',
+                        'Test multiple times before securing permanently'
+                    ]
+                },
+                {
+                    'number': 10,
+                    'title': 'Test and Adjust',
+                    'description': 'Arm system. Open door. Verify alarm sounds. Test entry delay. Adjust position if false alarms occur.',
+                    'time': '15 minutes',
+                    'components': ['Installed system'],
+                    'tips': [
+                        'Fine-tune magnet position for reliability',
+                        'Test with different door opening speeds',
+                        'Verify battery life indicator (if coded)',
+                        'Document arming/disarming procedure'
+                    ]
+                }
+            ],
+            'total_build_time': '1-2 hours',
+            'estimated_cost': '$11.15',
+            'code_template': '''
+/*
+ * Door Open Alarm System
+ * Arduino-based security alarm with reed switch
+ * Battery powered, portable
+ */
+
+// Hardware pins
+const int REED_SWITCH = 2;
+const int BUZZER = 3;
+const int LED = 4;
+const int ARM_BUTTON = 5;  // Optional
+
+// Alarm settings
+const int ENTRY_DELAY = 5;     // Seconds to close door before alarm
+const int ALARM_DURATION = 30; // Seconds alarm will sound
+bool armed = true;             // Start armed (change to false for manual arming)
+
+// State tracking
+bool doorWasOpen = false;
+unsigned long entryTime = 0;
+unsigned long alarmTime = 0;
+bool alarmActive = false;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(REED_SWITCH, INPUT_PULLUP);  // Internal pull-up
+  pinMode(ARM_BUTTON, INPUT_PULLUP);   // Internal pull-up
+  pinMode(BUZZER, OUTPUT);
+  pinMode(LED, OUTPUT);
+
+  Serial.println("Door Alarm System Started");
+  Serial.print("Armed: ");
+  Serial.println(armed ? "YES" : "NO");
+
+  // Visual startup indicator
+  for(int i=0; i<3; i++) {
+    digitalWrite(LED, HIGH);
+    delay(200);
+    digitalWrite(LED, LOW);
+    delay(200);
+  }
+}
+
+void loop() {
+  // Check arming button
+  if (digitalRead(ARM_BUTTON) == LOW) {
+    armed = !armed;
+    Serial.print("Armed: ");
+    Serial.println(armed ? "YES" : "NO");
+
+    // Blink LED to indicate state change
+    for(int i=0; i<5; i++) {
+      digitalWrite(LED, HIGH);
+      delay(100);
+      digitalWrite(LED, LOW);
+      delay(100);
+    }
+
+    delay(1000);  // Debounce
+  }
+
+  // Read door status
+  bool doorOpen = (digitalRead(REED_SWITCH) == HIGH);
+
+  // Door status (armed systems blink LED slowly)
+  if (armed && !alarmActive) {
+    digitalWrite(LED, (millis() / 1000) % 2);  // Blink every second
+  }
+
+  // Door opened
+  if (doorOpen && !doorWasOpen && armed) {
+    Serial.println("DOOR OPENED!");
+    entryTime = millis();
+    doorWasOpen = true;
+  }
+
+  // Door closed
+  if (!doorOpen && doorWasOpen) {
+    Serial.println("Door closed");
+    doorWasOpen = false;
+    entryTime = 0;
+    alarmActive = false;
+    alarmTime = 0;
+    noTone(BUZZER);
+  }
+
+  // Entry delay countdown
+  if (doorWasOpen && armed && !alarmActive) {
+    unsigned long elapsed = (millis() - entryTime) / 1000;
+
+    if (elapsed < ENTRY_DELAY) {
+      // Warning beeps during entry delay
+      if ((millis() / 500) % 2) {
+        tone(BUZZER, 2000);
+      } else {
+        noTone(BUZZER);
+      }
+      digitalWrite(LED, (millis() / 200) % 2);  // Fast blink
+
+      Serial.print("Entry delay: ");
+      Serial.print(ENTRY_DELAY - elapsed);
+      Serial.println(" seconds");
+    } else {
+      // ALARM!
+      alarmActive = true;
+      alarmTime = millis();
+      Serial.println("*** ALARM TRIGGERED ***");
+    }
+  }
+
+  // Sound alarm
+  if (alarmActive && armed) {
+    unsigned long alarmElapsed = (millis() - alarmTime) / 1000;
+
+    if (alarmElapsed < ALARM_DURATION) {
+      // Siren effect
+      int freq = 800 + (millis() % 1000);
+      tone(BUZZER, freq);
+      digitalWrite(LED, HIGH);
+
+      Serial.print("ALARM! ");
+      Serial.print(ALARM_DURATION - alarmElapsed);
+      Serial.println(" seconds remaining");
+    } else {
+      // Alarm timeout
+      alarmActive = false;
+      noTone(BUZZER);
+      Serial.println("Alarm timeout - waiting for door to close");
+    }
+  }
+
+  delay(100);  // Small delay for stability
+}
+''',
+            'business_notes': {
+                'marketability': 'MEDIUM - Competitive market but customizable features can differentiate. Best as multi-pack (4-6 units) for whole home.',
+                'target_audience': 'Homeowners, renters, dorm students, parents (child safety), small businesses, workshops',
+                'upsell_opportunities': [
+                    'WiFi notification version (ESP8266 + Blynk) - add $5, sell for +$20',
+                    'Multi-sensor package (4-pack for doors/windows) - add $40, sell for +$50',
+                    'Keypad arming with PIN code - add $8, sell for +$25',
+                    'SMS alert integration (SIM800L module) - add $12, sell for +$40',
+                    'Rechargeable battery with solar panel - add $15, sell for +$30',
+                    'Integration with smart home systems (MQTT/Home Assistant) - add $0, sell for +$15'
+                ],
+                'manufacturing_notes': [
+                    'Use rechargeable LiPo battery for better economics',
+                    'Custom 3D printed enclosure looks professional',
+                    'Pre-calibrate and test each unit before shipping',
+                    'Include installation template for easy mounting',
+                    'Sell in pairs or 4-packs for better margins'
+                ],
+                'competitive_advantages': [
+                    'Customizable alarm sounds and delays',
+                    'No subscription fees (unlike Ring/SimpliSafe)',
+                    'Battery powered = works during power outages',
+                    'Easy DIY installation = no professional needed',
+                    'Open source = expandable and hackable',
+                    'Educational value for learning electronics'
+                ]
+            },
+            'next_steps': [
+                'Add WiFi for smartphone notifications',
+                'SMS alerts via SIM800L GSM module',
+                'Multiple sensors on one Arduino (monitor 4-6 doors/windows)',
+                'Keypad with PIN code arming',
+                'Integration with Home Assistant/MQTT',
+                'Tamper detection (detect if unit is removed from wall)',
+                'Battery level monitoring and low battery alert',
+                'Data logging of entry/exit times to SD card'
+            ],
+            'safety_notes': [
+                'Low voltage (9V max) - very safe',
+                'Do not install where it could cause panic (hospitals, etc.)',
+                'Not a replacement for professional security systems',
+                'Clearly label "ALARM SYSTEM" to deter tampering',
+                'Test weekly to ensure battery is charged',
+                'Buzzer can be very loud - consider neighbors',
+                'Not suitable for high-security applications (jewelry stores, etc.)',
+                'Keep away from moisture (not outdoor rated without enclosure mod)'
+            ]
+        }
+
+    def _generate_water_level_instructions(self) -> Dict:
+        """Instructions for Water Level Alarm (Arduino Nano + Water Sensor + Buzzer)"""
+        return {
+            'project_name': 'Water Level Alarm',
+            'difficulty': 'easy',
+            'build_time': '1-2 hours',
+            'skill_level': 'Beginner',
+            'tools_needed': [
+                'Soldering iron (optional)',
+                'Wire strippers',
+                'Drill (for mounting)',
+                'Screwdriver'
+            ],
+            'components': [
+                {'name': 'Arduino Nano', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'AliExpress, Amazon'},
+                {'name': 'Water Level Sensor Module', 'quantity': 1, 'cost': 2.0, 'where_to_buy': 'Amazon, eBay'},
+                {'name': 'Buzzer (active)', 'quantity': 1, 'cost': 1.0, 'where_to_buy': 'Amazon'},
+                {'name': 'LED (Red)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon'},
+                {'name': 'LED (Blue)', 'quantity': 1, 'cost': 0.1, 'where_to_buy': 'Amazon'},
+                {'name': '220Ω Resistor', 'quantity': 2, 'cost': 0.1, 'where_to_buy': 'Amazon'},
+                {'name': '9V Battery + Connector', 'quantity': 1, 'cost': 3.0, 'where_to_buy': 'Amazon'},
+                {'name': 'Waterproof wire (for sensor)', 'quantity': 1, 'cost': 1.5, 'where_to_buy': 'Amazon'},
+                {'name': 'Project box', 'quantity': 1, 'cost': 2.0, 'where_to_buy': 'Amazon'}
+            ],
+            'market_analysis': {
+                'build_cost': 12.8,
+                'market_price_low': 15.0,
+                'market_price_high': 28.0,
+                'profit_margin': '17-119%',
+                'comparable_products': [
+                    'Glentronics BWD-HWA Basement Watchdog - $25-35',
+                    'UTILITECH Water Alarm - $15-20',
+                    'Zircon Leak Alert - $10-15',
+                    'Govee Water Sensor (WiFi) - $20-30'
+                ]
+            },
+            'steps': [
+                {
+                    'number': 1,
+                    'title': 'Understanding Water Level Sensors',
+                    'description': 'Water level sensors detect water presence using exposed traces that conduct electricity when wet. Output is analog voltage proportional to water depth. Simple, cheap, but corrodes over time.',
+                    'time': '5 minutes',
+                    'components': ['Water level sensor'],
+                    'tips': [
+                        'Sensor has series of exposed traces',
+                        'More traces covered = higher voltage output',
+                        'Analog output: 0V (dry) to ~3V (fully submerged)',
+                        'Digital output available on some modules (HIGH/LOW threshold)'
+                    ],
+                    'warnings': [
+                        'Sensor will corrode over months of use (normal)',
+                        'Do not apply constant power - only read periodically',
+                        'Coating with nail polish extends life but reduces sensitivity'
+                    ]
+                },
+                {
+                    'number': 2,
+                    'title': 'Connect Water Sensor to Arduino',
+                    'description': 'Wire the water level sensor module to Arduino. Sensor has 3 pins: VCC (+), GND (-), and analog output (S).',
+                    'time': '10 minutes',
+                    'components': ['Arduino Nano', 'Water sensor', 'Jumper wires'],
+                    'wiring': [
+                        '1. Sensor VCC (+) → Arduino D6 (power on demand to reduce corrosion)',
+                        '2. Sensor GND (-) → Arduino GND',
+                        '3. Sensor S (signal) → Arduino A0 (analog input)'
+                    ],
+                    'tips': [
+                        'Powering sensor from D6 allows turning it on only when reading',
+                        'This extends sensor life significantly (10x longer)',
+                        'Use waterproof wire if sensor is distant from Arduino',
+                        'Sensor wire can be extended up to 3-5 meters'
+                    ]
+                },
+                {
+                    'number': 3,
+                    'title': 'Add Buzzer and LEDs',
+                    'description': 'Connect buzzer for audio alert and LEDs for visual status (blue = normal, red = water detected).',
+                    'time': '10 minutes',
+                    'components': ['Buzzer', '2x LEDs', '2x 220Ω resistors'],
+                    'wiring': [
+                        '1. Buzzer (+) → Arduino D7',
+                        '2. Buzzer (-) → Arduino GND',
+                        '3. Blue LED anode (+) → 220Ω resistor → Arduino D8',
+                        '4. Blue LED cathode (-) → Arduino GND',
+                        '5. Red LED anode (+) → 220Ω resistor → Arduino D9',
+                        '6. Red LED cathode (-) → Arduino GND'
+                    ],
+                    'tips': [
+                        'Blue LED = system OK, monitoring',
+                        'Red LED = WATER DETECTED',
+                        'Buzzer sounds continuous alarm when triggered',
+                        'LEDs visible from distance for at-a-glance status'
+                    ]
+                },
+                {
+                    'number': 4,
+                    'title': 'Optional: Add Reset Button',
+                    'description': 'Add push button to silence alarm (acknowledge water detection). Alarm will re-trigger if water still present.',
+                    'time': '5 minutes',
+                    'components': ['Push button (optional)'],
+                    'wiring': [
+                        '1. Button terminal 1 → Arduino D10',
+                        '2. Button terminal 2 → Arduino GND',
+                        '3. (Internal pull-up resistor in code)'
+                    ],
+                    'tips': [
+                        'Press to silence alarm temporarily',
+                        'Useful for overnight monitoring without continuous noise',
+                        'Alarm resets and checks again after 1 minute'
+                    ]
+                },
+                {
+                    'number': 5,
+                    'title': 'Upload Calibration Code',
+                    'description': 'Upload simple code to determine water threshold value for your specific sensor.',
+                    'time': '10 minutes',
+                    'components': ['Arduino', 'Water sensor'],
+                    'code_snippet': '''
+// Calibration
+void setup() {
+  pinMode(6, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(6, HIGH);  // Power sensor
+  delay(10);
+  int value = analogRead(A0);
+  digitalWrite(6, LOW);   // Power off
+
+  Serial.print("Sensor: ");
+  Serial.println(value);
+  delay(2000);
+}
+// 1. Run with sensor DRY, note value (typically 0-50)
+// 2. Dip sensor in water 1cm, note value (typically 200-400)
+// 3. Set THRESHOLD in main code between these values
+''',
+                    'tips': [
+                        'Test with actual tank/basement water if possible',
+                        'Different water (tap, rain, salt) has different conductivity',
+                        'Set threshold conservatively to avoid false alarms'
+                    ]
+                },
+                {
+                    'number': 6,
+                    'title': 'Upload Main Code',
+                    'description': 'Upload the complete water alarm code with your calibrated threshold value.',
+                    'time': '10 minutes',
+                    'components': ['Computer with Arduino IDE'],
+                    'tips': [
+                        'Update WATER_THRESHOLD value from calibration',
+                        'Adjust CHECK_INTERVAL for battery life vs responsiveness',
+                        'Longer interval = longer battery life',
+                        'Serial monitor shows real-time sensor readings'
+                    ]
+                },
+                {
+                    'number': 7,
+                    'title': 'Test the System',
+                    'description': 'Test alarm by dipping sensor in water. Verify buzzer sounds, red LED lights, and blue LED turns off.',
+                    'time': '10 minutes',
+                    'components': ['Cup of water for testing'],
+                    'tips': [
+                        'Dry sensor = blue LED on, no sound',
+                        'Wet sensor = red LED on, buzzer sounds',
+                        'Test reset button functionality',
+                        'Ensure sensor wire is waterproof if extended'
+                    ]
+                },
+                {
+                    'number': 8,
+                    'title': 'Install Battery Power',
+                    'description': 'Connect 9V battery for portable operation. Essential for basement/tank monitoring away from outlets.',
+                    'time': '5 minutes',
+                    'components': ['9V battery', 'Battery connector'],
+                    'wiring': [
+                        '1. Battery red (+) → Arduino VIN',
+                        '2. Battery black (-) → Arduino GND'
+                    ],
+                    'tips': [
+                        '9V battery lasts 1-2 weeks with 10-second check interval',
+                        'Use 4x AA battery pack for 2-4 weeks runtime',
+                        'Rechargeable LiPo + solar for permanent installation',
+                        'Add power switch to conserve battery when not needed'
+                    ],
+                    'warnings': [
+                        '⚠️ Never connect USB and battery at same time'
+                    ]
+                },
+                {
+                    'number': 9,
+                    'title': 'Mount in Enclosure',
+                    'description': 'Place Arduino and components in waterproof box. Sensor stays outside, Arduino inside dry enclosure.',
+                    'time': '15 minutes',
+                    'components': ['Waterproof project box'],
+                    'tips': [
+                        'Drill holes for sensor wire and LEDs',
+                        'Seal holes with silicone or hot glue',
+                        'Mount box above expected water level',
+                        'LEDs visible from outside',
+                        'Buzzer facing out for maximum sound',
+                        'Include desiccant packet to absorb moisture'
+                    ],
+                    'warnings': [
+                        'Arduino must stay DRY - only sensor touches water',
+                        'Test enclosure waterproofing before deployment'
+                    ]
+                },
+                {
+                    'number': 10,
+                    'title': 'Install in Target Location',
+                    'description': 'Place sensor probe at lowest point of basement floor, bottom of water tank, or sump pump area. Mount control box on wall nearby.',
+                    'time': '20 minutes',
+                    'components': ['Completed system', 'Mounting hardware'],
+                    'tips': [
+                        'Basement: place sensor in corner where water collects',
+                        'Tank: mount sensor at FULL level',
+                        'Sump pump: place near pump to detect failure',
+                        'Aquarium: mount at overflow level',
+                        'Test by pouring water to trigger sensor',
+                        'Label system clearly: "WATER ALARM - DO NOT REMOVE"'
+                    ]
+                },
+                {
+                    'number': 11,
+                    'title': 'Maintenance and Testing',
+                    'description': 'Test weekly by pouring water on sensor. Clean sensor monthly with soft cloth. Replace battery every 2-4 weeks.',
+                    'time': 'Ongoing',
+                    'components': ['Completed system'],
+                    'tips': [
+                        'Weekly test ensures system is working',
+                        'Check battery voltage monthly (needs >7V)',
+                        'Clean sensor corrosion with vinegar + brush',
+                        'Replace sensor every 6-12 months (cheap)',
+                        'Keep spare battery and sensor on hand'
+                    ]
+                }
+            ],
+            'total_build_time': '1-2 hours',
+            'estimated_cost': '$12.80',
+            'code_template': '''
+/*
+ * Water Level Alarm System
+ * Detects water leaks and floods
+ * Battery powered for basements/remote locations
+ */
+
+// Calibration (UPDATE THIS)
+const int WATER_THRESHOLD = 300;  // Sensor value indicating water (calibrate!)
+
+// Hardware pins
+const int SENSOR_POWER = 6;
+const int SENSOR_PIN = A0;
+const int BUZZER = 7;
+const int BLUE_LED = 8;   // Normal status
+const int RED_LED = 9;    // Alarm status
+const int RESET_BUTTON = 10;  // Optional
+
+// Settings
+const int CHECK_INTERVAL = 10000;  // Check every 10 seconds (adjust for battery life)
+
+// State
+bool alarmTriggered = false;
+bool alarmSilenced = false;
+unsigned long lastCheck = 0;
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(SENSOR_POWER, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  pinMode(BLUE_LED, OUTPUT);
+  pinMode(RED_LED, OUTPUT);
+  pinMode(RESET_BUTTON, INPUT_PULLUP);
+
+  // Keep sensor powered off until reading
+  digitalWrite(SENSOR_POWER, LOW);
+
+  Serial.println("Water Level Alarm Started");
+  Serial.print("Threshold: ");
+  Serial.println(WATER_THRESHOLD);
+  Serial.print("Check interval: ");
+  Serial.print(CHECK_INTERVAL / 1000);
+  Serial.println(" seconds");
+
+  // Startup indicator
+  for(int i=0; i<3; i++) {
+    digitalWrite(BLUE_LED, HIGH);
+    digitalWrite(RED_LED, HIGH);
+    delay(300);
+    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(RED_LED, LOW);
+    delay(300);
+  }
+}
+
+void loop() {
+  unsigned long currentTime = millis();
+
+  // Check reset button
+  if (digitalRead(RESET_BUTTON) == LOW) {
+    alarmSilenced = true;
+    alarmTriggered = false;
+    noTone(BUZZER);
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(BLUE_LED, HIGH);
+    Serial.println("Alarm silenced");
+    delay(1000);  // Debounce
+  }
+
+  // Periodic water level check
+  if (currentTime - lastCheck >= CHECK_INTERVAL) {
+    lastCheck = currentTime;
+
+    // Power on sensor
+    digitalWrite(SENSOR_POWER, HIGH);
+    delay(10);  // Allow sensor to stabilize
+
+    // Read sensor
+    int sensorValue = analogRead(SENSOR_PIN);
+
+    // Power off sensor (extend life)
+    digitalWrite(SENSOR_POWER, LOW);
+
+    // Print reading
+    Serial.print("Water level: ");
+    Serial.print(sensorValue);
+
+    // Check for water
+    if (sensorValue > WATER_THRESHOLD) {
+      Serial.println(" - WATER DETECTED!");
+
+      if (!alarmTriggered) {
+        alarmTriggered = true;
+        alarmSilenced = false;
+      }
+    } else {
+      Serial.println(" - OK");
+
+      // Auto-reset if water gone
+      if (alarmTriggered) {
+        Serial.println("Water cleared - alarm reset");
+        alarmTriggered = false;
+        alarmSilenced = false;
+        noTone(BUZZER);
+      }
+    }
+  }
+
+  // Alarm state
+  if (alarmTriggered && !alarmSilenced) {
+    // ALARM!
+    digitalWrite(BLUE_LED, LOW);
+    digitalWrite(RED_LED, HIGH);
+
+    // Pulsing alarm sound
+    int freq = 1000 + (millis() % 500);
+    tone(BUZZER, freq);
+  }
+  else if (alarmTriggered && alarmSilenced) {
+    // Silenced but water still present
+    digitalWrite(RED_LED, (millis() / 1000) % 2);  // Slow blink
+    digitalWrite(BLUE_LED, LOW);
+    noTone(BUZZER);
+
+    // Re-check after 1 minute
+    if (currentTime - lastCheck > 60000) {
+      alarmSilenced = false;
+    }
+  }
+  else {
+    // Normal monitoring
+    digitalWrite(BLUE_LED, (millis() / 2000) % 2);  // Very slow blink
+    digitalWrite(RED_LED, LOW);
+    noTone(BUZZER);
+  }
+
+  delay(100);  // Small delay for stability
+}
+''',
+            'business_notes': {
+                'marketability': 'MEDIUM-HIGH - Every homeowner with a basement needs this. Insurance companies love proactive prevention. Great gift for new homeowners.',
+                'target_audience': 'Homeowners with basements, sump pump owners, aquarium enthusiasts, boat owners, RV owners, property managers',
+                'upsell_opportunities': [
+                    'WiFi version with smartphone alerts (ESP8266 + Blynk/IFTTT) - add $5, sell for +$20',
+                    'Multiple sensor zones (3-4 sensors, one Arduino) - add $6, sell for +$25',
+                    'SMS alerts via GSM module - add $12, sell for +$40',
+                    'Auto-shutoff valve integration (turn off water main) - add $45, sell for +$150',
+                    'Solar powered with rechargeable battery - add $15, sell for +$30',
+                    'Temperature monitoring (frozen pipe prevention) - add $3, sell for +$15'
+                ],
+                'manufacturing_notes': [
+                    'Use silicone-coated sensors for longer life',
+                    'Include 3-meter sensor cable standard',
+                    'Professional 3D printed case with IP65 rating',
+                    'Pre-calibrate for fresh water',
+                    'Include mounting template and hardware',
+                    'Offer insurance-approved certification for premium pricing'
+                ],
+                'competitive_advantages': [
+                    'Much cheaper than professional systems ($50-200)',
+                    'No monthly monitoring fees',
+                    'Battery powered = works during power outages (sump pump failures)',
+                    'Customizable threshold and check interval',
+                    'Can expand to multiple sensors',
+                    'DIY installation = no technician needed',
+                    'Educational value for electronics learning'
+                ]
+            },
+            'next_steps': [
+                'WiFi connectivity for remote alerts',
+                'Integration with Home Assistant/SmartThings',
+                'SMS alerts when water detected',
+                'Multiple sensor support (monitor several locations)',
+                'Temperature sensor for frozen pipe detection',
+                'Humidity sensor for mold prevention',
+                'Auto water shutoff valve control',
+                'Data logging of water events',
+                'Solar panel + rechargeable battery for permanent install',
+                'Cellular connectivity for properties without WiFi'
+            ],
+            'safety_notes': [
+                'Low voltage (9V max) - safe around water',
+                'Arduino must stay DRY - only sensor touches water',
+                'Ensure enclosure is waterproof before installation',
+                'Test weekly to ensure functionality',
+                'Not a replacement for proper drainage/waterproofing',
+                'Water sensor will corrode over time - replace yearly',
+                'Do not use in drinking water systems (not food safe)',
+                'For flood insurance discounts, may need professional installation cert',
+                'Ensure buzzer is loud enough to be heard from living areas',
+                'Consider neighbors if in shared building (noise)'
             ]
         }
 

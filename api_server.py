@@ -31,6 +31,9 @@ from intelligence.circuit_validator import CircuitValidator
 from integrations.fritzing_integration import FritzingPartsLibrary, FritzingFileGenerator
 from intelligence.recipe_optimizer import RecipeOptimizer
 from intelligence.build_instructions import BuildInstructionsGenerator
+from intelligence.repair_guide_generator import RepairGuideGenerator
+from intelligence.device_diagnostic_engine import DeviceDiagnosticEngine
+from intelligence.global_payment_service import GlobalPaymentService
 from intelligence.learning_paths import LearningPathGenerator
 from integrations.pricing_service import UnifiedPricingService
 from engines.unified_workflow import UnifiedWorkflowEngine, UserProfile, UserLevel
@@ -830,6 +833,9 @@ fritzing_lib = FritzingPartsLibrary()
 fritzing_gen = FritzingFileGenerator(fritzing_lib)
 recipe_optimizer = RecipeOptimizer()
 instructions_gen = BuildInstructionsGenerator()
+repair_guide_gen = RepairGuideGenerator()
+diagnostic_engine = DeviceDiagnosticEngine()
+payment_service = GlobalPaymentService()
 learning_paths = LearningPathGenerator()
 pricing_service = UnifiedPricingService()
 
@@ -1369,6 +1375,337 @@ def list_available_instructions():
             'available_projects': available,
             'count': len(available)
         })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# Repair Guides API
+# ============================================================================
+
+@app.route('/api/repair-guides', methods=['GET'])
+def list_repair_guides():
+    """
+    List all available repair guides for phones, laptops, and electronics
+    """
+    try:
+        available = repair_guide_gen.list_available_guides()
+
+        return jsonify({
+            'available_guides': available,
+            'count': len(available),
+            'categories': {
+                'iphone': [g for g in available if 'iPhone' in g],
+                'android': [g for g in available if 'Samsung' in g or 'Android' in g],
+                'laptop': [g for g in available if 'Laptop' in g or 'Macbook' in g]
+            }
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/repair-guides/<path:issue_name>', methods=['GET'])
+def get_repair_guide(issue_name):
+    """
+    Get step-by-step repair guide for specific device issue
+
+    Examples:
+        /api/repair-guides/iPhone Screen Replacement
+        /api/repair-guides/iPhone Battery Replacement
+        /api/repair-guides/Laptop Not Charging
+
+    Query params:
+        device_model: Specific device model (e.g., "iPhone 12", "MacBook Pro 2020")
+        user_id: User identifier (email or session_id) for access control
+        preview: Set to 'true' for free preview (limited content)
+    """
+    try:
+        device_model = request.args.get('device_model')
+        user_id = request.args.get('user_id')
+        preview_mode = request.args.get('preview', 'false').lower() == 'true'
+
+        # Access control check (if user_id provided)
+        has_access = True  # Default to true for testing
+        if user_id and not preview_mode:
+            access_check = payment_service.check_access(user_id, issue_name)
+            has_access = access_check.get('has_access', False)
+
+            if not has_access:
+                # Return preview version with paywall
+                return jsonify({
+                    'error': 'Payment required',
+                    'message': 'Purchase this guide to access full content',
+                    'preview': True,
+                    'pricing': {
+                        'guide_onetime': '$4.99 one-time',
+                        'pro_monthly': '$9.99/month for all guides'
+                    },
+                    'upgrade_url': '/static/repair-diagnostic.html'
+                }), 402
+
+        # Get repair guide
+        guide = repair_guide_gen.generate_repair_guide(issue_name, device_model)
+
+        if not guide:
+            return jsonify({'error': f'Repair guide not found for: {issue_name}'}), 404
+
+        # If preview mode, limit content
+        if preview_mode and not has_access:
+            if 'steps' in guide and len(guide['steps']) > 3:
+                guide['steps'] = guide['steps'][:3]
+                guide['preview_mode'] = True
+                guide['preview_message'] = 'Preview - Purchase to see all steps'
+
+        return jsonify(guide)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/diagnose', methods=['POST'])
+def diagnose_device():
+    """
+    AI-powered device diagnostics from user symptoms
+
+    Analyzes symptoms and recommends repair guides
+
+    Request Body (JSON):
+        {
+            "symptoms": ["won't charge", "cable falls out"],
+            "device_type": "iPhone"  // optional, defaults to "iPhone"
+        }
+
+    Returns:
+        {
+            "device_type": "iPhone",
+            "diagnosis_method": "symptom_analysis",
+            "recommendations": [
+                {
+                    "issue": "iPhone Charging Port",
+                    "confidence": 0.67,
+                    "guide_summary": {
+                        "difficulty": "easy",
+                        "time": "5-45 minutes",
+                        "cost": "$0-25"
+                    }
+                }
+            ],
+            "top_recommendation": {...}
+        }
+
+    Examples:
+        # Charging issue
+        curl -X POST http://localhost:5000/api/diagnose \\
+          -H "Content-Type: application/json" \\
+          -d '{"symptoms": ["won\'t charge", "cable loose"]}'
+
+        # Battery issue
+        curl -X POST http://localhost:5000/api/diagnose \\
+          -H "Content-Type: application/json" \\
+          -d '{"symptoms": ["battery drains fast", "shuts down at 30%"]}'
+
+        # Screen issue
+        curl -X POST http://localhost:5000/api/diagnose \\
+          -H "Content-Type: application/json" \\
+          -d '{"symptoms": ["cracked screen", "touch not working"]}'
+    """
+    try:
+        data = request.get_json()
+
+        if not data or 'symptoms' not in data:
+            return jsonify({
+                'error': 'Missing required field: symptoms',
+                'example': {
+                    'symptoms': ['won\'t charge', 'cable falls out'],
+                    'device_type': 'iPhone'
+                }
+            }), 400
+
+        symptoms = data.get('symptoms', [])
+        device_type = data.get('device_type', 'iPhone')
+
+        if not isinstance(symptoms, list) or len(symptoms) == 0:
+            return jsonify({'error': 'symptoms must be a non-empty list'}), 400
+
+        # Run diagnosis
+        diagnosis = diagnostic_engine.diagnose_from_symptoms(symptoms, device_type)
+
+        return jsonify(diagnosis)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# Payment Endpoints - Stripe Integration for Repair Guides
+# ============================================================================
+
+@app.route('/api/payment/create-checkout', methods=['POST'])
+def create_checkout():
+    """
+    Create a Stripe checkout session for purchasing repair guides
+
+    Request Body (JSON):
+        {
+            "product_type": "guide_onetime",  // or "pro_monthly", "expert_session"
+            "repair_guide": "iPhone Screen Replacement",
+            "customer_email": "user@example.com"  // optional
+        }
+
+    Returns:
+        {
+            "checkout_url": "https://checkout.stripe.com/...",
+            "session_id": "cs_test_...",
+            "publishable_key": "pk_test_..."
+        }
+
+    Examples:
+        # Purchase one-time guide
+        curl -X POST http://localhost:5000/api/payment/create-checkout \\
+          -H "Content-Type: application/json" \\
+          -d '{"product_type": "guide_onetime", "repair_guide": "iPhone Screen Replacement"}'
+
+        # Subscribe to Pro
+        curl -X POST http://localhost:5000/api/payment/create-checkout \\
+          -H "Content-Type: application/json" \\
+          -d '{"product_type": "pro_monthly", "repair_guide": "All Guides"}'
+    """
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Missing request body'}), 400
+
+        product_type = data.get('product_type', 'guide_onetime')
+        repair_guide = data.get('repair_guide')
+        customer_email = data.get('customer_email')
+
+        if not repair_guide:
+            return jsonify({'error': 'repair_guide is required'}), 400
+
+        # Create checkout session
+        base_url = request.host_url.rstrip('/')
+        checkout_result = payment_service.create_checkout_session(
+            product_type=product_type,
+            repair_guide=repair_guide,
+            success_url=f"{base_url}/payment-success",
+            cancel_url=f"{base_url}/payment-cancelled",
+            customer_email=customer_email
+        )
+
+        if 'error' in checkout_result:
+            return jsonify(checkout_result), 400
+
+        return jsonify(checkout_result)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/payment/verify', methods=['GET'])
+def verify_payment():
+    """
+    Verify a payment and grant access to purchased content
+
+    Query Parameters:
+        session_id: Stripe checkout session ID
+
+    Returns:
+        {
+            "status": "paid",
+            "repair_guide": "iPhone Screen Replacement",
+            "access_granted": true,
+            "purchase_id": "purchase_..."
+        }
+
+    Examples:
+        curl "http://localhost:5000/api/payment/verify?session_id=cs_test_123"
+    """
+    try:
+        session_id = request.args.get('session_id')
+
+        if not session_id:
+            return jsonify({'error': 'session_id is required'}), 400
+
+        verification = payment_service.verify_payment(session_id)
+
+        if verification.get('access_granted'):
+            return jsonify(verification)
+        else:
+            return jsonify(verification), 402  # Payment Required
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/payment/check-access', methods=['POST'])
+def check_access():
+    """
+    Check if a user has access to a repair guide
+
+    Request Body (JSON):
+        {
+            "user_identifier": "user@example.com",  // email or session_id
+            "repair_guide": "iPhone Screen Replacement"
+        }
+
+    Returns:
+        {
+            "has_access": true,
+            "type": "one_time_purchase",  // or "pro_subscription"
+            "purchase_id": "purchase_..."
+        }
+
+    Examples:
+        curl -X POST http://localhost:5000/api/payment/check-access \\
+          -H "Content-Type: application/json" \\
+          -d '{"user_identifier": "user@example.com", "repair_guide": "iPhone Screen Replacement"}'
+    """
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'Missing request body'}), 400
+
+        user_identifier = data.get('user_identifier')
+        repair_guide = data.get('repair_guide')
+
+        if not user_identifier or not repair_guide:
+            return jsonify({'error': 'user_identifier and repair_guide are required'}), 400
+
+        access_result = payment_service.check_access(user_identifier, repair_guide)
+
+        if access_result.get('has_access'):
+            return jsonify(access_result)
+        else:
+            return jsonify(access_result), 402  # Payment Required
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/payment/analytics', methods=['GET'])
+def payment_analytics():
+    """
+    Get revenue analytics (admin only in production)
+
+    Returns:
+        {
+            "total_revenue": "$99.80",
+            "total_purchases": 20,
+            "active_subscriptions": 5,
+            "mrr": "$49.95",
+            "avg_order_value": "$4.99"
+        }
+
+    Examples:
+        curl http://localhost:5000/api/payment/analytics
+    """
+    try:
+        analytics = payment_service.get_analytics()
+        return jsonify(analytics)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

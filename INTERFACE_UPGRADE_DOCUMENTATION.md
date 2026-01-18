@@ -58,6 +58,16 @@ The interface has been completely redesigned to merge **Professional Density** (
 *   **Ghost Mode:** The AI visualizes proposed optimizations (e.g., shrinking the board) as green wireframe "ghosts" overlaid on the real board.
 *   **Visual Explosion:** A clarity slider that physically lifts components off the board in 3D space to reveal hidden traces.
 
+### 3.4 Hybrid Knowledge Engine (Signal-Based RAG)
+Circuit-AI implements a unique "Skeptical RAG" architecture to handle external publications (Hackaday, EEVblog, CNX Software) without the risk of misinformation.
+
+*   **Signals, Not Facts:** The system treats news feeds as *Signals* to be verified by the core LLM intelligence, rather than absolute facts.
+*   **Knowledge Bridge Workflow:**
+    1.  **Poll:** Periodically retrieves latest engineering hacks and component warnings.
+    2.  **Cross-Check:** When a user creates a design, the system cross-references components against recent "unverified signals."
+    3.  **Proactive Critique:** If a signal matches a design element (e.g., "AMS1117 oscillation reports"), the system generates a **Modernity Warning** instead of a silent failure.
+*   **Value:** Ensures designs align with *current* best practices and avoids "training cutoff" limitations while maintaining rigorous engineering standards.
+
 ---
 
 ## 4. The New Backend Engines ("The Muscle")

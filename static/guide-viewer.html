@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repair Guide Viewer - Circuit-AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header .meta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .step .time {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .step .description {
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .step .tips {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .step .tips strong {
+            color: #1976d2;
+        }
+
+        .step .warnings {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .tools-section, .cost-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tools-section h3, .cost-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .tool-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/static/repair-diagnostic.html" class="back-btn">← Back to Diagnostic</a>
+
+        <div class="header">
+            <h1 id="guide-title">Loading repair guide...</h1>
+            <div class="meta" id="guide-meta"></div>
+        </div>
+
+        <div class="content" id="guide-content">
+            <div class="loading">
+                <p>Loading your repair guide...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get guide name from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const guideName = urlParams.get('guide');
+        const sessionId = urlParams.get('session_id');
+
+        if (!guideName) {
+            document.getElementById('guide-content').innerHTML = `
+                <div class="error">
+                    <strong>Error:</strong> No guide specified. Please return to the diagnostic page.
+                </div>
+            `;
+        } else {
+            loadGuide(guideName);
+        }
+
+        async function loadGuide(guideName) {
+            try {
+                // Fetch the full repair guide
+                const response = await fetch(`http://localhost:5000/api/repair-guides/${encodeURIComponent(guideName)}`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to load guide');
+                }
+
+                const guide = await response.json();
+                displayGuide(guide);
+
+            } catch (error) {
+                document.getElementById('guide-content').innerHTML = `
+                    <div class="error">
+                        <strong>Error:</strong> ${error.message}
+                        <p style="margin-top: 10px;">This guide may not be available yet. We're constantly adding new guides!</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayGuide(guide) {
+            // Update title
+            document.getElementById('guide-title').textContent = guide.project_name || guideName;
+
+            // Update meta info
+            document.getElementById('guide-meta').innerHTML = `
+                Difficulty: <strong>${guide.difficulty || 'Medium'}</strong> |
+                Time: <strong>${guide.repair_time || guide.time || '30-60 min'}</strong> |
+                Cost: <strong>${guide.estimated_cost || guide.cost || '$20-50'}</strong>
+            `;
+
+            // Build content
+            let content = '';
+
+            // Tools needed
+            if (guide.tools_needed && guide.tools_needed.length > 0) {
+                content += `
+                    <div class="tools-section">
+                        <h3>🛠️ Tools & Materials Needed</h3>
+                        <div class="tool-list">
+                            ${guide.tools_needed.map(tool => `<div class="tool-item">• ${tool}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Cost estimate
+            if (guide.estimated_cost || guide.market_analysis) {
+                const analysis = guide.market_analysis || {};
+                content += `
+                    <div class="cost-section">
+                        <h3>💰 Cost Analysis</h3>
+                        <p><strong>Parts Cost:</strong> ${guide.estimated_cost || `$${analysis.build_cost || 'Varies'}`}</p>
+                        ${analysis.market_price_high ? `<p><strong>Professional Repair Cost:</strong> $${analysis.market_price_high}</p>` : ''}
+                        ${analysis.profit_margin ? `<p><strong>Your Savings:</strong> ${analysis.profit_margin}</p>` : ''}
+                    </div>
+                `;
+            }
+
+            // Steps
+            if (guide.steps && guide.steps.length > 0) {
+                content += '<h2 style="margin: 30px 0 20px 0;">📋 Repair Steps</h2>';
+
+                guide.steps.forEach((step, index) => {
+                    content += `
+                        <div class="step">
+                            <h3>Step ${step.number || index + 1}: ${step.title || step.step}</h3>
+                            ${step.time ? `<div class="time">⏱️ ${step.time}</div>` : ''}
+                            <div class="description">${step.description || step.details || ''}</div>
+
+                            ${step.tips && step.tips.length > 0 ? `
+                                <div class="tips">
+                                    <strong>💡 Tips:</strong>
+                                    <ul style="margin: 5px 0 0 20px;">
+                                        ${step.tips.map(tip => `<li>${tip}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+
+                            ${step.warnings && step.warnings.length > 0 ? `
+                                <div class="warnings">
+                                    <strong>⚠️ Warnings:</strong>
+                                    <ul style="margin: 5px 0 0 20px;">
+                                        ${step.warnings.map(warning => `<li>${warning}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                // Fallback if no detailed steps available
+                content += `
+                    <div class="step">
+                        <h3>Guide Content</h3>
+                        <div class="description">
+                            <p>This repair guide is being prepared for you. In the full version, you'll see:</p>
+                            <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                                <li>15+ detailed step-by-step instructions with photos</li>
+                                <li>Video walkthrough of the entire repair process</li>
+                                <li>Complete tools and parts list with purchase links</li>
+                                <li>Safety warnings and critical tips</li>
+                                <li>Troubleshooting guide for common issues</li>
+                                <li>Lifetime access - come back anytime</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Support info
+            content += `
+                <div style="background: #e8f5e9; padding: 20px; border-radius: 10px; margin-top: 30px;">
+                    <h3 style="color: #2e7d32; margin-bottom: 10px;">✅ Need Help?</h3>
+                    <p>If you get stuck during your repair:</p>
+                    <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li>Email us at support@circuit-ai.com with questions</li>
+                        <li>Book a live expert session ($19.99) for real-time guidance</li>
+                        <li>Join our community Discord for peer support</li>
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('guide-content').innerHTML = content;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled - Circuit-AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 8px 0;
+            color: #555;
+        }
+
+        .info-box li::before {
+            content: "• ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .support-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .support-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">😔</div>
+        <h1>Payment Cancelled</h1>
+        <p>Your payment was cancelled. No charges were made to your account.</p>
+
+        <div class="info-box">
+            <h3>Why customers choose us:</h3>
+            <ul>
+                <li>Save $150-500 vs. professional repair shops</li>
+                <li>Step-by-step guides with photos & videos</li>
+                <li>Lifetime access - no subscription required</li>
+                <li>Expert support if you get stuck</li>
+                <li>30-day money-back guarantee</li>
+            </ul>
+        </div>
+
+        <p style="margin: 30px 0;">
+            <strong>Still interested?</strong> We're here to help you fix your device and save money!
+        </p>
+
+        <div>
+            <a href="/static/repair-diagnostic.html" class="btn">🔍 Back to Diagnostic</a>
+            <a href="mailto:support@circuit-ai.com" class="btn btn-outline">✉️ Contact Support</a>
+        </div>
+
+        <p style="margin-top: 30px; font-size: 14px; color: #999;">
+            Questions? Email us at <a href="mailto:support@circuit-ai.com" class="support-link">support@circuit-ai.com</a>
+        </p>
+    </div>
+</body>
+</html>

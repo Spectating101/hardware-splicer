@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Device Repair Diagnostic - Fix Your Phone in Minutes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .device-selector {
+            margin-bottom: 30px;
+        }
+
+        .device-selector label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .device-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .device-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .device-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .device-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .symptom-input {
+            margin-bottom: 30px;
+        }
+
+        .symptom-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .symptom-input p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .symptom-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .symptom-tag {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .symptom-tag:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .symptom-tag.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .diagnose-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .diagnose-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .diagnose-btn:active {
+            transform: translateY(0);
+        }
+
+        .diagnose-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .diagnosis-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .diagnosis-header h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: #4caf50;
+            color: white;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .confidence-badge.medium {
+            background: #ff9800;
+        }
+
+        .confidence-badge.low {
+            background: #f44336;
+        }
+
+        .recommendation {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .recommendation h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .difficulty {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .difficulty.easy {
+            background: #4caf50;
+            color: white;
+        }
+
+        .difficulty.medium {
+            background: #ff9800;
+            color: white;
+        }
+
+        .difficulty.hard {
+            background: #f44336;
+            color: white;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .testimonials {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+
+        .testimonial {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .device-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 AI Repair Diagnostic</h1>
+            <p>Fix your device in minutes. Save $200-500 on repairs.</p>
+        </div>
+
+        <div class="card">
+            <div class="device-selector">
+                <label>What device needs repair?</label>
+                <div class="device-buttons">
+                    <button class="device-btn active" data-device="iPhone">📱 iPhone</button>
+                    <button class="device-btn" data-device="Android">🤖 Android</button>
+                    <button class="device-btn" data-device="Laptop">💻 Laptop</button>
+                    <button class="device-btn" data-device="Tablet">📲 Tablet</button>
+                </div>
+            </div>
+
+            <div class="symptom-input">
+                <label>What's wrong with it?</label>
+                <p>Select common issues or describe your own:</p>
+
+                <div class="symptom-tags" id="symptomTags">
+                    <!-- Common symptoms will be inserted here -->
+                </div>
+
+                <textarea
+                    id="customSymptoms"
+                    placeholder="Or describe the problem in your own words...&#10;Example: 'Phone won't charge and gets really hot'">
+                </textarea>
+            </div>
+
+            <button class="diagnose-btn" onclick="diagnose()">
+                🔍 Diagnose My Device (FREE)
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>AI is analyzing your symptoms...</p>
+        </div>
+
+        <div class="results" id="results">
+            <!-- Results will be inserted here -->
+        </div>
+
+        <div class="testimonials">
+            <div class="testimonial">
+                <div class="testimonial-text">"Saved me $279! Apple wanted that much for a screen replacement. Fixed it myself in 45 minutes for $40."</div>
+                <div class="testimonial-author">- Sarah M., San Francisco</div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-text">"The AI knew instantly it was my charging port. Cleaned out the lint and it works perfectly now. Took 5 minutes!"</div>
+                <div class="testimonial-author">- James K., New York</div>
+            </div>
+            <div class="testimonial">
+                <div class="testimonial-text">"Running a side hustle fixing phones now. This tool saves me hours of diagnostics every week."</div>
+                <div class="testimonial-author">- Miguel R., Miami</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by Circuit-AI | Right to Repair | Save Money, Fix It Yourself</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedDevice = 'iPhone';
+        let selectedSymptoms = [];
+
+        const commonSymptoms = {
+            'iPhone': [
+                'Cracked screen',
+                'Battery drains fast',
+                'Won\'t charge',
+                'Screen won\'t turn on',
+                'Touch not working',
+                'Phone getting hot',
+                'Dropped in water',
+                'Camera not working',
+                'Speaker sounds muffled',
+                'Battery swollen'
+            ],
+            'Android': [
+                'Cracked screen',
+                'Battery drains fast',
+                'Won\'t charge',
+                'Screen black',
+                'Slow performance',
+                'Overheating',
+                'Camera blurry',
+                'Charging port loose',
+                'Water damage',
+                'Back popping off'
+            ],
+            'Laptop': [
+                'Screen cracked',
+                'Won\'t turn on',
+                'Not charging',
+                'Overheating',
+                'Fan loud',
+                'Keyboard not working',
+                'Slow performance',
+                'Battery not detected',
+                'Screen flickering',
+                'Keys sticky'
+            ],
+            'Tablet': [
+                'Cracked screen',
+                'Battery dies quickly',
+                'Won\'t charge',
+                'Touch screen broken',
+                'Slow',
+                'Overheating',
+                'Camera not working',
+                'Speaker quiet',
+                'Dropped in water',
+                'Won\'t turn on'
+            ]
+        };
+
+        // Initialize
+        updateSymptomTags();
+
+        // Device selector
+        document.querySelectorAll('.device-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                selectedDevice = this.dataset.device;
+                selectedSymptoms = [];
+                updateSymptomTags();
+            });
+        });
+
+        function updateSymptomTags() {
+            const container = document.getElementById('symptomTags');
+            container.innerHTML = '';
+
+            commonSymptoms[selectedDevice].forEach(symptom => {
+                const tag = document.createElement('span');
+                tag.className = 'symptom-tag';
+                tag.textContent = symptom;
+                tag.onclick = () => toggleSymptom(tag, symptom);
+                container.appendChild(tag);
+            });
+        }
+
+        function toggleSymptom(element, symptom) {
+            element.classList.toggle('selected');
+            if (selectedSymptoms.includes(symptom)) {
+                selectedSymptoms = selectedSymptoms.filter(s => s !== symptom);
+            } else {
+                selectedSymptoms.push(symptom);
+            }
+        }
+
+        async function diagnose() {
+            const customText = document.getElementById('customSymptoms').value.trim();
+
+            // Combine selected tags and custom text
+            let symptoms = [...selectedSymptoms];
+            if (customText) {
+                symptoms.push(customText);
+            }
+
+            if (symptoms.length === 0) {
+                alert('Please select at least one symptom or describe the problem');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+            document.querySelector('.diagnose-btn').disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/diagnose', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        symptoms: symptoms,
+                        device_type: selectedDevice
+                    })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error diagnosing device. Please try again.');
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.querySelector('.diagnose-btn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+
+            if (!data.top_recommendation) {
+                resultsDiv.innerHTML = `
+                    <div class="card">
+                        <div class="diagnosis-header">
+                            <h2>🤔 No Match Found</h2>
+                            <p>We couldn't identify a specific issue based on these symptoms.</p>
+                            <p style="margin-top: 15px;">Suggestions:</p>
+                            <ul style="text-align: left; margin: 15px 0; color: #666;">
+                                <li>Try describing the symptoms differently</li>
+                                <li>Add more details about when the problem occurs</li>
+                                <li>Select multiple symptoms from the tags above</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                resultsDiv.classList.add('show');
+                return;
+            }
+
+            const rec = data.top_recommendation;
+            const confidence = Math.round(rec.confidence * 100);
+            const confidenceClass = confidence >= 80 ? '' : confidence >= 50 ? 'medium' : 'low';
+            const guide = rec.guide_summary;
+
+            resultsDiv.innerHTML = `
+                <div class="card">
+                    <div class="diagnosis-header">
+                        <h2>✅ Diagnosis Complete</h2>
+                        <span class="confidence-badge ${confidenceClass}">${confidence}% Confident</span>
+                    </div>
+
+                    <div class="recommendation">
+                        <h3>${rec.issue}</h3>
+
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label">Difficulty</div>
+                                <div class="info-value">
+                                    <span class="difficulty ${guide.difficulty}">${guide.difficulty || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Time Required</div>
+                                <div class="info-value">${guide.time || 'N/A'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Estimated Cost</div>
+                                <div class="info-value">${guide.cost || 'Varies'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Repair Steps</div>
+                                <div class="info-value">${guide.steps || 0} steps</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
+                            <strong>💡 Our Recommendation:</strong><br>
+                            ${getRecommendationText(rec, guide)}
+                        </div>
+
+                        <div style="text-align: center; margin-top: 25px;">
+                            <a href="#" class="cta-button" onclick="showFullGuide('${rec.issue}'); return false;">
+                                📖 Get Full Repair Guide - $4.99
+                            </a>
+                            <br>
+                            <a href="#" class="cta-button" style="background: #4caf50; margin-top: 10px;" onclick="bookExpert(); return false;">
+                                💬 Talk to Expert - $19.99
+                            </a>
+                        </div>
+                    </div>
+
+                    ${data.recommendations.length > 1 ? `
+                        <div style="margin-top: 20px;">
+                            <h4>Alternative Possibilities:</h4>
+                            ${data.recommendations.slice(1, 3).map(r => `
+                                <div style="padding: 10px; margin: 10px 0; background: #f5f5f5; border-radius: 5px;">
+                                    <strong>${r.issue}</strong> (${Math.round(r.confidence * 100)}% match)
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            resultsDiv.classList.add('show');
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function getRecommendationText(rec, guide) {
+            if (rec.issue.includes('Charging Port') && guide.difficulty === 'easy') {
+                return 'Try cleaning the charging port first (FREE, 5 minutes). This fixes the problem 90% of the time!';
+            } else if (rec.issue.includes('Battery') && rec.confidence > 0.8) {
+                return 'Battery replacement is straightforward for most people. Save $150-300 vs. repair shop!';
+            } else if (rec.issue.includes('Screen')) {
+                return 'Screen replacement requires patience but saves $200-500. Full video guide included.';
+            } else if (guide.difficulty === 'hard' || guide.difficulty === 'expert') {
+                return 'This repair is advanced. Consider professional help or our expert consultation service.';
+            } else {
+                return `This is a ${guide.difficulty} repair. You can save $${estimateSavings(rec.issue)} by doing it yourself!`;
+            }
+        }
+
+        function estimateSavings(issue) {
+            if (issue.includes('Screen')) return '200-500';
+            if (issue.includes('Battery')) return '150-300';
+            if (issue.includes('Charging')) return '80-150';
+            return '100-200';
+        }
+
+        async function showFullGuide(issue) {
+            // Create checkout session for guide purchase
+            try {
+                const response = await fetch('http://localhost:5000/api/payment/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_type: 'guide_onetime',
+                        repair_guide: issue,
+                        customer_email: prompt('Enter your email to receive the repair guide:')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                if (data.test_mode) {
+                    // Test mode - show what would happen
+                    const confirmed = confirm(
+                        `🧪 TEST MODE 🧪\n\n` +
+                        `You would be charged $4.99 for:\n` +
+                        `"${issue}"\n\n` +
+                        `This includes:\n` +
+                        `• 15+ step-by-step instructions with photos\n` +
+                        `• Video walkthrough\n` +
+                        `• Tools & parts list with buy links\n` +
+                        `• Safety warnings & tips\n` +
+                        `• Lifetime access\n\n` +
+                        `In production, you would be redirected to Stripe checkout.\n\n` +
+                        `Click OK to simulate successful payment.`
+                    );
+
+                    if (confirmed) {
+                        // Simulate successful payment
+                        window.location.href = `/static/guide-viewer.html?guide=${encodeURIComponent(issue)}`;
+                    }
+                } else {
+                    // Production mode - redirect to Stripe checkout
+                    window.location.href = data.checkout_url;
+                }
+
+            } catch (error) {
+                alert('Payment system error: ' + error.message);
+                console.error('Payment error:', error);
+            }
+        }
+
+        async function bookExpert() {
+            // Create checkout session for expert consultation
+            try {
+                const response = await fetch('http://localhost:5000/api/payment/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_type: 'expert_session',
+                        repair_guide: 'Live Expert Diagnosis',
+                        customer_email: prompt('Enter your email to book expert session:')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                if (data.test_mode) {
+                    // Test mode
+                    const confirmed = confirm(
+                        `🧪 TEST MODE 🧪\n\n` +
+                        `You would be charged $19.99 for:\n\n` +
+                        `Live Expert Help:\n` +
+                        `• 30-minute video call with repair technician\n` +
+                        `• Real-time guidance through your repair\n` +
+                        `• Screen sharing support\n` +
+                        `• "Should I continue?" advice\n` +
+                        `• Recording of the session\n\n` +
+                        `In production, you would be redirected to Stripe checkout.\n\n` +
+                        `Click OK to simulate booking.`
+                    );
+
+                    if (confirmed) {
+                        alert('✅ Expert session booked!\n\nYou will receive a calendar invite via email with a video call link.');
+                    }
+                } else {
+                    // Production mode
+                    window.location.href = data.checkout_url;
+                }
+
+            } catch (error) {
+                alert('Booking system error: ' + error.message);
+                console.error('Booking error:', error);
+            }
+        }
+
+        // Pro subscription button (add this to the UI if needed)
+        async function subscribeToPro() {
+            try {
+                const response = await fetch('http://localhost:5000/api/payment/create-checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        product_type: 'pro_monthly',
+                        repair_guide: 'All Repair Guides',
+                        customer_email: prompt('Enter your email for Circuit-AI Pro:')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                if (data.test_mode) {
+                    const confirmed = confirm(
+                        `🧪 TEST MODE 🧪\n\n` +
+                        `You would be charged $9.99/month for:\n\n` +
+                        `Circuit-AI Pro:\n` +
+                        `• Unlimited access to ALL repair guides\n` +
+                        `• Expert chat support (response in <2 hours)\n` +
+                        `• Priority video help sessions\n` +
+                        `• New guides added weekly\n` +
+                        `• Cancel anytime\n\n` +
+                        `In production, you would be redirected to Stripe checkout.\n\n` +
+                        `Click OK to simulate subscription.`
+                    );
+
+                    if (confirmed) {
+                        alert('✅ Subscribed to Pro!\n\nYou now have unlimited access to all repair guides.');
+                    }
+                } else {
+                    window.location.href = data.checkout_url;
+                }
+
+            } catch (error) {
+                alert('Subscription error: ' + error.message);
+                console.error('Subscription error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

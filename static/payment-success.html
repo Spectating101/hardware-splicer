@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Circuit-AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            color: #2e7d32;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .info-box h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 8px 0;
+            color: #333;
+        }
+
+        .info-box li::before {
+            content: "✓ ";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #4caf50;
+        }
+
+        .btn-secondary:hover {
+            background: #45a049;
+        }
+
+        .loading {
+            margin: 20px 0;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">🎉</div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase. Your payment has been processed successfully.</p>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Verifying your payment and setting up access...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="info-box">
+                <h3>What's Next?</h3>
+                <ul id="next-steps">
+                    <li>Check your email for the receipt and access details</li>
+                    <li>Your repair guide is ready to view now</li>
+                    <li>Bookmark the guide for easy access later</li>
+                    <li>Contact support if you need any help</li>
+                </ul>
+            </div>
+
+            <div id="guide-access" style="display: none;">
+                <a href="#" id="view-guide-btn" class="btn btn-secondary">📖 View Your Repair Guide</a>
+            </div>
+
+            <div>
+                <a href="/static/repair-diagnostic.html" class="btn">🔍 Diagnose Another Device</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        async function verifyPayment() {
+            if (!sessionId) {
+                // No session ID - just show generic success
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                return;
+            }
+
+            try {
+                // Verify the payment with backend
+                const response = await fetch(`http://localhost:5000/api/payment/verify?session_id=${sessionId}`);
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                if (data.access_granted && data.repair_guide) {
+                    // Show guide access button
+                    const guideAccess = document.getElementById('guide-access');
+                    const viewBtn = document.getElementById('view-guide-btn');
+
+                    guideAccess.style.display = 'block';
+                    viewBtn.href = `/static/guide-viewer.html?guide=${encodeURIComponent(data.repair_guide)}&session_id=${sessionId}`;
+
+                    // Update next steps
+                    document.getElementById('next-steps').innerHTML = `
+                        <li>Your purchase: <strong>${data.repair_guide}</strong></li>
+                        <li>Amount paid: <strong>$${(data.amount / 100).toFixed(2)}</strong></li>
+                        <li>Receipt sent to: <strong>${data.customer_email || 'your email'}</strong></li>
+                        <li>Access: <strong>Lifetime</strong> - no expiration</li>
+                    `;
+                }
+
+            } catch (error) {
+                console.error('Payment verification error:', error);
+                // Show content anyway
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            }
+        }
+
+        // Verify payment on page load
+        verifyPayment();
+    </script>
+</body>
+</html>

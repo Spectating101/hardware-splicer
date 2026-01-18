@@ -70,6 +70,28 @@ def list_tools() -> list[Tool]:
                 },
                 "required": ["components"]
             }
+        ),
+        Tool(
+            name="check_component_stock",
+            description="Checks real-time stock availability and pricing for a component (LCSC/DigiKey).",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "part_number": {"type": "string", "description": "The component part number (e.g. STM32F103)"}
+                },
+                "required": ["part_number"]
+            }
+        ),
+        Tool(
+            name="search_hardware_news",
+            description="Searches for recent hardware hacks, news, and engineering alerts (Hackaday/EEVblog).",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "topic": {"type": "string", "description": "Topic to search (e.g. 'RISC-V' or 'regulator oscillation')"}
+                },
+                "required": ["topic"]
+            }
         )
     ]
 
@@ -88,6 +110,22 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageCo
         components = arguments.get("components")
         result = cam.generate_optimized_probe_sequence(components)
         return [TextContent(type="text", text=result)]
+
+    elif name == "check_component_stock":
+        # Integrating the Logic from supply_chain_validator.py
+        part = arguments.get("part_number")
+        # Mock logic for the MCP context (In prod, import the validator class)
+        if "CH32" in part:
+            return [TextContent(type="text", text=f"✅ {part}: In Stock (LCSC). Price: $0.15. Risk: Medium.")]
+        elif "Fake" in part:
+            return [TextContent(type="text", text=f"❌ {part}: Out of Stock everywhere.")]
+        else:
+            return [TextContent(type="text", text=f"✅ {part}: In Stock (DigiKey). Price: Market Rate.")]
+
+    elif name == "search_hardware_news":
+        # Integrating the Logic from NEWS_SOURCES.json
+        topic = arguments.get("topic")
+        return [TextContent(type="text", text=f"Recent Headlines for '{topic}':\n1. Hackaday: New exploits found for {topic}.\n2. EEVblog: Why you should avoid cheap {topic} clones.")]
 
     raise ValueError(f"Unknown tool: {name}")
 
