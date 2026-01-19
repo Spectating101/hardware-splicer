@@ -8,18 +8,40 @@ Targeting: Llama-3.3-70b (Cerebras) or Gemini 1.5 Pro (Google)
 import os
 import json
 import urllib.request
+import urllib.error
+from pathlib import Path
 from typing import Dict, List, Any
 
 # Load env vars manually for the standalone script context
 def load_env_if_needed():
     # Only simple parsing for the demo script
     try:
-        if os.path.exists("../../../.env.local"):
-            with open("../../../.env.local", "r") as f:
+        # Search upwards from this file (and also CWD) for a `.env.local`.
+        candidates = []
+        try:
+            candidates.append(Path.cwd())
+        except Exception:
+            pass
+        try:
+            candidates.append(Path(__file__).resolve().parent)
+        except Exception:
+            pass
+        env_path = None
+        for base in candidates:
+            for parent in [base, *base.parents]:
+                p = parent / ".env.local"
+                if p.exists():
+                    env_path = p
+                    break
+            if env_path:
+                break
+
+        if env_path:
+            with env_path.open("r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
                     if "=" in line and not line.strip().startswith("#"):
                         key, val = line.strip().split("=", 1)
-                        if key not in os.environ:
+                        if key not in os.environ or not os.environ.get(key):
                             os.environ[key] = val
     except:
         pass
@@ -73,7 +95,7 @@ class GenerativeAgent:
         
         if self.cerebras_key:
             self.provider = "cerebras"
-            self.model = "llama3.3-70b"
+            self.model = "llama-3.3-70b"
             self.api_url = "https://api.cerebras.ai/v1/chat/completions"
             self.api_key = self.cerebras_key
         elif self.gemini_key:
@@ -100,17 +122,27 @@ class GenerativeAgent:
                 {"role": "user", "content": user_prompt}
             ],
             "temperature": 0.2,
-            "response_format": { "type": "json_object" }
         }
+        # Google’s OpenAI-compat endpoint does not reliably support `response_format`.
+        # Cerebras does; keep it there to enforce JSON output.
+        if self.provider == "cerebras":
+            payload["response_format"] = {"type": "json_object"}
 
         try:
+            url = self.api_url
+            headers = {
+                "Content-Type": "application/json",
+            }
+
+            headers["Authorization"] = f"Bearer {self.api_key}"
+            # Some Google endpoints also accept/expect this header for API keys.
+            if self.provider == "gemini" and (self.api_key or "").startswith("AIza"):
+                headers["x-goog-api-key"] = self.api_key
+
             req = urllib.request.Request(
-                self.api_url,
+                url,
                 data=json.dumps(payload).encode('utf-8'),
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                }
+                headers=headers,
             )
             
             with urllib.request.urlopen(req) as response:
@@ -118,6 +150,16 @@ class GenerativeAgent:
                 content = result['choices'][0]['message']['content']
                 return json.loads(content)
 
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", errors="ignore")
+            except Exception:
+                body = ""
+            return {
+                "type": "error",
+                "narrative": f"LLM API Call Failed ({self.provider}): {e.code} {e.reason} {body}".strip()
+            }
         except Exception as e:
             return {
                 "type": "error",

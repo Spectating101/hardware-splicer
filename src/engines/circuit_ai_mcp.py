@@ -1,7 +1,7 @@
 """
 Circuit-AI MCP Server (Integrated)
 ==================================
-Leverages the official 'mcp' SDK pattern found in 'jobs_mcp.py'.
+Leverages the official 'mcp' SDK pattern found in 'scripts/mcp/jobs_mcp.py'.
 Exposes the new engines as standard MCP Tools.
 """
 
