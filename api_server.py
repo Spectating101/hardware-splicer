@@ -18,6 +18,10 @@ import tempfile
 import uuid
 from typing import Optional, Dict, Any, Tuple, Set
 import textwrap
+import subprocess
+import shutil
+import csv as _csv
+import io as _io
 
 # Ensure both styles of imports work across the codebase:
 # - `from intelligence...` (requires `src` on sys.path)
@@ -192,15 +196,65 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
     """
     return {
         # Free: validate only, small cap.
-        "free": {"default": 10, "validate_kicad": 10, "manufacture_bom": 0, "manufacture_gerber": 0, "download_gerber": 0},
+        "free": {
+            "default": 10,
+            "validate_kicad": 10,
+            "manufacture_bom": 0,
+            "manufacture_gerber": 0,
+            "download_gerber": 0,
+            "manufacture_pnp": 0,
+            "manufacture_package": 0,
+            "download_package": 0,
+            "report_dfm": 0,
+        },
         # Hobby: validation-only but higher than free.
-        "hobby": {"default": 40, "validate_kicad": 40, "manufacture_bom": 0, "manufacture_gerber": 0, "download_gerber": 0},
+        "hobby": {
+            "default": 40,
+            "validate_kicad": 40,
+            "manufacture_bom": 0,
+            "manufacture_gerber": 0,
+            "download_gerber": 0,
+            "manufacture_pnp": 0,
+            "manufacture_package": 0,
+            "download_package": 0,
+            "report_dfm": 0,
+        },
         # Builder: validation + limited BOM.
-        "builder": {"default": 80, "validate_kicad": 80, "manufacture_bom": 10, "manufacture_gerber": 0, "download_gerber": 10},
+        "builder": {
+            "default": 80,
+            "validate_kicad": 80,
+            "manufacture_bom": 10,
+            "manufacture_gerber": 0,
+            "download_gerber": 10,
+            "manufacture_pnp": 10,
+            "manufacture_package": 5,
+            "download_package": 10,
+            "report_dfm": 10,
+        },
         # Pro: full workflow, moderate cap.
-        "pro": {"default": 200, "validate_kicad": 200, "manufacture_bom": 50, "manufacture_gerber": 25, "download_gerber": 50},
+        "pro": {
+            "default": 200,
+            "validate_kicad": 200,
+            "manufacture_bom": 50,
+            "manufacture_gerber": 25,
+            "download_gerber": 50,
+            "manufacture_pnp": 50,
+            "manufacture_package": 25,
+            "download_package": 50,
+            "report_dfm": 50,
+        },
         # Back-compat alias.
-        "paid": {"default": 200, "validate_kicad": 200, "manufacture_bom": 50, "manufacture_gerber": 25, "download_gerber": 50},
+        "paid": {
+            "default": 200,
+            "validate_kicad": 200,
+            "manufacture_bom": 50,
+            "manufacture_gerber": 25,
+            "download_gerber": 50,
+            "manufacture_pnp": 50,
+            "manufacture_package": 25,
+            "download_package": 50,
+            "report_dfm": 50,
+        },
     }
 
 
@@ -2440,6 +2494,7 @@ def generate_gerber():
         # Format response
         response = {
             'status': package['status'],
+            'export_method': package.get('export_method', 'unknown'),
             'pcb_info': package['pcb_info'],
             'gerber_files': [
                 {
@@ -2481,6 +2536,365 @@ def download_gerber(filename):
             download_name=filename
         )
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/v2/manufacture/pnp', methods=['POST'])
+@require_api_key("manufacture_pnp")
+def generate_pnp():
+    """
+    Generate a Pick-and-Place (PnP) position CSV from a KiCad `.kicad_pcb`.
+
+    Request (multipart/form-data):
+    - pcb_file: KiCad PCB file upload
+
+    Returns:
+    - CSV content (text) + saved file path for packaging.
+    """
+    try:
+        # Handle file upload only (PnP requires pcb geometry).
+        if request.is_json:
+            data = request.get_json() or {}
+            pcb_path = data.get('pcb_path')
+        else:
+            if 'pcb_file' not in request.files:
+                return jsonify({'error': 'pcb_file required'}), 400
+            file = request.files['pcb_file']
+            temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+            temp_dir.mkdir(exist_ok=True)
+            pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+            file.save(str(pcb_path))
+
+        if not pcb_path:
+            return jsonify({'error': 'pcb_path required'}), 400
+
+        from src.engines.pnp_exporter import extract_pnp_rows_from_kicad_pcb, export_pnp_csv, export_pnp_csv_via_kicad_cli
+
+        csv_text = export_pnp_csv_via_kicad_cli(str(pcb_path), units="mm")
+        export_method = "kicad-cli" if csv_text else "geometry"
+        if not csv_text:
+            rows = extract_pnp_rows_from_kicad_pcb(str(pcb_path))
+            csv_text = export_pnp_csv(rows)
+
+        # Count rows (exclude header).
+        count = 0
+        try:
+            r = _csv.reader(_io.StringIO(csv_text))
+            header = next(r, None)
+            for _ in r:
+                count += 1
+        except Exception:
+            count = max(0, len([ln for ln in csv_text.splitlines() if ln.strip()]) - 1)
+
+        out_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'pnp'
+        out_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{Path(str(pcb_path)).stem}-pnp.csv"
+        out_path = out_dir / filename
+        out_path.write_text(csv_text, encoding="utf-8")
+
+        return jsonify(
+            {
+                "status": "success",
+                "export_method": export_method,
+                "count": count,
+                "csv": csv_text,
+                "csv_file": str(out_path),
+            }
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/report/dfm', methods=['POST'])
+@require_api_key("report_dfm")
+def dfm_report():
+    """
+    Generate an audit-style DFM report (Markdown) from an uploaded KiCad PCB.
+    Optionally includes BOM/gerbers/PnP metadata when provided.
+    """
+    try:
+        # Upload KiCad PCB.
+        if 'pcb_file' not in request.files:
+            return jsonify({'error': 'pcb_file required'}), 400
+        file = request.files['pcb_file']
+        temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+        temp_dir.mkdir(exist_ok=True)
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+        file.save(str(pcb_path))
+
+        hints = request.form.get('hints')
+        if hints:
+            import json as _json
+            hints = _json.loads(hints)
+        else:
+            hints = None
+
+        # Run validation workflow (same engine as validate-kicad endpoint).
+        result = workflow_engine.execute_validation_workflow(kicad_file=str(pcb_path), hints=hints)
+
+        # Convert to the same response format used by /api/v2/workflow/validate-kicad.
+        response = {"status": result.status, "next_steps": result.next_steps}
+        if result.validation_issues:
+            critical = [i for i in result.validation_issues if i.severity == 'critical']
+            errors = [i for i in result.validation_issues if i.severity == 'error']
+            warnings = [i for i in result.validation_issues if i.severity == 'warning']
+            response['validation'] = {
+                'issues_count': len(result.validation_issues),
+                'critical': len(critical),
+                'errors': len(errors),
+                'warnings': len(warnings),
+                'issues': [
+                    {
+                        'severity': i.severity,
+                        'component': i.component,
+                        'issue': i.issue,
+                        'solution': i.solution,
+                        'physics': i.physics if hasattr(i, 'physics') else None
+                    }
+                    for i in result.validation_issues
+                ]
+            }
+            response['manufacturing_ready'] = (len(critical) == 0 and len(errors) == 0 and result.status not in ['error', 'validation_failed', 'validation_partial'])
+        else:
+            response['validation'] = {'issues_count': 0, 'critical': 0, 'errors': 0, 'warnings': 0, 'issues': []}
+            response['manufacturing_ready'] = False if result.status in ['error', 'validation_failed'] else True
+
+        # Best-effort geometry
+        try:
+            from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+            response['pcb_geometry'] = extract_pcb_geometry(str(pcb_path))
+        except Exception:
+            pass
+
+        # Render report markdown.
+        from src.engines.dfm_report import render_dfm_report_markdown
+        md = render_dfm_report_markdown(
+            title=f"DFM Preflight — {Path(str(pcb_path)).stem}",
+            validation_response=response,
+        )
+
+        out_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'reports'
+        out_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{Path(str(pcb_path)).stem}-dfm-report.md"
+        out_path = out_dir / filename
+        out_path.write_text(md, encoding="utf-8")
+
+        return jsonify(
+            {
+                "status": "success",
+                "report_md": md,
+                "report_file": str(out_path),
+                "validation": response.get("validation"),
+                "manufacturing_ready": response.get("manufacturing_ready"),
+            }
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/manufacture/package', methods=['POST'])
+@require_api_key("manufacture_package")
+def manufacture_package():
+    """
+    Build a single ZIP containing:
+    - DFM_REPORT.md
+    - BOM.csv (best-effort: prefers netlist, falls back to footprint/value grouping from PCB geometry)
+    - PnP.csv
+    - Gerbers.zip (NOTE: may be placeholder if KiCad CLI is not installed)
+
+    Request (multipart/form-data):
+    - pcb_file: required
+    - netlist_file: optional (preferred for accurate BOM)
+    - sch_file: optional (used to generate netlist via `kicad-cli` when netlist_file omitted)
+    """
+    try:
+        if 'pcb_file' not in request.files:
+            return jsonify({'error': 'pcb_file required'}), 400
+        pcb_file = request.files['pcb_file']
+        temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+        temp_dir.mkdir(exist_ok=True)
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+        pcb_file.save(str(pcb_path))
+
+        # Optional netlist upload for more accurate BOM.
+        netlist_path = None
+        if 'netlist_file' in request.files:
+            nf = request.files['netlist_file']
+            netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+            nf.save(str(netlist_path))
+
+        # Optional schematic upload: if provided and netlist missing, try generating one.
+        sch_path = None
+        if 'sch_file' in request.files:
+            sf = request.files['sch_file']
+            sch_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_sch"
+            sf.save(str(sch_path))
+
+        netlist_export_method = "upload" if netlist_path else None
+        netlist_export_error = None
+        if netlist_path is None and sch_path is not None and shutil.which("kicad-cli"):
+            try:
+                netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+                subprocess.run(
+                    [
+                        "kicad-cli",
+                        "sch",
+                        "export",
+                        "netlist",
+                        "--format",
+                        "kicadsexpr",
+                        "--output",
+                        str(netlist_path),
+                        str(sch_path),
+                    ],
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    timeout=120,
+                )
+                netlist_export_method = "kicad-cli"
+            except Exception as e:
+                netlist_path = None
+                netlist_export_method = "failed"
+                netlist_export_error = str(e)
+
+        hints = request.form.get('hints')
+        if hints:
+            import json as _json
+            hints = _json.loads(hints)
+        else:
+            hints = None
+
+        # 1) Validation response (for report)
+        validation = workflow_engine.execute_validation_workflow(kicad_file=str(pcb_path), hints=hints)
+        validation_resp = {"status": validation.status, "next_steps": validation.next_steps, "manufacturing_ready": False, "validation": {"issues": []}}
+        if validation.validation_issues:
+            validation_resp["validation"]["issues"] = [
+                {"severity": i.severity, "component": i.component, "issue": i.issue, "solution": i.solution, "physics": i.physics if hasattr(i, 'physics') else None}
+                for i in validation.validation_issues
+            ]
+
+        # 2) PnP CSV (prefer KiCad CLI export)
+        from src.engines.pnp_exporter import extract_pnp_rows_from_kicad_pcb, export_pnp_csv, export_pnp_csv_via_kicad_cli
+        pnp_csv = export_pnp_csv_via_kicad_cli(str(pcb_path), units="mm")
+        pnp_export_method = "kicad-cli" if pnp_csv else "geometry"
+        if not pnp_csv:
+            pnp_rows = extract_pnp_rows_from_kicad_pcb(str(pcb_path))
+            pnp_csv = export_pnp_csv(pnp_rows)
+
+        # 3) BOM CSV (prefer netlist; fall back to PCB geometry grouping)
+        bom_summary = None
+        bom_csv = None
+        if netlist_path:
+            from engines.bom_generator import BOMGenerator
+            bg = BOMGenerator()
+            bom = bg.generate_bom(str(netlist_path), include_pricing=False)
+            if bom.get("status") == "success":
+                bom_summary = bom.get("summary")
+                bom_csv = bg.export_csv(bom)
+
+        if bom_csv is None:
+            # Minimal BOM from footprints list (ref/value/footprint only).
+            from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+            geom = extract_pcb_geometry(str(pcb_path))
+            items = {}
+            for fp in (geom.get("footprints") or []):
+                if not isinstance(fp, dict):
+                    continue
+                key = (str(fp.get("value") or ""), str(fp.get("footprint") or ""))
+                items.setdefault(key, []).append(str(fp.get("ref") or "?"))
+            lines = ["References,Value,Footprint,Quantity"]
+            for (value, footprint), refs in sorted(items.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+                refs = sorted(set(refs))
+                lines.append(f"\"{' '.join(refs)}\",\"{value}\",\"{footprint}\",{len(refs)}")
+            bom_csv = "\n".join(lines) + "\n"
+            bom_summary = {"total_components": sum(len(v) for v in items.values()), "unique_parts": len(items)}
+
+        # 4) Gerbers ZIP
+        from engines.gerber_generator import GerberGenerator
+        gg = GerberGenerator()
+        gerb_pkg = gg.generate_gerber_package(str(pcb_path))
+        export_method = gerb_pkg.get("export_method", "unknown")
+
+        gerbers_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'gerbers'
+        gerbers_dir.mkdir(parents=True, exist_ok=True)
+        gerbers_zip_name = f"{Path(str(pcb_path)).stem}-gerbers.zip"
+        gerbers_zip_path = gerbers_dir / gerbers_zip_name
+        gg.create_gerber_zip(gerb_pkg, output_path=str(gerbers_zip_path))
+
+        # 5) Report markdown
+        from src.engines.dfm_report import render_dfm_report_markdown
+        report_md = render_dfm_report_markdown(
+            title=f"DFM Preflight — {Path(str(pcb_path)).stem}",
+            validation_response=validation_resp,
+            bom_summary=bom_summary,
+            pnp_csv_filename="PnP.csv",
+            gerber_zip_filename="Gerbers.zip",
+            export_method=export_method,
+            pnp_export_method=pnp_export_method,
+            netlist_export_method=netlist_export_method,
+        )
+
+        # 6) Package zip
+        from src.engines.package_builder import build_package_zip
+        packages_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'packages'
+        packages_dir.mkdir(parents=True, exist_ok=True)
+        pkg_name = f"{Path(str(pcb_path)).stem}-package.zip"
+        pkg_path = packages_dir / pkg_name
+        kicad_cli_version = None
+        if shutil.which("kicad-cli"):
+            try:
+                kicad_cli_version = subprocess.check_output(["kicad-cli", "--version"], text=True, stderr=subprocess.DEVNULL).strip()
+            except Exception:
+                kicad_cli_version = None
+        pkg = build_package_zip(
+            out_path=pkg_path,
+            report_md=report_md,
+            bom_csv=bom_csv,
+            pnp_csv=pnp_csv,
+            gerbers_zip_path=gerbers_zip_path,
+            metadata={
+                "kicad_cli_version": kicad_cli_version,
+                "gerbers_export_method": export_method,
+                "pnp_export_method": pnp_export_method,
+                "netlist_export_method": netlist_export_method,
+                "netlist_export_error": netlist_export_error,
+            },
+        )
+
+        return jsonify(
+            {
+                "status": "success",
+                "export_method": export_method,
+                "pnp_export_method": pnp_export_method,
+                "netlist_export_method": netlist_export_method,
+                "netlist_export_error": netlist_export_error,
+                "package_file": str(pkg.zip_path),
+                "download_url": f"/api/v2/manufacture/download-package/{pkg.zip_path.name}",
+                "manifest": pkg.manifest,
+            }
+        )
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/v2/manufacture/download-package/<filename>', methods=['GET'])
+@require_api_key("download_package")
+def download_package(filename):
+    try:
+        packages_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'packages'
+        file_path = packages_dir / filename
+
+        if not file_path.exists():
+            return jsonify({'error': 'File not found'}), 404
+
+        return send_file(
+            file_path,
+            mimetype='application/zip',
+            as_attachment=True,
+            download_name=filename
+        )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

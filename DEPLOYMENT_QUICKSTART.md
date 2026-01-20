@@ -15,6 +15,12 @@ This is the simplest way to deploy Circuit-AI for **paid MCP access**:
 
 If your host supports persistent volumes, mount a volume at `/data`.
 
+### Optional: KiCad CLI for real Gerber export
+
+Circuit‑AI can always produce a “Gerbers.zip”, but if `kicad-cli` is not installed on the host/image it may fall back to a placeholder generator (`export_method: sample`).
+
+If you want **real fabrication-ready exports**, install KiCad so `kicad-cli` is available in `PATH`. When present, Circuit‑AI automatically switches to `export_method: kicad-cli`.
+
 ### Optional: automate fulfillment (Stripe + email)
 
 If you want payments → keys → email to be automated:
@@ -105,3 +111,12 @@ Start **prepaid credits** using your key quotas:
 - Pro: validation + BOM + Gerbers
 
 Subscriptions come later (after repeat buyers).
+
+## 5) Deliverables endpoints (service packaging)
+
+These help you sell “audit + manufacturing package” services using the same backend+keys:
+
+- `POST /api/v2/report/dfm` (Markdown DFM preflight memo; upload `pcb_file`)
+- `POST /api/v2/manufacture/pnp` (Pick-and-place CSV; upload `pcb_file`)
+- `POST /api/v2/manufacture/package` (ZIP bundle: report + BOM + PnP + Gerbers)
+- `GET /api/v2/manufacture/download-package/<filename>` (download ZIP)

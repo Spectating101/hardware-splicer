@@ -258,6 +258,7 @@ class UnifiedWorkflowEngine:
             geometric_issues = []
             next_steps = []
             error_type = type(e).__name__
+            geometric_ran = False
 
             # Try geometric validation for .kicad_pcb files
             if str(kicad_file).lower().endswith(".kicad_pcb"):
@@ -265,6 +266,7 @@ class UnifiedWorkflowEngine:
                     from engines.geometric_validator import validate_pcb_geometry, add_hints_recommendation
 
                     geometric_issues_raw = validate_pcb_geometry(str(kicad_file))
+                    geometric_ran = True
                     # Convert to SimulationIssue format
                     for gi in geometric_issues_raw:
                         if SimulationIssue:  # Only if available
@@ -320,7 +322,9 @@ class UnifiedWorkflowEngine:
                     ]
 
             return WorkflowResult(
-                status="validation_partial" if geometric_issues else "error",
+                # If geometric validation ran successfully, treat this as a partial validation
+                # (even when there are 0 issues); the electrical model failed, not the file itself.
+                status="validation_partial" if geometric_ran else "error",
                 project=None,
                 instructions=None,
                 validation_issues=geometric_issues,

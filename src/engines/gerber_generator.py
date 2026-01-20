@@ -25,6 +25,9 @@ from pathlib import Path
 import zipfile
 import io
 import re
+import shutil
+import subprocess
+import tempfile
 
 
 @dataclass
@@ -224,6 +227,14 @@ M30
     def generate_gerber_package(self, kicad_pcb_path: str) -> Dict:
         """Generate complete Gerber package from KiCAD PCB file"""
 
+        # Prefer real KiCad CLI export when available; otherwise fall back to sample generator.
+        if shutil.which("kicad-cli"):
+            try:
+                return self._generate_gerbers_via_kicad_cli(kicad_pcb_path)
+            except Exception:
+                # Fall back to sample output rather than failing hard.
+                pass
+
         # Extract PCB info
         pcb_info = self.extract_pcb_info(kicad_pcb_path)
 
@@ -288,7 +299,79 @@ M30
             },
             'gerber_files': layers,
             'manufacturing_ready': True,
-            'compatible_fabs': ['JLCPCB', 'OSH Park', 'PCBWay', 'ALLPCB']
+            'compatible_fabs': ['JLCPCB', 'OSH Park', 'PCBWay', 'ALLPCB'],
+            'export_method': 'sample'
+        }
+
+    def _generate_gerbers_via_kicad_cli(self, kicad_pcb_path: str) -> Dict:
+        """
+        Best-effort: export Gerbers/Drill using KiCad CLI if installed.
+
+        This keeps the return shape compatible with the existing API endpoint
+        (it still returns a list of GerberLayer objects, but with real file contents).
+        """
+        pcb_info = self.extract_pcb_info(kicad_pcb_path)
+        out_dir = Path(tempfile.mkdtemp(prefix="circuit-ai-gerbers-"))
+        proj = pcb_info.name
+
+        # Export gerbers and drill. KiCad CLI arguments vary by version; keep it minimal.
+        subprocess.run(
+            ["kicad-cli", "pcb", "export", "gerbers", "-o", str(out_dir), str(kicad_pcb_path)],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        subprocess.run(
+            ["kicad-cli", "pcb", "export", "drill", "-o", str(out_dir), str(kicad_pcb_path)],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+
+        layers: List[GerberLayer] = []
+        for f in sorted(out_dir.glob("*")):
+            if not f.is_file():
+                continue
+            # Keep raw text; manufacturers expect ASCII in gerber/drill.
+            try:
+                content = f.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                content = ""
+            ext = f.suffix.lower()
+            layer_type = "unknown"
+            if ext in (".gtl", ".gbl", ".g1", ".g2", ".g3", ".g4"):
+                layer_type = "copper"
+            elif ext in (".gto", ".gbo"):
+                layer_type = "silkscreen"
+            elif ext in (".gts", ".gbs"):
+                layer_type = "soldermask"
+            elif ext in (".gtp", ".gbp"):
+                layer_type = "paste"
+            elif ext in (".drl", ".xln", ".txt"):
+                layer_type = "drill"
+
+            layers.append(
+                GerberLayer(
+                    filename=f.name,
+                    layer_type=layer_type,
+                    content=content,
+                    description=f"Exported by kicad-cli ({layer_type})",
+                )
+            )
+
+        return {
+            'status': 'success',
+            'pcb_info': {
+                'name': pcb_info.name,
+                'dimensions': f"{pcb_info.width_mm}mm x {pcb_info.height_mm}mm",
+                'layers': pcb_info.layers,
+                'thickness': f"{pcb_info.thickness_mm}mm",
+                'copper_weight': f"{pcb_info.copper_weight_oz}oz"
+            },
+            'gerber_files': layers,
+            'manufacturing_ready': True,
+            'compatible_fabs': ['JLCPCB', 'OSH Park', 'PCBWay', 'ALLPCB'],
+            'export_method': 'kicad-cli'
         }
 
     def create_gerber_zip(self, gerber_package: Dict, output_path: str = None) -> str:
@@ -308,6 +391,11 @@ Dimensions: {gerber_package['pcb_info']['dimensions']}
 Layers: {gerber_package['pcb_info']['layers']}
 Thickness: {gerber_package['pcb_info']['thickness']}
 Copper Weight: {gerber_package['pcb_info']['copper_weight']}
+Export Method: {gerber_package.get('export_method', 'unknown')}
+
+IMPORTANT:
+- If Export Method is 'sample', the files are placeholders and are NOT suitable for fabrication.
+- If Export Method is 'kicad-cli', the files were exported using KiCad CLI and should be suitable for fabrication.
 
 Compatible Manufacturers:
 - JLCPCB (https://jlcpcb.com)

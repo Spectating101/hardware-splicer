@@ -140,6 +140,66 @@ Notes:
 - `pcb_geometry` is only included when the uploaded file is a `.kicad_pcb`.
 - When uploading a `.net`, you still get validation results but no placement/trace geometry in the response.
 
+---
+
+## Manufacturing / Deliverables (v2)
+
+These endpoints exist to support “service-style” outputs (DFM memo, manufacturing package).
+
+### Generate BOM (netlist)
+
+**Endpoint:** `POST /api/v2/manufacture/bom`
+
+Accepts netlist upload (`netlist_file`) and returns BOM in JSON or CSV.
+
+### Generate Gerbers (PCB)
+
+**Endpoint:** `POST /api/v2/manufacture/gerber`
+
+Accepts KiCad PCB upload (`pcb_file`) and returns a Gerber ZIP path + cost estimates.
+
+**Important:** If `kicad-cli` is not installed on the backend host, gerbers may be produced by a placeholder generator. The response includes `export_method` (`kicad-cli` or `sample`).
+
+### Generate Pick-and-Place (PnP) CSV (PCB)
+
+**Endpoint:** `POST /api/v2/manufacture/pnp`
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/api/v2/manufacture/pnp \
+  -F "pcb_file=@my_board.kicad_pcb"
+```
+
+Returns CSV content and a saved file path for packaging.
+
+### Generate DFM Report (Markdown)
+
+**Endpoint:** `POST /api/v2/report/dfm`
+
+**Request:**
+```bash
+curl -X POST http://localhost:5000/api/v2/report/dfm \
+  -F "pcb_file=@my_board.kicad_pcb"
+```
+
+Returns a client-facing DFM preflight memo as Markdown.
+
+### Build “Manufacturing Package” ZIP
+
+**Endpoint:** `POST /api/v2/manufacture/package`
+
+**Request (best):**
+```bash
+curl -X POST http://localhost:5000/api/v2/manufacture/package \
+  -F "pcb_file=@my_board.kicad_pcb" \
+  -F "netlist_file=@my_board.net"
+```
+
+If `netlist_file` is omitted, Circuit‑AI falls back to a minimal BOM derived from PCB footprints (value/footprint grouping; no MPNs).
+
+Download the generated ZIP:
+- `GET /api/v2/manufacture/download-package/<filename>`
+
 **Response (planned UI payload):**
 ```json
 {

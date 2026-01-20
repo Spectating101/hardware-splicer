@@ -14,6 +14,10 @@ Extracts components from KiCAD netlist and generates BOM with:
 from dataclasses import dataclass
 from typing import List, Dict, Optional
 import re
+from pathlib import Path
+import xml.etree.ElementTree as ET
+
+from src.engines.kicad_sexp import parse_sexp_file, sexp_find_all
 
 
 @dataclass
@@ -65,31 +69,81 @@ class BOMGenerator:
         pass
 
     def parse_kicad_netlist(self, netlist_path: str) -> List[Dict]:
-        """Parse KiCAD S-expression netlist and extract components"""
-        components = []
+        """
+        Parse a KiCad netlist and extract components.
 
+        Supports:
+        - KiCad CLI netlist export: `--format kicadsexpr` (preferred)
+        - Best-effort regex fallback for older/partial netlists
+        """
+        p = Path(netlist_path)
+        if not p.exists():
+            return []
+
+        # Peek a small prefix to decide parser strategy.
         try:
-            with open(netlist_path, 'r') as f:
-                content = f.read()
+            head = p.read_text(encoding="utf-8", errors="ignore")[:4096]
+        except Exception:
+            head = ""
 
-            # Parse (comp entries in S-expression format
+        # 0) KiCad XML netlist (kicadxml) - common on older flows.
+        if "<export" in head and "<components" in head and "<comp" in head:
+            try:
+                root = ET.parse(str(p)).getroot()
+                comps: List[Dict[str, str]] = []
+                for comp in root.findall(".//components/comp"):
+                    ref = (comp.get("ref") or "").strip()
+                    value = (comp.findtext("value") or "").strip()
+                    footprint = (comp.findtext("footprint") or "").strip()
+                    if ref:
+                        comps.append({"reference": ref, "value": value, "footprint": footprint})
+                if comps:
+                    return comps
+            except Exception:
+                # Fall back to other methods.
+                pass
+
+        # 1) Robust parse via S-expression (KiCad 6+ style kicadsexpr netlist)
+        try:
+            ast = parse_sexp_file(str(p))
+            comps = []
+            for comp in sexp_find_all(ast, "comp"):
+                ref = ""
+                value = ""
+                footprint = ""
+
+                for child in comp:
+                    if not isinstance(child, list) or len(child) < 2:
+                        continue
+                    head = child[0]
+                    if head == "ref" and isinstance(child[1], str):
+                        ref = child[1]
+                    elif head == "value" and isinstance(child[1], str):
+                        value = child[1]
+                    elif head == "footprint" and isinstance(child[1], str):
+                        footprint = child[1]
+
+                if ref:
+                    comps.append({"reference": ref, "value": value, "footprint": footprint})
+
+            if comps:
+                return comps
+        except Exception:
+            # fall back to regex parsing
+            pass
+
+        # 2) Regex fallback (older exports)
+        components: List[Dict] = []
+        try:
+            content = p.read_text(encoding="utf-8", errors="ignore")
             # Example: (comp (ref R1) (value 10K) (footprint Resistor_SMD:R_0805))
-            comp_pattern = r'\(comp\s+\(ref\s+(\S+)\)\s+\(value\s+([^)]+)\)(?:\s+\(footprint\s+([^)]+)\))?'
-
+            comp_pattern = r"\(comp\s+\(ref\s+([^)\\s]+)\)\s+\(value\s+([^)]+)\)(?:\s+\(footprint\s+([^)]+)\))?"
             for match in re.finditer(comp_pattern, content):
-                ref = match.group(1)
-                value = match.group(2).strip('"')
-                footprint = match.group(3).strip('"') if match.group(3) else ""
-
-                components.append({
-                    'reference': ref,
-                    'value': value,
-                    'footprint': footprint
-                })
-
-        except Exception as e:
-            print(f"Warning: Could not parse netlist: {e}")
-            # Return empty list instead of failing
+                ref = match.group(1).strip().strip('"')
+                value = match.group(2).strip().strip('"')
+                footprint = match.group(3).strip().strip('"') if match.group(3) else ""
+                components.append({"reference": ref, "value": value, "footprint": footprint})
+        except Exception:
             return []
 
         return components
