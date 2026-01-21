@@ -16,7 +16,7 @@ import sqlite3
 import sys
 import tempfile
 import uuid
-from typing import Optional, Dict, Any, Tuple, Set
+from typing import Optional, Dict, Any, Tuple, Set, List
 import textwrap
 import subprocess
 import shutil
@@ -121,6 +121,15 @@ def _init_usage_schema(con: sqlite3.Connection) -> None:
     con.execute(
         "CREATE TABLE IF NOT EXISTS support_tickets (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, customer_email TEXT, subject TEXT, message TEXT, status TEXT NOT NULL)"
     )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, name TEXT, lane TEXT, design_intent TEXT)"
+    )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS project_revisions (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, project_id TEXT NOT NULL, requirements_json TEXT, intake_id TEXT, notes TEXT)"
+    )
+    con.execute(
+        "CREATE TABLE IF NOT EXISTS project_builds (id TEXT PRIMARY KEY, created_at TEXT NOT NULL, project_id TEXT NOT NULL, revision_id TEXT, package_file TEXT, manifest_json TEXT)"
+    )
 
 
 def _has_any_active_db_key() -> bool:
@@ -206,6 +215,14 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
             "manufacture_package": 0,
             "download_package": 0,
             "report_dfm": 0,
+            "intake_template": 10,
+            "intake_compile": 10,
+            "intake_get": 10,
+            "projects_create": 0,
+            "projects_get": 0,
+            "projects_revisions_list": 0,
+            "projects_revision_create": 0,
+            "projects_build_package": 0,
         },
         # Hobby: validation-only but higher than free.
         "hobby": {
@@ -218,6 +235,14 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
             "manufacture_package": 0,
             "download_package": 0,
             "report_dfm": 0,
+            "intake_template": 40,
+            "intake_compile": 40,
+            "intake_get": 40,
+            "projects_create": 0,
+            "projects_get": 0,
+            "projects_revisions_list": 0,
+            "projects_revision_create": 0,
+            "projects_build_package": 0,
         },
         # Builder: validation + limited BOM.
         "builder": {
@@ -230,6 +255,14 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
             "manufacture_package": 5,
             "download_package": 10,
             "report_dfm": 10,
+            "intake_template": 80,
+            "intake_compile": 80,
+            "intake_get": 80,
+            "projects_create": 10,
+            "projects_get": 80,
+            "projects_revisions_list": 80,
+            "projects_revision_create": 20,
+            "projects_build_package": 10,
         },
         # Pro: full workflow, moderate cap.
         "pro": {
@@ -242,6 +275,14 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
             "manufacture_package": 25,
             "download_package": 50,
             "report_dfm": 50,
+            "intake_template": 200,
+            "intake_compile": 200,
+            "intake_get": 200,
+            "projects_create": 50,
+            "projects_get": 200,
+            "projects_revisions_list": 200,
+            "projects_revision_create": 200,
+            "projects_build_package": 100,
         },
         # Back-compat alias.
         "paid": {
@@ -254,6 +295,14 @@ def _plan_presets() -> Dict[str, Dict[str, int]]:
             "manufacture_package": 25,
             "download_package": 50,
             "report_dfm": 50,
+            "intake_template": 200,
+            "intake_compile": 200,
+            "intake_get": 200,
+            "projects_create": 50,
+            "projects_get": 200,
+            "projects_revisions_list": 200,
+            "projects_revision_create": 200,
+            "projects_build_package": 100,
         },
     }
 
@@ -2759,122 +2808,45 @@ def manufacture_package():
                 netlist_export_method = "failed"
                 netlist_export_error = str(e)
 
-        hints = request.form.get('hints')
+        strict = (request.form.get("strict") or "").strip().lower() in ("1", "true", "yes", "on")
+        allow_incomplete = (request.form.get("allow_incomplete") or "").strip().lower() in ("1", "true", "yes", "on")
+        if allow_incomplete:
+            strict = False
+
+        intake_id = (request.form.get("intake_id") or "").strip() or None
+        hints = request.form.get("hints")
         if hints:
             import json as _json
             hints = _json.loads(hints)
+        elif intake_id:
+            hints = _load_hints_from_intake_id(intake_id)
         else:
             hints = None
 
-        # 1) Validation response (for report)
-        validation = workflow_engine.execute_validation_workflow(kicad_file=str(pcb_path), hints=hints)
-        validation_resp = {"status": validation.status, "next_steps": validation.next_steps, "manufacturing_ready": False, "validation": {"issues": []}}
-        if validation.validation_issues:
-            validation_resp["validation"]["issues"] = [
-                {"severity": i.severity, "component": i.component, "issue": i.issue, "solution": i.solution, "physics": i.physics if hasattr(i, 'physics') else None}
-                for i in validation.validation_issues
-            ]
+        readiness = None
+        if intake_id:
+            req = _load_requirements_from_intake_id(intake_id)
+            if isinstance(req, dict):
+                try:
+                    from src.engines.requirements_intake import evaluate_requirements
+                    readiness = evaluate_requirements(req)
+                except Exception:
+                    readiness = None
+        block = _should_block_for_intake(readiness, strict=strict)
+        if block:
+            return jsonify(block), 400
 
-        # 2) PnP CSV (prefer KiCad CLI export)
-        from src.engines.pnp_exporter import extract_pnp_rows_from_kicad_pcb, export_pnp_csv, export_pnp_csv_via_kicad_cli
-        pnp_csv = export_pnp_csv_via_kicad_cli(str(pcb_path), units="mm")
-        pnp_export_method = "kicad-cli" if pnp_csv else "geometry"
-        if not pnp_csv:
-            pnp_rows = extract_pnp_rows_from_kicad_pcb(str(pcb_path))
-            pnp_csv = export_pnp_csv(pnp_rows)
-
-        # 3) BOM CSV (prefer netlist; fall back to PCB geometry grouping)
-        bom_summary = None
-        bom_csv = None
-        if netlist_path:
-            from engines.bom_generator import BOMGenerator
-            bg = BOMGenerator()
-            bom = bg.generate_bom(str(netlist_path), include_pricing=False)
-            if bom.get("status") == "success":
-                bom_summary = bom.get("summary")
-                bom_csv = bg.export_csv(bom)
-
-        if bom_csv is None:
-            # Minimal BOM from footprints list (ref/value/footprint only).
-            from src.engines.kicad_pcb_geometry import extract_pcb_geometry
-            geom = extract_pcb_geometry(str(pcb_path))
-            items = {}
-            for fp in (geom.get("footprints") or []):
-                if not isinstance(fp, dict):
-                    continue
-                key = (str(fp.get("value") or ""), str(fp.get("footprint") or ""))
-                items.setdefault(key, []).append(str(fp.get("ref") or "?"))
-            lines = ["References,Value,Footprint,Quantity"]
-            for (value, footprint), refs in sorted(items.items(), key=lambda kv: (kv[0][0], kv[0][1])):
-                refs = sorted(set(refs))
-                lines.append(f"\"{' '.join(refs)}\",\"{value}\",\"{footprint}\",{len(refs)}")
-            bom_csv = "\n".join(lines) + "\n"
-            bom_summary = {"total_components": sum(len(v) for v in items.values()), "unique_parts": len(items)}
-
-        # 4) Gerbers ZIP
-        from engines.gerber_generator import GerberGenerator
-        gg = GerberGenerator()
-        gerb_pkg = gg.generate_gerber_package(str(pcb_path))
-        export_method = gerb_pkg.get("export_method", "unknown")
-
-        gerbers_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'gerbers'
-        gerbers_dir.mkdir(parents=True, exist_ok=True)
-        gerbers_zip_name = f"{Path(str(pcb_path)).stem}-gerbers.zip"
-        gerbers_zip_path = gerbers_dir / gerbers_zip_name
-        gg.create_gerber_zip(gerb_pkg, output_path=str(gerbers_zip_path))
-
-        # 5) Report markdown
-        from src.engines.dfm_report import render_dfm_report_markdown
-        report_md = render_dfm_report_markdown(
-            title=f"DFM Preflight — {Path(str(pcb_path)).stem}",
-            validation_response=validation_resp,
-            bom_summary=bom_summary,
-            pnp_csv_filename="PnP.csv",
-            gerber_zip_filename="Gerbers.zip",
-            export_method=export_method,
-            pnp_export_method=pnp_export_method,
+        result = _build_manufacturing_package(
+            pcb_path=pcb_path,
+            netlist_path=netlist_path,
+            hints=hints,
+            intake_id=intake_id,
             netlist_export_method=netlist_export_method,
+            netlist_export_error=netlist_export_error,
         )
-
-        # 6) Package zip
-        from src.engines.package_builder import build_package_zip
-        packages_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'packages'
-        packages_dir.mkdir(parents=True, exist_ok=True)
-        pkg_name = f"{Path(str(pcb_path)).stem}-package.zip"
-        pkg_path = packages_dir / pkg_name
-        kicad_cli_version = None
-        if shutil.which("kicad-cli"):
-            try:
-                kicad_cli_version = subprocess.check_output(["kicad-cli", "--version"], text=True, stderr=subprocess.DEVNULL).strip()
-            except Exception:
-                kicad_cli_version = None
-        pkg = build_package_zip(
-            out_path=pkg_path,
-            report_md=report_md,
-            bom_csv=bom_csv,
-            pnp_csv=pnp_csv,
-            gerbers_zip_path=gerbers_zip_path,
-            metadata={
-                "kicad_cli_version": kicad_cli_version,
-                "gerbers_export_method": export_method,
-                "pnp_export_method": pnp_export_method,
-                "netlist_export_method": netlist_export_method,
-                "netlist_export_error": netlist_export_error,
-            },
-        )
-
-        return jsonify(
-            {
-                "status": "success",
-                "export_method": export_method,
-                "pnp_export_method": pnp_export_method,
-                "netlist_export_method": netlist_export_method,
-                "netlist_export_error": netlist_export_error,
-                "package_file": str(pkg.zip_path),
-                "download_url": f"/api/v2/manufacture/download-package/{pkg.zip_path.name}",
-                "manifest": pkg.manifest,
-            }
-        )
+        if readiness:
+            result["readiness"] = readiness
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -2897,6 +2869,646 @@ def download_package(filename):
         )
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# V2 API - REQUIREMENTS INTAKE (iterative constraints)
+# ============================================================================
+
+def _intake_dir() -> Path:
+    return Path(tempfile.gettempdir()) / "circuit-ai" / "intakes"
+
+def _load_hints_from_intake_id(intake_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Best-effort load of a previously compiled intake's `hints.json`.
+    """
+    if not intake_id:
+        return None
+    try:
+        p = _intake_dir() / intake_id / "hints.json"
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return None
+
+
+def _load_requirements_from_intake_id(intake_id: str) -> Optional[Dict[str, Any]]:
+    if not intake_id:
+        return None
+    try:
+        p = _intake_dir() / intake_id / "requirements.json"
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return None
+
+
+def _build_manufacturing_package(
+    *,
+    pcb_path: Path,
+    netlist_path: Optional[Path],
+    hints: Optional[Dict[str, Any]],
+    intake_id: Optional[str],
+    netlist_export_method: Optional[str],
+    netlist_export_error: Optional[str],
+) -> Dict[str, Any]:
+    """
+    Core implementation shared by multiple endpoints.
+    """
+    # 1) Validation response (for report)
+    validation = workflow_engine.execute_validation_workflow(kicad_file=str(pcb_path), hints=hints)
+    validation_resp = {"status": validation.status, "next_steps": validation.next_steps, "manufacturing_ready": False, "validation": {"issues": []}}
+    if validation.validation_issues:
+        validation_resp["validation"]["issues"] = [
+            {"severity": i.severity, "component": i.component, "issue": i.issue, "solution": i.solution, "physics": i.physics if hasattr(i, 'physics') else None}
+            for i in validation.validation_issues
+        ]
+
+    # 2) PnP CSV (prefer KiCad CLI export)
+    from src.engines.pnp_exporter import extract_pnp_rows_from_kicad_pcb, export_pnp_csv, export_pnp_csv_via_kicad_cli
+    pnp_csv = export_pnp_csv_via_kicad_cli(str(pcb_path), units="mm")
+    pnp_export_method = "kicad-cli" if pnp_csv else "geometry"
+    if not pnp_csv:
+        pnp_rows = extract_pnp_rows_from_kicad_pcb(str(pcb_path))
+        pnp_csv = export_pnp_csv(pnp_rows)
+
+    # 3) BOM CSV (prefer netlist; fall back to PCB geometry grouping)
+    bom_summary = None
+    bom_csv = None
+    if netlist_path:
+        from engines.bom_generator import BOMGenerator
+        bg = BOMGenerator()
+        bom = bg.generate_bom(str(netlist_path), include_pricing=False)
+        if bom.get("status") == "success":
+            bom_summary = bom.get("summary")
+            bom_csv = bg.export_csv(bom)
+
+    if bom_csv is None:
+        from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+        geom = extract_pcb_geometry(str(pcb_path))
+        items: Dict[Tuple[str, str], List[str]] = {}
+        for fp in (geom.get("footprints") or []):
+            if not isinstance(fp, dict):
+                continue
+            key = (str(fp.get("value") or ""), str(fp.get("footprint") or ""))
+            items.setdefault(key, []).append(str(fp.get("ref") or "?"))
+        lines = ["References,Value,Footprint,Quantity"]
+        for (value, footprint), refs in sorted(items.items(), key=lambda kv: (kv[0][0], kv[0][1])):
+            refs = sorted(set(refs))
+            lines.append(f"\"{' '.join(refs)}\",\"{value}\",\"{footprint}\",{len(refs)}")
+        bom_csv = "\n".join(lines) + "\n"
+        bom_summary = {"total_components": sum(len(v) for v in items.values()), "unique_parts": len(items)}
+
+    # 4) Gerbers ZIP
+    from engines.gerber_generator import GerberGenerator
+    gg = GerberGenerator()
+    gerb_pkg = gg.generate_gerber_package(str(pcb_path))
+    export_method = gerb_pkg.get("export_method", "unknown")
+
+    gerbers_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'gerbers'
+    gerbers_dir.mkdir(parents=True, exist_ok=True)
+    gerbers_zip_name = f"{pcb_path.stem}-gerbers.zip"
+    gerbers_zip_path = gerbers_dir / gerbers_zip_name
+    gg.create_gerber_zip(gerb_pkg, output_path=str(gerbers_zip_path))
+
+    # 5) Report markdown
+    from src.engines.dfm_report import render_dfm_report_markdown
+    report_md = render_dfm_report_markdown(
+        title=f"DFM Preflight — {pcb_path.stem}",
+        validation_response=validation_resp,
+        bom_summary=bom_summary,
+        pnp_csv_filename="PnP.csv",
+        gerber_zip_filename="Gerbers.zip",
+        export_method=export_method,
+        pnp_export_method=pnp_export_method,
+        netlist_export_method=netlist_export_method,
+    )
+
+    # 6) Package zip
+    from src.engines.package_builder import build_package_zip
+    packages_dir = Path(tempfile.gettempdir()) / 'circuit-ai' / 'packages'
+    packages_dir.mkdir(parents=True, exist_ok=True)
+    pkg_name = f"{pcb_path.stem}-package.zip"
+    pkg_path = packages_dir / pkg_name
+    kicad_cli_version = None
+    if shutil.which("kicad-cli"):
+        try:
+            kicad_cli_version = subprocess.check_output(["kicad-cli", "--version"], text=True, stderr=subprocess.DEVNULL).strip()
+        except Exception:
+            kicad_cli_version = None
+    pkg = build_package_zip(
+        out_path=pkg_path,
+        report_md=report_md,
+        bom_csv=bom_csv,
+        pnp_csv=pnp_csv,
+        gerbers_zip_path=gerbers_zip_path,
+        metadata={
+            "kicad_cli_version": kicad_cli_version,
+            "gerbers_export_method": export_method,
+            "pnp_export_method": pnp_export_method,
+            "netlist_export_method": netlist_export_method,
+            "netlist_export_error": netlist_export_error,
+            "intake_id": intake_id,
+        },
+    )
+
+    return {
+        "status": "success",
+        "export_method": export_method,
+        "pnp_export_method": pnp_export_method,
+        "netlist_export_method": netlist_export_method,
+        "netlist_export_error": netlist_export_error,
+        "package_file": str(pkg.zip_path),
+        "download_url": f"/api/v2/manufacture/download-package/{pkg.zip_path.name}",
+        "manifest": pkg.manifest,
+    }
+
+
+def _should_block_for_intake(readiness: Optional[Dict[str, Any]], *, strict: bool) -> Optional[Dict[str, Any]]:
+    """
+    Decide whether to block package generation due to insufficient requirements readiness.
+
+    In strict mode we require at least 'reviewable'. 'draft' means critical constraints are missing.
+    """
+    if not strict:
+        return None
+    if not readiness:
+        return {"error": "strict mode requires intake readiness, but none was provided"}
+    if readiness.get("readiness_level") == "draft":
+        return {"error": "requirements not ready (draft)", "readiness": readiness}
+    return None
+
+
+def _save_intake_artifacts(intake_id: str, artifacts: Dict[str, Any]) -> Dict[str, str]:
+    """
+    Writes known artifacts to disk (best-effort) and returns saved paths.
+    """
+    out_dir = _intake_dir() / intake_id
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    saved: Dict[str, str] = {}
+    for key, filename in (
+        ("requirements", "requirements.json"),
+        ("hints", "hints.json"),
+        ("questions_md", "questions.md"),
+        ("assumptions_md", "assumptions.md"),
+        ("risk_register_md", "risk_register.md"),
+        ("sow_md", "SOW.md"),
+    ):
+        if key not in artifacts:
+            continue
+        path = out_dir / filename
+        val = artifacts[key]
+        if isinstance(val, (dict, list)):
+            path.write_text(json.dumps(val, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        else:
+            path.write_text(str(val).rstrip() + "\n", encoding="utf-8")
+        saved[key] = str(path)
+    return saved
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def _db_exec(query: str, params: Tuple[Any, ...] = ()) -> None:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        con.execute(query, params)
+        con.commit()
+    finally:
+        con.close()
+
+
+def _db_fetchone(query: str, params: Tuple[Any, ...] = ()) -> Optional[Tuple[Any, ...]]:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        return con.execute(query, params).fetchone()
+    finally:
+        con.close()
+
+
+def _db_fetchall(query: str, params: Tuple[Any, ...] = ()) -> List[Tuple[Any, ...]]:
+    con = _open_usage_db()
+    try:
+        _init_usage_schema(con)
+        return con.execute(query, params).fetchall()
+    finally:
+        con.close()
+
+
+@app.route("/api/v2/intake/template", methods=["GET"])
+@require_api_key("intake_template")
+def intake_template():
+    lane = (request.args.get("lane") or "generic").strip()
+    design_intent = (request.args.get("design_intent") or "").strip() or None
+    from src.engines.requirements_intake import LANES, DESIGN_INTENTS, template_for_lane
+
+    if lane not in LANES:
+        return jsonify({"error": f"unknown lane: {lane}", "lanes": sorted(LANES.keys())}), 400
+    req = template_for_lane(lane)
+    if design_intent:
+        if design_intent not in DESIGN_INTENTS:
+            return jsonify({"error": f"unknown design_intent: {design_intent}", "design_intents": sorted(DESIGN_INTENTS.keys())}), 400
+        req["meta"]["design_intent"] = design_intent
+    return jsonify(
+        {
+            "status": "success",
+            "lane": lane,
+            "design_intents": sorted(DESIGN_INTENTS.keys()),
+            "requirements": req,
+        }
+    )
+
+
+@app.route("/api/v2/intake/compile", methods=["POST"])
+@require_api_key("intake_compile")
+def intake_compile():
+    """
+    Compile a requirements JSON into:
+    - Circuit-AI `hints` (structured inputs for validation)
+    - questions/assumptions/risk register
+    - an SOW (scope + exclusions + acceptance criteria)
+
+    Request:
+    - JSON body: { "requirements": {...} }
+      OR multipart/form-data with `requirements_file`
+    """
+    try:
+        requirements = None
+        if request.is_json:
+            payload = request.get_json() or {}
+            requirements = payload.get("requirements")
+        else:
+            if "requirements_file" in request.files:
+                rf = request.files["requirements_file"]
+                requirements = json.loads(rf.read().decode("utf-8", errors="strict"))
+
+        if not isinstance(requirements, dict):
+            return jsonify({"error": "requirements object required"}), 400
+
+        from src.engines.requirements_intake import (
+            LANES,
+            DESIGN_INTENTS,
+            build_questions_and_assumptions,
+            compile_to_circuit_ai_hints,
+            evaluate_requirements,
+            render_sow,
+        )
+
+        lane = ((requirements.get("meta") or {}).get("lane") or "generic").strip()
+        design_intent = ((requirements.get("meta") or {}).get("design_intent") or "prototype").strip()
+        if lane not in LANES:
+            return jsonify({"error": f"unknown lane: {lane}", "lanes": sorted(LANES.keys())}), 400
+        if design_intent not in DESIGN_INTENTS:
+            return jsonify({"error": f"unknown design_intent: {design_intent}", "design_intents": sorted(DESIGN_INTENTS.keys())}), 400
+
+        hints = compile_to_circuit_ai_hints(requirements)
+        questions, assumptions, risks = build_questions_and_assumptions(requirements)
+        readiness = evaluate_requirements(requirements)
+        sow = render_sow(requirements, questions, assumptions, risks)
+
+        artifacts = {
+            "requirements": requirements,
+            "hints": hints,
+            "questions_md": "\n".join([f"- {q}" for q in questions]) + ("\n" if questions else ""),
+            "assumptions_md": "\n".join([f"- {a}" for a in assumptions]) + ("\n" if assumptions else ""),
+            "risk_register_md": "\n".join([f"- {r}" for r in risks]) + ("\n" if risks else ""),
+            "sow_md": sow,
+        }
+
+        intake_id = uuid.uuid4().hex[:10]
+        saved_paths = _save_intake_artifacts(intake_id, artifacts)
+
+        return jsonify(
+            {
+                "status": "success",
+                "intake_id": intake_id,
+                "lane": lane,
+                "readiness": readiness,
+                "hints": hints,
+                "questions": questions,
+                "assumptions": assumptions,
+                "risks": risks,
+                "sow_md": sow,
+                "saved_paths": saved_paths,
+            }
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/v2/intake/<intake_id>", methods=["GET"])
+@require_api_key("intake_get")
+def intake_get(intake_id: str):
+    out_dir = _intake_dir() / intake_id
+    if not out_dir.exists():
+        return jsonify({"error": "not found"}), 404
+
+    def read_text(name: str) -> Optional[str]:
+        p = out_dir / name
+        if p.exists():
+            return p.read_text(encoding="utf-8", errors="replace")
+        return None
+
+    def read_json(name: str) -> Optional[Dict[str, Any]]:
+        p = out_dir / name
+        if p.exists():
+            try:
+                return json.loads(p.read_text(encoding="utf-8"))
+            except Exception:
+                return None
+        return None
+
+    return jsonify(
+        {
+            "status": "success",
+            "intake_id": intake_id,
+            "requirements": read_json("requirements.json"),
+            "hints": read_json("hints.json"),
+            "questions_md": read_text("questions.md"),
+            "assumptions_md": read_text("assumptions.md"),
+            "risk_register_md": read_text("risk_register.md"),
+            "sow_md": read_text("SOW.md"),
+        }
+    )
+
+
+# ============================================================================
+# V2 API - PROJECTS (iteration & revision tracking)
+# ============================================================================
+
+@app.route("/api/v2/projects", methods=["POST"])
+@require_api_key("projects_create")
+def projects_create():
+    """
+    Create a project container for iterative work.
+
+    Request JSON:
+    - name: required
+    - lane: optional (generic|power|rf|automotive|compliance)
+    - design_intent: optional (prototype|professional)
+    """
+    if not request.is_json:
+        return jsonify({"error": "JSON body required"}), 400
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"error": "name required"}), 400
+
+    from src.engines.requirements_intake import LANES, DESIGN_INTENTS
+
+    lane = (data.get("lane") or "generic").strip()
+    design_intent = (data.get("design_intent") or "prototype").strip()
+    if lane not in LANES:
+        return jsonify({"error": f"unknown lane: {lane}", "lanes": sorted(LANES.keys())}), 400
+    if design_intent not in DESIGN_INTENTS:
+        return jsonify({"error": f"unknown design_intent: {design_intent}", "design_intents": sorted(DESIGN_INTENTS.keys())}), 400
+
+    project_id = uuid.uuid4().hex[:10]
+    _db_exec(
+        "INSERT INTO projects (id, created_at, name, lane, design_intent) VALUES (?, ?, ?, ?, ?)",
+        (project_id, _utc_now(), name, lane, design_intent),
+    )
+    return jsonify({"status": "success", "project_id": project_id, "name": name, "lane": lane, "design_intent": design_intent})
+
+
+@app.route("/api/v2/projects/<project_id>", methods=["GET"])
+@require_api_key("projects_get")
+def projects_get(project_id: str):
+    row = _db_fetchone("SELECT id, created_at, name, lane, design_intent FROM projects WHERE id=?", (project_id,))
+    if not row:
+        return jsonify({"error": "not found"}), 404
+    latest = _db_fetchone(
+        "SELECT id, created_at, intake_id, notes FROM project_revisions WHERE project_id=? ORDER BY created_at DESC LIMIT 1",
+        (project_id,),
+    )
+    return jsonify(
+        {
+            "status": "success",
+            "project": {"id": row[0], "created_at": row[1], "name": row[2], "lane": row[3], "design_intent": row[4]},
+            "latest_revision": {"id": latest[0], "created_at": latest[1], "intake_id": latest[2], "notes": latest[3]} if latest else None,
+        }
+    )
+
+
+@app.route("/api/v2/projects/<project_id>/revisions", methods=["GET"])
+@require_api_key("projects_revisions_list")
+def projects_revisions_list(project_id: str):
+    rows = _db_fetchall(
+        "SELECT id, created_at, intake_id, notes FROM project_revisions WHERE project_id=? ORDER BY created_at ASC",
+        (project_id,),
+    )
+    return jsonify(
+        {
+            "status": "success",
+            "project_id": project_id,
+            "revisions": [{"id": r[0], "created_at": r[1], "intake_id": r[2], "notes": r[3]} for r in rows],
+        }
+    )
+
+
+@app.route("/api/v2/projects/<project_id>/revisions", methods=["POST"])
+@require_api_key("projects_revision_create")
+def projects_revision_create(project_id: str):
+    """
+    Create a new revision.
+
+    Request JSON:
+    - requirements: optional (if omitted, server uses project lane/design_intent template)
+    - notes: optional
+    """
+    if not request.is_json:
+        return jsonify({"error": "JSON body required"}), 400
+    data = request.get_json() or {}
+    notes = (data.get("notes") or "").strip()
+
+    proj = _db_fetchone("SELECT lane, design_intent, name FROM projects WHERE id=?", (project_id,))
+    if not proj:
+        return jsonify({"error": "project not found"}), 404
+    lane, design_intent, proj_name = proj[0], proj[1], proj[2]
+
+    from src.engines.requirements_intake import (
+        LANES,
+        DESIGN_INTENTS,
+        template_for_lane,
+        compile_to_circuit_ai_hints,
+        build_questions_and_assumptions,
+        evaluate_requirements,
+        render_sow,
+    )
+    if lane not in LANES or design_intent not in DESIGN_INTENTS:
+        return jsonify({"error": "project has invalid lane/design_intent"}), 500
+
+    requirements = data.get("requirements")
+    if not isinstance(requirements, dict):
+        requirements = template_for_lane(lane)
+        requirements["meta"]["design_intent"] = design_intent
+        requirements["meta"]["project_name"] = proj_name or ""
+
+    hints = compile_to_circuit_ai_hints(requirements)
+    questions, assumptions, risks = build_questions_and_assumptions(requirements)
+    readiness = evaluate_requirements(requirements)
+    sow = render_sow(requirements, questions, assumptions, risks)
+
+    intake_id = uuid.uuid4().hex[:10]
+    _save_intake_artifacts(
+        intake_id,
+        {
+            "requirements": requirements,
+            "hints": hints,
+            "questions_md": "\n".join([f"- {q}" for q in questions]) + ("\n" if questions else ""),
+            "assumptions_md": "\n".join([f"- {a}" for a in assumptions]) + ("\n" if assumptions else ""),
+            "risk_register_md": "\n".join([f"- {r}" for r in risks]) + ("\n" if risks else ""),
+            "sow_md": sow,
+        },
+    )
+
+    revision_id = uuid.uuid4().hex[:10]
+    _db_exec(
+        "INSERT INTO project_revisions (id, created_at, project_id, requirements_json, intake_id, notes) VALUES (?, ?, ?, ?, ?, ?)",
+        (revision_id, _utc_now(), project_id, json.dumps(requirements), intake_id, notes),
+    )
+    return jsonify(
+        {
+            "status": "success",
+            "project_id": project_id,
+            "revision_id": revision_id,
+            "intake_id": intake_id,
+            "readiness": readiness,
+            "questions": questions,
+            "risks": risks,
+            "sow_md": sow,
+            "hints": hints,
+        }
+    )
+
+
+@app.route("/api/v2/projects/<project_id>/build-package", methods=["POST"])
+@require_api_key("projects_build_package")
+def projects_build_package(project_id: str):
+    """
+    Convenience wrapper: build a manufacturing package using the latest (or specified) revision's intake_id/hints.
+    """
+    revision_id = (request.form.get("revision_id") or "").strip() or None
+    if revision_id:
+        row = _db_fetchone(
+            "SELECT id, intake_id FROM project_revisions WHERE id=? AND project_id=?",
+            (revision_id, project_id),
+        )
+    else:
+        row = _db_fetchone(
+            "SELECT id, intake_id FROM project_revisions WHERE project_id=? ORDER BY created_at DESC LIMIT 1",
+            (project_id,),
+        )
+    if not row or not row[1]:
+        return jsonify({"error": "no revision/intake found"}), 400
+    resolved_revision_id = row[0]
+    intake_id = row[1]
+
+    # Validate optional caller-provided intake_id, but do not require it.
+    provided_intake_id = (request.form.get("intake_id") or "").strip() or None
+    if provided_intake_id and provided_intake_id != intake_id:
+        return jsonify({"error": "intake_id does not match revision"}), 400
+
+    # Save uploads similarly to /manufacture/package.
+    if 'pcb_file' not in request.files:
+        return jsonify({'error': 'pcb_file required'}), 400
+    pcb_file = request.files['pcb_file']
+    temp_dir = Path(tempfile.gettempdir()) / 'circuit-ai'
+    temp_dir.mkdir(exist_ok=True)
+    pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+    pcb_file.save(str(pcb_path))
+
+    netlist_path = None
+    if 'netlist_file' in request.files:
+        nf = request.files['netlist_file']
+        netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+        nf.save(str(netlist_path))
+
+    sch_path = None
+    if 'sch_file' in request.files:
+        sf = request.files['sch_file']
+        sch_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_sch"
+        sf.save(str(sch_path))
+
+    netlist_export_method = "upload" if netlist_path else None
+    netlist_export_error = None
+    if netlist_path is None and sch_path is not None and shutil.which("kicad-cli"):
+        try:
+            netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+            subprocess.run(
+                [
+                    "kicad-cli",
+                    "sch",
+                    "export",
+                    "netlist",
+                    "--format",
+                    "kicadsexpr",
+                    "--output",
+                    str(netlist_path),
+                    str(sch_path),
+                ],
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=120,
+            )
+            netlist_export_method = "kicad-cli"
+        except Exception as e:
+            netlist_path = None
+            netlist_export_method = "failed"
+            netlist_export_error = str(e)
+
+    hints = _load_hints_from_intake_id(intake_id)
+
+    strict = (request.form.get("strict") or "").strip().lower() not in ("0", "false", "no", "off")
+    allow_incomplete = (request.form.get("allow_incomplete") or "").strip().lower() in ("1", "true", "yes", "on")
+    if allow_incomplete:
+        strict = False
+
+    readiness = None
+    req = _load_requirements_from_intake_id(intake_id)
+    if isinstance(req, dict):
+        try:
+            from src.engines.requirements_intake import evaluate_requirements
+            readiness = evaluate_requirements(req)
+        except Exception:
+            readiness = None
+    block = _should_block_for_intake(readiness, strict=strict)
+    if block:
+        return jsonify(block), 400
+
+    result = _build_manufacturing_package(
+        pcb_path=pcb_path,
+        netlist_path=netlist_path,
+        hints=hints,
+        intake_id=intake_id,
+        netlist_export_method=netlist_export_method,
+        netlist_export_error=netlist_export_error,
+    )
+    if readiness:
+        result["readiness"] = readiness
+
+    # Persist a build record for traceability.
+    try:
+        build_id = uuid.uuid4().hex[:10]
+        _db_exec(
+            "INSERT INTO project_builds (id, created_at, project_id, revision_id, package_file, manifest_json) VALUES (?, ?, ?, ?, ?, ?)",
+            (build_id, _utc_now(), project_id, resolved_revision_id, result.get("package_file"), json.dumps(result.get("manifest") or {})),
+        )
+        result["project_build_id"] = build_id
+        result["project_id"] = project_id
+        result["revision_id"] = resolved_revision_id
+    except Exception:
+        pass
+
+    return jsonify(result)
 
 
 # ============================================================================
