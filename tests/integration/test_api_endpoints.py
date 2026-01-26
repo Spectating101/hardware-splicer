@@ -78,3 +78,97 @@ def test_v2_api_key_required_when_enabled(client, monkeypatch):
         headers={"Authorization": "Bearer test_key_123"},
     )
     assert r.status_code == 200
+
+
+def test_v2_simulate_spice_missing_ngspice_returns_501(client):
+    payload = {"netlist_text": "* test\n.op\n.end\n"}
+    r = client.post("/api/v2/simulate/spice", data=json.dumps(payload), content_type="application/json")
+    assert r.status_code in (200, 501)
+    data = r.get_json() or {}
+    if r.status_code == 501:
+        assert data.get("error") == "ngspice_not_available"
+
+
+def test_v2_layout_and_prototype3d_endpoints_accept_pcb(client):
+    # Use a demo KiCad board shipped with the repo.
+    demo_pcb = REPO_ROOT / "data" / "demo_kicad_projects" / "pic_programmer" / "pic_programmer.kicad_pcb"
+    if not demo_pcb.exists():
+        pytest.skip("demo KiCad PCB not present")
+
+    with demo_pcb.open("rb") as f:
+        r = client.post("/api/v2/layout/advice", data={"pcb_file": (f, "board.kicad_pcb")}, content_type="multipart/form-data")
+    assert r.status_code == 200
+    data = r.get_json() or {}
+    assert data.get("status") == "success"
+    assert "report_md" in data
+    assert "pcbnew_script_py" in data
+
+    with demo_pcb.open("rb") as f:
+        r = client.post(
+            "/api/v2/prototype3d/package",
+            data={"pcb_file": (f, "board.kicad_pcb")},
+            content_type="multipart/form-data",
+        )
+    assert r.status_code == 200
+    data = r.get_json() or {}
+    assert data.get("status") == "success"
+    artifacts = data.get("artifacts") or {}
+    assert "scad" in artifacts
+    assert "wiring_plan_md" in artifacts
+
+
+def test_v2_report_ee_quality_and_projects_diff(client):
+    # Create minimal project + two revisions with different requirements.
+    r = client.post("/api/v2/projects", data=json.dumps({"name": "Demo Project"}), content_type="application/json")
+    assert r.status_code == 200
+    project_id = (r.get_json() or {}).get("project_id")
+    assert project_id
+
+    # Revision A: draft (missing fields)
+    req_a = {"meta": {"lane": "generic", "design_intent": "prototype", "project_name": "DemoA"}, "manufacturing": {"fab": {"name": ""}}}
+    r = client.post(
+        f"/api/v2/projects/{project_id}/revisions",
+        data=json.dumps({"notes": "revA", "requirements": req_a}),
+        content_type="application/json",
+    )
+    assert r.status_code == 200
+    rev_a = (r.get_json() or {}).get("revision_id")
+    assert rev_a
+
+    # Revision B: more complete
+    req_b = {
+        "meta": {"lane": "power", "design_intent": "professional", "project_name": "DemoB"},
+        "manufacturing": {"fab": {"name": "JLCPCB"}, "dnp_policy": "explicit"},
+        "board": {"layers": 2},
+        "risk_and_validation": {"what_good_looks_like": "Powers on."},
+        "power": {
+            "rails": [{"name": "3V3", "voltage_v": 3.3, "max_current_a": 1.0}],
+            "sources": [{"name": "VIN", "voltage_v": 5.0, "max_current_a": 2.0}],
+            "loads": [{"name": "MCU", "rail": "3V3", "current_a": 0.2}],
+        },
+    }
+    r = client.post(
+        f"/api/v2/projects/{project_id}/revisions",
+        data=json.dumps({"notes": "revB", "requirements": req_b}),
+        content_type="application/json",
+    )
+    assert r.status_code == 200
+    rev_b = (r.get_json() or {}).get("revision_id")
+    assert rev_b
+
+    # EE quality report endpoint (JSON mode)
+    r = client.post("/api/v2/report/ee-quality", data=json.dumps({"requirements": req_b}), content_type="application/json")
+    assert r.status_code == 200
+    data = r.get_json() or {}
+    assert data.get("status") == "success"
+    assert "report_md" in data
+
+    # Diff endpoint
+    r = client.get(f"/api/v2/projects/{project_id}/diff?from={rev_a}&to={rev_b}")
+    assert r.status_code == 200
+    data = r.get_json() or {}
+    assert data.get("status") == "success"
+    diff = data.get("diff") or {}
+    assert diff.get("from_revision_id") == rev_a
+    assert diff.get("to_revision_id") == rev_b
+    assert "diff_md" in diff
