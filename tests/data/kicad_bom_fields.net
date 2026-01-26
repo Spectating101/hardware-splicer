@@ -1,0 +1,27 @@
+(export (version D)
+  (components
+    (comp (ref R1)
+      (value "10k")
+      (footprint "Resistor_SMD:R_0603")
+      (fields
+        (field (name "Manufacturer") "Yageo")
+        (field (name "MPN") "RC0603FR-0710KL")
+      )
+    )
+    (comp (ref R2) (value "10 K") (footprint "Resistor_SMD:R_0603"))
+    (comp (ref R3) (value "10K") (footprint "Resistor_SMD:R_0603"))
+
+    (comp (ref C1) (value "0.1uF") (footprint "Capacitor_SMD:C_0603"))
+
+    (comp (ref U1)
+      (value "ESP32")
+      (footprint "RF_Module:ESP32-WROOM-32")
+      (fields
+        (field (name "Supplier") "DigiKey")
+        (field (name "DigiKey") "1965-ESP32-WROOM-32ECT-ND")
+      )
+    )
+    (comp (ref U2) (value "ESP32") (footprint "RF_Module:ESP32-WROOM-32"))
+  )
+)
+

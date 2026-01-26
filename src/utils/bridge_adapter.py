@@ -96,5 +96,32 @@ class BridgeAdapter:
                     "h_mm": h,
                     "side": side
                 })
+
+        # Mount points (optional): preserve only plausible holes inside the PCB.
+        for m in vision_data.get("mounts", []) or []:
+            try:
+                x = float(m.get("x_mm"))
+                y = float(m.get("y_mm"))
+                dia = float(m.get("diameter_mm") or m.get("dia") or 2.2)
+            except Exception:
+                continue
+
+            # Clamp within PCB bounds with a small margin.
+            margin = 2.0
+            if x < margin or x > (pcb_width - margin) or y < margin or y > (pcb_height - margin):
+                continue
+            if dia < 1.0 or dia > 6.0:
+                continue
+
+            # De-dupe near-identical mounts.
+            dup = False
+            for existing in splicer_req["mounts"]:
+                if abs(existing["x_mm"] - x) < 1.0 and abs(existing["y_mm"] - y) < 1.0:
+                    dup = True
+                    break
+            if dup:
+                continue
+
+            splicer_req["mounts"].append({"x_mm": x, "y_mm": y, "diameter_mm": dia})
                 
         return splicer_req
