@@ -197,6 +197,10 @@ curl -X POST http://localhost:5000/api/v2/manufacture/package \
 
 If `netlist_file` is omitted, Circuit‑AI falls back to a minimal BOM derived from PCB footprints (value/footprint grouping; no MPNs).
 
+**Readiness gating (recommended):**
+- Use `strict=1` to enforce “don’t guess critical constraints” behavior.
+- Use `allow_incomplete=1` only when you explicitly want a “draft package” for review.
+
 Download the generated ZIP:
 - `GET /api/v2/manufacture/download-package/<filename>`
 
@@ -353,6 +357,76 @@ Download the generated ZIP:
 ```
 
 ---
+
+## Requirements Intake + Iteration (v2)
+
+These endpoints support “ambiguous client brief → questions → revision → build” workflows (common for Upwork PCB/KiCad jobs).
+
+### Get Intake Template
+
+**Endpoint:** `GET /api/v2/intake/template`
+
+Returns a structured template you can fill from a job post or a client call (includes `design_intent` such as `prototype` vs `professional`).
+
+### Compile Intake (evaluate readiness)
+
+**Endpoint:** `POST /api/v2/intake/compile`
+
+Returns:
+- `readiness_level`: `draft` | `reviewable` | `manufacturable`
+- `blockers`: missing constraints/questions to resolve
+- `completeness_score`: 0–100
+
+### Fetch Intake
+
+**Endpoint:** `GET /api/v2/intake/<intake_id>`
+
+---
+
+## Projects / Revisions / Builds (v2)
+
+These endpoints store an iterative job in a lightweight local DB and produce a consistent manufacturing handoff bundle per revision.
+
+### Create Project
+
+**Endpoint:** `POST /api/v2/projects`
+
+### Get Project
+
+**Endpoint:** `GET /api/v2/projects/<project_id>`
+
+### List Revisions
+
+**Endpoint:** `GET /api/v2/projects/<project_id>/revisions`
+
+### Add Revision
+
+**Endpoint:** `POST /api/v2/projects/<project_id>/revisions`
+
+Typically includes an `intake_id` from `/api/v2/intake/compile`.
+
+### Build Package for a Revision (strict by default)
+
+**Endpoint:** `POST /api/v2/projects/<project_id>/build-package`
+
+Builds the ZIP bundle using the revision’s intake. Refuses to build in strict mode if readiness is `draft`.
+
+---
+
+## EE Quality / Layout / Prototype (v2)
+
+These endpoints are for higher-level “engineering quality” workflows.
+
+- `POST /api/v2/report/ee-quality` — consolidated EE quality report (readiness + lane checks + capability matrix), optionally with `netlist_file` and `pcb_file`.
+- `POST /api/v2/layout/advice` — heuristic layout advice + pcbnew helper script (`pcb_file`).
+- `POST /api/v2/prototype3d/package` — prototype 3D OpenSCAD stub + wiring plan (`pcb_file`).
+- `POST /api/v2/simulate/spice` — run ngspice on a SPICE netlist (requires `ngspice` installed).
+
+---
+
+## Projects Diff (v2)
+
+- `GET /api/v2/projects/<project_id>/diff?from=<revision_id>&to=<revision_id>` — diff two revisions (readiness/quality/blockers/issues).
 
 ### 4. Validate Circuit Design (JSON)
 

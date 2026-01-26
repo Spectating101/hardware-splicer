@@ -21,6 +21,14 @@ Circuit‑AI can always produce a “Gerbers.zip”, but if `kicad-cli` is not i
 
 If you want **real fabrication-ready exports**, install KiCad so `kicad-cli` is available in `PATH`. When present, Circuit‑AI automatically switches to `export_method: kicad-cli`.
 
+### Optional: EE toolchain (SPICE + 3D)
+
+Some newer endpoints are gated behind optional tools:
+- SPICE simulation: `POST /api/v2/simulate/spice` requires `ngspice`
+- Prototype 3D export: `POST /api/v2/prototype3d/package` always returns OpenSCAD text, but server-side STL export would require `openscad`
+
+If you want these tools in your container, use `Dockerfile.ee` instead of the default `Dockerfile` (it installs `ngspice` + `openscad`).
+
 ### Optional: automate fulfillment (Stripe + email)
 
 If you want payments → keys → email to be automated:

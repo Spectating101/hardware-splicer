@@ -606,22 +606,32 @@ Possible status values:
 
 ## What's Next
 
-### Planned v2.1 Features
+### Shipped Since v2.0
 
-1. **Manufacturing Integration**:
-   - Gerber file generation
-   - BOM generation with supplier links
-   - One-click JLCPCB ordering
+1. **Manufacturing / Deliverables API**:
+   - `POST /api/v2/manufacture/bom`
+   - `POST /api/v2/manufacture/gerber` (prefers `kicad-cli` when available)
+   - `POST /api/v2/manufacture/pnp`
+   - `POST /api/v2/report/dfm`
+   - `POST /api/v2/manufacture/package` (ZIP bundle + `MANIFEST.json`)
 
-2. **Enhanced Validation**:
-   - AC analysis
-   - Thermal analysis
-   - EMI/EMC checks
+2. **Iterative Requirements + Project Tracking**:
+   - `GET /api/v2/intake/template`
+   - `POST /api/v2/intake/compile` (readiness + blockers)
+   - `POST /api/v2/projects` + revisions + `build-package` (strict by default)
+   - `GET /api/v2/projects/<project_id>/diff` (revision diff)
 
-3. **Progress Tracking**:
-   - User progress API
-   - Achievement system
-   - Project portfolio
+3. **EE Quality / Layout / Prototype APIs**:
+   - `POST /api/v2/report/ee-quality` (one consolidated report)
+   - `POST /api/v2/layout/advice` (pcbnew-based heuristic report + script)
+   - `POST /api/v2/prototype3d/package` (OpenSCAD stub + wiring plan)
+   - `POST /api/v2/simulate/spice` (ngspice-backed, if installed)
+
+### Candidate Next Features (higher effort)
+
+- AC/Transient analysis and improved convergence diagnostics (ngspice integration can be extended)
+- Stronger schematic/netlist-backed checks (map caps/regulators/rails to real refs & nets)
+- EMI/EMC heuristics (layout + routing patterns)
 
 ---
 

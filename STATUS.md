@@ -67,6 +67,7 @@
 - Power tree validation ✅
 - KiCAD netlist integration ✅
 - Quantitative fixes ("Widen to 2.0mm" not "too thin")
+- KiCad CLI support for real exports (when installed) ✅
 
 **Educational Features:**
 - 29 project recipes ✅
@@ -77,7 +78,12 @@
 **API Endpoints:**
 - V1 API (legacy compatibility) ✅
 - V2 Unified Workflow API ✅
-- Manufacturing pipeline (BOM, Gerber, JLCPCB) ✅
+- Deliverables pipeline (DFM report, BOM, Gerbers, PnP, ZIP + MANIFEST) ✅
+- Iterative intake + project revisions/builds (readiness gating) ✅
+- EE quality layer (lane checks + conservative grade) ✅
+- Consolidated EE-quality report + revision diff ✅
+- Layout advice (pcbnew) + prototype 3D artifacts ✅
+- SPICE endpoint (ngspice-gated) ✅
 - MCP server (Claude Desktop integration) ✅
 
 ### Academic Benchmarks
