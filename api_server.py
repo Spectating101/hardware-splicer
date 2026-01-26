@@ -2905,6 +2905,63 @@ def _load_requirements_from_intake_id(intake_id: str) -> Optional[Dict[str, Any]
     return None
 
 
+def _load_intake_json(intake_id: str, filename: str) -> Optional[Dict[str, Any]]:
+    if not intake_id or not filename:
+        return None
+    try:
+        p = _intake_dir() / intake_id / filename
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return None
+
+
+def _diff_sets(a: List[str], b: List[str]) -> Dict[str, List[str]]:
+    sa = set([str(x) for x in a if str(x)])
+    sb = set([str(x) for x in b if str(x)])
+    return {"added": sorted(sb - sa), "removed": sorted(sa - sb)}
+
+
+def _render_revision_diff_md(diff: Dict[str, Any]) -> str:
+    lines: List[str] = []
+    lines.append("# Revision Diff")
+    lines.append("")
+    lines.append(f"- Project: `{diff.get('project_id')}`")
+    lines.append(f"- From revision: `{diff.get('from_revision_id')}`")
+    lines.append(f"- To revision: `{diff.get('to_revision_id')}`")
+    lines.append("")
+    lines.append("## Readiness")
+    lines.append(f"- from: `{diff.get('from_readiness')}`")
+    lines.append(f"- to: `{diff.get('to_readiness')}`")
+    lines.append("")
+    lines.append("## Quality")
+    lines.append(f"- from: `{diff.get('from_quality')}`")
+    lines.append(f"- to: `{diff.get('to_quality')}`")
+    lines.append("")
+    lines.append("## Blockers")
+    blockers = diff.get("blockers") or {}
+    for k in ("added", "removed"):
+        vals = blockers.get(k) or []
+        if vals:
+            lines.append(f"- {k}: `{', '.join(vals[:12])}`" + (" …" if len(vals) > 12 else ""))
+    if not (blockers.get("added") or blockers.get("removed")):
+        lines.append("- No blocker changes.")
+    lines.append("")
+    lines.append("## Issues")
+    issues = diff.get("issues") or {}
+    for k in ("added", "removed"):
+        vals = issues.get(k) or []
+        if vals:
+            lines.append(f"- {k}: `{', '.join(vals[:12])}`" + (" …" if len(vals) > 12 else ""))
+    if not (issues.get("added") or issues.get("removed")):
+        lines.append("- No issue-type changes.")
+    lines.append("")
+    lines.append("## Notes")
+    lines.append("- Diffs are based on stored intake artifacts (readiness/blockers/issue types).")
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def _build_manufacturing_package(
     *,
     pcb_path: Path,
@@ -3051,7 +3108,10 @@ def _save_intake_artifacts(intake_id: str, artifacts: Dict[str, Any]) -> Dict[st
     saved: Dict[str, str] = {}
     for key, filename in (
         ("requirements", "requirements.json"),
+        ("evidence", "evidence.json"),
         ("hints", "hints.json"),
+        ("lane_checks", "lane_checks.json"),
+        ("capabilities", "capabilities.json"),
         ("questions_md", "questions.md"),
         ("assumptions_md", "assumptions.md"),
         ("risk_register_md", "risk_register.md"),
@@ -3140,13 +3200,28 @@ def intake_compile():
     """
     try:
         requirements = None
+        evidence = None
         if request.is_json:
             payload = request.get_json() or {}
             requirements = payload.get("requirements")
+            evidence = payload.get("evidence")
         else:
             if "requirements_file" in request.files:
                 rf = request.files["requirements_file"]
                 requirements = json.loads(rf.read().decode("utf-8", errors="strict"))
+            if "netlist_file" in request.files:
+                # Optional file-backed evidence extraction
+                try:
+                    nf = request.files["netlist_file"]
+                    temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+                    temp_dir.mkdir(exist_ok=True)
+                    net_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+                    nf.save(str(net_path))
+                    from src.engines.evidence_extractor import extract_evidence_from_kicad_netlist
+
+                    evidence = extract_evidence_from_kicad_netlist(net_path)
+                except Exception:
+                    evidence = None
 
         if not isinstance(requirements, dict):
             return jsonify({"error": "requirements object required"}), 400
@@ -3157,6 +3232,8 @@ def intake_compile():
             build_questions_and_assumptions,
             compile_to_circuit_ai_hints,
             evaluate_requirements,
+            run_lane_checks,
+            build_capability_matrix,
             render_sow,
         )
 
@@ -3170,11 +3247,16 @@ def intake_compile():
         hints = compile_to_circuit_ai_hints(requirements)
         questions, assumptions, risks = build_questions_and_assumptions(requirements)
         readiness = evaluate_requirements(requirements)
+        lane_checks = run_lane_checks(requirements)
+        capabilities = build_capability_matrix(requirements, readiness=readiness, lane_checks=lane_checks)
         sow = render_sow(requirements, questions, assumptions, risks)
 
         artifacts = {
             "requirements": requirements,
+            "evidence": evidence if isinstance(evidence, dict) else None,
             "hints": hints,
+            "lane_checks": lane_checks,
+            "capabilities": capabilities,
             "questions_md": "\n".join([f"- {q}" for q in questions]) + ("\n" if questions else ""),
             "assumptions_md": "\n".join([f"- {a}" for a in assumptions]) + ("\n" if assumptions else ""),
             "risk_register_md": "\n".join([f"- {r}" for r in risks]) + ("\n" if risks else ""),
@@ -3190,6 +3272,9 @@ def intake_compile():
                 "intake_id": intake_id,
                 "lane": lane,
                 "readiness": readiness,
+                "lane_checks": lane_checks,
+                "capabilities": capabilities,
+                "evidence": evidence if isinstance(evidence, dict) else None,
                 "hints": hints,
                 "questions": questions,
                 "assumptions": assumptions,
@@ -3229,13 +3314,254 @@ def intake_get(intake_id: str):
             "status": "success",
             "intake_id": intake_id,
             "requirements": read_json("requirements.json"),
+            "evidence": read_json("evidence.json"),
             "hints": read_json("hints.json"),
+            "lane_checks": read_json("lane_checks.json"),
+            "capabilities": read_json("capabilities.json"),
             "questions_md": read_text("questions.md"),
             "assumptions_md": read_text("assumptions.md"),
             "risk_register_md": read_text("risk_register.md"),
             "sow_md": read_text("SOW.md"),
         }
     )
+
+
+# ============================================================================
+# V2 API - SIMULATION (SPICE / ngspice)
+# ============================================================================
+
+@app.route("/api/v2/simulate/spice", methods=["POST"])
+@require_api_key("simulate_spice")
+def simulate_spice():
+    """
+    Run a SPICE netlist using ngspice if available.
+
+    Request:
+      - multipart/form-data with `netlist_file` (text) OR JSON {"netlist_text": "..."}
+      - optional: timeout_s (int)
+    """
+    try:
+        netlist_text = None
+        timeout_s = 60
+        if request.is_json:
+            payload = request.get_json() or {}
+            netlist_text = payload.get("netlist_text")
+            timeout_s = int(payload.get("timeout_s") or timeout_s)
+        else:
+            if "netlist_file" in request.files:
+                nf = request.files["netlist_file"]
+                netlist_text = nf.read().decode("utf-8", errors="replace")
+            if request.form.get("timeout_s"):
+                timeout_s = int(request.form.get("timeout_s") or timeout_s)
+
+        if not netlist_text or not isinstance(netlist_text, str):
+            return jsonify({"error": "netlist_text required"}), 400
+
+        from src.engines.spice_runner import run_ngspice
+
+        result = run_ngspice(netlist_text=netlist_text, timeout_s=timeout_s)
+        if not result.get("ok"):
+            # 501 is appropriate when the host does not support the requested operation.
+            if result.get("error") == "ngspice_not_available":
+                return jsonify(result), 501
+        return jsonify({"status": "success", "result": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# V2 API - CONSOLIDATED EE QUALITY REPORT
+# ============================================================================
+
+@app.route("/api/v2/report/ee-quality", methods=["POST"])
+@require_api_key("report_ee_quality")
+def report_ee_quality():
+    """
+    Generate a consolidated EE quality report (readiness + checks + capability matrix),
+    optionally grounded by file-backed evidence (KiCad netlist, PCB).
+
+    Request:
+      - JSON: { "requirements": {...}, "evidence": {... optional ...} }
+      OR multipart/form-data:
+        - requirements_file (json) OR requirements (json string)
+        - optional: netlist_file (.net), pcb_file (.kicad_pcb)
+    """
+    try:
+        requirements = None
+        evidence = None
+        pcb_path = None
+
+        if request.is_json:
+            payload = request.get_json() or {}
+            requirements = payload.get("requirements")
+            evidence = payload.get("evidence")
+        else:
+            if request.form.get("requirements"):
+                try:
+                    requirements = json.loads(request.form.get("requirements") or "{}")
+                except Exception:
+                    requirements = None
+            if requirements is None and "requirements_file" in request.files:
+                rf = request.files["requirements_file"]
+                requirements = json.loads(rf.read().decode("utf-8", errors="strict"))
+
+            if "netlist_file" in request.files:
+                try:
+                    nf = request.files["netlist_file"]
+                    temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+                    temp_dir.mkdir(exist_ok=True)
+                    net_path = temp_dir / f"{uuid.uuid4().hex[:8]}.net"
+                    nf.save(str(net_path))
+                    from src.engines.evidence_extractor import extract_evidence_from_kicad_netlist
+
+                    evidence = extract_evidence_from_kicad_netlist(net_path)
+                except Exception:
+                    evidence = None
+
+            if "pcb_file" in request.files:
+                pf = request.files["pcb_file"]
+                temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+                temp_dir.mkdir(exist_ok=True)
+                pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+                pf.save(str(pcb_path))
+
+        if not isinstance(requirements, dict):
+            return jsonify({"error": "requirements object required"}), 400
+        if isinstance(evidence, dict):
+            requirements = dict(requirements)
+            requirements["evidence"] = evidence
+
+        from src.engines.requirements_intake import (
+            build_questions_and_assumptions,
+            build_capability_matrix,
+            evaluate_requirements,
+            render_sow,
+            run_lane_checks,
+        )
+        from src.engines.ee_quality_report import render_ee_quality_report_md
+
+        questions, assumptions, risks = build_questions_and_assumptions(requirements)
+        readiness = evaluate_requirements(requirements)
+        lane_checks = run_lane_checks(requirements)
+        capabilities = build_capability_matrix(requirements, readiness=readiness, lane_checks=lane_checks)
+        sow_md = render_sow(requirements, questions, assumptions, risks)
+
+        layout_report_md = None
+        if pcb_path is not None:
+            try:
+                from src.engines.layout_advisor import render_layout_advice_md
+
+                layout_report_md = render_layout_advice_md(Path(pcb_path))
+            except Exception:
+                layout_report_md = None
+
+        report_md = render_ee_quality_report_md(
+            requirements=requirements,
+            readiness=readiness,
+            lane_checks=lane_checks,
+            capabilities=capabilities,
+            sow_md=sow_md,
+            layout_report_md=layout_report_md,
+        )
+
+        return jsonify(
+            {
+                "status": "success",
+                "readiness": readiness,
+                "lane_checks": lane_checks,
+                "capabilities": capabilities,
+                "questions": questions,
+                "assumptions": assumptions,
+                "risks": risks,
+                "report_md": report_md,
+            }
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# V2 API - LAYOUT ADVICE (KiCad / pcbnew)
+# ============================================================================
+
+@app.route("/api/v2/layout/advice", methods=["POST"])
+@require_api_key("layout_advice")
+def layout_advice():
+    """
+    Generate heuristic layout advice + a pcbnew helper script.
+
+    Request:
+      - multipart/form-data with `pcb_file` (.kicad_pcb)
+    """
+    try:
+        if "pcb_file" not in request.files:
+            return jsonify({"error": "pcb_file required"}), 400
+        pcb_file = request.files["pcb_file"]
+        temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+        temp_dir.mkdir(exist_ok=True)
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+        pcb_file.save(str(pcb_path))
+
+        from src.engines.layout_advisor import render_layout_advice_md, render_pcbnew_script, summarize_board
+
+        report_md = render_layout_advice_md(pcb_path)
+        script_py = render_pcbnew_script(pcb_path)
+        summary = summarize_board(pcb_path)
+
+        return jsonify(
+            {
+                "status": "success",
+                "board": summary.get("board"),
+                "report_md": report_md,
+                "pcbnew_script_py": script_py,
+            }
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# V2 API - PROTOTYPE 3D (OpenSCAD text + wiring plan)
+# ============================================================================
+
+@app.route("/api/v2/prototype3d/package", methods=["POST"])
+@require_api_key("prototype3d_package")
+def prototype3d_package():
+    """
+    Generate a prototype-mode 3D mounting plate OpenSCAD stub + wiring plan.
+
+    Request:
+      - multipart/form-data with `pcb_file` (.kicad_pcb)
+      - optional: `requirements` JSON (string) OR `requirements_file` upload
+    """
+    try:
+        if "pcb_file" not in request.files:
+            return jsonify({"error": "pcb_file required"}), 400
+        pcb_file = request.files["pcb_file"]
+        temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+        temp_dir.mkdir(exist_ok=True)
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+        pcb_file.save(str(pcb_path))
+
+        requirements = None
+        if request.form.get("requirements"):
+            try:
+                requirements = json.loads(request.form.get("requirements") or "{}")
+            except Exception:
+                requirements = None
+        if requirements is None and "requirements_file" in request.files:
+            try:
+                rf = request.files["requirements_file"]
+                requirements = json.loads(rf.read().decode("utf-8", errors="strict"))
+            except Exception:
+                requirements = None
+
+        from src.engines.prototype3d_generator import build_prototype3d_artifacts
+
+        artifacts = build_prototype3d_artifacts(pcb_path, requirements=requirements if isinstance(requirements, dict) else None)
+        return jsonify({"status": "success", "artifacts": artifacts})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # ============================================================================
@@ -3474,10 +3800,14 @@ def projects_build_package(project_id: str):
 
     readiness = None
     req = _load_requirements_from_intake_id(intake_id)
+    lane_checks = None
+    capabilities = None
     if isinstance(req, dict):
         try:
-            from src.engines.requirements_intake import evaluate_requirements
+            from src.engines.requirements_intake import evaluate_requirements, run_lane_checks, build_capability_matrix
             readiness = evaluate_requirements(req)
+            lane_checks = run_lane_checks(req)
+            capabilities = build_capability_matrix(req, readiness=readiness, lane_checks=lane_checks)
         except Exception:
             readiness = None
     block = _should_block_for_intake(readiness, strict=strict)
@@ -3494,6 +3824,10 @@ def projects_build_package(project_id: str):
     )
     if readiness:
         result["readiness"] = readiness
+    if lane_checks:
+        result["lane_checks"] = lane_checks
+    if capabilities:
+        result["capabilities"] = capabilities
 
     # Persist a build record for traceability.
     try:
@@ -3509,6 +3843,87 @@ def projects_build_package(project_id: str):
         pass
 
     return jsonify(result)
+
+
+@app.route("/api/v2/projects/<project_id>/diff", methods=["GET"])
+@require_api_key("projects_diff")
+def projects_diff(project_id: str):
+    """
+    Diff two project revisions (readiness/quality/blockers/issues).
+
+    Query params:
+      - from: revision_id
+      - to: revision_id
+    """
+    from_rev = (request.args.get("from") or "").strip()
+    to_rev = (request.args.get("to") or "").strip()
+    if not from_rev or not to_rev:
+        return jsonify({"error": "from and to revision ids required"}), 400
+
+    a = _db_fetchone("SELECT intake_id FROM project_revisions WHERE id=? AND project_id=?", (from_rev, project_id))
+    b = _db_fetchone("SELECT intake_id FROM project_revisions WHERE id=? AND project_id=?", (to_rev, project_id))
+    if not a or not a[0] or not b or not b[0]:
+        return jsonify({"error": "revision not found or missing intake_id"}), 404
+
+    intake_a = str(a[0])
+    intake_b = str(b[0])
+
+    req_a = _load_requirements_from_intake_id(intake_a) or {}
+    req_b = _load_requirements_from_intake_id(intake_b) or {}
+
+    lane_checks_a = _load_intake_json(intake_a, "lane_checks.json") or {}
+    lane_checks_b = _load_intake_json(intake_b, "lane_checks.json") or {}
+
+    try:
+        from src.engines.requirements_intake import evaluate_requirements, run_lane_checks
+    except Exception:
+        evaluate_requirements = None
+        run_lane_checks = None
+
+    def compute_readiness_and_checks(req: Dict[str, Any], lc: Dict[str, Any]) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        readiness_local: Dict[str, Any] = {}
+        lc_local: Dict[str, Any] = lc or {}
+        if callable(evaluate_requirements) and isinstance(req, dict):
+            try:
+                readiness_local = evaluate_requirements(req)
+            except Exception:
+                readiness_local = {}
+        if (not isinstance(lc_local, dict) or not isinstance(lc_local.get("quality"), dict)) and callable(run_lane_checks):
+            try:
+                lc_local = run_lane_checks(req)
+            except Exception:
+                lc_local = lc or {}
+        return readiness_local, lc_local
+
+    readiness_a, lane_checks_a = compute_readiness_and_checks(req_a, lane_checks_a)
+    readiness_b, lane_checks_b = compute_readiness_and_checks(req_b, lane_checks_b)
+
+    blockers_a = list((readiness_a or {}).get("blockers") or [])
+    blockers_b = list((readiness_b or {}).get("blockers") or [])
+
+    issues_a = [str(i.get("type") or "") for i in (lane_checks_a.get("issues") or []) if isinstance(i, dict)]
+    issues_b = [str(i.get("type") or "") for i in (lane_checks_b.get("issues") or []) if isinstance(i, dict)]
+
+    qa = (lane_checks_a.get("quality") or {}) if isinstance(lane_checks_a.get("quality"), dict) else {}
+    qb = (lane_checks_b.get("quality") or {}) if isinstance(lane_checks_b.get("quality"), dict) else {}
+    from_quality = f"{qa.get('grade')}:{qa.get('score')}"
+    to_quality = f"{qb.get('grade')}:{qb.get('score')}"
+
+    diff = {
+        "project_id": project_id,
+        "from_revision_id": from_rev,
+        "to_revision_id": to_rev,
+        "from_intake_id": intake_a,
+        "to_intake_id": intake_b,
+        "from_readiness": (readiness_a or {}).get("readiness_level"),
+        "to_readiness": (readiness_b or {}).get("readiness_level"),
+        "from_quality": from_quality,
+        "to_quality": to_quality,
+        "blockers": _diff_sets(blockers_a, blockers_b),
+        "issues": _diff_sets(issues_a, issues_b),
+    }
+    diff["diff_md"] = _render_revision_diff_md(diff)
+    return jsonify({"status": "success", "diff": diff})
 
 
 # ============================================================================
@@ -3532,6 +3947,12 @@ def index():
             'POST /api/v2/workflow/beginner': 'Complete beginner workflow (learning paths + projects)',
             'POST /api/v2/workflow/complete': 'End-to-end workflow (recipe → instructions → validation)',
             'POST /api/v2/workflow/validate-kicad': 'Professional KiCAD PCB validation',
+            'GET /api/v2/intake/template': 'Requirements intake template',
+            'POST /api/v2/intake/compile': 'Compile intake (readiness + questions + capability matrix)',
+            'POST /api/v2/report/ee-quality': 'Consolidated EE quality report (optionally with netlist/pcb evidence)',
+            'POST /api/v2/layout/advice': 'Heuristic layout advice + pcbnew helper script',
+            'POST /api/v2/prototype3d/package': 'Prototype-mode OpenSCAD stub + wiring plan',
+            'POST /api/v2/simulate/spice': 'Run SPICE netlist via ngspice (if installed)',
             '=== V1 API - CORE FEATURES ===': '',
             'GET /api/health': 'Health check',
             'GET /api/components': 'List available components',
