@@ -3481,6 +3481,52 @@ def report_ee_quality():
 
 
 # ============================================================================
+# V2 API - MECHANICAL BOM (catalog-driven)
+# ============================================================================
+
+@app.route("/api/v2/mechanical/bom", methods=["POST"])
+@require_api_key("mechanical_bom")
+def mechanical_bom():
+    """
+    Build candidate mechanical BOMs from a local catalog (Shopee-friendly).
+
+    Request JSON:
+      {
+        "work_area_mm": [w, h],
+        "accuracy_mm": 0.25,
+        "prefer": "cheapest" | "balanced"
+      }
+    """
+    try:
+        if not request.is_json:
+            return jsonify({"error": "JSON body required"}), 400
+        payload = request.get_json() or {}
+        work_area = payload.get("work_area_mm") or [100, 100]
+        w = int(work_area[0]) if isinstance(work_area, list) and len(work_area) >= 2 else 100
+        h = int(work_area[1]) if isinstance(work_area, list) and len(work_area) >= 2 else 100
+        accuracy_mm = float(payload.get("accuracy_mm") or 0.25)
+        prefer = str(payload.get("prefer") or "cheapest").strip().lower()
+        if prefer not in ("cheapest", "balanced"):
+            prefer = "cheapest"
+
+        from src.engines.mechanical_catalog import (
+            build_candidate_boms,
+            catalog_default_path,
+            load_catalog_jsonl,
+        )
+
+        repo_root = Path(__file__).resolve().parent
+        catalog_path = catalog_default_path(repo_root)
+        catalog = load_catalog_jsonl(catalog_path)
+        result = build_candidate_boms(catalog=catalog, work_area_mm=(w, h), accuracy_mm=accuracy_mm, prefer=prefer)
+        result["catalog_path"] = str(catalog_path)
+        result["catalog_items"] = len(catalog)
+        return jsonify({"status": "success", "result": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
 # V2 API - LAYOUT ADVICE (KiCad / pcbnew)
 # ============================================================================
 
@@ -3560,6 +3606,91 @@ def prototype3d_package():
 
         artifacts = build_prototype3d_artifacts(pcb_path, requirements=requirements if isinstance(requirements, dict) else None)
         return jsonify({"status": "success", "artifacts": artifacts})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
+# V2 API - ROBOT MVP (probe plan + G-code + runlog)
+# ============================================================================
+
+@app.route("/api/v2/robot/probe-plan/template", methods=["GET"])
+@require_api_key("robot_probe_plan_template")
+def robot_probe_plan_template():
+    from src.engines.cam.probe_plan import probe_plan_template
+    return jsonify({"status": "success", "template": probe_plan_template()})
+
+
+@app.route("/api/v2/robot/probe-plan", methods=["POST"])
+@require_api_key("robot_probe_plan")
+def robot_probe_plan():
+    """
+    Build a software-only probe plan from a KiCad PCB:
+    - resolves refs to footprint centroids (best-effort)
+    - outputs G-code with pauses (human-in-the-loop)
+    - outputs a runlog CSV template
+
+    Request: multipart/form-data
+      - pcb_file: required (.kicad_pcb)
+      - plan: optional JSON string (see /template)
+    """
+    try:
+        if "pcb_file" not in request.files:
+            return jsonify({"error": "pcb_file required"}), 400
+
+        plan = None
+        if request.form.get("plan"):
+            try:
+                plan = json.loads(request.form.get("plan") or "{}")
+            except Exception:
+                plan = None
+        if not isinstance(plan, dict):
+            plan = {}
+
+        pcb_file = request.files["pcb_file"]
+        temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+        temp_dir.mkdir(exist_ok=True)
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}.kicad_pcb"
+        pcb_file.save(str(pcb_path))
+
+        from src.engines.cam.probe_plan import (
+            build_probe_gcode,
+            build_probe_points,
+            render_probe_report_md,
+            render_runlog_csv,
+        )
+
+        points = build_probe_points(pcb_path, plan=plan)
+        gcode = build_probe_gcode(
+            points,
+            travel_z=float(plan.get("travel_z") or 5.0),
+            work_z=float(plan.get("work_z") or -0.1),
+            feed_xy=int(plan.get("feed_xy") or 1200),
+            feed_z=int(plan.get("feed_z") or 120),
+            home_first=bool(plan.get("home_first", True)),
+            auto_plunge=bool(plan.get("auto_plunge", False)),
+        )
+        runlog_csv = render_runlog_csv(points)
+        report_md = render_probe_report_md(
+            pcb_filename=pcb_file.filename or pcb_path.name,
+            points=points,
+            gcode_preview=gcode,
+            dry_run=not bool(plan.get("auto_plunge", False)),
+        )
+
+        return jsonify(
+            {
+                "status": "success",
+                "points": [p.__dict__ for p in points],
+                "gcode": gcode,
+                "runlog_csv": runlog_csv,
+                "report_md": report_md,
+                "notes": [
+                    "Footprint centroid probing is best-effort. For pad-level probing you need calibration + pad geometry mapping.",
+                    "Always test with pen-in-air / probe lifted before touching a PCB.",
+                ],
+            }
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

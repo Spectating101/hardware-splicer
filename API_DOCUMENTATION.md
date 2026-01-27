@@ -428,6 +428,24 @@ These endpoints are for higher-level “engineering quality” workflows.
 
 - `GET /api/v2/projects/<project_id>/diff?from=<revision_id>&to=<revision_id>` — diff two revisions (readiness/quality/blockers/issues).
 
+---
+
+## Mechanical BOM (v2)
+
+Circuit‑AI can also generate a **candidate mechanical BOM** (useful for building a low-cost Dum‑E style probe gantry) from a local catalog file you maintain.
+
+- `POST /api/v2/mechanical/bom` — returns 2–3 candidate builds and total cost in TWD
+
+Catalog file:
+- `data/mechanical/catalog.jsonl` (fill `url` + `price_twd` with Taiwan Shopee listings)
+
+Example:
+```bash
+curl -sS -X POST http://localhost:5000/api/v2/mechanical/bom \
+  -H "Content-Type: application/json" \
+  -d '{"work_area_mm":[100,100],"accuracy_mm":0.25,"prefer":"cheapest"}'
+```
+
 ### 4. Validate Circuit Design (JSON)
 
 **Endpoint:** `POST /api/validate`

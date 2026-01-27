@@ -172,3 +172,23 @@ def test_v2_report_ee_quality_and_projects_diff(client):
     assert diff.get("from_revision_id") == rev_a
     assert diff.get("to_revision_id") == rev_b
     assert "diff_md" in diff
+
+
+def test_v2_robot_probe_plan_mvp(client):
+    demo_pcb = REPO_ROOT / "circuit-ai-frontend" / "public" / "demo" / "usb_esp32_sensor.kicad_pcb"
+    if not demo_pcb.exists():
+        pytest.skip("demo KiCad PCB not present")
+
+    plan = {"points": [{"ref": "U1", "point_id": "U1"}, {"x_mm": 10.0, "y_mm": 20.0, "point_id": "P1"}]}
+    with demo_pcb.open("rb") as f:
+        r = client.post(
+            "/api/v2/robot/probe-plan",
+            data={"pcb_file": (f, "board.kicad_pcb"), "plan": json.dumps(plan)},
+            content_type="multipart/form-data",
+        )
+    assert r.status_code == 200
+    data = r.get_json() or {}
+    assert data.get("status") == "success"
+    assert "gcode" in data
+    assert "runlog_csv" in data
+    assert "report_md" in data
