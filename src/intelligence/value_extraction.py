@@ -14,6 +14,9 @@ import cv2
 import numpy as np
 from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -85,14 +88,11 @@ class ValueExtractor:
                                comp_id: str,
                                comp_type: str) -> Optional[ComponentValue]:
         """
-        Extract resistor value from color bands.
+        Extract resistor value from color bands or SMD codes.
 
-        This would require color detection - for now return pattern-based estimate.
+        Uses ResistorColorDecoder for through-hole resistors with color bands,
+        and OCR for SMD resistors with numerical codes.
         """
-
-        # For through-hole resistors, we'd analyze color bands
-        # For SMD resistors, we'd read numerical codes
-
         # Check if SMD (smaller, has text) or through-hole (larger, color bands)
         height, width = roi.shape[:2]
 
@@ -113,8 +113,36 @@ class ValueExtractor:
                     )
 
         else:  # Likely through-hole with color bands
-            # Would need color detection here
-            # For now, return common values based on size
+            # Try to use the resistor color decoder
+            try:
+                from src.intelligence.resistor_color_decoder import resistor_color_decoder
+
+                # Create a pseudo bounding box for the full ROI
+                bbox = (0, 0, width, height)
+                reading = resistor_color_decoder.read_resistor(roi, bbox)
+
+                if reading.resistance_ohms > 0 and reading.error_message is None:
+                    # Successfully decoded color bands
+                    formatted_value = resistor_color_decoder.format_resistance(reading.resistance_ohms)
+                    return ComponentValue(
+                        component_id=comp_id,
+                        component_type=comp_type,
+                        value=formatted_value.replace('Ω', ''),
+                        unit='Ω',
+                        tolerance=f"±{reading.tolerance_percent}%",
+                        confidence=reading.confidence,
+                        extraction_method="color_band_decode"
+                    )
+                else:
+                    # Color decoder failed, log the reason
+                    logger.debug(f"Color band decode failed: {reading.error_message}")
+
+            except ImportError:
+                logger.debug("ResistorColorDecoder not available")
+            except Exception as e:
+                logger.debug(f"Color band decode error: {e}")
+
+            # Fallback: return common values based on size with low confidence
             common_values = ["10k", "1k", "100", "4.7k", "220"]
             return ComponentValue(
                 component_id=comp_id,

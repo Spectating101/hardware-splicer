@@ -14,10 +14,10 @@ from src.services.websocket_service import AnalysisProgressTracker, websocket_ma
 from src.services.cache_service import analysis_cache
 from src.services.queue_service import queue_service, JobPriority
 from src.intelligence.circuit_analyzer import circuit_intelligence
-from src.intelligence.repair_guidance import repair_guidance
+from src.intelligence.repair_guide_generator import repair_guidance
 from src.intelligence.modification_planner import modification_planner
 from src.intelligence.trace_analyzer import trace_analyzer
-from src.intelligence.value_extractor import value_extractor
+from src.intelligence.value_extraction import value_extractor
 from src.intelligence.safety_validator import safety_validator
 
 class EnhancedCircuitAnalyzer:

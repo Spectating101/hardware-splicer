@@ -36,6 +36,17 @@ except ImportError:
     logger.warning("LLM service not available")
 
 
+# Emergency fallback provider configuration
+# These are tried in order when the primary LiteLLM provider fails
+FALLBACK_PROVIDERS = [
+    # Format: (provider_prefix, model_name, env_key_for_api_key)
+    ("cohere", "command-r", "COHERE_API_KEY"),
+    ("mistral", "mistral-small-latest", "MISTRAL_API_KEY"),
+    ("anthropic", "claude-3-haiku-20240307", "ANTHROPIC_API_KEY"),
+    ("openai", "gpt-3.5-turbo", "OPENAI_API_KEY"),
+]
+
+
 class CircuitLLMIntegration:
     """Advanced LLM integration for Circuit.AI."""
     
@@ -200,8 +211,86 @@ class CircuitLLMIntegration:
     def _lite_enabled(self) -> bool:
         return LITE_AVAILABLE and getattr(self, "lite_provider", None) is not None
 
+    def _get_available_fallback_providers(self) -> list:
+        """
+        Get list of available fallback providers based on configured API keys.
+
+        Returns:
+            List of (model_string, provider_name) tuples for providers with valid API keys
+        """
+        import os
+        available = []
+
+        for provider, model, env_key in FALLBACK_PROVIDERS:
+            api_key = os.environ.get(env_key)
+            if api_key and len(api_key) > 5:  # Basic sanity check
+                # LiteLLM format: provider/model or just model for openai
+                if provider == "openai":
+                    model_str = model
+                else:
+                    model_str = f"{provider}/{model}"
+                available.append((model_str, provider))
+
+        return available
+
+    def _try_fallback_providers(self, prompt: str) -> Optional[str]:
+        """
+        Try fallback providers when primary LiteLLM call fails.
+
+        Args:
+            prompt: The prompt to send to the LLM
+
+        Returns:
+            Response text if successful, None if all fallbacks fail
+        """
+        if not LITE_AVAILABLE:
+            return None
+
+        available_providers = self._get_available_fallback_providers()
+        if not available_providers:
+            logger.warning("No fallback providers available (no API keys configured)")
+            return None
+
+        for model_str, provider_name in available_providers:
+            try:
+                logger.info(f"Trying fallback provider: {provider_name}")
+                system_msg = {
+                    "role": "system",
+                    "content": (
+                        "You are a strict JSON generator. Respond with ONLY valid, minified JSON. "
+                        "Do not include explanations, prose, or code fences."
+                    ),
+                }
+                response = litellm.completion(
+                    model=model_str,
+                    messages=[system_msg, {"role": "user", "content": prompt}],
+                    timeout=30,
+                )
+
+                # Extract text from response
+                choice = response["choices"][0]
+                if "message" in choice and "content" in choice["message"]:
+                    text = choice["message"]["content"] or ""
+                    logger.info(f"Fallback provider {provider_name} succeeded")
+                    return text
+                if "text" in choice:
+                    text = choice["text"] or ""
+                    logger.info(f"Fallback provider {provider_name} succeeded")
+                    return text
+
+            except Exception as e:
+                logger.warning(f"Fallback provider {provider_name} failed: {e}")
+                continue
+
+        logger.error("All fallback providers failed")
+        return None
+
     def _lite_complete(self, prompt: str) -> str:
-        """Make a completion call via LiteLLM with configured provider/model."""
+        """Make a completion call via LiteLLM with configured provider/model.
+
+        If the primary provider fails after retries, attempts fallback providers
+        before raising an exception.
+        """
         if not self._lite_enabled():
             raise RuntimeError("LiteLLM not configured")
         model = settings.llm_model or "command-r"
@@ -211,78 +300,67 @@ class CircuitLLMIntegration:
         kwargs = {}
         if settings.llm_api_base:
             kwargs["api_base"] = settings.llm_api_base
-        try:
-            # Cache
-            if settings.llm_cache_enabled:
-                key = f"{model}:{hash(prompt)}"
-                # disk cache first
-                if self._disk_cache is not None:
-                    cached = self._disk_cache.get(key, default=None)
-                    if cached is not None:
-                        return cached
-                # memory cache
-                if key in self._cache:
-                    return self._cache[key]
 
-            # Basic retry/backoff
-            last_exc = None
-            for attempt in range(3):
-                try:
-                    system_msg = {
-                        "role": "system",
-                        "content": (
-                            "You are a strict JSON generator. Respond with ONLY valid, minified JSON. "
-                            "Do not include explanations, prose, or code fences."
-                        ),
-                    }
-                    response = litellm.completion(
-                        model=model,
-                        messages=[system_msg, {"role": "user", "content": prompt}],
-                        **kwargs,
-                    )
-                    break
-                except Exception as e:
-                    last_exc = e
-                    import time as _t
-                    _t.sleep(0.5 * (attempt + 1))
-            else:
-                raise last_exc
-            # Extract text depending on provider format
-            choice = response["choices"][0]
-            if "message" in choice and "content" in choice["message"]:
-                text = choice["message"]["content"] or ""
-                if settings.llm_cache_enabled:
-                    self._cache[key] = text
-                    if self._disk_cache is not None:
-                        self._disk_cache.set(key, text, expire=getattr(settings, "llm_cache_ttl_seconds", 3600))
-                return text
-            if "text" in choice:
-                text = choice["text"] or ""
-                if settings.llm_cache_enabled:
-                    self._cache[key] = text
-                    if self._disk_cache is not None:
-                        self._disk_cache.set(key, text, expire=getattr(settings, "llm_cache_ttl_seconds", 3600))
-                return text
-            text = json.dumps(response)
-            if settings.llm_cache_enabled:
-                self._cache[key] = text
+        # Cache key for this prompt
+        cache_key = f"{model}:{hash(prompt)}" if settings.llm_cache_enabled else None
+
+        # Check cache first
+        if cache_key:
+            # disk cache first
+            if self._disk_cache is not None:
+                cached = self._disk_cache.get(cache_key, default=None)
+                if cached is not None:
+                    return cached
+            # memory cache
+            if cache_key in self._cache:
+                return self._cache[cache_key]
+
+        # Helper to cache and return result
+        def _cache_and_return(text: str) -> str:
+            if cache_key and settings.llm_cache_enabled:
+                self._cache[cache_key] = text
                 if self._disk_cache is not None:
-                    self._disk_cache.set(key, text, expire=getattr(settings, "llm_cache_ttl_seconds", 3600))
+                    self._disk_cache.set(cache_key, text, expire=getattr(settings, "llm_cache_ttl_seconds", 3600))
             return text
-        except Exception as e:
-            raise
-        
-        try:
-            prompt = self._create_educational_content_prompt(component_data)
-            response = self.llm_manager.generate_response(prompt)
-            
-            content = self._parse_educational_content(response)
-            valid = try_validate(EducationalContent, content)
-            return valid.model_dump() if valid else content
-            
-        except Exception as e:
-            logger.error(f"LLM educational content generation failed: {e}")
-            return self._fallback_educational_content(component_data)
+
+        # Basic retry/backoff for primary provider
+        last_exc = None
+        for attempt in range(3):
+            try:
+                system_msg = {
+                    "role": "system",
+                    "content": (
+                        "You are a strict JSON generator. Respond with ONLY valid, minified JSON. "
+                        "Do not include explanations, prose, or code fences."
+                    ),
+                }
+                response = litellm.completion(
+                    model=model,
+                    messages=[system_msg, {"role": "user", "content": prompt}],
+                    **kwargs,
+                )
+                # Extract text depending on provider format
+                choice = response["choices"][0]
+                if "message" in choice and "content" in choice["message"]:
+                    return _cache_and_return(choice["message"]["content"] or "")
+                if "text" in choice:
+                    return _cache_and_return(choice["text"] or "")
+                return _cache_and_return(json.dumps(response))
+
+            except Exception as e:
+                last_exc = e
+                logger.warning(f"Primary LLM attempt {attempt + 1} failed: {e}")
+                import time as _t
+                _t.sleep(0.5 * (attempt + 1))
+
+        # Primary provider failed - try fallback providers
+        logger.warning(f"Primary provider {provider}/{model} failed after 3 attempts, trying fallbacks")
+        fallback_result = self._try_fallback_providers(prompt)
+        if fallback_result is not None:
+            return _cache_and_return(fallback_result)
+
+        # All providers failed
+        raise RuntimeError(f"LLM completion failed (primary and all fallbacks): {last_exc}")
     
     def _create_component_analysis_prompt(self, component_data: Dict[str, Any]) -> str:
         """Create prompt for component analysis."""

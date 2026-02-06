@@ -216,10 +216,20 @@ class DefectDetector:
 
             # Bridges are elongated (high aspect ratio)
             if aspect_ratio > 3.0:
+                # Calculate confidence based on feature strength
+                confidence = self._calculate_classical_confidence(
+                    aspect_ratio=aspect_ratio,
+                    area=area,
+                    expected_aspect_min=3.0,
+                    expected_aspect_max=15.0,
+                    expected_area_min=15,
+                    expected_area_max=300
+                )
+
                 defects.append(DefectDetection(
                     defect_type="solder_bridge",
                     bbox=[x, y, x + w, y + h],
-                    confidence=0.7,
+                    confidence=confidence,
                     severity=0.9,  # Critical - causes shorts
                     description=f"Solder bridge detected (aspect ratio: {aspect_ratio:.1f})",
                     repair_action="Remove excess solder with desoldering wick",
@@ -257,10 +267,17 @@ class DefectDetector:
             mean_intensity = cv2.mean(cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY))[0]
 
             if mean_intensity < 60:  # Very dark
+                # Calculate confidence: darker = more confident it's a burn
+                # Intensity 0-30 = high confidence, 30-60 = lower confidence
+                intensity_confidence = max(0.5, 1.0 - (mean_intensity / 60.0) * 0.5)
+                # Area in expected range boosts confidence
+                area_confidence = 1.0 if 100 < area < 2000 else 0.8
+                confidence = min(0.95, intensity_confidence * area_confidence)
+
                 defects.append(DefectDetection(
                     defect_type="burnt_component",
                     bbox=[x, y, x + w, y + h],
-                    confidence=0.65,
+                    confidence=confidence,
                     severity=0.85,  # High severity - component likely damaged
                     description=f"Burnt area detected (mean intensity: {mean_intensity:.1f})",
                     repair_action="Replace damaged component",
@@ -293,14 +310,23 @@ class DefectDetector:
 
             x, y, w, h = cv2.boundingRect(cnt)
 
+            # Calculate confidence based on color saturation strength
+            roi_hsv = hsv[y:y+h, x:x+w]
+            mean_saturation = np.mean(roi_hsv[:, :, 1]) if roi_hsv.size > 0 else 0
+            # Higher saturation = more confident it's true corrosion (not just green PCB)
+            saturation_confidence = min(1.0, mean_saturation / 150.0)
+            # Area in typical range boosts confidence
+            area_confidence = 1.0 if 50 < area < 1000 else 0.75
+            confidence = max(0.4, min(0.85, saturation_confidence * area_confidence))
+
             defects.append(DefectDetection(
                 defect_type="corrosion",
                 bbox=[x, y, x + w, y + h],
-                confidence=0.6,
+                confidence=confidence,
                 severity=0.5,  # Medium - degrades over time
                 description=f"Corrosion detected (area: {area} px)",
                 repair_action="Clean with isopropyl alcohol, consider conformal coating",
-                metadata={"detector": "classical_cv", "area": area}
+                metadata={"detector": "classical_cv", "area": area, "saturation": mean_saturation}
             ))
 
         return defects
@@ -329,10 +355,16 @@ class DefectDetector:
 
                 # Look for short isolated segments (potential break indicators)
                 if 30 < length < 100:
+                    # Calculate confidence based on segment characteristics
+                    # Longer isolated segments in the valid range are more suspicious
+                    length_factor = (length - 30) / 70.0  # 0 at 30px, 1 at 100px
+                    # Base confidence is low (0.35-0.55) because trace detection is inherently noisy
+                    confidence = 0.35 + (length_factor * 0.2)
+
                     defects.append(DefectDetection(
                         defect_type="broken_trace",
                         bbox=[min(x1, x2)-5, min(y1, y2)-5, max(x1, x2)+5, max(y1, y2)+5],
-                        confidence=0.4,  # Low confidence - needs verification
+                        confidence=confidence,
                         severity=0.95,  # Critical if real
                         description=f"Potential trace break (length: {length:.1f} px)",
                         repair_action="Verify with multimeter, repair with solder jumper wire",
@@ -410,6 +442,51 @@ class DefectDetector:
         union_area = bbox1_area + bbox2_area - inter_area
 
         return inter_area / union_area if union_area > 0 else 0.0
+
+    def _calculate_classical_confidence(
+        self,
+        aspect_ratio: float = 1.0,
+        area: float = 0.0,
+        expected_aspect_min: float = 1.0,
+        expected_aspect_max: float = 10.0,
+        expected_area_min: float = 10,
+        expected_area_max: float = 500
+    ) -> float:
+        """
+        Calculate confidence score for classical CV detections based on feature strength.
+
+        Uses how well the detected features match expected ranges to determine confidence.
+        Features in the middle of expected ranges get higher confidence.
+
+        Returns:
+            Confidence score between 0.4 and 0.9
+        """
+        # Aspect ratio score: how well it fits the expected range
+        if aspect_ratio < expected_aspect_min:
+            aspect_score = 0.5
+        elif aspect_ratio > expected_aspect_max:
+            aspect_score = 0.6  # Still somewhat confident if very elongated
+        else:
+            # Best confidence when in the middle of expected range
+            range_mid = (expected_aspect_min + expected_aspect_max) / 2
+            range_half = (expected_aspect_max - expected_aspect_min) / 2
+            distance_from_mid = abs(aspect_ratio - range_mid) / range_half
+            aspect_score = 1.0 - (distance_from_mid * 0.3)
+
+        # Area score: how well it fits the expected range
+        if area < expected_area_min:
+            area_score = 0.5
+        elif area > expected_area_max:
+            area_score = 0.6
+        else:
+            range_mid = (expected_area_min + expected_area_max) / 2
+            range_half = (expected_area_max - expected_area_min) / 2
+            distance_from_mid = abs(area - range_mid) / range_half if range_half > 0 else 0
+            area_score = 1.0 - (distance_from_mid * 0.3)
+
+        # Combined confidence with bounds
+        combined = (aspect_score * 0.6 + area_score * 0.4)
+        return max(0.4, min(0.9, combined))
 
     def _estimate_severity(self, defect_type: str, bbox: List[int], image: np.ndarray) -> float:
         """Estimate defect severity based on type and visual features"""

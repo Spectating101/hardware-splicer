@@ -19,13 +19,28 @@ from sklearn.cluster import DBSCAN
 from collections import defaultdict
 from loguru import logger
 
-from vision.enhanced_detector import ComponentDetection
-from intelligence.component_knowledge import (
-    get_component_spec, infer_component_relationships,
-    estimate_power_consumption, get_modification_ideas,
-    get_test_points, get_failure_modes
-)
-from intelligence.electrical_analysis import electrical_analyzer
+try:
+    from src.vision.enhanced_detector import ComponentDetection
+except ImportError:
+    from vision.enhanced_detector import ComponentDetection
+
+try:
+    from src.intelligence.component_knowledge import (
+        get_component_spec, infer_component_relationships,
+        estimate_power_consumption, get_modification_ideas,
+        get_test_points, get_failure_modes
+    )
+except ImportError:
+    from intelligence.component_knowledge import (
+        get_component_spec, infer_component_relationships,
+        estimate_power_consumption, get_modification_ideas,
+        get_test_points, get_failure_modes
+    )
+
+try:
+    from src.intelligence.electrical_analysis import electrical_analyzer
+except ImportError:
+    from intelligence.electrical_analysis import electrical_analyzer
 
 
 @dataclass

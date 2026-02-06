@@ -133,9 +133,23 @@ class EnhancedComponentDetector:
             'Arduino Uno': 0.6 # High confidence for board detection
         }
         
+        # Component database with detailed specifications
+        self.component_db = {
+            'resistor': {'category': 'passive', 'function': 'current limiting', 'testable': True},
+            'capacitor': {'category': 'passive', 'function': 'energy storage/filtering', 'testable': True},
+            'mosfet': {'category': 'active', 'function': 'switching/amplification', 'testable': True},
+            'transformer': {'category': 'passive', 'function': 'voltage conversion', 'testable': False},
+            'ic': {'category': 'active', 'function': 'integrated circuit', 'testable': False},
+            'diode': {'category': 'active', 'function': 'rectification', 'testable': True},
+            'led': {'category': 'active', 'function': 'indicator', 'testable': True},
+            'connector': {'category': 'passive', 'function': 'interconnection', 'testable': False},
+            'inductor': {'category': 'passive', 'function': 'energy storage/filtering', 'testable': True},
+            'crystal': {'category': 'passive', 'function': 'timing/oscillation', 'testable': False},
+        }
+
         # Thread pool for parallel processing
         self.executor = ThreadPoolExecutor(max_workers=4)
-        
+
         logger.info(f"Enhanced detector initialized on {self.device}")
     
     def _initialize_models(self):
@@ -620,6 +634,10 @@ class EnhancedComponentDetector:
                     pin_y_px = int(y2_img - pin_y_mm * px_per_mm_y) # Flip Y logic: y2 is bottom of board
                     
                     cv2.circle(img_copy, (pin_x_px, pin_y_px), radius=4, color=(0, 255, 255), thickness=-1)
-                    cv2.putText(img_copy, pin_name, (pin_x_px + 7, pin_y_px + 5), 
+                    cv2.putText(img_copy, pin_name, (pin_x_px + 7, pin_y_px + 5),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
         return img_copy
+
+
+# Global singleton instance for API usage
+enhanced_detector = EnhancedComponentDetector()

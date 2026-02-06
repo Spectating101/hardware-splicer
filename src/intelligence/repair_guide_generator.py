@@ -931,6 +931,10 @@ class RepairGuideGenerator:
         return {'issue_name': 'Laptop SSD/RAM Upgrade', 'status': 'coming_soon'}
 
 
+# Global singleton instance for API usage
+repair_guidance = RepairGuideGenerator()
+
+
 if __name__ == '__main__':
     """Demo repair guide generator."""
     generator = RepairGuideGenerator()
