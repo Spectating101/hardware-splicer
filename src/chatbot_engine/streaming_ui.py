@@ -89,7 +89,7 @@ class StreamingChatUI:
                             break
                 finally:
                     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-            except:
+            except (ImportError, OSError):
                 pass  # Fall back to Ctrl+C only on Windows or if termios unavailable
         
         listener_thread = threading.Thread(target=listen_for_esc, daemon=True)

@@ -316,7 +316,7 @@ class CircuitGraphSolver:
             for c in capacitors:
                 try:
                     if list(nx.common_neighbors(G, r, c)): count += 1
-                except: pass
+                except Exception: pass
         return count
 
     @staticmethod

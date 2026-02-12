@@ -337,7 +337,7 @@ class HardwareDetector:
             result = sock.connect_ex(('192.168.1.100', 30002))
             sock.close()
             return result == 0
-        except:
+        except (OSError, socket.error):
             return False
 
     def _check_rebel_robot(self) -> bool:

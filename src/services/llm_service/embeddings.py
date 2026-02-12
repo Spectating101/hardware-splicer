@@ -444,7 +444,7 @@ class EmbeddingManager:
                 # Try to clean up the FAISS file
                 try:
                     os.remove(str(save_path) + ".faiss")
-                except:
+                except OSError:
                     pass
                 return False
             

@@ -43,7 +43,7 @@ def load_env_if_needed():
                         key, val = line.strip().split("=", 1)
                         if key not in os.environ or not os.environ.get(key):
                             os.environ[key] = val
-    except:
+    except (OSError, ValueError):
         pass
 
 load_env_if_needed()

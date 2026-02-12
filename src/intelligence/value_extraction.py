@@ -286,7 +286,7 @@ class ValueExtractor:
 
             text = pytesseract.image_to_string(image, config=config)
             return text.strip()
-        except:
+        except Exception:
             return ""
 
     def _decode_smd_resistor(self, text: str) -> Optional[Dict[str, Any]]:
@@ -360,7 +360,7 @@ class ValueExtractor:
             else:
                 return {'value': str(value_pf), 'unit': 'pF'}
 
-        except:
+        except (ValueError, KeyError, IndexError):
             return None
 
     def _load_resistor_codes(self) -> Dict[str, Any]:
