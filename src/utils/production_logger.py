@@ -6,7 +6,7 @@ Structured logging for production environments with JSON format.
 
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 from loguru import logger
 import os
@@ -47,7 +47,7 @@ class ProductionLogger:
     def _json_formatter(self, record: Dict[str, Any]) -> str:
         """Format log record as JSON."""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
             "level": record["level"].name,
             "message": record["message"],
             "module": record["name"],

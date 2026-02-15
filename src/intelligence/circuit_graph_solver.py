@@ -326,7 +326,7 @@ class CircuitGraphSolver:
         for r1, r2 in itertools.combinations(resistors, 2):
             try:
                 if list(nx.common_neighbors(G, r1, r2)): count += 1
-            except: pass
+            except Exception: pass
         return count
 
     @staticmethod

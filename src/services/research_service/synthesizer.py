@@ -4,7 +4,7 @@ import logging
 import re
 import asyncio
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import redis.asyncio as redis
 import hashlib
@@ -208,7 +208,7 @@ class ContentSynthesizer:
                 return {
                     "error": "No valid content found",
                     "content_count": 0,
-                    "generated_at": datetime.utcnow().isoformat()
+                    "generated_at": datetime.now(timezone.utc).isoformat()
                 }
             
             logger.info(f"Retrieved {len(content_items)} content items for synthesis")
@@ -235,7 +235,7 @@ class ContentSynthesizer:
             synthesis.update({
                 "content_count": len(content_items),
                 "content_type": content_type,
-                "generated_at": datetime.utcnow().isoformat(),
+                "generated_at": datetime.now(timezone.utc).isoformat(),
                 "cache_key": cache_key
             })
             

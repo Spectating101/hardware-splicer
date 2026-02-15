@@ -649,7 +649,7 @@ This demo shows how Circuit.AI can identify components and suggest educational p
                     )
                 else:
                     return 0, 0, 0.0, 0.0
-            except:
+            except Exception:
                 return 0, 0, 0.0, 0.0
         
         def load_recent_analyses():
@@ -667,7 +667,7 @@ This demo shows how Circuit.AI can identify components and suggest educational p
                         return "No recent analyses found."
                 else:
                     return "Unable to load recent analyses."
-            except:
+            except Exception:
                 return "Unable to connect to analysis service."
         
         def export_report(analysis_id, export_format):
@@ -768,7 +768,7 @@ def draw_detection_boxes(image, detections):
             try:
                 # Try to use a nice font
                 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 12)
-            except:
+            except Exception:
                 font = ImageFont.load_default()
             
             # Draw label background

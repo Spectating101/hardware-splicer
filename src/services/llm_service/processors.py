@@ -2,7 +2,7 @@ import logging
 import re
 import asyncio
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -180,7 +180,7 @@ class DocumentProcessor:
                 "chunks": processed_chunks,
                 "summary": summary,
                 "total_chunks": len(chunks),
-                "processed_at": datetime.utcnow().isoformat(),
+                "processed_at": datetime.now(timezone.utc).isoformat(),
                 "success": True
             }
             
@@ -265,7 +265,7 @@ class DocumentProcessor:
                 "content": chunk,
                 "token_count": token_count,
                 "key_points": key_points,
-                "processed_at": datetime.utcnow().isoformat()
+                "processed_at": datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -562,7 +562,7 @@ class ContentAnalyzer:
                 "metadata": metadata,
                 "topics": topics,
                 "complexity": complexity,
-                "analyzed_at": datetime.utcnow().isoformat(),
+                "analyzed_at": datetime.now(timezone.utc).isoformat(),
                 "success": True
             }
             

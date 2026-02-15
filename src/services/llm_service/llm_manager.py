@@ -5,7 +5,7 @@ import logging
 import os
 import json
 from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
 import re
 
@@ -294,7 +294,7 @@ class LLMManager:
         try:
             health_status = {
                 "status": "healthy",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "components": {}
             }
             
@@ -334,7 +334,7 @@ class LLMManager:
             return {
                 "status": "error",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     async def cleanup(self):

@@ -1,7 +1,7 @@
 import logging
 import re
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import motor.motor_asyncio
 from bson.objectid import ObjectId
 import redis.asyncio as redis
@@ -258,7 +258,7 @@ class DatabaseOperations:
             try:
                 result = await self.papers.update_one(
                     {"id": paper_id},
-                    {"$set": {"status": sanitized_status, "updated_at": datetime.utcnow().isoformat()}}
+                    {"$set": {"status": sanitized_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
                 )
                 success = result.modified_count > 0
                 
@@ -311,7 +311,7 @@ class DatabaseOperations:
                 await self.processed.insert_one({
                     "doc_id": doc_id,
                     "content": sanitized_content,
-                    "stored_at": datetime.utcnow().isoformat()
+                    "stored_at": datetime.now(timezone.utc).isoformat()
                 })
                 
                 # Store searchable content in Redis
@@ -486,7 +486,7 @@ class DatabaseOperations:
             
             # Sanitize session data
             sanitized_session = self._sanitize_dict(session_data)
-            sanitized_session['stored_at'] = datetime.utcnow().isoformat()
+            sanitized_session['stored_at'] = datetime.now(timezone.utc).isoformat()
             
             logger.info(f"Storing research session: {session_id}")
             
@@ -533,7 +533,7 @@ class DatabaseOperations:
             
             # Sanitize session data
             sanitized_session = self._sanitize_dict(session_data)
-            sanitized_session['updated_at'] = datetime.utcnow().isoformat()
+            sanitized_session['updated_at'] = datetime.now(timezone.utc).isoformat()
             
             logger.info(f"Updating research session: {session_id}")
             
@@ -665,7 +665,7 @@ class DatabaseOperations:
             'answer': answer,
             'citations': citations,
             'user_profile': user_profile,
-            'timestamp': datetime.utcnow().isoformat()
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
         await self.responses.insert_one(doc)
 
@@ -685,7 +685,7 @@ class DatabaseOperations:
         try:
             health_status = {
                 "status": "healthy",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "components": {}
             }
             
@@ -713,7 +713,7 @@ class DatabaseOperations:
             return {
                 "status": "error",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     async def cleanup(self):

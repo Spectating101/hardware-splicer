@@ -183,13 +183,13 @@ def show_system_status():
     try:
         api_response = requests.get("http://localhost:8000/health", timeout=2)
         api_status = "✅ RUNNING" if api_response.status_code == 200 else "❌ ERROR"
-    except:
+    except Exception:
         api_status = "❌ NOT RUNNING"
     
     try:
         ui_response = requests.get("http://localhost:7860", timeout=2)
         ui_status = "✅ RUNNING" if ui_response.status_code == 200 else "❌ ERROR"
-    except:
+    except Exception:
         ui_status = "❌ NOT RUNNING"
     
     print(f"API Server (port 8000): {api_status}")
@@ -203,8 +203,7 @@ def show_system_status():
                 stats = stats_response.json()
                 print(f"Total analyses: {stats.get('total_analyses', 0)}")
                 print(f"Average processing time: {stats.get('average_processing_time', 'N/A')}")
-        except:
-            pass
+        except Exception: pass
 
 
 def main():

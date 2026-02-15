@@ -440,7 +440,7 @@ def draw_detection_boxes(image, detections):
             label = f"{component_type.upper()} ({confidence:.1f})"
             try:
                 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 12)
-            except:
+            except Exception:
                 font = ImageFont.load_default()
             
             # Draw label background

@@ -2,7 +2,7 @@ import logging
 import re
 import asyncio
 from typing import List, Dict, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import hashlib
 import os
 
@@ -281,7 +281,7 @@ class EmbeddingManager:
                         "doc_id": doc_id,
                         "chunk_index": i,
                         "text": text,
-                        "added_at": datetime.utcnow().isoformat()
+                        "added_at": datetime.now(timezone.utc).isoformat()
                     }
             except Exception as e:
                 logger.error(f"Failed to update document map: {str(e)}")
@@ -346,7 +346,7 @@ class EmbeddingManager:
                         "text": doc_info["text"],
                         "score": float(1.0 / (1.0 + distance)),
                         "distance": float(distance),
-                        "searched_at": datetime.utcnow().isoformat()
+                        "searched_at": datetime.now(timezone.utc).isoformat()
                     })
             
             logger.info(f"Found {len(results)} similar documents")
@@ -521,7 +521,7 @@ class EmbeddingManager:
         try:
             health_status = {
                 "status": "healthy",
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "components": {}
             }
             
@@ -581,7 +581,7 @@ class EmbeddingManager:
             return {
                 "status": "error",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
     
     @property

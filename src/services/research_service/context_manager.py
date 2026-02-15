@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import redis.asyncio as redis
 from src.storage.db.operations import DatabaseOperations
@@ -48,7 +48,7 @@ class ContentContextManager:
         session = {
             "session_id": session_id,
             "content_type": content_type,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.now(timezone.utc).isoformat(),
             "status": "active",
             "content_items": [],
             "citations": [],
@@ -91,8 +91,8 @@ class ContentContextManager:
                 "content_id": content_id,
                 "title": content_item.get("title", "Unknown"),
                 "source": content_item.get("source", "Unknown"),
-                "date": content_item.get("date", datetime.utcnow().isoformat()),
-                "added_at": datetime.utcnow().isoformat()
+                "date": content_item.get("date", datetime.now(timezone.utc).isoformat()),
+                "added_at": datetime.now(timezone.utc).isoformat()
             })
             
             # Update session
@@ -147,10 +147,10 @@ class ContentContextManager:
             "content": content_item.get("content", ""),
             "source": content_item.get("source", ""),
             "url": content_item.get("url", ""),
-            "date": content_item.get("date", datetime.utcnow().isoformat()),
+            "date": content_item.get("date", datetime.now(timezone.utc).isoformat()),
             "content_type": content_item.get("content_type", "general"),
             "metadata": content_item.get("metadata", {}),
-            "processed_at": datetime.utcnow().isoformat()
+            "processed_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Extract key information using LLM if available
@@ -201,7 +201,7 @@ Summary:"""
             session: Updated session data
         """
         try:
-            session["updated_at"] = datetime.utcnow().isoformat()
+            session["updated_at"] = datetime.now(timezone.utc).isoformat()
             await self.redis_client.setex(
                 f"session:{session_id}",
                 3600,  # 1 hour
@@ -228,7 +228,7 @@ Summary:"""
                 return False
             
             session["status"] = "closed"
-            session["closed_at"] = datetime.utcnow().isoformat()
+            session["closed_at"] = datetime.now(timezone.utc).isoformat()
             
             # Store final session data
             await self.db.store_session_data(session)
@@ -281,7 +281,7 @@ Summary:"""
         """
         try:
             cleaned = 0
-            current_time = datetime.utcnow()
+            current_time = datetime.now(timezone.utc)
             
             for session_id, session in list(self.active_sessions.items()):
                 created_at = datetime.fromisoformat(session["created_at"])

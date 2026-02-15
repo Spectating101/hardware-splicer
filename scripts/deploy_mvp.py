@@ -191,7 +191,7 @@ def initialize_database() -> bool:
             if len(tables) > 0:
                 print_success(f"Database already initialized with {len(tables)} tables")
                 return True
-        except:
+        except Exception:
             print_warning("Database file exists but appears corrupted")
     
     # Create directory if needed
