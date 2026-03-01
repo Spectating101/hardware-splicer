@@ -170,6 +170,43 @@ curl -X POST http://localhost:5000/api/v2/workflow/complete \
 # 3. KiCAD validation - Professional PCB validation
 curl -X POST http://localhost:5000/api/v2/workflow/validate-kicad \
   -F "kicad_file=@my_design.net"
+
+# 4. Multi-board machine compile - Boards + interconnect + ME anchors
+curl -X POST http://localhost:5000/api/v2/machines/compile \
+  -H "Content-Type: application/json" \
+  -d '{
+    "machine_name": "BenchInspector",
+    "boards": [
+      {"board_id": "main_ctrl", "lane": "generic", "pcb_outline_mm": [80, 50, 1.6]},
+      {"board_id": "sensor_io", "lane": "power", "pcb_outline_mm": [45, 35, 1.6]}
+    ],
+    "interconnects": [{"from_board": "main_ctrl", "to_board": "sensor_io", "interface": "i2c"}],
+    "power_tree": [{"source": "bench_supply", "board_id": "main_ctrl", "rail": "VIN", "voltage_v": 12.0}]
+  }'
+
+# 5. Multi-board machine package (multipart uploads)
+# Required form fields:
+#   - machine_json: JSON string with boards[] containing board_id values
+#   - pcb_file_<board_id>: one PCB file per board (e.g. pcb_file_main_ctrl)
+
+# 6. Machine system engineering simulation (power + interconnect + optional mechanism)
+curl -X POST http://localhost:5000/api/v2/machines/engineer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "machine": {
+      "machine_name": "BenchBot",
+      "boards": [{"board_id":"main_ctrl"},{"board_id":"sensor_io"}],
+      "interconnects": [{"from_board":"main_ctrl","to_board":"sensor_io","interface":"i2c","length_cm":25}],
+      "power_tree": [{"source":"bench_12v","board_id":"main_ctrl","rail":"VIN","voltage_v":12.0,"max_current_a":1.0}]
+    },
+    "mechanism": {"project_name":"benchbot_mech","pan_tilt":{"name":"pt","pan_servo":"sg90","tilt_servo":"sg90"}},
+    "run_mechanism_sim": true,
+    "simulation_fidelity": "high"
+  }'
+
+# 7. Full simulation gates (strict pass/fail)
+# multipart: machine_json + netlist_file_<board_id>/pcb_file_<board_id>
+# example: add strict=false to allow partial pass when ngspice is unavailable
 ```
 
 **See [V2_API_GUIDE.md](V2_API_GUIDE.md) for complete documentation.**
@@ -220,7 +257,12 @@ circuit-ai-api --host 0.0.0.0 --port 8000
 
 ## 💰 Monetization Strategy
 
-See [COMMERCIAL_STRATEGY.md](COMMERCIAL_STRATEGY.md) for a detailed breakdown of how to spin off and monetize these modules.
+For subscription positioning and reliability gates:
+- [docs/NICHE_SUBSCRIPTION_POSITIONING.md](docs/NICHE_SUBSCRIPTION_POSITIONING.md)
+- [docs/SUBSCRIPTION_RELIABILITY_GATES.md](docs/SUBSCRIPTION_RELIABILITY_GATES.md)
+
+For MCP operator packaging:
+- [mcp_server/README.md](mcp_server/README.md)
 
 ---
 

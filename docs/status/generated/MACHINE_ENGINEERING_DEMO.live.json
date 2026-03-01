@@ -1,0 +1,686 @@
+{
+  "result": {
+    "analysis": {
+      "control_coupling": {
+        "capabilities": {
+          "actuation_current_budget_a": 1.2,
+          "pwm_channels": 8,
+          "stepper_channels": 2
+        },
+        "control_board_id": "main_ctrl",
+        "issues": [],
+        "requirements": {
+          "estimated_actuation_current_a": 0.6,
+          "servo_channels": 2,
+          "stepper_channels": 0
+        }
+      },
+      "improvements": [
+        {
+          "action": "Apply suggested positions_mm and update cable lengths from recommended_lengths.",
+          "message": "Reposition boards to cut harness length by 295.23mm.",
+          "priority": "high",
+          "topic": "layout"
+        },
+        {
+          "action": "Adjust mechanism spec dimensions/materials and rerun high-fidelity simulation.",
+          "message": "Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo.",
+          "priority": "medium",
+          "topic": "mechanical_dfm"
+        }
+      ],
+      "interconnects": {
+        "issues": [],
+        "links": [
+          {
+            "from_board": "main_ctrl",
+            "interface": "i2c",
+            "length_cm": 25.0,
+            "margin_cm": 5.0,
+            "recommended_max_cm": 30.0,
+            "status": "pass",
+            "to_board": "sensor_io"
+          },
+          {
+            "from_board": "main_ctrl",
+            "interface": "uart",
+            "length_cm": 30.0,
+            "margin_cm": 70.0,
+            "recommended_max_cm": 100.0,
+            "status": "pass",
+            "to_board": "power_stage"
+          },
+          {
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 22.0,
+            "margin_cm": 178.0,
+            "recommended_max_cm": 200.0,
+            "status": "pass",
+            "to_board": "main_ctrl"
+          },
+          {
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 18.0,
+            "margin_cm": 182.0,
+            "recommended_max_cm": 200.0,
+            "status": "pass",
+            "to_board": "sensor_io"
+          }
+        ]
+      },
+      "mechanism": {
+        "bundle_file": "/tmp/circuit-ai/machine_mecha/out_xne9v9br/mecha_splicer.bundle.json",
+        "command": [
+          "python3",
+          "/home/phyrexian/Downloads/llm_automation/project_portfolio/Mecha-Splicer/scripts/mecha_splicer_spec.py",
+          "--spec",
+          "/tmp/circuit-ai/machine_mecha/mecha_spec_kd_8muw1.json",
+          "--out",
+          "/tmp/circuit-ai/machine_mecha/out_xne9v9br",
+          "--simulation-fidelity",
+          "high"
+        ],
+        "dfm": [
+          {
+            "message": "Tilt torque sanity: moment\u22480.25 N\u00b7m vs servo stall\u22480.18 N\u00b7m (SG90).",
+            "severity": "info"
+          },
+          {
+            "message": "Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo.",
+            "severity": "warn"
+          },
+          {
+            "message": "Professional mode: consider thicker base/bracket plates (>=8mm) for stiffness.",
+            "severity": "info"
+          }
+        ],
+        "ok": true,
+        "out_dir": "/tmp/circuit-ai/machine_mecha/out_xne9v9br",
+        "returncode": 0,
+        "safety": [
+          {
+            "message": "Motion subsystem present: add e-stop and startup interlock in controller firmware.",
+            "severity": "info",
+            "topic": "motion"
+          }
+        ],
+        "simulation": [
+          {
+            "domain": "pan_tilt",
+            "message": "Tilt torque safety-factor\u22480.71x (stall/reference).",
+            "metrics": {
+              "tilt_torque_safety_factor_x": 0.7132
+            },
+            "model": "high",
+            "severity": "block"
+          },
+          {
+            "domain": "pan_tilt",
+            "message": "PyBullet pan-tilt scene: RMS error pan\u22483.12deg, tilt\u22481.94deg.",
+            "metrics": {
+              "pan_rms_error_deg": 3.1224,
+              "pan_target_deg": 25.0,
+              "steps": 720,
+              "tilt_rms_error_deg": 1.9383,
+              "tilt_target_deg": 20.0
+            },
+            "model": "pybullet_pan_tilt",
+            "severity": "info"
+          }
+        ],
+        "stderr_tail": "pybullet build time: Mar  1 2026 17:56:37\n"
+      },
+      "placement": {
+        "after_mm": 184.77,
+        "before_mm": 480.0,
+        "improvement_mm": 295.23,
+        "ok": true,
+        "positions_mm": {
+          "main_ctrl": [
+            118.13,
+            0.0
+          ],
+          "power_stage": [
+            179.72,
+            0.0
+          ],
+          "sensor_io": [
+            150.49,
+            0.0
+          ]
+        },
+        "recommended_lengths": [
+          {
+            "from_board": "main_ctrl",
+            "interface": "i2c",
+            "recommended_length_cm": 5.9,
+            "to_board": "sensor_io"
+          },
+          {
+            "from_board": "main_ctrl",
+            "interface": "uart",
+            "recommended_length_cm": 9.4,
+            "to_board": "power_stage"
+          },
+          {
+            "from_board": "power_stage",
+            "interface": "power",
+            "recommended_length_cm": 9.4,
+            "to_board": "main_ctrl"
+          },
+          {
+            "from_board": "power_stage",
+            "interface": "power",
+            "recommended_length_cm": 5.5,
+            "to_board": "sensor_io"
+          }
+        ]
+      },
+      "power": {
+        "issues": [],
+        "rails": [
+          {
+            "board_current_a": 0.9,
+            "board_id": "power_stage",
+            "length_cm": 20.0,
+            "rail": "VIN",
+            "source": "Battery_24V",
+            "status": "pass",
+            "voltage_at_board_v": 23.9698,
+            "voltage_drop_v": 0.0302,
+            "voltage_nominal_v": 24.0,
+            "wire_awg": "24"
+          },
+          {
+            "board_current_a": 0.45,
+            "board_id": "main_ctrl",
+            "length_cm": 22.0,
+            "rail": "12V",
+            "source": "power_stage",
+            "status": "pass",
+            "voltage_at_board_v": 11.9895,
+            "voltage_drop_v": 0.0105,
+            "voltage_nominal_v": 12.0,
+            "wire_awg": "22"
+          },
+          {
+            "board_current_a": 0.22,
+            "board_id": "sensor_io",
+            "length_cm": 18.0,
+            "rail": "12V",
+            "source": "power_stage",
+            "status": "pass",
+            "voltage_at_board_v": 11.9933,
+            "voltage_drop_v": 0.0067,
+            "voltage_nominal_v": 12.0,
+            "wire_awg": "24"
+          }
+        ],
+        "source_currents_a": {
+          "Battery_24V": 0.9,
+          "power_stage": 0.67
+        },
+        "spice": {
+          "error": "ngspice_not_available",
+          "export_method": "none",
+          "message": "ngspice is not installed on this host.",
+          "ok": false
+        }
+      },
+      "verdict": "sim_ready"
+    },
+    "compiled": {
+      "boards": [
+        {
+          "assumptions": [
+            "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+            "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+          ],
+          "blockers": [],
+          "board_id": "main_ctrl",
+          "design_intent": "professional",
+          "hints": {
+            "loads_cc": [],
+            "sources": [],
+            "voltage_constraints": []
+          },
+          "lane": "generic",
+          "name": "Main Controller",
+          "quality": {
+            "confidence": 0.53,
+            "grade": "B",
+            "readiness_level": "manufacturable",
+            "reasons": [
+              "Missing inputs: 8 fields."
+            ],
+            "score": 84.0
+          },
+          "questions": [
+            "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+            "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+            "Is this a single-pass deliverable or an iterative revision loop?",
+            "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+            "Do you have an enclosure/3D model and mounting hole requirements?"
+          ],
+          "readiness_level": "manufacturable",
+          "risks": [],
+          "role": "",
+          "sow_md": "# SOW \u2014 Main Ctrl\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:21:30.182865+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+        },
+        {
+          "assumptions": [
+            "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+            "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+          ],
+          "blockers": [],
+          "board_id": "sensor_io",
+          "design_intent": "professional",
+          "hints": {
+            "loads_cc": [
+              {
+                "current_a": 0.22,
+                "name": "SensorArray",
+                "notes": "",
+                "rail": "12V"
+              }
+            ],
+            "sources": [
+              {
+                "max_current_a": 1.0,
+                "name": "VIN",
+                "notes": "",
+                "voltage_v": 12.0
+              }
+            ],
+            "voltage_constraints": [
+              {
+                "max_v": null,
+                "min_v": null,
+                "nominal_v": 12.0,
+                "notes": "",
+                "rail": "12V"
+              }
+            ]
+          },
+          "lane": "power",
+          "name": "Sensor IO",
+          "quality": {
+            "confidence": 0.67,
+            "grade": "B",
+            "readiness_level": "manufacturable",
+            "reasons": [
+              "Missing inputs: 8 fields."
+            ],
+            "score": 84.0
+          },
+          "questions": [
+            "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+            "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+            "Is this a single-pass deliverable or an iterative revision loop?",
+            "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+            "Do you have an enclosure/3D model and mounting hole requirements?",
+            "Provide max current per rail + transient requirements (startup, inrush, load step).",
+            "Any thermal limits (ambient temp, enclosure, airflow)?",
+            "Any EMI constraints (sensitive radios, conducted emissions target)?"
+          ],
+          "readiness_level": "manufacturable",
+          "risks": [
+            "SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly."
+          ],
+          "role": "",
+          "sow_md": "# SOW \u2014 Sensor IO\n\n- Lane: `power`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:21:30.185300+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n- Provide max current per rail + transient requirements (startup, inrush, load step).\n- Any thermal limits (ambient temp, enclosure, airflow)?\n- Any EMI constraints (sensitive radios, conducted emissions target)?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n- SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly.\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+        },
+        {
+          "assumptions": [
+            "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+            "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+          ],
+          "blockers": [],
+          "board_id": "power_stage",
+          "design_intent": "professional",
+          "hints": {
+            "loads_cc": [
+              {
+                "current_a": 0.9,
+                "name": "ActuationRail",
+                "notes": "",
+                "rail": "12V"
+              }
+            ],
+            "sources": [
+              {
+                "max_current_a": 3.0,
+                "name": "VIN",
+                "notes": "",
+                "voltage_v": 24.0
+              }
+            ],
+            "voltage_constraints": [
+              {
+                "max_v": null,
+                "min_v": null,
+                "nominal_v": 12.0,
+                "notes": "",
+                "rail": "12V"
+              }
+            ]
+          },
+          "lane": "power",
+          "name": "Power Stage",
+          "quality": {
+            "confidence": 0.67,
+            "grade": "B",
+            "readiness_level": "manufacturable",
+            "reasons": [
+              "Missing inputs: 8 fields."
+            ],
+            "score": 84.0
+          },
+          "questions": [
+            "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+            "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+            "Is this a single-pass deliverable or an iterative revision loop?",
+            "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+            "Do you have an enclosure/3D model and mounting hole requirements?",
+            "Provide max current per rail + transient requirements (startup, inrush, load step).",
+            "Any thermal limits (ambient temp, enclosure, airflow)?",
+            "Any EMI constraints (sensitive radios, conducted emissions target)?"
+          ],
+          "readiness_level": "manufacturable",
+          "risks": [
+            "SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly."
+          ],
+          "role": "",
+          "sow_md": "# SOW \u2014 Power Stage\n\n- Lane: `power`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:21:30.185420+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n- Provide max current per rail + transient requirements (startup, inrush, load step).\n- Any thermal limits (ambient temp, enclosure, airflow)?\n- Any EMI constraints (sensitive radios, conducted emissions target)?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n- SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly.\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+        }
+      ],
+      "hints": {
+        "boards": [
+          {
+            "board_id": "main_ctrl",
+            "hints": {
+              "loads_cc": [],
+              "sources": [],
+              "voltage_constraints": []
+            }
+          },
+          {
+            "board_id": "sensor_io",
+            "hints": {
+              "loads_cc": [
+                {
+                  "current_a": 0.22,
+                  "name": "SensorArray",
+                  "notes": "",
+                  "rail": "12V"
+                }
+              ],
+              "sources": [
+                {
+                  "max_current_a": 1.0,
+                  "name": "VIN",
+                  "notes": "",
+                  "voltage_v": 12.0
+                }
+              ],
+              "voltage_constraints": [
+                {
+                  "max_v": null,
+                  "min_v": null,
+                  "nominal_v": 12.0,
+                  "notes": "",
+                  "rail": "12V"
+                }
+              ]
+            }
+          },
+          {
+            "board_id": "power_stage",
+            "hints": {
+              "loads_cc": [
+                {
+                  "current_a": 0.9,
+                  "name": "ActuationRail",
+                  "notes": "",
+                  "rail": "12V"
+                }
+              ],
+              "sources": [
+                {
+                  "max_current_a": 3.0,
+                  "name": "VIN",
+                  "notes": "",
+                  "voltage_v": 24.0
+                }
+              ],
+              "voltage_constraints": [
+                {
+                  "max_v": null,
+                  "min_v": null,
+                  "nominal_v": 12.0,
+                  "notes": "",
+                  "rail": "12V"
+                }
+              ]
+            }
+          }
+        ],
+        "interconnects": [
+          {
+            "connector": "",
+            "from_board": "main_ctrl",
+            "interface": "i2c",
+            "length_cm": 25.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "sensor_io"
+          },
+          {
+            "connector": "",
+            "from_board": "main_ctrl",
+            "interface": "uart",
+            "length_cm": 30.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "power_stage"
+          },
+          {
+            "connector": "",
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 22.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "main_ctrl"
+          },
+          {
+            "connector": "",
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 18.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "sensor_io"
+          }
+        ],
+        "machine_name": "PanTilt_Inspector_System",
+        "mecha_electronics_anchors": [
+          {
+            "device": "Main Controller",
+            "mounts": [],
+            "pcb_h_mm": 55.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 80.0,
+            "ports": []
+          },
+          {
+            "device": "Sensor IO",
+            "mounts": [],
+            "pcb_h_mm": 35.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 50.0,
+            "ports": []
+          },
+          {
+            "device": "Power Stage",
+            "mounts": [],
+            "pcb_h_mm": 45.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 70.0,
+            "ports": []
+          }
+        ],
+        "power_tree": [
+          {
+            "board_id": "power_stage",
+            "max_current_a": 3.0,
+            "notes": "",
+            "rail": "VIN",
+            "source": "Battery_24V",
+            "voltage_v": 24.0
+          },
+          {
+            "board_id": "main_ctrl",
+            "max_current_a": 1.2,
+            "notes": "",
+            "rail": "12V",
+            "source": "power_stage",
+            "voltage_v": 12.0
+          },
+          {
+            "board_id": "sensor_io",
+            "max_current_a": 0.8,
+            "notes": "",
+            "rail": "12V",
+            "source": "power_stage",
+            "voltage_v": 12.0
+          }
+        ]
+      },
+      "machine": {
+        "blockers": [],
+        "board_count": 3,
+        "design_intent": "professional",
+        "interconnect_count": 4,
+        "lane": "generic",
+        "machine_name": "PanTilt_Inspector_System",
+        "readiness_level": "ready"
+      },
+      "system": {
+        "harness_bom_csv": "from_board,to_board,interface,connector,signal_count,length_cm,notes\n\"main_ctrl\",\"sensor_io\",\"i2c\",\"JST-XH\",3,25,\"\"\n\"main_ctrl\",\"power_stage\",\"uart\",\"JST-XH\",3,30,\"\"\n\"power_stage\",\"main_ctrl\",\"power\",\"JST-XH\",2,22,\"\"\n\"power_stage\",\"sensor_io\",\"power\",\"JST-XH\",2,18,\"\"\n",
+        "interconnects": [
+          {
+            "connector": "",
+            "from_board": "main_ctrl",
+            "interface": "i2c",
+            "length_cm": 25.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "sensor_io"
+          },
+          {
+            "connector": "",
+            "from_board": "main_ctrl",
+            "interface": "uart",
+            "length_cm": 30.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "power_stage"
+          },
+          {
+            "connector": "",
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 22.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "main_ctrl"
+          },
+          {
+            "connector": "",
+            "from_board": "power_stage",
+            "interface": "power",
+            "length_cm": 18.0,
+            "notes": "",
+            "signals": [],
+            "to_board": "sensor_io"
+          }
+        ],
+        "mecha_electronics_anchors": [
+          {
+            "device": "Main Controller",
+            "mounts": [],
+            "pcb_h_mm": 55.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 80.0,
+            "ports": []
+          },
+          {
+            "device": "Sensor IO",
+            "mounts": [],
+            "pcb_h_mm": 35.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 50.0,
+            "ports": []
+          },
+          {
+            "device": "Power Stage",
+            "mounts": [],
+            "pcb_h_mm": 45.0,
+            "pcb_t_mm": 1.6,
+            "pcb_w_mm": 70.0,
+            "ports": []
+          }
+        ],
+        "power_tree": [
+          {
+            "board_id": "power_stage",
+            "max_current_a": 3.0,
+            "notes": "",
+            "rail": "VIN",
+            "source": "Battery_24V",
+            "voltage_v": 24.0
+          },
+          {
+            "board_id": "main_ctrl",
+            "max_current_a": 1.2,
+            "notes": "",
+            "rail": "12V",
+            "source": "power_stage",
+            "voltage_v": 12.0
+          },
+          {
+            "board_id": "sensor_io",
+            "max_current_a": 0.8,
+            "notes": "",
+            "rail": "12V",
+            "source": "power_stage",
+            "voltage_v": 12.0
+          }
+        ],
+        "questions": [],
+        "risks": [],
+        "sow_md": "# System SOW \u2014 PanTilt_Inspector_System\n\n## Board Scope\n- `main_ctrl` (generic/professional): readiness `manufacturable`, quality `B:84.0`.\n- `sensor_io` (power/professional): readiness `manufacturable`, quality `B:84.0`.\n- `power_stage` (power/professional): readiness `manufacturable`, quality `B:84.0`.\n\n## System Open Questions\n- None\n\n## System Risks\n- None\n\n## Acceptance\n- Each board has explicit requirements + readiness + unresolved questions.\n- Inter-board interfaces are listed with connector and signal assumptions.\n- Mechanical enclosure anchors are generated for boards that provide outlines.\n"
+      }
+    },
+    "intake_id": "1621debc40",
+    "machine": {
+      "blockers": [],
+      "board_count": 3,
+      "design_intent": "professional",
+      "interconnect_count": 4,
+      "lane": "generic",
+      "machine_name": "PanTilt_Inspector_System",
+      "readiness_level": "ready"
+    },
+    "report_md": "# System Engineering Report \u2014 PanTilt_Inspector_System\n\n- Generated: `2026-03-01T14:21:30.623253+00:00`\n- Boards: `3`\n- Interconnects: `4`\n- Base readiness: `ready`\n- Simulation verdict: `sim_ready`\n\n## Placement Optimization\n- Total cable (before): `480.0` mm\n- Total cable (after): `184.77` mm\n- Improvement: `295.23` mm\n\n## Power Simulation\n- Paths simulated: `3`\n- Issues: `0`\n- ngspice: `ngspice_not_available`\n\n## Interconnect Simulation\n- Links checked: `4`\n- Issues: `0`\n\n## Control/Mechanism Coupling\n- Control board: `main_ctrl`\n- Coupling issues: `0`\n- Mecha bridge: `True`\n- Mecha simulation findings: `2`\n\n## Improvements\n- [high] Reposition boards to cut harness length by 295.23mm. -> Apply suggested positions_mm and update cable lengths from recommended_lengths.\n- [medium] Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. -> Adjust mechanism spec dimensions/materials and rerun high-fidelity simulation.\n",
+    "saved_artifacts": {
+      "hints": "/tmp/circuit-ai/intakes/1621debc40/hints.json",
+      "requirements": "/tmp/circuit-ai/intakes/1621debc40/requirements.json",
+      "sow_md": "/tmp/circuit-ai/intakes/1621debc40/SOW.md"
+    }
+  },
+  "status": "success"
+}

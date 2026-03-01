@@ -1,6 +1,6 @@
 # Circuit-AI MCP Server
 
-**Professional PCB validation, project recipes, and manufacturing tools via Model Context Protocol (MCP).**
+**KiCad preflight + manufacturing handoff via Model Context Protocol (MCP).**
 
 [![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)]()
 [![MCP](https://img.shields.io/badge/MCP-compatible-success.svg)]()
@@ -9,11 +9,37 @@
 
 ## What is This?
 
-An MCP server that brings Circuit-AI's professional electronics tools into your IDE:
+An MCP server that brings Circuit-AI's electronics workflow into your IDE:
 - **Validate KiCAD designs** without leaving VSCode/Cursor/Claude Desktop
 - **Get quantitative fixes**: "Widen trace to 2mm" not "traces too thin"
-- **Find buildable projects** from your component inventory
-- **Generate BOMs** with supplier links
+- **Run iterative intake** before committing to a risky design direction
+- **Generate handoff outputs** (BOM/Gerber/package) for build/manufacturing
+
+## Who This Is For
+
+Best fit:
+- Freelance PCB/KiCad engineers doing repeated revisions
+- Small hardware teams shipping prototypes and manufacturing handoff packages
+- Technical operators who want a defensible preflight process before fab
+
+Not a fit:
+- Buyers expecting one-click final hardware design from vague prompts
+- Teams needing certified compliance sign-off (UL/CE/medical) without lab workflows
+- One-off hobby users who only run a single validation occasionally
+
+## Core Promise (Niche)
+
+Circuit-AI is sold as a **respin-prevention and handoff-automation layer**, not a "magic PCB designer."
+
+What you are buying:
+- Faster draft-to-review loops
+- Quantitative preflight checks with explicit open questions
+- Repeatable manufacturing package generation with provenance
+
+What you are not buying:
+- Guaranteed compliance certification
+- Fully autonomous high-risk RF/high-speed design without constraints
+- Final responsibility transfer away from engineering review
 
 ---
 
@@ -43,13 +69,18 @@ If the Circuit-AI backend requires an API key, set:
 
 This MCP server is designed to be monetized with **API keys + daily quotas**.
 
-Recommended early model: **prepaid credits** (simpler than subscriptions).
-- Hobby: validation-only
-- Builder: validation + limited BOM
-- Pro: validation + BOM + Gerbers
+Recommended early model:
+- **Subscription for recurring users** (weekly revision workflow)
+- **Manual fulfill/credits for occasional buyers**
+
+Plan presets supported by backend:
+- `free` (validation-only starter)
+- `hobby` (higher validation cap)
+- `builder` (validation + limited manufacturing outputs)
+- `pro` / `paid` (full workflow caps)
 
 Key management endpoints live on the Circuit-AI backend:
-- `POST /api/v2/admin/keys/issue` (plan preset: `free|paid`)
+- `POST /api/v2/admin/keys/issue` (plan preset: `free|hobby|builder|pro|paid`)
 - `GET /api/v2/admin/keys` (list)
 - `POST /api/v2/admin/keys/<key_hash>/revoke` (revoke)
 
@@ -61,6 +92,11 @@ Buyer flow (minimal marketing):
 If Stripe isn’t available in your country, you can still monetize:
 - Collect payment via PayPal/Wise/bank transfer.
 - Issue keys with `POST /api/v2/admin/fulfill` (records fulfillment; can email setup if configured).
+
+### Niche Packaging Rule
+
+Use subscriptions only for users with recurring monthly usage.
+For uncertain scopes and one-off jobs, use paid discovery + milestone service delivery first.
 
 ### Install in Claude Desktop
 
@@ -331,14 +367,19 @@ npm run dev
 
 ---
 
-## Pricing (When Deployed)
+## Pricing (Niche Starting Point)
 
-| Tier | Price | Tools |
-|------|-------|-------|
-| **Free** | $0 | 10 validations/month |
-| **Maker** | $19/mo | Unlimited validations + recipes |
-| **Pro** | $49/mo | + Manufacturing (Gerber, BOM, JLCPCB) |
-| **Team** | $149/mo | 5 seats + API access |
+Use this as the initial positioning for KiCad/prototype operators:
+
+| Tier | Price | Best Fit | Core Limits |
+|------|-------|----------|-------------|
+| **Builder** | $29/mo | Solo engineer, recurring preflight | Validation-heavy + limited package builds |
+| **Pro** | $79/mo | Freelancer with active client revisions | Full validation + manufacturing workflow caps |
+| **Team** | $199/mo | Small hardware team | Shared workflow + higher daily caps |
+
+For one-time buyers:
+- Sell fixed-scope service package first.
+- Upgrade to subscription only after recurring revision volume is proven.
 
 ---
 
@@ -358,23 +399,15 @@ npm run dev
 
 ---
 
-## Roadmap
+## Operational Focus
 
-**Week 1 (Current):**
-- [x] MCP server core
-- [x] validate-kicad tool
-- [x] suggest-projects tool
-- [ ] generate-bom tool (basic)
+Current reliability focus:
+- Keep the niche scope tight (KiCad preflight + handoff workflow)
+- Preserve explicit intake -> validate -> package iteration path
+- Enforce plan quotas and predictable entitlement boundaries
 
-**Week 2:**
-- [ ] Gerber generation tool
-- [ ] JLCPCB integration
-- [ ] Enhanced BOM with pricing
-
-**Week 3:**
-- [ ] DUM-E design assistant tool
-- [ ] Visual PCB analysis tool
-- [ ] Streaming support for long outputs
+Expansion rule:
+- Add new high-variance features only after current niche workflow remains stable under real recurring usage.
 
 ---
 

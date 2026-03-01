@@ -20,6 +20,7 @@ from typing import Optional, Dict, Any, Tuple, Set, List
 import textwrap
 import subprocess
 import shutil
+import zipfile
 import csv as _csv
 import io as _io
 
@@ -3696,6 +3697,424 @@ def robot_probe_plan():
 
 
 # ============================================================================
+# V2 API - MACHINES (multi-board system compile)
+# ============================================================================
+
+@app.route("/api/v2/machines/compile", methods=["POST"])
+@require_api_key("machines_compile")
+def machines_compile():
+    """
+    Compile a multi-board machine definition into board-level EE packs plus
+    system-level integration artifacts.
+
+    Request JSON:
+      {
+        "machine_name": "name",
+        "lane": "generic|power|rf|automotive|compliance",            # optional default for boards
+        "design_intent": "prototype|professional",                    # optional default for boards
+        "boards": [
+          {
+            "board_id": "main_ctrl",
+            "name": "Main Controller",
+            "lane": "generic",
+            "design_intent": "prototype",
+            "requirements": {...},                                    # optional, template auto-filled if absent
+            "pcb_outline_mm": [80, 60, 1.6],                          # optional EE->ME bridge
+            "mounts": [...],                                           # optional EE->ME bridge
+            "ports": [...]                                             # optional EE->ME bridge
+          }
+        ],
+        "interconnects": [
+          {
+            "from_board": "main_ctrl",
+            "to_board": "sensor_io",
+            "interface": "i2c",
+            "signals": ["SCL", "SDA", "GND"],
+            "connector": "JST-XH-4",
+            "length_cm": 25
+          }
+        ],
+        "power_tree": [
+          {"source": "battery_12v", "board_id": "main_ctrl", "rail": "VIN", "voltage_v": 12.0, "max_current_a": 2.0}
+        ]
+      }
+    """
+    if not request.is_json:
+        return jsonify({"error": "JSON body required"}), 400
+    payload = request.get_json() or {}
+    try:
+        from src.engines.machine_requirements import compile_machine_requirements
+
+        compiled = compile_machine_requirements(payload)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    system = compiled.get("system") or {}
+    board_reports = compiled.get("boards") or []
+    board_questions = []
+    board_risks = []
+    board_assumptions = []
+    for b in board_reports:
+        bid = b.get("board_id") or "board"
+        for q in (b.get("questions") or [])[:40]:
+            board_questions.append(f"[{bid}] {q}")
+        for r in (b.get("risks") or [])[:20]:
+            board_risks.append(f"[{bid}] {r}")
+        for a in (b.get("assumptions") or [])[:20]:
+            board_assumptions.append(f"[{bid}] {a}")
+
+    system_questions = list(system.get("questions") or [])
+    system_risks = list(system.get("risks") or [])
+    all_questions = system_questions + board_questions
+    all_risks = system_risks + board_risks
+
+    machine_info = compiled.get("machine") or {}
+    machine_name = machine_info.get("machine_name") or "machine"
+    assumptions_lines = ["Machine-level assumptions:"] + board_assumptions if board_assumptions else ["None"]
+    questions_md = "\n".join(f"- {q}" for q in all_questions) + ("\n" if all_questions else "")
+    assumptions_md = "\n".join(f"- {a}" for a in assumptions_lines) + ("\n" if assumptions_lines else "")
+    risk_md = "\n".join(f"- {r}" for r in all_risks) + ("\n" if all_risks else "")
+    sow_md = str(system.get("sow_md") or f"# System SOW — {machine_name}\n\n- No system SOW generated.\n")
+
+    intake_id = uuid.uuid4().hex[:10]
+    saved = _save_intake_artifacts(
+        intake_id,
+        {
+            "requirements": payload,
+            "hints": compiled.get("hints") or {},
+            "questions_md": questions_md,
+            "assumptions_md": assumptions_md,
+            "risk_register_md": risk_md,
+            "sow_md": sow_md,
+        },
+    )
+    compiled["intake_id"] = intake_id
+    compiled["saved_artifacts"] = saved
+    return jsonify({"status": "success", "result": compiled})
+
+
+@app.route("/api/v2/machines/build-package", methods=["POST"])
+@require_api_key("machines_build_package")
+def machines_build_package():
+    """
+    Build a multi-board machine package from uploaded PCB files.
+
+    Request: multipart/form-data
+      - machine_json: required JSON string (same shape as /machines/compile input)
+      - board PCB files:
+          default file field is `pcb_file_<board_id>`
+          or board can specify `pcb_form_field` in machine_json
+      - optional netlists:
+          default file field is `netlist_file_<board_id>`
+          or board can specify `netlist_form_field` in machine_json
+    """
+    machine_json_raw = (request.form.get("machine_json") or "").strip()
+    if not machine_json_raw:
+        return jsonify({"error": "machine_json required"}), 400
+    try:
+        machine_payload = json.loads(machine_json_raw)
+    except Exception as e:
+        return jsonify({"error": f"invalid machine_json: {e}"}), 400
+
+    if not isinstance(machine_payload, dict):
+        return jsonify({"error": "machine_json must decode to an object"}), 400
+    if not isinstance(machine_payload.get("boards"), list) or not machine_payload.get("boards"):
+        return jsonify({"error": "machine_json.boards[] is required"}), 400
+
+    try:
+        from src.engines.machine_requirements import compile_machine_requirements
+
+        compiled = compile_machine_requirements(machine_payload)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    board_rows: Dict[str, Dict[str, Any]] = {}
+    for row in machine_payload.get("boards") or []:
+        if isinstance(row, dict):
+            bid = str(row.get("board_id") or "").strip()
+            if bid:
+                board_rows[bid] = row
+
+    board_reports = compiled.get("boards") or []
+    missing_files: List[Dict[str, str]] = []
+    build_results: List[Dict[str, Any]] = []
+    temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+    temp_dir.mkdir(parents=True, exist_ok=True)
+
+    for report in board_reports:
+        board_id = str(report.get("board_id") or "").strip()
+        if not board_id:
+            continue
+        board_row = board_rows.get(board_id) or {}
+        pcb_field = str(board_row.get("pcb_form_field") or f"pcb_file_{board_id}").strip()
+        if pcb_field not in request.files:
+            missing_files.append({"board_id": board_id, "expected_field": pcb_field})
+            continue
+
+        pcb_upload = request.files[pcb_field]
+        pcb_path = temp_dir / f"{uuid.uuid4().hex[:8]}_{board_id}.kicad_pcb"
+        pcb_upload.save(str(pcb_path))
+
+        netlist_field = str(board_row.get("netlist_form_field") or f"netlist_file_{board_id}").strip()
+        netlist_path: Optional[Path] = None
+        if netlist_field in request.files:
+            netlist_upload = request.files[netlist_field]
+            netlist_path = temp_dir / f"{uuid.uuid4().hex[:8]}_{board_id}.net"
+            netlist_upload.save(str(netlist_path))
+
+        result = _build_manufacturing_package(
+            pcb_path=pcb_path,
+            netlist_path=netlist_path,
+            hints=report.get("hints") if isinstance(report.get("hints"), dict) else None,
+            intake_id=None,
+            netlist_export_method="upload" if netlist_path else None,
+            netlist_export_error=None,
+        )
+        build_results.append(
+            {
+                "board_id": board_id,
+                "status": result.get("status"),
+                "package_file": result.get("package_file"),
+                "manifest": result.get("manifest"),
+            }
+        )
+
+    if missing_files:
+        return jsonify({"error": "missing board pcb uploads", "missing": missing_files}), 400
+
+    machine_info = compiled.get("machine") or {}
+    machine_name = str(machine_info.get("machine_name") or "machine")
+    machine_slug = "".join(ch if ch.isalnum() or ch in ("-", "_") else "_" for ch in machine_name).strip("_") or "machine"
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out_dir = Path(tempfile.gettempdir()) / "circuit-ai" / "packages"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    bundle_path = out_dir / f"{machine_slug}-{stamp}-machine-package.zip"
+
+    machine_manifest = {
+        "machine": machine_info,
+        "board_packages": build_results,
+        "system": {
+            "interconnects": (compiled.get("system") or {}).get("interconnects") or [],
+            "power_tree": (compiled.get("system") or {}).get("power_tree") or [],
+            "mecha_electronics_anchors": (compiled.get("system") or {}).get("mecha_electronics_anchors") or [],
+        },
+    }
+    system = compiled.get("system") or {}
+    with zipfile.ZipFile(bundle_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("MACHINE_MANIFEST.json", json.dumps(machine_manifest, indent=2, sort_keys=True) + "\n")
+        zf.writestr("MACHINE_HINTS.json", json.dumps(compiled.get("hints") or {}, indent=2, sort_keys=True) + "\n")
+        zf.writestr("SYSTEM_SOW.md", str(system.get("sow_md") or "").rstrip() + "\n")
+        zf.writestr("HARNESS_BOM.csv", str(system.get("harness_bom_csv") or "").rstrip() + "\n")
+        for r in build_results:
+            pkg_file = r.get("package_file")
+            bid = r.get("board_id") or "board"
+            if not pkg_file:
+                continue
+            p = Path(str(pkg_file))
+            if p.exists():
+                zf.write(str(p), arcname=f"boards/{bid}/{p.name}")
+            man = r.get("manifest")
+            if isinstance(man, dict):
+                zf.writestr(f"boards/{bid}/MANIFEST.json", json.dumps(man, indent=2, sort_keys=True) + "\n")
+
+    return jsonify(
+        {
+            "status": "success",
+            "machine": machine_info,
+            "board_packages": build_results,
+            "machine_package_file": str(bundle_path),
+            "download_url": f"/api/v2/manufacture/download-package/{bundle_path.name}",
+        }
+    )
+
+
+@app.route("/api/v2/machines/engineer", methods=["POST"])
+@require_api_key("machines_engineer")
+def machines_engineer():
+    """
+    Perform system-level engineering for a multi-board machine:
+      - placement optimization
+      - interconnect simulation
+      - power distribution simulation (incl. ngspice when available)
+      - optional mechanism simulation via Mecha-Splicer bridge
+
+    Request JSON:
+      {
+        "machine": { ... },                   # required; same machine object used by /machines/compile
+        "mechanism": { ... },                 # optional Mecha-Splicer spec fragment
+        "run_mechanism_sim": true,            # optional, default true
+        "simulation_fidelity": "high"         # optional: starter|high
+      }
+    """
+    if not request.is_json:
+        return jsonify({"error": "JSON body required"}), 400
+    payload = request.get_json() or {}
+    machine = payload.get("machine")
+    if not isinstance(machine, dict):
+        return jsonify({"error": "machine object required"}), 400
+    mechanism = payload.get("mechanism")
+    if mechanism is None:
+        mechanism = {}
+    if not isinstance(mechanism, dict):
+        return jsonify({"error": "mechanism must be an object"}), 400
+
+    run_mecha = bool(payload.get("run_mechanism_sim", True))
+    fidelity = str(payload.get("simulation_fidelity") or "high").strip().lower()
+    if fidelity not in ("starter", "high"):
+        fidelity = "high"
+    try:
+        from src.engines.machine_system_engineering import engineer_machine_system
+
+        result = engineer_machine_system(
+            machine,
+            run_mechanism_sim=run_mecha,
+            mechanism_spec=mechanism,
+            simulation_fidelity=fidelity,
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    intake_id = uuid.uuid4().hex[:10]
+    saved = _save_intake_artifacts(
+        intake_id,
+        {
+            "requirements": {"machine": machine, "mechanism": mechanism},
+            "hints": (result.get("compiled") or {}).get("hints") or {},
+            "sow_md": str(result.get("report_md") or "").rstrip() + "\n",
+        },
+    )
+    result["intake_id"] = intake_id
+    result["saved_artifacts"] = saved
+    return jsonify({"status": "success", "result": result})
+
+
+@app.route("/api/v2/machines/full-simulate", methods=["POST"])
+@require_api_key("machines_full_simulate")
+def machines_full_simulate():
+    """
+    Strict full-system simulation for multi-board machines.
+
+    Supports either:
+    1) JSON body:
+       {
+         "machine": {...},
+         "mechanism": {... optional ...},
+         "board_design_files": {
+           "main_ctrl": {"path": "/abs/path/main.net", "kind": "netlist"},
+           "sensor_io": {"path": "/abs/path/board.kicad_pcb", "kind": "pcb"}
+         },
+         "strict": true,
+         "simulation_fidelity": "high"
+       }
+    2) multipart/form-data:
+       - machine_json: required JSON string
+       - mechanism_json: optional JSON string
+       - strict: optional bool-like
+       - simulation_fidelity: optional starter|high
+       - for each board_id:
+         - netlist_file_<board_id> OR pcb_file_<board_id>
+    """
+    machine: Dict[str, Any] = {}
+    mechanism: Dict[str, Any] = {}
+    board_design_files: Dict[str, Dict[str, Any]] = {}
+    strict = True
+    simulation_fidelity = "high"
+
+    if request.is_json:
+        payload = request.get_json() or {}
+        machine = payload.get("machine") if isinstance(payload.get("machine"), dict) else {}
+        mechanism = payload.get("mechanism") if isinstance(payload.get("mechanism"), dict) else {}
+        board_design_files = payload.get("board_design_files") if isinstance(payload.get("board_design_files"), dict) else {}
+        strict = bool(payload.get("strict", True))
+        simulation_fidelity = str(payload.get("simulation_fidelity") or "high").strip().lower()
+    else:
+        machine_raw = (request.form.get("machine_json") or "").strip()
+        if machine_raw:
+            try:
+                parsed = json.loads(machine_raw)
+                if isinstance(parsed, dict):
+                    machine = parsed
+            except Exception as e:
+                return jsonify({"error": f"invalid machine_json: {e}"}), 400
+        mech_raw = (request.form.get("mechanism_json") or "").strip()
+        if mech_raw:
+            try:
+                parsed = json.loads(mech_raw)
+                if isinstance(parsed, dict):
+                    mechanism = parsed
+            except Exception as e:
+                return jsonify({"error": f"invalid mechanism_json: {e}"}), 400
+        strict_raw = (request.form.get("strict") or "").strip().lower()
+        if strict_raw in ("0", "false", "no", "off"):
+            strict = False
+        simulation_fidelity = str(request.form.get("simulation_fidelity") or "high").strip().lower()
+
+        if isinstance(machine.get("boards"), list):
+            temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            for row in machine.get("boards") or []:
+                if not isinstance(row, dict):
+                    continue
+                bid = str(row.get("board_id") or "").strip()
+                if not bid:
+                    continue
+                net_field = f"netlist_file_{bid}"
+                pcb_field = f"pcb_file_{bid}"
+                if net_field in request.files:
+                    f = request.files[net_field]
+                    p = temp_dir / f"{uuid.uuid4().hex[:8]}_{bid}.net"
+                    f.save(str(p))
+                    board_design_files[bid] = {"path": str(p), "kind": "netlist"}
+                    continue
+                if pcb_field in request.files:
+                    f = request.files[pcb_field]
+                    p = temp_dir / f"{uuid.uuid4().hex[:8]}_{bid}.kicad_pcb"
+                    f.save(str(p))
+                    board_design_files[bid] = {"path": str(p), "kind": "pcb"}
+
+    if not isinstance(machine, dict) or not machine:
+        return jsonify({"error": "machine object required"}), 400
+    if not isinstance(machine.get("boards"), list) or not machine.get("boards"):
+        return jsonify({"error": "machine.boards[] is required"}), 400
+    if simulation_fidelity not in ("starter", "high"):
+        simulation_fidelity = "high"
+
+    try:
+        from src.engines.machine_system_engineering import full_simulate_machine_system
+
+        result = full_simulate_machine_system(
+            machine,
+            board_design_files=board_design_files,
+            mechanism_spec=mechanism,
+            simulation_fidelity=simulation_fidelity,
+            strict=bool(strict),
+        )
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    intake_id = uuid.uuid4().hex[:10]
+    saved = _save_intake_artifacts(
+        intake_id,
+        {
+            "requirements": {"machine": machine, "mechanism": mechanism, "board_design_files": board_design_files},
+            "hints": ((result.get("engineering") or {}).get("compiled") or {}).get("hints") or {},
+            "sow_md": str(result.get("report_md") or "").rstrip() + "\n",
+        },
+    )
+    result["intake_id"] = intake_id
+    result["saved_artifacts"] = saved
+    return jsonify({"status": "success", "result": result})
+
+
+# ============================================================================
 # V2 API - PROJECTS (iteration & revision tracking)
 # ============================================================================
 
@@ -4083,6 +4502,10 @@ def index():
             'POST /api/v2/report/ee-quality': 'Consolidated EE quality report (optionally with netlist/pcb evidence)',
             'POST /api/v2/layout/advice': 'Heuristic layout advice + pcbnew helper script',
             'POST /api/v2/prototype3d/package': 'Prototype-mode OpenSCAD stub + wiring plan',
+            'POST /api/v2/machines/compile': 'Compile multi-board machine (boards + interconnects + harness + ME anchors)',
+            'POST /api/v2/machines/build-package': 'Build multi-board machine package ZIP (per-board package + system artifacts)',
+            'POST /api/v2/machines/engineer': 'System-engineer machine (placement/power/interconnect simulation + optional mecha sim)',
+            'POST /api/v2/machines/full-simulate': 'Strict full simulation gates (system + board-level netlist/pcb + optional mecha)',
             'POST /api/v2/simulate/spice': 'Run SPICE netlist via ngspice (if installed)',
             '=== V1 API - CORE FEATURES ===': '',
             'GET /api/health': 'Health check',

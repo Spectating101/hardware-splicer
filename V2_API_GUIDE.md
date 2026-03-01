@@ -627,6 +627,12 @@ Possible status values:
    - `POST /api/v2/prototype3d/package` (OpenSCAD stub + wiring plan)
    - `POST /api/v2/simulate/spice` (ngspice-backed, if installed)
 
+4. **Multi-Board Machine Compile**:
+   - `POST /api/v2/machines/compile` (board-by-board readiness + system interconnect checks + harness BOM CSV + Mecha anchors)
+   - `POST /api/v2/machines/build-package` (multipart uploads for each board PCB, outputs one machine ZIP bundle)
+   - `POST /api/v2/machines/engineer` (system optimization + power/interconnect simulation + optional mechanism simulation)
+   - `POST /api/v2/machines/full-simulate` (strict gates: board-level netlist/pcb simulation + system-level checks + optional mecha)
+
 ### Candidate Next Features (higher effort)
 
 - AC/Transient analysis and improved convergence diagnostics (ngspice integration can be extended)

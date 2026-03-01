@@ -1,0 +1,795 @@
+{
+  "result": {
+    "board_simulations": [
+      {
+        "board_id": "main_logic",
+        "issues": [],
+        "kind": "netlist",
+        "ok": true,
+        "op_results": {
+          "converged": true,
+          "iterations": 2,
+          "node_v": {
+            "+3V3": 0.0,
+            "0": 0.0,
+            "5V": 5.0,
+            "SCL": 0.0,
+            "SDA": 0.0
+          },
+          "vsource_i": {
+            "AUTO_SRC_main_logic": -0.550000005
+          }
+        },
+        "path": "circuit-ai-frontend/public/demo/usb_esp32_sensor.net",
+        "spice": {
+          "export_method": "ngspice",
+          "netlist_file": "/tmp/circuit-ai/spice/hbhedcpe.cir",
+          "ok": true,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "\nNote: No compatibility mode selected!\n\n\nCircuit: * board-level spice generated from compiled netlist\n\nDoing analysis at TEMP = 27.000000 and TNOM = 27.000000\n\nUsing SPARSE 1.3 as Direct Linear Solver\n\nNo. of Data Rows : 1\n\tNode                                  Voltage\n\t----                                  -------\n\t----\t-------\n\tscl                              0.000000e+00\n\tsda                              0.000000e+00\n\t+3v3                             0.000000e+00\n\tV(5v)                            5.000000e+00\n\n\tSource\tCurrent\n\t------\t-------\n\n\tv_auto_src_main_logic#branch     -5.50000e-01\n\n Resistor models (Simple linear resistor)\n      model                     R\n\n        rsh                     0\n     narrow                     0\n      short                     0\n        tc1                     0\n        tc2                     0\n        tce                     0\n       defw                 1e-05\n          l                 1e-05\n         kf                     0\n         af                     0\n          r                     0\n     bv_max                 1e+99\n         lf                     1\n         wf                     1\n         ef                     1\n\n Isource: Independent current source\n     device i_auto_load_main_logi\n         dc                  0.55\n          m                     1\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n          v                    -5\n          p                  2.75\n    current                  0.55\n\n Resistor: Simple linear resistor\n     device             r_gmin::4             r_gmin::3             r_gmin::2\n      model                     R                     R                     R\n resistance                 1e+09                 1e+09                 1e+09\n         ac                 1e+09                 1e+09                 1e+09\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i                     0                     0                 5e-09\n          p                     0                     0               2.5e-08\n\n Resistor: Simple linear resistor\n     device             r_gmin::1                  r_r2                  r_r1\n      model                     R                     R                     R\n resistance                 1e+09                  4700                  4700\n         ac                 1e+09                  4700                  4700\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i                     0                     0                     0\n          p                     0                     0                     0\n\n Vsource: Independent voltage source\n     device v_auto_src_main_logic\n         dc                     5\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n    portnum                     0\n         z0                     0\n        pwr                     0\n       freq                     0\n      phase                     0\n          i                 -0.55\n          p                 -2.75\n\n\nTotal analysis time (seconds) = 0.000991675\n\nTotal elapsed time (seconds) = 0.003 \n\nTotal DRAM available = 31899.430 MB.\nDRAM currently available = 11107.152 MB.\nMaximum ngspice program size =   21.656 MB.\nCurrent ngspice program size =   12.449 MB.\n\nShared ngspice pages =   10.559 MB.\nText (code) pages =    6.543 MB.\nStack = 0 bytes.\nLibrary pages =    1.980 MB.\n\n"
+        },
+        "summary": {
+          "converged": true,
+          "error_count": 0,
+          "iterations": 2,
+          "node_count": 5,
+          "source_count": 1,
+          "warning_count": 0
+        }
+      },
+      {
+        "board_id": "controls_audio",
+        "issues": [],
+        "kind": "netlist",
+        "ok": true,
+        "op_results": {
+          "converged": true,
+          "iterations": 2,
+          "node_v": {
+            "+3V3": 0.0,
+            "0": 0.0,
+            "5V": 5.0,
+            "SCL": 0.0,
+            "SDA": 0.0
+          },
+          "vsource_i": {
+            "AUTO_SRC_controls_audio": -0.200000005
+          }
+        },
+        "path": "circuit-ai-frontend/public/demo/usb_esp32_sensor.net",
+        "spice": {
+          "export_method": "ngspice",
+          "netlist_file": "/tmp/circuit-ai/spice/csxv0o9c.cir",
+          "ok": true,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "\nNote: No compatibility mode selected!\n\n\nCircuit: * board-level spice generated from compiled netlist\n\nDoing analysis at TEMP = 27.000000 and TNOM = 27.000000\n\nUsing SPARSE 1.3 as Direct Linear Solver\n\nNo. of Data Rows : 1\n\tNode                                  Voltage\n\t----                                  -------\n\t----\t-------\n\tscl                              0.000000e+00\n\tsda                              0.000000e+00\n\t+3v3                             0.000000e+00\n\tV(5v)                            5.000000e+00\n\n\tSource\tCurrent\n\t------\t-------\n\n\tv_auto_src_controls_audio#branch   -2.00000e-01\n\n Resistor models (Simple linear resistor)\n      model                     R\n\n        rsh                     0\n     narrow                     0\n      short                     0\n        tc1                     0\n        tc2                     0\n        tce                     0\n       defw                 1e-05\n          l                 1e-05\n         kf                     0\n         af                     0\n          r                     0\n     bv_max                 1e+99\n         lf                     1\n         wf                     1\n         ef                     1\n\n Isource: Independent current source\n     device i_auto_load_controls_\n         dc                   0.2\n          m                     1\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n          v                    -5\n          p                     1\n    current                   0.2\n\n Resistor: Simple linear resistor\n     device             r_gmin::4             r_gmin::3             r_gmin::2\n      model                     R                     R                     R\n resistance                 1e+09                 1e+09                 1e+09\n         ac                 1e+09                 1e+09                 1e+09\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i                     0                     0                 5e-09\n          p                     0                     0               2.5e-08\n\n Resistor: Simple linear resistor\n     device             r_gmin::1                  r_r2                  r_r1\n      model                     R                     R                     R\n resistance                 1e+09                  4700                  4700\n         ac                 1e+09                  4700                  4700\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i                     0                     0                     0\n          p                     0                     0                     0\n\n Vsource: Independent voltage source\n     device v_auto_src_controls_a\n         dc                     5\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n    portnum                     0\n         z0                     0\n        pwr                     0\n       freq                     0\n      phase                     0\n          i                  -0.2\n          p                    -1\n\n\nTotal analysis time (seconds) = 0.000102506\n\nTotal elapsed time (seconds) = 0.002 \n\nTotal DRAM available = 31899.430 MB.\nDRAM currently available = 11100.879 MB.\nMaximum ngspice program size =   21.656 MB.\nCurrent ngspice program size =   12.500 MB.\n\nShared ngspice pages =   10.605 MB.\nText (code) pages =    6.543 MB.\nStack = 0 bytes.\nLibrary pages =    1.980 MB.\n\n"
+        },
+        "summary": {
+          "converged": true,
+          "error_count": 0,
+          "iterations": 2,
+          "node_count": 5,
+          "source_count": 1,
+          "warning_count": 0
+        }
+      },
+      {
+        "board_id": "power_charge",
+        "issues": [],
+        "kind": "netlist",
+        "ok": true,
+        "op_results": {
+          "converged": true,
+          "iterations": 2,
+          "node_v": {
+            "": 0.0,
+            "0": 0.0,
+            "VBAT": 3.7
+          },
+          "vsource_i": {
+            "AUTO_SRC_power_charge": -0.9500000036999999
+          }
+        },
+        "path": "circuit-ai-frontend/public/demo/drone_fc_power.net",
+        "spice": {
+          "export_method": "ngspice",
+          "netlist_file": "/tmp/circuit-ai/spice/lillmhsj.cir",
+          "ok": true,
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "\nNote: No compatibility mode selected!\n\n\nCircuit: * board-level spice generated from compiled netlist\n\nDoing analysis at TEMP = 27.000000 and TNOM = 27.000000\n\nUsing SPARSE 1.3 as Direct Linear Solver\n\nNo. of Data Rows : 1\n\tNode                                  Voltage\n\t----                                  -------\n\t----\t-------\n\tvbat                             3.700000e+00\n\n\tSource\tCurrent\n\t------\t-------\n\n\tv_auto_src_power_charge#branch   -9.50000e-01\n\n Resistor models (Simple linear resistor)\n      model                     R\n\n        rsh                     0\n     narrow                     0\n      short                     0\n        tc1                     0\n        tc2                     0\n        tce                     0\n       defw                 1e-05\n          l                 1e-05\n         kf                     0\n         af                     0\n          r                     0\n     bv_max                 1e+99\n         lf                     1\n         wf                     1\n         ef                     1\n\n Isource: Independent current source\n     device i_auto_load_power_cha\n         dc                  0.95\n          m                     1\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n          v                  -3.7\n          p                 3.515\n    current                  0.95\n\n Resistor: Simple linear resistor\n     device             r_gmin::2             r_gmin::1\n      model                     R                     R\n resistance                 1e+09                 1e+09\n         ac                 1e+09                 1e+09\n      dtemp                     0                     0\n     bv_max                 1e+99                 1e+99\n      noisy                     1                     1\n          i               3.7e-09                     0\n          p             1.369e-08                     0\n\n Vsource: Independent voltage source\n     device v_auto_src_power_char\n         dc                   3.7\n      acmag                     0\n      pulse         -\n        sin         -\n        exp         -\n        pwl         -\n       sffm         -\n         am         -\n    trnoise         -\n   trrandom         -\n    portnum                     0\n         z0                     0\n        pwr                     0\n       freq                     0\n      phase                     0\n          i                 -0.95\n          p                -3.515\n\n\nTotal analysis time (seconds) = 6.5689E-05\n\nTotal elapsed time (seconds) = 0.002 \n\nTotal DRAM available = 31899.430 MB.\nDRAM currently available = 11105.477 MB.\nMaximum ngspice program size =   21.656 MB.\nCurrent ngspice program size =   12.547 MB.\n\nShared ngspice pages =   10.656 MB.\nText (code) pages =    6.543 MB.\nStack = 0 bytes.\nLibrary pages =    1.980 MB.\n\n"
+        },
+        "summary": {
+          "converged": true,
+          "error_count": 0,
+          "iterations": 2,
+          "node_count": 3,
+          "source_count": 1,
+          "warning_count": 0
+        }
+      }
+    ],
+    "engineering": {
+      "analysis": {
+        "control_coupling": {
+          "capabilities": {
+            "actuation_current_budget_a": 1.0,
+            "pwm_channels": 8,
+            "stepper_channels": 0
+          },
+          "control_board_id": "main_logic",
+          "issues": [],
+          "requirements": {
+            "estimated_actuation_current_a": 0.0,
+            "servo_channels": 0,
+            "stepper_channels": 0
+          }
+        },
+        "improvements": [
+          {
+            "action": "Apply suggested positions_mm and update cable lengths from recommended_lengths.",
+            "message": "Reposition boards to cut harness length by 238.37mm.",
+            "priority": "high",
+            "topic": "layout"
+          }
+        ],
+        "interconnects": {
+          "issues": [],
+          "links": [
+            {
+              "from_board": "main_logic",
+              "interface": "gpio",
+              "length_cm": 10.0,
+              "margin_cm": 70.0,
+              "recommended_max_cm": 80.0,
+              "status": "pass",
+              "to_board": "controls_audio"
+            },
+            {
+              "from_board": "main_logic",
+              "interface": "i2c",
+              "length_cm": 12.0,
+              "margin_cm": 18.0,
+              "recommended_max_cm": 30.0,
+              "status": "pass",
+              "to_board": "controls_audio"
+            },
+            {
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 8.0,
+              "margin_cm": 192.0,
+              "recommended_max_cm": 200.0,
+              "status": "pass",
+              "to_board": "main_logic"
+            },
+            {
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 9.0,
+              "margin_cm": 191.0,
+              "recommended_max_cm": 200.0,
+              "status": "pass",
+              "to_board": "controls_audio"
+            }
+          ]
+        },
+        "mechanism": {
+          "bundle_file": "/tmp/circuit-ai/machine_mecha/out_6jaa6w04/mecha_splicer.bundle.json",
+          "command": [
+            "python3",
+            "/home/phyrexian/Downloads/llm_automation/project_portfolio/Mecha-Splicer/scripts/mecha_splicer_spec.py",
+            "--spec",
+            "/tmp/circuit-ai/machine_mecha/mecha_spec_epqlrthv.json",
+            "--out",
+            "/tmp/circuit-ai/machine_mecha/out_6jaa6w04",
+            "--simulation-fidelity",
+            "high"
+          ],
+          "dfm": [],
+          "ok": true,
+          "out_dir": "/tmp/circuit-ai/machine_mecha/out_6jaa6w04",
+          "returncode": 0,
+          "safety": [
+            {
+              "message": "No rule-based safety flags raised.",
+              "severity": "info",
+              "topic": "general"
+            }
+          ],
+          "simulation": [
+            {
+              "domain": "general",
+              "message": "No motion subsystem available for high-fidelity analysis.",
+              "model": "high",
+              "severity": "info"
+            },
+            {
+              "domain": "rigid_body",
+              "message": "PyBullet available, but no supported scene type requested (linear_axis / pan_tilt).",
+              "model": "pybullet",
+              "severity": "info"
+            }
+          ],
+          "stderr_tail": "pybullet build time: Mar  1 2026 17:56:37\n"
+        },
+        "placement": {
+          "after_mm": 161.63,
+          "before_mm": 400.0,
+          "improvement_mm": 238.37,
+          "ok": true,
+          "positions_mm": {
+            "controls_audio": [
+              105.36,
+              0.0
+            ],
+            "main_logic": [
+              71.74,
+              0.0
+            ],
+            "power_charge": [
+              135.75,
+              0.0
+            ]
+          },
+          "recommended_lengths": [
+            {
+              "from_board": "main_logic",
+              "interface": "gpio",
+              "recommended_length_cm": 6.0,
+              "to_board": "controls_audio"
+            },
+            {
+              "from_board": "main_logic",
+              "interface": "i2c",
+              "recommended_length_cm": 6.0,
+              "to_board": "controls_audio"
+            },
+            {
+              "from_board": "power_charge",
+              "interface": "power",
+              "recommended_length_cm": 9.7,
+              "to_board": "main_logic"
+            },
+            {
+              "from_board": "power_charge",
+              "interface": "power",
+              "recommended_length_cm": 5.6,
+              "to_board": "controls_audio"
+            }
+          ]
+        },
+        "power": {
+          "issues": [],
+          "rails": [
+            {
+              "board_current_a": 0.95,
+              "board_id": "power_charge",
+              "length_cm": 20.0,
+              "rail": "VBAT",
+              "source": "Battery_LiIon",
+              "status": "pass",
+              "voltage_at_board_v": 3.6681,
+              "voltage_drop_v": 0.0319,
+              "voltage_nominal_v": 3.7,
+              "wire_awg": "24"
+            },
+            {
+              "board_current_a": 0.55,
+              "board_id": "main_logic",
+              "length_cm": 8.0,
+              "rail": "5V",
+              "source": "power_charge",
+              "status": "pass",
+              "voltage_at_board_v": 4.9953,
+              "voltage_drop_v": 0.0047,
+              "voltage_nominal_v": 5.0,
+              "wire_awg": "22"
+            },
+            {
+              "board_current_a": 0.2,
+              "board_id": "controls_audio",
+              "length_cm": 9.0,
+              "rail": "5V",
+              "source": "power_charge",
+              "status": "pass",
+              "voltage_at_board_v": 4.997,
+              "voltage_drop_v": 0.003,
+              "voltage_nominal_v": 5.0,
+              "wire_awg": "24"
+            }
+          ],
+          "source_currents_a": {
+            "Battery_LiIon": 0.95,
+            "power_charge": 0.75
+          },
+          "spice": {
+            "export_method": "ngspice",
+            "netlist_file": "/tmp/circuit-ai/spice/fvk_x8b1.cir",
+            "ok": true,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "\nNote: No compatibility mode selected!\n\n\nCircuit: * machine power distribution\n\nDoing analysis at TEMP = 27.000000 and TNOM = 27.000000\n\nUsing SPARSE 1.3 as Direct Linear Solver\n\nNo. of Data Rows : 1\n\tNode                                  Voltage\n\t----                                  -------\n\t----\t-------\n\tn_controls_audio_3               4.997002e+00\n\tn_main_logic_2                   4.995305e+00\n\tn_power_charge_1                 3.668373e+00\n\tnsrc2                            5.000000e+00\n\tnsrc1                            3.700000e+00\n\n\tSource\tCurrent\n\t------\t-------\n\n\tv_1#branch                       -9.41879e-01\n\tv_2#branch                       -7.49364e-01\n\n Resistor models (Simple linear resistor)\n      model                     R\n\n        rsh                     0\n     narrow                     0\n      short                     0\n        tc1                     0\n        tc2                     0\n        tce                     0\n       defw                 1e-05\n          l                 1e-05\n         kf                     0\n         af                     0\n          r                     0\n     bv_max                 1e+99\n         lf                     1\n         wf                     1\n         ef                     1\n\n Resistor: Simple linear resistor\n     device               rload_3               rpath_3               rload_2\n      model                     R                     R                     R\n resistance                    25                 0.015               9.09091\n         ac                    25                 0.015               9.09091\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i               0.19988               0.19988              0.549484\n          p              0.998801           0.000599281               2.74484\n\n Resistor: Simple linear resistor\n     device               rpath_2               rload_1               rpath_1\n      model                     R                     R                     R\n resistance              0.008545               3.89474              0.033579\n         ac              0.008545               3.89474              0.033579\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i              0.549484              0.941879              0.941879\n          p            0.00258001               3.45516             0.0297892\n\n Vsource: Independent voltage source\n     device                   v_2                   v_1\n         dc                     5                   3.7\n      acmag                     0                     0\n      pulse         -         -\n        sin         -         -\n        exp         -         -\n        pwl         -         -\n       sffm         -         -\n         am         -         -\n    trnoise         -         -\n   trrandom         -         -\n    portnum                     0                     0\n         z0                     0                     0\n        pwr                     0                     0\n       freq                     0                     0\n      phase                     0                     0\n          i             -0.749364             -0.941879\n          p              -3.74682              -3.48495\n\n\nTotal analysis time (seconds) = 6.3239E-05\n\nTotal elapsed time (seconds) = 0.001 \n\nTotal DRAM available = 31899.430 MB.\nDRAM currently available = 11146.414 MB.\nMaximum ngspice program size =   21.652 MB.\nCurrent ngspice program size =   12.426 MB.\n\nShared ngspice pages =   10.535 MB.\nText (code) pages =    6.543 MB.\nStack = 0 bytes.\nLibrary pages =    1.977 MB.\n\n"
+          }
+        },
+        "verdict": "sim_ready"
+      },
+      "compiled": {
+        "boards": [
+          {
+            "assumptions": [
+              "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+              "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+            ],
+            "blockers": [],
+            "board_id": "main_logic",
+            "design_intent": "professional",
+            "hints": {
+              "loads_cc": [],
+              "sources": [],
+              "voltage_constraints": []
+            },
+            "lane": "generic",
+            "name": "Main Logic Board",
+            "quality": {
+              "confidence": 0.53,
+              "grade": "B",
+              "readiness_level": "manufacturable",
+              "reasons": [
+                "Missing inputs: 8 fields."
+              ],
+              "score": 84.0
+            },
+            "questions": [
+              "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+              "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+              "Is this a single-pass deliverable or an iterative revision loop?",
+              "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+              "Do you have an enclosure/3D model and mounting hole requirements?"
+            ],
+            "readiness_level": "manufacturable",
+            "risks": [],
+            "role": "cpu_display_audio",
+            "sow_md": "# SOW \u2014 PocketArcade Main Logic\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:46:44.258565+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+          },
+          {
+            "assumptions": [
+              "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+              "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+            ],
+            "blockers": [],
+            "board_id": "controls_audio",
+            "design_intent": "professional",
+            "hints": {
+              "loads_cc": [],
+              "sources": [],
+              "voltage_constraints": []
+            },
+            "lane": "generic",
+            "name": "Controls + Audio Board",
+            "quality": {
+              "confidence": 0.53,
+              "grade": "B",
+              "readiness_level": "manufacturable",
+              "reasons": [
+                "Missing inputs: 8 fields."
+              ],
+              "score": 84.0
+            },
+            "questions": [
+              "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+              "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+              "Is this a single-pass deliverable or an iterative revision loop?",
+              "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+              "Do you have an enclosure/3D model and mounting hole requirements?"
+            ],
+            "readiness_level": "manufacturable",
+            "risks": [],
+            "role": "buttons_joystick_amplifier",
+            "sow_md": "# SOW \u2014 PocketArcade Controls Audio\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:46:44.258714+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+          },
+          {
+            "assumptions": [
+              "Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.",
+              "Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed."
+            ],
+            "blockers": [],
+            "board_id": "power_charge",
+            "design_intent": "professional",
+            "hints": {
+              "loads_cc": [
+                {
+                  "current_a": 0.95,
+                  "name": "MainRail",
+                  "notes": "",
+                  "rail": "5V"
+                }
+              ],
+              "sources": [
+                {
+                  "max_current_a": 2.0,
+                  "name": "VBAT",
+                  "notes": "",
+                  "voltage_v": 3.7
+                }
+              ],
+              "voltage_constraints": [
+                {
+                  "max_v": null,
+                  "min_v": null,
+                  "nominal_v": 5.0,
+                  "notes": "",
+                  "rail": "5V"
+                }
+              ]
+            },
+            "lane": "power",
+            "name": "Power + Charge Board",
+            "quality": {
+              "confidence": 0.67,
+              "grade": "B",
+              "readiness_level": "manufacturable",
+              "reasons": [
+                "Missing inputs: 8 fields."
+              ],
+              "score": 84.0
+            },
+            "questions": [
+              "What is the target PCB manufacturer (or at least their min trace/space/via rules)?",
+              "Any mechanical constraints (enclosure, connectors placement, keepouts)?",
+              "Is this a single-pass deliverable or an iterative revision loop?",
+              "Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?",
+              "Do you have an enclosure/3D model and mounting hole requirements?",
+              "Provide max current per rail + transient requirements (startup, inrush, load step).",
+              "Any thermal limits (ambient temp, enclosure, airflow)?",
+              "Any EMI constraints (sensitive radios, conducted emissions target)?"
+            ],
+            "readiness_level": "manufacturable",
+            "risks": [
+              "SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly."
+            ],
+            "role": "battery_charge_regulation",
+            "sow_md": "# SOW \u2014 PocketArcade Power Charge\n\n- Lane: `power`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:46:44.258833+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n- Provide max current per rail + transient requirements (startup, inrush, load step).\n- Any thermal limits (ambient temp, enclosure, airflow)?\n- Any EMI constraints (sensitive radios, conducted emissions target)?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n- SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly.\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+          }
+        ],
+        "hints": {
+          "boards": [
+            {
+              "board_id": "main_logic",
+              "hints": {
+                "loads_cc": [],
+                "sources": [],
+                "voltage_constraints": []
+              }
+            },
+            {
+              "board_id": "controls_audio",
+              "hints": {
+                "loads_cc": [],
+                "sources": [],
+                "voltage_constraints": []
+              }
+            },
+            {
+              "board_id": "power_charge",
+              "hints": {
+                "loads_cc": [
+                  {
+                    "current_a": 0.95,
+                    "name": "MainRail",
+                    "notes": "",
+                    "rail": "5V"
+                  }
+                ],
+                "sources": [
+                  {
+                    "max_current_a": 2.0,
+                    "name": "VBAT",
+                    "notes": "",
+                    "voltage_v": 3.7
+                  }
+                ],
+                "voltage_constraints": [
+                  {
+                    "max_v": null,
+                    "min_v": null,
+                    "nominal_v": 5.0,
+                    "notes": "",
+                    "rail": "5V"
+                  }
+                ]
+              }
+            }
+          ],
+          "interconnects": [
+            {
+              "connector": "",
+              "from_board": "main_logic",
+              "interface": "gpio",
+              "length_cm": 10.0,
+              "notes": "",
+              "signals": [
+                "BTN_A",
+                "BTN_B",
+                "D_PAD",
+                "START",
+                "SELECT",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            },
+            {
+              "connector": "",
+              "from_board": "main_logic",
+              "interface": "i2c",
+              "length_cm": 12.0,
+              "notes": "",
+              "signals": [
+                "SCL",
+                "SDA",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            },
+            {
+              "connector": "",
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 8.0,
+              "notes": "",
+              "signals": [
+                "V+",
+                "GND"
+              ],
+              "to_board": "main_logic"
+            },
+            {
+              "connector": "",
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 9.0,
+              "notes": "",
+              "signals": [
+                "V+",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            }
+          ],
+          "machine_name": "PocketArcade_R1",
+          "mecha_electronics_anchors": [
+            {
+              "device": "Main Logic Board",
+              "mounts": [],
+              "pcb_h_mm": 58.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 92.0,
+              "ports": []
+            },
+            {
+              "device": "Controls + Audio Board",
+              "mounts": [],
+              "pcb_h_mm": 38.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 72.0,
+              "ports": []
+            },
+            {
+              "device": "Power + Charge Board",
+              "mounts": [],
+              "pcb_h_mm": 36.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 65.0,
+              "ports": []
+            }
+          ],
+          "power_tree": [
+            {
+              "board_id": "power_charge",
+              "max_current_a": 2.0,
+              "notes": "",
+              "rail": "VBAT",
+              "source": "Battery_LiIon",
+              "voltage_v": 3.7
+            },
+            {
+              "board_id": "main_logic",
+              "max_current_a": 1.2,
+              "notes": "",
+              "rail": "5V",
+              "source": "power_charge",
+              "voltage_v": 5.0
+            },
+            {
+              "board_id": "controls_audio",
+              "max_current_a": 0.8,
+              "notes": "",
+              "rail": "5V",
+              "source": "power_charge",
+              "voltage_v": 5.0
+            }
+          ]
+        },
+        "machine": {
+          "blockers": [],
+          "board_count": 3,
+          "design_intent": "professional",
+          "interconnect_count": 4,
+          "lane": "generic",
+          "machine_name": "PocketArcade_R1",
+          "readiness_level": "ready"
+        },
+        "system": {
+          "harness_bom_csv": "from_board,to_board,interface,connector,signal_count,length_cm,notes\n\"main_logic\",\"controls_audio\",\"gpio\",\"JST-XH\",6,10,\"\"\n\"main_logic\",\"controls_audio\",\"i2c\",\"JST-XH\",3,12,\"\"\n\"power_charge\",\"main_logic\",\"power\",\"JST-XH\",2,8,\"\"\n\"power_charge\",\"controls_audio\",\"power\",\"JST-XH\",2,9,\"\"\n",
+          "interconnects": [
+            {
+              "connector": "",
+              "from_board": "main_logic",
+              "interface": "gpio",
+              "length_cm": 10.0,
+              "notes": "",
+              "signals": [
+                "BTN_A",
+                "BTN_B",
+                "D_PAD",
+                "START",
+                "SELECT",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            },
+            {
+              "connector": "",
+              "from_board": "main_logic",
+              "interface": "i2c",
+              "length_cm": 12.0,
+              "notes": "",
+              "signals": [
+                "SCL",
+                "SDA",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            },
+            {
+              "connector": "",
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 8.0,
+              "notes": "",
+              "signals": [
+                "V+",
+                "GND"
+              ],
+              "to_board": "main_logic"
+            },
+            {
+              "connector": "",
+              "from_board": "power_charge",
+              "interface": "power",
+              "length_cm": 9.0,
+              "notes": "",
+              "signals": [
+                "V+",
+                "GND"
+              ],
+              "to_board": "controls_audio"
+            }
+          ],
+          "mecha_electronics_anchors": [
+            {
+              "device": "Main Logic Board",
+              "mounts": [],
+              "pcb_h_mm": 58.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 92.0,
+              "ports": []
+            },
+            {
+              "device": "Controls + Audio Board",
+              "mounts": [],
+              "pcb_h_mm": 38.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 72.0,
+              "ports": []
+            },
+            {
+              "device": "Power + Charge Board",
+              "mounts": [],
+              "pcb_h_mm": 36.0,
+              "pcb_t_mm": 1.6,
+              "pcb_w_mm": 65.0,
+              "ports": []
+            }
+          ],
+          "power_tree": [
+            {
+              "board_id": "power_charge",
+              "max_current_a": 2.0,
+              "notes": "",
+              "rail": "VBAT",
+              "source": "Battery_LiIon",
+              "voltage_v": 3.7
+            },
+            {
+              "board_id": "main_logic",
+              "max_current_a": 1.2,
+              "notes": "",
+              "rail": "5V",
+              "source": "power_charge",
+              "voltage_v": 5.0
+            },
+            {
+              "board_id": "controls_audio",
+              "max_current_a": 0.8,
+              "notes": "",
+              "rail": "5V",
+              "source": "power_charge",
+              "voltage_v": 5.0
+            }
+          ],
+          "questions": [],
+          "risks": [],
+          "sow_md": "# System SOW \u2014 PocketArcade_R1\n\n## Board Scope\n- `main_logic` (generic/professional): readiness `manufacturable`, quality `B:84.0`.\n- `controls_audio` (generic/professional): readiness `manufacturable`, quality `B:84.0`.\n- `power_charge` (power/professional): readiness `manufacturable`, quality `B:84.0`.\n\n## System Open Questions\n- None\n\n## System Risks\n- None\n\n## Acceptance\n- Each board has explicit requirements + readiness + unresolved questions.\n- Inter-board interfaces are listed with connector and signal assumptions.\n- Mechanical enclosure anchors are generated for boards that provide outlines.\n"
+        }
+      },
+      "machine": {
+        "blockers": [],
+        "board_count": 3,
+        "design_intent": "professional",
+        "interconnect_count": 4,
+        "lane": "generic",
+        "machine_name": "PocketArcade_R1",
+        "readiness_level": "ready"
+      },
+      "report_md": "# System Engineering Report \u2014 PocketArcade_R1\n\n- Generated: `2026-03-01T14:46:44.766864+00:00`\n- Boards: `3`\n- Interconnects: `4`\n- Base readiness: `ready`\n- Simulation verdict: `sim_ready`\n\n## Placement Optimization\n- Total cable (before): `400.0` mm\n- Total cable (after): `161.63` mm\n- Improvement: `238.37` mm\n\n## Power Simulation\n- Paths simulated: `3`\n- Issues: `0`\n- ngspice: `ok`\n\n## Interconnect Simulation\n- Links checked: `4`\n- Issues: `0`\n\n## Control/Mechanism Coupling\n- Control board: `main_logic`\n- Coupling issues: `0`\n- Mecha bridge: `True`\n- Mecha simulation findings: `2`\n\n## Improvements\n- [high] Reposition boards to cut harness length by 238.37mm. -> Apply suggested positions_mm and update cable lengths from recommended_lengths.\n"
+    },
+    "gates": [
+      {
+        "detail": "System-level power/interconnect/control checks must have no error issues.",
+        "gate": "system_power_and_links",
+        "passed": true,
+        "required": true
+      },
+      {
+        "detail": "Each board netlist/pcb must compile and pass operating-point validation.",
+        "gate": "board_level_operating_point",
+        "passed": true,
+        "required": true
+      },
+      {
+        "detail": "Each board should pass ngspice .op cross-check (strict mode requires this).",
+        "gate": "board_level_ngspice_crosscheck",
+        "passed": true,
+        "required": true
+      },
+      {
+        "detail": "Mechanism simulation should succeed with no block-level finding (strict mode).",
+        "gate": "mechanical_simulation",
+        "passed": true,
+        "required": true
+      }
+    ],
+    "intake_id": "ecb1a9f565",
+    "machine": {
+      "blockers": [],
+      "board_count": 3,
+      "design_intent": "professional",
+      "interconnect_count": 4,
+      "lane": "generic",
+      "machine_name": "PocketArcade_R1",
+      "readiness_level": "ready"
+    },
+    "report_md": "# Full Simulation Report \u2014 PocketArcade_R1\n\n- Generated: `2026-03-01T14:46:44.794509+00:00`\n- Strict mode: `True`\n- Verdict: `pass`\n\n## Gates\n- `system_power_and_links` required=`True` passed=`True`\n- `board_level_operating_point` required=`True` passed=`True`\n- `board_level_ngspice_crosscheck` required=`True` passed=`True`\n- `mechanical_simulation` required=`True` passed=`True`\n\n## Board Simulations\n- `main_logic` ok=`True` converged=`True` errors=`0` ngspice=`ok`\n- `controls_audio` ok=`True` converged=`True` errors=`0` ngspice=`ok`\n- `power_charge` ok=`True` converged=`True` errors=`0` ngspice=`ok`\n",
+    "saved_artifacts": {
+      "hints": "/tmp/circuit-ai/intakes/ecb1a9f565/hints.json",
+      "requirements": "/tmp/circuit-ai/intakes/ecb1a9f565/requirements.json",
+      "sow_md": "/tmp/circuit-ai/intakes/ecb1a9f565/SOW.md"
+    },
+    "strict": true,
+    "verdict": "pass"
+  },
+  "status": "success"
+}
