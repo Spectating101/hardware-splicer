@@ -1,6 +1,6 @@
 # Multi-Board Service Value Proof
 
-- Generated (UTC): `2026-03-01T14:11:50.750476+00:00`
+- Generated (UTC): `2026-03-02T07:32:23.964800+00:00`
 - Machine: `BenchBot_Controller_Stack`
 - Readiness: `ready`
 - Board count: `3`
@@ -10,7 +10,7 @@
 - `/api/v2/machines/compile` baseline: success
 - `/api/v2/machines/compile` hardened: success
 - `/api/v2/machines/build-package`: success
-- Machine package path: `/tmp/circuit-ai/packages/BenchBot_Controller_Stack-20260301T141150Z-machine-package.zip`
+- Machine package path: `/tmp/circuit-ai/packages/BenchBot_Controller_Stack-20260302T073223Z-machine-package.zip`
 - Board packages generated: `3`
 - ZIP entries: `10`
 

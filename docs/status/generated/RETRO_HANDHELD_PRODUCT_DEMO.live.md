@@ -1,7 +1,7 @@
 # Retro Handheld Product Demo
 
 - Product concept: `PocketArcade_R1` (original handheld console architecture)
-- Generated: `2026-03-01T14:26:04.478138+00:00`
+- Generated: `2026-03-02T07:31:54.708435+00:00`
 - System verdict: `sim_ready`
 
 ## What Was Engineered
@@ -21,7 +21,7 @@
 - Mechanism findings: `2` simulation, `0` DFM
 
 ## Product Package Produced
-- Machine ZIP: `/tmp/circuit-ai/packages/PocketArcade_R1-20260301T142604Z-machine-package.zip`
+- Machine ZIP: `/tmp/circuit-ai/packages/PocketArcade_R1-20260302T073154Z-machine-package.zip`
 - Board package count: `3`
 - ZIP entries: `10`
 - Key bundle artifacts:

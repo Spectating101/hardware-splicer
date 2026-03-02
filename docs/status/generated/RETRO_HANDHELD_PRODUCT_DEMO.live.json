@@ -66,20 +66,22 @@
           ]
         },
         "mechanism": {
-          "bundle_file": "/tmp/circuit-ai/machine_mecha/out_g1w2ermr/mecha_splicer.bundle.json",
+          "bundle_file": "/tmp/circuit-ai/machine_mecha/out_wdo5fqht/mecha_splicer.bundle.json",
           "command": [
             "python3",
             "/home/phyrexian/Downloads/llm_automation/project_portfolio/Mecha-Splicer/scripts/mecha_splicer_spec.py",
             "--spec",
-            "/tmp/circuit-ai/machine_mecha/mecha_spec_i8zbaos3.json",
+            "/tmp/circuit-ai/machine_mecha/mecha_spec_1_mbzfpw.json",
             "--out",
-            "/tmp/circuit-ai/machine_mecha/out_g1w2ermr",
+            "/tmp/circuit-ai/machine_mecha/out_wdo5fqht",
             "--simulation-fidelity",
-            "high"
+            "high",
+            "--use-3d-splicer"
           ],
           "dfm": [],
           "ok": true,
-          "out_dir": "/tmp/circuit-ai/machine_mecha/out_g1w2ermr",
+          "out_dir": "/tmp/circuit-ai/machine_mecha/out_wdo5fqht",
+          "render_stl": false,
           "returncode": 0,
           "safety": [
             {
@@ -102,7 +104,12 @@
               "severity": "info"
             }
           ],
-          "stderr_tail": "pybullet build time: Mar  1 2026 17:56:37\n"
+          "splicer3d": {
+            "error": "[Errno 111] Connection refused",
+            "ok": false
+          },
+          "stderr_tail": "pybullet build time: Mar  1 2026 17:56:37\n",
+          "use_3d_splicer": true
         },
         "placement": {
           "after_mm": 161.63,
@@ -195,10 +202,12 @@
             "power_charge": 0.75
           },
           "spice": {
-            "error": "ngspice_not_available",
-            "export_method": "none",
-            "message": "ngspice is not installed on this host.",
-            "ok": false
+            "export_method": "ngspice",
+            "netlist_file": "/tmp/circuit-ai/spice/oelj9r6g.cir",
+            "ok": true,
+            "returncode": 0,
+            "stderr": "",
+            "stdout": "\nNote: No compatibility mode selected!\n\n\nCircuit: * machine power distribution\n\nDoing analysis at TEMP = 27.000000 and TNOM = 27.000000\n\nUsing SPARSE 1.3 as Direct Linear Solver\n\nNo. of Data Rows : 1\n\tNode                                  Voltage\n\t----                                  -------\n\t----\t-------\n\tn_controls_audio_3               4.997002e+00\n\tn_main_logic_2                   4.995305e+00\n\tn_power_charge_1                 3.668373e+00\n\tnsrc2                            5.000000e+00\n\tnsrc1                            3.700000e+00\n\n\tSource\tCurrent\n\t------\t-------\n\n\tv_1#branch                       -9.41879e-01\n\tv_2#branch                       -7.49364e-01\n\n Resistor models (Simple linear resistor)\n      model                     R\n\n        rsh                     0\n     narrow                     0\n      short                     0\n        tc1                     0\n        tc2                     0\n        tce                     0\n       defw                 1e-05\n          l                 1e-05\n         kf                     0\n         af                     0\n          r                     0\n     bv_max                 1e+99\n         lf                     1\n         wf                     1\n         ef                     1\n\n Resistor: Simple linear resistor\n     device               rload_3               rpath_3               rload_2\n      model                     R                     R                     R\n resistance                    25                 0.015               9.09091\n         ac                    25                 0.015               9.09091\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i               0.19988               0.19988              0.549484\n          p              0.998801           0.000599281               2.74484\n\n Resistor: Simple linear resistor\n     device               rpath_2               rload_1               rpath_1\n      model                     R                     R                     R\n resistance              0.008545               3.89474              0.033579\n         ac              0.008545               3.89474              0.033579\n      dtemp                     0                     0                     0\n     bv_max                 1e+99                 1e+99                 1e+99\n      noisy                     1                     1                     1\n          i              0.549484              0.941879              0.941879\n          p            0.00258001               3.45516             0.0297892\n\n Vsource: Independent voltage source\n     device                   v_2                   v_1\n         dc                     5                   3.7\n      acmag                     0                     0\n      pulse         -         -\n        sin         -         -\n        exp         -         -\n        pwl         -         -\n       sffm         -         -\n         am         -         -\n    trnoise         -         -\n   trrandom         -         -\n    portnum                     0                     0\n         z0                     0                     0\n        pwr                     0                     0\n       freq                     0                     0\n      phase                     0                     0\n          i             -0.749364             -0.941879\n          p              -3.74682              -3.48495\n\n\nTotal analysis time (seconds) = 5.9275E-05\n\nTotal elapsed time (seconds) = 0.005 \n\nTotal DRAM available = 31899.430 MB.\nDRAM currently available = 9807.473 MB.\nMaximum ngspice program size =   21.648 MB.\nCurrent ngspice program size =   12.426 MB.\n\nShared ngspice pages =   10.535 MB.\nText (code) pages =    6.543 MB.\nStack = 0 bytes.\nLibrary pages =    1.977 MB.\n\n"
           }
         },
         "verdict": "sim_ready"
@@ -239,7 +248,7 @@
             "readiness_level": "manufacturable",
             "risks": [],
             "role": "cpu_display_audio",
-            "sow_md": "# SOW \u2014 PocketArcade Main Logic\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:26:01.770947+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+            "sow_md": "# SOW \u2014 PocketArcade Main Logic\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-02T07:31:51.881200+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
           },
           {
             "assumptions": [
@@ -275,7 +284,7 @@
             "readiness_level": "manufacturable",
             "risks": [],
             "role": "buttons_joystick_amplifier",
-            "sow_md": "# SOW \u2014 PocketArcade Controls Audio\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:26:01.771067+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+            "sow_md": "# SOW \u2014 PocketArcade Controls Audio\n\n- Lane: `generic`\n- Design intent: `professional`\n- Generated: `2026-03-02T07:31:51.881309+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
           },
           {
             "assumptions": [
@@ -338,7 +347,7 @@
               "SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly."
             ],
             "role": "battery_charge_regulation",
-            "sow_md": "# SOW \u2014 PocketArcade Power Charge\n\n- Lane: `power`\n- Design intent: `professional`\n- Generated: `2026-03-01T14:26:01.771190+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n- Provide max current per rail + transient requirements (startup, inrush, load step).\n- Any thermal limits (ambient temp, enclosure, airflow)?\n- Any EMI constraints (sensitive radios, conducted emissions target)?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n- SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly.\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
+            "sow_md": "# SOW \u2014 PocketArcade Power Charge\n\n- Lane: `power`\n- Design intent: `professional`\n- Generated: `2026-03-02T07:31:51.881425+00:00` (UTC)\n\n## Deliverables\n- Schematic: `no`\n- PCB layout: `no`\n- BOM: `no`\n- Pick-and-place: `no`\n- Gerbers: `no`\n- DFM memo: `no`\n- Bring-up notes: `no`\n\n## Open Questions (must answer to avoid guessing)\n- What is the target PCB manufacturer (or at least their min trace/space/via rules)?\n- Any mechanical constraints (enclosure, connectors placement, keepouts)?\n- Is this a single-pass deliverable or an iterative revision loop?\n- Are there any presentation/aesthetic requirements (board outline, silkscreen quality, labels, testpoints)?\n- Do you have an enclosure/3D model and mounting hole requirements?\n- Provide max current per rail + transient requirements (startup, inrush, load step).\n- Any thermal limits (ambient temp, enclosure, airflow)?\n- Any EMI constraints (sensitive radios, conducted emissions target)?\n\n## Assumptions\n- Work proceeds iteratively: deliver Draft-1 quickly, collect client corrections, then converge to manufacturing package.\n- Anything not provided as a requirement is treated as an open question and will be flagged, not silently assumed.\n\n## Risks / Validation Notes\n- SMPS stability/EMI/thermal may require iteration and/or lab validation; scope accordingly.\n\n## Exclusions (explicit)\n- None listed\n\n## Acceptance Criteria (practical)\n- Deliverables package generated and reproducible (BOM/PnP/Gerbers/DFM memo).\n- Critical issues enumerated with proposed fixes; client confirms priorities for trade-offs.\n- Missing constraints are explicitly documented (no silent assumptions).\n"
           }
         ],
         "hints": {
@@ -622,7 +631,7 @@
           "sow_md": "# System SOW \u2014 PocketArcade_R1\n\n## Board Scope\n- `main_logic` (generic/professional): readiness `manufacturable`, quality `B:84.0`.\n- `controls_audio` (generic/professional): readiness `manufacturable`, quality `B:84.0`.\n- `power_charge` (power/professional): readiness `manufacturable`, quality `B:84.0`.\n\n## System Open Questions\n- None\n\n## System Risks\n- None\n\n## Acceptance\n- Each board has explicit requirements + readiness + unresolved questions.\n- Inter-board interfaces are listed with connector and signal assumptions.\n- Mechanical enclosure anchors are generated for boards that provide outlines.\n"
         }
       },
-      "intake_id": "a3b1ad8486",
+      "intake_id": "672ab40a8e",
       "machine": {
         "blockers": [],
         "board_count": 3,
@@ -632,11 +641,11 @@
         "machine_name": "PocketArcade_R1",
         "readiness_level": "ready"
       },
-      "report_md": "# System Engineering Report \u2014 PocketArcade_R1\n\n- Generated: `2026-03-01T14:26:02.196750+00:00`\n- Boards: `3`\n- Interconnects: `4`\n- Base readiness: `ready`\n- Simulation verdict: `sim_ready`\n\n## Placement Optimization\n- Total cable (before): `400.0` mm\n- Total cable (after): `161.63` mm\n- Improvement: `238.37` mm\n\n## Power Simulation\n- Paths simulated: `3`\n- Issues: `0`\n- ngspice: `ngspice_not_available`\n\n## Interconnect Simulation\n- Links checked: `4`\n- Issues: `0`\n\n## Control/Mechanism Coupling\n- Control board: `main_logic`\n- Coupling issues: `0`\n- Mecha bridge: `True`\n- Mecha simulation findings: `2`\n\n## Improvements\n- [high] Reposition boards to cut harness length by 238.37mm. -> Apply suggested positions_mm and update cable lengths from recommended_lengths.\n",
+      "report_md": "# System Engineering Report \u2014 PocketArcade_R1\n\n- Generated: `2026-03-02T07:31:52.294662+00:00`\n- Boards: `3`\n- Interconnects: `4`\n- Base readiness: `ready`\n- Simulation verdict: `sim_ready`\n\n## Placement Optimization\n- Total cable (before): `400.0` mm\n- Total cable (after): `161.63` mm\n- Improvement: `238.37` mm\n\n## Power Simulation\n- Paths simulated: `3`\n- Issues: `0`\n- ngspice: `ok`\n\n## Interconnect Simulation\n- Links checked: `4`\n- Issues: `0`\n\n## Control/Mechanism Coupling\n- Control board: `main_logic`\n- Coupling issues: `0`\n- Mecha bridge: `True`\n- Mecha simulation findings: `2`\n\n## Improvements\n- [high] Reposition boards to cut harness length by 238.37mm. -> Apply suggested positions_mm and update cable lengths from recommended_lengths.\n",
       "saved_artifacts": {
-        "hints": "/tmp/circuit-ai/intakes/a3b1ad8486/hints.json",
-        "requirements": "/tmp/circuit-ai/intakes/a3b1ad8486/requirements.json",
-        "sow_md": "/tmp/circuit-ai/intakes/a3b1ad8486/SOW.md"
+        "hints": "/tmp/circuit-ai/intakes/672ab40a8e/hints.json",
+        "requirements": "/tmp/circuit-ai/intakes/672ab40a8e/requirements.json",
+        "sow_md": "/tmp/circuit-ai/intakes/672ab40a8e/SOW.md"
       }
     },
     "status": "success"
@@ -668,7 +677,7 @@
               "path": "MANIFEST.json"
             }
           ],
-          "generated_at": "2026-03-01T14:26:02.968254+00:00",
+          "generated_at": "2026-03-02T07:31:53.191138+00:00",
           "metadata": {
             "gerbers_export_method": "sample",
             "intake_id": null,
@@ -678,7 +687,7 @@
             "pnp_export_method": "geometry"
           }
         },
-        "package_file": "/tmp/circuit-ai/packages/8809f887_main_logic-package.zip",
+        "package_file": "/tmp/circuit-ai/packages/263b4d47_main_logic-package.zip",
         "status": "success"
       },
       {
@@ -706,7 +715,7 @@
               "path": "MANIFEST.json"
             }
           ],
-          "generated_at": "2026-03-01T14:26:03.723788+00:00",
+          "generated_at": "2026-03-02T07:31:53.949747+00:00",
           "metadata": {
             "gerbers_export_method": "sample",
             "intake_id": null,
@@ -716,7 +725,7 @@
             "pnp_export_method": "geometry"
           }
         },
-        "package_file": "/tmp/circuit-ai/packages/bf84d4a6_controls_audio-package.zip",
+        "package_file": "/tmp/circuit-ai/packages/25962bdf_controls_audio-package.zip",
         "status": "success"
       },
       {
@@ -744,7 +753,7 @@
               "path": "MANIFEST.json"
             }
           ],
-          "generated_at": "2026-03-01T14:26:04.475204+00:00",
+          "generated_at": "2026-03-02T07:31:54.705505+00:00",
           "metadata": {
             "gerbers_export_method": "sample",
             "intake_id": null,
@@ -754,11 +763,11 @@
             "pnp_export_method": "geometry"
           }
         },
-        "package_file": "/tmp/circuit-ai/packages/bdfd8aa8_power_charge-package.zip",
+        "package_file": "/tmp/circuit-ai/packages/54e2c5dd_power_charge-package.zip",
         "status": "success"
       }
     ],
-    "download_url": "/api/v2/manufacture/download-package/PocketArcade_R1-20260301T142604Z-machine-package.zip",
+    "download_url": "/api/v2/manufacture/download-package/PocketArcade_R1-20260302T073154Z-machine-package.zip",
     "machine": {
       "blockers": [
         "main_logic: manufacturing.fab.name",
@@ -775,7 +784,7 @@
       "machine_name": "PocketArcade_R1",
       "readiness_level": "draft"
     },
-    "machine_package_file": "/tmp/circuit-ai/packages/PocketArcade_R1-20260301T142604Z-machine-package.zip",
+    "machine_package_file": "/tmp/circuit-ai/packages/PocketArcade_R1-20260302T073154Z-machine-package.zip",
     "status": "success"
   },
   "zip_entries": [
@@ -783,11 +792,11 @@
     "MACHINE_HINTS.json",
     "MACHINE_MANIFEST.json",
     "SYSTEM_SOW.md",
+    "boards/controls_audio/25962bdf_controls_audio-package.zip",
     "boards/controls_audio/MANIFEST.json",
-    "boards/controls_audio/bf84d4a6_controls_audio-package.zip",
-    "boards/main_logic/8809f887_main_logic-package.zip",
+    "boards/main_logic/263b4d47_main_logic-package.zip",
     "boards/main_logic/MANIFEST.json",
-    "boards/power_charge/MANIFEST.json",
-    "boards/power_charge/bdfd8aa8_power_charge-package.zip"
+    "boards/power_charge/54e2c5dd_power_charge-package.zip",
+    "boards/power_charge/MANIFEST.json"
   ]
 }
