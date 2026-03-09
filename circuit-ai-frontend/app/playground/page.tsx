@@ -1,18 +1,25 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { Check, Code, Copy, KeyRound, PlayCircle, Terminal, Upload, Workflow, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { motion } from 'framer-motion';
-import { Upload, Play, Copy, Check, Download, Eye, Code, Terminal, Zap } from 'lucide-react';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
+import { PageIntro } from '@/components/page-intro';
+import { usePageTitle } from '@/components/use-page-title';
 
 export default function PlaygroundPage() {
+  usePageTitle('Playground | Circuit.AI');
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [apiKey, setApiKey] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,6 +27,7 @@ export default function PlaygroundPage() {
     if (file) {
       setSelectedFile(file);
       setAnalysisResult(null);
+      setErrorMessage(null);
     }
   };
 
@@ -27,22 +35,29 @@ export default function PlaygroundPage() {
     if (!selectedFile || !apiKey) return;
 
     setIsAnalyzing(true);
+    setErrorMessage(null);
+
     try {
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('file', selectedFile);
 
-      const response = await fetch('/api/analyze', {
+      const response = await fetch(`${apiBaseUrl}/analyze`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
+          Authorization: `Bearer ${apiKey}`,
         },
         body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(`Analysis request failed (${response.status})`);
+      }
 
       const result = await response.json();
       setAnalysisResult(result);
     } catch (error) {
       console.error('Analysis failed:', error);
+      setErrorMessage(`Could not reach ${apiBaseUrl}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -51,275 +66,234 @@ export default function PlaygroundPage() {
   const copyToClipboard = (code: string, id: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(id);
-    setTimeout(() => setCopiedCode(null), 2000);
+    setTimeout(() => setCopiedCode(null), 1500);
   };
 
-  const generateCurlCommand = () => {
-    if (!selectedFile) return '';
-    return `curl -X POST "https://api.circuit-ai.com/v1/analyze" \\
+  const curlCommand = selectedFile
+    ? `curl -X POST "${apiBaseUrl}/analyze" \\
   -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\
   -H "Content-Type: multipart/form-data" \\
-  -F "image=@${selectedFile.name}"`;
-  };
+  -F "file=@${selectedFile.name}"`
+    : `curl -X POST "${apiBaseUrl}/analyze" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: multipart/form-data" \\
+  -F "file=@pcb_image.jpg"`;
 
-  const generatePythonCode = () => {
-    if (!selectedFile) return '';
-    return `import circuitai
+  const pythonSnippet = `import circuitai
 
 client = circuitai.Client(api_key="${apiKey || 'YOUR_API_KEY'}")
+result = client.analyze_pcb("${selectedFile?.name || 'pcb_image.jpg'}")
 
-# Analyze a PCB image
-result = client.analyze_pcb("${selectedFile.name}")
-
-	    print(f"Found {len(result.components)} components")
-	    for component in result.components:
-	        print(f"- {component.name}: {component.confidence:.2f}")
-	    print(f"  Value: ${"$"}{component.value}")
-	    print(f"  Function: {component.function}")`;
-  };
+print(result.total_value)
+for component in result.components:
+    print(component.name, component.confidence)`;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">API Playground</h1>
-              <p className="text-slate-600 mt-1">Test Circuit.AI API endpoints with real PCB images</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Input
-                type="password"
-                placeholder="Enter API Key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-64"
-              />
-              <Button variant="outline">
-                <Terminal className="w-4 h-4 mr-2" />
-                View Docs
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
+      <SiteHeader />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Upload Section */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Upload className="w-5 h-5 mr-2" />
-                  Upload PCB Image
-                </CardTitle>
-                <CardDescription>
-                  Upload a PCB image to test the analysis API
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div
-                    className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    {selectedFile ? (
-                      <div className="space-y-2">
-                        <Eye className="w-12 h-12 text-blue-500 mx-auto" />
-                        <p className="text-slate-900 font-medium">{selectedFile.name}</p>
-                        <p className="text-sm text-slate-500">
-                          {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="w-12 h-12 text-slate-400 mx-auto" />
-                        <p className="text-slate-600">Click to upload or drag and drop</p>
-                        <p className="text-sm text-slate-500">PNG, JPG, JPEG up to 10MB</p>
-                      </div>
-                    )}
+      <main>
+        <PageIntro
+          eyebrow="Validation playground"
+          title="Prove the request path before you promise the workflow."
+          description="This route exists to keep the frontend honest. Put in a real key, target the real backend, upload a board image, and verify the contract before building assumptions into the product."
+          actions={
+            <>
+              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                <Link href="/dashboard/keys">
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Get an API key
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
+                <Link href="/docs">
+                  <Terminal className="mr-2 h-4 w-4" />
+                  Review docs
+                </Link>
+              </Button>
+            </>
+          }
+          aside={
+            <div className="space-y-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Execution notes</div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-semibold text-slate-900">Backend target</div>
+                <code className="mt-2 block rounded-xl bg-white px-3 py-2 text-xs text-slate-700">{apiBaseUrl}</code>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                If this backend is not reachable, the page should fail clearly instead of implying the analysis stack is fully live.
+              </div>
+            </div>
+          }
+        />
+
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="space-y-6">
+              <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_50px_rgba(15,23,42,0.05)]">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-slate-950">Run a request</CardTitle>
+                  <CardDescription className="text-base leading-7 text-slate-600">
+                    Keep the funnel explicit: key first, file second, request third.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <div className="grid gap-4">
+                    <div>
+                      <div className="mb-2 text-sm font-semibold text-slate-900">1. API key</div>
+                      <Input
+                        type="password"
+                        value={apiKey}
+                        onChange={(event) => setApiKey(event.target.value)}
+                        placeholder="Paste a Circuit.AI key"
+                        className="rounded-2xl border-slate-200 bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="mb-2 text-sm font-semibold text-slate-900">2. Board image</div>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex w-full flex-col items-center justify-center rounded-[1.75rem] border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition-colors hover:border-slate-400 hover:bg-white"
+                      >
+                        <Upload className="mb-4 h-10 w-10 text-slate-400" />
+                        <div className="text-sm font-semibold text-slate-900">
+                          {selectedFile ? selectedFile.name : 'Upload PCB image'}
+                        </div>
+                        <div className="mt-1 text-sm text-slate-500">
+                          {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB selected` : 'PNG, JPG, JPEG up to 10MB'}
+                        </div>
+                      </button>
+                      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                    </div>
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  
+
                   <Button
                     onClick={handleAnalyze}
                     disabled={!selectedFile || !apiKey || isAnalyzing}
-                    className="w-full"
+                    className="w-full rounded-full bg-slate-900 text-white hover:bg-slate-800"
                   >
-                    {isAnalyzing ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-2" />
-                        Analyze PCB
-                      </>
-                    )}
+                    <PlayCircle className="mr-2 h-4 w-4" />
+                    {isAnalyzing ? 'Running analysis...' : 'Run analysis'}
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* API Response */}
-            {analysisResult && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Zap className="w-5 h-5 mr-2" />
-                    Analysis Results
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 p-4 rounded-lg">
-                        <p className="text-sm text-blue-600 font-medium">Components Found</p>
-                        <p className="text-2xl font-bold text-blue-900">
-                          {analysisResult.components?.length || 0}
-                        </p>
-                      </div>
-                      <div className="bg-green-50 p-4 rounded-lg">
-                        <p className="text-sm text-green-600 font-medium">Total Value</p>
-                        <p className="text-2xl font-bold text-green-900">
-                          ${analysisResult.total_value || '0.00'}
-                        </p>
-                      </div>
+                  {errorMessage ? (
+                    <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
+                      {errorMessage}
                     </div>
-                    
-                    {analysisResult.components && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-slate-900">Detected Components:</h4>
-                        <div className="max-h-48 overflow-y-auto space-y-2">
-                          {analysisResult.components.map((component: any, index: number) => (
-                            <div key={index} className="bg-slate-50 p-3 rounded-lg">
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-slate-900">{component.name}</p>
-                                  <p className="text-sm text-slate-600">{component.function}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-sm font-medium text-green-600">
-                                    ${component.value}
-                                  </p>
-                                  <p className="text-xs text-slate-500">
-                                    {Math.round(component.confidence * 100)}% confidence
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                  ) : null}
+
+                  {analysisResult ? (
+                    <div className="rounded-[1.75rem] border border-emerald-200 bg-emerald-50 p-5">
+                      <div className="text-sm font-semibold text-emerald-900">Analysis response received</div>
+                      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div className="rounded-2xl bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Components</div>
+                          <div className="mt-2 text-3xl font-semibold text-slate-950">{analysisResult.components?.length || 0}</div>
+                        </div>
+                        <div className="rounded-2xl bg-white p-4">
+                          <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Total value</div>
+                          <div className="mt-2 text-3xl font-semibold text-slate-950">${analysisResult.total_value || '0.00'}</div>
                         </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
                 </CardContent>
               </Card>
-            )}
-          </div>
 
-          {/* Code Examples */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Code className="w-5 h-5 mr-2" />
-                  cURL Command
-                </CardTitle>
-                <CardDescription>
-                  Copy this command to test the API from your terminal
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="relative">
-                  <pre className="bg-slate-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto">
-                    <code>{generateCurlCommand()}</code>
+              <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl text-slate-950">
+                    <Workflow className="h-5 w-5 text-slate-700" />
+                    What this page is for
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm leading-6 text-slate-600">
+                  <p>It is not meant to be a polished end-user destination. It is a truth-checking surface for operators, developers, and anyone wiring the frontend to the backend.</p>
+                  <p>If the request fails, that is useful information. The UI should expose that dependency clearly instead of turning backend absence into frontend confusion.</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card className="rounded-[2rem] border-slate-200/80 bg-[#0f172a] text-slate-100 shadow-[0_26px_70px_rgba(15,23,42,0.18)]">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-cyan-300">
+                      <Terminal className="h-4 w-4" />
+                      cURL
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-slate-300 hover:bg-white/10 hover:text-white"
+                      onClick={() => copyToClipboard(curlCommand, 'curl')}
+                    >
+                      {copiedCode === 'curl' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <CardTitle className="text-2xl text-white">Request shape</CardTitle>
+                  <CardDescription className="text-base leading-7 text-slate-300">
+                    This is the concrete shape the frontend should align to.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <pre className="overflow-x-auto rounded-[1.5rem] border border-white/10 bg-black/25 p-5 text-sm leading-7 text-cyan-100">
+                    <code>{curlCommand}</code>
                   </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => copyToClipboard(generateCurlCommand(), 'curl')}
-                  >
-                    {copiedCode === 'curl' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Code className="w-5 h-5 mr-2" />
-                  Python SDK
-                </CardTitle>
-                <CardDescription>
-                  Example using the Circuit.AI Python SDK
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="relative">
-                  <pre className="bg-slate-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto">
-                    <code>{generatePythonCode()}</code>
+              <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      <Code className="h-4 w-4" />
+                      Python SDK
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(pythonSnippet, 'python')}
+                    >
+                      {copiedCode === 'python' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  <CardTitle className="text-2xl text-slate-950">SDK parity</CardTitle>
+                  <CardDescription className="text-base leading-7 text-slate-600">
+                    Use the same trust boundary in code that you expect in the UI.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <pre className="overflow-x-auto rounded-[1.5rem] border border-slate-200 bg-slate-950 p-5 text-sm leading-7 text-emerald-300">
+                    <code>{pythonSnippet}</code>
                   </pre>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2"
-                    onClick={() => copyToClipboard(generatePythonCode(), 'python')}
-                  >
-                    {copiedCode === 'python' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>API Response Format</CardTitle>
-                <CardDescription>
-                  Example JSON response from the analysis endpoint
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-slate-900 text-green-400 font-mono text-sm p-4 rounded-lg overflow-x-auto">
-                  <code>{`{
-  "success": true,
-  "analysis_id": "anal_123456789",
-  "components": [
-    {
-      "name": "Arduino Uno R3",
-      "type": "microcontroller",
-      "confidence": 0.95,
-      "value": 25.00,
-      "function": "Main processing unit",
-      "position": {"x": 100, "y": 150},
-      "specifications": {
-        "voltage": "5V",
-        "current": "20mA",
-        "pins": 14
-      }
-    }
-  ],
-  "total_value": 25.00,
-  "analysis_time": 2.3,
-  "timestamp": "2024-01-15T10:30:00Z"
-}`}</code>
-                </pre>
-              </CardContent>
-            </Card>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Link href="/docs" className="rounded-[1.5rem] border border-slate-200 bg-white/90 p-5 shadow-[0_16px_36px_rgba(15,23,42,0.04)] transition-transform hover:-translate-y-1">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <Terminal className="h-4 w-4" />
+                    Docs
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">Cross-check auth, endpoints, and expectations before changing the UI copy.</p>
+                </Link>
+                <Link href="/status" className="rounded-[1.5rem] border border-slate-200 bg-white/90 p-5 shadow-[0_16px_36px_rgba(15,23,42,0.04)] transition-transform hover:-translate-y-1">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <Wrench className="h-4 w-4" />
+                    Status
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">Use this when a route needs to admit that a backend service is not currently reachable.</p>
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

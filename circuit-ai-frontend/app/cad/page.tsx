@@ -90,8 +90,8 @@ export default function CircuitAIWorkspace() {
   };
 
   const handleLoadDemo = () => {
-    const res = demoValidation();
-    setGeometry(res.pcb_geometry);
+    const res = demoValidation;
+    setGeometry(res.pcb_geometry ?? null);
     setIssues(res.validation.issues);
     setShowStart(false);
   };
@@ -169,7 +169,11 @@ export default function CircuitAIWorkspace() {
           {/* Left: Explorer */}
           <GlassPanel title="Project Explorer" className="absolute top-24 left-6 bottom-32 w-72 z-10">
              {activeView === "design" ? (
-               <TreePanel geometry={geometry} selectedRef={selectedRef} onSelectRef={setSelectedRef} />
+               <TreePanel
+                 geometry={geometry}
+                 selectedRef={selectedRef ?? undefined}
+                 onSelectRef={(ref) => setSelectedRef(ref)}
+               />
              ) : (
                <div className="p-4 space-y-4">
                   <div className="text-xs font-bold text-orange-400 uppercase tracking-widest">Robot Control</div>

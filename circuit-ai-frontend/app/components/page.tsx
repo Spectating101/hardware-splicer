@@ -1,352 +1,294 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { 
-  Search, 
-  Filter, 
-  Cpu, 
-  Zap, 
-  BookOpen, 
-  DollarSign, 
-  Star,
-  Eye,
-  Download,
-  Info
-} from "lucide-react";
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import {
+  BookOpen,
+  CircuitBoard,
+  Cpu,
+  LoaderCircle,
+  RefreshCcw,
+  ShieldCheck,
+  Sparkles,
+  Wrench,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
+import { PageIntro } from '@/components/page-intro';
+import { usePageTitle } from '@/components/use-page-title';
 
-interface Component {
-  type: string;
-  description: string;
-  capabilities: string[];
-  reuse_value: string;
-  market_value: number;
-  educational_value: string;
-  icon: string;
-  color: string;
-}
+type ComponentResponse = {
+  total_components?: number;
+  component_types?: string[];
+  last_updated?: string;
+};
 
-const components: Component[] = [
-  {
-    type: "ic_chip",
-    description: "Integrated Circuit chips for digital and analog processing",
-    capabilities: ["arduino_projects", "iot_devices", "educational_electronics", "signal_processing"],
-    reuse_value: "high",
-    market_value: 0.50,
-    educational_value: "high",
-    icon: "Cpu",
-    color: "from-blue-500 to-cyan-600"
-  },
-  {
-    type: "capacitor",
-    description: "Capacitive components for energy storage and filtering",
-    capabilities: ["power_filtering", "audio_circuits", "voltage_regulation", "timing_circuits"],
-    reuse_value: "medium",
-    market_value: 0.25,
-    educational_value: "medium",
-    icon: "Zap",
-    color: "from-green-500 to-emerald-600"
-  },
-  {
-    type: "resistor",
-    description: "Resistive components for current limiting and voltage division",
-    capabilities: ["current_limiting", "voltage_division", "biasing", "load_simulation"],
-    reuse_value: "low",
-    market_value: 0.01,
-    educational_value: "high",
-    icon: "Zap",
-    color: "from-orange-500 to-red-600"
-  },
-  {
-    type: "connector",
-    description: "Interface connectors for signal and power transmission",
-    capabilities: ["signal_transmission", "power_distribution", "modular_design", "data_communication"],
-    reuse_value: "high",
-    market_value: 0.10,
-    educational_value: "medium",
-    icon: "Zap",
-    color: "from-purple-500 to-pink-600"
-  },
-  {
-    type: "transformer",
-    description: "Power conversion components for voltage transformation",
-    capabilities: ["voltage_conversion", "isolation", "power_distribution", "signal_coupling"],
-    reuse_value: "high",
-    market_value: 2.00,
-    educational_value: "high",
-    icon: "Zap",
-    color: "from-indigo-500 to-purple-600"
-  },
-  {
-    type: "diode",
-    description: "Semiconductor components for rectification and protection",
-    capabilities: ["rectification", "voltage_regulation", "signal_detection", "protection"],
-    reuse_value: "medium",
-    market_value: 0.05,
-    educational_value: "medium",
-    icon: "Zap",
-    color: "from-yellow-500 to-orange-600"
-  }
-];
+type EducationalResponse = {
+  total_content?: number;
+  content?: Array<{
+    title?: string;
+    difficulty?: string;
+    component_type?: string;
+    estimated_time?: string;
+  }>;
+};
+
+type RepairResponse = {
+  total_guides?: number;
+  guides?: Array<{
+    component_type?: string;
+    issue?: string;
+    difficulty?: string;
+    success_rate?: number;
+  }>;
+};
+
+const fallbackTypes = ['ic_chip', 'capacitor', 'resistor', 'connector', 'transformer', 'diode'];
 
 export default function ComponentsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterValue, setFilterValue] = useState("all");
-  const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
+  usePageTitle('Component Intelligence | Circuit.AI');
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const [componentData, setComponentData] = useState<ComponentResponse | null>(null);
+  const [educationData, setEducationData] = useState<EducationalResponse | null>(null);
+  const [repairData, setRepairData] = useState<RepairResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const filteredComponents = components.filter(component => {
-    const matchesSearch = component.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         component.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterValue === "all" || 
-                         (filterValue === "high_value" && component.market_value > 1) ||
-                         (filterValue === "high_education" && component.educational_value === "high") ||
-                         (filterValue === "high_reuse" && component.reuse_value === "high");
-    
-    return matchesSearch && matchesFilter;
-  });
+  useEffect(() => {
+    let active = true;
 
-  const getValueColor = (value: string) => {
-    switch (value) {
-      case "high": return "text-green-600 bg-green-100";
-      case "medium": return "text-yellow-600 bg-yellow-100";
-      case "low": return "text-red-600 bg-red-100";
-      default: return "text-gray-600 bg-gray-100";
+    async function load() {
+      setLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const [componentsRes, educationRes, repairRes] = await Promise.all([
+          fetch(`${apiBaseUrl}/components`, { cache: 'no-store' }),
+          fetch(`${apiBaseUrl}/educational`, { cache: 'no-store' }),
+          fetch(`${apiBaseUrl}/repair`, { cache: 'no-store' }),
+        ]);
+
+        const [componentsJson, educationJson, repairJson] = await Promise.all([
+          componentsRes.ok ? componentsRes.json() : Promise.resolve({}),
+          educationRes.ok ? educationRes.json() : Promise.resolve({}),
+          repairRes.ok ? repairRes.json() : Promise.resolve({}),
+        ]);
+
+        if (!active) return;
+        setComponentData(componentsJson);
+        setEducationData(educationJson);
+        setRepairData(repairJson);
+
+        if (!componentsRes.ok && !educationRes.ok && !repairRes.ok) {
+          setErrorMessage(`Could not load live component intelligence from ${apiBaseUrl}. Showing a fallback summary instead.`);
+        }
+      } catch (error) {
+        if (!active) return;
+        console.error('Failed to load component intelligence', error);
+        setErrorMessage(`Could not load live component intelligence from ${apiBaseUrl}. Showing a fallback summary instead.`);
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-  };
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, [apiBaseUrl]);
+
+  const componentTypes = useMemo(
+    () => componentData?.component_types?.length ? componentData.component_types : fallbackTypes,
+    [componentData],
+  );
+  const educationalItems = educationData?.content || [];
+  const repairGuides = repairData?.guides || [];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Component Library</h1>
-        <p className="text-xl text-gray-600">
-          Explore electronic components and their educational potential
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
+      <SiteHeader />
 
-      {/* Search and Filter */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search components..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <select
-          value={filterValue}
-          onChange={(e) => setFilterValue(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="all">All Components</option>
-          <option value="high_value">High Value ($1+)</option>
-          <option value="high_education">High Educational Value</option>
-          <option value="high_reuse">High Reuse Potential</option>
-        </select>
-      </div>
+      <main>
+        <PageIntro
+          eyebrow="Component intelligence"
+          title="Turn detections into usable engineering, educational, and repair context."
+          description="The backend already exposes more than a flat component list. This route should show how the platform can enrich parts with educational context, repair guidance, and a clearer map of what the system actually knows."
+          actions={
+            <>
+              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                <Link href="/analyze">
+                  <CircuitBoard className="mr-2 h-4 w-4" />
+                  Analyze a board
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
+                <Link href="/docs">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Inspect endpoints
+                </Link>
+              </Button>
+            </>
+          }
+          aside={
+            <div className="space-y-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Current source</div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                This page reads from <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/components</code>, <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/educational</code>, and <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/repair</code> when the backend is reachable.
+              </div>
+            </div>
+          }
+        />
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Component Grid */}
-        <div className="lg:col-span-2">
-          <div className="grid md:grid-cols-2 gap-6">
-            {filteredComponents.map((component) => (
-              <Card 
-                key={component.type} 
-                className="card-hover cursor-pointer"
-                onClick={() => setSelectedComponent(component)}
-              >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${component.color} rounded-lg flex items-center justify-center`}>
-                      <Cpu className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-green-600">
-                        ${component.market_value}
-                      </div>
-                      <div className="text-sm text-gray-600">Market Value</div>
-                    </div>
-                  </div>
-                  <CardTitle className="capitalize">{component.type.replace('_', ' ')}</CardTitle>
-                  <CardDescription>{component.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span>Reuse Value:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getValueColor(component.reuse_value)}`}>
-                        {component.reuse_value}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Educational Value:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getValueColor(component.educational_value)}`}>
-                        {component.educational_value}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {component.capabilities.slice(0, 3).map((capability, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs"
-                        >
-                          {capability.replace('_', ' ')}
-                        </span>
-                      ))}
-                      {component.capabilities.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                          +{component.capabilities.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {errorMessage ? (
+            <div className="mb-6 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              {errorMessage}
+            </div>
+          ) : null}
 
-        {/* Component Details Sidebar */}
-        <div className="lg:col-span-1">
-          {selectedComponent ? (
-            <Card className="sticky top-8">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${selectedComponent.color} rounded-lg flex items-center justify-center`}>
-                    <Cpu className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <CardTitle className="capitalize">{selectedComponent.type.replace('_', ' ')}</CardTitle>
-                    <CardDescription>Component Details</CardDescription>
-                  </div>
-                </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Tracked types</CardDescription>
+                <CardTitle className="text-4xl text-slate-950">
+                  {loading ? <LoaderCircle className="h-8 w-8 animate-spin text-slate-400" /> : componentData?.total_components || componentTypes.length}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-semibold mb-2">Description</h4>
-                  <p className="text-sm text-gray-600">{selectedComponent.description}</p>
-                </div>
+            </Card>
+            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Educational overlays</CardDescription>
+                <CardTitle className="text-4xl text-slate-950">{educationData?.total_content || educationalItems.length || 0}</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
+              <CardHeader className="pb-2">
+                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Repair guides</CardDescription>
+                <CardTitle className="text-4xl text-slate-950">{repairData?.total_guides || repairGuides.length || 0}</CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Market Value</h4>
-                  <div className="text-2xl font-bold text-green-600">${selectedComponent.market_value}</div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Value Assessment</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm">Reuse Value:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getValueColor(selectedComponent.reuse_value)}`}>
-                        {selectedComponent.reuse_value}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm">Educational Value:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getValueColor(selectedComponent.educational_value)}`}>
-                        {selectedComponent.educational_value}
-                      </span>
-                    </div>
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
+                  <Cpu className="h-5 w-5 text-slate-700" />
+                  Known component types
+                </CardTitle>
+                <CardDescription className="text-base leading-7 text-slate-600">
+                  This is the inventory layer the frontend can use for enrichment, explanations, and operator guidance.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {componentTypes.map((type) => (
+                  <div key={type} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-sm font-semibold text-slate-900">{type.replaceAll('_', ' ')}</div>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      Candidate anchor for detection overlays, part intelligence, and salvage or replacement workflows.
+                    </p>
                   </div>
-                </div>
+                ))}
+              </CardContent>
+            </Card>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Capabilities</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedComponent.capabilities.map((capability, index) => (
-                      <span
-                        key={index}
-                        className="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm"
-                      >
-                        {capability.replace('_', ' ')}
-                      </span>
-                    ))}
+            <Card className="rounded-[2rem] border-slate-200/80 bg-[#0f172a] text-slate-100 shadow-[0_24px_65px_rgba(15,23,42,0.18)]">
+              <CardHeader>
+                <CardTitle className="text-2xl text-white">Why this route matters</CardTitle>
+                <CardDescription className="text-base leading-7 text-slate-300">
+                  A strong frontend turns raw detections into understandable next steps.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm leading-6 text-slate-300">
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center gap-2 font-semibold text-white">
+                    <Sparkles className="h-4 w-4 text-cyan-300" />
+                    Education
                   </div>
+                  <p className="mt-2">Explain what a component does and why it matters without forcing the user to leave the workflow.</p>
                 </div>
-
-                <div>
-                  <h4 className="font-semibold mb-2">Educational Applications</h4>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <BookOpen className="w-4 h-4" />
-                      <span>Basic electronics principles</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      <span>Circuit design and analysis</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      <span>Component value assessment</span>
-                    </div>
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center gap-2 font-semibold text-white">
+                    <Wrench className="h-4 w-4 text-orange-300" />
+                    Repair
                   </div>
+                  <p className="mt-2">Use issue-specific guidance to bridge from diagnosis into actual remediation or fabrication decisions.</p>
                 </div>
-
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Projects
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Download className="w-4 h-4 mr-2" />
-                    Export Info
-                  </Button>
+                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center gap-2 font-semibold text-white">
+                    <ShieldCheck className="h-4 w-4 text-emerald-300" />
+                    Honesty
+                  </div>
+                  <p className="mt-2">If the backend is unreachable, say so and preserve a fallback surface instead of leaving the route empty.</p>
                 </div>
               </CardContent>
             </Card>
-          ) : (
-            <Card>
+          </div>
+
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
               <CardHeader>
-                <CardTitle>Component Details</CardTitle>
-                <CardDescription>Select a component to view details</CardDescription>
+                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
+                  <BookOpen className="h-5 w-5 text-slate-700" />
+                  Educational content
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-gray-500">
-                  <Info className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Click on a component to see detailed information</p>
-                </div>
+              <CardContent className="space-y-3">
+                {educationalItems.length ? educationalItems.slice(0, 6).map((item, index) => (
+                  <div key={`${item.title || 'educational'}-${index}`} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="text-sm font-semibold text-slate-900">{item.title || 'Untitled content'}</div>
+                      {item.difficulty ? (
+                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                          {item.difficulty}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {item.component_type ? `${item.component_type.replaceAll('_', ' ')} focus` : 'Component-focused material'}
+                      {item.estimated_time ? ` • ${item.estimated_time}` : ''}
+                    </p>
+                  </div>
+                )) : (
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                    No live educational content was returned. The backend hook exists, so the route is prepared for it when populated.
+                  </div>
+                )}
               </CardContent>
             </Card>
-          )}
-        </div>
-      </div>
 
-      {/* Statistics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Component Statistics</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-indigo-600">{components.length}</div>
-              <div className="text-sm text-gray-600">Total Components</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                ${components.reduce((sum, c) => sum + c.market_value, 0).toFixed(2)}
-              </div>
-              <div className="text-sm text-gray-600">Total Value</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {components.filter(c => c.educational_value === "high").length}
-              </div>
-              <div className="text-sm text-gray-600">High Educational Value</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">
-                {components.filter(c => c.reuse_value === "high").length}
-              </div>
-              <div className="text-sm text-gray-600">High Reuse Potential</div>
-            </div>
+            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
+                  <RefreshCcw className="h-5 w-5 text-slate-700" />
+                  Repair guidance
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {repairGuides.length ? repairGuides.slice(0, 6).map((guide, index) => (
+                  <div key={`${guide.component_type || 'repair'}-${guide.issue || index}`} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <div className="text-sm font-semibold text-slate-900">
+                      {guide.component_type ? guide.component_type.replaceAll('_', ' ') : 'Component'} {guide.issue ? `• ${guide.issue}` : ''}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {guide.difficulty ? `${guide.difficulty} difficulty` : 'Difficulty unavailable'}
+                      {guide.success_rate !== undefined ? ` • ${Math.round(guide.success_rate * 100)}% success rate` : ''}
+                    </p>
+                  </div>
+                )) : (
+                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                    No live repair guidance was returned. The route still preserves the intended surface and backend expectation.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

@@ -1,255 +1,203 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight, Check, Coins, Factory, KeyRound, PlayCircle, ShieldCheck, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { motion } from 'framer-motion';
-import { Check, Zap, Star, Building, ArrowRight } from 'lucide-react';
+import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
+import { PageIntro } from '@/components/page-intro';
+import { usePageTitle } from '@/components/use-page-title';
+
+const planCopy = [
+  {
+    name: 'Free',
+    description: 'For proving the contract and testing with small files.',
+    price: { monthly: 0, annual: 0 },
+    features: ['50 requests / month', 'Basic analysis surface', 'Docs and playground access', 'Best for validation and demos'],
+    buttonText: 'Create demo key',
+    href: '/dashboard/keys',
+    popular: false,
+  },
+  {
+    name: 'Pro',
+    description: 'For teams turning analysis into an actual workflow.',
+    price: { monthly: 99, annual: 990 },
+    features: ['Unlimited requests', 'Streaming and richer telemetry', 'Priority support', 'Best fit for active integrations'],
+    buttonText: 'Open playground',
+    href: '/playground',
+    popular: true,
+  },
+  {
+    name: 'Enterprise',
+    description: 'For backend-heavy deployments that need explicit operating boundaries.',
+    price: { monthly: 'Custom', annual: 'Custom' },
+    features: ['Dedicated infrastructure', 'Custom deployment targets', 'Operational support', 'Best fit for fabrication or ops programs'],
+    buttonText: 'Review status',
+    href: '/status',
+    popular: false,
+  },
+];
+
+const fitNotes = [
+  { icon: KeyRound, title: 'Free tier is for trust', copy: 'Use it to verify auth, request shape, and frontend wiring before you scale complexity.' },
+  { icon: PlayCircle, title: 'Pro is for iteration', copy: 'Use it when the frontend needs to keep pace with real backend behavior and operator feedback.' },
+  { icon: Factory, title: 'Enterprise is for workflow ownership', copy: 'Use it when your backend and operations model matter more than a generic feature checklist.' },
+];
 
 export default function PricingPage() {
+  usePageTitle('Pricing | Circuit.AI');
   const [isAnnual, setIsAnnual] = useState(false);
 
-  const plans = [
-    {
-      name: 'Free',
-      description: 'Perfect for getting started',
-      price: { monthly: 0, annual: 0 },
-      features: [
-        '50 API requests/month',
-        'Basic component detection',
-        'Community support',
-        'Standard response time',
-        'Basic documentation'
-      ],
-      limitations: [
-        'No SLA guarantee',
-        'Limited to 5MB file size',
-        'No real-time streaming'
-      ],
-      buttonText: 'Get Started Free',
-      buttonVariant: 'outline' as const,
-      popular: false
-    },
-    {
-      name: 'Pro',
-      description: 'For growing applications',
-      price: { monthly: 99, annual: 990 },
-      features: [
-        'Unlimited API requests',
-        'Advanced AI detection',
-        'Real-time WebSocket streaming',
-        'Priority support',
-        '99.9% SLA guarantee',
-        'Up to 50MB file size',
-        'Advanced analytics',
-        'Custom integrations'
-      ],
-      limitations: [],
-      buttonText: 'Start Pro Trial',
-      buttonVariant: 'default' as const,
-      popular: true
-    },
-    {
-      name: 'Enterprise',
-      description: 'For large-scale deployments',
-      price: { monthly: 'Custom', annual: 'Custom' },
-      features: [
-        'Everything in Pro',
-        'Dedicated infrastructure',
-        'Custom model training',
-        'On-premise deployment',
-        '24/7 dedicated support',
-        'Custom SLA terms',
-        'Volume discounts',
-        'White-label options'
-      ],
-      limitations: [],
-      buttonText: 'Contact Sales',
-      buttonVariant: 'outline' as const,
-      popular: false
-    }
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="border-b border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-slate-900">Simple, Transparent Pricing</h1>
-            <p className="text-slate-600 mt-2">Choose the plan that fits your needs</p>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
+      <SiteHeader />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Billing Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-slate-100 p-1 rounded-lg">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                !isAnnual
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                isAnnual
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Annual
-              <span className="ml-1 text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded">
-                Save 17%
-              </span>
-            </button>
-          </div>
-        </div>
+      <main>
+        <PageIntro
+          eyebrow="Pricing and fit"
+          title="Pricing should describe operating mode, not just request volume."
+          description="This stack is more than a basic PCB API. The right pricing surface needs to make room for trust-building, iteration, and full operational ownership."
+          actions={
+            <>
+              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
+                <Link href="/dashboard/keys">
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Create a key
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
+                <Link href="/playground">
+                  <PlayCircle className="mr-2 h-4 w-4" />
+                  Validate a request
+                </Link>
+              </Button>
+            </>
+          }
+          aside={
+            <div className="space-y-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Commercial posture</div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                  Frontend rule
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Never imply a fully productized workflow when the actual deployment still depends on backend reachability, proxy wiring, or operator review.
+                </p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <Coins className="h-4 w-4 text-orange-600" />
+                  Buyer signal
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Users spending real money need the UI to feel grounded in the system’s true depth, not generic SaaS pricing theater.
+                </p>
+              </div>
+            </div>
+          }
+        />
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <Card className={`relative ${plan.popular ? 'border-blue-500 shadow-lg scale-105' : 'border-slate-200'}`}>
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
-                      <Star className="w-4 h-4 mr-1" />
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    {typeof plan.price.monthly === 'number' && typeof plan.price.annual === 'number' ? (
-                      <div className="flex items-baseline justify-center">
-                        <span className="text-4xl font-bold text-slate-900">
-                          ${isAnnual ? plan.price.annual / 12 : plan.price.monthly}
-                        </span>
-                        <span className="text-slate-600 ml-1">
-                          /{isAnnual ? 'month' : 'month'}
-                        </span>
+        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Plan view</div>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Choose based on workflow depth.</h2>
+            </div>
+            <div className="inline-flex rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+              <button
+                onClick={() => setIsAnnual(false)}
+                className={`rounded-full px-4 py-2 text-sm font-medium ${!isAnnual ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setIsAnnual(true)}
+                className={`rounded-full px-4 py-2 text-sm font-medium ${isAnnual ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Annual
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {planCopy.map((plan, index) => (
+              <motion.div key={plan.name} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: index * 0.08 }}>
+                <Card className={`h-full rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_50px_rgba(15,23,42,0.06)] ${plan.popular ? 'ring-2 ring-cyan-300' : ''}`}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <CardTitle className="text-2xl text-slate-950">{plan.name}</CardTitle>
+                        <CardDescription className="mt-2 text-base leading-7 text-slate-600">{plan.description}</CardDescription>
                       </div>
-                    ) : (
-                      <div className="text-4xl font-bold text-slate-900">
-                        {plan.price.monthly}
-                      </div>
-                    )}
-                    {isAnnual && typeof plan.price.monthly === 'number' && typeof plan.price.annual === 'number' && (
-                      <p className="text-sm text-slate-500 mt-1">
-                        Billed annually (${plan.price.annual}/year)
-                      </p>
-                    )}
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-6">
-                  <Button 
-                    className={`w-full ${plan.popular ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
-                    variant={plan.buttonVariant}
-                  >
-                    {plan.buttonText}
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                  
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-slate-900">Features included:</h4>
-                    <ul className="space-y-2">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center text-sm text-slate-600">
-                          <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  
-                  {plan.limitations.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-medium text-slate-900">Limitations:</h4>
-                      <ul className="space-y-2">
-                        {plan.limitations.map((limitation, limitationIndex) => (
-                          <li key={limitationIndex} className="flex items-center text-sm text-slate-500">
-                            <span className="w-4 h-4 mr-2 flex-shrink-0">•</span>
-                            {limitation}
-                          </li>
-                        ))}
-                      </ul>
+                      {plan.popular ? (
+                        <div className="inline-flex items-center gap-1 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-cyan-800">
+                          <Star className="h-3.5 w-3.5" />
+                          Fit for active work
+                        </div>
+                      ) : null}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    <div className="pt-4">
+                      {typeof plan.price.monthly === 'number' ? (
+                        <div className="flex items-end gap-2">
+                          <span className="text-5xl font-semibold tracking-tight text-slate-950">
+                            ${isAnnual ? (plan.price.annual as number) / 12 : (plan.price.monthly as number)}
+                          </span>
+                          <span className="pb-2 text-sm text-slate-500">/ month</span>
+                        </div>
+                      ) : (
+                        <div className="text-5xl font-semibold tracking-tight text-slate-950">{plan.price.monthly}</div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <Button asChild className={`w-full rounded-full ${plan.popular ? 'bg-slate-900 text-white hover:bg-slate-800' : ''}`} variant={plan.popular ? 'default' : 'outline'}>
+                      <Link href={plan.href}>
+                        {plan.buttonText}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                    <div className="space-y-3">
+                      {plan.features.map((feature) => (
+                        <div key={feature} className="flex gap-3 text-sm leading-6 text-slate-600">
+                          <Check className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </section>
 
-        {/* Additional Information */}
-        <div className="mt-16 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="text-left">
-              <h3 className="font-semibold text-slate-900 mb-2">What counts as an API request?</h3>
-              <p className="text-slate-600 text-sm">
-                Each call to our analysis endpoints counts as one request. This includes component detection, 
-                value assessment, and educational content retrieval.
-              </p>
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-slate-900 mb-2">Can I change plans anytime?</h3>
-              <p className="text-slate-600 text-sm">
-                Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, 
-                and we'll prorate any billing differences.
-              </p>
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-slate-900 mb-2">Do you offer custom pricing?</h3>
-              <p className="text-slate-600 text-sm">
-                Yes, we offer custom pricing for high-volume usage, enterprise deployments, 
-                and specialized requirements. Contact our sales team for details.
-              </p>
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-slate-900 mb-2">What payment methods do you accept?</h3>
-              <p className="text-slate-600 text-sm">
-                We accept all major credit cards, PayPal, and bank transfers for annual plans. 
-                Enterprise customers can also pay via invoice.
-              </p>
+        <section className="border-y border-slate-200/80 bg-white/70">
+          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="grid gap-6 lg:grid-cols-3">
+              {fitNotes.map((note) => {
+                const Icon = note.icon;
+                return (
+                  <Card key={note.title} className="rounded-[1.75rem] border-slate-200/80 bg-white/85 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
+                    <CardHeader>
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <CardTitle className="text-xl text-slate-950">{note.title}</CardTitle>
+                      <CardDescription className="text-base leading-7 text-slate-600">{note.copy}</CardDescription>
+                    </CardHeader>
+                  </Card>
+                );
+              })}
             </div>
           </div>
-        </div>
+        </section>
+      </main>
 
-        {/* CTA Section */}
-        <div className="mt-16 bg-blue-600 rounded-2xl p-8 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-            Join thousands of developers and teams using Circuit.AI to build the future of electronics analysis.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
-              <Zap className="w-5 h-5 mr-2" />
-              Start Free Trial
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
-              <Building className="w-5 h-5 mr-2" />
-              Contact Sales
-            </Button>
-          </div>
-        </div>
-      </div>
+      <SiteFooter />
     </div>
   );
 }
