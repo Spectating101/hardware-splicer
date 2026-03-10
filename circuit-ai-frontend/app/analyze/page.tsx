@@ -3,11 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  AlertTriangle,
   Brain,
   CheckCircle2,
   CircuitBoard,
-  Eye,
   FileImage,
   KeyRound,
   LoaderCircle,
@@ -15,22 +13,28 @@ import {
   Settings2,
   Sparkles,
   Terminal,
+  Upload,
   Workflow,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { PageIntro } from '@/components/page-intro';
+import { StudioShell } from '@/components/studio-shell';
 import { usePageTitle } from '@/components/use-page-title';
 
 type AnalyzeResult = Record<string, any> | null;
 
+const navItems = [
+  { href: '/', label: 'Overview' },
+  { href: '/analyze', label: 'Analyze' },
+  { href: '/components', label: 'Components' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/cad', label: 'CAD' },
+];
+
 const backendOptions = [
-  { value: 'ensemble', label: 'Ensemble', note: 'Use the full enhanced analysis path.' },
-  { value: 'classical', label: 'Classical', note: 'Lighter analysis for local validation and comparison.' },
-  { value: 'yolo', label: 'YOLO', note: 'Vision-heavy path when you want detector-centric behavior.' },
+  { value: 'ensemble', label: 'Ensemble' },
+  { value: 'classical', label: 'Classical' },
+  { value: 'yolo', label: 'YOLO' },
 ];
 
 function metricValue(result: AnalyzeResult, keys: string[], fallback = 'N/A') {
@@ -66,8 +70,18 @@ function detectionList(result: AnalyzeResult) {
   ) as Array<Record<string, any>>;
 }
 
+function panelTitle(eyebrow: string, title: string) {
+  return (
+    <div className="mb-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
+      <div className="mt-2 text-sm font-semibold text-white">{title}</div>
+    </div>
+  );
+}
+
 export default function AnalyzePage() {
   usePageTitle('Analyze Workspace | Circuit.AI');
+
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [apiKey, setApiKey] = useState('');
@@ -128,273 +142,286 @@ export default function AnalyzePage() {
       setResult(payload);
     } catch (error) {
       console.error('Analyze route request failed', error);
-      setErrorMessage(`Could not complete analysis against ${apiBaseUrl}/analyze. Confirm the backend is reachable and the auth mode matches the deployed service.`);
+      setErrorMessage(`Could not complete analysis against ${apiBaseUrl}/analyze. Confirm the target is reachable and try again.`);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
-      <SiteHeader />
-
-      <main>
-        <PageIntro
-          eyebrow="Analysis workspace"
-          title="Run an actual PCB analysis without dropping back into a disconnected demo UI."
-          description="This route is the bridge between the public product story and the heavier engineering surfaces. Upload a board image, choose the backend mode, and inspect the response shape the rest of the frontend should be built around."
-          actions={
-            <>
-              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                <Link href="/playground">
-                  <Terminal className="mr-2 h-4 w-4" />
-                  Open playground
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
-                <Link href="/docs">
-                  <Workflow className="mr-2 h-4 w-4" />
-                  Review endpoints
-                </Link>
-              </Button>
-            </>
-          }
-          aside={
-            <div className="space-y-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Why this route exists</div>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <CircuitBoard className="h-4 w-4 text-slate-700" />
-                  Frontend job
-                </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Translate backend depth into an operable surface. The point is not a pretty upload widget. The point is making analysis behavior legible.
-                </p>
-              </div>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                The enhanced backend accepts uploads under <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">file</code>. The UI now reflects that contract directly.
-              </div>
-            </div>
-          }
-        />
-
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr]">
-            <div className="space-y-6">
-              <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-slate-950">Analysis controls</CardTitle>
-                  <CardDescription className="text-base leading-7 text-slate-600">
-                    Set the trust boundary first, then run the board through the target backend mode.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <div>
-                    <div className="mb-2 text-sm font-semibold text-slate-900">API key</div>
-                    <Input
-                      type="password"
-                      value={apiKey}
-                      onChange={(event) => setApiKey(event.target.value)}
-                      placeholder="Optional locally, required for protected deployments"
-                      className="rounded-2xl border-slate-200 bg-white"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="mb-2 text-sm font-semibold text-slate-900">Board image</div>
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex w-full flex-col items-center justify-center rounded-[1.75rem] border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition-colors hover:border-slate-400 hover:bg-white"
-                    >
-                      <FileImage className="mb-4 h-10 w-10 text-slate-400" />
-                      <div className="text-sm font-semibold text-slate-900">
-                        {selectedFile ? selectedFile.name : 'Upload PCB image'}
-                      </div>
-                      <div className="mt-1 text-sm text-slate-500">
-                        {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB selected` : 'PNG, JPG, or JPEG'}
-                      </div>
-                    </button>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <div className="mb-2 text-sm font-semibold text-slate-900">Backend mode</div>
-                      <select
-                        value={backend}
-                        onChange={(event) => setBackend(event.target.value)}
-                        className="h-10 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none"
-                      >
-                        {backendOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        {backendOptions.find((option) => option.value === backend)?.note}
-                      </p>
-                    </div>
-
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                      <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
-                        <Settings2 className="h-4 w-4" />
-                        Analysis options
-                      </div>
-                      <label className="flex items-center justify-between gap-3 text-sm text-slate-700">
-                        <span>OCR enrichment</span>
-                        <input type="checkbox" checked={enableOcr} onChange={() => setEnableOcr((value) => !value)} />
-                      </label>
-                      <label className="mt-3 flex items-center justify-between gap-3 text-sm text-slate-700">
-                        <span>Quality assessment</span>
-                        <input type="checkbox" checked={enableQuality} onChange={() => setEnableQuality((value) => !value)} />
-                      </label>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={runAnalysis}
-                    disabled={!selectedFile || isAnalyzing}
-                    className="w-full rounded-full bg-slate-900 text-white hover:bg-slate-800"
-                  >
-                    {isAnalyzing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
-                    {isAnalyzing ? 'Running analysis' : 'Run PCB analysis'}
-                  </Button>
-
-                  {errorMessage ? (
-                    <div className="rounded-[1.5rem] border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-                      {errorMessage}
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-[2rem] border-slate-200/80 bg-[#0f172a] text-slate-100 shadow-[0_24px_65px_rgba(15,23,42,0.18)]">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl text-white">
-                    <Sparkles className="h-5 w-5 text-cyan-300" />
-                    Workflow position
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm leading-6 text-slate-300">
-                  <p>Use this route when you want a richer operator-facing analysis surface than the playground, but you are still validating core backend behavior before CAD or fabrication workflows.</p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Link href="/components" className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
-                      <div className="flex items-center gap-2 font-semibold text-white">
-                        <Eye className="h-4 w-4" />
-                        Component intelligence
-                      </div>
-                    </Link>
-                    <Link href="/projects" className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10">
-                      <div className="flex items-center gap-2 font-semibold text-white">
-                        <KeyRound className="h-4 w-4" />
-                        Project templates
-                      </div>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="space-y-6">
-              <Card className="overflow-hidden rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-slate-950">Board preview</CardTitle>
-                  <CardDescription className="text-base leading-7 text-slate-600">
-                    Keep the user anchored to the specific artifact being analyzed.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {previewUrl ? (
-                    <img src={previewUrl} alt="PCB preview" className="w-full rounded-[1.5rem] border border-slate-200 object-cover" />
-                  ) : (
-                    <div className="flex min-h-[280px] items-center justify-center rounded-[1.5rem] border-2 border-dashed border-slate-200 bg-slate-50 text-sm text-slate-500">
-                      Upload an image to preview the board here.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-                  <CardHeader className="pb-2">
-                    <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Detections</CardDescription>
-                    <CardTitle className="text-4xl text-slate-950">{detections.length}</CardTitle>
-                  </CardHeader>
-                </Card>
-                <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-                  <CardHeader className="pb-2">
-                    <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Backend</CardDescription>
-                    <CardTitle className="text-2xl text-slate-950">{metricValue(result, ['backend'])}</CardTitle>
-                  </CardHeader>
-                </Card>
-                <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-                  <CardHeader className="pb-2">
-                    <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Quality</CardDescription>
-                    <CardTitle className="text-2xl text-slate-950">{metricValue(result, ['detection_quality', 'quality', 'confidence'])}</CardTitle>
-                  </CardHeader>
-                </Card>
+    <StudioShell
+      eyebrow="Workbench"
+      title="Analyze a board inside a real studio layout."
+      description="Controls stay on the left, the board stays in the middle, and findings stay docked instead of dropping into a page-length report."
+      status={selectedFile ? `Active artifact: ${selectedFile.name}` : 'No artifact loaded'}
+      activeHref="/analyze"
+      navItems={navItems}
+      actions={
+        <>
+          <Button asChild className="rounded-full bg-white text-slate-950 hover:bg-slate-100">
+            <Link href="/playground">
+              <Terminal className="mr-2 h-4 w-4" />
+              Playground
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10">
+            <Link href="/docs">
+              <Workflow className="mr-2 h-4 w-4" />
+              Docs
+            </Link>
+          </Button>
+        </>
+      }
+      left={
+        <div className="space-y-5">
+          <div>
+            {panelTitle('Session', 'Run controls')}
+            <div className="space-y-3">
+              <div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Access key</div>
+                <Input
+                  type="password"
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder="Paste key if required"
+                  className="rounded-2xl border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                />
               </div>
 
-              <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                    <Brain className="h-5 w-5 text-slate-700" />
-                    Findings
-                  </CardTitle>
-                  <CardDescription className="text-base leading-7 text-slate-600">
-                    Structure the response so the next route can keep context instead of starting over.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {result ? (
-                    <>
-                      {detections.length ? (
-                        <div className="grid gap-3">
-                          {detections.slice(0, 8).map((item, index) => (
-                            <div key={`${item.class_name || item.name || 'detection'}-${index}`} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <div className="text-sm font-semibold text-slate-900">
-                                    {item.class_name || item.name || item.type || 'Detected component'}
-                                  </div>
-                                  <p className="mt-1 text-sm leading-6 text-slate-600">
-                                    {item.ocr_text || item.part_number || item.description || 'Structured detection output ready for enrichment.'}
-                                  </p>
-                                </div>
-                                <div className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">
-                                  {item.confidence ? `${Math.round(Number(item.confidence) * 100)}%` : 'Detected'}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                          The current payload did not expose a simple detection list. The raw response is still shown below so the integration path remains inspectable.
-                        </div>
-                      )}
+              <div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Artifact</div>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-white/15 bg-white/[0.03] px-4 py-6 text-center transition-colors hover:border-cyan-300/40 hover:bg-white/[0.06]"
+                >
+                  <Upload className="mb-3 h-7 w-7 text-cyan-200" />
+                  <div className="text-sm font-medium text-white">{selectedFile ? selectedFile.name : 'Load board image'}</div>
+                  <div className="mt-1 text-xs text-slate-400">
+                    {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'PNG, JPG, JPEG'}
+                  </div>
+                </button>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              </div>
 
-                      <div className="rounded-[1.75rem] border border-slate-200 bg-slate-950 p-5">
-                        <pre className="overflow-x-auto text-sm leading-7 text-emerald-300">
-                          <code>{JSON.stringify(result, null, 2)}</code>
-                        </pre>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 text-sm leading-6 text-slate-600">
-                      Run an analysis to inspect returned detections, metadata, and any enriched summary fields.
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Mode</div>
+                <select
+                  value={backend}
+                  onChange={(event) => setBackend(event.target.value)}
+                  className="h-11 w-full rounded-2xl border border-white/10 bg-white/5 px-4 text-sm text-white outline-none"
+                >
+                  {backendOptions.map((option) => (
+                    <option key={option.value} value={option.value} className="bg-slate-900">
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
-        </section>
-      </main>
 
-      <SiteFooter />
-    </div>
+          <div className="rounded-[1.5rem] border border-cyan-400/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <Settings2 className="h-4 w-4 text-cyan-300" />
+              Analysis switches
+            </div>
+            <label className="flex items-center justify-between gap-3 py-2 text-sm text-slate-300">
+              <span>OCR enrichment</span>
+              <input type="checkbox" checked={enableOcr} onChange={() => setEnableOcr((value) => !value)} />
+            </label>
+            <label className="flex items-center justify-between gap-3 py-2 text-sm text-slate-300">
+              <span>Quality assessment</span>
+              <input type="checkbox" checked={enableQuality} onChange={() => setEnableQuality((value) => !value)} />
+            </label>
+          </div>
+
+          <Button
+            onClick={runAnalysis}
+            disabled={!selectedFile || isAnalyzing}
+            className="w-full rounded-full bg-cyan-300 text-slate-950 hover:bg-cyan-200"
+          >
+            {isAnalyzing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
+            {isAnalyzing ? 'Running analysis' : 'Run analysis'}
+          </Button>
+
+          <div className="rounded-[1.5rem] border border-white/8 bg-[#08111f] p-4 text-sm leading-6 text-slate-300">
+            This route is meant to feel like a workstation: controls on the rail, artifact in the center, findings in docks.
+          </div>
+        </div>
+      }
+      main={
+        <div className="grid h-full gap-px bg-white/5 lg:grid-rows-[minmax(0,1fr)_220px]">
+          <div className="grid min-h-0 gap-px lg:grid-cols-[minmax(0,1fr)_240px]">
+            <div className="relative min-h-0 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.16),transparent_24%),linear-gradient(180deg,#0b1323_0%,#0f1a30_100%)] p-4">
+              <div className="flex h-full flex-col rounded-[1.5rem] border border-white/10 bg-[#0a1220] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                  <div>
+                    <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Canvas</div>
+                    <div className="mt-1 text-sm font-semibold text-white">Active board</div>
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                    {selectedFile ? 'Loaded' : 'Waiting for upload'}
+                  </div>
+                </div>
+                <div className="flex min-h-0 flex-1 items-center justify-center p-4">
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="PCB preview" className="max-h-full rounded-[1.25rem] border border-white/10 object-contain shadow-[0_20px_45px_rgba(2,6,23,0.35)]" />
+                  ) : (
+                    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.25rem] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.7),rgba(8,15,28,0.96))] text-center">
+                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:42px_42px]" />
+                      <div className="relative mb-8 flex h-36 w-56 items-center justify-center rounded-[1.5rem] border border-cyan-300/20 bg-cyan-300/5 shadow-[0_30px_60px_rgba(8,145,178,0.10)]">
+                        <div className="absolute left-6 top-7 h-3 w-3 rounded-full bg-cyan-300" />
+                        <div className="absolute right-8 top-10 h-3 w-3 rounded-full bg-orange-300" />
+                        <div className="absolute left-10 bottom-9 h-3 w-3 rounded-full bg-emerald-300" />
+                        <div className="absolute right-12 bottom-8 h-3 w-3 rounded-full bg-cyan-300" />
+                        <div className="absolute left-12 top-9 h-px w-24 bg-cyan-300/40" />
+                        <div className="absolute right-12 top-11 h-16 w-px bg-orange-300/35" />
+                        <div className="absolute left-14 bottom-10 h-px w-28 bg-emerald-300/35" />
+                        <FileImage className="h-12 w-12 text-cyan-200" />
+                      </div>
+                      <div className="relative text-base font-medium text-slate-100">Drop a board into the canvas</div>
+                      <div className="relative mt-2 max-w-md text-sm leading-6 text-slate-400">
+                        The artifact stays central while controls and findings remain docked around it.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="min-h-0 overflow-y-auto bg-[#08101d] p-4">
+              <div className="space-y-4">
+                <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Telemetry</div>
+                  <div className="mt-3 grid gap-3">
+                    {[
+                      ['Detections', String(detections.length)],
+                      ['Backend', metricValue(result, ['backend'])],
+                      ['Quality', metricValue(result, ['detection_quality', 'quality', 'confidence'])],
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">{label}</div>
+                        <div className="mt-2 text-lg font-semibold text-white">{value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <Sparkles className="h-4 w-4 text-cyan-300" />
+                    Next surface
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <Link href="/components" className="block rounded-[1rem] border border-white/8 bg-[#081423] px-3 py-3 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
+                      Component intelligence
+                    </Link>
+                    <Link href="/projects" className="block rounded-[1rem] border border-white/8 bg-[#081423] px-3 py-3 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
+                      Project orchestration
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="min-h-0 overflow-y-auto bg-[#07101d] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <Brain className="h-4 w-4 text-cyan-300" />
+              Findings tray
+            </div>
+            {result ? (
+              <div className="grid gap-3 xl:grid-cols-2">
+                {detections.length ? (
+                  detections.slice(0, 8).map((item, index) => (
+                    <div key={`${item.class_name || item.name || 'detection'}-${index}`} className="rounded-[1.25rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-white">
+                            {item.class_name || item.name || item.type || 'Detected component'}
+                          </div>
+                          <p className="mt-2 text-sm leading-6 text-slate-400">
+                            {item.ocr_text || item.part_number || item.description || 'Structured detection ready for enrichment.'}
+                          </p>
+                        </div>
+                        <div className="rounded-full border border-white/10 bg-[#07111f] px-3 py-1 text-xs text-slate-300">
+                          {item.confidence ? `${Math.round(Number(item.confidence) * 100)}%` : 'Detected'}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-[1.25rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4 text-sm text-slate-400 xl:col-span-2">
+                    The response did not expose a simple detection list. The raw response remains available in the inspector.
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-[1.25rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4 text-sm leading-6 text-slate-400">
+                Run an analysis to populate the findings tray without leaving the current workspace.
+              </div>
+            )}
+          </div>
+        </div>
+      }
+      right={
+        <div className="space-y-4">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            {panelTitle('Inspector', 'Session summary')}
+            <div className="space-y-3 text-sm text-slate-300">
+              <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Target</div>
+                <div className="mt-2 font-medium text-white">{apiBaseUrl}</div>
+              </div>
+              <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Artifact state</div>
+                <div className="mt-2 font-medium text-white">{selectedFile ? 'Artifact mounted' : 'No artifact yet'}</div>
+              </div>
+            </div>
+          </div>
+
+          {errorMessage ? (
+            <div className="rounded-[1.5rem] border border-rose-400/20 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100">
+              {errorMessage}
+            </div>
+          ) : (
+            <div className="rounded-[1.5rem] border border-emerald-400/20 bg-emerald-500/10 p-4 text-sm leading-6 text-emerald-100">
+              Keep the workspace stable: the board stays central and the findings tray updates in place instead of forcing another page jump.
+            </div>
+          )}
+
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <CheckCircle2 className="h-4 w-4 text-cyan-300" />
+              Raw response
+            </div>
+            <div className="max-h-[320px] overflow-auto rounded-[1rem] border border-white/8 bg-[#08111d] p-3">
+              <pre className="text-xs leading-6 text-slate-400">
+                <code>{result ? JSON.stringify(result, null, 2) : 'No analysis response yet.'}</code>
+              </pre>
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <KeyRound className="h-4 w-4 text-cyan-300" />
+              Route shortcuts
+            </div>
+            <div className="space-y-2">
+              {[
+                ['/dashboard/keys', 'Key management'],
+                ['/components', 'Component intelligence'],
+                ['/projects', 'Project planning'],
+              ].map(([href, label]) => (
+                <Link key={href} href={href} className="block rounded-[1rem] border border-white/8 bg-[#081423] px-3 py-3 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    />
   );
 }

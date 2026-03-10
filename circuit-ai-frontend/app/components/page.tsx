@@ -2,27 +2,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  BookOpen,
-  CircuitBoard,
-  Cpu,
-  LoaderCircle,
-  RefreshCcw,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from 'lucide-react';
+import { BookOpen, CircuitBoard, Cpu, LoaderCircle, RefreshCcw, ShieldCheck, Sparkles, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { PageIntro } from '@/components/page-intro';
+import { StudioShell } from '@/components/studio-shell';
 import { usePageTitle } from '@/components/use-page-title';
 
 type ComponentResponse = {
   total_components?: number;
   component_types?: string[];
-  last_updated?: string;
 };
 
 type EducationalResponse = {
@@ -45,7 +32,24 @@ type RepairResponse = {
   }>;
 };
 
+const navItems = [
+  { href: '/', label: 'Overview' },
+  { href: '/analyze', label: 'Analyze' },
+  { href: '/components', label: 'Components' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/cad', label: 'CAD' },
+];
+
 const fallbackTypes = ['ic_chip', 'capacitor', 'resistor', 'connector', 'transformer', 'diode'];
+
+function panelHeading(eyebrow: string, title: string) {
+  return (
+    <div className="mb-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
+      <div className="mt-2 text-sm font-semibold text-white">{title}</div>
+    </div>
+  );
+}
 
 export default function ComponentsPage() {
   usePageTitle('Component Intelligence | Circuit.AI');
@@ -82,12 +86,12 @@ export default function ComponentsPage() {
         setRepairData(repairJson);
 
         if (!componentsRes.ok && !educationRes.ok && !repairRes.ok) {
-          setErrorMessage(`Could not load live component intelligence from ${apiBaseUrl}. Showing a fallback summary instead.`);
+          setErrorMessage(`Live component intelligence is unavailable at ${apiBaseUrl}. Fallback summary loaded.`);
         }
       } catch (error) {
         if (!active) return;
         console.error('Failed to load component intelligence', error);
-        setErrorMessage(`Could not load live component intelligence from ${apiBaseUrl}. Showing a fallback summary instead.`);
+        setErrorMessage(`Live component intelligence is unavailable at ${apiBaseUrl}. Fallback summary loaded.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -107,188 +111,166 @@ export default function ComponentsPage() {
   const repairGuides = repairData?.guides || [];
 
   return (
-    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
-      <SiteHeader />
-
-      <main>
-        <PageIntro
-          eyebrow="Component intelligence"
-          title="Turn detections into usable engineering, educational, and repair context."
-          description="The backend already exposes more than a flat component list. This route should show how the platform can enrich parts with educational context, repair guidance, and a clearer map of what the system actually knows."
-          actions={
-            <>
-              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                <Link href="/analyze">
-                  <CircuitBoard className="mr-2 h-4 w-4" />
-                  Analyze a board
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
-                <Link href="/docs">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  Inspect endpoints
-                </Link>
-              </Button>
-            </>
-          }
-          aside={
-            <div className="space-y-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Current source</div>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                This page reads from <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/components</code>, <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/educational</code>, and <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/repair</code> when the backend is reachable.
-              </div>
+    <StudioShell
+      eyebrow="Workbench"
+      title="Browse component intelligence in a docked reference layout."
+      description="The parts grid sits in the center, source context lives on the left, and education plus repair guidance stay in the inspector rather than being pushed below the fold."
+      status={loading ? 'Refreshing part intelligence' : `${componentData?.total_components || componentTypes.length} component types indexed`}
+      activeHref="/components"
+      navItems={navItems}
+      actions={
+        <>
+          <Button asChild className="rounded-full bg-white text-slate-950 hover:bg-slate-100">
+            <Link href="/analyze">
+              <CircuitBoard className="mr-2 h-4 w-4" />
+              Back to analyze
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10">
+            <Link href="/projects">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Project planning
+            </Link>
+          </Button>
+        </>
+      }
+      left={
+        <div className="space-y-5">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            {panelHeading('Source', 'Workspace feed')}
+            <div className="text-sm leading-6 text-slate-400">
+              Pulls from <span className="text-white">/components</span>, <span className="text-white">/educational</span>, and <span className="text-white">/repair</span> when available.
             </div>
-          }
-        />
+          </div>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            {panelHeading('Counts', 'Reference stats')}
+            <div className="grid gap-3">
+              {[
+                ['Tracked types', loading ? '...' : String(componentData?.total_components || componentTypes.length)],
+                ['Educational overlays', String(educationData?.total_content || educationalItems.length || 0)],
+                ['Repair guides', String(repairData?.total_guides || repairGuides.length || 0)],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">{label}</div>
+                  <div className="mt-2 text-lg font-semibold text-white">{value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {errorMessage ? (
-            <div className="mb-6 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+            <div className="rounded-[1.5rem] border border-amber-400/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-100">
               {errorMessage}
             </div>
           ) : null}
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Tracked types</CardDescription>
-                <CardTitle className="text-4xl text-slate-950">
-                  {loading ? <LoaderCircle className="h-8 w-8 animate-spin text-slate-400" /> : componentData?.total_components || componentTypes.length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Educational overlays</CardDescription>
-                <CardTitle className="text-4xl text-slate-950">{educationData?.total_content || educationalItems.length || 0}</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Repair guides</CardDescription>
-                <CardTitle className="text-4xl text-slate-950">{repairData?.total_guides || repairGuides.length || 0}</CardTitle>
-              </CardHeader>
-            </Card>
+        </div>
+      }
+      main={
+        <div className="grid h-full gap-px bg-white/5 lg:grid-rows-[72px_minmax(0,1fr)]">
+          <div className="flex items-center justify-between bg-[#0d1628] px-5">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Parts matrix</div>
+              <div className="mt-1 text-sm font-semibold text-white">Known component types</div>
+            </div>
+            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+              {loading ? 'Syncing' : 'Studio reference view'}
+            </div>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                  <Cpu className="h-5 w-5 text-slate-700" />
-                  Known component types
-                </CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-600">
-                  This is the inventory layer the frontend can use for enrichment, explanations, and operator guidance.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {componentTypes.map((type) => (
-                  <div key={type} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-sm font-semibold text-slate-900">{type.replaceAll('_', ' ')}</div>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Candidate anchor for detection overlays, part intelligence, and salvage or replacement workflows.
-                    </p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[2rem] border-slate-200/80 bg-[#0f172a] text-slate-100 shadow-[0_24px_65px_rgba(15,23,42,0.18)]">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Why this route matters</CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-300">
-                  A strong frontend turns raw detections into understandable next steps.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm leading-6 text-slate-300">
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center gap-2 font-semibold text-white">
-                    <Sparkles className="h-4 w-4 text-cyan-300" />
-                    Education
-                  </div>
-                  <p className="mt-2">Explain what a component does and why it matters without forcing the user to leave the workflow.</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center gap-2 font-semibold text-white">
-                    <Wrench className="h-4 w-4 text-orange-300" />
-                    Repair
-                  </div>
-                  <p className="mt-2">Use issue-specific guidance to bridge from diagnosis into actual remediation or fabrication decisions.</p>
-                </div>
-                <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center gap-2 font-semibold text-white">
-                    <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                    Honesty
-                  </div>
-                  <p className="mt-2">If the backend is unreachable, say so and preserve a fallback surface instead of leaving the route empty.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
-            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                  <BookOpen className="h-5 w-5 text-slate-700" />
-                  Educational content
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {educationalItems.length ? educationalItems.slice(0, 6).map((item, index) => (
-                  <div key={`${item.title || 'educational'}-${index}`} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="text-sm font-semibold text-slate-900">{item.title || 'Untitled content'}</div>
-                      {item.difficulty ? (
-                        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                          {item.difficulty}
-                        </span>
-                      ) : null}
+          <div className="min-h-0 overflow-y-auto bg-[#09111f] p-4">
+            <div className="grid gap-5 xl:grid-cols-2 2xl:grid-cols-3">
+              {componentTypes.map((type) => (
+                <div key={type} className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,#0f1b35,#091423)] p-5 transition-all hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-[linear-gradient(180deg,#122244,#0b1730)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-400/10 text-cyan-200 shadow-[0_14px_30px_rgba(34,211,238,0.12)]">
+                        <Cpu className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <div className="text-base font-semibold text-white">{type.replaceAll('_', ' ')}</div>
+                        <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">reference node</div>
+                      </div>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {item.component_type ? `${item.component_type.replaceAll('_', ' ')} focus` : 'Component-focused material'}
-                      {item.estimated_time ? ` • ${item.estimated_time}` : ''}
-                    </p>
-                  </div>
-                )) : (
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                    No live educational content was returned. The backend hook exists, so the route is prepared for it when populated.
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[2rem] border-slate-200/80 bg-white/90 shadow-[0_24px_55px_rgba(15,23,42,0.05)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl text-slate-950">
-                  <RefreshCcw className="h-5 w-5 text-slate-700" />
-                  Repair guidance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {repairGuides.length ? repairGuides.slice(0, 6).map((guide, index) => (
-                  <div key={`${guide.component_type || 'repair'}-${guide.issue || index}`} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                    <div className="text-sm font-semibold text-slate-900">
-                      {guide.component_type ? guide.component_type.replaceAll('_', ' ') : 'Component'} {guide.issue ? `• ${guide.issue}` : ''}
+                    <div className="rounded-full border border-white/10 bg-[#081423] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-200">
+                      active
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {guide.difficulty ? `${guide.difficulty} difficulty` : 'Difficulty unavailable'}
-                      {guide.success_rate !== undefined ? ` • ${Math.round(guide.success_rate * 100)}% success rate` : ''}
-                    </p>
                   </div>
-                )) : (
-                  <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                    No live repair guidance was returned. The route still preserves the intended surface and backend expectation.
+                  <p className="mt-5 text-sm leading-6 text-slate-300">
+                    Candidate anchor for overlays, part intelligence, reuse pathways, and focused repair guidance.
+                  </p>
+                  <div className="mt-5 grid gap-2">
+                    {['Overlay annotations', 'Reuse signal', 'Repair lookup'].map((label) => (
+                      <div key={label} className="rounded-xl border border-white/8 bg-[#081423] px-3 py-2 text-xs font-medium text-slate-300">
+                        {label}
+                      </div>
+                    ))}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+              ))}
+            </div>
           </div>
-        </section>
-      </main>
+        </div>
+      }
+      right={
+        <div className="space-y-4">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <BookOpen className="h-4 w-4 text-cyan-300" />
+              Education dock
+            </div>
+            <div className="space-y-3">
+              {educationalItems.length ? educationalItems.slice(0, 5).map((item, index) => (
+                <div key={`${item.title || 'educational'}-${index}`} className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                  <div className="text-sm font-semibold text-white">{item.title || 'Untitled content'}</div>
+                  <div className="mt-2 text-sm leading-6 text-slate-400">
+                    {item.component_type ? item.component_type.replaceAll('_', ' ') : 'Component-focused material'}
+                    {item.estimated_time ? ` • ${item.estimated_time}` : ''}
+                  </div>
+                </div>
+              )) : (
+                <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3 text-sm leading-6 text-slate-400">
+                  No educational items loaded for this session.
+                </div>
+              )}
+            </div>
+          </div>
 
-      <SiteFooter />
-    </div>
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <RefreshCcw className="h-4 w-4 text-cyan-300" />
+              Repair dock
+            </div>
+            <div className="space-y-3">
+              {repairGuides.length ? repairGuides.slice(0, 5).map((guide, index) => (
+                <div key={`${guide.component_type || 'repair'}-${guide.issue || index}`} className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                  <div className="text-sm font-semibold text-white">
+                    {guide.component_type ? guide.component_type.replaceAll('_', ' ') : 'Component'}
+                  </div>
+                  <div className="mt-2 text-sm leading-6 text-slate-400">
+                    {guide.issue || 'Repair path unavailable'}
+                    {guide.success_rate !== undefined ? ` • ${Math.round(guide.success_rate * 100)}%` : ''}
+                  </div>
+                </div>
+              )) : (
+                <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3 text-sm leading-6 text-slate-400">
+                  No repair guidance loaded for this session.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <ShieldCheck className="h-4 w-4 text-cyan-300" />
+              Flow note
+            </div>
+            <div className="text-sm leading-6 text-slate-400">
+              The center stays focused on the parts matrix while the right dock holds interpretation. This is the visual direction the whole product should follow.
+            </div>
+          </div>
+        </div>
+      }
+    />
   );
 }

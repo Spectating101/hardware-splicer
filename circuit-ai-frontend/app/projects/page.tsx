@@ -2,21 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import {
-  ArrowRight,
-  CircuitBoard,
-  Layers3,
-  LoaderCircle,
-  PackageCheck,
-  Sparkles,
-  Target,
-  Wrench,
-} from 'lucide-react';
+import { ArrowRight, CircuitBoard, Layers3, LoaderCircle, PackageCheck, Sparkles, Target, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SiteHeader } from '@/components/site-header';
-import { SiteFooter } from '@/components/site-footer';
-import { PageIntro } from '@/components/page-intro';
+import { StudioShell } from '@/components/studio-shell';
 import { usePageTitle } from '@/components/use-page-title';
 
 type ProjectItem = {
@@ -33,19 +21,18 @@ type ProjectResponse = {
   projects?: ProjectItem[];
 };
 
+const navItems = [
+  { href: '/', label: 'Overview' },
+  { href: '/analyze', label: 'Analyze' },
+  { href: '/components', label: 'Components' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/cad', label: 'CAD' },
+];
+
 const orchestrationLanes = [
-  {
-    title: 'Recovery and salvage',
-    copy: 'Map detected boards and components into realistic reuse or teardown programs.',
-  },
-  {
-    title: 'Educational builds',
-    copy: 'Turn identified inventory into guided projects with clear difficulty and cost posture.',
-  },
-  {
-    title: 'Minting and procurement',
-    copy: 'Package the board state into deterministic next steps for BOM and operator review.',
-  },
+  'Recovery and salvage',
+  'Educational builds',
+  'Minting and procurement',
 ];
 
 const fallbackProjects: ProjectItem[] = [
@@ -53,6 +40,15 @@ const fallbackProjects: ProjectItem[] = [
   { id: 'audio_amplifier', name: 'Simple Audio Amplifier', difficulty: 'intermediate', category: 'repair', estimated_cost: 25, score: 0.84 },
   { id: 'power_supply', name: 'Variable Power Supply', difficulty: 'intermediate', category: 'fabrication', estimated_cost: 35, score: 0.8 },
 ];
+
+function panelHeading(eyebrow: string, title: string) {
+  return (
+    <div className="mb-4">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
+      <div className="mt-2 text-sm font-semibold text-white">{title}</div>
+    </div>
+  );
+}
 
 export default function ProjectsPage() {
   usePageTitle('Project Orchestration | Circuit.AI');
@@ -76,12 +72,12 @@ export default function ProjectsPage() {
         setProjectData(payload);
 
         if (!response.ok) {
-          setErrorMessage(`Could not load live project templates from ${apiBaseUrl}/projects. Showing a curated fallback list instead.`);
+          setErrorMessage(`Live project templates are unavailable at ${apiBaseUrl}/projects. Curated fallback set loaded.`);
         }
       } catch (error) {
         if (!active) return;
         console.error('Failed to load project templates', error);
-        setErrorMessage(`Could not load live project templates from ${apiBaseUrl}/projects. Showing a curated fallback list instead.`);
+        setErrorMessage(`Live project templates are unavailable at ${apiBaseUrl}/projects. Curated fallback set loaded.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -99,188 +95,179 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#edf2f7] text-slate-950">
-      <SiteHeader />
+    <StudioShell
+      eyebrow="Workbench"
+      title="Plan downstream actions from a fixed project dock."
+      description="Projects should feel like a decision board inside the same workspace, not a long template page. The center stays on candidate paths while the rails hold context and next moves."
+      status={loading ? 'Refreshing project board' : `${projectData?.total_projects || projects.length} project paths available`}
+      activeHref="/projects"
+      navItems={navItems}
+      actions={
+        <>
+          <Button asChild className="rounded-full bg-white text-slate-950 hover:bg-slate-100">
+            <Link href="/components">
+              <Layers3 className="mr-2 h-4 w-4" />
+              Component dock
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10">
+            <Link href="/cad">
+              <CircuitBoard className="mr-2 h-4 w-4" />
+              CAD workspace
+            </Link>
+          </Button>
+        </>
+      }
+      left={
+        <div className="space-y-5">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            {panelHeading('Lanes', 'Planning tracks')}
+            <div className="space-y-2">
+              {orchestrationLanes.map((lane) => (
+                <div key={lane} className="rounded-[1rem] border border-white/8 bg-[#081423] px-3 py-3 text-sm text-slate-300">
+                  {lane}
+                </div>
+              ))}
+            </div>
+          </div>
 
-      <main>
-        <PageIntro
-          eyebrow="Project orchestration"
-          title="Project templates should prove the system can turn intelligence into action."
-          description="This route is where recovered parts, analysis results, and educational or fabrication intent start converging. Instead of a generic template gallery, it should read like the planning layer of the broader stack."
-          actions={
-            <>
-              <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                <Link href="/components">
-                  <Layers3 className="mr-2 h-4 w-4" />
-                  Inspect components
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full border-slate-300 bg-white/80">
-                <Link href="/cad">
-                  <CircuitBoard className="mr-2 h-4 w-4" />
-                  Open CAD workspace
-                </Link>
-              </Button>
-            </>
-          }
-          aside={
-            <div className="space-y-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Backend source</div>
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                Live data is read from <code className="rounded bg-white px-1.5 py-0.5 text-xs text-slate-700">/projects</code>. If the backend is unavailable, the route falls back without hiding that fact.
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            {panelHeading('Counts', 'Board summary')}
+            <div className="grid gap-3">
+              <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Templates</div>
+                <div className="mt-2 text-lg font-semibold text-white">
+                  {loading ? <LoaderCircle className="h-5 w-5 animate-spin text-slate-400" /> : projectData?.total_projects || projects.length}
+                </div>
+              </div>
+              <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Primary direction</div>
+                <div className="mt-2 text-lg font-semibold text-white">Education + recovery</div>
               </div>
             </div>
-          }
-        />
+          </div>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           {errorMessage ? (
-            <div className="mb-6 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+            <div className="rounded-[1.5rem] border border-amber-400/20 bg-amber-500/10 p-4 text-sm leading-6 text-amber-100">
               {errorMessage}
             </div>
           ) : null}
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Project templates</CardDescription>
-                <CardTitle className="text-4xl text-slate-950">
-                  {loading ? <LoaderCircle className="h-8 w-8 animate-spin text-slate-400" /> : projectData?.total_projects || projects.length}
-                </CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Primary direction</CardDescription>
-                <CardTitle className="text-2xl text-slate-950">Education + recovery</CardTitle>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.5rem] border-slate-200/80 bg-white/90 shadow-[0_18px_38px_rgba(15,23,42,0.04)]">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Downstream path</CardDescription>
-                <CardTitle className="text-2xl text-slate-950">Minting + CAD</CardTitle>
-              </CardHeader>
-            </Card>
+        </div>
+      }
+      main={
+        <div className="grid h-full gap-px bg-white/5 lg:grid-rows-[72px_minmax(0,1fr)]">
+          <div className="flex items-center justify-between bg-[#0d1628] px-5">
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Decision board</div>
+              <div className="mt-1 text-sm font-semibold text-white">Project candidates</div>
+            </div>
+            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+              {loading ? 'Syncing' : 'Studio planning view'}
+            </div>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-            <Card className="rounded-[2rem] border-slate-200/80 bg-[#0f172a] text-slate-100 shadow-[0_24px_65px_rgba(15,23,42,0.18)]">
-              <CardHeader>
-                <CardTitle className="text-2xl text-white">Project lanes</CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-300">
-                  These are the ways project recommendations can reinforce the full product promise.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {orchestrationLanes.map((lane) => (
-                  <div key={lane.title} className="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-                    <div className="text-sm font-semibold text-white">{lane.title}</div>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{lane.copy}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-4">
+          <div className="min-h-0 overflow-y-auto bg-[#09111f] p-4">
+            <div className="grid gap-5 xl:grid-cols-2">
               {projects.map((project, index) => (
-                <Card key={project.id || `${project.name || 'project'}-${index}`} className="rounded-[1.75rem] border-slate-200/80 bg-white/90 shadow-[0_20px_45px_rgba(15,23,42,0.05)]">
-                  <CardHeader>
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <CardTitle className="text-2xl text-slate-950">{project.name || 'Unnamed project'}</CardTitle>
-                        <CardDescription className="mt-2 text-base leading-7 text-slate-600">
-                          {project.category ? `${project.category} workflow` : 'Project workflow candidate'}
-                        </CardDescription>
-                      </div>
-                      {project.difficulty ? (
-                        <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700">
-                          {project.difficulty}
-                        </div>
-                      ) : null}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-500">
-                          <PackageCheck className="h-4 w-4" />
-                          Estimated cost
-                        </div>
-                        <div className="mt-2 text-2xl font-semibold text-slate-950">
-                          {project.estimated_cost !== undefined ? `$${project.estimated_cost}` : 'Pending'}
-                        </div>
-                      </div>
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-500">
-                          <Target className="h-4 w-4" />
-                          Score
-                        </div>
-                        <div className="mt-2 text-2xl font-semibold text-slate-950">
-                          {project.score !== undefined ? `${Math.round(project.score * 100)}%` : 'N/A'}
-                        </div>
-                      </div>
-                      <div className="rounded-[1.25rem] bg-slate-50 p-4">
-                        <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-slate-500">
-                          <Wrench className="h-4 w-4" />
-                          Outcome
-                        </div>
-                        <div className="mt-2 text-sm font-semibold text-slate-900">
-                          {project.category ? `${project.category} ready` : 'Review next step'}
-                        </div>
+                <div key={project.id || `${project.name || 'project'}-${index}`} className="rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,#0f1b35,#091423)] p-5 transition-all hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-[linear-gradient(180deg,#122244,#0b1730)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-lg font-semibold text-white">{project.name || 'Unnamed project'}</div>
+                      <div className="mt-1 text-sm text-slate-300">
+                        {project.category ? `${project.category} pathway` : 'Planning pathway'}
                       </div>
                     </div>
+                    {project.difficulty ? (
+                      <div className="rounded-full border border-white/10 bg-[#081423] px-3 py-1 text-xs uppercase tracking-[0.16em] text-cyan-200">
+                        {project.difficulty}
+                      </div>
+                    ) : null}
+                  </div>
 
-                    <Button asChild variant="outline" className="rounded-full">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                        <PackageCheck className="h-3.5 w-3.5" />
+                        Cost
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">
+                        {project.estimated_cost !== undefined ? `$${project.estimated_cost}` : 'Pending'}
+                      </div>
+                    </div>
+                    <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                        <Target className="h-3.5 w-3.5" />
+                        Score
+                      </div>
+                      <div className="mt-2 text-lg font-semibold text-white">
+                        {project.score !== undefined ? `${Math.round(project.score * 100)}%` : 'N/A'}
+                      </div>
+                    </div>
+                    <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
+                      <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                        <Wrench className="h-3.5 w-3.5" />
+                        Outcome
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-white">
+                        {project.category ? `${project.category} ready` : 'Review next step'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">candidate path</div>
+                    <Button asChild variant="outline" className="rounded-full border-white/10 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/20">
                       <Link href="/analyze">
                         Use with analysis
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+      right={
+        <div className="space-y-4">
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <Sparkles className="h-4 w-4 text-cyan-300" />
+              Planning notes
+            </div>
+            <div className="space-y-3">
+              {[
+                'Keep project selection tied to component intelligence rather than treating this like a template marketplace.',
+                'A chosen path should continue naturally into CAD or operator surfaces.',
+                'The workspace should preserve the active board and detected inventory across route changes.',
+              ].map((note) => (
+                <div key={note} className="rounded-[1rem] border border-white/8 bg-[#081423] p-3 text-sm leading-6 text-slate-400">
+                  {note}
+                </div>
               ))}
             </div>
           </div>
 
-          <section className="mt-8 grid gap-6 lg:grid-cols-3">
-            <Card className="rounded-[1.75rem] border-slate-200/80 bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <CardTitle className="text-xl text-slate-950">Synergy target</CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-600">
-                  Keep project recommendations connected to component intelligence, analysis evidence, and fabrication follow-through.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.75rem] border-slate-200/80 bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
-                  <Layers3 className="h-5 w-5" />
-                </div>
-                <CardTitle className="text-xl text-slate-950">Inventory continuity</CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-600">
-                  Detected or recovered parts should influence what projects appear plausible, not just what looks nice in a catalog.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card className="rounded-[1.75rem] border-slate-200/80 bg-white/90 shadow-[0_18px_40px_rgba(15,23,42,0.04)]">
-              <CardHeader>
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-900">
-                  <CircuitBoard className="h-5 w-5" />
-                </div>
-                <CardTitle className="text-xl text-slate-950">Operator handoff</CardTitle>
-                <CardDescription className="text-base leading-7 text-slate-600">
-                  The path should continue into CAD, validation, or minting, not terminate at a dead-end project card.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </section>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+              <CircuitBoard className="h-4 w-4 text-cyan-300" />
+              Next moves
+            </div>
+            <div className="space-y-2">
+              {[
+                ['/analyze', 'Return to board analysis'],
+                ['/components', 'Inspect component intelligence'],
+                ['/cad', 'Open CAD workspace'],
+              ].map(([href, label]) => (
+                <Link key={href} href={href} className="block rounded-[1rem] border border-white/8 bg-[#081423] px-3 py-3 text-sm text-slate-300 transition-colors hover:bg-white/10 hover:text-white">
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    />
   );
 }
