@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 from typing import Any, Dict, List, Optional, Tuple
 
 from src.engines.kicad_netlist_compiler import parse_resistance_ohms
 from src.engines.kicad_parser import KiCadParser
+
+
+def _canonical_power_name(n: str) -> str:
+    up = (n or "").strip().upper().lstrip("/")
+    for suffix in ("_RAIL", "-RAIL"):
+        if up.endswith(suffix):
+            up = up[: -len(suffix)]
+    return up
 
 
 def _normalize_net(n: str) -> str:
@@ -25,12 +34,16 @@ def is_ground_net(n: str) -> bool:
 def is_power_net(n: str) -> bool:
     if not n:
         return False
-    up = n.upper()
+    up = _canonical_power_name(n)
     if up in {"VCC", "VDD", "VIN", "VBAT", "VBUS", "+5V", "+3V3", "+3.3V", "+12V", "+24V"}:
         return True
     if up.startswith("+") and any(ch.isdigit() for ch in up):
         return True
     if up.startswith("V") and any(ch.isdigit() for ch in up):
+        return True
+    if up.endswith("V+") or up.endswith("V-"):
+        return True
+    if re.search(r"(^|[_/\-+])(\+?\d+V\d*|V(?:BUS|BAT|USB|CC|DD|IN|REF))($|[_/\-+])", up):
         return True
     if up.startswith("VREF"):
         return True
@@ -161,4 +174,3 @@ def infer_common_interface_facts(
             can_terms.append({"ref": r.ref, "n1": r.n1, "n2": r.n2, "ohms": r.ohms})
 
     return {"pullups": pullups, "decoupling": decoupling, "can_termination": {"detected": can_terms}}
-

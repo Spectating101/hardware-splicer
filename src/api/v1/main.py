@@ -9,12 +9,14 @@ from loguru import logger
 from PIL import Image
 
 from src.api.v1.auth import get_current_user
+from src.api.v1.billing import router as billing_router
 from src.api.v1.physics import router as physics_router
 from src.core.ingest import CircuitAnalyzer
 
 
 app = FastAPI(title="Circuit.AI API v1", version="1.0.0")
 app.include_router(physics_router)
+app.include_router(billing_router)
 _analyzer: CircuitAnalyzer | None = None
 
 

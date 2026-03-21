@@ -3,5 +3,12 @@ def test_cli_entrypoint_imports():
 
 
 def test_api_entrypoint_imports():
+    import src.api.server  # noqa: F401
+
+
+def test_fastapi_entrypoint_imports():
     import src.api.v1.cli  # noqa: F401
 
+
+def test_fastapi_billing_imports():
+    import src.api.v1.billing  # noqa: F401

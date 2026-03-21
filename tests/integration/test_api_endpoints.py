@@ -18,9 +18,14 @@ if str(REPO_ROOT) not in sys.path:
 
 import api_server
 
+DEMO_PCB = REPO_ROOT / "circuit-ai-frontend" / "public" / "demo" / "usb_esp32_sensor.kicad_pcb"
+
 
 @pytest.fixture()
-def client():
+def client(tmp_path, monkeypatch):
+    monkeypatch.setenv("CIRCUIT_AI_REQUIRE_API_KEY", "false")
+    monkeypatch.setenv("CIRCUIT_AI_API_KEYS", "")
+    monkeypatch.setenv("CIRCUIT_AI_USAGE_DB", str(tmp_path / "usage.sqlite"))
     return api_server.app.test_client()
 
 
@@ -90,12 +95,9 @@ def test_v2_simulate_spice_missing_ngspice_returns_501(client):
 
 
 def test_v2_layout_and_prototype3d_endpoints_accept_pcb(client):
-    # Use a demo KiCad board shipped with the repo.
-    demo_pcb = REPO_ROOT / "data" / "demo_kicad_projects" / "pic_programmer" / "pic_programmer.kicad_pcb"
-    if not demo_pcb.exists():
-        pytest.skip("demo KiCad PCB not present")
+    assert DEMO_PCB.exists(), f"demo KiCad PCB not present: {DEMO_PCB}"
 
-    with demo_pcb.open("rb") as f:
+    with DEMO_PCB.open("rb") as f:
         r = client.post("/api/v2/layout/advice", data={"pcb_file": (f, "board.kicad_pcb")}, content_type="multipart/form-data")
     assert r.status_code == 200
     data = r.get_json() or {}
@@ -103,7 +105,7 @@ def test_v2_layout_and_prototype3d_endpoints_accept_pcb(client):
     assert "report_md" in data
     assert "pcbnew_script_py" in data
 
-    with demo_pcb.open("rb") as f:
+    with DEMO_PCB.open("rb") as f:
         r = client.post(
             "/api/v2/prototype3d/package",
             data={"pcb_file": (f, "board.kicad_pcb")},
@@ -187,9 +189,7 @@ def test_v2_machine_compile_multiboard(client):
 
 
 def test_v2_machine_build_package_multiboard(client):
-    demo_pcb = REPO_ROOT / "data" / "demo_kicad_projects" / "pic_programmer" / "pic_programmer.kicad_pcb"
-    if not demo_pcb.exists():
-        pytest.skip("demo KiCad PCB not present")
+    assert DEMO_PCB.exists(), f"demo KiCad PCB not present: {DEMO_PCB}"
 
     machine_payload = {
         "machine_name": "BenchInspectorPkg",
@@ -200,7 +200,7 @@ def test_v2_machine_build_package_multiboard(client):
         "interconnects": [{"from_board": "main_ctrl", "to_board": "sensor_io", "interface": "i2c"}],
     }
 
-    with demo_pcb.open("rb") as f1, demo_pcb.open("rb") as f2:
+    with DEMO_PCB.open("rb") as f1, DEMO_PCB.open("rb") as f2:
         r = client.post(
             "/api/v2/machines/build-package",
             data={

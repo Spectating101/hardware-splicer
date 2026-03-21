@@ -5,7 +5,10 @@ from typing import Optional
 
 
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(prog="circuit-ai-api", description="Run the Circuit-AI FastAPI server")
+    ap = argparse.ArgumentParser(
+        prog="circuit-ai-fastapi",
+        description="Run the secondary Circuit-AI FastAPI server",
+    )
     ap.add_argument("--host", default="0.0.0.0")
     ap.add_argument("--port", default=8000, type=int)
     ap.add_argument("--reload", action="store_true", help="Enable auto-reload (dev only)")
@@ -30,4 +33,3 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

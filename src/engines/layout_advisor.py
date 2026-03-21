@@ -14,9 +14,15 @@ class FootprintRecord:
 
 
 def _load_board(pcb_path: Path):
-    import pcbnew  # type: ignore
+    try:
+        import pcbnew  # type: ignore
+    except Exception:
+        return None, None
 
-    board = pcbnew.LoadBoard(str(pcb_path))
+    try:
+        board = pcbnew.LoadBoard(str(pcb_path))
+    except Exception:
+        board = None
     return pcbnew, board
 
 
@@ -25,9 +31,49 @@ def _mm(v_nm: int) -> float:
     return float(v_nm) / 1_000_000.0
 
 
+def _summarize_board_fallback(pcb_path: Path) -> Dict[str, Any]:
+    from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+
+    geometry = extract_pcb_geometry(str(pcb_path))
+    board = geometry.get("board") or {}
+    bbox = board.get("bbox_mm") or {}
+    footprints_raw = geometry.get("footprints") or []
+
+    fps: List[FootprintRecord] = []
+    for fp in footprints_raw:
+        at = fp.get("at") or {}
+        fps.append(
+            FootprintRecord(
+                ref=str(fp.get("ref") or "?"),
+                footprint=str(fp.get("footprint") or ""),
+                x_mm=float(at.get("x") or 0.0),
+                y_mm=float(at.get("y") or 0.0),
+            )
+        )
+
+    return {
+        "board": {
+            "width_mm": round(float(bbox.get("width") or 0.0), 3),
+            "height_mm": round(float(bbox.get("height") or 0.0), 3),
+            "origin_mm": {
+                "x": round(float(bbox.get("min_x") or 0.0), 3),
+                "y": round(float(bbox.get("min_y") or 0.0), 3),
+            },
+            "layers": int(board.get("layers") or 0),
+        },
+        "footprints": [fp.__dict__ for fp in fps],
+    }
+
+
 def summarize_board(pcb_path: Path) -> Dict[str, Any]:
     pcbnew, board = _load_board(pcb_path)
+    if board is None:
+        return _summarize_board_fallback(pcb_path)
+
     bbox = board.GetBoardEdgesBoundingBox()
+    if bbox is None:
+        return _summarize_board_fallback(pcb_path)
+
     width_mm = _mm(bbox.GetWidth())
     height_mm = _mm(bbox.GetHeight())
     origin = bbox.GetPosition()
@@ -120,6 +166,23 @@ def analyze_decoupling_proximity(pcb_path: Path, *, cap_prefix: str = "C", ic_pr
 
 def find_mounting_holes(pcb_path: Path) -> List[Dict[str, Any]]:
     pcbnew, board = _load_board(pcb_path)
+    if board is None:
+        summary = _summarize_board_fallback(pcb_path)
+        holes: List[Dict[str, Any]] = []
+        for fp in summary.get("footprints") or []:
+            footprint = str(fp.get("footprint") or "")
+            if "mounting" not in footprint.lower() and "hole" not in footprint.lower():
+                continue
+            holes.append(
+                {
+                    "ref": str(fp.get("ref") or ""),
+                    "footprint": footprint,
+                    "x_mm": round(float(fp.get("x_mm") or 0.0), 3),
+                    "y_mm": round(float(fp.get("y_mm") or 0.0), 3),
+                }
+            )
+        return holes
+
     holes: List[Dict[str, Any]] = []
     for fp in board.GetFootprints():
         fpn = ""
@@ -220,4 +283,3 @@ def render_pcbnew_script(pcb_path: Path) -> str:
         "for d, cref, uref in rows[:10]:\n"
         "    print(f'  {cref} -> {uref}: {d:.2f}mm')\n"
     )
-

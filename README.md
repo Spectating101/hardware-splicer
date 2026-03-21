@@ -121,15 +121,15 @@ This repository contains the core logic for **4 Distinct Commercial Tools**:
 *   **Vision:** YOLOv8 (Custom trained, state-of-the-art 2023), OpenCV (Adaptive/HSV), Tesseract OCR.
 *   **Intelligence:** Python-based Logic Engines (`src/intelligence/`).
 *   **LLM Integration:** Llama-3.3-70b (via Cerebras) for synthesis.
-*   **Backend:** FastAPI.
-*   **Packaging:** `pyproject.toml` / `setup.cfg` with console scripts (`circuit-ai-cli`, `circuit-ai-api`).
+*   **Backend:** Flask product API with secondary FastAPI services.
+*   **Packaging:** `pyproject.toml` / `setup.cfg` with console scripts (`circuit-ai-cli`, `circuit-ai-api`, `circuit-ai-fastapi`).
 
 ---
 
 ## 🚀 Quick Start
 
 ### CAD Demo UI
-1. Start the API: `python3 api_server.py` (serves `http://localhost:5000`)
+1. Start the API: `circuit-ai-api` or `python3 api_server.py` (serves `http://localhost:5000`)
 2. Start the frontend: `cd circuit-ai-frontend && npm run dev` (serves `http://localhost:3000`)
 3. Open the workspace: `http://localhost:3000/cad` (click `Demo Board` to preview without backend)
 
@@ -140,9 +140,9 @@ This repository contains the core logic for **4 Distinct Commercial Tools**:
 
 ### V2 API - Unified Workflows
 
-Start the API server:
+Start the canonical API server:
 ```bash
-python3 api_server.py
+circuit-ai-api
 ```
 
 Test the v2 endpoints:
@@ -242,7 +242,12 @@ circuit-ai-cli validate-design design.json --json
 
 Run the API:
 ```bash
-circuit-ai-api --host 0.0.0.0 --port 8000
+circuit-ai-api --host 0.0.0.0 --port 5000
+```
+
+Run the secondary FastAPI surface:
+```bash
+circuit-ai-fastapi --host 0.0.0.0 --port 8000
 ```
 
 ### Helper scripts

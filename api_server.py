@@ -1135,7 +1135,10 @@ def design_and_validate():
             output_path = temp_dir / filename
 
             fzz_path = fritzing_gen.generate_fzz(design, str(output_path))
+            # Keep the temp file path for existing callers, but surface the
+            # stable export route promised by the API contract.
             result['export_file'] = str(fzz_path)
+            result['export_url'] = '/api/export/fritzing'
             result['message'] += ' and exported to Fritzing'
 
         return jsonify(result)
@@ -1530,8 +1533,10 @@ def get_repair_guide(issue_name):
         user_id = request.args.get('user_id')
         preview_mode = request.args.get('preview', 'false').lower() == 'true'
 
-        # Access control check (if user_id provided)
-        has_access = True  # Default to true for testing
+        # Preview mode should return limited content without requiring a paid
+        # entitlement check. Outside preview mode, default to permissive local
+        # behavior unless an explicit access check says otherwise.
+        has_access = not preview_mode
         if user_id and not preview_mode:
             access_check = payment_service.check_access(user_id, issue_name)
             has_access = access_check.get('has_access', False)
@@ -3697,6 +3702,184 @@ def robot_probe_plan():
 
 
 # ============================================================================
+# V2 API - SYSTEM EXTRACTION (board structure + machine topology)
+# ============================================================================
+
+@app.route("/api/v2/system/extract-board", methods=["POST"])
+@require_api_key("system_extract_board")
+def system_extract_board():
+    """
+    Deterministically extract board structure from a KiCad netlist or PCB.
+
+    Supports:
+    1) JSON:
+       {
+         "path": "/abs/path/to/design.net",
+         "kind": "netlist|pcb",          # optional
+         "board_id": "main_ctrl",        # optional
+         "board_name": "Main Controller" # optional
+       }
+    2) multipart/form-data:
+       - netlist_file OR pcb_file
+       - optional: board_id, board_name
+    """
+    try:
+        design_path: Optional[Path] = None
+        kind: Optional[str] = None
+        board_id: Optional[str] = None
+        board_name: Optional[str] = None
+
+        if request.is_json:
+            payload = request.get_json() or {}
+            raw_path = str(payload.get("path") or "").strip()
+            if not raw_path:
+                return jsonify({"error": "path required"}), 400
+            design_path = Path(raw_path)
+            kind = str(payload.get("kind") or "").strip().lower() or None
+            board_id = str(payload.get("board_id") or "").strip() or None
+            board_name = str(payload.get("board_name") or "").strip() or None
+        else:
+            upload = request.files.get("netlist_file")
+            if upload is not None:
+                kind = "netlist"
+            else:
+                upload = request.files.get("pcb_file")
+                if upload is not None:
+                    kind = "pcb"
+            if upload is None:
+                return jsonify({"error": "netlist_file or pcb_file required"}), 400
+            board_id = str(request.form.get("board_id") or "").strip() or None
+            board_name = str(request.form.get("board_name") or "").strip() or None
+            temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+            suffix = ".net" if kind == "netlist" else ".kicad_pcb"
+            design_path = temp_dir / f"{uuid.uuid4().hex[:8]}{suffix}"
+            upload.save(str(design_path))
+
+        if design_path is None or not design_path.exists():
+            return jsonify({"error": "design path not found"}), 400
+
+        from src.engines.system_structure_extractor import extract_board_structure
+
+        result = extract_board_structure(
+            str(design_path),
+            board_id=board_id,
+            board_name=board_name,
+            kind=kind,
+        )
+        return jsonify({"status": "success", "result": result})
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/v2/system/extract-machine", methods=["POST"])
+@require_api_key("system_extract_machine")
+def system_extract_machine():
+    """
+    Extract board structure for several boards, then synthesize a machine/system topology.
+
+    Supports:
+    1) JSON:
+       {
+         "machine_name": "BenchBot",
+         "boards": [
+           {"board_id": "main_ctrl", "board_name": "Main", "path": "/abs/path/main.net", "kind": "netlist"},
+           {"board_id": "sensor_io", "path": "/abs/path/sensor.net", "kind": "netlist"}
+         ]
+       }
+    2) multipart/form-data:
+       - machine_name: optional
+       - board_specs_json: optional array of objects with `board_id`, `board_name`, `file_field`, `kind`
+       - uploaded files referenced by `file_field`
+       If `board_specs_json` is omitted, all uploaded files are treated as boards.
+    """
+    try:
+        machine_name = "auto_machine"
+        specs: List[Dict[str, Any]] = []
+
+        if request.is_json:
+            payload = request.get_json() or {}
+            machine_name = str(payload.get("machine_name") or "auto_machine").strip() or "auto_machine"
+            raw_specs = payload.get("boards")
+            if not isinstance(raw_specs, list) or not raw_specs:
+                return jsonify({"error": "boards[] required"}), 400
+            specs = [row for row in raw_specs if isinstance(row, dict)]
+        else:
+            machine_name = str(request.form.get("machine_name") or "auto_machine").strip() or "auto_machine"
+            specs_json = (request.form.get("board_specs_json") or "").strip()
+            if specs_json:
+                try:
+                    parsed = json.loads(specs_json)
+                except Exception as e:
+                    return jsonify({"error": f"invalid board_specs_json: {e}"}), 400
+                if not isinstance(parsed, list) or not parsed:
+                    return jsonify({"error": "board_specs_json must decode to a non-empty array"}), 400
+                specs = [row for row in parsed if isinstance(row, dict)]
+            else:
+                for field_name, upload in request.files.items():
+                    filename = upload.filename or field_name
+                    kind = "pcb" if filename.lower().endswith(".kicad_pcb") else "netlist"
+                    specs.append(
+                        {
+                            "board_id": field_name.replace("board_file_", "") or Path(filename).stem,
+                            "board_name": Path(filename).stem,
+                            "file_field": field_name,
+                            "kind": kind,
+                        }
+                    )
+            if not specs:
+                return jsonify({"error": "no board specifications or uploads provided"}), 400
+
+        from src.engines.system_structure_extractor import extract_board_structure, synthesize_machine_topology
+
+        board_results: List[Dict[str, Any]] = []
+        temp_dir = Path(tempfile.gettempdir()) / "circuit-ai"
+        temp_dir.mkdir(parents=True, exist_ok=True)
+
+        for idx, spec in enumerate(specs):
+            board_id = str(spec.get("board_id") or f"board_{idx + 1}").strip() or f"board_{idx + 1}"
+            board_name = str(spec.get("board_name") or board_id).strip() or board_id
+            kind = str(spec.get("kind") or "").strip().lower() or None
+
+            if request.is_json:
+                raw_path = str(spec.get("path") or "").strip()
+                if not raw_path:
+                    return jsonify({"error": f"boards[{idx}].path required"}), 400
+                design_path = Path(raw_path)
+            else:
+                field_name = str(spec.get("file_field") or "").strip()
+                if not field_name or field_name not in request.files:
+                    return jsonify({"error": f"missing uploaded file for board {board_id} ({field_name})"}), 400
+                upload = request.files[field_name]
+                if kind is None:
+                    kind = "pcb" if (upload.filename or "").lower().endswith(".kicad_pcb") else "netlist"
+                suffix = ".kicad_pcb" if kind == "pcb" else ".net"
+                design_path = temp_dir / f"{uuid.uuid4().hex[:8]}_{board_id}{suffix}"
+                upload.save(str(design_path))
+
+            if not design_path.exists():
+                return jsonify({"error": f"design path not found for board {board_id}: {design_path}"}), 400
+
+            board_results.append(
+                extract_board_structure(
+                    str(design_path),
+                    board_id=board_id,
+                    board_name=board_name,
+                    kind=kind,
+                )
+            )
+
+        result = synthesize_machine_topology(board_results, machine_name=machine_name)
+        return jsonify({"status": "success", "result": result})
+    except FileNotFoundError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
 # V2 API - MACHINES (multi-board system compile)
 # ============================================================================
 
@@ -3946,6 +4129,9 @@ def machines_engineer():
       {
         "machine": { ... },                   # required; same machine object used by /machines/compile
         "mechanism": { ... },                 # optional Mecha-Splicer spec fragment
+        "board_design_files": {               # optional; same shape as /machines/full-simulate
+          "main_ctrl": {"path": "/abs/path/main.net", "kind": "netlist"}
+        },
         "run_mechanism_sim": true,            # optional, default true
         "simulation_fidelity": "high"         # optional: starter|high
       }
@@ -3961,6 +4147,11 @@ def machines_engineer():
         mechanism = {}
     if not isinstance(mechanism, dict):
         return jsonify({"error": "mechanism must be an object"}), 400
+    board_design_files = payload.get("board_design_files")
+    if board_design_files is None:
+        board_design_files = {}
+    if not isinstance(board_design_files, dict):
+        return jsonify({"error": "board_design_files must be an object"}), 400
 
     run_mecha = bool(payload.get("run_mechanism_sim", True))
     fidelity = str(payload.get("simulation_fidelity") or "high").strip().lower()
@@ -3974,6 +4165,7 @@ def machines_engineer():
             run_mechanism_sim=run_mecha,
             mechanism_spec=mechanism,
             simulation_fidelity=fidelity,
+            board_design_files=board_design_files,
         )
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -3984,7 +4176,7 @@ def machines_engineer():
     saved = _save_intake_artifacts(
         intake_id,
         {
-            "requirements": {"machine": machine, "mechanism": mechanism},
+            "requirements": {"machine": machine, "mechanism": mechanism, "board_design_files": board_design_files},
             "hints": (result.get("compiled") or {}).get("hints") or {},
             "sow_md": str(result.get("report_md") or "").rstrip() + "\n",
         },
@@ -4502,6 +4694,8 @@ def index():
             'POST /api/v2/report/ee-quality': 'Consolidated EE quality report (optionally with netlist/pcb evidence)',
             'POST /api/v2/layout/advice': 'Heuristic layout advice + pcbnew helper script',
             'POST /api/v2/prototype3d/package': 'Prototype-mode OpenSCAD stub + wiring plan',
+            'POST /api/v2/system/extract-board': 'Extract board structure (connectors, rails, interfaces, roles) from KiCad artifacts',
+            'POST /api/v2/system/extract-machine': 'Extract several boards and synthesize a candidate machine/system topology',
             'POST /api/v2/machines/compile': 'Compile multi-board machine (boards + interconnects + harness + ME anchors)',
             'POST /api/v2/machines/build-package': 'Build multi-board machine package ZIP (per-board package + system artifacts)',
             'POST /api/v2/machines/engineer': 'System-engineer machine (placement/power/interconnect simulation + optional mecha sim)',

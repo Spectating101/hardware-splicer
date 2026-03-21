@@ -7,14 +7,11 @@ Stripe integration for subscription management and billing.
 import stripe
 from fastapi import APIRouter, HTTPException, Depends, Request, status
 from pydantic import BaseModel
-from typing import Dict, Any, Optional
 import os
-from datetime import datetime, timezone
 from loguru import logger
 
 from .auth import get_current_user
-from .models import SuccessResponse, ErrorResponse
-from ..v1.rate_limiting import get_user_tier
+from .models import SuccessResponse
 
 # Initialize Stripe
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")

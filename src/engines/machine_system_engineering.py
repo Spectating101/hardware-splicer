@@ -20,6 +20,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from .kicad_netlist_compiler import compile_kicad_netlist
 from .machine_requirements import compile_machine_requirements
+from .mechatronic_context import build_mechatronic_context
 from .netlist import Resistor, is_ground
 from .power_tree_validator import validate_pcb_power_tree
 from .spice_runner import run_ngspice
@@ -357,6 +358,52 @@ def _extract_primary_anchor(machine: Dict[str, Any]) -> Dict[str, Any] | None:
     }
 
 
+def _merge_machine_with_mechatronic_context(machine: Dict[str, Any], context: Dict[str, Any]) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    merged = dict(machine)
+    raw_boards = [dict(board) for board in (machine.get("boards") or []) if isinstance(board, dict)]
+    board_ctx_by_id = {str(row.get("board_id") or ""): row for row in (context.get("boards") or []) if isinstance(row, dict)}
+    board_overrides: List[Dict[str, Any]] = []
+
+    for board in raw_boards:
+        board_id = str(board.get("board_id") or "").strip()
+        ctx = board_ctx_by_id.get(board_id) or {}
+        anchor = ctx.get("electronics_anchor") or {}
+        changes: List[str] = []
+        if isinstance(anchor, dict):
+            outline = board.get("pcb_outline_mm")
+            if not (isinstance(outline, list) and len(outline) >= 2):
+                board["pcb_outline_mm"] = [
+                    _as_float(anchor.get("pcb_w_mm"), 50.0),
+                    _as_float(anchor.get("pcb_h_mm"), 40.0),
+                    _as_float(anchor.get("pcb_t_mm"), 1.6),
+                ]
+                changes.append("pcb_outline_mm")
+            if not (isinstance(board.get("mounts"), list) and board.get("mounts")) and isinstance(anchor.get("mounts"), list) and anchor.get("mounts"):
+                board["mounts"] = anchor.get("mounts")
+                changes.append("mounts")
+            if not (isinstance(board.get("ports"), list) and board.get("ports")) and isinstance(anchor.get("ports"), list) and anchor.get("ports"):
+                board["ports"] = anchor.get("ports")
+                changes.append("ports")
+        if changes:
+            board_overrides.append({"board_id": board_id, "applied": changes})
+
+    merged["boards"] = raw_boards
+    topology = context.get("machine_topology") or {}
+    applied_topology: List[str] = []
+    if not (isinstance(merged.get("interconnects"), list) and merged.get("interconnects")):
+        inferred_interconnects = topology.get("candidate_interconnects") or []
+        if inferred_interconnects:
+            merged["interconnects"] = inferred_interconnects
+            applied_topology.append("interconnects")
+    if not (isinstance(merged.get("power_tree"), list) and merged.get("power_tree")):
+        inferred_power_tree = topology.get("candidate_power_tree") or []
+        if inferred_power_tree:
+            merged["power_tree"] = inferred_power_tree
+            applied_topology.append("power_tree")
+
+    return merged, {"board_overrides": board_overrides, "applied_topology": applied_topology}
+
+
 def run_mecha_bridge(
     machine: Dict[str, Any],
     mechanism: Dict[str, Any],
@@ -364,6 +411,7 @@ def run_mecha_bridge(
     simulation_fidelity: str = "high",
     use_3d_splicer: bool = True,
     render_stl: bool = False,
+    mechatronic_context: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     mecha_root = Path(__file__).resolve().parents[3] / "Mecha-Splicer"
     cli = mecha_root / "scripts" / "mecha_splicer_spec.py"
@@ -378,7 +426,13 @@ def run_mecha_bridge(
     if "process" not in mech_spec:
         mech_spec["process"] = "fdm"
     if "electronics" not in mech_spec:
-        anchor = _extract_primary_anchor(machine)
+        anchor = None
+        if isinstance(mechatronic_context, dict):
+            candidate = mechatronic_context.get("primary_electronics_anchor")
+            if isinstance(candidate, dict) and candidate:
+                anchor = candidate
+        if anchor is None:
+            anchor = _extract_primary_anchor(machine)
         if anchor:
             mech_spec["electronics"] = anchor
 
@@ -423,6 +477,8 @@ def run_mecha_bridge(
         "splicer3d": parsed.get("splicer3d") if isinstance(parsed, dict) else None,
         "use_3d_splicer": bool(use_3d_splicer),
         "render_stl": bool(render_stl),
+        "electronics_anchor_device": ((mech_spec.get("electronics") or {}).get("device") if isinstance(mech_spec.get("electronics"), dict) else None),
+        "electronics_bundle_size": len((mechatronic_context or {}).get("electronics_bundle") or []),
         "stderr_tail": (p.stderr or "")[-4000:],
     }
 
@@ -446,7 +502,7 @@ def _actuation_requirements(mechanism: Dict[str, Any]) -> Dict[str, Any]:
     return req
 
 
-def evaluate_control_coupling(machine: Dict[str, Any], mechanism: Dict[str, Any]) -> Dict[str, Any]:
+def evaluate_control_coupling(machine: Dict[str, Any], mechanism: Dict[str, Any], *, mechatronic_context: Dict[str, Any] | None = None) -> Dict[str, Any]:
     boards = {str(b.get("board_id") or "").strip(): b for b in (machine.get("boards") or []) if isinstance(b, dict)}
     ctrl_bid = str((machine.get("actuation") or {}).get("board_id") or "").strip()
     if not ctrl_bid:
@@ -457,6 +513,9 @@ def evaluate_control_coupling(machine: Dict[str, Any], mechanism: Dict[str, Any]
     step = int(_as_float(caps.get("stepper_channels"), 2))
     current_budget = _as_float(caps.get("actuation_current_budget_a"), 1.0)
     req = _actuation_requirements(mechanism)
+    ctx_by_id = {str(row.get("board_id") or ""): row for row in ((mechatronic_context or {}).get("boards") or []) if isinstance(row, dict)}
+    ctrl_ctx = ctx_by_id.get(ctrl_bid) or {}
+    runtime = ctrl_ctx.get("controller_runtime") or {}
 
     issues: List[Dict[str, Any]] = []
     if req["servo_channels"] > pwm:
@@ -486,8 +545,55 @@ def evaluate_control_coupling(machine: Dict[str, Any], mechanism: Dict[str, Any]
                 "fix": "Power actuators from separate rail and isolate logic supply.",
             }
         )
+    controllers = runtime.get("controllers") or []
+    if req["servo_channels"] or req["stepper_channels"]:
+        if not controllers:
+            issues.append(
+                {
+                    "severity": "warning",
+                    "topic": "controller_identity",
+                    "message": f"Control board {ctrl_bid} has actuation demand but no controller/runtime identity was extracted from its design files.",
+                    "fix": "Attach KiCad board/netlist files for the control board so actuator bring-up can be grounded to real MCU and connector evidence.",
+                }
+            )
+        elif not (runtime.get("programming_paths") or []):
+            issues.append(
+                {
+                    "severity": "warning",
+                    "topic": "programming_path",
+                    "message": f"Control board {ctrl_bid} needs actuation but no explicit programming/debug path was extracted.",
+                    "fix": "Expose UART/SWD/USB programming pins before relying on closed-loop bring-up.",
+                }
+            )
+        connector_interfaces = {
+            str(interface_row.get("interface") or "").lower()
+            for connector in ((ctrl_ctx.get("structure") or {}).get("connectors") or [])
+            if isinstance(connector, dict)
+            for interface_row in (connector.get("interfaces") or [])
+            if isinstance(interface_row, dict)
+        }
+        if req["estimated_actuation_current_a"] > 0.5 and "power" not in connector_interfaces:
+            issues.append(
+                {
+                    "severity": "warning",
+                    "topic": "actuation_power_path",
+                    "message": f"Control board {ctrl_bid} does not expose an obvious actuator power connector despite mechanical actuation demand.",
+                    "fix": "Add or confirm dedicated power/output connectors for servo, stepper, or motor rails.",
+                }
+            )
 
-    return {"control_board_id": ctrl_bid, "capabilities": {"pwm_channels": pwm, "stepper_channels": step, "actuation_current_budget_a": current_budget}, "requirements": req, "issues": issues}
+    return {
+        "control_board_id": ctrl_bid,
+        "capabilities": {"pwm_channels": pwm, "stepper_channels": step, "actuation_current_budget_a": current_budget},
+        "requirements": req,
+        "runtime_summary": {
+            "controller_count": len(controllers),
+            "controllers": [row.get("part_number") or row.get("ref") for row in controllers[:4] if isinstance(row, dict)],
+            "programming_paths": len(runtime.get("programming_paths") or []),
+            "buses": [row.get("bus") for row in (runtime.get("bus_inventory") or [])[:8] if isinstance(row, dict)],
+        },
+        "issues": issues,
+    }
 
 
 def _build_improvements(results: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -521,6 +627,15 @@ def _build_improvements(results: Dict[str, Any]) -> List[Dict[str, Any]]:
                     "action": "Adjust mechanism spec dimensions/materials and rerun high-fidelity simulation.",
                 }
             )
+    for question in (results.get("mechatronic_context") or {}).get("questions") or []:
+        improvements.append(
+            {
+                "priority": "medium",
+                "topic": "mechatronic_context",
+                "message": str(question),
+                "action": "Attach richer board/mechanism artifacts or confirm the inferred system-level coupling manually.",
+            }
+        )
     return improvements[:80]
 
 
@@ -581,6 +696,16 @@ def _render_engineering_report(machine: Dict[str, Any], compiled: Dict[str, Any]
     if mech.get("ok"):
         lines.append(f"- Mecha simulation findings: `{len(mech.get('simulation') or [])}`")
     lines.append("")
+    lines.append("## Mechatronic Context")
+    mecha_ctx = results.get("mechatronic_context") or {}
+    lines.append(f"- Boards with context: `{len(mecha_ctx.get('boards') or [])}`")
+    lines.append(f"- Primary electronics anchor: `{(mecha_ctx.get('primary_electronics_anchor') or {}).get('device')}`")
+    lines.append(f"- Prototype3D board packages: `{len([b for b in (mecha_ctx.get('boards') or []) if (b.get('prototype3d') or {}).get('scad')])}`")
+    topo = mecha_ctx.get("machine_topology") or {}
+    if topo:
+        lines.append(f"- Candidate interconnects from design files: `{len(topo.get('candidate_interconnects') or [])}`")
+        lines.append(f"- Candidate power links from design files: `{len(topo.get('candidate_power_tree') or [])}`")
+    lines.append("")
     lines.append("## Improvements")
     for item in (results.get("improvements") or [])[:40]:
         lines.append(f"- [{item.get('priority')}] {item.get('message')} -> {item.get('action')}")
@@ -595,15 +720,23 @@ def engineer_machine_system(
     run_mechanism_sim: bool = True,
     mechanism_spec: Dict[str, Any] | None = None,
     simulation_fidelity: str = "high",
+    board_design_files: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
-    compiled = compile_machine_requirements(machine)
-    placement = optimize_board_placement(machine)
-    inter = simulate_interconnects(machine, placement)
-    power = simulate_power_distribution(machine, placement)
-    control = evaluate_control_coupling(machine, mechanism_spec or {})
+    mechatronic_context = build_mechatronic_context(machine, board_design_files=board_design_files)
+    working_machine, inferred_context_overrides = _merge_machine_with_mechatronic_context(machine, mechatronic_context)
+    compiled = compile_machine_requirements(working_machine)
+    placement = optimize_board_placement(working_machine)
+    inter = simulate_interconnects(working_machine, placement)
+    power = simulate_power_distribution(working_machine, placement)
+    control = evaluate_control_coupling(working_machine, mechanism_spec or {}, mechatronic_context=mechatronic_context)
     mechanism = {"ok": False, "skipped": True, "reason": "run_mechanism_sim=false"}
     if run_mechanism_sim and isinstance(mechanism_spec, dict) and mechanism_spec:
-        mechanism = run_mecha_bridge(machine, mechanism_spec, simulation_fidelity=simulation_fidelity)
+        mechanism = run_mecha_bridge(
+            working_machine,
+            mechanism_spec,
+            simulation_fidelity=simulation_fidelity,
+            mechatronic_context=mechatronic_context,
+        )
 
     results = {
         "placement": placement,
@@ -611,10 +744,12 @@ def engineer_machine_system(
         "power": power,
         "control_coupling": control,
         "mechanism": mechanism,
+        "mechatronic_context": mechatronic_context,
+        "inferred_context_overrides": inferred_context_overrides,
     }
     results["improvements"] = _build_improvements(results)
     results["verdict"] = _readiness_verdict(compiled, results)
-    report_md = _render_engineering_report(machine, compiled, results)
+    report_md = _render_engineering_report(working_machine, compiled, results)
 
     return {
         "machine": compiled.get("machine") or {},
@@ -909,6 +1044,7 @@ def full_simulate_machine_system(
         run_mechanism_sim=bool(mechanism_spec),
         mechanism_spec=mechanism_spec or {},
         simulation_fidelity=simulation_fidelity,
+        board_design_files=board_design_files,
     )
     compiled = engineering.get("compiled") or {}
     analysis = engineering.get("analysis") or {}

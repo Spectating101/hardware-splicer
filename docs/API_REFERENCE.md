@@ -1,12 +1,15 @@
 # Circuit.AI API Reference
 
+> Status note: the canonical product backend is the Flask server in `api_server.py` exposed by `circuit-ai-api` on port `5000`. This document describes the optional enhanced FastAPI surface in `src/api/enhanced_api.py`, not the default shipped backend.
+
 ## 🔌 API Overview
 
-Circuit.AI provides a comprehensive REST API with WebSocket support for real-time communication. The API is built with FastAPI and follows OpenAPI 3.0 specifications.
+Circuit.AI provides multiple API surfaces. The enhanced FastAPI branch documented here adds WebSocket support and batch/status helpers, but it is a secondary surface rather than the canonical product API.
 
 ### Base URL
 ```
-Development: http://localhost:8000
+Canonical product API: http://localhost:5000
+Enhanced FastAPI branch: http://localhost:8000
 Production: https://your-domain.com
 ```
 
@@ -217,6 +220,17 @@ Content-Type: application/json
     "total_analyses": 1234,
     "total_components_detected": 5678
 }
+```
+
+### Prometheus Metrics
+**Endpoint**: `GET /metrics`
+
+**Description**: Returns Prometheus-formatted metrics for the enhanced FastAPI surface.
+
+**Response**:
+```text
+# HELP circuit_api_requests_total Total number of HTTP requests handled by the enhanced API surface.
+# TYPE circuit_api_requests_total counter
 ```
 
 ### Cache Statistics
@@ -510,4 +524,3 @@ const result = await client.analyzePCB(fileInput.files[0], {
 - **[Frontend Guide](FRONTEND_GUIDE.md)** - Frontend integration guide
 - **[Testing](TESTING.md)** - API testing strategies
 - **[Performance](PERFORMANCE.md)** - Performance optimization guide
-

@@ -1,8 +1,10 @@
 # Circuit.AI - Enterprise PCB Analysis API Platform
 
+> Status note: this document reflects the API-first FastAPI branch direction, not the canonical shipped backend. The current product backend is the Flask server in `api_server.py` exposed by `circuit-ai-api`; use the README and v2 guides for the default contract.
+
 ## Executive Summary
 
-Circuit.AI is an enterprise-grade API platform for PCB (Printed Circuit Board) analysis, built for developers and teams. The platform provides production-ready AI-powered component detection, value assessment, and educational insights through a comprehensive REST API with native SDKs for Python and JavaScript.
+Circuit.AI is an enterprise-grade API platform for PCB (Printed Circuit Board) analysis, built for developers and teams. This document describes the API-first product direction and secondary FastAPI-oriented platform surface, including AI-powered component detection, value assessment, and educational insights.
 
 ## Platform Overview
 

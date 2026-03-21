@@ -132,11 +132,7 @@ class EnhancedCircuitAnalyzer:
             await progress_tracker.update_progress(
                 "diagnostics", "Generating diagnostic procedures...", 0.83
             )
-            diagnostic_procedure = repair_guidance.generate_diagnostic_procedure(
-                circuit_topology.device_type,
-                symptoms=[],  # Could be provided by user
-                components=[d.class_name for d in detections]
-            )
+            diagnostic_procedure = self._generate_diagnostic_procedure(circuit_topology, detections)
 
             # Step 11: Generate modification plans (common ones)
             await progress_tracker.update_progress(
@@ -361,7 +357,7 @@ class EnhancedCircuitAnalyzer:
             detection_list.append(detection_dict)
         
         # Generate detection summary
-        detection_summary = self.detector.get_detection_summary(detections)
+        detection_summary = self._get_detection_summary(detections)
         
         # Calculate analysis metrics
         analysis_metrics = self._calculate_analysis_metrics(
@@ -564,6 +560,38 @@ class EnhancedCircuitAnalyzer:
             learning_path.append(f"Advanced learners can explore {len(advanced_content)} advanced topics")
         
         return learning_path
+
+    def _generate_diagnostic_procedure(self, circuit_topology: Any,
+                                       detections: List[ComponentDetection]) -> Dict[str, Any]:
+        """Generate a diagnostic procedure, falling back when the legacy helper is absent."""
+        device_type = getattr(circuit_topology, "device_type", "unknown")
+        component_names = [d.class_name for d in detections]
+
+        generator = getattr(repair_guidance, "generate_diagnostic_procedure", None)
+        if callable(generator):
+            return generator(
+                device_type,
+                symptoms=[],
+                components=component_names,
+            )
+
+        suggested_checks = []
+        if component_names:
+            suggested_checks.append("Visually inspect detected components for polarity, orientation, and visible damage.")
+        if any("transformer" in c.lower() for c in component_names):
+            suggested_checks.append("Check isolation and winding continuity before powering the board.")
+        if any("mosfet" in c.lower() for c in component_names):
+            suggested_checks.append("Measure gate-to-source and drain-to-source for shorts before power-up.")
+        if not suggested_checks:
+            suggested_checks.append("Start with a visual inspection and basic continuity checks on power rails.")
+
+        return {
+            "device_type": device_type,
+            "symptoms": [],
+            "components": component_names,
+            "suggested_checks": suggested_checks,
+            "source": "fallback",
+        }
     
     def _generate_maintenance_tips(self, repairs: List[Dict[str, Any]]) -> List[str]:
         """Generate maintenance tips from repair recommendations."""
@@ -658,11 +686,43 @@ class EnhancedCircuitAnalyzer:
         """Get comprehensive analysis statistics."""
         return {
             **self.stats,
-            "detector_stats": self.detector.get_detection_summary([]),
+            "detector_stats": self._get_detection_summary([]),
             "mapper_stats": self.mapper.get_analysis_statistics(),
             "cache_stats": analysis_cache.get_stats(),
             "queue_stats": queue_service.get_queue_stats(),
             "websocket_stats": websocket_manager.get_connection_stats()
+        }
+
+    def _get_detection_summary(self, detections: List[Any]) -> Dict[str, Any]:
+        """Summarize detections without relying on the legacy detector interface."""
+        by_type: Dict[str, int] = {}
+        confidences: List[float] = []
+
+        for det in detections or []:
+            if isinstance(det, dict):
+                class_name = str(det.get("class_name") or "unknown")
+                confidence = det.get("confidence")
+            else:
+                class_name = str(getattr(det, "class_name", "unknown") or "unknown")
+                confidence = getattr(det, "confidence", None)
+
+            by_type[class_name] = by_type.get(class_name, 0) + 1
+            if isinstance(confidence, (int, float)):
+                confidences.append(float(confidence))
+
+        avg_conf = (sum(confidences) / len(confidences)) if confidences else 0.0
+        if avg_conf >= 0.75:
+            quality = "high"
+        elif avg_conf >= 0.5:
+            quality = "medium"
+        else:
+            quality = "low"
+
+        return {
+            "total_components": sum(by_type.values()),
+            "components_by_type": by_type,
+            "average_confidence": avg_conf,
+            "detection_quality": quality,
         }
     
     def get_system_health(self) -> Dict[str, Any]:

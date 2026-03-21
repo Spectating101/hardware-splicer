@@ -285,5 +285,9 @@ class AnalysisCache:
         key = f"projects:{hash(capabilities_str)}"
         return self.cache.set(key, recommendations, ttl)
 
+    def get_stats(self) -> Dict[str, Any]:
+        """Expose underlying cache stats for higher-level services."""
+        return self.cache.get_stats()
+
 # Global analysis cache instance
 analysis_cache = AnalysisCache()

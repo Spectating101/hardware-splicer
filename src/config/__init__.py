@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 import os
 from pathlib import Path
@@ -63,12 +63,13 @@ class Settings(BaseSettings):
     # Development
     debug: bool = True
     
-    class Config:
+    model_config = SettingsConfigDict(
         # Prioritize .env.local over .env
         # If .env.local exists, use it; otherwise fall back to .env
-        env_file = ".env.local" if Path(".env.local").exists() else ".env"
-        case_sensitive = False
-        extra = "ignore"  # Allow and ignore extra environment variables
+        env_file=".env.local" if Path(".env.local").exists() else ".env",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
 
 # Global settings instance
