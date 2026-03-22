@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Set
 
 from src.engines.evidence_extractor import is_power_net
@@ -104,8 +105,14 @@ def _stage_kind(
     kind = str(regulator.get("kind") or "")
     ref = str(regulator.get("ref") or "")
     text = _blob(ref, (components or {}).get(ref) or {})
-    touching_inductors = [ref for ref in inductor_refs if _shared_nets(ref_nets, ref, {vin_net, vout_net})]
-    if ("ldo" in kind or any(token in text for token in ("1117", "AP2112", "XC620", "LDO"))) and not touching_inductors:
+    touching_inductors = [ref for ref in inductor_refs if len(_shared_nets(ref_nets, ref, {vin_net, vout_net})) >= 2]
+    if any(token in text for token in ("MCP1642", "BOOST", "XL6009")):
+        return "boost_like"
+    if any(token in text for token in ("MP1584", "LM2596", "LM22675", "BUCK")):
+        return "buck_like"
+    if any(token in text for token in ("LM7805", "7805", "AMS1117", "AZ1117", "AP2112", "LDO")) and not touching_inductors:
+        return "ldo"
+    if ("ldo" in kind or any(token in text for token in ("1117", "AP2112", "AZ1117", "XC620", "LDO"))) and not touching_inductors:
         return "ldo"
     vin_v = _infer_nominal_voltage(vin_net)
     vout_v = _infer_nominal_voltage(vout_net)
@@ -116,6 +123,90 @@ def _stage_kind(
             return "boost_like"
         return "switching_regulator"
     return "linear_regulator"
+
+
+def _motor_driver_profile(ref: str, components: Dict[str, Dict[str, Any]], driver_nets: Set[str]) -> Dict[str, Any]:
+    text = _blob(ref, (components or {}).get(ref) or {})
+    up_nets = {str(net).upper() for net in driver_nets}
+    topology = "actuation_driver"
+    if any(token in text for token in ("POLULU_MOTOR_DRIVER", "DRV8833", "TB6612", "VNH", "L298")):
+        topology = "h_bridge"
+    if any(net in {"U", "V", "W"} or net.startswith(("PHASE", "/PHASE")) for net in up_nets):
+        topology = "bldc_3phase"
+    integrated_current_limit = any(token in text for token in ("POLULU_MOTOR_DRIVER", "DRV8833", "TB6612", "VNH", "TMC"))
+    supply_nets = sorted(net for net in driver_nets if is_power_net(net))
+    control_nets = sorted(
+        net
+        for net in driver_nets
+        if any(token in str(net).upper() for token in ("PWM", "INA", "INB", "ENA", "ENB", "FAULT", "STEP", "DIR"))
+    )
+    return {
+        "topology": topology,
+        "integrated_current_limit": integrated_current_limit,
+        "supply_nets": supply_nets,
+        "control_nets": control_nets,
+    }
+
+
+def _gate_driver_profile(ref: str, components: Dict[str, Dict[str, Any]], driver_nets: Set[str]) -> Dict[str, Any]:
+    text = _blob(ref, (components or {}).get(ref) or {})
+    phase_nets = sorted(
+        net for net in driver_nets if any(token in str(net).upper() for token in ("PH_", "PHASE", "/POWER FET/PH", "/PH_"))
+    )
+    pwm_high_nets = sorted(net for net in driver_nets if any(token in str(net).upper() for token in ("PWM_H", "HIN", "HI_")))
+    pwm_low_nets = sorted(net for net in driver_nets if any(token in str(net).upper() for token in ("PWM_L", "LIN", "LO_")))
+    supply_nets = sorted(net for net in driver_nets if is_power_net(net))
+    topology = "half_bridge_gate_driver"
+    if len(phase_nets) >= 3 or any(net.upper().endswith(("_A", "_B", "_C")) for net in phase_nets):
+        topology = "bldc_gate_driver"
+    return {
+        "topology": topology,
+        "phase_nets": phase_nets,
+        "pwm_high_nets": pwm_high_nets,
+        "pwm_low_nets": pwm_low_nets,
+        "supply_nets": supply_nets,
+        "driver_text": text,
+    }
+
+
+def _current_sense_amp_profile(ref: str, ref_nets: Dict[str, Set[str]]) -> Dict[str, Any]:
+    nets = sorted(net for net in (ref_nets.get(ref) or set()) if net)
+    sense_nets = sorted(net for net in nets if any(token in str(net).upper() for token in ("I_SENSE", "CURRENT", "SHUNT")))
+    linked_refs = _linked_refs_from_nets(nets)
+    expanded_nets = list(nets)
+    for linked_ref in linked_refs:
+        expanded_nets.extend(sorted(net for net in (ref_nets.get(linked_ref) or set()) if net))
+    return {
+        "ref": ref,
+        "sense_nets": sense_nets,
+        "nets": nets,
+        "linked_refs": linked_refs,
+        "phase_tags": _phase_tags(sense_nets + expanded_nets),
+    }
+
+
+def _phase_tags(nets: List[str]) -> Set[str]:
+    tags: Set[str] = set()
+    for net in nets or []:
+        up = str(net).upper()
+        for pattern in (
+            r"(?:PH(?:ASE)?[_/\-]?|PWM_[HL]_)([ABC])(?:$|[^A-Z0-9])",
+            r"I_SENSE[_/\-]?([ABC])(?:$|[^A-Z0-9])",
+            r"[_/\-]([ABC])$",
+        ):
+            match = re.search(pattern, up)
+            if match:
+                tags.add(match.group(1))
+    return tags
+
+
+def _linked_refs_from_nets(nets: List[str]) -> List[str]:
+    refs: List[str] = []
+    for net in nets or []:
+        up = str(net).upper()
+        for match in re.finditer(r"NET-\(([^-()]+)-PAD\d+\)", up):
+            refs.append(match.group(1))
+    return sorted(dict.fromkeys(refs))
 
 
 def analyze_power_control(
@@ -203,20 +294,27 @@ def analyze_power_control(
             questions.append(f"Confirm fuse/TVS/reverse-polarity strategy for external power connector {connector.get('ref')}.")
 
     motor_driver_refs = [str(row.get("ref")) for row in (active_components or []) if row.get("category") == "motor_driver"]
+    gate_driver_refs = [str(row.get("ref")) for row in (active_components or []) if row.get("category") == "gate_driver"]
+    current_sense_amp_refs = [str(row.get("ref")) for row in (active_components or []) if row.get("category") == "current_sense_amp"]
     for ref in motor_driver_refs:
         driver_nets = {net for net in (ref_nets.get(ref) or set()) if net and not is_power_net(net)}
+        power_nets = {net for net in (ref_nets.get(ref) or set()) if net and is_power_net(net)}
         linked_connectors = [
             str(connector.get("ref"))
             for connector in actuator_connectors
             if driver_nets & {str(net) for net in (connector.get("pin_nets") or {}).values()}
         ]
         linked_shunts = [row["ref"] for row in shunts if {row.get("n1"), row.get("n2")} & (ref_nets.get(ref) or set())]
+        profile = _motor_driver_profile(ref, components, set(driver_nets) | set(power_nets))
         control_stages.append(
             {
                 "ref": ref,
                 "kind": "motor_driver",
+                "topology": profile["topology"],
                 "actuator_connectors": sorted(set(linked_connectors)),
                 "current_sense_refs": sorted(set(linked_shunts)),
+                "supply_nets": profile["supply_nets"],
+                "control_nets": profile["control_nets"],
                 "nets": sorted(driver_nets),
             }
         )
@@ -230,23 +328,81 @@ def analyze_power_control(
                 }
             )
         if not linked_shunts:
+            if profile["integrated_current_limit"]:
+                risk_findings.append(
+                    {
+                        "severity": "info",
+                        "topic": "current_sense_optional",
+                        "message": f"{ref} is a motor-driver module without obvious external shunts; current limiting may be internal or module-integrated.",
+                        "evidence": [ref],
+                    }
+                )
+            else:
+                risk_findings.append(
+                    {
+                        "severity": "warning",
+                        "topic": "current_sense",
+                        "message": f"{ref} looks like a motor/actuation driver without obvious low-ohm current-sense resistors.",
+                        "evidence": [ref],
+                    }
+                )
+        if not any((_infer_nominal_voltage(net) or 0.0) >= 5.0 or net.upper().startswith(("VBAT", "VIN", "+12V", "+24V")) for net in profile["supply_nets"]):
             risk_findings.append(
                 {
                     "severity": "warning",
-                    "topic": "current_sense",
-                    "message": f"{ref} looks like a motor/actuation driver without obvious low-ohm current-sense resistors.",
+                    "topic": "motor_supply_headroom",
+                    "message": f"{ref} has no obvious high-energy supply rail extracted; confirm the driver power path and current headroom.",
+                    "evidence": sorted(profile["supply_nets"]) or [ref],
+                }
+            )
+
+    current_sense_profiles = {ref: _current_sense_amp_profile(ref, ref_nets) for ref in current_sense_amp_refs}
+    for ref in gate_driver_refs:
+        nets = {net for net in (ref_nets.get(ref) or set()) if net}
+        profile = _gate_driver_profile(ref, components, nets)
+        gate_phase_tags = _phase_tags(profile["phase_nets"] + profile["pwm_high_nets"] + profile["pwm_low_nets"])
+        linked_current_feedback = [
+            sense_ref
+            for sense_ref, sense_profile in current_sense_profiles.items()
+            if (gate_phase_tags and (sense_profile.get("phase_tags") or set()) & gate_phase_tags)
+            or (not gate_phase_tags and bool(sense_profile.get("sense_nets")))
+        ]
+        control_stages.append(
+            {
+                "ref": ref,
+                "kind": "gate_driver",
+                "topology": profile["topology"],
+                "phase_nets": profile["phase_nets"],
+                "phase_tags": sorted(gate_phase_tags),
+                "pwm_high_nets": profile["pwm_high_nets"],
+                "pwm_low_nets": profile["pwm_low_nets"],
+                "supply_nets": profile["supply_nets"],
+                "current_feedback_refs": sorted(set(linked_current_feedback)),
+            }
+        )
+        if not linked_current_feedback:
+            risk_findings.append(
+                {
+                    "severity": "warning",
+                    "topic": "phase_current_feedback",
+                    "message": f"{ref} looks like a gate-driver stage without obvious current-sense amplifier support on matching phase feedback nets.",
                     "evidence": [ref],
                 }
             )
 
     if primary_role == "motor_control" and not motor_driver_refs:
-        questions.append("Board role looks motor-control-like, but no explicit motor-driver component was extracted.")
+        if gate_driver_refs:
+            questions.append("Motor-control-like board uses gate-driver stages instead of integrated motor-driver modules; verify phase-current feedback and gate-power sequencing.")
+        else:
+            questions.append("Board role looks motor-control-like, but no explicit motor-driver component was extracted.")
 
     summary = {
         "external_power_input_count": len(external_inputs),
         "actuation_connector_count": len(actuator_connectors),
         "power_stage_count": len(power_stages),
         "motor_driver_count": len(motor_driver_refs),
+        "gate_driver_count": len(gate_driver_refs),
+        "current_sense_amp_count": len(current_sense_amp_refs),
         "current_sense_count": len(shunts),
         "protection_component_count": len(protection_refs),
     }

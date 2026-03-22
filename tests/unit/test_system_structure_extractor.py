@@ -93,6 +93,139 @@ SENSOR_IO_NETLIST = """
 """.strip()
 
 
+POWER_HUB_NETLIST = """
+(export (version "E")
+  (components
+    (comp (ref "U1")
+      (value "7805")
+      (footprint "Package_TO_SOT_THT:TO-220-3"))
+    (comp (ref "P1")
+      (value "LiPo_IN")
+      (footprint "Connector_JST:JST_XH_B2B-XH-A"))
+    (comp (ref "P2")
+      (value "Balance_Board")
+      (footprint "Connector_PinHeader_2.54mm:PinHeader_1x08"))
+  )
+  (nets
+    (net (code "1") (name "+12V")
+      (node (ref "P1") (pin "1"))
+      (node (ref "U1") (pin "1")))
+    (net (code "2") (name "GND")
+      (node (ref "P1") (pin "2"))
+      (node (ref "U1") (pin "2"))
+      (node (ref "P2") (pin "1")))
+    (net (code "3") (name "+5V")
+      (node (ref "U1") (pin "3"))
+      (node (ref "P2") (pin "2")))
+    (net (code "4") (name "/TXD1")
+      (node (ref "P2") (pin "3")))
+    (net (code "5") (name "/RXD1")
+      (node (ref "P2") (pin "4")))
+  )
+)
+""".strip()
+
+
+MOTOR_NODE_NETLIST = """
+(export (version "E")
+  (components
+    (comp (ref "MD1")
+      (value "Motor_Driver")
+      (footprint "POLULU_MOTOR_DRIVER"))
+    (comp (ref "P1")
+      (value "Power_And_UART")
+      (footprint "Connector_PinHeader_2.54mm:PinHeader_1x08"))
+    (comp (ref "M1")
+      (value "Motor")
+      (footprint "POLULU_MOTOR_CONN"))
+  )
+  (nets
+    (net (code "1") (name "+5V")
+      (node (ref "P1") (pin "2"))
+      (node (ref "MD1") (pin "1"))
+      (node (ref "M1") (pin "4")))
+    (net (code "2") (name "GND")
+      (node (ref "P1") (pin "1"))
+      (node (ref "MD1") (pin "2"))
+      (node (ref "M1") (pin "3")))
+    (net (code "3") (name "/TXD1")
+      (node (ref "P1") (pin "3")))
+    (net (code "4") (name "/RXD1")
+      (node (ref "P1") (pin "4")))
+    (net (code "5") (name "OUTA")
+      (node (ref "MD1") (pin "3"))
+      (node (ref "M1") (pin "1")))
+    (net (code "6") (name "OUTB")
+      (node (ref "MD1") (pin "4"))
+      (node (ref "M1") (pin "2")))
+  )
+)
+""".strip()
+
+
+LOCAL_REGULATED_NODE_NETLIST = """
+(export (version "E")
+  (components
+    (comp (ref "U1")
+      (value "7805")
+      (footprint "Package_TO_SOT_THT:TO-220-3"))
+    (comp (ref "P1")
+      (value "Local_Power")
+      (footprint "Connector_JST:JST_XH_B2B-XH-A"))
+  )
+  (nets
+    (net (code "1") (name "+12V")
+      (node (ref "P1") (pin "1"))
+      (node (ref "U1") (pin "1")))
+    (net (code "2") (name "GND")
+      (node (ref "P1") (pin "2"))
+      (node (ref "U1") (pin "2")))
+    (net (code "3") (name "/5V")
+      (node (ref "U1") (pin "3")))
+  )
+)
+""".strip()
+
+
+BRIDGE_NODE_NETLIST = """
+(export (version "E")
+  (components
+    (comp (ref "P1")
+      (value "Upstream")
+      (footprint "Connector_JST:JST_XH_B2B-XH-A"))
+    (comp (ref "P2")
+      (value "Downstream")
+      (footprint "Connector_JST:JST_XH_B2B-XH-A"))
+  )
+  (nets
+    (net (code "1") (name "+12V")
+      (node (ref "P1") (pin "1"))
+      (node (ref "P2") (pin "1")))
+    (net (code "2") (name "GND")
+      (node (ref "P1") (pin "2"))
+      (node (ref "P2") (pin "2")))
+  )
+)
+""".strip()
+
+
+SINK_NODE_NETLIST = """
+(export (version "E")
+  (components
+    (comp (ref "P1")
+      (value "Power_Input")
+      (footprint "Connector_JST:JST_XH_B2B-XH-A"))
+  )
+  (nets
+    (net (code "1") (name "+12V")
+      (node (ref "P1") (pin "1")))
+    (net (code "2") (name "GND")
+      (node (ref "P1") (pin "2")))
+  )
+)
+""".strip()
+
+
 def _write_netlist(path: Path, contents: str) -> Path:
     path.write_text(contents + "\n", encoding="utf-8")
     return path
@@ -148,3 +281,67 @@ def test_synthesize_machine_topology_matches_i2c_and_power(tmp_path):
     compiled = result["compiled_preview"]
     assert (compiled.get("machine") or {}).get("board_count") == 2
     assert (compiled.get("system") or {}).get("interconnects")
+
+
+def test_synthesize_machine_topology_prefers_power_hub_for_legacy_shared_rail(tmp_path):
+    hub_path = _write_netlist(tmp_path / "power_hub.net", POWER_HUB_NETLIST)
+    motor_path = _write_netlist(tmp_path / "motor_node.net", MOTOR_NODE_NETLIST)
+
+    power_hub = extract_board_structure(str(hub_path), board_id="power_hub", kind="netlist")
+    motor_node = extract_board_structure(str(motor_path), board_id="motor_node", kind="netlist")
+
+    balance = next(row for row in power_hub["connectors"] if row["ref"] == "P2")
+    interfaces = {row["interface"] for row in (balance.get("interfaces") or [])}
+    assert "uart" in interfaces
+
+    result = synthesize_machine_topology([power_hub, motor_node], machine_name="LegacyRig")
+
+    assert any(row["source"] == "power_hub:+5V" and row["board_id"] == "motor_node" for row in (result.get("candidate_power_tree") or []))
+    pack = result.get("motor_control_pack") or {}
+    assert pack.get("status") == "integrated"
+    assert pack.get("topology") == "single_motor_control"
+    assert any(row.get("board_id") == "motor_node" for row in (pack.get("actuation_boards") or []))
+    assert any(row.get("source") == "power_hub:+5V" for row in (pack.get("power_feeds") or []))
+    assert pack.get("bring_up_focus")
+
+
+def test_synthesize_machine_topology_skips_voltage_only_links_when_both_boards_regulate_locally(tmp_path):
+    hub_path = _write_netlist(tmp_path / "power_hub.net", POWER_HUB_NETLIST)
+    local_path = _write_netlist(tmp_path / "local_regulated.net", LOCAL_REGULATED_NODE_NETLIST)
+
+    power_hub = extract_board_structure(str(hub_path), board_id="power_hub", kind="netlist")
+    local_node = extract_board_structure(str(local_path), board_id="local_node", kind="netlist")
+
+    result = synthesize_machine_topology([power_hub, local_node], machine_name="IsolatedPower")
+
+    assert not any(row["board_id"] == "local_node" and row["voltage_v"] == 5.0 for row in (result.get("candidate_power_tree") or []))
+
+
+def test_synthesize_machine_topology_prunes_duplicate_downstream_power_candidates(tmp_path):
+    source_path = _write_netlist(tmp_path / "source_hub.net", POWER_HUB_NETLIST)
+    bridge_path = _write_netlist(tmp_path / "bridge.net", BRIDGE_NODE_NETLIST)
+    sink_path = _write_netlist(tmp_path / "sink.net", SINK_NODE_NETLIST)
+
+    source = extract_board_structure(str(source_path), board_id="source_hub", kind="netlist")
+    bridge = extract_board_structure(str(bridge_path), board_id="bridge", kind="netlist")
+    sink = extract_board_structure(str(sink_path), board_id="sink", kind="netlist")
+
+    result = synthesize_machine_topology([source, bridge, sink], machine_name="PowerTree")
+
+    sink_edges = [row for row in (result.get("candidate_power_tree") or []) if row["board_id"] == "sink" and row["rail"] == "+12V"]
+    assert len(sink_edges) == 1
+    assert sink_edges[0]["source"] == "source_hub:+12V"
+
+
+def test_synthesize_machine_topology_skips_ambiguous_power_questions_for_unlinked_sink_boards(tmp_path):
+    sink_a_path = _write_netlist(tmp_path / "sink_a.net", SINK_NODE_NETLIST)
+    sink_b_path = _write_netlist(tmp_path / "sink_b.net", SINK_NODE_NETLIST)
+
+    sink_a = extract_board_structure(str(sink_a_path), board_id="sink_a", kind="netlist")
+    sink_b = extract_board_structure(str(sink_b_path), board_id="sink_b", kind="netlist")
+
+    result = synthesize_machine_topology([sink_a, sink_b], machine_name="LooseRails")
+
+    assert not result.get("candidate_power_tree")
+    assert not any("source direction is ambiguous" in str(question) for question in (result.get("questions") or []))
+    assert (result.get("motor_control_pack") or {}).get("status") == "not_applicable"

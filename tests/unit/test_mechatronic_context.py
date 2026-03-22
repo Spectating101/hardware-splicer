@@ -38,3 +38,4 @@ def test_build_mechatronic_context_generates_anchor_bundle_and_topology():
     assert (board_rows["sensor_io"]["electronics_anchor"] or {}).get("ports")
     assert (board_rows["main_ctrl"]["controller_runtime"] or {}).get("controllers")
     assert "machine_bring_up_sequence" in context
+    assert "motor_control_pack" in context

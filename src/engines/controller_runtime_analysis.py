@@ -11,6 +11,27 @@ def _module_path() -> Path:
     return Path(__file__).resolve().parents[1] / "intelligence" / "pinout_database.py"
 
 
+def _lookup_candidates(value: str) -> List[str]:
+    value_text = str(value or "").strip()
+    if not value_text:
+        return []
+    upper = value_text.upper()
+    candidates = [value_text]
+    if any(token in upper for token in ("TINYPICO", "HUZZAH32", "ESP32", "ESP8266", "NODEMCU", "DEVKIT")):
+        candidates.append("ESP32")
+    if "CP210" in upper:
+        candidates.append("CP2102")
+    if "CH340" in upper:
+        candidates.append("CH340")
+    if re.search(r"(^|[^A-Z0-9])(LM7805|L7805|MC7805|UA7805|7805)([^A-Z0-9]|$)", upper):
+        candidates.append("LM7805")
+    deduped: List[str] = []
+    for candidate in candidates:
+        if candidate and candidate not in deduped:
+            deduped.append(candidate)
+    return deduped
+
+
 @lru_cache(maxsize=1)
 def _load_pinout_runtime() -> Tuple[Any, Any]:
     pinout_path = _module_path()
@@ -24,13 +45,14 @@ def _load_pinout_runtime() -> Tuple[Any, Any]:
 
 def _get_pinout(value: str) -> Optional[Any]:
     pinout_db, _ = _load_pinout_runtime()
-    if not value:
-        return None
-    value_text = str(value).strip()
-    pinout = pinout_db.get_pinout(value_text)
-    if pinout:
-        return pinout
-    return pinout_db.search_by_component_name(value_text)
+    for candidate in _lookup_candidates(value):
+        pinout = pinout_db.get_pinout(candidate)
+        if pinout:
+            return pinout
+        pinout = pinout_db.search_by_component_name(candidate)
+        if pinout:
+            return pinout
+    return None
 
 
 def _is_power_net(net: str) -> bool:
@@ -115,6 +137,55 @@ def _role_tags(pin: Any) -> Set[str]:
     return tags
 
 
+def _tags_from_net_name(net: str) -> Set[str]:
+    normalized = _normalize_net(net)
+    up = normalized.upper()
+    tags: Set[str] = set()
+    if normalized == "0":
+        tags.add("GROUND")
+    if _is_power_net(normalized):
+        tags.add("POWER")
+    if re.search(r"(^|[_/\-])(TXD?\d*|UART\d*TX|USART\d*TX)($|[_/\-])", up):
+        tags.add("UART_TX")
+    if re.search(r"(^|[_/\-])(RXD?\d*|UART\d*RX|USART\d*RX)($|[_/\-])", up):
+        tags.add("UART_RX")
+    if "SDA" in up:
+        tags.add("I2C_SDA")
+    if "SCL" in up:
+        tags.add("I2C_SCL")
+    if any(token in up for token in ("MOSI", "SDO")):
+        tags.add("SPI_MOSI")
+    if any(token in up for token in ("MISO", "SDI")):
+        tags.add("SPI_MISO")
+    if any(token in up for token in ("SCLK", "SCK")):
+        tags.add("SPI_SCK")
+    if re.search(r"(^|[_/\-])(CS|NCS|NSS|SS)($|[_/\-])", up):
+        tags.add("SPI_CS")
+    if any(token in up for token in ("USB_D+", "USBDP", "D+")):
+        tags.add("USB_DP")
+    if any(token in up for token in ("USB_D-", "USBDM", "D-")):
+        tags.add("USB_DM")
+    if "SWDIO" in up:
+        tags.add("SWDIO")
+    if "SWCLK" in up:
+        tags.add("SWCLK")
+    if "RESET" in up or re.search(r"(^|[_/\-])RST($|[_/\-])", up):
+        tags.add("RESET")
+    if up.endswith("EN") or "ENABLE" in up:
+        tags.add("ENABLE")
+    if "BOOT" in up:
+        tags.add("BOOT")
+    if "GPIO0" in up:
+        tags.add("BOOT_GPIO0")
+    if "GPIO2" in up:
+        tags.add("BOOT_GPIO2")
+    if "GPIO15" in up:
+        tags.add("BOOT_GPIO15")
+    if any(token in up for token in ("ADC", "I_SENS", "CURRENT", "HALL", "TEMP", "THERM")):
+        tags.add("ANALOG")
+    return tags
+
+
 def _component_kind(part_number: str) -> str:
     up = (part_number or "").upper()
     if up.startswith(("ESP32", "ESP8266", "ATMEGA", "STM32", "RP2040", "ATSAMD", "GD32", "CH32", "PIC")):
@@ -126,6 +197,35 @@ def _component_kind(part_number: str) -> str:
     if up.startswith(("W25Q", "MX25")):
         return "flash_memory"
     return "known_ic"
+
+
+def _controller_family(part_number: str) -> str:
+    up = (part_number or "").upper()
+    if any(token in up for token in ("TINYPICO", "HUZZAH32", "ESP32", "ESP8266", "NODEMCU", "DEVKIT")):
+        return "esp32_family"
+    if up.startswith("STM32"):
+        return "stm32_family"
+    if "RP2040" in up:
+        return "rp2040_family"
+    if up.startswith(("ATMEGA", "ATTINY")):
+        return "avr_family"
+    return "generic_controller"
+
+
+def _is_dev_controller_module(part_number: str) -> bool:
+    up = (part_number or "").upper()
+    return any(
+        token in up
+        for token in (
+            "TINYPICO",
+            "HUZZAH32",
+            "NODEMCU",
+            "DEVKIT",
+            "FEATHER",
+            "PICO",
+            "XIAO",
+        )
+    )
 
 
 def _build_bias_maps(resistors: Iterable[Dict[str, Any]]) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, List[Dict[str, Any]]]]:
@@ -167,9 +267,28 @@ def _pin_instance_rows(part_number: str, ref: str, pinmap: Dict[str, str]) -> Li
                 "pin_number": pin.pin_number,
                 "pin_name": pin.pin_name,
                 "net": _normalize_net(net),
-                "tags": sorted(_role_tags(pin)),
+                "tags": sorted(_role_tags(pin) | _tags_from_net_name(net)),
                 "critical": bool(getattr(pin, "critical", False)),
                 "description": getattr(pin, "description", "") or "",
+            }
+        )
+    return rows
+
+
+def _raw_pin_rows(ref: str, pinmap: Dict[str, str]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for pin_number, net in sorted((pinmap or {}).items(), key=lambda row: row[0]):
+        normalized = _normalize_net(net)
+        if not normalized:
+            continue
+        rows.append(
+            {
+                "pin_number": pin_number,
+                "pin_name": f"PIN{pin_number}",
+                "net": normalized,
+                "tags": sorted(_tags_from_net_name(normalized)),
+                "critical": False,
+                "description": f"raw fallback pin mapping for {ref}",
             }
         )
     return rows
@@ -203,10 +322,14 @@ def _find_mcu_instances(
             continue
         part_number = str(meta.get("value") or "").strip()
         pin_rows = _pin_instance_rows(part_number, ref, pinmap.get(ref) or {})
+        if not pin_rows:
+            pin_rows = _raw_pin_rows(ref, pinmap.get(ref) or {})
         rows.append(
             {
                 "ref": ref,
                 "part_number": part_number,
+                "controller_family": _controller_family(part_number),
+                "dev_module": _is_dev_controller_module(part_number),
                 "kind": _component_kind(part_number),
                 "pins": pin_rows,
             }
@@ -330,6 +453,65 @@ def _header_programming_paths(
     return paths
 
 
+def _module_programming_paths(
+    mcu: Dict[str, Any],
+    connectors: Iterable[Dict[str, Any]],
+    rails: Iterable[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    if not mcu.get("dev_module"):
+        return []
+
+    paths: List[Dict[str, Any]] = []
+    usb_connector_refs = sorted(
+        {
+            str(connector.get("ref"))
+            for connector in (connectors or [])
+            if any(row.get("interface") == "usb2" for row in (connector.get("interfaces") or []))
+            or any(
+                token in f"{str(connector.get('value') or '').upper()} {str(connector.get('footprint') or '').upper()}"
+                for token in ("USB", "TYPE-C", "MICRO-B", "MINI-B")
+            )
+        }
+    )
+    module_source_rails = sorted(
+        {
+            str(row.get("net") or "")
+            for row in (rails or [])
+            if row.get("is_input_root") or ((row.get("nominal_v") or 0.0) >= 4.5)
+        }
+    )
+    low_voltage_rails = sorted(
+        {
+            str(row.get("net") or "")
+            for row in (rails or [])
+            if row.get("nominal_v") is not None and (row.get("nominal_v") or 0.0) <= 3.6
+        }
+    )
+
+    if usb_connector_refs:
+        paths.append(
+            {
+                "type": "module_usb",
+                "mcu_ref": mcu.get("ref"),
+                "connector_refs": usb_connector_refs,
+                "confidence": 0.76,
+                "note": "Dev-module controller likely exposes onboard USB programming/debug through the extracted USB connector.",
+            }
+        )
+    elif module_source_rails and low_voltage_rails:
+        paths.append(
+            {
+                "type": "module_usb",
+                "mcu_ref": mcu.get("ref"),
+                "source_power_nets": module_source_rails,
+                "regulated_nets": low_voltage_rails,
+                "confidence": 0.61,
+                "note": "Dev-module controller likely carries an onboard USB/debug and regulator path even though the netlist does not expose the module's USB connector explicitly.",
+            }
+        )
+    return paths
+
+
 def _boot_constraints(
     mcu: Dict[str, Any],
     pullups: Dict[str, List[Dict[str, Any]]],
@@ -401,6 +583,233 @@ def _bus_inventory(mcu: Dict[str, Any], connectors: Iterable[Dict[str, Any]]) ->
             }
         )
     return inventory
+
+
+def _signal_inventory(pin_rows: Iterable[Dict[str, Any]]) -> Dict[str, List[str]]:
+    inventory = {
+        "pwm_nets": [],
+        "analog_nets": [],
+        "step_nets": [],
+        "dir_nets": [],
+        "can_nets": [],
+        "fault_nets": [],
+    }
+    for row in pin_rows or []:
+        net = _normalize_net(str(row.get("net") or ""))
+        if not net:
+            continue
+        up = net.upper()
+        tags = {str(tag) for tag in (row.get("tags") or [])}
+        if any(token in up for token in ("PWM", "HIN", "LIN", "ENA", "ENB")):
+            inventory["pwm_nets"].append(net)
+        if "ANALOG" in tags or any(token in up for token in ("ADC", "I_SENS", "CURRENT", "HALL", "TEMP", "THERM")):
+            inventory["analog_nets"].append(net)
+        if "STEP" in up:
+            inventory["step_nets"].append(net)
+        if re.search(r"(^|[_/\-])DIR($|[_/\-])", up):
+            inventory["dir_nets"].append(net)
+        if "CAN" in up:
+            inventory["can_nets"].append(net)
+        if any(token in up for token in ("FAULT", "ALERT", "INT")):
+            inventory["fault_nets"].append(net)
+    return {key: sorted(dict.fromkeys(values)) for key, values in inventory.items()}
+
+
+def _attached_peripheral_refs(category_by_ref: Dict[str, str]) -> Dict[str, List[str]]:
+    groups = {
+        "sensors": "sensor",
+        "radios": "radio",
+        "transceivers": "transceiver",
+        "memory": "memory",
+        "motor_drivers": "motor_driver",
+        "gate_drivers": "gate_driver",
+        "current_sense_amps": "current_sense_amp",
+    }
+    rows: Dict[str, List[str]] = {}
+    for group, category in groups.items():
+        refs = sorted(
+            str(ref)
+            for ref, found in (category_by_ref or {}).items()
+            if found == category and not str(ref).upper().startswith("TP")
+        )
+        rows[group] = refs
+    return rows
+
+
+def _external_interfaces(connectors: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for connector in connectors or []:
+        interfaces = sorted(
+            {
+                str(row.get("interface") or "").lower()
+                for row in (connector.get("interfaces") or [])
+                if str(row.get("interface") or "").strip()
+            }
+        )
+        power_nets = sorted(dict.fromkeys(str(net) for net in (connector.get("power_nets") or []) if str(net)))
+        semantic_role = str(connector.get("semantic_role") or "generic")
+        if not interfaces and not power_nets and semantic_role == "generic":
+            continue
+        signals = sorted(
+            {
+                str(signal)
+                for row in (connector.get("interfaces") or [])
+                for signal in (row.get("signals") or [])
+                if str(signal).strip()
+            }
+        )
+        rows.append(
+            {
+                "connector_ref": connector.get("ref"),
+                "semantic_role": semantic_role,
+                "interfaces": interfaces,
+                "signals": signals,
+                "power_nets": power_nets,
+            }
+        )
+    return rows
+
+
+def _flash_strategy(programming_paths: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+    rows = [row for row in (programming_paths or []) if isinstance(row, dict)]
+    if not rows:
+        return {"primary_method": "unknown", "methods": [], "confidence": 0.0}
+    best = max(rows, key=lambda row: float(row.get("confidence") or 0.0))
+    methods = sorted(dict.fromkeys(str(row.get("type") or "unknown") for row in rows))
+    return {
+        "primary_method": str(best.get("type") or "unknown"),
+        "methods": methods,
+        "confidence": round(float(best.get("confidence") or 0.0), 2),
+    }
+
+
+def _runtime_role(
+    peripherals: Dict[str, List[str]],
+    bus_inventory: Iterable[Dict[str, Any]],
+    signal_inventory: Dict[str, List[str]],
+) -> str:
+    if peripherals.get("motor_drivers") or peripherals.get("gate_drivers"):
+        return "motor_controller"
+    if peripherals.get("sensors") and peripherals.get("radios"):
+        return "wireless_sensor_node"
+    if peripherals.get("transceivers") or signal_inventory.get("can_nets"):
+        return "gateway_controller"
+    if peripherals.get("sensors"):
+        return "sensor_node"
+    if any(str(row.get("bus") or "") == "uart" for row in (bus_inventory or [])):
+        return "control_node"
+    return "general_controller"
+
+
+def _runtime_functions(
+    runtime_role: str,
+    peripherals: Dict[str, List[str]],
+    programming_paths: Iterable[Dict[str, Any]],
+    bus_inventory: Iterable[Dict[str, Any]],
+    signal_inventory: Dict[str, List[str]],
+    boot_constraints: Iterable[Dict[str, Any]],
+) -> List[str]:
+    rows: List[str] = []
+    methods = {str(row.get("type") or "") for row in (programming_paths or [])}
+    buses = {str(row.get("bus") or "") for row in (bus_inventory or [])}
+
+    if methods:
+        rows.append("firmware_update")
+    if methods & {"usb_uart_bridge", "module_usb", "uart_header"}:
+        rows.append("serial_console")
+    if "i2c" in buses:
+        rows.append("sensor_bus_manager" if peripherals.get("sensors") else "i2c_expansion")
+    if "spi" in buses:
+        rows.append("spi_peripheral_control")
+    if "uart" in buses and "serial_console" not in rows:
+        rows.append("serial_link")
+    if runtime_role == "motor_controller" or signal_inventory.get("pwm_nets"):
+        rows.append("motor_drive_control")
+    if peripherals.get("current_sense_amps") or any(signal_inventory.get(key) for key in ("analog_nets", "fault_nets")):
+        rows.append("closed_loop_feedback")
+    if peripherals.get("radios"):
+        rows.append("wireless_link")
+    if peripherals.get("transceivers") or signal_inventory.get("can_nets"):
+        rows.append("fieldbus_gateway")
+    if peripherals.get("memory"):
+        rows.append("persistent_state")
+    if any(row.get("status") != "ok" for row in (boot_constraints or [])):
+        rows.append("boot_mode_management")
+    return sorted(dict.fromkeys(rows))
+
+
+def _firmware_questions(
+    runtime_role: str,
+    peripherals: Dict[str, List[str]],
+    programming_paths: Iterable[Dict[str, Any]],
+    bus_inventory: Iterable[Dict[str, Any]],
+    signal_inventory: Dict[str, List[str]],
+    external_interfaces: Iterable[Dict[str, Any]],
+) -> List[str]:
+    questions: List[str] = []
+    if runtime_role == "motor_controller" and not signal_inventory.get("pwm_nets"):
+        questions.append("Motor-control hardware is present, but MCU PWM or gate-control nets are not clearly exposed on known pins.")
+    if peripherals.get("sensors") and not any(str(row.get("bus") or "") in {"i2c", "spi", "uart"} for row in (bus_inventory or [])):
+        questions.append("Sensors are present, but no deterministic firmware bus mapping was extracted.")
+    if peripherals.get("transceivers") and not any("can" in (row.get("interfaces") or []) or "uart" in (row.get("interfaces") or []) for row in (external_interfaces or [])):
+        questions.append("Fieldbus/transceiver hardware is present, but no clear external communications connector was extracted.")
+    if not programming_paths:
+        questions.append("Firmware update or debug entry path is not deterministic from the extracted hardware evidence.")
+    return questions
+
+
+def _firmware_surface(
+    controller_rows: Iterable[Dict[str, Any]],
+    connectors: Iterable[Dict[str, Any]],
+    programming_paths: Iterable[Dict[str, Any]],
+    bus_inventory: Iterable[Dict[str, Any]],
+    boot_constraints: Iterable[Dict[str, Any]],
+    category_by_ref: Dict[str, str],
+) -> Dict[str, Any]:
+    controllers = [row for row in (controller_rows or []) if isinstance(row, dict)]
+    peripherals = _attached_peripheral_refs(category_by_ref)
+    external = _external_interfaces(connectors)
+    if not controllers:
+        return {
+            "runtime_role": "passive_only",
+            "primary_controller_ref": None,
+            "controller_family": None,
+            "flash_strategy": _flash_strategy(programming_paths),
+            "runtime_functions": [],
+            "signal_inventory": {},
+            "attached_peripherals": peripherals,
+            "external_interfaces": external,
+            "questions": ["No controller-class IC was extracted, so firmware-facing reasoning is unavailable."],
+        }
+
+    primary = controllers[0]
+    signal_inventory = _signal_inventory(primary.get("pins") or [])
+    role = _runtime_role(peripherals, bus_inventory, signal_inventory)
+    return {
+        "runtime_role": role,
+        "primary_controller_ref": primary.get("ref"),
+        "controller_family": primary.get("controller_family"),
+        "flash_strategy": _flash_strategy(programming_paths),
+        "runtime_functions": _runtime_functions(
+            role,
+            peripherals,
+            programming_paths,
+            bus_inventory,
+            signal_inventory,
+            boot_constraints,
+        ),
+        "signal_inventory": signal_inventory,
+        "attached_peripherals": peripherals,
+        "external_interfaces": external,
+        "questions": _firmware_questions(
+            role,
+            peripherals,
+            programming_paths,
+            bus_inventory,
+            signal_inventory,
+            external,
+        ),
+    }
 
 
 def _controller_bring_up_plan(
@@ -531,7 +940,11 @@ def analyze_controller_runtime(
     board_boot_constraints: List[Dict[str, Any]] = []
 
     for mcu in mcu_rows:
-        mcu_programming_paths = _bridge_programming_paths(mcu, support_parts, connector_lookup) + _header_programming_paths(mcu, connectors)
+        mcu_programming_paths = (
+            _bridge_programming_paths(mcu, support_parts, connector_lookup)
+            + _header_programming_paths(mcu, connectors)
+            + _module_programming_paths(mcu, connectors, rails)
+        )
         mcu_boot_constraints = _boot_constraints(mcu, pullups, pulldowns)
         mcu_bus_inventory = _bus_inventory(mcu, connectors)
         programming_paths.extend(mcu_programming_paths)
@@ -541,6 +954,8 @@ def analyze_controller_runtime(
             {
                 "ref": mcu.get("ref"),
                 "part_number": mcu.get("part_number"),
+                "controller_family": mcu.get("controller_family"),
+                "dev_module": mcu.get("dev_module"),
                 "pins": mcu.get("pins"),
                 "programming_paths": mcu_programming_paths,
                 "boot_constraints": mcu_boot_constraints,
@@ -570,6 +985,15 @@ def analyze_controller_runtime(
     else:
         warnings.append("No controller-class IC matched the lightweight pinout database.")
 
+    firmware_surface = _firmware_surface(
+        controller_rows=controller_rows,
+        connectors=connectors,
+        programming_paths=programming_paths,
+        bus_inventory=board_bus_inventory,
+        boot_constraints=board_boot_constraints,
+        category_by_ref=category_by_ref,
+    )
+
     return {
         "controllers": controller_rows,
         "support_components": support_parts,
@@ -585,5 +1009,6 @@ def analyze_controller_runtime(
             "warning_count": len(warnings),
             "warnings": warnings,
         },
+        "firmware_surface": firmware_surface,
         "bring_up_plan": bring_up_plan,
     }

@@ -329,6 +329,7 @@ def build_mechatronic_context(machine: Dict[str, Any], board_design_files: Optio
         "primary_electronics_anchor": (primary_board.get("electronics_anchor") if isinstance(primary_board, dict) else None) or {},
         "electronics_bundle": [row.get("electronics_anchor") or {} for row in board_contexts if isinstance(row.get("electronics_anchor"), dict)],
         "machine_topology": topology,
+        "motor_control_pack": (topology.get("motor_control_pack") if isinstance(topology, dict) else None) or {"status": "not_applicable"},
         "machine_bring_up_sequence": topology.get("machine_bring_up_sequence") if isinstance(topology, dict) else [],
         "questions": sorted(dict.fromkeys(question for question in questions if question)),
     }

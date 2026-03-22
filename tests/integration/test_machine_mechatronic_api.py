@@ -57,6 +57,7 @@ def test_machine_engineer_emits_mechatronic_context_from_board_files(client):
 
     assert ctx.get("primary_board_id")
     assert len(ctx.get("electronics_bundle") or []) == 2
+    assert "motor_control_pack" in ctx
     board_rows = {row["board_id"]: row for row in (ctx.get("boards") or [])}
     assert (board_rows["sensor_io"]["prototype3d"] or {}).get("scad")
     assert (board_rows["main_ctrl"]["controller_runtime"] or {}).get("controllers")
@@ -100,3 +101,4 @@ def test_machine_full_simulate_preserves_mechatronic_context(client):
     ctx = ((engineering.get("analysis") or {}).get("mechatronic_context") or {})
     assert ctx.get("primary_board_id") == "main_ctrl"
     assert len(ctx.get("electronics_bundle") or []) == 1
+    assert "motor_control_pack" in ctx

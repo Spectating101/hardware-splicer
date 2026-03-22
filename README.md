@@ -9,6 +9,15 @@
 
 Circuit-AI is a **complete electronics platform** that combines educational tools, professional PCB validation, and visual intelligence. It takes users from "I want to learn Arduino" to "Here's your validated PCB design ready for manufacturing."
 
+## Documentation Map
+
+- [docs/VALUE_AND_WORKFLOWS.md](docs/VALUE_AND_WORKFLOWS.md)
+  Canonical map of product value, workflows, and use cases.
+- [V2_API_GUIDE.md](V2_API_GUIDE.md)
+  Canonical route and request/response guide for the v2 backend.
+- [docs/API_FIRST_DOCUMENTATION.md](docs/API_FIRST_DOCUMENTATION.md)
+  Secondary API-first/FastAPI branch direction, not the canonical shipped backend.
+
 ## 🚀 V2 API - NEW! Unified Workflows
 
 The v2 API integrates educational tools with professional validation:

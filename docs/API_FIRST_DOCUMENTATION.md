@@ -1,6 +1,8 @@
 # Circuit.AI - Enterprise PCB Analysis API Platform
 
 > Status note: this document reflects the API-first FastAPI branch direction, not the canonical shipped backend. The current product backend is the Flask server in `api_server.py` exposed by `circuit-ai-api`; use the README and v2 guides for the default contract.
+>
+> Canonical product/use-case map: [VALUE_AND_WORKFLOWS.md](VALUE_AND_WORKFLOWS.md)
 
 ## Executive Summary
 

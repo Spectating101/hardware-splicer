@@ -35,7 +35,7 @@ def is_power_net(n: str) -> bool:
     if not n:
         return False
     up = _canonical_power_name(n)
-    if up in {"VCC", "VDD", "VIN", "VBAT", "VBUS", "+5V", "+3V3", "+3.3V", "+12V", "+24V"}:
+    if up in {"VCC", "VDD", "VIN", "VBAT", "VBUS", "VPP", "VSYS", "+5V", "+3V3", "+3.3V", "+12V", "+24V"}:
         return True
     if up.startswith("+") and any(ch.isdigit() for ch in up):
         return True

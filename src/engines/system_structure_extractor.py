@@ -39,6 +39,25 @@ _CATEGORY_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "CH32",
         "LPC",
         "IMXRT",
+        "TINYPICO",
+        "NODEMCU",
+        "DEVKIT",
+        "FEATHER",
+    ),
+    "gate_driver": (
+        "LM5101",
+        "IR210",
+        "IRS200",
+        "MIC460",
+        "FAN738",
+        "HIP210",
+    ),
+    "current_sense_amp": (
+        "INA240",
+        "INA181",
+        "INA199",
+        "MAX4080",
+        "CURRENT_SENSE",
     ),
     "sensor": (
         "BME",
@@ -50,7 +69,6 @@ _CATEGORY_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "LIS3",
         "TOF",
         "VL53",
-        "INA",
         "ADS",
         "HX711",
         "ACS",
@@ -62,14 +80,22 @@ _CATEGORY_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "AMS1117",
         "AP2112",
         "LM1117",
+        "LM7805",
+        "7805",
         "TLV",
         "TPS",
         "MCP17",
+        "MCP1642",
+        "LM22675",
+        "AZ1117",
+        "LM2596",
+        "XL6009",
         "MPM",
         "MP1584",
         "XC620",
         "BUCK",
         "BOOST",
+        "TL431",
     ),
     "motor_driver": (
         "DRV",
@@ -133,8 +159,8 @@ _INTERFACE_SIGNAL_PATTERNS: List[Tuple[str, re.Pattern[str]]] = [
     ("MOSI", re.compile(r"(^|[_\-/])(MOSI|SDO)($|[_\-/])|SPI.*MOSI", re.I)),
     ("MISO", re.compile(r"(^|[_\-/])(MISO|SDI)($|[_\-/])|SPI.*MISO", re.I)),
     ("CS", re.compile(r"(^|[_\-/])(CS|NCS|NSS|SS)($|[_\-/])", re.I)),
-    ("TX", re.compile(r"(^|[_\-/])(TX|TXD)($|[_\-/])|UART.*TX", re.I)),
-    ("RX", re.compile(r"(^|[_\-/])(RX|RXD)($|[_\-/])|UART.*RX", re.I)),
+    ("TX", re.compile(r"(^|[_\-/])(TXD?\d*|USART\d*TX|UART\d*TX)($|[_\-/])|UART.*TX|TX.*UART", re.I)),
+    ("RX", re.compile(r"(^|[_\-/])(RXD?\d*|USART\d*RX|UART\d*RX)($|[_\-/])|UART.*RX|RX.*UART", re.I)),
     ("CANH", re.compile(r"CAN[\s_\-/]*H", re.I)),
     ("CANL", re.compile(r"CAN[\s_\-/]*L", re.I)),
     ("D+", re.compile(r"(D\+|USB_DP|USBDP|DP$)", re.I)),
@@ -191,7 +217,7 @@ def _is_source_like_power_net(net: str) -> bool:
             up = up[: -len(suffix)]
     if up.endswith("V+"):
         return True
-    return up.startswith(("VIN", "VBAT", "VBUS", "VUSB")) or up in {"+12V", "+24V", "12V", "24V"}
+    return up.startswith(("VIN", "VBAT", "VBUS", "VUSB", "VPP", "VSYS")) or up in {"+12V", "+24V", "12V", "24V"}
 
 
 def _pinmap_from_nets(nets: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
@@ -319,6 +345,46 @@ def _connector_interfaces(pin_nets: Dict[str, str]) -> List[Dict[str, Any]]:
     return interface_rows
 
 
+def _connector_semantic_role(
+    *,
+    value: str,
+    footprint: str,
+    pin_nets: Dict[str, str],
+    interfaces: List[Dict[str, Any]],
+) -> str:
+    text = f"{value} {footprint}".upper()
+    nets = {_normalize_net(net).upper() for net in pin_nets.values() if _normalize_net(net)}
+    interface_names = {str(row.get("interface") or "") for row in interfaces}
+    power_nets = {net for net in nets if is_power_net(net)}
+    non_power_nets = {net for net in nets if net not in power_nets and not is_ground_net(net)}
+    control_like_nets = {
+        net
+        for net in non_power_nets
+        if any(token in net for token in ("PWM", "INA", "INB", "ENA", "ENB", "TX", "RX", "SCL", "SDA", "SWD", "RST", "CAN"))
+    }
+    if power_nets and not non_power_nets:
+        if any((_infer_nominal_voltage(net) or 0.0) >= 9.0 or _is_source_like_power_net(net) for net in power_nets):
+            return "power_input"
+        return "power_link"
+    if power_nets and len(control_like_nets) >= 2:
+        return "control_harness"
+    if any(token in text for token in ("LIPO", "BAT", "BATTERY", "POWER_IN", "BAT_IN", "VIN", "XT30", "XT60")):
+        return "power_input"
+    if any(token in text for token in ("MOTOR", "SERVO", "ESC", "PHASE", "FAN", "PUMP")):
+        return "actuation"
+    if any(token in text for token in ("IMU", "SENSOR", "GYRO", "ENCODER")):
+        return "sensor_link"
+    if any(token in text for token in ("DEBUG", "SWD", "UART", "USB", "PROG", "PROGRAM", "ISP")):
+        return "debug_link"
+    if interface_names & {"uart", "i2c", "spi", "swd", "usb2"}:
+        return "board_link"
+    if any(net.startswith(("VBAT", "VIN", "+12V", "+24V", "/M_V+", "/BOT_V+")) for net in nets):
+        return "power_input"
+    if any(is_power_net(net) for net in nets):
+        return "power_link"
+    return "generic"
+
+
 def _build_passives(components: Dict[str, Dict[str, Any]], pinmap: Dict[str, Dict[str, str]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     resistors: List[Dict[str, Any]] = []
     capacitors: List[Dict[str, Any]] = []
@@ -375,6 +441,7 @@ def _regulator_rows(
     components: Dict[str, Dict[str, Any]],
     ref_nets: Dict[str, Set[str]],
     ground_net: str,
+    category_by_ref: Dict[str, str],
 ) -> List[Dict[str, Any]]:
     inferred = infer_ldo_candidates(components, ref_nets, ground_net)
     rows: List[Dict[str, Any]] = []
@@ -403,10 +470,11 @@ def _regulator_rows(
         if _component_category(ref, meta if isinstance(meta, dict) else {}) != "regulator":
             continue
         nets = sorted({_normalize_net(net) for net in (ref_nets.get(ref) or set()) if _normalize_net(net) and not is_ground_net(net)})
-        if len(nets) < 2:
+        power_nets = sorted({net for net in nets if is_power_net(net) or _is_source_like_power_net(net)})
+        if len(power_nets) < 2:
             continue
         ranked = sorted(
-            nets,
+            power_nets,
             key=lambda net: (
                 0 if _is_source_like_power_net(net) else 1,
                 _infer_nominal_voltage(net) is None,
@@ -416,8 +484,9 @@ def _regulator_rows(
         )
         vin_net = ranked[0]
         vout_candidates = sorted(
-            nets,
+            power_nets,
             key=lambda net: (
+                1 if net == vin_net else 0,
                 _infer_nominal_voltage(net) is None,
                 (_infer_nominal_voltage(net) or 999.0),
                 net,
@@ -439,6 +508,43 @@ def _regulator_rows(
             }
         )
         seen.add(ref)
+
+    existing_outputs = {_normalize_net(str(row.get("vout_net") or "")) for row in rows}
+    for ref, meta in (components or {}).items():
+        if ref in seen or category_by_ref.get(ref) != "mcu":
+            continue
+        text = f"{str(meta.get('value') or '').upper()} {str(meta.get('footprint') or '').upper()}"
+        if not any(token in text for token in ("TINYPICO", "PICO", "NODEMCU", "DEVKIT", "FEATHER", "HUZZAH32")):
+            continue
+        nets = sorted({_normalize_net(net) for net in (ref_nets.get(ref) or set()) if _normalize_net(net) and not is_ground_net(net)})
+        source_nets = sorted(
+            {net for net in nets if _is_source_like_power_net(net) or ((is_power_net(net) and (_infer_nominal_voltage(net) or 0.0) >= 4.5))},
+            key=lambda net: (
+                0 if _is_source_like_power_net(net) else 1,
+                _infer_nominal_voltage(net) is None,
+                -(_infer_nominal_voltage(net) or 0.0),
+                net,
+            ),
+        )
+        low_rails = sorted(
+            {net for net in nets if is_power_net(net) and (_infer_nominal_voltage(net) or 99.0) <= 3.6 and _normalize_net(net) not in existing_outputs},
+            key=lambda net: ((_infer_nominal_voltage(net) or 99.0), net),
+        )
+        if not source_nets or not low_rails:
+            continue
+        rows.append(
+            {
+                "ref": ref,
+                "kind": "module_regulator",
+                "vin_net": source_nets[0],
+                "vout_net": low_rails[0],
+                "gnd_net": _normalize_net(ground_net),
+                "vout_nominal_v": _infer_nominal_voltage(low_rails[0]),
+                "confidence": 0.58,
+                "note": "inferred from dev-module board exposing both upstream power and an onboard low-voltage rail",
+            }
+        )
+        seen.add(ref)
     return rows
 
 
@@ -446,6 +552,10 @@ def _role_scores(category_counts: Dict[str, int], connectors: List[Dict[str, Any
     scores: Dict[str, float] = defaultdict(float)
     if category_counts.get("mcu", 0):
         scores["controller"] += 4.0
+    if category_counts.get("gate_driver", 0) >= 2:
+        scores["motor_control"] += 3.8
+    if category_counts.get("current_sense_amp", 0) >= 2:
+        scores["motor_control"] += 1.4
     if category_counts.get("sensor", 0):
         scores["sensor_io"] += 2.0 if not category_counts.get("mcu", 0) else 1.0
     if category_counts.get("regulator", 0) or category_counts.get("power", 0):
@@ -506,7 +616,7 @@ def extract_board_structure(design_path: str, *, board_id: Optional[str] = None,
         ],
         rails=[row["net"] for row in rails],
     )
-    regulators = _regulator_rows(components, ref_nets, ground_net)
+    regulators = _regulator_rows(components, ref_nets, ground_net, category_by_ref)
 
     connectors: List[Dict[str, Any]] = []
     interface_hits: Dict[str, int] = defaultdict(int)
@@ -526,6 +636,12 @@ def extract_board_structure(design_path: str, *, board_id: Optional[str] = None,
                 "pin_nets": pin_nets,
                 "power_nets": sorted(net for net in set(pin_nets.values()) if is_power_net(net)),
                 "interfaces": interfaces,
+                "semantic_role": _connector_semantic_role(
+                    value=str(meta.get("value") or ""),
+                    footprint=str(meta.get("footprint") or ""),
+                    pin_nets=pin_nets,
+                    interfaces=interfaces,
+                ),
             }
         )
     connectors.sort(key=lambda row: row["ref"])
@@ -571,6 +687,12 @@ def extract_board_structure(design_path: str, *, board_id: Optional[str] = None,
         capacitors=capacitors,
         primary_role=primary_role,
     )
+    if controller_runtime.get("programming_paths"):
+        questions = [
+            question
+            for question in questions
+            if question != "Controller-like board has no obvious programming or debug interface extracted."
+        ]
     questions.extend(controller_runtime.get("firmware_readiness", {}).get("warnings") or [])
     questions.extend(power_control.get("questions") or [])
 
@@ -646,22 +768,67 @@ def _shared_interface_rows(board_a: Dict[str, Any], board_b: Dict[str, Any]) -> 
 def _power_source_score(board: Dict[str, Any], rail_name: str, nominal_v: Optional[float]) -> float:
     score = 0.0
     primary_role = str(board.get("primary_role") or "")
-    if primary_role in {"power_board", "controller", "motor_control"}:
-        score += 1.0
+    role_weights = {
+        "power_board": 3.0,
+        "controller": 1.8,
+        "interface_board": 1.5,
+        "motor_control": 0.9,
+        "sensor_io": 0.6,
+    }
+    score += role_weights.get(primary_role, 0.2)
     for regulator in board.get("power", {}).get("regulators", []) or []:
         if _normalize_net(str(regulator.get("vout_net") or "")) == _normalize_net(rail_name):
-            score += 2.0
+            score += 2.5
     for rail in board.get("power", {}).get("rails", []) or []:
         if _normalize_net(str(rail.get("net") or "")) != _normalize_net(rail_name):
             continue
         if rail.get("is_input_root"):
-            score += 1.0
+            score += 1.5
         if nominal_v is not None and rail.get("nominal_v") == nominal_v:
             score += 0.5
+    for connector in board.get("connectors") or []:
+        if _normalize_net(rail_name) not in {_normalize_net(net) for net in (connector.get("power_nets") or [])}:
+            continue
+        score += 0.2
+        semantic_role = str(connector.get("semantic_role") or "")
+        if semantic_role == "power_input":
+            score += 1.2 if _is_source_like_power_net(rail_name) or ((nominal_v or 0.0) >= 9.0) else 0.1
+        elif semantic_role in {"board_link", "debug_link"}:
+            score += 0.6
+        elif semantic_role == "control_harness":
+            score += 0.1
+        elif semantic_role == "actuation":
+            score -= 0.15
     return score
 
 
-def _shared_power_rows(board_a: Dict[str, Any], board_b: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], List[str]]:
+def _prune_power_candidates(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    grouped: Dict[Tuple[str, str, Optional[float]], Dict[str, Any]] = {}
+    for row in rows:
+        key = (str(row.get("board_id") or ""), _normalize_net(str(row.get("rail") or "")), row.get("voltage_v"))
+        existing = grouped.get(key)
+        if existing is None or float(row.get("confidence") or 0.0) > float(existing.get("confidence") or 0.0):
+            grouped[key] = row
+    return sorted(grouped.values(), key=lambda row: (str(row.get("board_id") or ""), str(row.get("rail") or ""), -float(row.get("confidence") or 0.0)))
+
+
+def _board_locally_generates_rail(board: Dict[str, Any], rail_name: str, nominal_v: Optional[float]) -> bool:
+    target = _normalize_net(rail_name)
+    for regulator in board.get("power", {}).get("regulators", []) or []:
+        vout = _normalize_net(str(regulator.get("vout_net") or ""))
+        if target and vout == target:
+            return True
+        reg_v = regulator.get("vout_nominal_v")
+        if nominal_v is not None and reg_v is not None and abs(float(reg_v) - nominal_v) <= 0.05:
+            return True
+    return False
+
+
+def _shared_power_rows(
+    board_a: Dict[str, Any],
+    board_b: Dict[str, Any],
+    interface_rows: Optional[List[Dict[str, Any]]] = None,
+) -> Tuple[List[Dict[str, Any]], List[str]]:
     rows: List[Dict[str, Any]] = []
     questions: List[str] = []
     power_nets_a: Dict[str, Optional[float]] = {}
@@ -687,9 +854,16 @@ def _shared_power_rows(board_a: Dict[str, Any], board_b: Dict[str, Any]) -> Tupl
     considered = {(net_name, net_name) for net_name in exact_matches}
     for net_name in exact_matches:
         nominal_v = power_nets_a.get(net_name) or power_nets_b.get(net_name)
+        if _board_locally_generates_rail(board_a, net_name, nominal_v) and _board_locally_generates_rail(board_b, net_name, nominal_v):
+            questions.append(
+                f"Both {board_a.get('board_id')} and {board_b.get('board_id')} appear to generate {net_name} locally; cross-board sourcing is likely not required."
+            )
+            continue
         score_a = _power_source_score(board_a, net_name, nominal_v)
         score_b = _power_source_score(board_b, net_name, nominal_v)
         if score_a == score_b:
+            if not interface_rows:
+                continue
             questions.append(
                 f"Both {board_a.get('board_id')} and {board_b.get('board_id')} expose {net_name}; source direction is ambiguous."
             )
@@ -709,6 +883,10 @@ def _shared_power_rows(board_a: Dict[str, Any], board_b: Dict[str, Any]) -> Tupl
 
     for net_a, net_b, nominal_v in voltage_matches:
         if (net_a, net_b) in considered or (net_b, net_a) in considered:
+            continue
+        if not interface_rows:
+            continue
+        if _board_locally_generates_rail(board_a, net_a, nominal_v) and _board_locally_generates_rail(board_b, net_b, nominal_v):
             continue
         score_a = _power_source_score(board_a, net_a, nominal_v)
         score_b = _power_source_score(board_b, net_b, nominal_v)
@@ -738,6 +916,88 @@ def _shared_power_rows(board_a: Dict[str, Any], board_b: Dict[str, Any]) -> Tupl
     return list(deduped.values()), questions
 
 
+def _motor_control_pack(
+    boards: List[Dict[str, Any]],
+    interconnects: List[Dict[str, Any]],
+    power_tree: List[Dict[str, Any]],
+    bring_up_sequence: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    actuation_boards: List[Dict[str, Any]] = []
+    questions: List[str] = []
+    totals = {
+        "motor_driver_count": 0,
+        "gate_driver_count": 0,
+        "current_sense_amp_count": 0,
+        "actuation_connector_count": 0,
+    }
+
+    for board in boards:
+        if not isinstance(board, dict):
+            continue
+        analysis = board.get("power_control_analysis") or {}
+        summary = analysis.get("summary") or {}
+        role = str(board.get("primary_role") or "")
+        is_actuation = role == "motor_control" or any(
+            int(summary.get(key) or 0) > 0 for key in ("motor_driver_count", "gate_driver_count")
+        )
+        if not is_actuation:
+            continue
+        board_row = {
+            "board_id": board.get("board_id"),
+            "role": role,
+            "runtime_role": ((board.get("controller_runtime") or {}).get("firmware_surface") or {}).get("runtime_role"),
+            "motor_driver_count": int(summary.get("motor_driver_count") or 0),
+            "gate_driver_count": int(summary.get("gate_driver_count") or 0),
+            "current_sense_amp_count": int(summary.get("current_sense_amp_count") or 0),
+            "actuation_connector_count": int(summary.get("actuation_connector_count") or 0),
+        }
+        actuation_boards.append(board_row)
+        for key in totals:
+            totals[key] += int(board_row.get(key) or 0)
+        questions.extend(str(question) for question in (analysis.get("questions") or []) if question)
+        for finding in (analysis.get("risk_findings") or []):
+            topic = str(finding.get("topic") or "")
+            if topic in {"phase_current_feedback", "motor_supply_headroom", "actuation_outputs", "current_sense"}:
+                message = str(finding.get("message") or "").strip()
+                if message:
+                    questions.append(message)
+
+    actuation_ids = {str(row.get("board_id") or "") for row in actuation_boards if row.get("board_id")}
+    control_links = [
+        row
+        for row in (interconnects or [])
+        if str(row.get("from_board") or "") in actuation_ids or str(row.get("to_board") or "") in actuation_ids
+    ]
+    power_feeds = [row for row in (power_tree or []) if str(row.get("board_id") or "") in actuation_ids]
+    bring_up_focus = [row for row in (bring_up_sequence or []) if str(row.get("board_id") or "") in actuation_ids]
+
+    if actuation_boards and not power_feeds:
+        questions.append("Actuation-capable boards were extracted, but no supporting machine power feed was inferred.")
+    if actuation_boards and len(actuation_boards) > 1 and not control_links:
+        questions.append("Several actuation boards were extracted, but no inter-board control link was recovered.")
+
+    if not actuation_boards:
+        status = "not_applicable"
+        topology = "none"
+    elif power_feeds and (control_links or len(actuation_boards) == 1):
+        status = "integrated"
+        topology = "distributed_motor_control" if len(actuation_boards) > 1 else "single_motor_control"
+    else:
+        status = "partial"
+        topology = "distributed_motor_control" if len(actuation_boards) > 1 else "single_motor_control"
+
+    return {
+        "status": status,
+        "topology": topology,
+        "actuation_boards": actuation_boards,
+        "control_links": control_links,
+        "power_feeds": power_feeds,
+        "bring_up_focus": bring_up_focus,
+        "totals": totals,
+        "questions": sorted(dict.fromkeys(question for question in questions if question)),
+    }
+
+
 def synthesize_machine_topology(board_structures: Iterable[Dict[str, Any]], *, machine_name: str = "auto_machine") -> Dict[str, Any]:
     boards = [board for board in board_structures if isinstance(board, dict)]
     machine_boards = [
@@ -749,7 +1009,7 @@ def synthesize_machine_topology(board_structures: Iterable[Dict[str, Any]], *, m
         for board in boards
     ]
     interconnects: List[Dict[str, Any]] = []
-    power_tree: List[Dict[str, Any]] = []
+    power_tree_candidates: List[Dict[str, Any]] = []
     questions: List[str] = []
     graph_edges: List[Dict[str, Any]] = []
 
@@ -765,18 +1025,20 @@ def synthesize_machine_topology(board_structures: Iterable[Dict[str, Any]], *, m
                     "confidence": row["confidence"],
                 }
             )
-        power_rows, power_questions = _shared_power_rows(board_a, board_b)
-        power_tree.extend(power_rows)
+        power_rows, power_questions = _shared_power_rows(board_a, board_b, interface_rows=interface_rows)
+        power_tree_candidates.extend(power_rows)
         questions.extend(power_questions)
-        for row in power_rows:
-            graph_edges.append(
-                {
-                    "from_board": str(row["source"]).split(":", 1)[0],
-                    "to_board": row["board_id"],
-                    "kind": "power",
-                    "confidence": row["confidence"],
-                }
-            )
+
+    power_tree = _prune_power_candidates(power_tree_candidates)
+    for row in power_tree:
+        graph_edges.append(
+            {
+                "from_board": str(row["source"]).split(":", 1)[0],
+                "to_board": row["board_id"],
+                "kind": "power",
+                "confidence": row["confidence"],
+            }
+        )
 
     connected_board_ids = {edge["from_board"] for edge in graph_edges} | {edge["to_board"] for edge in graph_edges}
     for board in boards:
@@ -816,6 +1078,7 @@ def synthesize_machine_topology(board_structures: Iterable[Dict[str, Any]], *, m
                 "first_steps": first_steps,
             }
         )
+    motor_control_pack = _motor_control_pack(boards, interconnects, power_tree, machine_bring_up_sequence)
     return {
         "machine": {
             "machine_name": machine_name,
@@ -834,4 +1097,5 @@ def synthesize_machine_topology(board_structures: Iterable[Dict[str, Any]], *, m
         "machine_payload": machine_payload,
         "compiled_preview": compiled_preview,
         "machine_bring_up_sequence": machine_bring_up_sequence,
+        "motor_control_pack": motor_control_pack,
     }

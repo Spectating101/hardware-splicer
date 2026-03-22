@@ -189,6 +189,7 @@ def test_v2_system_extract_machine(client, tmp_path):
     result = data.get("result") or {}
     assert any(row.get("interface") == "i2c" for row in (result.get("candidate_interconnects") or []))
     assert any(row.get("source") == "main_ctrl:+3V3" for row in (result.get("candidate_power_tree") or []))
+    assert (result.get("motor_control_pack") or {}).get("status") == "not_applicable"
 
 
 def test_v2_system_extract_board_reports_controller_runtime(client, tmp_path):
@@ -206,6 +207,9 @@ def test_v2_system_extract_board_reports_controller_runtime(client, tmp_path):
     runtime = result.get("controller_runtime") or {}
     assert (runtime.get("controllers") or [])[0]["part_number"] == "ESP32-WROOM-32"
     assert any(path.get("type") == "usb_uart_bridge" for path in (runtime.get("programming_paths") or []))
+    firmware_surface = runtime.get("firmware_surface") or {}
+    assert firmware_surface.get("flash_strategy", {}).get("primary_method") == "usb_uart_bridge"
+    assert "firmware_update" in (firmware_surface.get("runtime_functions") or [])
 
 
 def test_v2_system_extract_board_reports_power_control_analysis(client, tmp_path):
