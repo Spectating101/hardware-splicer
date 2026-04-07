@@ -1,25 +1,57 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, type ThreeEvent } from "@react-three/fiber";
 import { Html, OrbitControls, Environment, GizmoHelper, GizmoViewport, Line } from "@react-three/drei";
 import * as THREE from "three";
+import type { PcbGeometry, ValidationIssue } from "@/lib/cad-types";
 
 // --- CONSTANTS ---
 const COLORS = {
-  bg: "#050505", // True Black for AR feel
   solderMask: "#0f2e1b", 
-  pads: "#eab308",
   body: "#2d2d2d", 
   pin: "#cccccc",
   selection: "#007fd4",
-  alert: "#ef4444",
   ghost: "#00ff00",
 };
 
 // --- SPATIAL COMPONENTS ---
 
-function SpatialCallout({ position, label, color = COLORS.selection }: any) {
+type Footprint = PcbGeometry["footprints"][number];
+
+type SelectionState = {
+  footprintRef: string | null;
+};
+
+type SpatialCalloutProps = {
+  position: [number, number, number];
+  label: string;
+  color?: string;
+};
+
+type ChipMeshProps = {
+  fp: Footprint;
+  selected: boolean;
+  isGhost?: boolean;
+  onSelect?: (selection: SelectionState) => void;
+};
+
+type BoardSceneProps = {
+  geometry: PcbGeometry | null;
+  selection: SelectionState;
+  optimizedGeometry?: PcbGeometry | null;
+  onSelectionChange?: (selection: SelectionState) => void;
+};
+
+export type PcbViewportProps = {
+  geometry: PcbGeometry | null;
+  issues: ValidationIssue[];
+  selection: SelectionState;
+  optimizedGeometry?: PcbGeometry | null;
+  onSelectionChange?: (selection: SelectionState) => void;
+  explodeFactor?: number;
+};
+
+function SpatialCallout({ position, label, color = COLORS.selection }: SpatialCalloutProps) {
   // Draws a "Leader Line" from the 3D point to a floating label
   // This gives the "Tuurny/AR" feel
   return (
@@ -51,7 +83,7 @@ function SpatialCallout({ position, label, color = COLORS.selection }: any) {
   );
 }
 
-function ChipMesh({ fp, selected, isGhost = false, onContextMenu }: any) {
+function ChipMesh({ fp, selected, isGhost = false, onSelect }: ChipMeshProps) {
   const [w, d] = [8, 8]; 
   const materialProps = isGhost ? { 
     color: COLORS.ghost, wireframe: true, transparent: true, opacity: 0.5 
@@ -61,12 +93,13 @@ function ChipMesh({ fp, selected, isGhost = false, onContextMenu }: any) {
 
   return (
     <group position={[fp.at.x, 0, fp.at.y]} rotation={[0, THREE.MathUtils.degToRad(fp.at.rot_deg || 0), 0]}>
-      {/* Context Menu Trigger (Invisible Hitbox) */}
+      {/* Selection hitbox */}
       <mesh 
         position={[0, 2, 0]} 
         visible={false} 
-        onPointerDown={(e) => {
-          if (e.button === 2) onContextMenu(e); // Right click
+        onPointerDown={(event: ThreeEvent<PointerEvent>) => {
+          event.stopPropagation();
+          onSelect?.({ footprintRef: fp.ref });
         }}
       >
          <boxGeometry args={[w, 4, d]} />
@@ -102,7 +135,7 @@ function ChipMesh({ fp, selected, isGhost = false, onContextMenu }: any) {
   );
 }
 
-function BoardScene({ geometry, selection, optimizedGeometry }: any) {
+function BoardScene({ geometry, selection, optimizedGeometry, onSelectionChange }: BoardSceneProps) {
   return (
     <group>
       <mesh position={[40, -0.2, 30]} receiveShadow>
@@ -113,15 +146,16 @@ function BoardScene({ geometry, selection, optimizedGeometry }: any) {
       {/* Dark Grid for "Scanner" feel */}
       <gridHelper args={[200, 40, "#222", "#111"]} position={[40, -0.41, 30]} />
 
-      {geometry?.footprints.map((fp: any) => (
+      {geometry?.footprints.map((fp) => (
         <ChipMesh 
           key={fp.ref} 
           fp={fp} 
           selected={selection.footprintRef === fp.ref} 
+          onSelect={onSelectionChange}
         />
       ))}
 
-      {optimizedGeometry && optimizedGeometry.footprints.map((fp: any) => (
+      {optimizedGeometry?.footprints.map((fp) => (
         <ChipMesh 
           key={`ghost-${fp.ref}`} 
           fp={fp} 
@@ -139,14 +173,18 @@ function BoardScene({ geometry, selection, optimizedGeometry }: any) {
   );
 }
 
-export function PcbViewport(props: any) {
+export function PcbViewport({ selection, onSelectionChange, ...props }: PcbViewportProps) {
   return (
     <div className="h-full w-full bg-[#050505] relative overflow-hidden">
       {/* Background Gradient for "Deep Space" feel */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#050505] to-[#0a0a10] pointer-events-none" />
       
-      <Canvas camera={{ position: [40, 80, 60], fov: 40 }} gl={{ antialias: true }}>
-        <BoardScene {...props} />
+      <Canvas
+        camera={{ position: [40, 80, 60], fov: 40 }}
+        gl={{ antialias: true }}
+        onPointerMissed={() => onSelectionChange?.({ footprintRef: null })}
+      >
+        <BoardScene {...props} selection={selection} onSelectionChange={onSelectionChange} />
         <OrbitControls makeDefault minPolarAngle={0} maxPolarAngle={Math.PI / 2.1} />
         <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
           <GizmoViewport axisColors={['#9d4b4b', '#2f7f4f', '#3b5b9d']} labelColor="white" />

@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, ctx: { params: Promise<{ filename: string }> }) {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || "http://localhost:5000";
+  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
 
   const { filename } = await ctx.params;
@@ -12,12 +12,20 @@ export async function GET(_req: Request, ctx: { params: Promise<{ filename: stri
 
   const url = `${apiBaseUrl}/api/v2/manufacture/download-gerber/${encodeURIComponent(filename)}`;
   const authHeaders: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
-  const res = await fetch(url, { method: "GET", headers: authHeaders });
-  const body = await res.arrayBuffer();
+  try {
+    const res = await fetch(url, { method: "GET", headers: authHeaders });
+    const body = await res.arrayBuffer();
 
-  const headers = new Headers();
-  headers.set("content-type", res.headers.get("content-type") || "application/zip");
-  headers.set("content-disposition", res.headers.get("content-disposition") || `attachment; filename=\"${filename}\"`);
+    const headers = new Headers();
+    headers.set("content-type", res.headers.get("content-type") || "application/zip");
+    headers.set("content-disposition", res.headers.get("content-disposition") || `attachment; filename=\"${filename}\"`);
 
-  return new NextResponse(body, { status: res.status, headers });
+    return new NextResponse(body, { status: res.status, headers });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    return NextResponse.json(
+      { error: `Could not reach ${url}. ${message}` },
+      { status: 502 },
+    );
+  }
 }

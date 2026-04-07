@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, CircuitBoard, Cpu, LoaderCircle, RefreshCcw, ShieldCheck, Sparkles, Wrench } from 'lucide-react';
+import { BookOpen, CircuitBoard, Cpu, Sparkles, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CopilotDock } from '@/components/copilot-dock';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
 type ComponentResponse = {
   total_components?: number;
@@ -56,7 +57,7 @@ function panelHeading(eyebrow: string, title: string) {
 export default function ComponentsPage() {
   usePageTitle('Component Intelligence | Circuit.AI');
   const { setFocusedComponent } = useStudioRuntime();
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [componentData, setComponentData] = useState<ComponentResponse | null>(null);
   const [educationData, setEducationData] = useState<EducationalResponse | null>(null);
   const [repairData, setRepairData] = useState<RepairResponse | null>(null);
@@ -73,29 +74,45 @@ export default function ComponentsPage() {
 
       try {
         const [componentsRes, educationRes, repairRes] = await Promise.all([
-          fetch(`${apiBaseUrl}/components`, { cache: 'no-store' }),
-          fetch(`${apiBaseUrl}/educational`, { cache: 'no-store' }),
-          fetch(`${apiBaseUrl}/repair`, { cache: 'no-store' }),
+          fetch('/api/proxy/components', { cache: 'no-store' }),
+          fetch('/api/proxy/educational', { cache: 'no-store' }),
+          fetch('/api/proxy/repair', { cache: 'no-store' }),
         ]);
 
         const [componentsJson, educationJson, repairJson] = await Promise.all([
-          componentsRes.ok ? componentsRes.json() : Promise.resolve({}),
-          educationRes.ok ? educationRes.json() : Promise.resolve({}),
-          repairRes.ok ? repairRes.json() : Promise.resolve({}),
+          readJsonPayload<ComponentResponse | ProxyErrorPayload>(componentsRes),
+          readJsonPayload<EducationalResponse | ProxyErrorPayload>(educationRes),
+          readJsonPayload<RepairResponse | ProxyErrorPayload>(repairRes),
         ]);
 
         if (!active) return;
-        setComponentData(componentsJson);
-        setEducationData(educationJson);
-        setRepairData(repairJson);
+        const componentsUnavailable = isProxyFailure(componentsJson);
+        const educationUnavailable = isProxyFailure(educationJson);
+        const repairUnavailable = isProxyFailure(repairJson);
 
-        if (!componentsRes.ok && !educationRes.ok && !repairRes.ok) {
-          setErrorMessage(`Live component intelligence is unavailable at ${apiBaseUrl}. Fallback summary loaded.`);
+        setComponentData(componentsUnavailable ? null : componentsJson as ComponentResponse | null);
+        setEducationData(educationUnavailable ? null : educationJson as EducationalResponse | null);
+        setRepairData(repairUnavailable ? null : repairJson as RepairResponse | null);
+
+        const failedResponses = [componentsUnavailable, educationUnavailable, repairUnavailable].filter(Boolean).length;
+        if (failedResponses > 0) {
+          const detail = [
+            getProxyErrorMessage(componentsUnavailable ? componentsJson : null, ''),
+            getProxyErrorMessage(educationUnavailable ? educationJson : null, ''),
+            getProxyErrorMessage(repairUnavailable ? repairJson : null, ''),
+          ].find(Boolean);
+
+          setErrorMessage(
+            detail || (
+              failedResponses === 3
+                ? `Live component intelligence is unavailable at ${backendTarget}. Fallback summary loaded.`
+                : `Some component feeds are unavailable at ${backendTarget}. Showing fallback content where needed.`
+            ),
+          );
         }
-      } catch (error) {
+      } catch {
         if (!active) return;
-        console.error('Failed to load component intelligence', error);
-        setErrorMessage(`Live component intelligence is unavailable at ${apiBaseUrl}. Fallback summary loaded.`);
+        setErrorMessage(`Live component intelligence is unavailable at ${backendTarget}. Fallback summary loaded.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -105,14 +122,14 @@ export default function ComponentsPage() {
     return () => {
       active = false;
     };
-  }, [apiBaseUrl]);
+  }, [backendTarget]);
 
   const componentTypes = useMemo(
     () => componentData?.component_types?.length ? componentData.component_types : fallbackTypes,
     [componentData],
   );
-  const educationalItems = educationData?.content || [];
-  const repairGuides = repairData?.guides || [];
+  const educationalItems = useMemo(() => educationData?.content || [], [educationData]);
+  const repairGuides = useMemo(() => repairData?.guides || [], [repairData]);
   const activeType = componentTypes.includes(selectedType || '') ? selectedType || componentTypes[0] : componentTypes[0];
   const relatedEducation = useMemo(
     () => educationalItems.filter((item) => !activeType || item.component_type === activeType),

@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
+import { forwardUiJsonResponse, proxyUiFailureResponse } from "../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function isFileLike(value: FormDataEntryValue | null): value is File {
+  return Boolean(
+    value
+    && typeof value === "object"
+    && "arrayBuffer" in value
+    && "name" in value
+    && typeof value.name === "string",
+  );
+}
+
 export async function POST(req: Request) {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || "http://localhost:5000";
+  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
 
   const inbound = await req.formData();
   const file = inbound.get("kicad_file");
   const hints = inbound.get("hints");
 
-  if (!(file instanceof File)) {
+  if (!isFileLike(file)) {
     return NextResponse.json({ error: "kicad_file required" }, { status: 400 });
   }
 
@@ -20,17 +31,15 @@ export async function POST(req: Request) {
   if (typeof hints === "string" && hints.trim()) outbound.set("hints", hints);
 
   const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
-  const res = await fetch(`${apiBaseUrl}/api/v2/workflow/validate-kicad`, {
-    method: "POST",
-    body: outbound,
-    headers,
-  });
-
-  const text = await res.text();
   try {
-    const json = JSON.parse(text);
-    return NextResponse.json(json, { status: res.status });
-  } catch {
-    return new NextResponse(text, { status: res.status, headers: { "content-type": "text/plain" } });
+    const res = await fetch(`${apiBaseUrl}/api/v2/workflow/validate-kicad`, {
+      method: "POST",
+      body: outbound,
+      headers,
+    });
+
+    return await forwardUiJsonResponse(res, `${apiBaseUrl}/api/v2/workflow/validate-kicad`);
+  } catch (error: unknown) {
+    return proxyUiFailureResponse(`${apiBaseUrl}/api/v2/workflow/validate-kicad`, error);
   }
 }

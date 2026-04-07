@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type StudioRuntimeState = {
   artifactName: string | null;
@@ -54,17 +54,54 @@ export function StudioRuntimeProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
+  const setRuntimeField = useCallback(
+    <K extends keyof StudioRuntimeState>(key: K, value: StudioRuntimeState[K]) => {
+      setState((current) => {
+        if (current[key] === value) return current;
+        return { ...current, [key]: value };
+      });
+    },
+    [],
+  );
+
+  const setArtifactName = useCallback(
+    (artifactName: string | null) => setRuntimeField('artifactName', artifactName),
+    [setRuntimeField],
+  );
+  const setAnalysisMode = useCallback(
+    (analysisMode: string | null) => setRuntimeField('analysisMode', analysisMode),
+    [setRuntimeField],
+  );
+  const setDetectionCount = useCallback(
+    (detectionCount: number | null) => setRuntimeField('detectionCount', detectionCount),
+    [setRuntimeField],
+  );
+  const setFocusedComponent = useCallback(
+    (focusedComponent: string | null) => setRuntimeField('focusedComponent', focusedComponent),
+    [setRuntimeField],
+  );
+  const setFocusedProject = useCallback(
+    (focusedProject: string | null) => setRuntimeField('focusedProject', focusedProject),
+    [setRuntimeField],
+  );
+  const resetRuntime = useCallback(() => {
+    setState((current) => {
+      const hasState = Object.values(current).some((value) => value !== null);
+      return hasState ? initialState : current;
+    });
+  }, []);
+
   const value = useMemo<StudioRuntimeContextValue>(
     () => ({
       state,
-      setArtifactName: (artifactName) => setState((current) => ({ ...current, artifactName })),
-      setAnalysisMode: (analysisMode) => setState((current) => ({ ...current, analysisMode })),
-      setDetectionCount: (detectionCount) => setState((current) => ({ ...current, detectionCount })),
-      setFocusedComponent: (focusedComponent) => setState((current) => ({ ...current, focusedComponent })),
-      setFocusedProject: (focusedProject) => setState((current) => ({ ...current, focusedProject })),
-      resetRuntime: () => setState(initialState),
+      setArtifactName,
+      setAnalysisMode,
+      setDetectionCount,
+      setFocusedComponent,
+      setFocusedProject,
+      resetRuntime,
     }),
-    [state],
+    [resetRuntime, setAnalysisMode, setArtifactName, setDetectionCount, setFocusedComponent, setFocusedProject, state],
   );
 
   return <StudioRuntimeContext.Provider value={value}>{children}</StudioRuntimeContext.Provider>;

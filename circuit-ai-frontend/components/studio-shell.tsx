@@ -11,7 +11,6 @@ import {
   Minus,
   PanelLeftClose,
   Search,
-  ScanLine,
   ScanSearch,
   SlidersHorizontal,
   Square,

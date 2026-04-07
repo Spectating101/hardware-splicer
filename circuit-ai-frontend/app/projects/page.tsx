@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CircuitBoard, Layers3, LoaderCircle, PackageCheck, Sparkles, Target, Wrench } from 'lucide-react';
+import { ArrowRight, CircuitBoard, Layers3, LoaderCircle, PackageCheck, Target, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CopilotDock } from '@/components/copilot-dock';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
 type ProjectItem = {
   id?: string;
@@ -59,7 +60,7 @@ function panelHeading(eyebrow: string, title: string) {
 export default function ProjectsPage() {
   usePageTitle('Project Orchestration | Circuit.AI');
   const { setFocusedProject } = useStudioRuntime();
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,19 +74,24 @@ export default function ProjectsPage() {
       setErrorMessage(null);
 
       try {
-        const response = await fetch(`${apiBaseUrl}/projects`, { cache: 'no-store' });
-        const payload = response.ok ? await response.json() : {};
+        const response = await fetch('/api/proxy/projects', { cache: 'no-store' });
+        const payload = await readJsonPayload<ProjectResponse | ProxyErrorPayload>(response);
+        const unavailable = isProxyFailure(payload);
 
         if (!active) return;
-        setProjectData(payload);
+        setProjectData(unavailable ? null : payload as ProjectResponse | null);
 
-        if (!response.ok) {
-          setErrorMessage(`Live project templates are unavailable at ${apiBaseUrl}/projects. Curated fallback set loaded.`);
+        if (unavailable) {
+          setErrorMessage(
+            getProxyErrorMessage(
+              payload,
+              `Live project templates are unavailable at ${backendTarget}/projects. Curated fallback set loaded.`,
+            ),
+          );
         }
-      } catch (error) {
+      } catch {
         if (!active) return;
-        console.error('Failed to load project templates', error);
-        setErrorMessage(`Live project templates are unavailable at ${apiBaseUrl}/projects. Curated fallback set loaded.`);
+        setErrorMessage(`Live project templates are unavailable at ${backendTarget}/projects. Curated fallback set loaded.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -95,7 +101,7 @@ export default function ProjectsPage() {
     return () => {
       active = false;
     };
-  }, [apiBaseUrl]);
+  }, [backendTarget]);
 
   const projects = useMemo(
     () => projectData?.projects?.length ? projectData.projects : fallbackProjects,
@@ -226,7 +232,7 @@ export default function ProjectsPage() {
                         <div className="rounded-full bg-[#081423] px-2.5 py-1 text-[11px] text-slate-400">{lane.items.length}</div>
                       </div>
                       <div className="space-y-3">
-                        {lane.items.map((project, index) => {
+                        {lane.items.map((project) => {
                           const key = projectKey(project, projects.indexOf(project));
                           return (
                             <button

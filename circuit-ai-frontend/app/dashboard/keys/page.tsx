@@ -151,7 +151,7 @@ export default function APIKeysPage() {
                   <Input
                     value={newKeyName}
                     onChange={(event) => setNewKeyName(event.target.value)}
-                    placeholder="Example: playground, operator-demo, production-ingest"
+                    placeholder="Example: playground, operator-demo, production-ingest…"
                     className="rounded-2xl border-slate-200 bg-white"
                   />
                   <Button onClick={createKey} className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
@@ -204,10 +204,10 @@ export default function APIKeysPage() {
                           value={visibleKeys[apiKey.id] ? apiKey.key : maskKey(apiKey.key)}
                           className="rounded-2xl border-slate-200 bg-white font-mono text-sm"
                         />
-                        <Button variant="outline" size="sm" onClick={() => toggleVisibility(apiKey.id)}>
+                        <Button aria-label={visibleKeys[apiKey.id] ? "Hide API key" : "Show API key"} variant="outline" size="sm" onClick={() => toggleVisibility(apiKey.id)}>
                           {visibleKeys[apiKey.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => copyKey(apiKey.key, apiKey.id)}>
+                        <Button aria-label="Copy API key" variant="outline" size="sm" onClick={() => copyKey(apiKey.key, apiKey.id)}>
                           {copiedKey === apiKey.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                         </Button>
                       </div>

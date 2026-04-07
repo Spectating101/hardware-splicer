@@ -180,8 +180,8 @@ export function CopilotDock({
         <textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Tell the agent what to change in the current board..."
-          className="min-h-[96px] w-full resize-none rounded-[1rem] border border-white/10 bg-[#06101d] px-3 py-3 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-500 focus:border-cyan-300/30"
+          placeholder="Tell the agent what to change in the current board…"
+          className="min-h-[96px] w-full resize-none rounded-[1rem] border border-white/10 bg-[#06101d] px-3 py-3 text-sm text-slate-100 transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35 focus:border-cyan-300/30"
         />
         <div className="mt-3 flex items-center justify-between gap-2">
           <div className="text-xs text-slate-500">Agent output should reshape the canvas first. Manual tools are fallback.</div>

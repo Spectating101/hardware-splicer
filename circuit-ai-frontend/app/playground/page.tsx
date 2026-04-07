@@ -10,13 +10,32 @@ import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
 import { PageIntro } from '@/components/page-intro';
 import { usePageTitle } from '@/components/use-page-title';
+import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
+
+type AnalyzeResult = {
+  components?: unknown;
+  total_value?: unknown;
+} & Record<string, unknown>;
+
+function asAnalyzeResult(value: unknown): AnalyzeResult | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as AnalyzeResult : null;
+}
+
+function componentCount(result: AnalyzeResult | null) {
+  return Array.isArray(result?.components) ? result.components.length : 0;
+}
+
+function totalValue(result: AnalyzeResult | null) {
+  const value = result?.total_value;
+  return typeof value === 'number' || typeof value === 'string' ? String(value) : '0.00';
+}
 
 export default function PlaygroundPage() {
   usePageTitle('Playground | Circuit.AI');
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalyzeResult | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -41,23 +60,30 @@ export default function PlaygroundPage() {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch(`${apiBaseUrl}/analyze`, {
+      const response = await fetch('/api/proxy/analyze', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
         },
         body: formData,
       });
+      const payload = await readJsonPayload<AnalyzeResult | ProxyErrorPayload>(response);
 
-      if (!response.ok) {
-        throw new Error(`Analysis request failed (${response.status})`);
+      if (isProxyFailure(payload)) {
+        setAnalysisResult(null);
+        setErrorMessage(
+          getProxyErrorMessage(
+            payload,
+            `Could not reach ${backendTarget}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`,
+          ),
+        );
+        return;
       }
 
-      const result = await response.json();
-      setAnalysisResult(result);
-    } catch (error) {
-      console.error('Analysis failed:', error);
-      setErrorMessage(`Could not reach ${apiBaseUrl}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`);
+      setAnalysisResult(asAnalyzeResult(payload));
+    } catch {
+      setAnalysisResult(null);
+      setErrorMessage(`Could not reach ${backendTarget}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -70,11 +96,11 @@ export default function PlaygroundPage() {
   };
 
   const curlCommand = selectedFile
-    ? `curl -X POST "${apiBaseUrl}/analyze" \\
+    ? `curl -X POST "${backendTarget}/analyze" \\
   -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\
   -H "Content-Type: multipart/form-data" \\
   -F "file=@${selectedFile.name}"`
-    : `curl -X POST "${apiBaseUrl}/analyze" \\
+    : `curl -X POST "${backendTarget}/analyze" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: multipart/form-data" \\
   -F "file=@pcb_image.jpg"`;
@@ -118,7 +144,7 @@ for component in result.components:
               <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Execution notes</div>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-slate-900">Backend target</div>
-                <code className="mt-2 block rounded-xl bg-white px-3 py-2 text-xs text-slate-700">{apiBaseUrl}</code>
+                <code className="mt-2 block rounded-xl bg-white px-3 py-2 text-xs text-slate-700">{backendTarget}</code>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                 If this backend is not reachable, the page should fail clearly instead of implying the analysis stack is fully live.
@@ -145,7 +171,7 @@ for component in result.components:
                         type="password"
                         value={apiKey}
                         onChange={(event) => setApiKey(event.target.value)}
-                        placeholder="Paste a Circuit.AI key"
+                        placeholder="Paste a Circuit.AI key…"
                         className="rounded-2xl border-slate-200 bg-white"
                       />
                     </div>
@@ -162,7 +188,11 @@ for component in result.components:
                           {selectedFile ? selectedFile.name : 'Upload PCB image'}
                         </div>
                         <div className="mt-1 text-sm text-slate-500">
-                          {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB selected` : 'PNG, JPG, JPEG up to 10MB'}
+                          {selectedFile
+                            ? selectedFile.size < 1024 * 1024
+                              ? `${Math.max(1, Math.round(selectedFile.size / 1024))} KB selected`
+                              : `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB selected`
+                            : 'PNG, JPG, JPEG up to 10 MB'}
                         </div>
                       </button>
                       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
@@ -175,7 +205,7 @@ for component in result.components:
                     className="w-full rounded-full bg-slate-900 text-white hover:bg-slate-800"
                   >
                     <PlayCircle className="mr-2 h-4 w-4" />
-                    {isAnalyzing ? 'Running analysis...' : 'Run analysis'}
+                    {isAnalyzing ? 'Running analysis…' : 'Run analysis'}
                   </Button>
 
                   {errorMessage ? (
@@ -190,11 +220,11 @@ for component in result.components:
                       <div className="mt-4 grid gap-4 sm:grid-cols-2">
                         <div className="rounded-2xl bg-white p-4">
                           <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Components</div>
-                          <div className="mt-2 text-3xl font-semibold text-slate-950">{analysisResult.components?.length || 0}</div>
+                          <div className="mt-2 text-3xl font-semibold text-slate-950">{componentCount(analysisResult)}</div>
                         </div>
                         <div className="rounded-2xl bg-white p-4">
                           <div className="text-xs uppercase tracking-[0.16em] text-slate-500">Total value</div>
-                          <div className="mt-2 text-3xl font-semibold text-slate-950">${analysisResult.total_value || '0.00'}</div>
+                          <div className="mt-2 text-3xl font-semibold text-slate-950">${totalValue(analysisResult)}</div>
                         </div>
                       </div>
                     </div>

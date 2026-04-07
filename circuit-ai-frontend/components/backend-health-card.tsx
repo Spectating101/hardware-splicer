@@ -84,9 +84,9 @@ export function BackendHealthCard({ className = "" }: { className?: string }) {
         </CardTitle>
         <CardDescription className={tone.text}>{tone.label}</CardDescription>
       </CardHeader>
-      <CardContent className={`space-y-2 text-sm ${tone.text}`}>
+      <CardContent className={`space-y-2 text-sm ${tone.text}`} aria-live="polite">
         {health?.error ? <p>{health.error}</p> : null}
-        {health?.timestamp ? <p>Last check: {health.timestamp}</p> : null}
+        {health?.timestamp ? <p>Last check: {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(health.timestamp))}</p> : null}
         {!health?.error ? (
           <p className="flex items-center gap-2">
             <Server className="h-4 w-4" />

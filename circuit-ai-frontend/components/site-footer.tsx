@@ -6,6 +6,7 @@ const footerGroups = [
     title: "Navigate",
     items: [
       { href: "/", label: "Overview" },
+      { href: "/analyze", label: "Workbench" },
       { href: "/docs", label: "Docs" },
       { href: "/playground", label: "Playground" },
       { href: "/status", label: "Status" },
@@ -16,8 +17,8 @@ const footerGroups = [
     items: [
       { href: "/dashboard/keys", label: "API Keys" },
       { href: "/playground", label: "Validate Requests" },
-      { href: "/cad", label: "CAD Workspace" },
-      { href: "/projects", label: "Project Templates" },
+      { href: "/components", label: "Component Atlas" },
+      { href: "/projects", label: "Project Board" },
     ],
   },
 ];

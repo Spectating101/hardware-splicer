@@ -5,14 +5,11 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
-  Binary,
   Bot,
   Check,
-  CheckCircle2,
   CircuitBoard,
   Code,
   Copy,
-  Cpu,
   Factory,
   KeyRound,
   PackageCheck,
@@ -20,7 +17,6 @@ import {
   ShieldCheck,
   Sparkles,
   Terminal,
-  Workflow,
   Wrench,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -53,6 +49,12 @@ const capabilityLayers = [
 ];
 
 const productSurfaces = [
+  {
+    href: '/analyze',
+    title: 'Workbench',
+    copy: 'Open the shared studio shell and move from board inspection into component, project, and CAD views.',
+    accent: 'border-slate-900 bg-slate-900 text-white',
+  },
   {
     href: '/dashboard/keys',
     title: 'API keys',
@@ -159,15 +161,21 @@ export default function HomePage() {
                 className="mt-8 flex flex-wrap gap-3"
               >
                 <Button asChild size="lg" className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
-                  <Link href="/dashboard/keys">
-                    <KeyRound className="mr-2 h-5 w-5" />
-                    Start with API keys
+                  <Link href="/analyze">
+                    <CircuitBoard className="mr-2 h-5 w-5" />
+                    Open workbench
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="rounded-full border-slate-300 bg-white/80 text-slate-900 hover:bg-white">
                   <Link href="/playground">
                     <Terminal className="mr-2 h-5 w-5" />
-                    Run the playground
+                    Validate request
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="rounded-full border-slate-300 bg-white/80 text-slate-900 hover:bg-white">
+                  <Link href="/dashboard/keys">
+                    <KeyRound className="mr-2 h-5 w-5" />
+                    Issue API keys
                   </Link>
                 </Button>
               </motion.div>

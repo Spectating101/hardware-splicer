@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PcbGeometry, ValidateKiCadResponse, ValidationIssue } from "@/lib/cad-types";
 import { demoValidation } from "@/lib/cad-demo";
+import { isProxyFailure } from "@/lib/proxy-client";
 import { 
   createProject, 
   getActiveProjectId, 
@@ -19,22 +20,13 @@ import { TreePanel } from "@/components/cad/tree-panel";
 import { GlassPanel, FloatingToolbar } from "@/components/cad/spatial-ui";
 import { 
   Files, 
-  Search, 
-  Cpu, 
-  Settings, 
-  Terminal, 
   Zap,
   Printer,
-  Maximize2,
   Box,
   ChevronRight,
-  ChevronDown,
   Layers,
   Activity,
   Command,
-  Mic,
-  X,
-  Download
 } from "lucide-react";
 
 export default function CircuitAIWorkspace() {
@@ -54,19 +46,36 @@ export default function CircuitAIWorkspace() {
   const [fabMode, setFabMode] = useState<"robot" | "manual">("manual");
   const [selectedRef, setSelectedRef] = useState<string | null>(null);
   const [showPanels, setShowPanels] = useState(true);
-  const [explodeFactor, setExplodeFactor] = useState(0);
+  const [explodeFactor] = useState(0);
+
+  const activateProject = useCallback((project: CadProject, nextProjects?: CadProject[]) => {
+    const openedProject = touchProject(project);
+    setProjects((currentProjects) => {
+      const persistedProjects = upsertProject(nextProjects ?? currentProjects, openedProject);
+      saveProjects(persistedProjects);
+      return persistedProjects;
+    });
+    setActiveProject(openedProject);
+    setActiveProjectId(openedProject.id);
+    setShowStart(false);
+    return openedProject;
+  }, []);
 
   // --- EFFECT: Load Projects ---
   useEffect(() => {
     const ps = loadProjects();
-    setProjects(ps);
     const activeId = getActiveProjectId();
     const p = (activeId && ps.find((x) => x.id === activeId)) || ps[0] || null;
     if (p) {
-      setActiveProject(touchProject(p));
-      setShowStart(false);
+      activateProject(p, ps);
+      return;
     }
-  }, []);
+    setProjects(ps);
+  }, [activateProject]);
+
+  type SelectionState = {
+    footprintRef: string | null;
+  };
 
   // --- HANDLERS: Logic ---
   const handleValidate = async () => {
@@ -78,11 +87,25 @@ export default function CircuitAIWorkspace() {
       fd.set("kicad_file", file, file.name);
       // Calls the PROXY route (secure)
       const res = await fetch("/api/proxy/validate-kicad", { method: "POST", body: fd });
-      const json = await res.json();
-      setGeometry(json.pcb_geometry);
-      setIssues(json.validation?.issues || []);
+      const json = await res.json() as ValidateKiCadResponse | { error?: string; ok?: boolean };
+      if (isProxyFailure(json)) {
+        throw new Error(json.error || "Validation failed.");
+      }
+      const payload = json as ValidateKiCadResponse;
+      setGeometry(payload.pcb_geometry ?? null);
+      setIssues(payload.validation.issues || []);
       setStatus("done");
-    } catch (e) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Validation request failed.";
+      setGeometry(null);
+      setIssues([
+        {
+          severity: "error",
+          component: file.name,
+          issue: "Validation request failed",
+          solution: message,
+        },
+      ]);
       setStatus("error");
     } finally {
       setBusy(false);
@@ -90,20 +113,19 @@ export default function CircuitAIWorkspace() {
   };
 
   const handleLoadDemo = () => {
+    const demoProject = activeProject ?? createProject("Intelligence Demo", { type: "demo" });
+    const nextProjects = activeProject ? projects : upsertProject(projects, demoProject);
+    activateProject(demoProject, nextProjects);
     const res = demoValidation;
     setGeometry(res.pcb_geometry ?? null);
     setIssues(res.validation.issues);
-    setShowStart(false);
+    setStatus("ready");
   };
 
   const startNewProject = (name: string) => {
     const p = createProject(name);
     const next = upsertProject(projects, p);
-    saveProjects(next);
-    setProjects(next);
-    setActiveProject(p);
-    setActiveProjectId(p.id);
-    setShowStart(false);
+    activateProject(p, next);
   };
 
   // --- RENDER: Startup ---
@@ -137,7 +159,7 @@ export default function CircuitAIWorkspace() {
           geometry={geometry} 
           issues={issues}
           selection={{ footprintRef: selectedRef }}
-          onSelectionChange={(s: any) => setSelectedRef(s.footprintRef)}
+          onSelectionChange={({ footprintRef }: SelectionState) => setSelectedRef(footprintRef)}
           explodeFactor={explodeFactor}
         />
       </div>
@@ -148,8 +170,9 @@ export default function CircuitAIWorkspace() {
           <Command size={18} className="text-white/40" />
           <input 
             type="text" 
-            placeholder="Ask AI to analyze, route, or repair..." 
-            className="bg-transparent border-none outline-none text-sm text-white w-full placeholder-white/30"
+            aria-label="AI command bar"
+            placeholder="Ask AI to analyze, route, or repair…"
+            className="w-full bg-transparent border-none text-sm text-white placeholder-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/50"
           />
           <input 
              type="file" 
@@ -158,7 +181,7 @@ export default function CircuitAIWorkspace() {
              onChange={(e) => setFile(e.target.files?.[0] || null)} 
           />
           <button onClick={handleValidate} disabled={busy} className="bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-500 disabled:opacity-50">
-            {busy ? "Thinking..." : "Validate"}
+            {busy ? "Thinking…" : "Validate"}
           </button>
         </div>
       </div>
@@ -209,7 +232,7 @@ export default function CircuitAIWorkspace() {
                   <button className="w-full py-2 bg-white/5 border border-white/10 rounded text-xs">Download Datasheet</button>
                </div>
              ) : (
-               <IssuesPanel issues={issues} onFocusComponent={(c: any) => setSelectedRef(c)} />
+               <IssuesPanel issues={issues} onFocusComponent={(component) => setSelectedRef(component)} />
              )}
           </GlassPanel>
         </>
@@ -224,12 +247,12 @@ export default function CircuitAIWorkspace() {
           </div>
         )}
         <FloatingToolbar>
-           <button onClick={() => setShowPanels(!showPanels)} className={`p-2 rounded-full ${showPanels ? "bg-white text-black" : "text-white/40"}`}><Files size={20}/></button>
+           <button aria-label={showPanels ? "Hide panels" : "Show panels"} onClick={() => setShowPanels(!showPanels)} className={`p-2 rounded-full ${showPanels ? "bg-white text-black" : "text-white/40"}`}><Files size={20}/></button>
            <div className="w-px h-6 bg-white/10" />
-           <button onClick={() => setActiveView("design")} className={`p-2 rounded-full ${activeView === "design" ? "bg-blue-600 text-white" : "text-white/40"}`}><Layers size={20}/></button>
-           <button onClick={() => setActiveView("fab")} className={`p-2 rounded-full ${activeView === "fab" ? "bg-orange-600 text-white" : "text-white/40"}`}><Printer size={20}/></button>
+           <button aria-label="Switch to design view" onClick={() => setActiveView("design")} className={`p-2 rounded-full ${activeView === "design" ? "bg-blue-600 text-white" : "text-white/40"}`}><Layers size={20}/></button>
+           <button aria-label="Switch to fabrication view" onClick={() => setActiveView("fab")} className={`p-2 rounded-full ${activeView === "fab" ? "bg-orange-600 text-white" : "text-white/40"}`}><Printer size={20}/></button>
            <div className="w-px h-6 bg-white/10" />
-           <button className="p-2 rounded-full text-white/40"><Activity size={20}/></button>
+           <button aria-label="Open activity panel" className="p-2 rounded-full text-white/40"><Activity size={20}/></button>
         </FloatingToolbar>
       </div>
 

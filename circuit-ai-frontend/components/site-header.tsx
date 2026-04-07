@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/", label: "Overview" },
+  { href: "/analyze", label: "Workbench" },
   { href: "/docs", label: "Docs" },
   { href: "/playground", label: "Playground" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/status", label: "Status" },
 ];
 
@@ -56,7 +56,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-3 lg:flex">
           <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600">
-            API + CAD + Ops
+            Workbench + Trust + Ops
           </div>
           <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
             <Link href="/dashboard/keys">

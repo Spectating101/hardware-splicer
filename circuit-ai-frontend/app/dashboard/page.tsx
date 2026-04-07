@@ -40,9 +40,9 @@ const commandCards = [
     icon: ShieldCheck,
   },
   {
-    href: "/cad",
-    title: "CAD workspace",
-    copy: "Move into the heavier engineering surface when image-level analysis is no longer enough.",
+    href: "/analyze",
+    title: "Workbench",
+    copy: "Move into the shared studio shell when image-level analysis needs downstream component, project, and CAD context.",
     icon: CircuitBoard,
   },
 ];

@@ -1,17 +1,14 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
-  Brain,
   CheckCircle2,
-  CircuitBoard,
   FileImage,
-  KeyRound,
   LoaderCircle,
   PlayCircle,
   Settings2,
-  Sparkles,
   Terminal,
   Upload,
   Workflow,
@@ -22,8 +19,11 @@ import { CopilotDock } from '@/components/copilot-dock';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
-type AnalyzeResult = Record<string, any> | null;
+type AnalyzeRecord = Record<string, unknown>;
+type AnalyzeResult = AnalyzeRecord | null;
+type DetectionRecord = Record<string, unknown>;
 
 const navItems = [
   { href: '/', label: 'Overview' },
@@ -39,21 +39,31 @@ const backendOptions = [
   { value: 'yolo', label: 'YOLO' },
 ];
 
+function asRecord(value: unknown): AnalyzeRecord | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as AnalyzeRecord : null;
+}
+
+function asRecordArray(value: unknown): DetectionRecord[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is DetectionRecord => typeof item === 'object' && item !== null && !Array.isArray(item));
+}
+
 function metricValue(result: AnalyzeResult, keys: string[], fallback = 'N/A') {
-  if (!result) return fallback;
+  const resultRecord = asRecord(result);
+  if (!resultRecord) return fallback;
 
   const candidates = [
-    result,
-    result.summary,
-    result.metadata,
-    result.results,
-    result.analysis_summary,
-    result.detection_summary,
-  ].filter(Boolean);
+    resultRecord,
+    asRecord(resultRecord.summary),
+    asRecord(resultRecord.metadata),
+    asRecord(resultRecord.results),
+    asRecord(resultRecord.analysis_summary),
+    asRecord(resultRecord.detection_summary),
+  ].filter((candidate): candidate is AnalyzeRecord => candidate !== null);
 
   for (const candidate of candidates) {
     for (const key of keys) {
-      const value = candidate?.[key];
+      const value = candidate[key];
       if (value !== undefined && value !== null && value !== '') return String(value);
     }
   }
@@ -62,14 +72,17 @@ function metricValue(result: AnalyzeResult, keys: string[], fallback = 'N/A') {
 }
 
 function detectionList(result: AnalyzeResult) {
-  if (!result) return [];
-  return (
-    result.detections ||
-    result.components ||
-    result.results?.detections ||
-    result.results?.components ||
-    []
-  ) as Array<Record<string, any>>;
+  const resultRecord = asRecord(result);
+  if (!resultRecord) return [];
+  const resultSummary = asRecord(resultRecord.results);
+  const candidates = [
+    asRecordArray(resultRecord.detections),
+    asRecordArray(resultRecord.components),
+    asRecordArray(resultSummary?.detections),
+    asRecordArray(resultSummary?.components),
+  ];
+
+  return candidates.find((candidate) => candidate.length > 0) || [];
 }
 
 function panelTitle(eyebrow: string, title: string) {
@@ -81,11 +94,35 @@ function panelTitle(eyebrow: string, title: string) {
   );
 }
 
+function fileSizeLabel(file: File | null) {
+  if (!file) return 'PNG, JPG, JPEG';
+  return file.size < 1024 * 1024
+    ? `${Math.max(1, Math.round(file.size / 1024))} KB`
+    : `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function firstTextValue(item: DetectionRecord, keys: string[], fallback: string) {
+  for (const key of keys) {
+    const value = item[key];
+    if (typeof value === 'string' && value.trim()) return value;
+    if (typeof value === 'number') return String(value);
+  }
+
+  return fallback;
+}
+
+function confidenceLabel(item: DetectionRecord) {
+  const value = item.confidence;
+  if (typeof value === 'number') return `${Math.round(value * 100)}%`;
+  if (typeof value === 'string' && value.trim()) return value;
+  return 'Detected';
+}
+
 export default function AnalyzePage() {
   usePageTitle('Analyze Workspace | Circuit.AI');
   const { setArtifactName, setAnalysisMode, setDetectionCount } = useStudioRuntime();
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [apiKey, setApiKey] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -141,21 +178,28 @@ export default function AnalyzePage() {
     setErrorMessage(null);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/analyze`, {
+      const response = await fetch('/api/proxy/analyze', {
         method: 'POST',
         headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : undefined,
         body: formData,
       });
+      const payload = await readJsonPayload<AnalyzeRecord | ProxyErrorPayload>(response);
 
-      if (!response.ok) {
-        throw new Error(`Analysis request failed (${response.status})`);
+      if (isProxyFailure(payload)) {
+        setResult(null);
+        setErrorMessage(
+          getProxyErrorMessage(
+            payload,
+            `Could not complete analysis against ${backendTarget}/analyze. Confirm the target is reachable and try again.`,
+          ),
+        );
+        return;
       }
 
-      const payload = await response.json();
-      setResult(payload);
-    } catch (error) {
-      console.error('Analyze route request failed', error);
-      setErrorMessage(`Could not complete analysis against ${apiBaseUrl}/analyze. Confirm the target is reachable and try again.`);
+      setResult(asRecord(payload));
+    } catch {
+      setResult(null);
+      setErrorMessage(`Could not complete analysis against ${backendTarget}/analyze. Confirm the target is reachable and try again.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -196,7 +240,7 @@ export default function AnalyzePage() {
                   type="password"
                   value={apiKey}
                   onChange={(event) => setApiKey(event.target.value)}
-                  placeholder="Paste key if required"
+                  placeholder="Paste key if required…"
                   className="editor-input h-auto border-0 px-4 py-3"
                 />
               </div>
@@ -211,7 +255,7 @@ export default function AnalyzePage() {
                   <Upload className="mb-3 h-7 w-7 text-cyan-200" />
                   <div className="text-sm font-medium text-white">{selectedFile ? selectedFile.name : 'Load board image'}</div>
                   <div className="mt-1 text-xs text-slate-400">
-                    {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'PNG, JPG, JPEG'}
+                    {fileSizeLabel(selectedFile)}
                   </div>
                 </button>
                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
@@ -255,7 +299,7 @@ export default function AnalyzePage() {
             className="editor-button-primary w-full rounded-full"
           >
             {isAnalyzing ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
-            {isAnalyzing ? 'Running analysis' : 'Run analysis'}
+            {isAnalyzing ? 'Running analysis…' : 'Run analysis'}
           </Button>
 
           <div className="rounded-[1.5rem] border border-white/8 bg-[#08111f] p-4 text-sm leading-6 text-slate-300">
@@ -325,9 +369,12 @@ export default function AnalyzePage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.08),transparent_44%)]" />
                 {previewUrl ? (
                   <div className="relative flex max-h-full max-w-full items-center justify-center">
-                    <img
+                    <Image
                       src={previewUrl}
                       alt="PCB preview"
+                      width={1200}
+                      height={900}
+                      unoptimized
                       className="max-h-[72vh] max-w-full rounded-[1.15rem] border border-white/12 object-contain shadow-[0_25px_60px_rgba(2,6,23,0.5)]"
                     />
                     <div className="pointer-events-none absolute left-[12%] top-[18%] rounded-full border border-cyan-300/30 bg-cyan-300/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
@@ -386,14 +433,14 @@ export default function AnalyzePage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="text-sm font-semibold text-white">
-                            {item.class_name || item.name || item.type || 'Detected component'}
+                            {firstTextValue(item, ['class_name', 'name', 'type'], 'Detected component')}
                           </div>
                           <p className="mt-2 text-sm leading-6 text-slate-400">
-                            {item.ocr_text || item.part_number || item.description || 'Structured detection ready for enrichment.'}
+                            {firstTextValue(item, ['ocr_text', 'part_number', 'description'], 'Structured detection ready for enrichment.')}
                           </p>
                         </div>
                         <div className="rounded-full border border-white/10 bg-[#07111f] px-3 py-1 text-xs text-slate-300">
-                          {item.confidence ? `${Math.round(Number(item.confidence) * 100)}%` : 'Detected'}
+                          {confidenceLabel(item)}
                         </div>
                       </div>
                     </div>
