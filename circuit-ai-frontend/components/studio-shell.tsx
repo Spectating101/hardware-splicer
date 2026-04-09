@@ -29,7 +29,9 @@ type StudioShellProps = {
   title: string;
   description: string;
   status?: string;
+  commandBar?: ReactNode;
   actions?: ReactNode;
+  defaultBottomOpen?: boolean;
   navItems: StudioNavItem[];
   activeHref: string;
   left: ReactNode;
@@ -43,7 +45,9 @@ export function StudioShell({
   title,
   description,
   status,
+  commandBar,
   actions,
+  defaultBottomOpen = false,
   navItems,
   activeHref,
   left,
@@ -52,7 +56,7 @@ export function StudioShell({
   bottom,
 }: StudioShellProps) {
   const { state } = useStudioRuntime();
-  const [bottomOpen, setBottomOpen] = useState(false);
+  const [bottomOpen, setBottomOpen] = useState(defaultBottomOpen);
 
   const iconForHref = (href: string) => {
     if (href === '/') return House;
@@ -124,10 +128,16 @@ export function StudioShell({
                 ))}
               </div>
 
-              <div className="ml-auto hidden items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[11px] text-slate-400 xl:flex">
-                <Search className="h-3.5 w-3.5 text-slate-500" />
-                Search commands, routes, tools
-              </div>
+              {commandBar ? (
+                <div className="ml-auto hidden min-w-0 flex-1 items-center justify-end xl:flex">
+                  {commandBar}
+                </div>
+              ) : (
+                <div className="ml-auto hidden items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-3 py-1.5 text-[11px] text-slate-400 xl:flex">
+                  <Search className="h-3.5 w-3.5 text-slate-500" />
+                  Search commands, routes, tools
+                </div>
+              )}
 
               <div className="flex items-center gap-1.5 text-slate-500">
                 <button type="button" className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/6 hover:text-white" aria-label="Minimize">

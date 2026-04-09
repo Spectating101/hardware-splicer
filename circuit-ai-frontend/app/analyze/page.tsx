@@ -16,9 +16,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CopilotDock } from '@/components/copilot-dock';
+import { StudioCommandBar } from '@/components/studio-command-bar';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
 type AnalyzeRecord = Record<string, unknown>;
@@ -38,6 +40,17 @@ const backendOptions = [
   { value: 'classical', label: 'Classical' },
   { value: 'yolo', label: 'YOLO' },
 ];
+
+const stagePositions = [
+  { x: '16%', y: '18%' },
+  { x: '72%', y: '18%' },
+  { x: '16%', y: '66%' },
+  { x: '70%', y: '68%' },
+  { x: '42%', y: '12%' },
+  { x: '44%', y: '74%' },
+];
+
+const stageTones = ['cyan', 'amber', 'emerald', 'slate', 'cyan', 'amber'] as const;
 
 function asRecord(value: unknown): AnalyzeRecord | null {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as AnalyzeRecord : null;
@@ -148,6 +161,81 @@ export default function AnalyzePage() {
   }, [selectedFile, setArtifactName]);
 
   const detections = useMemo(() => detectionList(result), [result]);
+  const stageNodes = useMemo<WorkbenchCanvasNode[]>(() => {
+    if (detections.length) {
+      return detections.slice(0, stagePositions.length).map((item, index) => ({
+        id: `detection-${index}`,
+        title: firstTextValue(item, ['class_name', 'name', 'type'], 'Detected component'),
+        description: firstTextValue(item, ['ocr_text', 'part_number', 'description'], 'Structured detection ready for enrichment.'),
+        badge: confidenceLabel(item),
+        x: stagePositions[index]?.x || '50%',
+        y: stagePositions[index]?.y || '50%',
+        tone: stageTones[index % stageTones.length],
+      }));
+    }
+
+    if (selectedFile) {
+      return [
+        {
+          id: 'ocr-lane',
+          title: enableOcr ? 'OCR lane online' : 'OCR lane paused',
+          description: enableOcr ? 'Silkscreen and label extraction remain part of this run.' : 'This pass is image-first without text enrichment.',
+          badge: enableOcr ? 'active' : 'paused',
+          x: '16%',
+          y: '18%',
+          tone: 'cyan',
+        },
+        {
+          id: 'quality-gate',
+          title: enableQuality ? 'Quality gate armed' : 'Quality gate bypassed',
+          description: enableQuality ? 'Inspection will include defect and confidence scoring.' : 'The run skips quality scoring and focuses on raw recognition.',
+          badge: enableQuality ? 'armed' : 'bypass',
+          x: '72%',
+          y: '18%',
+          tone: 'amber',
+        },
+        {
+          id: 'engine',
+          title: `${backendOptions.find((option) => option.value === backend)?.label || backend} engine`,
+          description: 'The active inference path stays visible on the same stage instead of hiding inside a report.',
+          badge: 'engine',
+          x: '44%',
+          y: '74%',
+          tone: 'emerald',
+        },
+      ];
+    }
+
+    return [
+      {
+        id: 'intake',
+        title: 'Load board',
+        description: 'Mount a PCB image and keep it centered while the rest of the workspace updates around it.',
+        badge: '01',
+        x: '16%',
+        y: '18%',
+        tone: 'cyan',
+      },
+      {
+        id: 'inspect',
+        title: 'Inspect signals',
+        description: 'Agent-assisted inspection should stay spatial and board-first instead of turning into a document flow.',
+        badge: '02',
+        x: '72%',
+        y: '18%',
+        tone: 'amber',
+      },
+      {
+        id: 'route',
+        title: 'Branch downstream',
+        description: 'Detections should feed the parts atlas and project board without forcing a route reset.',
+        badge: '03',
+        x: '44%',
+        y: '74%',
+        tone: 'emerald',
+      },
+    ];
+  }, [backend, detections, enableOcr, enableQuality, selectedFile]);
 
   useEffect(() => {
     setAnalysisMode(backend);
@@ -211,6 +299,15 @@ export default function AnalyzePage() {
       title="Analyze a board inside a real studio layout."
       description="The board owns the center viewport, tooling stays docked, and detections stream into a bottom tray instead of turning into a report page."
       status={selectedFile ? `Active artifact: ${selectedFile.name}` : 'No artifact loaded'}
+      commandBar={(
+        <StudioCommandBar
+          modeLabel="Analyze"
+          objective="Keep the board fixed while the agent isolates suspect regions, part identities, and the strongest downstream branch."
+          context={selectedFile ? `Mounted artifact: ${selectedFile.name}` : 'No board loaded yet. Start by mounting a PCB image into the stage.'}
+          status={isAnalyzing ? 'agent running' : result ? 'stage updated' : 'agent primed'}
+          badges={['board-first', 'proxy-safe', 'route-aware']}
+        />
+      )}
       activeHref="/analyze"
       navItems={navItems}
       actions={
@@ -308,107 +405,59 @@ export default function AnalyzePage() {
         </div>
       }
       main={
-        <div className="grid h-full grid-rows-[44px_minmax(0,1fr)] bg-white/5">
-          <div className="flex items-center justify-between border-b border-white/8 bg-[#08111e] px-4">
-            <div className="flex items-center gap-2">
-              {['Viewport', 'Annotate', 'Compare'].map((item, index) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium ${index === 0 ? 'bg-cyan-300/15 text-cyan-100' : 'text-slate-400 hover:bg-white/6 hover:text-white'}`}
-                >
-                  {item}
-                </button>
-              ))}
+        <WorkbenchCanvas
+          toolbar={['Canvas', 'Signals', 'Review']}
+          activeToolbar="Canvas"
+          toolbarStatus={selectedFile ? (isAnalyzing ? 'Running analysis' : 'Viewport ready') : 'Awaiting board'}
+          stageLabel="Board canvas"
+          stageTitle="Inspect on one persistent stage."
+          stageSummary="The board remains fixed while detections, engine states, and next-route cues gather around it instead of replacing it."
+          badge={selectedFile ? 'Artifact mounted' : 'Awaiting board'}
+          metrics={[
+            { label: 'Detections', value: String(detections.length), tone: 'cyan' },
+            { label: 'Engine', value: metricValue(result, ['backend'], backend), tone: 'amber' },
+            { label: 'Confidence', value: metricValue(result, ['detection_quality', 'quality', 'confidence']), tone: 'emerald' },
+          ]}
+          notes={[
+            'Keep the viewport sacred. Detailed lists and raw traces belong in the tray and inspector, not in the center stage.',
+            'This route should hand off cleanly into parts and projects without making the user re-orient.',
+          ]}
+          actions={[
+            { href: '/components', label: 'Component atlas' },
+            { href: '/projects', label: 'Project board' },
+          ]}
+          nodes={stageNodes}
+        >
+          {previewUrl ? (
+            <div className="relative flex max-h-full max-w-full items-center justify-center">
+              <Image
+                src={previewUrl}
+                alt="PCB preview"
+                width={1200}
+                height={900}
+                unoptimized
+                className="max-h-[72vh] max-w-full rounded-[1.15rem] border border-white/12 object-contain shadow-[0_25px_60px_rgba(2,6,23,0.5)]"
+              />
             </div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-              stage locked to active artifact
-            </div>
-          </div>
-
-          <div className="min-h-0 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(8,145,178,0.16),transparent_24%),linear-gradient(180deg,#0b1323_0%,#0b1627_100%)] p-3">
-            <div className="relative flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#09111d] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-              <div className="pointer-events-none absolute right-4 top-16 z-10 hidden w-48 space-y-2 xl:block">
-                {[
-                  ['Detections', String(detections.length)],
-                  ['Engine', metricValue(result, ['backend'])],
-                  ['Confidence', metricValue(result, ['detection_quality', 'quality', 'confidence'])],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-[1rem] border border-white/10 bg-[#081423]/90 p-3 backdrop-blur">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">{label}</div>
-                    <div className="mt-2 text-lg font-semibold text-white">{value}</div>
-                  </div>
-                ))}
+          ) : (
+            <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.68),rgba(8,15,28,0.96))] text-center">
+              <div className="relative mb-8 flex h-36 w-56 items-center justify-center rounded-[1.4rem] border border-cyan-300/20 bg-cyan-300/5 shadow-[0_30px_60px_rgba(8,145,178,0.10)]">
+                <div className="absolute left-6 top-7 h-3 w-3 rounded-full bg-cyan-300" />
+                <div className="absolute right-8 top-10 h-3 w-3 rounded-full bg-orange-300" />
+                <div className="absolute left-10 bottom-9 h-3 w-3 rounded-full bg-emerald-300" />
+                <div className="absolute right-12 bottom-8 h-3 w-3 rounded-full bg-cyan-300" />
+                <div className="absolute left-12 top-9 h-px w-24 bg-cyan-300/40" />
+                <div className="absolute right-12 top-11 h-16 w-px bg-orange-300/35" />
+                <div className="absolute left-14 bottom-10 h-px w-28 bg-emerald-300/35" />
+                <FileImage className="h-12 w-12 text-cyan-200" />
               </div>
-
-              <div className="pointer-events-none absolute bottom-4 left-4 z-10 hidden max-w-sm rounded-[1rem] border border-white/10 bg-[#081423]/88 p-3 text-sm leading-6 text-slate-300 backdrop-blur xl:block">
-                Keep attention on the stage. Route jumps and detailed output belong in the side dock and lower console, not inside the viewport.
-              </div>
-
-              <div className="pointer-events-none absolute bottom-4 right-4 z-10 hidden items-center gap-2 xl:flex">
-                <Link href="/components" className="pointer-events-auto rounded-full border border-white/10 bg-[#081423]/88 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/10 hover:text-white">
-                  Component atlas
-                </Link>
-                <Link href="/projects" className="pointer-events-auto rounded-full border border-white/10 bg-[#081423]/88 px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/10 hover:text-white">
-                  Project board
-                </Link>
-              </div>
-
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Viewport</div>
-                  <div className="mt-1 text-sm font-semibold text-white">Board canvas</div>
-                </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-                  {selectedFile ? 'Artifact mounted' : 'Awaiting board'}
-                </div>
-              </div>
-
-              <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5">
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.026)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.026)_1px,transparent_1px)] bg-[size:44px_44px]" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.08),transparent_44%)]" />
-                {previewUrl ? (
-                  <div className="relative flex max-h-full max-w-full items-center justify-center">
-                    <Image
-                      src={previewUrl}
-                      alt="PCB preview"
-                      width={1200}
-                      height={900}
-                      unoptimized
-                      className="max-h-[72vh] max-w-full rounded-[1.15rem] border border-white/12 object-contain shadow-[0_25px_60px_rgba(2,6,23,0.5)]"
-                    />
-                    <div className="pointer-events-none absolute left-[12%] top-[18%] rounded-full border border-cyan-300/30 bg-cyan-300/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100">
-                      OCR lane
-                    </div>
-                    <div className="pointer-events-none absolute right-[14%] top-[32%] rounded-full border border-amber-300/30 bg-amber-300/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100">
-                      hot spot
-                    </div>
-                    <div className="pointer-events-none absolute bottom-[16%] left-[28%] rounded-full border border-emerald-300/30 bg-emerald-300/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100">
-                      salvage
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border border-dashed border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.68),rgba(8,15,28,0.96))] text-center">
-                    <div className="relative mb-8 flex h-36 w-56 items-center justify-center rounded-[1.4rem] border border-cyan-300/20 bg-cyan-300/5 shadow-[0_30px_60px_rgba(8,145,178,0.10)]">
-                      <div className="absolute left-6 top-7 h-3 w-3 rounded-full bg-cyan-300" />
-                      <div className="absolute right-8 top-10 h-3 w-3 rounded-full bg-orange-300" />
-                      <div className="absolute left-10 bottom-9 h-3 w-3 rounded-full bg-emerald-300" />
-                      <div className="absolute right-12 bottom-8 h-3 w-3 rounded-full bg-cyan-300" />
-                      <div className="absolute left-12 top-9 h-px w-24 bg-cyan-300/40" />
-                      <div className="absolute right-12 top-11 h-16 w-px bg-orange-300/35" />
-                      <div className="absolute left-14 bottom-10 h-px w-28 bg-emerald-300/35" />
-                      <FileImage className="h-12 w-12 text-cyan-200" />
-                    </div>
-                    <div className="relative text-base font-medium text-slate-100">Drop a board into the viewport</div>
-                    <div className="relative mt-2 max-w-md text-sm leading-6 text-slate-400">
-                      The active board stays centered while the side docks and console trays update around it.
-                    </div>
-                  </div>
-                )}
+              <div className="relative text-base font-medium text-slate-100">Drop a board into the viewport</div>
+              <div className="relative mt-2 max-w-md text-sm leading-6 text-slate-400">
+                The active board stays centered while the side docks and console trays update around it.
               </div>
             </div>
-          </div>
-        </div>
+          )}
+        </WorkbenchCanvas>
       }
       bottom={
         <div className="grid h-full grid-rows-[40px_minmax(0,1fr)]">

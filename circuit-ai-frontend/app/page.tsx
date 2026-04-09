@@ -56,10 +56,16 @@ const productSurfaces = [
     accent: 'border-slate-900 bg-slate-900 text-white',
   },
   {
+    href: '/cad',
+    title: 'Spatial CAD',
+    copy: 'Carry the same board into geometry, fit, repair, and fabrication context without leaving the workbench language.',
+    accent: 'border-cyan-200 bg-cyan-50 text-cyan-900',
+  },
+  {
     href: '/dashboard/keys',
     title: 'API keys',
     copy: 'Issue and manage credentials so the rest of the stack has a clean trust boundary.',
-    accent: 'border-cyan-200 bg-cyan-50 text-cyan-900',
+    accent: 'border-slate-200 bg-white text-slate-900',
   },
   {
     href: '/playground',
@@ -141,7 +147,7 @@ export default function HomePage() {
                 transition={{ duration: 0.55 }}
                 className="max-w-4xl text-5xl font-semibold tracking-tight text-slate-950 sm:text-6xl"
               >
-                One frontend for PCB inspection, validation, minting, and the path to fabrication.
+                One frontend for PCB inspection, routing, spatial execution, and the path to fabrication.
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 18 }}
@@ -240,7 +246,7 @@ export default function HomePage() {
                     Future-facing
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-300">
-                    The surface is ready to grow into CAD, repair orchestration, and operator-grade evidence review.
+                    The surface now extends into a spatial workbench instead of ending at analysis, and it is ready to keep deepening into repair orchestration and operator-grade evidence review.
                   </p>
                 </div>
               </div>

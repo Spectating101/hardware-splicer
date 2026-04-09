@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { BookOpen, CircuitBoard, Cpu, Sparkles, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CopilotDock } from '@/components/copilot-dock';
+import { StudioCommandBar } from '@/components/studio-command-bar';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
 type ComponentResponse = {
@@ -44,6 +46,16 @@ const navItems = [
 ];
 
 const fallbackTypes = ['ic_chip', 'capacitor', 'resistor', 'connector', 'transformer', 'diode'];
+const atlasPositions = [
+  { x: '16%', y: '18%' },
+  { x: '72%', y: '18%' },
+  { x: '16%', y: '66%' },
+  { x: '70%', y: '68%' },
+  { x: '44%', y: '12%' },
+  { x: '42%', y: '74%' },
+];
+
+const atlasTones = ['cyan', 'amber', 'emerald', 'slate', 'cyan', 'amber'] as const;
 
 function panelHeading(eyebrow: string, title: string) {
   return (
@@ -139,6 +151,22 @@ export default function ComponentsPage() {
     () => repairGuides.filter((guide) => !activeType || guide.component_type === activeType),
     [activeType, repairGuides],
   );
+  const stageNodes = useMemo<WorkbenchCanvasNode[]>(
+    () => componentTypes.slice(0, atlasPositions.length).map((type, index) => ({
+      id: type,
+      title: type.replaceAll('_', ' '),
+      description: type === activeType
+        ? 'Focused node. Use the inspector and lower tray for meaning, repair, and reuse decisions.'
+        : 'Selectable part family. Promote it to the active node to see overlays and repair context.',
+      badge: type === activeType ? 'focus' : `node ${index + 1}`,
+      x: atlasPositions[index]?.x || '50%',
+      y: atlasPositions[index]?.y || '50%',
+      tone: atlasTones[index % atlasTones.length],
+      active: type === activeType,
+      onClick: () => setSelectedType(type),
+    })),
+    [activeType, componentTypes],
+  );
 
   useEffect(() => {
     setFocusedComponent(activeType || null);
@@ -150,6 +178,15 @@ export default function ComponentsPage() {
       title="Browse component intelligence inside a component atlas."
       description="The center behaves like a selectable parts field, with focused context pushed into the side inspector and the lower tray."
       status={loading ? 'Refreshing part intelligence' : `${componentData?.total_components || componentTypes.length} component types indexed`}
+      commandBar={(
+        <StudioCommandBar
+          modeLabel="Components"
+          objective="Turn raw part families into usable hardware knowledge, repair guidance, and reusable modules without leaving the shared stage."
+          context={`Current focus: ${activeType.replaceAll('_', ' ')}.`}
+          status={loading ? 'syncing' : 'atlas primed'}
+          badges={['atlas-first', 'repair-aware', 'education-linked']}
+        />
+      )}
       activeHref="/components"
       navItems={navItems}
       actions={
@@ -201,89 +238,72 @@ export default function ComponentsPage() {
         </div>
       }
       main={
-        <div className="grid h-full grid-rows-[44px_minmax(0,1fr)] bg-white/5">
-          <div className="flex items-center justify-between border-b border-white/8 bg-[#08111e] px-4">
-            <div className="flex items-center gap-2">
-              {['Atlas', 'Clusters', 'Overlays'].map((item, index) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium ${index === 0 ? 'bg-cyan-300/15 text-cyan-100' : 'text-slate-400 hover:bg-white/6 hover:text-white'}`}
-                >
-                  {item}
-                </button>
+        <WorkbenchCanvas
+          toolbar={['Atlas', 'Clusters', 'Overlays']}
+          activeToolbar="Atlas"
+          toolbarStatus={loading ? 'Syncing' : 'Atlas ready'}
+          stageLabel="Component atlas"
+          stageTitle="Read parts as a spatial knowledge field."
+          stageSummary="Part families orbit the same board-centered workspace, while the active node expands into repair, education, and reuse context around it."
+          badge={activeType.replaceAll('_', ' ')}
+          metrics={[
+            { label: 'Tracked types', value: String(componentData?.total_components || componentTypes.length), tone: 'cyan' },
+            { label: 'Education', value: String(educationData?.total_content || educationalItems.length || 0), tone: 'amber' },
+            { label: 'Repair', value: String(repairData?.total_guides || repairGuides.length || 0), tone: 'emerald' },
+          ]}
+          notes={[
+            'Choose a node, then let the right dock explain it. The tray stays responsible for deeper repair and learning material.',
+            'The atlas should feel like a knowledge layer over the workbench, not a disconnected catalog page.',
+          ]}
+          actions={[
+            { href: '/analyze', label: 'Return to analyze' },
+            { href: '/projects', label: 'Project board' },
+          ]}
+          nodes={stageNodes}
+        >
+          <div className="w-full max-w-2xl rounded-[1.4rem] border border-white/12 bg-[linear-gradient(180deg,rgba(10,20,35,0.92),rgba(7,17,30,0.96))] p-6 shadow-[0_28px_70px_rgba(2,6,23,0.44)]">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-[1.4rem] border border-cyan-300/18 bg-cyan-300/10 text-cyan-100">
+                  <Cpu className="h-7 w-7" />
+                </div>
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Focused node</div>
+                  <div className="mt-2 text-2xl font-semibold text-white">{activeType.replaceAll('_', ' ')}</div>
+                  <div className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
+                    {relatedEducation[0]?.title || relatedRepair[0]?.issue || 'Use the side dock and lower tray to expand this component into repair and project context.'}
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
+                active selection
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Education hits</div>
+                <div className="mt-2 text-xl font-semibold text-white">{relatedEducation.length || educationalItems.length || 0}</div>
+              </div>
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Repair paths</div>
+                <div className="mt-2 text-xl font-semibold text-white">{relatedRepair.length || repairGuides.length || 0}</div>
+              </div>
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">State</div>
+                <div className="mt-2 text-xl font-semibold text-white">{loading ? 'Syncing' : 'Ready'}</div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {(relatedEducation.length ? relatedEducation : educationalItems.slice(0, 2)).slice(0, 3).map((item, index) => (
+                <div key={`${item.title || 'education-chip'}-${index}`} className="rounded-full border border-white/10 bg-[#081423] px-3 py-2 text-xs text-slate-300">
+                  {item.title || `${activeType.replaceAll('_', ' ')} reference`}
+                </div>
               ))}
             </div>
-            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {loading ? 'Syncing' : 'Atlas ready'}
-            </div>
           </div>
-
-          <div className="relative min-h-0 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.11),transparent_24%),linear-gradient(180deg,#0b1323_0%,#0b1627_100%)] p-3">
-            <div className="pointer-events-none absolute right-6 top-16 z-10 hidden rounded-[1rem] border border-white/10 bg-[#081423]/88 px-3 py-2 text-xs font-medium text-slate-300 backdrop-blur xl:block">
-              atlas scan active
-            </div>
-
-            <div className="pointer-events-none absolute bottom-4 right-4 z-10 hidden max-w-sm rounded-[1rem] border border-white/10 bg-[#081423]/88 p-3 text-sm leading-6 text-slate-300 backdrop-blur xl:block">
-              Focus one node at a time. The side dock holds the active summary and the lower tray holds deeper education and repair material.
-            </div>
-
-            <div className="grid h-full grid-rows-[76px_minmax(0,1fr)] overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#09111d]">
-              <div className="flex items-center justify-between border-b border-white/10 px-4">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Atlas field</div>
-                  <div className="mt-1 text-sm font-semibold text-white">Selectable component nodes</div>
-                </div>
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                  {activeType.replaceAll('_', ' ')}
-                </div>
-              </div>
-
-              <div className="min-h-0 overflow-y-auto p-5">
-                <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-                  {componentTypes.map((type, index) => {
-                    const active = type === activeType;
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={() => setSelectedType(type)}
-                        className={`group rounded-[1.35rem] border p-5 text-left transition-all ${
-                          active
-                            ? 'border-cyan-300/35 bg-[linear-gradient(180deg,#132344,#0d1a31)] shadow-[0_24px_44px_rgba(8,145,178,0.16)]'
-                            : 'border-white/10 bg-[linear-gradient(180deg,#0f1b35,#091423)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[linear-gradient(180deg,#122244,#0b1730)]'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${active ? 'border-cyan-300/30 bg-cyan-400/12 text-cyan-100' : 'border-white/10 bg-white/[0.04] text-cyan-200'}`}>
-                              <Cpu className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <div className="text-base font-semibold text-white">{type.replaceAll('_', ' ')}</div>
-                              <div className="mt-1 text-[11px] uppercase tracking-[0.22em] text-slate-500">node {index + 1}</div>
-                            </div>
-                          </div>
-                          <div className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${active ? 'bg-cyan-300/14 text-cyan-100' : 'bg-[#081423] text-slate-400'}`}>
-                            {active ? 'focused' : 'ready'}
-                          </div>
-                        </div>
-
-                        <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                          {['Overlay', 'Reference', 'Repair'].map((label) => (
-                            <div key={label} className="rounded-xl border border-white/8 bg-[#081423] px-3 py-2 text-xs font-medium text-slate-300">
-                              {label}
-                            </div>
-                          ))}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </WorkbenchCanvas>
       }
       bottom={
         <div className="grid h-full grid-rows-[40px_minmax(0,1fr)]">

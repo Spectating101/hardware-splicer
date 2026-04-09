@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { ArrowRight, CircuitBoard, Layers3, LoaderCircle, PackageCheck, Target, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CopilotDock } from '@/components/copilot-dock';
+import { StudioCommandBar } from '@/components/studio-command-bar';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
+import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
 
 type ProjectItem = {
@@ -43,6 +45,16 @@ const fallbackProjects: ProjectItem[] = [
   { id: 'audio_amplifier', name: 'Simple Audio Amplifier', difficulty: 'intermediate', category: 'repair', estimated_cost: 25, score: 0.84 },
   { id: 'power_supply', name: 'Variable Power Supply', difficulty: 'intermediate', category: 'fabrication', estimated_cost: 35, score: 0.8 },
 ];
+const routePositions = [
+  { x: '16%', y: '18%' },
+  { x: '72%', y: '18%' },
+  { x: '16%', y: '66%' },
+  { x: '70%', y: '68%' },
+  { x: '44%', y: '12%' },
+  { x: '42%', y: '74%' },
+];
+
+const routeTones = ['cyan', 'amber', 'emerald', 'slate', 'cyan', 'amber'] as const;
 
 function projectKey(project: ProjectItem, index: number) {
   return project.id || `${project.name || 'project'}-${index}`;
@@ -123,6 +135,25 @@ export default function ProjectsPage() {
     ],
     [projects],
   );
+  const stageNodes = useMemo<WorkbenchCanvasNode[]>(
+    () => projects.slice(0, routePositions.length).map((project, index) => {
+      const key = projectKey(project, index);
+      return {
+        id: key,
+        title: project.name || 'Unnamed project',
+        description: project.category
+          ? `${project.category} pathway${project.score !== undefined ? ` • ${Math.round(project.score * 100)}% suitability` : ''}`
+          : 'Selectable route candidate for the active board state.',
+        badge: project.difficulty || `route ${index + 1}`,
+        x: routePositions[index]?.x || '50%',
+        y: routePositions[index]?.y || '50%',
+        tone: routeTones[index % routeTones.length],
+        active: key === activeProjectKey,
+        onClick: () => setSelectedProjectId(key),
+      };
+    }),
+    [activeProjectKey, projects],
+  );
 
   useEffect(() => {
     setFocusedProject(activeProject?.name || null);
@@ -134,6 +165,15 @@ export default function ProjectsPage() {
       title="Plan downstream actions from a project board."
       description="Candidate paths live on a selectable planning board, while route context and deeper notes stay docked instead of pushing the screen vertical."
       status={loading ? 'Refreshing project board' : `${projectData?.total_projects || projects.length} project paths available`}
+      commandBar={(
+        <StudioCommandBar
+          modeLabel="Projects"
+          objective="Compare downstream routes on one decision stage and let the agent defend which path deserves fabrication or CAD time."
+          context={activeProject ? `Selected route: ${activeProject.name}.` : 'No route selected yet.'}
+          status={loading ? 'syncing' : 'decision ready'}
+          badges={['decision-first', 'cost-aware', 'cad-bound']}
+        />
+      )}
       activeHref="/projects"
       navItems={navItems}
       actions={
@@ -189,101 +229,77 @@ export default function ProjectsPage() {
         </div>
       }
       main={
-        <div className="grid h-full grid-rows-[44px_minmax(0,1fr)] bg-white/5">
-          <div className="flex items-center justify-between border-b border-white/8 bg-[#08111e] px-4">
-            <div className="flex items-center gap-2">
-              {['Board', 'Rank', 'Routes'].map((item, index) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium ${index === 0 ? 'bg-cyan-300/15 text-cyan-100' : 'text-slate-400 hover:bg-white/6 hover:text-white'}`}
-                >
-                  {item}
-                </button>
+        <WorkbenchCanvas
+          toolbar={['Board', 'Rank', 'Routes']}
+          activeToolbar="Board"
+          toolbarStatus={loading ? 'Syncing' : 'Board ready'}
+          stageLabel="Decision board"
+          stageTitle="Compare routes on the same workbench plane."
+          stageSummary="Candidate paths should orbit one shared board state so the user can compare cost, suitability, and next action without switching mental models."
+          badge={activeProject?.name || 'No route selected'}
+          metrics={[
+            { label: 'Routes', value: String(projectData?.total_projects || projects.length), tone: 'cyan' },
+            { label: 'Primary direction', value: activeProject?.category || 'Review', tone: 'amber' },
+            { label: 'Suitability', value: activeProject?.score !== undefined ? `${Math.round(activeProject.score * 100)}%` : 'N/A', tone: 'emerald' },
+          ]}
+          notes={[
+            'Keep candidate routes visible together. Selection should sharpen the decision, not send the user to a different page mode.',
+            'The tray owns metrics and next steps. The stage owns comparison and confidence.',
+          ]}
+          actions={[
+            { href: '/components', label: 'Component dock' },
+            { href: '/cad', label: 'CAD workspace' },
+          ]}
+          nodes={stageNodes}
+        >
+          <div className="w-full max-w-2xl rounded-[1.4rem] border border-white/12 bg-[linear-gradient(180deg,rgba(10,20,35,0.92),rgba(7,17,30,0.96))] p-6 shadow-[0_28px_70px_rgba(2,6,23,0.44)]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Selected route</div>
+                <div className="mt-2 text-2xl font-semibold text-white">{activeProject?.name || 'No project selected'}</div>
+                <div className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
+                  {activeProject?.category
+                    ? `${activeProject.category} pathway prepared for deeper justification, cost review, and CAD handoff.`
+                    : 'Pick a candidate route and the board will keep the comparison stable around it.'}
+                </div>
+              </div>
+              {activeProject?.difficulty ? (
+                <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
+                  {activeProject.difficulty}
+                </div>
+              ) : null}
+            </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Estimated cost</div>
+                <div className="mt-2 text-xl font-semibold text-white">
+                  {activeProject?.estimated_cost !== undefined ? `$${activeProject.estimated_cost}` : 'Pending'}
+                </div>
+              </div>
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Suitability</div>
+                <div className="mt-2 text-xl font-semibold text-white">
+                  {activeProject?.score !== undefined ? `${Math.round(activeProject.score * 100)}%` : 'N/A'}
+                </div>
+              </div>
+              <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Best next move</div>
+                <div className="mt-2 text-xl font-semibold text-white">
+                  {activeProject?.category === 'fabrication' ? 'Move to CAD' : 'Compare and refine'}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {projectLanes.map((lane) => (
+                <div key={lane.label} className="rounded-full border border-white/10 bg-[#081423] px-3 py-2 text-xs text-slate-300">
+                  {lane.label} • {lane.items.length}
+                </div>
               ))}
             </div>
-            <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-              {loading ? 'Syncing' : 'Board ready'}
-            </div>
           </div>
-
-          <div className="relative min-h-0 overflow-hidden bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.10),transparent_24%),linear-gradient(180deg,#0b1323_0%,#0b1627_100%)] p-3">
-            <div className="pointer-events-none absolute bottom-4 right-4 z-10 hidden max-w-sm rounded-[1rem] border border-white/10 bg-[#081423]/88 p-3 text-sm leading-6 text-slate-300 backdrop-blur xl:block">
-              Select one route, compare it against the others, then use the lower tray for metrics and next actions.
-            </div>
-
-            <div className="grid h-full grid-rows-[76px_minmax(0,1fr)] overflow-hidden rounded-[1.25rem] border border-white/10 bg-[#09111d]">
-              <div className="flex items-center justify-between border-b border-white/10 px-4">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Decision board</div>
-                  <div className="mt-1 text-sm font-semibold text-white">Candidate paths</div>
-                </div>
-                <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100">
-                  {activeProject?.name || 'No project selected'}
-                </div>
-              </div>
-
-              <div className="min-h-0 overflow-x-auto overflow-y-hidden p-4">
-                <div className="grid min-h-full min-w-[980px] gap-4 xl:grid-cols-3">
-                  {projectLanes.map((lane) => (
-                    <div key={lane.label} className="flex min-h-full flex-col rounded-[1.2rem] border border-white/10 bg-[linear-gradient(180deg,#0d1728,#09111f)] p-3">
-                      <div className="mb-3 flex items-center justify-between">
-                        <div className="text-sm font-semibold text-white">{lane.label}</div>
-                        <div className="rounded-full bg-[#081423] px-2.5 py-1 text-[11px] text-slate-400">{lane.items.length}</div>
-                      </div>
-                      <div className="space-y-3">
-                        {lane.items.map((project) => {
-                          const key = projectKey(project, projects.indexOf(project));
-                          return (
-                            <button
-                              key={key}
-                              type="button"
-                              onClick={() => setSelectedProjectId(key)}
-                              className={`w-full rounded-[1.15rem] border p-4 text-left transition-all ${
-                                key === activeProjectKey
-                                  ? 'border-cyan-300/35 bg-[linear-gradient(180deg,#132344,#0d1a31)] shadow-[0_24px_44px_rgba(8,145,178,0.16)]'
-                                  : 'border-white/10 bg-[linear-gradient(180deg,#0f1b35,#091423)] hover:-translate-y-0.5 hover:border-white/18 hover:bg-[linear-gradient(180deg,#122244,#0b1730)]'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <div className="text-base font-semibold text-white">{project.name || 'Unnamed project'}</div>
-                                  <div className="mt-1 text-sm text-slate-300">
-                                    {project.category ? `${project.category} pathway` : 'Planning pathway'}
-                                  </div>
-                                </div>
-                                {project.difficulty ? (
-                                  <div className={`rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.16em] ${key === activeProjectKey ? 'bg-cyan-300/14 text-cyan-100' : 'bg-[#081423] text-slate-400'}`}>
-                                    {project.difficulty}
-                                  </div>
-                                ) : null}
-                              </div>
-
-                              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                                <div className="rounded-[0.9rem] border border-white/8 bg-[#081423] p-3">
-                                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Cost</div>
-                                  <div className="mt-2 text-sm font-semibold text-white">
-                                    {project.estimated_cost !== undefined ? `$${project.estimated_cost}` : 'Pending'}
-                                  </div>
-                                </div>
-                                <div className="rounded-[0.9rem] border border-white/8 bg-[#081423] p-3">
-                                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Score</div>
-                                  <div className="mt-2 text-sm font-semibold text-white">
-                                    {project.score !== undefined ? `${Math.round(project.score * 100)}%` : 'N/A'}
-                                  </div>
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        </WorkbenchCanvas>
       }
       bottom={
         <div className="grid h-full grid-rows-[40px_minmax(0,1fr)]">
