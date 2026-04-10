@@ -16,12 +16,13 @@ type CopilotDockProps = {
   objective: string;
   status: string;
   messages: Array<{
-    role: 'agent' | 'user' | 'system';
+    role: 'agent' | 'assistant' | 'user' | 'system';
     body: string;
   }>;
   prompts: string[];
   links?: CopilotLink[];
   footer?: ReactNode;
+  onDispatch?: (draft: string) => void;
 };
 
 export function CopilotDock({
@@ -32,6 +33,7 @@ export function CopilotDock({
   prompts,
   links = [],
   footer,
+  onDispatch,
 }: CopilotDockProps) {
   const { state } = useStudioRuntime();
   const [draft, setDraft] = useState('');
@@ -43,7 +45,7 @@ export function CopilotDock({
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-200">{modeLabel}</div>
-            <div className="mt-1 text-base font-semibold text-white">Agent dock</div>
+            <div className="mt-1 text-base font-semibold text-white">Assistant dock</div>
           </div>
           <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-200">
             {status}
@@ -82,24 +84,28 @@ export function CopilotDock({
               Conversation
             </div>
             <div className="space-y-3">
-              {messages.map((message, index) => (
-                <div
-                  key={`${message.role}-${index}`}
-                  className={cn(
-                    'rounded-[1rem] border px-3 py-3 text-sm leading-6',
-                    message.role === 'agent' && 'border-cyan-300/14 bg-cyan-300/8 text-slate-100',
-                    message.role === 'user' && 'border-white/10 bg-[#0b1628] text-slate-300',
-                    message.role === 'system' && 'border-amber-300/14 bg-amber-300/8 text-amber-100',
-                  )}
-                >
-                  <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
-                    {message.role === 'agent' ? <Bot className="h-3.5 w-3.5 text-cyan-300" /> : null}
-                    {message.role === 'user' ? <CornerDownLeft className="h-3.5 w-3.5 text-slate-400" /> : null}
-                    {message.role}
+              {messages.map((message, index) => {
+                const isAssistantMessage = message.role === 'agent' || message.role === 'assistant';
+
+                return (
+                  <div
+                    key={`${message.role}-${index}`}
+                    className={cn(
+                      'rounded-[1rem] border px-3 py-3 text-sm leading-6',
+                      isAssistantMessage && 'border-cyan-300/14 bg-cyan-300/8 text-slate-100',
+                      message.role === 'user' && 'border-white/10 bg-[#0b1628] text-slate-300',
+                      message.role === 'system' && 'border-amber-300/14 bg-amber-300/8 text-amber-100',
+                    )}
+                  >
+                    <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
+                      {isAssistantMessage ? <Bot className="h-3.5 w-3.5 text-cyan-300" /> : null}
+                      {message.role === 'user' ? <CornerDownLeft className="h-3.5 w-3.5 text-slate-400" /> : null}
+                      {isAssistantMessage ? 'assistant' : message.role}
+                    </div>
+                    <div>{message.body}</div>
                   </div>
-                  <div>{message.body}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : null}
@@ -180,13 +186,20 @@ export function CopilotDock({
         <textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="Tell the agent what to change in the current board…"
+          placeholder={onDispatch ? 'Tell the assistant what to change in the current board…' : 'Prompt staging only. Wire an assistant endpoint to enable dispatch.'}
           className="min-h-[96px] w-full resize-none rounded-[1rem] border border-white/10 bg-[#06101d] px-3 py-3 text-sm text-slate-100 transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/35 focus:border-cyan-300/30"
         />
         <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="text-xs text-slate-500">Agent output should reshape the canvas first. Manual tools are fallback.</div>
-          <button type="button" className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-300/18">
-            Dispatch
+          <div className="text-xs text-slate-500">
+            {onDispatch ? 'Dispatch sends the staged prompt to the configured assistant endpoint.' : 'No hidden fake execution: this dock explains context until an assistant endpoint is connected.'}
+          </div>
+          <button
+            type="button"
+            disabled={!onDispatch || !draft.trim()}
+            onClick={() => onDispatch?.(draft)}
+            className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100 transition-colors hover:bg-cyan-300/18 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-500"
+          >
+            {onDispatch ? 'Dispatch' : 'Connect endpoint'}
           </button>
         </div>
       </div>

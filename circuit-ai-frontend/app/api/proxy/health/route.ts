@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
+import { getCircuitApiBaseUrl, getProxyAuthHeaders } from "../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
+  const apiBaseUrl = getCircuitApiBaseUrl();
   const target = `${apiBaseUrl}/api/health`;
   try {
-    const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+    const headers = getProxyAuthHeaders();
     const res = await fetch(target, { method: "GET", headers });
     const text = await res.text();
 

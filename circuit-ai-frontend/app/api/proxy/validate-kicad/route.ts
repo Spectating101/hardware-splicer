@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { forwardUiJsonResponse, proxyUiFailureResponse } from "../_backend";
+import { forwardUiJsonResponse, getCircuitApiBaseUrl, getProxyAuthHeaders, proxyUiFailureResponse } from "../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,8 +15,7 @@ function isFileLike(value: FormDataEntryValue | null): value is File {
 }
 
 export async function POST(req: Request) {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
+  const apiBaseUrl = getCircuitApiBaseUrl();
 
   const inbound = await req.formData();
   const file = inbound.get("kicad_file");
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
   outbound.set("kicad_file", file, file.name);
   if (typeof hints === "string" && hints.trim()) outbound.set("hints", hints);
 
-  const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const headers = getProxyAuthHeaders(req);
   try {
     const res = await fetch(`${apiBaseUrl}/api/v2/workflow/validate-kicad`, {
       method: "POST",

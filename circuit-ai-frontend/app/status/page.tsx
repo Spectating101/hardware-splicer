@@ -19,13 +19,13 @@ const surfaces = [
   {
     title: "Analysis API",
     status: "Backend-dependent",
-    detail: "Interactive analysis still depends on NEXT_PUBLIC_API_URL or a local backend at http://localhost:8000.",
+    detail: "Interactive analysis runs through /api/proxy and depends on CIRCUIT_AI_API_URL. The local development example is http://localhost:5000.",
     tone: "text-amber-800 bg-amber-50 border-amber-200",
   },
   {
     title: "Trust boundary",
     status: "Explicit",
-    detail: "The frontend now says what is real, what is mocked, and what still needs backend reachability.",
+    detail: "The frontend now says what is live, what is local reference data, and what still needs backend reachability.",
     tone: "text-sky-800 bg-sky-50 border-sky-200",
   },
 ];
@@ -60,7 +60,7 @@ export default function StatusPage() {
       <main>
         <PageIntro
           eyebrow="Platform status"
-          title="What is live, what is simulated, and what still needs backend wiring."
+          title="What is live, what is reference-backed, and what still needs backend wiring."
           description="This page exists so the frontend does not quietly overclaim. It should help users understand the real operating boundary of the product at any given moment."
           actions={
             <Button asChild className="rounded-full bg-slate-900 text-white hover:bg-slate-800">
@@ -111,13 +111,13 @@ export default function StatusPage() {
               </CardHeader>
               <CardContent className="space-y-4 text-sm text-slate-700">
                 <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                  <div className="font-semibold text-slate-900">Default target</div>
-                  <div className="mt-1 font-mono text-xs text-slate-600">http://localhost:8000/analyze</div>
+                  <div className="font-semibold text-slate-900">Local proxy target</div>
+                  <div className="mt-1 font-mono text-xs text-slate-600">CIRCUIT_AI_API_URL=http://localhost:5000</div>
                 </div>
                 <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                   <div className="font-semibold text-slate-900">Override</div>
                   <div className="mt-1 text-slate-600">
-                    Set <code className="rounded bg-white px-1.5 py-0.5 text-xs">NEXT_PUBLIC_API_URL</code> to move playground and analysis routes to the backend you actually want to test.
+                    Set <code className="rounded bg-white px-1.5 py-0.5 text-xs">CIRCUIT_AI_API_URL</code> for the server proxy. Only set <code className="rounded bg-white px-1.5 py-0.5 text-xs">NEXT_PUBLIC_API_URL</code> when the target should be visible in client-rendered copy.
                   </div>
                 </div>
               </CardContent>

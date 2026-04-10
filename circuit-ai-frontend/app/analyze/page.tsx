@@ -135,7 +135,8 @@ export default function AnalyzePage() {
   usePageTitle('Analyze Workspace | Circuit.AI');
   const { setArtifactName, setAnalysisMode, setDetectionCount } = useStudioRuntime();
 
-  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const publicApiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const analyzeTargetLabel = publicApiBaseUrl ? `${publicApiBaseUrl}/analyze` : '/api/proxy/analyze -> configured proxy backend';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [apiKey, setApiKey] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -174,31 +175,56 @@ export default function AnalyzePage() {
       }));
     }
 
+    if (errorMessage) {
+      return [
+        {
+          id: 'analysis-error',
+          title: 'Analysis request blocked',
+          description: errorMessage,
+          badge: 'review',
+          x: '16%',
+          y: '18%',
+          tone: 'amber',
+        },
+        {
+          id: 'request-context',
+          title: selectedFile ? selectedFile.name : 'No artifact selected',
+          description: selectedFile
+            ? `${fileSizeLabel(selectedFile)} • ${backendOptions.find((option) => option.value === backend)?.label || backend}`
+            : `Target route: ${analyzeTargetLabel}`,
+          badge: selectedFile ? 'file' : 'target',
+          x: '72%',
+          y: '18%',
+          tone: 'slate',
+        },
+      ];
+    }
+
     if (selectedFile) {
       return [
         {
-          id: 'ocr-lane',
-          title: enableOcr ? 'OCR lane online' : 'OCR lane paused',
-          description: enableOcr ? 'Silkscreen and label extraction remain part of this run.' : 'This pass is image-first without text enrichment.',
-          badge: enableOcr ? 'active' : 'paused',
+          id: 'selected-file',
+          title: selectedFile.name,
+          description: `${fileSizeLabel(selectedFile)} • ${selectedFile.type || 'image upload'}`,
+          badge: 'artifact',
           x: '16%',
           y: '18%',
           tone: 'cyan',
         },
         {
-          id: 'quality-gate',
-          title: enableQuality ? 'Quality gate armed' : 'Quality gate bypassed',
-          description: enableQuality ? 'Inspection will include defect and confidence scoring.' : 'The run skips quality scoring and focuses on raw recognition.',
-          badge: enableQuality ? 'armed' : 'bypass',
+          id: 'analysis-config',
+          title: `${backendOptions.find((option) => option.value === backend)?.label || backend} request config`,
+          description: `OCR ${enableOcr ? 'enabled' : 'disabled'} • quality assessment ${enableQuality ? 'enabled' : 'disabled'}`,
+          badge: isAnalyzing ? 'running' : 'ready',
           x: '72%',
           y: '18%',
           tone: 'amber',
         },
         {
-          id: 'engine',
-          title: `${backendOptions.find((option) => option.value === backend)?.label || backend} engine`,
-          description: 'The active inference path stays visible on the same stage instead of hiding inside a report.',
-          badge: 'engine',
+          id: 'analysis-target',
+          title: 'Proxy target',
+          description: analyzeTargetLabel,
+          badge: 'proxy-safe',
           x: '44%',
           y: '74%',
           tone: 'emerald',
@@ -206,36 +232,8 @@ export default function AnalyzePage() {
       ];
     }
 
-    return [
-      {
-        id: 'intake',
-        title: 'Load board',
-        description: 'Mount a PCB image and keep it centered while the rest of the workspace updates around it.',
-        badge: '01',
-        x: '16%',
-        y: '18%',
-        tone: 'cyan',
-      },
-      {
-        id: 'inspect',
-        title: 'Inspect signals',
-        description: 'Agent-assisted inspection should stay spatial and board-first instead of turning into a document flow.',
-        badge: '02',
-        x: '72%',
-        y: '18%',
-        tone: 'amber',
-      },
-      {
-        id: 'route',
-        title: 'Branch downstream',
-        description: 'Detections should feed the parts atlas and project board without forcing a route reset.',
-        badge: '03',
-        x: '44%',
-        y: '74%',
-        tone: 'emerald',
-      },
-    ];
-  }, [backend, detections, enableOcr, enableQuality, selectedFile]);
+    return [];
+  }, [analyzeTargetLabel, backend, detections, enableOcr, enableQuality, errorMessage, isAnalyzing, selectedFile]);
 
   useEffect(() => {
     setAnalysisMode(backend);
@@ -278,7 +276,7 @@ export default function AnalyzePage() {
         setErrorMessage(
           getProxyErrorMessage(
             payload,
-            `Could not complete analysis against ${backendTarget}/analyze. Confirm the target is reachable and try again.`,
+            `Could not complete analysis against ${analyzeTargetLabel}. Confirm the target is reachable and try again.`,
           ),
         );
         return;
@@ -287,7 +285,7 @@ export default function AnalyzePage() {
       setResult(asRecord(payload));
     } catch {
       setResult(null);
-      setErrorMessage(`Could not complete analysis against ${backendTarget}/analyze. Confirm the target is reachable and try again.`);
+      setErrorMessage(`Could not complete analysis against ${analyzeTargetLabel}. Confirm the target is reachable and try again.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -298,13 +296,13 @@ export default function AnalyzePage() {
       eyebrow="Workbench"
       title="Analyze a board inside a real studio layout."
       description="The board owns the center viewport, tooling stays docked, and detections stream into a bottom tray instead of turning into a report page."
-      status={selectedFile ? `Active artifact: ${selectedFile.name}` : 'No artifact loaded'}
+      status={selectedFile ? `Active artifact: ${selectedFile.name}` : 'No artifact selected'}
       commandBar={(
         <StudioCommandBar
           modeLabel="Analyze"
-          objective="Keep the board fixed while the agent isolates suspect regions, part identities, and the strongest downstream branch."
-          context={selectedFile ? `Mounted artifact: ${selectedFile.name}` : 'No board loaded yet. Start by mounting a PCB image into the stage.'}
-          status={isAnalyzing ? 'agent running' : result ? 'stage updated' : 'agent primed'}
+          objective="Keep the board fixed while the analysis route isolates suspect regions, part identities, and the strongest downstream branch."
+          context={selectedFile ? `Mounted artifact: ${selectedFile.name}` : 'No board selected yet. Start by loading a PCB image into the stage.'}
+          status={isAnalyzing ? 'analysis running' : result ? 'stage updated' : 'ready'}
           badges={['board-first', 'proxy-safe', 'route-aware']}
         />
       )}
@@ -408,18 +406,18 @@ export default function AnalyzePage() {
         <WorkbenchCanvas
           toolbar={['Canvas', 'Signals', 'Review']}
           activeToolbar="Canvas"
-          toolbarStatus={selectedFile ? (isAnalyzing ? 'Running analysis' : 'Viewport ready') : 'Awaiting board'}
+          toolbarStatus={selectedFile ? (isAnalyzing ? 'Running analysis' : 'Viewport ready') : 'Select board'}
           stageLabel="Board canvas"
           stageTitle="Inspect on one persistent stage."
-          stageSummary="The board remains fixed while detections, engine states, and next-route cues gather around it instead of replacing it."
-          badge={selectedFile ? 'Artifact mounted' : 'Awaiting board'}
+          stageSummary="The board remains fixed while selected-file state, request config, detections, and errors gather around it instead of replacing it."
+          badge={selectedFile ? 'Artifact mounted' : 'No artifact'}
           metrics={[
             { label: 'Detections', value: String(detections.length), tone: 'cyan' },
             { label: 'Engine', value: metricValue(result, ['backend'], backend), tone: 'amber' },
             { label: 'Confidence', value: metricValue(result, ['detection_quality', 'quality', 'confidence']), tone: 'emerald' },
           ]}
           notes={[
-            'Keep the viewport sacred. Detailed lists and raw traces belong in the tray and inspector, not in the center stage.',
+            'Keep the viewport stable. Detailed lists and raw traces belong in the tray and inspector, not in the center stage.',
             'This route should hand off cleanly into parts and projects without making the user re-orient.',
           ]}
           actions={[
@@ -451,7 +449,7 @@ export default function AnalyzePage() {
                 <div className="absolute left-14 bottom-10 h-px w-28 bg-emerald-300/35" />
                 <FileImage className="h-12 w-12 text-cyan-200" />
               </div>
-              <div className="relative text-base font-medium text-slate-100">Drop a board into the viewport</div>
+              <div className="relative text-base font-medium text-slate-100">Load a board image from the left panel</div>
               <div className="relative mt-2 max-w-md text-sm leading-6 text-slate-400">
                 The active board stays centered while the side docks and console trays update around it.
               </div>
@@ -511,14 +509,14 @@ export default function AnalyzePage() {
       right={
         <CopilotDock
           modeLabel="Analyze"
-          objective="Use the agent to scan the current board, steer inspection, and decide what should become the next focused part or route."
+          objective="Use the assistant context to scan the current board, steer inspection, and decide what should become the next focused part or route."
           status={errorMessage ? 'Attention required' : isAnalyzing ? 'Running' : 'Ready'}
           messages={[
             {
               role: 'agent',
               body: selectedFile
                 ? `The current board is loaded as ${selectedFile.name}. Ask for a targeted scan, a suspect region review, or a summary of what should move forward.`
-                : 'Load a board into the stage, then ask the agent what it sees or what it should focus on first.',
+                : 'Load a board into the stage, then ask what the assistant should focus on first.',
             },
             {
               role: 'user',

@@ -42,7 +42,7 @@ export function TreePanel({
 
         {!geometry ? (
           <div className="rounded-md border border-white/10 bg-white/5 p-3 text-sm text-white/70">
-            No design loaded. Use `Project` → `Import KiCad`, or click `Demo Board`.
+            No design loaded. Import a KiCad board from the left panel or load the reference demo.
           </div>
         ) : (
           <div className="space-y-1">

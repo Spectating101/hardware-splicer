@@ -24,7 +24,7 @@ import { StudioCommandBar } from '@/components/studio-command-bar';
 import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
-import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
+import { WorkbenchCanvas, type CanvasTone, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { demoValidation } from '@/lib/cad-demo';
 import {
   createProject,
@@ -74,13 +74,47 @@ function panelHeading(eyebrow: string, title: string) {
 function sourceLabel(project: CadProject | null) {
   if (!project) return 'No source';
   if (project.source.type === 'kicad') return `KiCad import • ${project.source.filename}`;
-  if (project.source.type === 'demo') return 'Intelligence demo';
+  if (project.source.type === 'demo') return 'Local reference demo';
   if (project.source.type === 'template') return `Template • ${project.source.templateId}`;
   return 'Blank workspace';
 }
 
 function projectNameFromFile(filename: string) {
   return filename.replace(/\.[^.]+$/, '') || filename;
+}
+
+function clampPercent(value: number) {
+  return Math.min(82, Math.max(12, value));
+}
+
+function footprintCanvasPosition(geometry: PcbGeometry, footprint: PcbGeometry['footprints'][number], fallbackIndex: number) {
+  const bbox = geometry.board.bbox_mm;
+  if (!bbox || bbox.width <= 0 || bbox.height <= 0) return stagePositions[fallbackIndex % stagePositions.length];
+
+  const xRatio = (footprint.at.x - bbox.min_x) / bbox.width;
+  const yRatio = (footprint.at.y - bbox.min_y) / bbox.height;
+
+  return {
+    x: `${clampPercent(12 + xRatio * 68).toFixed(1)}%`,
+    y: `${clampPercent(18 + yRatio * 56).toFixed(1)}%`,
+  };
+}
+
+function offsetCanvasPosition(position: { x: string; y: string }, xOffset: number, yOffset: number) {
+  const x = Number(position.x.replace('%', ''));
+  const y = Number(position.y.replace('%', ''));
+
+  return {
+    x: `${clampPercent(x + xOffset).toFixed(1)}%`,
+    y: `${clampPercent(y + yOffset).toFixed(1)}%`,
+  };
+}
+
+function issueTone(issue: ValidationIssue): CanvasTone {
+  const severity = issue.severity.toLowerCase();
+  if (severity === 'info') return 'slate';
+  if (severity === 'warning') return 'amber';
+  return 'amber';
 }
 
 export default function CadPage() {
@@ -214,8 +248,11 @@ export default function CadPage() {
   };
 
   const handleLoadDemo = () => {
-    const demoProject = activeProject ?? createProject('Intelligence Demo', { type: 'demo' });
-    const nextProjects = activeProject ? projects : upsertProject(projects, demoProject);
+    const storedDemo = projects.find((project) => project.source.type === 'demo');
+    const demoProject = storedDemo
+      ? { ...storedDemo, name: 'Reference Demo Board', source: { type: 'demo' } as const }
+      : createProject('Reference Demo Board', { type: 'demo' });
+    const nextProjects = upsertProject(projects, demoProject);
     activateProject(demoProject, nextProjects);
     setFile(null);
     setSelectedRef(null);
@@ -239,79 +276,100 @@ export default function CadPage() {
   };
 
   const stageNodes = useMemo<WorkbenchCanvasNode[]>(() => {
-    const nodes: WorkbenchCanvasNode[] = [
-      {
-        id: 'project',
-        title: activeProject?.name || 'Spatial workspace',
-        description: sourceLabel(activeProject),
-        badge: activeProject?.source.type || 'blank',
-        x: stagePositions[0].x,
-        y: stagePositions[0].y,
-        tone: stageTones[0],
-      },
-      {
-        id: 'selection',
-        title: selectedRef || 'No component focus',
-        description: selectedFootprint
-          ? `${selectedFootprint.value || 'Unnamed value'} • ${selectedFootprint.footprint}`
-          : 'Pick a footprint in the viewport or from the tree to lock a spatial focus.',
-        badge: selectedRef ? 'focus' : 'idle',
-        x: stagePositions[1].x,
-        y: stagePositions[1].y,
-        tone: stageTones[1],
-      },
-      {
-        id: 'issues',
-        title: issues.length ? `${issues.length} validation issues` : 'No validation issues',
+    if (geometry) {
+      const visibleFootprints = geometry.footprints.slice(0, 4);
+      if (selectedFootprint && !visibleFootprints.some((footprint) => footprint.ref === selectedFootprint.ref)) {
+        visibleFootprints.push(selectedFootprint);
+      }
+
+      const footprintNodes = visibleFootprints.map((footprint, index) => {
+        const position = footprintCanvasPosition(geometry, footprint, index);
+        return {
+          id: `footprint-${footprint.ref}`,
+          title: footprint.ref,
+          description: `${footprint.value || 'Unnamed value'} • ${footprint.footprint}`,
+          badge: footprint.layer,
+          x: position.x,
+          y: position.y,
+          tone: stageTones[index % stageTones.length],
+          active: selectedRef === footprint.ref,
+          onClick: () => setSelectedRef(footprint.ref),
+        };
+      });
+
+      const issueNodes = issues.slice(0, 2).map((issue, index) => {
+        const issueFootprint = geometry.footprints.find((footprint) => footprint.ref === issue.component);
+        const position = issueFootprint
+          ? offsetCanvasPosition(footprintCanvasPosition(geometry, issueFootprint, index + 3), 10, 9)
+          : stagePositions[(index + 4) % stagePositions.length];
+
+        return {
+          id: `issue-${issue.component}-${index}`,
+          title: `${String(issue.severity).toUpperCase()} • ${issue.component}`,
+          description: issue.issue,
+          badge: 'issue',
+          x: position.x,
+          y: position.y,
+          tone: issueTone(issue),
+          active: selectedRef === issue.component,
+          onClick: issueFootprint ? () => setSelectedRef(issue.component) : undefined,
+        };
+      });
+
+      const summaryNode: WorkbenchCanvasNode = {
+        id: 'geometry-summary',
+        title: `${geometry.footprints.length} footprints • ${geometry.nets.length} nets`,
         description: issues.length
-          ? `Most recent severity: ${String(issues[0]?.severity || 'unknown').toUpperCase()}. Use the tray to triage and queue fixes.`
-          : 'Validate the imported board to populate constraints, issues, and downstream readiness.',
+          ? `${issues.length} validation issues loaded. Use the issue tray to inspect disposition before fabrication.`
+          : 'Geometry is loaded with no active validation issues in the current session.',
         badge: status,
-        x: stagePositions[2].x,
-        y: stagePositions[2].y,
-        tone: issues.length ? 'amber' : 'emerald',
-      },
-      {
-        id: 'view',
-        title: activeView === 'design' ? 'Design orbit' : 'Fabrication orbit',
-        description: activeView === 'design'
-          ? 'Inspect placement, select parts, and keep geometry central.'
-          : 'Shift the same board into execution context without leaving the workspace.',
-        badge: activeView,
-        x: stagePositions[3].x,
-        y: stagePositions[3].y,
-        tone: stageTones[3],
-        onClick: () => setActiveView((current) => current === 'design' ? 'fab' : 'design'),
-      },
-      {
-        id: 'fab-mode',
-        title: activeView === 'fab' ? `${fabMode} execution` : 'Fabrication queue',
-        description: activeView === 'fab'
-          ? fabMode === 'manual'
-            ? 'Operator-guided repair steps are active.'
-            : 'Robot path staging is active for this board.'
-          : 'Switch into fabrication mode to expose manual and robotic execution branches.',
-        badge: activeView === 'fab' ? fabMode : 'standby',
-        x: stagePositions[4].x,
-        y: stagePositions[4].y,
-        tone: stageTones[4],
-        onClick: () => setFabMode((current) => current === 'manual' ? 'robot' : 'manual'),
-      },
-      {
-        id: 'footprints',
-        title: geometry ? `${geometry.footprints.length} footprints` : 'No geometry loaded',
-        description: geometry
-          ? `${geometry.nets.length} nets available for spatial reasoning and downstream inspection.`
-          : 'Import a KiCad board or load the demo to make the 3D board stage live.',
-        badge: geometry ? 'geometry' : 'awaiting',
         x: stagePositions[5].x,
         y: stagePositions[5].y,
-        tone: stageTones[5],
-      },
-    ];
+        tone: issues.length ? 'amber' : 'emerald',
+      };
 
-    return nodes;
-  }, [activeProject, activeView, fabMode, geometry, issues, selectedFootprint, selectedRef, status]);
+      return [...footprintNodes, ...issueNodes, summaryNode];
+    }
+
+    if (file) {
+      return [
+        {
+          id: 'staged-file',
+          title: file.name,
+          description: `${(file.size / 1024).toFixed(0)} KB staged for /validate-kicad.`,
+          badge: status,
+          x: stagePositions[0].x,
+          y: stagePositions[0].y,
+          tone: 'cyan',
+        },
+        {
+          id: 'validation-target',
+          title: 'Validation route',
+          description: 'Run validation to load board geometry, validation issues, and selectable footprints.',
+          badge: busy ? 'running' : 'ready',
+          x: stagePositions[3].x,
+          y: stagePositions[3].y,
+          tone: 'amber',
+        },
+      ];
+    }
+
+    if (activeProject) {
+      return [
+        {
+          id: 'project-source',
+          title: activeProject.name,
+          description: sourceLabel(activeProject),
+          badge: activeProject.source.type,
+          x: stagePositions[0].x,
+          y: stagePositions[0].y,
+          tone: 'slate',
+        },
+      ];
+    }
+
+    return [];
+  }, [activeProject, busy, file, geometry, issues, selectedFootprint, selectedRef, status]);
 
   const recentProjects = useMemo(
     () => [...projects].sort((a, b) => b.lastOpenedAt.localeCompare(a.lastOpenedAt)).slice(0, 5),
@@ -362,7 +420,7 @@ export default function CadPage() {
                   </div>
                   <ChevronRight className="h-4 w-4 text-cyan-200 transition-transform group-hover:translate-x-1" />
                 </div>
-                <div className="mt-5 text-lg font-semibold text-white">Load intelligence demo</div>
+                <div className="mt-5 text-lg font-semibold text-white">Load reference demo</div>
                 <div className="mt-2 text-sm leading-6 text-slate-300">
                   Open a pre-filled board state so the spatial shell, issues, and component focus are immediately visible.
                 </div>
@@ -438,7 +496,7 @@ export default function CadPage() {
       commandBar={(
         <StudioCommandBar
           modeLabel="CAD"
-          objective="Keep geometry live while the agent explains fit, selection, validation, and the next fabrication move."
+          objective="Keep geometry live while the assistant context explains fit, selection, validation, and the next fabrication move."
           context={activeProject ? `${activeProject.name} • ${sourceLabel(activeProject)}` : 'No workspace active.'}
           status={busy ? 'validating' : geometry ? 'viewport live' : 'stage primed'}
           badges={['spatial-first', 'kicad-aware', 'fab-linked']}
@@ -517,14 +575,14 @@ export default function CadPage() {
                 onClick={() => setActiveView('design')}
                 className={`rounded-[1rem] border px-3 py-3 text-left text-sm ${activeView === 'design' ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-100' : 'border-white/8 bg-[#081423] text-slate-300'}`}
               >
-                Spatial design orbit
+                Spatial design review
               </button>
               <button
                 type="button"
                 onClick={() => setActiveView('fab')}
                 className={`rounded-[1rem] border px-3 py-3 text-left text-sm ${activeView === 'fab' ? 'border-amber-300/30 bg-amber-300/10 text-amber-100' : 'border-white/8 bg-[#081423] text-slate-300'}`}
               >
-                Fabrication orbit
+                Fabrication review
               </button>
             </div>
 
@@ -581,7 +639,7 @@ export default function CadPage() {
           toolbarStatus={busy ? 'Validating board' : geometry ? 'Viewport live' : 'Awaiting geometry'}
           stageLabel="Spatial CAD"
           stageTitle="Keep the board spatial, selected, and downstream-aware."
-          stageSummary="This stage should let the user orbit geometry, isolate parts, understand validation pressure, and move into fabrication without leaving the workbench grammar."
+          stageSummary="This stage keeps imported geometry, selected parts, validation pressure, and fabrication review in one board-centered workspace."
           badge={activeProject?.name || 'No workspace'}
           metrics={[
             { label: 'Project', value: activeProject?.name || 'None', tone: 'cyan' },
@@ -589,10 +647,10 @@ export default function CadPage() {
             { label: 'Selection', value: selectedRef || 'None', tone: 'slate' },
           ]}
           notes={[
-            'The viewport is interactive here. Orbit, select, and inspect should all happen without losing the shared shell.',
+            'The viewport is interactive here. Pan, rotate, select, and inspect should all happen without losing the shared shell.',
             activeView === 'fab'
               ? `Fabrication mode is active. ${fabMode === 'manual' ? 'Manual instructions are foregrounded.' : 'Robot execution is foregrounded.'}`
-              : 'Stay in design orbit until the geometry and issue state are stable enough to hand off.',
+              : 'Stay in design review until the geometry and issue state are stable enough to hand off.',
           ]}
           actions={[
             { href: '/analyze', label: 'Return to analyze' },
@@ -659,14 +717,14 @@ export default function CadPage() {
             <div className="min-h-0 overflow-y-auto bg-[#07101d] p-4">
               <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
                 <Activity className="h-4 w-4 text-cyan-300" />
-                Fab queue
+                Fabrication actions
               </div>
               <div className="space-y-3">
                 {(activeView === 'fab'
                   ? fabMode === 'manual'
                     ? ['Heat target pad', 'Apply flux', 'Lift component carefully']
-                    : ['Prepare robot path', 'Verify nozzle clearance', 'Queue execution packet']
-                  : ['Validate board geometry', 'Select suspect component', 'Choose fabrication orbit']
+                    : ['Prepare robot path', 'Verify nozzle clearance', 'Stage execution packet']
+                  : ['Validate board geometry', 'Select suspect component', 'Choose fabrication review']
                 ).map((step) => (
                   <div key={step} className="rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-3 text-sm text-slate-300">
                     {step}
@@ -686,7 +744,7 @@ export default function CadPage() {
       right={
         <CopilotDock
           modeLabel="CAD"
-          objective="Use the agent to explain selected geometry, justify spatial decisions, and move the board into fabrication or repair without breaking context."
+          objective="Use the assistant context to explain selected geometry, justify spatial decisions, and move the board into fabrication or repair without breaking context."
           status={busy ? 'Validating' : selectedRef || status}
           messages={[
             {
@@ -710,7 +768,7 @@ export default function CadPage() {
                   role: 'agent',
                   body: activeView === 'fab'
                     ? 'Fabrication mode is active. Use this dock for execution reasoning while the stage remains spatial.'
-                    : 'Stay in design orbit until geometry and issue pressure are clear enough to branch with confidence.',
+                    : 'Stay in design review until geometry and issue pressure are clear enough to branch with confidence.',
                 },
           ]}
           prompts={[

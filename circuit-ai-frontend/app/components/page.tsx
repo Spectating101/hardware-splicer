@@ -11,6 +11,7 @@ import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
 import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
+import { referenceComponentTypes, referenceEducationalContent, referenceRepairGuides } from '@/lib/reference-data';
 
 type ComponentResponse = {
   total_components?: number;
@@ -45,7 +46,6 @@ const navItems = [
   { href: '/cad', label: 'CAD' },
 ];
 
-const fallbackTypes = ['ic_chip', 'capacitor', 'resistor', 'connector', 'transformer', 'diode'];
 const atlasPositions = [
   { x: '16%', y: '18%' },
   { x: '72%', y: '18%' },
@@ -69,7 +69,7 @@ function panelHeading(eyebrow: string, title: string) {
 export default function ComponentsPage() {
   usePageTitle('Component Intelligence | Circuit.AI');
   const { setFocusedComponent } = useStudioRuntime();
-  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'the configured proxy backend';
   const [componentData, setComponentData] = useState<ComponentResponse | null>(null);
   const [educationData, setEducationData] = useState<EducationalResponse | null>(null);
   const [repairData, setRepairData] = useState<RepairResponse | null>(null);
@@ -117,14 +117,14 @@ export default function ComponentsPage() {
           setErrorMessage(
             detail || (
               failedResponses === 3
-                ? `Live component intelligence is unavailable at ${backendTarget}. Fallback summary loaded.`
-                : `Some component feeds are unavailable at ${backendTarget}. Showing fallback content where needed.`
+                ? `Live component intelligence is unavailable at ${backendTarget}. Local reference dataset is active and clearly labeled.`
+                : `Some component feeds are unavailable at ${backendTarget}. Live data is mixed with the local reference dataset where needed.`
             ),
           );
         }
       } catch {
         if (!active) return;
-        setErrorMessage(`Live component intelligence is unavailable at ${backendTarget}. Fallback summary loaded.`);
+        setErrorMessage(`Live component intelligence is unavailable at ${backendTarget}. Local reference dataset is active and clearly labeled.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -137,11 +137,12 @@ export default function ComponentsPage() {
   }, [backendTarget]);
 
   const componentTypes = useMemo(
-    () => componentData?.component_types?.length ? componentData.component_types : fallbackTypes,
+    () => componentData?.component_types?.length ? componentData.component_types : referenceComponentTypes,
     [componentData],
   );
-  const educationalItems = useMemo(() => educationData?.content || [], [educationData]);
-  const repairGuides = useMemo(() => repairData?.guides || [], [repairData]);
+  const educationalItems = useMemo(() => educationData?.content?.length ? educationData.content : referenceEducationalContent, [educationData]);
+  const repairGuides = useMemo(() => repairData?.guides?.length ? repairData.guides : referenceRepairGuides, [repairData]);
+  const feedMode = componentData ? 'Live API' : 'Local reference dataset';
   const activeType = componentTypes.includes(selectedType || '') ? selectedType || componentTypes[0] : componentTypes[0];
   const relatedEducation = useMemo(
     () => educationalItems.filter((item) => !activeType || item.component_type === activeType),
@@ -155,17 +156,19 @@ export default function ComponentsPage() {
     () => componentTypes.slice(0, atlasPositions.length).map((type, index) => ({
       id: type,
       title: type.replaceAll('_', ' '),
-      description: type === activeType
-        ? 'Focused node. Use the inspector and lower tray for meaning, repair, and reuse decisions.'
-        : 'Selectable part family. Promote it to the active node to see overlays and repair context.',
-      badge: type === activeType ? 'focus' : `node ${index + 1}`,
+      description: [
+        `${educationalItems.filter((item) => item.component_type === type).length} education items`,
+        `${repairGuides.filter((guide) => guide.component_type === type).length} repair guides`,
+        type === activeType ? 'currently selected' : 'click to focus',
+      ].join(' • '),
+      badge: type === activeType ? 'focus' : feedMode === 'Live API' ? 'live' : 'reference',
       x: atlasPositions[index]?.x || '50%',
       y: atlasPositions[index]?.y || '50%',
       tone: atlasTones[index % atlasTones.length],
       active: type === activeType,
       onClick: () => setSelectedType(type),
     })),
-    [activeType, componentTypes],
+    [activeType, componentTypes, educationalItems, feedMode, repairGuides],
   );
 
   useEffect(() => {
@@ -182,7 +185,7 @@ export default function ComponentsPage() {
         <StudioCommandBar
           modeLabel="Components"
           objective="Turn raw part families into usable hardware knowledge, repair guidance, and reusable modules without leaving the shared stage."
-          context={`Current focus: ${activeType.replaceAll('_', ' ')}.`}
+          context={`Current focus: ${activeType.replaceAll('_', ' ')} • ${feedMode}.`}
           status={loading ? 'syncing' : 'atlas primed'}
           badges={['atlas-first', 'repair-aware', 'education-linked']}
         />
@@ -210,7 +213,7 @@ export default function ComponentsPage() {
           <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
             {panelHeading('Source', 'Workspace feed')}
             <div className="text-sm leading-6 text-slate-400">
-              Pulls from <span className="text-white">/components</span>, <span className="text-white">/educational</span>, and <span className="text-white">/repair</span> when available.
+              Source: <span className="text-white">{feedMode}</span>. Live routes are <span className="text-white">/components</span>, <span className="text-white">/educational</span>, and <span className="text-white">/repair</span>.
             </div>
           </div>
 
@@ -244,16 +247,17 @@ export default function ComponentsPage() {
           toolbarStatus={loading ? 'Syncing' : 'Atlas ready'}
           stageLabel="Component atlas"
           stageTitle="Read parts as a spatial knowledge field."
-          stageSummary="Part families orbit the same board-centered workspace, while the active node expands into repair, education, and reuse context around it."
+          stageSummary={`${feedMode}: each visible node is backed by loaded component, education, and repair records rather than decorative placeholders.`}
           badge={activeType.replaceAll('_', ' ')}
           metrics={[
             { label: 'Tracked types', value: String(componentData?.total_components || componentTypes.length), tone: 'cyan' },
             { label: 'Education', value: String(educationData?.total_content || educationalItems.length || 0), tone: 'amber' },
             { label: 'Repair', value: String(repairData?.total_guides || repairGuides.length || 0), tone: 'emerald' },
+            { label: 'Source', value: feedMode, tone: 'slate' },
           ]}
           notes={[
-            'Choose a node, then let the right dock explain it. The tray stays responsible for deeper repair and learning material.',
-            'The atlas should feel like a knowledge layer over the workbench, not a disconnected catalog page.',
+            'The node map is data-driven: click a family to filter the education and repair trays.',
+            feedMode === 'Live API' ? 'Live API records are active.' : 'Reference data is local and labeled because the backend feed is not reachable.',
           ]}
           actions={[
             { href: '/analyze', label: 'Return to analyze' },
@@ -337,7 +341,7 @@ export default function ComponentsPage() {
                 ))}
                 {!educationalItems.length ? (
                   <div className="rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-3 text-sm leading-6 text-slate-400">
-                    No educational items are loaded for the current session.
+                    No educational items are loaded for the current focus.
                   </div>
                 ) : null}
               </div>
@@ -362,7 +366,7 @@ export default function ComponentsPage() {
                 ))}
                 {!repairGuides.length ? (
                   <div className="rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-3 text-sm leading-6 text-slate-400">
-                    No repair guides are loaded for the current session.
+                    No repair guides are loaded for the current focus.
                   </div>
                 ) : null}
               </div>
@@ -373,12 +377,12 @@ export default function ComponentsPage() {
       right={
         <CopilotDock
           modeLabel="Components"
-          objective="Use the agent to explain the focused node, decide whether it is reusable or repairable, and move the board toward a coherent parts understanding."
+          objective="Use the assistant context to explain the focused node, decide whether it is reusable or repairable, and move the board toward a coherent parts understanding."
           status={loading ? 'Syncing' : activeType.replaceAll('_', ' ')}
           messages={[
             {
               role: 'agent',
-              body: `The atlas is focused on ${activeType.replaceAll('_', ' ')}. I can explain what it does, where it belongs, and whether it should feed repair, reuse, or project planning.`,
+                  body: `The atlas is focused on ${activeType.replaceAll('_', ' ')} from the ${feedMode.toLowerCase()}. Use this panel to interpret the selected family and decide whether it should feed repair, reuse, or project planning.`,
             },
             {
               role: 'user',
@@ -391,7 +395,7 @@ export default function ComponentsPage() {
                 }
               : {
                   role: 'agent',
-                  body: `The deeper educational and repair material stays in the lower tray. Keep the atlas visual and let me narrate the meaning from here.`,
+                  body: `The deeper educational and repair material stays in the lower tray. The current source is ${feedMode}.`,
                 },
           ]}
           prompts={[
@@ -406,7 +410,7 @@ export default function ComponentsPage() {
           ]}
           footer={
             <div className="rounded-[0.95rem] border border-white/10 bg-[#0b1628] p-3 text-sm leading-6 text-slate-300">
-              Indexed types: {componentData?.total_components || componentTypes.length}. Education overlays: {educationData?.total_content || educationalItems.length || 0}. Repair paths: {repairData?.total_guides || repairGuides.length || 0}.
+              Source: {feedMode}. Indexed types: {componentData?.total_components || componentTypes.length}. Education overlays: {educationData?.total_content || educationalItems.length || 0}. Repair paths: {repairData?.total_guides || repairGuides.length || 0}.
             </div>
           }
         />

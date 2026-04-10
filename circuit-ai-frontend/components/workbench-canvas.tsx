@@ -73,18 +73,18 @@ export function WorkbenchCanvas({
       <div className="flex items-center justify-between border-b border-white/8 bg-[#08111e] px-4">
         <div className="flex items-center gap-2">
           {toolbar.map((item) => (
-            <button
+            <div
               key={item}
-              type="button"
+              aria-current={activeToolbar === item ? 'true' : undefined}
               className={cn(
                 'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
                 activeToolbar === item
                   ? 'bg-cyan-300/15 text-cyan-100'
-                  : 'text-slate-400 hover:bg-white/6 hover:text-white',
+                  : 'text-slate-500',
               )}
             >
               {item}
-            </button>
+            </div>
           ))}
         </div>
         <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
@@ -170,7 +170,7 @@ export function WorkbenchCanvas({
             {nodes.map((node) => {
               const tone = toneStyles[node.tone || 'slate'];
               const sharedClassName = cn(
-                'absolute z-10 max-w-[13rem] rounded-[1rem] border px-3 py-3 text-left shadow-[0_18px_40px_rgba(2,6,23,0.32)] backdrop-blur transition-all',
+                'absolute z-30 max-w-[13rem] rounded-[1rem] border px-3 py-3 text-left shadow-[0_18px_40px_rgba(2,6,23,0.32)] backdrop-blur transition-all',
                 tone,
                 node.active
                   ? 'scale-[1.02] shadow-[0_24px_48px_rgba(8,145,178,0.24)]'

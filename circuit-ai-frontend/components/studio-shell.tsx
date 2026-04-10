@@ -8,13 +8,8 @@ import {
   FolderKanban,
   House,
   LayoutPanelTop,
-  Minus,
-  PanelLeftClose,
   Search,
   ScanSearch,
-  SlidersHorizontal,
-  Square,
-  X,
 } from 'lucide-react';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { cn } from '@/lib/utils';
@@ -120,11 +115,11 @@ export function StudioShell({
                 </div>
               </Link>
 
-              <div className="hidden items-center gap-5 lg:flex">
-                {['File', 'Edit', 'View', 'Window', 'Inspect'].map((item) => (
-                  <button key={item} type="button" className="text-xs font-medium text-slate-400 transition-colors hover:text-white">
+              <div className="hidden items-center gap-4 lg:flex">
+                {['Live routes', 'Proxy guarded', 'Evidence first'].map((item) => (
+                  <span key={item} className="text-xs font-medium text-slate-500">
                     {item}
-                  </button>
+                  </span>
                 ))}
               </div>
 
@@ -139,16 +134,9 @@ export function StudioShell({
                 </div>
               )}
 
-              <div className="flex items-center gap-1.5 text-slate-500">
-                <button type="button" className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/6 hover:text-white" aria-label="Minimize">
-                  <Minus className="h-4 w-4" />
-                </button>
-                <button type="button" className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-white/6 hover:text-white" aria-label="Maximize">
-                  <Square className="h-3.5 w-3.5" />
-                </button>
-                <button type="button" className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-rose-500/16 hover:text-rose-100" aria-label="Close">
-                  <X className="h-4 w-4" />
-                </button>
+              <div className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:flex">
+                <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                Professor mode
               </div>
             </div>
 
@@ -193,20 +181,9 @@ export function StudioShell({
 
               <div className="ml-auto flex items-center gap-2 justify-self-end">
                 {actions ? <div className="hidden items-center gap-2 md:flex">{actions}</div> : null}
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#0a1321] text-slate-300"
-                  aria-label="Studio layout"
-                >
-                  <PanelLeftClose className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#0a1321] text-slate-300"
-                  aria-label="Workspace preferences"
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                </button>
+                <div className="hidden rounded-xl border border-white/10 bg-[#0a1321] px-3 py-2 text-xs font-medium text-slate-300 lg:block">
+                  Layout locked for evaluation
+                </div>
               </div>
 
               <div className="hidden min-w-0 flex-wrap items-center gap-2 lg:flex lg:col-span-2">

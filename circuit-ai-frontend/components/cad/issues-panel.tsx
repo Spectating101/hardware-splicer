@@ -48,8 +48,8 @@ export function IssuesPanel({
                 <Button variant="outline" size="sm" onClick={() => onFocusComponent(issue.component)}>
                   Show
                 </Button>
-                <Button variant="secondary" size="sm" onClick={() => {}}>
-                  Apply Fix (queue)
+                <Button variant="secondary" size="sm" disabled title="Fix application requires a connected CAD mutation endpoint.">
+                  Fix endpoint required
                 </Button>
               </div>
             </div>
@@ -59,4 +59,3 @@ export function IssuesPanel({
     </Card>
   );
 }
-

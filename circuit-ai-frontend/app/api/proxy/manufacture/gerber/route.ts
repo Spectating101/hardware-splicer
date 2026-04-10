@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
+import { getCircuitApiBaseUrl, getProxyAuthHeaders } from "../../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
+  const apiBaseUrl = getCircuitApiBaseUrl();
 
   const inbound = await req.formData();
   const file = inbound.get("pcb_file");
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   outbound.set("pcb_file", file, file.name);
   if (typeof quantity === "string") outbound.set("quantity", quantity);
 
-  const headers: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const headers = getProxyAuthHeaders(req);
   try {
     const res = await fetch(`${apiBaseUrl}/api/v2/manufacture/gerber`, {
       method: "POST",

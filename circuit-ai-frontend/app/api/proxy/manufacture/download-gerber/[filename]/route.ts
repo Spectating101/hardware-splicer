@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
+import { getCircuitApiBaseUrl, getProxyAuthHeaders } from "../../../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, ctx: { params: Promise<{ filename: string }> }) {
-  const apiBaseUrl = process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-  const apiKey = process.env.CIRCUIT_AI_API_KEY || "";
+  const apiBaseUrl = getCircuitApiBaseUrl();
 
   const { filename } = await ctx.params;
   if (!filename) return NextResponse.json({ error: "filename required" }, { status: 400 });
 
   const url = `${apiBaseUrl}/api/v2/manufacture/download-gerber/${encodeURIComponent(filename)}`;
-  const authHeaders: HeadersInit = apiKey ? { Authorization: `Bearer ${apiKey}` } : {};
+  const authHeaders = getProxyAuthHeaders(_req);
   try {
     const res = await fetch(url, { method: "GET", headers: authHeaders });
     const body = await res.arrayBuffer();

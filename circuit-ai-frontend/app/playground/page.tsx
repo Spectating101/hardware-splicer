@@ -32,7 +32,9 @@ function totalValue(result: AnalyzeResult | null) {
 
 export default function PlaygroundPage() {
   usePageTitle('Playground | Circuit.AI');
-  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const publicApiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const requestUrl = publicApiBaseUrl ? `${publicApiBaseUrl}/analyze` : '/api/proxy/analyze';
+  const analyzeTargetLabel = publicApiBaseUrl ? `${publicApiBaseUrl}/analyze` : '/api/proxy/analyze -> configured proxy backend';
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalyzeResult | null>(null);
@@ -74,7 +76,7 @@ export default function PlaygroundPage() {
         setErrorMessage(
           getProxyErrorMessage(
             payload,
-            `Could not reach ${backendTarget}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`,
+            `Could not reach ${analyzeTargetLabel}. Start the backend or set CIRCUIT_AI_API_URL for the proxy target.`,
           ),
         );
         return;
@@ -83,7 +85,7 @@ export default function PlaygroundPage() {
       setAnalysisResult(asAnalyzeResult(payload));
     } catch {
       setAnalysisResult(null);
-      setErrorMessage(`Could not reach ${backendTarget}/analyze. Start the backend or point NEXT_PUBLIC_API_URL at the correct service.`);
+      setErrorMessage(`Could not reach ${analyzeTargetLabel}. Start the backend or set CIRCUIT_AI_API_URL for the proxy target.`);
     } finally {
       setIsAnalyzing(false);
     }
@@ -96,11 +98,11 @@ export default function PlaygroundPage() {
   };
 
   const curlCommand = selectedFile
-    ? `curl -X POST "${backendTarget}/analyze" \\
+    ? `curl -X POST "${requestUrl}" \\
   -H "Authorization: Bearer ${apiKey || 'YOUR_API_KEY'}" \\
   -H "Content-Type: multipart/form-data" \\
   -F "file=@${selectedFile.name}"`
-    : `curl -X POST "${backendTarget}/analyze" \\
+    : `curl -X POST "${requestUrl}" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: multipart/form-data" \\
   -F "file=@pcb_image.jpg"`;
@@ -144,7 +146,7 @@ for component in result.components:
               <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Execution notes</div>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-slate-900">Backend target</div>
-                <code className="mt-2 block rounded-xl bg-white px-3 py-2 text-xs text-slate-700">{backendTarget}</code>
+                <code className="mt-2 block rounded-xl bg-white px-3 py-2 text-xs text-slate-700">{analyzeTargetLabel}</code>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                 If this backend is not reachable, the page should fail clearly instead of implying the analysis stack is fully live.

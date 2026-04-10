@@ -11,6 +11,7 @@ import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
 import { WorkbenchCanvas, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { getProxyErrorMessage, isProxyFailure, readJsonPayload, type ProxyErrorPayload } from '@/lib/proxy-client';
+import { referenceProjects } from '@/lib/reference-data';
 
 type ProjectItem = {
   id?: string;
@@ -19,6 +20,8 @@ type ProjectItem = {
   category?: string;
   estimated_cost?: number;
   score?: number;
+  rationale?: string;
+  next_action?: string;
 };
 
 type ProjectResponse = {
@@ -36,15 +39,10 @@ const navItems = [
 
 const orchestrationLanes = [
   'Recovery and salvage',
-  'Educational builds',
-  'Minting and procurement',
+  'Evidence review',
+  'Fabrication handoff',
 ];
 
-const fallbackProjects: ProjectItem[] = [
-  { id: 'weather_station', name: 'Arduino Weather Station', difficulty: 'beginner', category: 'education', estimated_cost: 15, score: 0.91 },
-  { id: 'audio_amplifier', name: 'Simple Audio Amplifier', difficulty: 'intermediate', category: 'repair', estimated_cost: 25, score: 0.84 },
-  { id: 'power_supply', name: 'Variable Power Supply', difficulty: 'intermediate', category: 'fabrication', estimated_cost: 35, score: 0.8 },
-];
 const routePositions = [
   { x: '16%', y: '18%' },
   { x: '72%', y: '18%' },
@@ -60,6 +58,20 @@ function projectKey(project: ProjectItem, index: number) {
   return project.id || `${project.name || 'project'}-${index}`;
 }
 
+function laneForProject(project: ProjectItem) {
+  const category = project.category?.toLowerCase() || '';
+  if (category.includes('fabrication')) return 'Fabrication';
+  if (category.includes('review')) return 'Review';
+  return 'Recovery';
+}
+
+function bestNextMove(project: ProjectItem | null) {
+  if (!project) return 'Select a route';
+  if (project.next_action) return project.next_action;
+  if (project.category === 'fabrication') return 'Move to CAD after issue disposition';
+  return 'Compare and refine the route';
+}
+
 function panelHeading(eyebrow: string, title: string) {
   return (
     <div className="mb-4">
@@ -72,7 +84,8 @@ function panelHeading(eyebrow: string, title: string) {
 export default function ProjectsPage() {
   usePageTitle('Project Orchestration | Circuit.AI');
   const { setFocusedProject } = useStudioRuntime();
-  const backendTarget = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const publicApiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  const projectsTargetLabel = publicApiBaseUrl ? `${publicApiBaseUrl}/projects` : '/api/proxy/projects -> configured proxy backend';
   const [projectData, setProjectData] = useState<ProjectResponse | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,13 +110,13 @@ export default function ProjectsPage() {
           setErrorMessage(
             getProxyErrorMessage(
               payload,
-              `Live project templates are unavailable at ${backendTarget}/projects. Curated fallback set loaded.`,
+              `Live project templates are unavailable at ${projectsTargetLabel}. Local reference project set is active and clearly labeled.`,
             ),
           );
         }
       } catch {
         if (!active) return;
-        setErrorMessage(`Live project templates are unavailable at ${backendTarget}/projects. Curated fallback set loaded.`);
+        setErrorMessage(`Live project templates are unavailable at ${projectsTargetLabel}. Local reference project set is active and clearly labeled.`);
       } finally {
         if (active) setLoading(false);
       }
@@ -113,12 +126,14 @@ export default function ProjectsPage() {
     return () => {
       active = false;
     };
-  }, [backendTarget]);
+  }, [projectsTargetLabel]);
 
   const projects = useMemo(
-    () => projectData?.projects?.length ? projectData.projects : fallbackProjects,
+    () => [...(projectData?.projects?.length ? projectData.projects : referenceProjects)]
+      .sort((a, b) => (b.score ?? -1) - (a.score ?? -1)),
     [projectData],
   );
+  const feedMode = projectData ? 'Live API' : 'Local reference dataset';
   const activeProject = useMemo(() => {
     const selected = projects.find((project, index) => projectKey(project, index) === selectedProjectId);
     return selected || projects[0] || null;
@@ -129,9 +144,9 @@ export default function ProjectsPage() {
   );
   const projectLanes = useMemo(
     () => [
-      { label: 'Recovery', items: projects.filter((_, index) => index % 3 === 0) },
-      { label: 'Build', items: projects.filter((_, index) => index % 3 === 1) },
-      { label: 'Launch', items: projects.filter((_, index) => index % 3 === 2) },
+      { label: 'Recovery', items: projects.filter((project) => laneForProject(project) === 'Recovery') },
+      { label: 'Review', items: projects.filter((project) => laneForProject(project) === 'Review') },
+      { label: 'Fabrication', items: projects.filter((project) => laneForProject(project) === 'Fabrication') },
     ],
     [projects],
   );
@@ -141,10 +156,11 @@ export default function ProjectsPage() {
       return {
         id: key,
         title: project.name || 'Unnamed project',
-        description: project.category
-          ? `${project.category} pathway${project.score !== undefined ? ` • ${Math.round(project.score * 100)}% suitability` : ''}`
-          : 'Selectable route candidate for the active board state.',
-        badge: project.difficulty || `route ${index + 1}`,
+        description: [
+          project.rationale || project.next_action || project.category || 'Selectable route candidate for the active board state.',
+          project.score !== undefined ? `${Math.round(project.score * 100)}% suitability` : null,
+        ].filter(Boolean).join(' • '),
+        badge: key === activeProjectKey ? 'focus' : feedMode === 'Live API' ? 'live' : 'reference',
         x: routePositions[index]?.x || '50%',
         y: routePositions[index]?.y || '50%',
         tone: routeTones[index % routeTones.length],
@@ -152,7 +168,7 @@ export default function ProjectsPage() {
         onClick: () => setSelectedProjectId(key),
       };
     }),
-    [activeProjectKey, projects],
+    [activeProjectKey, feedMode, projects],
   );
 
   useEffect(() => {
@@ -168,8 +184,8 @@ export default function ProjectsPage() {
       commandBar={(
         <StudioCommandBar
           modeLabel="Projects"
-          objective="Compare downstream routes on one decision stage and let the agent defend which path deserves fabrication or CAD time."
-          context={activeProject ? `Selected route: ${activeProject.name}.` : 'No route selected yet.'}
+          objective="Compare downstream routes on one decision stage and require a concrete rationale before spending CAD or fabrication time."
+          context={activeProject ? `Selected route: ${activeProject.name} • ${feedMode}.` : `No route selected yet • ${feedMode}.`}
           status={loading ? 'syncing' : 'decision ready'}
           badges={['decision-first', 'cost-aware', 'cad-bound']}
         />
@@ -215,8 +231,8 @@ export default function ProjectsPage() {
                 </div>
               </div>
               <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Primary direction</div>
-                <div className="mt-2 text-lg font-semibold text-white">Education + recovery</div>
+                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Source</div>
+                <div className="mt-2 text-lg font-semibold text-white">{feedMode}</div>
               </div>
             </div>
           </div>
@@ -235,15 +251,16 @@ export default function ProjectsPage() {
           toolbarStatus={loading ? 'Syncing' : 'Board ready'}
           stageLabel="Decision board"
           stageTitle="Compare routes on the same workbench plane."
-          stageSummary="Candidate paths should orbit one shared board state so the user can compare cost, suitability, and next action without switching mental models."
+          stageSummary={`${feedMode}: routes are ranked by suitability and backed by rationale, cost, and next-action fields rather than decorative cards.`}
           badge={activeProject?.name || 'No route selected'}
           metrics={[
             { label: 'Routes', value: String(projectData?.total_projects || projects.length), tone: 'cyan' },
             { label: 'Primary direction', value: activeProject?.category || 'Review', tone: 'amber' },
             { label: 'Suitability', value: activeProject?.score !== undefined ? `${Math.round(activeProject.score * 100)}%` : 'N/A', tone: 'emerald' },
+            { label: 'Source', value: feedMode, tone: 'slate' },
           ]}
           notes={[
-            'Keep candidate routes visible together. Selection should sharpen the decision, not send the user to a different page mode.',
+            'Keep candidate routes visible together. Selection sharpens the decision without sending the user to a different page mode.',
             'The tray owns metrics and next steps. The stage owns comparison and confidence.',
           ]}
           actions={[
@@ -259,7 +276,7 @@ export default function ProjectsPage() {
                 <div className="mt-2 text-2xl font-semibold text-white">{activeProject?.name || 'No project selected'}</div>
                 <div className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
                   {activeProject?.category
-                    ? `${activeProject.category} pathway prepared for deeper justification, cost review, and CAD handoff.`
+                    ? activeProject.rationale || `${activeProject.category} pathway prepared for deeper justification, cost review, and CAD handoff.`
                     : 'Pick a candidate route and the board will keep the comparison stable around it.'}
                 </div>
               </div>
@@ -285,8 +302,8 @@ export default function ProjectsPage() {
               </div>
               <div className="rounded-[1rem] border border-white/10 bg-[#081423] p-4">
                 <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Best next move</div>
-                <div className="mt-2 text-xl font-semibold text-white">
-                  {activeProject?.category === 'fabrication' ? 'Move to CAD' : 'Compare and refine'}
+                <div className="mt-2 text-sm font-semibold leading-6 text-white">
+                  {bestNextMove(activeProject)}
                 </div>
               </div>
             </div>
@@ -343,7 +360,16 @@ export default function ProjectsPage() {
                       Outcome
                     </div>
                     <div className="mt-3 text-xl font-semibold text-white">
-                      {activeProject.category ? `${activeProject.category} ready` : 'Review'}
+                      {laneForProject(activeProject)}
+                    </div>
+                  </div>
+                  <div className="rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4 xl:col-span-3">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Rationale and next action</div>
+                    <div className="mt-3 text-sm leading-6 text-slate-300">
+                      {activeProject.rationale || 'No rationale returned by the live route feed.'}
+                    </div>
+                    <div className="mt-2 text-sm leading-6 text-cyan-100">
+                      {bestNextMove(activeProject)}
                     </div>
                   </div>
                 </div>
@@ -377,14 +403,14 @@ export default function ProjectsPage() {
       right={
         <CopilotDock
           modeLabel="Projects"
-          objective="Use the agent to compare candidate paths, justify the selected route, and move the design toward a buildable outcome without leaving the shared workspace."
+          objective="Use the assistant context to compare candidate paths, justify the selected route, and move the design toward a buildable outcome without leaving the shared workspace."
           status={loading ? 'Syncing' : activeProject?.name || 'No path'}
           messages={[
             {
               role: 'agent',
               body: activeProject
                 ? `The current route focus is ${activeProject.name}. I can compare it against the other paths and explain why it should advance or be rejected.`
-                : 'Select a route card and I will turn it into a concrete next action.',
+                : `Select a route card and I will turn it into a concrete next action. Source: ${feedMode}.`,
             },
             {
               role: 'user',
@@ -399,7 +425,7 @@ export default function ProjectsPage() {
                 }
               : {
                   role: 'agent',
-                  body: 'Use the lower tray for route metrics and next actions. The center board should stay focused on comparing candidates at a glance.',
+                  body: `Use the lower tray for route metrics and next actions. The center board should stay focused on comparing candidates at a glance. Source: ${feedMode}.`,
                 },
           ]}
           prompts={[
@@ -415,6 +441,7 @@ export default function ProjectsPage() {
           footer={
             <div className="rounded-[0.95rem] border border-white/10 bg-[#0b1628] p-3 text-sm leading-6 text-slate-300">
               Loaded routes: {projectData?.total_projects || projects.length}. Planning lanes: {orchestrationLanes.length}. Focused route: {activeProject?.name || 'None'}.
+              {' '}Source: {feedMode}.
             </div>
           }
         />
