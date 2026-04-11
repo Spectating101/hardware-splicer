@@ -3,29 +3,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
-  Activity,
-  ArrowRight,
-  ChevronRight,
-  CircuitBoard,
   FileUp,
   Layers,
   LoaderCircle,
   PackageCheck,
-  Sparkles,
   Wrench,
   Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CopilotDock } from '@/components/copilot-dock';
 import { IssuesPanel } from '@/components/cad/issues-panel';
 import { PcbViewport } from '@/components/cad/pcb-viewport';
 import { TreePanel } from '@/components/cad/tree-panel';
-import { StudioCommandBar } from '@/components/studio-command-bar';
-import { StudioShell } from '@/components/studio-shell';
 import { useStudioRuntime } from '@/components/studio-runtime';
 import { usePageTitle } from '@/components/use-page-title';
-import { WorkbenchCanvas, type CanvasTone, type WorkbenchCanvasNode } from '@/components/workbench-canvas';
 import { demoValidation } from '@/lib/cad-demo';
+import {
+  cadTemplates,
+  type CadTemplate,
+} from '@/lib/cad-templates';
 import {
   createProject,
   getActiveProjectId,
@@ -35,6 +30,7 @@ import {
   touchProject,
   upsertProject,
   type CadProject,
+  type CadProjectSource,
 } from '@/lib/cad-project';
 import type { PcbGeometry, ValidateKiCadResponse, ValidationIssue } from '@/lib/cad-types';
 import { isProxyFailure } from '@/lib/proxy-client';
@@ -43,38 +39,20 @@ type SelectionState = {
   footprintRef: string | null;
 };
 
-const navItems = [
-  { href: '/', label: 'Overview' },
-  { href: '/analyze', label: 'Analyze' },
-  { href: '/components', label: 'Components' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/cad', label: 'CAD' },
-];
+function pickRefFromComponent(component: string, geometry: PcbGeometry | null): string | null {
+  if (!geometry) return null;
 
-const stagePositions = [
-  { x: '14%', y: '18%' },
-  { x: '72%', y: '18%' },
-  { x: '16%', y: '68%' },
-  { x: '70%', y: '70%' },
-  { x: '42%', y: '12%' },
-  { x: '42%', y: '76%' },
-];
+  const match = (component || '').toUpperCase().match(/\b[A-Z]{1,3}\d{1,4}\b/);
+  if (!match) return null;
 
-const stageTones = ['cyan', 'amber', 'emerald', 'slate', 'cyan', 'amber'] as const;
-
-function panelHeading(eyebrow: string, title: string) {
-  return (
-    <div className="mb-4">
-      <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
-      <div className="mt-2 text-sm font-semibold text-white">{title}</div>
-    </div>
-  );
+  const ref = match[0];
+  return geometry.footprints.some((footprint) => footprint.ref.toUpperCase() === ref) ? ref : null;
 }
 
 function sourceLabel(project: CadProject | null) {
   if (!project) return 'No source';
   if (project.source.type === 'kicad') return `KiCad import • ${project.source.filename}`;
-  if (project.source.type === 'demo') return 'Local reference demo';
+  if (project.source.type === 'demo') return 'Reference demo board';
   if (project.source.type === 'template') return `Template • ${project.source.templateId}`;
   return 'Blank workspace';
 }
@@ -83,38 +61,32 @@ function projectNameFromFile(filename: string) {
   return filename.replace(/\.[^.]+$/, '') || filename;
 }
 
-function clampPercent(value: number) {
-  return Math.min(82, Math.max(12, value));
+function formatMillimeters(value: number) {
+  return `${value.toFixed(1)} mm`;
 }
 
-function footprintCanvasPosition(geometry: PcbGeometry, footprint: PcbGeometry['footprints'][number], fallbackIndex: number) {
-  const bbox = geometry.board.bbox_mm;
-  if (!bbox || bbox.width <= 0 || bbox.height <= 0) return stagePositions[fallbackIndex % stagePositions.length];
+function issueSummary(issues: ValidationIssue[]) {
+  return issues.reduce(
+    (summary, issue) => {
+      const severity = String(issue.severity).toLowerCase();
 
-  const xRatio = (footprint.at.x - bbox.min_x) / bbox.width;
-  const yRatio = (footprint.at.y - bbox.min_y) / bbox.height;
+      if (severity === 'critical') summary.critical += 1;
+      else if (severity === 'error') summary.error += 1;
+      else if (severity === 'warning') summary.warning += 1;
+      else summary.info += 1;
 
-  return {
-    x: `${clampPercent(12 + xRatio * 68).toFixed(1)}%`,
-    y: `${clampPercent(18 + yRatio * 56).toFixed(1)}%`,
-  };
+      return summary;
+    },
+    { critical: 0, error: 0, warning: 0, info: 0 },
+  );
 }
 
-function offsetCanvasPosition(position: { x: string; y: string }, xOffset: number, yOffset: number) {
-  const x = Number(position.x.replace('%', ''));
-  const y = Number(position.y.replace('%', ''));
+async function loadPublicFile(path: string, filename: string) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`Failed to load ${path}`);
 
-  return {
-    x: `${clampPercent(x + xOffset).toFixed(1)}%`,
-    y: `${clampPercent(y + yOffset).toFixed(1)}%`,
-  };
-}
-
-function issueTone(issue: ValidationIssue): CanvasTone {
-  const severity = issue.severity.toLowerCase();
-  if (severity === 'info') return 'slate';
-  if (severity === 'warning') return 'amber';
-  return 'amber';
+  const blob = await response.blob();
+  return new File([blob], filename, { type: 'text/plain' });
 }
 
 export default function CadPage() {
@@ -129,45 +101,159 @@ export default function CadPage() {
   } = useStudioRuntime();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
+  const [pcbFile, setPcbFile] = useState<File | null>(null);
+  const [netFile, setNetFile] = useState<File | null>(null);
+  const [activeFileKind, setActiveFileKind] = useState<'pcb' | 'net'>('pcb');
   const [geometry, setGeometry] = useState<PcbGeometry | null>(null);
   const [issues, setIssues] = useState<ValidationIssue[]>([]);
+  const [nextSteps, setNextSteps] = useState<string[]>([]);
   const [status, setStatus] = useState('idle');
+  const [manufacturingReady, setManufacturingReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [backendOk, setBackendOk] = useState<boolean | null>(null);
   const [projects, setProjects] = useState<CadProject[]>([]);
   const [activeProject, setActiveProject] = useState<CadProject | null>(null);
   const [showStart, setShowStart] = useState(true);
+  const [starterChecklist, setStarterChecklist] = useState<string[]>([]);
+  const [defaultHints, setDefaultHints] = useState<Record<string, unknown> | null>(null);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  const [exportStatus, setExportStatus] = useState('');
+  const [lastGerberFilename, setLastGerberFilename] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'design' | 'fab'>('design');
   const [fabMode, setFabMode] = useState<'robot' | 'manual'>('manual');
   const [selectedRef, setSelectedRef] = useState<string | null>(null);
+  const [activeTray, setActiveTray] = useState<'issues' | 'projects' | 'fabrication'>('issues');
+
+  const activeFile = useMemo(
+    () => (activeFileKind === 'pcb' ? pcbFile : netFile),
+    [activeFileKind, netFile, pcbFile],
+  );
+
+  const selectedFootprint = useMemo(
+    () => geometry?.footprints.find((footprint) => footprint.ref === selectedRef) || null,
+    [geometry, selectedRef],
+  );
+
+  const selectedIssues = useMemo(
+    () => (selectedRef ? issues.filter((issue) => issue.component === selectedRef) : []),
+    [issues, selectedRef],
+  );
+
+  const primaryIssue = selectedIssues[0] || issues[0] || null;
+  const visibleNets = useMemo(
+    () => geometry?.nets.filter((net) => net.name.trim()).slice(0, 4) || [],
+    [geometry],
+  );
+
+  const summary = useMemo(() => issueSummary(issues), [issues]);
+  const recentProjects = useMemo(
+    () => [...projects].sort((a, b) => b.lastOpenedAt.localeCompare(a.lastOpenedAt)).slice(0, 8),
+    [projects],
+  );
+
+  const headerStatus = useMemo(() => {
+    if (busy) return 'Validating';
+    if (status === 'idle') return 'Ready';
+    return status.toUpperCase();
+  }, [busy, status]);
+
+  const hydrateTemplateContext = useCallback((source: CadProjectSource) => {
+    if (source.type === 'template') {
+      const template = cadTemplates.find((item) => item.id === source.templateId);
+      setStarterChecklist(template?.starterChecklist || []);
+      setDefaultHints(template?.defaultHints ?? null);
+      setActiveTemplateId(template?.id || null);
+      return;
+    }
+
+    if (source.type === 'demo') {
+      setStarterChecklist([
+        'Click issues to focus the board',
+        'Switch between design review and fabrication review',
+        'Export manufacturing artifacts after validating a real KiCad board',
+      ]);
+      setDefaultHints(null);
+      setActiveTemplateId(null);
+      return;
+    }
+
+    setStarterChecklist([]);
+    setDefaultHints(null);
+    setActiveTemplateId(null);
+  }, []);
+
+  const resetWorkspace = useCallback(() => {
+    setPcbFile(null);
+    setNetFile(null);
+    setActiveFileKind('pcb');
+    setGeometry(null);
+    setIssues([]);
+    setNextSteps([]);
+    setSelectedRef(null);
+    setStatus('idle');
+    setManufacturingReady(false);
+    setExportStatus('');
+    setLastGerberFilename(null);
+    setActiveView('design');
+    setFabMode('manual');
+    setActiveTray('issues');
+  }, []);
 
   const activateProject = useCallback((project: CadProject, nextProjects?: CadProject[]) => {
     const openedProject = touchProject(project);
+
     setProjects((currentProjects) => {
-      const persistedProjects = upsertProject(nextProjects ?? currentProjects, openedProject);
-      saveProjects(persistedProjects);
-      return persistedProjects;
+      const persisted = upsertProject(nextProjects ?? currentProjects, openedProject);
+      saveProjects(persisted);
+      return persisted;
     });
+
     setActiveProject(openedProject);
     setActiveProjectId(openedProject.id);
     setShowStart(false);
+    hydrateTemplateContext(openedProject.source);
+
+    if (openedProject.source.type === 'demo') {
+      setPcbFile(null);
+      setNetFile(null);
+      setActiveFileKind('pcb');
+      setGeometry(demoValidation.pcb_geometry ?? null);
+      setIssues(demoValidation.validation.issues);
+      setNextSteps(demoValidation.next_steps || []);
+      setSelectedRef(demoValidation.pcb_geometry?.footprints?.[0]?.ref || null);
+      setStatus(demoValidation.status || 'ready');
+      setManufacturingReady(Boolean(demoValidation.manufacturing_ready));
+      setExportStatus('');
+      setLastGerberFilename(null);
+      return openedProject;
+    }
+
+    if (openedProject.source.type !== 'kicad') {
+      resetWorkspace();
+    } else {
+      setExportStatus('');
+      setLastGerberFilename(null);
+    }
+
     return openedProject;
-  }, []);
+  }, [hydrateTemplateContext, resetWorkspace]);
 
   useEffect(() => {
     const storedProjects = loadProjects();
     const activeId = getActiveProjectId();
     const project = (activeId && storedProjects.find((item) => item.id === activeId)) || storedProjects[0] || null;
+
     if (project) {
       activateProject(project, storedProjects);
       return;
     }
+
     setProjects(storedProjects);
   }, [activateProject]);
 
   useEffect(() => {
-    setArtifactName(file?.name || null);
-  }, [file, setArtifactName]);
+    setArtifactName(activeFile?.name || null);
+  }, [activeFile, setArtifactName]);
 
   useEffect(() => {
     setAnalysisMode(activeView === 'fab' ? `fab-${fabMode}` : 'spatial-design');
@@ -185,42 +271,93 @@ export default function CadPage() {
     setFocusedProject(activeProject?.name || null);
   }, [activeProject, setFocusedProject]);
 
-  const selectedFootprint = useMemo(
-    () => geometry?.footprints.find((footprint) => footprint.ref === selectedRef) || null,
-    [geometry, selectedRef],
-  );
+  useEffect(() => {
+    if (activeView === 'fab') setActiveTray('fabrication');
+  }, [activeView]);
+
+  const createAndActivateProject = (name: string, source: CadProjectSource) => {
+    const project = createProject(name.trim(), source);
+    const nextProjects = upsertProject(projects, project);
+    saveProjects(nextProjects);
+    setProjects(nextProjects);
+    activateProject(project, nextProjects);
+  };
+
+  const startNewProject = (source: CadProjectSource) => {
+    const defaultName =
+      source.type === 'demo'
+        ? 'Demo Board'
+        : source.type === 'template'
+          ? 'Template Project'
+          : 'New Project';
+
+    const name = window.prompt('Project name?', defaultName);
+    if (!name) return;
+
+    createAndActivateProject(name, source);
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const nextFile = event.target.files?.[0] || null;
-    setFile(nextFile);
-
     if (!nextFile) return;
 
-    const nextProjectName = projectNameFromFile(nextFile.name);
-    const draftProject = activeProject
+    const isPcb = nextFile.name.toLowerCase().endsWith('.kicad_pcb');
+    const project =
+      activeProject ||
+      createProject(projectNameFromFile(nextFile.name), isPcb ? { type: 'kicad', filename: nextFile.name } : { type: 'blank' });
+
+    const nextProject = isPcb
       ? {
-          ...activeProject,
-          name: nextProjectName,
+          ...project,
+          name: projectNameFromFile(nextFile.name),
           source: { type: 'kicad', filename: nextFile.name } as const,
         }
-      : createProject(nextProjectName, { type: 'kicad', filename: nextFile.name });
+      : project;
 
-    activateProject(draftProject, upsertProject(projects, draftProject));
-    setStatus('staged');
+    activateProject(nextProject, upsertProject(projects, nextProject));
+
+    if (isPcb) {
+      setPcbFile(nextFile);
+      setActiveFileKind('pcb');
+      setGeometry(null);
+      setIssues([]);
+      setNextSteps([]);
+      setSelectedRef(null);
+      setStatus('staged');
+      setExportStatus('');
+      setLastGerberFilename(null);
+    } else {
+      setNetFile(nextFile);
+      setActiveFileKind('net');
+      setExportStatus('Netlist loaded. BOM export is available once you want manufacturing outputs.');
+    }
+
+    event.target.value = '';
   };
 
-  const handleValidate = async () => {
-    if (!file) return;
+  const validate = useCallback(async (fileOverride?: File) => {
+    const file = fileOverride ?? pcbFile;
+    if (!file) return null;
 
     setBusy(true);
-    setStatus('validating');
+    setStatus('running');
 
     try {
+      if (backendOk === null) {
+        try {
+          const health = await fetch('/api/proxy/health', { method: 'GET' });
+          setBackendOk(health.ok);
+        } catch {
+          setBackendOk(false);
+        }
+      }
+
       const formData = new FormData();
       formData.set('kicad_file', file, file.name);
+      if (defaultHints) formData.set('hints', JSON.stringify(defaultHints));
 
       const response = await fetch('/api/proxy/validate-kicad', { method: 'POST', body: formData });
-      const payload = await response.json() as ValidateKiCadResponse | { error?: string; ok?: boolean };
+      const payload = (await response.json()) as ValidateKiCadResponse | { error?: string; ok?: boolean };
 
       if (isProxyFailure(payload)) {
         throw new Error(payload.error || 'Validation failed.');
@@ -229,7 +366,30 @@ export default function CadPage() {
       const result = payload as ValidateKiCadResponse;
       setGeometry(result.pcb_geometry ?? null);
       setIssues(result.validation.issues || []);
-      setStatus(result.manufacturing_ready ? 'ready' : 'review');
+      setNextSteps(result.next_steps || []);
+      setManufacturingReady(Boolean(result.manufacturing_ready));
+      setStatus(result.status || (result.manufacturing_ready ? 'ready' : 'review'));
+      setSelectedRef(result.pcb_geometry?.footprints?.[0]?.ref || null);
+      setExportStatus(
+        result.validation.issues?.length
+          ? 'Validation loaded the board and issue set. Review the board, then export manufacturing artifacts when ready.'
+          : 'Validation completed with no active issues.',
+      );
+
+      if (activeProject) {
+        const updatedProject: CadProject = {
+          ...activeProject,
+          lastOpenedAt: new Date().toISOString(),
+          source: { type: 'kicad', filename: file.name },
+        };
+        const nextProjects = upsertProject(projects, updatedProject);
+        saveProjects(nextProjects);
+        setProjects(nextProjects);
+        setActiveProject(updatedProject);
+        setActiveProjectId(updatedProject.id);
+      }
+
+      return result;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Validation request failed.';
       setGeometry(null);
@@ -241,425 +401,229 @@ export default function CadPage() {
           solution: message,
         },
       ]);
+      setNextSteps([]);
+      setManufacturingReady(false);
       setStatus('error');
+      setExportStatus(message);
+      return null;
     } finally {
       setBusy(false);
     }
-  };
+  }, [activeProject, backendOk, defaultHints, pcbFile, projects]);
 
-  const handleLoadDemo = () => {
-    const storedDemo = projects.find((project) => project.source.type === 'demo');
-    const demoProject = storedDemo
-      ? { ...storedDemo, name: 'Reference Demo Board', source: { type: 'demo' } as const }
+  const loadDemo = () => {
+    const existingDemo = projects.find((project) => project.source.type === 'demo');
+    const demoProject = existingDemo
+      ? { ...existingDemo, name: 'Reference Demo Board', source: { type: 'demo' } as const }
       : createProject('Reference Demo Board', { type: 'demo' });
-    const nextProjects = upsertProject(projects, demoProject);
-    activateProject(demoProject, nextProjects);
-    setFile(null);
-    setSelectedRef(null);
-    setActiveView('design');
-    setFabMode('manual');
-    setGeometry(demoValidation.pcb_geometry ?? null);
-    setIssues(demoValidation.validation.issues);
-    setStatus('ready');
+
+    activateProject(demoProject, upsertProject(projects, demoProject));
   };
 
-  const startNewProject = (name: string) => {
-    const project = createProject(name);
-    activateProject(project, upsertProject(projects, project));
-    setFile(null);
-    setGeometry(null);
-    setIssues([]);
-    setSelectedRef(null);
-    setStatus('idle');
-    setActiveView('design');
-    setFabMode('manual');
+  const loadTemplateSample = async (template: CadTemplate, mode: 'load' | 'guided') => {
+    if (!template.sampleFiles) return;
+
+    createAndActivateProject(template.productName ?? template.name, template.source);
+    hydrateTemplateContext(template.source);
+
+    try {
+      const [pcb, net] = await Promise.all([
+        loadPublicFile(template.sampleFiles.pcbPath, template.sampleFiles.pcbFilename),
+        loadPublicFile(template.sampleFiles.netPath, template.sampleFiles.netFilename),
+      ]);
+
+      setPcbFile(pcb);
+      setNetFile(net);
+      setActiveFileKind('pcb');
+      setStatus('staged');
+      setExportStatus(mode === 'guided' ? 'Sample loaded. Running validate…' : 'Sample loaded. Review it or validate when ready.');
+
+      if (mode === 'guided') {
+        const result = await validate(pcb);
+        const firstIssue = result?.validation.issues?.[0];
+        const firstRef = firstIssue ? pickRefFromComponent(firstIssue.component, result?.pcb_geometry ?? null) : null;
+        if (firstRef) setSelectedRef(firstRef);
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to load sample.';
+      setExportStatus(message);
+    }
   };
 
-  const stageNodes = useMemo<WorkbenchCanvasNode[]>(() => {
-    if (geometry) {
-      const visibleFootprints = geometry.footprints.slice(0, 4);
-      if (selectedFootprint && !visibleFootprints.some((footprint) => footprint.ref === selectedFootprint.ref)) {
-        visibleFootprints.push(selectedFootprint);
+  const exportGerbers = async () => {
+    if (!pcbFile) return;
+
+    setExportStatus('Generating Gerbers…');
+    setLastGerberFilename(null);
+
+    try {
+      const formData = new FormData();
+      formData.set('pcb_file', pcbFile, pcbFile.name);
+      formData.set('quantity', '5');
+
+      const response = await fetch('/api/proxy/manufacture/gerber', { method: 'POST', body: formData });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setExportStatus(payload?.error ? `Gerber export failed: ${payload.error}` : 'Gerber export failed.');
+        return;
       }
 
-      const footprintNodes = visibleFootprints.map((footprint, index) => {
-        const position = footprintCanvasPosition(geometry, footprint, index);
-        return {
-          id: `footprint-${footprint.ref}`,
-          title: footprint.ref,
-          description: `${footprint.value || 'Unnamed value'} • ${footprint.footprint}`,
-          badge: footprint.layer,
-          x: position.x,
-          y: position.y,
-          tone: stageTones[index % stageTones.length],
-          active: selectedRef === footprint.ref,
-          onClick: () => setSelectedRef(footprint.ref),
-        };
-      });
+      const zipFile: string | undefined = payload?.zip_file;
+      const filename = zipFile ? String(zipFile).split('/').pop() : null;
 
-      const issueNodes = issues.slice(0, 2).map((issue, index) => {
-        const issueFootprint = geometry.footprints.find((footprint) => footprint.ref === issue.component);
-        const position = issueFootprint
-          ? offsetCanvasPosition(footprintCanvasPosition(geometry, issueFootprint, index + 3), 10, 9)
-          : stagePositions[(index + 4) % stagePositions.length];
-
-        return {
-          id: `issue-${issue.component}-${index}`,
-          title: `${String(issue.severity).toUpperCase()} • ${issue.component}`,
-          description: issue.issue,
-          badge: 'issue',
-          x: position.x,
-          y: position.y,
-          tone: issueTone(issue),
-          active: selectedRef === issue.component,
-          onClick: issueFootprint ? () => setSelectedRef(issue.component) : undefined,
-        };
-      });
-
-      const summaryNode: WorkbenchCanvasNode = {
-        id: 'geometry-summary',
-        title: `${geometry.footprints.length} footprints • ${geometry.nets.length} nets`,
-        description: issues.length
-          ? `${issues.length} validation issues loaded. Use the issue tray to inspect disposition before fabrication.`
-          : 'Geometry is loaded with no active validation issues in the current session.',
-        badge: status,
-        x: stagePositions[5].x,
-        y: stagePositions[5].y,
-        tone: issues.length ? 'amber' : 'emerald',
-      };
-
-      return [...footprintNodes, ...issueNodes, summaryNode];
+      if (filename) {
+        setLastGerberFilename(filename);
+        setExportStatus(`Gerbers ready: ${filename}`);
+      } else {
+        setExportStatus('Gerbers generated.');
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Gerber export failed.';
+      setExportStatus(`Gerber export error: ${message}`);
     }
+  };
 
-    if (file) {
-      return [
-        {
-          id: 'staged-file',
-          title: file.name,
-          description: `${(file.size / 1024).toFixed(0)} KB staged for /validate-kicad.`,
-          badge: status,
-          x: stagePositions[0].x,
-          y: stagePositions[0].y,
-          tone: 'cyan',
-        },
-        {
-          id: 'validation-target',
-          title: 'Validation route',
-          description: 'Run validation to load board geometry, validation issues, and selectable footprints.',
-          badge: busy ? 'running' : 'ready',
-          x: stagePositions[3].x,
-          y: stagePositions[3].y,
-          tone: 'amber',
-        },
-      ];
+  const exportBom = async (format: 'json' | 'csv') => {
+    if (!netFile) return;
+
+    setExportStatus(`Generating BOM (${format.toUpperCase()})…`);
+
+    try {
+      const formData = new FormData();
+      formData.set('netlist_file', netFile, netFile.name);
+      formData.set('include_pricing', 'false');
+      formData.set('format', format);
+
+      const response = await fetch('/api/proxy/manufacture/bom', { method: 'POST', body: formData });
+      if (!response.ok) {
+        const text = await response.text();
+        setExportStatus(`BOM export failed: ${text.slice(0, 200)}`);
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = format === 'csv' ? 'bom.csv' : 'bom.json';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setExportStatus(`BOM downloaded (${format.toUpperCase()}).`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'BOM export failed.';
+      setExportStatus(`BOM export error: ${message}`);
     }
+  };
 
-    if (activeProject) {
-      return [
-        {
-          id: 'project-source',
-          title: activeProject.name,
-          description: sourceLabel(activeProject),
-          badge: activeProject.source.type,
-          x: stagePositions[0].x,
-          y: stagePositions[0].y,
-          tone: 'slate',
-        },
-      ];
-    }
+  const focusComponent = (component: string) => {
+    const ref = pickRefFromComponent(component, geometry);
+    if (ref) setSelectedRef(ref);
+  };
 
-    return [];
-  }, [activeProject, busy, file, geometry, issues, selectedFootprint, selectedRef, status]);
-
-  const recentProjects = useMemo(
-    () => [...projects].sort((a, b) => b.lastOpenedAt.localeCompare(a.lastOpenedAt)).slice(0, 5),
-    [projects],
-  );
-
-  if (showStart) {
-    return (
-      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.10),transparent_20%),radial-gradient(circle_at_82%_12%,rgba(249,115,22,0.10),transparent_18%),linear-gradient(180deg,#02050a_0%,#040a12_100%)] px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="rounded-[2rem] border border-white/10 bg-[#060b13]/92 p-8 shadow-[0_35px_80px_rgba(0,0,0,0.42)]">
-            <div className="inline-flex items-center rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100">
-              Spatial workbench
-            </div>
-            <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Start where board intelligence turns into a spatial engine.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-300">
-              This route should feel like the point where analysis, component knowledge, and project planning condense into one live board stage for geometry, fit, repair, and fabrication.
-            </p>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => startNewProject('New Design')}
-                className="group rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,#0d1728,#09111f)] p-5 text-left transition-transform hover:-translate-y-1"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/6 text-cyan-200">
-                    <CircuitBoard className="h-5 w-5" />
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-slate-500 transition-transform group-hover:translate-x-1 group-hover:text-white" />
-                </div>
-                <div className="mt-5 text-lg font-semibold text-white">Create blank workspace</div>
-                <div className="mt-2 text-sm leading-6 text-slate-400">
-                  Open a clean spatial shell and stage the board geometry when you are ready.
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLoadDemo}
-                className="group rounded-[1.6rem] border border-cyan-300/22 bg-[linear-gradient(180deg,#12304a,#0c192b)] p-5 text-left transition-transform hover:-translate-y-1"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-300/12 text-cyan-100">
-                    <Zap className="h-5 w-5" />
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-cyan-200 transition-transform group-hover:translate-x-1" />
-                </div>
-                <div className="mt-5 text-lg font-semibold text-white">Load reference demo</div>
-                <div className="mt-2 text-sm leading-6 text-slate-300">
-                  Open a pre-filled board state so the spatial shell, issues, and component focus are immediately visible.
-                </div>
-              </button>
-            </div>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {[
-                ['Board-first', 'The center stage stays spatial and persistent.'],
-                ['Agent-assisted', 'AI stays in the work loop instead of outside it.'],
-                ['Fab-aware', 'Manual and robotic execution belong in the same shell.'],
-              ].map(([title, copy]) => (
-                <div key={title} className="rounded-[1.3rem] border border-white/8 bg-white/[0.03] p-4">
-                  <div className="text-sm font-semibold text-white">{title}</div>
-                  <div className="mt-2 text-sm leading-6 text-slate-400">{copy}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[2rem] border border-white/10 bg-[#060b13]/88 p-6 shadow-[0_35px_80px_rgba(0,0,0,0.35)]">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Recent missions</div>
-                <div className="mt-2 text-xl font-semibold text-white">Resume spatial context</div>
-              </div>
-              <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-                {recentProjects.length} recent
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              {recentProjects.length ? recentProjects.map((project) => (
-                <button
-                  key={project.id}
-                  type="button"
-                  onClick={() => activateProject(project, projects)}
-                  className="w-full rounded-[1.25rem] border border-white/10 bg-[linear-gradient(180deg,#0d1728,#09111f)] px-4 py-4 text-left transition-colors hover:border-white/18 hover:bg-[linear-gradient(180deg,#11203a,#0b1730)]"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-semibold text-white">{project.name}</div>
-                      <div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">{sourceLabel(project)}</div>
-                    </div>
-                    <ArrowRight className="h-4 w-4 text-slate-500" />
-                  </div>
-                </button>
-              )) : (
-                <div className="rounded-[1.25rem] border border-white/10 bg-[linear-gradient(180deg,#0d1728,#09111f)] p-4 text-sm leading-6 text-slate-400">
-                  No recent projects yet. Start a blank workspace or load the demo to seed the spatial history.
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 rounded-[1.4rem] border border-white/10 bg-[#08111d] p-5">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Why this route exists</div>
-              <div className="mt-3 text-sm leading-7 text-slate-300">
-                CAD here should not be decorative 3D. It should be the place where geometry, issues, part focus, fit, and execution converge without losing the upstream board intelligence.
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const heroTemplate = cadTemplates.find((template) => template.id === 'hero-drone-fc-power') || null;
+  const activeTemplate = cadTemplates.find((template) => template.id === activeTemplateId) || null;
 
   return (
-    <StudioShell
-      eyebrow="Workbench"
-      title="Drive the board through a spatial editor, not a separate CAD silo."
-      description="The same workbench now carries geometry, validation, part focus, and fabrication context so the spatial route extends the product instead of splitting from it."
-      status={activeProject ? `Active workspace: ${activeProject.name}` : 'No active workspace'}
-      commandBar={(
-        <StudioCommandBar
-          modeLabel="CAD"
-          objective="Keep geometry live while the assistant context explains fit, selection, validation, and the next fabrication move."
-          context={activeProject ? `${activeProject.name} • ${sourceLabel(activeProject)}` : 'No workspace active.'}
-          status={busy ? 'validating' : geometry ? 'viewport live' : 'stage primed'}
-          badges={['spatial-first', 'kicad-aware', 'fab-linked']}
-        />
-      )}
-      defaultBottomOpen={true}
-      activeHref="/cad"
-      navItems={navItems}
-      actions={
-        <>
-          <Button type="button" onClick={handleLoadDemo} className="rounded-full bg-white text-slate-950 hover:bg-slate-100">
-            <Zap className="mr-2 h-4 w-4" />
-            Demo board
-          </Button>
-          <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10">
-            <Link href="/projects">
-              <Sparkles className="mr-2 h-4 w-4" />
-              Project board
+    <div className="min-h-screen bg-[#070b14] text-white">
+      <div className="border-b border-white/10 bg-[#0b1220]">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <Link href="/" className="text-sm font-semibold tracking-[0.12em] text-white/90">
+              Circuit.AI / CAD
             </Link>
-          </Button>
-        </>
-      }
-      left={
-        <div className="space-y-5">
-          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
-            {panelHeading('Workspace', 'Mission state')}
-            <div className="space-y-3">
-              <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
-                <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Project</div>
-                <div className="mt-2 text-sm font-semibold text-white">{activeProject?.name || 'No active project'}</div>
-                <div className="mt-2 text-sm leading-6 text-slate-400">{sourceLabel(activeProject)}</div>
+            {activeProject ? (
+              <div className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/70">
+                {activeProject.name}
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Status</div>
-                  <div className="mt-2 text-lg font-semibold text-white">{status.toUpperCase()}</div>
-                </div>
-                <div className="rounded-[1rem] border border-white/8 bg-[#081423] p-3">
-                  <div className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Geometry</div>
-                  <div className="mt-2 text-lg font-semibold text-white">{geometry ? `${geometry.footprints.length} parts` : 'Pending'}</div>
-                </div>
-              </div>
+            ) : null}
+            <div className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/70">
+              {headerStatus}
             </div>
-          </div>
-
-          <div>
-            {panelHeading('Import', 'Board intake')}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="editor-dropzone flex w-full flex-col items-center justify-center px-4 py-6 text-center"
-            >
-              <FileUp className="mb-3 h-7 w-7 text-cyan-200" />
-              <div className="text-sm font-medium text-white">{file ? file.name : 'Import KiCad board'}</div>
-              <div className="mt-1 text-xs text-slate-400">
-                {file ? `Ready to validate • ${(file.size / 1024).toFixed(0)} KB` : '.kicad_pcb and compatible board files'}
-              </div>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".kicad_pcb,.zip,.json"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-
-          <div className="editor-subpanel rounded-[1.5rem] p-4">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-              <Layers className="h-4 w-4 text-cyan-300" />
-              Stage modes
-            </div>
-            <div className="grid gap-2">
-              <button
-                type="button"
-                onClick={() => setActiveView('design')}
-                className={`rounded-[1rem] border px-3 py-3 text-left text-sm ${activeView === 'design' ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-100' : 'border-white/8 bg-[#081423] text-slate-300'}`}
+            {backendOk !== null ? (
+              <div
+                className={`rounded border px-2 py-1 text-xs ${
+                  backendOk
+                    ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+                    : 'border-red-400/20 bg-red-500/10 text-red-200'
+                }`}
               >
-                Spatial design review
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveView('fab')}
-                className={`rounded-[1rem] border px-3 py-3 text-left text-sm ${activeView === 'fab' ? 'border-amber-300/30 bg-amber-300/10 text-amber-100' : 'border-white/8 bg-[#081423] text-slate-300'}`}
-              >
-                Fabrication review
-              </button>
-            </div>
-
-            {activeView === 'fab' ? (
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => setFabMode('manual')}
-                  className={`rounded-[1rem] border px-3 py-3 text-sm ${fabMode === 'manual' ? 'border-white/15 bg-white text-slate-950' : 'border-white/8 bg-[#081423] text-slate-300'}`}
-                >
-                  Manual
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFabMode('robot')}
-                  className={`rounded-[1rem] border px-3 py-3 text-sm ${fabMode === 'robot' ? 'border-orange-300/30 bg-orange-300/12 text-orange-100' : 'border-white/8 bg-[#081423] text-slate-300'}`}
-                >
-                  Robot
-                </button>
+                API {backendOk ? 'Connected' : 'Offline'}
+              </div>
+            ) : null}
+            {manufacturingReady ? (
+              <div className="rounded border border-emerald-400/20 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200">
+                Manufacturing Ready
               </div>
             ) : null}
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
-            {panelHeading('Navigator', 'Footprint tree')}
-            <div className="h-64 overflow-hidden rounded-[1rem] border border-white/8 bg-[#081423]">
-              <TreePanel
-                geometry={geometry}
-                selectedRef={selectedRef ?? undefined}
-                onSelectRef={(ref) => setSelectedRef(ref)}
-              />
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept=".kicad_pcb,.net"
+              onChange={handleFileSelect}
+            />
+            <Button variant="outline" onClick={() => setShowStart(true)}>
+              Projects
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/projects">Project board</Link>
+            </Button>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <FileUp className="mr-2 h-4 w-4" />
+              Import KiCad
+            </Button>
+            <Button disabled={!pcbFile || busy} onClick={() => void validate()}>
+              {busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Wrench className="mr-2 h-4 w-4" />}
+              Validate
+            </Button>
+            <Button variant="outline" onClick={loadDemo}>
+              <Zap className="mr-2 h-4 w-4" />
+              Demo board
+            </Button>
+            {heroTemplate ? (
+              <Button variant="outline" onClick={() => void loadTemplateSample(heroTemplate, 'guided')}>
+                Guided Drone
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 p-3 xl:h-[calc(100vh-73px)] xl:grid-cols-[280px_minmax(0,1fr)_360px] xl:grid-rows-[minmax(480px,1fr)_230px]">
+        <section className="order-1 flex min-h-[420px] min-w-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-[#0b1220] xl:col-start-2 xl:row-start-1 xl:min-h-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+            <div>
+              <div className="text-sm font-semibold text-white/90">Board stage</div>
+              <div className="mt-1 text-xs text-white/50">
+                {activeProject ? `${activeProject.name} • ${sourceLabel(activeProject)}` : 'Create a project or load the demo board.'}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveView('design')}
+                className={`rounded border px-3 py-1.5 text-xs ${activeView === 'design' ? 'border-blue-400/30 bg-blue-500/10 text-blue-200' : 'border-white/10 bg-white/5 text-white/65 hover:bg-white/10'}`}
+              >
+                Design review
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveView('fab')}
+                className={`rounded border px-3 py-1.5 text-xs ${activeView === 'fab' ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-white/10 bg-white/5 text-white/65 hover:bg-white/10'}`}
+              >
+                Fabrication review
+              </button>
             </div>
           </div>
 
-          <Button
-            type="button"
-            onClick={handleValidate}
-            disabled={!file || busy}
-            className="editor-button-primary w-full rounded-full"
-          >
-            {busy ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Wrench className="mr-2 h-4 w-4" />}
-            {busy ? 'Validating geometry…' : 'Validate board'}
-          </Button>
-
-          <div className="rounded-[1.5rem] border border-white/8 bg-[#08111f] p-4 text-sm leading-6 text-slate-300">
-            Treat this route as the spatial continuation of the same system. Geometry, issues, and execution should stay in one loop instead of opening a second product.
-          </div>
-        </div>
-      }
-      main={
-        <WorkbenchCanvas
-          toolbar={['Spatial', 'Assembly', 'Fabrication']}
-          activeToolbar={activeView === 'design' ? 'Spatial' : 'Fabrication'}
-          toolbarStatus={busy ? 'Validating board' : geometry ? 'Viewport live' : 'Awaiting geometry'}
-          stageLabel="Spatial CAD"
-          stageTitle="Keep the board spatial, selected, and downstream-aware."
-          stageSummary="This stage keeps imported geometry, selected parts, validation pressure, and fabrication review in one board-centered workspace."
-          badge={activeProject?.name || 'No workspace'}
-          metrics={[
-            { label: 'Project', value: activeProject?.name || 'None', tone: 'cyan' },
-            { label: 'Issues', value: String(issues.length), tone: issues.length ? 'amber' : 'emerald' },
-            { label: 'Selection', value: selectedRef || 'None', tone: 'slate' },
-          ]}
-          notes={[
-            'The viewport is interactive here. Pan, rotate, select, and inspect should all happen without losing the shared shell.',
-            activeView === 'fab'
-              ? `Fabrication mode is active. ${fabMode === 'manual' ? 'Manual instructions are foregrounded.' : 'Robot execution is foregrounded.'}`
-              : 'Stay in design review until the geometry and issue state are stable enough to hand off.',
-          ]}
-          actions={[
-            { href: '/analyze', label: 'Return to analyze' },
-            { href: '/projects', label: 'Route board' },
-          ]}
-          nodes={stageNodes}
-          contentInteractive={true}
-        >
-          <div className="h-full w-full overflow-hidden rounded-[1.25rem] border border-white/12 bg-[#04070c] shadow-[0_30px_70px_rgba(2,6,23,0.5)]">
+          <div className="min-h-0 flex-1 p-3">
             <PcbViewport
               geometry={geometry}
               issues={issues}
@@ -667,129 +631,468 @@ export default function CadPage() {
               onSelectionChange={({ footprintRef }: SelectionState) => setSelectedRef(footprintRef)}
             />
           </div>
-        </WorkbenchCanvas>
-      }
-      bottom={
-        <div className="grid h-full grid-rows-[40px_minmax(0,1fr)]">
-          <div className="flex items-center gap-2 border-b border-white/8 bg-[#08111d] px-4">
-            {['Issues', 'Projects', 'Fabrication'].map((item, index) => (
+        </section>
+
+        <aside className="order-2 flex min-h-0 flex-col gap-3 xl:col-start-3 xl:row-span-2">
+          <div className="rounded-xl border border-white/10 bg-[#0b1220] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Selection inspector</div>
+                <div className="mt-2 text-2xl font-semibold text-white">
+                  {selectedFootprint?.ref || selectedRef || 'None'}
+                </div>
+              </div>
+              <div className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">
+                {selectedIssues.length ? `${selectedIssues.length} issue` : geometry ? 'Geometry live' : 'Idle'}
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Footprint</div>
+                <div className="mt-2 text-sm font-semibold text-white/90">
+                  {selectedFootprint ? `${selectedFootprint.value || 'Unnamed'} • ${selectedFootprint.footprint}` : 'Select a footprint from the board or project tree.'}
+                </div>
+                {selectedFootprint ? (
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    <div className="rounded border border-white/10 bg-black/20 p-2 text-xs text-white/70">
+                      Layer
+                      <div className="mt-1 text-sm font-semibold text-white">{selectedFootprint.layer}</div>
+                    </div>
+                    <div className="rounded border border-white/10 bg-black/20 p-2 text-xs text-white/70">
+                      Rotation
+                      <div className="mt-1 text-sm font-semibold text-white">{selectedFootprint.at.rot_deg}°</div>
+                    </div>
+                    <div className="rounded border border-white/10 bg-black/20 p-2 text-xs text-white/70 sm:col-span-2">
+                      Position
+                      <div className="mt-1 text-sm font-semibold text-white">
+                        {formatMillimeters(selectedFootprint.at.x)} × {formatMillimeters(selectedFootprint.at.y)}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Constraint context</div>
+                <div className="mt-2 text-sm text-white/80">
+                  {selectedIssues[0]?.issue || primaryIssue?.issue || 'No active constraint tied to the current selection.'}
+                </div>
+                <div className="mt-2 text-sm text-cyan-200/90">
+                  {selectedIssues[0]?.solution || primaryIssue?.solution || 'Validate a board to populate review context.'}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/70">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Review mode</div>
+                <div className="mt-2">
+                  {activeView === 'fab'
+                    ? `${fabMode === 'manual' ? 'Manual rework' : 'Robot execution'} active`
+                    : 'Design review active'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="min-h-[320px] flex-1">
+            <IssuesPanel issues={issues} onFocusComponent={focusComponent} />
+          </div>
+        </aside>
+
+        <section className="order-3 overflow-hidden rounded-xl border border-white/10 bg-[#0b1220] xl:col-start-2 xl:row-start-2">
+          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+            {[
+              ['issues', 'Issues'],
+              ['projects', 'Projects'],
+              ['fabrication', 'Fabrication'],
+            ].map(([value, label]) => (
               <button
-                key={item}
+                key={value}
                 type="button"
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${index === 0 ? 'bg-cyan-300/15 text-cyan-100' : 'text-slate-400 hover:bg-white/6 hover:text-white'}`}
+                onClick={() => setActiveTray(value as 'issues' | 'projects' | 'fabrication')}
+                className={`rounded border px-3 py-1.5 text-xs ${activeTray === value ? 'border-blue-400/30 bg-blue-500/10 text-blue-200' : 'border-white/10 bg-white/5 text-white/60 hover:bg-white/10'}`}
               >
-                {item}
+                {label}
               </button>
             ))}
           </div>
 
-          <div className="grid min-h-0 gap-px lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_280px]">
-            <div className="min-h-0 overflow-hidden bg-[#07101d] p-4">
-              <div className="h-full">
-                <IssuesPanel issues={issues} onFocusComponent={(component) => setSelectedRef(component)} />
+          <div className="grid gap-3 p-4 md:grid-cols-[minmax(0,1.15fr)_300px]">
+            {activeTray === 'issues' ? (
+              <>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-semibold text-white/90">Next steps</div>
+                    <div className="text-xs text-white/45">
+                      {activeFile ? `Active file: ${activeFile.name}` : activeProject ? 'Project active' : 'No project'}
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-3 md:grid-cols-2">
+                    <div className="rounded border border-white/10 bg-black/20 p-3 text-sm text-white/70">
+                      {starterChecklist.length === 0 && nextSteps.length === 0 ? (
+                        <div className="text-white/50">Start a project or validate a board to get a review checklist.</div>
+                      ) : (
+                        <ol className="list-decimal space-y-1 pl-4">
+                          {starterChecklist.map((item, index) => (
+                            <li key={`starter-${index}`}>{item}</li>
+                          ))}
+                          {nextSteps.map((item, index) => (
+                            <li key={`next-${index}`}>{item}</li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                    <div className="rounded border border-white/10 bg-black/20 p-3 text-sm text-white/70">
+                      <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Validation summary</div>
+                      <div className="mt-2">{exportStatus || 'Validate a board to populate guidance and manufacturing readiness.'}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="text-sm font-semibold text-white/90">DRC summary</div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {[
+                        ['Critical', summary.critical],
+                        ['Error', summary.error],
+                        ['Warning', summary.warning],
+                        ['Info', summary.info],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded border border-white/10 bg-black/20 p-2">
+                          <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">{label}</div>
+                          <div className="mt-1 text-lg font-semibold text-white">{value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="text-sm font-semibold text-white/90">Visible nets</div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {visibleNets.length ? visibleNets.map((net) => (
+                        <div key={net.id} className="rounded border border-white/10 bg-black/20 px-2 py-1 text-xs text-white/70">
+                          {net.name}
+                        </div>
+                      )) : (
+                        <div className="text-sm text-white/50">No named nets loaded.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+
+            {activeTray === 'projects' ? (
+              <>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <div className="text-sm font-semibold text-white/90">Recent projects</div>
+                  <div className="mt-3 grid gap-2">
+                    {recentProjects.length ? recentProjects.map((project) => (
+                      <button
+                        key={project.id}
+                        type="button"
+                        onClick={() => activateProject(project, projects)}
+                        className={`rounded border px-3 py-2 text-left ${
+                          project.id === activeProject?.id
+                            ? 'border-blue-400/30 bg-blue-500/10 text-blue-100'
+                            : 'border-white/10 bg-black/20 text-white/75 hover:bg-white/10'
+                        }`}
+                      >
+                        <div className="text-sm font-semibold">{project.name}</div>
+                        <div className="mt-1 text-xs text-white/45">{sourceLabel(project)}</div>
+                      </button>
+                    )) : (
+                      <div className="rounded border border-white/10 bg-black/20 p-3 text-sm text-white/50">
+                        No projects yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="text-sm font-semibold text-white/90">Active workspace</div>
+                    <div className="mt-2 text-lg font-semibold text-white">{activeProject?.name || 'None'}</div>
+                    <div className="mt-2 text-sm text-white/60">{sourceLabel(activeProject)}</div>
+                  </div>
+
+                  {activeTemplate ? (
+                    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                      <div className="text-sm font-semibold text-white/90">{activeTemplate.productName ?? activeTemplate.name}</div>
+                      <div className="mt-2 text-sm text-white/60">{activeTemplate.productPitch ?? activeTemplate.description}</div>
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
+
+            {activeTray === 'fabrication' ? (
+              <>
+                <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <div className="text-sm font-semibold text-white/90">Fabrication actions</div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    {(activeView === 'fab'
+                      ? fabMode === 'manual'
+                        ? ['Heat target pad', 'Apply flux', 'Lift component carefully', 'Document rework result']
+                        : ['Prepare robot path', 'Verify nozzle clearance', 'Stage execution packet', 'Dry-run robot sequence']
+                      : ['Validate board geometry', 'Review highest-risk issue', 'Switch to fabrication review', 'Generate outputs']
+                    ).map((step) => (
+                      <div key={step} className="rounded border border-white/10 bg-black/20 p-3 text-sm text-white/75">
+                        {step}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="text-sm font-semibold text-white/90">Outputs</div>
+                    <div className="mt-3 grid gap-2">
+                      <Button variant="outline" disabled={!pcbFile || busy} onClick={() => void exportGerbers()}>
+                        Export Gerbers
+                      </Button>
+                      <Button variant="outline" disabled={!netFile || busy} onClick={() => void exportBom('json')}>
+                        Export BOM (JSON)
+                      </Button>
+                      <Button variant="outline" disabled={!netFile || busy} onClick={() => void exportBom('csv')}>
+                        Export BOM (CSV)
+                      </Button>
+                      {lastGerberFilename ? (
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            window.location.href = `/api/proxy/manufacture/download-gerber/${encodeURIComponent(lastGerberFilename)}`;
+                          }}
+                        >
+                          Download ZIP
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3 text-sm text-white/70">
+                    <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Gating issue</div>
+                    <div className="mt-2">
+                      {primaryIssue
+                        ? `${primaryIssue.issue}. ${primaryIssue.solution}`
+                        : 'No active issue is blocking fabrication in the current session.'}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </div>
+        </section>
+
+        <aside className="order-4 flex min-h-0 flex-col gap-3 xl:col-start-1 xl:row-span-2">
+          <div className="rounded-xl border border-white/10 bg-[#0b1220] p-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Workspace</div>
+            <div className="mt-2 text-xl font-semibold text-white">
+              {activeProject?.name || 'No project'}
+            </div>
+            <div className="mt-2 text-sm text-white/60">{sourceLabel(activeProject)}</div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="rounded border border-white/10 bg-white/5 p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Files</div>
+                <div className="mt-2 text-sm text-white/80">{pcbFile ? pcbFile.name : 'No PCB loaded'}</div>
+                <div className="mt-1 text-xs text-white/50">{netFile ? netFile.name : 'No netlist loaded'}</div>
+              </div>
+              <div className="rounded border border-white/10 bg-white/5 p-3">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-white/45">Selection</div>
+                <div className="mt-2 text-sm text-white/80">{selectedRef || 'None'}</div>
+                <div className="mt-1 text-xs text-white/50">
+                  {geometry ? `${geometry.footprints.length} footprints • ${geometry.nets.length} nets` : 'No geometry loaded'}
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="min-h-0 overflow-y-auto bg-[#07101d] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <PackageCheck className="h-4 w-4 text-cyan-300" />
-                Project stack
+          <div className="rounded-xl border border-white/10 bg-[#0b1220] p-4">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white/90">
+              <Layers className="h-4 w-4 text-cyan-300" />
+              Stage modes
+            </div>
+            <div className="grid gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveView('design')}
+                className={`rounded border px-3 py-2 text-left text-sm ${activeView === 'design' ? 'border-blue-400/30 bg-blue-500/10 text-blue-200' : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'}`}
+              >
+                Design review
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveView('fab')}
+                className={`rounded border px-3 py-2 text-left text-sm ${activeView === 'fab' ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'}`}
+              >
+                Fabrication review
+              </button>
+            </div>
+
+            {activeView === 'fab' ? (
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                <button
+                  type="button"
+                  onClick={() => setFabMode('manual')}
+                  className={`rounded border px-3 py-2 text-left text-sm ${fabMode === 'manual' ? 'border-white/20 bg-white text-slate-950' : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'}`}
+                >
+                  Manual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFabMode('robot')}
+                  className={`rounded border px-3 py-2 text-left text-sm ${fabMode === 'robot' ? 'border-amber-400/30 bg-amber-500/10 text-amber-200' : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'}`}
+                >
+                  Robot
+                </button>
               </div>
-              <div className="space-y-3">
-                {recentProjects.map((project) => (
+            ) : null}
+          </div>
+
+          {activeTemplate ? (
+            <div className="rounded-xl border border-white/10 bg-[#0b1220] p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white/90">
+                <PackageCheck className="h-4 w-4 text-cyan-300" />
+                Product context
+              </div>
+              <div className="text-sm font-semibold text-white">{activeTemplate.productName ?? activeTemplate.name}</div>
+              <div className="mt-2 text-sm text-white/60">{activeTemplate.productPitch ?? activeTemplate.description}</div>
+            </div>
+          ) : null}
+
+          <div className="min-h-[320px] flex-1">
+            <TreePanel
+              geometry={geometry}
+              selectedRef={selectedRef ?? undefined}
+              onSelectRef={(ref) => setSelectedRef(ref)}
+            />
+          </div>
+        </aside>
+      </div>
+
+      {showStart ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-xl border border-white/10 bg-[#0b1220] p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-lg font-semibold text-white">Start a project</div>
+                <div className="mt-1 text-sm text-white/60">
+                  This workspace is project-first. Start from a product, a demo board, or a direct KiCad import.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="rounded border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70 hover:bg-white/10"
+                onClick={() => setShowStart(false)}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <button
+                type="button"
+                className="rounded-lg border border-white/10 bg-white/5 p-4 text-left hover:bg-white/10"
+                onClick={() => startNewProject({ type: 'blank' })}
+              >
+                <div className="text-sm font-semibold text-white">New Project</div>
+                <div className="mt-1 text-xs text-white/60">Start with an empty CAD workspace.</div>
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-white/10 bg-white/5 p-4 text-left hover:bg-white/10"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <div className="text-sm font-semibold text-white">Import KiCad</div>
+                <div className="mt-1 text-xs text-white/60">Bring in a `.kicad_pcb` or `.net` file directly.</div>
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-white/10 bg-white/5 p-4 text-left hover:bg-white/10"
+                onClick={loadDemo}
+              >
+                <div className="text-sm font-semibold text-white">Demo Project</div>
+                <div className="mt-1 text-xs text-white/60">Instant board + issues for direct review.</div>
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Templates</div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                {cadTemplates.map((template) => (
                   <button
-                    key={project.id}
+                    key={template.id}
                     type="button"
-                    onClick={() => activateProject(project, projects)}
-                    className={`w-full rounded-[1rem] border px-3 py-3 text-left transition-colors ${
-                      project.id === activeProject?.id
-                        ? 'border-cyan-300/30 bg-cyan-300/10 text-cyan-100'
-                        : 'border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] text-slate-300 hover:border-white/18'
-                    }`}
+                    className="rounded-lg border border-white/10 bg-white/5 p-4 text-left hover:bg-white/10"
+                    onClick={() => {
+                      createAndActivateProject(template.productName ?? template.name, template.source);
+                      hydrateTemplateContext(template.source);
+                    }}
                   >
-                    <div className="text-sm font-semibold">{project.name}</div>
-                    <div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">{sourceLabel(project)}</div>
+                    <div className="text-sm font-semibold text-white">{template.name}</div>
+                    <div className="mt-2 text-xs text-white/60">{template.description}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="min-h-0 overflow-y-auto bg-[#07101d] p-4">
-              <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
-                <Activity className="h-4 w-4 text-cyan-300" />
-                Fabrication actions
+            <div className="mt-6">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">One-click products</div>
+              <div className="mt-3 space-y-2">
+                {cadTemplates
+                  .filter((template) => Boolean(template.sampleFiles))
+                  .slice()
+                  .sort((a, b) => {
+                    const rank = (template: CadTemplate) => (template.id === 'hero-drone-fc-power' ? 0 : template.id.startsWith('hero-') ? 1 : 2);
+                    return rank(a) - rank(b);
+                  })
+                  .map((template) => (
+                    <div key={template.id} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-white">{template.productName ?? template.name}</div>
+                          <div className="mt-1 text-xs text-white/60">{template.description}</div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => void loadTemplateSample(template, 'load')}>
+                            Load
+                          </Button>
+                          <Button size="sm" onClick={() => void loadTemplateSample(template, 'guided')}>
+                            Guided
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
               </div>
-              <div className="space-y-3">
-                {(activeView === 'fab'
-                  ? fabMode === 'manual'
-                    ? ['Heat target pad', 'Apply flux', 'Lift component carefully']
-                    : ['Prepare robot path', 'Verify nozzle clearance', 'Stage execution packet']
-                  : ['Validate board geometry', 'Select suspect component', 'Choose fabrication review']
-                ).map((step) => (
-                  <div key={step} className="rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-3 text-sm text-slate-300">
-                    {step}
-                  </div>
-                ))}
-                <Link
-                  href="/projects"
-                  className="block rounded-[1rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] px-3 py-3 text-sm text-slate-300 transition-colors hover:border-white/18 hover:text-white"
-                >
-                  Hand route back to project board
-                </Link>
+            </div>
+
+            <div className="mt-6">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-white/45">Recent projects</div>
+              <div className="mt-3 max-h-48 overflow-auto rounded-lg border border-white/10">
+                {recentProjects.length ? recentProjects.map((project) => (
+                  <button
+                    key={project.id}
+                    type="button"
+                    className="flex w-full items-center justify-between border-b border-white/10 bg-transparent px-4 py-3 text-left hover:bg-white/5 last:border-b-0"
+                    onClick={() => activateProject(project, projects)}
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-white/90">{project.name}</div>
+                      <div className="truncate text-xs text-white/45">{sourceLabel(project)}</div>
+                    </div>
+                    <div className="text-xs text-white/35">{new Date(project.lastOpenedAt).toLocaleString()}</div>
+                  </button>
+                )) : (
+                  <div className="p-4 text-sm text-white/50">No projects yet.</div>
+                )}
               </div>
             </div>
           </div>
         </div>
-      }
-      right={
-        <CopilotDock
-          modeLabel="CAD"
-          objective="Use the assistant context to explain selected geometry, justify spatial decisions, and move the board into fabrication or repair without breaking context."
-          status={busy ? 'Validating' : selectedRef || status}
-          messages={[
-            {
-              role: 'agent',
-              body: activeProject
-                ? `The current spatial focus is ${activeProject.name}. I can explain board geometry, selected parts, fit questions, and the strongest next execution move.`
-                : 'Open a workspace or load the demo and I will anchor the spatial reasoning around it.',
-            },
-            {
-              role: 'user',
-              body: selectedRef
-                ? `Tell me what ${selectedRef} means in this geometry and whether it changes the fabrication path.`
-                : 'Keep the board stable and tell me what should be spatially inspected next.',
-            },
-            issues.length
-              ? {
-                  role: 'system',
-                  body: `${issues.length} validation issues are active. The lower tray owns detailed triage while this dock narrates the consequences.`,
-                }
-              : {
-                  role: 'agent',
-                  body: activeView === 'fab'
-                    ? 'Fabrication mode is active. Use this dock for execution reasoning while the stage remains spatial.'
-                    : 'Stay in design review until geometry and issue pressure are clear enough to branch with confidence.',
-                },
-          ]}
-          prompts={[
-            'Explain selected part in 3D',
-            'Prepare fabrication handoff',
-            'Highlight highest-risk issue',
-            'Ask whether robot mode is viable',
-          ]}
-          links={[
-            { href: '/analyze', label: 'Return to analysis' },
-            { href: '/projects', label: 'Open project routes' },
-          ]}
-          footer={
-            <div className="rounded-[0.95rem] border border-white/10 bg-[#0b1628] p-3 text-sm leading-6 text-slate-300">
-              <div>Project: {activeProject?.name || 'None'}</div>
-              <div>Selection: {selectedRef || 'None'}</div>
-              <div>Geometry: {geometry ? `${geometry.footprints.length} footprints • ${geometry.nets.length} nets` : 'No board loaded'}</div>
-            </div>
-          }
-        />
-      }
-    />
+      ) : null}
+    </div>
   );
 }

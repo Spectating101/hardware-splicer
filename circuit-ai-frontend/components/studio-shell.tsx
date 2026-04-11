@@ -100,24 +100,24 @@ export function StudioShell({
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.08),transparent_18%),radial-gradient(circle_at_86%_6%,rgba(251,146,60,0.08),transparent_20%),linear-gradient(180deg,#02050a_0%,#040a12_100%)] text-slate-100">
-      <main className="mx-auto max-w-[2200px] px-2 py-2 sm:px-3">
-        <section className="overflow-hidden rounded-[1.35rem] border border-white/10 bg-[#060b13] shadow-[0_45px_120px_rgba(0,0,0,0.58)]">
-          <div className="border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))]">
-            <div className="flex min-h-[38px] items-center gap-3 border-b border-white/8 px-4 text-sm">
+    <div className="circuit-chassis min-h-screen overflow-hidden text-slate-100">
+      <main className="mx-auto max-w-[2240px] px-2 py-2 sm:px-4 sm:py-4">
+        <section className="circuit-window overflow-hidden rounded-[1.6rem]">
+          <div className="border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),rgba(255,255,255,0.018))]">
+            <div className="flex min-h-[44px] items-center gap-3 border-b border-white/8 px-4 text-sm">
               <Link href="/" className="flex items-center gap-3">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[linear-gradient(135deg,#0f172a,#2563eb,#f97316)] text-white shadow-[0_12px_28px_rgba(37,99,235,0.28)]">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-[linear-gradient(135deg,#09111f,#0e7490,#f97316)] text-white shadow-[0_16px_34px_rgba(34,211,238,0.18)]">
                   <CircuitBoard className="h-4 w-4" />
                 </div>
                 <div>
                   <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200">{eyebrow}</div>
-                  <div className="text-xs font-semibold text-white">Circuit.AI Studio</div>
+                  <div className="text-sm font-semibold tracking-tight text-white">Circuit.AI Studio</div>
                 </div>
               </Link>
 
               <div className="hidden items-center gap-4 lg:flex">
                 {['Live routes', 'Proxy guarded', 'Evidence first'].map((item) => (
-                  <span key={item} className="text-xs font-medium text-slate-500">
+                  <span key={item} className="rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[11px] font-medium text-slate-400">
                     {item}
                   </span>
                 ))}
@@ -134,22 +134,22 @@ export function StudioShell({
                 </div>
               )}
 
-              <div className="hidden items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:flex">
+              <div className="hidden items-center gap-2 rounded-full border border-emerald-300/18 bg-emerald-300/8 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-100 sm:flex">
                 <span className="h-2 w-2 rounded-full bg-emerald-300" />
                 Professor mode
               </div>
             </div>
 
-            <div className="flex min-h-[46px] items-center gap-2 border-b border-white/8 px-4">
+            <div className="flex min-h-[54px] items-center gap-2 border-b border-white/8 px-4">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'inline-flex h-9 items-center gap-2 rounded-t-xl border border-b-0 px-3 text-sm font-medium transition-colors',
+                    'inline-flex h-10 items-center gap-2 rounded-2xl border px-3.5 text-sm font-semibold transition-colors',
                     activeHref === item.href
-                      ? 'border-white/12 bg-[#091321] text-white'
-                      : 'border-transparent bg-transparent text-slate-400 hover:text-white',
+                      ? 'border-cyan-300/22 bg-cyan-300/12 text-cyan-50 shadow-[0_14px_32px_rgba(34,211,238,0.08)]'
+                      : 'border-white/8 bg-white/[0.025] text-slate-400 hover:border-white/16 hover:bg-white/[0.05] hover:text-white',
                   )}
                 >
                   {item.label}
@@ -157,16 +157,18 @@ export function StudioShell({
               ))}
 
               <div className="ml-auto hidden items-center gap-2 xl:flex">
-                <div className="rounded-t-xl border border-white/12 border-b-0 bg-[#091321] px-3 py-2 text-xs font-medium text-slate-300">
+                <div className="rounded-full border border-white/10 bg-[#091321] px-3 py-2 text-xs font-medium text-slate-300">
                   workspace.circuit
                 </div>
               </div>
             </div>
 
-            <div className="grid gap-3 px-4 py-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
               <div className="hidden min-w-0 flex-1 items-center gap-3 lg:flex">
-                <div className="flex min-w-0 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-[#091321] px-3 py-2.5">
-                  <LayoutPanelTop className="h-4 w-4 text-cyan-300" />
+                <div className="circuit-panel flex min-w-0 flex-1 items-center gap-3 rounded-[1.2rem] px-3.5 py-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/18 bg-cyan-300/10">
+                    <LayoutPanelTop className="h-4 w-4 text-cyan-200" />
+                  </div>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-white">{title}</div>
                     <div className="truncate text-xs text-slate-400">{description}</div>
@@ -181,7 +183,7 @@ export function StudioShell({
 
               <div className="ml-auto flex items-center gap-2 justify-self-end">
                 {actions ? <div className="hidden items-center gap-2 md:flex">{actions}</div> : null}
-                <div className="hidden rounded-xl border border-white/10 bg-[#0a1321] px-3 py-2 text-xs font-medium text-slate-300 lg:block">
+                <div className="hidden rounded-2xl border border-white/10 bg-[#0a1321] px-3 py-2 text-xs font-medium text-slate-300 lg:block">
                   Layout locked for evaluation
                 </div>
               </div>
@@ -194,17 +196,19 @@ export function StudioShell({
                       key={`${item.label}-${item.href}`}
                       href={item.href}
                       className={cn(
-                        'group relative inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors',
+                        'group relative inline-flex min-w-[9.5rem] items-center gap-2 rounded-2xl border px-3 py-2 text-sm transition-colors',
                         active
-                          ? 'border-cyan-300/30 bg-cyan-300/10'
+                          ? 'border-cyan-300/30 bg-cyan-300/12'
                           : item.ready
                             ? 'border-white/10 bg-[#091321] hover:border-white/18'
                             : 'border-white/8 bg-[#07101b]',
                       )}
                     >
                       <div className={cn('h-2 w-2 rounded-full', item.ready ? 'bg-cyan-300' : 'bg-slate-600')} />
-                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">{item.label}</div>
-                      <div className="hidden xl:block text-sm font-semibold text-white">{item.detail}</div>
+                      <div>
+                        <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">{item.label}</div>
+                        <div className="hidden max-w-[11rem] truncate text-xs font-semibold text-white xl:block">{item.detail}</div>
+                      </div>
                       <div className="pointer-events-none absolute left-0 top-[calc(100%+0.5rem)] z-20 hidden w-56 rounded-[1rem] border border-white/10 bg-[#081423]/96 p-3 text-left shadow-[0_18px_40px_rgba(2,6,23,0.45)] backdrop-blur group-hover:block">
                         <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{item.label}</div>
                         <div className="mt-1 text-sm font-semibold text-white">{item.detail}</div>
@@ -218,10 +222,10 @@ export function StudioShell({
           </div>
 
           <section className={cn(
-            'grid gap-px bg-white/8 lg:grid-cols-[54px_172px_minmax(0,1fr)_338px] lg:h-[calc(100vh-7.8rem)]',
-            bottom && bottomOpen ? 'lg:grid-rows-[minmax(0,1fr)_170px]' : 'lg:grid-rows-[minmax(0,1fr)_46px]',
+            'grid gap-px bg-white/8 lg:grid-cols-[64px_248px_minmax(0,1fr)_360px] lg:h-[calc(100vh-9.7rem)]',
+            bottom && bottomOpen ? 'lg:grid-rows-[minmax(0,1fr)_190px]' : 'lg:grid-rows-[minmax(0,1fr)_48px]',
           )}>
-            <aside className="hidden overflow-hidden bg-[linear-gradient(180deg,#050a12_0%,#09111e_100%)] lg:col-start-1 lg:block">
+            <aside className="hidden overflow-hidden bg-[linear-gradient(180deg,#030812_0%,#08111e_100%)] lg:col-start-1 lg:block">
               <div className="flex h-full flex-col items-center justify-between py-4">
                 <div className="flex flex-col items-center gap-3">
                   {navItems.map((item) => {
@@ -251,20 +255,20 @@ export function StudioShell({
               </div>
             </aside>
 
-            <aside className="overflow-hidden bg-[linear-gradient(180deg,#07101b_0%,#0a1220_100%)] lg:col-start-2 lg:row-start-1">
-              <div className="h-full overflow-y-auto p-3">{left}</div>
+            <aside className="order-4 circuit-panel overflow-hidden rounded-none lg:order-none lg:col-start-2 lg:row-start-1">
+              <div className="h-full overflow-y-auto p-4">{left}</div>
             </aside>
 
-            <section className="overflow-hidden bg-[#060d17] lg:col-start-3 lg:row-start-1">
+            <section className="order-1 overflow-hidden bg-[#050b14] lg:order-none lg:col-start-3 lg:row-start-1">
               <div className="h-full overflow-hidden">{main}</div>
             </section>
 
-            <aside className="overflow-hidden bg-[linear-gradient(180deg,#07101b_0%,#0a1220_100%)] lg:col-start-4 lg:row-start-1">
-              <div className="h-full overflow-y-auto p-3">{right}</div>
+            <aside className="order-2 circuit-panel overflow-hidden lg:order-none lg:col-start-4 lg:row-start-1">
+              <div className="h-full overflow-y-auto p-4">{right}</div>
             </aside>
 
             {bottom ? (
-              <section className="relative overflow-hidden bg-[linear-gradient(180deg,#060d17_0%,#081220_100%)] lg:col-start-2 lg:col-end-5 lg:row-start-2">
+              <section className="order-3 relative overflow-hidden border-t border-white/8 bg-[linear-gradient(180deg,#060d17_0%,#081220_100%)] lg:order-none lg:col-start-2 lg:col-end-5 lg:row-start-2">
                 <button
                   type="button"
                   onClick={() => setBottomOpen((open) => !open)}

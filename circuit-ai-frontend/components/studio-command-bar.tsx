@@ -18,8 +18,8 @@ export function StudioCommandBar({
   badges = [],
 }: StudioCommandBarProps) {
   return (
-    <div className="flex min-w-[24rem] max-w-[42rem] items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/16 bg-cyan-300/10 text-cyan-200">
+    <div className="flex min-w-[26rem] max-w-[48rem] items-center gap-3 rounded-[1.25rem] border border-white/12 bg-[linear-gradient(135deg,rgba(10,21,38,0.92),rgba(6,15,28,0.96))] px-3 py-2.5 text-left shadow-[0_20px_50px_rgba(2,6,23,0.22),inset_0_1px_0_rgba(255,255,255,0.04)]">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/18 bg-cyan-300/12 text-cyan-200 shadow-[0_14px_34px_rgba(34,211,238,0.13)]">
         <BrainCircuit className="h-4 w-4" />
       </div>
 
@@ -30,7 +30,7 @@ export function StudioCommandBar({
             {status}
           </div>
         </div>
-        <div className="mt-1 truncate text-sm font-semibold text-white">{objective}</div>
+        <div className="mt-1 truncate text-sm font-semibold tracking-tight text-white">{objective}</div>
         <div className="mt-1 truncate text-xs text-slate-400">{context}</div>
       </div>
 
