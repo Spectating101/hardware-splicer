@@ -131,19 +131,25 @@ function MfgDrawer({ data }: { data: ManufacturingNodeData }) {
       <div className="rounded-xl border border-white/10 bg-white/3 p-3 flex flex-col gap-2">
         <p className="text-xs text-white/40 uppercase tracking-wide font-semibold">Submit to fab</p>
         <p className="text-[11px] text-white/40 leading-relaxed">
-          Upload the Gerber zip to your preferred PCB manufacturer. Most fabs accept the standard KiCad output directly.
+          Zip the Gerber/drill files and upload to your preferred PCB manufacturer. Most fabs accept the standard KiCad output directly.
         </p>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           {[
-            { name: "JLCPCB", note: "5 pcs from $2", href: null },
-            { name: "PCBWay", note: "assembly + sourcing", href: null },
-            { name: "OSH Park", note: "US-made, purple PCBs", href: null },
+            { name: "JLCPCB", note: "5 pcs from $2", url: "https://jlcpcb.com" },
+            { name: "PCBWay", note: "Assembly + component sourcing", url: "https://www.pcbway.com" },
+            { name: "OSH Park", note: "US-made, signature purple solder mask", url: "https://oshpark.com" },
           ].map((fab) => (
-            <div key={fab.name} className="flex items-center gap-2">
-              <ExternalLink size={10} className="text-white/20 flex-shrink-0" />
-              <span className="text-xs text-white/60 font-medium">{fab.name}</span>
-              <span className="text-[10px] text-white/25">{fab.note}</span>
-            </div>
+            <a
+              key={fab.name}
+              href={fab.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 py-1 px-2 rounded-lg hover:bg-white/5 transition-colors group"
+            >
+              <ExternalLink size={10} className="text-white/20 group-hover:text-purple-400 flex-shrink-0 transition-colors" />
+              <span className="text-xs text-white/60 font-medium group-hover:text-white/80 transition-colors">{fab.name}</span>
+              <span className="text-[10px] text-white/25 group-hover:text-white/40 transition-colors">{fab.note}</span>
+            </a>
           ))}
         </div>
       </div>

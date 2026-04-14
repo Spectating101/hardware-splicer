@@ -38,7 +38,6 @@ function WorkspaceFlow() {
     addNode,
     addJarvisMessage,
     showJarvisStrip,
-    undo,
     focusNodeId,
     setFocusNodeId,
     updateNodePosition,
@@ -133,18 +132,6 @@ function WorkspaceFlow() {
     },
     [addNode, addJarvisMessage, showJarvisStrip]
   );
-
-  // Keyboard shortcuts: Ctrl+Z → undo
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        undo();
-      }
-    }
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [undo]);
 
   // Zoom-to-node when focusNodeId is set from the conversation history
   useEffect(() => {

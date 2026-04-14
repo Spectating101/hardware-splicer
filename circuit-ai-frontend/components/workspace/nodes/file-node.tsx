@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { motion } from "framer-motion";
 import { FileText, X } from "lucide-react";
@@ -13,6 +14,21 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as FileNodeData;
   const { updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip, removeNode } =
     useWorkspaceStore();
+
+  // Proactive nudge: if file sits idle (un-parsed) for 30s, JARVIS reminds
+  useEffect(() => {
+    if (data.status !== "idle") return;
+    const timer = setTimeout(() => {
+      const msg = `**${data.filename}** is ready to parse. Click **Parse board** on the node — I'll extract the circuit structure and check it for issues.`;
+      addJarvisMessage({ role: "jarvis", text: msg, nodeId: id });
+      showJarvisStrip({
+        message: msg,
+        nodeId: id,
+      });
+    }, 30000);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.status]);
 
   const nodeFromStore = useWorkspaceStore((s) => s.nodes.find((n) => n.id === id));
   const position = nodeFromStore?.position ?? { x: 0, y: 0 };

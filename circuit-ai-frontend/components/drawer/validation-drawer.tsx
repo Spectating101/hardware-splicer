@@ -218,11 +218,29 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
           <span className={cn("text-6xl font-bold tabular-nums", scoreColor(data.healthScore))}>
             {data.healthScore}
           </span>
-          <div>
+          <div className="flex-1">
             <p className={cn("text-lg font-medium", scoreColor(data.healthScore))}>
               {healthLabel(data.healthScore)}
             </p>
             <p className="text-white/30 text-sm">Health score out of 100</p>
+            {/* Score progress bar */}
+            <div className="mt-2 h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all duration-700",
+                  data.healthScore >= 80 ? "bg-emerald-500" : data.healthScore >= 50 ? "bg-amber-500" : "bg-red-500"
+                )}
+                style={{ width: `${data.healthScore}%` }}
+              />
+            </div>
+            {/* Delta from previous score */}
+            {data.prevScore != null && data.prevScore !== data.healthScore && (
+              <p className={cn("text-[10px] mt-1 font-semibold",
+                data.healthScore > data.prevScore ? "text-emerald-400" : "text-red-400"
+              )}>
+                {data.healthScore > data.prevScore ? "▲" : "▼"} {Math.abs(data.healthScore - data.prevScore)} pts vs. last run
+              </p>
+            )}
           </div>
         </div>
 
