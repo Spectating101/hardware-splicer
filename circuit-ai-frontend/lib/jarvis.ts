@@ -169,6 +169,7 @@ export interface JarvisContext {
   healthScore?: number;
   componentCount?: number;
   layerCount?: number;
+  topIssue?: { what: string; fix: string; severity: string };
 }
 
 export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): string {
@@ -286,10 +287,35 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
 
     default: {
       const { text } = intent as { type: "unknown"; text: string };
+      const t = text.toLowerCase();
+
       if (!ctx.hasBoardNode)
         return text
           ? `I heard you — but I need a board to work with first. Drop a \`.kicad_pcb\` file.`
           : "Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
+
+      // Try to answer specific questions about the board
+      if (ctx.hasValidation && ctx.topIssue) {
+        if (/\b(why|reason|cause|explain|what.?s the issue|problem)\b/.test(t)) {
+          return `The top issue: **${ctx.topIssue.what}**. Fix: ${ctx.topIssue.fix}`;
+        }
+        if (/\b(fix|how|resolve|repair|correct)\b/.test(t)) {
+          return `To fix the top ${ctx.topIssue.severity}: ${ctx.topIssue.fix}`;
+        }
+        if (/\bjlcpcb|pcbway|oshpark|fab|fabricat|order\b/.test(t)) {
+          if (ctx.hasCriticals)
+            return `**${ctx.boardName}** has critical issues — most fabs (JLCPCB, PCBWay) will reject this board. Resolve the ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} first.`;
+          if (!ctx.hasManufacturing)
+            return `**${ctx.boardName}** looks fab-ready — score **${ctx.healthScore}/100** with no criticals. Say **manufacture** to generate the Gerber package, then upload to your fab.`;
+          return `Manufacturing package is ready. Download the Gerbers from the manufacture tab and upload to JLCPCB, PCBWay, or your preferred fab.`;
+        }
+      }
+
+      if (/\b(score|health|rating|grade)\b/.test(t) && ctx.hasValidation && ctx.healthScore != null) {
+        const s = ctx.healthScore;
+        return `Health score is **${s}/100** — ${ctx.activeIssueCount === 0 ? "no active issues" : `${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}`}. ${s >= 80 ? "Looks good." : s >= 60 ? "Acceptable, but review the issues." : "Needs attention before manufacture."}`;
+      }
+
       if (!ctx.hasValidation)
         return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see what I can do.`;
       if (ctx.hasCriticals)

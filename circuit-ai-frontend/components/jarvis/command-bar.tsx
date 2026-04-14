@@ -107,6 +107,14 @@ export function CommandBar() {
     const activeIssues = validationData?.issues.filter((i) => !i.acknowledged) ?? [];
     const criticals = activeIssues.filter((i) => i.severity === "critical");
 
+    const severityOrder = { critical: 0, error: 1, warning: 2 } as const;
+    const topIssue = activeIssues.length > 0
+      ? [...activeIssues].sort((a, b) =>
+          (severityOrder[a.severity as keyof typeof severityOrder] ?? 3) -
+          (severityOrder[b.severity as keyof typeof severityOrder] ?? 3)
+        )[0]
+      : undefined;
+
     return {
       boardNode,
       boardData,
@@ -126,6 +134,7 @@ export function CommandBar() {
         healthScore: validationData?.healthScore,
         componentCount: boardData?.componentCount,
         layerCount: boardData?.layerCount,
+        topIssue: topIssue ? { what: topIssue.what, fix: topIssue.fix, severity: topIssue.severity } : undefined,
       },
     };
   }
