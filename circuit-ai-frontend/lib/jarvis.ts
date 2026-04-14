@@ -415,4 +415,44 @@ export const jarvis = {
   defaultResponse(): string {
     return "I'm here. Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
   },
+
+  drawerOpenedBoard(boardName: string, componentCount: number, layerCount: number, netCount?: number, healthScore?: number): string {
+    const specs = [`**${componentCount}** component${componentCount === 1 ? "" : "s"}`, `**${layerCount}**-layer`];
+    if (netCount && netCount > 0) specs.push(`**${netCount}** nets`);
+    const validation = healthScore != null
+      ? ` Health score: **${healthScore}/100**.`
+      : " Validation not run yet — say **validate** to check for issues.";
+    return `**${boardName}** — ${specs.join(", ")}.${validation}`;
+  },
+
+  drawerOpenedValidation(boardName: string, healthScore: number, activeIssueCount: number, criticalCount: number): string {
+    if (activeIssueCount === 0)
+      return `**${boardName}** passed all checks — score **${healthScore}/100**, no active issues. Ready to manufacture.`;
+    const criticalSuffix = criticalCount > 0
+      ? ` **${criticalCount} critical** must be resolved before manufacture.`
+      : ` No critical blockers — acceptable to proceed.`;
+    return `**${boardName}** — score **${healthScore}/100**, ${activeIssueCount} active issue${activeIssueCount === 1 ? "" : "s"}.${criticalSuffix}`;
+  },
+
+  drawerOpenedMfg(packageName: string, status: string, gerberCount?: number, hasBom?: boolean, hasAssembly?: boolean): string {
+    if (status !== "done") return `Generating **${packageName}**…`;
+    const parts: string[] = [`**${gerberCount ?? 8}** Gerber/drill files`];
+    if (hasBom) parts.push("BOM");
+    if (hasAssembly) parts.push("assembly guide");
+    return `Package ready — ${parts.join(", ")}. Download the Gerber zip and submit to your preferred fab.`;
+  },
+
+  drawerOpenedFile(filename: string, fileKind: string, sizeBytes: number, isParsed: boolean): string {
+    const kindLabels: Record<string, string> = {
+      kicad_pcb: "KiCad PCB",
+      kicad_sch: "KiCad Schematic",
+      gerber: "Gerber file",
+      bom_csv: "BOM CSV",
+      unknown: "File",
+    };
+    const label = kindLabels[fileKind] ?? "File";
+    const size = formatFileSize(sizeBytes);
+    if (isParsed) return `**${filename}** — ${label}, ${size}. Board already extracted.`;
+    return `**${filename}** — ${label}, ${size}. Click **Parse board** on the canvas node to extract the circuit structure.`;
+  },
 };

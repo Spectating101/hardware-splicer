@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Package, FileCode, FileText, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { useWorkspaceStore } from "@/lib/store";
 import type { BoardNodeData, ValidationNodeData, FileNodeData, ManufacturingNodeData, ManufacturingFile } from "@/lib/node-types";
 import { BoardDrawer } from "./board-drawer";
 import { ValidationDrawer } from "./validation-drawer";
+import { jarvis, fileKindLabel, formatFileSize } from "@/lib/jarvis";
+import type { FileKind } from "@/lib/jarvis";
+import { Badge } from "@/components/ui/badge";
 
 const kindLabel: Record<string, string> = {
   file: "File",
@@ -150,10 +152,12 @@ function MfgDrawer({ data }: { data: ManufacturingNodeData }) {
 }
 
 export function NodeDrawer() {
-  const { drawer, closeDrawer, nodes } = useWorkspaceStore();
+  const { drawer, closeDrawer, nodes, edges, addJarvisMessage, showJarvisStrip } = useWorkspaceStore();
 
   const node = drawer ? nodes.find((n) => n.id === drawer.nodeId) : null;
+  const prevNodeIdRef = useRef<string | null>(null);
 
+  // Escape key closes drawer
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") closeDrawer();
@@ -161,6 +165,43 @@ export function NodeDrawer() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [closeDrawer]);
+
+  // JARVIS narrates when a new node's drawer opens
+  useEffect(() => {
+    if (!drawer || !node) return;
+    if (drawer.nodeId === prevNodeIdRef.current) return; // tab change only — skip
+    prevNodeIdRef.current = drawer.nodeId;
+
+    let narration: string | null = null;
+
+    if (node.kind === "board") {
+      const d = node.data as BoardNodeData;
+      // Find validation node connected to this board
+      const valEdge = edges.find((e) => e.source === node.id);
+      const valNode = valEdge ? nodes.find((n) => n.id === valEdge.target && n.kind === "validation") : null;
+      const valData = valNode?.data as ValidationNodeData | undefined;
+      narration = jarvis.drawerOpenedBoard(d.boardName, d.componentCount, d.layerCount, d.netCount, valData?.healthScore);
+    } else if (node.kind === "validation") {
+      const d = node.data as ValidationNodeData;
+      const boardNode = nodes.find((n) => n.id === d.sourceBoardNodeId);
+      const boardName = boardNode ? (boardNode.data as BoardNodeData).boardName : "the board";
+      const activeIssues = d.issues.filter((i) => !i.acknowledged);
+      const criticalCount = activeIssues.filter((i) => i.severity === "critical").length;
+      narration = jarvis.drawerOpenedValidation(boardName, d.healthScore, activeIssues.length, criticalCount);
+    } else if (node.kind === "manufacturing") {
+      const d = node.data as ManufacturingNodeData;
+      narration = jarvis.drawerOpenedMfg(d.packageName, d.status, d.gerberCount, d.hasBom, d.hasAssembly);
+    } else if (node.kind === "file") {
+      const d = node.data as FileNodeData;
+      narration = jarvis.drawerOpenedFile(d.filename, d.fileKind, d.sizeBytes, d.status === "done");
+    }
+
+    if (narration) {
+      addJarvisMessage({ role: "jarvis", text: narration, nodeId: node.id });
+      showJarvisStrip({ message: narration, nodeId: node.id });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawer?.nodeId]);
 
   return (
     <AnimatePresence>
@@ -219,16 +260,66 @@ export function NodeDrawer() {
             {node.kind === "manufacturing" && (
               <MfgDrawer data={node.data as ManufacturingNodeData} />
             )}
-            {node.kind === "file" && (
-              <div className="flex-1 flex items-center justify-center p-6">
-                <div className="text-center">
-                  <p className="text-white/40 text-sm">File details</p>
-                  <p className="text-white/25 text-xs mt-1">
-                    Parse the board to see more information.
-                  </p>
+            {node.kind === "file" && (() => {
+              const d = node.data as FileNodeData;
+              const isParsed = d.status === "done";
+              return (
+                <div className="flex flex-col gap-4 p-4 overflow-y-auto">
+                  {/* File identity */}
+                  <div className="rounded-xl border border-white/10 bg-white/3 p-4 flex items-start gap-3">
+                    <FileText size={22} className="text-white/30 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white/80 break-all leading-snug">{d.filename}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="info">{fileKindLabel(d.fileKind as FileKind)}</Badge>
+                        <span className="text-xs text-white/30">{formatFileSize(d.sizeBytes)}</span>
+                        {isParsed && <Badge variant="success">Parsed</Badge>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status guidance */}
+                  {isParsed ? (
+                    <div className="rounded-xl border border-emerald-600/30 bg-emerald-950/20 p-3">
+                      <p className="text-sm text-emerald-400 font-medium mb-1">Board extracted</p>
+                      <p className="text-xs text-white/40 leading-relaxed">
+                        The circuit structure has been parsed. See the connected Board node for components, layers, and validation.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/10 p-3">
+                      <p className="text-xs text-white/50 leading-relaxed">
+                        Click <span className="text-cyan-400 font-medium">Parse board</span> on the canvas node to extract the circuit structure and begin the validation pipeline.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* What JARVIS will extract */}
+                  {!isParsed && d.fileKind === "kicad_pcb" && (
+                    <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold mb-2">What I&apos;ll extract</p>
+                      <ul className="text-xs text-white/45 space-y-1.5 leading-relaxed">
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-cyan-500/60 flex-shrink-0" />Component count and placement</li>
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-cyan-500/60 flex-shrink-0" />Layer stack-up (1L, 2L, 4L…)</li>
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-cyan-500/60 flex-shrink-0" />Net connections and ratsnest</li>
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-cyan-500/60 flex-shrink-0" />Footprint data for DFM analysis</li>
+                      </ul>
+                    </div>
+                  )}
+
+                  {!isParsed && d.fileKind === "bom_csv" && (
+                    <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-3">
+                      <p className="text-[10px] text-white/40 uppercase tracking-widest font-semibold mb-2">What I&apos;ll extract</p>
+                      <ul className="text-xs text-white/45 space-y-1.5 leading-relaxed">
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-violet-500/60 flex-shrink-0" />Component list and quantities</li>
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-violet-500/60 flex-shrink-0" />Part numbers and values</li>
+                        <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-violet-500/60 flex-shrink-0" />Sourcing availability check</li>
+                      </ul>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </motion.aside>
       )}

@@ -26,7 +26,7 @@ export function CommandBar() {
     acknowledgeAllIssues,
   } = useWorkspaceStore();
 
-  // Cmd+K / Ctrl+K → focus command input
+  // Cmd+K / Ctrl+K → focus command input; Ctrl+Z → undo (when not in a text field)
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
@@ -34,10 +34,23 @@ export function CommandBar() {
         inputRef.current?.focus();
         inputRef.current?.select();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        const target = e.target as HTMLElement;
+        const isEditable =
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable;
+        if (!isEditable) {
+          e.preventDefault();
+          undo();
+          addJarvisMessage({ role: "jarvis", text: "Undone." });
+          showJarvisStrip({ message: "Undone." });
+        }
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [undo, addJarvisMessage, showJarvisStrip]);
 
   function handleFileOnBar(file: File) {
     // Prevent duplicate drops of the same filename
