@@ -174,6 +174,7 @@ function WorkspaceFlow() {
         fitViewOptions={{ padding: 0.3 }}
         style={{ background: "#0d1421" }}
         deleteKeyCode={null}
+        nodesFocusable={false}
         proOptions={{ hideAttribution: true }}
       >
         <Background

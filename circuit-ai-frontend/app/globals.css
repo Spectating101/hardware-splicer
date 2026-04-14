@@ -421,6 +421,16 @@
     transform: translate(-50%, calc(-50% - 2px));
   }
 
+  /* Suppress ReactFlow node selection outlines and handles */
+  .react-flow__node:focus,
+  .react-flow__node:focus-visible {
+    outline: none !important;
+  }
+  .react-flow__node.selected .react-flow__node-toolbar,
+  .react-flow__node.selected::after {
+    display: none;
+  }
+
   .circuit-ambient {
     animation: circuitAmbient 9s ease-in-out infinite alternate;
   }
