@@ -41,6 +41,10 @@ export function EmptyState() {
     addJarvisMessage({ role: "user", text: prompt });
     addJarvisMessage({ role: "jarvis", text: response });
     showJarvisStrip({ message: response });
+    // Focus the command bar input via the Cmd+K event dispatch
+    setTimeout(() => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+    }, 100);
   }
 
   return (
