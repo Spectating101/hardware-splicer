@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { CircuitBoard, ExternalLink, X } from "lucide-react";
+import { CircuitBoard, ExternalLink, X, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -260,6 +260,25 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
           <p className="text-sm text-white/90 font-medium truncate">{data.boardName}</p>
           <p className="text-xs text-white/30 mt-0.5">PCB Layout</p>
         </div>
+        {validationData && (
+          <div
+            className={cn(
+              "flex items-center gap-1 text-[11px] font-bold",
+              validationData.healthScore >= 80
+                ? "text-emerald-400"
+                : validationData.healthScore >= 50
+                  ? "text-amber-400"
+                  : "text-red-400"
+            )}
+            title={`Health score: ${validationData.healthScore}/100`}
+          >
+            {validationData.healthScore >= 80
+              ? <ShieldCheck size={12} className="flex-shrink-0" />
+              : <ShieldAlert size={12} className="flex-shrink-0" />
+            }
+            {validationData.healthScore}
+          </div>
+        )}
         <button onClick={() => openDrawer(id)} className="text-white/30 hover:text-white/70 transition-colors">
           <ExternalLink size={12} />
         </button>
@@ -269,7 +288,6 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
         <Badge variant="info">{data.componentCount} parts</Badge>
         <Badge variant="default">{data.layerCount}L</Badge>
         {data.netCount != null && data.netCount > 0 && <Badge variant="default">{data.netCount} nets</Badge>}
-        {isDone && <Badge variant="success">Validated</Badge>}
         {data.status === "error" && <Badge variant="error">Error</Badge>}
       </div>
 
