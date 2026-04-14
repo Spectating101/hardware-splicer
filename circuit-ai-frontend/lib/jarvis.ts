@@ -221,7 +221,15 @@ export const jarvis = {
       componentCount && layerCount
         ? ` — **${componentCount} components** across **${layerCount} layers**`
         : "";
-    return `Board parsed from **${filename}**${detail}. Say **validate** or click "Check issues" to run the electrical rules check.`;
+    const characterize = (() => {
+      if (!componentCount || !layerCount) return "";
+      if (componentCount < 10 && layerCount <= 2) return " Looks like a minimal proof-of-concept.";
+      if (componentCount < 30 && layerCount <= 2) return " Looks like a simple 2-layer prototype.";
+      if (componentCount < 60 && layerCount <= 4) return " Medium-complexity board.";
+      if (componentCount < 150) return " High-component-count design — take care with clearances.";
+      return " Dense, high-layer board — expect DFM scrutiny.";
+    })();
+    return `Board parsed from **${filename}**${detail}.${characterize} Say **validate** or click "Check issues" to run the electrical rules check.`;
   },
 
   validationStart(): string {

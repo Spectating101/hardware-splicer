@@ -44,6 +44,14 @@ function WorkspaceFlow() {
     updateNodePosition,
   } = useWorkspaceStore();
 
+  // Deduplication helper (same logic as command-bar)
+  const isDuplicateFile = useCallback(
+    (filename: string) => storeNodes.some(
+      (n) => n.kind === "file" && (n.data as FileNodeData).filename === filename
+    ),
+    [storeNodes]
+  );
+
   const { fitBounds, getNode } = useReactFlow();
 
   // Convert store nodes to React Flow nodes
@@ -88,6 +96,14 @@ function WorkspaceFlow() {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
       if (!file) return;
+
+      // Prevent duplicate drops
+      if (isDuplicateFile(file.name)) {
+        const msg = jarvis.duplicateFile(file.name);
+        addJarvisMessage({ role: "jarvis", text: msg });
+        showJarvisStrip({ message: msg });
+        return;
+      }
 
       const bounds = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
       const x = e.clientX - bounds.left - 110;

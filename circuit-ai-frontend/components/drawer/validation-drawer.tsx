@@ -140,6 +140,7 @@ interface ValidationDrawerProps {
 
 export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: ValidationDrawerProps) {
   const { acknowledgeAllIssues } = useWorkspaceStore();
+  const [showAll, setShowAll] = useState(false);
   const sorted = [...data.issues].sort(
     (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
   );
@@ -148,6 +149,7 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
   const errorCount = active.filter((i) => i.severity === "error").length;
   const warningCount = active.filter((i) => i.severity === "warning").length;
   const acknowledgedCount = data.issues.filter((i) => i.acknowledged).length;
+  const displayedIssues = showAll ? sorted : sorted.filter((i) => !i.acknowledged);
 
   return (
     <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
@@ -166,10 +168,25 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
 
       {/* Issues tab */}
       <TabsContent value="issues" className="p-4 flex flex-col gap-2 overflow-y-auto">
-        {active.length > 0 && (
+        {data.issues.length > 0 && (
           <div className="flex items-center justify-between mb-1">
-            <p className="text-xs text-white/30">{active.length} active issue{active.length === 1 ? "" : "s"}</p>
-            {criticalCount === 0 && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAll(false)}
+                className={`text-xs px-2 py-0.5 rounded border transition-colors ${!showAll ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "text-white/30 border-white/10 hover:border-white/20"}`}
+              >
+                Active {active.length > 0 && `(${active.length})`}
+              </button>
+              {acknowledgedCount > 0 && (
+                <button
+                  onClick={() => setShowAll(true)}
+                  className={`text-xs px-2 py-0.5 rounded border transition-colors ${showAll ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "text-white/30 border-white/10 hover:border-white/20"}`}
+                >
+                  All ({data.issues.length})
+                </button>
+              )}
+            </div>
+            {criticalCount === 0 && active.length > 0 && (
               <button
                 onClick={() => acknowledgeAllIssues(nodeId)}
                 className="text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2 py-0.5 transition-colors"
@@ -179,7 +196,7 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
             )}
           </div>
         )}
-        {sorted.length === 0 ? (
+        {displayedIssues.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-emerald-400 text-sm font-medium">No issues found</p>
             <p className="text-white/30 text-xs mt-1">Board passed all checks</p>
