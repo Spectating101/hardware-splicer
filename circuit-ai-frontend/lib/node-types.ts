@@ -27,6 +27,8 @@ export interface BoardNodeData {
   componentCount: number;
   layerCount: number;
   netCount?: number;
+  boardWidthMm?: number;
+  boardHeightMm?: number;
   sourceFileNodeId: string;
   components?: import("./kicad-parser").KicadComponent[];
 }

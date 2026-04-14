@@ -52,6 +52,9 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
     let components: KicadComponent[] = [];
 
     // Real client-side parse for KiCAD PCB files
+    let boardWidthMm: number | undefined;
+    let boardHeightMm: number | undefined;
+
     if (data.rawFile && data.fileKind === "kicad_pcb") {
       try {
         const text = await data.rawFile.text();
@@ -60,6 +63,8 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
         layerCount = info.layerCount;
         netCount = info.netCount;
         components = info.components;
+        boardWidthMm = info.boardWidthMm;
+        boardHeightMm = info.boardHeightMm;
       } catch {
         // fall through to defaults
       }
@@ -81,6 +86,8 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
         componentCount,
         layerCount,
         netCount,
+        boardWidthMm,
+        boardHeightMm,
         components,
         sourceFileNodeId: id,
       } satisfies BoardNodeData,

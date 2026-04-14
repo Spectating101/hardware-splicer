@@ -124,13 +124,31 @@ export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDraw
             <p className="text-2xl font-bold text-white">{data.layerCount}</p>
             <p className="text-xs text-white/40 mt-0.5">Layers</p>
           </div>
-          {data.netCount != null && data.netCount > 0 && (
+          {data.netCount != null && data.netCount > 0 ? (
             <div className="rounded-xl bg-white/5 border border-white/10 p-3">
               <p className="text-2xl font-bold text-white">{data.netCount}</p>
               <p className="text-xs text-white/40 mt-0.5">Nets</p>
             </div>
-          )}
+          ) : data.boardWidthMm != null ? (
+            <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+              <p className="text-sm font-bold text-white leading-tight">
+                {Math.round(data.boardWidthMm)}<span className="text-white/40 text-xs font-normal">mm</span>
+                {" × "}
+                {Math.round(data.boardHeightMm ?? data.boardWidthMm)}<span className="text-white/40 text-xs font-normal">mm</span>
+              </p>
+              <p className="text-xs text-white/40 mt-0.5">Est. size</p>
+            </div>
+          ) : null}
         </div>
+        {/* Board dimensions if we have both net count and board size */}
+        {data.netCount != null && data.netCount > 0 && data.boardWidthMm != null && (
+          <div className="flex items-center gap-2 text-xs text-white/30">
+            <span className="font-mono">
+              ~{Math.round(data.boardWidthMm)}mm × {Math.round(data.boardHeightMm ?? data.boardWidthMm)}mm
+            </span>
+            <span className="text-white/15">estimated board footprint</span>
+          </div>
+        )}
 
         {validationData ? (
           <div className="rounded-xl border border-white/10 bg-white/3 p-3 flex items-center gap-3">

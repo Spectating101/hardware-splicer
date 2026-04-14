@@ -186,7 +186,7 @@ export function NodeDrawer() {
       const valEdge = edges.find((e) => e.source === node.id);
       const valNode = valEdge ? nodes.find((n) => n.id === valEdge.target && n.kind === "validation") : null;
       const valData = valNode?.data as ValidationNodeData | undefined;
-      narration = jarvis.drawerOpenedBoard(d.boardName, d.componentCount, d.layerCount, d.netCount, valData?.healthScore);
+      narration = jarvis.drawerOpenedBoard(d.boardName, d.componentCount, d.layerCount, d.netCount, valData?.healthScore, d.boardWidthMm, d.boardHeightMm);
     } else if (node.kind === "validation") {
       const d = node.data as ValidationNodeData;
       const boardNode = nodes.find((n) => n.id === d.sourceBoardNodeId);

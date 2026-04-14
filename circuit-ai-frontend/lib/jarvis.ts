@@ -492,9 +492,10 @@ export const jarvis = {
     return "I'm here. Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
   },
 
-  drawerOpenedBoard(boardName: string, componentCount: number, layerCount: number, netCount?: number, healthScore?: number): string {
+  drawerOpenedBoard(boardName: string, componentCount: number, layerCount: number, netCount?: number, healthScore?: number, widthMm?: number, heightMm?: number): string {
     const specs = [`**${componentCount}** component${componentCount === 1 ? "" : "s"}`, `**${layerCount}**-layer`];
     if (netCount && netCount > 0) specs.push(`**${netCount}** nets`);
+    if (widthMm != null && heightMm != null) specs.push(`~${Math.round(widthMm)}×${Math.round(heightMm)}mm`);
     const validation = healthScore != null
       ? ` Health score: **${healthScore}/100**.`
       : " Validation not run yet — say **validate** to check for issues.";
