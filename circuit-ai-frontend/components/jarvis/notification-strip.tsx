@@ -24,10 +24,12 @@ function InlineMarkdown({ text }: { text: string }) {
 export function NotificationStrip() {
   const { jarvisStrip, isJarvisThinking, dismissJarvisStrip, openDrawer } = useWorkspaceStore();
 
-  // Auto-dismiss: longer when there's an action (give user time to react)
+  // Auto-dismiss: scale with message length + extra time when there's an action
   useEffect(() => {
     if (!jarvisStrip) return;
-    const delay = jarvisStrip.action ? 14000 : 9000;
+    const words = jarvisStrip.message.split(/\s+/).length;
+    const readTimeMs = Math.max(5000, words * 350); // ~350ms per word, min 5s
+    const delay = jarvisStrip.action ? Math.max(readTimeMs, 12000) : readTimeMs;
     const timer = setTimeout(() => dismissJarvisStrip(), delay);
     return () => clearTimeout(timer);
   }, [jarvisStrip, dismissJarvisStrip]);
