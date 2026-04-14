@@ -15,7 +15,7 @@ export function TabsList({
   return (
     <RadixTabs.List
       className={cn(
-        "flex border-b border-white/10 bg-transparent",
+        "flex border-b border-white/10 bg-transparent overflow-x-auto scrollbar-none flex-shrink-0",
         className
       )}
     >
@@ -37,9 +37,9 @@ export function TabsTrigger({
     <RadixTabs.Trigger
       value={value}
       className={cn(
-        "px-4 py-2 text-sm text-white/50 border-b-2 border-transparent",
+        "px-3 py-2.5 text-xs font-medium text-white/50 border-b-2 border-transparent flex-shrink-0",
         "data-[state=active]:text-white data-[state=active]:border-cyan-500",
-        "hover:text-white/80 transition-colors cursor-pointer",
+        "hover:text-white/80 transition-colors cursor-pointer whitespace-nowrap",
         className
       )}
     >

@@ -22,7 +22,7 @@ function severityGlow(criticalCount: number, errorCount: number, issueCount: num
 
 export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as ValidationNodeData;
-  const { openDrawer, removeNode } = useWorkspaceStore();
+  const { openDrawer, removeNode, acknowledgeAllIssues } = useWorkspaceStore();
 
   const active = data.issues.filter((i) => !i.acknowledged);
   const criticalCount = active.filter((i) => i.severity === "critical").length;
@@ -41,6 +41,7 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
       )}
     >
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />
+      <Handle type="source" position={Position.Right} className="!bg-purple-500 !border-purple-700" />
       <button
         onClick={() => removeNode(id)}
         className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1e293b] border border-white/15 text-white/30 hover:text-white/80 hover:border-white/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
@@ -94,6 +95,16 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
           </div>
         )}
       </div>
+
+      {/* Ack all non-critical issues when there are only warnings/errors */}
+      {active.length > 0 && criticalCount === 0 && (
+        <button
+          onClick={() => acknowledgeAllIssues(id)}
+          className="w-full py-1.5 rounded-lg text-xs font-medium bg-amber-500/8 text-amber-400/70 border border-amber-500/20 hover:bg-amber-500/15 hover:text-amber-400 transition-colors"
+        >
+          Dismiss warnings
+        </button>
+      )}
 
       <button
         onClick={() => openDrawer(id, "issues")}

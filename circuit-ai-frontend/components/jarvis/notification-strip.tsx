@@ -5,12 +5,30 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Zap, X } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 
+/** Renders **bold** and `code` markdown inline */
+function InlineMarkdown({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith("**") && part.endsWith("**"))
+          return <strong key={i} className="font-semibold text-cyan-100">{part.slice(2, -2)}</strong>;
+        if (part.startsWith("`") && part.endsWith("`"))
+          return <code key={i} className="font-mono text-cyan-300 bg-cyan-950/40 px-0.5 rounded">{part.slice(1, -1)}</code>;
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+}
+
 export function NotificationStrip() {
   const { jarvisStrip, dismissJarvisStrip, openDrawer } = useWorkspaceStore();
 
+  // Auto-dismiss: longer when there's an action (give user time to react)
   useEffect(() => {
     if (!jarvisStrip) return;
-    const timer = setTimeout(() => dismissJarvisStrip(), 8000);
+    const delay = jarvisStrip.action ? 14000 : 9000;
+    const timer = setTimeout(() => dismissJarvisStrip(), delay);
     return () => clearTimeout(timer);
   }, [jarvisStrip, dismissJarvisStrip]);
 
@@ -27,18 +45,16 @@ export function NotificationStrip() {
         >
           <div className="bg-cyan-950/60 border-b border-cyan-500/20 px-4 py-2 flex items-center gap-3">
             <Zap size={14} className="text-cyan-400 flex-shrink-0" />
-            <p className="flex-1 text-sm text-cyan-100/80 truncate">
-              {jarvisStrip.message
-                .replace(/\*\*(.*?)\*\*/g, "$1")
-                .replace(/`(.*?)`/g, "$1")}
+            <p className="flex-1 text-sm text-cyan-100/80 min-w-0">
+              <InlineMarkdown text={jarvisStrip.message.split("\n")[0]} />
             </p>
-            {jarvisStrip.nodeId && (
+            {jarvisStrip.nodeId && !jarvisStrip.action && (
               <button
                 onClick={() => {
                   openDrawer(jarvisStrip.nodeId!);
                   dismissJarvisStrip();
                 }}
-                className="text-xs text-cyan-400 hover:text-cyan-200 transition-colors flex-shrink-0"
+                className="text-xs text-cyan-400 hover:text-cyan-200 transition-colors flex-shrink-0 whitespace-nowrap"
               >
                 Show me →
               </button>
@@ -49,7 +65,7 @@ export function NotificationStrip() {
                   jarvisStrip.action!.onAction();
                   dismissJarvisStrip();
                 }}
-                className="text-xs bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-md px-2 py-0.5 transition-colors flex-shrink-0"
+                className="text-xs bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-md px-2.5 py-1 transition-colors flex-shrink-0 whitespace-nowrap"
               >
                 {jarvisStrip.action.label}
               </button>

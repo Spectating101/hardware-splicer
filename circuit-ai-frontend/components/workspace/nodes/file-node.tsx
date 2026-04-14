@@ -5,7 +5,7 @@ import { FileText, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
 import { fileKindLabel, formatFileSize, jarvis } from "@/lib/jarvis";
-import { parseKicadPcb } from "@/lib/kicad-parser";
+import { parseKicadPcb, type KicadComponent } from "@/lib/kicad-parser";
 import type { FileNodeData, BoardNodeData, WorkspaceNode, WorkspaceEdge } from "@/lib/node-types";
 
 export function FileNodeComponent({ id, data: rawData }: NodeProps) {
@@ -22,6 +22,7 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
     let componentCount = 0;
     let layerCount = 2;
     let netCount = 0;
+    let components: KicadComponent[] = [];
 
     // Real client-side parse for KiCAD PCB files
     if (data.rawFile && data.fileKind === "kicad_pcb") {
@@ -31,6 +32,7 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
         componentCount = info.componentCount;
         layerCount = info.layerCount;
         netCount = info.netCount;
+        components = info.components;
       } catch {
         // fall through to defaults
       }
@@ -52,6 +54,7 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
         componentCount,
         layerCount,
         netCount,
+        components,
         sourceFileNodeId: id,
       } satisfies BoardNodeData,
     };
@@ -65,7 +68,7 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
     addNode(boardNode);
     addEdge(edge);
 
-    const msg = jarvis.boardFound(data.filename);
+    const msg = jarvis.boardFound(data.filename, componentCount, layerCount);
     addJarvisMessage({ role: "jarvis", text: msg, nodeId: boardId });
     showJarvisStrip({ message: msg, nodeId: boardId });
 

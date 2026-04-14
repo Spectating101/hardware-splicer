@@ -28,6 +28,7 @@ export interface BoardNodeData {
   layerCount: number;
   netCount?: number;
   sourceFileNodeId: string;
+  components?: import("./kicad-parser").KicadComponent[];
 }
 
 export interface ValidationNodeData {

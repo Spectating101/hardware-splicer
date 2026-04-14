@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, XCircle, AlertTriangle, AlertCircle, Check } from "lucide-react";
+import { ChevronDown, ChevronRight, XCircle, AlertTriangle, AlertCircle, Check, Zap } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { healthLabel } from "@/lib/jarvis";
@@ -32,6 +32,14 @@ function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }
         ? "text-orange-400"
         : "text-amber-400";
 
+  const severityLabel = isAcknowledged
+    ? null
+    : issue.severity === "critical"
+      ? "CRITICAL"
+      : issue.severity === "error"
+        ? "ERROR"
+        : "WARNING";
+
   const Icon = isAcknowledged
     ? Check
     : issue.severity === "critical"
@@ -41,15 +49,22 @@ function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }
         : AlertCircle;
 
   return (
-    <div className={cn("rounded-xl border bg-white/3 overflow-hidden transition-all duration-200", borderColor, isAcknowledged && "opacity-50")}>
+    <div className={cn("rounded-xl border bg-white/3 overflow-hidden transition-all duration-200", borderColor, isAcknowledged && "opacity-40")}>
       <button
         onClick={() => setExpanded((x) => !x)}
         className="w-full flex items-center gap-2 p-3 text-left hover:bg-white/5 transition-colors"
       >
         <Icon size={14} className={cn("flex-shrink-0", iconColor)} />
-        <span className={cn("flex-1 text-sm leading-snug", isAcknowledged ? "text-white/30 line-through" : "text-white/80")}>
-          {issue.what}
-        </span>
+        <div className="flex-1 min-w-0">
+          {severityLabel && (
+            <span className={cn("text-[9px] font-bold uppercase tracking-widest mr-1.5", iconColor)}>
+              {severityLabel}
+            </span>
+          )}
+          <span className={cn("text-xs leading-snug", isAcknowledged ? "text-white/30 line-through" : "text-white/80")}>
+            {issue.what}
+          </span>
+        </div>
         {expanded ? (
           <ChevronDown size={12} className="text-white/30 flex-shrink-0" />
         ) : (
@@ -60,17 +75,17 @@ function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }
       {expanded && (
         <div className="px-3 pb-3 flex flex-col gap-2 border-t border-white/5 pt-2">
           <div>
-            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">Why</p>
+            <p className="text-[10px] text-white/40 font-semibold uppercase tracking-widest mb-1">Why this matters</p>
             <p className="text-xs text-white/70 leading-relaxed">{issue.why}</p>
           </div>
-          <div>
-            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">Fix</p>
-            <p className="text-xs text-white/70 leading-relaxed">{issue.fix}</p>
+          <div className="rounded-lg bg-emerald-950/20 border border-emerald-700/20 p-2">
+            <p className="text-[10px] text-emerald-400/70 font-semibold uppercase tracking-widest mb-1">Suggested fix</p>
+            <p className="text-xs text-emerald-100/70 leading-relaxed">{issue.fix}</p>
           </div>
           {!isAcknowledged && (
             <button
               onClick={(e) => { e.stopPropagation(); acknowledgeIssue(nodeId, issue.id); }}
-              className="mt-1 self-start text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2 py-1 transition-colors"
+              className="mt-1 self-start text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2.5 py-1 transition-colors"
             >
               Won&apos;t fix this iteration
             </button>
@@ -87,6 +102,36 @@ function scoreColor(score: number) {
   return "text-red-400";
 }
 
+function jarvisAnalysis(data: ValidationNodeData): string {
+  const active = data.issues.filter((i) => !i.acknowledged);
+  const criticals = active.filter((i) => i.severity === "critical");
+  const errors = active.filter((i) => i.severity === "error");
+  const warnings = active.filter((i) => i.severity === "warning");
+
+  if (active.length === 0) {
+    return "Board passed all checks. No active issues — this is ready to send to fabrication.";
+  }
+
+  const parts: string[] = [];
+  if (criticals.length > 0) {
+    parts.push(`${criticals.length} critical issue${criticals.length > 1 ? "s" : ""} must be resolved — they will cause board failures.`);
+  }
+  if (errors.length > 0) {
+    parts.push(`${errors.length} error${errors.length > 1 ? "s" : ""} indicate rule violations that may affect reliability.`);
+  }
+  if (warnings.length > 0) {
+    parts.push(`${warnings.length} warning${warnings.length > 1 ? "s" : ""} are worth reviewing but won't block manufacture.`);
+  }
+
+  if (criticals.length === 0) {
+    parts.push("You can proceed to manufacture and acknowledge the remaining warnings if they're acceptable for this revision.");
+  } else {
+    parts.push("Fix the critical issues first, then re-run validation.");
+  }
+
+  return parts.join(" ");
+}
+
 interface ValidationDrawerProps {
   nodeId: string;
   data: ValidationNodeData;
@@ -94,6 +139,7 @@ interface ValidationDrawerProps {
 }
 
 export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: ValidationDrawerProps) {
+  const { acknowledgeAllIssues } = useWorkspaceStore();
   const sorted = [...data.issues].sort(
     (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
   );
@@ -106,13 +152,33 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
   return (
     <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
       <TabsList>
-        <TabsTrigger value="issues">What&apos;s Wrong</TabsTrigger>
+        <TabsTrigger value="issues">
+          What&apos;s Wrong
+          {active.length > 0 && (
+            <span className="ml-1.5 text-[10px] bg-white/10 rounded-full px-1.5 py-0.5 text-white/50">
+              {active.length}
+            </span>
+          )}
+        </TabsTrigger>
         <TabsTrigger value="summary">Summary</TabsTrigger>
         <TabsTrigger value="next">What to Do Next</TabsTrigger>
       </TabsList>
 
       {/* Issues tab */}
-      <TabsContent value="issues" className="p-4 flex flex-col gap-2">
+      <TabsContent value="issues" className="p-4 flex flex-col gap-2 overflow-y-auto">
+        {active.length > 0 && (
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs text-white/30">{active.length} active issue{active.length === 1 ? "" : "s"}</p>
+            {criticalCount === 0 && (
+              <button
+                onClick={() => acknowledgeAllIssues(nodeId)}
+                className="text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2 py-0.5 transition-colors"
+              >
+                Dismiss all
+              </button>
+            )}
+          </div>
+        )}
         {sorted.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-emerald-400 text-sm font-medium">No issues found</p>
@@ -124,11 +190,9 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
       </TabsContent>
 
       {/* Summary tab */}
-      <TabsContent value="summary" className="p-4 flex flex-col gap-4">
+      <TabsContent value="summary" className="p-4 flex flex-col gap-4 overflow-y-auto">
         <div className="flex items-center gap-4">
-          <span
-            className={cn("text-6xl font-bold tabular-nums", scoreColor(data.healthScore))}
-          >
+          <span className={cn("text-6xl font-bold tabular-nums", scoreColor(data.healthScore))}>
             {data.healthScore}
           </span>
           <div>
@@ -153,6 +217,13 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
             <p className="text-xs text-white/40 mt-1">Warnings</p>
           </div>
         </div>
+
+        {/* JARVIS analysis */}
+        <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-3 flex gap-2">
+          <Zap size={14} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-cyan-100/70 leading-relaxed">{jarvisAnalysis(data)}</p>
+        </div>
+
         {acknowledgedCount > 0 && (
           <p className="text-xs text-white/30 text-center">
             {acknowledgedCount} issue{acknowledgedCount === 1 ? "" : "s"} acknowledged — won&apos;t fix this iteration
@@ -161,7 +232,7 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
       </TabsContent>
 
       {/* Next steps tab */}
-      <TabsContent value="next" className="p-4">
+      <TabsContent value="next" className="p-4 flex flex-col gap-3 overflow-y-auto">
         {criticalCount > 0 ? (
           <div className="rounded-xl border border-red-700/50 bg-red-950/20 p-4">
             <p className="text-sm font-medium text-red-400 mb-1">
@@ -172,28 +243,41 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
               and must be resolved before proceeding to manufacture.
             </p>
           </div>
-        ) : data.issues.length === 0 ? (
+        ) : data.issues.length === 0 || active.length === 0 ? (
           <div className="rounded-xl border border-emerald-700/50 bg-emerald-950/20 p-4">
             <p className="text-sm font-medium text-emerald-400 mb-1">
               Board is ready to manufacture
             </p>
             <p className="text-xs text-white/50 leading-relaxed">
-              No issues found. You can proceed to generate Gerber files and
-              submit to your preferred fab.
+              No blocking issues. Generate the Gerber files and submit to your preferred fab.
             </p>
           </div>
         ) : (
           <div className="rounded-xl border border-amber-700/40 bg-amber-950/10 p-4">
             <p className="text-sm font-medium text-amber-400 mb-1">
-              Review {data.issues.length} issue{data.issues.length === 1 ? "" : "s"} before manufacturing
+              Review {active.length} issue{active.length === 1 ? "" : "s"} before manufacturing
             </p>
             <p className="text-xs text-white/50 leading-relaxed">
-              No critical blockers found, but there are warnings and errors
-              that may affect board performance. Review and decide which to
-              fix before sending to fab.
+              No critical blockers. Decide which warnings and errors are acceptable
+              for this revision, acknowledge them, then say <strong className="text-white/60">manufacture</strong>.
             </p>
           </div>
         )}
+
+        {/* Top issue quick fix */}
+        {active.length > 0 && (
+          <div className="rounded-xl border border-white/10 bg-white/3 p-3">
+            <p className="text-xs text-white/40 font-semibold uppercase tracking-widest mb-2">Top priority fix</p>
+            <p className="text-xs text-white/70 leading-relaxed font-medium">{active[0].what}</p>
+            <p className="text-xs text-emerald-400/80 leading-relaxed mt-1.5">→ {active[0].fix}</p>
+          </div>
+        )}
+
+        {/* JARVIS analysis */}
+        <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/20 p-3 flex gap-2">
+          <Zap size={14} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-cyan-100/70 leading-relaxed">{jarvisAnalysis(data)}</p>
+        </div>
       </TabsContent>
     </Tabs>
   );

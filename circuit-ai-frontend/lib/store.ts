@@ -46,6 +46,7 @@ interface WorkspaceState {
   history: HistorySnapshot[];
   canUndo: boolean;
   focusNodeId: string | null;
+  pendingCommand: { action: "validate" | "manufacture" | "show_issues"; boardNodeId: string } | null;
 
   // Node actions
   addNode: (node: WorkspaceNode) => void;
@@ -67,12 +68,16 @@ interface WorkspaceState {
   // Workspace mutations
   removeNode: (nodeId: string) => void;
   acknowledgeIssue: (nodeId: string, issueId: string) => void;
+  acknowledgeAllIssues: (nodeId: string) => void;
 
   // History
   undo: () => void;
 
   // Camera
   setFocusNodeId: (id: string | null) => void;
+
+  // Command dispatch
+  setPendingCommand: (cmd: WorkspaceState["pendingCommand"]) => void;
 
   // Project actions
   clearProject: () => void;
@@ -99,6 +104,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       history: [],
       canUndo: false,
       focusNodeId: null,
+      pendingCommand: null,
 
       addNode: (node) =>
         set((state) => ({
@@ -170,6 +176,18 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           }),
         })),
 
+      acknowledgeAllIssues: (nodeId) =>
+        set((state) => ({
+          nodes: state.nodes.map((n) => {
+            if (n.id !== nodeId || n.kind !== "validation") return n;
+            const data = n.data as ValidationNodeData;
+            return {
+              ...n,
+              data: { ...data, issues: data.issues.map((i) => ({ ...i, acknowledged: true })) },
+            };
+          }),
+        })),
+
       undo: () =>
         set((state) => {
           if (state.history.length === 0) return {};
@@ -185,6 +203,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         }),
 
       setFocusNodeId: (id) => set({ focusNodeId: id }),
+
+      setPendingCommand: (cmd) => set({ pendingCommand: cmd }),
 
       clearProject: () =>
         set({

@@ -1,11 +1,21 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Package, FileCode, FileText, ExternalLink, X, AlertCircle } from "lucide-react";
+import { Package, FileCode, FileText, ExternalLink, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import type { ManufacturingNodeData, ManufacturingFile } from "@/lib/node-types";
+
+const MFG_STEPS = [
+  "Parsing board layout…",
+  "Generating Gerber layers…",
+  "Creating drill files…",
+  "Building BOM…",
+  "Compiling assembly guide…",
+  "Packaging files…",
+];
 
 function FileTypeIcon({ type }: { type: ManufacturingFile["type"] }) {
   if (type === "gerber" || type === "drill") return <FileCode size={11} className="text-purple-400" />;
@@ -15,10 +25,21 @@ function FileTypeIcon({ type }: { type: ManufacturingFile["type"] }) {
 export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as ManufacturingNodeData;
   const { openDrawer, removeNode } = useWorkspaceStore();
+  const [stepIndex, setStepIndex] = useState(0);
 
   const isProcessing = data.status === "processing";
   const isDone = data.status === "done";
   const isError = data.status === "error";
+
+  // Cycle through steps while processing
+  useEffect(() => {
+    if (!isProcessing) return;
+    setStepIndex(0);
+    const interval = setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, MFG_STEPS.length - 1));
+    }, 800);
+    return () => clearInterval(interval);
+  }, [isProcessing]);
 
   const gerbers = data.files?.filter((f) => f.type === "gerber" || f.type === "drill") ?? [];
   const otherFiles = data.files?.filter((f) => f.type !== "gerber" && f.type !== "drill") ?? [];
@@ -28,7 +49,7 @@ export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
       className={cn(
         "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500 relative",
         isProcessing
-          ? "border-purple-500/60 shadow-[0_0_0_2px_rgba(168,85,247,0.2),0_4px_24px_rgba(0,0,0,0.5)] animate-pulse"
+          ? "border-purple-500/60 shadow-[0_0_0_2px_rgba(168,85,247,0.2),0_4px_24px_rgba(0,0,0,0.5)]"
           : isDone
             ? "border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.25),0_4px_24px_rgba(0,0,0,0.5)]"
             : isError
@@ -46,14 +67,20 @@ export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
       </button>
 
       <div className="flex items-start gap-2">
-        <Package size={16} className={cn("flex-shrink-0 mt-0.5", isDone ? "text-emerald-400" : isError ? "text-red-400" : "text-purple-400")} />
+        <Package
+          size={16}
+          className={cn(
+            "flex-shrink-0 mt-0.5",
+            isDone ? "text-emerald-400" : isError ? "text-red-400" : "text-purple-400"
+          )}
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm text-white/90 font-medium truncate">{data.packageName}</p>
           <p className="text-xs text-white/30 mt-0.5">Manufacturing Package</p>
         </div>
         {isDone && (
           <button
-            onClick={() => openDrawer(id, "files")}
+            onClick={() => openDrawer(id, "manufacture")}
             className="text-white/30 hover:text-white/70 transition-colors"
           >
             <ExternalLink size={12} />
@@ -75,6 +102,34 @@ export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
         )}
         {isError && <Badge variant="error">Failed</Badge>}
       </div>
+
+      {/* Step tracker while processing */}
+      {isProcessing && (
+        <div className="flex flex-col gap-1 pt-1 border-t border-white/5">
+          {MFG_STEPS.map((step, i) => (
+            <div
+              key={step}
+              className={cn(
+                "flex items-center gap-1.5 text-xs transition-all duration-300",
+                i < stepIndex
+                  ? "text-emerald-400/70"
+                  : i === stepIndex
+                    ? "text-purple-300 font-medium"
+                    : "text-white/15"
+              )}
+            >
+              {i < stepIndex ? (
+                <CheckCircle2 size={10} className="flex-shrink-0" />
+              ) : i === stepIndex ? (
+                <span className="w-2.5 h-2.5 rounded-full border border-purple-400 animate-pulse flex-shrink-0" />
+              ) : (
+                <span className="w-2.5 h-2.5 rounded-full border border-white/15 flex-shrink-0" />
+              )}
+              <span>{step}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* File list when done */}
       {isDone && data.files && data.files.length > 0 && (
