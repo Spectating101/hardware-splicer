@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Package, FileCode, FileText, Download } from "lucide-react";
+import { X, Package, FileCode, FileText, Download, ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { useWorkspaceStore } from "@/lib/store";
 import type { BoardNodeData, ValidationNodeData, FileNodeData, ManufacturingNodeData, ManufacturingFile } from "@/lib/node-types";
 import { BoardDrawer } from "./board-drawer";
@@ -32,6 +33,30 @@ function MfgDrawer({ data }: { data: ManufacturingNodeData }) {
     a.download = `${data.packageName}_manifest.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function FileGroup({ title, files, color }: { title: string; files: ManufacturingFile[]; color: string }) {
+    const [expanded, setExpanded] = useState(true);
+    if (files.length === 0) return null;
+    return (
+      <div className="rounded-xl border border-white/10 bg-white/3 overflow-hidden">
+        <button
+          onClick={() => setExpanded((x) => !x)}
+          className="w-full flex items-center justify-between px-3 py-2 hover:bg-white/5 transition-colors"
+        >
+          <span className={`text-xs font-semibold uppercase tracking-wide ${color}`}>{title}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-white/25">{files.length} file{files.length === 1 ? "" : "s"}</span>
+            {expanded ? <ChevronDown size={12} className="text-white/30" /> : <ChevronRight size={12} className="text-white/30" />}
+          </div>
+        </button>
+        {expanded && (
+          <div className="px-3 pb-2 border-t border-white/5">
+            {files.map((f) => <FileRow key={f.name} file={f} />)}
+          </div>
+        )}
+      </div>
+    );
   }
 
   function FileRow({ file }: { file: ManufacturingFile }) {
@@ -69,9 +94,13 @@ function MfgDrawer({ data }: { data: ManufacturingNodeData }) {
     );
   }
 
+  const gerberFiles = data.files.filter((f) => f.type === "gerber" || f.type === "drill");
+  const bomFiles = data.files.filter((f) => f.type === "bom");
+  const assemblyFiles = data.files.filter((f) => f.type === "assembly");
+
   return (
     <div className="flex flex-col gap-4 p-4 overflow-y-auto">
-      {/* Summary */}
+      {/* Summary banner */}
       <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-3 flex items-center gap-3">
         <Package size={18} className="text-emerald-400 flex-shrink-0" />
         <div className="flex-1 min-w-0">
@@ -91,10 +120,30 @@ function MfgDrawer({ data }: { data: ManufacturingNodeData }) {
         </button>
       </div>
 
-      {/* File list */}
-      <div className="rounded-xl border border-white/10 bg-white/3 p-3">
-        <p className="text-xs text-white/40 uppercase tracking-wide mb-2">Output files</p>
-        {data.files.map((f) => <FileRow key={f.name} file={f} />)}
+      {/* Grouped file sections */}
+      <FileGroup title="Gerber & Drill Files" files={gerberFiles} color="text-purple-400" />
+      {bomFiles.length > 0 && <FileGroup title="Bill of Materials" files={bomFiles} color="text-cyan-400" />}
+      {assemblyFiles.length > 0 && <FileGroup title="Assembly Guide" files={assemblyFiles} color="text-amber-400" />}
+
+      {/* Fab house guidance */}
+      <div className="rounded-xl border border-white/10 bg-white/3 p-3 flex flex-col gap-2">
+        <p className="text-xs text-white/40 uppercase tracking-wide font-semibold">Submit to fab</p>
+        <p className="text-[11px] text-white/40 leading-relaxed">
+          Upload the Gerber zip to your preferred PCB manufacturer. Most fabs accept the standard KiCad output directly.
+        </p>
+        <div className="flex flex-col gap-1">
+          {[
+            { name: "JLCPCB", note: "5 pcs from $2", href: null },
+            { name: "PCBWay", note: "assembly + sourcing", href: null },
+            { name: "OSH Park", note: "US-made, purple PCBs", href: null },
+          ].map((fab) => (
+            <div key={fab.name} className="flex items-center gap-2">
+              <ExternalLink size={10} className="text-white/20 flex-shrink-0" />
+              <span className="text-xs text-white/60 font-medium">{fab.name}</span>
+              <span className="text-[10px] text-white/25">{fab.note}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
