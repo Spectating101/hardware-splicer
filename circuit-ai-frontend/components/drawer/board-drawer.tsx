@@ -39,7 +39,7 @@ interface BoardDrawerProps {
 }
 
 export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDrawerProps) {
-  const { nodes, edges } = useWorkspaceStore();
+  const { nodes, edges, setPendingCommand } = useWorkspaceStore();
 
   const validationEdge = edges.find((e) => e.source === nodeId);
   const validationNode = validationEdge
@@ -168,6 +168,17 @@ export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDraw
           <Badge variant="default">KiCad</Badge>
           {mfgData?.status === "done" && <Badge variant="success">Mfg Ready</Badge>}
         </div>
+
+        {/* Quick-action: manufacture CTA when validated and clean */}
+        {validationData && activeIssueCount === 0 && !mfgData && (
+          <button
+            onClick={() => setPendingCommand({ action: "manufacture", boardNodeId: nodeId })}
+            className="w-full py-2 rounded-xl text-sm font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 hover:bg-purple-500/20 transition-colors flex items-center justify-center gap-2"
+          >
+            <Package size={14} />
+            Generate manufacturing package →
+          </button>
+        )}
 
         {/* JARVIS board insights */}
         {(() => {

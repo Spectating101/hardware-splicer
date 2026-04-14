@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Zap, X } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
@@ -30,6 +30,15 @@ export function NotificationStrip() {
     const delay = jarvisStrip.action ? 14000 : 9000;
     const timer = setTimeout(() => dismissJarvisStrip(), delay);
     return () => clearTimeout(timer);
+  }, [jarvisStrip, dismissJarvisStrip]);
+
+  // Escape to dismiss
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && jarvisStrip) dismissJarvisStrip();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [jarvisStrip, dismissJarvisStrip]);
 
   return (

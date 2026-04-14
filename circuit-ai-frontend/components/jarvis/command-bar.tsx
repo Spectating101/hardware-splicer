@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CircuitBoard, Zap, Loader2, Upload } from "lucide-react";
 import { useWorkspaceStore, newNodeId } from "@/lib/store";
 import { detectFileKind, jarvis, parseIntent, contextualResponse } from "@/lib/jarvis";
@@ -25,6 +25,19 @@ export function CommandBar() {
     setFocusNodeId,
     acknowledgeAllIssues,
   } = useWorkspaceStore();
+
+  // Cmd+K / Ctrl+K → focus command input
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   function handleFileOnBar(file: File) {
     // Prevent duplicate drops of the same filename
@@ -290,6 +303,11 @@ export function CommandBar() {
             placeholder={getContextualPlaceholder()}
             className="flex-1 bg-transparent text-sm text-white placeholder-white/25 outline-none"
           />
+          {input === "" && (
+            <kbd className="hidden sm:block text-[9px] font-mono text-white/15 bg-white/5 border border-white/10 rounded px-1 py-0.5 flex-shrink-0">
+              ⌘K
+            </kbd>
+          )}
         </div>
       </form>
 
