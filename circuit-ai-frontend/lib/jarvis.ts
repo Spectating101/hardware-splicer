@@ -131,30 +131,32 @@ export function parseIntent(text: string): JarvisIntent {
   if (/\b(validate|check\s+issue|run\s+erc|erc|drc|check\s+board|re-?validate|run\s+check)\b/.test(t))
     return { type: "validate" };
   if (
-    /\b(manufactur|gerber|package\s+for|generate\s+package|send\s+to\s+fab|produce|fabricat|build\s+it|ready\s+to\s+ship|order\s+(the\s+)?board)\b/.test(t)
+    /\b(manufactur|gerber|package\s+for|generate\s+package|send\s+to\s+fab|produce|fabricat|build\s+it|ready\s+to\s+ship|order\s+(the\s+)?board|zip.*(file|gerber)|submit.*(fab|board))\b/.test(t)
   )
     return { type: "manufacture" };
   if (
-    /(\b(show|open|see|view|list)\b.*\b(issue|error|problem|wrong|warning|fix)\b)|(\bwhat.?s wrong\b)|\bissues?\b|(\bshow\s+me\b)/.test(t)
+    /(\b(show|open|see|view|list)\b.*\b(issue|error|problem|wrong|warning|fix)\b)|(\bwhat.?s wrong\b)|\bissues?\b|(\bshow\s+me\b)/.test(t) ||
+    /\b(bugs?|defect|violation|drc\s+error)\b/.test(t)
   )
     return { type: "show_issues" };
-  if (/\b(status|progress|where\s+are\s+we|what.?s\s+(the\s+)?status|summary|how.?s\s+(the\s+)?(board|project|design)|health\b|score\b)\b/.test(t))
+  if (/\b(status|progress|where\s+are\s+we|what.?s\s+(the\s+)?status|summary|how.?s\s+(the\s+)?(board|project|design)|health\b|score\b|overview)\b/.test(t))
     return { type: "status" };
   if (
-    /\b(acknowledge|ack|dismiss|ignore|suppress|accept)\b.*\b(warning|issue|error)\b/.test(t) ||
-    /\b(mark|set)\b.*\b(warning|issue).*\b(ok|okay|done|resolved|fixed)\b/.test(t)
+    /\b(acknowledge|ack|dismiss|ignore|suppress|accept|skip)\b.*\b(warning|issue|error)\b/.test(t) ||
+    /\b(mark|set)\b.*\b(warning|issue).*\b(ok|okay|done|resolved|fixed)\b/.test(t) ||
+    /\b(that.?s\s+fine|good\s+enough|acceptable|live\s+with)\b/.test(t)
   )
     return { type: "acknowledge" };
   if (/\bundo\b/.test(t)) return { type: "undo" };
-  if (/\b(clear|reset|new\s+project|start\s+over|fresh)\b/.test(t))
+  if (/\b(clear|reset|new\s+project|start\s+(over|fresh|again)|wipe)\b/.test(t))
     return { type: "clear" };
-  if (/\b(help|commands?|what\s+can\s+you|how\s+do)\b/.test(t))
+  if (/\b(help|commands?|what\s+can\s+you|how\s+do\s+i|what\s+do\s+you)\b/.test(t))
     return { type: "help" };
-  if (/\b(next|what\s+(should|do)\s+i|what.?s\s+next|what\s+now|proceed|continue|done|looks?\s+good|looks?\s+(ok|okay|fine))\b/.test(t))
+  if (/\b(next|what\s+(should|do)\s+i|what.?s\s+next|what\s+now|proceed|continue|done|looks?\s+good|looks?\s+(ok|okay|fine)|good\s+to\s+go|all\s+good)\b/.test(t))
     return { type: "next" };
-  if (/\b(open|inspect|view|show)\b.*\b(board|pcb|schematic|design)\b|\bboard\s+(detail|info|drawer)\b/.test(t))
+  if (/\b(open|inspect|view|show)\b.*\b(board|pcb|schematic|design|layout)\b|\bboard\s+(detail|info|drawer)\b/.test(t))
     return { type: "open_board" };
-  if (/\b(open|view|show|download)\b.*\b(mfg|manufactur|package|gerber|files?|output)\b|\bpackage\s+detail\b/.test(t))
+  if (/\b(open|view|show|download|get|grab)\b.*\b(mfg|manufactur|package|gerber|files?|output|zip)\b|\bpackage\s+detail\b/.test(t))
     return { type: "open_mfg" };
   return { type: "unknown", text };
 }
@@ -291,38 +293,93 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
 
       if (!ctx.hasBoardNode)
         return text
-          ? `I heard you — but I need a board to work with first. Drop a \`.kicad_pcb\` file.`
+          ? `I heard you — but I need a board to work with first. Drop a \`.kicad_pcb\` file on the canvas.`
           : "Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
 
-      // Try to answer specific questions about the board
+      // Fab ordering questions
+      if (/\bjlcpcb|pcbway|oshpark|osh\s+park|fab\s+house|fabricat|order|prototype|spin\s+(the\s+)?board\b/.test(t)) {
+        if (ctx.hasCriticals)
+          return `**${ctx.boardName}** has critical issues — most fabs (JLCPCB, PCBWay) will reject this board. Resolve the ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} first, then say **manufacture**.`;
+        if (!ctx.hasValidation)
+          return `Run **validate** first. I need to confirm there are no critical issues before you send it to fab.`;
+        if (!ctx.hasManufacturing)
+          return `**${ctx.boardName}** looks clean — score **${ctx.healthScore}/100** with no critical blockers. Say **manufacture** to generate the Gerber package, then upload to JLCPCB, PCBWay, or OSH Park.`;
+        return `Manufacturing package is ready. Download the Gerbers from the Manufacture tab and upload the zip to JLCPCB, PCBWay, or your preferred fab. Most accept KiCad Gerbers directly.`;
+      }
+
+      // Layer/stackup questions
+      if (/\b(layer|stack.?up|impedance|controlled|4l|6l|2l)\b/.test(t) && ctx.layerCount) {
+        const l = ctx.layerCount;
+        const guidance =
+          l === 1 ? "Single-layer boards have limited routing options — consider 2L if you need ground plane or power isolation."
+          : l === 2 ? "2-layer is cost-effective for most projects. Keep GND on B.Cu as a reference plane for best EMI performance."
+          : l === 4 ? "4-layer is solid for mixed-signal or power designs: signal / GND / PWR / signal stack-up is common."
+          : l >= 6 ? `${l}-layer stack-up is used for high-density or controlled-impedance designs — confirm your fab's exact dielectric thicknesses.`
+          : `${l} layers detected.`;
+        return `**${ctx.boardName}** is a **${l}-layer** board. ${guidance}`;
+      }
+
+      // Component count / density questions
+      if (/\b(component|part|density|count|how\s+many)\b/.test(t) && ctx.componentCount) {
+        const c = ctx.componentCount;
+        const density = c < 10 ? "minimal footprint — low cost to assemble" : c < 50 ? "standard prototype density" : c < 150 ? "high-density — expect DFM scrutiny" : "very dense — verify clearances carefully before ordering";
+        return `**${ctx.boardName}** has **${c} component${c === 1 ? "" : "s"}** across **${ctx.layerCount} layer${ctx.layerCount === 1 ? "" : "s"}** — ${density}.`;
+      }
+
+      // Fix / resolve specific top issue
       if (ctx.hasValidation && ctx.topIssue) {
-        if (/\b(why|reason|cause|explain|what.?s the issue|problem)\b/.test(t)) {
-          return `The top issue: **${ctx.topIssue.what}**. Fix: ${ctx.topIssue.fix}`;
+        if (/\b(fix|how|resolve|repair|correct|patch|address)\b/.test(t)) {
+          return `To fix the top **${ctx.topIssue.severity}**: ${ctx.topIssue.fix}. Say **show issues** to see all issues with individual fix hints.`;
         }
-        if (/\b(fix|how|resolve|repair|correct)\b/.test(t)) {
-          return `To fix the top ${ctx.topIssue.severity}: ${ctx.topIssue.fix}`;
-        }
-        if (/\bjlcpcb|pcbway|oshpark|fab|fabricat|order\b/.test(t)) {
-          if (ctx.hasCriticals)
-            return `**${ctx.boardName}** has critical issues — most fabs (JLCPCB, PCBWay) will reject this board. Resolve the ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} first.`;
-          if (!ctx.hasManufacturing)
-            return `**${ctx.boardName}** looks fab-ready — score **${ctx.healthScore}/100** with no criticals. Say **manufacture** to generate the Gerber package, then upload to your fab.`;
-          return `Manufacturing package is ready. Download the Gerbers from the manufacture tab and upload to JLCPCB, PCBWay, or your preferred fab.`;
+        if (/\b(why|reason|cause|explain|what.?s the issue|describe|tell me about)\b/.test(t)) {
+          return `Top issue: **${ctx.topIssue.what}**. This matters because: it's a design-rule violation that could affect board reliability or cause fab rejection. Fix: ${ctx.topIssue.fix}`;
         }
       }
 
-      if (/\b(score|health|rating|grade)\b/.test(t) && ctx.hasValidation && ctx.healthScore != null) {
+      // Health score questions
+      if (/\b(score|health|rating|grade|quality|how\s+(good|bad)|pass|fail)\b/.test(t) && ctx.hasValidation && ctx.healthScore != null) {
         const s = ctx.healthScore;
-        return `Health score is **${s}/100** — ${ctx.activeIssueCount === 0 ? "no active issues" : `${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}`}. ${s >= 80 ? "Looks good." : s >= 60 ? "Acceptable, but review the issues." : "Needs attention before manufacture."}`;
+        const verdict = s >= 80 ? "looks good for manufacture" : s >= 60 ? "acceptable with caveats — review the active issues" : "needs attention — score below 60 suggests significant violations";
+        return `Health score is **${s}/100** — ${ctx.activeIssueCount === 0 ? "no active issues" : `${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}`}. This ${verdict}.`;
       }
 
+      // Net / connectivity questions
+      if (/\b(net|connection|ratsnest|connect|unconnect|pin)\b/.test(t)) {
+        if (ctx.hasValidation && ctx.hasCriticals)
+          return `**${ctx.boardName}** has connectivity violations in the active issues — say **show issues** to review unconnected nets and pin errors.`;
+        return ctx.hasValidation
+          ? `No connectivity violations detected in **${ctx.boardName}** — all nets appear routed.`
+          : `Say **validate** to check **${ctx.boardName}** for unconnected nets and pin errors.`;
+      }
+
+      // EMI / power / noise questions
+      if (/\b(emi|emc|noise|power\s+(plane|integrity)|ground\s+plane|decoupling|bypass)\b/.test(t)) {
+        const l = ctx.layerCount ?? 2;
+        if (l === 1) return `Single-layer boards have no dedicated ground plane — EMI performance will be limited. Consider a 2-layer design with a GND pour on B.Cu.`;
+        if (l === 2) return `For **${ctx.boardName}** (2-layer): place a solid GND copper pour on B.Cu, keep high-speed traces short, and add 100nF decoupling caps close to each IC's VCC pin.`;
+        return `For **${ctx.boardName}** (${l}-layer): with dedicated ground/power planes, EMI should be well-controlled. Verify your layer stack-up has alternating signal/reference layers.`;
+      }
+
+      // Thermal / heat questions
+      if (/\b(thermal|heat|temperature|dissipat|hotspot|via|copper\s+fill)\b/.test(t)) {
+        return `For thermal management on **${ctx.boardName}**: use thermal vias under power components, maximize copper pour area on the GND net, and ensure components with high dissipation have adequate clearance for airflow.`;
+      }
+
+      // Clearance / trace width questions
+      if (/\b(clearance|spacing|trace\s+width|minimum|rule|0\.\d+\s*mm)\b/.test(t)) {
+        if (ctx.hasValidation && ctx.activeIssueCount > 0)
+          return `**${ctx.boardName}** has ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} — some may be clearance violations. Say **show issues** to review the specific traces and components flagged.`;
+        return `For most fabs (JLCPCB, PCBWay): minimum trace width 0.127mm, minimum clearance 0.127mm, minimum drill 0.3mm. Check your fab's design rules and confirm they match your KiCad DRC settings.`;
+      }
+
+      // Generic fallbacks based on pipeline state
       if (!ctx.hasValidation)
-        return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see what I can do.`;
+        return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see everything I can do.`;
       if (ctx.hasCriticals)
-        return `**${ctx.boardName}** has **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** blocking manufacture. Say **show issues** to review the fixes.`;
+        return `**${ctx.boardName}** has **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** blocking manufacture. Say **show issues** to review the fixes, or say **what's next** for guidance.`;
       if (!ctx.hasManufacturing)
-        return `**${ctx.boardName}** is validated — health score **${ctx.healthScore}/100**. Say **manufacture** to generate the Gerbers and BOM, or **what's next** for guidance.`;
-      return `**${ctx.boardName}** is fully processed — validated and packaged. Manufacturing files are ready.`;
+        return `**${ctx.boardName}** is validated — health score **${ctx.healthScore}/100**. ${ctx.activeIssueCount === 0 ? 'Say **manufacture** to generate Gerbers and BOM.' : `${ctx.activeIssueCount} non-critical issue${ctx.activeIssueCount === 1 ? "" : "s"} remain — say **acknowledge warnings** then **manufacture**, or **show issues** to review.`}`;
+      return `**${ctx.boardName}** is fully processed — validated and packaged. Manufacturing files are ready to download and submit to fab.`;
     }
   }
 }
