@@ -430,6 +430,20 @@
   .react-flow__node.selected::after {
     display: none;
   }
+  /* Suppress browser focus outlines on canvas node buttons (they're not keyboard-navigable) */
+  .react-flow__node button:focus,
+  .react-flow__node button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  /* Reset native button appearance — applies globally at zero specificity */
+  :where(button) {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    border: none;
+    padding: 0;
+  }
 
   .circuit-ambient {
     animation: circuitAmbient 9s ease-in-out infinite alternate;
