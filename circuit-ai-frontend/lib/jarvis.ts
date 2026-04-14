@@ -372,6 +372,25 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
         return `For most fabs (JLCPCB, PCBWay): minimum trace width 0.127mm, minimum clearance 0.127mm, minimum drill 0.3mm. Check your fab's design rules and confirm they match your KiCad DRC settings.`;
       }
 
+      // Conversational / social responses
+      if (/^(hi|hello|hey|yo|sup|greetings|howdy|good\s+(morning|evening|afternoon|day))\b/.test(t)) {
+        if (!ctx.hasBoardNode)
+          return `Hey! I'm JARVIS — your PCB-to-manufacture AI. Drop a \`.kicad_pcb\` file to get started, or say **help** to see what I can do.`;
+        if (!ctx.hasValidation)
+          return `Hey! **${ctx.boardName}** is on the canvas. Say **validate** to run the electrical rules check.`;
+        if (ctx.hasManufacturing)
+          return `Hey! **${ctx.boardName}** is fully processed — manufacturing package ready to submit.`;
+        return `Hey! **${ctx.boardName}** is at **${ctx.healthScore}/100**${ctx.hasCriticals ? ` with ${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"} blocking manufacture` : ctx.activeIssueCount > 0 ? ` with ${ctx.activeIssueCount} non-critical issue${ctx.activeIssueCount === 1 ? "" : "s"}` : " — clean"}. Say **what's next** for my recommendation.`;
+      }
+
+      if (/\b(thanks?|thank\s+you|cheers|great(\s+job)?|nice(\s+work)?|perfect|awesome|excellent|brilliant|love\s+it)\b/.test(t)) {
+        if (ctx.hasManufacturing) return `Package is ready — good luck with the fab run. JLCPCB and PCBWay both accept this format directly.`;
+        return `Anytime. Say **what's next** if you need guidance on the next step.`;
+      }
+
+      if (/\b(who\s+are\s+you|what\s+are\s+you|what\s+do\s+you\s+do|tell\s+me\s+about\s+yourself)\b/.test(t))
+        return `I'm **JARVIS** — an AI built to guide you from PCB file to manufactured board. Drop a \`.kicad_pcb\`, and I'll parse it, validate it, generate Gerbers, and tell you exactly where to send it for manufacture.`;
+
       // Generic fallbacks based on pipeline state
       if (!ctx.hasValidation)
         return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see everything I can do.`;

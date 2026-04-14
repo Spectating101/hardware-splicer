@@ -181,8 +181,10 @@ export function CommandBar() {
     const { ctx } = buildContext();
     const chips: { label: string; cmd: string; color: string }[] = [];
     if (!ctx.hasBoardNode) return chips;
+
     if (!ctx.hasValidation) {
       chips.push({ label: "⚡ validate", cmd: "validate", color: "text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10" });
+      chips.push({ label: "inspect board", cmd: "open board", color: "text-white/30 border-white/10 hover:bg-white/5 hover:text-white/50" });
     } else {
       if (ctx.activeIssueCount > 0) {
         chips.push({ label: `show issues (${ctx.activeIssueCount})`, cmd: "show issues", color: "text-amber-400 border-amber-500/30 hover:bg-amber-500/10" });
@@ -192,6 +194,7 @@ export function CommandBar() {
       }
       if (ctx.hasManufacturing) {
         chips.push({ label: "✓ status", cmd: "status", color: "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" });
+        chips.push({ label: "open files", cmd: "open manufacturing files", color: "text-purple-400/70 border-purple-500/20 hover:bg-purple-500/10" });
       }
     }
     // Always offer "what's next?" as a gentle nudge when the pipeline isn't complete
