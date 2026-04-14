@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "@/lib/store";
 
 export function ConversationDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { jarvisMessages, openDrawer } = useWorkspaceStore();
+  const { jarvisMessages, openDrawer, setFocusNodeId } = useWorkspaceStore();
   const listRef = useRef<HTMLDivElement>(null);
   const lastMessage = jarvisMessages[jarvisMessages.length - 1];
 
@@ -16,6 +16,12 @@ export function ConversationDrawer() {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
   }, [jarvisMessages, isOpen]);
+
+  function handleFocusNode(nodeId: string) {
+    // Pan canvas to the node, then open its drawer
+    setFocusNodeId(nodeId);
+    setTimeout(() => openDrawer(nodeId), 700);
+  }
 
   return (
     <div className="flex-shrink-0 border-t border-white/5 bg-[#080e1a] z-10">
@@ -75,7 +81,7 @@ export function ConversationDrawer() {
                       </p>
                       {msg.role === "jarvis" && msg.nodeId && (
                         <button
-                          onClick={() => openDrawer(msg.nodeId!)}
+                          onClick={() => handleFocusNode(msg.nodeId!)}
                           className="mt-1 text-cyan-400 hover:text-cyan-200 transition-colors"
                         >
                           Show →

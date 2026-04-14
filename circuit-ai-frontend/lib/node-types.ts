@@ -26,6 +26,7 @@ export interface BoardNodeData {
   boardName: string;
   componentCount: number;
   layerCount: number;
+  netCount?: number;
   sourceFileNodeId: string;
 }
 
@@ -37,10 +38,22 @@ export interface ValidationNodeData {
   sourceBoardNodeId: string;
 }
 
+export interface ManufacturingFile {
+  name: string;
+  type: "gerber" | "bom" | "assembly" | "drill" | "other";
+  sizeBytes?: number;
+}
+
 export interface ManufacturingNodeData {
   kind: "manufacturing";
   status: NodeStatus;
   packageName: string;
+  files?: ManufacturingFile[];
+  gerberCount?: number;
+  hasAssembly?: boolean;
+  hasBom?: boolean;
+  errorMessage?: string;
+  sourceBoardNodeId: string;
 }
 
 export type WorkspaceNodeData =

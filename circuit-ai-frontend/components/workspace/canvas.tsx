@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -8,6 +8,7 @@ import {
   BackgroundVariant,
   Controls,
   MiniMap,
+  useReactFlow,
   type Node,
   type Edge,
   type NodeTypes,
@@ -20,12 +21,14 @@ import type { FileNodeData, WorkspaceNode } from "@/lib/node-types";
 import { FileNodeComponent } from "./nodes/file-node";
 import { BoardNodeComponent } from "./nodes/board-node";
 import { ValidationNodeComponent } from "./nodes/validation-node";
+import { ManufacturingNodeComponent } from "./nodes/manufacturing-node";
 import { EmptyState } from "./empty-state";
 
 const nodeTypes: NodeTypes = {
   file: FileNodeComponent,
   board: BoardNodeComponent,
   validation: ValidationNodeComponent,
+  manufacturing: ManufacturingNodeComponent,
 };
 
 function WorkspaceFlow() {
@@ -35,7 +38,13 @@ function WorkspaceFlow() {
     addNode,
     addJarvisMessage,
     showJarvisStrip,
+    undo,
+    focusNodeId,
+    setFocusNodeId,
+    updateNodePosition,
   } = useWorkspaceStore();
+
+  const { fitBounds, getNode } = useReactFlow();
 
   // Convert store nodes to React Flow nodes
   const rfNodes: Node[] = storeNodes.map((n) => ({
@@ -48,19 +57,32 @@ function WorkspaceFlow() {
   // Convert store edges to React Flow edges
   const rfEdges: Edge[] = storeEdges.map((e) => {
     const targetNode = storeNodes.find((n) => n.id === e.target);
-    const isProcessing = (targetNode?.data as { status?: string } | undefined)?.status === "processing";
+    const status = (targetNode?.data as { status?: string } | undefined)?.status;
+    const isProcessing = status === "processing";
+    const isMfgEdge = targetNode?.kind === "manufacturing";
     return {
       id: e.id,
       source: e.source,
       target: e.target,
       animated: isProcessing,
       style: {
-        stroke: isProcessing ? "rgba(6, 182, 212, 0.9)" : "rgba(6, 182, 212, 0.4)",
+        stroke: isMfgEdge
+          ? isProcessing ? "rgba(168,85,247,0.9)" : "rgba(168,85,247,0.4)"
+          : isProcessing ? "rgba(6,182,212,0.9)" : "rgba(6,182,212,0.4)",
         strokeWidth: isProcessing ? 2.5 : 2,
       },
     };
   });
 
+  // Sync drag-stop position back to Zustand
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      updateNodePosition(node.id, node.position);
+    },
+    [updateNodePosition]
+  );
+
+  // File drop onto canvas
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
@@ -96,6 +118,31 @@ function WorkspaceFlow() {
     [addNode, addJarvisMessage, showJarvisStrip]
   );
 
+  // Keyboard shortcuts: Ctrl+Z → undo
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [undo]);
+
+  // Zoom-to-node when focusNodeId is set from the conversation history
+  useEffect(() => {
+    if (!focusNodeId) return;
+    const node = getNode(focusNodeId);
+    if (node) {
+      fitBounds(
+        { x: node.position.x, y: node.position.y, width: 220, height: 160 },
+        { padding: 0.5, duration: 600 }
+      );
+    }
+    setFocusNodeId(null);
+  }, [focusNodeId, getNode, fitBounds, setFocusNodeId]);
+
   return (
     <div
       className="w-full h-full relative"
@@ -106,6 +153,7 @@ function WorkspaceFlow() {
         nodes={rfNodes}
         edges={rfEdges}
         nodeTypes={nodeTypes}
+        onNodeDragStop={onNodeDragStop}
         fitView={rfNodes.length > 0}
         fitViewOptions={{ padding: 0.3 }}
         style={{ background: "#0d1421" }}
@@ -126,7 +174,7 @@ function WorkspaceFlow() {
         />
         <MiniMap
           style={{ background: "#0d1421", border: "1px solid rgba(255,255,255,0.1)" }}
-          nodeColor="#141e2e"
+          nodeColor={(n) => (n.type === "manufacturing" ? "#581c87" : "#141e2e")}
           maskColor="rgba(8,14,26,0.7)"
         />
       </ReactFlow>

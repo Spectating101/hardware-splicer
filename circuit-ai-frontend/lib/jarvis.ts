@@ -99,4 +99,16 @@ export const jarvis = {
     }
     return "Board checked. Ready to generate Gerber files, BOM, and assembly guide — takes about 30 seconds.";
   },
+
+  manufactureStart(boardName: string): string {
+    return `Generating manufacturing package for **${boardName}** — Gerbers, drill files, BOM, and assembly guide.`;
+  },
+
+  manufactureDone(gerberCount: number, boardName: string): string {
+    return `Manufacturing package for **${boardName}** is ready. **${gerberCount} Gerber files**, BOM, and assembly guide generated.`;
+  },
+
+  manufactureError(msg: string): string {
+    return `Manufacturing failed: ${msg}. Check that the Mecha-Splicer backend is running at MECHA_API_URL.`;
+  },
 };
