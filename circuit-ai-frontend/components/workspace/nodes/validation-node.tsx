@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { XCircle, AlertTriangle, AlertCircle, X } from "lucide-react";
+import { XCircle, AlertTriangle, AlertCircle, X, CheckCircle2 } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { healthLabel } from "@/lib/jarvis";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,12 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const errorCount = active.filter((i) => i.severity === "error").length;
   const warningCount = active.filter((i) => i.severity === "warning").length;
   const colors = scoreColor(data.healthScore);
+
+  // Top 2 issues for inline preview (sorted by severity)
+  const severityOrder = { critical: 0, error: 1, warning: 2 } as const;
+  const previewIssues = [...active]
+    .sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity])
+    .slice(0, 2);
 
   const glow = severityGlow(criticalCount, errorCount, active.length);
 
@@ -68,33 +74,57 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
         </div>
       </div>
 
-      {/* Severity row */}
-      <div className="flex items-center gap-3 py-1.5 border-t border-white/5">
-        {active.length === 0 && data.issues.length === 0 && (
-          <span className="text-xs text-emerald-400">No issues</span>
-        )}
-        {active.length === 0 && data.issues.length > 0 && (
-          <span className="text-xs text-white/30">All acknowledged</span>
-        )}
-        {criticalCount > 0 && (
-          <div className="flex items-center gap-1 text-xs text-red-400">
-            <XCircle size={11} />
-            <span>{criticalCount}</span>
-          </div>
-        )}
-        {errorCount > 0 && (
-          <div className="flex items-center gap-1 text-xs text-orange-400">
-            <AlertTriangle size={11} />
-            <span>{errorCount}</span>
-          </div>
-        )}
-        {warningCount > 0 && (
-          <div className="flex items-center gap-1 text-xs text-amber-400">
-            <AlertCircle size={11} />
-            <span>{warningCount}</span>
-          </div>
-        )}
-      </div>
+      {/* Severity count row */}
+      {(criticalCount > 0 || errorCount > 0 || warningCount > 0 || (active.length === 0 && data.issues.length > 0)) && (
+        <div className="flex items-center gap-3 py-1 border-t border-white/5">
+          {active.length === 0 && data.issues.length > 0 && (
+            <span className="text-xs text-white/30">All acknowledged</span>
+          )}
+          {criticalCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-red-400">
+              <XCircle size={11} />
+              <span>{criticalCount}</span>
+            </div>
+          )}
+          {errorCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-orange-400">
+              <AlertTriangle size={11} />
+              <span>{errorCount}</span>
+            </div>
+          )}
+          {warningCount > 0 && (
+            <div className="flex items-center gap-1 text-xs text-amber-400">
+              <AlertCircle size={11} />
+              <span>{warningCount}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Inline issue preview — top 2 active issues */}
+      {previewIssues.length > 0 && (
+        <div className="flex flex-col gap-1 py-1 border-t border-white/5">
+          {previewIssues.map((issue) => {
+            const IssueIcon = issue.severity === "critical" ? XCircle : issue.severity === "error" ? AlertTriangle : AlertCircle;
+            const issueColor = issue.severity === "critical" ? "text-red-400" : issue.severity === "error" ? "text-orange-400" : "text-amber-400";
+            return (
+              <div key={issue.id} className="flex items-start gap-1.5">
+                <IssueIcon size={10} className={cn("flex-shrink-0 mt-0.5", issueColor)} />
+                <span className="text-[10px] text-white/50 leading-snug line-clamp-2">{issue.what}</span>
+              </div>
+            );
+          })}
+          {active.length > 2 && (
+            <span className="text-[10px] text-white/25 ml-3.5">+{active.length - 2} more</span>
+          )}
+        </div>
+      )}
+      {active.length === 0 && data.issues.length === 0 && (
+        <div className="flex items-center gap-1.5 py-1 border-t border-white/5">
+          <CheckCircle2 size={11} className="text-emerald-400 flex-shrink-0" />
+          <span className="text-[10px] text-emerald-400/80">Board is clean</span>
+        </div>
+      )}
 
       {/* Ack all non-critical issues when there are only warnings/errors */}
       {active.length > 0 && criticalCount === 0 && (

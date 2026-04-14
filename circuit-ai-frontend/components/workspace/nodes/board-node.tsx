@@ -45,7 +45,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as BoardNodeData;
   const {
     updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip,
-    openDrawer, removeNode, nodes, edges, pendingCommand, setPendingCommand,
+    openDrawer, removeNode, nodes, edges, pendingCommand, setPendingCommand, setJarvisThinking,
   } = useWorkspaceStore();
 
   const nodeFromStore = useWorkspaceStore((s) => s.nodes.find((n) => n.id === id));
@@ -85,6 +85,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       : undefined;
     const isRevalidation = prevScore !== undefined;
 
+    setJarvisThinking(true);
     updateNode(id, { status: "processing" });
     const msg = jarvis.validationStart();
     addJarvisMessage({ role: "jarvis", text: msg });
@@ -120,6 +121,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       }
       if (demo) narration += " (demo — connect Circuit-AI backend for real ERC)";
 
+      setJarvisThinking(false);
       addJarvisMessage({ role: "jarvis", text: narration, nodeId: validationId });
       showJarvisStrip({
         message: narration,
@@ -195,6 +197,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
     addEdge({ id: newEdgeId(sourceId, mfgId), source: sourceId, target: mfgId });
 
     const startMsg = jarvis.manufactureStart(data.boardName);
+    setJarvisThinking(true);
     addJarvisMessage({ role: "jarvis", text: startMsg, nodeId: mfgId });
     showJarvisStrip({ message: startMsg, nodeId: mfgId });
 
@@ -210,11 +213,13 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       const gerberCount = files.filter((f: { type?: string; name?: string }) =>
         f.type === "gerber" || f.type === "drill" || /\.(gbr|gtl|gbl|gts|gbs|drl)$/i.test(f.name ?? "")
       ).length || 8;
+      setJarvisThinking(false);
       updateNode(mfgId, { status: "done", files: files.length > 0 ? files : defaultMfgFiles(data.boardName), gerberCount, hasAssembly: true, hasBom: true } as Partial<ManufacturingNodeData>);
       const doneMsg = jarvis.manufactureDone(gerberCount, data.boardName);
       addJarvisMessage({ role: "jarvis", text: doneMsg, nodeId: mfgId });
       showJarvisStrip({ message: doneMsg, nodeId: mfgId });
     } catch {
+      setJarvisThinking(false);
       const demoFiles = defaultMfgFiles(data.boardName);
       const gerberCount = demoFiles.filter((f) => f.type === "gerber" || f.type === "drill").length;
       updateNode(mfgId, { status: "done", files: demoFiles, gerberCount, hasAssembly: true, hasBom: true } as Partial<ManufacturingNodeData>);
