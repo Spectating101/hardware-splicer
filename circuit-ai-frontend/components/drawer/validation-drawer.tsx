@@ -202,7 +202,7 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
             <p className="text-white/30 text-xs mt-1">Board passed all checks</p>
           </div>
         ) : (
-          sorted.map((issue) => <IssueCard key={issue.id} issue={issue} nodeId={nodeId} />)
+          displayedIssues.map((issue) => <IssueCard key={issue.id} issue={issue} nodeId={nodeId} />)
         )}
       </TabsContent>
 

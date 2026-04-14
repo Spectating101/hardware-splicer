@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { motion } from "framer-motion";
 import { Package, FileCode, FileText, ExternalLink, X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,10 @@ export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
   const otherFiles = data.files?.filter((f) => f.type !== "gerber" && f.type !== "drill") ?? [];
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
       className={cn(
         "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500 relative",
         isProcessing
@@ -156,6 +160,6 @@ export function ManufacturingNodeComponent({ id, data: rawData }: NodeProps) {
           <p className="text-xs text-red-300/70 leading-snug">{data.errorMessage}</p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

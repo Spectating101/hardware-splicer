@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { motion } from "framer-motion";
 import { XCircle, AlertTriangle, AlertCircle, X, CheckCircle2 } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { healthLabel } from "@/lib/jarvis";
@@ -39,7 +40,10 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const glow = severityGlow(criticalCount, errorCount, active.length);
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
       className={cn(
         "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500 relative",
         colors.split(" ").find((c) => c.startsWith("border")) ?? "border-white/10",
@@ -142,6 +146,6 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
       >
         See details →
       </button>
-    </div>
+    </motion.div>
   );
 }

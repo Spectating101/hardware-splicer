@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { motion } from "framer-motion";
 import { FileText, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
@@ -89,7 +90,12 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
   const isDone = data.status === "done";
 
   return (
-    <div className="group w-[220px] rounded-2xl border border-white/10 bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2 relative">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className="group w-[220px] rounded-2xl border border-white/10 bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2 relative"
+    >
       <Handle type="source" position={Position.Right} className="!bg-cyan-500 !border-cyan-700" />
       <button
         onClick={() => removeNode(id)}
@@ -132,6 +138,6 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
           {isProcessing ? "Parsing…" : "Parse board"}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }

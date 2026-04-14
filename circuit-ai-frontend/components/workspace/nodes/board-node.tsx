@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { motion } from "framer-motion";
 import { CircuitBoard, ExternalLink, X, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
@@ -238,12 +239,17 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
   const canManufacture = isDone && validationData && activeCriticals === 0;
 
   return (
-    <div className={cn(
-      "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-300 relative",
-      isProcessing
-        ? "border-cyan-500/60 shadow-[0_0_0_2px_rgba(6,182,212,0.2),0_4px_24px_rgba(0,0,0,0.5)] animate-pulse"
-        : "border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
-    )}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.94, y: 8 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ duration: 0.22, ease: "easeOut" }}
+      className={cn(
+        "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-300 relative",
+        isProcessing
+          ? "border-cyan-500/60 shadow-[0_0_0_2px_rgba(6,182,212,0.2),0_4px_24px_rgba(0,0,0,0.5)] animate-pulse"
+          : "border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+      )}
+    >
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />
       <Handle type="source" position={Position.Right} className="!bg-cyan-500 !border-cyan-700" />
       <button
@@ -321,7 +327,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
           Package for manufacture →
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }
 
