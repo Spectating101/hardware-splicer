@@ -55,6 +55,61 @@ function scoreFromIssues(issues: { severity: string }[]): number {
 
 export { scoreFromIssues };
 
+// ─── Board insights ──────────────────────────────────────────────────────────
+
+export interface BoardInsight {
+  label: string;
+  body: string;
+  level: "info" | "tip" | "warn";
+}
+
+export function generateBoardInsights(
+  componentCount: number,
+  layerCount: number,
+  netCount?: number,
+  healthScore?: number
+): BoardInsight[] {
+  const insights: BoardInsight[] = [];
+
+  // Layer count observations
+  if (layerCount === 1) {
+    insights.push({ level: "warn", label: "Single-layer board", body: "1-layer designs limit routing options and EMI shielding. Consider 2-layer if trace density is tight." });
+  } else if (layerCount === 2) {
+    insights.push({ level: "info", label: "2-layer PCB", body: "Standard 2-layer design — cost-effective for most projects. Keep ground plane on B.Cu for best EMI performance." });
+  } else if (layerCount >= 6) {
+    insights.push({ level: "tip", label: `${layerCount}-layer stack-up`, body: "High layer count suggests controlled impedance or dense routing requirements. Confirm your fab's stack-up matches your design intent." });
+  } else if (layerCount % 2 !== 0) {
+    insights.push({ level: "warn", label: `${layerCount}-layer (odd)`, body: "Odd layer counts can cause warping during reflow. Most fabs recommend even layer counts." });
+  }
+
+  // Component density
+  const density = componentCount / Math.max(1, layerCount);
+  if (componentCount > 150) {
+    insights.push({ level: "warn", label: "High component density", body: `${componentCount} components — expect DFM scrutiny. Verify minimum clearances on BGA and fine-pitch parts.` });
+  } else if (componentCount < 10 && layerCount <= 2) {
+    insights.push({ level: "info", label: "Minimal design", body: `${componentCount} components — small footprint. Good candidate for panelization to reduce per-unit fab cost.` });
+  } else if (density > 40) {
+    insights.push({ level: "tip", label: "Dense per-layer", body: `${Math.round(density)} components/layer average. Tight routing — run DRC before ordering.` });
+  }
+
+  // Net count observations
+  if (netCount && netCount > 0) {
+    const netRatio = netCount / componentCount;
+    if (netRatio > 3) {
+      insights.push({ level: "tip", label: "High net-to-component ratio", body: `${netCount} nets across ${componentCount} components. Complex signal routing — verify no unconnected nets in schematic.` });
+    }
+  }
+
+  // Health score tips
+  if (healthScore !== undefined && healthScore < 60) {
+    insights.push({ level: "warn", label: "Low health score", body: `Score of ${healthScore}/100 indicates multiple rule violations. Resolve critical issues before ordering — fab rejection is likely otherwise.` });
+  } else if (healthScore !== undefined && healthScore >= 90) {
+    insights.push({ level: "tip", label: "Clean design", body: `Score ${healthScore}/100 — excellent. This board is in good shape for production.` });
+  }
+
+  return insights.slice(0, 3); // cap at 3 insights
+}
+
 // ─── Intent parsing ──────────────────────────────────────────────────────────
 
 export type JarvisIntent =

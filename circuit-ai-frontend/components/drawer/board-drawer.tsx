@@ -6,9 +6,9 @@ import { useWorkspaceStore } from "@/lib/store";
 import type { BoardNodeData, ValidationNodeData, ManufacturingNodeData, ManufacturingFile } from "@/lib/node-types";
 import { ValidationDrawer } from "./validation-drawer";
 import { StructureViewer } from "@/components/workspace/structure-viewer";
-import { healthLabel } from "@/lib/jarvis";
+import { healthLabel, generateBoardInsights } from "@/lib/jarvis";
 import { cn } from "@/lib/utils";
-import { FileCode, FileText, Package, Download } from "lucide-react";
+import { FileCode, FileText, Package, Download, Zap, Info, AlertTriangle, Lightbulb } from "lucide-react";
 
 function scoreColor(score: number) {
   if (score >= 80) return "text-emerald-400";
@@ -168,6 +168,43 @@ export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDraw
           <Badge variant="default">KiCad</Badge>
           {mfgData?.status === "done" && <Badge variant="success">Mfg Ready</Badge>}
         </div>
+
+        {/* JARVIS board insights */}
+        {(() => {
+          const insights = generateBoardInsights(
+            data.componentCount,
+            data.layerCount,
+            data.netCount,
+            validationData?.healthScore
+          );
+          if (insights.length === 0) return null;
+          return (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-1.5">
+                <Zap size={11} className="text-cyan-400/60" />
+                <span className="text-[10px] text-white/40 uppercase tracking-widest font-semibold">JARVIS Insights</span>
+              </div>
+              {insights.map((ins, i) => {
+                const Icon = ins.level === "warn" ? AlertTriangle : ins.level === "tip" ? Lightbulb : Info;
+                const colors = ins.level === "warn"
+                  ? "border-amber-700/30 bg-amber-950/10"
+                  : ins.level === "tip"
+                    ? "border-cyan-700/25 bg-cyan-950/10"
+                    : "border-white/10 bg-white/3";
+                const iconColor = ins.level === "warn" ? "text-amber-400/70" : ins.level === "tip" ? "text-cyan-400/70" : "text-white/30";
+                return (
+                  <div key={i} className={cn("rounded-xl border p-2.5 flex gap-2", colors)}>
+                    <Icon size={12} className={cn("flex-shrink-0 mt-0.5", iconColor)} />
+                    <div>
+                      <p className="text-[10px] font-semibold text-white/50 uppercase tracking-wide mb-0.5">{ins.label}</p>
+                      <p className="text-[11px] text-white/60 leading-relaxed">{ins.body}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </TabsContent>
 
       {/* Issues */}
