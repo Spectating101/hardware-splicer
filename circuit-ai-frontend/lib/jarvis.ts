@@ -240,11 +240,26 @@ export const jarvis = {
     return "All clean. No issues found. The board is ready to manufacture — say **manufacture** or click the button.";
   },
 
-  validationIssues(total: number, critical: number): string {
-    if (critical > 0) {
-      return `Found **${total} issue${total === 1 ? "" : "s"}**, including **${critical} critical**. These must be resolved before manufacture. Click "See details →" to review.`;
-    }
-    return `Found **${total} issue${total === 1 ? "" : "s"}** — no critical blockers. Review and decide what to fix, then say **manufacture** when ready.`;
+  validationIssues(total: number, critical: number, topFix?: string): string {
+    const base = critical > 0
+      ? `Found **${total} issue${total === 1 ? "" : "s"}**, including **${critical} critical**. These must be resolved before manufacture.`
+      : `Found **${total} issue${total === 1 ? "" : "s"}** — no critical blockers.`;
+    return topFix ? `${base} Top fix: ${topFix}` : base;
+  },
+
+  revalidationResult(newScore: number, oldScore: number, total: number, critical: number): string {
+    const delta = newScore - oldScore;
+    const direction = delta > 0 ? `improved **${oldScore} → ${newScore}**` : delta < 0 ? `dropped **${oldScore} → ${newScore}**` : `unchanged at **${newScore}/100**`;
+    const suffix = critical > 0
+      ? ` — **${critical} critical issue${critical === 1 ? "" : "s"}** still need attention.`
+      : total === 0
+        ? ` — board is now clean.`
+        : ` — no critical blockers remaining.`;
+    return `Score ${direction}${suffix}`;
+  },
+
+  schematicLoaded(filename: string): string {
+    return `Schematic **${filename}** loaded. Netlist structure will be analyzed when you say **validate** or click "Analyze nets".`;
   },
 
   validationError(msg: string): string {

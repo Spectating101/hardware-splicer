@@ -102,11 +102,20 @@ export function ConversationDrawer() {
             {lastMessage.text.replace(/\*\*(.*?)\*\*/g, "$1").slice(0, 90)}
           </span>
         )}
-        {jarvisMessages.length > 0 && (
-          <span className="ml-auto text-[10px] text-white/20 flex-shrink-0">
-            {jarvisMessages.length} msg{jarvisMessages.length === 1 ? "" : "s"}
+        <span className="ml-auto flex items-center gap-3 flex-shrink-0">
+          {jarvisMessages.length > 0 && (
+            <span className="text-[10px] text-white/20">
+              {jarvisMessages.length} msg{jarvisMessages.length === 1 ? "" : "s"}
+            </span>
+          )}
+          <span className="text-[10px] text-white/15 hidden sm:flex items-center gap-2">
+            <kbd className="font-mono bg-white/5 border border-white/10 rounded px-1 py-0.5 text-[9px]">Ctrl+Z</kbd>
+            <span>undo</span>
+            <span className="text-white/10">·</span>
+            <kbd className="font-mono bg-white/5 border border-white/10 rounded px-1 py-0.5 text-[9px]">Esc</kbd>
+            <span>close panel</span>
           </span>
-        )}
+        </span>
       </button>
 
       {/* Expanded panel */}

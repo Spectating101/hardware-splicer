@@ -79,10 +79,67 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
   }, [pendingCommand]);
 
   async function handleCheckIssues() {
+    // Capture previous score for delta reporting on re-validate
+    const prevScore = existingValidationNode
+      ? (existingValidationNode.data as ValidationNodeData).healthScore
+      : undefined;
+    const isRevalidation = prevScore !== undefined;
+
     updateNode(id, { status: "processing" });
     const msg = jarvis.validationStart();
     addJarvisMessage({ role: "jarvis", text: msg });
     showJarvisStrip({ message: msg });
+
+    function finishValidation(issues: ValidationIssue[], demo = false) {
+      const healthScore = scoreFromIssues(issues);
+      const criticalCount = issues.filter((i) => i.severity === "critical").length;
+      const validationId = newNodeId("validation");
+
+      // Top issue for inline fix hint — pick highest severity active issue
+      const severityOrder = { critical: 0, error: 1, warning: 2 } as const;
+      const sorted = [...issues].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+      const topFix = sorted[0]?.fix;
+
+      const validationNode: WorkspaceNode = {
+        id: validationId,
+        kind: "validation",
+        position: { x: position.x + 300, y: position.y },
+        data: { kind: "validation", status: "done", healthScore, issues, sourceBoardNodeId: id } satisfies ValidationNodeData,
+      };
+
+      addNode(validationNode);
+      addEdge({ id: newEdgeId(id, validationId), source: id, target: validationId });
+
+      let narration: string;
+      if (isRevalidation) {
+        narration = jarvis.revalidationResult(healthScore, prevScore!, issues.length, criticalCount);
+      } else if (issues.length === 0) {
+        narration = jarvis.validationClean();
+      } else {
+        narration = jarvis.validationIssues(issues.length, criticalCount, topFix);
+      }
+      if (demo) narration += " (demo — connect Circuit-AI backend for real ERC)";
+
+      addJarvisMessage({ role: "jarvis", text: narration, nodeId: validationId });
+      showJarvisStrip({
+        message: narration,
+        nodeId: validationId,
+        action: issues.length > 0
+          ? { label: "See details →", onAction: () => openDrawer(validationId, "issues") }
+          : undefined,
+      });
+      updateNode(id, { status: "done" });
+
+      const proactiveMsg = jarvis.proactiveManufacture(criticalCount > 0);
+      setTimeout(() => {
+        showJarvisStrip({
+          message: proactiveMsg,
+          action: criticalCount === 0
+            ? { label: "Package for manufacture →", onAction: () => handleManufacture(validationId) }
+            : undefined,
+        });
+      }, 12000);
+    }
 
     try {
       let issues: ValidationIssue[] = [];
@@ -103,72 +160,13 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
         ];
       }
 
-      const healthScore = scoreFromIssues(issues);
-      const criticalCount = issues.filter((i) => i.severity === "critical").length;
-      const validationId = newNodeId("validation");
-
-      const validationNode: WorkspaceNode = {
-        id: validationId,
-        kind: "validation",
-        position: { x: position.x + 300, y: position.y },
-        data: {
-          kind: "validation",
-          status: "done",
-          healthScore,
-          issues,
-          sourceBoardNodeId: id,
-        } satisfies ValidationNodeData,
-      };
-
-      const edge: WorkspaceEdge = { id: newEdgeId(id, validationId), source: id, target: validationId };
-      addNode(validationNode);
-      addEdge(edge);
-
-      const narration = issues.length === 0
-        ? jarvis.validationClean()
-        : jarvis.validationIssues(issues.length, criticalCount);
-
-      addJarvisMessage({ role: "jarvis", text: narration, nodeId: validationId });
-      showJarvisStrip({ message: narration, nodeId: validationId });
-      updateNode(id, { status: "done" });
-
-      const proactiveMsg = jarvis.proactiveManufacture(criticalCount > 0);
-      setTimeout(() => {
-        showJarvisStrip({
-          message: proactiveMsg,
-          action: criticalCount === 0
-            ? { label: "Package for manufacture →", onAction: () => handleManufacture(validationId) }
-            : undefined,
-        });
-      }, 9000);
+      finishValidation(issues);
     } catch {
-      // Backend offline — use demo validation data so the workflow isn't blocked
       const issues: ValidationIssue[] = [
         { id: "issue-0", severity: "error", what: "Clearance violation between U1 pin 3 and trace on B.Cu", why: "Minimum clearance rule (0.2mm) not met", fix: "Move trace or component to restore 0.2mm clearance" },
         { id: "issue-1", severity: "warning", what: "Net GND not connected to any copper pour", why: "Ground plane improves thermal and EMI performance", fix: "Add a copper pour zone on B.Cu assigned to GND" },
       ];
-      const healthScore = scoreFromIssues(issues);
-      const criticalCount = 0;
-      const validationId = newNodeId("validation");
-
-      const validationNode: WorkspaceNode = {
-        id: validationId,
-        kind: "validation",
-        position: { x: position.x + 300, y: position.y },
-        data: { kind: "validation", status: "done", healthScore, issues, sourceBoardNodeId: id } satisfies ValidationNodeData,
-      };
-      addNode(validationNode);
-      addEdge({ id: newEdgeId(id, validationId), source: id, target: validationId });
-
-      const narration = `${jarvis.validationIssues(issues.length, criticalCount)} (demo — connect Circuit-AI backend for real ERC)`;
-      addJarvisMessage({ role: "jarvis", text: narration, nodeId: validationId });
-      showJarvisStrip({ message: narration, nodeId: validationId });
-      updateNode(id, { status: "done" });
-
-      setTimeout(() => {
-        const proactiveMsg = jarvis.proactiveManufacture(false);
-        showJarvisStrip({ message: proactiveMsg, action: { label: "Package for manufacture →", onAction: () => handleManufacture(validationId) } });
-      }, 9000);
+      finishValidation(issues, true);
     }
   }
 

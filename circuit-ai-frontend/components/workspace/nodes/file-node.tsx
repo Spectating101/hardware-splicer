@@ -16,6 +16,16 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
   const nodeFromStore = useWorkspaceStore((s) => s.nodes.find((n) => n.id === id));
   const position = nodeFromStore?.position ?? { x: 0, y: 0 };
 
+  async function handleLoadSchematic() {
+    updateNode(id, { status: "processing" });
+    // Brief async tick so status renders
+    await new Promise((r) => setTimeout(r, 400));
+    updateNode(id, { status: "done" });
+    const msg = jarvis.schematicLoaded(data.filename);
+    addJarvisMessage({ role: "jarvis", text: msg, nodeId: id });
+    showJarvisStrip({ message: msg, nodeId: id });
+  }
+
   async function handleParseBoard() {
     updateNode(id, { status: "processing" });
 
@@ -104,7 +114,16 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
         {isDone && <Badge variant="success">Parsed</Badge>}
       </div>
 
-      {!isDone && (
+      {!isDone && data.fileKind === "kicad_sch" && (
+        <button
+          onClick={handleLoadSchematic}
+          disabled={isProcessing}
+          className="w-full mt-1 py-1.5 rounded-lg text-xs font-medium bg-violet-500/10 text-violet-400 border border-violet-500/20 hover:bg-violet-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isProcessing ? "Loading…" : "Analyze nets"}
+        </button>
+      )}
+      {!isDone && data.fileKind !== "kicad_sch" && (
         <button
           onClick={handleParseBoard}
           disabled={isProcessing}
