@@ -129,12 +129,14 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         set((state) => ({ edges: [...state.edges, edge] })),
 
       addJarvisMessage: (message) =>
-        set((state) => ({
-          jarvisMessages: [
+        set((state) => {
+          const next = [
             ...state.jarvisMessages,
             { ...message, id: `msg-${++_msgCounter}`, timestamp: Date.now() },
-          ],
-        })),
+          ];
+          // Cap history at 60 messages to prevent unbounded localStorage growth
+          return { jarvisMessages: next.length > 60 ? next.slice(next.length - 60) : next };
+        }),
 
       showJarvisStrip: (strip) => set({ jarvisStrip: strip }),
       dismissJarvisStrip: () => set({ jarvisStrip: null }),
@@ -151,13 +153,27 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         ),
 
       removeNode: (nodeId) =>
-        set((state) => ({
-          history: [...state.history, { nodes: state.nodes, edges: state.edges }].slice(-20),
-          canUndo: true,
-          nodes: state.nodes.filter((n) => n.id !== nodeId),
-          edges: state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
-          drawer: state.drawer?.nodeId === nodeId ? null : state.drawer,
-        })),
+        set((state) => {
+          // Collect all downstream nodes to remove (cascade through edges)
+          const toRemove = new Set<string>([nodeId]);
+          let changed = true;
+          while (changed) {
+            changed = false;
+            state.edges.forEach((e) => {
+              if (toRemove.has(e.source) && !toRemove.has(e.target)) {
+                toRemove.add(e.target);
+                changed = true;
+              }
+            });
+          }
+          return {
+            history: [...state.history, { nodes: state.nodes, edges: state.edges }].slice(-20),
+            canUndo: true,
+            nodes: state.nodes.filter((n) => !toRemove.has(n.id)),
+            edges: state.edges.filter((e) => !toRemove.has(e.source) && !toRemove.has(e.target)),
+            drawer: state.drawer && toRemove.has(state.drawer.nodeId) ? null : state.drawer,
+          };
+        }),
 
       acknowledgeIssue: (nodeId, issueId) =>
         set((state) => ({
