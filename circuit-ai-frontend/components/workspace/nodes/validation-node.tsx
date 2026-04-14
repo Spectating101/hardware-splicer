@@ -23,7 +23,20 @@ function severityGlow(criticalCount: number, errorCount: number, issueCount: num
 
 export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as ValidationNodeData;
-  const { openDrawer, removeNode, acknowledgeAllIssues } = useWorkspaceStore();
+  const { openDrawer, removeNode, acknowledgeAllIssues, showJarvisStrip, addJarvisMessage, nodes, edges } = useWorkspaceStore();
+
+  function handleAcknowledgeAll() {
+    acknowledgeAllIssues(id);
+    // After 90s, nudge to manufacture if no mfg node yet
+    setTimeout(() => {
+      const mfgExists = edges.some((e) => e.source === id && nodes.find((n) => n.id === e.target && n.kind === "manufacturing"));
+      if (!mfgExists) {
+        const msg = "All issues acknowledged — say **manufacture** to generate the Gerbers, BOM, and assembly guide.";
+        addJarvisMessage({ role: "jarvis", text: msg, nodeId: id });
+        showJarvisStrip({ message: msg, nodeId: id });
+      }
+    }, 90000);
+  }
 
   const active = data.issues.filter((i) => !i.acknowledged);
   const criticalCount = active.filter((i) => i.severity === "critical").length;
@@ -70,10 +83,27 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
         >
           {data.healthScore}
         </div>
-        <div>
-          <p className={cn("text-sm font-medium", colors.split(" ")[0])}>
-            {healthLabel(data.healthScore)}
-          </p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <p className={cn("text-sm font-medium", colors.split(" ")[0])}>
+              {healthLabel(data.healthScore)}
+            </p>
+            {data.prevScore != null && data.prevScore !== data.healthScore && (
+              <span className={cn(
+                "text-[10px] font-semibold px-1 rounded",
+                data.healthScore > data.prevScore
+                  ? "text-emerald-400 bg-emerald-950/40"
+                  : "text-red-400 bg-red-950/40"
+              )}>
+                {data.healthScore > data.prevScore ? "+" : ""}{data.healthScore - data.prevScore}
+              </span>
+            )}
+            {data.prevScore != null && data.prevScore === data.healthScore && (
+              <span className="text-[10px] font-semibold px-1 rounded text-white/20 bg-white/5">
+                ±0
+              </span>
+            )}
+          </div>
           <p className="text-xs text-white/30">Health score</p>
         </div>
       </div>
@@ -133,7 +163,7 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
       {/* Ack all non-critical issues when there are only warnings/errors */}
       {active.length > 0 && criticalCount === 0 && (
         <button
-          onClick={() => acknowledgeAllIssues(id)}
+          onClick={handleAcknowledgeAll}
           className="w-full py-1.5 rounded-lg text-xs font-medium bg-amber-500/8 text-amber-400/70 border border-amber-500/20 hover:bg-amber-500/15 hover:text-amber-400 transition-colors"
         >
           Dismiss warnings

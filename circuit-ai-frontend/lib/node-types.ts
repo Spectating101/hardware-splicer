@@ -35,6 +35,7 @@ export interface ValidationNodeData {
   kind: "validation";
   status: NodeStatus;
   healthScore: number;
+  prevScore?: number;
   issues: ValidationIssue[];
   sourceBoardNodeId: string;
 }

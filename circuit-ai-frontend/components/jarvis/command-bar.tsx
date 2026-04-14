@@ -144,15 +144,15 @@ export function CommandBar() {
     const { ctx } = buildContext();
     if (!ctx.hasBoardNode)
       return 'Drop a .kicad_pcb file, or ask anything…';
+    if (ctx.hasManufacturing)
+      return `${ctx.boardName ?? "Board"} packaged and ready — ask anything or say "status"…`;
     if (!ctx.hasValidation)
       return `"validate" to check ${ctx.boardName ?? "the board"}, or ask anything…`;
     if (ctx.hasCriticals)
       return `"show issues" to review ${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}, or ask anything…`;
     if (ctx.activeIssueCount > 0)
       return `"manufacture" or "acknowledge warnings" — or ask anything…`;
-    if (!ctx.hasManufacturing)
-      return `"manufacture" to generate Gerbers and BOM, or ask anything…`;
-    return `${ctx.boardName ?? "Board"} packaged — ask anything or say "status"…`;
+    return `"manufacture" to generate Gerbers and BOM, or ask anything…`;
   }
 
   function buildContextChips(): { label: string; cmd: string; color: string }[] {

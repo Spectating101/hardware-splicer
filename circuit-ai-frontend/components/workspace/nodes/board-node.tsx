@@ -110,6 +110,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
           kind: "validation",
           status: "done",
           healthScore,
+          prevScore: prevScore,
           issues,
           sourceBoardNodeId: id,
         } as Partial<ValidationNodeData>);
