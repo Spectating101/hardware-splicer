@@ -117,6 +117,63 @@ export function CommandBar() {
     };
   }
 
+  function quickSubmit(text: string) {
+    addJarvisMessage({ role: "user", text });
+    const intent = parseIntent(text);
+    const { ctx, boardNode, validationNode } = buildContext();
+    const response = contextualResponse(intent, ctx);
+
+    switch (intent.type) {
+      case "validate":
+        if (boardNode && !ctx.hasValidation) {
+          addJarvisMessage({ role: "jarvis", text: response });
+          showJarvisStrip({ message: response });
+          setPendingCommand({ action: "validate", boardNodeId: boardNode.id });
+          return;
+        }
+        break;
+      case "manufacture":
+        if (boardNode && ctx.hasValidation && !ctx.hasCriticals && !ctx.hasManufacturing) {
+          addJarvisMessage({ role: "jarvis", text: response });
+          showJarvisStrip({ message: response });
+          setPendingCommand({ action: "manufacture", boardNodeId: boardNode.id });
+          return;
+        }
+        break;
+      case "show_issues":
+        if (validationNode) {
+          addJarvisMessage({ role: "jarvis", text: response });
+          setFocusNodeId(validationNode.id);
+          setTimeout(() => openDrawer(validationNode.id, "issues"), 700);
+          showJarvisStrip({ message: response, nodeId: validationNode.id });
+          return;
+        }
+        break;
+    }
+    addJarvisMessage({ role: "jarvis", text: response });
+    showJarvisStrip({ message: response });
+  }
+
+  function buildContextChips(): { label: string; cmd: string; color: string }[] {
+    const { ctx } = buildContext();
+    const chips: { label: string; cmd: string; color: string }[] = [];
+    if (!ctx.hasBoardNode) return chips;
+    if (!ctx.hasValidation) {
+      chips.push({ label: "⚡ validate", cmd: "validate", color: "text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10" });
+    } else {
+      if (ctx.activeIssueCount > 0) {
+        chips.push({ label: `show issues (${ctx.activeIssueCount})`, cmd: "show issues", color: "text-amber-400 border-amber-500/30 hover:bg-amber-500/10" });
+      }
+      if (!ctx.hasCriticals && !ctx.hasManufacturing) {
+        chips.push({ label: "→ manufacture", cmd: "manufacture", color: "text-purple-400 border-purple-500/30 hover:bg-purple-500/10" });
+      }
+      if (ctx.hasManufacturing) {
+        chips.push({ label: "✓ status", cmd: "status", color: "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" });
+      }
+    }
+    return chips;
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -220,6 +277,22 @@ export function CommandBar() {
           />
         </div>
       </form>
+
+      {/* Context-aware quick-action chips — visible when input is empty */}
+      {input === "" && !isJarvisThinking && (
+        <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
+          {buildContextChips().map((chip) => (
+            <button
+              key={chip.cmd}
+              type="button"
+              onClick={() => quickSubmit(chip.cmd)}
+              className={`text-[11px] px-2 py-0.5 rounded-full border transition-colors ${chip.color}`}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Upload button */}
       <button
