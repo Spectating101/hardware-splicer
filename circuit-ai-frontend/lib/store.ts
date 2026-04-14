@@ -52,6 +52,10 @@ interface WorkspaceState {
   closeDrawer: () => void;
   setDrawerTab: (tab: string) => void;
 
+  // Workspace mutations
+  removeNode: (nodeId: string) => void;
+  acknowledgeIssue: (nodeId: string, issueId: string) => void;
+
   // Project actions
   clearProject: () => void;
 }
@@ -100,6 +104,30 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
     set((state) =>
       state.drawer ? { drawer: { ...state.drawer, tab } } : {}
     ),
+
+  removeNode: (nodeId) =>
+    set((state) => ({
+      nodes: state.nodes.filter((n) => n.id !== nodeId),
+      edges: state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
+      drawer: state.drawer?.nodeId === nodeId ? null : state.drawer,
+    })),
+
+  acknowledgeIssue: (nodeId, issueId) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) => {
+        if (n.id !== nodeId || n.kind !== "validation") return n;
+        const data = n.data as import("./node-types").ValidationNodeData;
+        return {
+          ...n,
+          data: {
+            ...data,
+            issues: data.issues.map((issue) =>
+              issue.id === issueId ? { ...issue, acknowledged: true } : issue
+            ),
+          },
+        };
+      }),
+    })),
 
   clearProject: () =>
     set({

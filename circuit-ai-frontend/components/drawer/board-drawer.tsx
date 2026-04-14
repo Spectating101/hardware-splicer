@@ -98,7 +98,7 @@ export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDraw
       {/* Issues — delegate to ValidationDrawer if available */}
       <TabsContent value="issues" className="flex flex-col h-full">
         {validationData ? (
-          <ValidationDrawer data={validationData} defaultTab="issues" />
+          <ValidationDrawer nodeId={validationNode!.id} data={validationData} defaultTab="issues" />
         ) : (
           <div className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">

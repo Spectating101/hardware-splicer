@@ -75,6 +75,7 @@ export function NodeDrawer() {
             )}
             {node.kind === "validation" && (
               <ValidationDrawer
+                nodeId={node.id}
                 data={node.data as ValidationNodeData}
                 defaultTab={drawer.tab}
               />

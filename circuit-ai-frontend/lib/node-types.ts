@@ -8,6 +8,7 @@ export interface ValidationIssue {
   what: string;
   why: string;
   fix: string;
+  acknowledged?: boolean;
 }
 
 export interface FileNodeData {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { CircuitBoard, ExternalLink } from "lucide-react";
+import { CircuitBoard, ExternalLink, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -46,7 +46,7 @@ function parseIssues(raw: RawApiIssue[]): ValidationIssue[] {
 
 export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as BoardNodeData;
-  const { updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip, openDrawer, nodes } =
+  const { updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip, openDrawer, removeNode, nodes } =
     useWorkspaceStore();
 
   const nodeFromStore = useWorkspaceStore((s) => s.nodes.find((n) => n.id === id));
@@ -167,13 +167,20 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
 
   return (
     <div className={cn(
-      "w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-300",
+      "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-300 relative",
       isProcessing
         ? "border-cyan-500/60 shadow-[0_0_0_2px_rgba(6,182,212,0.2),0_4px_24px_rgba(0,0,0,0.5)] animate-pulse"
         : "border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
     )}>
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />
       <Handle type="source" position={Position.Right} className="!bg-cyan-500 !border-cyan-700" />
+      <button
+        onClick={() => removeNode(id)}
+        className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1e293b] border border-white/15 text-white/30 hover:text-white/80 hover:border-white/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        title="Remove"
+      >
+        <X size={10} />
+      </button>
 
       <div className="flex items-start gap-2">
         <CircuitBoard size={16} className="text-cyan-400 flex-shrink-0 mt-0.5" />

@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { FileText } from "lucide-react";
+import { FileText, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
 import { fileKindLabel, formatFileSize, jarvis } from "@/lib/jarvis";
@@ -9,7 +9,7 @@ import type { FileNodeData, BoardNodeData, WorkspaceNode, WorkspaceEdge } from "
 
 export function FileNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as FileNodeData;
-  const { updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip } =
+  const { updateNode, addNode, addEdge, addJarvisMessage, showJarvisStrip, removeNode } =
     useWorkspaceStore();
 
   const nodeFromStore = useWorkspaceStore((s) => s.nodes.find((n) => n.id === id));
@@ -53,8 +53,15 @@ export function FileNodeComponent({ id, data: rawData }: NodeProps) {
   const isDone = data.status === "done";
 
   return (
-    <div className="w-[220px] rounded-2xl border border-white/10 bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2">
+    <div className="group w-[220px] rounded-2xl border border-white/10 bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2 relative">
       <Handle type="source" position={Position.Right} className="!bg-cyan-500 !border-cyan-700" />
+      <button
+        onClick={() => removeNode(id)}
+        className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1e293b] border border-white/15 text-white/30 hover:text-white/80 hover:border-white/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        title="Remove"
+      >
+        <X size={10} />
+      </button>
 
       <div className="flex items-start gap-2">
         <FileText size={16} className="text-white/50 flex-shrink-0 mt-0.5" />

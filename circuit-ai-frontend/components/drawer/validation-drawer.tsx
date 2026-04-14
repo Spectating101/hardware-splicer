@@ -1,51 +1,55 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, XCircle, AlertTriangle, AlertCircle } from "lucide-react";
+import { ChevronDown, ChevronRight, XCircle, AlertTriangle, AlertCircle, Check } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { healthLabel } from "@/lib/jarvis";
+import { useWorkspaceStore } from "@/lib/store";
 import type { ValidationNodeData, ValidationIssue } from "@/lib/node-types";
 
 const severityOrder = { critical: 0, error: 1, warning: 2 };
 
-function IssueCard({ issue }: { issue: ValidationIssue }) {
+function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }) {
   const [expanded, setExpanded] = useState(false);
+  const { acknowledgeIssue } = useWorkspaceStore();
 
-  const borderColor =
-    issue.severity === "critical"
+  const isAcknowledged = issue.acknowledged ?? false;
+
+  const borderColor = isAcknowledged
+    ? "border-white/10"
+    : issue.severity === "critical"
       ? "border-red-700/50"
       : issue.severity === "error"
         ? "border-orange-700/40"
         : "border-amber-700/30";
 
-  const iconColor =
-    issue.severity === "critical"
+  const iconColor = isAcknowledged
+    ? "text-white/20"
+    : issue.severity === "critical"
       ? "text-red-400"
       : issue.severity === "error"
         ? "text-orange-400"
         : "text-amber-400";
 
-  const Icon =
-    issue.severity === "critical"
+  const Icon = isAcknowledged
+    ? Check
+    : issue.severity === "critical"
       ? XCircle
       : issue.severity === "error"
         ? AlertTriangle
         : AlertCircle;
 
   return (
-    <div
-      className={cn(
-        "rounded-xl border bg-white/3 overflow-hidden",
-        borderColor
-      )}
-    >
+    <div className={cn("rounded-xl border bg-white/3 overflow-hidden transition-all duration-200", borderColor, isAcknowledged && "opacity-50")}>
       <button
         onClick={() => setExpanded((x) => !x)}
         className="w-full flex items-center gap-2 p-3 text-left hover:bg-white/5 transition-colors"
       >
         <Icon size={14} className={cn("flex-shrink-0", iconColor)} />
-        <span className="flex-1 text-sm text-white/80 leading-snug">{issue.what}</span>
+        <span className={cn("flex-1 text-sm leading-snug", isAcknowledged ? "text-white/30 line-through" : "text-white/80")}>
+          {issue.what}
+        </span>
         {expanded ? (
           <ChevronDown size={12} className="text-white/30 flex-shrink-0" />
         ) : (
@@ -56,17 +60,21 @@ function IssueCard({ issue }: { issue: ValidationIssue }) {
       {expanded && (
         <div className="px-3 pb-3 flex flex-col gap-2 border-t border-white/5 pt-2">
           <div>
-            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">
-              Why
-            </p>
+            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">Why</p>
             <p className="text-xs text-white/70 leading-relaxed">{issue.why}</p>
           </div>
           <div>
-            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">
-              Fix
-            </p>
+            <p className="text-xs text-white/40 font-medium uppercase tracking-wide mb-1">Fix</p>
             <p className="text-xs text-white/70 leading-relaxed">{issue.fix}</p>
           </div>
+          {!isAcknowledged && (
+            <button
+              onClick={(e) => { e.stopPropagation(); acknowledgeIssue(nodeId, issue.id); }}
+              className="mt-1 self-start text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2 py-1 transition-colors"
+            >
+              Won&apos;t fix this iteration
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -80,17 +88,20 @@ function scoreColor(score: number) {
 }
 
 interface ValidationDrawerProps {
+  nodeId: string;
   data: ValidationNodeData;
   defaultTab?: string;
 }
 
-export function ValidationDrawer({ data, defaultTab = "issues" }: ValidationDrawerProps) {
+export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: ValidationDrawerProps) {
   const sorted = [...data.issues].sort(
     (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
   );
-  const criticalCount = data.issues.filter((i) => i.severity === "critical").length;
-  const errorCount = data.issues.filter((i) => i.severity === "error").length;
-  const warningCount = data.issues.filter((i) => i.severity === "warning").length;
+  const active = data.issues.filter((i) => !i.acknowledged);
+  const criticalCount = active.filter((i) => i.severity === "critical").length;
+  const errorCount = active.filter((i) => i.severity === "error").length;
+  const warningCount = active.filter((i) => i.severity === "warning").length;
+  const acknowledgedCount = data.issues.filter((i) => i.acknowledged).length;
 
   return (
     <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
@@ -108,7 +119,7 @@ export function ValidationDrawer({ data, defaultTab = "issues" }: ValidationDraw
             <p className="text-white/30 text-xs mt-1">Board passed all checks</p>
           </div>
         ) : (
-          sorted.map((issue) => <IssueCard key={issue.id} issue={issue} />)
+          sorted.map((issue) => <IssueCard key={issue.id} issue={issue} nodeId={nodeId} />)
         )}
       </TabsContent>
 
@@ -142,6 +153,11 @@ export function ValidationDrawer({ data, defaultTab = "issues" }: ValidationDraw
             <p className="text-xs text-white/40 mt-1">Warnings</p>
           </div>
         </div>
+        {acknowledgedCount > 0 && (
+          <p className="text-xs text-white/30 text-center">
+            {acknowledgedCount} issue{acknowledgedCount === 1 ? "" : "s"} acknowledged — won&apos;t fix this iteration
+          </p>
+        )}
       </TabsContent>
 
       {/* Next steps tab */}

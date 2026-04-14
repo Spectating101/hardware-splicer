@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { XCircle, AlertTriangle, AlertCircle } from "lucide-react";
+import { XCircle, AlertTriangle, AlertCircle, X } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
 import { healthLabel } from "@/lib/jarvis";
 import { cn } from "@/lib/utils";
@@ -22,24 +22,32 @@ function severityGlow(criticalCount: number, errorCount: number, issueCount: num
 
 export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as ValidationNodeData;
-  const { openDrawer } = useWorkspaceStore();
+  const { openDrawer, removeNode } = useWorkspaceStore();
 
-  const criticalCount = data.issues.filter((i) => i.severity === "critical").length;
-  const errorCount = data.issues.filter((i) => i.severity === "error").length;
-  const warningCount = data.issues.filter((i) => i.severity === "warning").length;
+  const active = data.issues.filter((i) => !i.acknowledged);
+  const criticalCount = active.filter((i) => i.severity === "critical").length;
+  const errorCount = active.filter((i) => i.severity === "error").length;
+  const warningCount = active.filter((i) => i.severity === "warning").length;
   const colors = scoreColor(data.healthScore);
 
-  const glow = severityGlow(criticalCount, errorCount, data.issues.length);
+  const glow = severityGlow(criticalCount, errorCount, active.length);
 
   return (
     <div
       className={cn(
-        "w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500",
+        "group w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500 relative",
         colors.split(" ").find((c) => c.startsWith("border")) ?? "border-white/10",
         glow
       )}
     >
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />
+      <button
+        onClick={() => removeNode(id)}
+        className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#1e293b] border border-white/15 text-white/30 hover:text-white/80 hover:border-white/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+        title="Remove"
+      >
+        <X size={10} />
+      </button>
 
       {/* Score */}
       <div className="flex items-center gap-2">
@@ -60,31 +68,32 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
       </div>
 
       {/* Severity row */}
-      {data.issues.length > 0 && (
-        <div className="flex items-center gap-3 py-1.5 border-t border-white/5">
-          {criticalCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-red-400">
-              <XCircle size={11} />
-              <span>{criticalCount}</span>
-            </div>
-          )}
-          {errorCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-orange-400">
-              <AlertTriangle size={11} />
-              <span>{errorCount}</span>
-            </div>
-          )}
-          {warningCount > 0 && (
-            <div className="flex items-center gap-1 text-xs text-amber-400">
-              <AlertCircle size={11} />
-              <span>{warningCount}</span>
-            </div>
-          )}
-          {data.issues.length === 0 && (
-            <span className="text-xs text-emerald-400">No issues</span>
-          )}
-        </div>
-      )}
+      <div className="flex items-center gap-3 py-1.5 border-t border-white/5">
+        {active.length === 0 && data.issues.length === 0 && (
+          <span className="text-xs text-emerald-400">No issues</span>
+        )}
+        {active.length === 0 && data.issues.length > 0 && (
+          <span className="text-xs text-white/30">All acknowledged</span>
+        )}
+        {criticalCount > 0 && (
+          <div className="flex items-center gap-1 text-xs text-red-400">
+            <XCircle size={11} />
+            <span>{criticalCount}</span>
+          </div>
+        )}
+        {errorCount > 0 && (
+          <div className="flex items-center gap-1 text-xs text-orange-400">
+            <AlertTriangle size={11} />
+            <span>{errorCount}</span>
+          </div>
+        )}
+        {warningCount > 0 && (
+          <div className="flex items-center gap-1 text-xs text-amber-400">
+            <AlertCircle size={11} />
+            <span>{warningCount}</span>
+          </div>
+        )}
+      </div>
 
       <button
         onClick={() => openDrawer(id, "issues")}
