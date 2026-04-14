@@ -21,10 +21,19 @@ function InlineMarkdown({ text }: { text: string }) {
   );
 }
 
-function MessageBubble({ role, text, nodeId, onFocusNode }: {
+function relativeTime(timestamp: number): string {
+  const diff = Math.floor((Date.now() - timestamp) / 1000);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function MessageBubble({ role, text, nodeId, timestamp, onFocusNode }: {
   role: "user" | "jarvis";
   text: string;
   nodeId?: string;
+  timestamp: number;
   onFocusNode: (id: string) => void;
 }) {
   // Split on line breaks for multiline JARVIS messages
@@ -34,8 +43,11 @@ function MessageBubble({ role, text, nodeId, onFocusNode }: {
     return (
       <div className="flex justify-end">
         <div className="flex items-start gap-1.5 max-w-[82%]">
-          <div className="bg-white/10 border border-white/10 text-white/80 rounded-xl px-3 py-2 text-xs leading-relaxed">
-            {text}
+          <div className="flex flex-col items-end gap-0.5">
+            <div className="bg-white/10 border border-white/10 text-white/80 rounded-xl px-3 py-2 text-xs leading-relaxed">
+              {text}
+            </div>
+            <span className="text-[9px] text-white/15">{relativeTime(timestamp)}</span>
           </div>
           <User size={12} className="text-white/20 flex-shrink-0 mt-1.5" />
         </div>
@@ -47,20 +59,23 @@ function MessageBubble({ role, text, nodeId, onFocusNode }: {
     <div className="flex justify-start">
       <div className="flex items-start gap-1.5 max-w-[82%]">
         <Zap size={12} className="text-cyan-400/60 flex-shrink-0 mt-1.5" />
-        <div className="bg-cyan-950/50 border border-cyan-500/15 text-cyan-100/80 rounded-xl px-3 py-2 text-xs leading-relaxed">
-          {lines.map((line, i) => (
-            <p key={i} className={i > 0 ? "mt-1" : ""}>
-              <InlineMarkdown text={line} />
-            </p>
-          ))}
-          {nodeId && (
-            <button
-              onClick={() => onFocusNode(nodeId)}
-              className="mt-1.5 block text-cyan-400 hover:text-cyan-200 transition-colors font-medium"
-            >
-              Show on canvas →
-            </button>
-          )}
+        <div className="flex flex-col gap-0.5">
+          <div className="bg-cyan-950/50 border border-cyan-500/15 text-cyan-100/80 rounded-xl px-3 py-2 text-xs leading-relaxed">
+            {lines.map((line, i) => (
+              <p key={i} className={i > 0 ? "mt-1" : ""}>
+                <InlineMarkdown text={line} />
+              </p>
+            ))}
+            {nodeId && (
+              <button
+                onClick={() => onFocusNode(nodeId)}
+                className="mt-1.5 block text-cyan-400 hover:text-cyan-200 transition-colors font-medium"
+              >
+                Show on canvas →
+              </button>
+            )}
+          </div>
+          <span className="text-[9px] text-white/15 pl-1">{relativeTime(timestamp)}</span>
         </div>
       </div>
     </div>
@@ -163,6 +178,7 @@ export function ConversationDrawer() {
                       role={msg.role}
                       text={msg.text}
                       nodeId={msg.nodeId}
+                      timestamp={msg.timestamp}
                       onFocusNode={handleFocusNode}
                     />
                   ))}

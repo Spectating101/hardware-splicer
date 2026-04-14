@@ -442,6 +442,19 @@ export const jarvis = {
     return `Package ready — ${parts.join(", ")}. Download the Gerber zip and submit to your preferred fab.`;
   },
 
+  resumeProject(boardName: string, healthScore?: number, activeIssueCount?: number, criticalCount?: number, hasMfg?: boolean): string {
+    if (hasMfg)
+      return `Welcome back. **${boardName}** is fully processed — manufacturing package ready to download and submit.`;
+    if (healthScore != null) {
+      if (activeIssueCount === 0)
+        return `Welcome back. **${boardName}** is validated and clean (score **${healthScore}/100**) — ready to manufacture. Say **manufacture** to generate the files.`;
+      if (criticalCount && criticalCount > 0)
+        return `Welcome back. **${boardName}** has **${criticalCount} critical issue${criticalCount === 1 ? "" : "s"}** blocking manufacture (score **${healthScore}/100**). Say **show issues** to review.`;
+      return `Welcome back. **${boardName}** has **${activeIssueCount} active issue${activeIssueCount === 1 ? "" : "s"}** (score **${healthScore}/100**). Say **acknowledge warnings** then **manufacture**, or **show issues** to review.`;
+    }
+    return `Welcome back. **${boardName}** is on the canvas. Say **validate** to run the electrical rules check.`;
+  },
+
   drawerOpenedFile(filename: string, fileKind: string, sizeBytes: number, isParsed: boolean): string {
     const kindLabels: Record<string, string> = {
       kicad_pcb: "KiCad PCB",
