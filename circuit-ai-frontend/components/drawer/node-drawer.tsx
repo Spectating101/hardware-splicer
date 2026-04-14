@@ -4,14 +4,14 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useWorkspaceStore } from "@/lib/store";
-import type { BoardNodeData, ValidationNodeData } from "@/lib/node-types";
+import type { BoardNodeData, ValidationNodeData, FileNodeData } from "@/lib/node-types";
 import { BoardDrawer } from "./board-drawer";
 import { ValidationDrawer } from "./validation-drawer";
 
 const kindLabel: Record<string, string> = {
   file: "File",
   board: "PCB Board",
-  validation: "Validation",
+  validation: "Validation Results",
   manufacturing: "Manufacturing",
 };
 
@@ -49,8 +49,10 @@ export function NodeDrawer() {
                 {node.kind === "board"
                   ? (node.data as BoardNodeData).boardName
                   : node.kind === "file"
-                    ? (node.data as import("@/lib/node-types").FileNodeData).filename
-                    : node.id}
+                    ? (node.data as FileNodeData).filename
+                    : node.kind === "validation"
+                      ? `Health Score: ${(node.data as ValidationNodeData).healthScore}/100`
+                      : node.id}
               </p>
             </div>
             <button

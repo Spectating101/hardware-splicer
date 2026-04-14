@@ -43,6 +43,17 @@ export function NotificationStrip() {
                 Show me →
               </button>
             )}
+            {jarvisStrip.action && (
+              <button
+                onClick={() => {
+                  jarvisStrip.action!.onAction();
+                  dismissJarvisStrip();
+                }}
+                className="text-xs bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-md px-2 py-0.5 transition-colors flex-shrink-0"
+              >
+                {jarvisStrip.action.label}
+              </button>
+            )}
             <button
               onClick={dismissJarvisStrip}
               className="text-white/30 hover:text-white/60 transition-colors flex-shrink-0"

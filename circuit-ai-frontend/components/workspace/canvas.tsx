@@ -46,13 +46,20 @@ function WorkspaceFlow() {
   }));
 
   // Convert store edges to React Flow edges
-  const rfEdges: Edge[] = storeEdges.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-    style: { stroke: "rgba(6, 182, 212, 0.4)", strokeWidth: 2 },
-    animated: false,
-  }));
+  const rfEdges: Edge[] = storeEdges.map((e) => {
+    const targetNode = storeNodes.find((n) => n.id === e.target);
+    const isProcessing = (targetNode?.data as { status?: string } | undefined)?.status === "processing";
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      animated: isProcessing,
+      style: {
+        stroke: isProcessing ? "rgba(6, 182, 212, 0.9)" : "rgba(6, 182, 212, 0.4)",
+        strokeWidth: isProcessing ? 2.5 : 2,
+      },
+    };
+  });
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

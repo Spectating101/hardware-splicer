@@ -13,6 +13,13 @@ function scoreColor(score: number) {
   return "text-red-400 border-red-500/40";
 }
 
+function severityGlow(criticalCount: number, errorCount: number, issueCount: number): string {
+  if (criticalCount > 0) return "shadow-[0_0_28px_rgba(239,68,68,0.4),0_4px_24px_rgba(0,0,0,0.5)]";
+  if (errorCount > 0) return "shadow-[0_0_24px_rgba(249,115,22,0.3),0_4px_24px_rgba(0,0,0,0.5)]";
+  if (issueCount > 0) return "shadow-[0_0_20px_rgba(245,158,11,0.25),0_4px_24px_rgba(0,0,0,0.5)]";
+  return "shadow-[0_0_24px_rgba(16,185,129,0.35),0_4px_24px_rgba(0,0,0,0.5)]";
+}
+
 export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const data = rawData as unknown as ValidationNodeData;
   const { openDrawer } = useWorkspaceStore();
@@ -22,11 +29,14 @@ export function ValidationNodeComponent({ id, data: rawData }: NodeProps) {
   const warningCount = data.issues.filter((i) => i.severity === "warning").length;
   const colors = scoreColor(data.healthScore);
 
+  const glow = severityGlow(criticalCount, errorCount, data.issues.length);
+
   return (
     <div
       className={cn(
-        "w-[220px] rounded-2xl border bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2",
-        colors.split(" ").find((c) => c.startsWith("border")) ?? "border-white/10"
+        "w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-500",
+        colors.split(" ").find((c) => c.startsWith("border")) ?? "border-white/10",
+        glow
       )}
     >
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />

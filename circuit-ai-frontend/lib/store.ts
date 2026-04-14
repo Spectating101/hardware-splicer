@@ -20,6 +20,7 @@ export function newEdgeId(source: string, target: string): string {
 export interface JarvisStrip {
   message: string;
   nodeId?: string;
+  action?: { label: string; onAction: () => void };
 }
 
 export interface DrawerState {

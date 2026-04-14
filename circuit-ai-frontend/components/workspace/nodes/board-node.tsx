@@ -4,6 +4,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { CircuitBoard, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaceStore, newNodeId, newEdgeId } from "@/lib/store";
+import { cn } from "@/lib/utils";
 import { jarvis, scoreFromIssues } from "@/lib/jarvis";
 import type {
   BoardNodeData,
@@ -136,6 +137,22 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       addJarvisMessage({ role: "jarvis", text: narration, nodeId: validationId });
       showJarvisStrip({ message: narration, nodeId: validationId });
       updateNode(id, { status: "done" });
+
+      // Proactive next-step strip after the first one auto-dismisses (8s)
+      const proactiveMsg = jarvis.proactiveManufacture(criticalCount > 0);
+      setTimeout(() => {
+        showJarvisStrip({
+          message: proactiveMsg,
+          action: criticalCount === 0
+            ? {
+                label: "Package for manufacture →",
+                onAction: () => {
+                  addJarvisMessage({ role: "jarvis", text: "Manufacturing pipeline requires the Circuit-AI backend. Set CIRCUIT_AI_API_URL in your environment to connect." });
+                },
+              }
+            : undefined,
+        });
+      }, 9000);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const errMsg = jarvis.validationError(message);
@@ -149,7 +166,12 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
   const isDone = data.status === "done";
 
   return (
-    <div className="w-[220px] rounded-2xl border border-white/10 bg-[#141e2e] shadow-[0_4px_24px_rgba(0,0,0,0.5)] p-3 flex flex-col gap-2">
+    <div className={cn(
+      "w-[220px] rounded-2xl border bg-[#141e2e] p-3 flex flex-col gap-2 transition-all duration-300",
+      isProcessing
+        ? "border-cyan-500/60 shadow-[0_0_0_2px_rgba(6,182,212,0.2),0_4px_24px_rgba(0,0,0,0.5)] animate-pulse"
+        : "border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)]"
+    )}>
       <Handle type="target" position={Position.Left} className="!bg-cyan-500 !border-cyan-700" />
       <Handle type="source" position={Position.Right} className="!bg-cyan-500 !border-cyan-700" />
 

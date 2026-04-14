@@ -92,4 +92,11 @@ export const jarvis = {
   defaultResponse(): string {
     return "I'm here. Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
   },
+
+  proactiveManufacture(hasCritical: boolean): string {
+    if (hasCritical) {
+      return "Fix the critical issue first, then I can package it for manufacture. Want me to walk you through the fix?";
+    }
+    return "Board checked. Ready to generate Gerber files, BOM, and assembly guide — takes about 30 seconds.";
+  },
 };
