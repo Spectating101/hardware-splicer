@@ -137,6 +137,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-ws-base: #080e1a;
+  --color-ws-canvas: #0d1421;
+  --color-ws-node: #141e2e;
+  --color-ws-drawer: #0f172a;
 }
 
 @layer base {
