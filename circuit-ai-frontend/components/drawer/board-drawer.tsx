@@ -39,7 +39,7 @@ interface BoardDrawerProps {
 }
 
 export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDrawerProps) {
-  const { nodes, edges, setPendingCommand } = useWorkspaceStore();
+  const { nodes, edges, setPendingCommand, showJarvisStrip } = useWorkspaceStore();
 
   const validationEdge = edges.find((e) => e.source === nodeId);
   const validationNode = validationEdge
@@ -103,8 +103,26 @@ export function BoardDrawer({ nodeId, data, defaultTab = "overview" }: BoardDraw
     return Array.from(map.values()).sort((a, b) => b.refs.length - a.refs.length);
   })();
 
+  function handleTabChange(tab: string) {
+    if (tab === "structure") {
+      const front = (data.components ?? []).filter((c) => c.layer === "F.Cu").length;
+      const back = (data.components ?? []).filter((c) => c.layer === "B.Cu").length;
+      if (front + back > 0) {
+        showJarvisStrip({ message: `Component placement for **${data.boardName}** — **${front}** front (cyan) · **${back}** back (amber). Hover a dot for ref + value.` });
+      }
+    } else if (tab === "parts") {
+      showJarvisStrip({ message: `Parts list for **${data.boardName}** — **${data.componentCount}** components. Export as CSV with the button above the table.` });
+    } else if (tab === "manufacture") {
+      if (!mfgData) {
+        showJarvisStrip({ message: validationData && activeIssueCount === 0 ? `Ready to manufacture — say **manufacture** or click the button in the Overview tab.` : `Run **validate** first, then generate the manufacturing package.` });
+      } else if (mfgData.status === "done") {
+        showJarvisStrip({ message: `Manufacturing package ready — **${mfgData.gerberCount}** Gerber/drill files${mfgData.hasBom ? ", BOM" : ""}${mfgData.hasAssembly ? ", assembly guide" : ""}. Upload the zip to your fab.` });
+      }
+    }
+  }
+
   return (
-    <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
+    <Tabs defaultValue={defaultTab} className="flex flex-col h-full" onValueChange={handleTabChange}>
       <TabsList>
         <TabsTrigger value="overview">Overview</TabsTrigger>
         <TabsTrigger value="issues">Issues</TabsTrigger>

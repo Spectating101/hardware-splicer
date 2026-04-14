@@ -391,6 +391,30 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
       if (/\b(who\s+are\s+you|what\s+are\s+you|what\s+do\s+you\s+do|tell\s+me\s+about\s+yourself)\b/.test(t))
         return `I'm **JARVIS** — an AI built to guide you from PCB file to manufactured board. Drop a \`.kicad_pcb\`, and I'll parse it, validate it, generate Gerbers, and tell you exactly where to send it for manufacture.`;
 
+      // Beginner explanations
+      if (/what\s+is\s+a?\s*gerber|gerber\s+file\s*\?/.test(t))
+        return `**Gerber files** are the standard format that PCB manufacturers use to produce your board. They describe each copper layer, silkscreen, solder mask, and drill positions as separate files. I generate them from your KiCad design when you say **manufacture**.`;
+
+      if (/what\s+is\s+a?\s*bom|bill\s+of\s+material/.test(t))
+        return `**BOM (Bill of Materials)** is the list of all components needed to populate your PCB — reference designators (R1, C3, U1), values (10kΩ, 100nF), and footprints. I export it as a CSV when you generate the manufacturing package.`;
+
+      if (/what\s+is\s+(erc|drc|electrical\s+rules?\s+check|design\s+rules?\s+check)/.test(t))
+        return `**ERC (Electrical Rules Check)** verifies your schematic netlist — unconnected pins, missing power, duplicate references. **DRC (Design Rules Check)** validates the physical layout — trace clearances, via sizes, silk-to-copper gaps. I run both when you say **validate**.`;
+
+      if (/what\s+is\s+a?\s*(pcb|printed\s+circuit\s+board)/.test(t))
+        return `A **PCB (Printed Circuit Board)** is the physical board that connects and holds electronic components via copper traces. Your \`.kicad_pcb\` file describes its layers, copper routing, component positions, and drill holes. I validate the design and generate the files needed to manufacture it.`;
+
+      if (/what\s+is\s+(jlcpcb|pcbway|oshpark|fab\s+house)/.test(t))
+        return `**PCB fab houses** are factories that manufacture PCBs from Gerber files. **JLCPCB** and **PCBWay** are popular budget-friendly options (5 prototype boards from ~$2-5). **OSH Park** is a US-based option known for quality purple solder mask. Once I generate the manufacturing package, you upload the Gerber zip to your preferred fab.`;
+
+      if (/what\s+is\s+a?\s*(solder\s+mask|silkscreen|copper\s+pour|ground\s+plane|via|annular|pad)/.test(t)) {
+        if (/solder\s+mask/.test(t)) return `**Solder mask** is the protective coating (usually green, but any color) that covers copper traces, leaving only the pads exposed for soldering. It prevents accidental shorts and oxidation.`;
+        if (/silkscreen/.test(t)) return `**Silkscreen** is the printed layer on a PCB showing component outlines, reference designators (R1, C3), polarity marks, and other labels. It's purely for assembly reference — not electrically functional.`;
+        if (/copper\s+pour|ground\s+plane/.test(t)) return `A **copper pour** (or ground plane) is a filled area of copper on a layer, usually connected to GND. It improves EMI performance, provides a low-impedance return path, and helps with thermal dissipation.`;
+        if (/via/.test(t)) return `A **via** is a drilled and plated hole that connects copper traces on different PCB layers. Vias cost fab money (drill time) and consume space — use them to route signals between layers or connect to an inner ground plane.`;
+        if (/pad/.test(t)) return `A **pad** is the exposed copper area on a PCB where a component pin is soldered. Through-hole pads have drilled holes; SMD (surface-mount) pads are flat copper areas on the surface layer.`;
+      }
+
       // Generic fallbacks based on pipeline state
       if (!ctx.hasValidation)
         return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see everything I can do.`;
