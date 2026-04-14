@@ -139,7 +139,13 @@ interface ValidationDrawerProps {
 }
 
 export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: ValidationDrawerProps) {
-  const { acknowledgeAllIssues } = useWorkspaceStore();
+  const { acknowledgeAllIssues, setPendingCommand, nodes, edges } = useWorkspaceStore();
+
+  // Derive the source board node id for triggering manufacture
+  const boardNodeId = data.sourceBoardNodeId;
+  const mfgAlreadyExists = edges.some((e) =>
+    e.source === nodeId && nodes.find((n) => n.id === e.target && n.kind === "manufacturing")
+  );
   const [showAll, setShowAll] = useState(false);
   const sorted = [...data.issues].sort(
     (a, b) => severityOrder[a.severity] - severityOrder[b.severity]
@@ -270,14 +276,26 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-amber-700/40 bg-amber-950/10 p-4">
-            <p className="text-sm font-medium text-amber-400 mb-1">
-              Review {active.length} issue{active.length === 1 ? "" : "s"} before manufacturing
-            </p>
-            <p className="text-xs text-white/50 leading-relaxed">
-              No critical blockers. Decide which warnings and errors are acceptable
-              for this revision, acknowledge them, then say <strong className="text-white/60">manufacture</strong>.
-            </p>
+          <div className="rounded-xl border border-amber-700/40 bg-amber-950/10 p-4 flex flex-col gap-3">
+            <div>
+              <p className="text-sm font-medium text-amber-400 mb-1">
+                Review {active.length} issue{active.length === 1 ? "" : "s"} before manufacturing
+              </p>
+              <p className="text-xs text-white/50 leading-relaxed">
+                No critical blockers. Decide which warnings and errors are acceptable for this revision.
+              </p>
+            </div>
+            {!mfgAlreadyExists && (
+              <button
+                onClick={() => {
+                  acknowledgeAllIssues(nodeId);
+                  setPendingCommand({ action: "manufacture", boardNodeId });
+                }}
+                className="w-full py-2 rounded-lg text-xs font-medium bg-purple-500/15 text-purple-300 border border-purple-500/30 hover:bg-purple-500/25 transition-colors"
+              >
+                Acknowledge all + manufacture →
+              </button>
+            )}
           </div>
         )}
 
