@@ -244,7 +244,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       updateNode(mfgId, { status: "done", files: files.length > 0 ? files : defaultMfgFiles(data.boardName), gerberCount, hasAssembly: true, hasBom: true } as Partial<ManufacturingNodeData>);
       const doneMsg = jarvis.manufactureDone(gerberCount, data.boardName);
       addJarvisMessage({ role: "jarvis", text: doneMsg, nodeId: mfgId });
-      showJarvisStrip({ message: doneMsg, nodeId: mfgId });
+      showJarvisStrip({ message: doneMsg, nodeId: mfgId, action: { label: "See files →", onAction: () => openDrawer(mfgId, "manufacture") } });
     } catch {
       setJarvisThinking(false);
       const demoFiles = defaultMfgFiles(data.boardName);
@@ -252,7 +252,7 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
       updateNode(mfgId, { status: "done", files: demoFiles, gerberCount, hasAssembly: true, hasBom: true } as Partial<ManufacturingNodeData>);
       const doneMsg = jarvis.manufactureDone(gerberCount, data.boardName);
       addJarvisMessage({ role: "jarvis", text: `${doneMsg} (demo — connect Mecha-Splicer for real output)`, nodeId: mfgId });
-      showJarvisStrip({ message: doneMsg, nodeId: mfgId });
+      showJarvisStrip({ message: doneMsg, nodeId: mfgId, action: { label: "See files →", onAction: () => openDrawer(mfgId, "manufacture") } });
     }
   }
 

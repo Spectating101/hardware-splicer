@@ -201,25 +201,33 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
     case "status": {
       if (!ctx.hasBoardNode)
         return "Nothing on the canvas yet. Drop a `.kicad_pcb` file to get started.";
-      const parts: string[] = [];
-      parts.push(
-        `**${ctx.boardName ?? "Board"}**${ctx.componentCount ? ` — ${ctx.componentCount} components` : ""}${ctx.layerCount ? `, ${ctx.layerCount} layers` : ""}`
-      );
+      // First line: single-sentence summary (what the strip shows)
+      const boardDesc = `**${ctx.boardName ?? "Board"}**${ctx.componentCount ? ` — ${ctx.componentCount} components, ${ctx.layerCount}L` : ""}`;
+      let statusLine: string;
       if (!ctx.hasValidation) {
-        parts.push("ERC not run yet. Say **validate** to check for issues.");
+        statusLine = `${boardDesc}. ERC not run yet — say **validate** to check for issues.`;
+      } else if (ctx.hasManufacturing) {
+        statusLine = `${boardDesc}. Score **${ctx.healthScore}/100** — manufacturing package **ready**.`;
       } else if (ctx.activeIssueCount === 0) {
-        parts.push(`Validation: **${ctx.healthScore}/100** — no active issues.`);
+        statusLine = `${boardDesc}. Score **${ctx.healthScore}/100** — clean, ready to manufacture.`;
       } else {
-        parts.push(
-          `Validation: **${ctx.healthScore}/100** — ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}${ctx.hasCriticals ? " (critical)" : ""}.`
-        );
+        statusLine = `${boardDesc}. Score **${ctx.healthScore}/100** — ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}${ctx.hasCriticals ? " including criticals" : ""}.`;
+      }
+      // Extended lines for the conversation drawer
+      const extended: string[] = [];
+      if (!ctx.hasValidation) {
+        extended.push("ERC not run yet. Say **validate** to check for issues.");
+      } else if (ctx.activeIssueCount === 0) {
+        extended.push(`Validation: **${ctx.healthScore}/100** — no active issues.`);
+      } else {
+        extended.push(`Validation: **${ctx.healthScore}/100** — ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"}${ctx.hasCriticals ? " (critical)" : ""}.`);
       }
       if (ctx.hasManufacturing) {
-        parts.push("Manufacturing package: **ready**.");
+        extended.push("Manufacturing package: **ready**.");
       } else if (ctx.hasValidation && !ctx.hasCriticals) {
-        parts.push("Ready to manufacture — say **manufacture** to generate files.");
+        extended.push("Ready to manufacture — say **manufacture** to generate files.");
       }
-      return parts.join("  \n");
+      return [statusLine, ...extended].join("  \n");
     }
 
     case "acknowledge":
