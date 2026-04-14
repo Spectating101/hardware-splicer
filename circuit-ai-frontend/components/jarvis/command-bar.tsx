@@ -302,12 +302,30 @@ export function CommandBar() {
             onChange={(e) => setInput(e.target.value)}
             placeholder={getContextualPlaceholder()}
             className="flex-1 bg-transparent text-sm text-white placeholder-white/25 outline-none"
+            onKeyDown={(e) => {
+              if (e.key === "Tab" && input === "") {
+                const chips = buildContextChips();
+                const first = chips.find((c) => c.cmd !== "what's next");
+                if (first) {
+                  e.preventDefault();
+                  quickSubmit(first.cmd);
+                }
+              }
+            }}
           />
-          {input === "" && (
-            <kbd className="hidden sm:block text-[9px] font-mono text-white/15 bg-white/5 border border-white/10 rounded px-1 py-0.5 flex-shrink-0">
-              ⌘K
-            </kbd>
-          )}
+          {input === "" && (() => {
+            const chips = buildContextChips();
+            const hasActionChip = chips.some((c) => c.cmd !== "what's next");
+            return hasActionChip ? (
+              <kbd className="hidden sm:block text-[9px] font-mono text-white/15 bg-white/5 border border-white/10 rounded px-1 py-0.5 flex-shrink-0">
+                Tab
+              </kbd>
+            ) : (
+              <kbd className="hidden sm:block text-[9px] font-mono text-white/15 bg-white/5 border border-white/10 rounded px-1 py-0.5 flex-shrink-0">
+                ⌘K
+              </kbd>
+            );
+          })()}
         </div>
       </form>
 

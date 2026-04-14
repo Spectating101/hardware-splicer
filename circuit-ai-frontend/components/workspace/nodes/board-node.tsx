@@ -95,22 +95,36 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
     function finishValidation(issues: ValidationIssue[], demo = false) {
       const healthScore = scoreFromIssues(issues);
       const criticalCount = issues.filter((i) => i.severity === "critical").length;
-      const validationId = newNodeId("validation");
 
       // Top issue for inline fix hint — pick highest severity active issue
       const severityOrder = { critical: 0, error: 1, warning: 2 } as const;
       const sorted = [...issues].sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
       const topFix = sorted[0]?.fix;
 
-      const validationNode: WorkspaceNode = {
-        id: validationId,
-        kind: "validation",
-        position: { x: position.x + 300, y: position.y },
-        data: { kind: "validation", status: "done", healthScore, issues, sourceBoardNodeId: id } satisfies ValidationNodeData,
-      };
+      let validationId: string;
 
-      addNode(validationNode);
-      addEdge({ id: newEdgeId(id, validationId), source: id, target: validationId });
+      if (isRevalidation && existingValidationNode) {
+        // UPDATE existing validation node in place — no duplicate nodes
+        validationId = existingValidationNode.id;
+        updateNode(validationId, {
+          kind: "validation",
+          status: "done",
+          healthScore,
+          issues,
+          sourceBoardNodeId: id,
+        } as Partial<ValidationNodeData>);
+      } else {
+        // First validation — create new node + edge
+        validationId = newNodeId("validation");
+        const validationNode: WorkspaceNode = {
+          id: validationId,
+          kind: "validation",
+          position: { x: position.x + 300, y: position.y },
+          data: { kind: "validation", status: "done", healthScore, issues, sourceBoardNodeId: id } satisfies ValidationNodeData,
+        };
+        addNode(validationNode);
+        addEdge({ id: newEdgeId(id, validationId), source: id, target: validationId });
+      }
 
       let narration: string;
       if (isRevalidation) {

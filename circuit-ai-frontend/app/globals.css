@@ -460,4 +460,9 @@
       transform: translate3d(0.25rem, 0.35rem, 0) scale(1.025);
     }
   }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
 }
