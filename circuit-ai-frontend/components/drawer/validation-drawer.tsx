@@ -12,7 +12,7 @@ const severityOrder = { critical: 0, error: 1, warning: 2 };
 
 function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }) {
   const [expanded, setExpanded] = useState(false);
-  const { acknowledgeIssue } = useWorkspaceStore();
+  const { acknowledgeIssue, addJarvisMessage, showJarvisStrip, nodes } = useWorkspaceStore();
 
   const isAcknowledged = issue.acknowledged ?? false;
 
@@ -84,7 +84,21 @@ function IssueCard({ issue, nodeId }: { issue: ValidationIssue; nodeId: string }
           </div>
           {!isAcknowledged && (
             <button
-              onClick={(e) => { e.stopPropagation(); acknowledgeIssue(nodeId, issue.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                acknowledgeIssue(nodeId, issue.id);
+                // Count remaining active issues after this acknowledgment
+                const validationNode = nodes.find((n) => n.id === nodeId);
+                if (validationNode) {
+                  const vd = validationNode.data as import("@/lib/node-types").ValidationNodeData;
+                  const stillActive = vd.issues.filter((i) => !i.acknowledged && i.id !== issue.id);
+                  const msg = stillActive.length === 0
+                    ? `Acknowledged — all issues dismissed. Say **manufacture** to generate the Gerbers and BOM.`
+                    : `Skipping **${issue.what.slice(0, 60)}${issue.what.length > 60 ? "…" : ""}** this iteration. ${stillActive.length} issue${stillActive.length === 1 ? "" : "s"} remaining.`;
+                  addJarvisMessage({ role: "jarvis", text: msg, nodeId });
+                  showJarvisStrip({ message: msg, nodeId });
+                }
+              }}
               className="mt-1 self-start text-xs text-white/30 hover:text-white/60 border border-white/10 hover:border-white/20 rounded-md px-2.5 py-1 transition-colors"
             >
               Won&apos;t fix this iteration
@@ -139,7 +153,7 @@ interface ValidationDrawerProps {
 }
 
 export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: ValidationDrawerProps) {
-  const { acknowledgeAllIssues, setPendingCommand, nodes, edges } = useWorkspaceStore();
+  const { acknowledgeAllIssues, setPendingCommand, nodes, edges, addJarvisMessage, showJarvisStrip } = useWorkspaceStore();
 
   // Derive the source board node id for triggering manufacture
   const boardNodeId = data.sourceBoardNodeId;
@@ -157,8 +171,26 @@ export function ValidationDrawer({ nodeId, data, defaultTab = "issues" }: Valida
   const acknowledgedCount = data.issues.filter((i) => i.acknowledged).length;
   const displayedIssues = showAll ? sorted : sorted.filter((i) => !i.acknowledged);
 
+  function handleTabChange(tab: string) {
+    if (tab === "summary") {
+      const boardNode = nodes.find((n) => n.id === data.sourceBoardNodeId);
+      const boardName = boardNode ? (boardNode.data as import("@/lib/node-types").BoardNodeData).boardName : "the board";
+      const msg = active.length === 0
+        ? `**${boardName}** is clean — score **${data.healthScore}/100**, no active issues.`
+        : `Score **${data.healthScore}/100** — ${criticalCount > 0 ? `${criticalCount} critical must be resolved` : `${active.length} non-critical issue${active.length === 1 ? "" : "s"} — acceptable to proceed`}.`;
+      showJarvisStrip({ message: msg });
+    } else if (tab === "next") {
+      const msg = criticalCount > 0
+        ? `Fix **${criticalCount} critical issue${criticalCount === 1 ? "" : "s"}** first — they will cause board failure.`
+        : active.length === 0
+          ? `Board is ready — say **manufacture** to generate Gerbers, BOM, and assembly guide.`
+          : `${active.length} non-critical issue${active.length === 1 ? "" : "s"} remain. Acknowledge them and say **manufacture**, or review each one.`;
+      showJarvisStrip({ message: msg });
+    }
+  }
+
   return (
-    <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
+    <Tabs defaultValue={defaultTab} className="flex flex-col h-full" onValueChange={handleTabChange}>
       <TabsList>
         <TabsTrigger value="issues">
           What&apos;s Wrong
