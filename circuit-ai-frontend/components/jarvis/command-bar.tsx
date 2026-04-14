@@ -120,38 +120,26 @@ export function CommandBar() {
   function quickSubmit(text: string) {
     addJarvisMessage({ role: "user", text });
     const intent = parseIntent(text);
-    const { ctx, boardNode, validationNode } = buildContext();
+    const { ctx, boardNode, validationNode, mfgNode } = buildContext();
     const response = contextualResponse(intent, ctx);
+    executeIntent(intent, response, boardNode, validationNode, mfgNode, ctx);
+    // Refocus input after chip action so user can keep typing
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
 
-    switch (intent.type) {
-      case "validate":
-        if (boardNode && !ctx.hasValidation) {
-          addJarvisMessage({ role: "jarvis", text: response });
-          showJarvisStrip({ message: response });
-          setPendingCommand({ action: "validate", boardNodeId: boardNode.id });
-          return;
-        }
-        break;
-      case "manufacture":
-        if (boardNode && ctx.hasValidation && !ctx.hasCriticals && !ctx.hasManufacturing) {
-          addJarvisMessage({ role: "jarvis", text: response });
-          showJarvisStrip({ message: response });
-          setPendingCommand({ action: "manufacture", boardNodeId: boardNode.id });
-          return;
-        }
-        break;
-      case "show_issues":
-        if (validationNode) {
-          addJarvisMessage({ role: "jarvis", text: response });
-          setFocusNodeId(validationNode.id);
-          setTimeout(() => openDrawer(validationNode.id, "issues"), 700);
-          showJarvisStrip({ message: response, nodeId: validationNode.id });
-          return;
-        }
-        break;
-    }
-    addJarvisMessage({ role: "jarvis", text: response });
-    showJarvisStrip({ message: response });
+  function getContextualPlaceholder(): string {
+    const { ctx } = buildContext();
+    if (!ctx.hasBoardNode)
+      return 'Drop a .kicad_pcb file, or ask anything…';
+    if (!ctx.hasValidation)
+      return `"validate" to check ${ctx.boardName ?? "the board"}, or ask anything…`;
+    if (ctx.hasCriticals)
+      return `"show issues" to review ${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}, or ask anything…`;
+    if (ctx.activeIssueCount > 0)
+      return `"manufacture" or "acknowledge warnings" — or ask anything…`;
+    if (!ctx.hasManufacturing)
+      return `"manufacture" to generate Gerbers and BOM, or ask anything…`;
+    return `${ctx.boardName ?? "Board"} packaged — ask anything or say "status"…`;
   }
 
   function buildContextChips(): { label: string; cmd: string; color: string }[] {
@@ -171,25 +159,24 @@ export function CommandBar() {
         chips.push({ label: "✓ status", cmd: "status", color: "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10" });
       }
     }
+    // Always offer "what's next?" as a gentle nudge when the pipeline isn't complete
+    if (!ctx.hasManufacturing) {
+      chips.push({ label: "what's next?", cmd: "what's next", color: "text-white/25 border-white/10 hover:bg-white/5 hover:text-white/50" });
+    }
     return chips;
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text) return;
-
-    addJarvisMessage({ role: "user", text });
-    setInput("");
-
-    const intent = parseIntent(text);
-    const { ctx, boardNode, validationNode } = buildContext();
-    const response = contextualResponse(intent, ctx);
-
-    // Execute side effects
+  function executeIntent(
+    intent: ReturnType<typeof parseIntent>,
+    response: string,
+    boardNode: ReturnType<typeof buildContext>["boardNode"],
+    validationNode: ReturnType<typeof buildContext>["validationNode"],
+    mfgNode: ReturnType<typeof buildContext>["mfgNode"],
+    ctx: ReturnType<typeof buildContext>["ctx"]
+  ) {
     switch (intent.type) {
       case "validate":
-        if (boardNode && !ctx.hasValidation) {
+        if (boardNode) {
           addJarvisMessage({ role: "jarvis", text: response });
           showJarvisStrip({ message: response });
           setPendingCommand({ action: "validate", boardNodeId: boardNode.id });
@@ -215,11 +202,6 @@ export function CommandBar() {
           return;
         }
         break;
-
-      case "status":
-        addJarvisMessage({ role: "jarvis", text: response });
-        showJarvisStrip({ message: response });
-        return;
 
       case "acknowledge":
         if (validationNode) {
@@ -241,11 +223,44 @@ export function CommandBar() {
         addJarvisMessage({ role: "jarvis", text: response });
         showJarvisStrip({ message: response });
         return;
+
+      case "open_board":
+        if (boardNode) {
+          addJarvisMessage({ role: "jarvis", text: response });
+          setFocusNodeId(boardNode.id);
+          setTimeout(() => openDrawer(boardNode.id, "overview"), 700);
+          showJarvisStrip({ message: response, nodeId: boardNode.id });
+          return;
+        }
+        break;
+
+      case "open_mfg":
+        if (mfgNode) {
+          addJarvisMessage({ role: "jarvis", text: response });
+          setFocusNodeId(mfgNode.id);
+          setTimeout(() => openDrawer(mfgNode.id, "manufacture"), 700);
+          showJarvisStrip({ message: response, nodeId: mfgNode.id });
+          return;
+        }
+        break;
     }
 
-    // Fallback: just show the response
     addJarvisMessage({ role: "jarvis", text: response });
     showJarvisStrip({ message: response });
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text) return;
+
+    addJarvisMessage({ role: "user", text });
+    setInput("");
+
+    const intent = parseIntent(text);
+    const { ctx, boardNode, validationNode, mfgNode } = buildContext();
+    const response = contextualResponse(intent, ctx);
+    executeIntent(intent, response, boardNode, validationNode, mfgNode, ctx);
   }
 
   return (
@@ -272,7 +287,7 @@ export function CommandBar() {
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder='Ask JARVIS — "validate", "manufacture", "show issues", "help"'
+            placeholder={getContextualPlaceholder()}
             className="flex-1 bg-transparent text-sm text-white placeholder-white/25 outline-none"
           />
         </div>

@@ -67,9 +67,28 @@ function MessageBubble({ role, text, nodeId, onFocusNode }: {
   );
 }
 
+function TypingIndicator() {
+  return (
+    <div className="flex justify-start">
+      <div className="flex items-start gap-1.5">
+        <Zap size={12} className="text-cyan-400/60 flex-shrink-0 mt-1.5" />
+        <div className="bg-cyan-950/50 border border-cyan-500/15 rounded-xl px-3 py-2 flex items-center gap-1">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="w-1 h-1 rounded-full bg-cyan-400/50"
+              style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ConversationDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { jarvisMessages, openDrawer, setFocusNodeId } = useWorkspaceStore();
+  const { jarvisMessages, isJarvisThinking, openDrawer, setFocusNodeId } = useWorkspaceStore();
   const listRef = useRef<HTMLDivElement>(null);
   const lastMessage = jarvisMessages[jarvisMessages.length - 1];
 
@@ -77,7 +96,7 @@ export function ConversationDrawer() {
     if (isOpen && listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [jarvisMessages, isOpen]);
+  }, [jarvisMessages, isJarvisThinking, isOpen]);
 
   function handleFocusNode(nodeId: string) {
     setFocusNodeId(nodeId);
@@ -132,20 +151,23 @@ export function ConversationDrawer() {
               ref={listRef}
               className="h-[300px] overflow-y-auto px-4 py-3 flex flex-col gap-2.5"
             >
-              {jarvisMessages.length === 0 ? (
+              {jarvisMessages.length === 0 && !isJarvisThinking ? (
                 <p className="text-xs text-white/20 text-center mt-10">
                   No messages yet. Drop a file or type a prompt.
                 </p>
               ) : (
-                jarvisMessages.map((msg) => (
-                  <MessageBubble
-                    key={msg.id}
-                    role={msg.role}
-                    text={msg.text}
-                    nodeId={msg.nodeId}
-                    onFocusNode={handleFocusNode}
-                  />
-                ))
+                <>
+                  {jarvisMessages.map((msg) => (
+                    <MessageBubble
+                      key={msg.id}
+                      role={msg.role}
+                      text={msg.text}
+                      nodeId={msg.nodeId}
+                      onFocusNode={handleFocusNode}
+                    />
+                  ))}
+                  {isJarvisThinking && <TypingIndicator />}
+                </>
               )}
             </div>
           </motion.div>

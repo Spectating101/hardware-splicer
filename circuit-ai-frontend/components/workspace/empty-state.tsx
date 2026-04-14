@@ -11,6 +11,7 @@ const tiles = [
     description: "Validate, analyze, and generate Gerbers",
     hint: ".kicad_pcb",
     prompt: "I want to validate a KiCad PCB",
+    response: "Drag a `.kicad_pcb` file anywhere onto the canvas, or click **Upload** in the top right. I'll parse the board and run electrical rule checks.",
     accent: "group-hover:border-cyan-500/40 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.08)]",
   },
   {
@@ -19,6 +20,7 @@ const tiles = [
     description: "Source components and check availability",
     hint: ".csv",
     prompt: "I want to process a bill of materials",
+    response: "Drop a `.csv` BOM file onto the canvas. I'll parse the component list and check sourcing availability.",
     accent: "group-hover:border-violet-500/40 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]",
   },
   {
@@ -27,6 +29,7 @@ const tiles = [
     description: "Describe what you want to build",
     hint: "prompt",
     prompt: "Help me start a new electronics project",
+    response: "Tell me what you're building in the command bar above — component count, use case, constraints. I'll guide you through the design-to-manufacture pipeline.",
     accent: "group-hover:border-amber-500/40 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.08)]",
   },
 ];
@@ -34,9 +37,8 @@ const tiles = [
 export function EmptyState() {
   const { addJarvisMessage, showJarvisStrip } = useWorkspaceStore();
 
-  function handleTile(prompt: string) {
+  function handleTile(prompt: string, response: string) {
     addJarvisMessage({ role: "user", text: prompt });
-    const response = jarvis.defaultResponse();
     addJarvisMessage({ role: "jarvis", text: response });
     showJarvisStrip({ message: response });
   }
@@ -71,7 +73,7 @@ export function EmptyState() {
           {tiles.map((tile) => (
             <button
               key={tile.title}
-              onClick={() => handleTile(tile.prompt)}
+              onClick={() => handleTile(tile.prompt, tile.response)}
               className={`group flex flex-col items-start gap-3 w-44 p-4 rounded-2xl border border-white/[0.07] bg-[#141e2e]/80 transition-all text-left ${tile.accent}`}
             >
               <div className="flex items-center justify-between w-full">

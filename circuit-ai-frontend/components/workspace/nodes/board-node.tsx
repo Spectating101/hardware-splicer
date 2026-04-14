@@ -142,6 +142,17 @@ export function BoardNodeComponent({ id, data: rawData }: NodeProps) {
             : undefined,
         });
       }, 12000);
+
+      // 45s nudge: remind about blocking criticals if user hasn't opened the drawer yet
+      if (criticalCount > 0) {
+        setTimeout(() => {
+          showJarvisStrip({
+            message: jarvis.criticalNudge(data.boardName, criticalCount),
+            nodeId: validationId,
+            action: { label: "Show issues →", onAction: () => openDrawer(validationId, "issues") },
+          });
+        }, 45000);
+      }
     }
 
     try {

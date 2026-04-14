@@ -121,25 +121,24 @@ export type JarvisIntent =
   | { type: "undo" }
   | { type: "clear" }
   | { type: "help" }
+  | { type: "next" }
+  | { type: "open_board" }
+  | { type: "open_mfg" }
   | { type: "unknown"; text: string };
 
 export function parseIntent(text: string): JarvisIntent {
   const t = text.toLowerCase().trim();
-  if (/\b(validate|check\s+issue|run\s+erc|erc|drc|check\s+board)\b/.test(t))
+  if (/\b(validate|check\s+issue|run\s+erc|erc|drc|check\s+board|re-?validate|run\s+check)\b/.test(t))
     return { type: "validate" };
   if (
-    /\b(manufactur|gerber|package\s+for|generate\s+package|send\s+to\s+fab|produce|fabricat|build\s+it)\b/.test(
-      t
-    )
+    /\b(manufactur|gerber|package\s+for|generate\s+package|send\s+to\s+fab|produce|fabricat|build\s+it|ready\s+to\s+ship|order\s+(the\s+)?board)\b/.test(t)
   )
     return { type: "manufacture" };
   if (
-    /(\b(show|open|see|view)\b.*\b(issue|error|problem|wrong|warning)\b)|(\bwhat.?s wrong\b)|\bissues?\b/.test(
-      t
-    )
+    /(\b(show|open|see|view|list)\b.*\b(issue|error|problem|wrong|warning|fix)\b)|(\bwhat.?s wrong\b)|\bissues?\b|(\bshow\s+me\b)/.test(t)
   )
     return { type: "show_issues" };
-  if (/\b(status|progress|where\s+are\s+we|what.?s\s+(the\s+)?status|summary)\b/.test(t))
+  if (/\b(status|progress|where\s+are\s+we|what.?s\s+(the\s+)?status|summary|how.?s\s+(the\s+)?(board|project|design)|health\b|score\b)\b/.test(t))
     return { type: "status" };
   if (
     /\b(acknowledge|ack|dismiss|ignore|suppress|accept)\b.*\b(warning|issue|error)\b/.test(t) ||
@@ -151,6 +150,12 @@ export function parseIntent(text: string): JarvisIntent {
     return { type: "clear" };
   if (/\b(help|commands?|what\s+can\s+you|how\s+do)\b/.test(t))
     return { type: "help" };
+  if (/\b(next|what\s+(should|do)\s+i|what.?s\s+next|what\s+now|proceed|continue|done|looks?\s+good|looks?\s+(ok|okay|fine))\b/.test(t))
+    return { type: "next" };
+  if (/\b(open|inspect|view|show)\b.*\b(board|pcb|schematic|design)\b|\bboard\s+(detail|info|drawer)\b/.test(t))
+    return { type: "open_board" };
+  if (/\b(open|view|show|download)\b.*\b(mfg|manufactur|package|gerber|files?|output)\b|\bpackage\s+detail\b/.test(t))
+    return { type: "open_mfg" };
   return { type: "unknown", text };
 }
 
@@ -172,7 +177,7 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
       if (!ctx.hasBoardNode)
         return "Drop a `.kicad_pcb` file on the canvas first, then I'll run the electrical rules check.";
       if (ctx.hasValidation)
-        return `Already validated **${ctx.boardName ?? "this board"}** — health score is **${ctx.healthScore}/100**. Drop a new file or say **clear** to start fresh.`;
+        return `Re-running ERC on **${ctx.boardName ?? "the board"}** — comparing against the previous score of **${ctx.healthScore}/100**.`;
       return `Running ERC on **${ctx.boardName ?? "the board"}**…`;
 
     case "manufacture":
@@ -237,11 +242,39 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
         "**manufacture** — generate Gerbers, BOM, and assembly guide",
         "**show issues** — open the validation panel",
         "**status** — project summary",
+        "**what's next** — I'll tell you the single most important action",
+        "**open board** — inspect components and layers",
         "**acknowledge warnings** — dismiss all non-critical issues",
         "**undo** — undo the last action (or Ctrl+Z)",
         "**clear** — reset the workspace",
         "Or drop a `.kicad_pcb` file directly onto the canvas.",
       ].join("  \n");
+
+    case "next": {
+      if (!ctx.hasBoardNode)
+        return "Drop a `.kicad_pcb` file on the canvas to get started.";
+      if (!ctx.hasValidation)
+        return `Run **validate** — I need to check **${ctx.boardName ?? "the board"}** for electrical rule violations before it can go to manufacture.`;
+      if (ctx.hasCriticals)
+        return `Resolve the **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** in **${ctx.boardName ?? "the board"}** — say **show issues** to review the suggested fixes.`;
+      if (ctx.activeIssueCount > 0)
+        return `**${ctx.activeIssueCount} non-critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** remain. Say **acknowledge warnings** to dismiss them, then **manufacture** to generate the files.`;
+      if (!ctx.hasManufacturing)
+        return `Board is clean (score **${ctx.healthScore}/100**) — say **manufacture** to generate Gerbers, BOM, and assembly guide.`;
+      return `You're done. **${ctx.boardName ?? "The board"}** is validated and packaged — manufacturing files are ready to download.`;
+    }
+
+    case "open_board":
+      if (!ctx.hasBoardNode)
+        return "No board on the canvas yet. Drop a `.kicad_pcb` file first.";
+      return `Opening board details for **${ctx.boardName ?? "the board"}**…`;
+
+    case "open_mfg":
+      if (!ctx.hasManufacturing)
+        return ctx.hasValidation && !ctx.hasCriticals
+          ? `Manufacturing package not generated yet — say **manufacture** to create it.`
+          : `Run **validate** first, then say **manufacture** to generate the package.`;
+      return `Opening manufacturing package for **${ctx.boardName ?? "the board"}**…`;
 
     default: {
       const { text } = intent as { type: "unknown"; text: string };
@@ -252,10 +285,10 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
       if (!ctx.hasValidation)
         return `I can see **${ctx.boardName}** on the canvas. Say **validate** to run the electrical rules check, or **help** to see what I can do.`;
       if (ctx.hasCriticals)
-        return `**${ctx.boardName}** has **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** that need attention before manufacturing. Say **show issues** to review them.`;
+        return `**${ctx.boardName}** has **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** blocking manufacture. Say **show issues** to review the fixes.`;
       if (!ctx.hasManufacturing)
-        return `**${ctx.boardName}** is validated — health score **${ctx.healthScore}/100**. Say **manufacture** to generate the Gerbers and BOM.`;
-      return `**${ctx.boardName}** is fully processed — validated and packaged. The manufacturing files are ready in the rightmost node.`;
+        return `**${ctx.boardName}** is validated — health score **${ctx.healthScore}/100**. Say **manufacture** to generate the Gerbers and BOM, or **what's next** for guidance.`;
+      return `**${ctx.boardName}** is fully processed — validated and packaged. Manufacturing files are ready.`;
     }
   }
 }
@@ -326,6 +359,11 @@ export const jarvis = {
       return "Fix the critical issues first, then I can package it for manufacture.";
     }
     return "Board looks good. Say **manufacture** or click the button to generate Gerbers, BOM, and assembly guide.";
+  },
+
+  criticalNudge(boardName: string, criticalCount: number): string {
+    const plural = criticalCount === 1 ? "issue" : "issues";
+    return `Still **${criticalCount} critical ${plural}** blocking **${boardName}**. These will cause board failure — say **show issues** to review the fixes.`;
   },
 
   manufactureStart(boardName: string): string {
