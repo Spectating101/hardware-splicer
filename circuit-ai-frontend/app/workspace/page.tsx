@@ -1,10 +1,10 @@
-import WorkspacePage from "@/components/workspace/workspace-page";
+import { Workbench } from "@/components/workspace/workbench";
 
 export const metadata = {
   title: "Workspace — Circuit.AI",
-  description: "Intelligent electromechanical canvas",
+  description: "Intelligent PCB workbench",
 };
 
 export default function Page() {
-  return <WorkspacePage />;
+  return <Workbench />;
 }

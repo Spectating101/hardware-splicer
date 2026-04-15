@@ -16,6 +16,12 @@ export type PcbGeometry = {
     footprint: string;
     layer: string;
     at: { x: number; y: number; rot_deg: number };
+    pads?: Array<{
+      num: string;
+      wx: number; // world-space mm
+      wy: number;
+      net: { id: number; name: string };
+    }>;
   }>;
   segments: Array<{
     start: { x: number; y: number };
@@ -23,6 +29,13 @@ export type PcbGeometry = {
     width_mm: number | null;
     layer: string;
     net: { id: number | null; name: string };
+  }>;
+  vias?: Array<{
+    x: number;
+    y: number;
+    size_mm: number;
+    drill_mm: number;
+    net: { id: number; name: string };
   }>;
 };
 
