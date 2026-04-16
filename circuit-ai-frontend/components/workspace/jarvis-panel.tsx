@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
-import { Zap, AlertTriangle, ChevronRight, Send, Cpu, Layers, Network, Ruler } from "lucide-react";
+import { Zap, AlertTriangle, ChevronRight, Send, Cpu, Layers, Network, Ruler, CornerDownLeft } from "lucide-react";
 import type { PcbGeometry, ValidationIssue } from "@/lib/cad-types";
 import type { JarvisMsg } from "@/lib/workbench-store";
 import { parseIntent, contextualResponse, generateBoardInsights, healthLabel } from "@/lib/jarvis";
 import type { JarvisContext } from "@/lib/jarvis";
+import { tokenize, chipToken, type ChatChipKind } from "@/lib/chat-tokens";
 
 interface JarvisPanelProps {
   geometry: PcbGeometry | null;
@@ -22,6 +23,54 @@ interface JarvisPanelProps {
   onSetThinking(v: boolean): void;
   onValidate(): void;
   onManufacture(): void;
+  /** Chat-token chip handlers — click a chip in a message, act on the canvas. */
+  onRefChip(ref: string): void;
+  onNetChip(net: string): void;
+  onIssueChip(id: string): void;
+}
+
+/** Tokenised message body: text runs + inline clickable chips for ref/net/issue. */
+function MessageBody({
+  text,
+  onRefChip,
+  onNetChip,
+  onIssueChip,
+}: {
+  text: string;
+  onRefChip: (ref: string) => void;
+  onNetChip: (net: string) => void;
+  onIssueChip: (id: string) => void;
+}) {
+  const parts = tokenize(text);
+  return (
+    <>
+      {parts.map((p, i) => {
+        if (p.kind === "text") return <span key={i}>{p.value}</span>;
+        const style =
+          p.kind === "ref"   ? "bg-cyan-500/20 text-cyan-100 hover:bg-cyan-500/30"
+        : p.kind === "net"   ? "bg-violet-500/20 text-violet-100 hover:bg-violet-500/30"
+        :                      "bg-amber-500/20 text-amber-100 hover:bg-amber-500/30";
+        const onClick: (e: React.MouseEvent) => void =
+          p.kind === "ref"   ? () => onRefChip(p.value)
+        : p.kind === "net"   ? () => onNetChip(p.value)
+        :                      () => onIssueChip(p.value);
+        const label =
+          p.kind === "ref"   ? p.value
+        : p.kind === "net"   ? `net ${p.value}`
+        :                      `issue #${p.value}`;
+        return (
+          <button
+            key={i}
+            onClick={onClick}
+            className={`inline-flex items-center align-baseline rounded px-1.5 py-px font-mono text-[10px] leading-[1.1] mx-0.5 transition-colors ${style}`}
+            title={`Click to focus ${p.kind}: ${p.value}`}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </>
+  );
 }
 
 function relativeTime(ts: number): string {
@@ -61,6 +110,9 @@ export function JarvisPanel({
   onSetThinking,
   onValidate,
   onManufacture,
+  onRefChip,
+  onNetChip,
+  onIssueChip,
 }: JarvisPanelProps) {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -106,6 +158,14 @@ export function JarvisPanel({
         return s === "critical" || s === "error";
       }).length;
       const boardName = filename?.replace(/\.kicad_pcb$/i, "") ?? undefined;
+      // Rank issues by severity; pluck up to 3 refs so the reply can surface
+      // them as chip tokens for one-click navigation from chat to canvas.
+      const sevOrder: Record<string, number> = { critical: 0, error: 1, warning: 2, info: 3 };
+      const topIssueRefs = [...issues]
+        .sort((a, b) => (sevOrder[String(a.severity).toLowerCase()] ?? 4) - (sevOrder[String(b.severity).toLowerCase()] ?? 4))
+        .map((i) => i.component)
+        .filter((r, i, arr) => !!r && arr.indexOf(r) === i)
+        .slice(0, 3);
       const ctx: JarvisContext = {
         hasBoardNode: pipeline.parsed,
         hasValidation: pipeline.validated,
@@ -116,6 +176,8 @@ export function JarvisPanel({
         boardName,
         componentCount: geometry?.footprints.length,
         layerCount: geometry ? [...new Set(geometry.footprints.map(f => f.layer))].length : undefined,
+        topIssueRefs,
+        selectedRef: selectedRef ?? undefined,
       };
       const reply = contextualResponse(intent, ctx);
       onAddMessage({ role: "jarvis", text: reply });
@@ -127,6 +189,18 @@ export function JarvisPanel({
       e.preventDefault();
       submit();
     }
+  }
+
+  /** Paste a chip token into the composer — used by the canvas↔chat bridge. */
+  function insertChip(kind: ChatChipKind, value: string) {
+    const token = chipToken(kind, value);
+    setInput((prev) => {
+      const sep = prev.length === 0 || /\s$/.test(prev) ? "" : " ";
+      return `${prev}${sep}${token} `;
+    });
+    // Defer focus until after React commits the new value so the caret lands
+    // at the end. Focusing synchronously re-selects the old value.
+    setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   // Board stats from geometry
@@ -244,10 +318,22 @@ export function JarvisPanel({
           {selectedFp && (
             <div className="px-3 pb-2">
               <div className="rounded-lg border border-cyan-500/20 bg-cyan-950/20 px-2.5 py-2">
-                <p className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wide mb-1">Selected</p>
-                <p className="text-xs font-mono text-white/80">{selectedFp.ref}</p>
-                <p className="text-[10px] text-white/40">{selectedFp.value} · {selectedFp.footprint.split(":").pop()}</p>
-                <p className="text-[10px] text-white/30">{selectedFp.layer} · ({selectedFp.at.x.toFixed(1)}, {selectedFp.at.y.toFixed(1)}) mm</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wide mb-1">Selected</p>
+                    <p className="text-xs font-mono text-white/80">{selectedFp.ref}</p>
+                    <p className="text-[10px] text-white/40 truncate">{selectedFp.value} · {selectedFp.footprint.split(":").pop()}</p>
+                    <p className="text-[10px] text-white/30">{selectedFp.layer} · ({selectedFp.at.x.toFixed(1)}, {selectedFp.at.y.toFixed(1)}) mm</p>
+                  </div>
+                  <button
+                    onClick={() => insertChip("ref", selectedFp.ref)}
+                    title={`Paste [ref:${selectedFp.ref}] into the chat`}
+                    className="flex items-center gap-1 flex-shrink-0 text-[10px] text-cyan-300/70 hover:text-cyan-200 bg-cyan-500/10 hover:bg-cyan-500/20 rounded px-1.5 py-0.5 transition-colors"
+                  >
+                    <CornerDownLeft size={9} />
+                    <span>Chat</span>
+                  </button>
+                </div>
                 {selectedIssues.length > 0 && (
                   <div className="mt-1.5 flex items-center gap-1">
                     <AlertTriangle size={9} className="text-amber-400" />
@@ -306,7 +392,12 @@ export function JarvisPanel({
                           : "bg-white/5 text-white/75"
                       }`}
                     >
-                      {msg.text}
+                      <MessageBody
+                        text={msg.text}
+                        onRefChip={onRefChip}
+                        onNetChip={onNetChip}
+                        onIssueChip={onIssueChip}
+                      />
                     </div>
                     <p className="text-[9px] text-white/20">{relativeTime(msg.ts)}</p>
                   </div>

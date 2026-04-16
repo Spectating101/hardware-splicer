@@ -47,6 +47,26 @@ export type ValidationIssue = {
   physics?: unknown;
 };
 
+/** DC analysis produced by the backend's MNA solver. Optional — only present
+ *  when the board has a recognisable power source (battery/LDO/DCDC). */
+export type DcAnalysis = {
+  /** Node voltage per net id (volts). */
+  node_voltages?: Record<string, number>;
+  /** Branch current per segment id or "netId:segIndex" key (amps). */
+  branch_currents?: Record<string, number>;
+  /** Per-power-rail summary. */
+  rails?: Array<{ net_id: number; name: string; v_nom: number; v_drop_max_mv: number }>;
+};
+
+/** Simple thermal projection per component ref (°C junction temp). */
+export type ThermalMap = Record<string, { tj_c: number; derate_pct: number }>;
+
+/** Supply-chain risk per component ref (0–1, where 1 = highest risk). */
+export type BomRisk = Record<
+  string,
+  { risk: number; lead_days?: number; price_usd?: number; mpn?: string }
+>;
+
 export type ValidateKiCadResponse = {
   status: string;
   next_steps: string[];
@@ -59,5 +79,8 @@ export type ValidateKiCadResponse = {
     issues: ValidationIssue[];
   };
   pcb_geometry?: PcbGeometry;
+  dc_analysis?: DcAnalysis;
+  thermal?: ThermalMap;
+  bom_risk?: BomRisk;
 };
 

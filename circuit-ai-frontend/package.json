@@ -17,6 +17,7 @@
     "@radix-ui/react-toast": "^1.2.15",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@react-three/postprocessing": "^3.0.4",
     "@xyflow/react": "^12.10.2",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",

@@ -1,7 +1,7 @@
 "use client";
 
 import { Zap, FileCode, RotateCcw, Download, Plus } from "lucide-react";
-import type { WorkbenchPipeline } from "@/lib/workbench-store";
+import type { WorkbenchPipeline, RenderMode } from "@/lib/workbench-store";
 
 interface BoardHeaderProps {
   filename: string | null;
@@ -9,9 +9,47 @@ interface BoardHeaderProps {
   healthScore: number | null;
   issueCount: number;
   criticalCount: number;
+  renderMode: RenderMode;
+  onSetRenderMode(mode: RenderMode): void;
   onValidate(): void;
   onManufacture(): void;
   onNew(): void;
+}
+
+function RenderModeToggle({
+  value,
+  onChange,
+}: {
+  value: RenderMode;
+  onChange(v: RenderMode): void;
+}) {
+  const isEng = value === "engineering";
+  return (
+    <div className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] p-0.5 text-[10px] font-medium">
+      <button
+        onClick={() => onChange("engineering")}
+        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+          isEng
+            ? "bg-cyan-500/20 text-cyan-200 shadow-[0_0_0_1px_rgba(34,211,238,0.35)]"
+            : "text-white/40 hover:text-white/70"
+        }`}
+        title="Copper-primary engineering view"
+      >
+        Engineering
+      </button>
+      <button
+        onClick={() => onChange("production")}
+        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+          !isEng
+            ? "bg-emerald-500/20 text-emerald-200 shadow-[0_0_0_1px_rgba(16,185,129,0.35)]"
+            : "text-white/40 hover:text-white/70"
+        }`}
+        title="Opaque solder mask — product-photo look"
+      >
+        Production
+      </button>
+    </div>
+  );
 }
 
 function StatusPill({
@@ -41,6 +79,8 @@ export function BoardHeader({
   healthScore,
   issueCount,
   criticalCount,
+  renderMode,
+  onSetRenderMode,
   onValidate,
   onManufacture,
   onNew,
@@ -93,6 +133,13 @@ export function BoardHeader({
           <StatusPill label={mfgLabel} variant={mfgVariant} />
         )}
       </div>
+
+      {/* Render mode toggle (only once a board is loaded) */}
+      {pipeline.parsed && (
+        <div className="flex-shrink-0">
+          <RenderModeToggle value={renderMode} onChange={onSetRenderMode} />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex items-center gap-1.5 flex-shrink-0">

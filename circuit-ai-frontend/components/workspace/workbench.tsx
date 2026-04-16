@@ -78,9 +78,9 @@ function boardInfoToGeometry(info: KicadBoardInfo): PcbGeometry {
 }
 import { BoardHeader } from "./board-header";
 import { LayerPanel } from "./layer-panel";
-import { BoardCanvas } from "./board-canvas";
 import { JarvisPanel } from "./jarvis-panel";
 import { DrcConsole } from "./drc-console";
+import { PcbViewport } from "@/components/cad/pcb-viewport";
 
 const DFM_KEYWORDS = /(tolerance|clearance|assembly|thermal|mechanical|stress|via|drill|fab|solder|annular|keepout|courtyard|silk|mask)/i;
 
@@ -153,6 +153,11 @@ export function Workbench() {
       }
 
       store.setValidationResult(issues, score, nextSteps, dfmNotes);
+      store.setAnalysis({
+        dcAnalysis: json.dc_analysis ?? null,
+        thermal: json.thermal ?? null,
+        bomRisk: json.bom_risk ?? null,
+      });
       store.setJarvisThinking(false);
 
       const statusLine =
@@ -232,6 +237,11 @@ export function Workbench() {
 
       if (json.pcb_geometry) store.setGeometry(json.pcb_geometry);
       store.setValidationResult(issues, score, nextSteps, dfmNotes);
+      store.setAnalysis({
+        dcAnalysis: json.dc_analysis ?? null,
+        thermal: json.thermal ?? null,
+        bomRisk: json.bom_risk ?? null,
+      });
       store.setJarvisThinking(false);
 
       store.addJarvisMessage({
@@ -353,6 +363,8 @@ export function Workbench() {
         healthScore={store.healthScore}
         issueCount={store.issues.length}
         criticalCount={criticalCount}
+        renderMode={store.renderMode}
+        onSetRenderMode={store.setRenderMode}
         onValidate={handleValidate}
         onManufacture={handleManufacture}
         onNew={() => {
@@ -365,13 +377,20 @@ export function Workbench() {
       <div className="flex-1 flex overflow-hidden">
         <LayerPanel
           geometry={store.geometry}
-          layers={store.layers}
+          lenses={store.lenses}
           selectedRef={store.selectedRef}
-          onToggleLayer={store.toggleLayer}
+          availability={{
+            voltage: !!store.dcAnalysis?.node_voltages,
+            current: !!store.dcAnalysis?.branch_currents,
+            thermal: !!store.thermal,
+            bom: !!store.bomRisk,
+          }}
+          onToggleLens={store.toggleLens}
+          onSetLens={store.setLens}
           onSelectRef={store.setSelectedRef}
         />
 
-        {/* Canvas — also acts as file drop target with click-to-browse */}
+        {/* Canvas — single photoreal 3D board, also acts as file drop zone. */}
         <div
           className="flex-1 relative overflow-hidden cursor-default"
           onClick={() => {
@@ -380,12 +399,16 @@ export function Workbench() {
             }
           }}
         >
-          <BoardCanvas
+          <PcbViewport
             geometry={store.geometry}
-            layers={store.layers}
-            selectedRef={store.selectedRef}
-            onSelectRef={store.setSelectedRef}
-            filename={store.filename}
+            issues={store.issues}
+            selection={{ footprintRef: store.selectedRef }}
+            onSelectionChange={(s) => store.setSelectedRef(s.footprintRef)}
+            lenses={store.lenses}
+            dcAnalysis={store.dcAnalysis}
+            thermal={store.thermal}
+            bomRisk={store.bomRisk}
+            renderMode={store.renderMode}
           />
         </div>
 
@@ -404,6 +427,12 @@ export function Workbench() {
           onSetThinking={store.setJarvisThinking}
           onValidate={handleValidate}
           onManufacture={handleManufacture}
+          onRefChip={(r) => store.setSelectedRef(r)}
+          onNetChip={(n) => store.setSelectedNet(n)}
+          onIssueChip={() => {
+            // Open the DRC drawer when a user clicks an [issue:N] chip.
+            if (!store.drcOpen) store.toggleDrc();
+          }}
         />
       </div>
 

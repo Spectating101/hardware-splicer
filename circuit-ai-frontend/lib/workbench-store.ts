@@ -1,7 +1,9 @@
 "use client";
 
 import { create } from "zustand";
-import type { PcbGeometry, ValidationIssue } from "./cad-types";
+import type {
+  PcbGeometry, ValidationIssue, DcAnalysis, ThermalMap, BomRisk,
+} from "./cad-types";
 
 export interface JarvisMsg {
   role: "user" | "jarvis";
@@ -36,6 +38,34 @@ export interface WorkbenchPipeline {
   manufacturing: boolean;
 }
 
+/** Canvas lenses — overlays painted on the single 3D board. Each one is a
+ *  data stream the backend provides; toggling a lens switches shader uniforms
+ *  rather than swapping geometry. */
+export interface Lenses {
+  netFocus: boolean;
+  drc: boolean;
+  voltage: boolean;
+  current: boolean;
+  thermal: boolean;
+  bom: boolean;
+  peelMask: boolean;
+  /** 0–1 — how far components lift off the board on a reflow-order explode. */
+  explode: number;
+}
+
+export type RenderMode = "engineering" | "production";
+
+export const INITIAL_LENSES: Lenses = {
+  netFocus: true,
+  drc: true,
+  voltage: false,
+  current: false,
+  thermal: false,
+  bom: false,
+  peelMask: false,
+  explode: 0,
+};
+
 interface WorkbenchState {
   // Board data
   filename: string | null;
@@ -46,6 +76,11 @@ interface WorkbenchState {
   dfmNotes: string[];
   healthScore: number | null;
 
+  // Backend analysis streams that feed lenses
+  dcAnalysis: DcAnalysis | null;
+  thermal: ThermalMap | null;
+  bomRisk: BomRisk | null;
+
   // Pipeline flags
   pipeline: WorkbenchPipeline;
 
@@ -53,6 +88,14 @@ interface WorkbenchState {
   layers: LayerVis[];
   selectedRef: string | null;
   selectedNet: string | null;
+
+  // Canvas lenses
+  lenses: Lenses;
+
+  // Canvas render mode — engineering (copper-primary, default) vs production
+  // (opaque green mask, screenshot look). peelMask lens still wins on top of
+  // both when active.
+  renderMode: RenderMode;
 
   // JARVIS
   jarvisMessages: JarvisMsg[];
@@ -70,11 +113,19 @@ interface WorkbenchState {
     nextSteps: string[],
     dfmNotes: string[]
   ): void;
+  setAnalysis(p: {
+    dcAnalysis?: DcAnalysis | null;
+    thermal?: ThermalMap | null;
+    bomRisk?: BomRisk | null;
+  }): void;
   setManufactured(): void;
   setPipelineFlag(key: keyof WorkbenchPipeline, val: boolean): void;
   toggleLayer(name: string): void;
   setSelectedRef(ref: string | null): void;
   setSelectedNet(net: string | null): void;
+  toggleLens<K extends keyof Lenses>(key: K): void;
+  setLens<K extends keyof Lenses>(key: K, value: Lenses[K]): void;
+  setRenderMode(mode: RenderMode): void;
   addJarvisMessage(msg: Omit<JarvisMsg, "ts">): void;
   setJarvisThinking(v: boolean): void;
   toggleDrc(): void;
@@ -97,10 +148,15 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
   nextSteps: [],
   dfmNotes: [],
   healthScore: null,
+  dcAnalysis: null,
+  thermal: null,
+  bomRisk: null,
   pipeline: { ...INITIAL_PIPELINE },
   layers: DEFAULT_LAYERS,
   selectedRef: null,
   selectedNet: null,
+  lenses: { ...INITIAL_LENSES },
+  renderMode: "engineering",
   jarvisMessages: [],
   jarvisThinking: false,
   drcOpen: false,
@@ -112,6 +168,9 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
       geometry: null,
       issues: [],
       healthScore: null,
+      dcAnalysis: null,
+      thermal: null,
+      bomRisk: null,
       pipeline: { ...INITIAL_PIPELINE, parsed: true },
     }),
 
@@ -124,6 +183,13 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
       nextSteps,
       dfmNotes,
       pipeline: { ...s.pipeline, validated: true, validating: false },
+    })),
+
+  setAnalysis: ({ dcAnalysis, thermal, bomRisk }) =>
+    set((s) => ({
+      dcAnalysis: dcAnalysis !== undefined ? dcAnalysis : s.dcAnalysis,
+      thermal: thermal !== undefined ? thermal : s.thermal,
+      bomRisk: bomRisk !== undefined ? bomRisk : s.bomRisk,
     })),
 
   setManufactured: () =>
@@ -143,6 +209,16 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
 
   setSelectedRef: (ref) => set({ selectedRef: ref }),
   setSelectedNet: (net) => set({ selectedNet: net }),
+
+  toggleLens: (key) =>
+    set((s) => ({
+      lenses: { ...s.lenses, [key]: !s.lenses[key] } as Lenses,
+    })),
+
+  setLens: (key, value) =>
+    set((s) => ({ lenses: { ...s.lenses, [key]: value } })),
+
+  setRenderMode: (mode) => set({ renderMode: mode }),
 
   addJarvisMessage: (msg) =>
     set((s) => ({
@@ -164,10 +240,15 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
       nextSteps: [],
       dfmNotes: [],
       healthScore: null,
+      dcAnalysis: null,
+      thermal: null,
+      bomRisk: null,
       pipeline: { ...INITIAL_PIPELINE },
       layers: DEFAULT_LAYERS,
       selectedRef: null,
       selectedNet: null,
+      lenses: { ...INITIAL_LENSES },
+      renderMode: "engineering",
       jarvisMessages: [],
       drcOpen: false,
     }),

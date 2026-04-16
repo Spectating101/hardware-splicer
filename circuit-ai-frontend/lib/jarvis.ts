@@ -172,6 +172,11 @@ export interface JarvisContext {
   componentCount?: number;
   layerCount?: number;
   topIssue?: { what: string; fix: string; severity: string };
+  /** Up to 3 component refs of the most severe active issues — surfaced as
+   *  chip tokens `[ref:X]` so users can click into the canvas from chat. */
+  topIssueRefs?: string[];
+  /** Currently selected component (if any) — lets responses address it by name. */
+  selectedRef?: string;
 }
 
 export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): string {
@@ -199,7 +204,14 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
         return "No validation results yet. Say **validate** and I'll run the ERC check.";
       if (ctx.activeIssueCount === 0)
         return `**${ctx.boardName ?? "The board"}** is clean — no active issues. It's ready to manufacture.`;
-      return `Opening the issues panel — ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} found.`;
+      {
+        const chipList = (ctx.topIssueRefs ?? [])
+          .slice(0, 3)
+          .map((r) => `[ref:${r}]`)
+          .join(" ");
+        const suffix = chipList ? ` Flagged: ${chipList}.` : "";
+        return `Opening the issues panel — ${ctx.activeIssueCount} active issue${ctx.activeIssueCount === 1 ? "" : "s"} found.${suffix}`;
+      }
 
     case "status": {
       if (!ctx.hasBoardNode)
@@ -266,8 +278,11 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
         return "Drop a `.kicad_pcb` file on the canvas to get started.";
       if (!ctx.hasValidation)
         return `Run **validate** — I need to check **${ctx.boardName ?? "the board"}** for electrical rule violations before it can go to manufacture.`;
-      if (ctx.hasCriticals)
-        return `Resolve the **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** in **${ctx.boardName ?? "the board"}** — say **show issues** to review the suggested fixes.`;
+      if (ctx.hasCriticals) {
+        const refs = (ctx.topIssueRefs ?? []).slice(0, 3).map((r) => `[ref:${r}]`).join(" ");
+        const list = refs ? ` Start with ${refs}.` : "";
+        return `Resolve the **${ctx.activeIssueCount} critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** in **${ctx.boardName ?? "the board"}** — say **show issues** to review the suggested fixes.${list}`;
+      }
       if (ctx.activeIssueCount > 0)
         return `**${ctx.activeIssueCount} non-critical issue${ctx.activeIssueCount === 1 ? "" : "s"}** remain. Say **acknowledge warnings** to dismiss them, then **manufacture** to generate the files.`;
       if (!ctx.hasManufacturing)
