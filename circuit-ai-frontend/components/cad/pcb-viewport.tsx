@@ -52,6 +52,42 @@ const PALETTE = {
   selection: "#4ac8ff",
 };
 
+/** Engineering ("diagram") palette. Flat, unlit, high-contrast. The whole
+ *  scene is drawn with MeshBasicMaterial in this mode — no PBR, no Bloom,
+ *  no shadows, no HDRI. The eye reads color-coding, not shading. */
+const FLAT = {
+  board:         "#1b3a2a",   // flat mask-green plank
+  substrate:     "#8a7348",   // bare FR4 (when peel-mask is on)
+  copper:        "#ffae45",   // bold amber-orange trace — the star
+  pad:           "#ffd46a",   // gold pad
+  via:           "#e89a55",
+  airwire:       "#4af0ff",
+  netHighlight:  "#9fe8ff",
+  issueHalo:     "#ff4a4a",
+  selection:     "#4ac8ff",
+  bodyIC:        "#3a4d7a",
+  bodyPassive:   "#7a7a7a",
+  bodyLED:       "#f3c48b",
+  bodyDiode:     "#3a3a3a",
+  bodyConnector: "#c8784a",
+  bodyModule:    "#2aa6b8",
+  bodyMount:     "#888",
+  bodyDefault:   "#555",
+};
+
+function flatBodyColorForKind(kind: ReturnType<typeof inferFootprintSize>["kind"]): string {
+  switch (kind) {
+    case "ic": return FLAT.bodyIC;
+    case "passive": return FLAT.bodyPassive;
+    case "led": return FLAT.bodyLED;
+    case "diode": return FLAT.bodyDiode;
+    case "connector": return FLAT.bodyConnector;
+    case "module": return FLAT.bodyModule;
+    case "mounting": return FLAT.bodyMount;
+    default: return FLAT.bodyDefault;
+  }
+}
+
 /* KiCad uses mm with Y growing downward. We map KiCad(x, y) → world(x, 0, y).
  * Y in world space is "up" — layer stack grows in +Y off the substrate. */
 const BOARD_THICKNESS = 1.6;      // mm
@@ -135,12 +171,29 @@ function bodyColorForKind(kind: ReturnType<typeof inferFootprintSize>["kind"]): 
 
 /* ── Substrate + mask ─────────────────────────────────────────────────── */
 
-/** Plain box plank centered at y=0, top at +BOARD_THICKNESS/2, bottom at -BOARD_THICKNESS/2. */
-function BoardBody({ bbox }: { bbox: { min_x: number; min_y: number; max_x: number; max_y: number } }) {
+/** Plain box plank centered at y=0, top at +BOARD_THICKNESS/2, bottom at -BOARD_THICKNESS/2.
+ *  In engineering (flat) mode this plank doubles as the mask-colored backdrop
+ *  so we skip the SolderMask overlay entirely — one unlit plank, bold color. */
+function BoardBody({
+  bbox, flat, peeled,
+}: {
+  bbox: { min_x: number; min_y: number; max_x: number; max_y: number };
+  flat?: boolean;
+  peeled?: boolean;
+}) {
   const w = bbox.max_x - bbox.min_x;
   const d = bbox.max_y - bbox.min_y;
   const cx = (bbox.min_x + bbox.max_x) / 2;
   const cz = (bbox.min_y + bbox.max_y) / 2;
+  if (flat) {
+    // One flat plank — dark green in normal engineering, tan when peeled.
+    return (
+      <mesh position={[cx, 0, cz]}>
+        <boxGeometry args={[w, BOARD_THICKNESS, d]} />
+        <meshBasicMaterial color={peeled ? FLAT.substrate : FLAT.board} />
+      </mesh>
+    );
+  }
   return (
     <mesh position={[cx, 0, cz]} castShadow receiveShadow>
       <boxGeometry args={[w, BOARD_THICKNESS, d]} />
@@ -213,6 +266,7 @@ function Traces({
   voltageByNet,
   voltageRange,
   engineeringMode,
+  onSelectNet,
 }: {
   geometry: PcbGeometry;
   highlightedNet: number | null;
@@ -223,6 +277,8 @@ function Traces({
   /** Engineering render mode — traces are emissive so they read through the
    *  translucent mask. In Production mode traces are plain metallic copper. */
   engineeringMode?: boolean;
+  /** Click a trace to isolate its net. */
+  onSelectNet?: (netId: number | null) => void;
 }) {
   return (
     <group>
@@ -251,32 +307,19 @@ function Traces({
         // Voltage lens wins over the default copper color but loses to the
         // active net-highlight flash — we still want to see selected nets
         // clearly against a rainbow background.
-        let color = PALETTE.copper;
-        let emissive = "#000000";
-        let emissiveI = 0;
-        let tone = true;
+        let color = engineeringMode ? FLAT.copper : PALETTE.copper;
         if (isHi) {
-          color = PALETTE.netHighlight;
-          emissive = PALETTE.netHighlight;
-          emissiveI = 0.4;
+          color = engineeringMode ? FLAT.netHighlight : PALETTE.netHighlight;
         } else if (voltageByNet && voltageRange && seg.net?.id != null) {
           const v = voltageByNet.get(seg.net.id);
           if (v != null) {
             const span = voltageRange.max - voltageRange.min || 1;
             const t = (v - voltageRange.min) / span;
             color = scalarToColor(t);
-            emissive = color;
-            emissiveI = 0.25;
           }
-        } else if (engineeringMode) {
-          // Engineering view: copper glows hot through the translucent mask
-          // so the circuit is legible at a glance. Driven hard — this is the
-          // primary readable signal on the board.
-          color = "#ffb277";
-          emissive = "#ff8a3c";
-          emissiveI = 2.6;
-          tone = false;
         }
+
+        const netId = seg.net?.id ?? null;
 
         return (
           <mesh
@@ -284,16 +327,23 @@ function Traces({
             position={[cx, y, cz]}
             rotation={[0, -angle, 0]}
             renderOrder={1}
+            onClick={onSelectNet && netId != null ? (e) => {
+              e.stopPropagation();
+              onSelectNet(netId === highlightedNet ? null : netId);
+            } : undefined}
+            onPointerOver={onSelectNet ? (e) => { e.stopPropagation(); document.body.style.cursor = "pointer"; } : undefined}
+            onPointerOut={onSelectNet ? () => { document.body.style.cursor = "default"; } : undefined}
           >
             <boxGeometry args={[len, COPPER_HEIGHT, width]} />
-            <meshPhysicalMaterial
-              color={color}
-              metalness={1}
-              roughness={0.28}
-              emissive={emissive}
-              emissiveIntensity={emissiveI}
-              toneMapped={tone}
-            />
+            {engineeringMode ? (
+              <meshBasicMaterial color={color} toneMapped={false} />
+            ) : (
+              <meshPhysicalMaterial
+                color={color}
+                metalness={1}
+                roughness={0.28}
+              />
+            )}
           </mesh>
         );
       })}
@@ -304,9 +354,11 @@ function Traces({
 function Airwires({
   geometry,
   highlightedNet,
+  engineeringMode,
 }: {
   geometry: PcbGeometry;
   highlightedNet: number | null;
+  engineeringMode?: boolean;
 }) {
   const wires = useMemo(
     () => geometry.segments.filter((s) => s.layer === "Airwire"),
@@ -336,14 +388,23 @@ function Airwires({
                 Cylinder's default Y axis makes it read as a vertical pillar,
                 which is exactly wrong for a ratsnest line. */}
             <boxGeometry args={[len, 0.32, 0.32]} />
-            <meshStandardMaterial
-              color={isHi ? PALETTE.netHighlight : "#4af0ff"}
-              emissive={isHi ? PALETTE.netHighlight : "#2abfe0"}
-              emissiveIntensity={isHi ? 2.6 : 1.8}
-              toneMapped={false}
-              transparent
-              opacity={isHi ? 1 : 0.92}
-            />
+            {engineeringMode ? (
+              <meshBasicMaterial
+                color={isHi ? FLAT.netHighlight : FLAT.airwire}
+                toneMapped={false}
+                transparent
+                opacity={isHi ? 1 : 0.95}
+              />
+            ) : (
+              <meshStandardMaterial
+                color={isHi ? PALETTE.netHighlight : "#4af0ff"}
+                emissive={isHi ? PALETTE.netHighlight : "#2abfe0"}
+                emissiveIntensity={isHi ? 2.6 : 1.8}
+                toneMapped={false}
+                transparent
+                opacity={isHi ? 1 : 0.92}
+              />
+            )}
           </mesh>
         );
       })}
@@ -387,14 +448,20 @@ function Pads({
           return (
             <mesh key={`${fp.ref}-pad-${pi}`} position={[p.wx, y, p.wy]} renderOrder={3}>
               <cylinderGeometry args={[padR, padR, 0.08, 24]} />
-              <meshPhysicalMaterial
-                color={isHi ? PALETTE.netHighlight : PALETTE.padENIG}
-                metalness={1}
-                roughness={0.22}
-                emissive={isHi ? PALETTE.netHighlight : engineeringMode ? "#ffd07a" : "#000000"}
-                emissiveIntensity={isHi ? 0.4 : engineeringMode ? 0.95 : 0}
-                toneMapped={!(isHi || engineeringMode)}
-              />
+              {engineeringMode ? (
+                <meshBasicMaterial
+                  color={isHi ? FLAT.netHighlight : FLAT.pad}
+                  toneMapped={false}
+                />
+              ) : (
+                <meshPhysicalMaterial
+                  color={isHi ? PALETTE.netHighlight : PALETTE.padENIG}
+                  metalness={1}
+                  roughness={0.22}
+                  emissive={isHi ? PALETTE.netHighlight : "#000000"}
+                  emissiveIntensity={isHi ? 0.4 : 0}
+                />
+              )}
             </mesh>
           );
         });
@@ -406,9 +473,11 @@ function Pads({
 function Vias({
   geometry,
   highlightedNet,
+  engineeringMode,
 }: {
   geometry: PcbGeometry;
   highlightedNet: number | null;
+  engineeringMode?: boolean;
 }) {
   if (!geometry.vias) return null;
   return (
@@ -419,13 +488,20 @@ function Vias({
           <group key={`via-${i}`} position={[v.x, 0, v.y]}>
             <mesh>
               <cylinderGeometry args={[v.size_mm / 2, v.size_mm / 2, BOARD_THICKNESS + 0.12, 16]} />
-              <meshPhysicalMaterial
-                color={isHi ? PALETTE.netHighlight : PALETTE.via}
-                metalness={1}
-                roughness={0.3}
-                emissive={isHi ? PALETTE.netHighlight : "#000000"}
-                emissiveIntensity={isHi ? 0.35 : 0}
-              />
+              {engineeringMode ? (
+                <meshBasicMaterial
+                  color={isHi ? FLAT.netHighlight : FLAT.via}
+                  toneMapped={false}
+                />
+              ) : (
+                <meshPhysicalMaterial
+                  color={isHi ? PALETTE.netHighlight : PALETTE.via}
+                  metalness={1}
+                  roughness={0.3}
+                  emissive={isHi ? PALETTE.netHighlight : "#000000"}
+                  emissiveIntensity={isHi ? 0.35 : 0}
+                />
+              )}
             </mesh>
             <mesh>
               <cylinderGeometry args={[v.drill_mm / 2, v.drill_mm / 2, BOARD_THICKNESS + 0.2, 16]} />
@@ -449,6 +525,7 @@ function ComponentBody({
   lensDim,
   tintColor,
   tintIntensity,
+  engineeringMode,
 }: {
   fp: Footprint;
   selected: boolean;
@@ -460,12 +537,13 @@ function ComponentBody({
   tintColor?: string | null;
   /** 0–1, how strongly the tint replaces base body color. */
   tintIntensity?: number;
+  engineeringMode?: boolean;
 }) {
   const size = inferFootprintSize(fp.footprint, fp.ref);
   const w = Math.max(1.2, size.w_mm);
   const d = Math.max(1.2, size.h_mm);
   const h = size.kind === "module" ? 2.3 : size.kind === "connector" ? 5.5 : size.kind === "ic" ? 1.1 : size.kind === "led" ? 0.8 : 0.5;
-  const baseColor = bodyColorForKind(size.kind);
+  const baseColor = engineeringMode ? flatBodyColorForKind(size.kind) : bodyColorForKind(size.kind);
   const color = tintColor && tintIntensity ? tintColor : baseColor;
   const emissive = tintColor && tintIntensity ? tintColor : "#000000";
   const emissiveI = tintColor && tintIntensity ? 0.25 * tintIntensity : 0;
@@ -506,35 +584,51 @@ function ComponentBody({
             args={[w, h, d]}
             radius={Math.min(0.18, Math.min(w, d, h) * 0.12)}
             smoothness={3}
-            castShadow
-            receiveShadow
+            castShadow={!engineeringMode}
+            receiveShadow={!engineeringMode}
           >
-            <meshPhysicalMaterial
-              color={color}
-              metalness={metalness}
-              roughness={roughness}
-              clearcoat={size.kind === "ic" ? 0.7 : size.kind === "module" ? 0.35 : 0.2}
-              clearcoatRoughness={0.35}
-              transparent={lensDim}
-              opacity={lensDim ? 0.25 : 1}
-              emissive={emissive}
-              emissiveIntensity={emissiveI}
-            />
+            {engineeringMode ? (
+              <meshBasicMaterial
+                color={color}
+                transparent={lensDim}
+                opacity={lensDim ? 0.25 : 1}
+              />
+            ) : (
+              <meshPhysicalMaterial
+                color={color}
+                metalness={metalness}
+                roughness={roughness}
+                clearcoat={size.kind === "ic" ? 0.7 : size.kind === "module" ? 0.35 : 0.2}
+                clearcoatRoughness={0.35}
+                transparent={lensDim}
+                opacity={lensDim ? 0.25 : 1}
+                emissive={emissive}
+                emissiveIntensity={emissiveI}
+              />
+            )}
           </RoundedBox>
         ) : (
-          <mesh castShadow receiveShadow>
+          <mesh castShadow={!engineeringMode} receiveShadow={!engineeringMode}>
             <boxGeometry args={[w, h, d]} />
-            <meshPhysicalMaterial
-              color={color}
-              metalness={metalness}
-              roughness={roughness}
-              clearcoat={0}
-              clearcoatRoughness={0.4}
-              transparent={lensDim}
-              opacity={lensDim ? 0.25 : 1}
-              emissive={emissive}
-              emissiveIntensity={emissiveI}
-            />
+            {engineeringMode ? (
+              <meshBasicMaterial
+                color={color}
+                transparent={lensDim}
+                opacity={lensDim ? 0.25 : 1}
+              />
+            ) : (
+              <meshPhysicalMaterial
+                color={color}
+                metalness={metalness}
+                roughness={roughness}
+                clearcoat={0}
+                clearcoatRoughness={0.4}
+                transparent={lensDim}
+                opacity={lensDim ? 0.25 : 1}
+                emissive={emissive}
+                emissiveIntensity={emissiveI}
+              />
+            )}
           </mesh>
         )}
 
@@ -556,11 +650,19 @@ function ComponentBody({
             pins.push(
               <mesh key={`p1-${i}`} position={side1 as [number, number, number]}>
                 <boxGeometry args={longAxisX ? [0.25, 0.08, 0.5] : [0.5, 0.08, 0.25]} />
-                <meshStandardMaterial color="#d9c27a" metalness={0.85} roughness={0.25} />
+                {engineeringMode ? (
+                  <meshBasicMaterial color="#d9c27a" />
+                ) : (
+                  <meshStandardMaterial color="#d9c27a" metalness={0.85} roughness={0.25} />
+                )}
               </mesh>,
               <mesh key={`p2-${i}`} position={side2 as [number, number, number]}>
                 <boxGeometry args={longAxisX ? [0.25, 0.08, 0.5] : [0.5, 0.08, 0.25]} />
-                <meshStandardMaterial color="#d9c27a" metalness={0.85} roughness={0.25} />
+                {engineeringMode ? (
+                  <meshBasicMaterial color="#d9c27a" />
+                ) : (
+                  <meshStandardMaterial color="#d9c27a" metalness={0.85} roughness={0.25} />
+                )}
               </mesh>,
             );
           }
@@ -571,7 +673,11 @@ function ComponentBody({
         {(size.kind === "ic" || size.kind === "module") && (
           <mesh position={[-w / 2 + 0.4, h / 2 + 0.001, -d / 2 + 0.4]}>
             <cylinderGeometry args={[0.25, 0.25, 0.02, 16]} />
-            <meshStandardMaterial color="#e0e0e0" />
+            {engineeringMode ? (
+              <meshBasicMaterial color="#e0e0e0" />
+            ) : (
+              <meshStandardMaterial color="#e0e0e0" />
+            )}
           </mesh>
         )}
 
@@ -658,7 +764,7 @@ function CameraFit({
       // saw in the first pass.
       const elev = THREE.MathUtils.degToRad(38);
       const azim = THREE.MathUtils.degToRad(35);
-      const dist = Math.max(diag * 1.12, 32);
+      const dist = Math.max(diag * 1.0, 28);
       const px = cx + dist * Math.cos(elev) * Math.sin(azim);
       const py = dist * Math.sin(elev);
       const pz = cz + dist * Math.cos(elev) * Math.cos(azim);
@@ -776,8 +882,12 @@ function BoardScene({
     <>
       <CameraFit controls={controlsRef} bbox={bbox} target={targetFp} />
 
-      <BoardBody bbox={bbox} />
-      <SolderMask bbox={bbox} hidden={!!lenses.peelMask} translucent={engineeringMode} />
+      <BoardBody bbox={bbox} flat={engineeringMode} peeled={!!lenses.peelMask} />
+      {/* Solder mask is only drawn in production mode — in engineering the
+          BoardBody plank *is* the mask-colored backdrop. */}
+      {!engineeringMode && (
+        <SolderMask bbox={bbox} hidden={!!lenses.peelMask} />
+      )}
       <Traces
         geometry={geometry}
         highlightedNet={highlightedNet}
@@ -785,10 +895,11 @@ function BoardScene({
         voltageByNet={voltageLens?.byNet ?? null}
         voltageRange={voltageLens?.range ?? null}
         engineeringMode={engineeringMode}
+        onSelectNet={onSelectionChange ? (netId) => onSelectionChange({ footprintRef: null, netId }) : undefined}
       />
       <Pads geometry={geometry} highlightedNet={highlightedNet} engineeringMode={engineeringMode} />
-      <Vias geometry={geometry} highlightedNet={highlightedNet} />
-      <Airwires geometry={geometry} highlightedNet={highlightedNet} />
+      <Vias geometry={geometry} highlightedNet={highlightedNet} engineeringMode={engineeringMode} />
+      <Airwires geometry={geometry} highlightedNet={highlightedNet} engineeringMode={engineeringMode} />
 
       {geometry.footprints.map((fp) => {
         const hasIssue = issueRefs.has(fp.ref);
@@ -807,53 +918,46 @@ function BoardScene({
             lensDim={!!lensDim}
             tintColor={tint?.color ?? null}
             tintIntensity={tint?.intensity ?? 0}
+            engineeringMode={engineeringMode}
           />
         );
       })}
 
-      {/* Soft contact shadow under the board to ground it */}
-      <ContactShadows
-        position={[bbox.min_x + (bbox.max_x - bbox.min_x) / 2, -BOARD_THICKNESS / 2 - 0.2, bbox.min_y + (bbox.max_y - bbox.min_y) / 2]}
-        opacity={0.55}
-        scale={Math.max(bbox.max_x - bbox.min_x, bbox.max_y - bbox.min_y) * 1.8}
-        blur={2.2}
-        far={20}
-      />
-
-      {/* Studio lighting — warm key, cool rim, subtle ambient. HDRI is dialed
-          way back so dark component bodies actually read as dark. */}
-      <ambientLight intensity={0.15} />
-      <directionalLight
-        castShadow
-        position={[bbox.max_x + 30, 60, bbox.max_y + 20]}
-        intensity={2.2}
-        color="#ffeacf"
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        shadow-bias={-0.0001}
-      />
-      {/* Cool rim — only matters in production/photo mode. In engineering we
-          kill it because the harsh blue hot-spot fights the copper glow. */}
-      <directionalLight
-        position={[bbox.min_x - 30, 40, bbox.min_y - 30]}
-        intensity={engineeringMode ? 0 : 0.55}
-        color="#6aa0ff"
-      />
-      {/* Engineering top-fill — a soft white light straight above so the
-          copper surface is lit evenly and traces read end-to-end. */}
-      {engineeringMode && (
-        <directionalLight
-          position={[bbox.min_x + (bbox.max_x - bbox.min_x) / 2, 80, bbox.min_y + (bbox.max_y - bbox.min_y) / 2]}
-          intensity={0.65}
-          color="#ffffff"
-        />
+      {/* Photoreal-only: contact shadow, studio lights, HDRI. In engineering
+          mode everything is unlit MeshBasicMaterial, so none of this matters
+          and skipping it is free GPU. */}
+      {!engineeringMode && (
+        <>
+          <ContactShadows
+            position={[bbox.min_x + (bbox.max_x - bbox.min_x) / 2, -BOARD_THICKNESS / 2 - 0.2, bbox.min_y + (bbox.max_y - bbox.min_y) / 2]}
+            opacity={0.55}
+            scale={Math.max(bbox.max_x - bbox.min_x, bbox.max_y - bbox.min_y) * 1.8}
+            blur={2.2}
+            far={20}
+          />
+          <ambientLight intensity={0.15} />
+          <directionalLight
+            castShadow
+            position={[bbox.max_x + 30, 60, bbox.max_y + 20]}
+            intensity={2.2}
+            color="#ffeacf"
+            shadow-mapSize-width={2048}
+            shadow-mapSize-height={2048}
+            shadow-bias={-0.0001}
+          />
+          <directionalLight
+            position={[bbox.min_x - 30, 40, bbox.min_y - 30]}
+            intensity={0.55}
+            color="#6aa0ff"
+          />
+          <directionalLight
+            position={[bbox.min_x + (bbox.max_x - bbox.min_x) * 0.5, 20, bbox.max_y + 60]}
+            intensity={0.35}
+            color="#ffffff"
+          />
+          <Environment preset="city" environmentIntensity={0.18} />
+        </>
       )}
-      <directionalLight
-        position={[bbox.min_x + (bbox.max_x - bbox.min_x) * 0.5, 20, bbox.max_y + 60]}
-        intensity={0.35}
-        color="#ffffff"
-      />
-      <Environment preset="city" environmentIntensity={0.18} />
     </>
   );
 }
@@ -886,9 +990,9 @@ export function PcbViewport({
       />
 
       <Canvas
-        shadows
+        shadows={!engineeringMode}
         camera={{ position: [60, 60, 60], fov: 38, near: 0.1, far: 2000 }}
-        gl={{ antialias: true, toneMappingExposure: engineeringMode ? 1.25 : 1.05, preserveDrawingBuffer: true }}
+        gl={{ antialias: true, toneMappingExposure: 1.05, preserveDrawingBuffer: true }}
         onPointerMissed={() => onSelectionChange?.({ footprintRef: null })}
       >
         <Suspense fallback={null}>
@@ -920,21 +1024,25 @@ export function PcbViewport({
           draggingSmoothTime={0.12}
         />
 
-        <EffectComposer multisampling={4}>
-          <N8AO
-            aoRadius={2.0}
-            distanceFalloff={1.2}
-            intensity={2.2}
-            quality="medium"
-            color="black"
-          />
-          <Bloom
-            mipmapBlur
-            intensity={engineeringMode ? 0.85 : 0.35}
-            luminanceThreshold={engineeringMode ? 0.38 : 0.82}
-            luminanceSmoothing={0.15}
-          />
-        </EffectComposer>
+        {/* Postprocessing is a photoreal concern — engineering mode skips it
+            entirely for cheaper, crisper rendering. */}
+        {!engineeringMode && (
+          <EffectComposer multisampling={4}>
+            <N8AO
+              aoRadius={2.0}
+              distanceFalloff={1.2}
+              intensity={2.2}
+              quality="medium"
+              color="black"
+            />
+            <Bloom
+              mipmapBlur
+              intensity={0.35}
+              luminanceThreshold={0.82}
+              luminanceSmoothing={0.1}
+            />
+          </EffectComposer>
+        )}
 
         <GizmoHelper alignment="bottom-right" margin={[72, 72]}>
           <GizmoViewport axisColors={["#c84b4b", "#4bc884", "#4b8fc8"]} labelColor="white" />

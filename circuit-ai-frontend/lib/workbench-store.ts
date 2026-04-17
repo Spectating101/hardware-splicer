@@ -55,6 +55,30 @@ export interface Lenses {
 
 export type RenderMode = "engineering" | "production";
 
+/** Top-level UX mode. Determines which question the workspace is answering:
+ *  inspect = "does this work?", iterate = "make it better", ship = "get it made". */
+export type WorkbenchMode = "inspect" | "iterate" | "ship";
+
+export interface SpiceResult {
+  passed: boolean;
+  minRailV: number | null;  // worst-case minimum on a power rail
+  notes?: string[];
+}
+
+export interface DfmReport {
+  score: number;       // 0–100
+  critical: number;
+  warnings: number;
+  fab?: string;        // "JLCPCB 2-layer FR4"
+}
+
+export interface BomCost {
+  unitUsd: number;
+  qty: number;
+  totalUsd: number;
+  leadDays: number;
+}
+
 export const INITIAL_LENSES: Lenses = {
   netFocus: true,
   drc: true,
@@ -97,6 +121,15 @@ interface WorkbenchState {
   // both when active.
   renderMode: RenderMode;
 
+  // Top-level UX mode — swaps side-panel content, not layout.
+  mode: WorkbenchMode;
+
+  // Downstream pipeline artefacts. Null until the corresponding backend call
+  // returns. The header spine reads these to show real numbers at each stage.
+  spiceResult: SpiceResult | null;
+  dfmReport: DfmReport | null;
+  bomCost: BomCost | null;
+
   // JARVIS
   jarvisMessages: JarvisMsg[];
   jarvisThinking: boolean;
@@ -126,6 +159,10 @@ interface WorkbenchState {
   toggleLens<K extends keyof Lenses>(key: K): void;
   setLens<K extends keyof Lenses>(key: K, value: Lenses[K]): void;
   setRenderMode(mode: RenderMode): void;
+  setMode(mode: WorkbenchMode): void;
+  setSpiceResult(r: SpiceResult | null): void;
+  setDfmReport(r: DfmReport | null): void;
+  setBomCost(c: BomCost | null): void;
   addJarvisMessage(msg: Omit<JarvisMsg, "ts">): void;
   setJarvisThinking(v: boolean): void;
   toggleDrc(): void;
@@ -157,6 +194,10 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
   selectedNet: null,
   lenses: { ...INITIAL_LENSES },
   renderMode: "engineering",
+  mode: "inspect",
+  spiceResult: null,
+  dfmReport: null,
+  bomCost: null,
   jarvisMessages: [],
   jarvisThinking: false,
   drcOpen: false,
@@ -219,6 +260,10 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
     set((s) => ({ lenses: { ...s.lenses, [key]: value } })),
 
   setRenderMode: (mode) => set({ renderMode: mode }),
+  setMode: (mode) => set({ mode }),
+  setSpiceResult: (spiceResult) => set({ spiceResult }),
+  setDfmReport: (dfmReport) => set({ dfmReport }),
+  setBomCost: (bomCost) => set({ bomCost }),
 
   addJarvisMessage: (msg) =>
     set((s) => ({
@@ -249,6 +294,10 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
       selectedNet: null,
       lenses: { ...INITIAL_LENSES },
       renderMode: "engineering",
+      mode: "inspect",
+      spiceResult: null,
+      dfmReport: null,
+      bomCost: null,
       jarvisMessages: [],
       drcOpen: false,
     }),

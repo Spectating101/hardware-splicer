@@ -7,6 +7,60 @@ export type PcbBboxMm = {
   height: number;
 };
 
+export type PcbPadShape = "circle" | "oval" | "rect" | "roundrect" | "trapezoid" | "custom";
+export type PcbPadType = "smd" | "thru_hole" | "np_thru_hole" | "connect";
+
+export type PcbPad = {
+  num: string;
+  wx: number; // world-space mm (rotated footprint frame)
+  wy: number;
+  net: { id: number; name: string };
+  /** world rotation = footprint.rot + pad.rot */
+  wrot_deg?: number;
+  shape?: PcbPadShape;
+  size_w_mm?: number; // local-frame width (before world rotation)
+  size_h_mm?: number;
+  drill_mm?: number;   // >0 for thru-hole pads
+  roundrect_ratio?: number;
+  type?: PcbPadType;
+};
+
+export type PcbSilkLine = {
+  layer: string; // "F.SilkS" | "B.SilkS"
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  width_mm: number;
+};
+
+export type PcbSilkArc = {
+  layer: string;
+  start: { x: number; y: number };
+  mid: { x: number; y: number };
+  end: { x: number; y: number };
+  width_mm: number;
+};
+
+export type PcbSilkText = {
+  layer: string;
+  text: string;
+  at: { x: number; y: number; rot_deg: number };
+  size_mm: number;
+};
+
+export type PcbZone = {
+  layer: string;
+  net_id: number;
+  net_name: string;
+  /** Polygon rings in world mm. Multiple rings = disjoint fill islands. */
+  polygons: Array<Array<{ x: number; y: number }>>;
+};
+
+export type PcbEdgeArc = {
+  start: { x: number; y: number };
+  mid: { x: number; y: number };
+  end: { x: number; y: number };
+};
+
 export type PcbGeometry = {
   board: { bbox_mm: PcbBboxMm | null };
   nets: Array<{ id: number; name: string }>;
@@ -16,12 +70,7 @@ export type PcbGeometry = {
     footprint: string;
     layer: string;
     at: { x: number; y: number; rot_deg: number };
-    pads?: Array<{
-      num: string;
-      wx: number; // world-space mm
-      wy: number;
-      net: { id: number; name: string };
-    }>;
+    pads?: PcbPad[];
   }>;
   segments: Array<{
     start: { x: number; y: number };
@@ -37,6 +86,11 @@ export type PcbGeometry = {
     drill_mm: number;
     net: { id: number; name: string };
   }>;
+  zones?: PcbZone[];
+  silkLines?: PcbSilkLine[];
+  silkArcs?: PcbSilkArc[];
+  silkText?: PcbSilkText[];
+  edgeArcs?: PcbEdgeArc[];
 };
 
 export type ValidationIssue = {

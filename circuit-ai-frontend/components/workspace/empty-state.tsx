@@ -1,110 +1,119 @@
 "use client";
 
-import { FileText, List, Zap, Upload } from "lucide-react";
-import { useWorkspaceStore } from "@/lib/store";
-import { jarvis } from "@/lib/jarvis";
+import { Upload, MessageSquareQuote, LayoutGrid, GraduationCap, Zap, ArrowRight, type LucideIcon } from "lucide-react";
 
-const tiles = [
+interface Door {
+  key: "file" | "describe" | "catalog" | "learn";
+  Icon: LucideIcon;
+  title: string;
+  subtitle: string;
+  hint: string;
+  accent: string;   // tailwind colour family suffix, e.g. "cyan"
+}
+
+const DOORS: Door[] = [
   {
-    icon: FileText,
-    title: "Drop a KiCad PCB",
-    description: "Validate, analyze, and generate Gerbers",
-    hint: ".kicad_pcb",
-    prompt: "I want to validate a KiCad PCB",
-    response: "Drag a `.kicad_pcb` file anywhere onto the canvas, or click **Upload** in the top right. I'll parse the board and run electrical rule checks.",
-    accent: "group-hover:border-cyan-500/40 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.08)]",
+    key: "file",
+    Icon: Upload,
+    title: "Open a .kicad_pcb",
+    subtitle: "Drop a board, I'll parse it and run the full pipeline",
+    hint: "drop / browse",
+    accent: "cyan",
   },
   {
-    icon: List,
-    title: "Paste a BOM CSV",
-    description: "Source components and check availability",
-    hint: ".csv",
-    prompt: "I want to process a bill of materials",
-    response: "Drop a `.csv` BOM file onto the canvas. I'll parse the component list and check sourcing availability.",
-    accent: "group-hover:border-violet-500/40 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.08)]",
+    key: "describe",
+    Icon: MessageSquareQuote,
+    title: "Describe what to build",
+    subtitle: "\"Temperature logger with BLE\" → I compile intent into a board",
+    hint: "natural language",
+    accent: "violet",
   },
   {
-    icon: Zap,
-    title: "Start from scratch",
-    description: "Describe what you want to build",
-    hint: "prompt",
-    prompt: "Help me start a new electronics project",
-    response: "Tell me what you're building in the command bar above — component count, use case, constraints. I'll guide you through the design-to-manufacture pipeline.",
-    accent: "group-hover:border-amber-500/40 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.08)]",
+    key: "catalog",
+    Icon: LayoutGrid,
+    title: "Start from a template",
+    subtitle: "Fork a validated reference design — ESP32 sensor, PSU, motor driver",
+    hint: "catalog",
+    accent: "amber",
+  },
+  {
+    key: "learn",
+    Icon: GraduationCap,
+    title: "Just learning",
+    subtitle: "Guided path from resistor basics to your first PCB order",
+    hint: "learning paths",
+    accent: "emerald",
   },
 ];
 
-export function EmptyState() {
-  const { addJarvisMessage, showJarvisStrip } = useWorkspaceStore();
+const ACCENTS: Record<string, { ring: string; icon: string; arrow: string; glow: string }> = {
+  cyan:    { ring: "hover:border-cyan-500/40",    icon: "group-hover:text-cyan-300",    arrow: "group-hover:text-cyan-300",    glow: "group-hover:shadow-[0_0_24px_rgba(6,182,212,0.12)]" },
+  violet:  { ring: "hover:border-violet-500/40",  icon: "group-hover:text-violet-300",  arrow: "group-hover:text-violet-300",  glow: "group-hover:shadow-[0_0_24px_rgba(139,92,246,0.12)]" },
+  amber:   { ring: "hover:border-amber-500/40",   icon: "group-hover:text-amber-300",   arrow: "group-hover:text-amber-300",   glow: "group-hover:shadow-[0_0_24px_rgba(245,158,11,0.12)]" },
+  emerald: { ring: "hover:border-emerald-500/40", icon: "group-hover:text-emerald-300", arrow: "group-hover:text-emerald-300", glow: "group-hover:shadow-[0_0_24px_rgba(16,185,129,0.12)]" },
+};
 
-  function handleTile(prompt: string, response: string) {
-    addJarvisMessage({ role: "user", text: prompt });
-    addJarvisMessage({ role: "jarvis", text: response });
-    showJarvisStrip({ message: response });
-    // Focus the command bar input via the Cmd+K event dispatch
-    setTimeout(() => {
-      window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
-    }, 100);
-  }
+export interface EmptyStateProps {
+  onOpenFile?(): void;
+  onDescribe?(): void;
+  onCatalog?(): void;
+  onLearn?(): void;
+}
+
+export function EmptyState({ onOpenFile, onDescribe, onCatalog, onLearn }: EmptyStateProps = {}) {
+  const noop = () => {};
+  const handlers: Record<Door["key"], () => void> = {
+    file: onOpenFile ?? noop,
+    describe: onDescribe ?? noop,
+    catalog: onCatalog ?? noop,
+    learn: onLearn ?? noop,
+  };
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-      {/* Drop zone hint — very subtle */}
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
       <div className="absolute inset-8 rounded-3xl border border-dashed border-white/[0.04] pointer-events-none" />
-
-      <div className="flex flex-col items-center gap-8 pointer-events-auto">
-        {/* JARVIS identity */}
+      <div className="flex flex-col items-center gap-10 pointer-events-auto max-w-4xl px-6">
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-              <Zap size={18} className="text-cyan-400" />
+            <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+              <Zap size={20} className="text-cyan-400" />
             </div>
-            {/* Pulse ring */}
             <span className="absolute inset-0 rounded-xl border border-cyan-500/20 animate-ping opacity-30" />
           </div>
           <div className="text-center">
-            <h2 className="text-white/70 text-base font-medium tracking-tight">
-              JARVIS is ready
-            </h2>
-            <p className="text-white/25 text-sm mt-1">
-              Drop a file here or use the command bar above
-            </p>
+            <h2 className="text-white/80 text-lg font-medium tracking-tight">What are you starting with?</h2>
+            <p className="text-white/35 text-xs mt-1">Pick any door — Circuit.AI bridges the full stack from intent to fab.</p>
           </div>
         </div>
 
-        {/* Starter tiles */}
-        <div className="flex gap-3">
-          {tiles.map((tile) => (
-            <button
-              key={tile.title}
-              onClick={() => handleTile(tile.prompt, tile.response)}
-              className={`group flex flex-col items-start gap-3 w-44 p-4 rounded-2xl border border-white/[0.07] bg-[#141e2e]/80 transition-all text-left ${tile.accent}`}
-            >
-              <div className="flex items-center justify-between w-full">
-                <tile.icon
-                  size={16}
-                  className="text-white/30 group-hover:text-cyan-400 transition-colors"
-                />
-                <span className="text-[10px] text-white/20 font-mono group-hover:text-white/30 transition-colors">
-                  {tile.hint}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs text-white/60 font-medium group-hover:text-white/80 transition-colors">
-                  {tile.title}
-                </p>
-                <p className="text-[11px] text-white/25 leading-relaxed mt-0.5">
-                  {tile.description}
-                </p>
-              </div>
-            </button>
-          ))}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+          {DOORS.map((door) => {
+            const a = ACCENTS[door.accent];
+            return (
+              <button
+                key={door.key}
+                onClick={handlers[door.key]}
+                className={`group relative flex flex-col items-start gap-3 p-4 rounded-2xl border border-white/[0.07] bg-[#0f1624]/90 transition-all text-left ${a.ring} ${a.glow}`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <door.Icon size={18} className={`text-white/35 transition-colors ${a.icon}`} />
+                  <span className="text-[9px] uppercase tracking-wider text-white/25 font-mono">
+                    {door.hint}
+                  </span>
+                </div>
+                <div className="min-h-[3.25rem]">
+                  <p className="text-[13px] text-white/80 font-medium leading-tight">{door.title}</p>
+                  <p className="text-[11px] text-white/40 leading-snug mt-1">{door.subtitle}</p>
+                </div>
+                <ArrowRight size={12} className={`absolute bottom-3 right-3 text-white/20 transition-colors ${a.arrow}`} />
+              </button>
+            );
+          })}
         </div>
 
-        {/* Upload hint */}
-        <div className="flex items-center gap-2 text-white/20 text-xs">
+        <div className="flex items-center gap-2 text-white/25 text-[11px]">
           <Upload size={11} />
-          <span>drag files anywhere on the canvas</span>
+          <span>or drop a <code className="text-white/45 font-mono">.kicad_pcb</code> / <code className="text-white/45 font-mono">.kicad_sch</code> anywhere on the canvas</span>
         </div>
       </div>
     </div>

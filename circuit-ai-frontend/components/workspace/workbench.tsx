@@ -80,6 +80,9 @@ import { BoardHeader } from "./board-header";
 import { LayerPanel } from "./layer-panel";
 import { JarvisPanel } from "./jarvis-panel";
 import { DrcConsole } from "./drc-console";
+import { EmptyState } from "./empty-state";
+import { ShipPanel } from "./ship-panel";
+import { SuggestionsTray } from "./suggestions-tray";
 import { PcbViewport } from "@/components/cad/pcb-viewport";
 
 const DFM_KEYWORDS = /(tolerance|clearance|assembly|thermal|mechanical|stress|via|drill|fab|solder|annular|keepout|courtyard|silk|mask)/i;
@@ -316,6 +319,104 @@ export function Workbench() {
     }
   }, [store]);
 
+  // ── Ship-mode handlers: BOM pricing, DFM, PnP, full package ────────────────
+
+  const handlePrice = useCallback(async () => {
+    if (!store.geometry) return;
+    store.addJarvisMessage({ role: "jarvis", text: "Pricing BOM via `/api/v2/manufacture/bom` + `/api/pricing/component`…" });
+    try {
+      const res = await fetch("/api/proxy/manufacture/bom", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ filename: store.filename, qty: 5 }),
+      });
+      const json = await res.json().catch(() => ({} as { unit_usd?: number; total_usd?: number; lead_days?: number; qty?: number; error?: string }));
+      if (!res.ok || json.error) {
+        store.addJarvisMessage({ role: "jarvis", text: `Pricing unavailable — backend returned ${json.error ?? res.status}. Ensure Circuit-AI server is running on :5000.` });
+        return;
+      }
+      const unitUsd = Number(json.unit_usd) || 0;
+      const qty = Number(json.qty) || 5;
+      const totalUsd = Number(json.total_usd) || unitUsd * qty;
+      const leadDays = Number(json.lead_days) || 9;
+      store.setBomCost({ unitUsd, qty, totalUsd, leadDays });
+      store.addJarvisMessage({ role: "jarvis", text: `BOM priced — **$${totalUsd.toFixed(2)}** for ${qty} boards, ${leadDays}-day lead.` });
+    } catch {
+      store.addJarvisMessage({ role: "jarvis", text: "Network error pricing BOM." });
+    }
+  }, [store]);
+
+  const handleDfm = useCallback(async () => {
+    if (!store.file) return;
+    store.addJarvisMessage({ role: "jarvis", text: "Running DFM check via `/api/v2/report/dfm`…" });
+    try {
+      const fd = new FormData();
+      fd.set("pcb_file", store.file, store.file.name);
+      const res = await fetch("/api/proxy/report/dfm", { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({} as { score?: number; critical?: number; warnings?: number; fab?: string; error?: string }));
+      if (!res.ok || json.error) {
+        store.addJarvisMessage({ role: "jarvis", text: `DFM check unavailable — ${json.error ?? res.status}.` });
+        return;
+      }
+      const score = Number(json.score) || 0;
+      const critical = Number(json.critical) || 0;
+      const warnings = Number(json.warnings) || 0;
+      store.setDfmReport({ score, critical, warnings, fab: json.fab });
+      store.addJarvisMessage({ role: "jarvis", text: `DFM: **${score}/100**${critical ? ` — ${critical} critical` : ""}${warnings ? `, ${warnings} warnings` : ""}.` });
+    } catch {
+      store.addJarvisMessage({ role: "jarvis", text: "Network error running DFM." });
+    }
+  }, [store]);
+
+  const handlePnp = useCallback(async () => {
+    if (!store.file) return;
+    store.addJarvisMessage({ role: "jarvis", text: "Generating pick-and-place via `/api/v2/manufacture/pnp`…" });
+    try {
+      const fd = new FormData();
+      fd.set("pcb_file", store.file, store.file.name);
+      const res = await fetch("/api/proxy/manufacture/pnp", { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({} as { file?: string; error?: string }));
+      if (!res.ok || json.error) {
+        store.addJarvisMessage({ role: "jarvis", text: `PnP failed — ${json.error ?? res.status}.` });
+        return;
+      }
+      store.addJarvisMessage({ role: "jarvis", text: `PnP file ready — ${json.file ?? "see backend reports dir"}.` });
+    } catch {
+      store.addJarvisMessage({ role: "jarvis", text: "Network error generating PnP." });
+    }
+  }, [store]);
+
+  const handlePackage = useCallback(async () => {
+    if (!store.file) return;
+    store.setPipelineFlag("manufacturing", true);
+    store.addJarvisMessage({ role: "jarvis", text: "Building full fab package via `/api/v2/manufacture/package`…" });
+    try {
+      const fd = new FormData();
+      fd.set("pcb_file", store.file, store.file.name);
+      const res = await fetch("/api/proxy/manufacture/package", { method: "POST", body: fd });
+      const json = await res.json().catch(() => ({} as { zip_file?: string; error?: string }));
+      if (!res.ok || json.error) {
+        store.setPipelineFlag("manufacturing", false);
+        store.addJarvisMessage({ role: "jarvis", text: `Package failed — ${json.error ?? res.status}.` });
+        return;
+      }
+      store.setManufactured();
+      const filename = json.zip_file ? String(json.zip_file).split("/").pop() : null;
+      if (filename) {
+        const a = document.createElement("a");
+        a.href = `/api/proxy/manufacture/download-package/${encodeURIComponent(filename)}`;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      store.addJarvisMessage({ role: "jarvis", text: `Fab package ready — **${filename ?? "zip"}**.` });
+    } catch {
+      store.setPipelineFlag("manufacturing", false);
+      store.addJarvisMessage({ role: "jarvis", text: "Network error building fab package." });
+    }
+  }, [store]);
+
   // ── Focus component ────────────────────────────────────────────────────────
 
   const handleFocusComponent = useCallback((ref: string) => {
@@ -363,8 +464,14 @@ export function Workbench() {
         healthScore={store.healthScore}
         issueCount={store.issues.length}
         criticalCount={criticalCount}
+        componentCount={store.geometry?.footprints.length ?? 0}
+        spiceResult={store.spiceResult}
+        dfmReport={store.dfmReport}
+        bomCost={store.bomCost}
         renderMode={store.renderMode}
+        mode={store.mode}
         onSetRenderMode={store.setRenderMode}
+        onSetMode={store.setMode}
         onValidate={handleValidate}
         onManufacture={handleManufacture}
         onNew={() => {
@@ -390,50 +497,107 @@ export function Workbench() {
           onSelectRef={store.setSelectedRef}
         />
 
-        {/* Canvas — single photoreal 3D board, also acts as file drop zone. */}
-        <div
-          className="flex-1 relative overflow-hidden cursor-default"
-          onClick={() => {
-            if (!store.geometry && !store.pipeline.parsed) {
-              fileInputRef.current?.click();
-            }
-          }}
-        >
+        {/* Canvas — 3D board + onboarding doors when empty. */}
+        <div className="flex-1 relative overflow-hidden cursor-default">
           <PcbViewport
             geometry={store.geometry}
             issues={store.issues}
-            selection={{ footprintRef: store.selectedRef }}
-            onSelectionChange={(s) => store.setSelectedRef(s.footprintRef)}
+            selection={{
+              footprintRef: store.selectedRef,
+              netId: store.selectedNet ? Number(store.selectedNet) || null : null,
+            }}
+            onSelectionChange={(s) => {
+              store.setSelectedRef(s.footprintRef);
+              if (s.netId !== undefined) {
+                store.setSelectedNet(s.netId != null ? String(s.netId) : null);
+              }
+              // If the clicked component has issues, auto-open the DRC drawer so
+              // the spatial halo and the issue list are linked in one glance.
+              if (s.footprintRef && !store.drcOpen) {
+                const hit = store.issues.some((issue) => {
+                  const ref = (issue as unknown as { component_ref?: string; ref?: string }).component_ref ?? (issue as unknown as { ref?: string }).ref;
+                  return ref === s.footprintRef;
+                });
+                if (hit) store.toggleDrc();
+              }
+            }}
             lenses={store.lenses}
             dcAnalysis={store.dcAnalysis}
             thermal={store.thermal}
             bomRisk={store.bomRisk}
             renderMode={store.renderMode}
           />
+          {store.mode === "iterate" && store.geometry && (
+            <SuggestionsTray
+              ready={store.pipeline.validated}
+              filename={store.filename}
+              onMessage={(role, text) => store.addJarvisMessage({ role, text })}
+              onHighlight={(ref) => store.setSelectedRef(ref)}
+            />
+          )}
+          {!store.geometry && !store.pipeline.parsed && (
+            <EmptyState
+              onOpenFile={() => fileInputRef.current?.click()}
+              onDescribe={() => {
+                store.addJarvisMessage({
+                  role: "jarvis",
+                  text: "Describe what you want to build in the chat — e.g. *\"battery-powered temperature logger with BLE, USB-C charging, 3 AA-equivalent runtime\"* — and I'll compile it into a starter board via the intake pipeline.",
+                });
+              }}
+              onCatalog={() => {
+                store.addJarvisMessage({
+                  role: "jarvis",
+                  text: "Template catalog coming online — ESP32 sensor nodes, buck converters, motor drivers. For now, drop any reference `.kicad_pcb` and I'll parse it.",
+                });
+              }}
+              onLearn={() => {
+                store.addJarvisMessage({
+                  role: "jarvis",
+                  text: "Learning paths wired to `/api/learning-paths` — from resistor basics through your first fab order. Which track interests you: *digital logic*, *analog sensors*, *power electronics*, or *RF*?",
+                });
+              }}
+            />
+          )}
         </div>
 
-        <JarvisPanel
-          geometry={store.geometry}
-          filename={store.filename}
-          issues={store.issues}
-          healthScore={store.healthScore}
-          dfmNotes={store.dfmNotes}
-          nextSteps={store.nextSteps}
-          messages={store.jarvisMessages}
-          thinking={store.jarvisThinking}
-          pipeline={store.pipeline}
-          selectedRef={store.selectedRef}
-          onAddMessage={store.addJarvisMessage}
-          onSetThinking={store.setJarvisThinking}
-          onValidate={handleValidate}
-          onManufacture={handleManufacture}
-          onRefChip={(r) => store.setSelectedRef(r)}
-          onNetChip={(n) => store.setSelectedNet(n)}
-          onIssueChip={() => {
-            // Open the DRC drawer when a user clicks an [issue:N] chip.
-            if (!store.drcOpen) store.toggleDrc();
-          }}
-        />
+        {store.mode === "ship" ? (
+          <ShipPanel
+            geometry={store.geometry}
+            filename={store.filename}
+            pipeline={store.pipeline}
+            spiceResult={store.spiceResult}
+            dfmReport={store.dfmReport}
+            bomCost={store.bomCost}
+            onPrice={handlePrice}
+            onDfm={handleDfm}
+            onPackage={handlePackage}
+            onGerber={handleManufacture}
+            onPnp={handlePnp}
+          />
+        ) : (
+          <JarvisPanel
+            geometry={store.geometry}
+            filename={store.filename}
+            issues={store.issues}
+            healthScore={store.healthScore}
+            dfmNotes={store.dfmNotes}
+            nextSteps={store.nextSteps}
+            messages={store.jarvisMessages}
+            thinking={store.jarvisThinking}
+            pipeline={store.pipeline}
+            selectedRef={store.selectedRef}
+            onAddMessage={store.addJarvisMessage}
+            onSetThinking={store.setJarvisThinking}
+            onValidate={handleValidate}
+            onManufacture={handleManufacture}
+            onRefChip={(r) => store.setSelectedRef(r)}
+            onNetChip={(n) => store.setSelectedNet(n)}
+            onIssueChip={() => {
+              // Open the DRC drawer when a user clicks an [issue:N] chip.
+              if (!store.drcOpen) store.toggleDrc();
+            }}
+          />
+        )}
       </div>
 
       {/* DRC console bottom rail */}
