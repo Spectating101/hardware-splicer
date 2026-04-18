@@ -19,6 +19,9 @@ import {
   type SValue,
 } from "./kicad/sexpr";
 
+export type KicadPadShape = "circle" | "oval" | "rect" | "roundrect" | "trapezoid" | "custom";
+export type KicadPadType = "smd" | "thru_hole" | "np_thru_hole" | "connect";
+
 export interface KicadPad {
   num: string;
   netId: number;
@@ -26,6 +29,54 @@ export interface KicadPad {
   // pad center in WORLD mm (after applying footprint position + rotation)
   wx: number;
   wy: number;
+  /** world rotation = footprint.rot + pad.rot */
+  wrot_deg: number;
+  shape: KicadPadShape;
+  size_w_mm: number;
+  size_h_mm: number;
+  drill_mm: number;
+  roundrect_ratio: number;
+  type: KicadPadType;
+}
+
+export interface KicadSilkLine {
+  layer: string;
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+  width_mm: number;
+}
+
+export interface KicadSilkArc {
+  layer: string;
+  start: { x: number; y: number };
+  mid: { x: number; y: number };
+  end: { x: number; y: number };
+  width_mm: number;
+}
+
+export interface KicadSilkText {
+  layer: string;
+  text: string;
+  at: { x: number; y: number; rot_deg: number };
+  size_mm: number;
+}
+
+export interface KicadZone {
+  layer: string;
+  net_id: number;
+  net_name: string;
+  polygons: Array<Array<{ x: number; y: number }>>;
+}
+
+export interface KicadEdgeArc {
+  start: { x: number; y: number };
+  mid: { x: number; y: number };
+  end: { x: number; y: number };
+}
+
+export interface KicadEdgeLine {
+  start: { x: number; y: number };
+  end: { x: number; y: number };
 }
 
 export interface KicadComponent {
@@ -64,6 +115,12 @@ export interface KicadBoardInfo {
   segments: KicadSegment[];
   vias: KicadVia[];
   nets: Array<{ id: number; name: string }>;
+  zones: KicadZone[];
+  silkLines: KicadSilkLine[];
+  silkArcs: KicadSilkArc[];
+  silkText: KicadSilkText[];
+  edgeArcs: KicadEdgeArc[];
+  edgeLines: KicadEdgeLine[];
   boardWidthMm?: number;
   boardHeightMm?: number;
 }
@@ -119,7 +176,53 @@ function readProperty(fp: SList, key: string): string | undefined {
   return undefined;
 }
 
-function parseFootprint(fp: SList): KicadComponent {
+/** `(size W H)` helper. */
+function readSize(list: SList, name = "size"): { w: number; h: number } | undefined {
+  const s = firstChild(list, name);
+  if (!s) return undefined;
+  const w = atomNum(s.rest[0]);
+  const h = atomNum(s.rest[1]);
+  if (w === undefined) return undefined;
+  return { w, h: h ?? w };
+}
+
+function readPadShape(raw: string | undefined): KicadPadShape {
+  switch ((raw ?? "").toLowerCase()) {
+    case "circle": return "circle";
+    case "oval": return "oval";
+    case "rect": return "rect";
+    case "roundrect": return "roundrect";
+    case "trapezoid": return "trapezoid";
+    case "custom": return "custom";
+    default: return "rect";
+  }
+}
+
+function readPadType(raw: string | undefined): KicadPadType {
+  switch ((raw ?? "").toLowerCase()) {
+    case "smd": return "smd";
+    case "thru_hole": return "thru_hole";
+    case "np_thru_hole": return "np_thru_hole";
+    case "connect": return "connect";
+    default: return "smd";
+  }
+}
+
+/** `(drill D)` or `(drill oval W H)` → hole diameter in mm (larger axis). */
+function readDrill(pad: SList): number {
+  const d = firstChild(pad, "drill");
+  if (!d) return 0;
+  // Shape: (drill D), (drill D (offset X Y)), (drill oval W H)
+  const first = d.rest[0];
+  if (typeof first === "string" && first === "oval") {
+    const w = atomNum(d.rest[1]) ?? 0;
+    const h = atomNum(d.rest[2]) ?? 0;
+    return Math.max(w, h);
+  }
+  return atomNum(first) ?? 0;
+}
+
+function parseFootprint(fp: SList, silkLines: KicadSilkLine[], silkArcs: KicadSilkArc[], silkText: KicadSilkText[]): KicadComponent {
   const footprintLib = atomStr(fp.rest[0]) ?? "";
   const layer = readLayer(fp, "F.Cu");
   const { x, y, rot: rot_deg } = readAt(fp);
@@ -130,17 +233,89 @@ function parseFootprint(fp: SList): KicadComponent {
   const theta = (rot_deg * Math.PI) / 180;
   const cos = Math.cos(theta);
   const sin = Math.sin(theta);
+  const rotatePt = (lx: number, ly: number) => ({
+    x: x + lx * cos - ly * sin,
+    y: y + lx * sin + ly * cos,
+  });
 
   const pads: KicadPad[] = [];
   for (const pad of childrenNamed(fp, "pad")) {
     const num = atomStr(pad.rest[0]) ?? "";
+    const type = readPadType(atomStr(pad.rest[1]));
+    const shape = readPadShape(atomStr(pad.rest[2]));
     const padAt = readAt(pad);
+    const size = readSize(pad) ?? { w: 1, h: 1 };
+    const drill = readDrill(pad);
+    const rratio = numberProp(pad, "roundrect_rratio") ?? (shape === "roundrect" ? 0.25 : 0);
     const net = readNetRef(pad);
     const netId = net?.id ?? 0;
     const netName = net?.name ?? "";
-    const wx = x + padAt.x * cos - padAt.y * sin;
-    const wy = y + padAt.x * sin + padAt.y * cos;
-    pads.push({ num, netId, netName, wx, wy });
+    const world = rotatePt(padAt.x, padAt.y);
+    pads.push({
+      num, netId, netName,
+      wx: world.x, wy: world.y,
+      wrot_deg: rot_deg + padAt.rot,
+      shape,
+      size_w_mm: size.w,
+      size_h_mm: size.h,
+      drill_mm: drill,
+      roundrect_ratio: rratio,
+      type,
+    });
+  }
+
+  // ── Footprint silkscreen (fp_line / fp_arc / fp_text on *.SilkS) ──────
+  for (const line of childrenNamed(fp, "fp_line")) {
+    const lyr = readLayer(line, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const s = readPoint(line, "start");
+    const e = readPoint(line, "end");
+    if (!s || !e) continue;
+    const widthStroke = firstChild(line, "stroke");
+    const width = widthStroke ? numberProp(widthStroke, "width") ?? 0.12 : numberProp(line, "width") ?? 0.12;
+    silkLines.push({
+      layer: lyr,
+      start: rotatePt(s.x, s.y),
+      end: rotatePt(e.x, e.y),
+      width_mm: width,
+    });
+  }
+  for (const arc of childrenNamed(fp, "fp_arc")) {
+    const lyr = readLayer(arc, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const s = readPoint(arc, "start");
+    const m = readPoint(arc, "mid");
+    const e = readPoint(arc, "end");
+    if (!s || !e) continue;
+    const widthStroke = firstChild(arc, "stroke");
+    const width = widthStroke ? numberProp(widthStroke, "width") ?? 0.12 : numberProp(arc, "width") ?? 0.12;
+    silkArcs.push({
+      layer: lyr,
+      start: rotatePt(s.x, s.y),
+      mid: m ? rotatePt(m.x, m.y) : rotatePt((s.x + e.x) / 2, (s.y + e.y) / 2),
+      end: rotatePt(e.x, e.y),
+      width_mm: width,
+    });
+  }
+  for (const t of childrenNamed(fp, "fp_text")) {
+    const lyr = readLayer(t, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const kind = atomStr(t.rest[0])?.toLowerCase();
+    // `user` text is always drawn; `reference` and `value` only when visible
+    // (KiCad emits a `hide` token when hidden — we rely on that absence).
+    const hide = childrenNamed(t, "hide").length > 0 || t.rest.some((r) => r === "hide");
+    if (hide) continue;
+    const txt = atomStr(t.rest[1]) ?? "";
+    const at = readAt(t);
+    const effects = firstChild(t, "effects");
+    const font = effects ? firstChild(effects, "font") : undefined;
+    const sz = font ? readSize(font) : undefined;
+    silkText.push({
+      layer: lyr,
+      text: kind === "reference" ? ref : txt,
+      at: { ...rotatePt(at.x, at.y), rot_deg: rot_deg + at.rot },
+      size_mm: sz?.w ?? 1.0,
+    });
   }
 
   return { ref, value, footprint: footprintLib, layer, x, y, rot_deg, pads };
@@ -160,6 +335,12 @@ export function parseKicadPcb(text: string): KicadBoardInfo {
       segments: [],
       vias: [],
       nets: [],
+      zones: [],
+      silkLines: [],
+      silkArcs: [],
+      silkText: [],
+      edgeArcs: [],
+      edgeLines: [],
     };
   }
 
@@ -188,11 +369,145 @@ export function parseKicadPcb(text: string): KicadBoardInfo {
     copperLayerCount = seen.size;
   }
 
-  // ── Footprints
+  // ── Footprints (also harvest their silkscreen as we go)
+  const silkLines: KicadSilkLine[] = [];
+  const silkArcs: KicadSilkArc[] = [];
+  const silkText: KicadSilkText[] = [];
   const footprints = childrenNamed(root, "footprint");
-  // Some older files use `module` instead of `footprint`
   const modules = childrenNamed(root, "module");
-  const components: KicadComponent[] = [...footprints, ...modules].map(parseFootprint);
+  const components: KicadComponent[] = [...footprints, ...modules].map((fp) =>
+    parseFootprint(fp, silkLines, silkArcs, silkText),
+  );
+
+  // ── Top-level graphic silkscreen (logo outlines, board labels, etc.)
+  for (const gl of childrenNamed(root, "gr_line")) {
+    const lyr = readLayer(gl, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const s = readPoint(gl, "start");
+    const e = readPoint(gl, "end");
+    if (!s || !e) continue;
+    const ws = firstChild(gl, "stroke");
+    const width = ws ? numberProp(ws, "width") ?? 0.12 : numberProp(gl, "width") ?? 0.12;
+    silkLines.push({ layer: lyr, start: s, end: e, width_mm: width });
+  }
+  for (const ga of childrenNamed(root, "gr_arc")) {
+    const lyr = readLayer(ga, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const s = readPoint(ga, "start");
+    const m = readPoint(ga, "mid");
+    const e = readPoint(ga, "end");
+    if (!s || !e) continue;
+    const ws = firstChild(ga, "stroke");
+    const width = ws ? numberProp(ws, "width") ?? 0.12 : numberProp(ga, "width") ?? 0.12;
+    silkArcs.push({
+      layer: lyr, start: s,
+      mid: m ?? { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 },
+      end: e, width_mm: width,
+    });
+  }
+  for (const gt of childrenNamed(root, "gr_text")) {
+    const lyr = readLayer(gt, "");
+    if (!lyr.endsWith(".SilkS")) continue;
+    const txt = atomStr(gt.rest[0]) ?? "";
+    const at = readAt(gt);
+    const effects = firstChild(gt, "effects");
+    const font = effects ? firstChild(effects, "font") : undefined;
+    const sz = font ? readSize(font) : undefined;
+    silkText.push({
+      layer: lyr, text: txt,
+      at: { x: at.x, y: at.y, rot_deg: at.rot },
+      size_mm: sz?.w ?? 1.0,
+    });
+  }
+
+  // ── Edge.Cuts arcs — captured separately so we can draw a curved board
+  //    outline later. (Plain edge lines are picked up via gr_line above for
+  //    bbox purposes only.)
+  const edgeArcs: KicadEdgeArc[] = [];
+  for (const ga of childrenNamed(root, "gr_arc")) {
+    const lyr = readLayer(ga, "");
+    if (lyr !== "Edge.Cuts") continue;
+    const s = readPoint(ga, "start");
+    const m = readPoint(ga, "mid");
+    const e = readPoint(ga, "end");
+    if (!s || !e) continue;
+    edgeArcs.push({
+      start: s,
+      mid: m ?? { x: (s.x + e.x) / 2, y: (s.y + e.y) / 2 },
+      end: e,
+    });
+  }
+  const edgeLines: KicadEdgeLine[] = [];
+  for (const gl of childrenNamed(root, "gr_line")) {
+    const lyr = readLayer(gl, "");
+    if (lyr !== "Edge.Cuts") continue;
+    const s = readPoint(gl, "start");
+    const e = readPoint(gl, "end");
+    if (!s || !e) continue;
+    edgeLines.push({ start: s, end: e });
+  }
+
+  // ── Zones (copper pours) ─────────────────────────────────────────────
+  //    Prefer `filled_polygon` rings (the actual poured copper after fill).
+  //    Fall back to the user-drawn `polygon` outline when the board hasn't
+  //    been filled — at least something renders.
+  const zones: KicadZone[] = [];
+  for (const z of childrenNamed(root, "zone")) {
+    const layerList = firstChild(z, "layer");
+    const layersListMulti = firstChild(z, "layers");
+    const netId = numberProp(z, "net") ?? 0;
+    const netName = stringProp(z, "net_name") ?? (netNameById.get(netId) ?? "");
+    // A zone may target one or several layers. Collect them.
+    const layers: string[] = [];
+    if (layerList) {
+      const l = atomStr(layerList.rest[0]);
+      if (l) layers.push(l);
+    }
+    if (layersListMulti) {
+      for (const r of layersListMulti.rest) {
+        const l = atomStr(r);
+        if (l) layers.push(l);
+      }
+    }
+    if (layers.length === 0) layers.push("F.Cu");
+
+    // Gather fill rings for each target layer.
+    const fillRings = childrenNamed(z, "filled_polygon");
+    const outlineRings = childrenNamed(z, "polygon");
+
+    for (const lyr of layers) {
+      const polys: Array<Array<{ x: number; y: number }>> = [];
+      for (const fp of fillRings) {
+        // filled_polygon carries its own (layer "X") on KiCad 7+
+        const fpLayer = stringProp(fp, "layer");
+        if (fpLayer && fpLayer !== lyr) continue;
+        const pts = firstChild(fp, "pts");
+        if (!pts) continue;
+        const ring: Array<{ x: number; y: number }> = [];
+        for (const xy of childrenNamed(pts, "xy")) {
+          const px = atomNum(xy.rest[0]);
+          const py = atomNum(xy.rest[1]);
+          if (px !== undefined && py !== undefined) ring.push({ x: px, y: py });
+        }
+        if (ring.length >= 3) polys.push(ring);
+      }
+      if (polys.length === 0) {
+        for (const op of outlineRings) {
+          const pts = firstChild(op, "pts");
+          if (!pts) continue;
+          const ring: Array<{ x: number; y: number }> = [];
+          for (const xy of childrenNamed(pts, "xy")) {
+            const px = atomNum(xy.rest[0]);
+            const py = atomNum(xy.rest[1]);
+            if (px !== undefined && py !== undefined) ring.push({ x: px, y: py });
+          }
+          if (ring.length >= 3) polys.push(ring);
+        }
+      }
+      if (polys.length === 0) continue;
+      zones.push({ layer: lyr, net_id: netId, net_name: netName, polygons: polys });
+    }
+  }
 
   // ── Segments
   const segments: KicadSegment[] = [];
@@ -271,6 +586,12 @@ export function parseKicadPcb(text: string): KicadBoardInfo {
     segments,
     vias,
     nets,
+    zones,
+    silkLines,
+    silkArcs,
+    silkText,
+    edgeArcs,
+    edgeLines,
     boardWidthMm,
     boardHeightMm,
   };

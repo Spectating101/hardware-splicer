@@ -23,7 +23,7 @@ import {
 import { EffectComposer, Bloom, N8AO } from "@react-three/postprocessing";
 import * as THREE from "three";
 import type {
-  PcbGeometry, ValidationIssue, DcAnalysis, ThermalMap, BomRisk,
+  PcbGeometry, PcbPad, ValidationIssue, DcAnalysis, ThermalMap, BomRisk,
 } from "@/lib/cad-types";
 import { inferFootprintSize } from "@/lib/footprint-sizes";
 
@@ -36,7 +36,7 @@ const PALETTE = {
   copper: "#d99763",           // trace copper
   padENIG: "#d9b980",           // gold-plated pads
   pinMetal: "#cccccc",
-  silk: "#eadfc8",
+  silk: "#f5efe0",
   via: "#c78b52",
   viaHole: "#08110d",
   bodyIC: "#1b1b1f",
@@ -169,34 +169,156 @@ function bodyColorForKind(kind: ReturnType<typeof inferFootprintSize>["kind"]): 
   }
 }
 
+/** Build a closed THREE.Shape tracing the Edge.Cuts outline. Falls back to
+ *  the bbox rectangle when edges are absent or don't form a loop — so the
+ *  board always has *something* to extrude. */
+function buildBoardShape(
+  bbox: { min_x: number; min_y: number; max_x: number; max_y: number },
+  edgeLines?: Array<{ start: { x: number; y: number }; end: { x: number; y: number } }>,
+  edgeArcs?: Array<{ start: { x: number; y: number }; mid: { x: number; y: number }; end: { x: number; y: number } }>,
+): THREE.Shape {
+  const rect = () => {
+    const s = new THREE.Shape();
+    s.moveTo(bbox.min_x, bbox.min_y);
+    s.lineTo(bbox.max_x, bbox.min_y);
+    s.lineTo(bbox.max_x, bbox.max_y);
+    s.lineTo(bbox.min_x, bbox.max_y);
+    s.closePath();
+    return s;
+  };
+
+  const lines = edgeLines ?? [];
+  const arcs = edgeArcs ?? [];
+  if (lines.length + arcs.length < 3) return rect();
+
+  // Discretize arcs into short segments so the whole outline is polyline-shaped.
+  type Seg = { a: { x: number; y: number }; b: { x: number; y: number }; mids?: Array<{ x: number; y: number }> };
+  const segs: Seg[] = lines.map((l) => ({ a: l.start, b: l.end }));
+  for (const a of arcs) {
+    const { start: s, mid: m, end: e } = a;
+    const ax = s.x, ay = s.y, bx = m.x, by = m.y, cx_ = e.x, cy = e.y;
+    const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx_ * (ay - by));
+    if (Math.abs(d) < 1e-9) {
+      segs.push({ a: s, b: e });
+      continue;
+    }
+    const ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx_ * cx_ + cy * cy) * (ay - by)) / d;
+    const uy = ((ax * ax + ay * ay) * (cx_ - bx) + (bx * bx + by * by) * (ax - cx_) + (cx_ * cx_ + cy * cy) * (bx - ax)) / d;
+    const r = Math.hypot(ax - ux, ay - uy);
+    const a0 = Math.atan2(ay - uy, ax - ux);
+    const a2 = Math.atan2(cy - uy, cx_ - ux);
+    const am = Math.atan2(by - uy, bx - ux);
+    let start = a0, end = a2;
+    const inBetween = (x: number, lo: number, hi: number) => {
+      while (hi < lo) hi += 2 * Math.PI;
+      while (x < lo) x += 2 * Math.PI;
+      return x <= hi;
+    };
+    if (!inBetween(am, start, end)) {
+      [start, end] = [end, start + 2 * Math.PI];
+    } else if (end < start) {
+      end += 2 * Math.PI;
+    }
+    const steps = Math.max(8, Math.ceil(Math.abs(end - start) * 12));
+    const mids: Array<{ x: number; y: number }> = [];
+    for (let i = 1; i < steps; i++) {
+      const t = start + ((end - start) * i) / steps;
+      mids.push({ x: ux + Math.cos(t) * r, y: uy + Math.sin(t) * r });
+    }
+    segs.push({ a: s, b: e, mids });
+  }
+
+  // Walk segments into a closed loop by matching endpoints (tolerance 0.05mm).
+  const TOL = 0.05;
+  const near = (p: { x: number; y: number }, q: { x: number; y: number }) =>
+    Math.hypot(p.x - q.x, p.y - q.y) < TOL;
+  const used = new Array<boolean>(segs.length).fill(false);
+  const loop: Array<{ x: number; y: number }> = [];
+  const first = segs[0];
+  used[0] = true;
+  loop.push(first.a);
+  if (first.mids) loop.push(...first.mids);
+  loop.push(first.b);
+  let cursor = first.b;
+
+  while (true) {
+    let advanced = false;
+    for (let i = 0; i < segs.length; i++) {
+      if (used[i]) continue;
+      const s = segs[i];
+      if (near(s.a, cursor)) {
+        used[i] = true;
+        if (s.mids) loop.push(...s.mids);
+        loop.push(s.b);
+        cursor = s.b;
+        advanced = true;
+        break;
+      } else if (near(s.b, cursor)) {
+        used[i] = true;
+        if (s.mids) loop.push(...[...s.mids].reverse());
+        loop.push(s.a);
+        cursor = s.a;
+        advanced = true;
+        break;
+      }
+    }
+    if (!advanced) break;
+    if (near(cursor, first.a)) break;
+  }
+
+  if (loop.length < 4 || !near(cursor, first.a)) return rect();
+
+  const shape = new THREE.Shape();
+  shape.moveTo(loop[0].x, loop[0].y);
+  for (let i = 1; i < loop.length; i++) shape.lineTo(loop[i].x, loop[i].y);
+  shape.closePath();
+  return shape;
+}
+
 /* ── Substrate + mask ─────────────────────────────────────────────────── */
 
 /** Plain box plank centered at y=0, top at +BOARD_THICKNESS/2, bottom at -BOARD_THICKNESS/2.
  *  In engineering (flat) mode this plank doubles as the mask-colored backdrop
  *  so we skip the SolderMask overlay entirely — one unlit plank, bold color. */
 function BoardBody({
-  bbox, flat, peeled,
+  bbox, flat, peeled, geometry,
 }: {
   bbox: { min_x: number; min_y: number; max_x: number; max_y: number };
   flat?: boolean;
   peeled?: boolean;
+  /** When provided, the plank is extruded from the Edge.Cuts polygon rather
+   *  than the axis-aligned bbox — rounded or non-rectangular boards render
+   *  correctly. */
+  geometry?: PcbGeometry;
 }) {
-  const w = bbox.max_x - bbox.min_x;
-  const d = bbox.max_y - bbox.min_y;
-  const cx = (bbox.min_x + bbox.max_x) / 2;
-  const cz = (bbox.min_y + bbox.max_y) / 2;
+  const geom = useMemo(() => {
+    const shape = buildBoardShape(bbox, geometry?.edgeLines, geometry?.edgeArcs);
+    return new THREE.ExtrudeGeometry(shape, {
+      depth: BOARD_THICKNESS,
+      bevelEnabled: false,
+      steps: 1,
+    });
+  }, [bbox, geometry?.edgeLines, geometry?.edgeArcs]);
+
   if (flat) {
-    // One flat plank — dark green in normal engineering, tan when peeled.
     return (
-      <mesh position={[cx, 0, cz]}>
-        <boxGeometry args={[w, BOARD_THICKNESS, d]} />
-        <meshBasicMaterial color={peeled ? FLAT.substrate : FLAT.board} />
+      <mesh
+        position={[0, BOARD_THICKNESS / 2, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
+      >
+        <primitive object={geom} attach="geometry" />
+        <meshBasicMaterial color={peeled ? FLAT.substrate : FLAT.board} side={THREE.DoubleSide} />
       </mesh>
     );
   }
   return (
-    <mesh position={[cx, 0, cz]} castShadow receiveShadow>
-      <boxGeometry args={[w, BOARD_THICKNESS, d]} />
+    <mesh
+      position={[0, BOARD_THICKNESS / 2, 0]}
+      rotation={[Math.PI / 2, 0, 0]}
+      castShadow
+      receiveShadow
+    >
+      <primitive object={geom} attach="geometry" />
       <meshPhysicalMaterial
         color={PALETTE.substrate}
         roughness={0.82}
@@ -204,29 +326,122 @@ function BoardBody({
         sheen={0.4}
         sheenColor={"#3a2f18"}
         clearcoat={0.05}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
 }
 
-function SolderMask({ bbox, hidden, translucent }: {
+/** Build a THREE.Path approximating this pad's outline, expanded by `clearance`,
+ *  in world (x,y) KiCad coordinates. Returns null when the pad has no
+ *  usable shape info. */
+function padHolePath(
+  p: PcbPad,
+  clearance: number
+): THREE.Path | null {
+  const w = (p.size_w_mm ?? 0) + clearance * 2;
+  const h = (p.size_h_mm ?? 0) + clearance * 2;
+  if (w <= 0 || h <= 0) return null;
+  const shape = p.shape ?? "rect";
+  const rot = ((p.wrot_deg ?? 0) * Math.PI) / 180;
+  const cos = Math.cos(rot), sin = Math.sin(rot);
+  const path = new THREE.Path();
+
+  if (shape === "circle" || (shape === "oval" && Math.abs(w - h) < 1e-3)) {
+    path.absarc(p.wx, p.wy, Math.max(w, h) / 2, 0, Math.PI * 2, false);
+    return path;
+  }
+
+  if (shape === "oval") {
+    // Ellipse — sample 28 points for a smooth opening.
+    const steps = 28;
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * Math.PI * 2;
+      const lx = Math.cos(t) * (w / 2);
+      const ly = Math.sin(t) * (h / 2);
+      const x = p.wx + lx * cos - ly * sin;
+      const y = p.wy + lx * sin + ly * cos;
+      if (i === 0) path.moveTo(x, y); else path.lineTo(x, y);
+    }
+    path.closePath();
+    return path;
+  }
+
+  // rect / roundrect / trapezoid / custom → treat as rectangle (good enough
+  // for a mask opening; KiCad's pad clearance is already generous).
+  const corners: Array<[number, number]> = [
+    [-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2],
+  ];
+  corners.forEach(([lx, ly], i) => {
+    const x = p.wx + lx * cos - ly * sin;
+    const y = p.wy + lx * sin + ly * cos;
+    if (i === 0) path.moveTo(x, y); else path.lineTo(x, y);
+  });
+  path.closePath();
+  return path;
+}
+
+function SolderMask({ bbox, hidden, translucent, geometry }: {
   bbox: { min_x: number; min_y: number; max_x: number; max_y: number };
   hidden?: boolean;
   /** Engineering render mode — drop alpha so copper reads through the green. */
   translucent?: boolean;
+  /** Used to punch mask openings at every pad position. */
+  geometry?: PcbGeometry;
 }) {
-  const w = bbox.max_x - bbox.min_x;
-  const d = bbox.max_y - bbox.min_y;
-  const cx = (bbox.min_x + bbox.max_x) / 2;
-  const cz = (bbox.min_y + bbox.max_y) / 2;
+  const { topGeom, botGeom } = useMemo(() => {
+    // Match the mask outline to the board's Edge.Cuts polygon so rounded
+    // corners flow through the whole stack (substrate + copper + mask + silk).
+    const makeOuter = () => buildBoardShape(bbox, geometry?.edgeLines, geometry?.edgeArcs);
+    const topShape = makeOuter();
+    const botShape = makeOuter();
+    const CLEAR = 0.08; // mm of mask pullback around each pad
+
+    if (geometry?.footprints) {
+      for (const fp of geometry.footprints) {
+        if (!fp.pads) continue;
+        const fpIsBottom = fp.layer === "B.Cu";
+        for (const p of fp.pads) {
+          const isThruHole = (p.type === "thru_hole" || p.type === "np_thru_hole")
+            || (p.drill_mm ?? 0) > 0;
+          const path = padHolePath(p, CLEAR);
+          if (!path) continue;
+          if (isThruHole) {
+            topShape.holes.push(path);
+            // Need a separate path instance for the other shape — reusing
+            // the same object confuses ExtrudeGeometry triangulation.
+            const path2 = padHolePath(p, CLEAR);
+            if (path2) botShape.holes.push(path2);
+          } else if (fpIsBottom) {
+            botShape.holes.push(path);
+          } else {
+            topShape.holes.push(path);
+          }
+        }
+      }
+    }
+
+    const extrude = (s: THREE.Shape) => new THREE.ExtrudeGeometry(s, {
+      depth: MASK_HEIGHT, bevelEnabled: false, steps: 1,
+    });
+    return { topGeom: extrude(topShape), botGeom: extrude(botShape) };
+  }, [bbox, geometry]);
+
   const alpha = translucent ? 0.42 : 1;
 
-  // Ever-so-slightly bigger than substrate in-plane so the green fully skins
-  // it, and MASK_HEIGHT tall so pads/traces peek above when emissive.
+  // Masks live in XY (KiCad x,y) with extrusion going along local +Z. Apply
+  // Rx(+π/2) so local (sx, sy, 0) maps to world (sx, 0, sy) — KiCad-y becomes
+  // world-z, matching how traces and zones are laid out. The extrusion then
+  // travels along world -y, so position each mesh at the *top* of its slab.
   return (
-    <group position={[cx, 0, cz]}>
-      <mesh position={[0, BOARD_THICKNESS / 2 + MASK_HEIGHT / 2, 0]} renderOrder={2} visible={!hidden}>
-        <boxGeometry args={[w + 0.02, MASK_HEIGHT, d + 0.02]} />
+    <group>
+      <mesh
+        position={[0, BOARD_THICKNESS / 2 + MASK_HEIGHT, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
+        renderOrder={2}
+        visible={!hidden}
+      >
+        <primitive object={topGeom} attach="geometry" />
         <meshPhysicalMaterial
           color={PALETTE.mask}
           roughness={0.35}
@@ -238,10 +453,16 @@ function SolderMask({ bbox, hidden, translucent }: {
           transparent={translucent}
           opacity={alpha}
           depthWrite={!translucent}
+          side={THREE.DoubleSide}
         />
       </mesh>
-      <mesh position={[0, -BOARD_THICKNESS / 2 - MASK_HEIGHT / 2, 0]} renderOrder={2} visible={!hidden}>
-        <boxGeometry args={[w + 0.02, MASK_HEIGHT, d + 0.02]} />
+      <mesh
+        position={[0, -BOARD_THICKNESS / 2, 0]}
+        rotation={[Math.PI / 2, 0, 0]}
+        renderOrder={2}
+        visible={!hidden}
+      >
+        <primitive object={botGeom} attach="geometry" />
         <meshPhysicalMaterial
           color={PALETTE.mask}
           roughness={0.4}
@@ -251,8 +472,245 @@ function SolderMask({ bbox, hidden, translucent }: {
           transparent={translucent}
           opacity={alpha}
           depthWrite={!translucent}
+          side={THREE.DoubleSide}
         />
       </mesh>
+    </group>
+  );
+}
+
+/* ── Copper pours (zones) ─────────────────────────────────────────────
+ *   KiCad zones are polygon regions with (potentially disjoint) fill rings.
+ *   We triangulate each ring via THREE.Shape + ShapeGeometry, then place the
+ *   resulting flat mesh just above (or just below) the substrate. Layers:
+ *     F.Cu → y = +BOARD/2 + MASK + COPPER/2
+ *     B.Cu → y = -BOARD/2 - MASK - COPPER/2
+ *   This is what transforms "colored blocks floating on green" into "board
+ *   with ground/power planes", which is ~80% of the perceptual lift. */
+
+function Zones({
+  geometry, highlightedNet, peelMask, engineeringMode,
+}: {
+  geometry: PcbGeometry;
+  highlightedNet: number | null;
+  peelMask: boolean;
+  engineeringMode?: boolean;
+}) {
+  const meshes = useMemo(() => {
+    if (!geometry.zones) return [];
+    const out: Array<{
+      key: string; y: number; rot: [number, number, number];
+      geom: THREE.BufferGeometry; isHi: boolean; netId: number;
+    }> = [];
+    const signedArea = (ring: Array<{ x: number; y: number }>) => {
+      let s = 0;
+      for (let i = 0, n = ring.length; i < n; i++) {
+        const a = ring[i], b = ring[(i + 1) % n];
+        s += (b.x - a.x) * (b.y + a.y);
+      }
+      return s;
+    };
+    geometry.zones.forEach((zone, zi) => {
+      const isBottom = zone.layer === "B.Cu";
+      const isInner = /In\d+\.Cu/.test(zone.layer);
+      if (isInner && !peelMask) return;
+      // Zones sit on the copper layer just outside the substrate face. In
+      // Engineering mode there's no mask, so they're immediately visible; in
+      // Photoreal the opaque mask covers them (as on a real board), and only
+      // pad windows would expose copper beneath.
+      const y = isBottom
+        ? -BOARD_THICKNESS / 2 - COPPER_HEIGHT / 2
+        : BOARD_THICKNESS / 2 + COPPER_HEIGHT / 2;
+      zone.polygons.forEach((ring, ri) => {
+        if (ring.length < 3) return;
+        // Earcut expects CCW outer rings. KiCad emits CW in screen-space
+        // (y-down), so flip when the signed area is negative.
+        const ordered = signedArea(ring) < 0 ? ring.slice().reverse() : ring;
+        const shape = new THREE.Shape();
+        shape.moveTo(ordered[0].x, ordered[0].y);
+        for (let i = 1; i < ordered.length; i++) shape.lineTo(ordered[i].x, ordered[i].y);
+        shape.closePath();
+        // Extrude with a small depth so the pour has real thickness — sidesteps
+        // any triangulation ambiguity from a flat ShapeGeometry and guarantees
+        // the mesh is visible from above and below.
+        const geom = new THREE.ExtrudeGeometry(shape, {
+          depth: COPPER_HEIGHT,
+          bevelEnabled: false,
+          steps: 1,
+        });
+        const isHi = highlightedNet != null && zone.net_id === highlightedNet;
+        out.push({
+          key: `zone-${zi}-${ri}`,
+          y,
+          // ExtrudeGeometry lives in XY plane with +Z being depth; lay flat on XZ.
+          rot: [Math.PI / 2, 0, 0],
+          geom, isHi, netId: zone.net_id,
+        });
+      });
+    });
+    return out;
+  }, [geometry.zones, highlightedNet, peelMask]);
+
+  return (
+    <group>
+      {meshes.map((m) => {
+        const color = m.isHi
+          ? (engineeringMode ? FLAT.netHighlight : PALETTE.netHighlight)
+          : (engineeringMode ? "#c97638" : "#b27042");
+        // In engineering mode zones are slightly transparent so traces and
+        // silkscreen stay legible on top. In production they're opaque copper
+        // hidden under the mask.
+        return (
+          <mesh
+            key={m.key}
+            position={[0, m.y, 0]}
+            rotation={m.rot}
+            renderOrder={0}
+          >
+            <primitive object={m.geom} attach="geometry" />
+            {engineeringMode ? (
+              <meshBasicMaterial
+                color={color}
+                toneMapped={false}
+                transparent
+                opacity={m.isHi ? 0.98 : 0.82}
+                side={THREE.DoubleSide}
+                depthWrite={false}
+              />
+            ) : (
+              <meshPhysicalMaterial
+                color={color}
+                metalness={1}
+                roughness={0.4}
+                clearcoat={0.5}
+                clearcoatRoughness={0.5}
+                envMapIntensity={1.15}
+                side={THREE.DoubleSide}
+              />
+            )}
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
+/* ── Silkscreen — white lines + arcs + text on solder mask ─────────── */
+
+function Silkscreen({
+  geometry, engineeringMode,
+}: {
+  geometry: PcbGeometry;
+  engineeringMode?: boolean;
+}) {
+  const lines = geometry.silkLines ?? [];
+  const arcs = geometry.silkArcs ?? [];
+  const text = geometry.silkText ?? [];
+  const silkColor = engineeringMode ? "#f4ecd6" : PALETTE.silk;
+
+  const arcSegments = useMemo(() => {
+    // Discretize each arc (start, mid, end) into short line segments via
+    // circumcircle — good enough for viewing, cheap to compute.
+    const out: Array<{
+      layer: string; start: { x: number; y: number };
+      end: { x: number; y: number }; width_mm: number;
+    }> = [];
+    for (const a of arcs) {
+      const { start: s, mid: m, end: e } = a;
+      // Find circle through s, m, e.
+      const ax = s.x, ay = s.y, bx = m.x, by = m.y, cx_ = e.x, cy = e.y;
+      const d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx_ * (ay - by));
+      if (Math.abs(d) < 1e-9) {
+        out.push({ layer: a.layer, start: s, end: e, width_mm: a.width_mm });
+        continue;
+      }
+      const ux = ((ax * ax + ay * ay) * (by - cy) + (bx * bx + by * by) * (cy - ay) + (cx_ * cx_ + cy * cy) * (ay - by)) / d;
+      const uy = ((ax * ax + ay * ay) * (cx_ - bx) + (bx * bx + by * by) * (ax - cx_) + (cx_ * cx_ + cy * cy) * (bx - ax)) / d;
+      const r = Math.hypot(ax - ux, ay - uy);
+      const a0 = Math.atan2(ay - uy, ax - ux);
+      const a2 = Math.atan2(cy - uy, cx_ - ux);
+      const am = Math.atan2(by - uy, bx - ux);
+      // Walk a0 → a2 via am. Unwrap to ensure monotone sweep.
+      let start = a0, end = a2;
+      const inBetween = (x: number, lo: number, hi: number) => {
+        while (hi < lo) hi += 2 * Math.PI;
+        while (x < lo) x += 2 * Math.PI;
+        return x <= hi;
+      };
+      if (!inBetween(am, start, end)) {
+        // Sweep the other way.
+        [start, end] = [end, start + 2 * Math.PI];
+      } else if (end < start) {
+        end += 2 * Math.PI;
+      }
+      const steps = Math.max(6, Math.ceil(Math.abs(end - start) * 8));
+      let prev = { x: ux + Math.cos(start) * r, y: uy + Math.sin(start) * r };
+      for (let i = 1; i <= steps; i++) {
+        const t = start + ((end - start) * i) / steps;
+        const p = { x: ux + Math.cos(t) * r, y: uy + Math.sin(t) * r };
+        out.push({ layer: a.layer, start: prev, end: p, width_mm: a.width_mm });
+        prev = p;
+      }
+    }
+    return out;
+  }, [arcs]);
+
+  const renderLine = (layer: string, s: { x: number; y: number }, e: { x: number; y: number }, width: number, key: string) => {
+    const isBottom = layer === "B.SilkS";
+    const y = isBottom
+      ? -BOARD_THICKNESS / 2 - MASK_HEIGHT - SILK_HEIGHT / 2 - 0.005
+      : BOARD_THICKNESS / 2 + MASK_HEIGHT + SILK_HEIGHT / 2 + 0.02;
+    const dx = e.x - s.x;
+    const dz = e.y - s.y;
+    const len = Math.hypot(dx, dz);
+    if (len < 0.02) return null;
+    const cx = (s.x + e.x) / 2;
+    const cz = (s.y + e.y) / 2;
+    const angle = Math.atan2(dz, dx);
+    return (
+      <mesh key={key} position={[cx, y, cz]} rotation={[0, -angle, 0]} renderOrder={5}>
+        <boxGeometry args={[len, SILK_HEIGHT, Math.max(0.38, width * 1.8)]} />
+        <meshBasicMaterial color={silkColor} toneMapped={false} />
+      </mesh>
+    );
+  };
+
+  return (
+    <group>
+      {lines.map((l, i) => renderLine(l.layer, l.start, l.end, l.width_mm, `silk-${i}`))}
+      {arcSegments.map((l, i) => renderLine(l.layer, l.start, l.end, l.width_mm, `silkarc-${i}`))}
+      {text.map((t, i) => {
+        const isBottom = t.layer === "B.SilkS";
+        const y = isBottom
+          ? -BOARD_THICKNESS / 2 - MASK_HEIGHT - 0.02
+          : BOARD_THICKNESS / 2 + MASK_HEIGHT + 0.02;
+        return (
+          <Html
+            key={`silktxt-${i}`}
+            position={[t.at.x, y, t.at.y]}
+            center
+            distanceFactor={40}
+            occlude={false}
+            pointerEvents="none"
+          >
+            <div
+              className="font-mono font-semibold"
+              style={{
+                color: silkColor,
+                fontSize: `${Math.max(7, t.size_mm * 5)}px`,
+                lineHeight: 1,
+                letterSpacing: "0.02em",
+                textShadow: engineeringMode ? "none" : "0 0 2px rgba(0,0,0,0.45)",
+                whiteSpace: "nowrap",
+                userSelect: "none",
+                transform: `rotate(${-t.at.rot_deg}deg)`,
+              }}
+            >
+              {t.text}
+            </div>
+          </Html>
+        );
+      })}
     </group>
   );
 }
@@ -341,7 +799,10 @@ function Traces({
               <meshPhysicalMaterial
                 color={color}
                 metalness={1}
-                roughness={0.28}
+                roughness={0.34}
+                clearcoat={0.6}
+                clearcoatRoughness={0.45}
+                envMapIntensity={1.25}
               />
             )}
           </mesh>
@@ -423,46 +884,106 @@ function Pads({
   highlightedNet: number | null;
   engineeringMode?: boolean;
 }) {
+  const goldColor = engineeringMode ? FLAT.pad : PALETTE.padENIG;
+  const hiColor = engineeringMode ? FLAT.netHighlight : PALETTE.netHighlight;
+  const padThickness = 0.08;
+
   return (
     <group>
       {geometry.footprints.flatMap((fp) => {
         if (!fp.pads) return [];
-        const size = inferFootprintSize(fp.footprint, fp.ref);
-        const padR =
-          size.kind === "passive" || size.kind === "led" || size.kind === "diode"
-            ? Math.min(size.w_mm, size.h_mm) * 0.38
-            : size.kind === "ic" || size.kind === "module"
-              ? Math.max(0.25, Math.min(size.w_mm, size.h_mm) * 0.06)
-              : size.kind === "connector"
-                ? 0.7
-                : 0.4;
+        const fpSize = inferFootprintSize(fp.footprint, fp.ref);
         const isBottom = fp.layer === "B.Cu";
-        // Pads sit just above the mask — their own thickness is 0.08, so
-        // offset by half of it to keep them fully above.
-        const y = isBottom
-          ? -BOARD_THICKNESS / 2 - MASK_HEIGHT - 0.04
-          : BOARD_THICKNESS / 2 + MASK_HEIGHT + 0.04;
+        const yTop = isBottom
+          ? -BOARD_THICKNESS / 2 - MASK_HEIGHT - padThickness / 2
+          : BOARD_THICKNESS / 2 + MASK_HEIGHT + padThickness / 2;
 
         return fp.pads.map((p, pi) => {
           const isHi = highlightedNet != null && p.net.id === highlightedNet;
+          const color = isHi ? hiColor : goldColor;
+          const shape = p.shape ?? "rect";
+          const w = p.size_w_mm ?? 0;
+          const h = p.size_h_mm ?? 0;
+          const drill = p.drill_mm ?? 0;
+          const rot = -((p.wrot_deg ?? 0) * Math.PI) / 180;
+
+          // Fallback sizing when the pad has no shape info (old-synth demo
+          // files). Use the same heuristic as the old renderer.
+          const hasShape = w > 0 && h > 0;
+          const legacyR = fpSize.kind === "passive" || fpSize.kind === "led" || fpSize.kind === "diode"
+            ? Math.min(fpSize.w_mm, fpSize.h_mm) * 0.38
+            : fpSize.kind === "ic" || fpSize.kind === "module"
+              ? Math.max(0.25, Math.min(fpSize.w_mm, fpSize.h_mm) * 0.06)
+              : fpSize.kind === "connector" ? 0.7 : 0.4;
+
+          const material = engineeringMode ? (
+            <meshBasicMaterial color={color} toneMapped={false} />
+          ) : (
+            <meshPhysicalMaterial
+              color={color}
+              metalness={1}
+              roughness={0.26}
+              emissive={isHi ? PALETTE.netHighlight : "#000000"}
+              emissiveIntensity={isHi ? 0.4 : 0}
+              clearcoat={0.7}
+              clearcoatRoughness={0.28}
+              envMapIntensity={1.4}
+            />
+          );
+
+          // THT barrel: a copper cylinder that spans the full board thickness,
+          // with a dark hole drilled through it.
+          const tht = (p.type === "thru_hole" || p.type === "np_thru_hole") && drill > 0 ? (
+            <>
+              <mesh position={[p.wx, 0, p.wy]}>
+                <cylinderGeometry args={[Math.max(drill / 2 + 0.15, Math.min(w, h) / 2 || drill / 2 + 0.25), Math.max(drill / 2 + 0.15, Math.min(w, h) / 2 || drill / 2 + 0.25), BOARD_THICKNESS + 0.1, 20]} />
+                {engineeringMode ? (
+                  <meshBasicMaterial color={color} toneMapped={false} />
+                ) : (
+                  <meshPhysicalMaterial color={color} metalness={1} roughness={0.25} />
+                )}
+              </mesh>
+              <mesh position={[p.wx, 0, p.wy]}>
+                <cylinderGeometry args={[drill / 2, drill / 2, BOARD_THICKNESS + 0.18, 20]} />
+                <meshBasicMaterial color={PALETTE.viaHole} />
+              </mesh>
+            </>
+          ) : null;
+
+          // Top-face pad geometry, oriented by world rotation.
+          let geom: React.ReactElement;
+          if (!hasShape) {
+            geom = <cylinderGeometry args={[legacyR, legacyR, padThickness, 24]} />;
+          } else if (shape === "circle") {
+            geom = <cylinderGeometry args={[w / 2, w / 2, padThickness, 28]} />;
+          } else if (shape === "oval") {
+            // Oval ≈ scaled cylinder via group transform; keep geom cylindrical
+            // and scale in render step below.
+            geom = <cylinderGeometry args={[0.5, 0.5, padThickness, 28]} />;
+          } else {
+            // rect / roundrect / trapezoid / custom — render as a rounded box.
+            const rratio = shape === "roundrect" ? Math.max(0.04, p.roundrect_ratio ?? 0.25) : 0.02;
+            const radius = Math.min(w, h) * rratio;
+            geom = <boxGeometry args={[w, padThickness, h]} />;
+            void radius;
+          }
+
+          // Wrapper group handles rotation + oval scaling.
+          const scale: [number, number, number] = shape === "oval" ? [w, 1, h] : [1, 1, 1];
+
           return (
-            <mesh key={`${fp.ref}-pad-${pi}`} position={[p.wx, y, p.wy]} renderOrder={3}>
-              <cylinderGeometry args={[padR, padR, 0.08, 24]} />
-              {engineeringMode ? (
-                <meshBasicMaterial
-                  color={isHi ? FLAT.netHighlight : FLAT.pad}
-                  toneMapped={false}
-                />
-              ) : (
-                <meshPhysicalMaterial
-                  color={isHi ? PALETTE.netHighlight : PALETTE.padENIG}
-                  metalness={1}
-                  roughness={0.22}
-                  emissive={isHi ? PALETTE.netHighlight : "#000000"}
-                  emissiveIntensity={isHi ? 0.4 : 0}
-                />
-              )}
-            </mesh>
+            <group key={`${fp.ref}-pad-${pi}`}>
+              {tht}
+              <mesh
+                position={[p.wx, yTop, p.wy]}
+                rotation={[0, rot, 0]}
+                scale={scale}
+                renderOrder={3}
+              >
+                {geom}
+                {material}
+              </mesh>
+            </group>
           );
         });
       })}
@@ -882,12 +1403,19 @@ function BoardScene({
     <>
       <CameraFit controls={controlsRef} bbox={bbox} target={targetFp} />
 
-      <BoardBody bbox={bbox} flat={engineeringMode} peeled={!!lenses.peelMask} />
+      <BoardBody bbox={bbox} flat={engineeringMode} peeled={!!lenses.peelMask} geometry={geometry} />
       {/* Solder mask is only drawn in production mode — in engineering the
           BoardBody plank *is* the mask-colored backdrop. */}
       {!engineeringMode && (
-        <SolderMask bbox={bbox} hidden={!!lenses.peelMask} />
+        <SolderMask bbox={bbox} hidden={!!lenses.peelMask} geometry={geometry} />
       )}
+      <Zones
+        geometry={geometry}
+        highlightedNet={highlightedNet}
+        peelMask={!!lenses.peelMask}
+        engineeringMode={engineeringMode}
+      />
+      <Silkscreen geometry={geometry} engineeringMode={engineeringMode} />
       <Traces
         geometry={geometry}
         highlightedNet={highlightedNet}

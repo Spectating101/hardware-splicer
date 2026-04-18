@@ -61,6 +61,11 @@ export type PcbEdgeArc = {
   end: { x: number; y: number };
 };
 
+export type PcbEdgeLine = {
+  start: { x: number; y: number };
+  end: { x: number; y: number };
+};
+
 export type PcbGeometry = {
   board: { bbox_mm: PcbBboxMm | null };
   nets: Array<{ id: number; name: string }>;
@@ -91,6 +96,7 @@ export type PcbGeometry = {
   silkArcs?: PcbSilkArc[];
   silkText?: PcbSilkText[];
   edgeArcs?: PcbEdgeArc[];
+  edgeLines?: PcbEdgeLine[];
 };
 
 export type ValidationIssue = {

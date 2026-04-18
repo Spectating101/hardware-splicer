@@ -64,6 +64,13 @@ function boardInfoToGeometry(info: KicadBoardInfo): PcbGeometry {
         wx: p.wx,
         wy: p.wy,
         net: { id: p.netId, name: p.netName },
+        wrot_deg: p.wrot_deg,
+        shape: p.shape,
+        size_w_mm: p.size_w_mm,
+        size_h_mm: p.size_h_mm,
+        drill_mm: p.drill_mm,
+        roundrect_ratio: p.roundrect_ratio,
+        type: p.type,
       })),
     })),
     segments,
@@ -74,6 +81,17 @@ function boardInfoToGeometry(info: KicadBoardInfo): PcbGeometry {
       drill_mm: v.drill_mm,
       net: { id: v.net_id, name: info.nets.find((n) => n.id === v.net_id)?.name ?? "" },
     })),
+    zones: info.zones.map((z) => ({
+      layer: z.layer,
+      net_id: z.net_id,
+      net_name: z.net_name,
+      polygons: z.polygons,
+    })),
+    silkLines: info.silkLines,
+    silkArcs: info.silkArcs,
+    silkText: info.silkText,
+    edgeArcs: info.edgeArcs,
+    edgeLines: info.edgeLines,
   };
 }
 import { BoardHeader } from "./board-header";
@@ -152,7 +170,19 @@ export function Workbench() {
       }).length;
 
       if (json.pcb_geometry) {
-        store.setGeometry(json.pcb_geometry);
+        // Backend geometry is authoritative for nets/segments/zones, but the
+        // Python side doesn't emit silkscreen or edge arcs yet. Re-attach
+        // those from the local parse so the board doesn't go silent.
+        const localGeom = boardInfoToGeometry(localInfo);
+        store.setGeometry({
+          ...json.pcb_geometry,
+          silkLines: json.pcb_geometry.silkLines ?? localGeom.silkLines,
+          silkArcs: json.pcb_geometry.silkArcs ?? localGeom.silkArcs,
+          silkText: json.pcb_geometry.silkText ?? localGeom.silkText,
+          edgeArcs: json.pcb_geometry.edgeArcs ?? localGeom.edgeArcs,
+          edgeLines: json.pcb_geometry.edgeLines ?? localGeom.edgeLines,
+          zones: json.pcb_geometry.zones ?? localGeom.zones,
+        });
       }
 
       store.setValidationResult(issues, score, nextSteps, dfmNotes);
