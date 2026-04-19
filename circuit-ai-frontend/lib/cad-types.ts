@@ -127,6 +127,69 @@ export type BomRisk = Record<
   { risk: number; lead_days?: number; price_usd?: number; mpn?: string }
 >;
 
+/* ──────────────── DIY / reuse domain types ──────────────── */
+
+/** Traffic-light safety classification surfaced by the AI on every response.
+ *  - `safe`:    TTL / battery-level / <12V. Render freely.
+ *  - `caution`: 12–60V DC, medium-current, or anything a beginner can still handle
+ *               with a heads-up. Render with a visible caution banner.
+ *  - `hazard`:  Mains voltage (>60V AC), lithium packs >10Wh, CRT flyback, RF >1W,
+ *               bulk caps >400V. Render behind an "are you qualified" gate. */
+export type SafetyLevel = "safe" | "caution" | "hazard";
+
+/** One functional block identified on a salvage target. Produced by the vision
+ *  call (`/api/jarvis/identify`) or the salvage planner. */
+export type SalvageModule = {
+  id: string;
+  kind: "power" | "mcu" | "radio" | "sensor" | "driver" | "connector" | "passive" | "unknown";
+  label: string;                      // "5V buck regulator", "ESP32-WROOM"
+  description: string;                // plain-English what it does
+  safety: SafetyLevel;
+  /** Normalized image-space bounding box, 0–1 on each axis. */
+  bbox?: { x: number; y: number; w: number; h: number };
+  /** Pins the user can probably expose to reuse the module. */
+  pins?: Array<{ name: string; role: string; voltage?: string }>;
+  /** Free-text extraction recipe from the planner. */
+  extraction?: string;
+  warnings?: string[];
+};
+
+/** One wire the AI proposes on the Build canvas. `from`/`to` reference
+ *  `<module_id>.<pin_name>` in the current project. */
+export type WiringSuggestion = {
+  id: string;
+  from: string;
+  to: string;
+  purpose: string;                    // "5V supply", "I2C SDA", "GND return"
+  safety: SafetyLevel;
+  warnings?: string[];
+};
+
+/** A project recommendation surfaced from a parts inventory. */
+export type ProjectSuggestion = {
+  id: string;
+  title: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  summary: string;
+  requiredModules: string[];          // labels matched against inventory
+  optionalModules?: string[];
+  estimatedTimeHours?: number;
+  safety: SafetyLevel;
+};
+
+/** A single item in the user's parts inventory. Typed by hand, scanned from a
+ *  photo, or adopted from a past board scan. */
+export type InventoryPart = {
+  id: string;
+  label: string;
+  kind: SalvageModule["kind"];
+  source: "typed" | "scan" | "salvage";
+  qty: number;
+  notes?: string;
+  photoUrl?: string;
+  addedAt: number;
+};
+
 export type ValidateKiCadResponse = {
   status: string;
   next_steps: string[];

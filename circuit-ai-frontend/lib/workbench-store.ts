@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import type {
   PcbGeometry, ValidationIssue, DcAnalysis, ThermalMap, BomRisk,
+  SafetyLevel, InventoryPart, SalvageModule, WiringSuggestion, ProjectSuggestion,
 } from "./cad-types";
 
 export interface JarvisMsg {
@@ -134,6 +135,15 @@ interface WorkbenchState {
   jarvisMessages: JarvisMsg[];
   jarvisThinking: boolean;
 
+  // DIY/reuse domain — populated by /scan, /build, /parts flows.
+  salvageModules: SalvageModule[];
+  wiringSuggestions: WiringSuggestion[];
+  projectSuggestions: ProjectSuggestion[];
+  inventory: InventoryPart[];
+  /** Highest safety level surfaced by the current flow. Drives top-of-viewport
+   *  banner + gates detail reveals on hazardous boards. */
+  safetyLevel: SafetyLevel;
+
   // UI
   drcOpen: boolean;
 
@@ -166,6 +176,13 @@ interface WorkbenchState {
   addJarvisMessage(msg: Omit<JarvisMsg, "ts">): void;
   setJarvisThinking(v: boolean): void;
   toggleDrc(): void;
+  setSafetyLevel(level: SafetyLevel): void;
+  setSalvageModules(modules: SalvageModule[]): void;
+  setWiringSuggestions(wires: WiringSuggestion[]): void;
+  setProjectSuggestions(projects: ProjectSuggestion[]): void;
+  addInventoryPart(part: Omit<InventoryPart, "id" | "addedAt">): void;
+  removeInventoryPart(id: string): void;
+  clearInventory(): void;
   reset(): void;
 }
 
@@ -200,6 +217,11 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
   bomCost: null,
   jarvisMessages: [],
   jarvisThinking: false,
+  salvageModules: [],
+  wiringSuggestions: [],
+  projectSuggestions: [],
+  inventory: [],
+  safetyLevel: "safe",
   drcOpen: false,
 
   loadFile: (file, filename) =>
@@ -276,6 +298,20 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
   setJarvisThinking: (v) => set({ jarvisThinking: v }),
   toggleDrc: () => set((s) => ({ drcOpen: !s.drcOpen })),
 
+  setSafetyLevel: (level) => set({ safetyLevel: level }),
+  setSalvageModules: (modules) => set({ salvageModules: modules }),
+  setWiringSuggestions: (wires) => set({ wiringSuggestions: wires }),
+  setProjectSuggestions: (projects) => set({ projectSuggestions: projects }),
+  addInventoryPart: (part) =>
+    set((s) => ({
+      inventory: [
+        ...s.inventory,
+        { ...part, id: `inv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`, addedAt: Date.now() },
+      ],
+    })),
+  removeInventoryPart: (id) => set((s) => ({ inventory: s.inventory.filter((p) => p.id !== id) })),
+  clearInventory: () => set({ inventory: [] }),
+
   reset: () =>
     set({
       filename: null,
@@ -299,6 +335,11 @@ export const useWorkbenchStore = create<WorkbenchState>((set) => ({
       dfmReport: null,
       bomCost: null,
       jarvisMessages: [],
+      salvageModules: [],
+      wiringSuggestions: [],
+      projectSuggestions: [],
+      inventory: [],
+      safetyLevel: "safe",
       drcOpen: false,
     }),
 }));
