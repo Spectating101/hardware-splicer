@@ -127,6 +127,8 @@ export type PcbViewportProps = {
   /** "engineering" (default) lights copper through a translucent mask so the
    *  circuit reads at a glance. "production" is the opaque-green product shot. */
   renderMode?: "engineering" | "production";
+  /** Start with a top-down view so the render reads like a KiCad 2D board. */
+  topDown?: boolean;
 };
 
 /** Blue → cyan → yellow → red gradient for scalar overlays (voltage, Tj, I). */
@@ -1249,10 +1251,12 @@ function CameraFit({
   controls,
   bbox,
   target,
+  topDown,
 }: {
   controls: React.RefObject<CameraControls | null>;
   bbox: { min_x: number; min_y: number; max_x: number; max_y: number } | null;
   target: Footprint | null;
+  topDown?: boolean;
 }) {
   const fittedBoardRef = useRef(false);
 
@@ -1283,9 +1287,9 @@ function CameraFit({
       // re-fit to the board's vertical extent and crush the viewing angle
       // to near-horizontal (edge-on), which is exactly the failure mode we
       // saw in the first pass.
-      const elev = THREE.MathUtils.degToRad(38);
-      const azim = THREE.MathUtils.degToRad(35);
-      const dist = Math.max(diag * 1.0, 28);
+      const elev = THREE.MathUtils.degToRad(topDown ? 89 : 38);
+      const azim = THREE.MathUtils.degToRad(topDown ? 0 : 35);
+      const dist = topDown ? Math.max(diag * 0.95, 40) : Math.max(diag * 1.0, 28);
       const px = cx + dist * Math.cos(elev) * Math.sin(azim);
       const py = dist * Math.sin(elev);
       const pz = cz + dist * Math.cos(elev) * Math.cos(azim);
@@ -1312,6 +1316,7 @@ function BoardScene({
   thermal,
   bomRisk,
   renderMode,
+  topDown,
   onSelectionChange,
   controlsRef,
 }: {
@@ -1323,6 +1328,7 @@ function BoardScene({
   thermal?: ThermalMap | null;
   bomRisk?: BomRisk | null;
   renderMode: "engineering" | "production";
+  topDown?: boolean;
   onSelectionChange?: (sel: SelectionState) => void;
   controlsRef: React.RefObject<CameraControls | null>;
 }) {
@@ -1401,7 +1407,7 @@ function BoardScene({
 
   return (
     <>
-      <CameraFit controls={controlsRef} bbox={bbox} target={targetFp} />
+      <CameraFit controls={controlsRef} bbox={bbox} target={targetFp} topDown={topDown} />
 
       <BoardBody bbox={bbox} flat={engineeringMode} peeled={!!lenses.peelMask} geometry={geometry} />
       {/* Solder mask is only drawn in production mode — in engineering the
@@ -1502,9 +1508,13 @@ export function PcbViewport({
   thermal = null,
   bomRisk = null,
   renderMode = "engineering",
+  topDown = false,
 }: PcbViewportProps) {
   const controlsRef = useRef<CameraControls | null>(null);
   const engineeringMode = renderMode === "engineering";
+  // Board lies in the XZ plane (Y is up), so top-down means the camera looks
+  // down the Y axis — not the Z axis — at the origin.
+  const cameraStart = topDown ? [0, 140, 0.1] as [number, number, number] : [60, 60, 60] as [number, number, number];
 
   return (
     <div className="h-full w-full relative overflow-hidden">
@@ -1519,7 +1529,7 @@ export function PcbViewport({
 
       <Canvas
         shadows={!engineeringMode}
-        camera={{ position: [60, 60, 60], fov: 38, near: 0.1, far: 2000 }}
+        camera={{ position: cameraStart, fov: 38, near: 0.1, far: 2000 }}
         gl={{ antialias: true, toneMappingExposure: 1.05, preserveDrawingBuffer: true }}
         onPointerMissed={() => onSelectionChange?.({ footprintRef: null })}
       >
@@ -1534,6 +1544,7 @@ export function PcbViewport({
               thermal={thermal}
               bomRisk={bomRisk}
               renderMode={renderMode}
+              topDown={topDown}
               onSelectionChange={onSelectionChange}
               controlsRef={controlsRef}
             />

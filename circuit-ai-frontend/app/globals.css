@@ -466,3 +466,8 @@
     100% { transform: translateX(100%); }
   }
 }
+
+html.pcb-modal-open header,
+html.pcb-modal-open [data-build-toolbar] {
+  display: none !important;
+}
