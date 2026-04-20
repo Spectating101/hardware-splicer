@@ -16,6 +16,8 @@ ENV/
 *.egg-info/
 dist/
 build/
+!circuit-ai-frontend/app/build/
+!circuit-ai-frontend/components/build/
 .pytest_cache/
 *.log
 
