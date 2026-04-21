@@ -267,6 +267,31 @@ function BuildInner() {
     URL.revokeObjectURL(url);
   }, [graph]);
 
+  const exportBom = useCallback(() => {
+    const tally = new Map<string, number>();
+    for (const n of graph.nodes) tally.set(n.moduleId, (tally.get(n.moduleId) ?? 0) + 1);
+    const rows: string[] = ["Part,Category,Voltage,Pins,Qty"];
+    for (const [moduleId, qty] of tally) {
+      const spec = findModule(moduleId);
+      if (!spec) {
+        rows.push(`${moduleId},unknown,,,${qty}`);
+        continue;
+      }
+      const voltages = Array.from(
+        new Set(spec.pins.map((p) => p.voltage).filter((v): v is string => typeof v === "string" && v.length > 0)),
+      ).sort().join(" / ");
+      const esc = (s: string) => (s.includes(",") ? `"${s.replace(/"/g, '""')}"` : s);
+      rows.push([esc(spec.label), esc(spec.category), esc(voltages), String(spec.pins.length), String(qty)].join(","));
+    }
+    const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `circuit-bom-${Date.now()}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [graph]);
+
   const empty = nodes.length === 0;
 
   return (
@@ -294,6 +319,13 @@ function BuildInner() {
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-white/10 disabled:text-slate-500"
             >
               <Download className="h-3.5 w-3.5" /> JSON
+            </button>
+            <button
+              onClick={exportBom}
+              disabled={empty}
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-400/20 disabled:bg-transparent disabled:text-slate-500"
+            >
+              <Download className="h-3.5 w-3.5" /> BOM
             </button>
             <button
               onClick={() => setPcbOpen(true)}

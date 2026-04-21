@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { SafetyBanner } from "@/components/safety-banner";
 import { IdentificationOverlay } from "@/components/scan/identification-overlay";
 import { ModuleDetail } from "@/components/scan/module-detail";
+import { CameraCapture } from "@/components/scan/camera-capture";
 import { usePageTitle } from "@/components/use-page-title";
 import { useWorkbenchStore } from "@/lib/workbench-store";
 import type { SafetyLevel, SalvageModule } from "@/lib/cad-types";
@@ -45,6 +46,7 @@ function ScanPageInner() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addInventoryPart = useWorkbenchStore((s) => s.addInventoryPart);
@@ -147,7 +149,7 @@ function ScanPageInner() {
 
         {/* Drop/upload zone OR image + overlay */}
         {!imageUrl ? (
-          <UploadZone onPick={onSelectFile} fileInputRef={fileInputRef} />
+          <UploadZone onPick={onSelectFile} fileInputRef={fileInputRef} onOpenCamera={() => setCameraOpen(true)} />
         ) : (
           <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
             {/* Canvas */}
@@ -276,12 +278,22 @@ function ScanPageInner() {
             </div>
           </div>
         )}
+
+        {cameraOpen && (
+          <CameraCapture
+            onCapture={(file) => {
+              setCameraOpen(false);
+              onSelectFile(file);
+            }}
+            onClose={() => setCameraOpen(false)}
+          />
+        )}
       </main>
     </div>
   );
 }
 
-function UploadZone({ onPick, fileInputRef }: { onPick(file: File): void; fileInputRef: React.RefObject<HTMLInputElement | null> }) {
+function UploadZone({ onPick, fileInputRef, onOpenCamera }: { onPick(file: File): void; fileInputRef: React.RefObject<HTMLInputElement | null>; onOpenCamera(): void }) {
   const [dragging, setDragging] = useState(false);
   return (
     <div
@@ -313,13 +325,13 @@ function UploadZone({ onPick, fileInputRef }: { onPick(file: File): void; fileIn
           Choose image
         </Button>
         <Button
-          onClick={() => fileInputRef.current?.click()}
+          onClick={onOpenCamera}
           size="lg"
           variant="outline"
           className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10"
         >
           <Camera className="mr-2 h-4 w-4" />
-          Take photo (mobile)
+          Use camera
         </Button>
       </div>
 

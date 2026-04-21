@@ -1289,7 +1289,7 @@ function CameraFit({
       // saw in the first pass.
       const elev = THREE.MathUtils.degToRad(topDown ? 89 : 38);
       const azim = THREE.MathUtils.degToRad(topDown ? 0 : 35);
-      const dist = topDown ? Math.max(diag * 0.95, 40) : Math.max(diag * 1.0, 28);
+      const dist = topDown ? Math.max(diag * 1.55, 65) : Math.max(diag * 1.0, 28);
       const px = cx + dist * Math.cos(elev) * Math.sin(azim);
       const py = dist * Math.sin(elev);
       const pz = cz + dist * Math.cos(elev) * Math.cos(azim);
