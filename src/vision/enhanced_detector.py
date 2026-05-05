@@ -11,6 +11,8 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import sys
 import os
+from pathlib import Path
+from src.vision.image_polisher import polish_for_inference
 
 try:
     from ultralytics import YOLO
@@ -25,6 +27,13 @@ try:
 except ImportError:
     OCR_AVAILABLE = False
     logger.info("OCR not available - Install pytesseract for text reading")
+
+try:
+    from .component_taxonomy import PCB_COMPONENT_CLASS_NAMES, model_class_name, normalize_component_class_name
+    from .model_resolver import resolve_pcb_model_path
+except ImportError:
+    from component_taxonomy import PCB_COMPONENT_CLASS_NAMES, model_class_name, normalize_component_class_name
+    from model_resolver import resolve_pcb_model_path
 
 class DetectionMethod(Enum):
     YOLO = "yolo"
@@ -97,19 +106,8 @@ class EnhancedComponentDetector:
             self.defect_scorer = None
             self.defect_detection_enabled = False
 
-        # Component database - Updated for Circuit-AI trained model
-        self.component_classes = [
-            'Cap1',           # 0 - Capacitor type 1
-            'Cap2',           # 1 - Capacitor type 2
-            'Cap3',           # 2 - Capacitor type 3
-            'Cap4',           # 3 - Capacitor type 4
-            'MOSFET',         # 4 - MOSFET transistor
-            'Mov',            # 5 - MOV (Metal Oxide Varistor)
-            'Resestor',       # 6 - Resistor (note: typo in dataset)
-            'Resistor',       # 7 - Resistor
-            'Transformer',    # 8 - Transformer
-            'Arduino Uno'     # 9 - Arduino Uno Board (added for detection)
-        ]
+        # Canonical component labels used when model metadata is unavailable.
+        self.component_classes = list(PCB_COMPONENT_CLASS_NAMES)
         
         # Quality assessment parameters
         self.quality_thresholds = {
@@ -121,16 +119,28 @@ class EnhancedComponentDetector:
 
         # Per-class minimum confidence (tuned for PCB parts; extend as new labels are added)
         self.class_conf_thresholds = {
-            'Cap1': 0.25,
-            'Cap2': 0.25,
-            'Cap3': 0.25,
-            'Cap4': 0.25,
-            'MOSFET': 0.3,
-            'Mov': 0.3,
-            'Resistor': 0.25,
-            'Resestor': 0.25,
-            'Transformer': 0.35,
-            'Arduino Uno': 0.6 # High confidence for board detection
+            'battery': 0.25,
+            'button': 0.25,
+            'buzzer': 0.25,
+            'capacitor': 0.25,
+            'connector': 0.25,
+            'crystal': 0.25,
+            'diode': 0.25,
+            'display': 0.25,
+            'fuse': 0.25,
+            'heatsink': 0.25,
+            'ic_chip': 0.25,
+            'inductor': 0.25,
+            'led': 0.25,
+            'pads': 0.25,
+            'pins': 0.25,
+            'potentiometer': 0.25,
+            'relay': 0.25,
+            'resistor': 0.25,
+            'switch': 0.25,
+            'transducer': 0.25,
+            'transformer': 0.3,
+            'transistor': 0.25,
         }
         
         # Component database with detailed specifications
@@ -156,21 +166,19 @@ class EnhancedComponentDetector:
         """Initialize detection models."""
         if YOLO_AVAILABLE:
             try:
-                # Load trained Circuit-AI PCB component detection model
-                # Path relative to this file: ../../pcb_runs/real_pcb_v1/weights/best.pt
-                trained_model_path = os.path.join(os.path.dirname(__file__), '../../pcb_runs/real_pcb_v1/weights/best.pt')
-                trained_model_path = os.path.abspath(trained_model_path)
+                configured_path = self.config.get('model_path') or self.config.get('yolo_model_path')
+                trained_model_path = resolve_pcb_model_path(configured_path)
                 
-                if os.path.exists(trained_model_path):
+                if trained_model_path:
                     self.models['yolo'] = YOLO(trained_model_path)
                     logger.info(f"✅ Loaded trained Circuit-AI PCB model from {trained_model_path}")
-                    self.model_source = f"trained:{os.path.basename(trained_model_path)}"
+                    self.model_source = f"trained:{Path(trained_model_path).name}"
                     self.custom_model_found = True
                 else:
-                    self.models['yolo'] = YOLO('yolov8n.pt')
-                    logger.warning(f"⚠️  Trained model not found at {trained_model_path}, using pretrained YOLOv8n")
-                    self.model_source = "yolov8n-fallback"
+                    logger.warning("⚠️  No PCB YOLO model found; YOLO detection disabled")
+                    self.model_source = "pcb-model-missing"
                     self.fallback_used = True
+                    return
                 
                 self.models['yolo'].to(self.device)
             except Exception as e:
@@ -349,7 +357,9 @@ class EnhancedComponentDetector:
                         confidence = box.conf[0].item()
                         class_id = int(box.cls[0].item())
                         
-                        class_name = self._map_class_id_to_name(class_id)
+                        class_name, raw_class_name = model_class_name(
+                            self.models['yolo'], class_id, self.component_classes
+                        )
                         
                         detection = ComponentDetection(
                             bbox=[x1, y1, x2, y2],
@@ -358,7 +368,8 @@ class EnhancedComponentDetector:
                             method=DetectionMethod.YOLO,
                             metadata={
                                 'class_id': class_id,
-                                'model': 'yolo'
+                                'model': 'yolo',
+                                'raw_class_name': raw_class_name,
                             }
                         )
                         
@@ -534,9 +545,21 @@ class EnhancedComponentDetector:
     def _normalize_image(self, image: np.ndarray, mobile_optimized: bool) -> np.ndarray:
         """Ensure image is RGB uint8 and optionally downscale."""
         img = image
-        if img.dtype != np.uint8: img = np.clip(img, 0, 255).astype(np.uint8)
-        if img.ndim == 2: img = np.stack([img] * 3, axis=-1)
-        elif img.ndim == 3 and img.shape[2] == 4: img = img[:, :, :3]
+        if not isinstance(img, np.ndarray):
+            img = np.asarray(img)
+
+        if img.dtype != np.uint8:
+            img = np.clip(img, 0, 255).astype(np.uint8)
+        if img.ndim == 2:
+            img = np.stack([img] * 3, axis=-1)
+        elif img.ndim == 3 and img.shape[2] == 4:
+            img = img[:, :, :3]
+        if img.ndim != 3 or img.shape[2] != 3:
+            raise ValueError(f"Unsupported image shape for enhancement: {img.shape}")
+
+        # Polished preprocessing improves robustness across lighting/blur/chroma noise.
+        img, _ = polish_for_inference(img)
+        img = np.clip(np.round(img * 255.0), 0, 255).astype(np.uint8)
         if mobile_optimized:
             max_dim = max(img.shape[0], img.shape[1])
             if max_dim > 4096:
@@ -554,7 +577,8 @@ class EnhancedComponentDetector:
 
     def _map_class_id_to_name(self, class_id: int) -> str:
         """Map YOLO class ID to component name."""
-        if class_id < len(self.component_classes): return self.component_classes[class_id]
+        if class_id < len(self.component_classes):
+            return normalize_component_class_name(self.component_classes[class_id])
         return 'unknown'
     
     def _classify_by_shape(self, contour: np.ndarray, area: float, aspect_ratio: float) -> str:

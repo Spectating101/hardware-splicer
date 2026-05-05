@@ -41,18 +41,18 @@ export interface BuildGraph {
 
 interface ResolvedEndpoint {
   node: BuildNode;
-  module: ModuleSpec;
+  moduleSpec: ModuleSpec;
   pin: ModulePin;
 }
 
 function resolve(graph: BuildGraph, nodeId: string, pinId: string): ResolvedEndpoint | null {
   const node = graph.nodes.find((n) => n.id === nodeId);
   if (!node) return null;
-  const module = findModule(node.moduleId);
-  if (!module) return null;
-  const pin = findPin(module, pinId);
+  const moduleSpec = findModule(node.moduleId);
+  if (!moduleSpec) return null;
+  const pin = findPin(moduleSpec, pinId);
   if (!pin) return null;
-  return { node, module, pin };
+  return { node, moduleSpec, pin };
 }
 
 /** Parse voltage strings like "3.3V", "5V", "0-3.3V", "7-35V" → nominal V. */
@@ -87,7 +87,7 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
       warnings.push({
         id: `${w.id}-gnd`,
         level: "error",
-        message: `Wire connects GND (${aGnd ? a.module.label : b.module.label}) to a non-GND pin. This will short or misbehave.`,
+        message: `Wire connects GND (${aGnd ? a.moduleSpec.label : b.moduleSpec.label}) to a non-GND pin. This will short or misbehave.`,
         wireId: w.id,
       });
       continue;
@@ -108,7 +108,7 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
       warnings.push({
         id: `${w.id}-twoSources`,
         level: "error",
-        message: `Two power sources (${a.module.label}:${a.pin.id} and ${b.module.label}:${b.pin.id}) fighting on the same rail.`,
+        message: `Two power sources (${a.moduleSpec.label}:${a.pin.id} and ${b.moduleSpec.label}:${b.pin.id}) fighting on the same rail.`,
         wireId: w.id,
       });
     }
@@ -120,13 +120,13 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
       const snk = src === a ? b : src === b ? a : null;
       if (src && snk) {
         const srcV = parseVoltage(src.pin.voltage);
-        const snkRange = voltageRange(snk.pin.voltage) ?? (snk.module.inputVoltageRange ?? null);
+        const snkRange = voltageRange(snk.pin.voltage) ?? (snk.moduleSpec.inputVoltageRange ?? null);
         if (srcV != null && snkRange) {
           if (srcV < snkRange[0] - 0.2 || srcV > snkRange[1] + 0.2) {
             warnings.push({
               id: `${w.id}-voltage`,
               level: "error",
-              message: `${src.module.label} outputs ${srcV}V but ${snk.module.label} expects ${snkRange[0]}–${snkRange[1]}V. Insert a regulator.`,
+              message: `${src.moduleSpec.label} outputs ${srcV}V but ${snk.moduleSpec.label} expects ${snkRange[0]}–${snkRange[1]}V. Insert a regulator.`,
               wireId: w.id,
             });
           }
@@ -135,15 +135,15 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
     }
 
     // Logic-level mismatch: digital pins at different voltages, no level shifter
-    const aLV = a.module.logicVoltage;
-    const bLV = b.module.logicVoltage;
+    const aLV = a.moduleSpec.logicVoltage;
+    const bLV = b.moduleSpec.logicVoltage;
     const aDigital = a.pin.role !== "power_in" && a.pin.role !== "power_out" && a.pin.role !== "gnd" && a.pin.role !== "other";
     const bDigital = b.pin.role !== "power_in" && b.pin.role !== "power_out" && b.pin.role !== "gnd" && b.pin.role !== "other";
     if (aDigital && bDigital && aLV && bLV && aLV !== bLV) {
       warnings.push({
         id: `${w.id}-logic`,
         level: "error",
-        message: `${a.module.label} uses ${aLV}V logic, ${b.module.label} uses ${bLV}V logic. Add a level shifter.`,
+        message: `${a.moduleSpec.label} uses ${aLV}V logic, ${b.moduleSpec.label} uses ${bLV}V logic. Add a level shifter.`,
         wireId: w.id,
       });
     }
@@ -162,7 +162,7 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
     }
 
     // IRF520-style non-logic-level MOSFET driven from 3.3V
-    if ((a.module.id === "mosfet-irf520" && bLV === 3.3) || (b.module.id === "mosfet-irf520" && aLV === 3.3)) {
+    if ((a.moduleSpec.id === "mosfet-irf520" && bLV === 3.3) || (b.moduleSpec.id === "mosfet-irf520" && aLV === 3.3)) {
       warnings.push({
         id: `${w.id}-fetDrive`,
         level: "warn",
@@ -174,47 +174,47 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
 
   // 2. Per-node checks
   for (const n of graph.nodes) {
-    const module = findModule(n.moduleId);
-    if (!module) continue;
+    const moduleSpec = findModule(n.moduleId);
+    if (!moduleSpec) continue;
 
-    const powerInWired = module.pins
+    const powerInWired = moduleSpec.pins
       .filter((p) => p.role === "power_in")
       .some((p) => graph.wires.some((w) =>
         (w.from.nodeId === n.id && w.from.pinId === p.id) ||
         (w.to.nodeId === n.id && w.to.pinId === p.id)
       ));
-    if (!powerInWired && module.pins.some((p) => p.role === "power_in")) {
+    if (!powerInWired && moduleSpec.pins.some((p) => p.role === "power_in")) {
       warnings.push({
         id: `${n.id}-unpowered`,
         level: "warn",
-        message: `${module.label} has no power connection yet.`,
+        message: `${moduleSpec.label} has no power connection yet.`,
         nodeId: n.id,
       });
     }
 
-    const gndWired = module.pins
+    const gndWired = moduleSpec.pins
       .filter((p) => p.role === "gnd")
       .some((p) => graph.wires.some((w) =>
         (w.from.nodeId === n.id && w.from.pinId === p.id) ||
         (w.to.nodeId === n.id && w.to.pinId === p.id)
       ));
-    if (!gndWired && module.pins.some((p) => p.role === "gnd")) {
+    if (!gndWired && moduleSpec.pins.some((p) => p.role === "gnd")) {
       warnings.push({
         id: `${n.id}-nognd`,
         level: "error",
-        message: `${module.label} has no GND connection. All modules need a common ground.`,
+        message: `${moduleSpec.label} has no GND connection. All modules need a common ground.`,
         nodeId: n.id,
       });
     }
 
     // High-current loads shouldn't draw from MCU 5V
-    if (module.id === "sg90" || module.id === "l298n") {
+    if (moduleSpec.id === "sg90" || moduleSpec.id === "l298n") {
       const poweredFromMcu = graph.wires.some((w) => {
         const ends = [w.from, w.to];
         const mine = ends.find((e) => e.nodeId === n.id);
         const other = ends.find((e) => e.nodeId !== n.id);
         if (!mine || !other) return false;
-        const myPin = findPin(module, mine.pinId);
+        const myPin = findPin(moduleSpec, mine.pinId);
         if (myPin?.role !== "power_in") return false;
         const otherNode = graph.nodes.find((x) => x.id === other.nodeId);
         const otherMod = otherNode && findModule(otherNode.moduleId);
@@ -224,7 +224,7 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
         warnings.push({
           id: `${n.id}-highCurrent`,
           level: "error",
-          message: `${module.label} can pull >200mA. Don't power it from the MCU's 5V pin — use a separate supply.`,
+          message: `${moduleSpec.label} can pull >200mA. Don't power it from the MCU's 5V pin — use a separate supply.`,
           nodeId: n.id,
         });
       }

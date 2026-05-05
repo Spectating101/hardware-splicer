@@ -36,7 +36,7 @@ const navItems = [
 ];
 
 const backendOptions = [
-  { value: 'ensemble', label: 'Ensemble' },
+  { value: 'hybrid', label: 'Hybrid' },
   { value: 'classical', label: 'Classical' },
   { value: 'yolo', label: 'YOLO' },
 ];
@@ -141,7 +141,7 @@ export default function AnalyzePage() {
   const [apiKey, setApiKey] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [backend, setBackend] = useState('ensemble');
+  const [backend, setBackend] = useState('hybrid');
   const [enableOcr, setEnableOcr] = useState(true);
   const [enableQuality, setEnableQuality] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);

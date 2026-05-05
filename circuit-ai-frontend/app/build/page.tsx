@@ -36,6 +36,16 @@ function fuzzyFindModule(needle: string): ModuleSpec | undefined {
   const direct = findModule(needle);
   if (direct) return direct;
   const n = needle.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const alias =
+    /esp32|mcu|microcontroller|controller|processor/.test(n) ? "esp32-devkit"
+    : /buck|regulator|power|supply|dcconverter|stepdown/.test(n) ? "buck-lm2596"
+    : /boost|stepup/.test(n) ? "boost-mt3608"
+    : /temp|humidity|thermistor|sensor/.test(n) ? "dht22"
+    : /display|oled|screen/.test(n) ? "ssd1306-128x64"
+    : /relay|switch/.test(n) ? "relay-1ch-5v"
+    : /motor|servo/.test(n) ? "sg90"
+    : null;
+  if (alias) return findModule(alias);
   return MODULE_LIBRARY.find((m) => {
     const a = m.id.toLowerCase().replace(/[^a-z0-9]/g, "");
     const b = m.label.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -407,7 +417,7 @@ function BuildInner() {
           </h2>
           <p className="mt-1 text-xs leading-5 text-slate-400">
             Drag modules in from the left. Draw wires by dragging between pin dots. Ask Jarvis
-            to wire them up when you're ready.
+            to wire them up when you&apos;re ready.
           </p>
         </div>
 

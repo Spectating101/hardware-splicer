@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const apiBaseUrl = getCircuitApiBaseUrl();
-  const target = `${apiBaseUrl}/api/health`;
+  const target = `${apiBaseUrl}/healthz`;
   try {
     const headers = getProxyAuthHeaders();
     const res = await fetch(target, { method: "GET", headers });

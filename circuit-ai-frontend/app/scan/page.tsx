@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Camera, Image as ImageIcon, Loader2, RefreshCw, Scissors, Sparkles, Upload, Wrench } from "lucide-react";
+import { Camera, Image as ImageIcon, Loader2, RefreshCw, Scissors, Sparkles, Upload } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { SafetyBanner } from "@/components/safety-banner";
@@ -12,6 +12,7 @@ import { ModuleDetail } from "@/components/scan/module-detail";
 import { CameraCapture } from "@/components/scan/camera-capture";
 import { usePageTitle } from "@/components/use-page-title";
 import { useWorkbenchStore } from "@/lib/workbench-store";
+import { addInventoryItem } from "@/lib/inventory/storage";
 import type { SafetyLevel, SalvageModule } from "@/lib/cad-types";
 
 interface IdentifyResponse {
@@ -22,7 +23,72 @@ interface IdentifyResponse {
   error?: string;
   fromCache?: boolean;
   model?: string;
+  source?: "local" | "jarvis";
+  backend?: string;
+  reviewRequired?: boolean;
+  visualTopology?: {
+    traceCount: number;
+    connectionCount: number;
+    confidence: number;
+    uncertainty?: string;
+  };
+  aoiInspection?: {
+    readiness?: string;
+    score?: number;
+    learnedDetectionRatio?: number;
+    defectCandidateCount?: number;
+  };
 }
+
+type LocalAnalyzeDetection = {
+  bbox?: number[];
+  class_name?: string;
+  confidence?: number;
+  part_number?: string | null;
+  ocr_text?: string;
+};
+
+type LocalAnalyzeResponse = {
+  ok?: boolean;
+  error?: string;
+  results?: {
+    detections?: LocalAnalyzeDetection[];
+    detection_summary?: {
+      total_components?: number;
+      components_by_type?: Record<string, number>;
+      detection_quality?: string;
+      review_required?: boolean;
+    };
+    analysis_metadata?: {
+      backend?: string;
+      review_required?: boolean;
+      semantic_quality?: string;
+      limitations?: string[];
+    };
+    visual_topology?: {
+      trace_count?: number;
+      connection_count?: number;
+      confidence?: number;
+      uncertainty?: string;
+    };
+    aoi_inspection?: {
+      readiness?: string;
+      score?: number;
+      learned_detection_ratio?: number;
+      defect_candidate_count?: number;
+    };
+    defect_inspection?: {
+      defect_count?: number;
+    };
+  };
+  metadata?: {
+    backend?: string;
+    detection_quality?: string;
+  };
+  summary?: {
+    summary_text?: string;
+  };
+};
 
 type Mode = "identify" | "salvage";
 
@@ -42,6 +108,7 @@ function ScanPageInner() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [result, setResult] = useState<IdentifyResponse | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -63,14 +130,108 @@ function ScanPageInner() {
     [modules, selectedId],
   );
 
+  const addScannedModuleToInventory = useCallback((module: SalvageModule) => {
+    const part = {
+      label: module.label,
+      kind: module.kind ?? "unknown",
+      source: mode === "salvage" ? "salvage" as const : "scan" as const,
+      qty: 1,
+      notes: module.description ?? module.extraction,
+      photoUrl: imageUrl ?? undefined,
+    };
+    addInventoryPart(part);
+    addInventoryItem(part);
+  }, [addInventoryPart, imageUrl, mode]);
+
+  const mapKind = useCallback((className: string): SalvageModule["kind"] => {
+    const normalized = className.toLowerCase();
+    if (normalized.includes("connector") || normalized.includes("switch")) return "connector";
+    if (normalized.includes("ic") || normalized.includes("mcu") || normalized.includes("micro")) return "mcu";
+    if (normalized.includes("sensor")) return "sensor";
+    if (normalized.includes("transistor") || normalized.includes("mosfet") || normalized.includes("driver")) return "driver";
+    if (normalized.includes("capacitor") || normalized.includes("resistor") || normalized.includes("inductor") || normalized.includes("diode") || normalized.includes("crystal")) return "passive";
+    return "unknown";
+  }, []);
+
+  const mapLocalAnalysis = useCallback((json: LocalAnalyzeResponse): IdentifyResponse => {
+    if (json.error) {
+      return {
+        safety_level: "caution",
+        explanation: json.error,
+        components: [],
+        error: json.error,
+        source: "local",
+      };
+    }
+
+    const detections = json.results?.detections ?? [];
+    const summary = json.results?.detection_summary;
+    const backend = json.metadata?.backend ?? json.results?.analysis_metadata?.backend ?? "local";
+    const quality = json.metadata?.detection_quality ?? summary?.detection_quality ?? "unknown";
+    const reviewRequired = Boolean(summary?.review_required ?? json.results?.analysis_metadata?.review_required);
+
+    const modules = detections.map((det, index): SalvageModule => {
+      const className = det.class_name ?? "unknown";
+      const bbox = det.bbox;
+      const normalizedBox = bbox && imageSize
+        ? {
+          x: Math.max(0, Math.min(1, bbox[0] / imageSize.width)),
+          y: Math.max(0, Math.min(1, bbox[1] / imageSize.height)),
+          w: Math.max(0, Math.min(1, (bbox[2] - bbox[0]) / imageSize.width)),
+          h: Math.max(0, Math.min(1, (bbox[3] - bbox[1]) / imageSize.height)),
+        }
+        : undefined;
+      const confidence = typeof det.confidence === "number" ? ` (${Math.round(det.confidence * 100)}%)` : "";
+      const partText = det.part_number || det.ocr_text;
+      return {
+        id: `local-${index + 1}`,
+        kind: mapKind(className),
+        label: partText ? `${partText} ${className}` : className,
+        description: `Local ${backend} detector classified this region as ${className}${confidence}. Treat this as a candidate detection until reviewed against the photo.`,
+        safety: "safe",
+        bbox: normalizedBox,
+      };
+    });
+
+    return {
+      safety_level: "safe",
+      explanation: json.summary?.summary_text
+        ?? `Local scan completed with ${summary?.total_components ?? modules.length} candidate detections using ${backend}. Detection quality: ${quality}.`,
+      components: modules,
+      source: "local",
+      backend,
+      model: backend,
+      reviewRequired,
+      visualTopology: {
+        traceCount: json.results?.visual_topology?.trace_count ?? 0,
+        connectionCount: json.results?.visual_topology?.connection_count ?? 0,
+        confidence: json.results?.visual_topology?.confidence ?? 0,
+        uncertainty: json.results?.visual_topology?.uncertainty,
+      },
+      aoiInspection: {
+        readiness: json.results?.aoi_inspection?.readiness,
+        score: json.results?.aoi_inspection?.score,
+        learnedDetectionRatio: json.results?.aoi_inspection?.learned_detection_ratio,
+        defectCandidateCount: json.results?.aoi_inspection?.defect_candidate_count
+          ?? json.results?.defect_inspection?.defect_count
+          ?? 0,
+      },
+    };
+  }, [imageSize, mapKind]);
+
   const onSelectFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       setError("Please pick an image file (JPEG, PNG, etc.)");
       return;
     }
     if (imageUrl) URL.revokeObjectURL(imageUrl);
+    const nextUrl = URL.createObjectURL(file);
     setImageFile(file);
-    setImageUrl(URL.createObjectURL(file));
+    setImageUrl(nextUrl);
+    setImageSize(null);
+    const img = new Image();
+    img.onload = () => setImageSize({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 });
+    img.src = nextUrl;
     setResult(null);
     setSelectedId(null);
     setError(null);
@@ -83,13 +244,19 @@ function ScanPageInner() {
     setResult(null);
 
     const fd = new FormData();
-    fd.append("image", imageFile);
-
-    const endpoint = mode === "salvage" ? "/api/jarvis/plan-salvage" : "/api/jarvis/identify";
+    const endpoint = mode === "salvage" ? "/api/jarvis/plan-salvage" : "/api/proxy/analyze";
+    if (mode === "salvage") {
+      fd.append("image", imageFile);
+    } else {
+      fd.append("file", imageFile);
+      fd.append("backend", "hybrid");
+      fd.append("enable_ocr", "false");
+    }
 
     try {
       const resp = await fetch(endpoint, { method: "POST", body: fd });
-      const json = await resp.json() as IdentifyResponse;
+      const rawJson = await resp.json() as IdentifyResponse | LocalAnalyzeResponse;
+      const json = mode === "salvage" ? rawJson as IdentifyResponse : mapLocalAnalysis(rawJson as LocalAnalyzeResponse);
       if (!resp.ok || json.error) {
         setError(json.error ?? `Request failed (${resp.status})`);
         return;
@@ -103,12 +270,13 @@ function ScanPageInner() {
     } finally {
       setLoading(false);
     }
-  }, [imageFile, mode, setSalvageModules, setSafetyLevel]);
+  }, [imageFile, mapLocalAnalysis, mode, setSalvageModules, setSafetyLevel]);
 
   const reset = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageFile(null);
     setImageUrl(null);
+    setImageSize(null);
     setResult(null);
     setSelectedId(null);
     setError(null);
@@ -216,33 +384,46 @@ function ScanPageInner() {
                 </div>
               )}
 
+              {result?.aoiInspection && (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">AOI</div>
+                    <div className="mt-1 text-sm text-white">{result.aoiInspection.readiness ?? "unknown"}</div>
+                    <div className="text-[11px] text-slate-500">{Math.round((result.aoiInspection.score ?? 0) * 100)}%</div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Topology</div>
+                    <div className="mt-1 text-sm text-white">
+                      {result.visualTopology?.traceCount ?? 0} traces · {result.visualTopology?.connectionCount ?? 0} links
+                    </div>
+                    <div className="text-[11px] text-slate-500">{Math.round((result.visualTopology?.confidence ?? 0) * 100)}% · {result.visualTopology?.uncertainty ?? "high"}</div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Learned</div>
+                    <div className="mt-1 text-sm text-white">{Math.round((result.aoiInspection.learnedDetectionRatio ?? 0) * 100)}%</div>
+                    <div className="text-[11px] text-slate-500">{result.backend ?? "local"}</div>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-white/[0.02] p-3">
+                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Defects</div>
+                    <div className="mt-1 text-sm text-white">{result.aoiInspection.defectCandidateCount ?? 0} candidates</div>
+                    <div className="text-[11px] text-slate-500">visual AOI</div>
+                  </div>
+                </div>
+              )}
+
               {selectedModule ? (
                 <ModuleDetail
                   module={selectedModule}
-                  onAddToInventory={() => {
-                    addInventoryPart({
-                      label: selectedModule.label,
-                      kind: selectedModule.kind ?? "unknown",
-                      source: "scan",
-                      qty: 1,
-                    });
-                  }}
+                  onAddToInventory={() => addScannedModuleToInventory(selectedModule)}
                   onStartBuild={() => {
-                    // Phase 4 will route into /build with this module preloaded.
-                    // For now, add to inventory and send to parts.
-                    addInventoryPart({
-                      label: selectedModule.label,
-                      kind: selectedModule.kind ?? "unknown",
-                      source: "scan",
-                      qty: 1,
-                    });
-                    window.location.href = "/build";
+                    addScannedModuleToInventory(selectedModule);
+                    window.location.href = `/build?modules=${encodeURIComponent(selectedModule.label)}`;
                   }}
                 />
               ) : modules.length > 0 ? (
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                   <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                    {modules.length} {modules.length === 1 ? "block" : "blocks"} identified — click one on the image
+                    {modules.length} {result?.reviewRequired ? "candidate " : ""}{modules.length === 1 ? "block" : "blocks"} identified — click one on the image
                   </div>
                   <div className="space-y-1.5">
                     {modules.map((m) => (

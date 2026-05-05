@@ -17,12 +17,20 @@ CONFIDENCE_THRESHOLDS = {
     "diode": 0.30,
     "transistor": 0.25,
     "ic": 0.25,
+    "ic_chip": 0.25,
     
     # Mechanical components - lower threshold as they're more distinct
     "connector": 0.20,
+    "button": 0.20,
     "switch": 0.20,
+    "buzzer": 0.25,
+    "display": 0.25,
+    "heatsink": 0.25,
     "led": 0.30,
     "crystal": 0.25,
+    "pads": 0.25,
+    "pins": 0.25,
+    "transducer": 0.25,
     
     # Power components
     "relay": 0.25,
@@ -206,4 +214,3 @@ def update_thresholds_from_data(stats: dict, target_precision: float = 0.8) -> d
                 suggestions[class_name] = max(avg_confidence + 0.05, 0.1)
     
     return suggestions
-

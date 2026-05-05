@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     yolo_model_path: str = "models/yolo/pcb_detector.pt"
     
     # Detection pipeline
-    # Options: "demo" (enhanced demo), "classical" (OpenCV), "yolo" (model), "remote" (HTTP)
-    detection_backend: str = "yolo"
+    # Options: "hybrid"/"ensemble" (YOLO then classical fallback), "classical" (OpenCV), "yolo" (model), "remote" (HTTP)
+    detection_backend: str = "hybrid"
     enable_ocr: bool = True
     ocr_lang: str = "eng"
 
@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     cv_edge_density_weight: float = 0.35
     cv_rectangularity_weight: float = 0.2
     cv_area_norm_weight: float = 0.1
+    yolo_min_confidence: float = 0.2
+    yolo_nms_iou: float = 0.45
     
     # Logging
     log_level: str = "INFO"

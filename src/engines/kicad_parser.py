@@ -9,6 +9,14 @@ from __future__ import annotations
 import re
 from typing import Any, Dict
 
+from src.engines.kicad_sexp import SexpError, parse_sexp
+
+
+def _sexp_token_to_text(value: Any) -> str:
+    if isinstance(value, list):
+        return "(" + "".join(_sexp_token_to_text(part) for part in value) + ")"
+    return str(value)
+
 
 class KiCadParser:
     """Parses KiCad netlists across modern and legacy formats."""
@@ -24,6 +32,13 @@ class KiCadParser:
 
         if content.lstrip().startswith("# EESchema Netlist Version 1.1"):
             return self._parse_legacy_v1(content)
+
+        try:
+            return self._parse_modern_sexp(content)
+        except SexpError:
+            # Fall back to the older regex parser for malformed or uncommon
+            # exports. The structured path is preferred for valid KiCad files.
+            pass
 
         token = r'(?:\"([^\"]+)\"|([^\s\)]+))'
 
@@ -68,6 +83,55 @@ class KiCadParser:
                 nodes.append({"ref": ref, "pin": pin})
 
             self.nets[name] = {"code": code, "nodes": nodes}
+
+        return {"nets": self.nets, "components": self.components}
+
+    def _parse_modern_sexp(self, content: str) -> Dict[str, Any]:
+        ast = parse_sexp(content)
+
+        def first_child(node: list, head: str) -> list | None:
+            for child in node:
+                if isinstance(child, list) and child and child[0] == head:
+                    return child
+            return None
+
+        def child_value(node: list, head: str, default: str = "Unknown") -> str:
+            child = first_child(node, head)
+            if child and len(child) >= 2:
+                return "".join(_sexp_token_to_text(part) for part in child[1:])
+            return default
+
+        components_node = first_child(ast, "components") if isinstance(ast, list) else None
+        if components_node:
+            for comp in components_node:
+                if not isinstance(comp, list) or not comp or comp[0] != "comp":
+                    continue
+                ref = child_value(comp, "ref", "")
+                if not ref:
+                    continue
+                self.components[ref] = {
+                    "value": child_value(comp, "value"),
+                    "footprint": child_value(comp, "footprint"),
+                }
+
+        nets_node = first_child(ast, "nets") if isinstance(ast, list) else None
+        if nets_node:
+            for net in nets_node:
+                if not isinstance(net, list) or not net or net[0] != "net":
+                    continue
+                code = child_value(net, "code", "")
+                name = child_value(net, "name", "")
+                if not name:
+                    continue
+                nodes = []
+                for child in net:
+                    if not isinstance(child, list) or not child or child[0] != "node":
+                        continue
+                    ref = child_value(child, "ref", "")
+                    pin = child_value(child, "pin", "")
+                    if ref and pin:
+                        nodes.append({"ref": ref, "pin": pin})
+                self.nets[name] = {"code": code, "nodes": nodes}
 
         return {"nets": self.nets, "components": self.components}
 

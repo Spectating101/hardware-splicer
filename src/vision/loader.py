@@ -9,7 +9,9 @@ from typing import Optional, Dict, Any
 from loguru import logger
 import numpy as np
 import cv2
+from .component_taxonomy import normalize_component_class_name
 from .confidence_thresholds import get_confidence_threshold, filter_detections_by_confidence
+from .model_resolver import existing_model_path
 
 try:
     from ultralytics import YOLO
@@ -20,7 +22,7 @@ except ImportError:
 # Global model cache
 _models: Dict[str, Any] = {}
 
-def get_detector(model_name: str = "electrocom61_v1") -> Optional[Any]:
+def get_detector(model_name: str = "pcb_components_yolo11n_thawed") -> Optional[Any]:
     """
     Get a YOLO detector model with lazy loading.
     
@@ -35,10 +37,16 @@ def get_detector(model_name: str = "electrocom61_v1") -> Optional[Any]:
         return None
     
     if model_name not in _models:
-        model_path = f"models/pcb/{model_name}.onnx"
+        model_path = existing_model_path(
+            (
+                f"models/pcb/{model_name}.pt",
+                f"models/pcb/{model_name}.onnx",
+                f"pcb_runs/{model_name}/weights/best.pt",
+            )
+        )
         
-        if not os.path.exists(model_path):
-            logger.error(f"Model not found: {model_path}")
+        if not model_path:
+            logger.error(f"Model not found: {model_name}")
             return None
         
         try:
@@ -110,7 +118,8 @@ def postprocess_detections(results, confidence_threshold: float = 0.25, use_per_
             continue
         
         # Get class name
-        class_name = result.names[int(cls)]
+        raw_class_name = result.names[int(cls)]
+        class_name = normalize_component_class_name(raw_class_name)
         
         # Apply per-class threshold if enabled
         if use_per_class_thresholds:
@@ -128,6 +137,7 @@ def postprocess_detections(results, confidence_threshold: float = 0.25, use_per_
         detection = {
             "class_id": int(cls),
             "class_name": class_name,
+            "raw_class_name": raw_class_name,
             "confidence": float(conf),
             "threshold_used": get_confidence_threshold(class_name) if use_per_class_thresholds else confidence_threshold,
             "bbox": {

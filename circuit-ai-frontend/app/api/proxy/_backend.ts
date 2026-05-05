@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const DEFAULT_API_BASE_URL = "http://localhost:5000";
+const DEFAULT_API_BASE_URL = "http://localhost:8000";
 
 export function getCircuitApiBaseUrl() {
   return process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_BASE_URL;

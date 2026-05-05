@@ -25,6 +25,16 @@ export function saveInventory(items: InventoryPart[]) {
   }
 }
 
+export function addInventoryItem(part: Omit<InventoryPart, "id" | "addedAt">): InventoryPart {
+  const item: InventoryPart = {
+    ...part,
+    id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    addedAt: Date.now(),
+  };
+  saveInventory([item, ...loadInventory()]);
+  return item;
+}
+
 export function clearInventory() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(KEY);

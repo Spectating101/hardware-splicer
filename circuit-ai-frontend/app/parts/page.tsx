@@ -6,7 +6,7 @@ import { Plus, Trash2, Sparkles, Clock, ArrowRight, Camera, Wand2 } from "lucide
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { usePageTitle } from "@/components/use-page-title";
-import { loadInventory, saveInventory } from "@/lib/inventory/storage";
+import { addInventoryItem, loadInventory, saveInventory } from "@/lib/inventory/storage";
 import { SafetyBanner } from "@/components/safety-banner";
 import type { InventoryPart, ProjectSuggestion, SafetyLevel, SalvageModule } from "@/lib/cad-types";
 
@@ -25,6 +25,7 @@ export default function PartsPage() {
   usePageTitle("Parts | Circuit.AI");
 
   const [inventory, setInventory] = useState<InventoryPart[]>([]);
+  const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const [label, setLabel] = useState("");
   const [kind, setKind] = useState<SalvageModule["kind"]>("mcu");
   const [qty, setQty] = useState(1);
@@ -37,23 +38,23 @@ export default function PartsPage() {
 
   useEffect(() => {
     setInventory(loadInventory());
+    setInventoryLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!inventoryLoaded) return;
     saveInventory(inventory);
-  }, [inventory]);
+  }, [inventory, inventoryLoaded]);
 
   const addPart = useCallback(() => {
     const trimmed = label.trim();
     if (!trimmed) return;
-    const part: InventoryPart = {
-      id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    const part = addInventoryItem({
       label: trimmed,
       kind,
       source: "typed",
       qty: Math.max(1, qty),
-      addedAt: Date.now(),
-    };
+    });
     setInventory((prev) => [part, ...prev]);
     setLabel("");
     setQty(1);
@@ -105,7 +106,7 @@ export default function PartsPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">Your parts bin</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-            Tell Jarvis what's in your drawer. We'll suggest projects you can actually build today.
+            Tell Jarvis what&apos;s in your drawer. We&apos;ll suggest projects you can actually build today.
           </p>
         </div>
 

@@ -117,6 +117,7 @@ class DefectDetector:
         # Classical CV detection (always run as supplement or fallback)
         if self.use_classical_fallback or self.model is None:
             classical_defects = self._detect_with_classical_cv(image, component_detections)
+            classical_defects = [d for d in classical_defects if d.confidence >= confidence_threshold]
             defects.extend(classical_defects)
             logger.debug(f"Classical CV detected {len(classical_defects)} defects")
 
@@ -225,6 +226,15 @@ class DefectDetector:
                     expected_area_min=15,
                     expected_area_max=300
                 )
+                if min(w, h) <= 6:
+                    confidence = min(confidence, 0.49)
+                elif area < 45:
+                    # Tiny bright slivers are usually trace edges, silkscreen,
+                    # or glare in a single photo. Keep them exploratory unless
+                    # a trained defect model confirms the bridge.
+                    confidence = min(confidence, 0.49)
+                elif area < 90:
+                    confidence = min(confidence, 0.62)
 
                 defects.append(DefectDetection(
                     defect_type="solder_bridge",
@@ -261,18 +271,31 @@ class DefectDetector:
                 continue
 
             x, y, w, h = cv2.boundingRect(cnt)
+            bbox_area = float(w * h)
+            rectangularity = float(cv2.contourArea(cnt)) / bbox_area if bbox_area > 0 else 0.0
+            aspect_ratio = w / float(h) if h else 0.0
 
             # Check if area is actually dark (not just shadow)
             roi = image[y:y+h, x:x+w]
             mean_intensity = cv2.mean(cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY))[0]
 
             if mean_intensity < 60:  # Very dark
+                # Regular black component packages are often compact, uniform,
+                # and nearly rectangular. Treat those as normal components
+                # unless a trained defect model says otherwise.
+                if rectangularity > 0.82 and 0.45 <= aspect_ratio <= 2.2:
+                    continue
+
                 # Calculate confidence: darker = more confident it's a burn
                 # Intensity 0-30 = high confidence, 30-60 = lower confidence
                 intensity_confidence = max(0.5, 1.0 - (mean_intensity / 60.0) * 0.5)
                 # Area in expected range boosts confidence
                 area_confidence = 1.0 if 100 < area < 2000 else 0.8
                 confidence = min(0.95, intensity_confidence * area_confidence)
+                if area < 250:
+                    # Small dark features on real boards are often normal IC
+                    # markings, vias, or shadows rather than burn damage.
+                    confidence = min(confidence, 0.54)
 
                 defects.append(DefectDetection(
                     defect_type="burnt_component",
@@ -281,7 +304,13 @@ class DefectDetector:
                     severity=0.85,  # High severity - component likely damaged
                     description=f"Burnt area detected (mean intensity: {mean_intensity:.1f})",
                     repair_action="Replace damaged component",
-                    metadata={"detector": "classical_cv", "area": area, "intensity": mean_intensity}
+                    metadata={
+                        "detector": "classical_cv",
+                        "area": area,
+                        "intensity": mean_intensity,
+                        "rectangularity": rectangularity,
+                        "aspect_ratio": aspect_ratio,
+                    }
                 ))
 
         return defects
@@ -317,7 +346,11 @@ class DefectDetector:
             saturation_confidence = min(1.0, mean_saturation / 150.0)
             # Area in typical range boosts confidence
             area_confidence = 1.0 if 50 < area < 1000 else 0.75
-            confidence = max(0.4, min(0.85, saturation_confidence * area_confidence))
+            # Color alone cannot reliably separate corrosion from green solder
+            # mask or board markings. Keep classical corrosion below the
+            # default AOI reporting threshold; lower thresholds can still use it
+            # for exploratory inspection.
+            confidence = max(0.35, min(0.54, saturation_confidence * area_confidence))
 
             defects.append(DefectDetection(
                 defect_type="corrosion",
@@ -358,8 +391,11 @@ class DefectDetector:
                     # Calculate confidence based on segment characteristics
                     # Longer isolated segments in the valid range are more suspicious
                     length_factor = (length - 30) / 70.0  # 0 at 30px, 1 at 100px
-                    # Base confidence is low (0.35-0.55) because trace detection is inherently noisy
-                    confidence = 0.35 + (length_factor * 0.2)
+                    # Keep this below the default reporting threshold. A single
+                    # photo cannot reliably prove a broken trace from short line
+                    # fragments; expose it only in low-threshold exploratory
+                    # inspection or when a trained model confirms it.
+                    confidence = min(0.49, 0.32 + (length_factor * 0.16))
 
                     defects.append(DefectDetection(
                         defect_type="broken_trace",

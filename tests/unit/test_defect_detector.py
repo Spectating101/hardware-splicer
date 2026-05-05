@@ -118,6 +118,12 @@ class TestDefectDetection:
         # A trained YOLO model would be more reliable for this case
         assert isinstance(defects, list), "Should return a list of defects"
 
+    def test_color_only_corrosion_stays_below_default_aoi_threshold(self, detector, pcb_with_corrosion):
+        """Color-only green regions should not flood default AOI reports."""
+        defects = detector.detect_defects(pcb_with_corrosion, confidence_threshold=0.65)
+
+        assert not any(defect.defect_type == "corrosion" for defect in defects)
+
     def test_defect_detection_returns_proper_structure(self, detector, sample_pcb_image):
         """Test that defect detections have proper structure."""
         defects = detector.detect_defects(sample_pcb_image)
@@ -252,6 +258,43 @@ class TestEdgeCases:
 
         # High threshold should have fewer or equal detections
         assert len(defects_high) <= len(defects_low)
+        assert all(defect.confidence >= 0.95 for defect in defects_high)
+
+    def test_rectangular_black_component_is_not_burn(self, detector, sample_pcb_image):
+        """Normal dark IC packages should not be flagged as burnt components."""
+        image = sample_pcb_image.copy()
+        cv2.rectangle(image, (100, 100), (160, 140), (10, 10, 10), -1)
+
+        defects = detector.detect_defects(image, confidence_threshold=0.5)
+
+        assert not any(defect.defect_type == "burnt_component" for defect in defects)
+
+    def test_broken_trace_heuristic_is_exploratory_below_default_threshold(self, detector, sample_pcb_image):
+        """Line-fragment trace guesses should not surface at default confidence."""
+        image = sample_pcb_image.copy()
+        cv2.line(image, (40, 60), (120, 60), (220, 220, 220), 2)
+
+        defects = detector.detect_defects(image, confidence_threshold=0.5)
+
+        assert not any(defect.defect_type == "broken_trace" for defect in defects)
+
+    def test_tiny_solder_sliver_is_exploratory_below_default_threshold(self, detector, sample_pcb_image):
+        """Tiny metallic slivers are too ambiguous for default solder-bridge reporting."""
+        image = sample_pcb_image.copy()
+        cv2.rectangle(image, (100, 100), (130, 104), (220, 220, 220), -1)
+
+        defects = detector.detect_defects(image, confidence_threshold=0.65)
+
+        assert not any(defect.defect_type == "solder_bridge" for defect in defects)
+
+    def test_small_dark_artifact_is_not_default_burn_candidate(self, detector, sample_pcb_image):
+        """Small dark board features should stay below the default burn threshold."""
+        image = sample_pcb_image.copy()
+        cv2.circle(image, (200, 200), 7, (8, 8, 8), -1)
+
+        defects = detector.detect_defects(image, confidence_threshold=0.65)
+
+        assert not any(defect.defect_type == "burnt_component" for defect in defects)
 
     def test_with_component_detections(self, detector, sample_pcb_image):
         """Test defect detection with component context."""

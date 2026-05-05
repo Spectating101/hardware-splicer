@@ -51,6 +51,8 @@ class TraceAnalyzer:
     def __init__(self):
         self.pixel_to_mm_ratio: Optional[float] = None
         self.copper_thickness_oz = 1.0  # Standard 1oz copper
+        self.max_trace_candidates = 250
+        self.max_short_check_traces = 120
 
     def analyze_traces(self, image: np.ndarray,
                        component_detections: List[Any],
@@ -116,12 +118,18 @@ class TraceAnalyzer:
 
         # Find contours (traces)
         contours, _ = cv2.findContours(cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        candidates = [
+            (cv2.contourArea(contour), contour)
+            for contour in contours
+        ]
+        candidates = [
+            (area, contour)
+            for area, contour in candidates
+            if area >= 50
+        ]
+        candidates.sort(key=lambda item: item[0], reverse=True)
 
-        for idx, contour in enumerate(contours):
-            # Filter out noise (very small contours)
-            area = cv2.contourArea(contour)
-            if area < 50:  # Minimum trace area
-                continue
+        for idx, (area, contour) in enumerate(candidates[: self.max_trace_candidates]):
 
             # Get bounding rect
             x, y, w, h = cv2.boundingRect(contour)
@@ -197,9 +205,14 @@ class TraceAnalyzer:
             )
 
             # Create connections
+            seen_pairs: set[tuple[str, str]] = set()
             for comp1 in start_components:
                 for comp2 in end_components:
                     if comp1 != comp2:
+                        edge_key = tuple(sorted([comp1, comp2]))
+                        if edge_key in seen_pairs:
+                            continue
+                        seen_pairs.add(edge_key)
                         connection = Connection(
                             component1=comp1,
                             component2=comp2,
@@ -226,18 +239,48 @@ class TraceAnalyzer:
         px, py = point
 
         for comp in components:
-            if hasattr(comp, 'center') and comp.center:
-                cx, cy = comp.center
+            center = None
+            class_name = None
+            bbox = None
+            if isinstance(comp, dict):
+                center = comp.get("center")
+                class_name = comp.get("class_name")
+                bbox = comp.get("bbox")
+            elif hasattr(comp, 'center') and comp.center:
+                center = comp.center
+                class_name = getattr(comp, "class_name", None)
+                bbox = getattr(comp, "bbox", None)
+
+            if center:
+                cx, cy = center
                 distance = np.sqrt((px - cx)**2 + (py - cy)**2)
                 if distance <= radius:
-                    nearby.append(comp.class_name)
-            elif hasattr(comp, 'bbox'):
+                    instance_id = getattr(comp, "component_id", None)
+                    if instance_id is not None:
+                        nearby.append(str(instance_id))
+                        continue
+                    if isinstance(comp, dict):
+                        explicit_id = comp.get("topology_id") or comp.get("_instance_id") or comp.get("id")
+                        if explicit_id:
+                            nearby.append(str(explicit_id))
+                            continue
+                    nearby.append(f"{str(class_name or 'unknown')}")
+            elif bbox is not None:
                 # Use bbox center
-                x1, y1, x2, y2 = comp.bbox
+                x1, y1, x2, y2 = bbox
                 cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
                 distance = np.sqrt((px - cx)**2 + (py - cy)**2)
                 if distance <= radius:
-                    nearby.append(comp.class_name)
+                    instance_id = getattr(comp, "component_id", None)
+                    if instance_id is not None:
+                        nearby.append(str(instance_id))
+                        continue
+                    if isinstance(comp, dict):
+                        explicit_id = comp.get("topology_id") or comp.get("_instance_id") or comp.get("id")
+                        if explicit_id:
+                            nearby.append(str(explicit_id))
+                            continue
+                    nearby.append(f"{str(class_name or 'unknown')}")
 
         return nearby
 
@@ -294,9 +337,22 @@ class TraceAnalyzer:
                             connections: List[Connection]) -> List[Dict[str, Any]]:
         """Detect potential trace issues."""
         issues = []
+        issue_traces = traces
+        if len(traces) > self.max_short_check_traces:
+            issue_traces = sorted(traces, key=lambda trace: trace.length_px, reverse=True)[: self.max_short_check_traces]
+            issues.append({
+                "severity": "info",
+                "trace_id": "trace_density_limit",
+                "issue": "Dense trace map truncated",
+                "details": (
+                    f"Short-circuit proximity checks were limited to the {self.max_short_check_traces} "
+                    f"longest trace regions out of {len(traces)} extracted regions"
+                ),
+                "recommendation": "Use Gerber/KiCad input for exhaustive production net comparison"
+            })
 
         # Check for very thin traces (potential current issues)
-        for trace in traces:
+        for trace in issue_traces:
             if trace.width_mm and trace.width_mm < 0.15:  # < 0.15mm is very thin
                 issues.append({
                     "severity": "warning",
@@ -319,8 +375,8 @@ class TraceAnalyzer:
                     })
 
         # Check for potential short circuits (traces very close together)
-        for i, trace1 in enumerate(traces):
-            for trace2 in traces[i+1:]:
+        for i, trace1 in enumerate(issue_traces):
+            for trace2 in issue_traces[i+1:]:
                 min_distance = self._minimum_trace_distance(trace1, trace2)
                 if min_distance < 5:  # < 5 pixels very close
                     issues.append({
@@ -359,13 +415,18 @@ class TraceAnalyzer:
         }
 
         for comp in component_detections:
-            comp_name = comp.class_name if hasattr(comp, 'class_name') else str(comp)
+            if isinstance(comp, dict):
+                comp_name = str(comp.get("class_name") or "")
+                bbox = comp.get("bbox")
+            else:
+                comp_name = comp.class_name if hasattr(comp, 'class_name') else str(comp)
+                bbox = getattr(comp, "bbox", None)
 
             for known_comp, real_size_mm in known_sizes.items():
                 if known_comp in comp_name:
                     # Get component width in pixels
-                    if hasattr(comp, 'bbox'):
-                        x1, y1, x2, y2 = comp.bbox
+                    if bbox is not None:
+                        x1, y1, x2, y2 = bbox
                         width_px = x2 - x1
                         # Calculate scale
                         scale = real_size_mm / width_px

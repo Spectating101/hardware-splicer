@@ -1,0 +1,69 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Circuit.AI Build electronics from anything" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e13]:
+            - generic [ref=e14]: Circuit.AI
+            - generic [ref=e15]: Build electronics from anything
+        - navigation [ref=e16]:
+          - link "Scan" [ref=e17] [cursor=pointer]:
+            - /url: /scan
+            - img [ref=e18]
+            - text: Scan
+          - link "Build" [ref=e21] [cursor=pointer]:
+            - /url: /build
+            - img [ref=e22]
+            - text: Build
+          - link "Parts" [ref=e24] [cursor=pointer]:
+            - /url: /parts
+            - img [ref=e25]
+            - text: Parts
+          - link "Advanced" [ref=e36] [cursor=pointer]:
+            - /url: /cad
+          - link "Docs" [ref=e37] [cursor=pointer]:
+            - /url: /docs
+        - link "Start" [ref=e39] [cursor=pointer]:
+          - /url: /scan
+          - img [ref=e40]
+          - text: Start
+    - main [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Scan a board" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Upload a photo — we identify every block and tell you what's worth reusing.
+        - generic [ref=e47]:
+          - button "Identify" [ref=e48]:
+            - img [ref=e49]
+            - text: Identify
+          - button "Salvage plan" [ref=e52]:
+            - img [ref=e53]
+            - text: Salvage plan
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - img "Board under analysis" [ref=e81]
+            - img [ref=e82]
+          - generic [ref=e83]:
+            - button "Run identification" [ref=e84]:
+              - img [ref=e85]
+              - text: Run identification
+            - button "New photo" [ref=e88]:
+              - img [ref=e89]
+              - text: New photo
+        - generic [ref=e94]:
+          - generic [ref=e95]:
+            - text: Click
+            - strong [ref=e96]: Run identification
+            - text: to get started.
+          - generic [ref=e97]:
+            - text: "After you're done here: add useful blocks to your"
+            - link "parts bin" [ref=e98] [cursor=pointer]:
+              - /url: /parts
+            - text: or jump to
+            - link "Build" [ref=e99] [cursor=pointer]:
+              - /url: /build
+            - text: to wire them up.
+  - alert [ref=e100]

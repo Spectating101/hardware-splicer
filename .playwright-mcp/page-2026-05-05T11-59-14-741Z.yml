@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - link "Circuit.AI Build electronics from anything" [ref=e5] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e13]:
+            - generic [ref=e14]: Circuit.AI
+            - generic [ref=e15]: Build electronics from anything
+        - navigation [ref=e16]:
+          - link "Scan" [ref=e17] [cursor=pointer]:
+            - /url: /scan
+            - img [ref=e18]
+            - text: Scan
+          - link "Build" [ref=e21] [cursor=pointer]:
+            - /url: /build
+            - img [ref=e22]
+            - text: Build
+          - link "Parts" [ref=e24] [cursor=pointer]:
+            - /url: /parts
+            - img [ref=e25]
+            - text: Parts
+          - link "Advanced" [ref=e36] [cursor=pointer]:
+            - /url: /cad
+          - link "Docs" [ref=e37] [cursor=pointer]:
+            - /url: /docs
+        - link "Start" [ref=e39] [cursor=pointer]:
+          - /url: /scan
+          - img [ref=e40]
+          - text: Start
+    - main [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Scan a board" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Upload a photo — we identify every block and tell you what's worth reusing.
+        - generic [ref=e47]:
+          - button "Identify" [ref=e48]:
+            - img [ref=e49]
+            - text: Identify
+          - button "Salvage plan" [ref=e52]:
+            - img [ref=e53]
+            - text: Salvage plan
+      - generic [ref=e79]:
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - img "Board under analysis" [ref=e82]
+            - img [ref=e83]:
+              - generic [ref=e105] [cursor=pointer]: led
+              - generic [ref=e110] [cursor=pointer]: capacitor
+              - generic [ref=e115] [cursor=pointer]: ic_chip
+              - generic [ref=e120] [cursor=pointer]: capacitor
+              - generic [ref=e125] [cursor=pointer]: capacitor
+              - generic [ref=e130] [cursor=pointer]: capacitor
+              - generic [ref=e135] [cursor=pointer]: capacitor
+              - generic [ref=e140] [cursor=pointer]: ic_chip
+          - generic [ref=e84]:
+            - button "Analyze again" [ref=e141]:
+              - img [ref=e142]
+              - text: Analyze again
+            - button "New photo" [ref=e89]:
+              - img [ref=e90]
+              - text: New photo
+        - generic [ref=e95]:
+          - generic [ref=e145]:
+            - generic [ref=e146]: What this is
+            - paragraph [ref=e147]: "Found 8 components on this PCB. Components include: 1 led, 5 capacitor, 2 ic_chip. These are candidate detections and class labels should be reviewed against the photo. Project potential: fair. No specific project recommendations available."
+          - generic [ref=e148]:
+            - generic [ref=e149]: 8 candidate blocks identified — click one on the image
+            - generic [ref=e150]:
+              - button "led unknown" [ref=e151]:
+                - generic [ref=e152]:
+                  - generic [ref=e153]: led
+                  - generic [ref=e154]: unknown
+              - button "capacitor passive" [ref=e155]:
+                - generic [ref=e156]:
+                  - generic [ref=e157]: capacitor
+                  - generic [ref=e158]: passive
+              - button "ic_chip mcu" [ref=e159]:
+                - generic [ref=e160]:
+                  - generic [ref=e161]: ic_chip
+                  - generic [ref=e162]: mcu
+              - button "capacitor passive" [ref=e163]:
+                - generic [ref=e164]:
+                  - generic [ref=e165]: capacitor
+                  - generic [ref=e166]: passive
+              - button "capacitor passive" [ref=e167]:
+                - generic [ref=e168]:
+                  - generic [ref=e169]: capacitor
+                  - generic [ref=e170]: passive
+              - button "capacitor passive" [ref=e171]:
+                - generic [ref=e172]:
+                  - generic [ref=e173]: capacitor
+                  - generic [ref=e174]: passive
+              - button "capacitor passive" [ref=e175]:
+                - generic [ref=e176]:
+                  - generic [ref=e177]: capacitor
+                  - generic [ref=e178]: passive
+              - button "ic_chip mcu" [ref=e179]:
+                - generic [ref=e180]:
+                  - generic [ref=e181]: ic_chip
+                  - generic [ref=e182]: mcu
+          - generic [ref=e98]:
+            - text: "After you're done here: add useful blocks to your"
+            - link "parts bin" [ref=e99] [cursor=pointer]:
+              - /url: /parts
+            - text: or jump to
+            - link "Build" [ref=e100] [cursor=pointer]:
+              - /url: /build
+            - text: to wire them up.
+  - alert [ref=e78]
