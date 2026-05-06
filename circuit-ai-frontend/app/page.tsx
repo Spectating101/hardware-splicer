@@ -25,11 +25,11 @@ import { usePageTitle } from '@/components/use-page-title';
 const killerFlows = [
   {
     icon: Camera,
-    eyebrow: 'Scan',
-    title: 'Point your phone at any board.',
-    copy: 'Upload a photo or capture from your camera. Circuit.AI identifies every chip, passive, and connector — then tells you in plain English what each section actually does.',
-    cta: 'Open Scan',
-    href: '/scan',
+    eyebrow: 'Start',
+    title: 'Show us what you have.',
+    copy: 'Upload a photo, describe symptoms, or paste sourcing context. Circuit.AI creates a case file and routes it into repair, salvage, build, resale, or evidence collection.',
+    cta: 'Start a case',
+    href: '/start',
     accent: 'from-cyan-500/20 to-sky-500/10',
     stroke: 'border-cyan-300/50',
   },
@@ -140,9 +140,9 @@ export default function HomePage() {
               className="mt-8 flex flex-wrap items-center gap-3"
             >
               <Button asChild size="lg" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
-                <Link href="/scan">
+                <Link href="/start">
                   <Camera className="mr-2 h-5 w-5" />
-                  Scan a board
+                  Start a case
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="rounded-full border-white/20 bg-white/5 text-white hover:bg-white/10">

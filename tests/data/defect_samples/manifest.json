@@ -1,0 +1,16 @@
+{
+  "dataset_id": "synthetic_golden_defect_samples",
+  "golden_image": "good_board.jpg",
+  "samples": [
+    {"image": "good_board.jpg", "expected_defects": []},
+    {"image": "solder_bridge.jpg", "expected_defects": ["solder_or_contamination", "golden_mismatch"]},
+    {"image": "cold_joint.jpg", "expected_defects": ["solder_or_contamination", "golden_mismatch"]},
+    {"image": "burnt_component.jpg", "expected_defects": ["burnt_component"]},
+    {"image": "missing_component.jpg", "expected_defects": ["missing_component", "golden_mismatch"]},
+    {"image": "corrosion.jpg", "expected_defects": ["corrosion", "golden_mismatch"]},
+    {"image": "broken_trace.jpg", "expected_defects": ["golden_mismatch"]},
+    {"image": "misaligned_component.jpg", "expected_defects": ["unexpected_component_or_misalignment", "golden_mismatch"]},
+    {"image": "contamination.jpg", "expected_defects": ["solder_or_contamination", "golden_mismatch"]},
+    {"image": "excess_solder.jpg", "expected_defects": ["solder_or_contamination", "golden_mismatch"]}
+  ]
+}

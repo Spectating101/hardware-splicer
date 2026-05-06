@@ -1,0 +1,4669 @@
+{
+  "mode": "multi_image_board_analysis",
+  "view_count": 2,
+  "views": [
+    {
+      "detections": [
+        {
+          "bbox": [
+            0.0,
+            724.5000610351562,
+            227.2948455810547,
+            991.4095458984375
+          ],
+          "confidence": 0.8928114175796509,
+          "class_id": 6,
+          "class_name": "connector",
+          "center": [
+            113.64742279052734,
+            857.9548034667969
+          ],
+          "semantic_confidence": 0.8928114175796509,
+          "provenance": {
+            "backend": "yolo",
+            "model_path": "models/pcb/electrocom61_nano_320.pt",
+            "raw_class_name": "connector",
+            "threshold": 0.2
+          },
+          "ocr_text": "Comprehensivelearningresc Projecttdeas Intelllgentsuggestionsfored 1.234 ComponentsAnalyzed 567 ActiveUsers 89 DratarteMrasaton",
+          "part_number": "Intelllgentsuggestionsfored"
+        },
+        {
+          "bbox": [
+            0.0,
+            874.006591796875,
+            210.7667694091797,
+            1046.0
+          ],
+          "confidence": 0.5973686575889587,
+          "class_id": 6,
+          "class_name": "connector",
+          "center": [
+            105.38338470458984,
+            960.0032958984375
+          ],
+          "semantic_confidence": 0.5973686575889587,
+          "provenance": {
+            "backend": "yolo",
+            "model_path": "models/pcb/electrocom61_nano_320.pt",
+            "raw_class_name": "connector",
+            "threshold": 0.2
+          },
+          "ocr_text": "1234 ComponentsAnalyzed 567 ActiveUsers 89 ProjectsCreated 12345 ValueGenerated",
+          "part_number": "ComponentsAnalyzed"
+        }
+      ],
+      "detection_summary": {
+        "total_components": 2,
+        "components_by_type": {
+          "connector": 2
+        },
+        "backend_breakdown": {
+          "yolo": 2
+        },
+        "average_confidence": 0.7450900375843048,
+        "average_semantic_confidence": 0.7450900375843048,
+        "detection_quality": "medium",
+        "semantic_quality": "candidate",
+        "review_required": false,
+        "limitations": []
+      },
+      "functionality_analysis": {
+        "components": [
+          {
+            "id": "connector_0",
+            "type": "connector",
+            "capabilities": [
+              "signal_transmission",
+              "power_distribution",
+              "modular_design",
+              "data_communication"
+            ],
+            "reuse_value": "high",
+            "difficulty": "beginner",
+            "detection_confidence": 0.8928114175796509,
+            "bbox": [
+              0.0,
+              724.5000610351562,
+              227.2948455810547,
+              991.4095458984375
+            ],
+            "market_value": 0.1,
+            "educational_value": "medium",
+            "repair_guide": "Check continuity; clean contacts",
+            "price_estimate": 0.12,
+            "llm_analysis": {
+              "educational_value": "medium",
+              "reuse_potential": "high",
+              "failure_modes": [
+                "overheating",
+                "physical damage",
+                "electrical stress"
+              ],
+              "testing_procedures": [
+                "visual inspection",
+                "multimeter testing",
+                "functional test"
+              ],
+              "safety_considerations": [
+                "discharge capacitors",
+                "wear safety gear",
+                "work in well-ventilated area"
+              ],
+              "repair_difficulty": "medium",
+              "estimated_lifespan": "5-10 years",
+              "environmental_impact": "low"
+            }
+          },
+          {
+            "id": "connector_1",
+            "type": "connector",
+            "capabilities": [
+              "signal_transmission",
+              "power_distribution",
+              "modular_design",
+              "data_communication"
+            ],
+            "reuse_value": "high",
+            "difficulty": "beginner",
+            "detection_confidence": 0.5973686575889587,
+            "bbox": [
+              0.0,
+              874.006591796875,
+              210.7667694091797,
+              1046.0
+            ],
+            "market_value": 0.1,
+            "educational_value": "medium",
+            "repair_guide": "Check continuity; clean contacts",
+            "price_estimate": 0.1,
+            "llm_analysis": {
+              "educational_value": "medium",
+              "reuse_potential": "high",
+              "failure_modes": [
+                "overheating",
+                "physical damage",
+                "electrical stress"
+              ],
+              "testing_procedures": [
+                "visual inspection",
+                "multimeter testing",
+                "functional test"
+              ],
+              "safety_considerations": [
+                "discharge capacitors",
+                "wear safety gear",
+                "work in well-ventilated area"
+              ],
+              "repair_difficulty": "medium",
+              "estimated_lifespan": "5-10 years",
+              "environmental_impact": "low"
+            }
+          }
+        ],
+        "capabilities": [
+          "power_distribution",
+          "signal_transmission",
+          "data_communication",
+          "modular_design"
+        ],
+        "component_counts": {
+          "connector": 2
+        },
+        "total_components": 2,
+        "total_market_value": 0.22,
+        "project_potential": "excellent",
+        "educational_potential": "poor"
+      },
+      "marking_analysis": {
+        "mode": "ocr_marking_resolution",
+        "components": [
+          {
+            "component_id": "cmp_0_connector",
+            "class_name": "connector",
+            "bbox": [
+              0.0,
+              724.5000610351562,
+              227.2948455810547,
+              991.4095458984375
+            ],
+            "text": "Comprehensivelearningresc Projecttdeas Intelllgentsuggestionsfored 1.234 ComponentsAnalyzed 567 ActiveUsers 89 DratarteMrasaton",
+            "part_tokens": [
+              "COMPREHENSIVELEARNINGRESC",
+              "PROJECTTDEAS",
+              "INTELLLGENTSUGGESTIONSFORED",
+              "COMPONENTSANALYZED",
+              "ACTIVEUSERS",
+              "DRATARTEMRASATON"
+            ],
+            "silk_labels": [],
+            "candidates": [
+              {
+                "part_number": "COMPREHENSIVELEARNINGRESC",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "PROJECTTDEAS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "INTELLLGENTSUGGESTIONSFORED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "COMPONENTSANALYZED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "ACTIVEUSERS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              }
+            ]
+          },
+          {
+            "component_id": "cmp_1_connector",
+            "class_name": "connector",
+            "bbox": [
+              0.0,
+              874.006591796875,
+              210.7667694091797,
+              1046.0
+            ],
+            "text": "1234 ComponentsAnalyzed 567 ActiveUsers 89 ProjectsCreated 12345 ValueGenerated",
+            "part_tokens": [
+              "COMPONENTSANALYZED",
+              "ACTIVEUSERS",
+              "PROJECTSCREATED",
+              "VALUEGENERATED"
+            ],
+            "silk_labels": [],
+            "candidates": [
+              {
+                "part_number": "COMPONENTSANALYZED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "ACTIVEUSERS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "PROJECTSCREATED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "VALUEGENERATED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              }
+            ]
+          }
+        ],
+        "connector_labels": [],
+        "confidence": 0.18,
+        "limitations": [
+          "OCR markings are noisy and should be verified against the photo",
+          "short top-mark codes may map to multiple parts",
+          "datasheet/pinout matches are evidence, not proof, until package and circuit context agree"
+        ]
+      },
+      "board_understanding": {
+        "mode": "image_only_board_function_inference",
+        "board_identity": {
+          "primary_type": "io_interface_or_adapter",
+          "description": "Connector, adapter, breakout, or IO interface board",
+          "confidence": 0.635,
+          "evidence": [
+            "2 connector",
+            "text hints: io, in"
+          ],
+          "alternatives": [
+            {
+              "type": "power_supply_or_regulator",
+              "description": "Power conversion, protection, or distribution board",
+              "confidence": 0.18,
+              "evidence": [
+                "2 connector",
+                "text hints: ac"
+              ]
+            },
+            {
+              "type": "controller_or_embedded_compute",
+              "description": "Controller, development, or embedded compute board",
+              "confidence": 0.16,
+              "evidence": [
+                "2 connector"
+              ]
+            },
+            {
+              "type": "motor_or_actuator_driver",
+              "description": "Motor, relay, solenoid, or high-current actuator driver board",
+              "confidence": 0.16,
+              "evidence": [
+                "2 connector"
+              ]
+            }
+          ]
+        },
+        "functional_blocks": [
+          {
+            "block_type": "power_input_protection",
+            "label": "Input power/protection",
+            "component_count": 2,
+            "components": [
+              "cmp_0_connector",
+              "cmp_1_connector"
+            ],
+            "bbox": [
+              0,
+              725,
+              227,
+              1046
+            ],
+            "confidence": 0.49,
+            "function": "Accepts incoming power and protects downstream circuitry",
+            "crop_hint": {
+              "suggested_crop_bbox": [
+                0,
+                677,
+                275,
+                1046
+              ],
+              "include_margin": "15% around block bbox"
+            }
+          },
+          {
+            "block_type": "io_connectivity",
+            "label": "External IO/connectors",
+            "component_count": 2,
+            "components": [
+              "cmp_0_connector",
+              "cmp_1_connector"
+            ],
+            "bbox": [
+              0,
+              725,
+              227,
+              1046
+            ],
+            "confidence": 0.49,
+            "function": "Provides external electrical connections to a machine or host",
+            "crop_hint": {
+              "suggested_crop_bbox": [
+                0,
+                677,
+                275,
+                1046
+              ],
+              "include_margin": "15% around block bbox"
+            }
+          }
+        ],
+        "machine_context": {
+          "likely_roles": [
+            {
+              "role": "io_breakout",
+              "confidence": 0.72,
+              "description": "Connects sensors, actuators, host systems, or service ports",
+              "evidence": [
+                "2 connector",
+                "text hints: io, in"
+              ]
+            },
+            {
+              "role": "power_node",
+              "confidence": 0.18,
+              "description": "Supplies, converts, or protects machine power rails",
+              "evidence": [
+                "2 connector",
+                "text hints: ac"
+              ]
+            },
+            {
+              "role": "machine_controller",
+              "confidence": 0.16,
+              "description": "Runs firmware/control logic and coordinates IO",
+              "evidence": [
+                "2 connector"
+              ]
+            },
+            {
+              "role": "actuator_driver",
+              "confidence": 0.16,
+              "description": "Switches current for motors, relays, solenoids, or loads",
+              "evidence": [
+                "2 connector"
+              ]
+            }
+          ],
+          "integration_notes": [
+            "Treat connectors as machine interface points; build a pin map before splicing harnesses.",
+            "Connector regions are the best starting point for pinout tracing and machine-level integration."
+          ],
+          "pinout_evidence": [],
+          "connector_label_evidence": []
+        },
+        "reuse_and_splice": {
+          "candidate_regions": [
+            {
+              "region_id": "crop_1_io_connectivity",
+              "source_block": "io_connectivity",
+              "bbox": [
+                0,
+                725,
+                227,
+                1046
+              ],
+              "crop_bbox": [
+                0,
+                667,
+                285,
+                1046
+              ],
+              "confidence": 0.49,
+              "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+              "splice_requirements": [
+                "confirm pinout",
+                "measure supply rails",
+                "inspect both sides",
+                "verify isolation/clearance",
+                "map connector pins",
+                "confirm mating connector and cable clearance"
+              ],
+              "risk": {
+                "level": "low",
+                "overlapping_defects": 0,
+                "penalty": 0.0
+              }
+            }
+          ],
+          "board_spec_for_splicer": {
+            "coordinate_system": "image_pixels",
+            "bbox_px": [
+              0,
+              0,
+              800,
+              1046
+            ],
+            "confidence": 0.635,
+            "components": [
+              {
+                "id": "cmp_0_connector",
+                "class_name": "connector",
+                "bbox_px": [
+                  0,
+                  725,
+                  227,
+                  991
+                ],
+                "confidence": 0.893
+              },
+              {
+                "id": "cmp_1_connector",
+                "class_name": "connector",
+                "bbox_px": [
+                  0,
+                  874,
+                  211,
+                  1046
+                ],
+                "confidence": 0.597
+              }
+            ],
+            "io_ports": [
+              {
+                "id": "cmp_0_connector",
+                "kind": "connector",
+                "bbox_px": [
+                  0,
+                  725,
+                  227,
+                  991
+                ],
+                "center_px": [
+                  114,
+                  858
+                ],
+                "confidence": 0.893
+              },
+              {
+                "id": "cmp_1_connector",
+                "kind": "connector",
+                "bbox_px": [
+                  0,
+                  874,
+                  211,
+                  1046
+                ],
+                "center_px": [
+                  105,
+                  960
+                ],
+                "confidence": 0.597
+              }
+            ],
+            "keepouts": [],
+            "candidate_crops": [
+              {
+                "id": "crop_1_io_connectivity",
+                "bbox_px": [
+                  0,
+                  667,
+                  285,
+                  1046
+                ],
+                "source_block": "io_connectivity",
+                "confidence": 0.49
+              }
+            ],
+            "splicer_notes": [
+              "pixel geometry must be calibrated to mm before mechanical placement",
+              "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+              "do electrical validation before powering any harvested/spliced module"
+            ]
+          },
+          "warnings": [
+            "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design",
+            "visual topology confidence is low; hidden nets may make extracted modules unusable"
+          ]
+        },
+        "observed_inventory": {
+          "component_counts": {
+            "connector": 2
+          },
+          "recognized_component_count": 2,
+          "resolved_marking_count": 2
+        },
+        "confidence": 0.635,
+        "limitations": [
+          "single-image inference estimates board role; it does not identify exact manufacturer model",
+          "bottom-side parts, hidden traces, multilayer routing, and unlabeled ICs can change function",
+          "use OCR markings, datasheets, electrical tests, Gerber/KiCad files, or a known golden board for high-confidence intent"
+        ]
+      },
+      "machine_connection_map": {
+        "mode": "machine_connection_map",
+        "connector_count": 2,
+        "connector_maps": [
+          {
+            "connector_id": "conn_0_connector",
+            "bbox": [
+              0,
+              725,
+              227,
+              991
+            ],
+            "center": [
+              114,
+              858
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 15,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_side"
+          },
+          {
+            "connector_id": "conn_1_connector",
+            "bbox": [
+              0,
+              874,
+              211,
+              1046
+            ],
+            "center": [
+              105,
+              960
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 12,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          }
+        ],
+        "interfaces": [],
+        "pinout_evidence": [],
+        "splice_plan": {
+          "safest_entry_points": [],
+          "required_measurements": [
+            "continuity from connector to ground",
+            "unpowered resistance between power and ground"
+          ],
+          "do_not_assume": [
+            "pin order",
+            "voltage level",
+            "shared ground",
+            "connector current rating",
+            "firmware protocol"
+          ]
+        },
+        "confidence": 0.41,
+        "limitations": [
+          "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+          "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+          "do not power harvested modules until polarity, rails, and isolation are confirmed"
+        ]
+      },
+      "salvage_opportunities": {
+        "mode": "salvage_and_arbitrage_opportunity_engine",
+        "asset_summary": {
+          "capabilities": {
+            "connector": 4,
+            "power": 1
+          },
+          "parts": {
+            "activeusers": 2,
+            "componentsanalyzed": 2,
+            "comprehensivelearningresc": 1,
+            "intelllgentsuggestionsfored": 1,
+            "projectscreated": 1,
+            "projecttdeas": 1,
+            "valuegenerated": 1
+          },
+          "connector_count": 2,
+          "defect_count": 0,
+          "evidence": [
+            "board role: io_interface_or_adapter",
+            "part marking: comprehensivelearningresc",
+            "part marking: projecttdeas",
+            "part marking: intelllgentsuggestionsfored",
+            "part marking: componentsanalyzed",
+            "part marking: activeusers",
+            "part marking: componentsanalyzed",
+            "part marking: activeusers",
+            "part marking: projectscreated",
+            "part marking: valuegenerated"
+          ]
+        },
+        "opportunities": [
+          {
+            "type": "build_from_salvage",
+            "id": "bench_power_module",
+            "name": "Bench Power Supply Module",
+            "category": "tooling",
+            "score": 0.53,
+            "estimated_output_value_usd": 22.0,
+            "build_complexity": "medium",
+            "matched_assets": [
+              "power"
+            ],
+            "missing_assets": [],
+            "nice_to_have_matched": [
+              "connector"
+            ],
+            "next_steps": [
+              "test harvested modules",
+              "create pin map",
+              "verify power rails",
+              "prototype build using harvested modules"
+            ]
+          },
+          {
+            "type": "build_from_salvage",
+            "id": "wifi_relay_switch",
+            "name": "Smart WiFi Relay Switch",
+            "category": "upcycled_gadget",
+            "score": 0.23,
+            "estimated_output_value_usd": 18.0,
+            "build_complexity": "medium",
+            "matched_assets": [
+              "power"
+            ],
+            "missing_assets": [
+              "actuator_driver",
+              "wireless"
+            ],
+            "nice_to_have_matched": [
+              "connector"
+            ],
+            "next_steps": [
+              "test harvested modules",
+              "create pin map",
+              "verify power rails",
+              "source missing assets: actuator_driver, wireless"
+            ]
+          }
+        ],
+        "best_opportunity": {
+          "type": "build_from_salvage",
+          "id": "bench_power_module",
+          "name": "Bench Power Supply Module",
+          "category": "tooling",
+          "score": 0.53,
+          "estimated_output_value_usd": 22.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        "strategy": {
+          "recommendation": "build_now",
+          "reason": "Top opportunity is Bench Power Supply Module with score 0.53.",
+          "inventory_focus": [
+            "connector",
+            "power"
+          ]
+        },
+        "confidence": 0.8,
+        "limitations": [
+          "value estimates are planning estimates until parts are tested and market prices are verified",
+          "salvaged modules need electrical validation before resale or reuse",
+          "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+        ]
+      },
+      "visual_topology": {
+        "mode": "image_only_visual_estimate",
+        "trace_count": 176,
+        "connection_count": 0,
+        "scale_mm_per_px": null,
+        "analysis_resize_scale": 1.0,
+        "confidence": 0.35,
+        "uncertainty": "low",
+        "component_instances": [
+          {
+            "instance_id": "None",
+            "class_name": "connector"
+          },
+          {
+            "instance_id": "None",
+            "class_name": "connector"
+          }
+        ],
+        "traces": [
+          {
+            "trace_id": "trace_0",
+            "start_point": [
+              9,
+              572
+            ],
+            "end_point": [
+              58,
+              582
+            ],
+            "width_px": 50.0,
+            "length_px": 373.5887528891069,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_1",
+            "start_point": [
+              100,
+              577
+            ],
+            "end_point": [
+              163,
+              577
+            ],
+            "width_px": 10.0,
+            "length_px": 126.37218458033324,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_2",
+            "start_point": [
+              144,
+              391
+            ],
+            "end_point": [
+              184,
+              399
+            ],
+            "width_px": 21.0,
+            "length_px": 167.2482736519527,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_3",
+            "start_point": [
+              10,
+              297
+            ],
+            "end_point": [
+              30,
+              288
+            ],
+            "width_px": 21.0,
+            "length_px": 318.2998704866507,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_4",
+            "start_point": [
+              213,
+              241
+            ],
+            "end_point": [
+              243,
+              241
+            ],
+            "width_px": 24.0,
+            "length_px": 198.00795169594576,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_5",
+            "start_point": [
+              29,
+              461
+            ],
+            "end_point": [
+              77,
+              468
+            ],
+            "width_px": 14.0,
+            "length_px": 160.92105279186777,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_6",
+            "start_point": [
+              406,
+              259
+            ],
+            "end_point": [
+              422,
+              241
+            ],
+            "width_px": 17.0,
+            "length_px": 191.48741434245358,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_7",
+            "start_point": [
+              78,
+              805
+            ],
+            "end_point": [
+              114,
+              817
+            ],
+            "width_px": 13.0,
+            "length_px": 117.41807698237335,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_8",
+            "start_point": [
+              55,
+              286
+            ],
+            "end_point": [
+              70,
+              299
+            ],
+            "width_px": 16.0,
+            "length_px": 249.93982060198636,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_9",
+            "start_point": [
+              35,
+              286
+            ],
+            "end_point": [
+              50,
+              299
+            ],
+            "width_px": 16.0,
+            "length_px": 249.93982060198636,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_10",
+            "start_point": [
+              226,
+              185
+            ],
+            "end_point": [
+              268,
+              178
+            ],
+            "width_px": 11.0,
+            "length_px": 121.38890050981738,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_11",
+            "start_point": [
+              226,
+              70
+            ],
+            "end_point": [
+              268,
+              63
+            ],
+            "width_px": 11.0,
+            "length_px": 117.61453779742995,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_12",
+            "start_point": [
+              504,
+              253
+            ],
+            "end_point": [
+              520,
+              259
+            ],
+            "width_px": 17.0,
+            "length_px": 217.5330297467231,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_13",
+            "start_point": [
+              359,
+              258
+            ],
+            "end_point": [
+              375,
+              252
+            ],
+            "width_px": 17.0,
+            "length_px": 254.45546399261872,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_14",
+            "start_point": [
+              28,
+              815
+            ],
+            "end_point": [
+              63,
+              815
+            ],
+            "width_px": 15.0,
+            "length_px": 126.46495144885321,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_15",
+            "start_point": [
+              110,
+              259
+            ],
+            "end_point": [
+              126,
+              258
+            ],
+            "width_px": 17.0,
+            "length_px": 181.81033847917186,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_16",
+            "start_point": [
+              74,
+              296
+            ],
+            "end_point": [
+              90,
+              298
+            ],
+            "width_px": 17.0,
+            "length_px": 174.32526129647493,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_17",
+            "start_point": [
+              65,
+              582
+            ],
+            "end_point": [
+              97,
+              583
+            ],
+            "width_px": 13.0,
+            "length_px": 117.43303372812339,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_18",
+            "start_point": [
+              28,
+              857
+            ],
+            "end_point": [
+              55,
+              856
+            ],
+            "width_px": 15.0,
+            "length_px": 115.86392258581515,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_19",
+            "start_point": [
+              143,
+              264
+            ],
+            "end_point": [
+              168,
+              251
+            ],
+            "width_px": 18.0,
+            "length_px": 211.4121597892685,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_20",
+            "start_point": [
+              9,
+              650
+            ],
+            "end_point": [
+              25,
+              651
+            ],
+            "width_px": 16.0,
+            "length_px": 222.25298573161385,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_21",
+            "start_point": [
+              95,
+              286
+            ],
+            "end_point": [
+              116,
+              286
+            ],
+            "width_px": 22.0,
+            "length_px": 216.24642782899747,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_22",
+            "start_point": [
+              387,
+              241
+            ],
+            "end_point": [
+              402,
+              241
+            ],
+            "width_px": 16.0,
+            "length_px": 141.4194566098938,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_23",
+            "start_point": [
+              180,
+              241
+            ],
+            "end_point": [
+              195,
+              241
+            ],
+            "width_px": 16.0,
+            "length_px": 141.4194566098938,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_24",
+            "start_point": [
+              78,
+              399
+            ],
+            "end_point": [
+              112,
+              404
+            ],
+            "width_px": 7.0,
+            "length_px": 66.11665743260838,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_25",
+            "start_point": [
+              61,
+              206
+            ],
+            "end_point": [
+              95,
+              200
+            ],
+            "width_px": 7.0,
+            "length_px": 66.07443773397083,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_26",
+            "start_point": [
+              61,
+              91
+            ],
+            "end_point": [
+              95,
+              85
+            ],
+            "width_px": 7.0,
+            "length_px": 66.07443773397083,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_27",
+            "start_point": [
+              306,
+              188
+            ],
+            "end_point": [
+              335,
+              179
+            ],
+            "width_px": 11.0,
+            "length_px": 99.86328287981226,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_28",
+            "start_point": [
+              306,
+              73
+            ],
+            "end_point": [
+              335,
+              64
+            ],
+            "width_px": 11.0,
+            "length_px": 99.86328287981226,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_29",
+            "start_point": [
+              17,
+              411
+            ],
+            "end_point": [
+              35,
+              403
+            ],
+            "width_px": 17.0,
+            "length_px": 65.16646310568062,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_30",
+            "start_point": [
+              293,
+              251
+            ],
+            "end_point": [
+              308,
+              256
+            ],
+            "width_px": 16.0,
+            "length_px": 194.1489646572445,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_31",
+            "start_point": [
+              389,
+              505
+            ],
+            "end_point": [
+              416,
+              506
+            ],
+            "width_px": 9.0,
+            "length_px": 121.85908162336204,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_32",
+            "start_point": [
+              20,
+              693
+            ],
+            "end_point": [
+              46,
+              698
+            ],
+            "width_px": 13.0,
+            "length_px": 157.9714771895121,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_33",
+            "start_point": [
+              324,
+              623
+            ],
+            "end_point": [
+              353,
+              618
+            ],
+            "width_px": 12.0,
+            "length_px": 138.20625390662735,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_34",
+            "start_point": [
+              188,
+              296
+            ],
+            "end_point": [
+              204,
+              295
+            ],
+            "width_px": 17.0,
+            "length_px": 202.93061559567045,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_35",
+            "start_point": [
+              70,
+              188
+            ],
+            "end_point": [
+              91,
+              181
+            ],
+            "width_px": 15.0,
+            "length_px": 119.12554102017964,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_36",
+            "start_point": [
+              70,
+              73
+            ],
+            "end_point": [
+              91,
+              66
+            ],
+            "width_px": 15.0,
+            "length_px": 119.12554102017964,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_37",
+            "start_point": [
+              598,
+              342
+            ],
+            "end_point": [
+              614,
+              339
+            ],
+            "width_px": 12.0,
+            "length_px": 86.65981422724369,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_38",
+            "start_point": [
+              140,
+              286
+            ],
+            "end_point": [
+              155,
+              303
+            ],
+            "width_px": 16.0,
+            "length_px": 89.89949493661166,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_39",
+            "start_point": [
+              402,
+              364
+            ],
+            "end_point": [
+              426,
+              363
+            ],
+            "width_px": 9.0,
+            "length_px": 111.34006171862801,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_40",
+            "start_point": [
+              120,
+              286
+            ],
+            "end_point": [
+              135,
+              303
+            ],
+            "width_px": 16.0,
+            "length_px": 126.02789174043845,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_41",
+            "start_point": [
+              84,
+              693
+            ],
+            "end_point": [
+              108,
+              692
+            ],
+            "width_px": 10.0,
+            "length_px": 109.42096821509128,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_42",
+            "start_point": [
+              41,
+              258
+            ],
+            "end_point": [
+              56,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 177.10127898362066,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_43",
+            "start_point": [
+              524,
+              247
+            ],
+            "end_point": [
+              539,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 112.3609083236183,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_44",
+            "start_point": [
+              244,
+              258
+            ],
+            "end_point": [
+              259,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 178.1974353699644,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_45",
+            "start_point": [
+              543,
+              258
+            ],
+            "end_point": [
+              558,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 173.80209529607538,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_46",
+            "start_point": [
+              427,
+              247
+            ],
+            "end_point": [
+              442,
+              247
+            ],
+            "width_px": 16.0,
+            "length_px": 123.1325218143356,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_47",
+            "start_point": [
+              459,
+              735
+            ],
+            "end_point": [
+              475,
+              730
+            ],
+            "width_px": 12.0,
+            "length_px": 88.34404726627736,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_48",
+            "start_point": [
+              92,
+              985
+            ],
+            "end_point": [
+              112,
+              992
+            ],
+            "width_px": 9.0,
+            "length_px": 97.00650426443616,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_49",
+            "start_point": [
+              81,
+              468
+            ],
+            "end_point": [
+              106,
+              460
+            ],
+            "width_px": 10.0,
+            "length_px": 141.25612287292307,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          }
+        ],
+        "connections": [],
+        "issues": [
+          {
+            "severity": "info",
+            "trace_id": "trace_density_limit",
+            "issue": "Dense trace map truncated",
+            "details": "Short-circuit proximity checks were limited to the 120 longest trace regions out of 176 extracted regions",
+            "recommendation": "Use Gerber/KiCad input for exhaustive production net comparison"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_13_trace_90",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_65_trace_81",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_21_trace_40",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_64_trace_87",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.2px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_30_trace_98",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.6px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_6_trace_22",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.5px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_15_trace_81",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.6px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_42_trace_127",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_5_trace_49",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_32_trace_55",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_87_trace_115",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_33_trace_52",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_98_trace_72",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_1_trace_17",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_18_trace_121",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (2.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_76_trace_90",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_113_trace_89",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_66_trace_88",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.5px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_94_trace_70",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          }
+        ],
+        "limitations": [
+          "single-image trace extraction is a visual estimate, not a verified netlist",
+          "hidden, internal, bottom-side, and solder-mask-covered traces may be missed",
+          "use Gerber/KiCad/netlist input for high-confidence circuit topology"
+        ]
+      },
+      "topology_aoi": {
+        "status": "unavailable",
+        "mode": "reference_topology_aoi",
+        "reference_signatures": [],
+        "observed_signatures": [],
+        "matched_clusters": 0,
+        "topology_delta": 0,
+        "missing": [],
+        "extra": [],
+        "reference_stats": {
+          "net_count": 0,
+          "component_count": 0,
+          "isolated_count": 0
+        },
+        "observed_stats": {
+          "net_count": 0,
+          "component_count": 0,
+          "isolated_count": 0
+        },
+        "summary": "Topology AOI comparison not run.",
+        "notes": [
+          "Topology AOI comparison not run."
+        ]
+      },
+      "defect_inspection": {
+        "mode": "candidate_visual_defect_inspection",
+        "defect_count": 0,
+        "max_severity": 0.0,
+        "analysis_resize_scale": 1.0,
+        "review_required": false,
+        "defects": [],
+        "limitations": [
+          "classical defect checks are candidate flags until validated against a golden board",
+          "lighting, glare, solder mask color, and board finish can cause false positives",
+          "production defect detection requires labeled line-specific defect data"
+        ]
+      },
+      "reference_aoi": {
+        "status": "unavailable",
+        "reference_counts": {},
+        "current_counts": {},
+        "missing": [],
+        "extra": [],
+        "matched": [],
+        "component_delta": 0,
+        "mode": "reference_component_count_aoi",
+        "summary": "Reference AOI comparison not run.",
+        "notes": [
+          "Reference AOI comparison not run."
+        ]
+      },
+      "golden_aoi": {
+        "status": "unavailable",
+        "mode": "golden_image_diff",
+        "defect_count": 0,
+        "defects": [],
+        "summary": "Golden image comparison not run.",
+        "notes": [
+          "Golden image comparison not run."
+        ]
+      },
+      "aoi_inspection": {
+        "readiness": "prototype_ready",
+        "score": 0.701,
+        "learned_detection_ratio": 1.0,
+        "semantic_confidence": 0.745,
+        "topology_confidence": 0.35,
+        "scan_quality": {
+          "score": 0.628,
+          "reason": "tracked"
+        },
+        "current_capabilities": [
+          "component localization and coarse class identification",
+          "candidate trace/connection extraction from visible copper geometry",
+          "candidate visual defect detection for burns, solder bridges, corrosion, and broken traces",
+          "explicit confidence, provenance, and review-required metadata"
+        ],
+        "defect_candidate_count": 0,
+        "reference_component_delta": 0,
+        "golden_status": "unavailable",
+        "golden_defect_count": 0,
+        "topology_status": "unavailable",
+        "topology_delta": 0,
+        "blockers": [
+          "image-only topology confidence is below production threshold",
+          "calibrated camera/lighting fixture and focus checks",
+          "labeled defect dataset from the target production line",
+          "model/license review for any sourced checkpoints before redistribution"
+        ]
+      },
+      "project_recommendations": [],
+      "analysis_metadata": {
+        "total_processing_time": "~2 seconds",
+        "detection_quality": "medium",
+        "semantic_quality": "candidate",
+        "review_required": false,
+        "limitations": [],
+        "preprocessing": {
+          "steps_applied": [
+            "white_balance",
+            "clahe",
+            "denoise",
+            "sharpen",
+            "gamma"
+          ],
+          "opencv_available": true,
+          "white_balance": {
+            "white_balance": "applied",
+            "channel_means_before": [
+              246.6402587890625,
+              245.7395477294922,
+              245.79788208007812
+            ],
+            "channel_gains": [
+              0.997644305229187,
+              1.0013009309768677,
+              1.001063346862793
+            ]
+          },
+          "clahe": {
+            "clahe": {
+              "clip_limit": 2.2,
+              "tile_grid": [
+                8,
+                8
+              ]
+            }
+          },
+          "denoise": {
+            "denoise": {
+              "h": 8.0,
+              "h_color": 10.0
+            }
+          },
+          "sharpen": {
+            "sharpen": {
+              "amount": 0.4,
+              "sigma": 1.0
+            }
+          },
+          "gamma": {
+            "gamma": 1.08
+          },
+          "scan_quality": {
+            "score": 0.6281,
+            "luminance_mean": 244.833,
+            "contrast": 43.243,
+            "blur_var": 5958.268,
+            "dynamic_range": 22.0,
+            "p05": 233.0,
+            "p95": 255.0
+          },
+          "input_shape": [
+            1046,
+            800,
+            3
+          ],
+          "output_shape": [
+            1046,
+            800,
+            3
+          ]
+        },
+        "circuit_understanding_confidence": 0.35,
+        "defect_count": 0,
+        "reference_aoi_status": "unavailable",
+        "reference_component_delta": 0,
+        "golden_aoi_status": "unavailable",
+        "golden_defect_count": 0,
+        "topology_aoi_status": "unavailable",
+        "topology_aoi_delta": 0,
+        "board_type": "io_interface_or_adapter",
+        "board_function_confidence": 0.635,
+        "marking_confidence": 0.18,
+        "resolved_marking_count": 2,
+        "machine_connection_confidence": 0.41,
+        "connector_count": 2,
+        "salvage_opportunity_count": 2,
+        "best_salvage_opportunity": "Bench Power Supply Module",
+        "functional_block_count": 2,
+        "aoi_readiness": "prototype_ready",
+        "scan_quality": {
+          "score": 0.628,
+          "reason": "tracked"
+        },
+        "project_potential": "excellent",
+        "backend": "hybrid",
+        "ocr": true
+      },
+      "view_id": "view_1"
+    },
+    {
+      "detections": [
+        {
+          "bbox": [
+            0.0,
+            724.904541015625,
+            228.622802734375,
+            990.409912109375
+          ],
+          "confidence": 0.8893305063247681,
+          "class_id": 6,
+          "class_name": "connector",
+          "center": [
+            114.3114013671875,
+            857.6572265625
+          ],
+          "semantic_confidence": 0.8893305063247681,
+          "provenance": {
+            "backend": "yolo",
+            "model_path": "models/pcb/electrocom61_nano_320.pt",
+            "raw_class_name": "connector",
+            "threshold": 0.2
+          },
+          "ocr_text": "Comprehensivelearningresc Projecttdeas Intelllgentsuggestionsfored 1.234 ComponentsAnalyzed 567 ActiveUsers 89 DenteanteMrentad",
+          "part_number": "Intelllgentsuggestionsfored"
+        },
+        {
+          "bbox": [
+            0.0,
+            874.40478515625,
+            210.6340789794922,
+            1046.0
+          ],
+          "confidence": 0.609792172908783,
+          "class_id": 6,
+          "class_name": "connector",
+          "center": [
+            105.3170394897461,
+            960.202392578125
+          ],
+          "semantic_confidence": 0.609792172908783,
+          "provenance": {
+            "backend": "yolo",
+            "model_path": "models/pcb/electrocom61_nano_320.pt",
+            "raw_class_name": "connector",
+            "threshold": 0.2
+          },
+          "ocr_text": "1234 ComponentsAnalyzed 567 ActiveUsers 89 ProjectsCreated 12345 ValueGenerated",
+          "part_number": "ComponentsAnalyzed"
+        },
+        {
+          "bbox": [
+            0.0,
+            642.5147094726562,
+            238.48883056640625,
+            882.9232177734375
+          ],
+          "confidence": 0.4095212519168854,
+          "class_id": 6,
+          "class_name": "connector",
+          "center": [
+            119.24441528320312,
+            762.7189636230469
+          ],
+          "semantic_confidence": 0.4095212519168854,
+          "provenance": {
+            "backend": "yolo",
+            "model_path": "models/pcb/electrocom61_nano_320.pt",
+            "raw_class_name": "connector",
+            "threshold": 0.2
+          },
+          "ocr_text": "2 EducationalInsights Comprehensivelearningresou Projecttdeas Intelllgentsuggestionsforedu",
+          "part_number": "Intelllgentsuggestionsforedu"
+        }
+      ],
+      "detection_summary": {
+        "total_components": 3,
+        "components_by_type": {
+          "connector": 3
+        },
+        "backend_breakdown": {
+          "yolo": 3
+        },
+        "average_confidence": 0.6362146437168121,
+        "average_semantic_confidence": 0.6362146437168121,
+        "detection_quality": "medium",
+        "semantic_quality": "candidate",
+        "review_required": false,
+        "limitations": []
+      },
+      "functionality_analysis": {
+        "components": [
+          {
+            "id": "connector_0",
+            "type": "connector",
+            "capabilities": [
+              "signal_transmission",
+              "power_distribution",
+              "modular_design",
+              "data_communication"
+            ],
+            "reuse_value": "high",
+            "difficulty": "beginner",
+            "detection_confidence": 0.8893305063247681,
+            "bbox": [
+              0.0,
+              724.904541015625,
+              228.622802734375,
+              990.409912109375
+            ],
+            "market_value": 0.1,
+            "educational_value": "medium",
+            "repair_guide": "Check continuity; clean contacts",
+            "price_estimate": 0.12,
+            "llm_analysis": {
+              "educational_value": "medium",
+              "reuse_potential": "high",
+              "failure_modes": [
+                "overheating",
+                "physical damage",
+                "electrical stress"
+              ],
+              "testing_procedures": [
+                "visual inspection",
+                "multimeter testing",
+                "functional test"
+              ],
+              "safety_considerations": [
+                "discharge capacitors",
+                "wear safety gear",
+                "work in well-ventilated area"
+              ],
+              "repair_difficulty": "medium",
+              "estimated_lifespan": "5-10 years",
+              "environmental_impact": "low"
+            }
+          },
+          {
+            "id": "connector_1",
+            "type": "connector",
+            "capabilities": [
+              "signal_transmission",
+              "power_distribution",
+              "modular_design",
+              "data_communication"
+            ],
+            "reuse_value": "high",
+            "difficulty": "beginner",
+            "detection_confidence": 0.609792172908783,
+            "bbox": [
+              0.0,
+              874.40478515625,
+              210.6340789794922,
+              1046.0
+            ],
+            "market_value": 0.1,
+            "educational_value": "medium",
+            "repair_guide": "Check continuity; clean contacts",
+            "price_estimate": 0.1,
+            "llm_analysis": {
+              "educational_value": "medium",
+              "reuse_potential": "high",
+              "failure_modes": [
+                "overheating",
+                "physical damage",
+                "electrical stress"
+              ],
+              "testing_procedures": [
+                "visual inspection",
+                "multimeter testing",
+                "functional test"
+              ],
+              "safety_considerations": [
+                "discharge capacitors",
+                "wear safety gear",
+                "work in well-ventilated area"
+              ],
+              "repair_difficulty": "medium",
+              "estimated_lifespan": "5-10 years",
+              "environmental_impact": "low"
+            }
+          },
+          {
+            "id": "connector_2",
+            "type": "connector",
+            "capabilities": [
+              "signal_transmission",
+              "power_distribution",
+              "modular_design",
+              "data_communication"
+            ],
+            "reuse_value": "high",
+            "difficulty": "beginner",
+            "detection_confidence": 0.4095212519168854,
+            "bbox": [
+              0.0,
+              642.5147094726562,
+              238.48883056640625,
+              882.9232177734375
+            ],
+            "market_value": 0.1,
+            "educational_value": "medium",
+            "repair_guide": "Check continuity; clean contacts",
+            "price_estimate": 0.09,
+            "llm_analysis": {
+              "educational_value": "medium",
+              "reuse_potential": "high",
+              "failure_modes": [
+                "overheating",
+                "physical damage",
+                "electrical stress"
+              ],
+              "testing_procedures": [
+                "visual inspection",
+                "multimeter testing",
+                "functional test"
+              ],
+              "safety_considerations": [
+                "discharge capacitors",
+                "wear safety gear",
+                "work in well-ventilated area"
+              ],
+              "repair_difficulty": "medium",
+              "estimated_lifespan": "5-10 years",
+              "environmental_impact": "low"
+            }
+          }
+        ],
+        "capabilities": [
+          "power_distribution",
+          "signal_transmission",
+          "data_communication",
+          "modular_design"
+        ],
+        "component_counts": {
+          "connector": 3
+        },
+        "total_components": 3,
+        "total_market_value": 0.31,
+        "project_potential": "excellent",
+        "educational_potential": "poor"
+      },
+      "marking_analysis": {
+        "mode": "ocr_marking_resolution",
+        "components": [
+          {
+            "component_id": "cmp_0_connector",
+            "class_name": "connector",
+            "bbox": [
+              0.0,
+              724.904541015625,
+              228.622802734375,
+              990.409912109375
+            ],
+            "text": "Comprehensivelearningresc Projecttdeas Intelllgentsuggestionsfored 1.234 ComponentsAnalyzed 567 ActiveUsers 89 DenteanteMrentad",
+            "part_tokens": [
+              "COMPREHENSIVELEARNINGRESC",
+              "PROJECTTDEAS",
+              "INTELLLGENTSUGGESTIONSFORED",
+              "COMPONENTSANALYZED",
+              "ACTIVEUSERS",
+              "DENTEANTEMRENTAD"
+            ],
+            "silk_labels": [],
+            "candidates": [
+              {
+                "part_number": "COMPREHENSIVELEARNINGRESC",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "PROJECTTDEAS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "INTELLLGENTSUGGESTIONSFORED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "COMPONENTSANALYZED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "ACTIVEUSERS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              }
+            ]
+          },
+          {
+            "component_id": "cmp_1_connector",
+            "class_name": "connector",
+            "bbox": [
+              0.0,
+              874.40478515625,
+              210.6340789794922,
+              1046.0
+            ],
+            "text": "1234 ComponentsAnalyzed 567 ActiveUsers 89 ProjectsCreated 12345 ValueGenerated",
+            "part_tokens": [
+              "COMPONENTSANALYZED",
+              "ACTIVEUSERS",
+              "PROJECTSCREATED",
+              "VALUEGENERATED"
+            ],
+            "silk_labels": [],
+            "candidates": [
+              {
+                "part_number": "COMPONENTSANALYZED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "ACTIVEUSERS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "PROJECTSCREATED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "VALUEGENERATED",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              }
+            ]
+          },
+          {
+            "component_id": "cmp_2_connector",
+            "class_name": "connector",
+            "bbox": [
+              0.0,
+              642.5147094726562,
+              238.48883056640625,
+              882.9232177734375
+            ],
+            "text": "2 EducationalInsights Comprehensivelearningresou Projecttdeas Intelllgentsuggestionsforedu",
+            "part_tokens": [
+              "EDUCATIONALINSIGHTS",
+              "COMPREHENSIVELEARNINGRESOU",
+              "PROJECTTDEAS",
+              "INTELLLGENTSUGGESTIONSFOREDU"
+            ],
+            "silk_labels": [],
+            "candidates": [
+              {
+                "part_number": "EDUCATIONALINSIGHTS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "COMPREHENSIVELEARNINGRESOU",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "PROJECTTDEAS",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              },
+              {
+                "part_number": "INTELLLGENTSUGGESTIONSFOREDU",
+                "confidence": 0.18,
+                "match_type": "unresolved_marking",
+                "next_steps": [
+                  "search datasheet",
+                  "verify package",
+                  "capture sharper crop"
+                ]
+              }
+            ]
+          }
+        ],
+        "connector_labels": [],
+        "confidence": 0.18,
+        "limitations": [
+          "OCR markings are noisy and should be verified against the photo",
+          "short top-mark codes may map to multiple parts",
+          "datasheet/pinout matches are evidence, not proof, until package and circuit context agree"
+        ]
+      },
+      "board_understanding": {
+        "mode": "image_only_board_function_inference",
+        "board_identity": {
+          "primary_type": "io_interface_or_adapter",
+          "description": "Connector, adapter, breakout, or IO interface board",
+          "confidence": 0.738,
+          "evidence": [
+            "3 connector",
+            "text hints: io, in"
+          ],
+          "alternatives": [
+            {
+              "type": "controller_or_embedded_compute",
+              "description": "Controller, development, or embedded compute board",
+              "confidence": 0.24,
+              "evidence": [
+                "3 connector"
+              ]
+            },
+            {
+              "type": "motor_or_actuator_driver",
+              "description": "Motor, relay, solenoid, or high-current actuator driver board",
+              "confidence": 0.24,
+              "evidence": [
+                "3 connector"
+              ]
+            },
+            {
+              "type": "display_or_user_interface",
+              "description": "Display, indicator, button, or user-interface board",
+              "confidence": 0.24,
+              "evidence": [
+                "3 connector"
+              ]
+            }
+          ]
+        },
+        "functional_blocks": [
+          {
+            "block_type": "power_input_protection",
+            "label": "Input power/protection",
+            "component_count": 3,
+            "components": [
+              "cmp_0_connector",
+              "cmp_1_connector",
+              "cmp_2_connector"
+            ],
+            "bbox": [
+              0,
+              643,
+              238,
+              1046
+            ],
+            "confidence": 0.71,
+            "function": "Accepts incoming power and protects downstream circuitry",
+            "crop_hint": {
+              "suggested_crop_bbox": [
+                0,
+                583,
+                298,
+                1046
+              ],
+              "include_margin": "15% around block bbox"
+            }
+          },
+          {
+            "block_type": "io_connectivity",
+            "label": "External IO/connectors",
+            "component_count": 3,
+            "components": [
+              "cmp_0_connector",
+              "cmp_1_connector",
+              "cmp_2_connector"
+            ],
+            "bbox": [
+              0,
+              643,
+              238,
+              1046
+            ],
+            "confidence": 0.61,
+            "function": "Provides external electrical connections to a machine or host",
+            "crop_hint": {
+              "suggested_crop_bbox": [
+                0,
+                583,
+                298,
+                1046
+              ],
+              "include_margin": "15% around block bbox"
+            }
+          }
+        ],
+        "machine_context": {
+          "likely_roles": [
+            {
+              "role": "io_breakout",
+              "confidence": 0.95,
+              "description": "Connects sensors, actuators, host systems, or service ports",
+              "evidence": [
+                "3 connector",
+                "text hints: io, in"
+              ]
+            },
+            {
+              "role": "machine_controller",
+              "confidence": 0.24,
+              "description": "Runs firmware/control logic and coordinates IO",
+              "evidence": [
+                "3 connector"
+              ]
+            },
+            {
+              "role": "actuator_driver",
+              "confidence": 0.24,
+              "description": "Switches current for motors, relays, solenoids, or loads",
+              "evidence": [
+                "3 connector"
+              ]
+            },
+            {
+              "role": "operator_interface",
+              "confidence": 0.24,
+              "description": "Provides machine display, indicators, or controls",
+              "evidence": [
+                "3 connector"
+              ]
+            }
+          ],
+          "integration_notes": [
+            "Treat connectors as machine interface points; build a pin map before splicing harnesses.",
+            "Connector regions are the best starting point for pinout tracing and machine-level integration."
+          ],
+          "pinout_evidence": [],
+          "connector_label_evidence": []
+        },
+        "reuse_and_splice": {
+          "candidate_regions": [
+            {
+              "region_id": "crop_1_io_connectivity",
+              "source_block": "io_connectivity",
+              "bbox": [
+                0,
+                643,
+                238,
+                1046
+              ],
+              "crop_bbox": [
+                0,
+                570,
+                311,
+                1046
+              ],
+              "confidence": 0.61,
+              "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+              "splice_requirements": [
+                "confirm pinout",
+                "measure supply rails",
+                "inspect both sides",
+                "verify isolation/clearance",
+                "map connector pins",
+                "confirm mating connector and cable clearance"
+              ],
+              "risk": {
+                "level": "low",
+                "overlapping_defects": 0,
+                "penalty": 0.0
+              }
+            }
+          ],
+          "board_spec_for_splicer": {
+            "coordinate_system": "image_pixels",
+            "bbox_px": [
+              0,
+              0,
+              800,
+              1046
+            ],
+            "confidence": 0.738,
+            "components": [
+              {
+                "id": "cmp_0_connector",
+                "class_name": "connector",
+                "bbox_px": [
+                  0,
+                  725,
+                  229,
+                  990
+                ],
+                "confidence": 0.889
+              },
+              {
+                "id": "cmp_1_connector",
+                "class_name": "connector",
+                "bbox_px": [
+                  0,
+                  874,
+                  211,
+                  1046
+                ],
+                "confidence": 0.61
+              },
+              {
+                "id": "cmp_2_connector",
+                "class_name": "connector",
+                "bbox_px": [
+                  0,
+                  643,
+                  238,
+                  883
+                ],
+                "confidence": 0.41
+              }
+            ],
+            "io_ports": [
+              {
+                "id": "cmp_0_connector",
+                "kind": "connector",
+                "bbox_px": [
+                  0,
+                  725,
+                  229,
+                  990
+                ],
+                "center_px": [
+                  114,
+                  858
+                ],
+                "confidence": 0.889
+              },
+              {
+                "id": "cmp_1_connector",
+                "kind": "connector",
+                "bbox_px": [
+                  0,
+                  874,
+                  211,
+                  1046
+                ],
+                "center_px": [
+                  105,
+                  960
+                ],
+                "confidence": 0.61
+              },
+              {
+                "id": "cmp_2_connector",
+                "kind": "connector",
+                "bbox_px": [
+                  0,
+                  643,
+                  238,
+                  883
+                ],
+                "center_px": [
+                  119,
+                  763
+                ],
+                "confidence": 0.41
+              }
+            ],
+            "keepouts": [],
+            "candidate_crops": [
+              {
+                "id": "crop_1_io_connectivity",
+                "bbox_px": [
+                  0,
+                  570,
+                  311,
+                  1046
+                ],
+                "source_block": "io_connectivity",
+                "confidence": 0.61
+              }
+            ],
+            "splicer_notes": [
+              "pixel geometry must be calibrated to mm before mechanical placement",
+              "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+              "do electrical validation before powering any harvested/spliced module"
+            ]
+          },
+          "warnings": [
+            "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design",
+            "visual topology confidence is low; hidden nets may make extracted modules unusable"
+          ]
+        },
+        "observed_inventory": {
+          "component_counts": {
+            "connector": 3
+          },
+          "recognized_component_count": 3,
+          "resolved_marking_count": 3
+        },
+        "confidence": 0.738,
+        "limitations": [
+          "single-image inference estimates board role; it does not identify exact manufacturer model",
+          "bottom-side parts, hidden traces, multilayer routing, and unlabeled ICs can change function",
+          "use OCR markings, datasheets, electrical tests, Gerber/KiCad files, or a known golden board for high-confidence intent"
+        ]
+      },
+      "machine_connection_map": {
+        "mode": "machine_connection_map",
+        "connector_count": 3,
+        "connector_maps": [
+          {
+            "connector_id": "conn_0_connector",
+            "bbox": [
+              0,
+              725,
+              229,
+              990
+            ],
+            "center": [
+              114,
+              858
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 15,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_side"
+          },
+          {
+            "connector_id": "conn_1_connector",
+            "bbox": [
+              0,
+              874,
+              211,
+              1046
+            ],
+            "center": [
+              105,
+              960
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 12,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          },
+          {
+            "connector_id": "conn_2_connector",
+            "bbox": [
+              0,
+              643,
+              238,
+              883
+            ],
+            "center": [
+              119,
+              763
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 13,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          }
+        ],
+        "interfaces": [],
+        "pinout_evidence": [],
+        "splice_plan": {
+          "safest_entry_points": [],
+          "required_measurements": [
+            "continuity from connector to ground",
+            "unpowered resistance between power and ground"
+          ],
+          "do_not_assume": [
+            "pin order",
+            "voltage level",
+            "shared ground",
+            "connector current rating",
+            "firmware protocol"
+          ]
+        },
+        "confidence": 0.49,
+        "limitations": [
+          "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+          "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+          "do not power harvested modules until polarity, rails, and isolation are confirmed"
+        ]
+      },
+      "salvage_opportunities": {
+        "mode": "salvage_and_arbitrage_opportunity_engine",
+        "asset_summary": {
+          "capabilities": {
+            "connector": 5,
+            "power": 1
+          },
+          "parts": {
+            "activeusers": 2,
+            "componentsanalyzed": 2,
+            "comprehensivelearningresc": 1,
+            "comprehensivelearningresou": 1,
+            "educationalinsights": 1,
+            "intelllgentsuggestionsfored": 1,
+            "intelllgentsuggestionsforedu": 1,
+            "projectscreated": 1,
+            "projecttdeas": 2,
+            "valuegenerated": 1
+          },
+          "connector_count": 3,
+          "defect_count": 0,
+          "evidence": [
+            "board role: io_interface_or_adapter",
+            "part marking: comprehensivelearningresc",
+            "part marking: projecttdeas",
+            "part marking: intelllgentsuggestionsfored",
+            "part marking: componentsanalyzed",
+            "part marking: activeusers",
+            "part marking: componentsanalyzed",
+            "part marking: activeusers",
+            "part marking: projectscreated",
+            "part marking: valuegenerated",
+            "part marking: educationalinsights",
+            "part marking: comprehensivelearningresou",
+            "part marking: projecttdeas",
+            "part marking: intelllgentsuggestionsforedu"
+          ]
+        },
+        "opportunities": [
+          {
+            "type": "build_from_salvage",
+            "id": "bench_power_module",
+            "name": "Bench Power Supply Module",
+            "category": "tooling",
+            "score": 0.53,
+            "estimated_output_value_usd": 22.0,
+            "build_complexity": "medium",
+            "matched_assets": [
+              "power"
+            ],
+            "missing_assets": [],
+            "nice_to_have_matched": [
+              "connector"
+            ],
+            "next_steps": [
+              "test harvested modules",
+              "create pin map",
+              "verify power rails",
+              "prototype build using harvested modules"
+            ]
+          },
+          {
+            "type": "build_from_salvage",
+            "id": "wifi_relay_switch",
+            "name": "Smart WiFi Relay Switch",
+            "category": "upcycled_gadget",
+            "score": 0.23,
+            "estimated_output_value_usd": 18.0,
+            "build_complexity": "medium",
+            "matched_assets": [
+              "power"
+            ],
+            "missing_assets": [
+              "actuator_driver",
+              "wireless"
+            ],
+            "nice_to_have_matched": [
+              "connector"
+            ],
+            "next_steps": [
+              "test harvested modules",
+              "create pin map",
+              "verify power rails",
+              "source missing assets: actuator_driver, wireless"
+            ]
+          }
+        ],
+        "best_opportunity": {
+          "type": "build_from_salvage",
+          "id": "bench_power_module",
+          "name": "Bench Power Supply Module",
+          "category": "tooling",
+          "score": 0.53,
+          "estimated_output_value_usd": 22.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        "strategy": {
+          "recommendation": "build_now",
+          "reason": "Top opportunity is Bench Power Supply Module with score 0.53.",
+          "inventory_focus": [
+            "connector",
+            "power"
+          ]
+        },
+        "confidence": 0.9,
+        "limitations": [
+          "value estimates are planning estimates until parts are tested and market prices are verified",
+          "salvaged modules need electrical validation before resale or reuse",
+          "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+        ]
+      },
+      "visual_topology": {
+        "mode": "image_only_visual_estimate",
+        "trace_count": 179,
+        "connection_count": 0,
+        "scale_mm_per_px": null,
+        "analysis_resize_scale": 1.0,
+        "confidence": 0.35,
+        "uncertainty": "low",
+        "component_instances": [
+          {
+            "instance_id": "None",
+            "class_name": "connector"
+          },
+          {
+            "instance_id": "None",
+            "class_name": "connector"
+          },
+          {
+            "instance_id": "None",
+            "class_name": "connector"
+          }
+        ],
+        "traces": [
+          {
+            "trace_id": "trace_0",
+            "start_point": [
+              100,
+              577
+            ],
+            "end_point": [
+              163,
+              577
+            ],
+            "width_px": 10.0,
+            "length_px": 123.64830391671676,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_1",
+            "start_point": [
+              144,
+              391
+            ],
+            "end_point": [
+              184,
+              399
+            ],
+            "width_px": 21.0,
+            "length_px": 167.2482736519527,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_2",
+            "start_point": [
+              10,
+              297
+            ],
+            "end_point": [
+              30,
+              288
+            ],
+            "width_px": 21.0,
+            "length_px": 318.2998704866507,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_3",
+            "start_point": [
+              213,
+              241
+            ],
+            "end_point": [
+              243,
+              241
+            ],
+            "width_px": 24.0,
+            "length_px": 198.00795169594576,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_4",
+            "start_point": [
+              29,
+              461
+            ],
+            "end_point": [
+              77,
+              468
+            ],
+            "width_px": 14.0,
+            "length_px": 160.92105279186777,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_5",
+            "start_point": [
+              406,
+              259
+            ],
+            "end_point": [
+              422,
+              241
+            ],
+            "width_px": 17.0,
+            "length_px": 191.48741434245358,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_6",
+            "start_point": [
+              78,
+              805
+            ],
+            "end_point": [
+              114,
+              817
+            ],
+            "width_px": 13.0,
+            "length_px": 117.41807698237335,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_7",
+            "start_point": [
+              55,
+              286
+            ],
+            "end_point": [
+              70,
+              299
+            ],
+            "width_px": 16.0,
+            "length_px": 249.93982060198636,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_8",
+            "start_point": [
+              35,
+              286
+            ],
+            "end_point": [
+              50,
+              299
+            ],
+            "width_px": 16.0,
+            "length_px": 249.93982060198636,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_9",
+            "start_point": [
+              226,
+              185
+            ],
+            "end_point": [
+              268,
+              178
+            ],
+            "width_px": 11.0,
+            "length_px": 121.38890050981738,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_10",
+            "start_point": [
+              226,
+              70
+            ],
+            "end_point": [
+              268,
+              63
+            ],
+            "width_px": 11.0,
+            "length_px": 117.61453779742995,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_11",
+            "start_point": [
+              504,
+              253
+            ],
+            "end_point": [
+              520,
+              259
+            ],
+            "width_px": 17.0,
+            "length_px": 217.5330297467231,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_12",
+            "start_point": [
+              359,
+              258
+            ],
+            "end_point": [
+              375,
+              252
+            ],
+            "width_px": 17.0,
+            "length_px": 254.45546399261872,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_13",
+            "start_point": [
+              28,
+              815
+            ],
+            "end_point": [
+              63,
+              815
+            ],
+            "width_px": 15.0,
+            "length_px": 126.46495144885321,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_14",
+            "start_point": [
+              110,
+              259
+            ],
+            "end_point": [
+              126,
+              258
+            ],
+            "width_px": 17.0,
+            "length_px": 181.81033847917186,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_15",
+            "start_point": [
+              74,
+              296
+            ],
+            "end_point": [
+              90,
+              298
+            ],
+            "width_px": 17.0,
+            "length_px": 174.32526129647493,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_16",
+            "start_point": [
+              65,
+              582
+            ],
+            "end_point": [
+              97,
+              583
+            ],
+            "width_px": 13.0,
+            "length_px": 110.66579620077509,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_17",
+            "start_point": [
+              28,
+              857
+            ],
+            "end_point": [
+              55,
+              856
+            ],
+            "width_px": 15.0,
+            "length_px": 115.86392258581515,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_18",
+            "start_point": [
+              143,
+              264
+            ],
+            "end_point": [
+              168,
+              251
+            ],
+            "width_px": 18.0,
+            "length_px": 211.4121597892685,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_19",
+            "start_point": [
+              9,
+              650
+            ],
+            "end_point": [
+              25,
+              652
+            ],
+            "width_px": 16.0,
+            "length_px": 235.84150813202785,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_20",
+            "start_point": [
+              95,
+              286
+            ],
+            "end_point": [
+              116,
+              286
+            ],
+            "width_px": 22.0,
+            "length_px": 216.24642782899747,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_21",
+            "start_point": [
+              387,
+              241
+            ],
+            "end_point": [
+              402,
+              241
+            ],
+            "width_px": 16.0,
+            "length_px": 141.4194566098938,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_22",
+            "start_point": [
+              180,
+              241
+            ],
+            "end_point": [
+              195,
+              241
+            ],
+            "width_px": 16.0,
+            "length_px": 141.4194566098938,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_23",
+            "start_point": [
+              78,
+              399
+            ],
+            "end_point": [
+              112,
+              404
+            ],
+            "width_px": 7.0,
+            "length_px": 66.11665743260838,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_24",
+            "start_point": [
+              61,
+              206
+            ],
+            "end_point": [
+              95,
+              200
+            ],
+            "width_px": 7.0,
+            "length_px": 66.07443773397083,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_25",
+            "start_point": [
+              61,
+              91
+            ],
+            "end_point": [
+              95,
+              85
+            ],
+            "width_px": 7.0,
+            "length_px": 66.07443773397083,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_26",
+            "start_point": [
+              306,
+              188
+            ],
+            "end_point": [
+              335,
+              179
+            ],
+            "width_px": 11.0,
+            "length_px": 99.86328287981226,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_27",
+            "start_point": [
+              306,
+              73
+            ],
+            "end_point": [
+              335,
+              64
+            ],
+            "width_px": 11.0,
+            "length_px": 99.86328287981226,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_28",
+            "start_point": [
+              17,
+              411
+            ],
+            "end_point": [
+              35,
+              403
+            ],
+            "width_px": 17.0,
+            "length_px": 65.16646310568062,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_29",
+            "start_point": [
+              293,
+              251
+            ],
+            "end_point": [
+              308,
+              256
+            ],
+            "width_px": 16.0,
+            "length_px": 194.1489646572445,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_30",
+            "start_point": [
+              389,
+              505
+            ],
+            "end_point": [
+              416,
+              506
+            ],
+            "width_px": 9.0,
+            "length_px": 121.85908162336204,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_31",
+            "start_point": [
+              20,
+              693
+            ],
+            "end_point": [
+              46,
+              698
+            ],
+            "width_px": 13.0,
+            "length_px": 157.9714771895121,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_32",
+            "start_point": [
+              324,
+              623
+            ],
+            "end_point": [
+              353,
+              618
+            ],
+            "width_px": 12.0,
+            "length_px": 138.20625390662735,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_33",
+            "start_point": [
+              188,
+              296
+            ],
+            "end_point": [
+              204,
+              295
+            ],
+            "width_px": 17.0,
+            "length_px": 202.93061559567045,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_34",
+            "start_point": [
+              70,
+              188
+            ],
+            "end_point": [
+              91,
+              181
+            ],
+            "width_px": 15.0,
+            "length_px": 119.12554102017964,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_35",
+            "start_point": [
+              70,
+              73
+            ],
+            "end_point": [
+              91,
+              66
+            ],
+            "width_px": 15.0,
+            "length_px": 119.12554102017964,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_36",
+            "start_point": [
+              598,
+              342
+            ],
+            "end_point": [
+              614,
+              339
+            ],
+            "width_px": 12.0,
+            "length_px": 86.65981422724369,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_37",
+            "start_point": [
+              140,
+              286
+            ],
+            "end_point": [
+              155,
+              303
+            ],
+            "width_px": 16.0,
+            "length_px": 89.89949493661166,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_38",
+            "start_point": [
+              402,
+              364
+            ],
+            "end_point": [
+              426,
+              363
+            ],
+            "width_px": 9.0,
+            "length_px": 111.34006171862801,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_39",
+            "start_point": [
+              120,
+              286
+            ],
+            "end_point": [
+              135,
+              303
+            ],
+            "width_px": 16.0,
+            "length_px": 126.02789174043845,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_40",
+            "start_point": [
+              84,
+              693
+            ],
+            "end_point": [
+              108,
+              692
+            ],
+            "width_px": 10.0,
+            "length_px": 109.42096821509128,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_41",
+            "start_point": [
+              41,
+              258
+            ],
+            "end_point": [
+              56,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 177.10127898362066,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_42",
+            "start_point": [
+              524,
+              247
+            ],
+            "end_point": [
+              539,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 112.3609083236183,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_43",
+            "start_point": [
+              244,
+              258
+            ],
+            "end_point": [
+              259,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 178.1974353699644,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_44",
+            "start_point": [
+              543,
+              258
+            ],
+            "end_point": [
+              558,
+              264
+            ],
+            "width_px": 16.0,
+            "length_px": 173.80209529607538,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_45",
+            "start_point": [
+              10,
+              543
+            ],
+            "end_point": [
+              24,
+              541
+            ],
+            "width_px": 15.0,
+            "length_px": 97.95075908978541,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_46",
+            "start_point": [
+              427,
+              247
+            ],
+            "end_point": [
+              442,
+              247
+            ],
+            "width_px": 16.0,
+            "length_px": 123.1325218143356,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_47",
+            "start_point": [
+              459,
+              735
+            ],
+            "end_point": [
+              475,
+              730
+            ],
+            "width_px": 12.0,
+            "length_px": 88.34404726627736,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_48",
+            "start_point": [
+              92,
+              985
+            ],
+            "end_point": [
+              112,
+              992
+            ],
+            "width_px": 9.0,
+            "length_px": 97.00650426443616,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          },
+          {
+            "trace_id": "trace_49",
+            "start_point": [
+              81,
+              468
+            ],
+            "end_point": [
+              106,
+              460
+            ],
+            "width_px": 10.0,
+            "length_px": 141.25612287292307,
+            "width_mm": null,
+            "length_mm": null,
+            "current_capacity_a": null,
+            "connected_components": [],
+            "trace_type": "signal"
+          }
+        ],
+        "connections": [],
+        "issues": [
+          {
+            "severity": "info",
+            "trace_id": "trace_density_limit",
+            "issue": "Dense trace map truncated",
+            "details": "Short-circuit proximity checks were limited to the 120 longest trace regions out of 179 extracted regions",
+            "recommendation": "Use Gerber/KiCad input for exhaustive production net comparison"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_12_trace_91",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_65_trace_80",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_20_trace_39",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_64_trace_88",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.2px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_29_trace_99",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.6px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_5_trace_21",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.5px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_14_trace_80",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (3.6px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_41_trace_129",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_4_trace_49",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_31_trace_54",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_88_trace_117",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_32_trace_52",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_99_trace_71",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_0_trace_16",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_17_trace_123",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (2.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_75_trace_91",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_115_trace_90",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.0px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_66_trace_89",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.5px)",
+            "recommendation": "Inspect visually for shorts"
+          },
+          {
+            "severity": "critical",
+            "trace_id": "trace_95_trace_69",
+            "issue": "Potential short circuit",
+            "details": "Traces extremely close (4.1px)",
+            "recommendation": "Inspect visually for shorts"
+          }
+        ],
+        "limitations": [
+          "single-image trace extraction is a visual estimate, not a verified netlist",
+          "hidden, internal, bottom-side, and solder-mask-covered traces may be missed",
+          "use Gerber/KiCad/netlist input for high-confidence circuit topology"
+        ]
+      },
+      "topology_aoi": {
+        "status": "unavailable",
+        "mode": "reference_topology_aoi",
+        "reference_signatures": [],
+        "observed_signatures": [],
+        "matched_clusters": 0,
+        "topology_delta": 0,
+        "missing": [],
+        "extra": [],
+        "reference_stats": {
+          "net_count": 0,
+          "component_count": 0,
+          "isolated_count": 0
+        },
+        "observed_stats": {
+          "net_count": 0,
+          "component_count": 0,
+          "isolated_count": 0
+        },
+        "summary": "Topology AOI comparison not run.",
+        "notes": [
+          "Topology AOI comparison not run."
+        ]
+      },
+      "defect_inspection": {
+        "mode": "candidate_visual_defect_inspection",
+        "defect_count": 0,
+        "max_severity": 0.0,
+        "analysis_resize_scale": 1.0,
+        "review_required": false,
+        "defects": [],
+        "limitations": [
+          "classical defect checks are candidate flags until validated against a golden board",
+          "lighting, glare, solder mask color, and board finish can cause false positives",
+          "production defect detection requires labeled line-specific defect data"
+        ]
+      },
+      "reference_aoi": {
+        "status": "unavailable",
+        "reference_counts": {},
+        "current_counts": {},
+        "missing": [],
+        "extra": [],
+        "matched": [],
+        "component_delta": 0,
+        "mode": "reference_component_count_aoi",
+        "summary": "Reference AOI comparison not run.",
+        "notes": [
+          "Reference AOI comparison not run."
+        ]
+      },
+      "golden_aoi": {
+        "status": "unavailable",
+        "mode": "golden_image_diff",
+        "defect_count": 0,
+        "defects": [],
+        "summary": "Golden image comparison not run.",
+        "notes": [
+          "Golden image comparison not run."
+        ]
+      },
+      "aoi_inspection": {
+        "readiness": "prototype_ready",
+        "score": 0.673,
+        "learned_detection_ratio": 1.0,
+        "semantic_confidence": 0.636,
+        "topology_confidence": 0.35,
+        "scan_quality": {
+          "score": 0.618,
+          "reason": "tracked"
+        },
+        "current_capabilities": [
+          "component localization and coarse class identification",
+          "candidate trace/connection extraction from visible copper geometry",
+          "candidate visual defect detection for burns, solder bridges, corrosion, and broken traces",
+          "explicit confidence, provenance, and review-required metadata"
+        ],
+        "defect_candidate_count": 0,
+        "reference_component_delta": 0,
+        "golden_status": "unavailable",
+        "golden_defect_count": 0,
+        "topology_status": "unavailable",
+        "topology_delta": 0,
+        "blockers": [
+          "image-only topology confidence is below production threshold",
+          "calibrated camera/lighting fixture and focus checks",
+          "labeled defect dataset from the target production line",
+          "model/license review for any sourced checkpoints before redistribution"
+        ]
+      },
+      "project_recommendations": [],
+      "analysis_metadata": {
+        "total_processing_time": "~2 seconds",
+        "detection_quality": "medium",
+        "semantic_quality": "candidate",
+        "review_required": false,
+        "limitations": [],
+        "preprocessing": {
+          "steps_applied": [
+            "white_balance",
+            "clahe",
+            "denoise",
+            "sharpen",
+            "gamma"
+          ],
+          "opencv_available": true,
+          "white_balance": {
+            "white_balance": "applied",
+            "channel_means_before": [
+              246.8936004638672,
+              245.99288940429688,
+              246.0512237548828
+            ],
+            "channel_gains": [
+              0.9976465702056885,
+              1.001299500465393,
+              1.0010621547698975
+            ]
+          },
+          "clahe": {
+            "clahe": {
+              "clip_limit": 2.2,
+              "tile_grid": [
+                8,
+                8
+              ]
+            }
+          },
+          "denoise": {
+            "denoise": {
+              "h": 8.0,
+              "h_color": 10.0
+            }
+          },
+          "sharpen": {
+            "sharpen": {
+              "amount": 0.4,
+              "sigma": 1.0
+            }
+          },
+          "gamma": {
+            "gamma": 1.08
+          },
+          "scan_quality": {
+            "score": 0.6179,
+            "luminance_mean": 245.1,
+            "contrast": 42.738,
+            "blur_var": 5946.374,
+            "dynamic_range": 17.0,
+            "p05": 238.0,
+            "p95": 255.0
+          },
+          "input_shape": [
+            1046,
+            800,
+            3
+          ],
+          "output_shape": [
+            1046,
+            800,
+            3
+          ]
+        },
+        "circuit_understanding_confidence": 0.35,
+        "defect_count": 0,
+        "reference_aoi_status": "unavailable",
+        "reference_component_delta": 0,
+        "golden_aoi_status": "unavailable",
+        "golden_defect_count": 0,
+        "topology_aoi_status": "unavailable",
+        "topology_aoi_delta": 0,
+        "board_type": "io_interface_or_adapter",
+        "board_function_confidence": 0.738,
+        "marking_confidence": 0.18,
+        "resolved_marking_count": 3,
+        "machine_connection_confidence": 0.49,
+        "connector_count": 3,
+        "salvage_opportunity_count": 2,
+        "best_salvage_opportunity": "Bench Power Supply Module",
+        "functional_block_count": 2,
+        "aoi_readiness": "prototype_ready",
+        "scan_quality": {
+          "score": 0.618,
+          "reason": "tracked"
+        },
+        "project_potential": "excellent",
+        "backend": "hybrid",
+        "ocr": true
+      },
+      "view_id": "view_2"
+    }
+  ],
+  "fused_board_understanding": {
+    "mode": "multi_image_evidence_fusion",
+    "board_identity": {
+      "primary_type": "io_interface_or_adapter",
+      "confidence": 0.778,
+      "evidence": [
+        "view_1: 2 connector",
+        "view_1: text hints: io, in",
+        "view_2: 3 connector",
+        "view_2: text hints: io, in"
+      ],
+      "alternatives": [
+        {
+          "type": "controller_or_embedded_compute",
+          "confidence": 0.204,
+          "evidence": [
+            "view_1: 2 connector",
+            "view_2: 3 connector"
+          ]
+        },
+        {
+          "type": "motor_or_actuator_driver",
+          "confidence": 0.204,
+          "evidence": [
+            "view_1: 2 connector",
+            "view_2: 3 connector"
+          ]
+        },
+        {
+          "type": "display_or_user_interface",
+          "confidence": 0.204,
+          "evidence": [
+            "view_2: 3 connector"
+          ]
+        },
+        {
+          "type": "power_supply_or_regulator",
+          "confidence": 0.153,
+          "evidence": [
+            "view_1: 2 connector",
+            "view_1: text hints: ac"
+          ]
+        }
+      ]
+    },
+    "functional_block_votes": {
+      "io_connectivity": 2,
+      "power_input_protection": 2
+    },
+    "machine_context": {
+      "connector_label_evidence": [],
+      "pinout_evidence": [],
+      "connector_maps": [
+        {
+          "connector_id": "conn_0_connector",
+          "bbox": [
+            0,
+            725,
+            227,
+            991
+          ],
+          "center": [
+            114,
+            858
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 15,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.35,
+          "recommended_next_photo": "close_up_connector_side",
+          "view_id": "view_1"
+        },
+        {
+          "connector_id": "conn_1_connector",
+          "bbox": [
+            0,
+            874,
+            211,
+            1046
+          ],
+          "center": [
+            105,
+            960
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 12,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.35,
+          "recommended_next_photo": "close_up_connector_label",
+          "view_id": "view_1"
+        },
+        {
+          "connector_id": "conn_0_connector",
+          "bbox": [
+            0,
+            725,
+            229,
+            990
+          ],
+          "center": [
+            114,
+            858
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 15,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.35,
+          "recommended_next_photo": "close_up_connector_side",
+          "view_id": "view_2"
+        },
+        {
+          "connector_id": "conn_1_connector",
+          "bbox": [
+            0,
+            874,
+            211,
+            1046
+          ],
+          "center": [
+            105,
+            960
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 12,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.35,
+          "recommended_next_photo": "close_up_connector_label",
+          "view_id": "view_2"
+        },
+        {
+          "connector_id": "conn_2_connector",
+          "bbox": [
+            0,
+            643,
+            238,
+            883
+          ],
+          "center": [
+            119,
+            763
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 13,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.35,
+          "recommended_next_photo": "close_up_connector_label",
+          "view_id": "view_2"
+        }
+      ],
+      "integration_notes": [
+        "Use front/back/crop fusion as evidence aggregation, not geometric registration.",
+        "Calibrate scale and align views before mechanical splice planning.",
+        "Prioritize labels and pinout evidence that appear in multiple views or closeups."
+      ]
+    },
+    "reuse_and_splice": {
+      "candidate_regions": [
+        {
+          "region_id": "crop_1_io_connectivity",
+          "source_block": "io_connectivity",
+          "bbox": [
+            0,
+            643,
+            238,
+            1046
+          ],
+          "crop_bbox": [
+            0,
+            570,
+            311,
+            1046
+          ],
+          "confidence": 0.61,
+          "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+          "splice_requirements": [
+            "confirm pinout",
+            "measure supply rails",
+            "inspect both sides",
+            "verify isolation/clearance",
+            "map connector pins",
+            "confirm mating connector and cable clearance"
+          ],
+          "risk": {
+            "level": "low",
+            "overlapping_defects": 0,
+            "penalty": 0.0
+          },
+          "view_id": "view_2"
+        },
+        {
+          "region_id": "crop_1_io_connectivity",
+          "source_block": "io_connectivity",
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "crop_bbox": [
+            0,
+            667,
+            285,
+            1046
+          ],
+          "confidence": 0.49,
+          "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+          "splice_requirements": [
+            "confirm pinout",
+            "measure supply rails",
+            "inspect both sides",
+            "verify isolation/clearance",
+            "map connector pins",
+            "confirm mating connector and cable clearance"
+          ],
+          "risk": {
+            "level": "low",
+            "overlapping_defects": 0,
+            "penalty": 0.0
+          },
+          "view_id": "view_1"
+        }
+      ],
+      "warnings": [
+        "candidate crop coordinates are per-view pixels",
+        "front/back geometry is not yet registered into one metric coordinate frame"
+      ]
+    },
+    "observed_inventory": {
+      "component_counts": {
+        "connector": 5
+      }
+    },
+    "salvage_opportunities": {
+      "mode": "salvage_and_arbitrage_opportunity_engine",
+      "asset_summary": {
+        "capabilities": {
+          "connector": 23,
+          "power": 4
+        },
+        "parts": {
+          "activeusers": 8,
+          "componentsanalyzed": 8,
+          "comprehensivelearningresc": 4,
+          "comprehensivelearningresou": 2,
+          "educationalinsights": 2,
+          "intelllgentsuggestionsfored": 4,
+          "intelllgentsuggestionsforedu": 2,
+          "projectscreated": 4,
+          "projecttdeas": 6,
+          "valuegenerated": 4
+        },
+        "connector_count": 10,
+        "defect_count": 0,
+        "evidence": [
+          "board role: io_interface_or_adapter",
+          "part marking: comprehensivelearningresc",
+          "part marking: projecttdeas",
+          "part marking: intelllgentsuggestionsfored",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: projectscreated",
+          "part marking: valuegenerated",
+          "board role: io_interface_or_adapter",
+          "part marking: comprehensivelearningresc",
+          "part marking: projecttdeas",
+          "part marking: intelllgentsuggestionsfored",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: projectscreated",
+          "part marking: valuegenerated",
+          "board role: io_interface_or_adapter",
+          "part marking: comprehensivelearningresc",
+          "part marking: projecttdeas",
+          "part marking: intelllgentsuggestionsfored",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: componentsanalyzed",
+          "part marking: activeusers",
+          "part marking: projectscreated",
+          "part marking: valuegenerated"
+        ]
+      },
+      "opportunities": [
+        {
+          "type": "build_from_salvage",
+          "id": "bench_power_module",
+          "name": "Bench Power Supply Module",
+          "category": "tooling",
+          "score": 0.53,
+          "estimated_output_value_usd": 22.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "wifi_relay_switch",
+          "name": "Smart WiFi Relay Switch",
+          "category": "upcycled_gadget",
+          "score": 0.23,
+          "estimated_output_value_usd": 18.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [
+            "actuator_driver",
+            "wireless"
+          ],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: actuator_driver, wireless"
+          ]
+        }
+      ],
+      "best_opportunity": {
+        "type": "build_from_salvage",
+        "id": "bench_power_module",
+        "name": "Bench Power Supply Module",
+        "category": "tooling",
+        "score": 0.53,
+        "estimated_output_value_usd": 22.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "power"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      "strategy": {
+        "recommendation": "build_now",
+        "reason": "Top opportunity is Bench Power Supply Module with score 0.53.",
+        "inventory_focus": [
+          "connector",
+          "power"
+        ]
+      },
+      "confidence": 0.9,
+      "limitations": [
+        "value estimates are planning estimates until parts are tested and market prices are verified",
+        "salvaged modules need electrical validation before resale or reuse",
+        "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+      ]
+    },
+    "confidence": 0.778
+  },
+  "summary": "Fused 2 board view(s). Likely role: io_interface_or_adapter at 0.78 confidence. Connector/label evidence: none."
+}

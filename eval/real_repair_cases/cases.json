@@ -1,0 +1,143 @@
+[
+  {
+    "case_id": "xbox_thumbstick_drift",
+    "title": "Xbox One wireless controller has malfunctioning thumbstick",
+    "device_hint": "Xbox game controller",
+    "symptoms": [
+      "stick drift",
+      "thumbstick axis is unreliable",
+      "controller input is intermittent"
+    ],
+    "source_url": "https://www.ifixit.com/Troubleshooting/Xbox_One_Controller/Xbox%2BOne%2BWireless%2BController%2BHas%2BMalfunctioning%2BThumbstick/444889",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "open controller",
+      "inspect joystick module",
+      "clean contacts",
+      "replace analog stick if drift remains"
+    ],
+    "notes": "",
+    "expected_lane": "game_controller_input"
+  },
+  {
+    "case_id": "laptop_no_power",
+    "title": "Laptop will not turn on",
+    "device_hint": "PC laptop no power",
+    "symptoms": [
+      "laptop won't turn on",
+      "no power",
+      "not charging"
+    ],
+    "source_url": "https://www.ifixit.com/Troubleshooting/PC_Laptop/Laptop%2BWill%2BNot%2BTurn%2BOn/505262",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "try known-good charger",
+      "inspect charge port",
+      "isolate battery",
+      "check board input path"
+    ],
+    "notes": "",
+    "expected_lane": "laptop_power_path"
+  },
+  {
+    "case_id": "coffee_not_hot",
+    "title": "Coffee maker not hot enough",
+    "device_hint": "coffee maker heater appliance",
+    "symptoms": [
+      "coffee maker not heating",
+      "not hot enough",
+      "brew output is cold"
+    ],
+    "source_url": "https://www.ifixit.com/Troubleshooting/Coffee_Maker/Not%2BHot%2BEnough/483047",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "unplug appliance",
+      "check thermal fuse",
+      "check thermostat",
+      "measure heating element"
+    ],
+    "notes": "",
+    "expected_lane": "mains_heater_appliance"
+  },
+  {
+    "case_id": "electric_toothbrush_not_charging",
+    "title": "Electric toothbrush not charging",
+    "device_hint": "electric toothbrush charging dock",
+    "symptoms": [
+      "not charging",
+      "battery does not hold charge",
+      "charging dock suspected"
+    ],
+    "source_url": "https://www.ifixit.com/Troubleshooting/Electric_Toothbrush/Not%2BCharging/564390",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "inspect charging contacts",
+      "verify charger output",
+      "measure battery voltage",
+      "replace battery if safe"
+    ],
+    "notes": "",
+    "expected_lane": "battery_charging_gadget"
+  },
+  {
+    "case_id": "dewalt_battery_not_charge",
+    "title": "DeWalt DC970 battery will not charge",
+    "device_hint": "cordless drill battery and charger",
+    "symptoms": [
+      "cordless drill battery will not charge",
+      "charger or battery pack fault",
+      "tool has no power"
+    ],
+    "source_url": "https://www.ifixit.com/Wiki/DeWalt_DC970_Troubleshooting",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "check battery contacts",
+      "verify charger",
+      "measure pack voltage",
+      "inspect battery terminals"
+    ],
+    "notes": "",
+    "expected_lane": "battery_charging_gadget"
+  },
+  {
+    "case_id": "tv_sound_no_picture",
+    "title": "TV has sound but no picture",
+    "device_hint": "LED TV backlight power board",
+    "symptoms": [
+      "sound but no picture",
+      "screen dark",
+      "backlight suspected"
+    ],
+    "source_url": "https://www.ifixit.com/Troubleshooting/Television/TV%2BHas%2BSound%2BBut%2BNo%2BPicture/493422",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "flashlight test",
+      "inspect power board",
+      "test backlight strips",
+      "check backlight driver"
+    ],
+    "notes": "",
+    "expected_lane": "tv_backlight_power"
+  },
+  {
+    "case_id": "usb_fan_no_spin",
+    "title": "USB fan warms but motor will not spin",
+    "device_hint": "USB fan controller board",
+    "symptoms": [
+      "warm board",
+      "motor will not spin",
+      "no spin unless wire is wiggled",
+      "intermittent harness"
+    ],
+    "source_url": "local sample assets/samples/test_pcb.png",
+    "source_kind": "repair_reference",
+    "observed_actions": [
+      "scan PCB",
+      "inspect connector",
+      "measure continuity",
+      "test motor/load under current limit"
+    ],
+    "notes": "",
+    "expected_lane": "small_dc_motor_gadget"
+  }
+]

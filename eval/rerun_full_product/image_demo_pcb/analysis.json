@@ -1,0 +1,3906 @@
+{
+  "mode": "single_image_pipeline_analysis",
+  "results": {
+    "detections": [
+      {
+        "bbox": [
+          249.87734985351562,
+          152.31573486328125,
+          300.09368896484375,
+          196.42185974121094
+        ],
+        "confidence": 0.9205431938171387,
+        "class_id": 6,
+        "class_name": "connector",
+        "center": [
+          274.9855194091797,
+          174.3687973022461
+        ],
+        "semantic_confidence": 0.9205431938171387,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "connector",
+          "threshold": 0.2
+        },
+        "ocr_text": "Conn",
+        "part_number": "Conn"
+      },
+      {
+        "bbox": [
+          52.20405197143555,
+          55.61742401123047,
+          150.51739501953125,
+          97.71710205078125
+        ],
+        "confidence": 0.6970564126968384,
+        "class_id": 6,
+        "class_name": "connector",
+        "center": [
+          101.3607234954834,
+          76.66726303100586
+        ],
+        "semantic_confidence": 0.6970564126968384,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "connector",
+          "threshold": 0.2
+        },
+        "ocr_text": "ICChip",
+        "part_number": "ICChip"
+      },
+      {
+        "bbox": [
+          99.01512145996094,
+          149.61856079101562,
+          132.35940551757812,
+          199.21937561035156
+        ],
+        "confidence": 0.6088552474975586,
+        "class_id": 6,
+        "class_name": "connector",
+        "center": [
+          115.68726348876953,
+          174.4189682006836
+        ],
+        "semantic_confidence": 0.6088552474975586,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "connector",
+          "threshold": 0.2
+        },
+        "ocr_text": "I",
+        "part_number": null
+      },
+      {
+        "bbox": [
+          203.45445251464844,
+          55.228309631347656,
+          300.0697021484375,
+          97.23048400878906
+        ],
+        "confidence": 0.5946660041809082,
+        "class_id": 6,
+        "class_name": "connector",
+        "center": [
+          251.76207733154297,
+          76.22939682006836
+        ],
+        "semantic_confidence": 0.5946660041809082,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "connector",
+          "threshold": 0.2
+        },
+        "ocr_text": "McU",
+        "part_number": "McU"
+      },
+      {
+        "bbox": [
+          202.91354370117188,
+          54.111942291259766,
+          300.1253356933594,
+          97.39240264892578
+        ],
+        "confidence": 0.593205451965332,
+        "class_id": 4,
+        "class_name": "transistor",
+        "center": [
+          251.51943969726562,
+          75.75217247009277
+        ],
+        "semantic_confidence": 0.593205451965332,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "transistor",
+          "threshold": 0.25
+        }
+      },
+      {
+        "bbox": [
+          52.2817268371582,
+          54.72451400756836,
+          150.40565490722656,
+          97.90267181396484
+        ],
+        "confidence": 0.5862392783164978,
+        "class_id": 4,
+        "class_name": "transistor",
+        "center": [
+          101.34369087219238,
+          76.3135929107666
+        ],
+        "semantic_confidence": 0.5862392783164978,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "transistor",
+          "threshold": 0.25
+        }
+      },
+      {
+        "bbox": [
+          50.462188720703125,
+          150.49786376953125,
+          77.89293670654297,
+          197.7552947998047
+        ],
+        "confidence": 0.4658883213996887,
+        "class_id": 6,
+        "class_name": "connector",
+        "center": [
+          64.17756271362305,
+          174.12657928466797
+        ],
+        "semantic_confidence": 0.4658883213996887,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "connector",
+          "threshold": 0.2
+        },
+        "ocr_text": "a",
+        "part_number": null
+      },
+      {
+        "bbox": [
+          350.4582214355469,
+          150.8660430908203,
+          380.0374755859375,
+          181.1186981201172
+        ],
+        "confidence": 0.4541686773300171,
+        "class_id": 2,
+        "class_name": "inductor",
+        "center": [
+          365.2478485107422,
+          165.99237060546875
+        ],
+        "semantic_confidence": 0.4541686773300171,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "inductor",
+          "threshold": 0.3
+        }
+      },
+      {
+        "bbox": [
+          150.4371795654297,
+          151.52920532226562,
+          180.62596130371094,
+          198.40394592285156
+        ],
+        "confidence": 0.38359588384628296,
+        "class_id": 4,
+        "class_name": "transistor",
+        "center": [
+          165.5315704345703,
+          174.9665756225586
+        ],
+        "semantic_confidence": 0.38359588384628296,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "transistor",
+          "threshold": 0.25
+        }
+      },
+      {
+        "bbox": [
+          99.48155212402344,
+          149.2602996826172,
+          132.5152587890625,
+          201.07394409179688
+        ],
+        "confidence": 0.3424685299396515,
+        "class_id": 4,
+        "class_name": "transistor",
+        "center": [
+          115.99840545654297,
+          175.16712188720703
+        ],
+        "semantic_confidence": 0.3424685299396515,
+        "provenance": {
+          "backend": "yolo",
+          "model_path": "models/pcb/electrocom61_nano_320.pt",
+          "raw_class_name": "transistor",
+          "threshold": 0.25
+        }
+      }
+    ],
+    "detection_summary": {
+      "total_components": 10,
+      "components_by_type": {
+        "connector": 5,
+        "transistor": 4,
+        "inductor": 1
+      },
+      "backend_breakdown": {
+        "yolo": 10
+      },
+      "average_confidence": 0.5646687000989914,
+      "average_semantic_confidence": 0.5646687000989914,
+      "detection_quality": "medium",
+      "semantic_quality": "candidate",
+      "review_required": false,
+      "limitations": []
+    },
+    "functionality_analysis": {
+      "components": [
+        {
+          "id": "connector_0",
+          "type": "connector",
+          "capabilities": [
+            "signal_transmission",
+            "power_distribution",
+            "modular_design",
+            "data_communication"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.9205431938171387,
+          "bbox": [
+            249.87734985351562,
+            152.31573486328125,
+            300.09368896484375,
+            196.42185974121094
+          ],
+          "market_value": 0.1,
+          "educational_value": "medium",
+          "repair_guide": "Check continuity; clean contacts",
+          "price_estimate": 0.12,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "connector_1",
+          "type": "connector",
+          "capabilities": [
+            "signal_transmission",
+            "power_distribution",
+            "modular_design",
+            "data_communication"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.6970564126968384,
+          "bbox": [
+            52.20405197143555,
+            55.61742401123047,
+            150.51739501953125,
+            97.71710205078125
+          ],
+          "market_value": 0.1,
+          "educational_value": "medium",
+          "repair_guide": "Check continuity; clean contacts",
+          "price_estimate": 0.11,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "connector_2",
+          "type": "connector",
+          "capabilities": [
+            "signal_transmission",
+            "power_distribution",
+            "modular_design",
+            "data_communication"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.6088552474975586,
+          "bbox": [
+            99.01512145996094,
+            149.61856079101562,
+            132.35940551757812,
+            199.21937561035156
+          ],
+          "market_value": 0.1,
+          "educational_value": "medium",
+          "repair_guide": "Check continuity; clean contacts",
+          "price_estimate": 0.1,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "connector_3",
+          "type": "connector",
+          "capabilities": [
+            "signal_transmission",
+            "power_distribution",
+            "modular_design",
+            "data_communication"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.5946660041809082,
+          "bbox": [
+            203.45445251464844,
+            55.228309631347656,
+            300.0697021484375,
+            97.23048400878906
+          ],
+          "market_value": 0.1,
+          "educational_value": "medium",
+          "repair_guide": "Check continuity; clean contacts",
+          "price_estimate": 0.1,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "transistor_4",
+          "type": "transistor",
+          "capabilities": [],
+          "reuse_value": "unknown",
+          "difficulty": "unknown",
+          "detection_confidence": 0.593205451965332,
+          "bbox": [
+            202.91354370117188,
+            54.111942291259766,
+            300.1253356933594,
+            97.39240264892578
+          ],
+          "market_value": 0.0,
+          "educational_value": "medium",
+          "repair_guide": "No guide available",
+          "price_estimate": 0.0,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "unknown",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "transistor_5",
+          "type": "transistor",
+          "capabilities": [],
+          "reuse_value": "unknown",
+          "difficulty": "unknown",
+          "detection_confidence": 0.5862392783164978,
+          "bbox": [
+            52.2817268371582,
+            54.72451400756836,
+            150.40565490722656,
+            97.90267181396484
+          ],
+          "market_value": 0.0,
+          "educational_value": "medium",
+          "repair_guide": "No guide available",
+          "price_estimate": 0.0,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "unknown",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "connector_6",
+          "type": "connector",
+          "capabilities": [
+            "signal_transmission",
+            "power_distribution",
+            "modular_design",
+            "data_communication"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.4658883213996887,
+          "bbox": [
+            50.462188720703125,
+            150.49786376953125,
+            77.89293670654297,
+            197.7552947998047
+          ],
+          "market_value": 0.1,
+          "educational_value": "medium",
+          "repair_guide": "Check continuity; clean contacts",
+          "price_estimate": 0.1,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "inductor_7",
+          "type": "inductor",
+          "capabilities": [],
+          "reuse_value": "unknown",
+          "difficulty": "unknown",
+          "detection_confidence": 0.4541686773300171,
+          "bbox": [
+            350.4582214355469,
+            150.8660430908203,
+            380.0374755859375,
+            181.1186981201172
+          ],
+          "market_value": 0.0,
+          "educational_value": "medium",
+          "repair_guide": "No guide available",
+          "price_estimate": 0.0,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "unknown",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "transistor_8",
+          "type": "transistor",
+          "capabilities": [],
+          "reuse_value": "unknown",
+          "difficulty": "unknown",
+          "detection_confidence": 0.38359588384628296,
+          "bbox": [
+            150.4371795654297,
+            151.52920532226562,
+            180.62596130371094,
+            198.40394592285156
+          ],
+          "market_value": 0.0,
+          "educational_value": "medium",
+          "repair_guide": "No guide available",
+          "price_estimate": 0.0,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "unknown",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "transistor_9",
+          "type": "transistor",
+          "capabilities": [],
+          "reuse_value": "unknown",
+          "difficulty": "unknown",
+          "detection_confidence": 0.3424685299396515,
+          "bbox": [
+            99.48155212402344,
+            149.2602996826172,
+            132.5152587890625,
+            201.07394409179688
+          ],
+          "market_value": 0.0,
+          "educational_value": "medium",
+          "repair_guide": "No guide available",
+          "price_estimate": 0.0,
+          "llm_analysis": {
+            "educational_value": "medium",
+            "reuse_potential": "unknown",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        }
+      ],
+      "capabilities": [
+        "data_communication",
+        "modular_design",
+        "power_distribution",
+        "signal_transmission"
+      ],
+      "component_counts": {
+        "connector": 5,
+        "transistor": 4,
+        "inductor": 1
+      },
+      "total_components": 10,
+      "total_market_value": 0.5299999999999999,
+      "project_potential": "good",
+      "educational_potential": "poor"
+    },
+    "marking_analysis": {
+      "mode": "ocr_marking_resolution",
+      "components": [
+        {
+          "component_id": "cmp_0_connector",
+          "class_name": "connector",
+          "bbox": [
+            249.87734985351562,
+            152.31573486328125,
+            300.09368896484375,
+            196.42185974121094
+          ],
+          "text": "Conn",
+          "part_tokens": [
+            "CONN"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "CONN",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        },
+        {
+          "component_id": "cmp_1_connector",
+          "class_name": "connector",
+          "bbox": [
+            52.20405197143555,
+            55.61742401123047,
+            150.51739501953125,
+            97.71710205078125
+          ],
+          "text": "ICChip",
+          "part_tokens": [
+            "ICCHIP"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "ICCHIP",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        },
+        {
+          "component_id": "cmp_3_connector",
+          "class_name": "connector",
+          "bbox": [
+            203.45445251464844,
+            55.228309631347656,
+            300.0697021484375,
+            97.23048400878906
+          ],
+          "text": "McU",
+          "part_tokens": [
+            "MCU"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "ESP8266",
+              "confidence": 0.72,
+              "match_type": "known_pinout_or_datasheet",
+              "pinout": {
+                "part_number": "ESP8266",
+                "manufacturer": "Espressif",
+                "description": "WiFi SoC module (ESP-12E/F)",
+                "package": "module",
+                "pin_count": 22,
+                "datasheet_url": "https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf",
+                "notes": "CRITICAL: 3.3V ONLY! 5V will destroy chip. GPIO6-11 connected to flash, don't use. Boot pins need correct pull-up/down.",
+                "power_pins": [
+                  {
+                    "pin_number": 1,
+                    "pin_name": "VCC",
+                    "pin_type": "power",
+                    "description": "Power supply (3.3V ONLY!)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 300.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "3.3V regulator"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 9,
+                    "pin_name": "GND",
+                    "pin_type": "ground",
+                    "description": "Ground",
+                    "typical_voltage": 0.0,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Ground plane"
+                    ],
+                    "critical": true
+                  }
+                ],
+                "programming_or_clock_pins": [],
+                "io_pins_sample": [
+                  {
+                    "pin_number": 15,
+                    "pin_name": "GPIO0",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode select",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Flash button"
+                    ],
+                    "typical_connections": [
+                      "Pull-up (flash mode=LOW)"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 2,
+                    "pin_name": "GPIO2",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode (must be HIGH)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Built-in LED"
+                    ],
+                    "typical_connections": [
+                      "Pull-up"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 3,
+                    "pin_name": "GPIO15",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode (must be LOW)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-down"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 4,
+                    "pin_name": "EN/CH_PD",
+                    "pin_type": "input",
+                    "description": "Chip enable (must be HIGH)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-up 10k"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 5,
+                    "pin_name": "RST",
+                    "pin_type": "input",
+                    "description": "Reset (active LOW)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-up + reset button"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 6,
+                    "pin_name": "TXD/GPIO1",
+                    "pin_type": "output",
+                    "description": "UART transmit",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Debug output"
+                    ],
+                    "typical_connections": [
+                      "USB serial RX"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 7,
+                    "pin_name": "RXD/GPIO3",
+                    "pin_type": "input",
+                    "description": "UART receive",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "USB serial TX"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 10,
+                    "pin_name": "GPIO6/SD_CLK",
+                    "pin_type": "output",
+                    "description": "SPI flash clock (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 11,
+                    "pin_name": "GPIO7/SD_D0",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash data 0 (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 12,
+                    "pin_name": "GPIO8/SD_D1",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash data 1 (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 13,
+                    "pin_name": "GPIO11/SD_CMD",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash CMD (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 8,
+                    "pin_name": "GPIO4",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (safe to use)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "I2C SDA"
+                    ],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 14,
+                    "pin_name": "GPIO5",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (safe to use)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "I2C SCL"
+                    ],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 16,
+                    "pin_name": "GPIO12",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (MISO)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 17,
+                    "pin_name": "GPIO13",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (MOSI)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 18,
+                    "pin_name": "GPIO14",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (SCK)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "connector_labels": [],
+      "confidence": 0.36,
+      "limitations": [
+        "OCR markings are noisy and should be verified against the photo",
+        "short top-mark codes may map to multiple parts",
+        "datasheet/pinout matches are evidence, not proof, until package and circuit context agree"
+      ]
+    },
+    "board_understanding": {
+      "mode": "image_only_board_function_inference",
+      "board_identity": {
+        "primary_type": "motor_or_actuator_driver",
+        "description": "Motor, relay, solenoid, or high-current actuator driver board",
+        "confidence": 0.785,
+        "evidence": [
+          "4 mosfet",
+          "5 connector",
+          "1 inductor"
+        ],
+        "alternatives": [
+          {
+            "type": "io_interface_or_adapter",
+            "description": "Connector, adapter, breakout, or IO interface board",
+            "confidence": 0.84,
+            "evidence": [
+              "5 connector"
+            ]
+          },
+          {
+            "type": "power_supply_or_regulator",
+            "description": "Power conversion, protection, or distribution board",
+            "confidence": 0.66,
+            "evidence": [
+              "1 inductor",
+              "4 mosfet",
+              "5 connector"
+            ]
+          },
+          {
+            "type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.6,
+            "evidence": [
+              "5 connector",
+              "text hints: esp8266, mcu",
+              "marking evidence: esp8266, mcu"
+            ]
+          }
+        ]
+      },
+      "functional_blocks": [
+        {
+          "block_type": "power_input_protection",
+          "label": "Input power/protection",
+          "component_count": 10,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_4_mosfet",
+            "cmp_5_mosfet",
+            "cmp_6_connector",
+            "cmp_7_inductor",
+            "cmp_8_mosfet",
+            "cmp_9_mosfet"
+          ],
+          "bbox": [
+            50,
+            54,
+            380,
+            201
+          ],
+          "confidence": 0.95,
+          "function": "Accepts incoming power and protects downstream circuitry",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              4,
+              430,
+              251
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "actuator_drive",
+          "label": "Actuator or high-current output",
+          "component_count": 9,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_4_mosfet",
+            "cmp_5_mosfet",
+            "cmp_6_connector",
+            "cmp_8_mosfet",
+            "cmp_9_mosfet"
+          ],
+          "bbox": [
+            50,
+            54,
+            300,
+            201
+          ],
+          "confidence": 0.85,
+          "function": "Switches higher current loads from low-power control signals",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              12,
+              16,
+              338,
+              239
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "io_connectivity",
+          "label": "External IO/connectors",
+          "component_count": 5,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_6_connector"
+          ],
+          "bbox": [
+            50,
+            55,
+            300,
+            199
+          ],
+          "confidence": 0.85,
+          "function": "Provides external electrical connections to a machine or host",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              12,
+              17,
+              338,
+              237
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "power_regulation",
+          "label": "Voltage regulation/filtering",
+          "component_count": 1,
+          "components": [
+            "cmp_7_inductor"
+          ],
+          "bbox": [
+            350,
+            151,
+            380,
+            181
+          ],
+          "confidence": 0.37,
+          "function": "Converts, filters, or stabilizes board power rails",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              346,
+              147,
+              384,
+              185
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "passive_conditioning",
+          "label": "Passive filtering/biasing",
+          "component_count": 1,
+          "components": [
+            "cmp_7_inductor"
+          ],
+          "bbox": [
+            350,
+            151,
+            380,
+            181
+          ],
+          "confidence": 0.37,
+          "function": "Filters, biases, divides, limits current, or shapes signals",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              346,
+              147,
+              384,
+              185
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_context": {
+        "likely_roles": [
+          {
+            "role": "actuator_driver",
+            "confidence": 0.86,
+            "description": "Switches current for motors, relays, solenoids, or loads",
+            "evidence": [
+              "4 mosfet",
+              "5 connector",
+              "1 inductor"
+            ]
+          },
+          {
+            "role": "io_breakout",
+            "confidence": 0.84,
+            "description": "Connects sensors, actuators, host systems, or service ports",
+            "evidence": [
+              "5 connector"
+            ]
+          },
+          {
+            "role": "power_node",
+            "confidence": 0.66,
+            "description": "Supplies, converts, or protects machine power rails",
+            "evidence": [
+              "1 inductor",
+              "4 mosfet",
+              "5 connector"
+            ]
+          },
+          {
+            "role": "machine_controller",
+            "confidence": 0.6,
+            "description": "Runs firmware/control logic and coordinates IO",
+            "evidence": [
+              "5 connector",
+              "text hints: esp8266, mcu",
+              "marking evidence: esp8266, mcu"
+            ]
+          }
+        ],
+        "integration_notes": [
+          "Treat outputs as high-current paths; confirm load rating and protection before driving actuators.",
+          "Connector regions are the best starting point for pinout tracing and machine-level integration."
+        ],
+        "pinout_evidence": [
+          {
+            "component_id": "cmp_3_connector",
+            "part_number": "ESP8266",
+            "pin_count": 22,
+            "package": "module",
+            "power_pins": [
+              {
+                "pin_number": 1,
+                "pin_name": "VCC",
+                "pin_type": "power",
+                "description": "Power supply (3.3V ONLY!)",
+                "typical_voltage": 3.3,
+                "max_current_ma": 300.0,
+                "alternate_functions": [],
+                "typical_connections": [
+                  "3.3V regulator"
+                ],
+                "critical": true
+              },
+              {
+                "pin_number": 9,
+                "pin_name": "GND",
+                "pin_type": "ground",
+                "description": "Ground",
+                "typical_voltage": 0.0,
+                "max_current_ma": null,
+                "alternate_functions": [],
+                "typical_connections": [
+                  "Ground plane"
+                ],
+                "critical": true
+              }
+            ],
+            "programming_or_clock_pins": []
+          }
+        ],
+        "connector_label_evidence": []
+      },
+      "reuse_and_splice": {
+        "candidate_regions": [
+          {
+            "region_id": "crop_1_actuator_drive",
+            "source_block": "actuator_drive",
+            "bbox": [
+              50,
+              54,
+              300,
+              201
+            ],
+            "crop_bbox": [
+              5,
+              9,
+              345,
+              246
+            ],
+            "confidence": 0.85,
+            "reuse_mode": "harvest_as_load_driver_after_current_validation",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "measure load current",
+              "add flyback/ESD protection as needed"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          },
+          {
+            "region_id": "crop_2_io_connectivity",
+            "source_block": "io_connectivity",
+            "bbox": [
+              50,
+              55,
+              300,
+              199
+            ],
+            "crop_bbox": [
+              5,
+              10,
+              345,
+              244
+            ],
+            "confidence": 0.85,
+            "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "map connector pins",
+              "confirm mating connector and cable clearance"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          },
+          {
+            "region_id": "crop_3_power_regulation",
+            "source_block": "power_regulation",
+            "bbox": [
+              350,
+              151,
+              380,
+              181
+            ],
+            "crop_bbox": [
+              345,
+              146,
+              385,
+              186
+            ],
+            "confidence": 0.37,
+            "reuse_mode": "harvest_as_power_submodule",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "load-test output",
+              "verify input voltage range",
+              "thermal check"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          }
+        ],
+        "board_spec_for_splicer": {
+          "coordinate_system": "image_pixels",
+          "bbox_px": [
+            0,
+            0,
+            600,
+            400
+          ],
+          "confidence": 0.785,
+          "components": [
+            {
+              "id": "cmp_0_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                250,
+                152,
+                300,
+                196
+              ],
+              "confidence": 0.921
+            },
+            {
+              "id": "cmp_1_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                52,
+                56,
+                151,
+                98
+              ],
+              "confidence": 0.697
+            },
+            {
+              "id": "cmp_2_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                99,
+                150,
+                132,
+                199
+              ],
+              "confidence": 0.609
+            },
+            {
+              "id": "cmp_3_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                203,
+                55,
+                300,
+                97
+              ],
+              "confidence": 0.595
+            },
+            {
+              "id": "cmp_4_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                203,
+                54,
+                300,
+                97
+              ],
+              "confidence": 0.593
+            },
+            {
+              "id": "cmp_5_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                52,
+                55,
+                150,
+                98
+              ],
+              "confidence": 0.586
+            },
+            {
+              "id": "cmp_6_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                50,
+                150,
+                78,
+                198
+              ],
+              "confidence": 0.466
+            },
+            {
+              "id": "cmp_7_inductor",
+              "class_name": "inductor",
+              "bbox_px": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.454
+            },
+            {
+              "id": "cmp_8_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                150,
+                152,
+                181,
+                198
+              ],
+              "confidence": 0.384
+            },
+            {
+              "id": "cmp_9_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                99,
+                149,
+                133,
+                201
+              ],
+              "confidence": 0.342
+            }
+          ],
+          "io_ports": [
+            {
+              "id": "cmp_0_connector",
+              "kind": "connector",
+              "bbox_px": [
+                250,
+                152,
+                300,
+                196
+              ],
+              "center_px": [
+                275,
+                174
+              ],
+              "confidence": 0.921
+            },
+            {
+              "id": "cmp_1_connector",
+              "kind": "connector",
+              "bbox_px": [
+                52,
+                56,
+                151,
+                98
+              ],
+              "center_px": [
+                101,
+                77
+              ],
+              "confidence": 0.697
+            },
+            {
+              "id": "cmp_2_connector",
+              "kind": "connector",
+              "bbox_px": [
+                99,
+                150,
+                132,
+                199
+              ],
+              "center_px": [
+                116,
+                174
+              ],
+              "confidence": 0.609
+            },
+            {
+              "id": "cmp_3_connector",
+              "kind": "connector",
+              "bbox_px": [
+                203,
+                55,
+                300,
+                97
+              ],
+              "center_px": [
+                252,
+                76
+              ],
+              "confidence": 0.595
+            },
+            {
+              "id": "cmp_6_connector",
+              "kind": "connector",
+              "bbox_px": [
+                50,
+                150,
+                78,
+                198
+              ],
+              "center_px": [
+                64,
+                174
+              ],
+              "confidence": 0.466
+            }
+          ],
+          "keepouts": [
+            {
+              "id": "cmp_4_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                203,
+                54,
+                300,
+                97
+              ]
+            },
+            {
+              "id": "cmp_5_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                52,
+                55,
+                150,
+                98
+              ]
+            },
+            {
+              "id": "cmp_7_inductor",
+              "kind": "inductor",
+              "bbox_px": [
+                350,
+                151,
+                380,
+                181
+              ]
+            },
+            {
+              "id": "cmp_8_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                150,
+                152,
+                181,
+                198
+              ]
+            },
+            {
+              "id": "cmp_9_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                99,
+                149,
+                133,
+                201
+              ]
+            }
+          ],
+          "candidate_crops": [
+            {
+              "id": "crop_1_actuator_drive",
+              "bbox_px": [
+                5,
+                9,
+                345,
+                246
+              ],
+              "source_block": "actuator_drive",
+              "confidence": 0.85
+            },
+            {
+              "id": "crop_2_io_connectivity",
+              "bbox_px": [
+                5,
+                10,
+                345,
+                244
+              ],
+              "source_block": "io_connectivity",
+              "confidence": 0.85
+            },
+            {
+              "id": "crop_3_power_regulation",
+              "bbox_px": [
+                345,
+                146,
+                385,
+                186
+              ],
+              "source_block": "power_regulation",
+              "confidence": 0.37
+            }
+          ],
+          "splicer_notes": [
+            "pixel geometry must be calibrated to mm before mechanical placement",
+            "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+            "do electrical validation before powering any harvested/spliced module"
+          ]
+        },
+        "warnings": [
+          "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design"
+        ]
+      },
+      "observed_inventory": {
+        "component_counts": {
+          "connector": 5,
+          "inductor": 1,
+          "mosfet": 4
+        },
+        "recognized_component_count": 10,
+        "resolved_marking_count": 3
+      },
+      "confidence": 0.785,
+      "limitations": [
+        "single-image inference estimates board role; it does not identify exact manufacturer model",
+        "bottom-side parts, hidden traces, multilayer routing, and unlabeled ICs can change function",
+        "use OCR markings, datasheets, electrical tests, Gerber/KiCad files, or a known golden board for high-confidence intent"
+      ]
+    },
+    "machine_connection_map": {
+      "mode": "machine_connection_map",
+      "connector_count": 5,
+      "connector_maps": [
+        {
+          "connector_id": "conn_0_connector",
+          "bbox": [
+            250,
+            152,
+            300,
+            196
+          ],
+          "center": [
+            275,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_side"
+        },
+        {
+          "connector_id": "conn_1_connector",
+          "bbox": [
+            52,
+            56,
+            151,
+            98
+          ],
+          "center": [
+            101,
+            77
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 6,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_2_connector",
+          "bbox": [
+            99,
+            150,
+            132,
+            199
+          ],
+          "center": [
+            116,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_3_connector",
+          "bbox": [
+            203,
+            55,
+            300,
+            97
+          ],
+          "center": [
+            252,
+            76
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 5,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_6_connector",
+          "bbox": [
+            50,
+            150,
+            78,
+            198
+          ],
+          "center": [
+            64,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        }
+      ],
+      "interfaces": [
+        {
+          "type": "known_ic_pinout",
+          "part_number": "ESP8266",
+          "pin_count": 22,
+          "confidence": 0.74,
+          "validation": [
+            "verify package orientation",
+            "match pin 1 marker",
+            "confirm continuity to connector"
+          ]
+        }
+      ],
+      "pinout_evidence": [
+        {
+          "component_id": "cmp_3_connector",
+          "part_number": "ESP8266",
+          "pin_count": 22,
+          "package": "module",
+          "power_pins": [
+            {
+              "pin_number": 1,
+              "pin_name": "VCC",
+              "pin_type": "power",
+              "description": "Power supply (3.3V ONLY!)",
+              "typical_voltage": 3.3,
+              "max_current_ma": 300.0,
+              "alternate_functions": [],
+              "typical_connections": [
+                "3.3V regulator"
+              ],
+              "critical": true
+            },
+            {
+              "pin_number": 9,
+              "pin_name": "GND",
+              "pin_type": "ground",
+              "description": "Ground",
+              "typical_voltage": 0.0,
+              "max_current_ma": null,
+              "alternate_functions": [],
+              "typical_connections": [
+                "Ground plane"
+              ],
+              "critical": true
+            }
+          ],
+          "programming_or_clock_pins": []
+        }
+      ],
+      "splice_plan": {
+        "safest_entry_points": [],
+        "required_measurements": [
+          "continuity from connector to ground",
+          "unpowered resistance between power and ground",
+          "load output voltage",
+          "max load current",
+          "flyback/protection diode continuity"
+        ],
+        "do_not_assume": [
+          "pin order",
+          "voltage level",
+          "shared ground",
+          "connector current rating",
+          "firmware protocol"
+        ]
+      },
+      "confidence": 0.69,
+      "limitations": [
+        "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+        "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+        "do not power harvested modules until polarity, rails, and isolation are confirmed"
+      ]
+    },
+    "salvage_opportunities": {
+      "mode": "salvage_and_arbitrage_opportunity_engine",
+      "asset_summary": {
+        "capabilities": {
+          "actuator_driver": 2,
+          "connector": 6,
+          "controller": 1,
+          "known_ic_pinout": 1,
+          "power": 2,
+          "wireless": 1
+        },
+        "parts": {
+          "conn": 1,
+          "esp8266": 1,
+          "icchip": 1
+        },
+        "connector_count": 5,
+        "defect_count": 0,
+        "evidence": [
+          "board role: motor_or_actuator_driver",
+          "part marking: conn",
+          "part marking: icchip",
+          "part marking: esp8266",
+          "interface: known_ic_pinout"
+        ]
+      },
+      "opportunities": [
+        {
+          "type": "build_from_salvage",
+          "id": "robot_motor_controller",
+          "name": "Robot Motor Controller",
+          "category": "robotics",
+          "score": 0.61,
+          "estimated_output_value_usd": 28.0,
+          "build_complexity": "hard",
+          "matched_assets": [
+            "actuator_driver",
+            "controller"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector",
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "led_controller",
+          "name": "LED / Light Controller",
+          "category": "consumer_gadget",
+          "score": 0.61,
+          "estimated_output_value_usd": 16.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "actuator_driver",
+            "controller"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector",
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "wifi_relay_switch",
+          "name": "Smart WiFi Relay Switch",
+          "category": "upcycled_gadget",
+          "score": 0.53,
+          "estimated_output_value_usd": 18.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "actuator_driver",
+            "power",
+            "wireless"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "bench_power_module",
+          "name": "Bench Power Supply Module",
+          "category": "tooling",
+          "score": 0.53,
+          "estimated_output_value_usd": 22.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "resell_or_stock",
+          "id": "resell_esp8266",
+          "name": "Recover/stock ESP8266",
+          "score": 0.425,
+          "estimated_output_value_usd": 3.0,
+          "matched_assets": [
+            "esp8266"
+          ],
+          "missing_assets": [],
+          "next_steps": [
+            "test part",
+            "verify marking/package",
+            "sort into inventory",
+            "check live market price"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "sensor_gateway",
+          "name": "Sensor Gateway / Data Logger",
+          "category": "iot",
+          "score": 0.305,
+          "estimated_output_value_usd": 24.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "sensor_or_adc"
+          ],
+          "nice_to_have_matched": [
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: sensor_or_adc"
+          ]
+        }
+      ],
+      "best_opportunity": {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.61,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "actuator_driver",
+          "controller"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector",
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      "strategy": {
+        "recommendation": "build_now",
+        "reason": "Top opportunity is Robot Motor Controller with score 0.61.",
+        "inventory_focus": [
+          "actuator_driver",
+          "connector",
+          "controller",
+          "known_ic_pinout",
+          "power",
+          "wireless"
+        ]
+      },
+      "confidence": 0.6,
+      "limitations": [
+        "value estimates are planning estimates until parts are tested and market prices are verified",
+        "salvaged modules need electrical validation before resale or reuse",
+        "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+      ]
+    },
+    "visual_topology": {
+      "mode": "image_only_visual_estimate",
+      "trace_count": 6,
+      "connection_count": 3,
+      "scale_mm_per_px": null,
+      "analysis_resize_scale": 1.0,
+      "confidence": 0.455,
+      "uncertainty": "medium",
+      "component_instances": [
+        {
+          "instance_id": "None",
+          "class_name": "connector"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "connector"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "connector"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "connector"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "transistor"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "transistor"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "connector"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "inductor"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "transistor"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "transistor"
+        }
+      ],
+      "traces": [
+        {
+          "trace_id": "trace_0",
+          "start_point": [
+            361,
+            157
+          ],
+          "end_point": [
+            380,
+            164
+          ],
+          "width_px": 8.0,
+          "length_px": 38.650281539872886,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_1",
+          "start_point": [
+            410,
+            59
+          ],
+          "end_point": [
+            422,
+            60
+          ],
+          "width_px": 6.0,
+          "length_px": 28.12310562561766,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_2",
+          "start_point": [
+            360,
+            59
+          ],
+          "end_point": [
+            372,
+            60
+          ],
+          "width_px": 6.0,
+          "length_px": 28.12310562561766,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_3",
+          "start_point": [
+            160,
+            159
+          ],
+          "end_point": [
+            170,
+            159
+          ],
+          "width_px": 6.0,
+          "length_px": 20.0,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [
+            "connector",
+            "transistor"
+          ],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_4",
+          "start_point": [
+            110,
+            159
+          ],
+          "end_point": [
+            120,
+            159
+          ],
+          "width_px": 6.0,
+          "length_px": 20.0,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [
+            "connector",
+            "transistor"
+          ],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_5",
+          "start_point": [
+            60,
+            159
+          ],
+          "end_point": [
+            70,
+            159
+          ],
+          "width_px": 6.0,
+          "length_px": 20.0,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [
+            "connector",
+            "transistor"
+          ],
+          "trace_type": "signal"
+        }
+      ],
+      "connections": [
+        {
+          "component1": "connector",
+          "component2": "transistor",
+          "trace_id": "trace_3",
+          "connection_type": "direct",
+          "resistance_estimate_ohm": null,
+          "verified": false
+        },
+        {
+          "component1": "connector",
+          "component2": "transistor",
+          "trace_id": "trace_4",
+          "connection_type": "direct",
+          "resistance_estimate_ohm": null,
+          "verified": false
+        },
+        {
+          "component1": "connector",
+          "component2": "transistor",
+          "trace_id": "trace_5",
+          "connection_type": "direct",
+          "resistance_estimate_ohm": null,
+          "verified": false
+        }
+      ],
+      "issues": [],
+      "limitations": [
+        "single-image trace extraction is a visual estimate, not a verified netlist",
+        "hidden, internal, bottom-side, and solder-mask-covered traces may be missed",
+        "use Gerber/KiCad/netlist input for high-confidence circuit topology"
+      ]
+    },
+    "topology_aoi": {
+      "status": "unavailable",
+      "mode": "reference_topology_aoi",
+      "reference_signatures": [],
+      "observed_signatures": [],
+      "matched_clusters": 0,
+      "topology_delta": 0,
+      "missing": [],
+      "extra": [],
+      "reference_stats": {
+        "net_count": 0,
+        "component_count": 0,
+        "isolated_count": 0
+      },
+      "observed_stats": {
+        "net_count": 0,
+        "component_count": 0,
+        "isolated_count": 0
+      },
+      "summary": "Topology AOI comparison not run.",
+      "notes": [
+        "Topology AOI comparison not run."
+      ]
+    },
+    "defect_inspection": {
+      "mode": "candidate_visual_defect_inspection",
+      "defect_count": 0,
+      "max_severity": 0.0,
+      "analysis_resize_scale": 1.0,
+      "review_required": false,
+      "defects": [],
+      "limitations": [
+        "classical defect checks are candidate flags until validated against a golden board",
+        "lighting, glare, solder mask color, and board finish can cause false positives",
+        "production defect detection requires labeled line-specific defect data"
+      ]
+    },
+    "reference_aoi": {
+      "status": "unavailable",
+      "reference_counts": {},
+      "current_counts": {},
+      "missing": [],
+      "extra": [],
+      "matched": [],
+      "component_delta": 0,
+      "mode": "reference_component_count_aoi",
+      "summary": "Reference AOI comparison not run.",
+      "notes": [
+        "Reference AOI comparison not run."
+      ]
+    },
+    "golden_aoi": {
+      "status": "unavailable",
+      "mode": "golden_image_diff",
+      "defect_count": 0,
+      "defects": [],
+      "summary": "Golden image comparison not run.",
+      "notes": [
+        "Golden image comparison not run."
+      ]
+    },
+    "aoi_inspection": {
+      "readiness": "prototype_ready",
+      "score": 0.721,
+      "learned_detection_ratio": 1.0,
+      "semantic_confidence": 0.565,
+      "topology_confidence": 0.455,
+      "scan_quality": {
+        "score": 0.5,
+        "reason": "tracked"
+      },
+      "current_capabilities": [
+        "component localization and coarse class identification",
+        "candidate trace/connection extraction from visible copper geometry",
+        "candidate visual defect detection for burns, solder bridges, corrosion, and broken traces",
+        "explicit confidence, provenance, and review-required metadata"
+      ],
+      "defect_candidate_count": 0,
+      "reference_component_delta": 0,
+      "golden_status": "unavailable",
+      "golden_defect_count": 0,
+      "topology_status": "unavailable",
+      "topology_delta": 0,
+      "blockers": [
+        "scan quality is below production threshold (0.50, tracked)",
+        "image-only topology confidence is below production threshold",
+        "calibrated camera/lighting fixture and focus checks",
+        "labeled defect dataset from the target production line",
+        "model/license review for any sourced checkpoints before redistribution"
+      ]
+    },
+    "project_recommendations": [],
+    "analysis_metadata": {
+      "total_processing_time": "~2 seconds",
+      "detection_quality": "medium",
+      "semantic_quality": "candidate",
+      "review_required": false,
+      "limitations": [],
+      "preprocessing": {
+        "steps_applied": [
+          "white_balance",
+          "clahe",
+          "denoise",
+          "sharpen",
+          "gamma"
+        ],
+        "opencv_available": true,
+        "white_balance": {
+          "white_balance": "applied",
+          "channel_means_before": [
+            252.14222717285156,
+            251.4488067626953,
+            251.9057159423828
+          ],
+          "channel_gains": [
+            0.9987706542015076,
+            1.0015249252319336,
+            0.9997084140777588
+          ]
+        },
+        "clahe": {
+          "clahe": {
+            "clip_limit": 2.2,
+            "tile_grid": [
+              8,
+              8
+            ]
+          }
+        },
+        "denoise": {
+          "denoise": {
+            "h": 8.0,
+            "h_color": 10.0
+          }
+        },
+        "sharpen": {
+          "sharpen": {
+            "amount": 0.4,
+            "sigma": 1.0
+          }
+        },
+        "gamma": {
+          "gamma": 1.08
+        },
+        "scan_quality": {
+          "score": 0.5003,
+          "luminance_mean": 250.661,
+          "contrast": 26.838,
+          "blur_var": 2005.542,
+          "dynamic_range": 0.0,
+          "p05": 254.0,
+          "p95": 254.0
+        },
+        "input_shape": [
+          400,
+          600,
+          3
+        ],
+        "output_shape": [
+          400,
+          600,
+          3
+        ]
+      },
+      "circuit_understanding_confidence": 0.455,
+      "defect_count": 0,
+      "reference_aoi_status": "unavailable",
+      "reference_component_delta": 0,
+      "golden_aoi_status": "unavailable",
+      "golden_defect_count": 0,
+      "topology_aoi_status": "unavailable",
+      "topology_aoi_delta": 0,
+      "board_type": "motor_or_actuator_driver",
+      "board_function_confidence": 0.785,
+      "marking_confidence": 0.36,
+      "resolved_marking_count": 3,
+      "machine_connection_confidence": 0.69,
+      "connector_count": 5,
+      "salvage_opportunity_count": 6,
+      "best_salvage_opportunity": "Robot Motor Controller",
+      "functional_block_count": 5,
+      "aoi_readiness": "prototype_ready",
+      "scan_quality": {
+        "score": 0.5,
+        "reason": "tracked"
+      },
+      "project_potential": "good",
+      "backend": "hybrid",
+      "ocr": true
+    }
+  },
+  "summary": {
+    "summary_text": "Found 10 components on this PCB. Components include: 5 connector, 4 transistor, 1 inductor. Visible topology estimate: 6 trace regions and 3 candidate connections at 0.46 confidence. Likely board role: motor_or_actuator_driver at 0.79 confidence with 5 functional block candidate(s). OCR/marking lookup resolved evidence on 3 component(s). Machine connection map: 5 connector candidate(s) at 0.69 confidence. Best salvage/build opportunity: Robot Motor Controller (build_from_salvage). Reference AOI not executed. Topology AOI not executed. Golden image AOI not executed. AOI readiness: prototype_ready. Project potential: good. No specific project recommendations available.",
+    "total_components": 10,
+    "project_potential": "good",
+    "visual_topology": {
+      "trace_count": 6,
+      "connection_count": 3,
+      "confidence": 0.455,
+      "uncertainty": "medium"
+    },
+    "board_understanding": {
+      "primary_type": "motor_or_actuator_driver",
+      "confidence": 0.785,
+      "functional_blocks": [
+        {
+          "block_type": "power_input_protection",
+          "label": "Input power/protection",
+          "component_count": 10,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_4_mosfet",
+            "cmp_5_mosfet",
+            "cmp_6_connector",
+            "cmp_7_inductor",
+            "cmp_8_mosfet",
+            "cmp_9_mosfet"
+          ],
+          "bbox": [
+            50,
+            54,
+            380,
+            201
+          ],
+          "confidence": 0.95,
+          "function": "Accepts incoming power and protects downstream circuitry",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              4,
+              430,
+              251
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "actuator_drive",
+          "label": "Actuator or high-current output",
+          "component_count": 9,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_4_mosfet",
+            "cmp_5_mosfet",
+            "cmp_6_connector",
+            "cmp_8_mosfet",
+            "cmp_9_mosfet"
+          ],
+          "bbox": [
+            50,
+            54,
+            300,
+            201
+          ],
+          "confidence": 0.85,
+          "function": "Switches higher current loads from low-power control signals",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              12,
+              16,
+              338,
+              239
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "io_connectivity",
+          "label": "External IO/connectors",
+          "component_count": 5,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector",
+            "cmp_2_connector",
+            "cmp_3_connector",
+            "cmp_6_connector"
+          ],
+          "bbox": [
+            50,
+            55,
+            300,
+            199
+          ],
+          "confidence": 0.85,
+          "function": "Provides external electrical connections to a machine or host",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              12,
+              17,
+              338,
+              237
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "power_regulation",
+          "label": "Voltage regulation/filtering",
+          "component_count": 1,
+          "components": [
+            "cmp_7_inductor"
+          ],
+          "bbox": [
+            350,
+            151,
+            380,
+            181
+          ],
+          "confidence": 0.37,
+          "function": "Converts, filters, or stabilizes board power rails",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              346,
+              147,
+              384,
+              185
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "passive_conditioning",
+          "label": "Passive filtering/biasing",
+          "component_count": 1,
+          "components": [
+            "cmp_7_inductor"
+          ],
+          "bbox": [
+            350,
+            151,
+            380,
+            181
+          ],
+          "confidence": 0.37,
+          "function": "Filters, biases, divides, limits current, or shapes signals",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              346,
+              147,
+              384,
+              185
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_context": {
+        "likely_roles": [
+          {
+            "role": "actuator_driver",
+            "confidence": 0.86,
+            "description": "Switches current for motors, relays, solenoids, or loads",
+            "evidence": [
+              "4 mosfet",
+              "5 connector",
+              "1 inductor"
+            ]
+          },
+          {
+            "role": "io_breakout",
+            "confidence": 0.84,
+            "description": "Connects sensors, actuators, host systems, or service ports",
+            "evidence": [
+              "5 connector"
+            ]
+          },
+          {
+            "role": "power_node",
+            "confidence": 0.66,
+            "description": "Supplies, converts, or protects machine power rails",
+            "evidence": [
+              "1 inductor",
+              "4 mosfet",
+              "5 connector"
+            ]
+          },
+          {
+            "role": "machine_controller",
+            "confidence": 0.6,
+            "description": "Runs firmware/control logic and coordinates IO",
+            "evidence": [
+              "5 connector",
+              "text hints: esp8266, mcu",
+              "marking evidence: esp8266, mcu"
+            ]
+          }
+        ],
+        "integration_notes": [
+          "Treat outputs as high-current paths; confirm load rating and protection before driving actuators.",
+          "Connector regions are the best starting point for pinout tracing and machine-level integration."
+        ],
+        "pinout_evidence": [
+          {
+            "component_id": "cmp_3_connector",
+            "part_number": "ESP8266",
+            "pin_count": 22,
+            "package": "module",
+            "power_pins": [
+              {
+                "pin_number": 1,
+                "pin_name": "VCC",
+                "pin_type": "power",
+                "description": "Power supply (3.3V ONLY!)",
+                "typical_voltage": 3.3,
+                "max_current_ma": 300.0,
+                "alternate_functions": [],
+                "typical_connections": [
+                  "3.3V regulator"
+                ],
+                "critical": true
+              },
+              {
+                "pin_number": 9,
+                "pin_name": "GND",
+                "pin_type": "ground",
+                "description": "Ground",
+                "typical_voltage": 0.0,
+                "max_current_ma": null,
+                "alternate_functions": [],
+                "typical_connections": [
+                  "Ground plane"
+                ],
+                "critical": true
+              }
+            ],
+            "programming_or_clock_pins": []
+          }
+        ],
+        "connector_label_evidence": []
+      },
+      "reuse_and_splice": {
+        "candidate_regions": [
+          {
+            "region_id": "crop_1_actuator_drive",
+            "source_block": "actuator_drive",
+            "bbox": [
+              50,
+              54,
+              300,
+              201
+            ],
+            "crop_bbox": [
+              5,
+              9,
+              345,
+              246
+            ],
+            "confidence": 0.85,
+            "reuse_mode": "harvest_as_load_driver_after_current_validation",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "measure load current",
+              "add flyback/ESD protection as needed"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          },
+          {
+            "region_id": "crop_2_io_connectivity",
+            "source_block": "io_connectivity",
+            "bbox": [
+              50,
+              55,
+              300,
+              199
+            ],
+            "crop_bbox": [
+              5,
+              10,
+              345,
+              244
+            ],
+            "confidence": 0.85,
+            "reuse_mode": "reuse_as_connector_adapter_or_harness_anchor",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "map connector pins",
+              "confirm mating connector and cable clearance"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          },
+          {
+            "region_id": "crop_3_power_regulation",
+            "source_block": "power_regulation",
+            "bbox": [
+              350,
+              151,
+              380,
+              181
+            ],
+            "crop_bbox": [
+              345,
+              146,
+              385,
+              186
+            ],
+            "confidence": 0.37,
+            "reuse_mode": "harvest_as_power_submodule",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "load-test output",
+              "verify input voltage range",
+              "thermal check"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          }
+        ],
+        "board_spec_for_splicer": {
+          "coordinate_system": "image_pixels",
+          "bbox_px": [
+            0,
+            0,
+            600,
+            400
+          ],
+          "confidence": 0.785,
+          "components": [
+            {
+              "id": "cmp_0_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                250,
+                152,
+                300,
+                196
+              ],
+              "confidence": 0.921
+            },
+            {
+              "id": "cmp_1_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                52,
+                56,
+                151,
+                98
+              ],
+              "confidence": 0.697
+            },
+            {
+              "id": "cmp_2_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                99,
+                150,
+                132,
+                199
+              ],
+              "confidence": 0.609
+            },
+            {
+              "id": "cmp_3_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                203,
+                55,
+                300,
+                97
+              ],
+              "confidence": 0.595
+            },
+            {
+              "id": "cmp_4_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                203,
+                54,
+                300,
+                97
+              ],
+              "confidence": 0.593
+            },
+            {
+              "id": "cmp_5_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                52,
+                55,
+                150,
+                98
+              ],
+              "confidence": 0.586
+            },
+            {
+              "id": "cmp_6_connector",
+              "class_name": "connector",
+              "bbox_px": [
+                50,
+                150,
+                78,
+                198
+              ],
+              "confidence": 0.466
+            },
+            {
+              "id": "cmp_7_inductor",
+              "class_name": "inductor",
+              "bbox_px": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.454
+            },
+            {
+              "id": "cmp_8_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                150,
+                152,
+                181,
+                198
+              ],
+              "confidence": 0.384
+            },
+            {
+              "id": "cmp_9_mosfet",
+              "class_name": "mosfet",
+              "bbox_px": [
+                99,
+                149,
+                133,
+                201
+              ],
+              "confidence": 0.342
+            }
+          ],
+          "io_ports": [
+            {
+              "id": "cmp_0_connector",
+              "kind": "connector",
+              "bbox_px": [
+                250,
+                152,
+                300,
+                196
+              ],
+              "center_px": [
+                275,
+                174
+              ],
+              "confidence": 0.921
+            },
+            {
+              "id": "cmp_1_connector",
+              "kind": "connector",
+              "bbox_px": [
+                52,
+                56,
+                151,
+                98
+              ],
+              "center_px": [
+                101,
+                77
+              ],
+              "confidence": 0.697
+            },
+            {
+              "id": "cmp_2_connector",
+              "kind": "connector",
+              "bbox_px": [
+                99,
+                150,
+                132,
+                199
+              ],
+              "center_px": [
+                116,
+                174
+              ],
+              "confidence": 0.609
+            },
+            {
+              "id": "cmp_3_connector",
+              "kind": "connector",
+              "bbox_px": [
+                203,
+                55,
+                300,
+                97
+              ],
+              "center_px": [
+                252,
+                76
+              ],
+              "confidence": 0.595
+            },
+            {
+              "id": "cmp_6_connector",
+              "kind": "connector",
+              "bbox_px": [
+                50,
+                150,
+                78,
+                198
+              ],
+              "center_px": [
+                64,
+                174
+              ],
+              "confidence": 0.466
+            }
+          ],
+          "keepouts": [
+            {
+              "id": "cmp_4_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                203,
+                54,
+                300,
+                97
+              ]
+            },
+            {
+              "id": "cmp_5_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                52,
+                55,
+                150,
+                98
+              ]
+            },
+            {
+              "id": "cmp_7_inductor",
+              "kind": "inductor",
+              "bbox_px": [
+                350,
+                151,
+                380,
+                181
+              ]
+            },
+            {
+              "id": "cmp_8_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                150,
+                152,
+                181,
+                198
+              ]
+            },
+            {
+              "id": "cmp_9_mosfet",
+              "kind": "mosfet",
+              "bbox_px": [
+                99,
+                149,
+                133,
+                201
+              ]
+            }
+          ],
+          "candidate_crops": [
+            {
+              "id": "crop_1_actuator_drive",
+              "bbox_px": [
+                5,
+                9,
+                345,
+                246
+              ],
+              "source_block": "actuator_drive",
+              "confidence": 0.85
+            },
+            {
+              "id": "crop_2_io_connectivity",
+              "bbox_px": [
+                5,
+                10,
+                345,
+                244
+              ],
+              "source_block": "io_connectivity",
+              "confidence": 0.85
+            },
+            {
+              "id": "crop_3_power_regulation",
+              "bbox_px": [
+                345,
+                146,
+                385,
+                186
+              ],
+              "source_block": "power_regulation",
+              "confidence": 0.37
+            }
+          ],
+          "splicer_notes": [
+            "pixel geometry must be calibrated to mm before mechanical placement",
+            "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+            "do electrical validation before powering any harvested/spliced module"
+          ]
+        },
+        "warnings": [
+          "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design"
+        ]
+      }
+    },
+    "marking_analysis": {
+      "confidence": 0.36,
+      "resolved_component_count": 3,
+      "connector_labels": [],
+      "components": [
+        {
+          "component_id": "cmp_0_connector",
+          "class_name": "connector",
+          "bbox": [
+            249.87734985351562,
+            152.31573486328125,
+            300.09368896484375,
+            196.42185974121094
+          ],
+          "text": "Conn",
+          "part_tokens": [
+            "CONN"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "CONN",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        },
+        {
+          "component_id": "cmp_1_connector",
+          "class_name": "connector",
+          "bbox": [
+            52.20405197143555,
+            55.61742401123047,
+            150.51739501953125,
+            97.71710205078125
+          ],
+          "text": "ICChip",
+          "part_tokens": [
+            "ICCHIP"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "ICCHIP",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        },
+        {
+          "component_id": "cmp_3_connector",
+          "class_name": "connector",
+          "bbox": [
+            203.45445251464844,
+            55.228309631347656,
+            300.0697021484375,
+            97.23048400878906
+          ],
+          "text": "McU",
+          "part_tokens": [
+            "MCU"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "ESP8266",
+              "confidence": 0.72,
+              "match_type": "known_pinout_or_datasheet",
+              "pinout": {
+                "part_number": "ESP8266",
+                "manufacturer": "Espressif",
+                "description": "WiFi SoC module (ESP-12E/F)",
+                "package": "module",
+                "pin_count": 22,
+                "datasheet_url": "https://www.espressif.com/sites/default/files/documentation/0a-esp8266ex_datasheet_en.pdf",
+                "notes": "CRITICAL: 3.3V ONLY! 5V will destroy chip. GPIO6-11 connected to flash, don't use. Boot pins need correct pull-up/down.",
+                "power_pins": [
+                  {
+                    "pin_number": 1,
+                    "pin_name": "VCC",
+                    "pin_type": "power",
+                    "description": "Power supply (3.3V ONLY!)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 300.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "3.3V regulator"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 9,
+                    "pin_name": "GND",
+                    "pin_type": "ground",
+                    "description": "Ground",
+                    "typical_voltage": 0.0,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Ground plane"
+                    ],
+                    "critical": true
+                  }
+                ],
+                "programming_or_clock_pins": [],
+                "io_pins_sample": [
+                  {
+                    "pin_number": 15,
+                    "pin_name": "GPIO0",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode select",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Flash button"
+                    ],
+                    "typical_connections": [
+                      "Pull-up (flash mode=LOW)"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 2,
+                    "pin_name": "GPIO2",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode (must be HIGH)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Built-in LED"
+                    ],
+                    "typical_connections": [
+                      "Pull-up"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 3,
+                    "pin_name": "GPIO15",
+                    "pin_type": "bidirectional",
+                    "description": "Boot mode (must be LOW)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-down"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 4,
+                    "pin_name": "EN/CH_PD",
+                    "pin_type": "input",
+                    "description": "Chip enable (must be HIGH)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-up 10k"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 5,
+                    "pin_name": "RST",
+                    "pin_type": "input",
+                    "description": "Reset (active LOW)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Pull-up + reset button"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 6,
+                    "pin_name": "TXD/GPIO1",
+                    "pin_type": "output",
+                    "description": "UART transmit",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "Debug output"
+                    ],
+                    "typical_connections": [
+                      "USB serial RX"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 7,
+                    "pin_name": "RXD/GPIO3",
+                    "pin_type": "input",
+                    "description": "UART receive",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "USB serial TX"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 10,
+                    "pin_name": "GPIO6/SD_CLK",
+                    "pin_type": "output",
+                    "description": "SPI flash clock (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 11,
+                    "pin_name": "GPIO7/SD_D0",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash data 0 (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 12,
+                    "pin_name": "GPIO8/SD_D1",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash data 1 (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 13,
+                    "pin_name": "GPIO11/SD_CMD",
+                    "pin_type": "bidirectional",
+                    "description": "SPI flash CMD (INTERNAL)",
+                    "typical_voltage": null,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Flash chip"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 8,
+                    "pin_name": "GPIO4",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (safe to use)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "I2C SDA"
+                    ],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 14,
+                    "pin_name": "GPIO5",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (safe to use)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [
+                      "I2C SCL"
+                    ],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 16,
+                    "pin_name": "GPIO12",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (MISO)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 17,
+                    "pin_name": "GPIO13",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (MOSI)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  },
+                  {
+                    "pin_number": 18,
+                    "pin_name": "GPIO14",
+                    "pin_type": "bidirectional",
+                    "description": "GPIO (SCK)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 12.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "General purpose"
+                    ],
+                    "critical": false
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "machine_connection_map": {
+      "mode": "machine_connection_map",
+      "connector_count": 5,
+      "connector_maps": [
+        {
+          "connector_id": "conn_0_connector",
+          "bbox": [
+            250,
+            152,
+            300,
+            196
+          ],
+          "center": [
+            275,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_side"
+        },
+        {
+          "connector_id": "conn_1_connector",
+          "bbox": [
+            52,
+            56,
+            151,
+            98
+          ],
+          "center": [
+            101,
+            77
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 6,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_2_connector",
+          "bbox": [
+            99,
+            150,
+            132,
+            199
+          ],
+          "center": [
+            116,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_3_connector",
+          "bbox": [
+            203,
+            55,
+            300,
+            97
+          ],
+          "center": [
+            252,
+            76
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 5,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        },
+        {
+          "connector_id": "conn_6_connector",
+          "bbox": [
+            50,
+            150,
+            78,
+            198
+          ],
+          "center": [
+            64,
+            174
+          ],
+          "class_name": "connector",
+          "estimated_pin_count": 3,
+          "labels": [],
+          "likely_roles": [
+            "unlabeled_external_interface"
+          ],
+          "candidate_pin_groups": [],
+          "confidence": 0.4,
+          "recommended_next_photo": "close_up_connector_label"
+        }
+      ],
+      "interfaces": [
+        {
+          "type": "known_ic_pinout",
+          "part_number": "ESP8266",
+          "pin_count": 22,
+          "confidence": 0.74,
+          "validation": [
+            "verify package orientation",
+            "match pin 1 marker",
+            "confirm continuity to connector"
+          ]
+        }
+      ],
+      "pinout_evidence": [
+        {
+          "component_id": "cmp_3_connector",
+          "part_number": "ESP8266",
+          "pin_count": 22,
+          "package": "module",
+          "power_pins": [
+            {
+              "pin_number": 1,
+              "pin_name": "VCC",
+              "pin_type": "power",
+              "description": "Power supply (3.3V ONLY!)",
+              "typical_voltage": 3.3,
+              "max_current_ma": 300.0,
+              "alternate_functions": [],
+              "typical_connections": [
+                "3.3V regulator"
+              ],
+              "critical": true
+            },
+            {
+              "pin_number": 9,
+              "pin_name": "GND",
+              "pin_type": "ground",
+              "description": "Ground",
+              "typical_voltage": 0.0,
+              "max_current_ma": null,
+              "alternate_functions": [],
+              "typical_connections": [
+                "Ground plane"
+              ],
+              "critical": true
+            }
+          ],
+          "programming_or_clock_pins": []
+        }
+      ],
+      "splice_plan": {
+        "safest_entry_points": [],
+        "required_measurements": [
+          "continuity from connector to ground",
+          "unpowered resistance between power and ground",
+          "load output voltage",
+          "max load current",
+          "flyback/protection diode continuity"
+        ],
+        "do_not_assume": [
+          "pin order",
+          "voltage level",
+          "shared ground",
+          "connector current rating",
+          "firmware protocol"
+        ]
+      },
+      "confidence": 0.69,
+      "limitations": [
+        "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+        "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+        "do not power harvested modules until polarity, rails, and isolation are confirmed"
+      ]
+    },
+    "salvage_opportunities": {
+      "confidence": 0.6,
+      "best_opportunity": {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.61,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "actuator_driver",
+          "controller"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector",
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      "strategy": {
+        "recommendation": "build_now",
+        "reason": "Top opportunity is Robot Motor Controller with score 0.61.",
+        "inventory_focus": [
+          "actuator_driver",
+          "connector",
+          "controller",
+          "known_ic_pinout",
+          "power",
+          "wireless"
+        ]
+      },
+      "opportunities": [
+        {
+          "type": "build_from_salvage",
+          "id": "robot_motor_controller",
+          "name": "Robot Motor Controller",
+          "category": "robotics",
+          "score": 0.61,
+          "estimated_output_value_usd": 28.0,
+          "build_complexity": "hard",
+          "matched_assets": [
+            "actuator_driver",
+            "controller"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector",
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "led_controller",
+          "name": "LED / Light Controller",
+          "category": "consumer_gadget",
+          "score": 0.61,
+          "estimated_output_value_usd": 16.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "actuator_driver",
+            "controller"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector",
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "wifi_relay_switch",
+          "name": "Smart WiFi Relay Switch",
+          "category": "upcycled_gadget",
+          "score": 0.53,
+          "estimated_output_value_usd": 18.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "actuator_driver",
+            "power",
+            "wireless"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "bench_power_module",
+          "name": "Bench Power Supply Module",
+          "category": "tooling",
+          "score": 0.53,
+          "estimated_output_value_usd": 22.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "power"
+          ],
+          "missing_assets": [],
+          "nice_to_have_matched": [
+            "connector"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "prototype build using harvested modules"
+          ]
+        },
+        {
+          "type": "resell_or_stock",
+          "id": "resell_esp8266",
+          "name": "Recover/stock ESP8266",
+          "score": 0.425,
+          "estimated_output_value_usd": 3.0,
+          "matched_assets": [
+            "esp8266"
+          ],
+          "missing_assets": [],
+          "next_steps": [
+            "test part",
+            "verify marking/package",
+            "sort into inventory",
+            "check live market price"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "sensor_gateway",
+          "name": "Sensor Gateway / Data Logger",
+          "category": "iot",
+          "score": 0.305,
+          "estimated_output_value_usd": 24.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "sensor_or_adc"
+          ],
+          "nice_to_have_matched": [
+            "wireless"
+          ],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: sensor_or_adc"
+          ]
+        }
+      ],
+      "asset_summary": {
+        "capabilities": {
+          "actuator_driver": 2,
+          "connector": 6,
+          "controller": 1,
+          "known_ic_pinout": 1,
+          "power": 2,
+          "wireless": 1
+        },
+        "parts": {
+          "conn": 1,
+          "esp8266": 1,
+          "icchip": 1
+        },
+        "connector_count": 5,
+        "defect_count": 0,
+        "evidence": [
+          "board role: motor_or_actuator_driver",
+          "part marking: conn",
+          "part marking: icchip",
+          "part marking: esp8266",
+          "interface: known_ic_pinout"
+        ]
+      }
+    },
+    "aoi_readiness": "prototype_ready",
+    "top_recommendation": null,
+    "reference_aoi": {
+      "status": "unavailable",
+      "component_delta": 0,
+      "missing": [],
+      "extra": []
+    },
+    "golden_aoi": {
+      "status": "unavailable",
+      "defect_count": 0,
+      "defects": []
+    },
+    "topology_aoi": {
+      "status": "unavailable",
+      "topology_delta": 0,
+      "missing": [],
+      "extra": []
+    },
+    "component_breakdown": {
+      "connector": 5,
+      "transistor": 4,
+      "inductor": 1
+    }
+  }
+}

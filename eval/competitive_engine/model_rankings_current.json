@@ -1,0 +1,857 @@
+{
+  "created_at": "2026-05-06T07:46:47.707811+00:00",
+  "method": "unlabeled_smoke_rank_v1",
+  "limitations": [
+    "This is not mAP; use labeled validation data for production qualification.",
+    "The ranking estimates practical utility on local sample photos only."
+  ],
+  "skipped_models": [],
+  "images": [
+    "assets/samples/demo_pcb.png",
+    "assets/samples/iteration-1.png",
+    "assets/samples/iteration-2.png",
+    "assets/samples/iteration-3.png",
+    "assets/samples/iteration-4.png",
+    "assets/samples/test_pcb.png",
+    "data/test_images/demo_pcb.png",
+    "data/test_images/raspberry_pi.jpg",
+    "data/test_images/test_pcb.png"
+  ],
+  "rankings": [
+    {
+      "model_path": "pcb_runs/electrocom61_nano_320/weights/best.pt",
+      "score": 0.5783,
+      "image_count": 9,
+      "detected_images": 7,
+      "total_detections": 31,
+      "learned_detections": 31,
+      "average_confidence": 0.5936,
+      "class_diversity": 3,
+      "average_runtime_s": 0.1187,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 0.0615
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0542
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0185
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.021
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.3341
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0151
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 0.0231
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.2635,
+          "classes": [
+            "transistor"
+          ],
+          "elapsed_s": 0.024
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.5168
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/electrocom61_nano_320.pt",
+      "score": 0.5741,
+      "image_count": 9,
+      "detected_images": 7,
+      "total_detections": 31,
+      "learned_detections": 31,
+      "average_confidence": 0.5936,
+      "class_diversity": 3,
+      "average_runtime_s": 0.2854,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 1.8316
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0357
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0183
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0182
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.0215
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0219
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 0.1524
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.2635,
+          "classes": [
+            "transistor"
+          ],
+          "elapsed_s": 0.0392
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.43
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/pcb_components_yolo11n_thawed.pt",
+      "score": 0.3103,
+      "image_count": 9,
+      "detected_images": 3,
+      "total_detections": 11,
+      "learned_detections": 11,
+      "average_confidence": 0.4314,
+      "class_diversity": 4,
+      "average_runtime_s": 0.0858,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 0.1503
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0785
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0588
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1038
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0508
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0858
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 0.0667
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 9,
+          "learned_detections": 9,
+          "average_confidence": 0.5191,
+          "classes": [
+            "connector",
+            "ic_chip",
+            "switch"
+          ],
+          "elapsed_s": 0.0821
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0956
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_thawed.pt",
+      "score": 0.3072,
+      "image_count": 9,
+      "detected_images": 3,
+      "total_detections": 11,
+      "learned_detections": 11,
+      "average_confidence": 0.4314,
+      "class_diversity": 4,
+      "average_runtime_s": 0.2109,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 0.1549
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0548
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0607
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.15
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1058
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.6566
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 0.0564
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 9,
+          "learned_detections": 9,
+          "average_confidence": 0.5191,
+          "classes": [
+            "connector",
+            "ic_chip",
+            "switch"
+          ],
+          "elapsed_s": 0.4815
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1778
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_fully_thawed.pt",
+      "score": 0.2839,
+      "image_count": 9,
+      "detected_images": 3,
+      "total_detections": 9,
+      "learned_detections": 9,
+      "average_confidence": 0.406,
+      "class_diversity": 4,
+      "average_runtime_s": 0.3687,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3683,
+          "classes": [
+            "resistor"
+          ],
+          "elapsed_s": 0.1821
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.172
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.6164
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2113
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0616
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1963
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3683,
+          "classes": [
+            "resistor"
+          ],
+          "elapsed_s": 0.7126
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 7,
+          "learned_detections": 7,
+          "average_confidence": 0.4814,
+          "classes": [
+            "display",
+            "ic_chip",
+            "switch"
+          ],
+          "elapsed_s": 0.0517
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1143
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_small_component.pt",
+      "score": 0.2584,
+      "image_count": 9,
+      "detected_images": 1,
+      "total_detections": 10,
+      "learned_detections": 10,
+      "average_confidence": 0.4804,
+      "class_diversity": 4,
+      "average_runtime_s": 0.1708,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2096
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0753
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1499
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0964
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0545
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0468
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2013
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.4804,
+          "classes": [
+            "connector",
+            "crystal",
+            "display",
+            "ic_chip"
+          ],
+          "elapsed_s": 0.5801
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1235
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_zoomed.pt",
+      "score": 0.2506,
+      "image_count": 9,
+      "detected_images": 1,
+      "total_detections": 12,
+      "learned_detections": 12,
+      "average_confidence": 0.4021,
+      "class_diversity": 4,
+      "average_runtime_s": 0.2174,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2716
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0864
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.6701
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.6362
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0588
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0686
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0707
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 12,
+          "learned_detections": 12,
+          "average_confidence": 0.4021,
+          "classes": [
+            "connector",
+            "display",
+            "ic_chip",
+            "switch"
+          ],
+          "elapsed_s": 0.0442
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0498
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/electrocom61_v1.pt",
+      "score": 0.0,
+      "image_count": 9,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 0.2933,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.4337
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.3539
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.335
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2742
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2738
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2624
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2444
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1939
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2686
+        }
+      ]
+    },
+    {
+      "model_path": "pcb_runs/electrocom61_v2/weights/best.pt",
+      "score": 0.0,
+      "image_count": 9,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 0.3506,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.5775
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.4717
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.3994
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.3346
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.4673
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2164
+        },
+        {
+          "image": "data/test_images/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2575
+        },
+        {
+          "image": "data/test_images/raspberry_pi.jpg",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1867
+        },
+        {
+          "image": "data/test_images/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2437
+        }
+      ]
+    }
+  ]
+}

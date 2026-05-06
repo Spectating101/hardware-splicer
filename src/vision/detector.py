@@ -68,7 +68,8 @@ class ComponentDetector:
             return False
         try:
             self.model = YOLO(resolved_path)
-            self.model.to(self.device)
+            if str(resolved_path).lower().endswith(".pt"):
+                self.model.to(self.device)
             self.loaded_model_path = resolved_path
             logger.info(f"Loaded PCB YOLO model from {resolved_path}")
             return True
@@ -97,7 +98,7 @@ class ComponentDetector:
                 elif self._should_supplement_yolo(detections):
                     learned_supplemental = self._detect_with_supplemental_yolo(image)
                     detections = self._merge_detections(detections, learned_supplemental)
-                    if self._should_supplement_yolo(detections):
+                    if self._should_use_classical_supplement(detections):
                         supplemental = self._detect_with_classical_cv(image)
                         for det in supplemental:
                             det.setdefault("provenance", {})["backend"] = "classical-supplement"
@@ -129,6 +130,20 @@ class ComponentDetector:
         if not semantic_confidences:
             return True
         return (sum(semantic_confidences) / len(semantic_confidences)) < 0.35
+
+    def _should_use_classical_supplement(self, detections: List[Dict[str, Any]]) -> bool:
+        """Decide when shape heuristics are worth adding to learned detections."""
+        if not detections:
+            return True
+        semantic_confidences = [
+            float(det.get("semantic_confidence", det.get("confidence", 0.0)))
+            for det in detections
+            if isinstance(det.get("semantic_confidence", det.get("confidence")), (int, float))
+        ]
+        avg_semantic = (sum(semantic_confidences) / len(semantic_confidences)) if semantic_confidences else 0.0
+        if len(detections) <= 1:
+            return True
+        return avg_semantic < 0.35
 
     def _merge_detections(
         self,
@@ -181,7 +196,8 @@ class ComponentDetector:
             if model is None:
                 try:
                     model = YOLO(model_path)
-                    model.to(self.device)
+                    if str(model_path).lower().endswith(".pt"):
+                        model.to(self.device)
                     self.supplemental_models[model_path] = model
                     logger.info(f"Loaded supplemental PCB YOLO model from {model_path}")
                 except Exception as e:

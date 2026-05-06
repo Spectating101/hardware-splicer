@@ -3,14 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, Camera, CircuitBoard, Menu, Wrench, X, Zap } from "lucide-react";
+import { Boxes, Camera, CircuitBoard, ClipboardList, Menu, ShieldCheck, Sparkles, Wrench, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
+  { href: "/start", label: "Start", icon: Sparkles },
+  { href: "/cases", label: "Cases", icon: ClipboardList },
   { href: "/scan", label: "Scan", icon: Camera },
+  { href: "/repair", label: "Repair", icon: ShieldCheck },
   { href: "/build", label: "Build", icon: Wrench },
   { href: "/parts", label: "Parts", icon: Boxes },
+  { href: "/review", label: "Review", icon: ClipboardList },
 ];
 
 const secondaryNav = [
@@ -79,7 +83,7 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-2 lg:flex">
           <Button asChild size="sm" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
-            <Link href="/scan">
+            <Link href="/start">
               <Zap className="mr-1.5 h-3.5 w-3.5" />
               Start
             </Link>

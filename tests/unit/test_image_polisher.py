@@ -23,3 +23,10 @@ def test_polish_for_opencv_returns_bgr_uint8_when_possible():
     assert metadata["opencv_available"] is True
     assert "steps_applied" in metadata
 
+
+def test_polish_metadata_includes_scan_quality_gate():
+    raw = np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8)
+    _polished, metadata = image_polisher.polish_for_inference(raw)
+
+    assert "scan_quality" in metadata
+    assert 0.0 <= metadata["scan_quality"]["score"] <= 1.0

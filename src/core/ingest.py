@@ -8,7 +8,13 @@ from src.llm.mapper import FunctionalMapper
 from src.intelligence.trace_analyzer import TraceAnalyzer
 from src.intelligence.inspection_diff import InspectionDiff
 from src.intelligence.topology_diff import TopologyDiff
+from src.intelligence.board_function_inference import BoardFunctionInferencer
+from src.intelligence.marking_resolver import MarkingResolver
+from src.intelligence.connection_mapper import ConnectionMapper
+from src.intelligence.salvage_opportunity_engine import SalvageOpportunityEngine
+from src.intelligence.certainty_ledger import CertaintyLedgerBuilder
 from src.vision.image_polisher import polish_for_opencv
+from src.vision.golden_reference import GoldenReferenceInspector
 
 
 class CircuitAnalyzer:
@@ -22,6 +28,12 @@ class CircuitAnalyzer:
         self.trace_analyzer = TraceAnalyzer()
         self.reference_diff = InspectionDiff()
         self.topology_diff = TopologyDiff()
+        self.golden_inspector = GoldenReferenceInspector()
+        self.board_inferencer = BoardFunctionInferencer()
+        self.marking_resolver = MarkingResolver()
+        self.connection_mapper = ConnectionMapper()
+        self.salvage_engine = SalvageOpportunityEngine()
+        self.certainty_builder = CertaintyLedgerBuilder()
         logger.info("CircuitAnalyzer initialized")
     
     def analyze_pcb(
@@ -31,6 +43,7 @@ class CircuitAnalyzer:
         enable_ocr: bool | None = None,
         reference_counts: Dict[str, int] | None = None,
         reference_topology: Dict[str, Any] | None = None,
+        reference_image: np.ndarray | None = None,
     ) -> Dict[str, Any]:
         """Complete PCB analysis pipeline."""
         try:
@@ -46,6 +59,7 @@ class CircuitAnalyzer:
                 processed_image, preprocessing = processed_image_raw
             else:
                 processed_image = processed_image_raw
+            scan_quality = preprocessing.get("scan_quality") if isinstance(preprocessing, dict) else None
             
             # Step 2: Detect components
             detections = self.detector.detect_components(processed_image, backend=backend, enable_ocr=enable_ocr)
@@ -55,9 +69,11 @@ class CircuitAnalyzer:
 
             # Step 3.1: Optional golden/reference component count comparison
             reference_aoi = self._compare_with_reference(detections, reference_counts)
+            golden_aoi = self._compare_with_golden_image(image, reference_image)
             
             # Step 4: Map to functional metadata
             functionality_data = self.mapper.map_detections_to_functionality(detections)
+            marking_analysis = self._resolve_markings(detections)
             
             # Step 5: Estimate visual topology from traces and component geometry
             visual_topology = self._analyze_visual_topology(image, detections, detection_summary)
@@ -71,28 +87,77 @@ class CircuitAnalyzer:
             # Step 6: Detect visual defect candidates
             defect_inspection = self._detect_defect_candidates(image, detections)
 
-            # Step 7: Assess AOI production readiness for this scan
+            # Step 7: Infer board role, machine context, and reusable regions
+            board_understanding = self._infer_board_understanding(
+                image,
+                detections,
+                detection_summary,
+                visual_topology,
+                defect_inspection,
+                marking_analysis,
+            )
+            machine_connection_map = self._map_machine_connections(
+                detections,
+                marking_analysis,
+                board_understanding,
+            )
+            salvage_opportunities = self._evaluate_salvage_opportunities(
+                {
+                    "detection_summary": detection_summary,
+                    "marking_analysis": marking_analysis,
+                    "board_understanding": board_understanding,
+                    "machine_connection_map": machine_connection_map,
+                    "defect_inspection": defect_inspection,
+                }
+            )
+
+            # Step 8: Assess AOI production readiness for this scan
             aoi_inspection = self._assess_aoi_readiness(
                 detection_summary,
                 visual_topology,
                 defect_inspection,
                 reference_aoi,
                 topology_aoi,
+                scan_quality=scan_quality,
+                golden_aoi=golden_aoi,
             )
 
-            # Step 8: Generate project recommendations
+            # Step 9: Generate project recommendations
             recommendations = self.mapper.generate_project_recommendations(functionality_data)
+
+            # Step 9.1: Build auditable certainty ledger across all evidence.
+            certainty_ledger = self.certainty_builder.build(
+                detections=detections,
+                detection_summary=detection_summary,
+                marking_analysis=marking_analysis,
+                board_understanding=board_understanding,
+                machine_connection_map=machine_connection_map,
+                visual_topology=visual_topology,
+                defect_inspection=defect_inspection,
+                aoi_inspection=aoi_inspection,
+                reference_aoi=reference_aoi,
+                topology_aoi=topology_aoi,
+                golden_aoi=golden_aoi,
+                salvage_opportunities=salvage_opportunities,
+                scan_quality=scan_quality,
+            )
             
-            # Step 9: Compile results
+            # Step 10: Compile results
             results = {
                 "detections": detections,
                 "detection_summary": detection_summary,
                 "functionality_analysis": functionality_data,
+                "marking_analysis": marking_analysis,
+                "board_understanding": board_understanding,
+                "machine_connection_map": machine_connection_map,
+                "salvage_opportunities": salvage_opportunities,
                 "visual_topology": visual_topology,
                 "topology_aoi": topology_aoi,
                 "defect_inspection": defect_inspection,
                 "reference_aoi": reference_aoi,
+                "golden_aoi": golden_aoi,
                 "aoi_inspection": aoi_inspection,
+                "certainty_ledger": certainty_ledger,
                 "project_recommendations": recommendations,
                 "analysis_metadata": {
                     "total_processing_time": "~2 seconds",
@@ -105,9 +170,27 @@ class CircuitAnalyzer:
                     "defect_count": defect_inspection.get("defect_count", 0),
                     "reference_aoi_status": reference_aoi.get("status", "unavailable"),
                     "reference_component_delta": reference_aoi.get("component_delta", 0),
+                    "golden_aoi_status": golden_aoi.get("status", "unavailable"),
+                    "golden_defect_count": golden_aoi.get("defect_count", 0),
                     "topology_aoi_status": topology_aoi.get("status", "unavailable"),
                     "topology_aoi_delta": topology_aoi.get("topology_delta", 0),
+                    "board_type": board_understanding.get("board_identity", {}).get("primary_type", "unknown_board"),
+                    "board_function_confidence": board_understanding.get("confidence", 0.0),
+                    "marking_confidence": marking_analysis.get("confidence", 0.0),
+                    "resolved_marking_count": len(marking_analysis.get("components", []) or []),
+                    "machine_connection_confidence": machine_connection_map.get("confidence", 0.0),
+                    "connector_count": machine_connection_map.get("connector_count", 0),
+                    "salvage_opportunity_count": len(salvage_opportunities.get("opportunities", []) or []),
+                    "best_salvage_opportunity": (salvage_opportunities.get("best_opportunity") or {}).get("name"),
+                    "functional_block_count": len(board_understanding.get("functional_blocks", []) or []),
                     "aoi_readiness": aoi_inspection.get("readiness", "unknown"),
+                    "certainty_score": certainty_ledger.get("overall", {}).get("score", 0.0),
+                    "certainty_level": certainty_ledger.get("overall", {}).get("level", "unknown"),
+                    "certain_claim_count": certainty_ledger.get("counts", {}).get("certain", 0),
+                    "likely_claim_count": certainty_ledger.get("counts", {}).get("likely", 0),
+                    "missing_evidence_count": len(certainty_ledger.get("missing_evidence", []) or []),
+                    "training_capture_recommended": bool((certainty_ledger.get("training_queue") or {}).get("should_capture")),
+                    "scan_quality": aoi_inspection.get("scan_quality", {}),
                     "project_potential": functionality_data.get("project_potential", "none"),
                     "backend": backend or self.detector.default_backend,
                     "ocr": bool(enable_ocr) if enable_ocr is not None else self.detector.ocr_enabled_default
@@ -123,13 +206,59 @@ class CircuitAnalyzer:
                 "error": str(e),
                 "detection_summary": {"total_components": 0},
                 "functionality_analysis": {"components": [], "capabilities": []},
+                "marking_analysis": self._empty_marking_analysis(str(e)),
+                "board_understanding": self._empty_board_understanding(str(e)),
+                "machine_connection_map": self._empty_machine_connection_map(str(e)),
+                "salvage_opportunities": self._empty_salvage_opportunities(str(e)),
                 "visual_topology": self._empty_visual_topology(str(e)),
                 "defect_inspection": self._empty_defect_inspection(str(e)),
                 "reference_aoi": self._empty_reference_aoi(str(e)),
+                "golden_aoi": self._empty_golden_aoi(str(e)),
                 "topology_aoi": self._empty_topology_aoi(str(e)),
                 "aoi_inspection": {"readiness": "unavailable", "score": 0.0, "blockers": [str(e)]},
+                "certainty_ledger": self.certainty_builder.empty(str(e)),
                 "project_recommendations": []
             }
+
+    def analyze_board_set(
+        self,
+        images: List[np.ndarray],
+        backend: str | None = None,
+        enable_ocr: bool | None = None,
+        reference_image: np.ndarray | None = None,
+    ) -> Dict[str, Any]:
+        """Analyze multiple views/crops of the same board and fuse evidence."""
+        if not images:
+            return {
+                "error": "No images supplied",
+                "views": [],
+                "fused_board_understanding": self._empty_board_understanding("No images supplied"),
+            }
+
+        views = []
+        for idx, image in enumerate(images):
+            result = self.analyze_pcb(
+                image,
+                backend=backend,
+                enable_ocr=enable_ocr,
+                reference_image=reference_image if idx == 0 else None,
+            )
+            result["view_id"] = f"view_{idx + 1}"
+            views.append(result)
+
+        fused = self._fuse_board_views(views)
+        certainty_ledger = self.certainty_builder.build_multiview(
+            views=views,
+            fused_board_understanding=fused,
+        )
+        return {
+            "mode": "multi_image_board_analysis",
+            "view_count": len(views),
+            "views": views,
+            "fused_board_understanding": fused,
+            "certainty_ledger": certainty_ledger,
+            "summary": self._multi_view_summary(fused, views),
+        }
 
     def _compare_with_reference(
         self,
@@ -155,6 +284,116 @@ class CircuitAnalyzer:
         except Exception as e:
             logger.warning(f"Reference AOI comparison failed: {e}")
             return self._empty_reference_aoi(str(e))
+
+    def _fuse_board_views(self, views: List[Dict[str, Any]]) -> Dict[str, Any]:
+        role_scores: Dict[str, float] = {}
+        role_evidence: Dict[str, List[str]] = {}
+        block_counts: Dict[str, int] = {}
+        connector_labels = set()
+        pinout_evidence = []
+        connection_maps = []
+        candidate_regions = []
+        component_counts: Dict[str, int] = {}
+
+        for view in views:
+            view_id = view.get("view_id", "view")
+            board = view.get("board_understanding") or {}
+            identity = board.get("board_identity") or {}
+            primary = identity.get("primary_type", "unknown_board")
+            confidence = float(identity.get("confidence", board.get("confidence", 0.0)) or 0.0)
+            role_scores[primary] = max(role_scores.get(primary, 0.0), confidence)
+            role_evidence.setdefault(primary, []).extend([f"{view_id}: {item}" for item in identity.get("evidence", [])])
+            for alt in identity.get("alternatives", []) or []:
+                role = alt.get("type", "unknown_board")
+                score = float(alt.get("confidence", 0.0) or 0.0) * 0.85
+                role_scores[role] = max(role_scores.get(role, 0.0), score)
+                role_evidence.setdefault(role, []).extend([f"{view_id}: {item}" for item in alt.get("evidence", [])])
+
+            for block in board.get("functional_blocks", []) or []:
+                block_type = block.get("block_type", "unknown")
+                block_counts[block_type] = block_counts.get(block_type, 0) + 1
+
+            marking = view.get("marking_analysis") or {}
+            connector_labels.update(marking.get("connector_labels", []) or [])
+            pinout_evidence.extend((board.get("machine_context") or {}).get("pinout_evidence", []) or [])
+            connection = view.get("machine_connection_map") or {}
+            for connector_map in connection.get("connector_maps", []) or []:
+                next_map = dict(connector_map)
+                next_map["view_id"] = view_id
+                connection_maps.append(next_map)
+
+            for candidate in (board.get("reuse_and_splice") or {}).get("candidate_regions", []) or []:
+                next_candidate = dict(candidate)
+                next_candidate["view_id"] = view_id
+                candidate_regions.append(next_candidate)
+
+            for cls, count in (view.get("detection_summary", {}).get("components_by_type") or {}).items():
+                component_counts[cls] = component_counts.get(cls, 0) + int(count or 0)
+
+        best_role = max(role_scores, key=role_scores.get) if role_scores else "unknown_board"
+        best_conf = role_scores.get(best_role, 0.0)
+        view_bonus = min(0.14, 0.04 * max(0, len(views) - 1))
+        marking_bonus = 0.08 if pinout_evidence or connector_labels else 0.0
+        fused_conf = min(0.95, best_conf + view_bonus + marking_bonus)
+        candidate_regions.sort(key=lambda item: float(item.get("confidence", 0.0) or 0.0), reverse=True)
+
+        return {
+            "mode": "multi_image_evidence_fusion",
+            "board_identity": {
+                "primary_type": best_role,
+                "confidence": round(fused_conf, 3),
+                "evidence": role_evidence.get(best_role, [])[:12],
+                "alternatives": [
+                    {"type": role, "confidence": round(score, 3), "evidence": role_evidence.get(role, [])[:6]}
+                    for role, score in sorted(role_scores.items(), key=lambda item: item[1], reverse=True)
+                    if role != best_role
+                ][:4],
+            },
+            "functional_block_votes": dict(sorted(block_counts.items())),
+            "machine_context": {
+                "connector_label_evidence": sorted(connector_labels),
+                "pinout_evidence": pinout_evidence[:20],
+                "connector_maps": connection_maps[:20],
+                "integration_notes": [
+                    "Use front/back/crop fusion as evidence aggregation, not geometric registration.",
+                    "Calibrate scale and align views before mechanical splice planning.",
+                    "Prioritize labels and pinout evidence that appear in multiple views or closeups.",
+                ],
+            },
+            "reuse_and_splice": {
+                "candidate_regions": candidate_regions[:12],
+                "warnings": [
+                    "candidate crop coordinates are per-view pixels",
+                    "front/back geometry is not yet registered into one metric coordinate frame",
+                ],
+            },
+            "observed_inventory": {"component_counts": dict(sorted(component_counts.items()))},
+            "salvage_opportunities": self.salvage_engine.evaluate(views),
+            "confidence": round(fused_conf, 3),
+        }
+
+    def _multi_view_summary(self, fused: Dict[str, Any], views: List[Dict[str, Any]]) -> str:
+        identity = fused.get("board_identity", {})
+        labels = fused.get("machine_context", {}).get("connector_label_evidence", [])
+        return (
+            f"Fused {len(views)} board view(s). Likely role: "
+            f"{identity.get('primary_type', 'unknown_board')} at "
+            f"{float(identity.get('confidence', 0.0) or 0.0):.2f} confidence. "
+            f"Connector/label evidence: {', '.join(labels[:8]) if labels else 'none'}."
+        )
+
+    def _compare_with_golden_image(
+        self,
+        image: np.ndarray,
+        reference_image: np.ndarray | None,
+    ) -> Dict[str, Any]:
+        if reference_image is None:
+            return self._empty_golden_aoi()
+        try:
+            return self.golden_inspector.compare(reference_image, image)
+        except Exception as e:
+            logger.warning(f"Golden image AOI comparison failed: {e}")
+            return self._empty_golden_aoi(str(e))
 
     def _compare_with_reference_topology(
         self,
@@ -248,17 +487,36 @@ class CircuitAnalyzer:
         defect_inspection: Dict[str, Any] | None = None,
         reference_aoi: Dict[str, Any] | None = None,
         topology_aoi: Dict[str, Any] | None = None,
+        scan_quality: Dict[str, Any] | None = None,
+        golden_aoi: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         total = int(detection_summary.get("total_components", 0) or 0)
         learned_ratio = self._learned_detection_ratio(detection_summary)
         semantic = float(detection_summary.get("average_semantic_confidence", 0.0) or 0.0)
         topology_conf = float(visual_topology.get("confidence", 0.0) or 0.0)
+        scan_score = 1.0
+        scan_reason = "not_tracked"
+        if isinstance(scan_quality, dict):
+            scan_score = float(scan_quality.get("score", 1.0) or 0.0)
+            scan_reason = str(scan_quality.get("reason", "tracked"))
         defect_count = int((defect_inspection or {}).get("defect_count", 0) or 0)
         reference_status = (reference_aoi or {}).get("status")
         reference_delta = int((reference_aoi or {}).get("component_delta", 0) or 0)
         topology_status = (topology_aoi or {}).get("status")
         topology_delta = int((topology_aoi or {}).get("topology_delta", 0) or 0)
+        golden_status = (golden_aoi or {}).get("status")
+        golden_defect_count = int((golden_aoi or {}).get("defect_count", 0) or 0)
+        golden_max_severity = max(
+            (
+                float(defect.get("severity", 0.0) or 0.0)
+                for defect in ((golden_aoi or {}).get("defects") or [])
+                if isinstance(defect, dict)
+            ),
+            default=0.0,
+        )
         review_penalty = 0.2 if detection_summary.get("review_required") else 0.0
+        scan_penalty = 0.20 * min(1.0, max(0.0, 0.55 - scan_score) / 0.55)
+        golden_penalty = 0.25 * min(1.0, golden_defect_count / 6.0) + 0.20 * golden_max_severity
         score = max(
             0.0,
             min(
@@ -272,8 +530,11 @@ class CircuitAnalyzer:
                 )
                 + (0.15 if reference_status == "PASS" else 0.0)
                 + (0.2 if topology_status == "PASS" else 0.0)
+                + (0.15 if golden_status == "PASS" else 0.0)
                 - (0.05 * min(reference_delta, 8) if reference_status == "FAIL" else 0.0)
-                - (0.10 * min(topology_delta, 8) if topology_status == "FAIL" else 0.0),
+                - (0.10 * min(topology_delta, 8) if topology_status == "FAIL" else 0.0)
+                - (golden_penalty if golden_status == "FAIL" else 0.0)
+                - scan_penalty,
             ),
         )
         if score >= 0.75:
@@ -282,6 +543,12 @@ class CircuitAnalyzer:
             readiness = "prototype_ready"
         else:
             readiness = "research_preview"
+        if scan_score < 0.30:
+            readiness = "research_preview"
+        elif scan_score < 0.55 and readiness == "pilot_ready":
+            readiness = "prototype_ready"
+        if golden_status == "FAIL" and readiness == "pilot_ready":
+            readiness = "prototype_ready"
 
         blockers = [
             "calibrated camera/lighting fixture and focus checks",
@@ -296,10 +563,16 @@ class CircuitAnalyzer:
             blockers.append("supply reference_topology for topology-level AOI comparison")
         elif topology_status == "FAIL":
             blockers.insert(0, "topology AOI detected connectivity mismatches vs reference")
+        if golden_status is None:
+            blockers.append("supply reference_image/golden board for visual golden AOI comparison")
+        elif golden_status == "FAIL":
+            blockers.insert(0, f"golden image AOI found {golden_defect_count} changed region(s)")
         if topology_conf < 0.5:
             blockers.insert(0, "image-only topology confidence is below production threshold")
         if detection_summary.get("review_required"):
             blockers.insert(0, "some detections rely on heuristic supplements and need human review")
+        if scan_score < 0.55:
+            blockers.insert(0, f"scan quality is below production threshold ({scan_score:.2f}, {scan_reason})")
 
         return {
             "readiness": readiness,
@@ -307,6 +580,7 @@ class CircuitAnalyzer:
             "learned_detection_ratio": round(float(learned_ratio), 3),
             "semantic_confidence": round(float(semantic), 3),
             "topology_confidence": round(float(topology_conf), 3),
+            "scan_quality": {"score": round(float(scan_score), 3), "reason": scan_reason},
             "current_capabilities": [
                 "component localization and coarse class identification",
                 "candidate trace/connection extraction from visible copper geometry",
@@ -315,6 +589,8 @@ class CircuitAnalyzer:
             ],
             "defect_candidate_count": defect_count,
             "reference_component_delta": reference_delta,
+            "golden_status": golden_status or "unavailable",
+            "golden_defect_count": golden_defect_count,
             "topology_status": topology_status or "unavailable",
             "topology_delta": topology_delta,
             "blockers": blockers,
@@ -354,6 +630,16 @@ class CircuitAnalyzer:
             ] if reason else ["Topology AOI comparison not run."],
         }
 
+    def _empty_golden_aoi(self, reason: str = "") -> Dict[str, Any]:
+        return {
+            "status": "unavailable",
+            "mode": "golden_image_diff",
+            "defect_count": 0,
+            "defects": [],
+            "summary": "Golden image comparison not run.",
+            "notes": [reason] if reason else ["Golden image comparison not run."],
+        }
+
     def _detect_defect_candidates(
         self,
         image: np.ndarray,
@@ -389,6 +675,62 @@ class CircuitAnalyzer:
         except Exception as e:
             logger.warning(f"Defect candidate detection failed: {e}")
             return self._empty_defect_inspection(str(e))
+
+    def _infer_board_understanding(
+        self,
+        image: np.ndarray,
+        detections: List[Dict[str, Any]],
+        detection_summary: Dict[str, Any],
+        visual_topology: Dict[str, Any],
+        defect_inspection: Dict[str, Any],
+        marking_analysis: Dict[str, Any] | None = None,
+    ) -> Dict[str, Any]:
+        try:
+            return self.board_inferencer.analyze(
+                detections,
+                detection_summary=detection_summary,
+                visual_topology=visual_topology,
+                defect_inspection=defect_inspection,
+                marking_analysis=marking_analysis,
+                image_shape=tuple(np.asarray(image).shape),
+            )
+        except Exception as e:
+            logger.warning(f"Board function inference failed: {e}")
+            return self._empty_board_understanding(str(e))
+
+    def _resolve_markings(self, detections: List[Dict[str, Any]]) -> Dict[str, Any]:
+        try:
+            return self.marking_resolver.resolve_detections(detections)
+        except Exception as e:
+            logger.warning(f"Marking resolution failed: {e}")
+            return self._empty_marking_analysis(str(e))
+
+    def _map_machine_connections(
+        self,
+        detections: List[Dict[str, Any]],
+        marking_analysis: Dict[str, Any],
+        board_understanding: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        try:
+            return self.connection_mapper.map_connections(
+                detections,
+                marking_analysis=marking_analysis,
+                board_understanding=board_understanding,
+            )
+        except Exception as e:
+            logger.warning(f"Machine connection mapping failed: {e}")
+            return self._empty_machine_connection_map(str(e))
+
+    def _evaluate_salvage_opportunities(
+        self,
+        analysis: Dict[str, Any],
+        market_context: Dict[str, Any] | None = None,
+    ) -> Dict[str, Any]:
+        try:
+            return self.salvage_engine.evaluate(analysis, market_context=market_context)
+        except Exception as e:
+            logger.warning(f"Salvage opportunity evaluation failed: {e}")
+            return self._empty_salvage_opportunities(str(e))
 
     def _learned_detection_ratio(self, detection_summary: Dict[str, Any]) -> float:
         breakdown = detection_summary.get("backend_breakdown") or {}
@@ -440,6 +782,78 @@ class CircuitAnalyzer:
                 "defect inspection unavailable for this scan",
                 reason,
             ] if reason else ["defect inspection unavailable for this scan"],
+        }
+
+    def _empty_board_understanding(self, reason: str = "") -> Dict[str, Any]:
+        return {
+            "mode": "image_only_board_function_inference",
+            "board_identity": {
+                "primary_type": "unknown_board",
+                "description": "Board role could not be inferred.",
+                "confidence": 0.0,
+                "evidence": [],
+                "alternatives": [],
+            },
+            "functional_blocks": [],
+            "machine_context": {"likely_roles": [], "integration_notes": []},
+            "reuse_and_splice": {
+                "candidate_regions": [],
+                "board_spec_for_splicer": {},
+                "warnings": [
+                    reason,
+                ] if reason else ["Board function inference not run."],
+            },
+            "observed_inventory": {"component_counts": {}, "recognized_component_count": 0},
+            "confidence": 0.0,
+            "limitations": [
+                "board function inference unavailable for this scan",
+                reason,
+            ] if reason else ["board function inference unavailable for this scan"],
+        }
+
+    def _empty_marking_analysis(self, reason: str = "") -> Dict[str, Any]:
+        return {
+            "mode": "ocr_marking_resolution",
+            "components": [],
+            "connector_labels": [],
+            "confidence": 0.0,
+            "limitations": [
+                "marking resolution unavailable for this scan",
+                reason,
+            ] if reason else ["marking resolution unavailable for this scan"],
+        }
+
+    def _empty_machine_connection_map(self, reason: str = "") -> Dict[str, Any]:
+        return {
+            "mode": "machine_connection_map",
+            "connector_count": 0,
+            "connector_maps": [],
+            "interfaces": [],
+            "pinout_evidence": [],
+            "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [],
+                "do_not_assume": [],
+            },
+            "confidence": 0.0,
+            "limitations": [
+                "machine connection mapping unavailable for this scan",
+                reason,
+            ] if reason else ["machine connection mapping unavailable for this scan"],
+        }
+
+    def _empty_salvage_opportunities(self, reason: str = "") -> Dict[str, Any]:
+        return {
+            "mode": "salvage_and_arbitrage_opportunity_engine",
+            "asset_summary": {"capabilities": {}, "parts": {}, "connector_count": 0, "defect_count": 0, "evidence": []},
+            "opportunities": [],
+            "best_opportunity": None,
+            "strategy": {"recommendation": "inventory_first", "reason": reason or "No opportunity evaluation available."},
+            "confidence": 0.0,
+            "limitations": [
+                "salvage opportunity evaluation unavailable",
+                reason,
+            ] if reason else ["salvage opportunity evaluation unavailable"],
         }
 
     def _serialize_trace(self, trace: Any, coordinate_scale: float = 1.0) -> Dict[str, Any]:
@@ -599,6 +1013,7 @@ class CircuitAnalyzer:
                 "error": f"Could not load image: {str(e)}",
                 "detection_summary": {"total_components": 0},
                 "functionality_analysis": {"components": [], "capabilities": []},
+                "certainty_ledger": self.certainty_builder.empty(str(e)),
                 "project_recommendations": []
             }
     
@@ -608,9 +1023,15 @@ class CircuitAnalyzer:
         functionality_data = results.get("functionality_analysis", {})
         recommendations = results.get("project_recommendations", [])
         visual_topology = results.get("visual_topology", {})
+        marking_analysis = results.get("marking_analysis", {})
+        board_understanding = results.get("board_understanding", {})
+        machine_connection_map = results.get("machine_connection_map", {})
+        salvage_opportunities = results.get("salvage_opportunities", {})
         aoi_inspection = results.get("aoi_inspection", {})
         reference_aoi = results.get("reference_aoi", {})
+        golden_aoi = results.get("golden_aoi", {})
         topology_aoi = results.get("topology_aoi", {})
+        certainty_ledger = results.get("certainty_ledger", {})
         
         total_components = detection_summary.get("total_components", 0)
         components_by_type = detection_summary.get("components_by_type", {})
@@ -635,6 +1056,31 @@ class CircuitAnalyzer:
                 f"{connection_count} candidate connections at {topo_conf:.2f} confidence. "
             )
 
+        if board_understanding:
+            identity = board_understanding.get("board_identity", {})
+            board_type = identity.get("primary_type", "unknown_board")
+            board_conf = identity.get("confidence", board_understanding.get("confidence", 0.0))
+            block_count = len(board_understanding.get("functional_blocks", []) or [])
+            summary_text += (
+                f"Likely board role: {board_type} at {float(board_conf or 0.0):.2f} confidence "
+                f"with {block_count} functional block candidate(s). "
+            )
+
+        if marking_analysis:
+            resolved_count = len(marking_analysis.get("components", []) or [])
+            if resolved_count:
+                summary_text += f"OCR/marking lookup resolved evidence on {resolved_count} component(s). "
+
+        if machine_connection_map:
+            connector_count = machine_connection_map.get("connector_count", 0)
+            conn_conf = machine_connection_map.get("confidence", 0.0)
+            summary_text += f"Machine connection map: {connector_count} connector candidate(s) at {float(conn_conf or 0.0):.2f} confidence. "
+
+        if salvage_opportunities:
+            best = salvage_opportunities.get("best_opportunity") or {}
+            if best:
+                summary_text += f"Best salvage/build opportunity: {best.get('name')} ({best.get('type')}). "
+
         if reference_aoi:
             ref_status = reference_aoi.get("status", "unavailable")
             ref_delta = reference_aoi.get("component_delta", 0)
@@ -655,8 +1101,28 @@ class CircuitAnalyzer:
             else:
                 summary_text += "Topology AOI not executed. "
 
+        if golden_aoi:
+            golden_status = golden_aoi.get("status", "unavailable")
+            golden_count = golden_aoi.get("defect_count", 0)
+            if golden_status == "PASS":
+                summary_text += "Golden image AOI: PASS. "
+            elif golden_status == "FAIL":
+                summary_text += f"Golden image AOI: FAIL with {golden_count} changed region(s). "
+            else:
+                summary_text += "Golden image AOI not executed. "
+
         if aoi_inspection:
             summary_text += f"AOI readiness: {aoi_inspection.get('readiness', 'unknown')}. "
+
+        if certainty_ledger:
+            overall = certainty_ledger.get("overall", {})
+            certainty_level = overall.get("level", "unknown")
+            certainty_score = float(overall.get("score", 0.0) or 0.0)
+            missing_count = len(certainty_ledger.get("missing_evidence", []) or [])
+            summary_text += (
+                f"Evidence certainty: {certainty_level} at {certainty_score:.2f} "
+                f"with {missing_count} missing evidence item(s). "
+            )
         
         if project_potential != "none":
             summary_text += f"Project potential: {project_potential}. "
@@ -677,13 +1143,47 @@ class CircuitAnalyzer:
                 "confidence": visual_topology.get("confidence", 0.0),
                 "uncertainty": visual_topology.get("uncertainty", "high"),
             },
+            "board_understanding": {
+                "primary_type": board_understanding.get("board_identity", {}).get("primary_type", "unknown_board"),
+                "confidence": board_understanding.get("confidence", 0.0),
+                "functional_blocks": board_understanding.get("functional_blocks", []),
+                "machine_context": board_understanding.get("machine_context", {}),
+                "reuse_and_splice": board_understanding.get("reuse_and_splice", {}),
+            },
+            "marking_analysis": {
+                "confidence": marking_analysis.get("confidence", 0.0),
+                "resolved_component_count": len(marking_analysis.get("components", []) or []),
+                "connector_labels": marking_analysis.get("connector_labels", []),
+                "components": marking_analysis.get("components", []),
+            },
+            "machine_connection_map": machine_connection_map,
+            "salvage_opportunities": {
+                "confidence": salvage_opportunities.get("confidence", 0.0),
+                "best_opportunity": salvage_opportunities.get("best_opportunity"),
+                "strategy": salvage_opportunities.get("strategy", {}),
+                "opportunities": salvage_opportunities.get("opportunities", []),
+                "asset_summary": salvage_opportunities.get("asset_summary", {}),
+            },
             "aoi_readiness": aoi_inspection.get("readiness"),
+            "certainty_ledger": {
+                "overall": certainty_ledger.get("overall", {}),
+                "counts": certainty_ledger.get("counts", {}),
+                "missing_evidence": certainty_ledger.get("missing_evidence", []),
+                "next_actions": certainty_ledger.get("next_actions", []),
+                "training_queue": certainty_ledger.get("training_queue", {}),
+                "top_items": (certainty_ledger.get("items", []) or [])[:12],
+            },
             "top_recommendation": recommendations[0] if recommendations else None,
             "reference_aoi": {
                 "status": reference_aoi.get("status"),
                 "component_delta": reference_aoi.get("component_delta", 0),
                 "missing": reference_aoi.get("missing", []),
                 "extra": reference_aoi.get("extra", []),
+            },
+            "golden_aoi": {
+                "status": golden_aoi.get("status"),
+                "defect_count": golden_aoi.get("defect_count", 0),
+                "defects": golden_aoi.get("defects", []),
             },
             "topology_aoi": {
                 "status": topology_aoi.get("status"),

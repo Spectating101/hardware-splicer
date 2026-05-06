@@ -1,0 +1,13 @@
+{
+  "model_id": "yolo11n_best_zoomed",
+  "file": "models/pcb/yolo11n_best_zoomed.pt",
+  "sha256": "0e3af0733d78aaa8922896ec71d0a49b15d26b4ee9b27d2d3dc477b24f7b3623",
+  "source": {
+    "repository": "https://github.com/aryan-programmer/pcb-fault-detection",
+    "path": "yolo11n_best_zoomed.pt",
+    "url": "https://github.com/aryan-programmer/pcb-fault-detection/raw/master/pcb-components-detection/yolo11n_best_zoomed.pt",
+    "retrieved_at": "2026-05-05"
+  },
+  "task": "PCB component detection",
+  "updated_by": "scripts/fetch_pcb_component_model.py"
+}

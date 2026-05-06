@@ -1,0 +1,334 @@
+{
+  "ingest_reports": [
+    {
+      "mode": "salvage_analysis_ingest",
+      "created_assets": [
+        {
+          "asset_id": "board_controller_or_embedded_compute_1",
+          "asset_type": "board_or_module",
+          "name": "controller_or_embedded_compute",
+          "capabilities": [],
+          "source": "eval/test_pcb_salvage_board_understanding.json",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.371,
+          "estimated_value_usd": 0,
+          "quantity": 1,
+          "evidence": [],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "controller_or_embedded_compute",
+              "description": "Controller, development, or embedded compute board",
+              "confidence": 0.371,
+              "evidence": [
+                "3 ic_chip"
+              ],
+              "alternatives": [
+                {
+                  "type": "sensor_or_signal_conditioning",
+                  "description": "Sensor front-end or signal conditioning board",
+                  "confidence": 0.36,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "motor_or_actuator_driver",
+                  "description": "Motor, relay, solenoid, or high-current actuator driver board",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "wireless_or_communications",
+                  "description": "Wireless, RF, or communications module",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "compute_control",
+                "label": "Compute/control logic",
+                "component_count": 3,
+                "components": [
+                  "cmp_0_ic_chip",
+                  "cmp_1_ic_chip",
+                  "cmp_2_ic_chip"
+                ],
+                "bbox": [
+                  48,
+                  48,
+                  253,
+                  203
+                ],
+                "confidence": 0.71,
+                "function": "Runs logic, timing, firmware, or protocol control",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    17,
+                    17,
+                    284,
+                    234
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 0,
+              "connector_maps": [],
+              "interfaces": [],
+              "pinout_evidence": [],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.0,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T18:41:12.027355+00:00"
+        }
+      ],
+      "inventory_size": 0,
+      "report": {
+        "mode": "salvage_to_product_workflow",
+        "inventory": {
+          "asset_count": 0,
+          "unique_records": 0,
+          "estimated_inventory_value_usd": 0.0,
+          "by_capability": {},
+          "by_test_status": {},
+          "assets": []
+        },
+        "opportunity_report": {
+          "mode": "salvage_and_arbitrage_opportunity_engine",
+          "asset_summary": {
+            "capabilities": {
+              "controller": 2
+            },
+            "parts": {
+              "jeo": 1
+            },
+            "connector_count": 0,
+            "defect_count": 0,
+            "evidence": [
+              "board role: inventory_bundle",
+              "board role: controller_or_embedded_compute",
+              "part marking: jeo"
+            ]
+          },
+          "opportunities": [
+            {
+              "type": "build_from_salvage",
+              "id": "robot_motor_controller",
+              "name": "Robot Motor Controller",
+              "category": "robotics",
+              "score": 0.225,
+              "estimated_output_value_usd": 28.0,
+              "build_complexity": "hard",
+              "matched_assets": [
+                "controller"
+              ],
+              "missing_assets": [
+                "actuator_driver"
+              ],
+              "nice_to_have_matched": [],
+              "next_steps": [
+                "test harvested modules",
+                "create pin map",
+                "verify power rails",
+                "source missing assets: actuator_driver"
+              ]
+            },
+            {
+              "type": "build_from_salvage",
+              "id": "sensor_gateway",
+              "name": "Sensor Gateway / Data Logger",
+              "category": "iot",
+              "score": 0.225,
+              "estimated_output_value_usd": 24.0,
+              "build_complexity": "medium",
+              "matched_assets": [
+                "controller"
+              ],
+              "missing_assets": [
+                "sensor_or_adc"
+              ],
+              "nice_to_have_matched": [],
+              "next_steps": [
+                "test harvested modules",
+                "create pin map",
+                "verify power rails",
+                "source missing assets: sensor_or_adc"
+              ]
+            },
+            {
+              "type": "build_from_salvage",
+              "id": "led_controller",
+              "name": "LED / Light Controller",
+              "category": "consumer_gadget",
+              "score": 0.225,
+              "estimated_output_value_usd": 16.0,
+              "build_complexity": "medium",
+              "matched_assets": [
+                "controller"
+              ],
+              "missing_assets": [
+                "actuator_driver"
+              ],
+              "nice_to_have_matched": [],
+              "next_steps": [
+                "test harvested modules",
+                "create pin map",
+                "verify power rails",
+                "source missing assets: actuator_driver"
+              ]
+            }
+          ],
+          "best_opportunity": {
+            "type": "build_from_salvage",
+            "id": "robot_motor_controller",
+            "name": "Robot Motor Controller",
+            "category": "robotics",
+            "score": 0.225,
+            "estimated_output_value_usd": 28.0,
+            "build_complexity": "hard",
+            "matched_assets": [
+              "controller"
+            ],
+            "missing_assets": [
+              "actuator_driver"
+            ],
+            "nice_to_have_matched": [],
+            "next_steps": [
+              "test harvested modules",
+              "create pin map",
+              "verify power rails",
+              "source missing assets: actuator_driver"
+            ]
+          },
+          "strategy": {
+            "recommendation": "source_missing_parts_then_build",
+            "reason": "Top opportunity is Robot Motor Controller with score 0.225.",
+            "inventory_focus": [
+              "controller"
+            ]
+          },
+          "confidence": 0.52,
+          "limitations": [
+            "value estimates are planning estimates until parts are tested and market prices are verified",
+            "salvaged modules need electrical validation before resale or reuse",
+            "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+          ]
+        },
+        "recipe_report": {
+          "inventory_for_optimizer": [],
+          "recipes": [],
+          "best_recipe": null
+        },
+        "execution_plan": {
+          "status": "ready_to_execute",
+          "target": "Robot Motor Controller",
+          "target_type": "build_from_salvage",
+          "recipe_target": null,
+          "steps": [
+            "reserve matched salvage assets",
+            "run electrical validation on every reused module",
+            "source or substitute missing assets",
+            "generate wiring/pinout checklist",
+            "build first functional prototype",
+            "estimate enclosure, labor, and resale price"
+          ],
+          "validation_gates": [
+            "no unknown power polarity",
+            "all reused modules pass basic continuity",
+            "known voltage domains before interconnect",
+            "defect candidates reviewed"
+          ]
+        },
+        "decision": {
+          "action": "inventory_and_collect_more_evidence",
+          "reason": "Robot Motor Controller",
+          "confidence": 0.52,
+          "next_step": "reserve matched salvage assets"
+        }
+      }
+    }
+  ],
+  "final_report": {
+    "mode": "salvage_to_product_workflow",
+    "inventory": {
+      "asset_count": 0,
+      "unique_records": 0,
+      "estimated_inventory_value_usd": 0.0,
+      "by_capability": {},
+      "by_test_status": {},
+      "assets": []
+    },
+    "opportunity_report": {
+      "mode": "salvage_and_arbitrage_opportunity_engine",
+      "asset_summary": {
+        "capabilities": {},
+        "parts": {},
+        "connector_count": 0,
+        "defect_count": 0,
+        "evidence": [
+          "board role: inventory_bundle"
+        ]
+      },
+      "opportunities": [],
+      "best_opportunity": null,
+      "strategy": {
+        "recommendation": "inventory_first",
+        "reason": "No strong opportunity yet; collect more views, OCR closeups, and part tests."
+      },
+      "confidence": 0.29,
+      "limitations": [
+        "value estimates are planning estimates until parts are tested and market prices are verified",
+        "salvaged modules need electrical validation before resale or reuse",
+        "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+      ]
+    },
+    "recipe_report": {
+      "inventory_for_optimizer": [],
+      "recipes": [],
+      "best_recipe": null
+    },
+    "execution_plan": {
+      "status": "collect_more_assets",
+      "steps": [
+        "scan more boards",
+        "capture chip closeups",
+        "test power rails",
+        "add market listings"
+      ]
+    },
+    "decision": {
+      "action": "inventory_and_collect_more_evidence",
+      "reason": "No high-confidence opportunity yet",
+      "confidence": 0.29,
+      "next_step": "scan more boards"
+    }
+  }
+}

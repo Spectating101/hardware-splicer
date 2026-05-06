@@ -1,0 +1,177 @@
+{
+  "created_at": "2026-05-05T17:10:22.371818+00:00",
+  "manifest": "tests/data/defect_samples/manifest.json",
+  "golden_image": "tests/data/defect_samples/good_board.jpg",
+  "confidence_threshold": 0.65,
+  "metrics": {
+    "true_positive": 9,
+    "false_positive": 0,
+    "false_negative": 0,
+    "true_negative": 1,
+    "precision": 1.0,
+    "recall": 1.0,
+    "false_positive_rate": 0.0,
+    "golden_failures": 9,
+    "sample_count": 10
+  },
+  "samples": [
+    {
+      "image": "tests/data/defect_samples/good_board.jpg",
+      "expected_defects": [],
+      "golden_status": "PASS",
+      "golden_defect_types": [],
+      "golden_defect_count": 0,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/solder_bridge.jpg",
+      "expected_defects": [
+        "solder_or_contamination",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "golden_mismatch",
+        "solder_or_contamination"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/cold_joint.jpg",
+      "expected_defects": [
+        "solder_or_contamination",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/burnt_component.jpg",
+      "expected_defects": [
+        "burnt_component"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "burnt_component",
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [
+        "burnt_component"
+      ],
+      "classical_defect_count": 1,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/missing_component.jpg",
+      "expected_defects": [
+        "missing_component",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "corrosion",
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 6,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/corrosion.jpg",
+      "expected_defects": [
+        "corrosion",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "corrosion",
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/broken_trace.jpg",
+      "expected_defects": [
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "corrosion",
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 2,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/misaligned_component.jpg",
+      "expected_defects": [
+        "unexpected_component_or_misalignment",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "corrosion",
+        "golden_mismatch",
+        "missing_component",
+        "unexpected_component_or_misalignment"
+      ],
+      "golden_defect_count": 11,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/contamination.jpg",
+      "expected_defects": [
+        "solder_or_contamination",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "golden_mismatch",
+        "solder_or_contamination"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    },
+    {
+      "image": "tests/data/defect_samples/excess_solder.jpg",
+      "expected_defects": [
+        "solder_or_contamination",
+        "golden_mismatch"
+      ],
+      "golden_status": "FAIL",
+      "golden_defect_types": [
+        "golden_mismatch"
+      ],
+      "golden_defect_count": 1,
+      "classical_defect_types": [],
+      "classical_defect_count": 0,
+      "class_match": true
+    }
+  ],
+  "limitations": [
+    "Synthetic image set verifies pipeline mechanics, not real factory accuracy.",
+    "Use line-specific labeled photos for final production thresholds."
+  ]
+}

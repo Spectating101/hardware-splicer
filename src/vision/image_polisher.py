@@ -16,6 +16,38 @@ except Exception:  # pragma: no cover - optional dependency fallback
     cv2 = None
 
 
+def _compute_scan_quality(image_bgr: np.ndarray) -> dict:
+    """Estimate image capture quality for production AOI gating."""
+    if cv2 is None:
+        return {"score": 0.0, "reason": "opencv_unavailable"}
+
+    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+    if gray.size <= 1:
+        return {"score": 0.0, "reason": "empty_frame"}
+
+    luminance = float(np.mean(gray))
+    contrast = float(np.std(gray))
+    blur_var = float(cv2.Laplacian(gray, cv2.CV_64F).var())
+    p05, p95 = float(np.percentile(gray, 5)), float(np.percentile(gray, 95))
+    dynamic_range = max(0.0, p95 - p05)
+
+    exposure_factor = 1.0 - min(1.0, abs(luminance - 127.0) / 127.0)
+    contrast_factor = min(1.0, contrast / 55.0)
+    sharpness_factor = min(1.0, blur_var / 250.0)
+    range_factor = min(1.0, dynamic_range / 140.0)
+    score = 0.35 * sharpness_factor + 0.3 * contrast_factor + 0.2 * range_factor + 0.15 * exposure_factor
+
+    return {
+        "score": round(float(score), 4),
+        "luminance_mean": round(luminance, 3),
+        "contrast": round(contrast, 3),
+        "blur_var": round(blur_var, 3),
+        "dynamic_range": round(dynamic_range, 3),
+        "p05": round(p05, 3),
+        "p95": round(p95, 3),
+    }
+
+
 def _to_uint8_rgb(image: np.ndarray) -> np.ndarray:
     """Convert incoming arrays to uint8 RGB without changing layout assumptions."""
     img = np.asarray(image)
@@ -145,6 +177,7 @@ def polish_for_inference(
         metadata["steps_applied"].append("gamma")
         metadata["gamma"] = gamma_meta
 
+    metadata["scan_quality"] = _compute_scan_quality(bgr)
     rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
     return _to_float_rgb(rgb), {
         **metadata,
@@ -204,6 +237,7 @@ def polish_for_opencv(
         metadata["steps_applied"].append("gamma")
         metadata["gamma"] = gamma_meta
 
+    metadata["scan_quality"] = _compute_scan_quality(bgr)
     return bgr, {
         **metadata,
         "input_shape": tuple(int(v) for v in base_bgr.shape),

@@ -1,0 +1,138 @@
+{
+  "mode": "salvage_to_product_workflow",
+  "inventory": {
+    "asset_count": 0,
+    "unique_records": 0,
+    "estimated_inventory_value_usd": 0.0,
+    "by_capability": {},
+    "by_test_status": {},
+    "assets": []
+  },
+  "opportunity_report": {
+    "mode": "salvage_and_arbitrage_opportunity_engine",
+    "asset_summary": {
+      "capabilities": {},
+      "parts": {},
+      "connector_count": 0,
+      "defect_count": 0,
+      "evidence": [
+        "board role: inventory_bundle"
+      ]
+    },
+    "opportunities": [],
+    "best_opportunity": null,
+    "strategy": {
+      "recommendation": "inventory_first",
+      "reason": "No strong opportunity yet; collect more views, OCR closeups, and part tests."
+    },
+    "confidence": 0.29,
+    "limitations": [
+      "value estimates are planning estimates until parts are tested and market prices are verified",
+      "salvaged modules need electrical validation before resale or reuse",
+      "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+    ]
+  },
+  "recipe_report": {
+    "inventory_for_optimizer": [],
+    "recipes": [],
+    "best_recipe": null
+  },
+  "execution_plan": {
+    "status": "collect_more_assets",
+    "steps": [
+      "scan more boards",
+      "capture chip closeups",
+      "test power rails",
+      "add market listings"
+    ]
+  },
+  "decision": {
+    "action": "inventory_and_collect_more_evidence",
+    "reason": "No high-confidence opportunity yet",
+    "confidence": 0.29,
+    "next_step": "scan more boards"
+  },
+  "build_package": {
+    "mode": "salvage_build_package",
+    "package_type": "evidence_collection",
+    "target": {},
+    "work_order": {
+      "status": "collect_more_assets",
+      "target_name": null,
+      "steps": [
+        "scan more boards",
+        "capture chip closeups",
+        "test power rails",
+        "add market listings"
+      ],
+      "validation_gates": [],
+      "operator_notes": [
+        "treat salvaged parts as untrusted until tested",
+        "record test results back into inventory after each gate",
+        "separate resale-grade parts from build-only parts"
+      ]
+    },
+    "bom": {
+      "required": [],
+      "owned": [],
+      "missing": [],
+      "missing_parts_cost_usd": null,
+      "parts_cost_usd": null
+    },
+    "validation": {
+      "required_tests": [
+        "visual inspection",
+        "continuity power-to-ground",
+        "current-limited first power-up",
+        "connector pin map"
+      ],
+      "gates": [],
+      "pass_criteria": [
+        "no short on main rail",
+        "rails within expected voltage range",
+        "thermal behavior stable for first 5 minutes",
+        "all external pins labeled before integration"
+      ]
+    },
+    "wiring_plan": {
+      "known_wiring_steps": [],
+      "connector_maps": [],
+      "notes": [
+        "use workflow machine_connection_map when available for harvested modules",
+        "map every salvaged connector with continuity before connecting recipe wiring"
+      ]
+    },
+    "firmware_plan": {
+      "target_platform": "unknown_controller",
+      "features": [],
+      "starter_tasks": [
+        "blink/status LED test",
+        "serial boot log",
+        "read each attached sensor or toggle each output individually",
+        "add fault timeout before unattended use"
+      ]
+    },
+    "commercialization": {
+      "positioning": "upcycled electronics module",
+      "estimated_market_price_low_usd": null,
+      "estimated_market_price_high_usd": null,
+      "adjusted_margin_usd": null,
+      "inventory_value_used_usd": 0.0,
+      "listing_checklist": [
+        "photograph tested module",
+        "include voltage/current limits",
+        "state salvaged/refurbished condition clearly",
+        "include safety disclaimers for high-voltage or load-switching products"
+      ]
+    },
+    "source_inventory": {
+      "asset_count": 0,
+      "unique_records": 0,
+      "estimated_inventory_value_usd": 0.0,
+      "by_capability": {},
+      "by_test_status": {},
+      "assets": []
+    },
+    "confidence": 0.29
+  }
+}

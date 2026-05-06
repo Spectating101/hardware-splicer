@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Camera, Image as ImageIcon, Loader2, RefreshCw, Scissors, Sparkles, Upload } from "lucide-react";
+import { Camera, ClipboardList, Image as ImageIcon, Loader2, RefreshCw, Scissors, Search, ShieldCheck, Sparkles, Upload } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { SafetyBanner } from "@/components/safety-banner";
@@ -37,6 +37,21 @@ interface IdentifyResponse {
     score?: number;
     learnedDetectionRatio?: number;
     defectCandidateCount?: number;
+  };
+  certaintyLedger?: {
+    overall?: {
+      score?: number;
+      level?: string;
+      summary?: string;
+    };
+    counts?: Record<string, number>;
+    missing_evidence?: string[];
+    next_actions?: string[];
+    training_queue?: {
+      should_capture?: boolean;
+      reasons?: string[];
+      candidate_labels?: string[];
+    };
   };
 }
 
@@ -80,6 +95,13 @@ type LocalAnalyzeResponse = {
     defect_inspection?: {
       defect_count?: number;
     };
+    certainty_ledger?: IdentifyResponse["certaintyLedger"] & {
+      items?: Array<{
+        claim?: string;
+        certainty?: string;
+        score?: number;
+      }>;
+    };
   };
   metadata?: {
     backend?: string;
@@ -91,6 +113,11 @@ type LocalAnalyzeResponse = {
 };
 
 type Mode = "identify" | "salvage";
+
+function formatPercent(value: number | undefined) {
+  if (typeof value !== "number" || Number.isNaN(value)) return "N/A";
+  return `${Math.round(value * 100)}%`;
+}
 
 export default function ScanPage() {
   usePageTitle("Scan | Circuit.AI");
@@ -216,6 +243,7 @@ function ScanPageInner() {
           ?? json.results?.defect_inspection?.defect_count
           ?? 0,
       },
+      certaintyLedger: json.results?.certainty_ledger,
     };
   }, [imageSize, mapKind]);
 
@@ -407,6 +435,53 @@ function ScanPageInner() {
                     <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Defects</div>
                     <div className="mt-1 text-sm text-white">{result.aoiInspection.defectCandidateCount ?? 0} candidates</div>
                     <div className="text-[11px] text-slate-500">visual AOI</div>
+                  </div>
+                </div>
+              )}
+
+              {result?.certaintyLedger?.overall && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+                      <ShieldCheck className="h-4 w-4" />
+                      Evidence certainty
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-200">
+                      {result.certaintyLedger.overall.level ?? "unknown"} · {formatPercent(result.certaintyLedger.overall.score)}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-6 text-slate-200">
+                    {result.certaintyLedger.overall.summary ?? "The scan produced an evidence ledger for review."}
+                  </p>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <Search className="h-3.5 w-3.5" />
+                        Missing evidence
+                      </div>
+                      <div className="space-y-1.5">
+                        {(result.certaintyLedger.missing_evidence ?? []).slice(0, 4).map((item) => (
+                          <div key={item} className="text-xs leading-5 text-slate-400">{item}</div>
+                        ))}
+                        {!(result.certaintyLedger.missing_evidence ?? []).length && (
+                          <div className="text-xs text-slate-500">No major missing evidence flagged.</div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                        <ClipboardList className="h-3.5 w-3.5" />
+                        Next actions
+                      </div>
+                      <div className="space-y-1.5">
+                        {(result.certaintyLedger.next_actions ?? []).slice(0, 4).map((item) => (
+                          <div key={item} className="text-xs leading-5 text-slate-400">{item}</div>
+                        ))}
+                        {!(result.certaintyLedger.next_actions ?? []).length && (
+                          <div className="text-xs text-slate-500">No extra action generated.</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,0 +1,280 @@
+{
+  "trials": [
+    {
+      "trial_id": "value_20260506_125750_430d6d",
+      "session_id": "eval_value_e2e_1778072267",
+      "case_id": "value_e2e_1778072267",
+      "title": "USB fan warms but motor will not spin value trial",
+      "lane_id": "small_motor_usb",
+      "goal": "repair_or_diagnosis",
+      "status": "recorded",
+      "verdict": "plumbing_only",
+      "value_score": 0.505,
+      "baseline": {
+        "method": "manual search or ad-hoc repair",
+        "estimated_time_minutes": 60.0,
+        "confidence": 0.25,
+        "expected_value_usd": 25.0,
+        "known_blockers": []
+      },
+      "assisted": {
+        "session_found": true,
+        "workflow_score": 0.723,
+        "verdict": "solvable_now",
+        "confidence": 0.608,
+        "capture_count": 0,
+        "measurement_count": 0,
+        "review_count": 0,
+        "outcome_count": 0,
+        "training_export_count": 0,
+        "task_count": 5,
+        "resolved_task_count": 0,
+        "open_task_count": 5,
+        "safety_risk": "low_to_medium",
+        "route": "repair",
+        "outcome_decisions": [],
+        "value_recovered_usd": 0.0,
+        "time_saved_minutes": 0.0
+      },
+      "scorecard": [
+        {
+          "dimension": "case_relevance",
+          "weight": 0.12,
+          "score": 1.0,
+          "weighted_score": 0.12,
+          "why": "case has a lane, real device context, symptoms, and source"
+        },
+        {
+          "dimension": "actionable_guidance",
+          "weight": 0.2,
+          "score": 0.902,
+          "weighted_score": 0.18,
+          "why": "system created a usable guide and evidence queue"
+        },
+        {
+          "dimension": "evidence_followthrough",
+          "weight": 0.22,
+          "score": 0.0,
+          "weighted_score": 0.0,
+          "why": "operator captured, measured, reviewed, and resolved tasks"
+        },
+        {
+          "dimension": "certainty_delta",
+          "weight": 0.14,
+          "score": 0.858,
+          "weighted_score": 0.12,
+          "why": "assisted workflow increases confidence over baseline"
+        },
+        {
+          "dimension": "safety_handling",
+          "weight": 0.1,
+          "score": 0.85,
+          "weighted_score": 0.085,
+          "why": "unsafe cases get gated instead of overclaimed"
+        },
+        {
+          "dimension": "economic_outcome",
+          "weight": 0.14,
+          "score": 0.0,
+          "weighted_score": 0.0,
+          "why": "trial records saved time, recovered value, or successful reuse"
+        },
+        {
+          "dimension": "learning_asset",
+          "weight": 0.08,
+          "score": 0.0,
+          "weighted_score": 0.0,
+          "why": "case becomes data for model/workflow improvement"
+        }
+      ],
+      "evidence_gates": [
+        {
+          "gate": "session_exists",
+          "passed": true,
+          "why": "a persisted board/case session exists"
+        },
+        {
+          "gate": "has_action_queue",
+          "passed": true,
+          "why": "system produced specific evidence or diagnostic tasks"
+        },
+        {
+          "gate": "has_capture",
+          "passed": false,
+          "why": "operator attached at least one real capture or reference"
+        },
+        {
+          "gate": "has_measurement",
+          "passed": false,
+          "why": "operator recorded at least one electrical/mechanical measurement"
+        },
+        {
+          "gate": "has_review",
+          "passed": false,
+          "why": "human reviewed or corrected a system task"
+        },
+        {
+          "gate": "has_outcome",
+          "passed": false,
+          "why": "case ended with a repair, salvage, reuse, or no-fix outcome"
+        },
+        {
+          "gate": "has_measured_value",
+          "passed": false,
+          "why": "outcome includes saved time or recovered value"
+        },
+        {
+          "gate": "has_learning_export",
+          "passed": false,
+          "why": "reviewed case was exported as reusable training/workflow data"
+        }
+      ],
+      "honesty_notes": [
+        "This run proves software flow only; it does not prove repair or salvage value yet.",
+        "No practical certainty claim should be made until at least one relevant measurement is recorded.",
+        "Do not claim customer value until the case has a repair, no-fix, salvage, reuse, or sale outcome.",
+        "Business value is unmeasured until time saved or recovered value is recorded.",
+        "The case is not improving the engine until it is reviewed and exported as training/workflow data."
+      ],
+      "created_at": "2026-05-06T12:57:50.126853+00:00",
+      "updated_at": "2026-05-06T12:57:50.126853+00:00",
+      "user_id": "test_user"
+    },
+    {
+      "trial_id": "value_20260506_125753_9750a2",
+      "session_id": "eval_value_e2e_1778072267",
+      "case_id": "value_e2e_1778072267",
+      "title": "USB fan warms but motor will not spin value trial",
+      "lane_id": "small_motor_usb",
+      "goal": "repair_or_diagnosis",
+      "status": "recorded",
+      "verdict": "value_proven",
+      "value_score": 0.815,
+      "baseline": {
+        "method": "manual search or ad-hoc repair",
+        "estimated_time_minutes": 60.0,
+        "confidence": 0.25,
+        "expected_value_usd": 25.0,
+        "known_blockers": []
+      },
+      "assisted": {
+        "session_found": true,
+        "workflow_score": 0.723,
+        "verdict": "solvable_now",
+        "confidence": 0.608,
+        "capture_count": 1,
+        "measurement_count": 1,
+        "review_count": 1,
+        "outcome_count": 1,
+        "training_export_count": 1,
+        "task_count": 5,
+        "resolved_task_count": 3,
+        "open_task_count": 2,
+        "safety_risk": "low_to_medium",
+        "route": "repair",
+        "outcome_decisions": [
+          "repaired"
+        ],
+        "value_recovered_usd": 19.0,
+        "time_saved_minutes": 32.0
+      },
+      "scorecard": [
+        {
+          "dimension": "case_relevance",
+          "weight": 0.12,
+          "score": 1.0,
+          "weighted_score": 0.12,
+          "why": "case has a lane, real device context, symptoms, and source"
+        },
+        {
+          "dimension": "actionable_guidance",
+          "weight": 0.2,
+          "score": 0.902,
+          "weighted_score": 0.18,
+          "why": "system created a usable guide and evidence queue"
+        },
+        {
+          "dimension": "evidence_followthrough",
+          "weight": 0.22,
+          "score": 0.53,
+          "weighted_score": 0.117,
+          "why": "operator captured, measured, reviewed, and resolved tasks"
+        },
+        {
+          "dimension": "certainty_delta",
+          "weight": 0.14,
+          "score": 0.858,
+          "weighted_score": 0.12,
+          "why": "assisted workflow increases confidence over baseline"
+        },
+        {
+          "dimension": "safety_handling",
+          "weight": 0.1,
+          "score": 0.85,
+          "weighted_score": 0.085,
+          "why": "unsafe cases get gated instead of overclaimed"
+        },
+        {
+          "dimension": "economic_outcome",
+          "weight": 0.14,
+          "score": 0.892,
+          "weighted_score": 0.125,
+          "why": "trial records saved time, recovered value, or successful reuse"
+        },
+        {
+          "dimension": "learning_asset",
+          "weight": 0.08,
+          "score": 0.85,
+          "weighted_score": 0.068,
+          "why": "case becomes data for model/workflow improvement"
+        }
+      ],
+      "evidence_gates": [
+        {
+          "gate": "session_exists",
+          "passed": true,
+          "why": "a persisted board/case session exists"
+        },
+        {
+          "gate": "has_action_queue",
+          "passed": true,
+          "why": "system produced specific evidence or diagnostic tasks"
+        },
+        {
+          "gate": "has_capture",
+          "passed": true,
+          "why": "operator attached at least one real capture or reference"
+        },
+        {
+          "gate": "has_measurement",
+          "passed": true,
+          "why": "operator recorded at least one electrical/mechanical measurement"
+        },
+        {
+          "gate": "has_review",
+          "passed": true,
+          "why": "human reviewed or corrected a system task"
+        },
+        {
+          "gate": "has_outcome",
+          "passed": true,
+          "why": "case ended with a repair, salvage, reuse, or no-fix outcome"
+        },
+        {
+          "gate": "has_measured_value",
+          "passed": true,
+          "why": "outcome includes saved time or recovered value"
+        },
+        {
+          "gate": "has_learning_export",
+          "passed": true,
+          "why": "reviewed case was exported as reusable training/workflow data"
+        }
+      ],
+      "honesty_notes": [],
+      "created_at": "2026-05-06T12:57:53.428644+00:00",
+      "updated_at": "2026-05-06T12:57:53.428644+00:00",
+      "user_id": "test_user"
+    }
+  ]
+}

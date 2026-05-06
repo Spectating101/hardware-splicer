@@ -307,6 +307,37 @@ class TestComponentDetector:
         assert detections[1]["provenance"]["backend"] == "yolo-supplement"
         mock_classical.assert_not_called()
 
+    def test_hybrid_backend_does_not_classical_flood_two_confident_yolo_detections(self):
+        image = np.random.randint(0, 255, (300, 300, 3), dtype=np.uint8)
+        yolo_detections = [
+            {
+                "bbox": [10.0, 10.0, 40.0, 40.0],
+                "confidence": 0.74,
+                "semantic_confidence": 0.74,
+                "class_id": 6,
+                "class_name": "connector",
+                "center": [25.0, 25.0],
+                "provenance": {"backend": "yolo"},
+            },
+            {
+                "bbox": [100.0, 100.0, 140.0, 140.0],
+                "confidence": 0.72,
+                "semantic_confidence": 0.72,
+                "class_id": 6,
+                "class_name": "connector",
+                "center": [120.0, 120.0],
+                "provenance": {"backend": "yolo"},
+            },
+        ]
+
+        with patch.object(self.detector, "_detect_with_yolo", return_value=yolo_detections), \
+             patch.object(self.detector, "_detect_with_supplemental_yolo", return_value=[]), \
+             patch.object(self.detector, "_detect_with_classical_cv") as mock_classical:
+            detections = self.detector.detect_components(image, backend="hybrid", enable_ocr=False)
+
+        assert len(detections) == 2
+        mock_classical.assert_not_called()
+
     def test_classical_detections_are_marked_for_review(self):
         image = np.zeros((300, 300, 3), dtype=np.uint8)
         cv = pytest.importorskip("cv2")
