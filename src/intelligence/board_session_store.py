@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
+from src.intelligence.board_evidence_graph import BoardEvidenceGraphBuilder
+from src.intelligence.board_dossier import BoardDossierBuilder
+from src.intelligence.production_aoi_calibration import ProductionAOICalibrator
+
 try:
     import numpy as np
 except Exception:  # pragma: no cover - optional at import time
@@ -39,7 +43,13 @@ class BoardSessionStore:
         title = self._title(payload, analysis)
         route = str(payload.get("route") or self._infer_route(payload, analysis))
         repair_guide = payload.get("repair_guide") if isinstance(payload.get("repair_guide"), dict) else {}
-        tasks = self._dedupe_tasks(self._tasks_from_analysis(analysis) + self._tasks_from_repair_guide(repair_guide))
+        salvage_splice_plan = self._salvage_splice_plan_from_payload(payload, analysis)
+        tasks = self._dedupe_tasks(
+            self._tasks_from_salvage_splice_plan(salvage_splice_plan)
+            + self._tasks_from_analysis(analysis)
+            + self._tasks_from_repair_guide(repair_guide)
+        )
+        tasks = self._filter_tasks_for_safety_hold(tasks, salvage_splice_plan)
         tasks = self._trim_tasks(tasks)
         captures = self._listify_dict(payload.get("captures"))
         image_info = payload.get("image") if isinstance(payload.get("image"), dict) else None
@@ -80,6 +90,7 @@ class BoardSessionStore:
             "training_exports": [],
             "coverage": payload.get("coverage") if isinstance(payload.get("coverage"), dict) else {},
             "repair_guide": repair_guide,
+            "salvage_splice_plan": salvage_splice_plan,
             "case_file": payload.get("case_file") if isinstance(payload.get("case_file"), dict) else {},
             "metrics": self._session_metrics(tasks, analysis),
         }
@@ -233,6 +244,22 @@ class BoardSessionStore:
             "notes": str(payload.get("notes") or ""),
             "created_at": self._now(),
         }
+        for key in [
+            "aoi_actual_status",
+            "actual_status",
+            "aoi_release_ok",
+            "confirmed_defects",
+            "escape_reason",
+            "operator_id",
+            "lot_id",
+            "board_serial",
+        ]:
+            if key in payload:
+                outcome[key] = self._json_safe(payload.get(key))
+        if isinstance(payload.get("aoi_truth"), dict):
+            outcome["aoi_truth"] = self._json_safe(payload["aoi_truth"])
+        if isinstance(payload.get("production_result"), dict):
+            outcome["production_result"] = self._json_safe(payload["production_result"])
         session.setdefault("outcomes", []).append(outcome)
         if payload.get("close"):
             session["status"] = "closed"
@@ -262,7 +289,9 @@ class BoardSessionStore:
             "ocr_examples": out / "ocr_examples.jsonl",
             "defect_labels": out / "defect_labels.jsonl",
             "board_roles": out / "board_roles.jsonl",
+            "aoi_cases": out / "aoi_cases.jsonl",
             "repair_cases": out / "repair_cases.jsonl",
+            "reuse_cases": out / "reuse_cases.jsonl",
             "README": out / "README.md",
         }
         files["manifest"].write_text(json.dumps(package, indent=2), encoding="utf-8")
@@ -270,7 +299,9 @@ class BoardSessionStore:
         self._write_jsonl(files["ocr_examples"], package["examples"]["ocr_examples"])
         self._write_jsonl(files["defect_labels"], package["examples"]["defect_labels"])
         self._write_jsonl(files["board_roles"], package["examples"]["board_roles"])
+        self._write_jsonl(files["aoi_cases"], package["examples"]["aoi_cases"])
         self._write_jsonl(files["repair_cases"], package["examples"]["repair_cases"])
+        self._write_jsonl(files["reuse_cases"], package["examples"]["reuse_cases"])
         files["README"].write_text(self._training_readme(session, package), encoding="utf-8")
         record = {
             "export_id": export_id,
@@ -325,7 +356,7 @@ class BoardSessionStore:
                         "created_at": task.get("created_at") or session.get("created_at"),
                     }
                 )
-        rows.sort(key=lambda item: (int(item.get("priority", 3) or 3), str(item.get("created_at") or "")))
+        rows.sort(key=lambda item: (self._priority_value(item.get("priority")), str(item.get("created_at") or "")))
         return rows[: max(1, min(limit, 300))]
 
     def benchmark_report(self) -> Dict[str, Any]:
@@ -427,6 +458,21 @@ class BoardSessionStore:
             "next_actions": self._benchmark_next_actions(len(sessions), review_completion, avg_capture_burden, training_exports),
         }
 
+    def aoi_calibration_report(self) -> Dict[str, Any]:
+        return ProductionAOICalibrator().build_report(self.sessions)
+
+    def evidence_graph(self, session_id: str) -> Dict[str, Any]:
+        session = self.get_session(session_id)
+        if not session:
+            return {"error": f"session not found: {session_id}"}
+        return BoardEvidenceGraphBuilder().build(session)
+
+    def dossier(self, session_id: str) -> Dict[str, Any]:
+        session = self.get_session(session_id)
+        if not session:
+            return {"error": f"session not found: {session_id}"}
+        return BoardDossierBuilder().build(session)
+
     def _tasks_from_analysis(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         ledger = analysis.get("certainty_ledger") if isinstance(analysis.get("certainty_ledger"), dict) else {}
         tasks: List[Dict[str, Any]] = []
@@ -489,7 +535,104 @@ class BoardSessionStore:
         for blocker in (aoi.get("blockers") or [])[:8]:
             add(self._task_type_for_missing(str(blocker)), str(blocker), priority=2, source="aoi_blocker", usable_for=["aoi", "training"])
 
+        production_aoi = analysis.get("production_aoi") if isinstance(analysis.get("production_aoi"), dict) else {}
+        if production_aoi:
+            disposition = str(production_aoi.get("disposition") or "unknown")
+            if disposition not in {"release", "release_with_sampling"}:
+                add(
+                    "review",
+                    f"production AOI disposition is {disposition}; release is not authorized",
+                    priority=0,
+                    source="production_aoi_gate",
+                    usable_for=["aoi", "production_gate", "training"],
+                )
+            for blocker in (production_aoi.get("blockers") or [])[:8]:
+                add(
+                    self._task_type_for_missing(str(blocker)),
+                    str(blocker),
+                    priority=1,
+                    source="production_aoi_gate",
+                    usable_for=["aoi", "production_gate", "training"],
+                )
+            for evidence in (production_aoi.get("required_evidence") or [])[:8]:
+                add(
+                    self._task_type_for_missing(str(evidence)),
+                    str(evidence),
+                    priority=1,
+                    source="production_aoi_required_evidence",
+                    usable_for=["aoi", "production_gate", "training"],
+                )
+
         return self._trim_tasks(tasks)
+
+    def _tasks_from_salvage_splice_plan(self, plan: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if not plan:
+            return []
+        tasks: List[Dict[str, Any]] = []
+        now = self._now()
+        splice = plan.get("splice_plan") if isinstance(plan.get("splice_plan"), dict) else {}
+        evidence = plan.get("evidence_plan") if isinstance(plan.get("evidence_plan"), dict) else {}
+        verdict = str(plan.get("verdict") or "")
+
+        def add(
+            task_type: str,
+            prompt: str,
+            *,
+            priority: int = 3,
+            source: str = "salvage_splice_plan",
+            usable_for: Iterable[str] | None = None,
+        ) -> None:
+            text = str(prompt).strip()
+            if not text:
+                return
+            tasks.append(
+                {
+                    "task_id": f"task_{len(tasks) + 1}",
+                    "type": task_type,
+                    "prompt": text,
+                    "priority": priority,
+                    "status": "open",
+                    "source": source,
+                    "claim_id": None,
+                    "usable_for": list(usable_for or ["salvage", "reuse", "splicing", "training"]),
+                    "created_at": now,
+                }
+            )
+
+        if verdict == "unsafe_hold":
+            add(
+                "review",
+                "confirm hazardous section is isolated and no battery, mains, CRT, or high-voltage part will be powered",
+                priority=0,
+                source="salvage_splice_safety_gate",
+                usable_for=["safety", "salvage", "training"],
+            )
+            for stop in (plan.get("stop_conditions") or [])[:5]:
+                add(
+                    "review",
+                    f"safety stop: {stop}",
+                    priority=1,
+                    source="salvage_splice_safety_gate",
+                    usable_for=["safety", "salvage", "training"],
+                )
+
+        if verdict != "unsafe_hold":
+            for measurement in (splice.get("required_measurements") or evidence.get("measurement_prompts") or [])[:10]:
+                add("measurement", str(measurement), priority=1, source="salvage_splice_measurement_gate")
+
+        for prompt in (evidence.get("capture_prompts") or [])[:8]:
+            add("capture", str(prompt), priority=2, source="salvage_splice_capture")
+
+        for prompt in (evidence.get("review_prompts") or [])[:6]:
+            add("review", str(prompt), priority=2, source="salvage_splice_review")
+
+        for blocker in (splice.get("do_not_connect_until") or [])[:5]:
+            add("review", f"confirm before power: {blocker}", priority=1, source="salvage_splice_power_gate")
+
+        for step in (splice.get("wiring_steps") or [])[:4]:
+            add("action", str(step), priority=3, source="salvage_splice_first_build")
+
+        return tasks
 
     def _tasks_from_repair_guide(self, guide: Dict[str, Any]) -> List[Dict[str, Any]]:
         if not guide:
@@ -606,6 +749,40 @@ class BoardSessionStore:
         ] if board else []
         repair_guide = session.get("repair_guide") if isinstance(session.get("repair_guide"), dict) else {}
         top_fault = (repair_guide.get("fault_candidates") or [{}])[0] if isinstance(repair_guide.get("fault_candidates"), list) else {}
+        salvage_splice_plan = session.get("salvage_splice_plan") if isinstance(session.get("salvage_splice_plan"), dict) else {}
+        production_aoi = analysis.get("production_aoi") if isinstance(analysis.get("production_aoi"), dict) else {}
+        aoi_cases = []
+        if production_aoi:
+            aoi_cases.append(
+                {
+                    "session_id": session.get("session_id"),
+                    "title": session.get("title"),
+                    "route": session.get("route"),
+                    "disposition": production_aoi.get("disposition"),
+                    "release_authorized": production_aoi.get("release_authorized", False),
+                    "certainty_score": production_aoi.get("certainty_score", 0.0),
+                    "certainty_level": production_aoi.get("certainty_level"),
+                    "gates": production_aoi.get("gates") or [],
+                    "blockers": production_aoi.get("blockers") or [],
+                    "critical_findings": production_aoi.get("critical_findings") or [],
+                    "reference_statuses": (production_aoi.get("audit_packet") or {}).get("reference_statuses", {}),
+                    "operator_checklist": production_aoi.get("operator_checklist") or [],
+                    "workflow_tasks": [
+                        {
+                            "task_id": task.get("task_id"),
+                            "type": task.get("type"),
+                            "prompt": task.get("prompt"),
+                            "status": task.get("status", "open"),
+                            "source": task.get("source"),
+                        }
+                        for task in (session.get("evidence_tasks") or [])
+                        if str(task.get("source") or "").startswith("production_aoi")
+                    ],
+                    "reviews": reviews,
+                    "measurements": (session.get("evidence") or {}).get("measurements") or [],
+                    "outcomes": session.get("outcomes") or [],
+                }
+            )
         case_workflow = {
             "session_id": session.get("session_id"),
             "title": session.get("title"),
@@ -629,12 +806,53 @@ class BoardSessionStore:
             "measurements": (session.get("evidence") or {}).get("measurements") or [],
             "outcomes": session.get("outcomes") or [],
         }
+        reuse_case_workflow = []
+        if salvage_splice_plan:
+            target = salvage_splice_plan.get("target") if isinstance(salvage_splice_plan.get("target"), dict) else {}
+            splice = salvage_splice_plan.get("splice_plan") if isinstance(salvage_splice_plan.get("splice_plan"), dict) else {}
+            evidence_plan = salvage_splice_plan.get("evidence_plan") if isinstance(salvage_splice_plan.get("evidence_plan"), dict) else {}
+            reuse_case_workflow.append(
+                {
+                    "session_id": session.get("session_id"),
+                    "title": session.get("title"),
+                    "route": session.get("route"),
+                    "verdict": salvage_splice_plan.get("verdict"),
+                    "target_build_id": target.get("recommended_build_id") or salvage_splice_plan.get("target_build_id"),
+                    "target_build": target.get("recommended_build") or salvage_splice_plan.get("target_build"),
+                    "output_function": target.get("output_function") or salvage_splice_plan.get("output_function"),
+                    "reusable_blocks": salvage_splice_plan.get("reusable_blocks") or [],
+                    "capability_summary": salvage_splice_plan.get("capability_summary") or {},
+                    "integration_contract": salvage_splice_plan.get("integration_contract") or {},
+                    "required_measurements": splice.get("required_measurements") or [],
+                    "adapter_circuits": splice.get("adapter_circuits") or [],
+                    "wiring_steps": splice.get("wiring_steps") or [],
+                    "capture_prompts": evidence_plan.get("capture_prompts") or [],
+                    "review_prompts": evidence_plan.get("review_prompts") or [],
+                    "stop_conditions": salvage_splice_plan.get("stop_conditions") or [],
+                    "workflow_tasks": [
+                        {
+                            "task_id": task.get("task_id"),
+                            "type": task.get("type"),
+                            "prompt": task.get("prompt"),
+                            "status": task.get("status", "open"),
+                            "source": task.get("source"),
+                        }
+                        for task in (session.get("evidence_tasks") or [])
+                        if str(task.get("source") or "").startswith("salvage_splice")
+                    ],
+                    "reviews": reviews,
+                    "measurements": (session.get("evidence") or {}).get("measurements") or [],
+                    "outcomes": session.get("outcomes") or [],
+                }
+            )
         counts = {
             "component_labels": len(component_labels),
             "ocr_examples": len(ocr_examples),
             "defect_labels": len(defect_labels),
             "board_roles": len(board_roles),
+            "aoi_cases": len(aoi_cases),
             "repair_cases": 1,
+            "reuse_cases": len(reuse_case_workflow),
             "reviews": len(reviews),
             "measurements": len((session.get("evidence") or {}).get("measurements") or []),
         }
@@ -649,7 +867,9 @@ class BoardSessionStore:
                 "ocr_examples": ocr_examples,
                 "defect_labels": defect_labels,
                 "board_roles": board_roles,
+                "aoi_cases": aoi_cases,
                 "repair_cases": [case_workflow],
+                "reuse_cases": reuse_case_workflow,
                 "reviews": reviews,
                 "measurements": (session.get("evidence") or {}).get("measurements") or [],
             },
@@ -657,19 +877,26 @@ class BoardSessionStore:
                 "YOLO component label review",
                 "OCR crop/marking normalization",
                 "defect candidate validation",
+                "production AOI gate calibration and release-disposition tuning",
                 "board-role and functional-block benchmark cases",
                 "repair-lane and evidence-task workflow tuning",
+                "reuse/splice workflow tuning and salvage-to-build value proof",
             ],
         }
 
     def _session_preview(self, session: Dict[str, Any]) -> Dict[str, Any]:
         tasks = session.get("evidence_tasks") or []
+        salvage_splice_plan = session.get("salvage_splice_plan") if isinstance(session.get("salvage_splice_plan"), dict) else {}
+        target = salvage_splice_plan.get("target") if isinstance(salvage_splice_plan.get("target"), dict) else {}
         return {
             "session_id": session.get("session_id"),
             "title": session.get("title"),
             "route": session.get("route"),
             "status": session.get("status"),
             "device_hint": session.get("device_hint"),
+            "case_kind": (session.get("case_file") or {}).get("kind") if isinstance(session.get("case_file"), dict) else None,
+            "reuse_target": target.get("recommended_build") or salvage_splice_plan.get("target_build"),
+            "reuse_verdict": salvage_splice_plan.get("verdict"),
             "created_at": session.get("created_at"),
             "updated_at": session.get("updated_at"),
             "certainty": session.get("certainty", {}),
@@ -700,6 +927,47 @@ class BoardSessionStore:
             analysis = payload.get("results")
         return analysis if isinstance(analysis, dict) else {}
 
+    def _salvage_splice_plan_from_payload(self, payload: Dict[str, Any], analysis: Dict[str, Any]) -> Dict[str, Any]:
+        plan = payload.get("salvage_splice_plan")
+        if isinstance(plan, dict):
+            return self._json_safe(plan)
+
+        embedded = analysis.get("salvage_splice_plan") if isinstance(analysis.get("salvage_splice_plan"), dict) else {}
+        if not embedded:
+            return {}
+
+        target = embedded.get("target") if isinstance(embedded.get("target"), dict) else {}
+        if not target:
+            target = {
+                "recommended_build_id": embedded.get("target_build_id"),
+                "recommended_build": embedded.get("target_build"),
+                "output_function": embedded.get("output_function"),
+            }
+        salvage = analysis.get("salvage_opportunities") if isinstance(analysis.get("salvage_opportunities"), dict) else {}
+        asset_summary = salvage.get("asset_summary") if isinstance(salvage.get("asset_summary"), dict) else {}
+        stop_conditions = embedded.get("stop_conditions")
+        if not isinstance(stop_conditions, list):
+            stop_conditions = [
+                f"{item.get('hazard')}: {item.get('action')}"
+                for item in (embedded.get("hazards") or [])
+                if isinstance(item, dict) and item.get("hazard")
+            ]
+        normalized = {
+            "mode": embedded.get("mode") or "salvage_splice_reuse_plan",
+            "verdict": embedded.get("verdict"),
+            "confidence": embedded.get("confidence"),
+            "target": target,
+            "reusable_blocks": embedded.get("reusable_blocks") or [],
+            "capability_summary": embedded.get("capability_summary") or asset_summary.get("capabilities") or {},
+            "build_candidates": embedded.get("build_candidates") or [],
+            "splice_plan": embedded.get("splice_plan") if isinstance(embedded.get("splice_plan"), dict) else {},
+            "integration_contract": embedded.get("integration_contract") if isinstance(embedded.get("integration_contract"), dict) else {},
+            "evidence_plan": embedded.get("evidence_plan") if isinstance(embedded.get("evidence_plan"), dict) else {},
+            "stop_conditions": stop_conditions,
+            "hazards": embedded.get("hazards") or [],
+        }
+        return self._json_safe(normalized)
+
     def _latest_analysis(self, session: Dict[str, Any]) -> Dict[str, Any]:
         analyses = session.get("analyses") or []
         if not analyses:
@@ -721,11 +989,16 @@ class BoardSessionStore:
             [
                 str(payload.get("description") or ""),
                 str(payload.get("device_hint") or ""),
+                str(payload.get("goal") or ""),
                 " ".join(self._listify(payload.get("symptoms"))),
             ]
         ).lower()
         if any(term in text for term in ["mains", "microwave", "crt", "high voltage", "lithium swollen"]):
             return "safety"
+        if any(term in text for term in ["aoi", "inspection", "golden board", "production gate", "quality gate", "release decision"]):
+            return "aoi"
+        if any(term in text for term in ["reuse", "splice", "rewire", "repurpose", "salvage", "salvaged", "junk", "spare parts", "fume extractor", "bench jig", "build from parts"]):
+            return "salvage"
         if any(term in text for term in ["repair", "broken", "dead", "no power", "hot", "warm", "fault", "corrosion", "will not", "won't", "not spin", "no spin", "wiggle", "intermittent"]):
             return "repair"
         if any(term in text for term in ["lot", "sell", "price", "shipping", "resale", "arbitrage"]):
@@ -770,7 +1043,7 @@ class BoardSessionStore:
         ordered = sorted(
             tasks,
             key=lambda item: (
-                int(item.get("priority", 3) or 3),
+                self._priority_value(item.get("priority")),
                 {"measurement": 0, "capture": 1, "review": 2, "reference": 3, "evidence": 4, "action": 5}.get(str(item.get("type")), 6),
             ),
         )
@@ -797,6 +1070,16 @@ class BoardSessionStore:
             kept.append(task)
         return kept
 
+    def _filter_tasks_for_safety_hold(self, tasks: List[Dict[str, Any]], plan: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if str(plan.get("verdict") or "") != "unsafe_hold":
+            return tasks
+        kept: List[Dict[str, Any]] = []
+        for task in tasks:
+            if task.get("type") == "measurement":
+                continue
+            kept.append(task)
+        return kept
+
     def _priority_for_missing(self, text: str) -> int:
         lower = text.lower()
         if any(term in lower for term in ["voltage", "continuity", "resistance", "current", "power", "safety", "high-voltage", "mains", "tester readings", "charger rating", "thermal fuse", "flashlight-test", "driver output"]):
@@ -808,6 +1091,13 @@ class BoardSessionStore:
     def _looks_like_measurement(self, text: str) -> bool:
         lower = text.lower()
         return any(term in lower for term in ["voltage", "continuity", "resistance", "current", "logic level", "measure", "powered", "reading", "tester", "rating", "output"])
+
+    @staticmethod
+    def _priority_value(value: Any) -> int:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 3
 
     def _find_task(self, session: Dict[str, Any], task_id: str) -> Dict[str, Any] | None:
         for task in session.get("evidence_tasks", []) or []:
@@ -911,7 +1201,9 @@ class BoardSessionStore:
                 f"- OCR examples: {counts.get('ocr_examples', 0)}",
                 f"- Defect labels: {counts.get('defect_labels', 0)}",
                 f"- Board roles: {counts.get('board_roles', 0)}",
+                f"- AOI cases: {counts.get('aoi_cases', 0)}",
                 f"- Repair cases: {counts.get('repair_cases', 0)}",
+                f"- Reuse cases: {counts.get('reuse_cases', 0)}",
                 f"- Reviews: {counts.get('reviews', 0)}",
                 f"- Measurements: {counts.get('measurements', 0)}",
                 "",

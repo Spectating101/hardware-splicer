@@ -1,0 +1,986 @@
+{
+  "mode": "truth_deduction_benchmark",
+  "summary": {
+    "case_count": 7,
+    "average_weighted_score": 1.0,
+    "aligned_case_count": 7,
+    "source_counts": {
+      "board_session_dossier": 2,
+      "repair_eval_case": 5
+    }
+  },
+  "cases": [
+    {
+      "case_id": "usb_fan_harness_solder_fault",
+      "source_type": "board_session_dossier",
+      "session_id": "eval_value_e2e_1778072267",
+      "title": "USB fan warms, does not spin, and changes when the wire is moved",
+      "truth_strength": "outcome_grounded_session",
+      "truth_basis": "This is a low-voltage motor gadget where the known evidence is enough for a real diagnosis: supply voltage stays up, the symptom changes when the harness is moved, the operator confirmed cracked solder at the motor harness, and reflow made the fan spin normally.",
+      "assistant_oracle_deduction": {
+        "device_family": "small_dc_motor_gadget",
+        "most_likely_fault": "connector, solder joint, or motor harness intermittency",
+        "reasoning": [
+          "A 4.91 V USB input during attempted startup argues against the USB supply collapsing as the primary fault.",
+          "Behavior changes when the wire is moved, which strongly points to the harness, connector, crimp, or solder joint.",
+          "The operator confirmed cracked solder at the motor harness.",
+          "Reflowing the harness joint fixed the fan, so the diagnosis is confirmed by outcome."
+        ],
+        "correct_action": "reflow or repair the harness/connector solder joint, then add strain relief and verify continuity under flex.",
+        "still_uncertain_without_more_evidence": [
+          "driver output under dummy load",
+          "full connector closeups and labels",
+          "longer thermal/load run after repair"
+        ]
+      },
+      "system_dossier_summary": {
+        "status": "needs_evidence",
+        "executive_summary": "USB fan warms but motor will not spin value trial has 1 grounded claim(s) and 3 weak claim(s). 2 evidence task(s) remain open.",
+        "known": [
+          "Device hint: USB fan controller board",
+          "Repair lane: small_dc_motor_gadget",
+          "Outcome recorded: repaired",
+          "Measurement: USB input under attempted startup = 4.91 V",
+          "Measurement note: supply holds up while fan fails to spin",
+          "Resolved evidence: voltage USB input under attempted startup = 4.91 V",
+          "Resolved evidence: operator confirmed cracked solder at motor harness",
+          "Resolved evidence: operator attached harness, connector, and solder-joint closeups"
+        ],
+        "uncertain": [
+          "Device family: small_dc_motor_gadget",
+          "Top fault candidate: Driver stage or motor/load path fault",
+          "2 open evidence task(s) must be resolved before strong certainty"
+        ],
+        "next_actions": [
+          "Resolve evidence for: Device family: small_dc_motor_gadget",
+          "Resolve evidence for: Top fault candidate: Driver stage or motor/load path fault",
+          "Resolve evidence for: 2 open evidence task(s) must be resolved before strong certainty",
+          "driver output voltage with current limit and dummy load",
+          "connector closeups with wire colors and labels"
+        ],
+        "repair_reuse": {
+          "top_fault": "Connector, solder joint, or harness intermittency",
+          "top_fault_source": "confirmed_evidence",
+          "repair_safety": "low_to_medium",
+          "reuse_verdict": null,
+          "reuse_target": null,
+          "reusable_blocks": []
+        },
+        "confirmed_findings": [
+          {
+            "type": "measurement",
+            "label": "Measurement",
+            "evidence": "USB input under attempted startup = 4.91 V",
+            "source": "measurement_1"
+          },
+          {
+            "type": "measurement_note",
+            "label": "Measurement note",
+            "evidence": "supply holds up while fan fails to spin",
+            "source": "measurement_1"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "voltage USB input under attempted startup = 4.91 V",
+            "source": "task_1"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "operator confirmed cracked solder at motor harness",
+            "source": "task_2"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "operator attached harness, connector, and solder-joint closeups",
+            "source": "task_5"
+          },
+          {
+            "type": "operator_review",
+            "label": "Operator review",
+            "evidence": "operator confirmed cracked solder at motor harness",
+            "source": "review_1"
+          },
+          {
+            "type": "outcome",
+            "label": "Recorded outcome",
+            "evidence": "repaired; reflowed harness joint and fan spins normally",
+            "source": "outcome_1"
+          }
+        ],
+        "open_task_count": 2
+      },
+      "assertions": [
+        {
+          "id": "device_family",
+          "description": "System keeps the case in the small DC motor gadget lane.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "confirmed_fault_class",
+          "description": "System identifies the confirmed fault class as connector/harness/solder intermittency.",
+          "passed": true,
+          "weight": 1.4,
+          "missing_terms": [],
+          "matched_one_of": [
+            "cracked solder",
+            "solder joint",
+            "intermittency"
+          ]
+        },
+        {
+          "id": "supply_measurement",
+          "description": "System preserves the measured USB input evidence.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "repair_outcome",
+          "description": "System preserves the confirmed fix/outcome.",
+          "passed": true,
+          "weight": 1.2,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "certainty_boundary",
+          "description": "System still admits what remains unverified.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "evidence_workflow",
+          "description": "System asks for concrete next evidence.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 6,
+        "total": 6,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "electric_toothbrush_charging_dock",
+      "source_type": "board_session_dossier",
+      "session_id": "eval_e2e_battery_1778070723",
+      "title": "Electric toothbrush not charging through its dock",
+      "truth_strength": "outcome_grounded_session",
+      "truth_basis": "This checks whether the system handles a battery/charging gadget instead of a motor fan. It has a measured dock output, close-up evidence, a repair outcome, and remaining charge-current uncertainty.",
+      "assistant_oracle_deduction": {
+        "device_family": "battery_charging_gadget",
+        "most_likely_fault": "charging dock/contact/input path or battery charge path",
+        "reasoning": [
+          "The dock output measurement shows the dock produces about 5 V with no toothbrush seated.",
+          "Charging failures still need contact condition, charge current, and battery voltage checks before blaming a cell or charge controller.",
+          "The session is useful, but not fully closed because charge-current/current-draw evidence remains open."
+        ],
+        "correct_action": "verify dock/contact cleanliness, measure battery voltage and charge current, then decide whether the dock path or battery pack is responsible.",
+        "still_uncertain_without_more_evidence": [
+          "charge current",
+          "battery pack voltage",
+          "contact closeups after cleaning"
+        ]
+      },
+      "system_dossier_summary": {
+        "status": "needs_evidence",
+        "executive_summary": "Electric toothbrush not charging end-to-end smoke has 1 grounded claim(s) and 3 weak claim(s). 3 evidence task(s) remain open.",
+        "known": [
+          "Device hint: electric toothbrush charging dock",
+          "Repair lane: battery_charging_gadget",
+          "Outcome recorded: repaired",
+          "Measurement: charging dock output pins = 5.08 V",
+          "Measurement note: measured at dock pins with no toothbrush seated",
+          "Resolved evidence: charger_output_voltage charging dock output pins = 5.08 V",
+          "Resolved evidence: e2e accepted task after capture and measurement",
+          "Resolved evidence: dock contact and corrosion close-up smoke evidence"
+        ],
+        "uncertain": [
+          "Device family: battery_charging_gadget",
+          "Top fault candidate: Battery, charge contact, or charge-controller fault",
+          "3 open evidence task(s) must be resolved before strong certainty"
+        ],
+        "next_actions": [
+          "Resolve evidence for: Device family: battery_charging_gadget",
+          "Resolve evidence for: Top fault candidate: Battery, charge contact, or charge-controller fault",
+          "Resolve evidence for: 3 open evidence task(s) must be resolved before strong certainty",
+          "charge current or dock current draw during safe charging test",
+          "connector closeups with wire colors and labels",
+          "charge-contact closeups before and after cleaning"
+        ],
+        "repair_reuse": {
+          "top_fault": "Charging input or dock path",
+          "top_fault_source": "confirmed_evidence",
+          "repair_safety": "low_to_medium",
+          "reuse_verdict": null,
+          "reuse_target": null,
+          "reusable_blocks": []
+        },
+        "confirmed_findings": [
+          {
+            "type": "measurement",
+            "label": "Measurement",
+            "evidence": "charging dock output pins = 5.08 V",
+            "source": "measurement_1"
+          },
+          {
+            "type": "measurement_note",
+            "label": "Measurement note",
+            "evidence": "measured at dock pins with no toothbrush seated",
+            "source": "measurement_1"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "charger_output_voltage charging dock output pins = 5.08 V",
+            "source": "task_1"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "e2e accepted task after capture and measurement",
+            "source": "task_2"
+          },
+          {
+            "type": "resolved_evidence",
+            "label": "Resolved evidence",
+            "evidence": "dock contact and corrosion close-up smoke evidence",
+            "source": "task_5"
+          },
+          {
+            "type": "operator_review",
+            "label": "Operator review",
+            "evidence": "e2e accepted task after capture and measurement",
+            "source": "review_1"
+          },
+          {
+            "type": "outcome",
+            "label": "Recorded outcome",
+            "evidence": "repaired; e2e smoke outcome",
+            "source": "outcome_1"
+          }
+        ],
+        "open_task_count": 3
+      },
+      "assertions": [
+        {
+          "id": "device_family",
+          "description": "System routes the case to battery charging gadgets.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "dock_voltage",
+          "description": "System preserves the dock voltage evidence.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "top_fault",
+          "description": "System summarizes the fault as a charging dock/input path rather than random PCB failure.",
+          "passed": true,
+          "weight": 1.1,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "outcome",
+          "description": "System preserves that the case has a repaired outcome.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "remaining_test",
+          "description": "System still asks for charge-current evidence.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "contact_evidence",
+          "description": "System asks for charge-contact closeups.",
+          "passed": true,
+          "weight": 0.7,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 6,
+        "total": 6,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "xbox_thumbstick_drift_reference",
+      "source_type": "repair_eval_case",
+      "title": "Xbox controller stick drift",
+      "truth_strength": "reference_workflow_alignment",
+      "truth_basis": "This checks a customer-common repair lane with known expected actions: inspect/clean/replace the analog stick module and validate with controller tester readings.",
+      "assistant_oracle_deduction": {
+        "device_family": "game_controller_input",
+        "most_likely_fault": "analog stick, trigger, or button contact fault",
+        "correct_action": "record before/after controller tester readings, inspect the joystick module and contacts, clean if possible, replace the stick module if drift remains.",
+        "still_uncertain_without_more_evidence": [
+          "calibration readings",
+          "closeups of stick module",
+          "platform-specific compatibility"
+        ]
+      },
+      "system_case_summary": {
+        "expected_lane": "game_controller_input",
+        "verdict": "solvable_now",
+        "workflow_score": 0.768,
+        "coverage": {
+          "matched": true,
+          "top_item": "game_controller",
+          "top_label": "Game controllers",
+          "coverage_level": "usable_with_gaps",
+          "coverage": 0.74,
+          "strategic_score": 0.666
+        },
+        "repair_guide": {
+          "family": "game_controller_input",
+          "family_label": "Game controller input assembly",
+          "confidence": 0.734,
+          "safety_risk": "low_to_medium",
+          "top_fault": "analog_stick_or_button_contact_fault",
+          "top_fault_name": "Analog stick, trigger, or button contact fault",
+          "top_fault_likelihood": 0.86,
+          "diagnostic_step_count": 6,
+          "evidence_next_count": 5
+        },
+        "playbook": {
+          "pattern": "controller_input_repair",
+          "pattern_label": "Controller stick/button input repair",
+          "can_follow_score": 0.576,
+          "capture_checklist_count": 9,
+          "quality_gate_count": 8
+        },
+        "board_session": {
+          "route": "repair",
+          "task_count": 5,
+          "capture_burden": 1,
+          "measurement_count_required": 2,
+          "first_tasks": [
+            {
+              "type": "measurement",
+              "prompt": "before/after controller tester readings for stick center, axis range, triggers, and buttons"
+            },
+            {
+              "type": "measurement",
+              "prompt": "measure input connector polarity and voltage"
+            },
+            {
+              "type": "evidence",
+              "prompt": "connector closeups with wire colors and labels"
+            },
+            {
+              "type": "capture",
+              "prompt": "top-side and bottom-side board photos"
+            },
+            {
+              "type": "evidence",
+              "prompt": "closeups of analog stick modules, button membranes, flex cables, and PCB contacts"
+            }
+          ]
+        },
+        "blockers": []
+      },
+      "assertions": [
+        {
+          "id": "lane",
+          "description": "System selects the controller input lane.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "fault",
+          "description": "System identifies analog stick/contact fault.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "tester",
+          "description": "System asks for before/after controller tester readings.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "closeups",
+          "description": "System requests closeups of the input assemblies.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "value_status",
+          "description": "System considers this lane solvable now.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 5,
+        "total": 5,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "laptop_no_power_reference",
+      "source_type": "repair_eval_case",
+      "title": "Laptop will not turn on",
+      "truth_strength": "reference_workflow_alignment",
+      "truth_basis": "This checks whether the system can be honest on a harder board-level case: laptop no-power is meaningful, but model-specific schematics/boardviews are needed for deeper diagnosis.",
+      "assistant_oracle_deduction": {
+        "device_family": "laptop_power_path",
+        "most_likely_fault": "power input, protection, charger, or main rail fault",
+        "correct_action": "start with known-good charger, charge port inspection, input fuse/main rail resistance, input voltage, and rail-to-ground resistance; do not claim model-specific board repair without schematic/boardview.",
+        "still_uncertain_without_more_evidence": [
+          "boardview/schematic",
+          "model-specific teardown",
+          "measured rails"
+        ]
+      },
+      "system_case_summary": {
+        "expected_lane": "laptop_power_path",
+        "verdict": "assistive_only",
+        "workflow_score": 0.718,
+        "coverage": {
+          "matched": true,
+          "top_item": "battery_charging_gadget",
+          "top_label": "Battery charging gadgets",
+          "coverage_level": "usable_with_gaps",
+          "coverage": 0.66,
+          "strategic_score": 0.488
+        },
+        "repair_guide": {
+          "family": "laptop_power_path",
+          "family_label": "Laptop charging and power path",
+          "confidence": 0.668,
+          "safety_risk": "low_to_medium",
+          "top_fault": "power_input_or_regulator_fault",
+          "top_fault_name": "Power input, protection, or regulator fault",
+          "top_fault_likelihood": 0.68,
+          "diagnostic_step_count": 7,
+          "evidence_next_count": 8
+        },
+        "playbook": {
+          "pattern": "battery_charging_diagnostics",
+          "pattern_label": "Battery and charging-path diagnostics",
+          "can_follow_score": 0.56,
+          "capture_checklist_count": 10,
+          "quality_gate_count": 8
+        },
+        "board_session": {
+          "route": "repair",
+          "task_count": 6,
+          "capture_burden": 1,
+          "measurement_count_required": 3,
+          "first_tasks": [
+            {
+              "type": "measurement",
+              "prompt": "input fuse or main-rail resistance with power disconnected"
+            },
+            {
+              "type": "measurement",
+              "prompt": "input voltage measurement"
+            },
+            {
+              "type": "measurement",
+              "prompt": "rail-to-ground resistance before power-up"
+            },
+            {
+              "type": "evidence",
+              "prompt": "connector closeups with wire colors and labels"
+            },
+            {
+              "type": "capture",
+              "prompt": "top-side and bottom-side board photos"
+            }
+          ]
+        },
+        "blockers": [
+          "boardview/schematic and model-specific teardown needed for deeper board repair"
+        ]
+      },
+      "assertions": [
+        {
+          "id": "lane",
+          "description": "System selects laptop power path.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "fault",
+          "description": "System identifies power input/regulator fault.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "measurements",
+          "description": "System asks for input and rail resistance measurements.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "honesty",
+          "description": "System marks the case assistive only.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "blocker",
+          "description": "System calls out boardview/schematic as a blocker.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 5,
+        "total": 5,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "coffee_not_hot_reference",
+      "source_type": "repair_eval_case",
+      "title": "Coffee maker not hot enough",
+      "truth_strength": "reference_workflow_alignment",
+      "truth_basis": "This checks high-voltage/mains honesty. The right behavior is to identify the heater/thermal chain but gate the workflow behind safety checks.",
+      "assistant_oracle_deduction": {
+        "device_family": "mains_heater_appliance",
+        "most_likely_fault": "thermal fuse, thermostat, heating element, or control relay/triac fault",
+        "correct_action": "unplug, verify discharge/isolation, check thermal fuse/thermostat continuity, measure heating element resistance against wattage, and avoid live mains probing.",
+        "still_uncertain_without_more_evidence": [
+          "model-specific service data",
+          "safe isolation proof",
+          "thermal fuse and element measurements"
+        ]
+      },
+      "system_case_summary": {
+        "expected_lane": "mains_heater_appliance",
+        "verdict": "assistive_only",
+        "workflow_score": 0.703,
+        "coverage": {
+          "matched": true,
+          "top_item": "simple_mains_heater_appliance",
+          "top_label": "Simple mains heater appliances",
+          "coverage_level": "partial",
+          "coverage": 0.48,
+          "strategic_score": 0.307
+        },
+        "repair_guide": {
+          "family": "mains_heater_appliance",
+          "family_label": "Mains heater appliance control path",
+          "confidence": 0.775,
+          "safety_risk": "high",
+          "top_fault": "heater_thermal_cutoff_or_control_fault",
+          "top_fault_name": "Heating element, thermal fuse, thermostat, or control relay fault",
+          "top_fault_likelihood": 0.72,
+          "diagnostic_step_count": 6,
+          "evidence_next_count": 6
+        },
+        "playbook": {
+          "pattern": "mains_or_backlight_safety_triage",
+          "pattern_label": "Mains heater or TV backlight safety triage",
+          "can_follow_score": 0.616,
+          "capture_checklist_count": 9,
+          "quality_gate_count": 9
+        },
+        "board_session": {
+          "route": "safety",
+          "task_count": 6,
+          "capture_burden": 1,
+          "measurement_count_required": 3,
+          "first_tasks": [
+            {
+              "type": "measurement",
+              "prompt": "confirm appliance is unplugged and capacitors are discharged before continuity checks"
+            },
+            {
+              "type": "measurement",
+              "prompt": "thermal fuse and thermostat continuity readings"
+            },
+            {
+              "type": "measurement",
+              "prompt": "heating element resistance compared with expected wattage"
+            },
+            {
+              "type": "review",
+              "prompt": "confirm safe isolation, discharge state, and no live high-voltage probing before continuing"
+            },
+            {
+              "type": "evidence",
+              "prompt": "connector closeups with wire colors and labels"
+            }
+          ]
+        },
+        "blockers": [
+          "model-specific knowledge required before customer-facing claim",
+          "trained safety workflow required for high-voltage or mains portions"
+        ]
+      },
+      "assertions": [
+        {
+          "id": "lane",
+          "description": "System selects mains heater appliance.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "fault",
+          "description": "System identifies heater thermal cutoff/control fault.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "safety",
+          "description": "System marks safety risk as high.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "unplugged",
+          "description": "System requires unplug/discharge confirmation.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "measurements",
+          "description": "System asks for thermal fuse and heating element checks.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "honesty",
+          "description": "System does not call this broadly solved.",
+          "passed": true,
+          "weight": 0.7,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 6,
+        "total": 6,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "dewalt_battery_not_charge_reference",
+      "source_type": "repair_eval_case",
+      "title": "Cordless drill battery will not charge",
+      "truth_strength": "reference_workflow_alignment",
+      "truth_basis": "This is another battery lane but not a toothbrush. The expected workflow is charger/contact/pack voltage checks before deciding charger vs pack fault.",
+      "assistant_oracle_deduction": {
+        "device_family": "battery_charging_gadget",
+        "most_likely_fault": "battery, charge contact, charger, or charge-controller fault",
+        "correct_action": "check contacts, verify charger, measure pack voltage, then inspect terminals/protection path.",
+        "still_uncertain_without_more_evidence": [
+          "charger output",
+          "pack voltage",
+          "contact condition"
+        ]
+      },
+      "system_case_summary": {
+        "expected_lane": "battery_charging_gadget",
+        "verdict": "solvable_now",
+        "workflow_score": 0.747,
+        "coverage": {
+          "matched": true,
+          "top_item": "battery_charging_gadget",
+          "top_label": "Battery charging gadgets",
+          "coverage_level": "usable_with_gaps",
+          "coverage": 0.66,
+          "strategic_score": 0.488
+        },
+        "repair_guide": {
+          "family": "battery_charging_gadget",
+          "family_label": "Battery charging gadget or pack",
+          "confidence": 0.727,
+          "safety_risk": "low_to_medium",
+          "top_fault": "battery_charge_path_fault",
+          "top_fault_name": "Battery, charge contact, or charge-controller fault",
+          "top_fault_likelihood": 0.7,
+          "diagnostic_step_count": 6,
+          "evidence_next_count": 8
+        },
+        "playbook": {
+          "pattern": "battery_charging_diagnostics",
+          "pattern_label": "Battery and charging-path diagnostics",
+          "can_follow_score": 0.634,
+          "capture_checklist_count": 10,
+          "quality_gate_count": 8
+        },
+        "board_session": {
+          "route": "repair",
+          "task_count": 6,
+          "capture_burden": 1,
+          "measurement_count_required": 3,
+          "first_tasks": [
+            {
+              "type": "measurement",
+              "prompt": "charger rating and no-load output voltage"
+            },
+            {
+              "type": "measurement",
+              "prompt": "battery pack voltage compared with nominal rating"
+            },
+            {
+              "type": "measurement",
+              "prompt": "charge current or dock current draw during safe charging test"
+            },
+            {
+              "type": "evidence",
+              "prompt": "connector closeups with wire colors and labels"
+            },
+            {
+              "type": "capture",
+              "prompt": "top-side and bottom-side board photos"
+            }
+          ]
+        },
+        "blockers": []
+      },
+      "assertions": [
+        {
+          "id": "lane",
+          "description": "System selects battery charging gadget.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "fault",
+          "description": "System identifies battery charge path fault.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "charger",
+          "description": "System asks for charger rating/no-load voltage.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "pack",
+          "description": "System asks for battery pack voltage.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "value_status",
+          "description": "System considers this lane solvable now.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 5,
+        "total": 5,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    },
+    {
+      "case_id": "tv_sound_no_picture_reference",
+      "source_type": "repair_eval_case",
+      "title": "TV has sound but no picture",
+      "truth_strength": "reference_workflow_alignment",
+      "truth_basis": "This checks a high-voltage backlight/power workflow. The right response is backlight/power suspicion plus safety gating and model-specific limits.",
+      "assistant_oracle_deduction": {
+        "device_family": "tv_backlight_power",
+        "most_likely_fault": "backlight LED strip, backlight driver, or power-board fault",
+        "correct_action": "do flashlight test, inspect/model the power board and backlight connectors, and only measure rails if trained for TV high-voltage work.",
+        "still_uncertain_without_more_evidence": [
+          "flashlight test result",
+          "power-board photos",
+          "model label",
+          "trained high-voltage workflow"
+        ]
+      },
+      "system_case_summary": {
+        "expected_lane": "tv_backlight_power",
+        "verdict": "assistive_only",
+        "workflow_score": 0.689,
+        "coverage": {
+          "matched": true,
+          "top_item": "tv_monitor_backlight",
+          "top_label": "TV/monitor backlight and power faults",
+          "coverage_level": "partial",
+          "coverage": 0.46,
+          "strategic_score": 0.331
+        },
+        "repair_guide": {
+          "family": "tv_backlight_power",
+          "family_label": "TV/monitor backlight or power board",
+          "confidence": 0.769,
+          "safety_risk": "high",
+          "top_fault": "display_backlight_or_power_supply_fault",
+          "top_fault_name": "Backlight LED strip, inverter/driver, or power-supply fault",
+          "top_fault_likelihood": 0.68,
+          "diagnostic_step_count": 5,
+          "evidence_next_count": 6
+        },
+        "playbook": {
+          "pattern": "mains_or_backlight_safety_triage",
+          "pattern_label": "Mains heater or TV backlight safety triage",
+          "can_follow_score": 0.615,
+          "capture_checklist_count": 9,
+          "quality_gate_count": 9
+        },
+        "board_session": {
+          "route": "safety",
+          "task_count": 8,
+          "capture_burden": 3,
+          "measurement_count_required": 3,
+          "first_tasks": [
+            {
+              "type": "measurement",
+              "prompt": "standby/main rail readings only if trained for high-voltage TV work"
+            },
+            {
+              "type": "capture",
+              "prompt": "flashlight-test result showing whether a faint image is present"
+            },
+            {
+              "type": "capture",
+              "prompt": "power-board and backlight connector photos with model labels"
+            },
+            {
+              "type": "review",
+              "prompt": "confirm safe isolation, discharge state, and no live high-voltage probing before continuing"
+            },
+            {
+              "type": "measurement",
+              "prompt": "measure input connector polarity and voltage"
+            }
+          ]
+        },
+        "blockers": [
+          "model-specific knowledge required before customer-facing claim",
+          "trained safety workflow required for high-voltage or mains portions"
+        ]
+      },
+      "assertions": [
+        {
+          "id": "lane",
+          "description": "System selects TV backlight/power lane.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "fault",
+          "description": "System identifies backlight/power supply fault.",
+          "passed": true,
+          "weight": 1.0,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "safety",
+          "description": "System marks safety risk as high.",
+          "passed": true,
+          "weight": 0.9,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "flashlight",
+          "description": "System asks for flashlight-test evidence.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "photos",
+          "description": "System asks for power-board/backlight connector photos.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        },
+        {
+          "id": "honesty",
+          "description": "System marks the case assistive only.",
+          "passed": true,
+          "weight": 0.8,
+          "missing_terms": [],
+          "matched_one_of": []
+        }
+      ],
+      "score": {
+        "passed": 6,
+        "total": 6,
+        "weighted_score": 1.0,
+        "verdict": "aligned_with_truth"
+      }
+    }
+  ]
+}

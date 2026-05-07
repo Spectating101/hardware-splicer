@@ -26,6 +26,7 @@ interface IdentifyResponse {
   source?: "local" | "jarvis";
   backend?: string;
   reviewRequired?: boolean;
+  rawAnalysis?: Record<string, unknown>;
   visualTopology?: {
     traceCount: number;
     connectionCount: number;
@@ -37,6 +38,20 @@ interface IdentifyResponse {
     score?: number;
     learnedDetectionRatio?: number;
     defectCandidateCount?: number;
+  };
+  productionAoi?: {
+    disposition?: string;
+    releaseAuthorized?: boolean;
+    certaintyScore?: number;
+    certaintyLevel?: string;
+    blockers?: string[];
+    requiredEvidence?: string[];
+    gates?: Array<{
+      gate_id?: string;
+      status?: string;
+      score?: number;
+      evidence?: string;
+    }>;
   };
   certaintyLedger?: {
     overall?: {
@@ -92,6 +107,20 @@ type LocalAnalyzeResponse = {
       learned_detection_ratio?: number;
       defect_candidate_count?: number;
     };
+    production_aoi?: {
+      disposition?: string;
+      release_authorized?: boolean;
+      certainty_score?: number;
+      certainty_level?: string;
+      blockers?: string[];
+      required_evidence?: string[];
+      gates?: Array<{
+        gate_id?: string;
+        status?: string;
+        score?: number;
+        evidence?: string;
+      }>;
+    };
     defect_inspection?: {
       defect_count?: number;
     };
@@ -135,11 +164,17 @@ function ScanPageInner() {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [goldenFile, setGoldenFile] = useState<File | null>(null);
+  const [referenceCounts, setReferenceCounts] = useState("");
+  const [referenceTopology, setReferenceTopology] = useState("");
+  const [aoiProfile, setAoiProfile] = useState("");
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
   const [result, setResult] = useState<IdentifyResponse | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [savingSession, setSavingSession] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -229,6 +264,7 @@ function ScanPageInner() {
       backend,
       model: backend,
       reviewRequired,
+      rawAnalysis: json.results as Record<string, unknown> | undefined,
       visualTopology: {
         traceCount: json.results?.visual_topology?.trace_count ?? 0,
         connectionCount: json.results?.visual_topology?.connection_count ?? 0,
@@ -242,6 +278,15 @@ function ScanPageInner() {
         defectCandidateCount: json.results?.aoi_inspection?.defect_candidate_count
           ?? json.results?.defect_inspection?.defect_count
           ?? 0,
+      },
+      productionAoi: {
+        disposition: json.results?.production_aoi?.disposition,
+        releaseAuthorized: json.results?.production_aoi?.release_authorized,
+        certaintyScore: json.results?.production_aoi?.certainty_score,
+        certaintyLevel: json.results?.production_aoi?.certainty_level,
+        blockers: json.results?.production_aoi?.blockers,
+        requiredEvidence: json.results?.production_aoi?.required_evidence,
+        gates: json.results?.production_aoi?.gates,
       },
       certaintyLedger: json.results?.certainty_ledger,
     };
@@ -263,12 +308,14 @@ function ScanPageInner() {
     setResult(null);
     setSelectedId(null);
     setError(null);
+    setSaveMessage(null);
   }, [imageUrl]);
 
   const analyze = useCallback(async () => {
     if (!imageFile) return;
     setLoading(true);
     setError(null);
+    setSaveMessage(null);
     setResult(null);
 
     const fd = new FormData();
@@ -279,6 +326,10 @@ function ScanPageInner() {
       fd.append("file", imageFile);
       fd.append("backend", "hybrid");
       fd.append("enable_ocr", "false");
+      if (goldenFile) fd.append("golden_file", goldenFile);
+      if (referenceCounts.trim()) fd.append("reference_counts", referenceCounts.trim());
+      if (referenceTopology.trim()) fd.append("reference_topology", referenceTopology.trim());
+      if (aoiProfile.trim()) fd.append("aoi_profile", aoiProfile.trim());
     }
 
     try {
@@ -298,16 +349,62 @@ function ScanPageInner() {
     } finally {
       setLoading(false);
     }
-  }, [imageFile, mapLocalAnalysis, mode, setSalvageModules, setSafetyLevel]);
+  }, [aoiProfile, goldenFile, imageFile, mapLocalAnalysis, mode, referenceCounts, referenceTopology, setSalvageModules, setSafetyLevel]);
+
+  const saveReviewCase = useCallback(async () => {
+    if (!result) return;
+    setSavingSession(true);
+    setError(null);
+    setSaveMessage(null);
+    const productionAoi = result.productionAoi;
+    const analysis = result.rawAnalysis ?? {
+      production_aoi: productionAoi ? {
+        disposition: productionAoi.disposition,
+        release_authorized: productionAoi.releaseAuthorized,
+        certainty_score: productionAoi.certaintyScore,
+        certainty_level: productionAoi.certaintyLevel,
+        blockers: productionAoi.blockers,
+        required_evidence: productionAoi.requiredEvidence,
+        gates: productionAoi.gates,
+      } : undefined,
+      certainty_ledger: result.certaintyLedger,
+    };
+    try {
+      const response = await fetch("/api/proxy/board-sessions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          description: productionAoi?.disposition
+            ? `Scan AOI result: ${productionAoi.disposition.replace(/_/g, " ")}`
+            : "Scan analysis result",
+          route: productionAoi ? "aoi" : mode,
+          analysis,
+          summary: { summary_text: result.explanation },
+          source: "scan_ui",
+        }),
+      });
+      const payload = await response.json() as { session?: { session_id?: string }; error?: string };
+      if (!response.ok || payload.error) {
+        throw new Error(payload.error ?? `Save failed (${response.status})`);
+      }
+      setSaveMessage(`Saved review case ${payload.session?.session_id ?? ""}`.trim());
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save review case.");
+    } finally {
+      setSavingSession(false);
+    }
+  }, [mode, result]);
 
   const reset = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
     setImageFile(null);
     setImageUrl(null);
+    setGoldenFile(null);
     setImageSize(null);
     setResult(null);
     setSelectedId(null);
     setError(null);
+    setSaveMessage(null);
   };
 
   return (
@@ -376,6 +473,18 @@ function ScanPageInner() {
                   <RefreshCw className="mr-2 h-4 w-4" />
                   New photo
                 </Button>
+                {result && (
+                  <Button
+                    onClick={() => void saveReviewCase()}
+                    disabled={savingSession}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                  >
+                    {savingSession ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ClipboardList className="mr-2 h-4 w-4" />}
+                    Save case
+                  </Button>
+                )}
                 {result?.fromCache && (
                   <span className="ml-1 text-[11px] text-slate-500">
                     served from cache · {result.model}
@@ -383,9 +492,65 @@ function ScanPageInner() {
                 )}
               </div>
 
+              {mode === "identify" && (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                  <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+                    <ShieldCheck className="h-4 w-4" />
+                    Production gate inputs
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <label className="block rounded-lg border border-white/10 bg-black/20 p-3">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Golden image</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => setGoldenFile(event.target.files?.[0] ?? null)}
+                        className="mt-2 block w-full text-xs text-slate-400 file:mr-3 file:rounded-full file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-900"
+                      />
+                      {goldenFile && <span className="mt-2 block truncate text-xs text-slate-400">{goldenFile.name}</span>}
+                    </label>
+                    <label className="block rounded-lg border border-white/10 bg-black/20 p-3">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Reference counts</span>
+                      <textarea
+                        value={referenceCounts}
+                        onChange={(event) => setReferenceCounts(event.target.value)}
+                        rows={3}
+                        placeholder='{"resistor": 4, "capacitor": 2}'
+                        className="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+                      />
+                    </label>
+                    <label className="block rounded-lg border border-white/10 bg-black/20 p-3">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Reference topology</span>
+                      <textarea
+                        value={referenceTopology}
+                        onChange={(event) => setReferenceTopology(event.target.value)}
+                        rows={3}
+                        placeholder='{"nets":{},"components":{}}'
+                        className="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+                      />
+                    </label>
+                    <label className="block rounded-lg border border-white/10 bg-black/20 p-3">
+                      <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">AOI profile</span>
+                      <textarea
+                        value={aoiProfile}
+                        onChange={(event) => setAoiProfile(event.target.value)}
+                        rows={3}
+                        placeholder='{"fixture_id":"fx-1","calibration_id":"cal-1","station_id":"aoi-1"}'
+                        className="mt-2 w-full resize-none rounded-md border border-white/10 bg-black/30 px-2 py-1.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div className="rounded-xl border border-rose-400/40 bg-rose-500/10 p-3 text-sm text-rose-200">
                   {error}
+                </div>
+              )}
+              {saveMessage && (
+                <div className="rounded-xl border border-emerald-300/30 bg-emerald-300/10 p-3 text-sm text-emerald-100">
+                  {saveMessage}
                 </div>
               )}
             </div>
@@ -436,6 +601,45 @@ function ScanPageInner() {
                     <div className="mt-1 text-sm text-white">{result.aoiInspection.defectCandidateCount ?? 0} candidates</div>
                     <div className="text-[11px] text-slate-500">visual AOI</div>
                   </div>
+                </div>
+              )}
+
+              {result?.productionAoi?.disposition && (
+                <div className={`rounded-2xl border p-5 ${
+                  result.productionAoi.releaseAuthorized
+                    ? "border-emerald-300/30 bg-emerald-300/10"
+                    : "border-amber-300/30 bg-amber-300/10"
+                }`}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100/90">
+                      <ShieldCheck className="h-4 w-4" />
+                      Production AOI gate
+                    </div>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-slate-100">
+                      {result.productionAoi.certaintyLevel ?? "not production ready"} · {formatPercent(result.productionAoi.certaintyScore)}
+                    </span>
+                  </div>
+                  <div className="text-lg font-semibold text-white">
+                    {result.productionAoi.disposition.replace(/_/g, " ")}
+                  </div>
+                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {(result.productionAoi.gates ?? []).slice(0, 6).map((gate) => (
+                      <div key={gate.gate_id} className="rounded-lg border border-white/10 bg-black/20 p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-white">{gate.gate_id?.replace(/_/g, " ")}</span>
+                          <span className="text-[11px] uppercase text-slate-400">{gate.status}</span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-slate-400">{formatPercent(gate.score)}</div>
+                      </div>
+                    ))}
+                  </div>
+                  {(result.productionAoi.blockers ?? []).length ? (
+                    <div className="mt-4 space-y-1.5">
+                      {(result.productionAoi.blockers ?? []).slice(0, 4).map((item) => (
+                        <div key={item} className="text-xs leading-5 text-amber-50/90">{item}</div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               )}
 

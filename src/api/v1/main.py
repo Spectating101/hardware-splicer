@@ -27,6 +27,8 @@ from src.intelligence.repair_value_trial_store import RepairValueTrialStore
 from src.intelligence.repair_video_playbook import RepairVideoPlaybookBuilder
 from src.intelligence.salvage_workflow_engine import SalvageWorkflowEngine
 from src.intelligence.salvage_pipeline import SalvageToProductPipeline
+from src.intelligence.salvage_portfolio_planner import SalvagePortfolioPlanner
+from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
 from src.intelligence.board_session_store import BoardSessionStore
 from src.ml.research_radar import build_research_integration_plan
 from src.vision.foundation_adapters import build_foundation_assist_plan, foundation_backend_statuses
@@ -37,6 +39,8 @@ app.include_router(physics_router)
 app.include_router(billing_router)
 _analyzer: CircuitAnalyzer | None = None
 _salvage_workflow: SalvageWorkflowEngine | None = None
+_salvage_splice_planner: SalvageSplicePlanner | None = None
+_salvage_portfolio_planner: SalvagePortfolioPlanner | None = None
 _repair_encyclopedia: RepairEncyclopedia | None = None
 _repair_case_evaluator: RepairCaseEvaluator | None = None
 _repair_lane_packs: RepairLanePacks | None = None
@@ -58,6 +62,20 @@ def get_salvage_workflow() -> SalvageWorkflowEngine:
     if _salvage_workflow is None:
         _salvage_workflow = SalvageWorkflowEngine()
     return _salvage_workflow
+
+
+def get_salvage_splice_planner() -> SalvageSplicePlanner:
+    global _salvage_splice_planner
+    if _salvage_splice_planner is None:
+        _salvage_splice_planner = SalvageSplicePlanner()
+    return _salvage_splice_planner
+
+
+def get_salvage_portfolio_planner() -> SalvagePortfolioPlanner:
+    global _salvage_portfolio_planner
+    if _salvage_portfolio_planner is None:
+        _salvage_portfolio_planner = SalvagePortfolioPlanner(get_salvage_splice_planner())
+    return _salvage_portfolio_planner
 
 
 def get_repair_encyclopedia() -> RepairEncyclopedia:
@@ -154,8 +172,10 @@ def analyze(
     enable_ocr: bool = Form(True),
     reference_counts: Optional[str] = Form(None),
     reference_file: Optional[UploadFile] = File(None),
+    golden_file: Optional[UploadFile] = File(None),
     reference_topology: Optional[str] = Form(None),
     reference_topology_file: Optional[UploadFile] = File(None),
+    aoi_profile: Optional[str] = Form(None),
     current_user: Dict[str, Any] = Depends(get_current_user),
     analyzer: CircuitAnalyzer = Depends(get_analyzer),
 ) -> Dict[str, Any]:
@@ -169,7 +189,8 @@ def analyze(
     reference_payload: Dict[str, int] = {}
     reference_topology_payload: Dict[str, Any] | None = None
     reference_image_payload: np.ndarray | None = None
-    reference_source = "none"
+    reference_sources: List[str] = []
+    aoi_profile_payload: Dict[str, Any] = {}
 
     reference_counts_text = reference_counts if isinstance(reference_counts, str) else None
     if isinstance(reference_counts_text, str):
@@ -183,20 +204,26 @@ def analyze(
         if reference_topology_text == "":
             reference_topology_text = None
 
+    aoi_profile_text = aoi_profile if isinstance(aoi_profile, str) else None
+    if isinstance(aoi_profile_text, str):
+        aoi_profile_text = aoi_profile_text.strip()
+        if aoi_profile_text == "":
+            aoi_profile_text = None
+
     def _has_upload(file_item: Any) -> bool:
         return isinstance(file_item, StarletteUploadFile) and bool((file_item.filename or "").strip())
 
-    ref_inputs = [
-        ("reference_counts", reference_counts_text is not None),
-        ("reference_file", _has_upload(reference_file)),
-        ("reference_topology", reference_topology_text is not None),
-        ("reference_topology_file", _has_upload(reference_topology_file)),
+    legacy_reference_file = _has_upload(reference_file)
+    structured_inputs = [
+        reference_counts_text is not None,
+        _has_upload(golden_file),
+        reference_topology_text is not None,
+        _has_upload(reference_topology_file),
     ]
-    provided_ref_inputs = [name for name, value in ref_inputs if value]
-    if len(provided_ref_inputs) > 1:
+    if legacy_reference_file and any(structured_inputs):
         raise HTTPException(
             status_code=400,
-            detail="Use only one of reference_counts, reference_file, reference_topology, reference_topology_file",
+            detail="Use reference_file alone, or combine reference_counts, golden_file, and reference_topology separately",
         )
 
     def _parse_counts_payload(raw_counts: Any) -> Dict[str, int]:
@@ -269,14 +296,24 @@ def analyze(
             if tmp_path is not None:
                 os.remove(tmp_path)
 
+    def _parse_golden_file(file_item: UploadFile) -> np.ndarray:
+        reference_bytes = file_item.file.read()
+        if not reference_bytes:
+            raise HTTPException(status_code=400, detail="Golden reference file is empty")
+        try:
+            reference_image = Image.open(io.BytesIO(reference_bytes)).convert("RGB")
+            return np.array(reference_image)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Could not parse golden reference image: {e}")
+
     if reference_counts_text is not None:
         try:
             reference_payload = _parse_counts_payload(json.loads(reference_counts_text))
-            reference_source = "json"
+            reference_sources.append("counts_json")
         except json.JSONDecodeError as e:
             raise HTTPException(status_code=400, detail=f"Invalid reference_counts JSON: {e}")
 
-    elif reference_topology_text is not None:
+    if reference_topology_text is not None:
         try:
             raw_reference_topology = json.loads(reference_topology_text)
             if (
@@ -284,10 +321,10 @@ def analyze(
                 and {"nets", "components"}.issubset(set(raw_reference_topology.keys()))
             ):
                 reference_topology_payload = raw_reference_topology
-                reference_source = "topology_json"
+                reference_sources.append("topology_json")
             else:
                 reference_payload = _parse_counts_payload(raw_reference_topology)
-                reference_source = "topology_json"
+                reference_sources.append("counts_from_topology_json")
         except json.JSONDecodeError:
             tmp_path = None
             try:
@@ -298,26 +335,47 @@ def analyze(
                 if not isinstance(parsed, dict) or not parsed.get("nets"):
                     raise ValueError("Not a KiCad netlist")
                 reference_topology_payload = parsed
-                reference_source = "topology_text"
+                reference_sources.append("topology_text")
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Invalid reference_topology text: {e}")
             finally:
                 if tmp_path is not None:
                     os.remove(tmp_path)
 
-    elif _has_upload(reference_topology_file):
-        reference_payload, reference_topology_payload, reference_image_payload = _parse_reference_file(reference_topology_file)
-        reference_source = "topology_file"
+    if _has_upload(reference_topology_file):
+        parsed_counts, parsed_topology, parsed_image = _parse_reference_file(reference_topology_file)
+        if parsed_topology is not None:
+            reference_topology_payload = parsed_topology
+            reference_sources.append("topology_file")
+        elif parsed_counts:
+            reference_payload = parsed_counts
+            reference_sources.append("counts_from_topology_file")
+        elif parsed_image is not None:
+            reference_image_payload = parsed_image
+            reference_sources.append("golden_from_topology_file")
 
-    elif _has_upload(reference_file):
+    if _has_upload(golden_file):
+        reference_image_payload = _parse_golden_file(golden_file)
+        reference_sources.append("golden_file")
+
+    if legacy_reference_file:
         reference_payload, reference_topology_payload, reference_image_payload = _parse_reference_file(reference_file)
-        reference_source = (
+        reference_sources.append(
             "topology_file"
             if reference_topology_payload is not None
             else "image"
             if reference_image_payload is not None
             else "counts_file"
         )
+
+    if aoi_profile_text is not None:
+        try:
+            raw_profile = json.loads(aoi_profile_text)
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400, detail=f"Invalid aoi_profile JSON: {e}")
+        if not isinstance(raw_profile, dict):
+            raise HTTPException(status_code=400, detail="aoi_profile must be a JSON object")
+        aoi_profile_payload = raw_profile
 
     analyzer_signature = inspect.signature(analyzer.analyze_pcb)
     analyze_kwargs: Dict[str, Any] = {
@@ -330,12 +388,14 @@ def analyze(
         analyze_kwargs["reference_topology"] = reference_topology_payload
     if "reference_image" in analyzer_signature.parameters:
         analyze_kwargs["reference_image"] = reference_image_payload
+    if "aoi_profile" in analyzer_signature.parameters:
+        analyze_kwargs["aoi_profile"] = aoi_profile_payload
 
     try:
         results = analyzer.analyze_pcb(image_np, **analyze_kwargs)
     except TypeError as e:
         # Backward-compatible fallback for older/an alternative analyzer mocks.
-        if "reference_counts" in str(e) or "reference_topology" in str(e):
+        if "reference_counts" in str(e) or "reference_topology" in str(e) or "aoi_profile" in str(e):
             results = analyzer.analyze_pcb(image_np, backend=backend, enable_ocr=enable_ocr)
         else:
             raise
@@ -371,6 +431,12 @@ def analyze(
                     bool((certainty_ledger.get("training_queue") or {}).get("should_capture")),
                 ),
             },
+            "production_aoi": {
+                "disposition": analysis_meta.get("production_aoi_disposition"),
+                "release_authorized": analysis_meta.get("production_aoi_release_authorized", False),
+                "certainty_score": analysis_meta.get("production_aoi_certainty_score"),
+                "certainty_level": analysis_meta.get("production_aoi_certainty_level"),
+            },
             "reference": {
                 "status": analysis_meta.get("reference_aoi_status"),
                 "component_delta": analysis_meta.get("reference_component_delta", 0),
@@ -380,9 +446,10 @@ def analyze(
                 "golden_defect_count": analysis_meta.get("golden_defect_count", 0),
                 "input": {
                     "counts": reference_payload,
-                    "reference_source": reference_source,
+                    "reference_source": "+".join(reference_sources) if reference_sources else "none",
                     "topology": bool(reference_topology_payload),
                     "golden_image": bool(reference_image_payload is not None),
+                    "aoi_profile": bool(aoi_profile_payload),
                 },
             },
         },
@@ -567,6 +634,17 @@ def board_sessions_benchmark(
     }
 
 
+@app.get("/board-sessions/aoi-calibration")
+def board_sessions_aoi_calibration(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    return {
+        "calibration": store.aoi_calibration_report(),
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
 @app.get("/board-sessions/{session_id}")
 def board_sessions_get(
     session_id: str,
@@ -578,6 +656,36 @@ def board_sessions_get(
         raise HTTPException(status_code=404, detail=f"Board session not found: {session_id}")
     return {
         "session": session,
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
+@app.get("/board-sessions/{session_id}/evidence-graph")
+def board_sessions_evidence_graph(
+    session_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    graph = store.evidence_graph(session_id)
+    if "error" in graph:
+        raise HTTPException(status_code=404, detail=graph["error"])
+    return {
+        "graph": graph,
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
+@app.get("/board-sessions/{session_id}/dossier")
+def board_sessions_dossier(
+    session_id: str,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    dossier = store.dossier(session_id)
+    if "error" in dossier:
+        raise HTTPException(status_code=404, detail=dossier["error"])
+    return {
+        "dossier": dossier,
         "metadata": {"user_id": current_user.get("user_id")},
     }
 
@@ -719,6 +827,65 @@ def salvage_build_package(
     return {
         "build_package": report.get("build_package", {}),
         "decision": report.get("decision", {}),
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
+@app.post("/salvage/splice-plan")
+def salvage_splice_plan(
+    payload: Dict[str, Any],
+    commit_session: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    plan = planner.plan(payload)
+    session = None
+    if commit_session:
+        session_payload = plan.get("session_payload") if isinstance(plan.get("session_payload"), dict) else {}
+        session = store.create_session(
+            session_payload,
+            user_id=str(current_user.get("user_id") or "anonymous"),
+            commit=True,
+        )
+    return {
+        "splice_plan": plan,
+        "session": session,
+        "metadata": {"user_id": current_user.get("user_id"), "committed_session": bool(session)},
+    }
+
+
+@app.post("/salvage/splice-case")
+def salvage_splice_case(
+    payload: Dict[str, Any],
+    commit: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    plan = planner.plan(payload)
+    session_payload = plan.get("session_payload") if isinstance(plan.get("session_payload"), dict) else {}
+    session = store.create_session(
+        session_payload,
+        user_id=str(current_user.get("user_id") or "anonymous"),
+        commit=commit,
+    )
+    return {
+        "splice_plan": plan,
+        "session": session,
+        "metadata": {"user_id": current_user.get("user_id"), "committed": commit},
+    }
+
+
+@app.post("/salvage/portfolio-plan")
+def salvage_portfolio_plan(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    planner: SalvagePortfolioPlanner = Depends(get_salvage_portfolio_planner),
+) -> Dict[str, Any]:
+    plan = planner.plan(payload)
+    return {
+        "portfolio_plan": plan,
         "metadata": {"user_id": current_user.get("user_id")},
     }
 

@@ -32,10 +32,17 @@ export async function POST(request: Request) {
   const outbound = new FormData();
   outbound.set("file", file, file.name);
 
-  for (const field of ["backend", "enable_ocr", "enable_quality_assessment"]) {
+  for (const field of ["backend", "enable_ocr", "enable_quality_assessment", "reference_counts", "reference_topology", "aoi_profile"]) {
     const value = inbound.get(field);
     if (typeof value === "string" && value.trim()) {
       outbound.set(field, value);
+    }
+  }
+
+  for (const field of ["golden_file", "reference_topology_file"]) {
+    const value = inbound.get(field);
+    if (isFileLike(value)) {
+      outbound.set(field, value, value.name);
     }
   }
 

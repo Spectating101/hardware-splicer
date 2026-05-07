@@ -1,6 +1,7 @@
 import json
 
 from src.intelligence.board_session_store import BoardSessionStore
+from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
 
 
 def _analysis_payload():
@@ -114,3 +115,65 @@ def test_board_session_benchmark_reports_launch_gates(tmp_path):
     assert report["summary"]["launch_readiness_score"] > 0
     assert report["competitive_scorecard"]
     assert "collect 50 real board-in-hand sessions" in report["next_actions"][0]
+
+
+def test_board_session_store_exports_reuse_splice_case(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    plan = SalvageSplicePlanner().plan(
+        {
+            "title": "USB fan salvage",
+            "goal": "reuse as fume extractor",
+            "available_parts": ["5V USB cable", "small DC motor and fan blade", "switch", "wire connector", "plastic case"],
+        }
+    )
+
+    session = store.create_session(plan["session_payload"], user_id="operator-1")
+
+    assert session["route"] == "salvage"
+    assert session["salvage_splice_plan"]["target"]["recommended_build_id"] in {"usb_fume_extractor", "low_voltage_motor_test_jig"}
+    assert any(task["source"].startswith("salvage_splice") for task in session["evidence_tasks"])
+    assert any(task["type"] == "measurement" for task in session["evidence_tasks"])
+    assert any(task["type"] == "capture" for task in session["evidence_tasks"])
+
+    export = store.export_training_package(session["session_id"], tmp_path / "reuse_export")
+
+    assert export["training_export"]["counts"]["reuse_cases"] == 1
+    assert export["package"]["examples"]["reuse_cases"][0]["target_build_id"] in {"usb_fume_extractor", "low_voltage_motor_test_jig"}
+    assert (tmp_path / "reuse_export" / "reuse_cases.jsonl").exists()
+    json.dumps(export["package"])
+
+
+def test_board_session_store_exports_production_aoi_case(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    analysis = {
+        **_analysis_payload(),
+        "production_aoi": {
+            "mode": "production_aoi_certainty_gate",
+            "disposition": "hold_for_reference",
+            "release_authorized": False,
+            "certainty_score": 0.52,
+            "certainty_level": "not_production_ready",
+            "blockers": ["golden_visual_reference: golden image not supplied"],
+            "critical_findings": [],
+            "required_evidence": ["capture known-good golden board under the same fixture and lighting"],
+            "operator_checklist": ["capture known-good golden board under the same fixture and lighting"],
+            "gates": [
+                {"gate_id": "golden_visual_reference", "status": "missing", "score": 0.0},
+            ],
+            "audit_packet": {"reference_statuses": {"component": "unavailable", "golden": "unavailable"}},
+        },
+    }
+
+    session = store.create_session(
+        {"description": "AOI board", "route": "aoi", "analysis": analysis},
+        user_id="operator-1",
+    )
+
+    assert any(task["source"].startswith("production_aoi") for task in session["evidence_tasks"])
+
+    export = store.export_training_package(session["session_id"], tmp_path / "aoi_export")
+
+    assert export["training_export"]["counts"]["aoi_cases"] == 1
+    assert export["package"]["examples"]["aoi_cases"][0]["disposition"] == "hold_for_reference"
+    assert (tmp_path / "aoi_export" / "aoi_cases.jsonl").exists()
+    json.dumps(export["package"])

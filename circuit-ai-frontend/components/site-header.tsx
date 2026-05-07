@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, Camera, CircuitBoard, ClipboardList, Menu, ShieldCheck, Sparkles, Wrench, X, Zap } from "lucide-react";
+import { Boxes, Camera, CircuitBoard, ClipboardList, Menu, Recycle, ShieldCheck, Sparkles, Wrench, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const primaryNav = [
   { href: "/start", label: "Start", icon: Sparkles },
   { href: "/cases", label: "Cases", icon: ClipboardList },
+  { href: "/reuse", label: "Reuse", icon: Recycle },
+  { href: "/portfolio", label: "Portfolio", icon: Boxes },
   { href: "/scan", label: "Scan", icon: Camera },
   { href: "/repair", label: "Repair", icon: ShieldCheck },
   { href: "/build", label: "Build", icon: Wrench },

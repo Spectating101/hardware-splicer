@@ -1,0 +1,506 @@
+[
+  {
+    "case_id": "usb_fan",
+    "category": "low_voltage_air_mover",
+    "title": "USB fan with broken switch",
+    "goal": "reuse as fume extractor or bench cooling fan",
+    "available_parts": [
+      "5V USB cable",
+      "small DC motor and fan blade",
+      "on/off switch",
+      "wire harness connector",
+      "plastic enclosure"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "usb_fume_extractor",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "pc_fan",
+    "category": "low_voltage_air_mover",
+    "title": "old PC fan and adapter",
+    "goal": "reuse as bench cooling fan",
+    "available_parts": [
+      "12V PC fan",
+      "3 pin connector",
+      "fan grill",
+      "old 12V adapter"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "usb_fume_extractor",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "toy_rc_car",
+    "category": "motors_mechanics",
+    "title": "broken RC toy car",
+    "goal": "reuse motors and gearbox for a small robot",
+    "available_parts": [
+      "DC motors",
+      "gearbox",
+      "wheels",
+      "battery holder",
+      "switch",
+      "wire harness"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "robot_drive_base",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "inkjet_printer_motion",
+    "category": "motors_mechanics",
+    "title": "dead inkjet printer",
+    "goal": "reuse printer parts for CNC or plotter motion test jig",
+    "available_parts": [
+      "stepper motors",
+      "limit switches",
+      "optical sensor",
+      "24V power supply",
+      "belts and rails",
+      "wire harness connectors"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "plotter_motion_stage",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "flatbed_scanner",
+    "category": "motors_sensors_lighting",
+    "title": "flatbed scanner",
+    "goal": "reuse light bar, stepper, and rails for an inspection fixture",
+    "available_parts": [
+      "stepper motor",
+      "LED light bar",
+      "linear rail",
+      "optical sensor",
+      "12V adapter",
+      "limit switch"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "inspection_motion_fixture",
+      "plotter_motion_stage",
+      "camera_ir_light_or_sensor_mount",
+      "indicator_or_task_light"
+    ]
+  },
+  {
+    "case_id": "document_camera_slider",
+    "category": "inspection_fixture",
+    "title": "scrap scanner rail with webcam",
+    "goal": "build a repeatable document inspection camera slider",
+    "available_parts": [
+      "linear rail",
+      "stepper motor",
+      "limit switch",
+      "USB webcam camera module",
+      "LED light strip",
+      "12V adapter",
+      "wire harness"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "inspection_motion_fixture",
+      "camera_ir_light_or_sensor_mount",
+      "plotter_motion_stage"
+    ]
+  },
+  {
+    "case_id": "dvd_drive_motion",
+    "category": "small_motion_stage",
+    "title": "old DVD drive tray and sled",
+    "goal": "reuse the tray motor and sled as a small positioning stage",
+    "available_parts": [
+      "DC tray motor",
+      "linear sled rail",
+      "limit switch",
+      "5V connector",
+      "plastic frame"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "plotter_motion_stage",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "laser_printer_mains",
+    "category": "mains_laser_printer",
+    "title": "laser printer fuser and motor assembly",
+    "goal": "reuse motors and rollers",
+    "available_parts": [
+      "mains laser printer",
+      "fuser heater",
+      "high voltage corona board",
+      "DC motor",
+      "rollers",
+      "optical sensors"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "wifi_router",
+    "category": "network_modules",
+    "title": "old WiFi router",
+    "goal": "reuse router parts for network or status gadget",
+    "available_parts": [
+      "12V power adapter",
+      "WiFi antennas",
+      "LED indicators",
+      "Ethernet connectors",
+      "plastic case"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "network_status_indicator",
+      "bench_power_adapter"
+    ]
+  },
+  {
+    "case_id": "bluetooth_speaker",
+    "category": "audio_modules",
+    "title": "broken Bluetooth speaker",
+    "goal": "reuse speaker and amplifier as a small amp box",
+    "available_parts": [
+      "speaker driver",
+      "amplifier board",
+      "USB charging board",
+      "buttons",
+      "battery pack",
+      "enclosure"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "small_audio_amp_box"
+    ]
+  },
+  {
+    "case_id": "car_radio_speaker",
+    "category": "audio_modules",
+    "title": "old car speaker and 12V amp board",
+    "goal": "reuse as a bench audio monitor",
+    "available_parts": [
+      "speaker",
+      "12V amplifier board",
+      "volume knob",
+      "power connector",
+      "metal enclosure"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "small_audio_amp_box"
+    ]
+  },
+  {
+    "case_id": "led_desk_lamp",
+    "category": "lighting",
+    "title": "broken USB LED desk lamp",
+    "goal": "reuse as small task light",
+    "available_parts": [
+      "LED board",
+      "5V USB cable",
+      "switch",
+      "gooseneck enclosure"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "indicator_or_task_light"
+    ]
+  },
+  {
+    "case_id": "led_strip_controller",
+    "category": "lighting_control",
+    "title": "LED strip controller",
+    "goal": "reuse MOSFET board as low voltage light controller",
+    "available_parts": [
+      "12V adapter",
+      "MOSFET driver board",
+      "IR remote",
+      "LED strip scraps",
+      "wire connectors",
+      "plastic case"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "smart_relay_box",
+      "indicator_or_task_light",
+      "network_status_indicator"
+    ]
+  },
+  {
+    "case_id": "power_bank_normal",
+    "category": "battery_power",
+    "title": "normal power bank board",
+    "goal": "reuse USB boost/charging board as protected power breakout",
+    "available_parts": [
+      "USB boost charging board",
+      "18650 battery pack",
+      "case",
+      "USB connector"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "bench_power_adapter"
+    ]
+  },
+  {
+    "case_id": "electric_toothbrush",
+    "category": "battery_motor_gadget",
+    "title": "dead electric toothbrush",
+    "goal": "reuse motor, switch, and charging coil if safe",
+    "available_parts": [
+      "small vibration motor",
+      "battery pack",
+      "charging coil",
+      "switch button",
+      "plastic waterproof case"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "low_voltage_motor_test_jig",
+      "bench_power_adapter"
+    ]
+  },
+  {
+    "case_id": "game_controller",
+    "category": "input_devices",
+    "title": "broken game controller",
+    "goal": "reuse buttons and joysticks as control panel",
+    "available_parts": [
+      "USB cable",
+      "button board",
+      "joystick modules",
+      "vibration motors",
+      "plastic shell"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "salvaged_input_panel",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "keyboard",
+    "category": "input_devices",
+    "title": "old USB keyboard",
+    "goal": "reuse keys as macro pad or input panel",
+    "available_parts": [
+      "USB cable",
+      "keyboard matrix",
+      "keys",
+      "controller board",
+      "plastic case"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "salvaged_input_panel"
+    ]
+  },
+  {
+    "case_id": "mouse",
+    "category": "input_devices",
+    "title": "old optical mouse",
+    "goal": "reuse mouse sensor and buttons",
+    "available_parts": [
+      "USB cable",
+      "optical sensor",
+      "buttons",
+      "scroll wheel",
+      "plastic case"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "salvaged_input_panel",
+      "camera_ir_light_or_sensor_mount"
+    ]
+  },
+  {
+    "case_id": "security_camera",
+    "category": "camera_sensor",
+    "title": "dead WiFi security camera",
+    "goal": "reuse camera LEDs and enclosure as inspection fixture",
+    "available_parts": [
+      "WiFi camera board",
+      "IR LED board",
+      "5V USB cable",
+      "speaker",
+      "plastic enclosure"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "camera_ir_light_or_sensor_mount",
+      "network_status_indicator"
+    ]
+  },
+  {
+    "case_id": "hard_drive",
+    "category": "motors_mechanics",
+    "title": "old hard drive",
+    "goal": "reuse hard drive motor, magnets, and connector",
+    "available_parts": [
+      "spindle motor",
+      "voice coil magnets",
+      "SATA connector",
+      "aluminum enclosure",
+      "12V 5V power connector"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "low_voltage_motor_test_jig",
+      "bench_power_adapter"
+    ]
+  },
+  {
+    "case_id": "laptop_parts",
+    "category": "mixed_modules",
+    "title": "scrap laptop parts",
+    "goal": "reuse low-voltage peripherals only",
+    "available_parts": [
+      "USB webcam camera module",
+      "speaker pair",
+      "WiFi antenna",
+      "keyboard",
+      "cooling fan",
+      "plastic frame"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "camera_ir_light_or_sensor_mount",
+      "small_audio_amp_box",
+      "salvaged_input_panel",
+      "usb_fume_extractor"
+    ]
+  },
+  {
+    "case_id": "phone_parts",
+    "category": "mixed_modules",
+    "title": "scrap smartphone parts",
+    "goal": "reuse camera, vibration motor, speaker, and enclosure if practical",
+    "available_parts": [
+      "camera module",
+      "vibration motor",
+      "speaker",
+      "battery pack",
+      "screen",
+      "USB connector"
+    ],
+    "expected": "reuse",
+    "expected_build_ids": [
+      "camera_ir_light_or_sensor_mount",
+      "small_audio_amp_box",
+      "low_voltage_motor_test_jig"
+    ]
+  },
+  {
+    "case_id": "power_bank_swollen",
+    "category": "battery_hazard",
+    "title": "swollen lithium power bank",
+    "goal": "reuse cells",
+    "available_parts": [
+      "swollen lithium battery pack",
+      "USB charging board",
+      "plastic case"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "coffee_maker_mains",
+    "category": "mains_appliance",
+    "title": "mains AC coffee maker",
+    "goal": "reuse pump or heater parts",
+    "available_parts": [
+      "mains AC coffee maker",
+      "heater plate",
+      "thermal fuse",
+      "pump",
+      "switches"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "microwave_hv",
+    "category": "high_voltage_appliance",
+    "title": "microwave oven",
+    "goal": "reuse turntable motor",
+    "available_parts": [
+      "microwave oven",
+      "high voltage capacitor",
+      "magnetron",
+      "turntable motor",
+      "mains transformer"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "smart_bulb_mains",
+    "category": "mains_lighting",
+    "title": "mains smart bulb",
+    "goal": "reuse LED board",
+    "available_parts": [
+      "mains smart bulb",
+      "LED board",
+      "WiFi controller",
+      "AC line driver"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "pc_power_supply",
+    "category": "mains_power",
+    "title": "desktop ATX PC power supply",
+    "goal": "reuse as bench power supply",
+    "available_parts": [
+      "mains ATX power supply",
+      "AC line input",
+      "large capacitors",
+      "12V rails",
+      "fan",
+      "wiring harness"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "ebike_battery",
+    "category": "high_energy_battery",
+    "title": "e-bike battery pack",
+    "goal": "reuse pack for a machine",
+    "available_parts": [
+      "high voltage e-bike battery pack",
+      "BMS board",
+      "charger connector",
+      "case"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  },
+  {
+    "case_id": "crt_tv",
+    "category": "high_voltage_display",
+    "title": "CRT television",
+    "goal": "reuse speaker or enclosure",
+    "available_parts": [
+      "CRT tube",
+      "high voltage flyback",
+      "mains power board",
+      "speaker",
+      "plastic case"
+    ],
+    "expected": "safety",
+    "expected_build_ids": []
+  }
+]

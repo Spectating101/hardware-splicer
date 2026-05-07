@@ -92,3 +92,69 @@ def test_analyze_accepts_reference_topology_file():
     assert calls["reference_topology"]["components"]["R1"]["value"] == "10k"
     assert response["metadata"]["reference"]["input"]["topology"] is True
     assert response["metadata"]["reference"]["input"]["reference_source"] == "topology_file"
+
+
+def test_analyze_accepts_combined_production_aoi_references():
+    calls: Dict[str, Any] = {}
+
+    def fake_analyze_pcb(
+        image_np,
+        backend=None,
+        enable_ocr=None,
+        reference_counts=None,
+        reference_topology=None,
+        reference_image=None,
+        aoi_profile=None,
+    ):
+        calls["reference_counts"] = reference_counts
+        calls["reference_topology"] = reference_topology
+        calls["reference_image_shape"] = getattr(reference_image, "shape", None)
+        calls["aoi_profile"] = aoi_profile
+        result = _fake_analysis_result()
+        result["golden_aoi"] = {"status": "PASS", "defect_count": 0}
+        result["production_aoi"] = {
+            "disposition": "release",
+            "release_authorized": True,
+            "certainty_score": 0.91,
+            "certainty_level": "production_certified",
+        }
+        result["analysis_metadata"].update(
+            {
+                "golden_aoi_status": "PASS",
+                "golden_defect_count": 0,
+                "production_aoi_disposition": "release",
+                "production_aoi_release_authorized": True,
+                "production_aoi_certainty_score": 0.91,
+                "production_aoi_certainty_level": "production_certified",
+            }
+        )
+        return result
+
+    golden_buf = io.BytesIO()
+    Image.new("RGB", (32, 32), color="green").save(golden_buf, format="PNG")
+    golden_buf.seek(0)
+
+    fake_analyzer = types.SimpleNamespace(
+        analyze_pcb=fake_analyze_pcb,
+        get_analysis_summary=lambda results: {"total_components": 0},
+    )
+
+    response = main_module.analyze(
+        file=_blank_file(),
+        backend="hybrid",
+        enable_ocr=False,
+        reference_counts='{"resistor": 2, "capacitor": 1}',
+        reference_topology='{"nets":{"NET_1":{"nodes":[{"ref":"R1","pin":"1"},{"ref":"R2","pin":"2"}]}}, "components":{"R1":{"value":"10k"},"R2":{"value":"10k"}}}',
+        golden_file=UploadFile(filename="golden.png", file=golden_buf),
+        aoi_profile='{"fixture_id":"fixture-1","calibration_id":"cal-1","station_id":"station-1"}',
+        current_user={"user_id": "user-1"},
+        analyzer=fake_analyzer,
+    )
+
+    assert calls["reference_counts"] == {"resistor": 2, "capacitor": 1}
+    assert calls["reference_topology"]["components"]["R1"]["value"] == "10k"
+    assert tuple(calls["reference_image_shape"]) == (32, 32, 3)
+    assert calls["aoi_profile"]["fixture_id"] == "fixture-1"
+    assert response["metadata"]["reference"]["input"]["golden_image"] is True
+    assert response["metadata"]["reference"]["input"]["aoi_profile"] is True
+    assert response["metadata"]["production_aoi"]["release_authorized"] is True

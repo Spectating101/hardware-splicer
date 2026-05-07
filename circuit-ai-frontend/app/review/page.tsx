@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import {
   AlertTriangle,
@@ -86,9 +87,59 @@ type BenchmarkReport = {
   }>;
 };
 
+type AOICalibrationReport = {
+  summary?: {
+    candidate_case_count?: number;
+    labeled_case_count?: number;
+    false_accept_count?: number;
+    false_reject_count?: number;
+    false_accept_rate?: number;
+    false_reject_rate?: number;
+    release_precision?: number;
+    release_recall?: number;
+    readiness?: string;
+  };
+  next_actions?: string[];
+  recommended_profile_patch?: {
+    min_release_score?: number;
+    min_sampling_score?: number;
+    review_notes?: string[];
+  };
+  gate_report?: {
+    recurring_blockers?: Array<{ item?: string; count?: number }>;
+  };
+};
+
+type EvidenceClaim = {
+  claim_id?: string;
+  claim?: string;
+  score?: number;
+  certainty?: string;
+  grounding_status?: string;
+  supporting_evidence?: string[];
+  missing_evidence?: string[];
+  usable_for?: string[];
+};
+
+type EvidenceGraph = {
+  summary?: {
+    node_count?: number;
+    edge_count?: number;
+    claim_count?: number;
+    grounded_claim_count?: number;
+    weak_claim_count?: number;
+    source_count?: number;
+  };
+  grounded_claims?: EvidenceClaim[];
+  weak_claims?: EvidenceClaim[];
+  next_grounding_actions?: string[];
+};
+
 type SessionsResponse = { sessions?: SessionPreview[] };
 type QueueResponse = { tasks?: ReviewTask[] };
 type BenchmarkResponse = { benchmark?: BenchmarkReport };
+type AOICalibrationResponse = { calibration?: AOICalibrationReport };
+type EvidenceGraphResponse = { graph?: EvidenceGraph };
 
 function percent(value: number | undefined) {
   if (typeof value !== 'number' || Number.isNaN(value)) return 'N/A';
@@ -117,6 +168,9 @@ export default function ReviewPage() {
   const [sessions, setSessions] = useState<SessionPreview[]>([]);
   const [tasks, setTasks] = useState<ReviewTask[]>([]);
   const [benchmark, setBenchmark] = useState<BenchmarkReport | null>(null);
+  const [aoiCalibration, setAoiCalibration] = useState<AOICalibrationReport | null>(null);
+  const [evidenceGraph, setEvidenceGraph] = useState<EvidenceGraph | null>(null);
+  const [graphLoading, setGraphLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -128,6 +182,7 @@ export default function ReviewPage() {
   const [measurementValue, setMeasurementValue] = useState('');
   const [measurementUnit, setMeasurementUnit] = useState('');
   const [outcomeDecision, setOutcomeDecision] = useState('repaired');
+  const [aoiActualStatus, setAoiActualStatus] = useState('');
   const [outcomeValue, setOutcomeValue] = useState('');
   const [outcomeMinutes, setOutcomeMinutes] = useState('');
   const [closeOutcome, setCloseOutcome] = useState(false);
@@ -136,17 +191,20 @@ export default function ReviewPage() {
     setLoading(true);
     setError(null);
     try {
-      const [sessionResponse, queueResponse, benchmarkResponse] = await Promise.all([
+      const [sessionResponse, queueResponse, benchmarkResponse, aoiCalibrationResponse] = await Promise.all([
         fetch('/api/proxy/board-sessions?limit=30', { cache: 'no-store' }),
         fetch('/api/proxy/board-sessions/review-queue?limit=80', { cache: 'no-store' }),
         fetch('/api/proxy/board-sessions/benchmark', { cache: 'no-store' }),
+        fetch('/api/proxy/board-sessions/aoi-calibration', { cache: 'no-store' }),
       ]);
       const sessionPayload = await readUiJson<SessionsResponse>(sessionResponse, 'Could not load board sessions.');
       const queuePayload = await readUiJson<QueueResponse>(queueResponse, 'Could not load review queue.');
       const benchmarkPayload = await readUiJson<BenchmarkResponse>(benchmarkResponse, 'Could not load benchmark.');
+      const aoiPayload = await readUiJson<AOICalibrationResponse>(aoiCalibrationResponse, 'Could not load AOI calibration.');
       setSessions(sessionPayload.sessions ?? []);
       setTasks(queuePayload.tasks ?? []);
       setBenchmark(benchmarkPayload.benchmark ?? null);
+      setAoiCalibration(aoiPayload.calibration ?? null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Review queue failed.');
     } finally {
@@ -163,6 +221,29 @@ export default function ReviewPage() {
       setSelectedSessionId(sessions[0].session_id);
     }
   }, [selectedSessionId, sessions]);
+
+  useEffect(() => {
+    if (!selectedSessionId) {
+      setEvidenceGraph(null);
+      return;
+    }
+    let cancelled = false;
+    setGraphLoading(true);
+    fetch(`/api/proxy/board-sessions/${encodeURIComponent(selectedSessionId)}/evidence-graph`, { cache: 'no-store' })
+      .then((response) => readUiJson<EvidenceGraphResponse>(response, 'Could not load evidence graph.'))
+      .then((payload) => {
+        if (!cancelled) setEvidenceGraph(payload.graph ?? null);
+      })
+      .catch((caught) => {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Could not load evidence graph.');
+      })
+      .finally(() => {
+        if (!cancelled) setGraphLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedSessionId, sessions.length, tasks.length]);
 
   const grouped = useMemo(() => {
     const bySession = new Map<string, ReviewTask[]>();
@@ -279,6 +360,7 @@ export default function ReviewPage() {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           decision: outcomeDecision,
+          ...(aoiActualStatus ? { aoi_actual_status: aoiActualStatus } : {}),
           value_recovered_usd: Number(outcomeValue || 0),
           time_saved_minutes: Number(outcomeMinutes || 0),
           close: closeOutcome,
@@ -287,6 +369,7 @@ export default function ReviewPage() {
       await readUiJson(response, 'Could not record outcome.');
       event.currentTarget.reset();
       setOutcomeDecision('repaired');
+      setAoiActualStatus('');
       setOutcomeValue('');
       setOutcomeMinutes('');
       setCloseOutcome(false);
@@ -296,7 +379,7 @@ export default function ReviewPage() {
     } finally {
       setActioning(null);
     }
-  }, [closeOutcome, load, outcomeDecision, outcomeMinutes, outcomeValue, selectedSessionId]);
+  }, [aoiActualStatus, closeOutcome, load, outcomeDecision, outcomeMinutes, outcomeValue, selectedSessionId]);
 
   const summary = benchmark?.summary ?? {};
   const metrics: Array<{ label: string; value: string | number; icon: LucideIcon }> = [
@@ -323,6 +406,7 @@ export default function ReviewPage() {
                 <Badge variant="default">review</Badge>
                 <Badge variant="default">training export</Badge>
                 <Badge variant="default">launch benchmark</Badge>
+                <Badge variant="default">AOI calibration</Badge>
               </div>
               <h1 className="text-3xl font-semibold text-white">Board session review</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
@@ -375,15 +459,27 @@ export default function ReviewPage() {
                       <div className="text-sm font-semibold text-white">{sessionTasks[0]?.session_title || sessionId}</div>
                       <div className="mt-1 text-xs text-slate-500">{sessionTasks.length} open task(s) · {sessionTasks[0]?.route ?? 'intake'}</div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => void exportTraining(sessionId)}
-                      disabled={actioning === `export:${sessionId}`}
-                      className="rounded-lg border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
-                    >
-                      {actioning === `export:${sessionId}` ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                      Export
-                    </Button>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        asChild
+                        size="sm"
+                        className="rounded-lg border border-cyan-300/20 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15"
+                      >
+                        <Link href={`/dossier/${encodeURIComponent(sessionId)}`}>
+                          <ClipboardList className="mr-2 h-4 w-4" />
+                          Dossier
+                        </Link>
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => void exportTraining(sessionId)}
+                        disabled={actioning === `export:${sessionId}`}
+                        className="rounded-lg border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                      >
+                        {actioning === `export:${sessionId}` ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                        Export
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     {sessionTasks.map((task) => (
@@ -434,6 +530,67 @@ export default function ReviewPage() {
           </section>
 
           <aside className="space-y-4">
+            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <Target className="h-4 w-4" />
+                Evidence graph
+              </div>
+              {graphLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <LoaderCircle className="h-4 w-4 animate-spin text-cyan-200" />
+                  Loading graph...
+                </div>
+              ) : evidenceGraph ? (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Sources</div>
+                      <div className="mt-1 text-lg font-semibold text-white">{evidenceGraph.summary?.source_count ?? 0}</div>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Claims</div>
+                      <div className="mt-1 text-lg font-semibold text-white">{evidenceGraph.summary?.claim_count ?? 0}</div>
+                    </div>
+                    <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Weak</div>
+                      <div className="mt-1 text-lg font-semibold text-white">{evidenceGraph.summary?.weak_claim_count ?? 0}</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/80">Grounded</div>
+                      <div className="space-y-1.5">
+                        {(evidenceGraph.grounded_claims ?? []).slice(0, 3).map((claim) => (
+                          <p key={claim.claim_id ?? claim.claim} className="text-xs leading-5 text-slate-300">
+                            {claim.claim}
+                          </p>
+                        ))}
+                        {!evidenceGraph.grounded_claims?.length && <p className="text-xs text-slate-500">No strongly grounded claims yet.</p>}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-200/80">Needs grounding</div>
+                      <div className="space-y-1.5">
+                        {(evidenceGraph.weak_claims ?? []).slice(0, 3).map((claim) => (
+                          <p key={claim.claim_id ?? claim.claim} className="text-xs leading-5 text-slate-400">
+                            {claim.claim}
+                          </p>
+                        ))}
+                        {!evidenceGraph.weak_claims?.length && <p className="text-xs text-slate-500">No weak claims flagged.</p>}
+                      </div>
+                    </div>
+                  </div>
+                  {(evidenceGraph.next_grounding_actions ?? []).length ? (
+                    <div className="mt-4 rounded-md border border-cyan-300/20 bg-cyan-300/10 p-3 text-xs leading-5 text-cyan-50/90">
+                      {evidenceGraph.next_grounding_actions?.[0]}
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <p className="text-sm text-slate-500">Select a session to inspect grounded claims.</p>
+              )}
+            </section>
+
             <section className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
               <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 <Camera className="h-4 w-4" />
@@ -551,6 +708,17 @@ export default function ReviewPage() {
                   <option value="not_economic">Not economic</option>
                   <option value="unsafe">Unsafe</option>
                 </select>
+                <select
+                  value={aoiActualStatus}
+                  onChange={(event) => setAoiActualStatus(event.target.value)}
+                  className="h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-cyan-300/60"
+                >
+                  <option value="">AOI actual status</option>
+                  <option value="pass">Pass / conforming</option>
+                  <option value="rework">Rework needed</option>
+                  <option value="scrap">Scrap / not conforming</option>
+                  <option value="field_return">Escape / field return</option>
+                </select>
                 <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
                   <input
                     value={outcomeValue}
@@ -585,6 +753,41 @@ export default function ReviewPage() {
                   Close session
                 </label>
               </form>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+              <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <ShieldCheck className="h-4 w-4" />
+                AOI calibration
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Labeled</div>
+                  <div className="mt-1 text-lg font-semibold text-white">{aoiCalibration?.summary?.labeled_case_count ?? 0}</div>
+                </div>
+                <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">False accepts</div>
+                  <div className="mt-1 text-lg font-semibold text-white">{aoiCalibration?.summary?.false_accept_count ?? 0}</div>
+                </div>
+                <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Precision</div>
+                  <div className="mt-1 text-lg font-semibold text-white">{percent(aoiCalibration?.summary?.release_precision)}</div>
+                </div>
+                <div className="rounded-md border border-white/10 bg-black/20 p-3">
+                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">Readiness</div>
+                  <div className="mt-1 text-sm font-semibold text-white">{aoiCalibration?.summary?.readiness?.replace(/_/g, ' ') ?? 'not measured'}</div>
+                </div>
+              </div>
+              <div className="mt-3 space-y-2">
+                {(aoiCalibration?.next_actions ?? []).slice(0, 3).map((item) => (
+                  <p key={item} className="text-xs leading-5 text-slate-400">{item}</p>
+                ))}
+              </div>
+              {aoiCalibration?.recommended_profile_patch?.review_notes?.length ? (
+                <div className="mt-3 rounded-md border border-amber-300/20 bg-amber-300/10 p-3 text-xs leading-5 text-amber-100">
+                  {aoiCalibration.recommended_profile_patch.review_notes[0]}
+                </div>
+              ) : null}
             </section>
 
             <section className="rounded-lg border border-white/10 bg-white/[0.02] p-4">

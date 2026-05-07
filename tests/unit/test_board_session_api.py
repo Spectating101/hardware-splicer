@@ -16,6 +16,24 @@ def _analysis():
     }
 
 
+def _aoi_analysis():
+    analysis = _analysis()
+    analysis["production_aoi"] = {
+        "mode": "production_aoi_certainty_gate",
+        "disposition": "release",
+        "release_authorized": True,
+        "certainty_score": 0.92,
+        "certainty_level": "production_release",
+        "blockers": [],
+        "gates": [
+            {"gate_id": "capture_quality", "status": "pass", "score": 0.9},
+            {"gate_id": "component_reference", "status": "pass", "score": 1.0},
+            {"gate_id": "golden_visual_reference", "status": "pass", "score": 1.0},
+        ],
+    }
+    return analysis
+
+
 def test_board_session_api_create_review_export_and_benchmark(tmp_path):
     store = BoardSessionStore(tmp_path / "sessions.json")
     user = {"user_id": "user-1"}
@@ -77,3 +95,63 @@ def test_board_session_api_create_review_export_and_benchmark(tmp_path):
 
     benchmark = main_module.board_sessions_benchmark(current_user=user, store=store)
     assert benchmark["benchmark"]["summary"]["session_count"] == 1
+
+
+def test_board_session_api_aoi_calibration_report(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    user = {"user_id": "user-1"}
+    created = main_module.board_sessions_create(
+        {"description": "AOI production board", "analysis": _aoi_analysis(), "route": "aoi"},
+        current_user=user,
+        store=store,
+    )
+
+    main_module.board_sessions_record_outcome(
+        created["session"]["session_id"],
+        {"decision": "released", "aoi_actual_status": "field_return"},
+        current_user=user,
+        store=store,
+    )
+
+    calibration = main_module.board_sessions_aoi_calibration(current_user=user, store=store)
+
+    assert calibration["calibration"]["summary"]["false_accept_count"] == 1
+    assert calibration["calibration"]["summary"]["readiness"] == "unsafe_to_relax_release"
+
+
+def test_board_session_api_evidence_graph(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    user = {"user_id": "user-1"}
+    created = main_module.board_sessions_create(
+        {"description": "AOI production board", "analysis": _aoi_analysis(), "route": "aoi"},
+        current_user=user,
+        store=store,
+    )
+
+    graph = main_module.board_sessions_evidence_graph(
+        created["session"]["session_id"],
+        current_user=user,
+        store=store,
+    )
+
+    assert graph["graph"]["mode"] == "board_evidence_graph"
+    assert graph["graph"]["summary"]["claim_count"] >= 1
+
+
+def test_board_session_api_dossier(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    user = {"user_id": "user-1"}
+    created = main_module.board_sessions_create(
+        {"description": "AOI production board", "analysis": _aoi_analysis(), "route": "aoi"},
+        current_user=user,
+        store=store,
+    )
+
+    dossier = main_module.board_sessions_dossier(
+        created["session"]["session_id"],
+        current_user=user,
+        store=store,
+    )
+
+    assert dossier["dossier"]["mode"] == "board_dossier"
+    assert dossier["dossier"]["session_id"] == created["session"]["session_id"]

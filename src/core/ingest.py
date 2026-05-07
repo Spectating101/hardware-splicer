@@ -13,6 +13,7 @@ from src.intelligence.marking_resolver import MarkingResolver
 from src.intelligence.connection_mapper import ConnectionMapper
 from src.intelligence.salvage_opportunity_engine import SalvageOpportunityEngine
 from src.intelligence.certainty_ledger import CertaintyLedgerBuilder
+from src.intelligence.production_aoi_certainty import ProductionAOICertaintyGate
 from src.vision.image_polisher import polish_for_opencv
 from src.vision.golden_reference import GoldenReferenceInspector
 
@@ -34,6 +35,7 @@ class CircuitAnalyzer:
         self.connection_mapper = ConnectionMapper()
         self.salvage_engine = SalvageOpportunityEngine()
         self.certainty_builder = CertaintyLedgerBuilder()
+        self.production_aoi_gate = ProductionAOICertaintyGate()
         logger.info("CircuitAnalyzer initialized")
     
     def analyze_pcb(
@@ -44,6 +46,7 @@ class CircuitAnalyzer:
         reference_counts: Dict[str, int] | None = None,
         reference_topology: Dict[str, Any] | None = None,
         reference_image: np.ndarray | None = None,
+        aoi_profile: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Complete PCB analysis pipeline."""
         try:
@@ -141,6 +144,18 @@ class CircuitAnalyzer:
                 salvage_opportunities=salvage_opportunities,
                 scan_quality=scan_quality,
             )
+
+            production_aoi = self.production_aoi_gate.evaluate(
+                detection_summary=detection_summary,
+                visual_topology=visual_topology,
+                defect_inspection=defect_inspection,
+                reference_aoi=reference_aoi,
+                topology_aoi=topology_aoi,
+                golden_aoi=golden_aoi,
+                aoi_inspection=aoi_inspection,
+                certainty_ledger=certainty_ledger,
+                profile=aoi_profile,
+            )
             
             # Step 10: Compile results
             results = {
@@ -157,6 +172,7 @@ class CircuitAnalyzer:
                 "reference_aoi": reference_aoi,
                 "golden_aoi": golden_aoi,
                 "aoi_inspection": aoi_inspection,
+                "production_aoi": production_aoi,
                 "certainty_ledger": certainty_ledger,
                 "project_recommendations": recommendations,
                 "analysis_metadata": {
@@ -184,6 +200,10 @@ class CircuitAnalyzer:
                     "best_salvage_opportunity": (salvage_opportunities.get("best_opportunity") or {}).get("name"),
                     "functional_block_count": len(board_understanding.get("functional_blocks", []) or []),
                     "aoi_readiness": aoi_inspection.get("readiness", "unknown"),
+                    "production_aoi_disposition": production_aoi.get("disposition", "not_production_ready"),
+                    "production_aoi_certainty_score": production_aoi.get("certainty_score", 0.0),
+                    "production_aoi_certainty_level": production_aoi.get("certainty_level", "not_production_ready"),
+                    "production_aoi_release_authorized": production_aoi.get("release_authorized", False),
                     "certainty_score": certainty_ledger.get("overall", {}).get("score", 0.0),
                     "certainty_level": certainty_ledger.get("overall", {}).get("level", "unknown"),
                     "certain_claim_count": certainty_ledger.get("counts", {}).get("certain", 0),
@@ -216,6 +236,15 @@ class CircuitAnalyzer:
                 "golden_aoi": self._empty_golden_aoi(str(e)),
                 "topology_aoi": self._empty_topology_aoi(str(e)),
                 "aoi_inspection": {"readiness": "unavailable", "score": 0.0, "blockers": [str(e)]},
+                "production_aoi": {
+                    "mode": "production_aoi_certainty_gate",
+                    "disposition": "unavailable",
+                    "release_authorized": False,
+                    "certainty_score": 0.0,
+                    "certainty_level": "not_production_ready",
+                    "blockers": [str(e)],
+                    "gates": [],
+                },
                 "certainty_ledger": self.certainty_builder.empty(str(e)),
                 "project_recommendations": []
             }
@@ -1028,6 +1057,7 @@ class CircuitAnalyzer:
         machine_connection_map = results.get("machine_connection_map", {})
         salvage_opportunities = results.get("salvage_opportunities", {})
         aoi_inspection = results.get("aoi_inspection", {})
+        production_aoi = results.get("production_aoi", {})
         reference_aoi = results.get("reference_aoi", {})
         golden_aoi = results.get("golden_aoi", {})
         topology_aoi = results.get("topology_aoi", {})
@@ -1114,6 +1144,12 @@ class CircuitAnalyzer:
         if aoi_inspection:
             summary_text += f"AOI readiness: {aoi_inspection.get('readiness', 'unknown')}. "
 
+        if production_aoi:
+            summary_text += (
+                f"Production AOI gate: {production_aoi.get('disposition', 'unknown')} "
+                f"at {float(production_aoi.get('certainty_score', 0.0) or 0.0):.2f} certainty. "
+            )
+
         if certainty_ledger:
             overall = certainty_ledger.get("overall", {})
             certainty_level = overall.get("level", "unknown")
@@ -1165,6 +1201,14 @@ class CircuitAnalyzer:
                 "asset_summary": salvage_opportunities.get("asset_summary", {}),
             },
             "aoi_readiness": aoi_inspection.get("readiness"),
+            "production_aoi": {
+                "disposition": production_aoi.get("disposition"),
+                "release_authorized": production_aoi.get("release_authorized", False),
+                "certainty_score": production_aoi.get("certainty_score", 0.0),
+                "certainty_level": production_aoi.get("certainty_level"),
+                "blockers": production_aoi.get("blockers", []),
+                "gates": production_aoi.get("gates", []),
+            },
             "certainty_ledger": {
                 "overall": certainty_ledger.get("overall", {}),
                 "counts": certainty_ledger.get("counts", {}),

@@ -35,7 +35,10 @@ reverse engineering, production AOI, or a safety-critical repair.
 - `POST /board-sessions/from-scan`
 - `GET /board-sessions/review-queue`
 - `GET /board-sessions/benchmark`
+- `GET /board-sessions/aoi-calibration`
 - `GET /board-sessions/{session_id}`
+- `GET /board-sessions/{session_id}/evidence-graph`
+- `GET /board-sessions/{session_id}/dossier`
 - `POST /board-sessions/{session_id}/captures`
 - `POST /board-sessions/{session_id}/review`
 - `POST /board-sessions/{session_id}/measurement`
@@ -84,6 +87,23 @@ The benchmark endpoint tracks:
 - training export count
 - useful session count
 - launch readiness score
+
+The AOI calibration endpoint tracks:
+
+- production AOI cases with operator-recorded actual pass/fail status
+- false accepts, false rejects, release precision, and release recall
+- recurring gate blockers and recommended profile patches
+- next actions before loosening or tightening automatic release thresholds
+
+The evidence graph endpoint turns a board session into source nodes, claim
+nodes, support edges, weak claims, grounded claims, and next grounding actions.
+Use it when a scan or repair/AOI result needs to explain exactly what evidence
+supports each claim.
+
+The dossier endpoint packages the same evidence into an operator-facing board
+brief: identity, AOI state, component counts, repair/reuse summary, grounded
+claims, weak claims, open tasks, and next actions. The review page links each
+session to `/dossier/{session_id}`.
 
 Pilot target:
 
