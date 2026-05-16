@@ -27,6 +27,8 @@ import { SiteHeader } from "@/components/site-header";
 import { ModuleLibraryPanel } from "@/components/build/module-library-panel";
 import { ModuleNode, type ModuleNodeData } from "@/components/build/module-node";
 import { SafetyCheckPanel } from "@/components/build/safety-check-panel";
+import { DrcPanel } from "@/components/build/drc-panel";
+import { runDrc } from "@/lib/pcb/drc";
 import { PcbViewport } from "@/components/cad/pcb-viewport";
 import { buildGraphToGeometry } from "@/lib/pcb/build-to-geometry";
 import { analyzeBuild, type BuildGraph } from "@/lib/rules/safety-rules";
@@ -178,7 +180,11 @@ function BuildInner() {
   }), [nodes, edges]);
 
   const warnings = useMemo(() => analyzeBuild(graph), [graph]);
-  const pcbGeometry = useMemo(() => (pcbOpen ? buildGraphToGeometry(graph) : null), [pcbOpen, graph]);
+  // Geometry is cheap and deterministic; compute it always so the DRC verdict
+  // is visible before the user opens the PCB preview. The preview portal is
+  // still gated on pcbOpen below.
+  const pcbGeometry = useMemo(() => buildGraphToGeometry(graph), [graph]);
+  const drc = useMemo(() => runDrc(pcbGeometry), [pcbGeometry]);
 
   const askJarvisToWire = useCallback(async () => {
     if (nodes.length < 2) {
@@ -428,6 +434,8 @@ function BuildInner() {
         )}
 
         <SafetyCheckPanel warnings={warnings} />
+
+        <DrcPanel drc={drc} />
 
         <div className="mt-auto rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[10px] leading-4 text-slate-400">
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Wire legend</div>
