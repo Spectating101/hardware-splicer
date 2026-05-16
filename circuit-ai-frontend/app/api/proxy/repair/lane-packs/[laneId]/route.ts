@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../../_backend";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request, { params }: { params: Promise<{ laneId: string }> }) {
   const { laneId } = await params;
-  const target = `${getCircuitApiBaseUrl()}/repair/lane-packs/${encodeURIComponent(laneId)}`;
+  const target = `${getVisionApiBaseUrl()}/repair/lane-packs/${encodeURIComponent(laneId)}`;
 
   try {
     const response = await fetch(target, {

@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../_backend";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const target = `${getCircuitApiBaseUrl()}/repair/video-playbook`;
+  const target = `${getVisionApiBaseUrl()}/repair/video-playbook`;
   const body = await request.text();
 
   try {

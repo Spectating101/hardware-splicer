@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../../_backend";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const target = new URL(`${getCircuitApiBaseUrl()}/ml/foundation/status`);
+  const target = new URL(`${getVisionApiBaseUrl()}/ml/foundation/status`);
 
   for (const field of ["device_hint", "goal", "has_video"]) {
     const value = url.searchParams.get(field);

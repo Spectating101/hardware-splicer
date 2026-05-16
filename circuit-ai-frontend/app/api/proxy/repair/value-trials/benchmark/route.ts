@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../../_backend";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const target = `${getCircuitApiBaseUrl()}/repair/value-trials/benchmark`;
+  const target = `${getVisionApiBaseUrl()}/repair/value-trials/benchmark`;
 
   try {
     const response = await fetch(target, {

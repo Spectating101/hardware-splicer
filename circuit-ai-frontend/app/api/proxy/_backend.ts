@@ -1,9 +1,25 @@
 import { NextResponse } from "next/server";
 
-const DEFAULT_API_BASE_URL = "http://localhost:8000";
+// Two distinct backends. Flask api_server.py is the canonical surface
+// (/api/health, /api/v2/*). The FastAPI app (src/api/v1/main.py) serves the
+// vision/repair/board-session surface on bare paths (/analyze, /board-sessions,
+// /repair/*, /salvage/*, /ml/*, /components, /educational, /projects, /healthz).
+// They are separate processes on separate ports and must not be conflated.
+const DEFAULT_FLASK_BASE_URL = "http://localhost:5000";
+const DEFAULT_VISION_BASE_URL = "http://localhost:8000";
 
+// Canonical Flask backend. Used by /api/v2/* and /api/health proxies.
 export function getCircuitApiBaseUrl() {
-  return process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_BASE_URL;
+  return process.env.CIRCUIT_AI_API_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_FLASK_BASE_URL;
+}
+
+// FastAPI vision/repair backend. Used by all bare-path proxies.
+export function getVisionApiBaseUrl() {
+  return (
+    process.env.CIRCUIT_AI_VISION_URL ||
+    process.env.NEXT_PUBLIC_VISION_API_URL ||
+    DEFAULT_VISION_BASE_URL
+  );
 }
 
 export function getProxyAuthHeaders(request?: Request): HeadersInit {

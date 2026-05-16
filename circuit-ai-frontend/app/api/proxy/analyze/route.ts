@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../_backend";
@@ -20,7 +20,7 @@ function isFileLike(value: FormDataEntryValue | null): value is File {
 }
 
 export async function POST(request: Request) {
-  const apiBaseUrl = getCircuitApiBaseUrl();
+  const apiBaseUrl = getVisionApiBaseUrl();
   const target = `${apiBaseUrl}/analyze`;
   const inbound = await request.formData();
   const file = inbound.get("file");

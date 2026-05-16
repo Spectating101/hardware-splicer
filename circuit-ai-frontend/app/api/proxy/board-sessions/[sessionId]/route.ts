@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../_backend";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request, { params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
-  const target = `${getCircuitApiBaseUrl()}/board-sessions/${encodeURIComponent(sessionId)}`;
+  const target = `${getVisionApiBaseUrl()}/board-sessions/${encodeURIComponent(sessionId)}`;
 
   try {
     const response = await fetch(target, {

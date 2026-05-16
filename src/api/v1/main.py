@@ -1,21 +1,33 @@
 from __future__ import annotations
 
-import json
 import io
+import json
 import os
 import tempfile
 import inspect
+import time
+import uuid
+from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi.responses import JSONResponse, StreamingResponse
 from loguru import logger
 from PIL import Image
+from pydantic import BaseModel
 from starlette.datastructures import UploadFile as StarletteUploadFile
 
 from src.api.v1.auth import get_current_user
 from src.api.v1.billing import router as billing_router
+from src.api.v1.metrics import (
+    get_metrics_response,
+    record_error_metrics,
+    record_request_metrics,
+    set_active_connections,
+)
 from src.api.v1.physics import router as physics_router
 from src.core.ingest import CircuitAnalyzer
 from src.engines.kicad_parser import KiCadParser
@@ -37,6 +49,18 @@ from src.vision.foundation_adapters import build_foundation_assist_plan, foundat
 app = FastAPI(title="Circuit.AI API v1", version="1.0.0")
 app.include_router(physics_router)
 app.include_router(billing_router)
+
+
+class BatchAnalysisRequest(BaseModel):
+    image_paths: List[str]
+    analysis_options: Dict[str, Any] = {}
+
+
+class WebSocketMessage(BaseModel):
+    type: str
+    data: Dict[str, Any]
+
+
 _analyzer: CircuitAnalyzer | None = None
 _salvage_workflow: SalvageWorkflowEngine | None = None
 _salvage_splice_planner: SalvageSplicePlanner | None = None
@@ -48,6 +72,156 @@ _repair_coverage: RepairMarketCoverage | None = None
 _repair_value_trials: RepairValueTrialStore | None = None
 _repair_video_builder: RepairVideoPlaybookBuilder | None = None
 _board_session_store: BoardSessionStore | None = None
+
+
+@lru_cache(maxsize=1)
+def get_enhanced_analyzer():
+    from src.core.enhanced_analyzer import enhanced_analyzer
+
+    return enhanced_analyzer
+
+
+@lru_cache(maxsize=1)
+def get_websocket_manager():
+    from src.services.websocket_service import websocket_manager
+
+    return websocket_manager
+
+
+@lru_cache(maxsize=1)
+def get_cache_service():
+    from src.services.cache_service import cache_service
+
+    return cache_service
+
+
+@lru_cache(maxsize=1)
+def get_queue_service():
+    from src.services.queue_service import queue_service
+
+    return queue_service
+
+
+@lru_cache(maxsize=1)
+def get_kicad_parser():
+    from src.intelligence.parser import KiCadParser as LegacyKiCadParser
+
+    return LegacyKiCadParser
+
+
+@lru_cache(maxsize=1)
+def get_circuit_parser_analyzer():
+    from src.intelligence.analyzer import CircuitAnalyzer as NetlistCircuitAnalyzer
+
+    return NetlistCircuitAnalyzer
+
+
+@lru_cache(maxsize=1)
+def get_bom_generator():
+    from src.intelligence.bom import BomGenerator
+
+    return BomGenerator
+
+
+@lru_cache(maxsize=1)
+def get_workflow_engine():
+    from src.engines.unified_workflow import UnifiedWorkflowEngine
+
+    return UnifiedWorkflowEngine()
+
+
+def _format_validation_workflow_response(result: Any, kicad_path: str) -> Dict[str, Any]:
+    response: Dict[str, Any] = {
+        "status": result.status,
+        "next_steps": result.next_steps,
+    }
+
+    issues = result.validation_issues or []
+    critical = [i for i in issues if getattr(i, "severity", None) == "critical"]
+    errors = [i for i in issues if getattr(i, "severity", None) == "error"]
+    warnings = [i for i in issues if getattr(i, "severity", None) == "warning"]
+
+    response["validation"] = {
+        "issues_count": len(issues),
+        "critical": len(critical),
+        "errors": len(errors),
+        "warnings": len(warnings),
+        "issues": [
+            {
+                "severity": getattr(i, "severity", "unknown"),
+                "component": getattr(i, "component", None),
+                "issue": getattr(i, "issue", None),
+                "solution": getattr(i, "solution", None),
+                "physics": getattr(i, "physics", None),
+            }
+            for i in issues
+        ],
+    }
+
+    if issues:
+        response["manufacturing_ready"] = (
+            False if result.status == "validation_partial" else (len(critical) == 0 and len(errors) == 0)
+        )
+    else:
+        response["manufacturing_ready"] = result.status not in {"error", "validation_failed"}
+
+    if str(kicad_path).lower().endswith(".kicad_pcb"):
+        try:
+            from src.engines.kicad_pcb_geometry import extract_pcb_geometry
+
+            response["pcb_geometry"] = extract_pcb_geometry(str(kicad_path))
+        except Exception:
+            pass
+
+    return response
+
+
+@app.middleware("http")
+async def instrumentation_middleware(request: Request, call_next):
+    start = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    except Exception as exc:
+        record_error_metrics(type(exc).__name__, request.url.path)
+        raise
+    finally:
+        duration = time.perf_counter() - start
+        record_request_metrics(request.url.path, request.method, status_code, duration)
+
+
+@app.on_event("startup")
+async def enhanced_surface_startup():
+    try:
+        queue_service = get_queue_service()
+        cache_service = get_cache_service()
+        queue_service.start_workers()
+        logger.info("Queue workers started")
+        cache_service.cleanup_expired()
+        logger.info("Cache cleanup completed")
+        logger.info("Enhanced API startup completed")
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+
+
+@app.on_event("shutdown")
+async def enhanced_surface_shutdown():
+    try:
+        get_queue_service().stop_workers()
+        logger.info("Queue workers stopped")
+    except Exception as e:
+        logger.error(f"Queue shutdown error: {e}")
+    try:
+        websocket_manager = get_websocket_manager()
+        for client_id in list(websocket_manager.active_connections.keys()):
+            websocket_manager.disconnect(client_id)
+        set_active_connections(0)
+        logger.info("WebSocket connections closed")
+        logger.info("Enhanced API shutdown completed")
+    except Exception as e:
+        logger.error(f"Shutdown error: {e}")
 
 
 def get_analyzer() -> CircuitAnalyzer:
@@ -142,6 +316,373 @@ def readyz(analyzer: CircuitAnalyzer = Depends(get_analyzer)) -> Dict[str, Any]:
     # "Ready" means the app can import and create its analyzer; the heavy
     # YOLO weights are lazily loaded per request.
     return {"ready": True, "backend_default": getattr(analyzer.detector, "default_backend", "unknown")}
+
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    websocket_manager = get_websocket_manager()
+    await websocket_manager.connect(websocket, client_id)
+    set_active_connections(len(websocket_manager.active_connections))
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = json.loads(data)
+
+            if message.get("type") == "subscribe_analysis":
+                analysis_id = message.get("analysis_id")
+                if analysis_id:
+                    await websocket_manager.subscribe_to_analysis(client_id, analysis_id)
+                    await websocket_manager.send_personal_message(
+                        {"type": "subscription_confirmed", "analysis_id": analysis_id},
+                        client_id,
+                    )
+
+            elif message.get("type") == "unsubscribe_analysis":
+                analysis_id = message.get("analysis_id")
+                if analysis_id:
+                    await websocket_manager.unsubscribe_from_analysis(client_id, analysis_id)
+                    await websocket_manager.send_personal_message(
+                        {"type": "unsubscription_confirmed", "analysis_id": analysis_id},
+                        client_id,
+                    )
+
+            elif message.get("type") == "ping":
+                await websocket_manager.send_personal_message(
+                    {"type": "pong", "timestamp": datetime.now().isoformat()},
+                    client_id,
+                )
+
+    except WebSocketDisconnect:
+        websocket_manager.disconnect(client_id)
+        set_active_connections(len(websocket_manager.active_connections))
+    except Exception as e:
+        logger.error(f"WebSocket error for client {client_id}: {e}")
+        websocket_manager.disconnect(client_id)
+        set_active_connections(len(websocket_manager.active_connections))
+
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Circuit.AI Enhanced Component Intelligence Platform",
+        "version": "2.1.0",
+        "features": [
+            "Real-time WebSocket analysis progress",
+            "Enhanced computer vision with multi-model ensemble",
+            "Advanced LLM-powered functionality mapping",
+            "Netlist Analysis (ERC)",
+            "BOM Generation",
+            "Intelligent project recommendations",
+            "Educational content generation",
+            "Repair recommendations",
+            "Advanced caching and job queuing",
+            "Batch processing capabilities",
+        ],
+        "endpoints": {
+            "analyze": "/analyze - Upload PCB image for enhanced analysis",
+            "analyze_netlist": "/analyze/netlist - Upload KiCad netlist for ERC",
+            "generate_bom": "/generate/bom - Upload KiCad netlist for BOM CSV",
+            "batch_analyze": "/batch_analyze - Submit batch analysis job",
+            "job_status": "/job/{job_id} - Get batch job status",
+            "websocket": "/ws/{client_id} - Real-time WebSocket connection",
+            "health": "/health - Enhanced system health check",
+            "metrics": "/metrics - Prometheus metrics for enhanced API monitoring",
+            "statistics": "/statistics - Comprehensive system statistics",
+            "cache_stats": "/cache/stats - Cache performance statistics",
+            "queue_stats": "/queue/stats - Job queue statistics",
+            "websocket_stats": "/ws/stats - WebSocket connection statistics",
+        },
+    }
+
+
+@app.post("/analyze/netlist")
+async def analyze_netlist(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".net") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        try:
+            parser_cls = get_kicad_parser()
+            analyzer_cls = get_circuit_parser_analyzer()
+            parser = parser_cls(tmp_path)
+            data = parser.parse()
+            analyzer = analyzer_cls(data)
+
+            stats = analyzer.get_stats()
+            floating_nets = analyzer.find_single_node_nets()
+
+            return {
+                "status": "success",
+                "stats": stats,
+                "issues": {
+                    "floating_nets": floating_nets,
+                    "count": len(floating_nets),
+                },
+                "passed": len(floating_nets) == 0,
+            }
+        finally:
+            os.unlink(tmp_path)
+
+    except Exception as e:
+        logger.error(f"Netlist analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate/bom")
+async def generate_bom(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".net") as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        try:
+            parser_cls = get_kicad_parser()
+            bom_generator_cls = get_bom_generator()
+            parser = parser_cls(tmp_path)
+            data = parser.parse()
+            bom_gen = bom_generator_cls(data)
+            csv_content = bom_gen.generate_csv()
+
+            return StreamingResponse(
+                io.StringIO(csv_content),
+                media_type="text/csv",
+                headers={"Content-Disposition": "attachment; filename=bom.csv"},
+            )
+        finally:
+            os.unlink(tmp_path)
+
+    except Exception as e:
+        logger.error(f"BOM generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/batch_analyze")
+async def batch_analyze(request: BatchAnalysisRequest):
+    try:
+        job_id = get_enhanced_analyzer().submit_batch_analysis_job(
+            request.image_paths,
+            **request.analysis_options,
+        )
+
+        return {
+            "job_id": job_id,
+            "status": "submitted",
+            "image_count": len(request.image_paths),
+            "submitted_at": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Batch analysis submission error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/job/{job_id}")
+async def get_job_status(job_id: str):
+    try:
+        status = get_enhanced_analyzer().get_batch_job_status(job_id)
+        return status
+
+    except Exception as e:
+        logger.error(f"Job status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/health")
+async def health_check():
+    try:
+        health = get_enhanced_analyzer().get_system_health()
+        return health
+
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat(),
+        }
+
+
+@app.get("/statistics")
+async def get_statistics():
+    try:
+        stats = get_enhanced_analyzer().get_analysis_statistics()
+        return stats
+
+    except Exception as e:
+        logger.error(f"Statistics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/cache/stats")
+async def get_cache_stats():
+    try:
+        stats = get_cache_service().get_stats()
+        return stats
+
+    except Exception as e:
+        logger.error(f"Cache stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/queue/stats")
+async def get_queue_stats():
+    try:
+        stats = get_queue_service().get_queue_stats()
+        return stats
+
+    except Exception as e:
+        logger.error(f"Queue stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/ws/stats")
+async def get_websocket_stats():
+    try:
+        websocket_manager = get_websocket_manager()
+        set_active_connections(len(websocket_manager.active_connections))
+        stats = websocket_manager.get_connection_stats()
+        return stats
+
+    except Exception as e:
+        logger.error(f"WebSocket stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/cache/clear")
+async def clear_cache(pattern: Optional[str] = None):
+    try:
+        deleted_count = get_cache_service().clear(pattern)
+        return {
+            "message": "Cache cleared successfully",
+            "deleted_entries": deleted_count,
+            "pattern": pattern,
+        }
+
+    except Exception as e:
+        logger.error(f"Cache clear error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/components")
+async def get_component_database():
+    try:
+        enhanced_analyzer = get_enhanced_analyzer()
+        return {
+            "total_components": len(enhanced_analyzer.mapper.component_database),
+            "component_types": list(enhanced_analyzer.mapper.component_database.keys()),
+            "last_updated": datetime.now().isoformat(),
+        }
+
+    except Exception as e:
+        logger.error(f"Component database error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/projects")
+async def get_project_templates():
+    try:
+        projects = get_enhanced_analyzer().mapper.project_templates
+        return {
+            "total_projects": len(projects),
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "difficulty": p.difficulty,
+                    "category": p.category,
+                    "estimated_cost": p.estimated_cost,
+                    "score": p.score,
+                }
+                for p in projects
+            ],
+        }
+
+    except Exception as e:
+        logger.error(f"Project templates error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/educational")
+async def get_educational_content():
+    try:
+        content = get_enhanced_analyzer().mapper.educational_content
+        return {
+            "total_content": len(content),
+            "content": [
+                {
+                    "title": c.title,
+                    "difficulty": c.difficulty,
+                    "component_type": c.component_type,
+                    "estimated_time": c.estimated_time,
+                }
+                for c in content.values()
+            ],
+        }
+
+    except Exception as e:
+        logger.error(f"Educational content error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/repair")
+async def get_repair_guides():
+    try:
+        guides = get_enhanced_analyzer().mapper.repair_guides
+        return {
+            "total_guides": len(guides),
+            "guides": [
+                {
+                    "component_type": g.component_type,
+                    "issue": g.issue,
+                    "difficulty": g.difficulty,
+                    "success_rate": g.success_rate,
+                }
+                for g in guides.values()
+            ],
+        }
+
+    except Exception as e:
+        logger.error(f"Repair guides error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/metrics")
+async def metrics():
+    return get_metrics_response()
+
+
+@app.post("/validate-kicad")
+async def validate_kicad_proxy(
+    kicad_file: UploadFile = File(...),
+    hints: Optional[str] = Form(None),
+):
+    logger.info(f"Received KiCad validation request: {kicad_file.filename}")
+
+    content = await kicad_file.read()
+    temp_path = f"/tmp/{uuid.uuid4()}.kicad_pcb"
+    with open(temp_path, "wb") as f:
+        f.write(content)
+
+    try:
+        result = get_workflow_engine().execute_validation_workflow(kicad_file=str(temp_path))
+        return JSONResponse(_format_validation_workflow_response(result, temp_path))
+    except Exception as e:
+        logger.error(f"Validation failed: {e}")
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+
+@app.get("/api/proxy/health")
+async def health_check_proxy():
+    return {"status": "ok", "service": "circuit-ai-backend"}
 
 
 @app.get("/ml/research-radar")

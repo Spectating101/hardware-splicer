@@ -1,8 +1,10 @@
 import { NextRequest } from "next/server";
+import { getCircuitApiBaseUrl } from "../_backend";
 
 export async function POST(request: NextRequest) {
-  const backendUrl = process.env.CIRCUIT_AI_API_URL ?? "http://localhost:5000";
-  const targetUrl = `${backendUrl}/api/v2/workflow/validate-kicad`;
+  // /api/v2/* is the canonical Flask surface — use the shared resolver,
+  // not a standalone hardcode that can drift from _backend.ts.
+  const targetUrl = `${getCircuitApiBaseUrl()}/api/v2/workflow/validate-kicad`;
 
   try {
     const formData = await request.formData();

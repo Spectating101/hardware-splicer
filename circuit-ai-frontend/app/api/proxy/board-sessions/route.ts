@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../_backend";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const inbound = new URL(request.url);
-  const target = new URL(`${getCircuitApiBaseUrl()}/board-sessions`);
+  const target = new URL(`${getVisionApiBaseUrl()}/board-sessions`);
   for (const key of ["status", "limit"]) {
     const value = inbound.searchParams.get(key);
     if (value) target.searchParams.set(key, value);
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const target = `${getCircuitApiBaseUrl()}/board-sessions`;
+  const target = `${getVisionApiBaseUrl()}/board-sessions`;
   const body = await request.text();
 
   try {

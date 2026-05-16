@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 
 def test_enhanced_api_proxy_health_and_metrics():
-    from src.api.enhanced_api import app
+    from src.api.v1.main import app
 
     with TestClient(app) as client:
         health = client.get("/api/proxy/health")

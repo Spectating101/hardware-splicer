@@ -23,7 +23,16 @@
       "Skill(codex:setup)",
       "Bash(node *)",
       "Bash(git rm *)",
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(timeout 60 pip3 install --quiet --user loguru pytest fastapi 'httpx<0.28' starlette)",
+      "Bash(echo \"pip exit: $?\")",
+      "Bash(timeout 200 /tmp/caiv/bin/pip install -q loguru pytest \"fastapi\" \"httpx<0.28\" python-multipart)",
+      "Bash(echo \"venv pip exit: $?\")",
+      "Bash(/tmp/caiv/bin/python -c \"import loguru, pytest, fastapi; print\\('deps OK'\\)\")",
+      "Bash(/tmp/caiv/bin/python -c \"import src.api.v1.main; print\\('v1.main IMPORT OK'\\)\")",
+      "Bash(timeout 240 /tmp/caiv/bin/pip install -q numpy pydantic requests)",
+      "Bash(grep -cE '\\(^def __TRACKED_VAR__|^async def __TRACKED_VAR__|^    def __TRACKED_VAR__| import .*\\\\b__TRACKED_VAR__\\\\b|^__TRACKED_VAR__ *=|from .* import .*__TRACKED_VAR__\\)' src/api/v1/main.py)",
+      "Bash(grep -cE '\\\\b__TRACKED_VAR__\\\\\\(' src/api/v1/main.py)"
     ],
     "deny": [],
     "ask": []

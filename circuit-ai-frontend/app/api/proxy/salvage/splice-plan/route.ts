@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../_backend";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const inbound = new URL(request.url);
-  const target = new URL(`${getCircuitApiBaseUrl()}/salvage/splice-plan`);
+  const target = new URL(`${getVisionApiBaseUrl()}/salvage/splice-plan`);
   const commitSession = inbound.searchParams.get("commit_session");
   if (commitSession) target.searchParams.set("commit_session", commitSession);
   const body = await request.text();

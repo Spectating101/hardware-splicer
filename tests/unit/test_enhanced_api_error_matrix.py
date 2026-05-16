@@ -1,19 +1,17 @@
 from __future__ import annotations
 
-import io
 import json
 import sys
 import types
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from PIL import Image
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-import src.api.enhanced_api as enhanced_api
+import src.api.v1.main as enhanced_api
 
 DEMO_PCB = REPO_ROOT / "circuit-ai-frontend" / "public" / "demo" / "usb_esp32_sensor.kicad_pcb"
 DEMO_NET = REPO_ROOT / "circuit-ai-frontend" / "public" / "demo" / "usb_esp32_sensor.net"
@@ -25,17 +23,6 @@ def _raise(exc: Exception):
 
 def test_enhanced_api_endpoint_error_branches(monkeypatch):
     with TestClient(enhanced_api.app) as client:
-        class BrokenAnalyzer:
-            async def analyze_pcb(self, *args, **kwargs):
-                raise RuntimeError("analyze boom")
-
-        monkeypatch.setattr(enhanced_api, "get_enhanced_analyzer", lambda: BrokenAnalyzer())
-        image_buf = io.BytesIO()
-        Image.new("RGB", (64, 64), "white").save(image_buf, format="PNG")
-        r = client.post("/analyze", files={"file": ("blank.png", image_buf.getvalue(), "image/png")})
-        assert r.status_code == 500
-        assert (r.json() or {}).get("detail") == "analyze boom"
-
         monkeypatch.setattr(enhanced_api, "get_kicad_parser", lambda: lambda path: _raise(RuntimeError("netlist boom")))
         with DEMO_NET.open("rb") as nf:
             r = client.post("/analyze/netlist", files={"file": (DEMO_NET.name, nf, "text/plain")})

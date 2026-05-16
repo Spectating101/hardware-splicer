@@ -1,6 +1,6 @@
 import {
   forwardUiJsonResponse,
-  getCircuitApiBaseUrl,
+  getVisionApiBaseUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
 } from "../../_backend";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const target = `${getCircuitApiBaseUrl()}/ml/research-radar`;
+  const target = `${getVisionApiBaseUrl()}/ml/research-radar`;
 
   try {
     const response = await fetch(target, {

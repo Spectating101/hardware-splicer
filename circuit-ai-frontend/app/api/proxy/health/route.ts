@@ -5,8 +5,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  // Canonical health = the Flask backend is up. Flask serves /api/health
+  // (not /healthz, which is the secondary FastAPI surface).
   const apiBaseUrl = getCircuitApiBaseUrl();
-  const target = `${apiBaseUrl}/healthz`;
+  const target = `${apiBaseUrl}/api/health`;
   try {
     const headers = getProxyAuthHeaders();
     const res = await fetch(target, { method: "GET", headers });

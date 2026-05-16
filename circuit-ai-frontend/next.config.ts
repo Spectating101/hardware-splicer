@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     CIRCUIT_AI_API_URL: process.env.CIRCUIT_AI_API_URL ?? 'http://localhost:5000',
+    CIRCUIT_AI_VISION_URL: process.env.CIRCUIT_AI_VISION_URL ?? 'http://localhost:8000',
     MECHA_API_URL: process.env.MECHA_API_URL ?? 'http://localhost:8085',
   },
 };
