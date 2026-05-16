@@ -35,7 +35,18 @@
       "Bash(grep -cE '\\\\b__TRACKED_VAR__\\\\\\(' src/api/v1/main.py)",
       "Bash(grep -vE \"\\\\.\\(pyc\\)$\")",
       "Bash(git add *)",
-      "Bash(git commit -q -m ' *)"
+      "Bash(git commit -q -m ' *)",
+      "Bash(git push *)",
+      "Bash(git ls-remote *)",
+      "Bash(/home/phyrexian/Downloads/llm_automation/project_portfolio/.caiv/bin/python /home/phyrexian/Downloads/llm_automation/project_portfolio/.smoke_verify.py)",
+      "Bash(.caiv/bin/python -c \"import setuptools, pip; print\\('setuptools', setuptools.__version__, '| pip', pip.__version__\\)\")",
+      "Bash(.caiv/bin/python -c \"import fastapi\")",
+      "Bash(.caiv/bin/python -c \"import fastapi, starlette, flask, torch, cv2; print\\('core+ml import OK'\\)\")",
+      "Bash(.caiv/bin/python -c \"import flask,fastapi,starlette,numpy,cv2,torch,ultralytics,networkx,scipy; print\\('all key imports OK'\\)\")",
+      "Bash(../.caiv/bin/python ../.smoke_verify.py)",
+      "Bash(.caiv/bin/python -c \"import torch; print\\('torch', torch.__version__\\)\")",
+      "Bash(.caiv/bin/python -c \"import flask,fastapi,starlette,numpy,cv2,ultralytics,networkx,scipy,sqlalchemy,bleach,transformers; print\\('key imports OK'\\)\")",
+      "Bash(PYTHONPATH=/home/phyrexian/Downloads/llm_automation/project_portfolio/Circuit-AI ../.caiv/bin/python ../.smoke_verify.py)"
     ],
     "deny": [],
     "ask": []
