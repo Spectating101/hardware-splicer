@@ -32,7 +32,10 @@
       "Bash(/tmp/caiv/bin/python -c \"import src.api.v1.main; print\\('v1.main IMPORT OK'\\)\")",
       "Bash(timeout 240 /tmp/caiv/bin/pip install -q numpy pydantic requests)",
       "Bash(grep -cE '\\(^def __TRACKED_VAR__|^async def __TRACKED_VAR__|^    def __TRACKED_VAR__| import .*\\\\b__TRACKED_VAR__\\\\b|^__TRACKED_VAR__ *=|from .* import .*__TRACKED_VAR__\\)' src/api/v1/main.py)",
-      "Bash(grep -cE '\\\\b__TRACKED_VAR__\\\\\\(' src/api/v1/main.py)"
+      "Bash(grep -cE '\\\\b__TRACKED_VAR__\\\\\\(' src/api/v1/main.py)",
+      "Bash(grep -vE \"\\\\.\\(pyc\\)$\")",
+      "Bash(git add *)",
+      "Bash(git commit -q -m ' *)"
     ],
     "deny": [],
     "ask": []
