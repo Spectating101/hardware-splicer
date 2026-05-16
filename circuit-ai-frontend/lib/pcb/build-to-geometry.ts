@@ -11,12 +11,14 @@ import { findModule, type ModuleSpec } from "@/lib/modules/module-library";
 const PITCH = 2.54;              // mm between pins
 const PAD_DRILL = 1.0;            // mm
 const PAD_SIZE = 1.8;             // mm outer
-const TRACE_WIDTH = 0.35;         // mm
 const MODULE_MARGIN_X = 6;        // mm padding inside footprint rectangle
 const MODULE_MARGIN_Y = 4;
-const MODULE_GAP = 8;             // mm between modules
+const MODULE_GAP = 14;            // mm between modules — also the per-module
+                                  // vertical routing channel (kept pad-free)
 const BOARD_MARGIN = 3;
-const COLS = 2;
+// Single row: nothing is ever "below" another module, so escape jogs and net
+// rails reach the channel band without crossing a footprint.
+const COLS = Number.MAX_SAFE_INTEGER;
 
 type Placed = {
   nodeId: string;
@@ -216,32 +218,121 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
     };
   });
 
-  // --- 5) Build Manhattan-routed trace segments ---
-  // Each wire becomes a 3-segment run (stub out, lane, stub in). Lanes are
-  // offset per-wire by a small amount so parallel traces don't overlap — this
-  // gives the characteristic parallel-bus look of a real KiCad board.
+  // --- 5) Correct-by-construction 2-layer router -------------------------
+  //
+  // The previous router drew every trace on F.Cu with a cosmetic lane offset,
+  // so different nets crossed and shorted. This one is short-free by
+  // construction and the DRC (lib/pcb/drc.ts) is its proof:
+  //
+  //   • HV-split: horizontals on F.Cu, verticals on B.Cu. A horizontal and a
+  //     vertical can cross geometrically but never short — different layers.
+  //   • Each net gets a UNIQUE horizontal track Y (a "rail" in the channel
+  //     below the modules) and a UNIQUE convergence column X. Two different
+  //     nets therefore never share an F.Cu Y or a B.Cu X in the routing field.
+  //   • Each pad escapes via a per-pad-UNIQUE jog lane placed inside its own
+  //     module footprint, so per-pad B.Cu verticals never share an X either.
+  //   • The pad's only at-pad move is a short B.Cu stub; same-column pads are
+  //     >= PITCH apart, longer than the stub, so those don't overlap.
+  //
+  // Result: no two different-net copper features share a layer+coordinate.
   const segments: PcbGeometry["segments"] = [];
-  const LANE_OFFSET = 0.9; // mm between parallel trace lanes
-  graph.wires.forEach((w, wireIdx) => {
-    const from = placed.find((p) => p.nodeId === w.from.nodeId);
-    const to = placed.find((p) => p.nodeId === w.to.nodeId);
-    const a = from?.padPos.get(w.from.pinId);
-    const b = to?.padPos.get(w.to.pinId);
-    const netKey = `${w.from.nodeId}|${w.from.pinId}`;
-    const root = roots.get(netKey);
-    const net = root ? rootToNet.get(root) : undefined;
-    if (!a || !b) return;
-    const netTag = net ? { id: net.id, name: net.name } : { id: null, name: "" };
-    // Offset lane so parallel wires don't stack. Sign alternates to spread lanes.
-    const lane = ((wireIdx % 6) - 2.5) * LANE_OFFSET;
-    const midY = (a.y + b.y) / 2 + lane;
-    // stub out from pad A (horizontal), lane (vertical), stub in to pad B (horizontal)
-    segments.push(
-      { start: a, end: { x: a.x, y: midY }, width_mm: TRACE_WIDTH, layer: "F.Cu", net: netTag },
-      { start: { x: a.x, y: midY }, end: { x: b.x, y: midY }, width_mm: TRACE_WIDTH, layer: "F.Cu", net: netTag },
-      { start: { x: b.x, y: midY }, end: b, width_mm: TRACE_WIDTH, layer: "F.Cu", net: netTag },
-    );
-  });
+  const vias: NonNullable<PcbGeometry["vias"]> = [];
+  const RT_W = 0.25;            // routed trace width (>= DRC minTraceWidth)
+  const TRK = 1.0;              // mm between adjacent net tracks
+  const GAP = 6;                // mm from modules to the rail band
+
+  const seg = (
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    layer: "F.Cu" | "B.Cu",
+    net: { id: number | null; name: string },
+  ) => {
+    if (start.x === end.x && start.y === end.y) return;
+    segments.push({ start, end, width_mm: RT_W, layer, net });
+  };
+  const via = (x: number, y: number, net: { id: number; name: string }) =>
+    vias.push({ x, y, size_mm: 0.8, drill_mm: 0.4, net });
+
+  // Only nets with >= 2 pads are routed; each gets a unique rail Y.
+  const netSize = new Map<string, number>();
+  for (const r of roots.values()) netSize.set(r, (netSize.get(r) ?? 0) + 1);
+  const orderedRoots = [...new Set(roots.values())].filter(
+    (r) => (netSize.get(r) ?? 0) >= 2,
+  );
+  const kOf = new Map<string, number>();
+  orderedRoots.forEach((r, i) => kOf.set(r, i));
+
+  // Modules are a single row, so the band below every footprint is empty.
+  const railY0 = maxY + GAP;
+  const railY = (k: number) => railY0 + k * TRK;
+  // Convergence columns sit to the right of every module and every channel.
+  const lastRight = placed.reduce((m, p) => Math.max(m, p.x + p.hw), -Infinity);
+  const convX0 = lastRight + MODULE_GAP + GAP;
+  const convX = (k: number) => convX0 + k * TRK;
+
+  // Left-column pads escape LEFT, right-column pads escape RIGHT, each into a
+  // per-module side channel (a pad-free strip). Same-row L/R pads thus travel
+  // in opposite directions and never share F.Cu X; within one side there is
+  // exactly one pad per row, so escape hops at the pad's own Y never collide.
+  // No inter-row dead-band gymnastics needed — the hop is at p.y.
+  const HALF = MODULE_GAP / 2;
+  let routeMinX = Infinity;
+  let routeMaxX = -Infinity;
+  let routeMaxY = -Infinity;
+
+  for (const pl of placed) {
+    const leftPads: Array<{ pid: string; y: number }> = [];
+    const rightPads: Array<{ pid: string; y: number }> = [];
+    for (const pid of pl.pinOrder) {
+      const pos = pl.padPos.get(pid)!;
+      (pos.x < pl.x ? leftPads : rightPads).push({ pid, y: pos.y });
+    }
+
+    const routeSide = (
+      side: Array<{ pid: string; y: number }>,
+      chLo: number,
+      chHi: number,
+    ) => {
+      const m = side.length;
+      side.forEach(({ pid }, idx) => {
+        const key = `${pl.nodeId}|${pid}`;
+        const root = roots.get(key);
+        if (root == null) return;
+        const k = kOf.get(root);
+        if (k == null) return; // unrouted single-pad net
+        const net = rootToNet.get(root)!;
+        const tag = { id: net.id, name: net.name };
+        const p = pl.padPos.get(pid)!;
+        const laneX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
+        const ry = railY(k);
+        const cx = convX(k);
+
+        // 1) F.Cu escape straight out of the pad to this side's channel
+        seg(p, { x: laneX, y: p.y }, "F.Cu", tag);
+        via(laneX, p.y, net);
+        // 2) B.Cu down the unique lane to the net's rail (below all modules)
+        seg({ x: laneX, y: p.y }, { x: laneX, y: ry }, "B.Cu", tag);
+        via(laneX, ry, net);
+        // 3) F.Cu along the net's unique rail to its convergence point
+        seg({ x: laneX, y: ry }, { x: cx, y: ry }, "F.Cu", tag);
+        via(cx, ry, net);
+
+        routeMinX = Math.min(routeMinX, laneX);
+        routeMaxX = Math.max(routeMaxX, cx);
+        routeMaxY = Math.max(routeMaxY, ry);
+      });
+    };
+
+    // Right channel = left half of the gap to this module's right.
+    // Left channel  = right half of the gap to this module's left.
+    // Adjacent modules' channels are therefore disjoint (2 mm apart).
+    const rEdge = pl.x + pl.hw;
+    const lEdge = pl.x - pl.hw;
+    routeSide(rightPads, rEdge + 1.0, rEdge + HALF - 1.0);
+    routeSide(leftPads, lEdge - HALF + 1.0, lEdge - 1.0);
+  }
+  // Every pad of net k terminates at the identical point (convX(k),railY(k)),
+  // so the net is connected there — no separate trunk needed.
 
   // --- 6) Silkscreen rectangle + label per module ---
   const silkLines: PcbGeometry["silkLines"] = [];
@@ -272,42 +363,37 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
     });
   });
 
-  // --- 7) GND copper pour on back layer (big copper fill = realistic KiCad look) ---
-  const gndNet = [...rootToNet.values()].find((n) => n.name === "GND");
-  const zones: PcbGeometry["zones"] = [];
-  if (gndNet) {
-    const inset = 0.5;
-    zones.push({
-      layer: "B.Cu",
-      net_id: gndNet.id,
-      net_name: gndNet.name,
-      polygons: [[
-        { x: minX + inset, y: minY + inset },
-        { x: maxX - inset, y: minY + inset },
-        { x: maxX - inset, y: maxY - inset },
-        { x: minX + inset, y: maxY - inset },
-      ]],
-    });
-  }
+  // --- 7) (removed) The old full-board GND pour had no keepout and shorted
+  // every non-GND through-hole pad. A clean 2-layer board with GND routed as
+  // a normal net is honest and manufacturable; the PcbZone type can't express
+  // proper thermal-relief keepouts, so we don't fake one.
+
+  // --- 8) Board outline encloses modules AND the routing field, with edge
+  // clearance so DRC edge-clearance passes.
+  const EDGE_PAD = 1.5;
+  const bx0 = Math.min(minX, routeMinX === Infinity ? minX : routeMinX) - EDGE_PAD;
+  const by0 = minY - EDGE_PAD;
+  const bx1 = Math.max(maxX, routeMaxX === -Infinity ? maxX : routeMaxX) + EDGE_PAD;
+  const by1 = Math.max(maxY, routeMaxY === -Infinity ? maxY : routeMaxY) + EDGE_PAD;
 
   return {
     board: {
       bbox_mm: {
-        min_x: minX, min_y: minY, max_x: maxX, max_y: maxY,
-        width: maxX - minX, height: maxY - minY,
+        min_x: bx0, min_y: by0, max_x: bx1, max_y: by1,
+        width: bx1 - bx0, height: by1 - by0,
       },
     },
     nets: [...rootToNet.values()].map((n) => ({ id: n.id, name: n.name })),
     footprints,
     segments,
-    zones,
+    vias,
     silkLines,
     silkText,
     edgeLines: [
-      { start: { x: minX, y: minY }, end: { x: maxX, y: minY } },
-      { start: { x: maxX, y: minY }, end: { x: maxX, y: maxY } },
-      { start: { x: maxX, y: maxY }, end: { x: minX, y: maxY } },
-      { start: { x: minX, y: maxY }, end: { x: minX, y: minY } },
+      { start: { x: bx0, y: by0 }, end: { x: bx1, y: by0 } },
+      { start: { x: bx1, y: by0 }, end: { x: bx1, y: by1 } },
+      { start: { x: bx1, y: by1 }, end: { x: bx0, y: by1 } },
+      { start: { x: bx0, y: by1 }, end: { x: bx0, y: by0 } },
     ],
   };
 }
