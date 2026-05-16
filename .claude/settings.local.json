@@ -18,7 +18,12 @@
       "Bash(timeout 60 python:*)",
       "Bash(chmod:*)",
       "Bash(awk:*)",
-      "Bash(timeout 300 python scripts/data_collection/scrape_datasheets.py)"
+      "Bash(timeout 300 python scripts/data_collection/scrape_datasheets.py)",
+      "Bash(codex --version)",
+      "Skill(codex:setup)",
+      "Bash(node *)",
+      "Bash(git rm *)",
+      "Bash(echo \"exit:$?\")"
     ],
     "deny": [],
     "ask": []
