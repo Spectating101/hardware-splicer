@@ -21,8 +21,9 @@ import {
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Sparkles, Trash2, Download, GraduationCap, CircuitBoard, X } from "lucide-react";
-import { downloadKicadPcb } from "@/lib/kicad-serializer";
+import { Sparkles, Trash2, Download, GraduationCap, CircuitBoard, X, Factory } from "lucide-react";
+import { downloadKicadPcb, serializeBuildToKicadPcb } from "@/lib/kicad-serializer";
+import { ManufacturePanel, type MfgResult } from "@/components/build/manufacture-panel";
 import { SiteHeader } from "@/components/site-header";
 import { ModuleLibraryPanel } from "@/components/build/module-library-panel";
 import { ModuleNode, type ModuleNodeData } from "@/components/build/module-node";
@@ -93,6 +94,7 @@ function BuildInner() {
   const [aiBusy, setAiBusy] = useState(false);
   const [aiNote, setAiNote] = useState<string | null>(null);
   const [pcbOpen, setPcbOpen] = useState(false);
+  const [mfg, setMfg] = useState<MfgResult | null>(null);
   useEffect(() => {
     if (pcbOpen) document.documentElement.classList.add("pcb-modal-open");
     else document.documentElement.classList.remove("pcb-modal-open");
@@ -308,6 +310,72 @@ function BuildInner() {
     URL.revokeObjectURL(url);
   }, [graph]);
 
+  // Send the routed board to the REAL backend pipeline: physics-engine DFM
+  // preflight + Gerber generation. The client DRC is the instant local check;
+  // this is the authoritative second opinion + actual fab files.
+  const manufactureReal = useCallback(async () => {
+    if (nodes.length === 0) return;
+    setMfg({ busy: true });
+    try {
+      const pcb = serializeBuildToKicadPcb(graph);
+      const mkForm = () => {
+        const f = new FormData();
+        f.set(
+          "pcb_file",
+          new File([pcb], `circuit-build-${Date.now()}.kicad_pcb`, { type: "text/plain" }),
+        );
+        return f;
+      };
+      const gForm = mkForm();
+      gForm.set("quantity", "5");
+
+      const [dfmR, gerR] = await Promise.allSettled([
+        fetch("/api/proxy/report/dfm", { method: "POST", body: mkForm() }),
+        fetch("/api/proxy/manufacture/gerber", { method: "POST", body: gForm }),
+      ]);
+
+      const result: MfgResult = { busy: false };
+
+      if (dfmR.status === "fulfilled") {
+        const j = await dfmR.value.json().catch(() => null);
+        if (dfmR.value.ok && j?.validation) {
+          result.dfm = {
+            manufacturing_ready: !!j.manufacturing_ready,
+            critical: j.validation.critical ?? 0,
+            errors: j.validation.errors ?? 0,
+            warnings: j.validation.warnings ?? 0,
+            issues: Array.isArray(j.validation.issues) ? j.validation.issues : [],
+          };
+        } else if (!j) {
+          result.error = "DFM endpoint returned no JSON.";
+        } else {
+          result.error = j.error || `DFM failed (${dfmR.value.status}).`;
+        }
+      } else {
+        result.error = dfmR.reason?.message || "DFM request failed.";
+      }
+
+      if (gerR.status === "fulfilled") {
+        const j = await gerR.value.json().catch(() => null);
+        if (gerR.value.ok && j) {
+          const zip: string | undefined = j.zip_file || j.zip_url;
+          result.gerber = {
+            filename: zip ? String(zip).split(/[\\/]/).pop() : undefined,
+            manufacturing_ready: !!j.manufacturing_ready,
+            cost: j.cost_estimates,
+          };
+        }
+      }
+
+      if (!result.dfm && !result.gerber && !result.error) {
+        result.error = "Backend unreachable — start circuit-ai-api (:5000).";
+      }
+      setMfg(result);
+    } catch (e: unknown) {
+      setMfg({ busy: false, error: e instanceof Error ? e.message : String(e) });
+    }
+  }, [graph, nodes.length]);
+
   const empty = nodes.length === 0;
 
   return (
@@ -356,6 +424,13 @@ function BuildInner() {
               className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-violet-200 hover:bg-violet-500/15 disabled:text-slate-500"
             >
               <GraduationCap className="h-3.5 w-3.5" /> KiCad
+            </button>
+            <button
+              onClick={manufactureReal}
+              disabled={empty || mfg?.busy}
+              className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/20 px-3 py-1.5 text-xs font-semibold text-violet-100 hover:bg-violet-500/30 disabled:bg-transparent disabled:text-slate-500"
+            >
+              <Factory className="h-3.5 w-3.5" /> {mfg?.busy ? "Manufacturing…" : "Manufacture"}
             </button>
             <button
               onClick={clearAll}
@@ -436,6 +511,8 @@ function BuildInner() {
         <SafetyCheckPanel warnings={warnings} />
 
         <DrcPanel drc={drc} />
+
+        <ManufacturePanel mfg={mfg} />
 
         <div className="mt-auto rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[10px] leading-4 text-slate-400">
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Wire legend</div>
