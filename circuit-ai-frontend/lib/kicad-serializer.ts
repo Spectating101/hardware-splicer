@@ -1,10 +1,15 @@
-// Minimal BuildGraph -> .kicad_pcb serializer. Emits a valid KiCad 7+ PCB file
-// with one generic 2.54mm header footprint per module and a net per wire.
-// Trace geometry is *not* routed; the user opens in KiCad and places traces
-// themselves. The goal is a graduate-path handoff, not a finished PCB.
+// BuildGraph -> .kicad_pcb serializer.
+//
+// This emits the ACTUAL routed board, not a ratsnest stub: it serializes the
+// PcbGeometry produced by the correct-by-construction router
+// (lib/pcb/build-to-geometry.ts) — footprints at their placed positions,
+// every F.Cu/B.Cu trace segment, every via, the board outline, and silk.
+// The file you download opens in KiCad as the exact DRC-clean board the
+// /build preview shows, ready for KiCad -> Gerber -> fab.
 
 import type { BuildGraph } from "@/lib/rules/safety-rules";
-import { findModule } from "@/lib/modules/module-library";
+import type { PcbGeometry } from "@/lib/cad-types";
+import { buildGraphToGeometry } from "@/lib/pcb/build-to-geometry";
 
 const HEADER = `(kicad_pcb (version 20221018) (generator circuit-ai)
   (general (thickness 1.6))
@@ -23,134 +28,121 @@ const HEADER = `(kicad_pcb (version 20221018) (generator circuit-ai)
 
 const FOOTER = `)\n`;
 
-interface Net {
-  id: number;
-  name: string;
-}
-
 function quote(s: string): string {
-  return `"${s.replace(/"/g, '\\"')}"`;
+  return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
-function buildNets(graph: BuildGraph): { nets: Net[]; pinNetMap: Map<string, number> } {
-  // Union-find over (nodeId, pinId) pairs linked by wires.
-  const parent = new Map<string, string>();
-  const key = (n: string, p: string) => `${n}/${p}`;
-  const find = (k: string): string => {
-    if (!parent.has(k)) parent.set(k, k);
-    let cur = k;
-    while (parent.get(cur) !== cur) {
-      const p = parent.get(cur)!;
-      parent.set(cur, parent.get(p)!);
-      cur = parent.get(cur)!;
-    }
-    return cur;
-  };
-  const union = (a: string, b: string) => {
-    const ra = find(a);
-    const rb = find(b);
-    if (ra !== rb) parent.set(ra, rb);
-  };
+const n = (v: number) => (Number.isFinite(v) ? +v.toFixed(4) : 0);
 
-  for (const n of graph.nodes) {
-    const mod = findModule(n.moduleId);
-    if (!mod) continue;
-    for (const p of mod.pins) find(key(n.id, p.id));
+/** Map geometry net ids -> contiguous KiCad net ids; net 0 is the no-net. */
+function buildNetTable(geo: PcbGeometry) {
+  const byGeoId = new Map<number, { kid: number; name: string }>();
+  const decls: string[] = [`  (net 0 "")`];
+  let kid = 1;
+  for (const net of geo.nets) {
+    if (net.id == null || byGeoId.has(net.id)) continue;
+    byGeoId.set(net.id, { kid, name: net.name });
+    decls.push(`  (net ${kid} ${quote(net.name)})`);
+    kid += 1;
   }
-  for (const w of graph.wires) {
-    union(key(w.from.nodeId, w.from.pinId), key(w.to.nodeId, w.to.pinId));
-  }
-
-  const rootToNetId = new Map<string, number>();
-  const pinNetMap = new Map<string, number>();
-  const nets: Net[] = [{ id: 0, name: "" }]; // kicad net 0 = no-connect
-
-  for (const n of graph.nodes) {
-    const mod = findModule(n.moduleId);
-    if (!mod) continue;
-    for (const p of mod.pins) {
-      const k = key(n.id, p.id);
-      const root = find(k);
-      let netId = rootToNetId.get(root);
-      // Only assign a net if the pin is actually wired to something else
-      const isWired = graph.wires.some(
-        (w) =>
-          (w.from.nodeId === n.id && w.from.pinId === p.id) ||
-          (w.to.nodeId === n.id && w.to.pinId === p.id),
-      );
-      if (!isWired) {
-        pinNetMap.set(k, 0);
-        continue;
-      }
-      if (netId === undefined) {
-        netId = nets.length;
-        // Prefer GND/VCC naming when the role hints it
-        const role = p.role;
-        let name = `Net-${netId}`;
-        if (role === "gnd") name = "GND";
-        else if (role === "power_out" && /3\.?3/.test(p.voltage ?? "")) name = "+3V3";
-        else if (role === "power_out" && /^5/.test(p.voltage ?? "")) name = "+5V";
-        nets.push({ id: netId, name });
-        rootToNetId.set(root, netId);
-      }
-      pinNetMap.set(k, netId);
-    }
-  }
-  return { nets, pinNetMap };
+  const kidOf = (id: number | null | undefined) =>
+    id == null ? 0 : byGeoId.get(id)?.kid ?? 0;
+  const nameOf = (id: number | null | undefined) =>
+    id == null ? "" : byGeoId.get(id)?.name ?? "";
+  return { decls: decls.join("\n"), kidOf, nameOf };
 }
 
-function moduleFootprint(
-  nodeIdx: number,
-  nodeId: string,
-  moduleId: string,
-  pinNetMap: Map<string, number>,
-  nets: Net[],
+function footprintBlock(
+  fp: PcbGeometry["footprints"][number],
+  idx: number,
+  kidOf: (id: number | null | undefined) => number,
+  nameOf: (id: number | null | undefined) => string,
 ): string {
-  const mod = findModule(moduleId);
-  if (!mod) return "";
-  const cols = 4;
-  const col = nodeIdx % cols;
-  const row = Math.floor(nodeIdx / cols);
-  const x = 20 + col * 40;
-  const y = 20 + row * 40;
-  const pinCount = mod.pins.length;
-  const spacing = 2.54;
-
-  const padsStr = mod.pins
-    .map((p, i) => {
-      const px = (i - (pinCount - 1) / 2) * spacing;
-      const netId = pinNetMap.get(`${nodeId}/${p.id}`) ?? 0;
-      const net = nets[netId];
-      const netStr = netId === 0 ? "" : ` (net ${net.id} ${quote(net.name)})`;
-      return `    (pad ${quote(p.id)} thru_hole circle (at ${px.toFixed(2)} 0) (size 1.7 1.7) (drill 1.0) (layers "*.Cu" "*.Mask")${netStr})`;
+  const pinCount = (fp.pads ?? []).length || 1;
+  const lib = `Connector_PinHeader_2.54mm:PinHeader_1x${String(pinCount).padStart(2, "0")}_P2.54mm_Vertical`;
+  const pads = (fp.pads ?? [])
+    .map((pad) => {
+      // Footprint pads are local to the footprint origin; the router gives
+      // world coords with zero rotation.
+      const lx = n(pad.wx - fp.at.x);
+      const ly = n(pad.wy - fp.at.y);
+      const w = n(pad.size_w_mm ?? 1.7);
+      const h = n(pad.size_h_mm ?? 1.7);
+      const drill = pad.drill_mm ? ` (drill ${n(pad.drill_mm)})` : "";
+      const kid = kidOf(pad.net?.id ?? null);
+      const netStr = kid === 0 ? "" : ` (net ${kid} ${quote(nameOf(pad.net?.id ?? null))})`;
+      const shape = pad.shape ?? "circle";
+      const type = pad.type ?? "thru_hole";
+      const layers = type === "smd" ? `"F.Cu" "F.Paste" "F.Mask"` : `"*.Cu" "*.Mask"`;
+      return `    (pad ${quote(pad.num)} ${type} ${shape} (at ${lx} ${ly}) (size ${w} ${h})${drill} (layers ${layers})${netStr})`;
     })
     .join("\n");
 
-  return `  (footprint "Connector_PinHeader_2.54mm:PinHeader_1x${pinCount.toString().padStart(2, "0")}_P2.54mm_Vertical" (layer "F.Cu")
-    (at ${x} ${y})
-    (fp_text reference ${quote(`U${nodeIdx + 1}`)} (at 0 -4) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
-    (fp_text value ${quote(mod.label)} (at 0 4) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
-${padsStr}
+  return `  (footprint ${quote(lib)} (layer "${fp.layer}")
+    (at ${n(fp.at.x)} ${n(fp.at.y)} ${n(fp.at.rot_deg)})
+    (attr through_hole)
+    (fp_text reference ${quote(fp.ref || `U${idx + 1}`)} (at 0 -3) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
+    (fp_text value ${quote(fp.value || fp.ref)} (at 0 3) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+${pads}
   )`;
 }
 
 export function serializeBuildToKicadPcb(graph: BuildGraph): string {
-  const { nets, pinNetMap } = buildNets(graph);
+  const geo = buildGraphToGeometry(graph);
+  const { decls, kidOf, nameOf } = buildNetTable(geo);
 
-  const netDecls = nets
-    .map((n) => `  (net ${n.id} ${quote(n.name)})`)
+  const footprints = (geo.footprints ?? [])
+    .map((fp, i) => footprintBlock(fp, i, kidOf, nameOf))
     .join("\n");
 
-  const footprints = graph.nodes
-    .map((n, i) => moduleFootprint(i, n.id, n.moduleId, pinNetMap, nets))
-    .filter(Boolean)
+  const segments = (geo.segments ?? [])
+    .filter((s) => !(s.start.x === s.end.x && s.start.y === s.end.y))
+    .map(
+      (s) =>
+        `  (segment (start ${n(s.start.x)} ${n(s.start.y)}) (end ${n(s.end.x)} ${n(s.end.y)}) (width ${n(s.width_mm ?? 0.25)}) (layer "${s.layer}") (net ${kidOf(s.net?.id ?? null)}))`,
+    )
     .join("\n");
 
-  return HEADER + netDecls + "\n" + footprints + "\n" + FOOTER;
+  const vias = (geo.vias ?? [])
+    .map(
+      (v) =>
+        `  (via (at ${n(v.x)} ${n(v.y)}) (size ${n(v.size_mm)}) (drill ${n(v.drill_mm)}) (layers "F.Cu" "B.Cu") (net ${kidOf(v.net?.id ?? null)}))`,
+    )
+    .join("\n");
+
+  const edges = (geo.edgeLines ?? [])
+    .map(
+      (e) =>
+        `  (gr_line (start ${n(e.start.x)} ${n(e.start.y)}) (end ${n(e.end.x)} ${n(e.end.y)}) (layer "Edge.Cuts") (width 0.1))`,
+    )
+    .join("\n");
+
+  const silk = [
+    ...(geo.silkLines ?? []).map(
+      (l) =>
+        `  (gr_line (start ${n(l.start.x)} ${n(l.start.y)}) (end ${n(l.end.x)} ${n(l.end.y)}) (layer "${l.layer}") (width ${n(l.width_mm)}))`,
+    ),
+    ...(geo.silkText ?? []).map(
+      (t) =>
+        `  (gr_text ${quote(t.text)} (at ${n(t.at.x)} ${n(t.at.y)} ${n(t.at.rot_deg)}) (layer "${t.layer}") (effects (font (size ${n(t.size_mm)} ${n(t.size_mm)}) (thickness 0.15))))`,
+    ),
+  ].join("\n");
+
+  return (
+    HEADER +
+    decls +
+    "\n" +
+    [footprints, segments, vias, edges, silk].filter(Boolean).join("\n") +
+    "\n" +
+    FOOTER
+  );
 }
 
-/** Trigger a browser download of the serialized file. */
-export function downloadKicadPcb(graph: BuildGraph, filename = `circuit-build-${Date.now()}.kicad_pcb`) {
+/** Trigger a browser download of the serialized routed board. */
+export function downloadKicadPcb(
+  graph: BuildGraph,
+  filename = `circuit-build-${Date.now()}.kicad_pcb`,
+) {
   if (typeof window === "undefined") return;
   const pcb = serializeBuildToKicadPcb(graph);
   const blob = new Blob([pcb], { type: "text/plain" });
