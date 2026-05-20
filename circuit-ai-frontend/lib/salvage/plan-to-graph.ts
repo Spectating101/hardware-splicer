@@ -151,33 +151,36 @@ const RECIPES: Record<string, Recipe> = {
     notes: ["ESP32 supplies the wireless interface natively; USB-powered."],
   },
 
-  // Pico (3.3V logic) matches ssd1306 directly — no level shifter. Servo
-  // VCC is intentionally OFF-board: a 200mA+ servo must not share an MCU
-  // rail and the library has no fixed-output 5V regulator. Bench connects
-  // sg90 VCC to a 5V supply; we wire its signal + ground only.
+  // Pico (3.3V logic) matches ssd1306 directly — no level shifter. The new
+  // AMS1117-5V LDO gives the servo its own clean 5V rail, dedicated, so it
+  // doesn't drag the MCU.
   inspection_motion_fixture: {
     modules: [
       { role: "mcu", moduleId: "rpi-pico" },
       { role: "ui", moduleId: "ssd1306-128x64" },
+      { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
     ],
     wires: [
       ...i2cBus("mcu", "GP4", "GP5", "3V3", "GND", "ui"),
+      { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
+      { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
+      { from: { role: "svo_psu", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "mcu", pin: "GP0" }, to: { role: "svo", pin: "SIG" } },
-      { from: { role: "mcu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
     ],
     notes: [
-      "Power the SG90 VCC from a SEPARATE 5V bench supply (NOT the MCU rail).",
-      "Pico is USB-powered; signal/ground share with the servo via a single GND tie.",
+      "Feed 7-15V to the AMS1117-5V VIN; it produces a clean 5V for the servo.",
+      "Pico is USB-powered; GND ties to the servo rail for a common signal reference.",
     ],
   },
 
-  // HC-SR04 is 5V-only; arduino-nano matches without level shift. Servo VCC
-  // stays off-board for the same reason as inspection_motion_fixture.
+  // HC-SR04 is 5V-only; arduino (5V logic) matches without level shift.
+  // Servo gets its own dedicated 5V via AMS1117-5V — never the MCU rail.
   plotter_motion_stage: {
     modules: [
       { role: "mcu", moduleId: "arduino-nano" },
       { role: "limit", moduleId: "hc-sr04" },
+      { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
     ],
     wires: [
@@ -185,12 +188,14 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "GND" }, to: { role: "limit", pin: "GND" } },
       { from: { role: "mcu", pin: "D2" }, to: { role: "limit", pin: "TRIG" } },
       { from: { role: "mcu", pin: "A0" }, to: { role: "limit", pin: "ECHO" } },
+      { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
+      { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
+      { from: { role: "svo_psu", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "mcu", pin: "D3" }, to: { role: "svo", pin: "SIG" } },
-      { from: { role: "mcu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
     ],
     notes: [
-      "Power the SG90 VCC from a SEPARATE 5V bench supply (NOT the Arduino 5V rail).",
-      "Arduino is USB-powered.",
+      "Feed 7-15V to the AMS1117-5V VIN; it produces a clean 5V for the servo.",
+      "Arduino is USB-powered; HC-SR04 runs off the Arduino 5V rail.",
     ],
   },
 

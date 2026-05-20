@@ -174,6 +174,22 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     warnings: ["Inefficient at high drop — use a buck for >2V drop @ >200mA."],
   },
   {
+    id: "ldo-ams1117-5v",
+    label: "AMS1117 5V LDO",
+    category: "power",
+    summary: "Linear 5V regulator, 1A, drops excess as heat. Use for clean 5V from 7-15V.",
+    inputVoltageRange: [7, 15],
+    pins: [
+      { id: "VIN", label: "VIN", role: "power_in", voltage: "7-15V" },
+      { id: "VOUT", label: "VOUT", role: "power_out", voltage: "5V", currentMaxMa: 1000 },
+      { id: "GND", label: "GND", role: "gnd" },
+    ],
+    warnings: [
+      "Heatsink required above ~500mA continuous (LDO dissipates Vin-5V across the load current).",
+      "For higher efficiency at >500mA, use a fixed-output 5V buck (e.g. R-78E5.0) instead.",
+    ],
+  },
+  {
     id: "tp4056",
     label: "TP4056 Li-ion charger",
     category: "power",
