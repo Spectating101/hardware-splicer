@@ -21,9 +21,11 @@ import {
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Sparkles, Trash2, Download, GraduationCap, CircuitBoard, X, Factory } from "lucide-react";
+import { Sparkles, Trash2, Download, GraduationCap, CircuitBoard, X, Factory, Recycle } from "lucide-react";
 import { downloadKicadPcb, serializeBuildToKicadPcb } from "@/lib/kicad-serializer";
 import { ManufacturePanel, type MfgResult } from "@/components/build/manufacture-panel";
+import { SalvageImportModal } from "@/components/build/salvage-import-modal";
+import type { TranslationResult } from "@/lib/salvage/plan-to-graph";
 import { SiteHeader } from "@/components/site-header";
 import { ModuleLibraryPanel } from "@/components/build/module-library-panel";
 import { ModuleNode, type ModuleNodeData } from "@/components/build/module-node";
@@ -95,6 +97,45 @@ function BuildInner() {
   const [aiNote, setAiNote] = useState<string | null>(null);
   const [pcbOpen, setPcbOpen] = useState(false);
   const [mfg, setMfg] = useState<MfgResult | null>(null);
+  const [salvageOpen, setSalvageOpen] = useState(false);
+
+  const importSalvage = useCallback((result: TranslationResult) => {
+    // Replace the canvas with the recipe's modules + role-tagged wires. Layout
+    // mirrors addModule's column grid so nodes don't pile up at the origin.
+    const newNodes = result.graph.nodes.map((bn, i) => {
+      const col = i % 3;
+      const row = Math.floor(i / 3);
+      return {
+        id: bn.id,
+        type: "module" as const,
+        position: { x: 60 + col * 340, y: 60 + row * 320 },
+        data: { moduleId: bn.moduleId },
+      };
+    });
+    const newEdges = result.graph.wires.map((w) => ({
+      id: w.id,
+      source: w.from.nodeId,
+      target: w.to.nodeId,
+      sourceHandle: w.from.pinId,
+      targetHandle: w.to.pinId,
+    }));
+    setNodes(newNodes);
+    setEdges(newEdges);
+    // Keep idRef aligned so future manual additions don't collide.
+    const maxN = newNodes.reduce(
+      (m, n) => Math.max(m, parseInt(n.id.replace(/^n/, ""), 10) || 0),
+      0,
+    );
+    idRef.current = maxN;
+    setAiNote(
+      [
+        `Imported "${result.buildId}" recipe.`,
+        ...result.notes,
+        ...(result.warnings.length ? ["⚠ " + result.warnings.join(" ")] : []),
+      ].join(" "),
+    );
+    setSalvageOpen(false);
+  }, [setNodes, setEdges, setAiNote]);
   useEffect(() => {
     if (pcbOpen) document.documentElement.classList.add("pcb-modal-open");
     else document.documentElement.classList.remove("pcb-modal-open");
@@ -390,6 +431,12 @@ function BuildInner() {
         <div data-build-toolbar className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center pt-3">
           <div className="pointer-events-auto flex gap-2 rounded-full border border-white/10 bg-black/60 px-2 py-1 backdrop-blur">
             <button
+              onClick={() => setSalvageOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-400/25"
+            >
+              <Recycle className="h-3.5 w-3.5" /> Salvage
+            </button>
+            <button
               onClick={askJarvisToWire}
               disabled={aiBusy || nodes.length < 2}
               className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-[0_0_12px_rgba(34,211,238,0.4)] hover:bg-cyan-300 disabled:bg-white/10 disabled:text-slate-400 disabled:shadow-none"
@@ -519,6 +566,12 @@ function BuildInner() {
           <Legend />
         </div>
       </aside>
+
+      <SalvageImportModal
+        open={salvageOpen}
+        onClose={() => setSalvageOpen(false)}
+        onImport={importSalvage}
+      />
 
       {pcbOpen && pcbGeometry && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[100] flex flex-col bg-[#05080f]">
