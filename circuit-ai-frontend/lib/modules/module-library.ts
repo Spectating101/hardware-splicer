@@ -41,7 +41,7 @@ export interface ModuleSpec {
   id: string;
   label: string;
   /** Coarse category for filtering/icons. */
-  category: "mcu" | "power" | "sensor" | "display" | "actuator" | "radio" | "interface" | "passive";
+  category: "mcu" | "power" | "sensor" | "display" | "actuator" | "radio" | "interface" | "passive" | "other";
   summary: string;
   /** Logic level (most common). Used by safety rules to flag mismatches. */
   logicVoltage?: 3.3 | 5 | 12;
@@ -52,6 +52,20 @@ export interface ModuleSpec {
   pins: ModulePin[];
   /** Safety notes surfaced in inspectors. */
   warnings?: string[];
+
+  // ---- encyclopedia fields (optional, all backward-compatible) ----
+  /** Where this entry originated: curated by hand or ingested from a dataset. */
+  source?: "curated" | "ingested-component-db" | "ingested-pinout-extract";
+  /** Manufacturer name (Bosch, NXP, Atmel, etc.). */
+  manufacturer?: string;
+  /** Canonical part number (e.g. "BME280", "ATmega328P"). */
+  partNumber?: string;
+  /** Link to the canonical datasheet or vendor product page. */
+  datasheetUrl?: string;
+  /** Typical hobby/retail price in USD. */
+  priceUsd?: number;
+  /** Alternative names searches should match (e.g. "Bosch BME280", "BME-280"). */
+  aliases?: string[];
 }
 
 // A tight v1 library — the 20 modules that cover ~80% of beginner projects.
@@ -389,10 +403,41 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
   },
 ];
 
+// Merge the auto-ingested encyclopedia entries (87 from the component
+// database — see lib/modules/ingested.ts) after the curated set. Curated
+// wins on id collisions because it's listed first.
+import { INGESTED_MODULES } from "./ingested";
+const _seenIds = new Set(MODULE_LIBRARY.map((m) => m.id));
+for (const m of INGESTED_MODULES) {
+  if (!_seenIds.has(m.id)) {
+    MODULE_LIBRARY.push(m);
+    _seenIds.add(m.id);
+  }
+}
+
 export function findModule(id: string): ModuleSpec | undefined {
   return MODULE_LIBRARY.find((m) => m.id === id);
 }
 
 export function findPin(module: ModuleSpec, pinId: string): ModulePin | undefined {
   return module.pins.find((p) => p.id === pinId);
+}
+
+/** Convenience: filter by category. */
+export function modulesByCategory(category: ModuleSpec["category"]): ModuleSpec[] {
+  return MODULE_LIBRARY.filter((m) => m.category === category);
+}
+
+/** Search by id, label, partNumber, manufacturer, or aliases — case-insensitive. */
+export function searchModules(query: string): ModuleSpec[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return MODULE_LIBRARY.slice();
+  return MODULE_LIBRARY.filter((m) => {
+    if (m.id.toLowerCase().includes(q)) return true;
+    if (m.label.toLowerCase().includes(q)) return true;
+    if (m.partNumber?.toLowerCase().includes(q)) return true;
+    if (m.manufacturer?.toLowerCase().includes(q)) return true;
+    if (m.aliases?.some((a) => a.toLowerCase().includes(q))) return true;
+    return false;
+  });
 }
