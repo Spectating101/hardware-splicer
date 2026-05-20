@@ -11,7 +11,7 @@ the curated module-library.ts).
 import json, re, sys
 from pathlib import Path
 
-ROOT = Path("Path(__file__).resolve().parents[1]")
+ROOT = Path(__file__).resolve().parents[1]
 DB = json.load(open(ROOT / "data/component_cache/component_database.json"))
 OUT = ROOT / "circuit-ai-frontend/lib/modules/ingested.ts"
 CURATED = ROOT / "circuit-ai-frontend/lib/modules/module-library.ts"
