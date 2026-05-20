@@ -403,15 +403,20 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
   },
 ];
 
-// Merge the auto-ingested encyclopedia entries (87 from the component
-// database — see lib/modules/ingested.ts) after the curated set. Curated
-// wins on id collisions because it's listed first.
+// Merge auto-ingested encyclopedia entries after the curated set. Curated
+// wins on id collisions because it's listed first; the component-DB ingest
+// (~87 module-breakouts) is followed by the bare-IC pinout extracts (~12
+// op-amps, USB-UART bridges, flash chips) for completeness.
 import { INGESTED_MODULES } from "./ingested";
+import { INGESTED_PINOUTS } from "./ingested-pinouts";
+import { CURATED_EXTENDED } from "./curated-extended";
 const _seenIds = new Set(MODULE_LIBRARY.map((m) => m.id));
-for (const m of INGESTED_MODULES) {
-  if (!_seenIds.has(m.id)) {
-    MODULE_LIBRARY.push(m);
-    _seenIds.add(m.id);
+for (const src of [CURATED_EXTENDED, INGESTED_MODULES, INGESTED_PINOUTS]) {
+  for (const m of src) {
+    if (!_seenIds.has(m.id)) {
+      MODULE_LIBRARY.push(m);
+      _seenIds.add(m.id);
+    }
   }
 }
 
