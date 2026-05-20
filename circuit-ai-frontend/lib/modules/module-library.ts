@@ -55,7 +55,7 @@ export interface ModuleSpec {
 
   // ---- encyclopedia fields (optional, all backward-compatible) ----
   /** Where this entry originated: curated by hand or ingested from a dataset. */
-  source?: "curated" | "ingested-component-db" | "ingested-pinout-extract";
+  source?: "curated" | "ingested-component-db" | "ingested-pinout-extract" | "ingested-kb-board" | "ingested-kb-ic" | "ingested-datasheet-pdf";
   /** Manufacturer name (Bosch, NXP, Atmel, etc.). */
   manufacturer?: string;
   /** Canonical part number (e.g. "BME280", "ATmega328P"). */
@@ -410,8 +410,10 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
 import { INGESTED_MODULES } from "./ingested";
 import { INGESTED_PINOUTS } from "./ingested-pinouts";
 import { CURATED_EXTENDED } from "./curated-extended";
+import { INGESTED_KB } from "./ingested-kb";
+import { INGESTED_DATASHEETS } from "./ingested-datasheets";
 const _seenIds = new Set(MODULE_LIBRARY.map((m) => m.id));
-for (const src of [CURATED_EXTENDED, INGESTED_MODULES, INGESTED_PINOUTS]) {
+for (const src of [CURATED_EXTENDED, INGESTED_KB, INGESTED_DATASHEETS, INGESTED_MODULES, INGESTED_PINOUTS]) {
   for (const m of src) {
     if (!_seenIds.has(m.id)) {
       MODULE_LIBRARY.push(m);
