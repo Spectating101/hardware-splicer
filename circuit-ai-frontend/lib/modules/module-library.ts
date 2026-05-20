@@ -66,6 +66,16 @@ export interface ModuleSpec {
   priceUsd?: number;
   /** Alternative names searches should match (e.g. "Bosch BME280", "BME-280"). */
   aliases?: string[];
+  /**
+   * Capability tags matching the salvage planner vocabulary
+   * (motor_or_load, power, controller, actuator_driver, switch_or_button,
+   * sensor_or_adc, led_or_light, display_or_ui, camera_or_vision,
+   * speaker_or_audio, wireless, network_interface, enclosure_candidate,
+   * connector, usb_serial, mechanical_motion, wheel_or_drive, fan_or_pump,
+   * filter_frame, battery). Lets the salvage backend match harvested
+   * capability sets to concrete library parts automatically.
+   */
+  capabilityTags?: string[];
 }
 
 // A tight v1 library — the 20 modules that cover ~80% of beginner projects.
@@ -420,6 +430,78 @@ for (const src of [CURATED_EXTENDED, INGESTED_KB, INGESTED_DATASHEETS, INGESTED_
       _seenIds.add(m.id);
     }
   }
+}
+
+// Derive salvage-planner capability tags from each module's category + role
+// composition + label hints. Lets the upcycling pipeline match a salvage plan's
+// capability requirements straight to library parts without a hand-curated
+// per-build recipe — closes the vocabulary gap permanently for new build types.
+function deriveCapabilityTags(m: ModuleSpec): string[] {
+  const tags = new Set<string>();
+  const text = `${m.id} ${m.label} ${m.summary} ${m.partNumber ?? ""}`.toLowerCase();
+  const roles = new Set(m.pins.map((p) => p.role));
+
+  // Category-driven base tags
+  if (m.category === "mcu") tags.add("controller");
+  if (m.category === "power") tags.add("power");
+  if (m.category === "sensor") tags.add("sensor_or_adc");
+  if (m.category === "display") tags.add("display_or_ui");
+  if (m.category === "actuator") tags.add("actuator_driver");
+  if (m.category === "radio") { tags.add("wireless"); tags.add("network_interface"); }
+
+  // Pin-role refinements (only when not redundant or misleading)
+  if (roles.has("pwm") && m.category === "actuator") tags.add("actuator_driver");
+
+  // Label-hint refinements (lowercased text-match against id+label+summary).
+  // LED match excludes the substring "led" inside other words by requiring
+  // a word boundary or a known LED keyword.
+  if (/(?:^|\W)led(?:\W|$)|neopixel|ws28\d{2}|apa10\d|led.?strip|led.?matrix/.test(text)) tags.add("led_or_light");
+  if (/servo/.test(text)) { tags.add("mechanical_motion"); tags.add("motor_or_load"); }
+  if (/stepper|nema/.test(text)) { tags.add("mechanical_motion"); tags.add("motor_or_load"); }
+  if (/(?:^|\W)motor(?:\W|$)|dc\s*motor|bldc/.test(text)) { tags.add("motor_or_load"); tags.add("mechanical_motion"); }
+  if (/(?:^|\W)fan(?:\W|$)|pump|blower/.test(text)) { tags.add("fan_or_pump"); tags.add("motor_or_load"); }
+  // Audio: be specific — avoid matching "amp" inside "amplifier" used for
+  // non-audio things like thermocouple amps.
+  if (/speaker|buzzer|mp3|i2s|audio.?(amp|player|out|jack)|class.?d/.test(text)) tags.add("speaker_or_audio");
+  if (/camera|ov\d{4}|esp32.?cam|imx/.test(text)) tags.add("camera_or_vision");
+  if (/button|switch|keypad|joystick|encoder|touch/.test(text)) tags.add("switch_or_button");
+  if (/usb.?(uart|ttl|serial)|ch340|cp2102|ft232|ftdi/.test(text)) {
+    tags.add("usb_serial"); tags.add("connector");
+  }
+  if (/battery|lipo|li.?ion|18650|charger|charge\b/.test(text)) tags.add("battery");
+  if (/wifi|wi.?fi|bluetooth|esp.?(?:32|826)|nrf24|nrf52|lora|sim8\d{2}|hc.?05|hc.?06/.test(text)) {
+    tags.add("wireless");
+  }
+  if (/lan|ethernet|w5500|w5100/.test(text)) tags.add("network_interface");
+  if (/relay/.test(text)) { tags.add("actuator_driver"); tags.add("switch_or_button"); }
+  if (/h.?bridge|mosfet|drv8|l9110|l298n|bts7960/.test(text)) tags.add("actuator_driver");
+  if (/wheel|drive|tank|robot/.test(text)) tags.add("wheel_or_drive");
+  if (/enclosure|case|chassis|cover/.test(text)) tags.add("enclosure_candidate");
+  if (/filter|hepa|carbon/.test(text)) tags.add("filter_frame");
+  if (/connector|jack|terminal|barrel|usb.?c|micro.?usb|jst|xt60|xt30/.test(text)) {
+    tags.add("connector");
+  }
+
+  return [...tags];
+}
+
+for (const m of MODULE_LIBRARY) {
+  // Don't overwrite explicit tags if a future curated entry sets them.
+  if (!m.capabilityTags || m.capabilityTags.length === 0) {
+    m.capabilityTags = deriveCapabilityTags(m);
+  }
+}
+
+/**
+ * Find library modules whose `capabilityTags` satisfy a salvage-planner
+ * `requires_any` shape: an array of capability sets, each of which must be
+ * matched by AT LEAST ONE tag on the module.
+ */
+export function findModulesByCapabilities(requiresAny: string[][]): ModuleSpec[] {
+  return MODULE_LIBRARY.filter((m) => {
+    const tags = new Set(m.capabilityTags ?? []);
+    return requiresAny.every((alt) => alt.some((cap) => tags.has(cap)));
+  });
 }
 
 export function findModule(id: string): ModuleSpec | undefined {

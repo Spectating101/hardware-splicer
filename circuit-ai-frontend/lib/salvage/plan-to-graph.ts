@@ -15,6 +15,44 @@
 // Pure, deterministic, no deps. Pin names match lib/modules/module-library.
 
 import type { BuildGraph } from "@/lib/rules/safety-rules";
+import { findModulesByCapabilities, type ModuleSpec } from "@/lib/modules/module-library";
+
+// Mirror of the backend BUILD_CATALOG (src/intelligence/salvage_splice_planner.py)
+// — used as a fall-back when no hand-curated recipe matches the build_id.
+// Each entry's requires_any is the capability-set list the salvage planner
+// uses; we match against the library's derived capabilityTags to suggest
+// concrete library modules for buildable products without a wired recipe.
+const BUILD_CATALOG_CAPS: Record<string, string[][]> = {
+  usb_fume_extractor: [["motor_or_load", "fan_or_pump"], ["actuator_driver"], ["power"]],
+  inspection_motion_fixture: [["mechanical_motion"], ["led_or_light", "camera_or_vision"], ["power"]],
+  low_voltage_motor_test_jig: [["motor_or_load", "fan_or_pump", "mechanical_motion"], ["power"], ["connector", "switch_or_button"]],
+  robot_drive_base: [["motor_or_load", "wheel_or_drive"], ["actuator_driver", "controller"], ["power"]],
+  plotter_motion_stage: [["mechanical_motion"], ["switch_or_button", "sensor_or_adc"], ["power"]],
+  smart_relay_box: [["controller"], ["actuator_driver"], ["power"]],
+  sensor_logger: [["controller"], ["sensor_or_adc"], ["power"]],
+  network_status_indicator: [["wireless", "network_interface"], ["display_or_ui", "led_or_light"], ["power"]],
+  small_audio_amp_box: [["speaker_or_audio"], ["power"], ["switch_or_button", "connector"]],
+  salvaged_input_panel: [["switch_or_button"], ["connector"], ["power", "controller"]],
+  camera_ir_light_or_sensor_mount: [["camera_or_vision", "sensor_or_adc"], ["power"], ["enclosure_candidate", "connector"]],
+  bench_power_adapter: [["power"], ["connector"]],
+  usb_uart_debug_adapter: [["usb_serial"], ["connector"]],
+  indicator_or_task_light: [["led_or_light"], ["power"]],
+};
+
+/** Pick one module per requirement group (set-cover) — fallback composer. */
+function pickModulesForRequirements(reqAny: string[][]): ModuleSpec[] {
+  const chosen: ModuleSpec[] = [];
+  const chosenIds = new Set<string>();
+  for (const group of reqAny) {
+    const candidates = findModulesByCapabilities([group]).filter((m) => !chosenIds.has(m.id));
+    if (candidates.length === 0) continue;
+    // Prefer the most-focused module (fewest unrelated tags) for tighter fits.
+    candidates.sort((a, b) => (a.capabilityTags?.length ?? 99) - (b.capabilityTags?.length ?? 99));
+    chosen.push(candidates[0]);
+    chosenIds.add(candidates[0].id);
+  }
+  return chosen;
+}
 
 type Wire = { from: { role: string; pin: string }; to: { role: string; pin: string } };
 type Recipe = {
@@ -310,7 +348,22 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
 
   const recipe = RECIPES[buildId];
   if (!recipe) {
-    warnings.push(`No translator recipe for build "${buildId}".`);
+    // Fall-back: use capability matcher against the library to suggest modules
+    // for this build's requires_any. Returns an unwired starter graph the user
+    // can complete on the canvas — strictly better than an empty result.
+    const reqAny = BUILD_CATALOG_CAPS[buildId];
+    if (reqAny) {
+      const picked = pickModulesForRequirements(reqAny);
+      if (picked.length > 0) {
+        const nodes = picked.map((m, i) => ({ id: `n${i + 1}`, moduleId: m.id }));
+        warnings.push(
+          `No hand-curated recipe for "${buildId}" — suggested ${picked.length} module(s) ` +
+          `via capability matching: ${picked.map((m) => m.id).join(", ")}. Wire them on the canvas.`,
+        );
+        return { graph: { nodes, wires: [] }, buildId, notes, warnings };
+      }
+    }
+    warnings.push(`No translator recipe and no capability fall-back for "${buildId}".`);
     return { graph: { nodes: [], wires: [] }, buildId, notes, warnings };
   }
 
