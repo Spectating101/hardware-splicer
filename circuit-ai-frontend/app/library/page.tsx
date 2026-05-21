@@ -308,7 +308,7 @@ function ModuleDrawer({ m, onClose }: { m: ModuleSpec; onClose(): void }) {
         <div className="mt-6 border-t border-white/10 pt-3 text-[10px] text-slate-500">
           Source: <span className="font-mono">{m.source ?? "curated-original"}</span>
           {" · "}
-          <Link href={`/build?preload=${encodeURIComponent(m.id)}`} className="text-cyan-300 hover:text-cyan-200">
+          <Link href={`/build?modules=${encodeURIComponent(m.id)}`} className="text-cyan-300 hover:text-cyan-200">
             open in /build canvas →
           </Link>
         </div>
