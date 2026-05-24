@@ -62,15 +62,6 @@ type Recipe = {
   notes?: string[];
 };
 
-// Building blocks for common wire patterns.
-const powerChain = (
-  src: string, sPlus: string, sMinus: string,
-  load: string, lPos: string, lNeg: string,
-): Wire[] => [
-  { from: { role: src, pin: sPlus }, to: { role: load, pin: lPos } },
-  { from: { role: src, pin: sMinus }, to: { role: load, pin: lNeg } },
-];
-
 const i2cBus = (
   ctrl: string, sda: string, scl: string, vcc: string, gnd: string,
   dev: string,

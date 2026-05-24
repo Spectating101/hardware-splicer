@@ -451,6 +451,20 @@ function deriveCapabilityTags(m: ModuleSpec): string[] {
 
   // Pin-role refinements (only when not redundant or misleading)
   if (roles.has("pwm") && m.category === "actuator") tags.add("actuator_driver");
+  if (m.category === "interface" && (
+    roles.has("digital_io") ||
+    roles.has("digital_in") ||
+    roles.has("digital_out") ||
+    roles.has("uart_tx") ||
+    roles.has("uart_rx") ||
+    roles.has("i2c_sda") ||
+    roles.has("i2c_scl") ||
+    roles.has("spi_mosi") ||
+    roles.has("spi_miso") ||
+    roles.has("spi_sck")
+  )) {
+    tags.add("connector");
+  }
 
   // Label-hint refinements (lowercased text-match against id+label+summary).
   // LED match excludes the substring "led" inside other words by requiring
@@ -468,6 +482,19 @@ function deriveCapabilityTags(m: ModuleSpec): string[] {
   if (/usb.?(uart|ttl|serial)|ch340|cp2102|ft232|ftdi/.test(text)) {
     tags.add("usb_serial"); tags.add("connector");
   }
+  if (/level.?shifter|logic.?level|translator/.test(text)) tags.add("connector");
+  if (/gpio|io.?expander|shift.?reg|74hc595|mcp23017|pcf8574/.test(text)) {
+    tags.add("connector");
+    tags.add("switch_or_button");
+    tags.add("led_or_light");
+  }
+  if (/dac|pwm|servo.?driver/.test(text)) tags.add("actuator_driver");
+  if (/timer|ne555/.test(text)) tags.add("controller");
+  if (/opto|isolator|phototransistor/.test(text)) {
+    tags.add("connector");
+    tags.add("switch_or_button");
+  }
+  if (/eeprom|flash|sd.?card|memory|storage|rtc/.test(text)) tags.add("connector");
   if (/battery|lipo|li.?ion|18650|charger|charge\b/.test(text)) tags.add("battery");
   if (/wifi|wi.?fi|bluetooth|esp.?(?:32|826)|nrf24|nrf52|lora|sim8\d{2}|hc.?05|hc.?06/.test(text)) {
     tags.add("wireless");
@@ -481,6 +508,9 @@ function deriveCapabilityTags(m: ModuleSpec): string[] {
   if (/connector|jack|terminal|barrel|usb.?c|micro.?usb|jst|xt60|xt30/.test(text)) {
     tags.add("connector");
   }
+  if (/regulator|buck|boost|ldo|lm2596|lm317|lm7805/.test(text)) tags.add("power");
+  if (/\b(op.?amp|comparator|lm358|lm393|tl072)\b/.test(text)) tags.add("sensor_or_adc");
+  if (/logic|inverter|74hc04/.test(text)) tags.add("connector");
 
   return [...tags];
 }

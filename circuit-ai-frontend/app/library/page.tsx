@@ -109,7 +109,7 @@ export default function LibraryPage() {
             </Chip>
             {CATEGORY_ORDER.filter((c) => fullCounts[c]).map((c) => (
               <Chip key={c} active={cat === c} onClick={() => setCat(cat === c ? null : c)} count={fullCounts[c]}>
-                {c}
+                {CATEGORY_LABEL[c] ?? c}
               </Chip>
             ))}
           </div>
@@ -216,23 +216,33 @@ function ModuleCard({ m, onClick }: { m: ModuleSpec; onClick(): void }) {
 }
 
 function ModuleDrawer({ m, onClose }: { m: ModuleSpec; onClose(): void }) {
+  const buildHref = `/build?modules=${encodeURIComponent(m.id)}`;
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div
         className="flex h-full w-full max-w-2xl flex-col overflow-y-auto border-l border-white/10 bg-[#0a0f1a] p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-3 flex items-start justify-between">
+        <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
-              {m.category} · {m.id}
+              {CATEGORY_LABEL[m.category] ?? m.category} · {m.id}
             </div>
             <h2 className="mt-1 text-xl font-semibold">{m.label}</h2>
             <p className="mt-1 text-sm text-slate-300">{m.summary}</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-1.5 hover:bg-white/10">
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link
+              href={buildHref}
+              className="inline-flex items-center gap-1 rounded-md border border-cyan-400/30 bg-cyan-400/10 px-2.5 py-1.5 text-xs font-medium text-cyan-100 hover:bg-cyan-400/20"
+            >
+              Open in build <ExternalLink className="h-3 w-3" />
+            </Link>
+            <button onClick={onClose} className="rounded-full p-1.5 hover:bg-white/10">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-[11px] text-slate-400">
@@ -308,7 +318,7 @@ function ModuleDrawer({ m, onClose }: { m: ModuleSpec; onClose(): void }) {
         <div className="mt-6 border-t border-white/10 pt-3 text-[10px] text-slate-500">
           Source: <span className="font-mono">{m.source ?? "curated-original"}</span>
           {" · "}
-          <Link href={`/build?modules=${encodeURIComponent(m.id)}`} className="text-cyan-300 hover:text-cyan-200">
+          <Link href={buildHref} className="text-cyan-300 hover:text-cyan-200">
             open in /build canvas →
           </Link>
         </div>
