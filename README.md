@@ -61,6 +61,14 @@ python3 scripts/hardware_splicer.py scenario --scenario examples/scenarios/rover
 
 Scenario files wrap a compile spec, optional overrides, expected authority milestones, and required artifacts. The runner writes `PROJECT_AUTHORITY.json`, `SCENARIO_SUMMARY.md`, and `SCENARIO_RESULT.json`; the clean rover scenario is claimable, while the bad-speed scenario still compiles but blocks the project claim because the declared speed exceeds the available wheel RPM.
 
+Plan from a user-style project brief, then run the generated scenario:
+
+```bash
+python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant
+```
+
+The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, bench evidence, and reviewed release scope as explicit next actions.
+
 Run the lighter local Circuit-AI -> Mecha-Splicer -> 3D-Splicer smoke:
 
 ```bash
@@ -94,6 +102,7 @@ Useful API endpoints:
 - `POST /v1/mechatronics-authority`
 - `POST /v1/compile`
 - `POST /v1/scenario-run`
+- `POST /v1/intake-run`
 - `POST /v1/jobs`
 - `GET /v1/jobs`
 - `GET /v1/jobs/{job_id}`

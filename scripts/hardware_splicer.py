@@ -13,7 +13,14 @@ if str(SRC) in sys.path:
     sys.path.remove(str(SRC))
 sys.path.insert(0, str(SRC))
 
-from hardware_splicer import HardwareCompileSpec, compile_hardware_bundle, load_hardware_scenario, run_hardware_scenario
+from hardware_splicer import (
+    HardwareCompileSpec,
+    compile_hardware_bundle,
+    load_hardware_scenario,
+    load_project_intake,
+    run_hardware_scenario,
+    run_project_intake,
+)
 from hardware_splicer.runtime import runtime_status
 from hardware_splicer.validation import validate_compile_spec, validation_errors
 
@@ -100,6 +107,39 @@ def _run_scenario(args: argparse.Namespace) -> int:
     return 0 if result["ok"] else 1
 
 
+def _run_intake(args: argparse.Namespace) -> int:
+    intake = load_project_intake(Path(args.brief))
+    result = run_project_intake(
+        intake,
+        out_dir=args.out,
+        start_splicer=not args.no_start_splicer,
+        splicer_port=int(args.port or 0),
+        request_id=getattr(args, "request_id", None),
+    )
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        plan = result["intake_plan"]
+        authority = result["project_authority"]
+        print(f"ok={result['ok']}")
+        print(f"compile_ok={result['compile_ok']}")
+        print(f"archetype={plan['archetype']}")
+        print(f"planning_confidence={plan['planning_confidence']}")
+        print(f"claimable={authority['claimable']}")
+        print(f"authority_level={authority['project_authority_level']}")
+        print(f"authority_score={authority['authority_score']}")
+        print(f"request_id={result['request_id']}")
+        print(f"out_dir={result['out_dir']}")
+        print(f"project_intake={result['artifacts']['project_intake']}")
+        print(f"planned_scenario={result['artifacts']['planned_scenario']}")
+        print(f"project_authority={result['artifacts']['project_authority']}")
+        if plan["missing_info"]:
+            print("missing_info=" + " | ".join(plan["missing_info"][:8]))
+        if authority["blockers"]:
+            print("blockers=" + " | ".join(authority["blockers"][:5]))
+    return 0 if result["compile_ok"] else 1
+
+
 def _run_doctor(args: argparse.Namespace) -> int:
     status = runtime_status(splicer_url=args.splicer_url)
     if args.json:
@@ -162,6 +202,15 @@ def main() -> int:
     scenario_parser.add_argument("--request-id", default=None, help="Stable build/request identifier for manifests and API parity.")
     scenario_parser.add_argument("--json", action="store_true", help="Print scenario result JSON.")
     scenario_parser.set_defaults(func=_run_scenario)
+
+    intake_parser = sub.add_parser("intake", help="Plan and run a Hardware-Splicer project from a user-style brief.")
+    intake_parser.add_argument("--brief", required=True, help="Path to project intake JSON.")
+    intake_parser.add_argument("--out", required=True, help="Output directory.")
+    intake_parser.add_argument("--port", type=int, default=0, help="3D-Splicer port. Defaults to a free local port.")
+    intake_parser.add_argument("--no-start-splicer", action="store_true", help="Use an already running 3D-Splicer service.")
+    intake_parser.add_argument("--request-id", default=None, help="Stable build/request identifier for manifests and API parity.")
+    intake_parser.add_argument("--json", action="store_true", help="Print intake run result JSON.")
+    intake_parser.set_defaults(func=_run_intake)
 
     demo_parser = sub.add_parser("demo", help="Compile the canonical controller plus pan-tilt demo.")
     demo_parser.add_argument("--out", default="/tmp/hardware_splicer_demo", help="Output directory.")

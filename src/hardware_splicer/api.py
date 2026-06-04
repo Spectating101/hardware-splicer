@@ -15,6 +15,7 @@ from .compiler import _resolve_board_design_files, compile_hardware_bundle
 from .jobs import JobBackend, artifact_manifest, build_output_archive
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
+from .project_intake import plan_project_from_intake, run_project_intake
 from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
@@ -38,6 +39,14 @@ class ValidateRequest(BaseModel):
 
 class ScenarioRunRequest(BaseModel):
     scenario: Dict[str, Any]
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    start_splicer: bool = True
+    splicer_port: int = 0
+
+
+class IntakeRunRequest(BaseModel):
+    intake: Dict[str, Any]
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     start_splicer: bool = True
@@ -257,6 +266,29 @@ def create_app() -> FastAPI:
             raise _error(503, "dependency_unavailable", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "scenario_run_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/intake-run")
+    def intake_run(request: IntakeRunRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            intake = dict(request.intake)
+            plan = plan_project_from_intake(intake)
+            spec = HardwareCompileSpec.from_dict(plan["scenario"]["compile_spec"])
+            out_dir = _resolve_api_out_dir(request, spec, request_id)
+            return run_project_intake(
+                intake,
+                out_dir=out_dir,
+                start_splicer=bool(request.start_splicer),
+                splicer_port=int(request.splicer_port or 0),
+                request_id=request_id,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except (TimeoutError, ConnectionError, ServiceStartError) as exc:
+            raise _error(503, "dependency_unavailable", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "intake_run_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/jobs", status_code=202)
     def submit_job(request: CompileRequest) -> Dict[str, Any]:

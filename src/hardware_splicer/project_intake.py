@@ -1,0 +1,585 @@
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Mapping
+
+from .scenario_runner import run_hardware_scenario
+
+
+SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
+
+
+def load_project_intake(path: str | Path) -> Dict[str, Any]:
+    source = Path(path).resolve()
+    data = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(data, Mapping):
+        raise ValueError("project intake file must contain a JSON object")
+    intake = dict(data)
+    intake.setdefault("source_file", str(source))
+    return intake
+
+
+def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
+    body = _to_dict(intake, "intake")
+    project_name = _slug(str(body.get("project_name") or body.get("name") or body.get("goal") or "hardware_splicer_project"))
+    goal = str(body.get("goal") or body.get("intent") or body.get("brief") or project_name).strip()
+    constraints = _to_dict(body.get("constraints") or {}, "intake.constraints")
+    budget = _budget(body)
+    parts = _normalized_parts(body.get("available_parts") or body.get("parts") or body.get("resources") or [])
+    archetype = _detect_archetype(goal, parts)
+    assumptions = _assumptions(archetype, parts, constraints, budget)
+    missing = _missing_info(archetype, parts, constraints, budget)
+    spec = _compile_spec(project_name, goal, archetype, parts, constraints, budget, assumptions)
+    scenario = {
+        "scenario_name": f"{project_name}_{archetype}",
+        "intent": goal,
+        "compile_spec": spec,
+        "expected": _expected_authority(archetype, body),
+        "acceptance": {
+            "allowed_blockers": int(_to_dict(body.get("acceptance") or {}, "intake.acceptance").get("allowed_blockers") or 99),
+            "source_blockers_are_next_actions": True,
+            "must_have_artifacts": [
+                "ROBOTICS_SIMULATION.json",
+                "ROBOTICS_PLATFORM_AUTHORITY.json",
+                "MECHATRONICS_AUTHORITY.json",
+                "CASEFILE.json",
+                "PROJECT_LOG.json",
+                "HARDWARE_REVIEW.md",
+            ],
+        },
+    }
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "project_name": project_name,
+        "goal": goal,
+        "archetype": archetype,
+        "planning_confidence": _planning_confidence(archetype, parts, missing),
+        "budget": budget,
+        "normalized_parts": parts,
+        "assumptions": assumptions,
+        "missing_info": missing,
+        "scenario": scenario,
+    }
+
+
+def run_project_intake(
+    intake: Mapping[str, Any],
+    *,
+    out_dir: str | Path,
+    start_splicer: bool = True,
+    splicer_port: int = 0,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    plan = plan_project_from_intake(intake)
+    result = run_hardware_scenario(
+        plan["scenario"],
+        out_dir=out_dir,
+        start_splicer=start_splicer,
+        splicer_port=splicer_port,
+        request_id=request_id or plan["project_name"],
+    )
+    out_path = Path(result["out_dir"])
+    intake_file = out_path / "PROJECT_INTAKE.json"
+    planned_scenario_file = out_path / "PLANNED_SCENARIO.json"
+    intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
+    result["intake_plan"] = plan
+    result["artifacts"] = {
+        **result["artifacts"],
+        "project_intake": str(intake_file),
+        "planned_scenario": str(planned_scenario_file),
+    }
+    return result
+
+
+def _compile_spec(
+    project_name: str,
+    goal: str,
+    archetype: str,
+    parts: List[Dict[str, Any]],
+    constraints: Dict[str, Any],
+    budget: Dict[str, Any],
+    assumptions: List[str],
+) -> Dict[str, Any]:
+    board = _board(project_name, archetype, parts, constraints)
+    mechanism = _mechanism(project_name, archetype, parts)
+    robotics_project = _robotics_project(goal, archetype, constraints, budget)
+    robotics_actuation = _robotics_actuation(archetype, parts)
+    control_stack = _control_stack(archetype, parts)
+    safety_case = _safety_case(archetype)
+    return {
+        "project_name": project_name,
+        "simulation_fidelity": "starter",
+        "run_mechanism_sim": True,
+        "use_3d_splicer": False,
+        "render_stl": False,
+        "machine": {
+            "machine_name": _camel(project_name),
+            "design_intent": goal,
+            "boards": [board],
+        },
+        "mechanism": mechanism,
+        "robotics_project": robotics_project,
+        "robotics_actuation": robotics_actuation,
+        "control_stack": control_stack,
+        "safety_case": safety_case,
+        "planning_notes": {
+            "assumptions": assumptions,
+            "evidence_status": "planning_authority_only",
+            "release_status": "bench evidence and reviewed release are not attached by intake planning.",
+        },
+    }
+
+
+def _board(project_name: str, archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any]) -> Dict[str, Any]:
+    controller = _first_part(parts, ["esp32", "arduino", "raspberry_pi_pico", "microcontroller"]) or {"name": "controller", "type": "microcontroller"}
+    actuators = [part for part in parts if part["class"] == "actuator"]
+    sensors = [part for part in parts if part["class"] == "sensor"]
+    peak_current = sum(max(_float(part.get("stall_current_a") or part.get("current_a"), 0.0), 0.0) for part in actuators)
+    if peak_current <= 0:
+        peak_current = 1.5 if archetype == "automatic_watering" else 1.0
+    logic_current = _float(constraints.get("logic_current_a"), 0.35)
+    actuator_voltage = _dominant_voltage(actuators, 5.0 if archetype in {"automatic_watering", "airflow_controller"} else 6.0)
+    return {
+        "board_id": "main_ctrl",
+        "name": str(controller.get("name") or "main_ctrl"),
+        "lane": "project_intake",
+        "estimated_current_a": round(logic_current, 3),
+        "pcb_outline_mm": [80, 50, 1.6],
+        "capabilities": {
+            "pwm_channels": max(2, len([part for part in actuators if part.get("drive") in {"servo_pwm", "mosfet_pwm"}])),
+            "stepper_channels": len([part for part in actuators if part.get("type") == "stepper"]),
+            "actuation_current_budget_a": round(max(peak_current * 1.35, peak_current + 0.5), 3),
+        },
+        "requirements": {
+            "meta": {
+                "design_intent": "planning",
+                "project_name": f"{project_name}::main_ctrl",
+            },
+            "deliverables": {
+                "schematic": True,
+                "pcb_layout": True,
+                "bom": True,
+                "bringup_notes": True,
+            },
+            "interfaces": _interfaces(archetype, sensors, actuators),
+            "power": {
+                "sources": [
+                    {"name": "logic_5v", "voltage_v": 5.0, "max_current_a": max(0.8, logic_current + 0.4)},
+                    {"name": "actuator_supply", "voltage_v": actuator_voltage, "max_current_a": round(max(peak_current * 1.35, peak_current + 0.5), 3)},
+                ],
+                "rails": [
+                    {"name": "3V3", "voltage_v": 3.3, "max_current_a": 0.6},
+                    {"name": "ACT", "voltage_v": actuator_voltage, "max_current_a": round(max(peak_current * 1.35, peak_current + 0.5), 3)},
+                ],
+                "loads": [
+                    {"name": str(controller.get("name") or "controller"), "rail": "3V3", "current_a": logic_current},
+                ]
+                + [
+                    {"name": str(part.get("name") or part.get("type")), "rail": "ACT", "current_a": _float(part.get("current_a"), 0.4)}
+                    for part in actuators
+                ],
+                "protection": {
+                    "fuse_or_ptc": "current-limited actuator rail",
+                    "reverse_polarity": "keyed connector or diode/MOSFET protection",
+                    "inrush_limit": "bench current limit during first actuation",
+                },
+            },
+            "risk_and_validation": {
+                "what_good_looks_like": "Controller powers up, sensors read plausible values, actuator commands run within current limit, and failsafe state stops motion/output.",
+                "test_plan": "Bench-test logic rail, actuator rail, sensor readout, first actuation under current limit, failsafe stop, and enclosure clearance.",
+                "known_risks": [
+                    "Planning intake does not replace physical measurement, wiring inspection, or bench validation.",
+                    "Actuator current and thermal margins must be verified with the exact salvaged or purchased part.",
+                ],
+            },
+        },
+    }
+
+
+def _mechanism(project_name: str, archetype: str, parts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    mechanism: Dict[str, Any] = {
+        "project_name": f"{project_name}_mech",
+        "mode": "prototype",
+        "process": "fdm",
+        "enclosure": {
+            "name": "controller_case",
+            "inner_w_mm": 95,
+            "inner_d_mm": 70,
+            "inner_h_mm": 32,
+            "wall_mm": 2.4,
+            "floor_mm": 2.0,
+            "lid_mm": 2.0,
+            "clearance_mm": 0.6,
+        },
+    }
+    if archetype == "automatic_watering":
+        mechanism["bracket"] = {"name": "pump_mount", "w_mm": 55, "d_mm": 35, "t_mm": 3.0}
+        mechanism["assembly"] = {
+            "name": "watering_module",
+            "interfaces": ["controller_case", "pump_mount", "tube strain relief"],
+        }
+    elif archetype == "airflow_controller":
+        mechanism["bracket"] = {"name": "fan_mount", "w_mm": 80, "d_mm": 80, "t_mm": 3.0}
+    elif archetype == "pan_tilt":
+        servo = _first_part(parts, ["servo"]) or {}
+        mechanism["pan_tilt"] = {
+            "name": "sensor_head",
+            "pan_servo": str(servo.get("model") or "sg90"),
+            "tilt_servo": str(servo.get("model") or "sg90"),
+            "max_payload_n": 0.8,
+            "payload_offset_mm": 35,
+        }
+    else:
+        mechanism["bracket"] = {"name": "actuator_mount", "w_mm": 60, "d_mm": 40, "t_mm": 3.0}
+    return mechanism
+
+
+def _robotics_project(goal: str, archetype: str, constraints: Dict[str, Any], budget: Dict[str, Any]) -> Dict[str, Any]:
+    runtime_min = _float(constraints.get("runtime_min") or constraints.get("min_runtime_min"), 30.0 if budget.get("salvage_mode") else 15.0)
+    return {
+        "robot_class": archetype,
+        "mission": [_mission(archetype, goal)],
+        "operating_environment": {
+            "domain": "indoor bench/prototype",
+            "boundaries": ["low-voltage prototype", "supervised first-use", "current-limited bench bring-up"],
+            "hazards": _hazards(archetype),
+        },
+        "constraints": {
+            "runtime_min": runtime_min,
+            "mission_duty_cycle": _float(constraints.get("mission_duty_cycle"), 0.35 if archetype == "automatic_watering" else 0.65),
+            "baseline_current_a": _float(constraints.get("baseline_current_a"), 0.25),
+            "payload_kg": _float(constraints.get("payload_kg"), 0.2),
+            "mass_kg": _float(constraints.get("mass_kg"), 1.0),
+        },
+        "power": {
+            "battery": {
+                "chemistry": "USB power bank or small DC adapter",
+                "nominal_voltage_v": _float(constraints.get("battery_voltage_v"), 5.0),
+                "capacity_mah": _float(constraints.get("battery_capacity_mah"), 2000.0),
+                "usable_fraction": 0.75,
+            }
+        },
+        "platform": {
+            "type": "stationary_mechatronics_module",
+            "domains": _domains(archetype),
+            "degrees_of_freedom": 1,
+        },
+    }
+
+
+def _robotics_actuation(archetype: str, parts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    actuators = [part for part in parts if part["class"] == "actuator"]
+    if archetype == "automatic_watering" and not actuators:
+        actuators = [_part("mini water pump", "pump", "actuator", voltage_v=5.0, current_a=0.8)]
+    if archetype == "airflow_controller" and not actuators:
+        actuators = [_part("dc fan", "fan", "actuator", voltage_v=5.0, current_a=0.25)]
+    sensors = [part for part in parts if part["class"] == "sensor"]
+    if archetype == "automatic_watering" and not sensors:
+        sensors = [_part("soil moisture sensor", "soil_moisture", "sensor")]
+    return {
+        "actuators": [_actuator_row(part) for part in actuators],
+        "sensors": [_sensor_row(part) for part in sensors],
+        "protections": _protections(archetype, actuators),
+    }
+
+
+def _control_stack(archetype: str, parts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    controller = _first_part(parts, ["esp32", "arduino", "microcontroller"]) or {"name": "main_ctrl"}
+    sensors = [part for part in parts if part["class"] == "sensor"]
+    return {
+        "controllers": [{"id": "main_ctrl", "board_id": "main_ctrl", "firmware": f"{archetype}_controller"}],
+        "loops": [{"name": f"{archetype}_control", "rate_hz": 10 if archetype == "automatic_watering" else 50, "status": "planned"}],
+        "sensors": [_sensor_row(part) for part in sensors],
+        "comms": [{"type": "usb_serial", "failsafe": "local_stop"}],
+        "failsafes": ["current_limit", "watchdog", "manual_power_cutoff", "timeout_stop"],
+        "notes": f"Controller candidate: {controller.get('name') or 'main_ctrl'}.",
+    }
+
+
+def _safety_case(archetype: str) -> Dict[str, Any]:
+    return {
+        "hazards": [{"id": item, "mitigation": _mitigation(item), "status": "planned"} for item in _hazards(archetype)],
+        "mitigations": [
+            "current_limit",
+            "manual_power_cutoff",
+            "timeout_stop",
+            "logic_power_isolation",
+            "flyback_or_tvs",
+            "separate_actuator_supply",
+        ],
+    }
+
+
+def _expected_authority(archetype: str, body: Dict[str, Any]) -> Dict[str, Any]:
+    target = str(body.get("target_authority_level") or "control_safety_architecture").strip()
+    expected = {"minimum_authority_level": target}
+    if archetype in {"automatic_watering", "airflow_controller", "pan_tilt"}:
+        expected["robotics_project_release"] = False
+    return expected
+
+
+def _detect_archetype(goal: str, parts: List[Dict[str, Any]]) -> str:
+    text = " ".join([goal] + [str(part.get("name") or "") + " " + str(part.get("type") or "") for part in parts]).lower()
+    if any(word in text for word in ["soil", "water", "watering", "pump", "irrigation", "plant"]):
+        return "automatic_watering"
+    if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor"]):
+        return "rover"
+    if any(word in text for word in ["fan", "airflow", "vent", "blower"]):
+        return "airflow_controller"
+    if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal"]):
+        return "pan_tilt"
+    if any(word in text for word in ["gripper", "claw", "grab"]):
+        return "gripper"
+    return "generic_mechatronics"
+
+
+def _normalized_parts(data: Any) -> List[Dict[str, Any]]:
+    if isinstance(data, Mapping):
+        rows = data.get("available_parts") or data.get("parts") or []
+    else:
+        rows = data
+    if not isinstance(rows, list):
+        rows = [rows]
+    parts = []
+    for row in rows:
+        if isinstance(row, Mapping):
+            part = dict(row)
+            name = str(part.get("name") or part.get("part") or part.get("type") or "part")
+        else:
+            name = str(row)
+            part = {"name": name}
+        normalized = _classify_part(name, part)
+        parts.append(normalized)
+    return parts
+
+
+def _classify_part(name: str, part: Dict[str, Any]) -> Dict[str, Any]:
+    text = f"{name} {part.get('type') or ''} {part.get('kind') or ''}".lower()
+    if any(word in text for word in ["pump", "solenoid"]):
+        return _part(name, "pump" if "pump" in text else "solenoid", "actuator", part)
+    if any(word in text for word in ["fan", "blower"]):
+        return _part(name, "fan", "actuator", part)
+    if "servo" in text or re.search(r"\bsg90\b|\bmg996r\b", text):
+        return _part(name, "servo", "actuator", part, drive="servo_pwm", voltage_v=5.0, current_a=0.25)
+    if any(word in text for word in ["motor", "dc gear", "gear motor"]):
+        return _part(name, "dc_motor", "actuator", part, drive="h_bridge", voltage_v=6.0, current_a=0.5)
+    if any(word in text for word in ["soil", "moisture"]):
+        return _part(name, "soil_moisture", "sensor", part)
+    if any(word in text for word in ["tof", "range", "ultrasonic", "limit", "current sensor", "sensor"]):
+        return _part(name, "sensor", "sensor", part)
+    if any(word in text for word in ["esp32", "arduino", "pico", "microcontroller", "mcu"]):
+        return _part(name, "microcontroller", "controller", part)
+    return _part(name, str(part.get("type") or "part"), "material", part)
+
+
+def _part(
+    name: str,
+    part_type: str,
+    part_class: str,
+    source: Mapping[str, Any] | None = None,
+    **defaults: Any,
+) -> Dict[str, Any]:
+    row = dict(defaults)
+    if source:
+        row.update(dict(source))
+    row["name"] = str(row.get("name") or name)
+    row["type"] = str(row.get("type") or part_type)
+    row["class"] = part_class
+    if row["class"] == "actuator":
+        row.setdefault("voltage_v", 5.0 if row["type"] in {"pump", "fan", "servo"} else 6.0)
+        row.setdefault("current_a", 0.8 if row["type"] == "pump" else 0.3)
+        row.setdefault("drive", "low_side_mosfet" if row["type"] in {"pump", "solenoid"} else "mosfet_pwm")
+    return row
+
+
+def _actuator_row(part: Dict[str, Any]) -> Dict[str, Any]:
+    row = {
+        "id": _slug(str(part.get("id") or part.get("name") or part.get("type") or "actuator")),
+        "type": part.get("type"),
+        "role": part.get("role") or _role(part),
+        "drive": part.get("drive"),
+        "voltage_v": _float(part.get("voltage_v"), 5.0),
+        "current_a": _float(part.get("current_a"), 0.5),
+        "run_current_a": _float(part.get("run_current_a") or part.get("current_a"), 0.5),
+        "stall_current_a": _float(part.get("stall_current_a"), max(_float(part.get("current_a"), 0.5) * 1.8, 0.8)),
+    }
+    for key in ["output_free_speed_rpm", "stall_torque_nm", "wheel_d_mm", "model"]:
+        if part.get(key) is not None:
+            row[key] = part[key]
+    return row
+
+
+def _sensor_row(part: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "id": _slug(str(part.get("id") or part.get("name") or "sensor")),
+        "type": part.get("type") or "sensor",
+        "role": part.get("role") or ("feedback" if part.get("type") != "soil_moisture" else "soil moisture threshold"),
+    }
+
+
+def _interfaces(archetype: str, sensors: List[Dict[str, Any]], actuators: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    interfaces = [{"name": "programming", "type": "USB/UART", "voltage_v": 5.0}]
+    interfaces.extend({"name": str(sensor.get("name")), "type": "sensor", "voltage_v": 3.3} for sensor in sensors)
+    interfaces.extend({"name": str(actuator.get("name")), "type": str(actuator.get("drive") or "actuator_driver"), "voltage_v": _float(actuator.get("voltage_v"), 5.0)} for actuator in actuators)
+    if archetype == "automatic_watering":
+        interfaces.append({"name": "pump output", "type": "low_side_mosfet", "voltage_v": _dominant_voltage(actuators, 5.0)})
+    return interfaces
+
+
+def _assumptions(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any], budget: Dict[str, Any]) -> List[str]:
+    assumptions = [
+        "This is a planning authority package until measured geometry, wiring inspection, bench logs, and release review are attached.",
+        "Actuator current values are treated as estimates unless supplied explicitly in available_parts.",
+    ]
+    if archetype == "automatic_watering":
+        assumptions.append("Pump is driven through a low-side MOSFET or relay module with flyback/TVS protection and timeout shutoff.")
+    if not any(part["class"] == "controller" for part in parts):
+        assumptions.append("A generic ESP32/Arduino-class controller is assumed.")
+    if not budget:
+        assumptions.append("No explicit budget was supplied; planner chooses common low-cost prototype parts.")
+    if not constraints.get("runtime_min"):
+        assumptions.append("Default runtime target is used because constraints.runtime_min was not supplied.")
+    return assumptions
+
+
+def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any], budget: Dict[str, Any]) -> List[str]:
+    missing = []
+    if not any(part["class"] == "controller" for part in parts):
+        missing.append("controller choice")
+    if not any(part["class"] == "actuator" for part in parts):
+        missing.append("actuator model/current")
+    if archetype == "automatic_watering" and not any(part["class"] == "sensor" for part in parts):
+        missing.append("soil/water feedback sensor")
+    if not constraints.get("runtime_min"):
+        missing.append("runtime target")
+    if not budget:
+        missing.append("budget limit")
+    missing.extend(["measured dimensions", "bench evidence", "reviewed release scope"])
+    return missing
+
+
+def _planning_confidence(archetype: str, parts: List[Dict[str, Any]], missing: List[str]) -> float:
+    base = 0.45 if archetype == "generic_mechatronics" else 0.62
+    base += min(len(parts), 5) * 0.04
+    base -= len([item for item in missing if item not in {"measured dimensions", "bench evidence", "reviewed release scope"}]) * 0.06
+    return round(max(0.2, min(base, 0.86)), 2)
+
+
+def _budget(body: Dict[str, Any]) -> Dict[str, Any]:
+    raw = body.get("budget") or body.get("budget_usd") or body.get("budget_twd")
+    if isinstance(raw, Mapping):
+        budget = dict(raw)
+    elif raw is None:
+        budget = {}
+    else:
+        budget = {"amount": raw}
+    if body.get("salvage_mode") is not None:
+        budget["salvage_mode"] = bool(body.get("salvage_mode"))
+    return budget
+
+
+def _first_part(parts: List[Dict[str, Any]], tokens: List[str]) -> Dict[str, Any] | None:
+    for part in parts:
+        text = f"{part.get('name')} {part.get('type')} {part.get('model')}".lower()
+        if any(token in text for token in tokens):
+            return part
+    return None
+
+
+def _protections(archetype: str, actuators: List[Dict[str, Any]]) -> List[str]:
+    protections = ["current_limit", "logic_power_isolation", "manual_power_cutoff", "timeout_stop"]
+    if any(part.get("type") in {"pump", "solenoid", "dc_motor", "fan"} for part in actuators):
+        protections.extend(["flyback_or_tvs", "separate_actuator_supply"])
+    if archetype == "automatic_watering":
+        protections.extend(["leak_check", "dry_run_timeout"])
+    return sorted(set(protections))
+
+
+def _domains(archetype: str) -> List[str]:
+    if archetype == "automatic_watering":
+        return ["fluid_handling", "sensing", "automation"]
+    if archetype == "airflow_controller":
+        return ["airflow", "thermal", "automation"]
+    if archetype == "rover":
+        return ["locomotion", "sensing", "automation"]
+    return ["motion", "sensing", "automation"]
+
+
+def _hazards(archetype: str) -> List[str]:
+    if archetype == "automatic_watering":
+        return ["water_near_electronics", "pump_overcurrent", "dry_run", "leak"]
+    if archetype == "airflow_controller":
+        return ["fan_blade_contact", "startup_current", "thermal_runaway"]
+    if archetype == "rover":
+        return ["wheel_pinch", "battery_overcurrent", "signal_loss"]
+    return ["actuator_pinch", "overcurrent", "unexpected_motion"]
+
+
+def _mitigation(hazard: str) -> str:
+    mapping = {
+        "water_near_electronics": "Separate wet path from enclosure, add drip loop, seal cable entry, and test with low voltage only.",
+        "pump_overcurrent": "Current-limit actuator rail and stop on timeout or overcurrent.",
+        "dry_run": "Use timeout and reservoir/soil feedback before extended operation.",
+        "leak": "Bench leak-test before unattended operation.",
+        "fan_blade_contact": "Use guard grille and keep fan shroud closed.",
+        "startup_current": "Size MOSFET/supply for startup current and add current limit.",
+        "thermal_runaway": "Add thermal/current observation during first runs.",
+        "wheel_pinch": "Use low-speed boundary and guarded wheels.",
+        "battery_overcurrent": "Fuse or current-limit battery output.",
+        "signal_loss": "Stop motion on communication loss.",
+    }
+    return mapping.get(hazard, "Use current limit, manual power cutoff, guarded mechanism, and supervised bench test.")
+
+
+def _mission(archetype: str, goal: str) -> str:
+    if archetype == "automatic_watering":
+        return "Read soil moisture and run a small pump for timed watering within a supervised indoor prototype boundary."
+    if archetype == "airflow_controller":
+        return "Move air based on sensor/control input while staying inside current and guarding limits."
+    if archetype == "rover":
+        return "Drive a low-speed mobile platform inside a marked test boundary."
+    return goal
+
+
+def _role(part: Dict[str, Any]) -> str:
+    part_type = str(part.get("type") or "")
+    if part_type == "pump":
+        return "water/fluid output"
+    if part_type == "fan":
+        return "airflow output"
+    if part_type == "servo":
+        return "positioned motion"
+    return part_type or "actuator"
+
+
+def _dominant_voltage(parts: List[Dict[str, Any]], default: float) -> float:
+    voltages = [_float(part.get("voltage_v"), 0.0) for part in parts]
+    voltages = [value for value in voltages if value > 0]
+    return voltages[0] if voltages else default
+
+
+def _slug(value: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", value.strip().lower()).strip("_-.")
+    return slug[:80] or "hardware_splicer_project"
+
+
+def _camel(value: str) -> str:
+    return "".join(part.capitalize() for part in re.split(r"[^A-Za-z0-9]+", value) if part) or "HardwareSplicerProject"
+
+
+def _to_dict(data: Any, name: str) -> Dict[str, Any]:
+    if data is None:
+        return {}
+    if not isinstance(data, Mapping):
+        raise ValueError(f"{name} must be an object")
+    return dict(data)
+
+
+def _float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default

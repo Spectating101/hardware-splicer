@@ -151,8 +151,11 @@ def build_project_authority_packet(
     authority_score = PROJECT_LEVEL_SCORES.get(project_level, 0.0)
     if authority_score < 1.0:
         authority_score = round(min(authority_score, _weighted_score(component_scores)), 2)
-    blockers = _dedupe_strings([row["message"] for row in blocking_checks] + source_blockers)
+    source_blockers_are_next_actions = bool(acceptance.get("source_blockers_are_next_actions"))
+    blockers = _dedupe_strings([row["message"] for row in blocking_checks] + ([] if source_blockers_are_next_actions else source_blockers))
     next_actions = _next_actions(blockers, simulation, platform, mechatronics, mechanical, actuation)
+    if source_blockers_are_next_actions:
+        next_actions = _dedupe_strings(source_blockers + next_actions)[:12]
 
     return {
         "schema_version": SCHEMA_VERSION,

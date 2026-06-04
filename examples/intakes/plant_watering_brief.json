@@ -1,0 +1,43 @@
+{
+  "project_name": "desk_plant_watering_assistant",
+  "goal": "Build a small automatic plant watering device from cheap or salvaged parts. It should read soil moisture and run a mini pump briefly when the plant is dry.",
+  "budget": {
+    "currency": "USD",
+    "amount": 10
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "capacitive soil moisture sensor",
+      "type": "soil_moisture"
+    },
+    {
+      "name": "5V mini water pump",
+      "type": "pump",
+      "voltage_v": 5.0,
+      "current_a": 0.55,
+      "stall_current_a": 0.95
+    },
+    {
+      "name": "logic-level MOSFET module",
+      "type": "driver_module"
+    },
+    {
+      "name": "USB power bank",
+      "type": "power_source",
+      "voltage_v": 5.0,
+      "capacity_mah": 2000
+    }
+  ],
+  "constraints": {
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.12,
+    "baseline_current_a": 0.18,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000
+  }
+}
