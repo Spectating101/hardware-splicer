@@ -1,0 +1,32 @@
+{
+  "project_name": "reused_fan_controller",
+  "goal": "Turn a salvaged 5V fan and temperature sensor into a quiet automatic airflow controller with a printable mount.",
+  "budget": {
+    "currency": "USD",
+    "amount": 8
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "Arduino Nano clone",
+      "type": "microcontroller"
+    },
+    {
+      "name": "5V brushless fan",
+      "type": "fan",
+      "voltage_v": 5.0,
+      "current_a": 0.28,
+      "stall_current_a": 0.65
+    },
+    {
+      "name": "temperature sensor",
+      "type": "temperature"
+    }
+  ],
+  "constraints": {
+    "runtime_min": 30,
+    "mission_duty_cycle": 0.7,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000
+  }
+}

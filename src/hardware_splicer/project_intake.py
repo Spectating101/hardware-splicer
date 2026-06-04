@@ -9,6 +9,17 @@ from .scenario_runner import run_hardware_scenario
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
+UPGRADE_SCHEMA_VERSION = "hardware_splicer.authority_upgrade_plan.v1"
+
+PROJECT_LEVELS = [
+    "compile_failed",
+    "project_intake",
+    "architecture_project_package",
+    "control_safety_project_package",
+    "simulation_bench_project_package",
+    "field_validated_project_package",
+    "production_ready_project_package",
+]
 
 
 def load_project_intake(path: str | Path) -> Dict[str, Any]:
@@ -29,14 +40,16 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
     budget = _budget(body)
     parts = _normalized_parts(body.get("available_parts") or body.get("parts") or body.get("resources") or [])
     archetype = _detect_archetype(goal, parts)
+    evidence = _evidence(body)
+    base_dir = _source_base_dir(body)
     assumptions = _assumptions(archetype, parts, constraints, budget)
-    missing = _missing_info(archetype, parts, constraints, budget)
-    spec = _compile_spec(project_name, goal, archetype, parts, constraints, budget, assumptions)
+    missing = _missing_info(archetype, parts, constraints, budget, evidence)
+    spec = _compile_spec(project_name, goal, archetype, parts, constraints, budget, assumptions, evidence, base_dir)
     scenario = {
         "scenario_name": f"{project_name}_{archetype}",
         "intent": goal,
         "compile_spec": spec,
-        "expected": _expected_authority(archetype, body),
+        "expected": _expected_authority(archetype, body, evidence),
         "acceptance": {
             "allowed_blockers": int(_to_dict(body.get("acceptance") or {}, "intake.acceptance").get("allowed_blockers") or 99),
             "source_blockers_are_next_actions": True,
@@ -59,6 +72,7 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
         "budget": budget,
         "normalized_parts": parts,
         "assumptions": assumptions,
+        "evidence_summary": _evidence_summary(evidence, base_dir),
         "missing_info": missing,
         "scenario": scenario,
     }
@@ -83,15 +97,47 @@ def run_project_intake(
     out_path = Path(result["out_dir"])
     intake_file = out_path / "PROJECT_INTAKE.json"
     planned_scenario_file = out_path / "PLANNED_SCENARIO.json"
+    upgrade_plan = build_authority_upgrade_plan(plan, result)
+    upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
+    upgrade_plan_file.write_text(json.dumps(upgrade_plan, indent=2), encoding="utf-8")
     result["intake_plan"] = plan
+    result["authority_upgrade_plan"] = upgrade_plan
     result["artifacts"] = {
         **result["artifacts"],
         "project_intake": str(intake_file),
         "planned_scenario": str(planned_scenario_file),
+        "authority_upgrade_plan": str(upgrade_plan_file),
     }
+    scenario_result_path = result["artifacts"].get("scenario_result")
+    if scenario_result_path:
+        Path(str(scenario_result_path)).write_text(json.dumps(result, indent=2), encoding="utf-8")
     return result
+
+
+def build_authority_upgrade_plan(intake_plan: Mapping[str, Any], run_result: Mapping[str, Any]) -> Dict[str, Any]:
+    plan = _to_dict(intake_plan, "intake_plan")
+    result = _to_dict(run_result, "run_result")
+    authority = _to_dict(result.get("project_authority") or {}, "run_result.project_authority")
+    current_level = str(authority.get("project_authority_level") or "project_intake")
+    next_level = _next_project_level(current_level)
+    missing = _string_list(plan.get("missing_info"))
+    next_actions = _string_list(authority.get("next_actions"))
+    evidence_requests = _evidence_requests(current_level, next_level, missing, plan)
+    return {
+        "schema_version": UPGRADE_SCHEMA_VERSION,
+        "project_name": plan.get("project_name"),
+        "archetype": plan.get("archetype"),
+        "current_level": current_level,
+        "next_level": next_level,
+        "target_level": "production_ready_project_package",
+        "claimable_current_package": bool(authority.get("claimable")),
+        "evidence_requests": evidence_requests,
+        "missing_info": missing,
+        "engine_next_actions": next_actions[:16],
+        "how_to_upgrade": _upgrade_recipe(evidence_requests),
+    }
 
 
 def _compile_spec(
@@ -102,6 +148,8 @@ def _compile_spec(
     constraints: Dict[str, Any],
     budget: Dict[str, Any],
     assumptions: List[str],
+    evidence: Dict[str, Any],
+    base_dir: Path,
 ) -> Dict[str, Any]:
     board = _board(project_name, archetype, parts, constraints)
     mechanism = _mechanism(project_name, archetype, parts)
@@ -109,7 +157,7 @@ def _compile_spec(
     robotics_actuation = _robotics_actuation(archetype, parts)
     control_stack = _control_stack(archetype, parts)
     safety_case = _safety_case(archetype)
-    return {
+    spec = {
         "project_name": project_name,
         "simulation_fidelity": "starter",
         "run_mechanism_sim": True,
@@ -131,6 +179,150 @@ def _compile_spec(
             "release_status": "bench evidence and reviewed release are not attached by intake planning.",
         },
     }
+    _apply_evidence(spec, evidence, base_dir)
+    return spec
+
+
+def _evidence(body: Dict[str, Any]) -> Dict[str, Any]:
+    evidence = dict(_to_dict(body.get("evidence") or {}, "intake.evidence"))
+    aliases = {
+        "board_design_files": ["board_design_files", "board_files"],
+        "mechanical_measurement_capture": ["mechanical_measurement_capture", "mechanical_measurements", "measurements"],
+        "mechanical_bench_capture": ["mechanical_bench_capture", "mechanical_bench"],
+        "robotics_bench_capture": ["robotics_bench_capture", "robotics_bench", "motion_bench"],
+        "integrated_bench_capture": ["integrated_bench_capture", "integrated_bench", "bench_evidence"],
+        "field_validation": ["field_validation"],
+        "release_review": ["release_review", "release"],
+        "releases": ["releases"],
+    }
+    for canonical, names in aliases.items():
+        if evidence.get(canonical):
+            continue
+        for name in names:
+            if body.get(name):
+                evidence[canonical] = body[name]
+                break
+    return evidence
+
+
+def _apply_evidence(spec: Dict[str, Any], evidence: Dict[str, Any], base_dir: Path) -> None:
+    board_files = _board_design_files_from_evidence(evidence, base_dir)
+    if board_files:
+        spec["board_design_files"] = board_files
+
+    for field in [
+        "mechanical_measurement_capture",
+        "mechanical_bench_capture",
+        "robotics_bench_capture",
+        "integrated_bench_capture",
+        "field_validation",
+    ]:
+        capture = _capture_from_evidence(evidence.get(field))
+        if capture:
+            spec[field] = capture
+
+    release_review = _release_from_evidence(evidence)
+    if release_review:
+        spec["circuit_release"] = _release_scope(release_review, "Circuit release limited to the planned low-voltage controller and actuator interfaces.")
+        spec["mechanical_release"] = _release_scope(release_review, "Mechanical release limited to the planned enclosure, mounts, and printed mechanism primitives.")
+        spec["robotics_release"] = _release_scope(release_review, "Robotics release limited to the planned actuator/control envelope.")
+        spec["mechatronics_release"] = _release_scope(release_review, "Hardware-Splicer release limited to the integrated planned mechatronics package.")
+        spec["robotics_project_release"] = _release_scope(release_review, "Robotics project release limited to the declared mission, operating environment, and evidence package.")
+
+
+def _board_design_files_from_evidence(evidence: Dict[str, Any], base_dir: Path) -> Dict[str, Dict[str, Any]]:
+    raw = evidence.get("board_design_files")
+    if not raw:
+        return {}
+    rows: Dict[str, Any]
+    if isinstance(raw, Mapping):
+        rows = dict(raw)
+    elif isinstance(raw, list):
+        rows = {}
+        for index, row in enumerate(raw):
+            if not isinstance(row, Mapping):
+                continue
+            fallback_id = "main_ctrl" if index == 0 else f"board_{index}"
+            board_id = str(row.get("board_id") or row.get("id") or fallback_id)
+            rows[board_id] = row
+    else:
+        return {}
+    normalized: Dict[str, Dict[str, Any]] = {}
+    for board_id, meta in rows.items():
+        if not isinstance(meta, Mapping):
+            continue
+        path = str(meta.get("path") or meta.get("file") or "").strip()
+        if path and not Path(path).is_absolute():
+            path = str((base_dir / path).resolve())
+        normalized[str(board_id)] = {"path": path, "kind": str(meta.get("kind") or "netlist")}
+    return normalized
+
+
+def _capture_from_evidence(raw: Any) -> Dict[str, Any]:
+    if not raw:
+        return {}
+    if isinstance(raw, Mapping):
+        return dict(raw)
+    if isinstance(raw, list):
+        return {"artifact_uris": [str(item) for item in raw if item]}
+    if isinstance(raw, str):
+        return {"artifact_uris": [raw]}
+    return {}
+
+
+def _release_from_evidence(evidence: Dict[str, Any]) -> Dict[str, Any]:
+    releases = _to_dict(evidence.get("releases") or {}, "evidence.releases")
+    if releases:
+        combined = {}
+        for value in releases.values():
+            if isinstance(value, Mapping):
+                combined.update(dict(value))
+        if combined:
+            return combined
+    release = _to_dict(evidence.get("release_review") or {}, "evidence.release_review")
+    if release:
+        return release
+    return {}
+
+
+def _release_scope(release: Dict[str, Any], default_scope: str) -> Dict[str, Any]:
+    artifact_uris = _string_list(release.get("artifact_uris") or release.get("artifacts") or release.get("evidence_uris"))
+    return {
+        "scope_statement": str(release.get("scope_statement") or default_scope),
+        "artifact_uris": artifact_uris or ["evidence://intake/release-review"],
+        "acceptance_reviewed": bool(release.get("acceptance_reviewed")),
+    }
+
+
+def _evidence_summary(evidence: Dict[str, Any], base_dir: Path) -> Dict[str, Any]:
+    return {
+        "board_design_file_count": len(_board_design_files_from_evidence(evidence, base_dir)),
+        "has_measurements": _has_capture(evidence, "mechanical_measurement_capture"),
+        "has_mechanical_bench": _has_capture(evidence, "mechanical_bench_capture"),
+        "has_robotics_bench": _has_capture(evidence, "robotics_bench_capture"),
+        "has_integrated_bench": _has_capture(evidence, "integrated_bench_capture"),
+        "has_field_validation": _has_capture(evidence, "field_validation"),
+        "release_reviewed": _release_closed(evidence),
+    }
+
+
+def _has_capture(evidence: Dict[str, Any], key: str) -> bool:
+    capture = _capture_from_evidence(evidence.get(key))
+    if not capture:
+        return False
+    if capture.get("geometry_verified") is True or capture.get("motion_verified") is True or capture.get("bench_verified") is True:
+        return True
+    for value in capture.values():
+        if isinstance(value, list) and value:
+            return True
+        if isinstance(value, str) and value.strip():
+            return True
+    return False
+
+
+def _release_closed(evidence: Dict[str, Any]) -> bool:
+    release = _release_from_evidence(evidence)
+    return bool(release.get("acceptance_reviewed") and (_string_list(release.get("artifact_uris") or release.get("artifacts") or release.get("evidence_uris")) or release.get("scope_statement")))
 
 
 def _board(project_name: str, archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any]) -> Dict[str, Any]:
@@ -221,6 +413,15 @@ def _mechanism(project_name: str, archetype: str, parts: List[Dict[str, Any]]) -
             "name": "watering_module",
             "interfaces": ["controller_case", "pump_mount", "tube strain relief"],
         }
+    elif archetype == "rover":
+        mechanism["drive_base"] = {
+            "name": "wheel_drive_base",
+            "length_mm": 180,
+            "width_mm": 120,
+            "thickness_mm": 3,
+            "wheel_d_mm": 65,
+            "motor_spacing_mm": 96,
+        }
     elif archetype == "airflow_controller":
         mechanism["bracket"] = {"name": "fan_mount", "w_mm": 80, "d_mm": 80, "t_mm": 3.0}
     elif archetype == "pan_tilt":
@@ -232,13 +433,35 @@ def _mechanism(project_name: str, archetype: str, parts: List[Dict[str, Any]]) -
             "max_payload_n": 0.8,
             "payload_offset_mm": 35,
         }
+    elif archetype == "gripper":
+        servo = _first_part(parts, ["servo"]) or {}
+        mechanism["gripper"] = {
+            "name": "servo_gripper",
+            "servo_type": str(servo.get("model") or "sg90"),
+            "max_payload_n": 4.0,
+            "lever_arm_mm": 45.0,
+        }
     else:
         mechanism["bracket"] = {"name": "actuator_mount", "w_mm": 60, "d_mm": 40, "t_mm": 3.0}
     return mechanism
 
 
 def _robotics_project(goal: str, archetype: str, constraints: Dict[str, Any], budget: Dict[str, Any]) -> Dict[str, Any]:
-    runtime_min = _float(constraints.get("runtime_min") or constraints.get("min_runtime_min"), 30.0 if budget.get("salvage_mode") else 15.0)
+    runtime_default = 20.0 if archetype == "rover" else 30.0 if budget.get("salvage_mode") else 15.0
+    runtime_min = _float(constraints.get("runtime_min") or constraints.get("min_runtime_min"), runtime_default)
+    battery_voltage_default = 7.4 if archetype == "rover" else 5.0
+    platform = {
+        "type": "stationary_mechatronics_module",
+        "domains": _domains(archetype),
+        "degrees_of_freedom": 1,
+    }
+    if archetype == "rover":
+        platform = {
+            "type": "differential_drive_rover",
+            "domains": ["locomotion", "sensing", "automation"],
+            "degrees_of_freedom": 2,
+            "mobility": {"type": "differential_drive", "wheel_count": 2, "caster_count": 1, "wheel_d_mm": 65},
+        }
     return {
         "robot_class": archetype,
         "mission": [_mission(archetype, goal)],
@@ -252,21 +475,19 @@ def _robotics_project(goal: str, archetype: str, constraints: Dict[str, Any], bu
             "mission_duty_cycle": _float(constraints.get("mission_duty_cycle"), 0.35 if archetype == "automatic_watering" else 0.65),
             "baseline_current_a": _float(constraints.get("baseline_current_a"), 0.25),
             "payload_kg": _float(constraints.get("payload_kg"), 0.2),
-            "mass_kg": _float(constraints.get("mass_kg"), 1.0),
+            "mass_kg": _float(constraints.get("mass_kg"), 1.2 if archetype == "rover" else 1.0),
+            "max_speed_mps": _float(constraints.get("max_speed_mps"), 0.5 if archetype == "rover" else 0.0),
+            "acceleration_mps2": _float(constraints.get("acceleration_mps2"), 0.5 if archetype == "rover" else 0.0),
         },
         "power": {
             "battery": {
                 "chemistry": "USB power bank or small DC adapter",
-                "nominal_voltage_v": _float(constraints.get("battery_voltage_v"), 5.0),
-                "capacity_mah": _float(constraints.get("battery_capacity_mah"), 2000.0),
+                "nominal_voltage_v": _float(constraints.get("battery_voltage_v"), battery_voltage_default),
+                "capacity_mah": _float(constraints.get("battery_capacity_mah"), 2200.0 if archetype == "rover" else 2000.0),
                 "usable_fraction": 0.75,
             }
         },
-        "platform": {
-            "type": "stationary_mechatronics_module",
-            "domains": _domains(archetype),
-            "degrees_of_freedom": 1,
-        },
+        "platform": platform,
     }
 
 
@@ -276,9 +497,38 @@ def _robotics_actuation(archetype: str, parts: List[Dict[str, Any]]) -> Dict[str
         actuators = [_part("mini water pump", "pump", "actuator", voltage_v=5.0, current_a=0.8)]
     if archetype == "airflow_controller" and not actuators:
         actuators = [_part("dc fan", "fan", "actuator", voltage_v=5.0, current_a=0.25)]
+    if archetype == "rover" and not actuators:
+        actuators = [
+            _part(
+                "left drive motor",
+                "dc_motor",
+                "actuator",
+                voltage_v=6.0,
+                current_a=0.45,
+                stall_current_a=0.9,
+                output_free_speed_rpm=220,
+                stall_torque_nm=0.18,
+                role="left wheel drive",
+            ),
+            _part(
+                "right drive motor",
+                "dc_motor",
+                "actuator",
+                voltage_v=6.0,
+                current_a=0.45,
+                stall_current_a=0.9,
+                output_free_speed_rpm=220,
+                stall_torque_nm=0.18,
+                role="right wheel drive",
+            ),
+        ]
+    if archetype == "gripper" and not actuators:
+        actuators = [_part("gripper servo", "servo", "actuator", drive="servo_pwm", voltage_v=5.0, current_a=0.3, stall_current_a=0.8, model="sg90")]
     sensors = [part for part in parts if part["class"] == "sensor"]
     if archetype == "automatic_watering" and not sensors:
         sensors = [_part("soil moisture sensor", "soil_moisture", "sensor")]
+    if archetype == "rover" and not sensors:
+        sensors = [_part("front range sensor", "tof_range", "sensor"), _part("battery current sensor", "current_sensor", "sensor")]
     return {
         "actuators": [_actuator_row(part) for part in actuators],
         "sensors": [_sensor_row(part) for part in sensors],
@@ -288,13 +538,13 @@ def _robotics_actuation(archetype: str, parts: List[Dict[str, Any]]) -> Dict[str
 
 def _control_stack(archetype: str, parts: List[Dict[str, Any]]) -> Dict[str, Any]:
     controller = _first_part(parts, ["esp32", "arduino", "microcontroller"]) or {"name": "main_ctrl"}
-    sensors = [part for part in parts if part["class"] == "sensor"]
+    sensors = [part for part in parts if part["class"] == "sensor"] or _default_sensors(archetype)
     return {
         "controllers": [{"id": "main_ctrl", "board_id": "main_ctrl", "firmware": f"{archetype}_controller"}],
-        "loops": [{"name": f"{archetype}_control", "rate_hz": 10 if archetype == "automatic_watering" else 50, "status": "planned"}],
+        "loops": _control_loops(archetype),
         "sensors": [_sensor_row(part) for part in sensors],
-        "comms": [{"type": "usb_serial", "failsafe": "local_stop"}],
-        "failsafes": ["current_limit", "watchdog", "manual_power_cutoff", "timeout_stop"],
+        "comms": [{"type": "rc_link" if archetype == "rover" else "usb_serial", "failsafe": "signal_loss_stop" if archetype == "rover" else "local_stop"}],
+        "failsafes": ["current_limit", "watchdog", "manual_power_cutoff", "timeout_stop"] + (["signal_loss_stop", "e_stop"] if archetype == "rover" else []),
         "notes": f"Controller candidate: {controller.get('name') or 'main_ctrl'}.",
     }
 
@@ -313,10 +563,11 @@ def _safety_case(archetype: str) -> Dict[str, Any]:
     }
 
 
-def _expected_authority(archetype: str, body: Dict[str, Any]) -> Dict[str, Any]:
-    target = str(body.get("target_authority_level") or "control_safety_architecture").strip()
+def _expected_authority(archetype: str, body: Dict[str, Any], evidence: Dict[str, Any]) -> Dict[str, Any]:
+    default_target = "field_validation_authority" if _release_closed(evidence) else "control_safety_architecture"
+    target = str(body.get("target_authority_level") or default_target).strip()
     expected = {"minimum_authority_level": target}
-    if archetype in {"automatic_watering", "airflow_controller", "pan_tilt"}:
+    if not _release_closed(evidence) and archetype in {"automatic_watering", "airflow_controller", "pan_tilt", "rover", "gripper", "generic_mechatronics"}:
         expected["robotics_project_release"] = False
     return expected
 
@@ -334,6 +585,99 @@ def _detect_archetype(goal: str, parts: List[Dict[str, Any]]) -> str:
     if any(word in text for word in ["gripper", "claw", "grab"]):
         return "gripper"
     return "generic_mechatronics"
+
+
+def _evidence_requests(current_level: str, next_level: str | None, missing: List[str], plan: Dict[str, Any]) -> List[Dict[str, Any]]:
+    archetype = str(plan.get("archetype") or "generic_mechatronics")
+    requests: List[Dict[str, Any]] = []
+    if "measured dimensions" in missing or current_level in {"compile_failed", "project_intake", "architecture_project_package", "control_safety_project_package"}:
+        requests.append(
+            {
+                "id": "mechanical_measurement_capture",
+                "label": "Measured geometry capture",
+                "unlocks": "mechanical load and fit authority",
+                "intake_field": "evidence.mechanical_measurement_capture",
+                "required_items": [
+                    "artifact_uris with photos/sketches/caliper notes",
+                    "dimensions for enclosure/mount/drive primitive",
+                    "clearances for cables, moving parts, and service access",
+                ],
+            }
+        )
+    if "bench evidence" in missing or current_level in {"control_safety_project_package", "architecture_project_package"}:
+        requests.extend(
+            [
+                {
+                    "id": "mechanical_bench_capture",
+                    "label": "Mechanical fit/load bench",
+                    "unlocks": "controlled mechanical fit/load evidence",
+                    "intake_field": "evidence.mechanical_bench_capture",
+                    "required_items": ["fit_checks", "load_tests", "motion_tests where moving parts exist", "artifact_uris"],
+                },
+                {
+                    "id": "robotics_bench_capture",
+                    "label": "First-motion/current bench",
+                    "unlocks": "controlled robotics motion evidence",
+                    "intake_field": "evidence.robotics_bench_capture",
+                    "required_items": ["motion_tests", "current_tests", "timeout/failsafe observation", "artifact_uris"],
+                },
+                {
+                    "id": "integrated_bench_capture",
+                    "label": "Integrated electrical/mechanical bench",
+                    "unlocks": "simulation/bench project authority",
+                    "intake_field": "evidence.integrated_bench_capture",
+                    "required_items": ["electrical_tests", "motion_tests", "packaging_tests", "logs/photos/video artifact_uris"],
+                },
+            ]
+        )
+    if current_level in {"simulation_bench_project_package", "field_validated_project_package"} or "reviewed release scope" in missing:
+        requests.append(
+            {
+                "id": "release_review",
+                "label": "Reviewed scoped release",
+                "unlocks": "production-ready project package claim",
+                "intake_field": "evidence.release_review",
+                "required_items": ["scope_statement", "acceptance_reviewed=true", "artifact_uris"],
+            }
+        )
+    if archetype == "rover":
+        requests.append(
+            {
+                "id": "field_validation",
+                "label": "Field validation run",
+                "unlocks": "field-validated mobile-platform authority",
+                "intake_field": "evidence.field_validation",
+                "required_items": ["marked-boundary run", "telemetry/current log", "stop/failsafe observation", "artifact_uris"],
+            }
+        )
+    if not requests:
+        requests.append(
+            {
+                "id": "maintain_evidence_bundle",
+                "label": "Maintain release evidence bundle",
+                "unlocks": next_level or "current authority",
+                "intake_field": "evidence",
+                "required_items": ["Keep measurements, bench logs, field logs, and release review tied to the project package."],
+            }
+        )
+    return requests
+
+
+def _upgrade_recipe(requests: List[Dict[str, Any]]) -> List[str]:
+    recipe = []
+    for request in requests[:8]:
+        items = ", ".join(_string_list(request.get("required_items"))[:3])
+        recipe.append(f"Provide `{request.get('intake_field')}` for {request.get('label')}: {items}.")
+    return recipe
+
+
+def _next_project_level(current_level: str) -> str | None:
+    if current_level not in PROJECT_LEVELS:
+        return "control_safety_project_package"
+    index = PROJECT_LEVELS.index(current_level)
+    if index + 1 >= len(PROJECT_LEVELS):
+        return None
+    return PROJECT_LEVELS[index + 1]
 
 
 def _normalized_parts(data: Any) -> List[Dict[str, Any]]:
@@ -429,6 +773,33 @@ def _interfaces(archetype: str, sensors: List[Dict[str, Any]], actuators: List[D
     return interfaces
 
 
+def _default_sensors(archetype: str) -> List[Dict[str, Any]]:
+    if archetype == "automatic_watering":
+        return [_part("soil moisture sensor", "soil_moisture", "sensor")]
+    if archetype == "rover":
+        return [_part("front range sensor", "tof_range", "sensor"), _part("battery current sensor", "current_sensor", "sensor")]
+    if archetype == "airflow_controller":
+        return [_part("temperature sensor", "temperature", "sensor")]
+    if archetype in {"pan_tilt", "gripper"}:
+        return [_part("limit/current observation", "current_sensor", "sensor")]
+    return [_part("operator state sensor", "sensor", "sensor")]
+
+
+def _control_loops(archetype: str) -> List[Dict[str, Any]]:
+    if archetype == "rover":
+        return [
+            {"name": "drive_pwm", "rate_hz": 100, "status": "planned"},
+            {"name": "failsafe_stop", "rate_hz": 20, "status": "planned"},
+        ]
+    if archetype == "pan_tilt":
+        return [{"name": "pan_tilt_pwm", "rate_hz": 50, "status": "planned"}]
+    if archetype == "gripper":
+        return [{"name": "gripper_servo", "rate_hz": 50, "status": "planned"}]
+    if archetype == "automatic_watering":
+        return [{"name": "watering_threshold", "rate_hz": 10, "status": "planned"}]
+    return [{"name": f"{archetype}_control", "rate_hz": 50, "status": "planned"}]
+
+
 def _assumptions(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any], budget: Dict[str, Any]) -> List[str]:
     assumptions = [
         "This is a planning authority package until measured geometry, wiring inspection, bench logs, and release review are attached.",
@@ -445,7 +816,7 @@ def _assumptions(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[
     return assumptions
 
 
-def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any], budget: Dict[str, Any]) -> List[str]:
+def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict[str, Any], budget: Dict[str, Any], evidence: Dict[str, Any]) -> List[str]:
     missing = []
     if not any(part["class"] == "controller" for part in parts):
         missing.append("controller choice")
@@ -457,7 +828,12 @@ def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict
         missing.append("runtime target")
     if not budget:
         missing.append("budget limit")
-    missing.extend(["measured dimensions", "bench evidence", "reviewed release scope"])
+    if not _has_capture(evidence, "mechanical_measurement_capture"):
+        missing.append("measured dimensions")
+    if not (_has_capture(evidence, "mechanical_bench_capture") and _has_capture(evidence, "robotics_bench_capture") and _has_capture(evidence, "integrated_bench_capture")):
+        missing.append("bench evidence")
+    if not _release_closed(evidence):
+        missing.append("reviewed release scope")
     return missing
 
 
@@ -466,6 +842,13 @@ def _planning_confidence(archetype: str, parts: List[Dict[str, Any]], missing: L
     base += min(len(parts), 5) * 0.04
     base -= len([item for item in missing if item not in {"measured dimensions", "bench evidence", "reviewed release scope"}]) * 0.06
     return round(max(0.2, min(base, 0.86)), 2)
+
+
+def _source_base_dir(body: Dict[str, Any]) -> Path:
+    source_file = str(body.get("source_file") or "").strip()
+    if source_file:
+        return Path(source_file).resolve().parent
+    return Path.cwd()
 
 
 def _budget(body: Dict[str, Any]) -> Dict[str, Any]:
@@ -583,3 +966,18 @@ def _float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def _string_list(data: Any) -> List[str]:
+    if data is None:
+        return []
+    if isinstance(data, str):
+        return [data] if data.strip() else []
+    if isinstance(data, Iterable) and not isinstance(data, (Mapping, bytes)):
+        values = []
+        for item in data:
+            text = str(item).strip()
+            if text:
+                values.append(text)
+        return values
+    return [str(data)]

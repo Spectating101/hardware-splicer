@@ -1,0 +1,44 @@
+{
+  "project_name": "salvaged_floor_rover",
+  "goal": "Build a small RC rover from an ESP32, two DC gear motors, a front range sensor, and a printed chassis.",
+  "budget": {
+    "currency": "USD",
+    "amount": 20
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "left 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "stall_current_a": 0.9,
+      "output_free_speed_rpm": 220,
+      "stall_torque_nm": 0.18
+    },
+    {
+      "name": "right 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "stall_current_a": 0.9,
+      "output_free_speed_rpm": 220,
+      "stall_torque_nm": 0.18
+    },
+    {
+      "name": "front ToF range sensor",
+      "type": "tof_range"
+    }
+  ],
+  "constraints": {
+    "runtime_min": 20,
+    "max_speed_mps": 0.45,
+    "mass_kg": 1.1,
+    "battery_voltage_v": 7.4,
+    "battery_capacity_mah": 2200
+  }
+}

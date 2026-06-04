@@ -5,6 +5,7 @@ This folder consolidates the hardware-oriented projects behind a top-level compi
 - `apps/circuit-ai/` - electronics intelligence, PCB/image analysis, BOM/DFM-style workflows, repair/reseller tooling, APIs/MCP wrappers.
 - `apps/mecha-splicer/` - mechanical splicing pipeline for enclosures, brackets, fixtures, DFM/BOM bundles, proposals, and product packs.
 - `apps/3d-splicer/` - parametric enclosure generator API with CadQuery/STL-style outputs.
+- `apps/hardware-splicer-demo/` - frontend authority dashboard for showing intake results, deterministic margins, evidence gaps, and generated artifacts.
 
 The production-facing path is `scripts/hardware_splicer.py` and the `hardware_splicer` Python package. It validates compile specs, starts/stops the optional local 3D-Splicer service, copies mechanical outputs into the final bundle, and writes manifest/metadata files for downstream automation.
 
@@ -65,9 +66,33 @@ Plan from a user-style project brief, then run the generated scenario:
 
 ```bash
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant
+python3 scripts/hardware_splicer.py intake --brief examples/intakes/rover_brief.json --out /tmp/hardware_splicer_intake_rover
+python3 scripts/hardware_splicer.py intake --brief examples/intakes/fan_controller_brief.json --out /tmp/hardware_splicer_intake_fan
 ```
 
-The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, bench evidence, and reviewed release scope as explicit next actions.
+The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `AUTHORITY_UPGRADE_PLAN.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, bench evidence, and reviewed release scope as explicit next actions.
+
+Attach physical/project evidence through `evidence` fields in the intake file to upgrade the generated package:
+
+- `evidence.board_design_files`
+- `evidence.mechanical_measurement_capture`
+- `evidence.mechanical_bench_capture`
+- `evidence.robotics_bench_capture`
+- `evidence.integrated_bench_capture`
+- `evidence.field_validation`
+- `evidence.release_review`
+
+`AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
+
+Run the local dashboard:
+
+```bash
+cd apps/hardware-splicer-demo
+npm install
+npm run dev -- --port 5177
+```
+
+The dashboard currently uses seeded snapshots generated from backend intake runs, so it is suitable for portfolio/competition walkthroughs without relying on live model quota.
 
 Run the lighter local Circuit-AI -> Mecha-Splicer -> 3D-Splicer smoke:
 
