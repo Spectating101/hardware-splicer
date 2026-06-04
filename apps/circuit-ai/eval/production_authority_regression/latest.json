@@ -1,0 +1,185 @@
+[
+  {
+    "actual": {
+      "authorized": true,
+      "blocked_claim_count": 0,
+      "blockers": [],
+      "casefile_status": "release_ready",
+      "decision": "authorized_low_voltage_repair_release",
+      "requirements": []
+    },
+    "case_id": "complete_low_voltage_release_authorizes",
+    "checks": {
+      "authorized": true,
+      "blocked_claim_count": true,
+      "casefile_status": true,
+      "decision": true
+    },
+    "expected": {
+      "authorized": true,
+      "blocked_claim_count": 0,
+      "casefile_status": "release_ready",
+      "decision": "authorized_low_voltage_repair_release"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "authorized": false,
+      "blocked_claim_count": 1,
+      "blockers": [
+        "Production release manifest is incomplete."
+      ],
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "requirements": [
+        "Attach production_release or release_manifest.",
+        "Assign a release_id or manifest_id.",
+        "Record released_by, approved_by, or release_operator_id.",
+        "Record released_at or approved_at timestamp.",
+        "Record production release scope statement.",
+        "Release manifest selected_resource_ids must exactly match selected production resources.",
+        "Mark acceptance_reviewed or acceptance_checklist_complete true.",
+        "Record repeatability_count/sample_count/validated_unit_count >= 1."
+      ]
+    },
+    "case_id": "missing_release_manifest_blocks",
+    "checks": {
+      "authorized": true,
+      "casefile_status": true,
+      "decision": true,
+      "must_blocker": true
+    },
+    "expected": {
+      "authorized": false,
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "must_blocker": "Production release manifest is incomplete."
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "authorized": false,
+      "blocked_claim_count": 1,
+      "blockers": [
+        "Production release manifest is incomplete."
+      ],
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "requirements": [
+        "Release manifest selected_resource_ids must exactly match selected production resources."
+      ]
+    },
+    "case_id": "resource_mismatch_manifest_blocks",
+    "checks": {
+      "authorized": true,
+      "casefile_status": true,
+      "decision": true,
+      "must_requirement": true
+    },
+    "expected": {
+      "authorized": false,
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "must_requirement": "Release manifest selected_resource_ids must exactly match selected production resources."
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "authorized": false,
+      "blocked_claim_count": 3,
+      "blockers": [
+        "Required production measurements lack trusted provenance.",
+        "Required production measurements lack audit artifacts.",
+        "One or more production authority lanes are not authorized.",
+        "Production release manifest is incomplete."
+      ],
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "requirements": [
+        "Attach trusted provenance for continuity measurement evidence.",
+        "Attach trusted provenance for current measurement evidence.",
+        "Attach trusted provenance for resistance measurement evidence.",
+        "Attach trusted provenance for thermal measurement evidence.",
+        "Attach trusted provenance for voltage measurement evidence.",
+        "Attach evidence_uri/artifact_uri for continuity measurement evidence.",
+        "Attach evidence_uri/artifact_uri for current measurement evidence.",
+        "Attach evidence_uri/artifact_uri for resistance measurement evidence.",
+        "Attach evidence_uri/artifact_uri for thermal measurement evidence.",
+        "Attach evidence_uri/artifact_uri for voltage measurement evidence.",
+        "Complete workflow outcome.",
+        "Close all evidence gates.",
+        "Attach trusted resistance, continuity, voltage, current, and thermal measurements.",
+        "Record first-power, thermal, and output-function proof."
+      ]
+    },
+    "case_id": "untrusted_measurements_block",
+    "checks": {
+      "authorized": true,
+      "casefile_status": true,
+      "decision": true,
+      "must_blocker": true
+    },
+    "expected": {
+      "authorized": false,
+      "casefile_status": "evidence_required",
+      "decision": "not_authorized_evidence_required",
+      "must_blocker": "Required production measurements lack trusted provenance."
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "authorized": false,
+      "blocked_claim_count": 9,
+      "blockers": [
+        "No selected resources are available for production repair authority.",
+        "The plan is not authority-ready for first power or splice.",
+        "A terminal successful outcome is not fully recorded.",
+        "Repair authority is not authoritative_low_risk.",
+        "The hazard profile is outside production repair authority scope.",
+        "Open evidence gates remain.",
+        "Required production measurement categories are missing.",
+        "Required production measurements lack trusted provenance.",
+        "Required production measurements lack audit artifacts.",
+        "Output function is not verified in the terminal outcome.",
+        "First-power result is not recorded as passing.",
+        "Thermal result is not recorded as passing."
+      ],
+      "casefile_status": "evidence_required",
+      "decision": "blocked_by_hazard_scope",
+      "requirements": [
+        "Move battery evidence into the battery specialist workflow before production release.",
+        "Remove blocked resources from production-authority scope.",
+        "Close failed, blocked, or safety gates before production authority.",
+        "Provide, procure, design, or remove requirement for missing capability: battery.",
+        "Provide, procure, design, or remove requirement for missing capability: power.",
+        "Do not use swollen lithium battery pack until the safety or failed-evidence condition is separately resolved.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Keep safety hold until the hard blockers are cleared by new measurements.",
+        "Capture measured connector pinout, no-short, ground, and voltage evidence.",
+        "Use only safety triage and evidence collection until blockers clear.",
+        "Record passing continuity evidence.",
+        "Record passing current evidence.",
+        "Record passing resistance evidence."
+      ]
+    },
+    "case_id": "vision_battery_hazard_blocks",
+    "checks": {
+      "authorized": true,
+      "casefile_status": true,
+      "decision": true,
+      "must_blocker": true
+    },
+    "expected": {
+      "authorized": false,
+      "casefile_status": "evidence_required",
+      "decision": "blocked_by_hazard_scope",
+      "must_blocker": "The hazard profile is outside production repair authority scope."
+    },
+    "passed": true
+  }
+]

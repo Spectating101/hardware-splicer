@@ -20,5 +20,26 @@
       "CP2102",
       "FT232RL"
     ]
+  },
+  "AMS1117-3.3": {
+    "part_number": "AMS1117",
+    "manufacturer": "Advanced Monolithic Systems",
+    "datasheet_url": "http://www.advanced-monolithic.com/pdf/ds1117.pdf",
+    "local_path": null,
+    "key_specs": {
+      "Output Voltage": "3.3V or 5V",
+      "Output Current": "1A",
+      "Dropout Voltage": "1.3V",
+      "Package": "SOT-223"
+    },
+    "common_issues": [
+      "Insufficient input voltage (needs >4.6V for 3.3V out)",
+      "No heat dissipation (gets hot)",
+      "Missing decoupling capacitors"
+    ],
+    "replacement_parts": [
+      "LD1117",
+      "LM1117"
+    ]
   }
 }

@@ -1,0 +1,848 @@
+{
+  "cases": [
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 11,
+          "required_count": 11,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "sparkfun_ch340c_usb_serial_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html"
+      },
+      "title": "SparkFun CH340C USB-C serial breakout reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": false,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 1
+        }
+      },
+      "case_id": "adafruit_bme280_sensor_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts"
+      },
+      "title": "Adafruit BME280 breakout I2C/SPI reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "adafruit_drv8833_motor_driver_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board/pinouts"
+      },
+      "title": "Adafruit DRV8833 motor driver breakout reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1",
+            "i2c"
+          ],
+          "status": "blocked_missing_resources"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "adafruit_mcp23017_gpio_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.adafruit.com/adafruit-mcp23017-i2c-gpio-expander/pinouts"
+      },
+      "title": "Adafruit MCP23017 I2C GPIO expander reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1",
+            "i2c"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "sparkfun_qwiic_soil_moisture_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.sparkfun.com/tutorials/qwiic-soil-moisture-sensor-hookup-guide/all"
+      },
+      "title": "SparkFun Qwiic Soil Moisture Sensor reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j2",
+            "i2c",
+            "power"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "sparkfun_qwiic_relay_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.sparkfun.com/tutorials/qwiic-relay-hookup-guide/all"
+      },
+      "title": "SparkFun Qwiic Relay reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_analog",
+            "power"
+          ],
+          "status": "blocked_missing_resources"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": false,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 1
+        }
+      },
+      "case_id": "arduino_uno_rev3_headers_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://docs.arduino.cc/hardware/uno-rev3/"
+      },
+      "title": "Arduino Uno Rev3 public header reference"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 12,
+          "required_count": 12,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j8",
+            "i2c",
+            "vision_gpio"
+          ],
+          "status": "blocked_missing_resources"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": false,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 1
+        }
+      },
+      "case_id": "raspberry_pi_40pin_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://www.raspberrypi.com/documentation/computers/raspberry-pi.html"
+      },
+      "title": "Raspberry Pi 40-pin GPIO public header reference"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "blocked_by_hazard_scope",
+          "selected_resource_ids": [
+            "vision_bat"
+          ],
+          "status": "prototype_after_evidence"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": true,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 0
+        }
+      },
+      "case_id": "adafruit_powerboost_1000c_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.adafruit.com/adafruit-powerboost-1000c-load-share-usb-charge-boost/pinouts"
+      },
+      "title": "Adafruit PowerBoost 1000C charger/boost reference pinout"
+    },
+    {
+      "actual": {
+        "authority_level": "visual_candidate",
+        "authority_score": 0.18,
+        "can": {
+          "claim_production_repair_release": false,
+          "power_or_splice_now": false,
+          "use_electrical_simulation": false,
+          "use_measured_pinout": false
+        },
+        "measurement_progress": {
+          "closed_count": 0,
+          "next_action": "record_resistance_power_to_ground_no_short",
+          "open_count": 5,
+          "required_count": 5,
+          "status": "waiting_for_measurements"
+        },
+        "plan": {
+          "can_power_or_splice": false,
+          "production_authorized": false,
+          "production_decision": "not_authorized_evidence_required",
+          "selected_resource_ids": [
+            "topology_j1"
+          ],
+          "status": "blocked_missing_resources"
+        },
+        "stage_status": {
+          "controlled_bench": "open",
+          "electrical_simulation": "open",
+          "measured_topology": "open",
+          "production_repair": "open",
+          "visual_candidate": "pass"
+        },
+        "topology": {
+          "measurement_backed": false,
+          "pinout_known": false,
+          "reference_only": true,
+          "source": "public_reference_topology",
+          "unknown_pin_count": 2
+        }
+      },
+      "case_id": "adafruit_pam8302_audio_amp_reference",
+      "checks": {
+        "electrical_simulation_not_granted": true,
+        "measured_pinout_not_granted": true,
+        "measurement_plan_required": true,
+        "power_splice_not_granted": true,
+        "production_not_authorized": true,
+        "reference_only": true
+      },
+      "expected": {
+        "can_power_or_splice_now": false,
+        "can_use_electrical_simulation": false,
+        "can_use_measured_pinout": false,
+        "measurement_plan_required": true,
+        "production_authorized": false,
+        "reference_only": true
+      },
+      "overclaim": false,
+      "passed": true,
+      "source": {
+        "authority": "public_reference_only",
+        "url": "https://learn.adafruit.com/adafruit-pam8302-mono-2-5w-class-d-audio-amplifier/pinouts"
+      },
+      "title": "Adafruit PAM8302 mono amplifier reference pinout"
+    }
+  ],
+  "claim_boundary": "Internet references can train and evaluate visual/reference reasoning, but cannot grant measured pinout, simulation, power/splice, or production repair authority without bench evidence.",
+  "corpus_schema_version": "internet_reference_corpus.v1",
+  "dataset_sources": [
+    {
+      "access": "public",
+      "authority_use": [
+        "reference_topology",
+        "pinout_seed",
+        "measurement_plan"
+      ],
+      "limits": "Reference only; physical board revision and condition still require bench confirmation.",
+      "modality": [
+        "schematic",
+        "layout",
+        "product_doc",
+        "pinout"
+      ],
+      "name": "SparkFun open hardware repositories and product docs",
+      "source_id": "sparkfun_open_hardware",
+      "url": "https://github.com/sparkfun"
+    },
+    {
+      "access": "public",
+      "authority_use": [
+        "reference_topology",
+        "resource_catalog",
+        "measurement_plan"
+      ],
+      "limits": "Reference only; Eagle/GitHub files do not prove the user's board is intact.",
+      "modality": [
+        "schematic",
+        "layout",
+        "product_doc",
+        "pinout"
+      ],
+      "name": "Adafruit PCB design files and Learn pinouts",
+      "source_id": "adafruit_pcb_design_files",
+      "url": "https://learn.adafruit.com/accessing-and-using-adafruit-pcb-design-files/overview"
+    },
+    {
+      "access": "registration_required",
+      "authority_use": [
+        "visual_candidate_training",
+        "ocr_training",
+        "component_detection_eval"
+      ],
+      "limits": "Excellent visual corpus, but no direct repair/pinout authority without measurements.",
+      "modality": [
+        "pcb_photo",
+        "component_annotation",
+        "text_annotation"
+      ],
+      "name": "FICS PCB Image Collection",
+      "source_id": "fpic",
+      "url": "https://physicaldb.ece.ufl.edu/index.php/fics-pcb-image-collection-fpic/"
+    },
+    {
+      "access": "public_dataset",
+      "authority_use": [
+        "component_detection_eval",
+        "salvage_visual_candidate_training"
+      ],
+      "limits": "Component boxes support visual grounding, not electrical topology or safe reuse.",
+      "modality": [
+        "pcb_photo",
+        "component_bbox"
+      ],
+      "name": "PCB Component Detection dataset",
+      "source_id": "pcb_component_detection",
+      "url": "https://datasetninja.com/pcb-component-detection"
+    },
+    {
+      "access": "public_dataset",
+      "authority_use": [
+        "defect_detection_eval",
+        "hazard_visual_candidate_training"
+      ],
+      "limits": "Mostly surface-defect inspection; not a functional repair/topology dataset.",
+      "modality": [
+        "defect_image",
+        "defect_bbox",
+        "template_pair"
+      ],
+      "name": "DeepPCB and related PCB defect datasets",
+      "source_id": "deeppcb_defects",
+      "url": "https://github.com/tangsanli5201/DeepPCB"
+    },
+    {
+      "access": "public_dataset",
+      "authority_use": [
+        "failure_mode_prior",
+        "repair_value_prior",
+        "outcome_taxonomy"
+      ],
+      "limits": "Strong repair priors, but no board-level topology or measurement evidence.",
+      "modality": [
+        "repair_record",
+        "failure_mode",
+        "outcome_prior"
+      ],
+      "name": "Open Repair Alliance repair attempts dataset",
+      "source_id": "open_repair_alliance",
+      "url": "https://openrepair.org/open-data/downloads/"
+    },
+    {
+      "access": "public_api",
+      "authority_use": [
+        "source_discovery",
+        "documentation_discovery",
+        "license_filtering"
+      ],
+      "limits": "Discovery layer; docs must still be parsed and bench-gated.",
+      "modality": [
+        "project_metadata",
+        "documentation_link",
+        "license_signal"
+      ],
+      "name": "OSHWA certified open source hardware API",
+      "source_id": "oshwa_api",
+      "url": "https://certificationapi.oshwa.org/endpoints/"
+    }
+  ],
+  "generated_at": "2026-06-02T15:59:26.501463+00:00",
+  "mode": "internet_reference_corpus_eval",
+  "schema_version": "internet_reference_corpus_eval.v1",
+  "summary": {
+    "authority_gain": {
+      "estimated_arbitrary_board_push": "60_to_75_or_80_percent_before_physical_bench_cases",
+      "measured_pinout_authority": "requires_bench_capture",
+      "production_repair_authority": "requires_bench_outcome_and_release",
+      "visual_reference_planning": "strong"
+    },
+    "authority_uses": [
+      "component_detection_eval",
+      "defect_detection_eval",
+      "documentation_discovery",
+      "failure_mode_prior",
+      "hazard_visual_candidate_training",
+      "license_filtering",
+      "measurement_plan",
+      "ocr_training",
+      "outcome_taxonomy",
+      "pinout_seed",
+      "reference_topology",
+      "repair_value_prior",
+      "resource_catalog",
+      "salvage_visual_candidate_training",
+      "source_discovery",
+      "visual_candidate_training"
+    ],
+    "measurement_plan_case_count": 10,
+    "overclaim_cases": [],
+    "overclaim_count": 0,
+    "pass_rate": 1.0,
+    "passed_count": 10,
+    "reference_case_count": 10,
+    "source_count": 7,
+    "source_modalities": [
+      "component_annotation",
+      "component_bbox",
+      "defect_bbox",
+      "defect_image",
+      "documentation_link",
+      "failure_mode",
+      "layout",
+      "license_signal",
+      "outcome_prior",
+      "pcb_photo",
+      "pinout",
+      "product_doc",
+      "project_metadata",
+      "repair_record",
+      "schematic",
+      "template_pair",
+      "text_annotation"
+    ]
+  }
+}

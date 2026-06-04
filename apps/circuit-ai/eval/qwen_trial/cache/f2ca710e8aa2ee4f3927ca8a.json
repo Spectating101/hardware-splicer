@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T09:07:39.471559+00:00",
+  "request_preview": "eval/qwen_trial/requests/curated_raspberry_pi_f2ca710e8aa2ee4f3927ca8a.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"low\",\n  \"explanation\": \"This is a Raspberry Pi 4 Model B, a consumer-grade single-board computer with no exposed high-voltage or hazardous components. The board operates at low DC voltages (typically 5V) and poses no electrical or thermal hazard under normal use.\",\n  \"components\": [\n    {\n      \"type\": \"system_on_chip\",\n      \"description\": \"Broadcom BCM2711, 1.5GHz quad-core ARM Cortex-A72 CPU with 64-bit architecture\",\n      \"bbox_2d\": [338, 272, 540, 445]\n    },\n    {\n      \"type\": \"memory\",\n      \"description\": \"512MB/1GB/2GB/4GB LPDDR4 SDRAM (model-dependent)\",\n      \"bbox_2d\": [470, 392, 620, 537]\n    },\n    {\n      \"type\": \"ethernet_controller\",\n      \"description\": \"Realtek RTL8211F Gigabit Ethernet PHY\",\n      \"bbox_2d\": [720, 277, 987, 692]\n    },\n    {\n      \"type\": \"usb_hub\",\n      \"description\": \"Texas Instruments TUSB4021 USB 2.0/3.0 hub controller (for USB-C to dual USB-A)\",\n      \"bbox_2d\": [615, 392, 840, 792]\n    },\n    {\n      \"type\": \"power_management\",\n      \"description\": \"PMBus-compatible power management IC (e.g., TI TPS65913 or similar)\",\n      \"bbox_2d\": [135, 447, 240, 572]\n    },\n    {\n      \"type\": \"wireless_module\",\n      \"description\": \"Broadcom BCM43455C0 Wi-Fi/Bluetooth module (integrated in SoC), no external antenna visible on this side\",\n      \"bbox_2d\": [325, 137, 485, 272]\n    }\n  ],\n  \"markings\": [\n    {\n      \"text\": \"Raspberry Pi 4 Model B\",\n      \"bbox_2d\": [550, 287, 675, 352]\n    },\n    {\n      \"text\": \"\u00a9 Raspberry Pi 2018\",\n      \"bbox_2d\": [540, 322, 660, 377]\n    },\n    {\n      \"text\": \"FCC ID: 2A0C2-R014B\",\n      \"bbox_2d\": [275, 387, 385, 432]\n    },\n    {\n      \"text\": \"IC: 20853-NT17B\",\n      \"bbox_2d\": [275, 417, 385, 462]\n    },\n    {\n      \"text\": \"HDMI\",\n      \"bbox_2d\": [245, 472, 325, 552]\n    },\n    {\n      \"text\": \"USB2\",\n      \"bbox_2d\": [530, 862, 565, 897]\n    },\n    {\n      \"text\": \"EDAC\",\n      \"bbox_2d\": [515, 527, 575, 582]\n    },\n    {\n      \"text\": \"G310\",\n      \"bbox_2d\": [495, 242, 525, 272]\n    }\n  ],\n  \"regions\": [\n    {\n      \"type\": \"processor_area\",\n      \"description\": \"Central SoC and memory area with heat spreader and large black memory chip\",\n      \"bbox_2d\": [325, 267, 625, 557]\n    },\n    {\n      \"type\": \"peripheral_area\",\n      \"description\": \"I/O peripherals including USB, HDMI, Ethernet, audio jack, and power input\",\n      \"bbox_2d\": [30, 342, 845, 907]\n    }\n  ],\n  \"damage\": [],\n  \"connectors\": [\n    {\n      \"type\": \"usb_c\",\n      \"description\": \"USB Type-C power input (5V/3A max)\",\n      \"bbox_2d\": [40, 352, 150, 487]\n    },\n    {\n      \"type\": \"usb_a\",\n      \"description\": \"Two USB 3.0 ports (blue insert) for peripheral devices\",\n      \"bbox_2d\": [470, 500, 705, 902]\n    },\n    {\n      \"type\": \"ethernet\",\n      \"description\": \"RJ45 Gigabit Ethernet port\",\n      \"bbox_2d\": [720, 277, 987, 692]\n    },\n    {\n      \"type\": \"hdmi\",\n      \"description\": \"HDMI Type-A connector for video output\",\n      \"bbox_2d\": [225, 537, 315, 647]\n    },\n    {\n      \"type\": \"audio_jack\",\n      \"description\": \"3.5mm stereo audio jack\",\n      \"bbox_2d\": [305, 542, 470, 737]\n    },\n    {\n      \"type\": \"display_port\",\n      \"description\": \"DisplayPort (eDP) interface for eDP display modules\",\n      \"bbox_2d\": [155, 117, 340, 312]\n    },\n    {\n      \"type\": \"gpio_header\",\n      \"description\": \"40-pin GPIO header (full-size, 2x20)\",\n      \"bbox_2d\": [435, 22, 775, 372]\n    }\n  ],\n  \"test_points\": [],\n  \"salvage_candidates\": [\n    {\n      \"component\": \"system_on_chip\",\n      \"reason\": \"High-value component; possible for repair/replacement if damaged, but requires specialized equipment\"\n    },\n    {\n      \"component\": \"memory\",\n      \"reason\": \"Soldered directly to PCB; not user-replaceable without reballing\"\n    }\n  ],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"components\": [\n      {\n        \"bbox_2d\": [338, 272, 540, 445],\n        \"localized_part\": \"system_on_chip\"\n      },\n      {\n        \"bbox_2d\": [470, 392, 620, 537],\n        \"localized_part\": \"memory\"\n      },\n      {\n        \"bbox_2d\": [720, 277, 987, 692],\n        \"localized_part\": \"ethernet_controller\"\n      },\n      {\n        \"bbox_2d\": [615, 392, 840, 792],\n        \"localized_part\": \"usb_hub\"\n      },\n      {\n        \"bbox_2d\": [135, 447, 240, 572],\n        \"localized_part\": \"power_management\"\n      },\n      {\n        \"bbox_2d\": [325, 137, 485, 272],\n        \"localized_part\": \"wireless_module\"\n      }\n    ],\n    \"markings\": [\n      {\n        \"bbox_2d\": [550, 287, 675, 352],\n        \"localized_text\": \"Raspberry Pi 4 Model B\"\n      },\n      {\n        \"bbox_2d\": [540, 322, 660, 37",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "length",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 1043,
+      "completion_tokens": 1800,
+      "total_tokens": 2843,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 1800
+      }
+    },
+    "created": 1779700059,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-96f83206-c166-9085-a2fa-2e21bbd80180"
+  },
+  "qwen_summary": {
+    "json_valid": false,
+    "safety_level": null,
+    "component_count": 0,
+    "module_count": 0,
+    "evidence_component_count": 0,
+    "marking_count": 0,
+    "connector_count": 0,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 1043,
+    "output_tokens": 1800,
+    "estimated_usd": 0.00041,
+    "elapsed_s": 18.004
+  }
+}

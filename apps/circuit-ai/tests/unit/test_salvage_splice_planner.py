@@ -1,6 +1,13 @@
+from pathlib import Path
+
 from src.api.v1 import main as main_module
+from src.engines.circuit_board_graph import analyze_circuit_design, analyze_circuit_session
 from src.intelligence.board_session_store import BoardSessionStore
 from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
+
+
+ROOT = Path(__file__).resolve().parents[4]
+DEMO_NETLIST = ROOT / "examples" / "main_ctrl_esp32_servo.net"
 
 
 def test_splice_planner_turns_usb_fan_into_reuse_build_plan():
@@ -76,6 +83,145 @@ def test_splice_planner_uses_analysis_connector_and_interface_evidence():
     assert "conn_0_connector" in plan["splice_plan"]["safest_entry_points"]
     assert "logic high voltage" in plan["splice_plan"]["required_measurements"]
     assert any(adapter["name"] == "logic-to-load interface" for adapter in plan["splice_plan"]["adapter_circuits"])
+
+
+def test_splice_planner_consumes_circuit_functional_salvage_contract():
+    circuit = analyze_circuit_design(
+        {
+            "board": {
+                "board_id": "main_ctrl",
+                "path": str(DEMO_NETLIST),
+                "kind": "netlist",
+            }
+        }
+    )
+
+    plan = SalvageSplicePlanner().plan(
+        {
+            "title": "controller board reuse",
+            "goal": "reuse controller, sensor, and PWM connectors for a low-voltage machine",
+            "analysis": circuit,
+        }
+    )
+
+    assert plan["functional_reuse_plan"]["circuit_backed"] is True
+    assert plan["functional_reuse_plan"]["reusable_block_count"] >= 3
+    assert plan["functional_reuse_plan"]["open_evidence_gate_count"] > 0
+    assert any(block["source"] == "circuit_functional_salvage" for block in plan["reusable_blocks"])
+    assert any(entry == "main_ctrl:J2" for entry in plan["splice_plan"]["safest_entry_points"])
+    assert any("J2" in item for item in plan["splice_plan"]["required_measurements"])
+    assert plan["verdict"] == "ready_after_measurements"
+
+
+def test_splice_plan_api_preserves_circuit_backed_functional_reuse_plan():
+    circuit = analyze_circuit_design(
+        {
+            "board": {
+                "board_id": "main_ctrl",
+                "path": str(DEMO_NETLIST),
+                "kind": "netlist",
+            }
+        }
+    )
+
+    response = main_module.salvage_splice_plan(
+        {
+            "title": "controller board reuse",
+            "goal": "reuse controller board functions through verified connectors",
+            "analysis": circuit,
+        },
+        current_user={"user_id": "user-1"},
+        planner=SalvageSplicePlanner(),
+    )
+
+    plan = response["splice_plan"]
+    assert plan["functional_reuse_plan"]["circuit_backed"] is True
+    assert plan["functional_reuse_plan"]["top_blocks"]
+    assert response["metadata"]["committed_session"] is False
+
+
+def test_splice_planner_recommends_first_splice_after_circuit_gates_close(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    created = main_module.circuit_boards_analyze_design(
+        {
+            "description": "J2 sensor connector salvage proof",
+            "board": {
+                "board_id": "main_ctrl",
+                "path": str(DEMO_NETLIST),
+                "kind": "netlist",
+            },
+        },
+        commit_session=True,
+        current_user={"user_id": "operator-1"},
+        store=store,
+    )
+    session_id = created["session"]["session_id"]
+    for measurement in [
+        {"type": "voltage", "target": "J2 +3V3", "value": 3.31, "unit": "V", "notes": "J2 power pin measured to ground"},
+        {"type": "continuity", "target": "J2 ground", "value": "pass", "notes": "J2 ground continuity ok"},
+        {"type": "logic_level", "target": "J2 SCL SDA", "value": "pass", "notes": "logic idle high at 3.3V on SCL/SDA"},
+        {"type": "voltage", "target": "+3V3", "value": 3.31, "unit": "V", "notes": "rail measured to ground"},
+    ]:
+        store.add_measurement(session_id, measurement)
+    circuit = analyze_circuit_session(store.get_session(session_id))
+
+    plan = SalvageSplicePlanner().plan(
+        {
+            "title": "verified sensor connector reuse",
+            "goal": "reuse the verified J2 sensor connector in another low-voltage build",
+            "analysis": circuit,
+        }
+    )
+
+    reuse = plan["functional_reuse_plan"]
+    first = reuse["recommended_first_splice"]
+    assert reuse["splice_readiness"] == "ready_for_first_splice"
+    assert reuse["ready_block_count"] >= 1
+    assert first["status"] == "reuse_ready"
+    assert "main_ctrl:J2" in first["entry_points"]
+    assert first["missing_evidence"] == []
+
+
+def test_splice_plan_api_can_plan_from_existing_circuit_session(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    created = main_module.circuit_boards_analyze_design(
+        {
+            "description": "Session-backed J2 salvage proof",
+            "board": {
+                "board_id": "main_ctrl",
+                "path": str(DEMO_NETLIST),
+                "kind": "netlist",
+            },
+        },
+        commit_session=True,
+        current_user={"user_id": "operator-1"},
+        store=store,
+    )
+    session_id = created["session"]["session_id"]
+    for measurement in [
+        {"type": "voltage", "target": "J2 +3V3", "value": 3.31, "unit": "V"},
+        {"type": "continuity", "target": "J2 ground", "value": "pass"},
+        {"type": "logic_level", "target": "J2 SCL SDA", "value": "pass", "notes": "logic idle high at 3.3V"},
+        {"type": "voltage", "target": "+3V3", "value": 3.31, "unit": "V"},
+    ]:
+        store.add_measurement(session_id, measurement)
+
+    response = main_module.salvage_splice_plan(
+        {
+            "session_id": session_id,
+            "title": "session-backed salvage plan",
+            "goal": "reuse the verified sensor connector",
+        },
+        current_user={"user_id": "operator-1"},
+        planner=SalvageSplicePlanner(),
+        store=store,
+    )
+
+    first = response["splice_plan"]["functional_reuse_plan"]["recommended_first_splice"]
+    assert response["metadata"]["source_session_id"] == session_id
+    assert response["metadata"]["added_circuit_context"] is True
+    assert first["status"] == "reuse_ready"
+    assert "main_ctrl:J2" in first["entry_points"]
 
 
 def test_splice_planner_routes_scanner_parts_to_inspection_fixture():

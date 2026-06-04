@@ -14,18 +14,21 @@ class BoardDossierBuilder:
         graph = BoardEvidenceGraphBuilder().build(session)
         analysis = self._latest_analysis(session)
         production_aoi = analysis.get("production_aoi") if isinstance(analysis.get("production_aoi"), dict) else {}
+        evidence_trust = analysis.get("evidence_trust") if isinstance(analysis.get("evidence_trust"), dict) else {}
+        repair_authority = analysis.get("repair_authority") if isinstance(analysis.get("repair_authority"), dict) else {}
         repair_guide = session.get("repair_guide") if isinstance(session.get("repair_guide"), dict) else {}
-        salvage_plan = session.get("salvage_splice_plan") if isinstance(session.get("salvage_splice_plan"), dict) else {}
+        hardware_plan = self._hardware_plan_summary(analysis)
+        salvage_plan = self._salvage_plan(session, analysis)
         detections = analysis.get("detections") if isinstance(analysis.get("detections"), list) else []
         tasks = session.get("evidence_tasks") if isinstance(session.get("evidence_tasks"), list) else []
         open_tasks = [task for task in tasks if isinstance(task, dict) and str(task.get("status") or "open") == "open"]
         outcomes = session.get("outcomes") if isinstance(session.get("outcomes"), list) else []
 
         confirmed_findings = self._confirmed_findings(session)
-        known = self._known_items(session, analysis, repair_guide, salvage_plan, graph, confirmed_findings)
-        weak = self._weak_items(graph, production_aoi)
-        next_actions = self._next_actions(graph, open_tasks, production_aoi)
-        status = self._dossier_status(production_aoi, graph, open_tasks)
+        known = self._known_items(session, analysis, repair_guide, salvage_plan, hardware_plan, graph, confirmed_findings)
+        weak = self._weak_items(graph, production_aoi, evidence_trust, repair_authority)
+        next_actions = self._next_actions(graph, open_tasks, production_aoi, evidence_trust, repair_authority)
+        status = self._dossier_status(production_aoi, graph, open_tasks, repair_authority)
 
         return {
             "mode": "board_dossier",
@@ -38,6 +41,8 @@ class BoardDossierBuilder:
             "aoi": self._aoi_summary(production_aoi),
             "components": self._component_summary(detections, analysis),
             "repair_reuse": self._repair_reuse_summary(repair_guide, salvage_plan, confirmed_findings),
+            "hardware_plan": hardware_plan,
+            "authority": self._authority_summary(session, evidence_trust, repair_authority),
             "evidence": {
                 "graph_summary": graph.get("summary", {}),
                 "grounded_claims": graph.get("grounded_claims", [])[:8],
@@ -55,10 +60,7 @@ class BoardDossierBuilder:
                 "nodes": graph.get("nodes", [])[:80],
                 "edges": graph.get("edges", [])[:120],
             },
-            "claim_boundary": (
-                "This dossier only summarizes evidence already attached to the board session. "
-                "Weak claims require additional capture, measurement, review, reference, or outcome evidence."
-            ),
+            "claim_boundary": self._claim_boundary(repair_authority),
         }
 
     def _known_items(
@@ -67,6 +69,7 @@ class BoardDossierBuilder:
         analysis: Dict[str, Any],
         repair_guide: Dict[str, Any],
         salvage_plan: Dict[str, Any],
+        hardware_plan: Dict[str, Any],
         graph: Dict[str, Any],
         confirmed_findings: List[Dict[str, Any]],
     ) -> List[str]:
@@ -85,6 +88,13 @@ class BoardDossierBuilder:
         target = salvage_plan.get("target") if isinstance(salvage_plan.get("target"), dict) else {}
         if target.get("recommended_build") or salvage_plan.get("target_build"):
             items.append(f"Reuse target: {target.get('recommended_build') or salvage_plan.get('target_build')}")
+        if hardware_plan.get("available"):
+            if hardware_plan.get("status"):
+                items.append(f"Hardware plan status: {str(hardware_plan.get('status')).replace('_', ' ')}")
+            if hardware_plan.get("recommended_path"):
+                items.append(f"Hardware plan path: {str(hardware_plan.get('recommended_path')).replace('_', ' ')}")
+            if hardware_plan.get("selected_resource_count") is not None:
+                items.append(f"Hardware plan selected {hardware_plan.get('selected_resource_count')} resource(s)")
         for claim in graph.get("grounded_claims", [])[:4]:
             if isinstance(claim, dict) and claim.get("claim"):
                 items.append(str(claim["claim"]))
@@ -95,19 +105,44 @@ class BoardDossierBuilder:
                 items.append(f"{label}: {evidence}")
         return self._dedupe(items)[:10]
 
-    def _weak_items(self, graph: Dict[str, Any], production_aoi: Dict[str, Any]) -> List[str]:
+    def _weak_items(
+        self,
+        graph: Dict[str, Any],
+        production_aoi: Dict[str, Any],
+        evidence_trust: Dict[str, Any],
+        repair_authority: Dict[str, Any],
+    ) -> List[str]:
         items = []
         for blocker in production_aoi.get("blockers") or []:
             items.append(str(blocker))
+        for blocker in evidence_trust.get("blockers") or []:
+            if self._skip_stale_electrical_evidence_gap(str(blocker), repair_authority):
+                continue
+            items.append(str(blocker))
+        for blocked in repair_authority.get("blocked_decisions") or []:
+            items.append(f"Blocked repair decision: {blocked}")
         for claim in graph.get("weak_claims", [])[:8]:
             if isinstance(claim, dict) and claim.get("claim"):
                 items.append(str(claim["claim"]))
         return self._dedupe(items)[:10]
 
-    def _next_actions(self, graph: Dict[str, Any], open_tasks: List[Dict[str, Any]], production_aoi: Dict[str, Any]) -> List[str]:
+    def _next_actions(
+        self,
+        graph: Dict[str, Any],
+        open_tasks: List[Dict[str, Any]],
+        production_aoi: Dict[str, Any],
+        evidence_trust: Dict[str, Any],
+        repair_authority: Dict[str, Any],
+    ) -> List[str]:
         actions = [str(item) for item in graph.get("next_grounding_actions", []) if str(item).strip()]
         for evidence in production_aoi.get("required_evidence") or []:
             actions.append(str(evidence))
+        for evidence in evidence_trust.get("required_evidence") or []:
+            if self._skip_stale_electrical_evidence_gap(str(evidence), repair_authority):
+                continue
+            actions.append(str(evidence))
+        for measurement in repair_authority.get("required_measurements") or []:
+            actions.append(str(measurement))
         for task in open_tasks[:6]:
             actions.append(str(task.get("prompt") or "Resolve open evidence task"))
         return self._dedupe(actions)[:10]
@@ -181,12 +216,64 @@ class BoardDossierBuilder:
             "reusable_blocks": salvage_plan.get("reusable_blocks") or [],
         }
 
-    def _dossier_status(self, production_aoi: Dict[str, Any], graph: Dict[str, Any], open_tasks: List[Dict[str, Any]]) -> str:
+    def _authority_summary(
+        self,
+        session: Dict[str, Any],
+        evidence_trust: Dict[str, Any],
+        repair_authority: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        measurements = (session.get("evidence") or {}).get("measurements") or []
+        if not evidence_trust and not repair_authority:
+            return {
+                "available": False,
+                "measurement_count": len(measurements),
+                "release_authorized": False,
+                "claim_boundary": self._claim_boundary({}),
+            }
+        status = str(repair_authority.get("status") or "unknown")
+        return {
+            "available": True,
+            "measurement_count": len(measurements),
+            "evidence_trust": {
+                "score": evidence_trust.get("score"),
+                "level": evidence_trust.get("level"),
+                "launch_readiness": evidence_trust.get("launch_readiness"),
+                "blockers": evidence_trust.get("blockers") or [],
+            },
+            "repair_authority": {
+                "status": repair_authority.get("status"),
+                "score": repair_authority.get("score"),
+                "safety_level": repair_authority.get("safety_level"),
+                "summary": repair_authority.get("summary"),
+                "supported_decisions": repair_authority.get("supported_decisions") or [],
+                "blocked_decisions": repair_authority.get("blocked_decisions") or [],
+                "required_measurements": repair_authority.get("required_measurements") or [],
+                "measurement_summary": repair_authority.get("measurement_summary") or {},
+                "gates": repair_authority.get("gates") or [],
+            },
+            "release_authorized": status == "authoritative_low_risk",
+            "claim_boundary": self._claim_boundary(repair_authority),
+        }
+
+    def _dossier_status(
+        self,
+        production_aoi: Dict[str, Any],
+        graph: Dict[str, Any],
+        open_tasks: List[Dict[str, Any]],
+        repair_authority: Dict[str, Any],
+    ) -> str:
         if production_aoi.get("release_authorized"):
             return "release_ready"
         disposition = str(production_aoi.get("disposition") or "")
         if disposition in {"rework", "hold_for_capture", "hold_for_reference", "hold_for_calibration"}:
             return disposition
+        repair_status = str(repair_authority.get("status") or "")
+        if repair_status == "blocked":
+            return "safety_hold"
+        if repair_status == "authoritative_low_risk":
+            return "repair_authority_ready"
+        if repair_status in {"visual_only", "needs_measurements", "measurement_backed"}:
+            return "needs_measurements"
         if graph.get("summary", {}).get("weak_claim_count", 0) or open_tasks:
             return "needs_evidence"
         return "review_ready"
@@ -198,6 +285,8 @@ class BoardDossierBuilder:
         graph: Dict[str, Any],
         open_tasks: List[Dict[str, Any]],
     ) -> str:
+        analysis = self._latest_analysis(session)
+        repair_authority = analysis.get("repair_authority") if isinstance(analysis.get("repair_authority"), dict) else {}
         title = session.get("title") or session.get("device_hint") or "This board"
         graph_summary = graph.get("summary", {})
         parts = [
@@ -206,9 +295,84 @@ class BoardDossierBuilder:
         if production_aoi:
             disposition = str(production_aoi.get("disposition") or "unknown").replace("_", " ")
             parts.append(f"Production AOI disposition is {disposition}.")
+        if repair_authority:
+            parts.append(f"Repair authority is {str(repair_authority.get('status') or 'unknown').replace('_', ' ')}.")
         if open_tasks:
             parts.append(f"{len(open_tasks)} evidence task(s) remain open.")
         return " ".join(parts)
+
+    def _claim_boundary(self, repair_authority: Dict[str, Any]) -> str:
+        status = str(repair_authority.get("status") or "")
+        if status == "authoritative_low_risk":
+            return (
+                "Repair authority only applies to the measured low-risk claims in this dossier. "
+                "Hidden nets, high-voltage sections, lithium packs, and unmeasured reuse claims remain blocked."
+            )
+        return (
+            "This dossier only summarizes evidence already attached to the board session. "
+            "Weak or visual-only claims require additional capture, measurement, review, reference, or outcome evidence."
+        )
+
+    def _hardware_plan_summary(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+        summary = analysis.get("hardware_plan_summary") if isinstance(analysis.get("hardware_plan_summary"), dict) else {}
+        if not summary and analysis.get("mode") != "hardware_plan":
+            return {
+                "available": False,
+                "status": None,
+                "recommended_path": None,
+                "selected_resource_count": 0,
+                "selected_resource_ids": [],
+                "procurement": {},
+                "authority": {},
+                "assurance": {},
+                "target": {},
+                "first_measurements": [],
+                "first_build_steps": [],
+                "execution_package": {},
+                "outcome_memory": {},
+                "claim_boundary": None,
+            }
+        resource_strategy = analysis.get("resource_strategy") if isinstance(analysis.get("resource_strategy"), dict) else {}
+        procurement = summary.get("procurement") if isinstance(summary.get("procurement"), dict) else resource_strategy.get("procurement_plan") if isinstance(resource_strategy.get("procurement_plan"), dict) else {}
+        return {
+            "available": True,
+            "status": summary.get("status"),
+            "recommended_path": summary.get("recommended_path"),
+            "selected_resource_count": summary.get("selected_resource_count"),
+            "selected_resource_ids": summary.get("selected_resource_ids") or [],
+            "procurement": procurement,
+            "authority": summary.get("authority") if isinstance(summary.get("authority"), dict) else {},
+            "assurance": summary.get("assurance") if isinstance(summary.get("assurance"), dict) else {},
+            "target": summary.get("target") if isinstance(summary.get("target"), dict) else {},
+            "first_measurements": summary.get("first_measurements") or [],
+            "first_build_steps": summary.get("first_build_steps") or [],
+            "execution_package": summary.get("execution_package") if isinstance(summary.get("execution_package"), dict) else {},
+            "outcome_memory": summary.get("outcome_memory") if isinstance(summary.get("outcome_memory"), dict) else {},
+            "claim_boundary": summary.get("claim_boundary"),
+        }
+
+    def _salvage_plan(self, session: Dict[str, Any], analysis: Dict[str, Any]) -> Dict[str, Any]:
+        if isinstance(analysis.get("salvage_splice_plan"), dict):
+            return analysis["salvage_splice_plan"]
+        return session.get("salvage_splice_plan") if isinstance(session.get("salvage_splice_plan"), dict) else {}
+
+    def _skip_stale_electrical_evidence_gap(self, text: str, repair_authority: Dict[str, Any]) -> bool:
+        if not repair_authority:
+            return False
+        lower = text.lower()
+        summary = repair_authority.get("measurement_summary") if isinstance(repair_authority.get("measurement_summary"), dict) else {}
+        measurement_count = int(summary.get("count") or 0)
+        if measurement_count and any(term in lower for term in ["no electrical measurements", "no bench measurements"]):
+            return True
+        status = str(repair_authority.get("status") or "")
+        if status not in {"measurement_backed", "authoritative_low_risk"}:
+            return False
+        if not any(term in lower for term in ["voltage", "continuity", "resistance", "current", "measure", "power", "rail", "functional"]):
+            return False
+        required = [str(item).lower() for item in (repair_authority.get("required_measurements") or [])]
+        if not required:
+            return True
+        return not any(lower in item or item in lower for item in required)
 
     def _latest_analysis(self, session: Dict[str, Any]) -> Dict[str, Any]:
         analyses = session.get("analyses") if isinstance(session.get("analyses"), list) else []

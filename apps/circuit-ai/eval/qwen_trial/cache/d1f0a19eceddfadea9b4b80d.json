@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T09:03:32.551161+00:00",
+  "request_preview": "eval/qwen_trial/requests/single_test_pcb_d1f0a19eceddfadea9b4b80d.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"low\",\n  \"explanation\": \"The board appears to be a minimal test or prototype PCB with only three labeled components: an IC Chip, a Capacitor, and a Resistor. No visible traces, solder joints, or additional circuitry are shown. The labels are generic and do not provide part numbers or specifications. No safety-critical features (e.g., high voltage, thermal management) are evident. The board is likely for educational or development purposes.\",\n  \"components_modules\": [\n    {\n      \"type\": \"IC Chip\",\n      \"description\": \"Rectangular component labeled 'IC Chip', likely a microcontroller or logic device; no visible package details or markings.\",\n      \"location\": \"top-left\"\n    },\n    {\n      \"type\": \"Capacitor\",\n      \"description\": \"Rectangular component labeled 'Cap', likely a surface-mount capacitor; no polarity or value visible.\",\n      \"location\": \"top-right\"\n    },\n    {\n      \"type\": \"Resistor\",\n      \"description\": \"Square component labeled 'Res', likely a surface-mount resistor; no value or tolerance visible.\",\n      \"location\": \"bottom-left\"\n    }\n  ],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"components\": [\n      {\n        \"bbox_2d\": [0.117, 0.516, 0.234, 0.648],\n        \"label\": \"Res\",\n        \"type\": \"resistor\",\n        \"region\": \"bottom-left\"\n      },\n      {\n        \"bbox_2d\": [0.488, 0.176, 0.638, 0.312],\n        \"label\": \"Cap\",\n        \"type\": \"capacitor\",\n        \"region\": \"top-right\"\n      },\n      {\n        \"bbox_2d\": [0.125, 0.192, 0.350, 0.408],\n        \"label\": \"IC Chip\",\n        \"type\": \"integrated_circuit\",\n        \"region\": \"top-left\"\n      }\n    ],\n    \"markings\": [\n      {\n        \"bbox_2d\": [0.133, 0.248, 0.333, 0.352],\n        \"text\": \"IC Chip\",\n        \"type\": \"label\"\n      },\n      {\n        \"bbox_2d\": [0.508, 0.232, 0.612, 0.292],\n        \"text\": \"Cap\",\n        \"type\": \"label\"\n      },\n      {\n        \"bbox_2d\": [0.144, 0.548, 0.212, 0.604],\n        \"text\": \"Res\",\n        \"type\": \"label\"\n      }\n    ],\n    \"regions\": [],\n    \"damage\": [],\n    \"connectors\": [],\n    \"test_points\": [],\n    \"salvage_candidates\": []\n  }\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 760,
+      "completion_tokens": 663,
+      "total_tokens": 1423,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 663
+      }
+    },
+    "created": 1779699813,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-8f717d8b-ba7f-925b-982e-29903bf759e0"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "safety_level": "low",
+    "component_count": 0,
+    "module_count": 0,
+    "evidence_component_count": 3,
+    "marking_count": 3,
+    "connector_count": 0,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 760,
+    "output_tokens": 663,
+    "estimated_usd": 0.000159,
+    "elapsed_s": 7.551
+  }
+}

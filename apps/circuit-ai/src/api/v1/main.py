@@ -30,6 +30,12 @@ from src.api.v1.metrics import (
 )
 from src.api.v1.physics import router as physics_router
 from src.core.ingest import CircuitAnalyzer
+from src.engines.board_intelligence import (
+    analyze_board_intelligence,
+    analyze_board_session_intelligence,
+    assess_downstream_capabilities,
+)
+from src.engines.circuit_board_graph import analyze_circuit_design, analyze_circuit_session
 from src.engines.kicad_parser import KiCadParser
 from src.intelligence.repair_encyclopedia import RepairEncyclopedia
 from src.intelligence.repair_case_evaluator import RepairCaseEvaluator
@@ -41,9 +47,37 @@ from src.intelligence.salvage_workflow_engine import SalvageWorkflowEngine
 from src.intelligence.salvage_pipeline import SalvageToProductPipeline
 from src.intelligence.salvage_portfolio_planner import SalvagePortfolioPlanner
 from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
+from src.intelligence.functional_salvage_workflow import FunctionalSalvageWorkflowRunner
+from src.intelligence.circuit_ai_reasoner import CircuitAIReasoner, circuit_ai_model_status
 from src.intelligence.board_session_store import BoardSessionStore
+from src.intelligence.bench_topology_capture import (
+    bench_capture_to_topology_evidence,
+    build_bench_capture_template,
+    enrich_payload_with_bench_topology_capture,
+    extract_bench_topology_capture,
+)
+from src.intelligence.authority_ledger import build_authority_ledger
+from src.intelligence.board_omniscience_map import build_board_omniscience_map
+from src.intelligence.hardware_plan import HardwarePlanOrchestrator
+from src.intelligence.design_test_kit import build_design_test_kit
+from src.intelligence.diy_project_engineer import build_diy_project_engineering_plan
+from src.intelligence.diy_project_session import DIYProjectSessionStore
+from src.intelligence.field_model_advisory import build_field_model_advisory
+from src.intelligence.field_operator_agent import build_field_operator_next_action
+from src.intelligence.measurement_authority_closure import build_measurement_authority_closure
+from src.intelligence.measurement_session_progress import build_measurement_session_progress
+from src.intelligence.multiview_board_evidence import fuse_board_photo_set
+from src.intelligence.production_casefile import build_production_casefile
+from src.intelligence.resource_strategy import build_resource_strategy
+from src.intelligence.topology_netlist_compiler import compile_topology_to_netlist
+from src.intelligence.visual_topology_hypothesis import build_visual_topology_hypothesis
 from src.ml.research_radar import build_research_integration_plan
 from src.vision.foundation_adapters import build_foundation_assist_plan, foundation_backend_statuses
+from src.vision.qwen_board_vision import (
+    DEFAULT_MAX_TOKENS as QWEN_DEFAULT_MAX_TOKENS,
+    analyze_board_image_with_qwen,
+    qwen_vision_status,
+)
 
 
 app = FastAPI(title="Circuit.AI API v1", version="1.0.0")
@@ -72,6 +106,7 @@ _repair_coverage: RepairMarketCoverage | None = None
 _repair_value_trials: RepairValueTrialStore | None = None
 _repair_video_builder: RepairVideoPlaybookBuilder | None = None
 _board_session_store: BoardSessionStore | None = None
+_diy_project_session_store: DIYProjectSessionStore | None = None
 
 
 @lru_cache(maxsize=1)
@@ -304,6 +339,13 @@ def get_board_session_store() -> BoardSessionStore:
     if _board_session_store is None:
         _board_session_store = BoardSessionStore()
     return _board_session_store
+
+
+def get_diy_project_session_store() -> DIYProjectSessionStore:
+    global _diy_project_session_store
+    if _diy_project_session_store is None:
+        _diy_project_session_store = DIYProjectSessionStore()
+    return _diy_project_session_store
 
 
 @app.get("/healthz")
@@ -703,6 +745,251 @@ def ml_foundation_status(
             has_video=has_video,
             goal=goal,
         ),
+    }
+
+
+@app.get("/vision/qwen/status")
+def qwen_board_vision_status(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    return {
+        "status": qwen_vision_status(),
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
+@app.post("/vision/qwen/board-evidence")
+def qwen_board_vision_evidence(
+    file: UploadFile = File(...),
+    goal: Optional[str] = Form(None),
+    device_hint: Optional[str] = Form(None),
+    symptoms: Optional[str] = Form(None),
+    live: bool = Form(False),
+    include_hardware_plan: bool = Form(True),
+    max_tokens: int = Form(QWEN_DEFAULT_MAX_TOKENS),
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    try:
+        image_bytes = file.file.read()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid image upload: {exc}")
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Image upload is empty")
+
+    result = analyze_board_image_with_qwen(
+        image_bytes,
+        filename=file.filename or "board.png",
+        media_type=file.content_type,
+        goal=goal or "",
+        device_hint=device_hint or "",
+        symptoms=_parse_symptoms(symptoms),
+        live=live,
+        max_tokens=max_tokens,
+    )
+    evidence = result.get("board_evidence") if isinstance(result.get("board_evidence"), dict) else {}
+    plan = None
+    if include_hardware_plan and evidence:
+        plan = HardwarePlanOrchestrator().plan(
+            {
+                "goal": goal or "reason about Qwen board evidence",
+                "device_hint": device_hint or "",
+                "symptoms": _parse_symptoms(symptoms),
+                "strategy_mode": "constrained",
+                "board_evidence": evidence,
+                "use_reference_catalog": False,
+            }
+        )
+    return {
+        "qwen_board_vision": result,
+        "board_evidence": evidence,
+        "vision_evidence_bridge": result.get("vision_evidence_bridge") if isinstance(result.get("vision_evidence_bridge"), dict) else {},
+        "hardware_plan": plan,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "live": live,
+            "include_hardware_plan": include_hardware_plan,
+        },
+    }
+
+
+@app.post("/vision/board-evidence/fuse")
+def fuse_multiview_board_evidence(
+    payload: Dict[str, Any],
+    include_hardware_plan: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    reconstruction = fuse_board_photo_set(payload or {})
+    evidence = reconstruction.get("board_evidence") if isinstance(reconstruction.get("board_evidence"), dict) else {}
+    plan = None
+    if include_hardware_plan and evidence:
+        plan = HardwarePlanOrchestrator().plan(
+            {
+                **(payload or {}),
+                "goal": (payload or {}).get("goal") or "reconstruct board evidence from multiple photos",
+                "strategy_mode": (payload or {}).get("strategy_mode") or "constrained",
+                "board_evidence": evidence,
+                "use_reference_catalog": bool((payload or {}).get("use_reference_catalog", False)),
+            }
+        )
+    return {
+        "multiview_board_reconstruction": reconstruction,
+        "board_evidence": evidence,
+        "vision_evidence_bridge": reconstruction.get("vision_evidence_bridge")
+        if isinstance(reconstruction.get("vision_evidence_bridge"), dict)
+        else {},
+        "hardware_plan": plan,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "include_hardware_plan": include_hardware_plan,
+            "fixed_view_slots_required": False,
+        },
+    }
+
+
+@app.post("/vision/board-evidence/visual-topology")
+def visual_topology_hypothesis(
+    payload: Dict[str, Any],
+    include_hardware_plan: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    hypothesis = build_visual_topology_hypothesis(payload or {})
+    plan = HardwarePlanOrchestrator().plan(payload or {}) if include_hardware_plan else None
+    return {
+        "visual_topology_hypothesis": hypothesis,
+        "hardware_plan": plan,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "include_hardware_plan": include_hardware_plan,
+            "candidate_only": True,
+        },
+    }
+
+
+@app.post("/hardware/topology-capture/template")
+def hardware_topology_capture_template(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    body = payload or {}
+    reference = (
+        body.get("topology_evidence")
+        if isinstance(body.get("topology_evidence"), dict)
+        else body.get("reference_topology")
+    )
+    template = build_bench_capture_template(
+        reference_topology=reference if isinstance(reference, dict) else None,
+        board_evidence=body.get("board_evidence") if isinstance(body.get("board_evidence"), dict) else None,
+    )
+    return {
+        "bench_topology_capture_template": template,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "reference_seed_is_not_evidence": True,
+        },
+    }
+
+
+@app.post("/hardware/topology-capture/convert")
+def hardware_topology_capture_convert(
+    payload: Dict[str, Any],
+    include_hardware_plan: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    body = payload or {}
+    capture = extract_bench_topology_capture(body) or body
+    reference = (
+        body.get("topology_evidence")
+        if isinstance(body.get("topology_evidence"), dict)
+        else body.get("reference_topology")
+    )
+    topology_evidence = bench_capture_to_topology_evidence(
+        capture,
+        reference_topology=reference if isinstance(reference, dict) else None,
+    )
+    enriched = enrich_payload_with_bench_topology_capture(body)
+    plan = HardwarePlanOrchestrator().plan(enriched) if include_hardware_plan else None
+    return {
+        "bench_topology_capture": capture,
+        "topology_evidence": topology_evidence,
+        "enriched_payload": enriched,
+        "hardware_plan": plan,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "include_hardware_plan": include_hardware_plan,
+            "measurement_capture_required_for_authority": True,
+        },
+    }
+
+
+@app.post("/hardware/measurement-authority/close")
+def hardware_measurement_authority_close(
+    payload: Dict[str, Any],
+    include_casefile: bool = True,
+    include_omniscience: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    closure = build_measurement_authority_closure(
+        payload or {},
+        include_casefile=bool(include_casefile),
+        include_omniscience=bool(include_omniscience),
+    )
+    after = closure.get("authority_after") if isinstance(closure.get("authority_after"), dict) else {}
+    delta = closure.get("authority_delta") if isinstance(closure.get("authority_delta"), dict) else {}
+    return {
+        "measurement_authority_closure": closure,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "current_authority_level": after.get("current_authority_level"),
+            "authority_score": after.get("authority_score"),
+            "score_delta": delta.get("score_delta"),
+            "next_action_id": (closure.get("next_action") or {}).get("action_id")
+            if isinstance(closure.get("next_action"), dict)
+            else None,
+        },
+    }
+
+
+@app.post("/hardware/measurement-session/progress")
+def hardware_measurement_session_progress(
+    payload: Dict[str, Any],
+    include_authority_closure: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    progress = build_measurement_session_progress(
+        payload or {},
+        include_authority_closure=bool(include_authority_closure),
+    )
+    summary = progress.get("progress") if isinstance(progress.get("progress"), dict) else {}
+    next_measurement = progress.get("next_measurement") if isinstance(progress.get("next_measurement"), dict) else {}
+    return {
+        "measurement_session_progress": progress,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "status": progress.get("status"),
+            "progress_score": summary.get("progress_score"),
+            "open_count": summary.get("open_count"),
+            "authority_packet_ready": summary.get("authority_packet_ready"),
+            "next_action_id": next_measurement.get("action_id"),
+        },
+    }
+
+
+@app.post("/hardware/topology-netlist/compile")
+def hardware_topology_netlist_compile(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    compiled = compile_topology_to_netlist(payload or {})
+    coverage = compiled.get("coverage") if isinstance(compiled.get("coverage"), dict) else {}
+    return {
+        "topology_netlist_compilation": compiled,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "available": bool(compiled.get("available")),
+            "source": compiled.get("source"),
+            "coverage_score": coverage.get("score"),
+            "simulation_ready": coverage.get("simulation_ready"),
+        },
     }
 
 
@@ -1201,6 +1488,30 @@ def board_sessions_get(
     }
 
 
+@app.post("/board-sessions/{session_id}/analysis")
+def board_sessions_append_analysis(
+    session_id: str,
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    analysis = payload.get("analysis") if isinstance(payload.get("analysis"), dict) else payload.get("results")
+    if not isinstance(analysis, dict) or not analysis:
+        raise HTTPException(status_code=400, detail="analysis object is required")
+    result = store.append_analysis(
+        session_id,
+        analysis,
+        source=str(payload.get("source") or "manual_analysis"),
+        summary=payload.get("summary") if isinstance(payload.get("summary"), dict) else {},
+    )
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+    return {
+        "result": result,
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
 @app.get("/board-sessions/{session_id}/evidence-graph")
 def board_sessions_evidence_graph(
     session_id: str,
@@ -1347,6 +1658,238 @@ def board_sessions_training_export(
     }
 
 
+@app.post("/board-intelligence/analyze-design")
+def board_intelligence_analyze_design(
+    payload: Dict[str, Any],
+    commit_session: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    try:
+        intelligence = analyze_board_intelligence(payload)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    session = None
+    if commit_session:
+        session = store.create_session(
+            {
+                "description": payload.get("description") or "Circuit-AI board intelligence analysis",
+                "route": "board_intelligence",
+                "analysis": intelligence,
+                "summary": {
+                    "overall_disposition": intelligence.get("overall_disposition"),
+                    "board_count": intelligence.get("board_count"),
+                },
+                "source": "design_evidence",
+            },
+            user_id=str(current_user.get("user_id") or "anonymous"),
+            commit=True,
+        )
+
+    return {
+        "status": "success",
+        "intelligence": intelligence,
+        "session": session,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "committed": bool(commit_session),
+        },
+    }
+
+
+@app.post("/board-intelligence/sessions/{session_id}/analyze")
+def board_intelligence_analyze_session(
+    session_id: str,
+    payload: Optional[Dict[str, Any]] = None,
+    commit_analysis: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    session = store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail=f"Board session not found: {session_id}")
+
+    body = payload or {}
+    try:
+        intelligence = analyze_board_session_intelligence(
+            session,
+            design_payload=body.get("design") if isinstance(body.get("design"), dict) else None,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    saved = None
+    if commit_analysis:
+        saved = store.append_analysis(
+            session_id,
+            intelligence,
+            source="board_intelligence_session",
+            summary={
+                "overall_disposition": intelligence.get("overall_disposition"),
+                "readiness_level": (intelligence.get("readiness") or {}).get("level"),
+                "coverage_score": (intelligence.get("evidence_coverage") or {}).get("score"),
+            },
+            commit=True,
+        )
+        if "error" in saved:
+            raise HTTPException(status_code=404, detail=saved["error"])
+
+    return {
+        "status": "success",
+        "intelligence": intelligence,
+        "saved": saved,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "committed": bool(commit_analysis),
+        },
+    }
+
+
+@app.get("/board-intelligence/downstream-capabilities")
+def board_intelligence_downstream_capabilities(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    return {
+        "status": "success",
+        "capabilities": assess_downstream_capabilities(),
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
+@app.post("/circuit/boards/analyze-design")
+def circuit_boards_analyze_design(
+    payload: Dict[str, Any],
+    commit_session: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    try:
+        circuit = analyze_circuit_design(payload)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    session = None
+    if commit_session:
+        session = store.create_session(
+            {
+                "description": payload.get("description") or "Circuit graph and splice contract",
+                "route": "circuit",
+                "analysis": circuit,
+                "summary": {
+                    "overall_readiness": circuit.get("overall_readiness"),
+                    "board_count": circuit.get("board_count"),
+                },
+                "source": "circuit_design",
+            },
+            user_id=str(current_user.get("user_id") or "anonymous"),
+            commit=True,
+        )
+
+    return {
+        "status": "success",
+        "circuit": circuit,
+        "session": session,
+        "metadata": {"user_id": current_user.get("user_id"), "committed": bool(commit_session)},
+    }
+
+
+@app.post("/circuit/sessions/{session_id}/advance")
+def circuit_sessions_advance(
+    session_id: str,
+    payload: Optional[Dict[str, Any]] = None,
+    commit_analysis: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    session = store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail=f"Board session not found: {session_id}")
+    body = payload or {}
+    try:
+        circuit = analyze_circuit_session(
+            session,
+            design_payload=body.get("design") if isinstance(body.get("design"), dict) else None,
+        )
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    saved = None
+    if commit_analysis:
+        saved = store.append_analysis(
+            session_id,
+            circuit,
+            source="circuit_session_advance",
+            summary={
+                "overall_readiness": circuit.get("overall_readiness"),
+                "board_count": circuit.get("board_count"),
+            },
+            commit=True,
+        )
+        if "error" in saved:
+            raise HTTPException(status_code=404, detail=saved["error"])
+
+    return {
+        "status": "success",
+        "circuit": circuit,
+        "saved": saved,
+        "metadata": {"user_id": current_user.get("user_id"), "committed": bool(commit_analysis)},
+    }
+
+
+@app.post("/circuit/reasoning/assess")
+def circuit_reasoning_assess(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: BoardSessionStore = Depends(get_board_session_store),
+    planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
+) -> Dict[str, Any]:
+    body, source_session_id, added_circuit_context = _salvage_payload_with_session_context(payload, store)
+    include_salvage_plan = bool(body.get("include_salvage_plan", True))
+    salvage_plan = body.get("salvage_plan") if isinstance(body.get("salvage_plan"), dict) else None
+    if include_salvage_plan and salvage_plan is None:
+        plan_payload = dict(body)
+        plan_payload["use_llm_reasoner"] = False
+        salvage_plan = planner.plan(plan_payload)
+        body["salvage_plan"] = salvage_plan
+        body["functional_reuse_plan"] = salvage_plan.get("functional_reuse_plan")
+
+    reasoner = CircuitAIReasoner(
+        enable_llm=bool(body.get("use_llm_reasoner") or body.get("use_llm")),
+    )
+    reasoning = reasoner.assess(body)
+    return {
+        "status": "success",
+        "reasoning": reasoning,
+        "salvage_plan": salvage_plan if include_salvage_plan else None,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "source_session_id": source_session_id,
+            "added_circuit_context": added_circuit_context,
+            "llm_requested": bool(body.get("use_llm_reasoner") or body.get("use_llm")),
+        },
+    }
+
+
+@app.get("/circuit/reasoning/model-status")
+def circuit_reasoning_model_status(
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    return {
+        "status": "success",
+        "model_runtime": circuit_ai_model_status(),
+        "metadata": {"user_id": current_user.get("user_id")},
+    }
+
+
 @app.get("/salvage/workflow")
 def salvage_workflow_plan(
     current_user: Dict[str, Any] = Depends(get_current_user),
@@ -1372,6 +1915,320 @@ def salvage_build_package(
     }
 
 
+@app.post("/salvage/functional-workflow/golden")
+def salvage_functional_workflow_golden(
+    payload: Optional[Dict[str, Any]] = None,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    body = payload or {}
+    runner = FunctionalSalvageWorkflowRunner(store=store, planner=planner)
+    report = runner.run(commit_sessions=bool(body.get("commit_sessions", False)))
+    return {
+        "status": "success" if report.get("overall_status") == "pass" else "needs_review",
+        "workflow": report,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "commit_sessions": bool(body.get("commit_sessions", False)),
+        },
+    }
+
+
+@app.post("/resource/strategy")
+def resource_strategy(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    strategy = build_resource_strategy(payload)
+    return {
+        "resource_strategy": strategy,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "strategy_mode": strategy.get("strategy_mode"),
+            "build_readiness": (strategy.get("build_readiness") or {}).get("status"),
+        },
+    }
+
+
+@app.post("/hardware/diy-project/plan")
+def diy_project_plan(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    body = payload or {}
+    plan = build_diy_project_engineering_plan(body)
+    test_kit = build_design_test_kit({**body, "diy_project_engineering": plan})
+    suite = test_kit.get("test_suite") if isinstance(test_kit.get("test_suite"), dict) else {}
+    release = test_kit.get("release_gate") if isinstance(test_kit.get("release_gate"), dict) else {}
+    return {
+        "diy_project_engineering": plan,
+        "design_test_kit": test_kit,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "available": bool(plan.get("available")),
+            "profile_id": ((plan.get("project_intent") or {}).get("profile_id") if isinstance(plan.get("project_intent"), dict) else None),
+            "readiness": ((plan.get("readiness") or {}).get("level") if isinstance(plan.get("readiness"), dict) else None),
+            "test_kit_score": suite.get("score"),
+            "test_kit_decision": release.get("decision"),
+        },
+    }
+
+
+@app.post("/hardware/test-kit/run")
+def hardware_test_kit_run(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    test_kit = build_design_test_kit(payload or {})
+    suite = test_kit.get("test_suite") if isinstance(test_kit.get("test_suite"), dict) else {}
+    release = test_kit.get("release_gate") if isinstance(test_kit.get("release_gate"), dict) else {}
+    return {
+        "design_test_kit": test_kit,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "available": bool(test_kit.get("available")),
+            "score": suite.get("score"),
+            "decision": release.get("decision"),
+            "simulation_available": bool((test_kit.get("simulation") or {}).get("available")) if isinstance(test_kit.get("simulation"), dict) else False,
+        },
+    }
+
+
+@app.post("/hardware/field-agent/next-action")
+def hardware_field_agent_next_action(
+    payload: Dict[str, Any],
+    include_model_advisory: bool = False,
+    live_model_advisory: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    field_action = build_field_operator_next_action(payload or {})
+    call = field_action.get("operational_call") if isinstance(field_action.get("operational_call"), dict) else {}
+    advisory = None
+    if include_model_advisory or live_model_advisory:
+        advisory = build_field_model_advisory(
+            {**(payload or {}), "field_operator": field_action},
+            live=bool(live_model_advisory),
+        )
+    return {
+        "field_operator": field_action,
+        "field_model_advisory": advisory,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "available": bool(field_action.get("available")),
+            "next_action_id": call.get("action_id"),
+            "action_type": call.get("action_type"),
+            "authority": call.get("authority"),
+            "model_advisory_included": advisory is not None,
+            "live_model_advisory": bool(live_model_advisory),
+        },
+    }
+
+
+@app.post("/hardware/authority-ledger/evaluate")
+def hardware_authority_ledger_evaluate(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    ledger = build_authority_ledger(payload or {})
+    return {
+        "authority_ledger": ledger,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "available": bool(ledger.get("available")),
+            "current_authority_level": ledger.get("current_authority_level"),
+            "authority_score": ledger.get("authority_score"),
+            "claim_production_repair_release": ((ledger.get("can") or {}).get("claim_production_repair_release")),
+        },
+    }
+
+
+@app.post("/hardware/production-casefile/run")
+def hardware_production_casefile_run(
+    payload: Dict[str, Any],
+    live_model_advisory: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    casefile = build_production_casefile(payload or {}, live_model_advisory=bool(live_model_advisory))
+    return {
+        "production_casefile": casefile,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "casefile_id": casefile.get("casefile_id"),
+            "current_authority_level": (casefile.get("summary") or {}).get("current_authority_level"),
+            "authority_score": (casefile.get("summary") or {}).get("authority_score"),
+            "production_authorized": (casefile.get("summary") or {}).get("production_authorized"),
+            "live_model_advisory": bool(live_model_advisory),
+        },
+    }
+
+
+@app.post("/hardware/omniscience-map/run")
+def hardware_omniscience_map_run(
+    payload: Dict[str, Any],
+    include_evidence_graph: bool = True,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+) -> Dict[str, Any]:
+    omniscience = build_board_omniscience_map(payload or {}, include_evidence_graph=bool(include_evidence_graph))
+    summary = omniscience.get("summary") if isinstance(omniscience.get("summary"), dict) else {}
+    return {
+        "board_omniscience_map": omniscience,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "omniscience_level": summary.get("omniscience_level"),
+            "omniscience_score": summary.get("omniscience_score"),
+            "authority_level": summary.get("authority_level"),
+            "production_authorized": summary.get("production_authorized"),
+            "next_best_action_id": summary.get("next_best_action_id"),
+            "include_evidence_graph": bool(include_evidence_graph),
+        },
+    }
+
+
+@app.post("/hardware/diy-project/session")
+def diy_project_session_update(
+    payload: Dict[str, Any],
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    store: DIYProjectSessionStore = Depends(get_diy_project_session_store),
+) -> Dict[str, Any]:
+    result = store.update_from_turn(payload or {}, user_id=str(current_user.get("user_id") or "anonymous"))
+    plan = result.get("diy_project_engineering") if isinstance(result.get("diy_project_engineering"), dict) else {}
+    session = result.get("diy_project_session") if isinstance(result.get("diy_project_session"), dict) else {}
+    return {
+        **result,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "session_id": session.get("session_id"),
+            "turn_count": ((session.get("conversation") or {}).get("turn_count") if isinstance(session.get("conversation"), dict) else None),
+            "available": bool(plan.get("available")),
+            "profile_id": ((plan.get("project_intent") or {}).get("profile_id") if isinstance(plan.get("project_intent"), dict) else None),
+            "readiness": ((plan.get("readiness") or {}).get("level") if isinstance(plan.get("readiness"), dict) else None),
+        },
+    }
+
+
+@app.post("/hardware/plan")
+def hardware_plan(
+    payload: Dict[str, Any],
+    commit_session: bool = False,
+    current_user: Dict[str, Any] = Depends(get_current_user),
+    planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
+    store: BoardSessionStore = Depends(get_board_session_store),
+) -> Dict[str, Any]:
+    body = dict(payload or {})
+    source_session_id = str(
+        body.get("session_id")
+        or body.get("source_session_id")
+        or body.get("board_session_id")
+        or ""
+    ).strip()
+    session = None
+    if source_session_id:
+        session = store.get_session(source_session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail=f"Board session not found: {source_session_id}")
+
+    try:
+        plan = HardwarePlanOrchestrator(salvage_planner=planner).plan(body, session=session)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    test_kit_payload = dict(body)
+    analysis = plan.get("analysis") if isinstance(plan.get("analysis"), dict) else {}
+    diy_plan = analysis.get("diy_project_engineering") if isinstance(analysis.get("diy_project_engineering"), dict) else None
+    if diy_plan:
+        test_kit_payload["diy_project_engineering"] = diy_plan
+    test_kit = build_design_test_kit(test_kit_payload)
+    test_suite = test_kit.get("test_suite") if isinstance(test_kit.get("test_suite"), dict) else {}
+    release_gate = test_kit.get("release_gate") if isinstance(test_kit.get("release_gate"), dict) else {}
+
+    saved = None
+    created_session = None
+    if commit_session and source_session_id:
+        saved = store.append_analysis(
+            source_session_id,
+            plan.get("analysis") if isinstance(plan.get("analysis"), dict) else {},
+            source="hardware_plan",
+            summary={
+                "status": (plan.get("integrated_plan") or {}).get("status"),
+                "recommended_path": (plan.get("integrated_plan") or {}).get("recommended_path"),
+                "selected_resource_count": (plan.get("integrated_plan") or {}).get("selected_resource_count"),
+            },
+            commit=True,
+        )
+        if "error" in saved:
+            raise HTTPException(status_code=404, detail=saved["error"])
+    elif commit_session:
+        created_session = store.create_session(
+            plan.get("session_payload") if isinstance(plan.get("session_payload"), dict) else {},
+            user_id=str(current_user.get("user_id") or "anonymous"),
+            commit=True,
+        )
+
+    return {
+        "hardware_plan": plan,
+        "design_test_kit": test_kit,
+        "session": created_session,
+        "saved": saved,
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "source_session_id": source_session_id or None,
+            "committed": bool(saved or created_session),
+            "status": (plan.get("integrated_plan") or {}).get("status"),
+            "strategy_mode": plan.get("strategy_mode"),
+            "test_kit_score": test_suite.get("score"),
+            "test_kit_decision": release_gate.get("decision"),
+        },
+    }
+
+
+def _salvage_payload_with_session_context(
+    payload: Dict[str, Any],
+    store: BoardSessionStore,
+) -> tuple[Dict[str, Any], str | None, bool]:
+    body = dict(payload or {})
+    session_id = str(
+        body.get("session_id")
+        or body.get("source_session_id")
+        or body.get("board_session_id")
+        or ""
+    ).strip()
+    if not session_id:
+        return body, None, False
+
+    session = store.get_session(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail=f"Board session not found: {session_id}")
+
+    added_circuit_context = False
+    if not isinstance(body.get("analysis"), dict) and not isinstance(body.get("circuit"), dict):
+        try:
+            body["analysis"] = analyze_circuit_session(
+                session,
+                design_payload=body.get("design") if isinstance(body.get("design"), dict) else None,
+            )
+        except FileNotFoundError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        added_circuit_context = True
+    body["source_session_id"] = session_id
+    return body, session_id, added_circuit_context
+
+
+def _link_salvage_session_payload(session_payload: Dict[str, Any], source_session_id: str | None) -> Dict[str, Any]:
+    if not source_session_id:
+        return session_payload
+    linked = dict(session_payload)
+    linked["source_session_id"] = source_session_id
+    case_file = dict(linked.get("case_file") or {})
+    case_file["source_session_id"] = source_session_id
+    linked["case_file"] = case_file
+    return linked
+
+
 @app.post("/salvage/splice-plan")
 def salvage_splice_plan(
     payload: Dict[str, Any],
@@ -1380,10 +2237,12 @@ def salvage_splice_plan(
     planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
     store: BoardSessionStore = Depends(get_board_session_store),
 ) -> Dict[str, Any]:
+    payload, source_session_id, added_circuit_context = _salvage_payload_with_session_context(payload, store)
     plan = planner.plan(payload)
     session = None
     if commit_session:
         session_payload = plan.get("session_payload") if isinstance(plan.get("session_payload"), dict) else {}
+        session_payload = _link_salvage_session_payload(session_payload, source_session_id)
         session = store.create_session(
             session_payload,
             user_id=str(current_user.get("user_id") or "anonymous"),
@@ -1392,7 +2251,12 @@ def salvage_splice_plan(
     return {
         "splice_plan": plan,
         "session": session,
-        "metadata": {"user_id": current_user.get("user_id"), "committed_session": bool(session)},
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "committed_session": bool(session),
+            "source_session_id": source_session_id,
+            "added_circuit_context": added_circuit_context,
+        },
     }
 
 
@@ -1404,8 +2268,10 @@ def salvage_splice_case(
     planner: SalvageSplicePlanner = Depends(get_salvage_splice_planner),
     store: BoardSessionStore = Depends(get_board_session_store),
 ) -> Dict[str, Any]:
+    payload, source_session_id, added_circuit_context = _salvage_payload_with_session_context(payload, store)
     plan = planner.plan(payload)
     session_payload = plan.get("session_payload") if isinstance(plan.get("session_payload"), dict) else {}
+    session_payload = _link_salvage_session_payload(session_payload, source_session_id)
     session = store.create_session(
         session_payload,
         user_id=str(current_user.get("user_id") or "anonymous"),
@@ -1414,7 +2280,12 @@ def salvage_splice_case(
     return {
         "splice_plan": plan,
         "session": session,
-        "metadata": {"user_id": current_user.get("user_id"), "committed": commit},
+        "metadata": {
+            "user_id": current_user.get("user_id"),
+            "committed": commit,
+            "source_session_id": source_session_id,
+            "added_circuit_context": added_circuit_context,
+        },
     }
 
 

@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T09:07:21.464755+00:00",
+  "request_preview": "eval/qwen_trial/requests/curated_test_pcb_ac4013c65f45703313025be3.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"low\",\n  \"explanation\": \"The image shows a schematic-style layout with labeled components (IC Chip, Cap, Res) but no actual PCB image or physical board evidence. No real board features such as solder pads, traces, or mounting holes are visible. This appears to be a conceptual or annotated diagram rather than a captured PCB image.\",\n  \"components\": [\n    {\n      \"type\": \"IC Chip\",\n      \"label\": \"IC Chip\",\n      \"box\": [0.11, 0.22, 0.38, 0.35],\n      \"reason\": \"Labeled rectangular area consistent with IC package outline\"\n    },\n    {\n      \"type\": \"Capacitor\",\n      \"label\": \"Cap\",\n      \"box\": [0.49, 0.16, 0.62, 0.24],\n      \"reason\": \"Red rectangle labeled 'Cap', typical for capacitor in schematic layouts\"\n    },\n    {\n      \"type\": \"Resistor\",\n      \"label\": \"Res\",\n      \"box\": [0.11, 0.47, 0.22, 0.57],\n      \"reason\": \"Blue square labeled 'Res', consistent with resistor symbol/label\"\n    }\n  ],\n  \"markings\": [],\n  \"regions\": [],\n  \"damage\": [],\n  \"connectors\": [],\n  \"test_points\": [],\n  \"salvage_candidates\": [],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"components\": [\n      {\n        \"label\": \"IC Chip\",\n        \"box\": [0.11, 0.22, 0.38, 0.35]\n      },\n      {\n        \"label\": \"Cap\",\n        \"box\": [0.49, 0.16, 0.62, 0.24]\n      },\n      {\n        \"label\": \"Res\",\n        \"box\": [0.11, 0.47, 0.22, 0.57]\n      }\n    ],\n    \"markings\": [],\n    \"regions\": [],\n    \"damage\": [],\n    \"connectors\": [],\n    \"test_points\": [],\n    \"salvage_candidates\": []\n  }\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 317,
+      "completion_tokens": 498,
+      "total_tokens": 815,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 498
+      }
+    },
+    "created": 1779700041,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-85203d71-fa05-9ace-82d8-704b33db33db"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "safety_level": "low",
+    "component_count": 3,
+    "module_count": 0,
+    "evidence_component_count": 3,
+    "marking_count": 0,
+    "connector_count": 0,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 317,
+    "output_tokens": 498,
+    "estimated_usd": 0.000114,
+    "elapsed_s": 4.554
+  }
+}

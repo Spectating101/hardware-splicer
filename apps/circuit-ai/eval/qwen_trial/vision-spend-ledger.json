@@ -1,0 +1,185 @@
+{
+  "schema_version": "qwen_trial_spend_ledger.v1",
+  "entries": [
+    {
+      "ts": "2026-05-25T08:49:14.383207+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "single_test_pcb",
+      "cache_key": "e225961fccfcbfa1dcba95ff",
+      "input_tokens": 413,
+      "output_tokens": 501,
+      "estimated_usd": 0.000117
+    },
+    {
+      "ts": "2026-05-25T09:03:32.551420+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "single_test_pcb",
+      "cache_key": "d1f0a19eceddfadea9b4b80d",
+      "input_tokens": 760,
+      "output_tokens": 663,
+      "estimated_usd": 0.000159
+    },
+    {
+      "ts": "2026-05-25T09:03:49.813240+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "single_iteration_1",
+      "cache_key": "20b27b42578c0caae8debb8e",
+      "input_tokens": 1037,
+      "output_tokens": 1800,
+      "estimated_usd": 0.00041
+    },
+    {
+      "ts": "2026-05-25T09:03:51.822626+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "image_iteration-2",
+      "cache_key": "35202a9ac212539241ccdc1c",
+      "input_tokens": 1037,
+      "output_tokens": 110,
+      "estimated_usd": 4.6e-05
+    },
+    {
+      "ts": "2026-05-25T09:07:21.464983+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "ac4013c65f45703313025be3",
+      "input_tokens": 317,
+      "output_tokens": 498,
+      "estimated_usd": 0.000114
+    },
+    {
+      "ts": "2026-05-25T09:07:39.471811+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_raspberry_pi",
+      "cache_key": "f2ca710e8aa2ee4f3927ca8a",
+      "input_tokens": 1043,
+      "output_tokens": 1800,
+      "estimated_usd": 0.00041
+    },
+    {
+      "ts": "2026-05-25T09:07:42.049556+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_deeppcb_trace",
+      "cache_key": "afc8fadef5951c838bb36c4e",
+      "input_tokens": 611,
+      "output_tokens": 158,
+      "estimated_usd": 4.7e-05
+    },
+    {
+      "ts": "2026-05-25T09:09:54.343285+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "2de611499bcb7abd94fc2461",
+      "input_tokens": 355,
+      "output_tokens": 2600,
+      "estimated_usd": 0.000567
+    },
+    {
+      "ts": "2026-05-25T09:10:09.848468+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_raspberry_pi",
+      "cache_key": "79fb6466553581d75b5a146c",
+      "input_tokens": 1081,
+      "output_tokens": 1497,
+      "estimated_usd": 0.000346
+    },
+    {
+      "ts": "2026-05-25T09:10:11.181487+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_deeppcb_trace",
+      "cache_key": "a429e6b19d0fee3bc615e8ee",
+      "input_tokens": 649,
+      "output_tokens": 96,
+      "estimated_usd": 3.5e-05
+    },
+    {
+      "ts": "2026-05-25T09:11:22.506227+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "2222d172940ffb2a0c1bc147",
+      "input_tokens": 406,
+      "output_tokens": 427,
+      "estimated_usd": 0.000101
+    },
+    {
+      "ts": "2026-05-25T09:11:36.175858+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_raspberry_pi",
+      "cache_key": "b7d1d700ed46604be7e95310",
+      "input_tokens": 1132,
+      "output_tokens": 1094,
+      "estimated_usd": 0.00026
+    },
+    {
+      "ts": "2026-05-25T09:11:39.453146+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_deeppcb_trace",
+      "cache_key": "d483a4179988de16dd300064",
+      "input_tokens": 700,
+      "output_tokens": 306,
+      "estimated_usd": 8.1e-05
+    },
+    {
+      "ts": "2026-05-25T19:22:30.942798+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "6f071eec62e8c425ffbbd45b",
+      "input_tokens": 406,
+      "output_tokens": 250,
+      "estimated_usd": 6.3e-05
+    },
+    {
+      "ts": "2026-05-25T19:23:07.851051+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "7fd78544cde063c5e519189b",
+      "input_tokens": 406,
+      "output_tokens": 452,
+      "estimated_usd": 0.000106
+    },
+    {
+      "ts": "2026-05-26T08:41:47.512498+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_test_pcb",
+      "cache_key": "3c1738fce85f861a13986737",
+      "input_tokens": 406,
+      "output_tokens": 452,
+      "estimated_usd": 0.000106
+    },
+    {
+      "ts": "2026-05-26T08:42:04.396803+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_raspberry_pi",
+      "cache_key": "87f84a4438dfaf8b94e4f185",
+      "input_tokens": 1132,
+      "output_tokens": 1327,
+      "estimated_usd": 0.00031
+    },
+    {
+      "ts": "2026-05-26T08:42:08.586386+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "scenario": "curated_deeppcb_trace",
+      "cache_key": "46d45427c361add4a414555b",
+      "input_tokens": 700,
+      "output_tokens": 308,
+      "estimated_usd": 8.2e-05
+    }
+  ]
+}

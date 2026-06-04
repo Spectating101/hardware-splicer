@@ -1,0 +1,107 @@
+{
+  "created_at": "2026-06-02T17:12:31.063813+00:00",
+  "mode": "dry_run",
+  "model": "qwen3-vl-flash",
+  "limits": {
+    "monthly_usd": 1.0,
+    "daily_usd": 1.0,
+    "max_usd_per_call": 0.05,
+    "max_crops": 3
+  },
+  "summary": {
+    "rows": 1,
+    "cache_hits": 0,
+    "live_calls": 0,
+    "skipped_budget": 0,
+    "estimated_preflight_usd_total": 0.001092,
+    "actual_usd_total": 0
+  },
+  "rows": [
+    {
+      "scenario": "single_test_pcb",
+      "status": "dry_run",
+      "image": "assets/samples/test_pcb.png",
+      "analysis": "eval/capability_smoke_fixed/single_test_pcb/analysis.json",
+      "cache_key": "dfa0f2a09460f08c2fb81bdf",
+      "crop_count": 3,
+      "crops": [
+        {
+          "crop_id": "01_fm",
+          "path": "eval/qwen_trial/crops/single_test_pcb/01_fm.png",
+          "label": "fm",
+          "source_bbox": [
+            48.0,
+            148.0,
+            103.0,
+            203.0
+          ],
+          "crop_bbox": [
+            27,
+            127,
+            124,
+            224
+          ],
+          "confidence": 0.9400247933884297
+        },
+        {
+          "crop_id": "02_jeo",
+          "path": "eval/qwen_trial/crops/single_test_pcb/02_jeo.png",
+          "label": "Jeo",
+          "source_bbox": [
+            48.0,
+            48.0,
+            153.0,
+            103.0
+          ],
+          "crop_bbox": [
+            9,
+            27,
+            192,
+            124
+          ],
+          "confidence": 0.9140831168831168
+        },
+        {
+          "crop_id": "03_ic_chip",
+          "path": "eval/qwen_trial/crops/single_test_pcb/03_ic_chip.png",
+          "label": "ic_chip",
+          "source_bbox": [
+            198.0,
+            48.0,
+            253.0,
+            83.0
+          ],
+          "crop_bbox": [
+            177,
+            35,
+            274,
+            96
+          ],
+          "confidence": 0.9380676948051947
+        }
+      ],
+      "baseline": {
+        "board_type": "controller_or_embedded_compute",
+        "board_confidence": 0.371,
+        "detections": 3,
+        "connectors": 0,
+        "ocr_resolved": 1,
+        "aoi_readiness": "research_preview"
+      },
+      "preflight": {
+        "estimated_input_tokens": 9604,
+        "estimated_output_tokens": 4096,
+        "estimated_usd": 0.001092,
+        "max_usd_per_call": 0.05,
+        "model_rotation": [
+          "qwen3-vl-flash",
+          "qwen3-vl-30b-a3b-thinking",
+          "qwen-vl-ocr-2025-11-20"
+        ],
+        "low_quota_models": [
+          "qwen-plus"
+        ]
+      }
+    }
+  ]
+}

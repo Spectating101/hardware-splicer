@@ -207,6 +207,15 @@ def _infer_nominal_voltage(net: str) -> Optional[float]:
         for pattern, nominal in _POWER_NET_VOLTAGES:
             if pattern.search(candidate):
                 return nominal
+    for token in re.split(r"[^A-Z0-9+]+", normalized):
+        match = re.fullmatch(r"\+?(\d{1,2})V(\d)?", token)
+        if not match:
+            continue
+        whole = int(match.group(1))
+        fractional = match.group(2)
+        if fractional is not None:
+            return float(f"{whole}.{fractional}")
+        return float(whole)
     return None
 
 

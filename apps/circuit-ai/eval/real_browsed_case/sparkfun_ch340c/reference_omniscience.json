@@ -1,0 +1,1796 @@
+{
+  "available": true,
+  "ceiling_projection": {
+    "authority_ceiling_if_next_batch_closes": 0.55,
+    "blocking_unlocks": [
+      {
+        "blockers": [
+          "Public reference topology is planning evidence only; confirm it with bench measurements.",
+          "2 pins remain unknown."
+        ],
+        "next_unlock": "Confirm the public reference pinout with no-short, ground, voltage, current, thermal, and logic observations.",
+        "stage_id": "measured_topology",
+        "status": "open",
+        "title": "Measured Pinout/Topology Authority"
+      },
+      {
+        "blockers": [
+          "Measured topology authority must pass before electrical simulation can grant repair authority."
+        ],
+        "next_unlock": "Attach measured topology evidence, then rerun deterministic simulation against the measured connector/source/load scope.",
+        "stage_id": "electrical_simulation",
+        "status": "open",
+        "title": "Electrical Simulation Authority"
+      },
+      {
+        "blockers": [
+          "No terminal controlled bench outcome proves the target function."
+        ],
+        "next_unlock": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+        "stage_id": "controlled_bench",
+        "status": "open",
+        "title": "Controlled Bench Authority"
+      },
+      {
+        "blockers": [
+          "The plan is not authority-ready for first power or splice.",
+          "A terminal successful outcome is not fully recorded.",
+          "Repair authority is not authoritative_low_risk.",
+          "Open evidence gates remain.",
+          "Required production measurement categories are missing.",
+          "Required production measurements lack trusted provenance.",
+          "Required production measurements lack audit artifacts.",
+          "Output function is not verified in the terminal outcome.",
+          "First-power result is not recorded as passing.",
+          "Thermal result is not recorded as passing.",
+          "Terminal outcome lacks an audit artifact URI.",
+          "One or more production authority lanes are not authorized.",
+          "Production repair authority is not authorized by the casefile."
+        ],
+        "next_unlock": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+        "stage_id": "production_repair",
+        "status": "open",
+        "title": "Production Repair Authority"
+      }
+    ],
+    "current_authority_level": "visual_candidate",
+    "score_if_next_batch_closes_estimate": 0.652
+  },
+  "claim_control": {
+    "can": {
+      "claim_controlled_reuse": false,
+      "claim_production_repair_release": false,
+      "power_or_splice_now": false,
+      "run_controlled_bench": false,
+      "use_electrical_simulation": false,
+      "use_measured_pinout": false,
+      "use_visual_candidates": true
+    },
+    "cannot_claim_yet": [
+      "measured pinout/topology",
+      "simulation-backed electrical behavior",
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release",
+      "Run the USB/UART debug bridge reuse and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, logic.",
+      "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "Map GND, VCC, TX, RX, DTR/RTS if present.",
+      "No terminal controlled bench outcome proves the target function."
+    ],
+    "claim_boundary": "This map can rank hypotheses and evidence. It cannot infer hidden nets, safe power, or repair release from images alone. Authority still comes from measured topology, simulation, controlled outcome, and release artifacts."
+  },
+  "dimensions": {
+    "active_closure": {
+      "evidence": [
+        "closure_run_bench_protocol",
+        "closure_capture_2",
+        "closure_capture_5",
+        "closure_capture_1",
+        "closure_capture_overview",
+        "closure_capture_4",
+        "closure_capture_3",
+        "closure_missing_continuity"
+      ],
+      "score": 0.602,
+      "status": "open",
+      "summary": "Whether the engine has a concrete route to collapse unknowns."
+    },
+    "bench_outcome": {
+      "evidence": [
+        "No terminal controlled bench outcome proves the target function."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Controlled first-power/function outcome."
+    },
+    "function_hypothesis": {
+      "evidence": [
+        "usb_serial_debug_bridge",
+        "single_board_computer_module",
+        "power_distribution_or_regulator",
+        "controller_module",
+        "display_or_ui_module"
+      ],
+      "score": 0.96,
+      "status": "pass",
+      "summary": "Likely board purpose inferred from markings, connectors, capabilities, and topology."
+    },
+    "measured_topology": {
+      "evidence": [
+        "public reference topology attached",
+        "Public reference topology is planning evidence only; confirm it with bench measurements.",
+        "2 pins remain unknown."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Measured pinout/topology authority."
+    },
+    "part_identity": {
+      "evidence": [
+        "CH340",
+        "SBC",
+        "CH340"
+      ],
+      "score": 0.96,
+      "status": "pass",
+      "summary": "Component/marking identity confidence."
+    },
+    "release_authority": {
+      "evidence": [
+        "casefile: evidence_required",
+        "decision: not_authorized_evidence_required",
+        "The plan is not authority-ready for first power or splice.",
+        "A terminal successful outcome is not fully recorded.",
+        "Repair authority is not authoritative_low_risk.",
+        "Open evidence gates remain.",
+        "Required production measurement categories are missing.",
+        "Required production measurements lack trusted provenance.",
+        "Required production measurements lack audit artifacts.",
+        "Output function is not verified in the terminal outcome."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Scoped production repair/reuse release authority."
+    },
+    "simulation": {
+      "evidence": [
+        "release decision: simulation_model_incomplete_load_model_required",
+        "deterministic power-tree simulation available",
+        "no hard simulation issues",
+        "simulation/planning model available but not authority-granting without measured topology",
+        "Measured topology authority must pass before electrical simulation can grant repair authority."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Deterministic low-voltage simulation or bounded source/load envelope."
+    },
+    "visual_observability": {
+      "evidence": [
+        "2 component candidate(s)",
+        "2 connector candidate(s)",
+        "2 marking candidate(s)"
+      ],
+      "score": 0.72,
+      "status": "candidate",
+      "summary": "Photos and visual evidence are enough to create candidate inventory."
+    },
+    "visual_topology": {
+      "evidence": [
+        "0 component anchors",
+        "2 connector hypotheses",
+        "4 connection hypotheses"
+      ],
+      "score": 0.0,
+      "status": "pass",
+      "summary": "Candidate component/connector/trace topology from layout evidence."
+    }
+  },
+  "evidence_graph": {},
+  "hardware_plan_summary": {
+    "can_power_or_splice": false,
+    "open_gate_count": 32,
+    "recommended_path": "reuse_first",
+    "status": "prototype_after_evidence"
+  },
+  "hypothesis_lattice": {
+    "candidates": [
+      {
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "confidence": 0.96,
+        "confirmation_required": [
+          "measured pinout",
+          "logic voltage",
+          "loopback or safe serial capture"
+        ],
+        "evidence": [
+          "text hit: usb",
+          "text hit: uart",
+          "text hit: serial",
+          "measured interface: uart_serial",
+          "measured interface: usb2",
+          "grounded marking: CH340 (USB/UART bridge)"
+        ],
+        "hypothesis_id": "usb_serial_debug_bridge",
+        "label": "USB/UART debug or bridge module",
+        "status": "leading"
+      },
+      {
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "confidence": 0.67,
+        "confirmation_required": [
+          "baseline no-short",
+          "pinout",
+          "voltage/current/thermal measurements"
+        ],
+        "evidence": [
+          "text hit: gpio",
+          "grounded marking: SBC (single-board computer)"
+        ],
+        "hypothesis_id": "single_board_computer_module",
+        "label": "Single-board embedded compute module",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "power"
+        ],
+        "confidence": 0.56,
+        "confirmation_required": [
+          "no-short",
+          "output voltage",
+          "load current",
+          "thermal behavior"
+        ],
+        "evidence": [
+          "text hit: power",
+          "text hit: regulator"
+        ],
+        "hypothesis_id": "power_distribution_or_regulator",
+        "label": "Power distribution or regulator stage",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "controller",
+          "connector"
+        ],
+        "confidence": 0.48,
+        "confirmation_required": [
+          "power rails",
+          "boot/current behavior",
+          "I/O voltage domain"
+        ],
+        "evidence": [
+          "text hit: controller"
+        ],
+        "hypothesis_id": "controller_module",
+        "label": "Controller or embedded compute module",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "display_or_ui",
+          "led_or_light",
+          "switch_or_button",
+          "connector"
+        ],
+        "confidence": 0.46,
+        "confirmation_required": [
+          "pin map",
+          "current limiting",
+          "protected I/O test"
+        ],
+        "evidence": [
+          "text hit: display"
+        ],
+        "hypothesis_id": "display_or_ui_module",
+        "label": "Display, indicator, or user-interface board",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "wireless",
+          "network_interface",
+          "connector"
+        ],
+        "confidence": 0.39,
+        "confirmation_required": [
+          "supply current",
+          "antenna path",
+          "interface voltage",
+          "communication scan"
+        ],
+        "evidence": [],
+        "hypothesis_id": "wireless_or_rf_module",
+        "label": "Wireless, RF, or network module",
+        "status": "alternate"
+      }
+    ],
+    "grounded_parts": [
+      {
+        "canonical_part": "CH340",
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "common_faults": [
+          "USB connector damage",
+          "ESD damage",
+          "wrong logic-voltage connection",
+          "driver or boot-mode issue"
+        ],
+        "confidence": 0.76,
+        "family": "USB/UART bridge",
+        "function_id": "usb_serial_debug_bridge",
+        "key_specs": {
+          "interface": "USB to UART",
+          "logic_voltage": "3.3V or 5V board-dependent",
+          "typical_use": "serial debug adapter"
+        },
+        "matched_text": "CH340C  marking 1  marking",
+        "part_id": "ch340_usb_uart",
+        "replacement_parts": [
+          "CP2102",
+          "FT232RL"
+        ],
+        "source": "marking",
+        "source_ref": "m1",
+        "verification_required": [
+          "measured pinout",
+          "logic voltage",
+          "shared ground",
+          "loopback or safe serial capture"
+        ]
+      },
+      {
+        "canonical_part": "SBC",
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "common_faults": [
+          "damaged power connector",
+          "corrupt storage",
+          "shorted GPIO",
+          "overheated SoC",
+          "unknown firmware or data state"
+        ],
+        "confidence": 0.7,
+        "family": "single-board computer",
+        "function_id": "single_board_computer_module",
+        "key_specs": {
+          "requires": "known power input, boot evidence, connector map, and storage state",
+          "type": "Linux-capable embedded compute board"
+        },
+        "matched_text": "USB-C connector  connector",
+        "part_id": "single_board_computer_family",
+        "replacement_parts": [
+          "Raspberry Pi board",
+          "RP2040/ESP32 board for simpler controller use"
+        ],
+        "source": "connector",
+        "source_ref": "usb_c",
+        "verification_required": [
+          "power input voltage/current",
+          "boot/current behavior",
+          "GPIO voltage domain",
+          "connector map",
+          "storage/media state"
+        ]
+      },
+      {
+        "canonical_part": "CH340",
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "common_faults": [
+          "USB connector damage",
+          "ESD damage",
+          "wrong logic-voltage connection",
+          "driver or boot-mode issue"
+        ],
+        "confidence": 0.7,
+        "family": "USB/UART bridge",
+        "function_id": "usb_serial_debug_bridge",
+        "key_specs": {
+          "interface": "USB to UART",
+          "logic_voltage": "3.3V or 5V board-dependent",
+          "typical_use": "serial debug adapter"
+        },
+        "matched_text": "CH340C USB-to-Serial bridge IC  integrated_circuit",
+        "part_id": "ch340_usb_uart",
+        "replacement_parts": [
+          "CP2102",
+          "FT232RL"
+        ],
+        "source": "component",
+        "source_ref": "u1",
+        "verification_required": [
+          "measured pinout",
+          "logic voltage",
+          "shared ground",
+          "loopback or safe serial capture"
+        ]
+      }
+    ],
+    "primary": "usb_serial_debug_bridge",
+    "visual_topology_candidates": {
+      "available": true,
+      "connection_hypotheses": [
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.686,
+          "evidence": [
+            "regulator/power component",
+            "power-capable connector candidate",
+            "same photo observation"
+          ],
+          "from": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "components:u2",
+              "normalized_bbox": null
+            },
+            "label": "AP2112 voltage regulator",
+            "ref": "u2",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_u2_j1",
+          "required_measurements": [
+            "Measure input/output rails, polarity, no-short, load current, and thermal behavior."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "connectors:j1",
+              "normalized_bbox": null
+            },
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "type": "candidate_power_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.686,
+          "evidence": [
+            "regulator/power component",
+            "power-capable connector candidate",
+            "same photo observation"
+          ],
+          "from": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "components:u2",
+              "normalized_bbox": null
+            },
+            "label": "AP2112 voltage regulator",
+            "ref": "u2",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_u2_usb_c",
+          "required_measurements": [
+            "Measure input/output rails, polarity, no-short, load current, and thermal behavior."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "connectors:usb_c",
+              "normalized_bbox": null
+            },
+            "label": "USB-C connector",
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "type": "candidate_power_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.686,
+          "evidence": [
+            "USB/UART bridge component",
+            "UART header candidate",
+            "same photo observation"
+          ],
+          "from": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "components:u1",
+              "normalized_bbox": null
+            },
+            "label": "CH340C USB-to-Serial bridge IC",
+            "ref": "u1",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_u1_j1",
+          "required_measurements": [
+            "Identify TX/RX/GND/VCC pins by continuity or datasheet.",
+            "Measure UART idle logic level and run safe serial capture."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "connectors:j1",
+              "normalized_bbox": null
+            },
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "type": "candidate_uart_serial_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.686,
+          "evidence": [
+            "USB bridge component",
+            "USB connector candidate",
+            "same photo observation"
+          ],
+          "from": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "components:u1",
+              "normalized_bbox": null
+            },
+            "label": "CH340C USB-to-Serial bridge IC",
+            "ref": "u1",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_u1_usb_c",
+          "required_measurements": [
+            "Continuity-test D+/D- from connector to USB bridge/protection.",
+            "Verify USB ground/shield/reference continuity."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "geometry": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "map_id": "connectors:usb_c",
+              "normalized_bbox": null
+            },
+            "label": "USB-C connector",
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "type": "candidate_usb_data_path",
+          "visual_distance": null
+        }
+      ],
+      "connector_hypotheses": [
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "board_zone": "unmapped",
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "controller",
+            "power",
+            "usb_serial"
+          ],
+          "confidence": 0.7,
+          "connector_ref": "j1",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "map_id": "connectors:j1",
+            "normalized_bbox": null
+          },
+          "geometry_status": "unmapped",
+          "hypothesis_id": "visual_connector_j1",
+          "kind": "header",
+          "label": "DTR RXI TXO VCC CTS GND header",
+          "likely_roles": [
+            "uart_serial_header",
+            "debug_or_gpio_header",
+            "power_input_or_rail"
+          ],
+          "map_id": "connectors:j1",
+          "normalized_bbox": null,
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection.",
+            "Identify TX/RX and measure logic high voltage."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "board_zone": "unmapped",
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "usb"
+          ],
+          "confidence": 0.7,
+          "connector_ref": "usb_c",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "map_id": "connectors:usb_c",
+            "normalized_bbox": null
+          },
+          "geometry_status": "unmapped",
+          "hypothesis_id": "visual_connector_usb_c",
+          "kind": "connector",
+          "label": "USB-C connector",
+          "likely_roles": [
+            "usb2_connector"
+          ],
+          "map_id": "connectors:usb_c",
+          "normalized_bbox": null,
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection.",
+            "Map USB D+/D- continuity and ESD/protection path."
+          ],
+          "source_photo_ids": [
+            "photo_1"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        }
+      ]
+    }
+  },
+  "known_facts": [
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ap2112_voltage_regulator_regulator",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "u2",
+          "identity_status": "marking_linked_candidate",
+          "kind": "regulator",
+          "label": "AP2112 voltage regulator",
+          "missing_evidence": [],
+          "resolved_markings": [
+            {
+              "confidence": 0.48,
+              "marking": "AP2112  marking 2",
+              "marking_id": "m2",
+              "source_photo_ids": [
+                "photo_1"
+              ]
+            }
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "u2",
+              "label": "AP2112 voltage regulator",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ch340c_usb_to_serial_bridge_ic_integrated_circuit",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "u1",
+          "identity_status": "marking_linked_candidate",
+          "kind": "integrated_circuit",
+          "label": "CH340C USB-to-Serial bridge IC",
+          "missing_evidence": [],
+          "resolved_markings": [
+            {
+              "confidence": 0.74,
+              "marking": "CH340C  marking 1",
+              "marking_id": "m1",
+              "source_photo_ids": [
+                "photo_1"
+              ]
+            }
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "u1",
+              "label": "CH340C USB-to-Serial bridge IC",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_components",
+      "label": "component candidates",
+      "value": "2 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "dtr_rxi_txo_vcc_cts_gnd_header_header",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "j1",
+          "kind": "header",
+          "label": "DTR RXI TXO VCC CTS GND header",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "j1",
+              "label": "DTR RXI TXO VCC CTS GND header",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_c_connector_connector",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "usb_c",
+          "kind": "connector",
+          "label": "USB-C connector",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "usb_c",
+              "label": "USB-C connector",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_connectors",
+      "label": "connector candidates",
+      "value": "2 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ap2112_marking_2_marking",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "m2",
+          "kind": "marking",
+          "label": "marking 2",
+          "marking": "AP2112",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "m2",
+              "label": "marking 2",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [],
+          "confidence": 0.62,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ch340c_marking_1_marking",
+            "supporting_photo_ids": [
+              "photo_1"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 0,
+            "normalized_bbox": null,
+            "pixel_bbox": null,
+            "status": "unmapped"
+          },
+          "id": "m1",
+          "kind": "marking",
+          "label": "marking 1",
+          "marking": "CH340C",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [],
+              "bbox_role": "missing",
+              "item_id": "m1",
+              "label": "marking 1",
+              "photo_id": "photo_1",
+              "view_hint": null
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_markings",
+      "label": "marking candidates",
+      "value": "2 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": {
+        "capture_coverage_complete": false,
+        "capture_coverage_score": 0.6,
+        "counts": {
+          "components": 2,
+          "connectors": 2,
+          "damage": 0,
+          "markings": 2,
+          "regions": 0,
+          "salvage_candidates": 1,
+          "test_points": 0
+        },
+        "evidence_item_count": 7,
+        "identity_link_count": 2,
+        "layout_confidence": 0.32,
+        "level": "single_view_visual_candidate",
+        "mapped_item_count": 0,
+        "open_capture_lanes": [
+          "whole_board_context",
+          "layout_geometry"
+        ],
+        "photo_count": 1,
+        "source_policy": "Repeated visual observations raise candidate confidence but do not prove pinout, nets, voltage, or safe reuse.",
+        "unmapped_item_count": 7,
+        "usable_photo_count": 1
+      },
+      "fact_id": "multiview_reconstruction",
+      "label": "multi-photo reconstruction",
+      "value": "1 usable observation(s)"
+    },
+    {
+      "authority": "candidate_only",
+      "evidence": {
+        "can_power_or_splice": false,
+        "component_anchor_count": 2,
+        "connection_hypothesis_count": 4,
+        "connector_hypothesis_count": 2,
+        "layout_confidence": 0.32,
+        "level": "visual_component_connector_topology_candidate",
+        "measured_topology_available": false,
+        "measurement_task_count": 16,
+        "multi_view_evidence": false,
+        "next_unlock": "Attach measured topology_evidence.v1 generated from the visual measurement queue.",
+        "score": 0.638
+      },
+      "fact_id": "visual_topology",
+      "label": "visual topology hypothesis",
+      "value": "16 measurement task(s)"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "2 component candidates",
+        "2 connector candidates",
+        "2 marking candidates",
+        "1 salvage candidates",
+        "public reference topology attached"
+      ],
+      "fact_id": "authority_visual_candidate",
+      "label": "Visual Candidate Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "economic",
+      "evidence": {
+        "claim_boundary": "Economic estimate is heuristic until a successful function outcome is recorded.",
+        "confidence": 0.42,
+        "decision": "collect_baseline_evidence",
+        "estimated_cash_to_continue_usd": 0.75,
+        "estimated_time_minutes": 25,
+        "expected_recoverable_value_usd": 8.0,
+        "primary_function_id": "usb_serial_debug_bridge",
+        "rationale": "Insufficient evidence for value posture.",
+        "recommended_exit": "Collect baseline measurements before spending parts or time.",
+        "schema_version": "salvage_value_decision.v1",
+        "value_ratio": 8.0
+      },
+      "fact_id": "salvage_value_decision",
+      "label": "reuse/salvage value decision",
+      "value": "collect_baseline_evidence"
+    },
+    {
+      "authority": "planning",
+      "evidence": "A build path exists, but repair/build authority still requires the listed measurements and evidence gates.",
+      "fact_id": "hardware_plan_status",
+      "label": "hardware plan status",
+      "value": "prototype_after_evidence"
+    }
+  ],
+  "mode": "board_omniscience_map",
+  "model_routes": {
+    "deepseek_or_text_reasoner": {
+      "never_treat_as": [
+        "instrument measurement",
+        "terminal outcome"
+      ],
+      "next_prompts": [
+        "Establish source current limit and load current before loaded proof.",
+        "Run the USB/UART debug bridge reuse and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, logic.",
+        "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations."
+      ],
+      "use_for": [
+        "field advisory",
+        "measurement ordering",
+        "contradiction review",
+        "project/use-case planning"
+      ]
+    },
+    "deterministic_engine": {
+      "use_for": [
+        "topology-to-netlist",
+        "simulation gate",
+        "authority ledger",
+        "release gating"
+      ],
+      "visual_topology_available": true
+    },
+    "qwen_vision": {
+      "never_treat_as": [
+        "measured pinout",
+        "safe power authorization",
+        "production repair authority"
+      ],
+      "next_prompts": [
+        "Capture a whole-board context photo with orientation, connector edges, and major regions visible.",
+        "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+        "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+        "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+        "Add more board photos from different distances or angles.",
+        "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items."
+      ],
+      "use_for": [
+        "photo parsing",
+        "marking closeups",
+        "connector candidate extraction",
+        "damage observation"
+      ]
+    }
+  },
+  "next_evidence_batch": [
+    {
+      "action_id": "establish_source_limit_and_load_model",
+      "category": "operator_next_action",
+      "priority": -4,
+      "procedure": [
+        "Record the actual source current limit or choose a current-limited supply setting.",
+        "Measure steady and startup load current.",
+        "Add both the source limit and measured current to the topology evidence.",
+        "Rerun compiler/test kit to turn the incomplete rail model into a loaded simulation."
+      ],
+      "prompt": "Establish source current limit and load current before loaded proof.",
+      "source": "field_operator",
+      "type": "measurement",
+      "unlocks": "next authority gate",
+      "why": "No source current limit was supplied, so the compiler cannot derive a bounded load envelope without guessing."
+    },
+    {
+      "action_id": "closure_run_bench_protocol",
+      "category": "bench_protocol",
+      "priority": -3.0,
+      "procedure": [],
+      "prompt": "Run the USB/UART debug bridge reuse and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, logic.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "bench_protocol_pack",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_2",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_5",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Add more board photos from different distances or angles.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_1",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Capture a whole-board context photo with orientation, connector edges, and major regions visible.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_overview",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Capture several non-identical board observations: whole-board overview with scale, angled view, connector edge, and any backside/hidden area that exists.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_4",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_3",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_continuity",
+      "category": "continuity",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_current",
+      "category": "current",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_resistance",
+      "category": "resistance",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_thermal",
+      "category": "thermal",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_voltage",
+      "category": "voltage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "visual_topology_record",
+      "category": "topology",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1",
+      "why": null
+    },
+    {
+      "action_id": "pinout_j1",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map DTR RXI TXO VCC CTS GND header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "closure_protocol_bench_2",
+      "category": "continuity",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map GND, VCC, TX, RX, DTR/RTS if present.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_artifact",
+      "why": null
+    },
+    {
+      "action_id": "pinout_usb_c",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map USB-C connector: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "closure_protocol_bench_1",
+      "category": "resistance",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Measure VCC/GND and USB VBUS/GND unpowered resistance.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_artifact",
+      "why": null
+    },
+    {
+      "action_id": "closure_protocol_bench_3",
+      "category": "voltage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Measure idle TX/RX voltage under current-limited power.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_artifact",
+      "why": null
+    },
+    {
+      "action_id": "protocol_1",
+      "category": "topology",
+      "priority": 1,
+      "procedure": [],
+      "prompt": "Attach measured connector pinout/topology evidence with no unknown pins.",
+      "source": "measurement_protocol",
+      "type": "measurement",
+      "unlocks": "repair_power_release",
+      "why": "Every used connector pin has a measured role and voltage/domain where relevant."
+    }
+  ],
+  "operator_playbook": {
+    "hold_until": [
+      "measured pinout/topology",
+      "simulation-backed electrical behavior",
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release"
+    ],
+    "level": "function_identity_candidate_map",
+    "now": [
+      "Establish source current limit and load current before loaded proof.",
+      "Run the USB/UART debug bridge reuse and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, logic.",
+      "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "Add more board photos from different distances or angles.",
+      "Capture a whole-board context photo with orientation, connector edges, and major regions visible."
+    ],
+    "safe_posture": "measurement_capture_only"
+  },
+  "schema_version": "board_omniscience_map.v1",
+  "source_modules": {
+    "active_evidence_closure_plan": true,
+    "arbitrary_board_workflow": true,
+    "authority_ledger": true,
+    "hardware_plan": true,
+    "multiview_board_reconstruction": true,
+    "visual_topology_hypothesis": true
+  },
+  "summary": {
+    "authority_level": "visual_candidate",
+    "authority_score": 0.18,
+    "next_best_action_id": "establish_source_limit_and_load_model",
+    "omniscience_level": "function_identity_candidate_map",
+    "omniscience_score": 0.342,
+    "primary_function": "usb_serial_debug_bridge",
+    "primary_function_confidence": 0.96,
+    "production_authorized": false,
+    "unknown_count": 48
+  },
+  "unknowns": [
+    {
+      "category": "bench_protocol",
+      "evidence_type": "measurement",
+      "priority": -1.0,
+      "resolution": "bench_protocol_pack",
+      "summary": "Run the USB/UART debug bridge reuse and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, logic.",
+      "unknown_id": "closure_run_bench_protocol",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "continuity",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_continuity",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "continuity",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_artifact",
+      "summary": "Map GND, VCC, TX, RX, DTR/RTS if present.",
+      "unknown_id": "closure_protocol_bench_2",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "controlled_bench",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+      "summary": "No terminal controlled bench outcome proves the target function.",
+      "unknown_id": "authority_controlled_bench",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "current",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_current",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "electrical_simulation",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Attach measured topology evidence, then rerun deterministic simulation against the measured connector/source/load scope.",
+      "summary": "Measured topology authority must pass before electrical simulation can grant repair authority.",
+      "unknown_id": "authority_electrical_simulation",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "measured_topology",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Confirm the public reference pinout with no-short, ground, voltage, current, thermal, and logic observations.",
+      "summary": "Public reference topology is planning evidence only; confirm it with bench measurements.",
+      "unknown_id": "authority_measured_topology",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "measured_topology",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Confirm the public reference pinout with no-short, ground, voltage, current, thermal, and logic observations.",
+      "summary": "2 pins remain unknown.",
+      "unknown_id": "authority_measured_topology",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted continuity measurement.",
+      "unknown_id": "missing_measurement_continuity",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted current measurement.",
+      "unknown_id": "missing_measurement_current",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted resistance measurement.",
+      "unknown_id": "missing_measurement_resistance",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted thermal measurement.",
+      "unknown_id": "missing_measurement_thermal",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted voltage measurement.",
+      "unknown_id": "missing_measurement_voltage",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "The plan is not authority-ready for first power or splice.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "A terminal successful outcome is not fully recorded.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Repair authority is not authoritative_low_risk.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Open evidence gates remain.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurement categories are missing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurements lack trusted provenance.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurements lack audit artifacts.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Output function is not verified in the terminal outcome.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "First-power result is not recorded as passing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Thermal result is not recorded as passing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Terminal outcome lacks an audit artifact URI.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "One or more production authority lanes are not authorized.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Production repair authority is not authorized by the casefile.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "resistance",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_resistance",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "thermal",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_thermal",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Add a targeted photo observation.",
+      "summary": "Missing required capture lane: whole_board_context",
+      "unknown_id": "capture_whole_board_context",
+      "unlocks": "multiview_reconstruction"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Add a targeted photo observation.",
+      "summary": "Missing required capture lane: layout_geometry",
+      "unknown_id": "capture_layout_geometry",
+      "unlocks": "multiview_reconstruction"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "unknown_id": "closure_capture_2",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Add more board photos from different distances or angles.",
+      "unknown_id": "closure_capture_5",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Capture a whole-board context photo with orientation, connector edges, and major regions visible.",
+      "unknown_id": "closure_capture_1",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Capture several non-identical board observations: whole-board overview with scale, angled view, connector edge, and any backside/hidden area that exists.",
+      "unknown_id": "closure_capture_overview",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+      "unknown_id": "closure_capture_4",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+      "unknown_id": "closure_capture_3",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "unknown_id": "visual_topology_record",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Add an overview or annotated photo that maps unmapped connector/component evidence into normalized board coordinates.",
+      "unknown_id": "visual_topology_layout_reference",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map DTR RXI TXO VCC CTS GND header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_j1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on DTR RXI TXO VCC CTS GND header.",
+      "unknown_id": "short_j1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Power through a current limit and record voltage, polarity, and logic domain for DTR RXI TXO VCC CTS GND header before any external connection.",
+      "unknown_id": "voltage_j1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Identify TX, RX, GND, and VCC on DTR RXI TXO VCC CTS GND header; measure idle logic high and run loopback or safe serial capture before target connection.",
+      "unknown_id": "uart_logic_j1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map USB-C connector: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_usb_c",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-C connector.",
+      "unknown_id": "short_usb_c",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Power through a current limit and record voltage, polarity, and logic domain for USB-C connector before any external connection.",
+      "unknown_id": "voltage_usb_c",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Continuity-test USB D+ and D- path from USB-C connector to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+      "unknown_id": "usb_path_usb_c",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "For AP2112 voltage regulator, identify input, output, and ground, then measure no-short, output voltage, load current, and thermal behavior.",
+      "unknown_id": "regulator_u2",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "For CH340C USB-to-Serial bridge IC, measure continuity from USB pins to the USB connector and from UART pins to candidate headers before treating it as a USB serial adapter.",
+      "unknown_id": "bridge_u1",
+      "unlocks": "measured_topology"
+    }
+  ]
+}

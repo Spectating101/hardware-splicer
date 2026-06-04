@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit.AI Architecture One-Pager</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f7f8; color: #111827; font-family: Inter, Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif; line-height: 1.55; }
+.page { max-width: 880px; margin: 28px auto; background: white; border: 1px solid #dbe3ea; border-radius: 10px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); padding: 44px 54px; }
+h1 { margin: 0 0 22px; color: #07111f; font-size: 30px; line-height: 1.15; letter-spacing: 0; }
+h2 { margin: 30px 0 12px; padding-top: 12px; border-top: 1px solid #e5edf2; color: #102033; font-size: 20px; line-height: 1.25; }
+h3 { margin: 22px 0 8px; color: #102033; font-size: 16px; }
+p { margin: 0 0 12px; }
+ul, ol { margin: 0 0 14px 22px; padding: 0; }
+li { margin: 4px 0; }
+pre { margin: 12px 0 16px; padding: 13px 14px; border: 1px solid #d8e2e8; border-radius: 7px; background: #f8fafc; color: #0f172a; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; }
+code { font-family: "JetBrains Mono", Consolas, monospace; background: #f1f5f9; border-radius: 4px; padding: 1px 4px; font-size: 0.92em; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px; }
+th, td { border: 1px solid #dbe3ea; padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; color: #334155; }
+.hero-note { margin: -8px 0 24px; color: #52647a; font-size: 13px; }
+.appendix { margin-top: 34px; page-break-before: always; }
+.figure { margin: 18px 0 24px; }
+.figure img { width: 100%; border: 1px solid #d8e2e8; border-radius: 8px; display: block; }
+.figure figcaption { margin-top: 8px; color: #52647a; font-size: 12px; }
+@page { margin: 18mm 16mm; }
+@media print { body { background: white; } .page { margin: 0; border: 0; box-shadow: none; padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+<main class="page">
+<div class="hero-note">Prepared for Hsin Chuan Semiconductor Academy AI Agent Practical Competition, 2026.</div>
+<h1>Circuit.AI Hardware Splicer Architecture</h1>
+<h2>Core Claim</h2>
+<p>Circuit.AI is an evidence-gated AI agent for circuit board understanding,</p>
+<p>repair, reuse, and hardware recomposition. It does not treat visual model output</p>
+<p>as electrical truth. It converts model output into measurement plans and only</p>
+<p>promotes a board to repair authority after measured evidence and bench outcomes.</p>
+<h2>Architecture</h2>
+<pre><code>flowchart LR
+  A[Multi-photo board evidence] --&gt; B[Visual evidence extraction]
+  C[Public datasheets and pinouts] --&gt; D[Reference topology]
+  B --&gt; E[Board evidence v1]
+  D --&gt; E
+  E --&gt; F[Visual topology hypothesis]
+  F --&gt; G[Bench measurement packet]
+  G --&gt; H[Measured topology evidence]
+  H --&gt; I[Simulation and safety envelope]
+  I --&gt; J[Controlled bench outcome]
+  J --&gt; K[Production release manifest]
+  K --&gt; L[Production authority casefile]
+
+  M[Qwen or vision model] --&gt; B
+  N[DeepSeek/Copilot reasoner] --&gt; F
+  O[Deterministic verifier] --&gt; L</code></pre>
+<h2>Evidence Authority Levels</h2>
+<table>
+<thead><tr><th>Level</th><th>Meaning</th><th>Allowed Output</th></tr></thead><tbody>
+<tr><td><code>visual_candidate</code></td><td>photos and reference hints only</td><td>capture plan and measurement queue</td></tr>
+<tr><td><code>measured_topology</code></td><td>trusted pinout/rail measurements exist</td><td>scoped topology and simulation checks</td></tr>
+<tr><td><code>electrical_simulation</code></td><td>measured envelope passes deterministic checks</td><td>bench protocol and guarded bring-up</td></tr>
+<tr><td><code>controlled_bench</code></td><td>first-power/function proof recorded</td><td>controlled reuse claim</td></tr>
+<tr><td><code>production_repair</code></td><td>release manifest and artifacts complete</td><td>scoped production repair/reuse authority</td></tr>
+</tbody></table>
+<h2>Current Live Demo</h2>
+<p>Frontend:</p>
+<pre><code>/showcase?state=release</code></pre>
+<p>Backend:</p>
+<pre><code>POST /hardware/production-casefile/run</code></pre>
+<p>The showcase demonstrates:</p>
+<ul>
+<li>evidence packet selection</li>
+<li>board topology visualization</li>
+<li>measurement closure</li>
+<li>authority ladder</li>
+<li>live production casefile response</li>
+<li>runtime model/budget safety strip</li>
+</ul>
+<h2>Model Strategy</h2>
+<p>Models help interpret and plan:</p>
+<ul>
+<li>Qwen VL: candidate board evidence from multi-photo input.</li>
+<li>DeepSeek/Copilot-style reasoners: structured advisory reasoning.</li>
+<li>Local deterministic verifier: final authority gate.</li>
+</ul>
+<p>The system is designed so model output can accelerate work but cannot authorize</p>
+<p>unsafe hardware actions alone.</p>
+<h2>Competition Deliverable</h2>
+<p>The final demo will show a CH340C USB-serial board moving through:</p>
+<pre><code>reference-only evidence -&gt; blocked authority
+measured topology -&gt; simulation-ready authority
+release evidence -&gt; production repair authorized</code></pre>
+
+</main>
+</body>
+</html>

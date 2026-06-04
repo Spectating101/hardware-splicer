@@ -1,0 +1,94 @@
+{
+  "operator_confirmed_closure": {
+    "authority_after": "electrical_simulation",
+    "authority_score": 0.62,
+    "capture_verdict": "production_measurement_packet_ready",
+    "newly_passed": [
+      "measured_topology",
+      "electrical_simulation"
+    ],
+    "next_action": "record_controlled_bench_outcome",
+    "omniscience_score": 0.638,
+    "production_authorized": false
+  },
+  "operator_confirmed_progress": {
+    "authority_ready": true,
+    "capture_verdict": "production_measurement_packet_ready",
+    "closed_count": 6,
+    "next_action": "submit_authority_closure",
+    "open_count": 12,
+    "progress_score": 0.333,
+    "status": "authority_packet_ready"
+  },
+  "operator_confirmed_release_closure": {
+    "authority_after": "production_repair",
+    "authority_score": 1.0,
+    "capture_verdict": "production_measurement_packet_ready",
+    "newly_passed": [
+      "measured_topology",
+      "electrical_simulation",
+      "controlled_bench",
+      "production_repair"
+    ],
+    "next_action": "release_ready",
+    "omniscience_score": 1.0,
+    "production_authorized": true
+  },
+  "reference_ledger": {
+    "authority_score": 0.18,
+    "can": {
+      "claim_controlled_reuse": false,
+      "claim_production_repair_release": false,
+      "power_or_splice_now": false,
+      "run_controlled_bench": false,
+      "use_electrical_simulation": false,
+      "use_measured_pinout": false,
+      "use_visual_candidates": true
+    },
+    "current_authority_level": "visual_candidate",
+    "simulation_summary": {
+      "available": true,
+      "decision": "simulation_model_incomplete_load_model_required",
+      "issue_count": 0,
+      "simulation_model_source": "compiled_topology"
+    },
+    "stage_status": {
+      "controlled_bench": "open",
+      "electrical_simulation": "open",
+      "measured_topology": "open",
+      "production_repair": "open",
+      "visual_candidate": "pass"
+    },
+    "topology_summary": {
+      "measurement_backed": false,
+      "pinout_known": false,
+      "reference_only": true,
+      "shorts_detected": false,
+      "source": "public_reference_topology",
+      "unknown_pin_count": 2
+    }
+  },
+  "reference_only_closure": {
+    "authority_after": "visual_candidate",
+    "authority_score": 0.18,
+    "capture_verdict": "measurement_capture_incomplete",
+    "newly_passed": [],
+    "next_action": "complete_measurement_capture",
+    "omniscience_score": 0.342,
+    "production_authorized": false
+  },
+  "reference_only_progress": {
+    "authority_ready": false,
+    "capture_verdict": "measurement_capture_incomplete",
+    "closed_count": 0,
+    "next_action": "record_resistance_power_to_ground_no_short",
+    "open_count": 18,
+    "progress_score": 0.0,
+    "status": "waiting_for_measurements"
+  },
+  "source_urls": [
+    "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+    "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+    "https://learn.sparkfun.com/tutorials/sparkfun-serial-basic-ch340c-hookup-guide/all"
+  ]
+}

@@ -1,0 +1,793 @@
+[
+  {
+    "case_id": "sparkfun_ch340c_uart_complete",
+    "title": "SparkFun CH340C USB-C serial adapter completes after bench proof",
+    "source": {
+      "name": "SparkFun Serial Basic Breakout - CH340C and USB-C",
+      "url": "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+      "grounding": [
+        "CH340C USB-to-Serial adapter.",
+        "Works with 5V and 3.3V systems.",
+        "Breaks out DTR/RXI/TXO/VCC/CTS/GND style serial pins."
+      ]
+    },
+    "allowed_selected_ids": [
+      "sparkfun_ch340c"
+    ],
+    "payload": {
+      "goal": "use a SparkFun CH340C USB-C serial adapter to program and debug a 3.3V low-voltage target",
+      "target_authority_level": "production_repair",
+      "strategy_mode": "hybrid",
+      "required_capabilities": [
+        "usb_serial",
+        "connector"
+      ],
+      "available_resources": [
+        {
+          "resource_id": "sparkfun_ch340c",
+          "name": "SparkFun Serial Basic Breakout CH340C USB-C",
+          "resource_kind": "owned",
+          "capabilities": [
+            "usb_serial",
+            "connector"
+          ],
+          "confidence": 0.9,
+          "evidence_status": "verified"
+        }
+      ],
+      "measurements": [
+        {
+          "type": "resistance",
+          "target": "power to ground no-short",
+          "value": "pass",
+          "unit": "",
+          "notes": "unpowered resistance between power and ground is no-short",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/resistance/power to ground no-short"
+        },
+        {
+          "type": "continuity",
+          "target": "connector ground to exposed ground",
+          "value": "pass",
+          "unit": "",
+          "notes": "connector ground continuity ok",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/continuity/connector ground to exposed ground"
+        },
+        {
+          "type": "voltage",
+          "target": "UART logic high voltage",
+          "value": 3.31,
+          "unit": "V",
+          "notes": "UART TX/RX idle high at 3.3V",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/voltage/UART logic high voltage"
+        },
+        {
+          "type": "continuity",
+          "target": "shared ground continuity",
+          "value": "pass",
+          "unit": "",
+          "notes": "shared ground continuity pass",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/continuity/shared ground continuity"
+        },
+        {
+          "type": "logic_level",
+          "target": "serial UART idle state",
+          "value": "pass",
+          "unit": "",
+          "notes": "serial idle high and stable before connecting target board",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/logic_level/serial UART idle state"
+        },
+        {
+          "type": "current",
+          "target": "current draw under current-limited supply",
+          "value": "pass",
+          "unit": "",
+          "notes": "current draw under current-limited supply within limit",
+          "instrument_id": "bench_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/current/current draw under current-limited supply"
+        },
+        {
+          "type": "thermal",
+          "target": "thermal behavior after first power",
+          "value": "normal",
+          "unit": "",
+          "notes": "temperature stable and no abnormal heat",
+          "instrument_id": "thermal_probe_01",
+          "instrument_type": "thermal_probe",
+          "calibration_status": "valid",
+          "recorded_at": "2026-05-26T02:00:00Z",
+          "operator_id": "operator-1",
+          "evidence_uri": "session://hardware-plan-real-source/thermal/thermal behavior after first power"
+        }
+      ],
+      "outcome_history": [
+        {
+          "decision": "built",
+          "selected_resource_ids_used": [
+            "sparkfun_ch340c"
+          ],
+          "measurements_recorded": true,
+          "cash_spent_usd": 0,
+          "value_recovered_usd": 10.5,
+          "time_spent_minutes": 15,
+          "deviations_from_plan": [],
+          "failure_or_stop_reason": "",
+          "output_function_verified": true,
+          "first_power_result": "pass",
+          "thermal_result": "normal",
+          "current_limit_used": true,
+          "evidence_uri": "session://outcomes/sparkfun-ch340c-loopback"
+        }
+      ],
+      "production_release": {
+        "release_id": "REAL-SRC-CH340C-001",
+        "selected_resource_ids": [
+          "sparkfun_ch340c"
+        ],
+        "released_by": "operator-1",
+        "released_at": "2026-05-26T03:00:00Z",
+        "scope_statement": "Production release is limited to the measured resources, low-voltage evidence, and recorded terminal outcome in this eval case.",
+        "artifact_uris": [
+          "session://hardware-plan-real-source/release/test-report",
+          "session://hardware-plan-real-source/release/photos"
+        ],
+        "acceptance_reviewed": true,
+        "repeatability_count": 1
+      },
+      "repair_authority": {
+        "status": "authoritative_low_risk",
+        "score": 0.91,
+        "required_measurements": [],
+        "blocked_decisions": []
+      },
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "ready_for_build_plan",
+      "completion_state": "workflow_complete",
+      "execution_stage": "complete",
+      "can_power_or_splice": true,
+      "selected_exact": [
+        "sparkfun_ch340c"
+      ],
+      "missing_equals": [],
+      "open_gate_count": 0,
+      "next_actions_empty": true,
+      "production_authorized": true
+    }
+  },
+  {
+    "case_id": "sparkfun_ch340c_public_reference_pinout",
+    "title": "SparkFun CH340C official pinout seeds topology but still requires bench confirmation",
+    "source": {
+      "name": "SparkFun Serial Basic Breakout - CH340C and USB-C",
+      "url": "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+      "grounding": [
+        "Official pinout is DTR/RXI/TXO/VCC/CTS/GND.",
+        "Default VCC and logic level are 3.3V unless the rear jumper is changed.",
+        "Public pinout is reference topology, not a bench measurement of a salvaged board."
+      ]
+    },
+    "allowed_selected_ids": [
+      "topology_j1",
+      "uart_serial"
+    ],
+    "payload": {
+      "goal": "reuse a SparkFun CH340C serial board from public pinout reference",
+      "strategy_mode": "constrained",
+      "required_capabilities": [
+        "usb_serial",
+        "connector"
+      ],
+      "topology_evidence": {
+        "schema_version": "topology_evidence.v1",
+        "source_type": "public_reference_topology",
+        "reference_uri": "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+        "connectors": [
+          {
+            "ref": "J1",
+            "label": "SparkFun CH340C FTDI-style header",
+            "pins": [
+              {
+                "pin": "1",
+                "net": "DTR",
+                "role": "dtr"
+              },
+              {
+                "pin": "2",
+                "net": "RXI",
+                "role": "rxi",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "3",
+                "net": "TXO",
+                "role": "txo",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "4",
+                "net": "VCC",
+                "role": "vcc",
+                "voltage": 3.3
+              },
+              {
+                "pin": "5",
+                "net": "CTS",
+                "role": "cts"
+              },
+              {
+                "pin": "6",
+                "net": "GND",
+                "role": "gnd"
+              }
+            ]
+          }
+        ]
+      },
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "prototype_after_evidence",
+      "completion_state": "evidence_required",
+      "can_power_or_splice": false,
+      "selected_contains": [
+        "uart_serial"
+      ],
+      "missing_equals": [],
+      "next_actions_contain": [
+        "unpowered resistance"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_bme280_public_reference_pinout",
+    "title": "Adafruit BME280 official pinout gives I2C/SPI topology but remains evidence-gated",
+    "source": {
+      "name": "Adafruit BME280 Humidity + Barometric Pressure + Temperature Sensor Breakout",
+      "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts",
+      "grounding": [
+        "Vin accepts 3-5V and GND is common ground.",
+        "SCK/SDI can be used as I2C SCL/SDA for the breakout wiring path.",
+        "SPI pins SCK/SDO/SDI/CS are also exposed."
+      ]
+    },
+    "allowed_selected_ids": [
+      "topology_j1"
+    ],
+    "payload": {
+      "goal": "reuse an Adafruit BME280 breakout as an I2C environmental sensor",
+      "strategy_mode": "constrained",
+      "required_capabilities": [
+        "sensor_or_adc",
+        "power",
+        "connector"
+      ],
+      "topology_evidence": {
+        "schema_version": "topology_evidence.v1",
+        "source_type": "public_reference_topology",
+        "reference_uri": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout/pinouts",
+        "connectors": [
+          {
+            "ref": "J1",
+            "label": "Adafruit BME280 breakout header",
+            "pins": [
+              {
+                "pin": "1",
+                "net": "VIN",
+                "role": "vin"
+              },
+              {
+                "pin": "2",
+                "net": "3VO",
+                "role": "3v3"
+              },
+              {
+                "pin": "3",
+                "net": "GND",
+                "role": "gnd"
+              },
+              {
+                "pin": "4",
+                "net": "SCK/SCL",
+                "role": "i2c_scl",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "5",
+                "net": "SDI/SDA",
+                "role": "i2c_sda",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "6",
+                "net": "SDO",
+                "role": "spi_miso",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "7",
+                "net": "CS",
+                "role": "spi_cs",
+                "logic_voltage": 3.3
+              }
+            ]
+          }
+        ]
+      },
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "prototype_after_evidence",
+      "completion_state": "evidence_required",
+      "can_power_or_splice": false,
+      "selected_contains": [
+        "topology_j1"
+      ],
+      "missing_equals": [],
+      "next_actions_contain": [
+        "unpowered resistance"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_drv8833_public_reference_pinout",
+    "title": "Adafruit DRV8833 official pinout maps motor/control pins but blocks load use",
+    "source": {
+      "name": "Adafruit DRV8833 DC/Stepper Motor Driver Breakout Board",
+      "url": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board/pinouts",
+      "grounding": [
+        "Vmotor is motor voltage and GND is shared logic/motor ground.",
+        "AIN1/AIN2/BIN1/BIN2 are logic inputs.",
+        "Motor A and Motor B outputs are motor power outputs."
+      ]
+    },
+    "allowed_selected_ids": [
+      "topology_j1"
+    ],
+    "payload": {
+      "goal": "reuse an Adafruit DRV8833 breakout as a dual motor driver",
+      "strategy_mode": "constrained",
+      "required_capabilities": [
+        "actuator_driver",
+        "motor_or_load",
+        "power",
+        "connector"
+      ],
+      "topology_evidence": {
+        "schema_version": "topology_evidence.v1",
+        "source_type": "public_reference_topology",
+        "reference_uri": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board/pinouts",
+        "connectors": [
+          {
+            "ref": "J1",
+            "label": "Adafruit DRV8833 breakout pins",
+            "pins": [
+              {
+                "pin": "VMOTOR",
+                "net": "VMOTOR",
+                "role": "vin"
+              },
+              {
+                "pin": "GND",
+                "net": "GND",
+                "role": "gnd"
+              },
+              {
+                "pin": "AIN1",
+                "net": "AIN1",
+                "role": "ain1",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "AIN2",
+                "net": "AIN2",
+                "role": "ain2",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "BIN1",
+                "net": "BIN1",
+                "role": "bin1",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "BIN2",
+                "net": "BIN2",
+                "role": "bin2",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "SLP",
+                "net": "SLP",
+                "role": "slp",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "FLT",
+                "net": "FLT",
+                "role": "flt",
+                "logic_voltage": 3.3
+              },
+              {
+                "pin": "AOUT1",
+                "net": "AOUT1",
+                "role": "aout1"
+              },
+              {
+                "pin": "AOUT2",
+                "net": "AOUT2",
+                "role": "aout2"
+              },
+              {
+                "pin": "BOUT1",
+                "net": "BOUT1",
+                "role": "bout1"
+              },
+              {
+                "pin": "BOUT2",
+                "net": "BOUT2",
+                "role": "bout2"
+              }
+            ]
+          }
+        ]
+      },
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "prototype_after_evidence",
+      "completion_state": "evidence_required",
+      "can_power_or_splice": false,
+      "selected_contains": [
+        "topology_j1"
+      ],
+      "missing_equals": [],
+      "next_actions_contain": [
+        "startup current"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_bme280_esp32_hybrid",
+    "title": "ESP32 plus BME280 logger buys only the missing sensor and remains evidence-gated",
+    "source": {
+      "name": "Adafruit BME280 Humidity + Barometric Pressure + Temperature Sensor Breakout",
+      "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout?view=all",
+      "grounding": [
+        "BME280 is a temperature, pressure, and humidity environmental sensor.",
+        "The breakout supports I2C or SPI.",
+        "Vin accepts 3-5V and GND is common power/data ground.",
+        "I2C wiring uses SCK as clock and SDI as data."
+      ]
+    },
+    "allowed_selected_ids": [
+      "owned_esp32",
+      "usb_power_bank",
+      "adafruit_bme280"
+    ],
+    "payload": {
+      "goal": "build an ESP32 BME280 environmental sensor logger using I2C",
+      "strategy_mode": "hybrid",
+      "constraints": {
+        "budget_usd": 20
+      },
+      "required_capabilities": [
+        "controller",
+        "sensor_or_adc",
+        "power",
+        "connector"
+      ],
+      "available_resources": [
+        {
+          "resource_id": "owned_esp32",
+          "name": "ESP32 dev board",
+          "resource_kind": "owned",
+          "capabilities": [
+            "controller",
+            "wireless",
+            "usb_serial",
+            "connector"
+          ],
+          "confidence": 0.84,
+          "evidence_status": "verified"
+        },
+        {
+          "resource_id": "usb_power_bank",
+          "name": "USB power bank and cable",
+          "resource_kind": "owned",
+          "capabilities": [
+            "power",
+            "connector"
+          ],
+          "confidence": 0.78,
+          "evidence_status": "verified"
+        }
+      ],
+      "procurable_catalog": [
+        {
+          "resource_id": "adafruit_bme280",
+          "name": "Adafruit BME280 I2C or SPI sensor breakout",
+          "resource_kind": "procurable",
+          "capabilities": [
+            "sensor_or_adc",
+            "connector"
+          ],
+          "cost_usd": 14.95,
+          "confidence": 0.9
+        }
+      ],
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "prototype_after_evidence",
+      "completion_state": "evidence_required",
+      "execution_stage": "procurement_gap_fill",
+      "can_power_or_splice": false,
+      "selected_contains": [
+        "owned_esp32",
+        "usb_power_bank",
+        "adafruit_bme280"
+      ],
+      "missing_equals": [],
+      "procurement_within_budget": true,
+      "next_actions_contain": [
+        "Confirm datasheet",
+        "unpowered resistance"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_bme280_constrained_no_sensor",
+    "title": "Constrained ESP32 logger refuses to invent the missing BME280 sensor",
+    "source": {
+      "name": "Adafruit BME280 Humidity + Barometric Pressure + Temperature Sensor Breakout",
+      "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout?view=all",
+      "grounding": [
+        "The public example requires a real BME280 sensor breakout for environmental readings.",
+        "The logger goal alone is not evidence that the sensor exists in inventory."
+      ]
+    },
+    "allowed_selected_ids": [
+      "owned_esp32",
+      "usb_power_bank"
+    ],
+    "payload": {
+      "goal": "build an ESP32 BME280 environmental sensor logger using I2C",
+      "strategy_mode": "constrained",
+      "required_capabilities": [
+        "controller",
+        "sensor_or_adc",
+        "power",
+        "connector"
+      ],
+      "available_resources": [
+        {
+          "resource_id": "owned_esp32",
+          "name": "ESP32 dev board",
+          "resource_kind": "owned",
+          "capabilities": [
+            "controller",
+            "wireless",
+            "usb_serial",
+            "connector"
+          ],
+          "confidence": 0.84,
+          "evidence_status": "verified"
+        },
+        {
+          "resource_id": "usb_power_bank",
+          "name": "USB power bank and cable",
+          "resource_kind": "owned",
+          "capabilities": [
+            "power",
+            "connector"
+          ],
+          "confidence": 0.78,
+          "evidence_status": "verified"
+        }
+      ],
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "blocked_missing_resources",
+      "completion_state": "blocked",
+      "can_power_or_splice": false,
+      "selected_exact": [
+        "owned_esp32",
+        "usb_power_bank"
+      ],
+      "selected_excludes": [
+        "sensor",
+        "bme280",
+        "adafruit_bme280"
+      ],
+      "missing_equals": [
+        "sensor_or_adc"
+      ],
+      "next_actions_contain": [
+        "missing capability: sensor_or_adc"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_drv8833_motor_hybrid",
+    "title": "DRV8833 motor stage selects driver, motor, controller, and power but blocks first power",
+    "source": {
+      "name": "Adafruit DRV8833 DC/Stepper Motor Driver Breakout Board",
+      "url": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board?view=all",
+      "grounding": [
+        "DRV8833 is a motor driver breakout for DC/stepper motors.",
+        "Motor supply must stay in the specified low-voltage range.",
+        "Motors require external power, shared ground, and output coil/load wiring."
+      ]
+    },
+    "allowed_selected_ids": [
+      "owned_feather",
+      "small_dc_motors",
+      "nine_volt_supply",
+      "adafruit_drv8833"
+    ],
+    "payload": {
+      "goal": "build a low-voltage two-motor driver stage with a DRV8833 breakout",
+      "strategy_mode": "hybrid",
+      "required_capabilities": [
+        "controller",
+        "actuator_driver",
+        "motor_or_load",
+        "power",
+        "connector"
+      ],
+      "available_resources": [
+        {
+          "resource_id": "owned_feather",
+          "name": "Feather or ESP32 controller",
+          "resource_kind": "owned",
+          "capabilities": [
+            "controller",
+            "connector"
+          ],
+          "confidence": 0.84,
+          "evidence_status": "verified"
+        },
+        {
+          "resource_id": "small_dc_motors",
+          "name": "two small DC motors",
+          "resource_kind": "owned",
+          "capabilities": [
+            "motor_or_load"
+          ],
+          "confidence": 0.7,
+          "evidence_status": "needs_evidence"
+        },
+        {
+          "resource_id": "nine_volt_supply",
+          "name": "9V current-limited bench supply",
+          "resource_kind": "owned",
+          "capabilities": [
+            "power"
+          ],
+          "confidence": 0.82,
+          "evidence_status": "verified"
+        }
+      ],
+      "procurable_catalog": [
+        {
+          "resource_id": "adafruit_drv8833",
+          "name": "Adafruit DRV8833 DC/Stepper Motor Driver Breakout",
+          "resource_kind": "procurable",
+          "capabilities": [
+            "actuator_driver",
+            "connector"
+          ],
+          "cost_usd": 4.95,
+          "confidence": 0.9
+        }
+      ],
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "prototype_after_evidence",
+      "completion_state": "evidence_required",
+      "execution_stage": "procurement_gap_fill",
+      "can_power_or_splice": false,
+      "selected_contains": [
+        "owned_feather",
+        "small_dc_motors",
+        "nine_volt_supply",
+        "adafruit_drv8833"
+      ],
+      "missing_equals": [],
+      "next_actions_contain": [
+        "Confirm datasheet",
+        "startup current"
+      ],
+      "production_authorized": false
+    }
+  },
+  {
+    "case_id": "adafruit_lipo_swollen_pack_safety",
+    "title": "Swollen LiPoly pack is blocked as unsafe power",
+    "source": {
+      "name": "Adafruit Li-Ion & LiPoly Batteries",
+      "url": "https://learn.adafruit.com/li-ion-and-lipoly-batteries?view=all",
+      "grounding": [
+        "Li-Ion/LiPoly batteries are power dense and require care during use and charging.",
+        "Datasheets and safety guidance matter for safe voltage, current, and temperature limits.",
+        "A swollen pack is treated as unsafe project power."
+      ]
+    },
+    "allowed_selected_ids": [
+      "swollen_lipo"
+    ],
+    "payload": {
+      "goal": "reuse a swollen LiPoly battery as project power",
+      "strategy_mode": "constrained",
+      "required_capabilities": [
+        "power"
+      ],
+      "available_resources": [
+        {
+          "resource_id": "swollen_lipo",
+          "name": "swollen LiPoly pouch battery",
+          "resource_kind": "salvaged",
+          "capabilities": [
+            "power",
+            "battery"
+          ],
+          "confidence": 0.8
+        }
+      ],
+      "use_reference_catalog": false
+    },
+    "expected": {
+      "status": "safety_hold",
+      "completion_state": "blocked",
+      "can_power_or_splice": false,
+      "selected_exact": [],
+      "selected_excludes": [
+        "swollen_lipo"
+      ],
+      "missing_equals": [
+        "power"
+      ],
+      "next_actions_contain": [
+        "do not power"
+      ],
+      "production_authorized": false
+    }
+  }
+]

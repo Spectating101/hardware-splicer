@@ -1,0 +1,25 @@
+{
+  "schema_version": "qwen_board_vision_spend_ledger.v1",
+  "entries": [
+    {
+      "ts": "2026-06-02T14:46:17.917491+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "image_sha256": "a722baaaca7a606089a3d97dd8522136f3c4b1b88d3598719887096ad462808b",
+      "input_tokens": 1131,
+      "output_tokens": 1407,
+      "estimated_usd": 0.000327,
+      "elapsed_s": 13.84
+    },
+    {
+      "ts": "2026-06-02T14:46:29.263944+00:00",
+      "provider": "qwen",
+      "model": "qwen3-vl-flash",
+      "image_sha256": "2b92727e44d59f359a932a04e6c8f00e41e9f71e2c4b36f2fee8c3b332c08081",
+      "input_tokens": 703,
+      "output_tokens": 863,
+      "estimated_usd": 0.000201,
+      "elapsed_s": 11.345
+    }
+  ]
+}

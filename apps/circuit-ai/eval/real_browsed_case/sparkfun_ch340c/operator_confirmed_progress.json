@@ -1,0 +1,3006 @@
+{
+  "authority_closure": {
+    "authority_after": {
+      "authority_score": 0.62,
+      "can": {
+        "claim_controlled_reuse": false,
+        "claim_production_repair_release": false,
+        "power_or_splice_now": false,
+        "run_controlled_bench": true,
+        "use_electrical_simulation": true,
+        "use_measured_pinout": true,
+        "use_visual_candidates": true
+      },
+      "current_authority_level": "electrical_simulation",
+      "next_unlocks": [
+        {
+          "blockers": [
+            "No terminal controlled bench outcome proves the target function."
+          ],
+          "next_unlock": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+          "stage_id": "controlled_bench",
+          "status": "open",
+          "title": "Controlled Bench Authority"
+        },
+        {
+          "blockers": [
+            "A terminal successful outcome is not fully recorded.",
+            "Output function is not verified in the terminal outcome.",
+            "First-power result is not recorded as passing.",
+            "Terminal outcome lacks an audit artifact URI.",
+            "One or more production authority lanes are not authorized.",
+            "Production release manifest is incomplete.",
+            "Arbitrary-board trust assessment is not production_release_candidate.",
+            "Production repair authority is not authorized by the casefile."
+          ],
+          "next_unlock": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+          "stage_id": "production_repair",
+          "status": "open",
+          "title": "Production Repair Authority"
+        }
+      ],
+      "stage_status": {
+        "controlled_bench": "open",
+        "electrical_simulation": "pass",
+        "measured_topology": "pass",
+        "production_repair": "open",
+        "visual_candidate": "pass"
+      }
+    },
+    "authority_before": {
+      "authority_score": 0.18,
+      "can": {
+        "claim_controlled_reuse": false,
+        "claim_production_repair_release": false,
+        "power_or_splice_now": false,
+        "run_controlled_bench": false,
+        "use_electrical_simulation": false,
+        "use_measured_pinout": false,
+        "use_visual_candidates": true
+      },
+      "current_authority_level": "visual_candidate",
+      "next_unlocks": [
+        {
+          "blockers": [
+            "No measured topology_evidence.v1 is attached."
+          ],
+          "next_unlock": "Measure ground, no-short resistance, voltage, current, thermal, and unknown pins into topology_evidence.v1.",
+          "stage_id": "measured_topology",
+          "status": "open",
+          "title": "Measured Pinout/Topology Authority"
+        },
+        {
+          "blockers": [
+            "No deterministic simulation model has run."
+          ],
+          "next_unlock": "Supply measured topology/netlist with source limits and load current.",
+          "stage_id": "electrical_simulation",
+          "status": "open",
+          "title": "Electrical Simulation Authority"
+        },
+        {
+          "blockers": [
+            "No terminal controlled bench outcome proves the target function."
+          ],
+          "next_unlock": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+          "stage_id": "controlled_bench",
+          "status": "open",
+          "title": "Controlled Bench Authority"
+        },
+        {
+          "blockers": [
+            "The plan is not authority-ready for first power or splice.",
+            "A terminal successful outcome is not fully recorded.",
+            "Repair authority is not authoritative_low_risk.",
+            "Open evidence gates remain.",
+            "Required production measurement categories are missing.",
+            "Required production measurements lack trusted provenance.",
+            "Required production measurements lack audit artifacts.",
+            "Output function is not verified in the terminal outcome.",
+            "First-power result is not recorded as passing.",
+            "Thermal result is not recorded as passing.",
+            "Terminal outcome lacks an audit artifact URI.",
+            "One or more production authority lanes are not authorized.",
+            "Production repair authority is not authorized by the casefile."
+          ],
+          "next_unlock": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+          "stage_id": "production_repair",
+          "status": "open",
+          "title": "Production Repair Authority"
+        }
+      ],
+      "stage_status": {
+        "controlled_bench": "open",
+        "electrical_simulation": "open",
+        "measured_topology": "open",
+        "production_repair": "open",
+        "visual_candidate": "pass"
+      }
+    },
+    "authority_delta": {
+      "after_level": "electrical_simulation",
+      "after_score": 0.62,
+      "before_level": "visual_candidate",
+      "before_score": 0.18,
+      "level_delta": 2,
+      "newly_passed_stages": [
+        "measured_topology",
+        "electrical_simulation"
+      ],
+      "schema_version": "authority_delta.v1",
+      "score_delta": 0.44,
+      "stage_status_after": {
+        "controlled_bench": "open",
+        "electrical_simulation": "pass",
+        "measured_topology": "pass",
+        "production_repair": "open",
+        "visual_candidate": "pass"
+      },
+      "stage_status_before": {
+        "controlled_bench": "open",
+        "electrical_simulation": "open",
+        "measured_topology": "open",
+        "production_repair": "open",
+        "visual_candidate": "pass"
+      }
+    },
+    "available": true,
+    "board_omniscience_map": null,
+    "capture_integrity": {
+      "actionable_topology": true,
+      "artifact_categories": [
+        "continuity",
+        "current",
+        "resistance",
+        "thermal",
+        "voltage"
+      ],
+      "capture_available": true,
+      "claim_boundary": "Integrity covers measurement packet auditability only; functional outcome and release manifest are separate gates.",
+      "connector_count": 1,
+      "known_pin_count": 6,
+      "measurement_categories": [
+        "continuity",
+        "current",
+        "resistance",
+        "thermal",
+        "voltage"
+      ],
+      "measurement_count": 8,
+      "missing_artifact_categories": [],
+      "missing_measurement_categories": [],
+      "missing_root_provenance": [
+        "instrument_id",
+        "instrument_type",
+        "calibration_status",
+        "recorded_at",
+        "operator_id",
+        "evidence_uri"
+      ],
+      "missing_trusted_categories": [],
+      "pinout_known": true,
+      "reference_only": false,
+      "schema_version": "measurement_capture_integrity.v1",
+      "shorts_detected": false,
+      "topology_available": true,
+      "trusted_categories": [
+        "continuity",
+        "current",
+        "resistance",
+        "thermal",
+        "voltage"
+      ],
+      "trusted_measurement_count": 8,
+      "trusted_root_provenance": false,
+      "unknown_pin_count": 0,
+      "verdict": "production_measurement_packet_ready"
+    },
+    "capture_packet": {
+      "bench_topology_capture_template": {
+        "artifacts": [
+          {
+            "kind": "photo",
+            "notes": "Pinout close-up with pin 1 marked.",
+            "uri": ""
+          },
+          {
+            "kind": "measurement_log",
+            "notes": "DMM/supply/thermal readings used for this capture.",
+            "uri": ""
+          }
+        ],
+        "capture_id": "",
+        "connectors": [
+          {
+            "kind": "header",
+            "label": "SparkFun Serial Basic FTDI-style 6-pin header",
+            "pin_count": 6,
+            "pins": [
+              {
+                "label": "DTR",
+                "logic_voltage": null,
+                "net": "DTR",
+                "pin": "1",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "dtr",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "RXI",
+                "logic_voltage": 3.3,
+                "net": "RXI",
+                "pin": "2",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "rxi",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "TXO",
+                "logic_voltage": 3.3,
+                "net": "TXO",
+                "pin": "3",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "txo",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "VCC",
+                "logic_voltage": null,
+                "net": "VCC",
+                "pin": "4",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "vcc",
+                "status": "needs_measurement",
+                "voltage": 3.3
+              },
+              {
+                "label": "CTS",
+                "logic_voltage": null,
+                "net": "CTS",
+                "pin": "5",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "cts",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "GND",
+                "logic_voltage": null,
+                "net": "GND",
+                "pin": "6",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "gnd",
+                "status": "needs_measurement",
+                "voltage": null
+              }
+            ],
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "ref": "J1",
+            "reference_seed": true,
+            "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+            "status": "needs_measurement"
+          },
+          {
+            "kind": "usb_c_connector",
+            "label": "USB-C connector logical pins from schematic",
+            "pin_count": 7,
+            "pins": [
+              {
+                "label": "VBUS",
+                "logic_voltage": null,
+                "net": "VBUS",
+                "pin": "VBUS",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "power",
+                "status": "needs_measurement",
+                "voltage": 5.0
+              },
+              {
+                "label": "GND",
+                "logic_voltage": null,
+                "net": "GND",
+                "pin": "GND",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "ground",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "UD+",
+                "logic_voltage": null,
+                "net": "UD+",
+                "pin": "D+",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "usb_dp",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "UD-",
+                "logic_voltage": null,
+                "net": "UD-",
+                "pin": "D-",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "usb_dm",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "CC1",
+                "logic_voltage": null,
+                "net": "CC1",
+                "pin": "CC1",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "CC2",
+                "logic_voltage": null,
+                "net": "CC2",
+                "pin": "CC2",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "",
+                "status": "needs_measurement",
+                "voltage": null
+              },
+              {
+                "label": "SHLD",
+                "logic_voltage": null,
+                "net": "SHLD",
+                "pin": "SHLD",
+                "provenance": {
+                  "calibration_status": "",
+                  "evidence_uri": "",
+                  "instrument_id": "",
+                  "instrument_type": "",
+                  "operator_id": "",
+                  "recorded_at": ""
+                },
+                "reference_seed": true,
+                "role": "ground",
+                "status": "needs_measurement",
+                "voltage": null
+              }
+            ],
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "ref": "USB-C",
+            "reference_seed": true,
+            "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+            "status": "needs_measurement"
+          }
+        ],
+        "instruments": [
+          {
+            "calibration_status": "valid",
+            "instrument_id": "",
+            "instrument_type": "calibrated_dmm"
+          },
+          {
+            "calibration_status": "valid",
+            "instrument_id": "",
+            "instrument_type": "current_limited_supply"
+          },
+          {
+            "calibration_status": "valid",
+            "instrument_id": "",
+            "instrument_type": "thermal_probe"
+          }
+        ],
+        "measurements": [
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "resistance",
+            "notes": "Unpowered resistance check between supply and ground.",
+            "status": "",
+            "target": "power to ground no-short",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Confirm common ground reference.",
+            "status": "",
+            "target": "connector ground to exposed ground",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "voltage",
+            "notes": "Measure supply rail voltage and polarity under current limit.",
+            "status": "",
+            "target": "input voltage and polarity",
+            "unit": "V",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "current",
+            "notes": "Record first-power current at a safe current limit.",
+            "status": "",
+            "target": "current draw under current-limited supply",
+            "unit": "A",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "thermal",
+            "notes": "Record no abnormal heating after first power.",
+            "status": "",
+            "target": "thermal behavior after first power",
+            "unit": "C",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "voltage",
+            "notes": "Measure the reused signal voltage domain.",
+            "status": "",
+            "target": "logic high voltage",
+            "unit": "V",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) pin-1/orientation confirmation",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "resistance",
+            "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) supply-to-ground no-short: 4:VCC vs 6:GND",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "voltage",
+            "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) supply voltage and polarity: 4:VCC",
+            "unit": "V",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) ground reference continuity: 6:GND",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "voltage",
+            "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) logic voltage domain: 1:DTR, 2:RXI, 3:TXO, 5:CTS",
+            "unit": "V",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+            "status": "",
+            "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) signal pin continuity map: 1:DTR, 2:RXI, 3:TXO, 5:CTS",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) pin-1/orientation confirmation",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "resistance",
+            "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) supply-to-ground no-short: VBUS:VBUS vs GND:GND, SHLD:SHLD",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "voltage",
+            "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) supply voltage and polarity: VBUS:VBUS",
+            "unit": "V",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) ground reference continuity: GND:GND, SHLD:SHLD",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) USB data pair protection/path confirmation: D+:UD+, D-:UD-",
+            "unit": "ohm",
+            "value": ""
+          },
+          {
+            "evidence_uri": "",
+            "instrument_id": "",
+            "kind": "continuity",
+            "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+            "status": "",
+            "target": "USB-C connector logical pins from schematic (USB-C) high-speed/shield reference check: D+:UD+, D-:UD-",
+            "unit": "ohm",
+            "value": ""
+          }
+        ],
+        "operator_id": "",
+        "policy": {
+          "production_requires_instrument_operator_timestamp_and_artifact": true,
+          "reference_seed_is_not_evidence": true,
+          "set_pin_status_verified_only_after_continuity_or_voltage_confirmation": true
+        },
+        "recorded_at": "",
+        "schema_version": "bench_topology_capture.v1"
+      },
+      "expected_submit_schema": "bench_topology_capture.v1",
+      "reference_seed_is_not_evidence": true,
+      "schema_version": "measurement_authority_capture_packet.v1",
+      "targeted_measurement_count": 14,
+      "visual_topology_measurement_queue": [
+        {
+          "category": "topology",
+          "priority": 0,
+          "prompt": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "task_id": "visual_topology_record",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1",
+          "usable_for": [
+            "production_release",
+            "splice",
+            "repair",
+            "portfolio_demo"
+          ]
+        },
+        {
+          "category": "pinout",
+          "priority": 0,
+          "prompt": "Map DTR RXI TXO VCC CTS GND header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "task_id": "pinout_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.connectors",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "production_release"
+          ]
+        },
+        {
+          "category": "resistance",
+          "priority": 0,
+          "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on DTR RXI TXO VCC CTS GND header.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "task_id": "short_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.resistance",
+          "usable_for": [
+            "safety",
+            "repair",
+            "reuse",
+            "splice"
+          ]
+        },
+        {
+          "category": "voltage",
+          "priority": 0,
+          "prompt": "Power through a current limit and record voltage, polarity, and logic domain for DTR RXI TXO VCC CTS GND header before any external connection.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "task_id": "voltage_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.voltage",
+          "usable_for": [
+            "safety",
+            "repair",
+            "reuse",
+            "splice",
+            "production_release"
+          ]
+        },
+        {
+          "category": "logic",
+          "priority": 1,
+          "prompt": "Identify TX, RX, GND, and VCC on DTR RXI TXO VCC CTS GND header; measure idle logic high and run loopback or safe serial capture before target connection.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "DTR RXI TXO VCC CTS GND header",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "j1",
+            "source_type": "connector"
+          },
+          "task_id": "uart_logic_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.connectors",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "portfolio_demo"
+          ]
+        },
+        {
+          "category": "pinout",
+          "priority": 0,
+          "prompt": "Map USB-C connector: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "USB-C connector",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "task_id": "pinout_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.connectors",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "production_release"
+          ]
+        },
+        {
+          "category": "resistance",
+          "priority": 0,
+          "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-C connector.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "USB-C connector",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "task_id": "short_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.resistance",
+          "usable_for": [
+            "safety",
+            "repair",
+            "reuse",
+            "splice"
+          ]
+        },
+        {
+          "category": "voltage",
+          "priority": 0,
+          "prompt": "Power through a current limit and record voltage, polarity, and logic domain for USB-C connector before any external connection.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "USB-C connector",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "task_id": "voltage_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.voltage",
+          "usable_for": [
+            "safety",
+            "repair",
+            "reuse",
+            "splice",
+            "production_release"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "Continuity-test USB D+ and D- path from USB-C connector to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "USB-C connector",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "task_id": "usb_path_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "For CH340C USB-to-Serial bridge IC, measure continuity from USB pins to the USB connector and from UART pins to candidate headers before treating it as a USB serial adapter.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "CH340C USB-to-Serial bridge IC",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "u1",
+            "source_type": null
+          },
+          "task_id": "bridge_u1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "portfolio_demo"
+          ]
+        },
+        {
+          "category": "voltage",
+          "priority": 1,
+          "prompt": "For AP2112 voltage regulator, identify input, output, and ground, then measure no-short, output voltage, load current, and thermal behavior.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "board_zone": "unmapped",
+            "geometry_status": "unmapped",
+            "label": "AP2112 voltage regulator",
+            "map_id": null,
+            "normalized_bbox": null,
+            "ref": "u2",
+            "source_type": null
+          },
+          "task_id": "regulator_u2",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.voltage",
+          "usable_for": [
+            "safety",
+            "repair",
+            "reuse",
+            "splice"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "Continuity-test the visual candidate path CH340C USB-to-Serial bridge IC to DTR RXI TXO VCC CTS GND header; record both positive and negative results as topology_evidence.v1.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "from": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "CH340C USB-to-Serial bridge IC",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "u1",
+              "source_type": "component"
+            },
+            "relationship": "candidate_uart_serial_path",
+            "source_photo_ids": [],
+            "to": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "DTR RXI TXO VCC CTS GND header",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "j1",
+              "source_type": "connector"
+            },
+            "visual_distance": null
+          },
+          "task_id": "path_visual_path_u1_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "training"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "Continuity-test the visual candidate path CH340C USB-to-Serial bridge IC to USB-C connector; record both positive and negative results as topology_evidence.v1.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "from": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "CH340C USB-to-Serial bridge IC",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "u1",
+              "source_type": "component"
+            },
+            "relationship": "candidate_usb_data_path",
+            "source_photo_ids": [],
+            "to": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "USB-C connector",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "usb_c",
+              "source_type": "connector"
+            },
+            "visual_distance": null
+          },
+          "task_id": "path_visual_path_u1_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "training"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "Continuity-test the visual candidate path AP2112 voltage regulator to DTR RXI TXO VCC CTS GND header; record both positive and negative results as topology_evidence.v1.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "from": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "AP2112 voltage regulator",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "u2",
+              "source_type": "component"
+            },
+            "relationship": "candidate_power_path",
+            "source_photo_ids": [],
+            "to": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "DTR RXI TXO VCC CTS GND header",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "j1",
+              "source_type": "connector"
+            },
+            "visual_distance": null
+          },
+          "task_id": "path_visual_path_u2_j1",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "training"
+          ]
+        },
+        {
+          "category": "continuity",
+          "priority": 1,
+          "prompt": "Continuity-test the visual candidate path AP2112 voltage regulator to USB-C connector; record both positive and negative results as topology_evidence.v1.",
+          "source": "visual_topology_hypothesis",
+          "status": "open",
+          "target": {
+            "from": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "AP2112 voltage regulator",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "u2",
+              "source_type": "component"
+            },
+            "relationship": "candidate_power_path",
+            "source_photo_ids": [],
+            "to": {
+              "board_zone": "unmapped",
+              "geometry_status": "unmapped",
+              "label": "USB-C connector",
+              "map_id": null,
+              "normalized_bbox": null,
+              "ref": "usb_c",
+              "source_type": "connector"
+            },
+            "visual_distance": null
+          },
+          "task_id": "path_visual_path_u2_usb_c",
+          "type": "measurement",
+          "unlocks": "topology_evidence.v1.continuity",
+          "usable_for": [
+            "repair",
+            "reuse",
+            "splice",
+            "training"
+          ]
+        }
+      ]
+    },
+    "claim_boundary": "This closure packet reports what measured evidence unlocks. It does not convert reference pinouts, visual geometry, or model text into physical repair authority.",
+    "mode": "measurement_authority_closure",
+    "next_action": {
+      "action_id": "record_controlled_bench_outcome",
+      "category": "bench",
+      "prompt": "Run and record the controlled bench outcome: first power, current, thermal, and function proof."
+    },
+    "production_casefile": null,
+    "schema_version": "measurement_authority_closure.v1",
+    "topology_evidence": {
+      "artifacts": [
+        {
+          "artifact_id": "artifact_1",
+          "kind": "photo",
+          "notes": "",
+          "uri": "session://browsed/sparkfun_ch340c/pinout-confirmation"
+        },
+        {
+          "artifact_id": "artifact_2",
+          "kind": "measurement_log",
+          "notes": "",
+          "uri": "session://browsed/sparkfun_ch340c/measurement-log"
+        }
+      ],
+      "calibration_status": "valid",
+      "capture_id": "sparkfun-ch340c-operator-confirmed-demo",
+      "capture_summary": {
+        "claim_boundary": "Bench evidence covers only captured pins, observations, instruments, and attached artifacts.",
+        "connector_count": 1,
+        "observation_count": 6,
+        "trusted_root_provenance": true,
+        "verified_pin_count": 6
+      },
+      "connectors": [
+        {
+          "kind": "connector",
+          "label": "operator confirmed FTDI-style 6-pin header",
+          "pin_count": 6,
+          "pins": [
+            {
+              "label": "DTR",
+              "logic_voltage": null,
+              "net": "DTR",
+              "pin": "1",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "dtr",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "label": "RXI",
+              "logic_voltage": 3.3,
+              "net": "RXI",
+              "pin": "2",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "rxi",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "label": "TXO",
+              "logic_voltage": 3.3,
+              "net": "TXO",
+              "pin": "3",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "txo",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "label": "VCC",
+              "logic_voltage": null,
+              "net": "VCC",
+              "pin": "4",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "vcc",
+              "status": "verified",
+              "voltage": 3.3
+            },
+            {
+              "label": "CTS",
+              "logic_voltage": null,
+              "net": "CTS",
+              "pin": "5",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "cts",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "label": "GND",
+              "logic_voltage": null,
+              "net": "GND",
+              "pin": "6",
+              "provenance": {
+                "calibration_status": "valid",
+                "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                "instrument_id": "demo_dmm_01",
+                "instrument_type": "calibrated_dmm",
+                "operator_id": "operator-demo",
+                "recorded_at": "2026-06-02T08:00:00Z"
+              },
+              "role": "gnd",
+              "status": "verified",
+              "voltage": null
+            }
+          ],
+          "provenance": {
+            "calibration_status": "valid",
+            "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+            "instrument_id": "demo_dmm_01",
+            "instrument_type": "calibrated_dmm",
+            "operator_id": "operator-demo",
+            "recorded_at": "2026-06-02T08:00:00Z"
+          },
+          "ref": "J1",
+          "source_capture_id": "sparkfun-ch340c-operator-confirmed-demo",
+          "status": "verified"
+        }
+      ],
+      "continuity": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "kind": "continuity",
+          "notes": "",
+          "observation_id": "continuity_2",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "connector ground to exposed ground",
+          "to": "",
+          "unit": "ohm",
+          "value": "pass"
+        }
+      ],
+      "current": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_supply_01",
+          "instrument_type": "current_limited_supply",
+          "kind": "current",
+          "notes": "",
+          "observation_id": "current_4",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "current draw under current-limited supply",
+          "to": "",
+          "unit": "A",
+          "value": 0.04
+        }
+      ],
+      "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+      "instrument_id": "demo_dmm_01",
+      "instrument_type": "calibrated_dmm",
+      "instruments": [
+        {
+          "calibration_status": "valid",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm"
+        },
+        {
+          "calibration_status": "valid",
+          "instrument_id": "demo_supply_01",
+          "instrument_type": "current_limited_supply"
+        },
+        {
+          "calibration_status": "valid",
+          "instrument_id": "demo_thermal_01",
+          "instrument_type": "thermal_probe"
+        }
+      ],
+      "operator_id": "operator-demo",
+      "recorded_at": "2026-06-02T08:00:00Z",
+      "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+      "resistance": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "kind": "resistance",
+          "notes": "",
+          "observation_id": "resistance_1",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "power to ground no-short",
+          "to": "",
+          "unit": "ohm",
+          "value": "pass"
+        }
+      ],
+      "schema_version": "topology_evidence.v1",
+      "source": "bench_topology_capture.v1",
+      "source_type": "bench_measurement_capture",
+      "thermal": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_thermal_01",
+          "instrument_type": "thermal_probe",
+          "kind": "thermal",
+          "notes": "",
+          "observation_id": "thermal_5",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "thermal behavior after first power",
+          "to": "",
+          "unit": "C",
+          "value": "normal"
+        }
+      ],
+      "voltage": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "kind": "voltage",
+          "notes": "",
+          "observation_id": "voltage_3",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "input voltage and polarity",
+          "to": "",
+          "unit": "V",
+          "value": 3.3
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "from": "",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "kind": "voltage",
+          "notes": "",
+          "observation_id": "voltage_6",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "logic high voltage",
+          "to": "",
+          "unit": "V",
+          "value": 3.3
+        }
+      ]
+    },
+    "topology_evidence_bridge": {
+      "available": true,
+      "connector_maps": [
+        {
+          "candidate_pin_groups": [
+            {
+              "labels": [
+                "VCC",
+                "GND"
+              ],
+              "pins": [
+                "4",
+                "6"
+              ],
+              "type": "power"
+            },
+            {
+              "labels": [
+                "RXI",
+                "TXO"
+              ],
+              "pins": [
+                "2",
+                "3"
+              ],
+              "type": "uart"
+            },
+            {
+              "labels": [
+                "DTR",
+                "CTS"
+              ],
+              "pins": [
+                "1",
+                "5"
+              ],
+              "type": "serial_control"
+            }
+          ],
+          "class_name": "connector",
+          "confidence": 0.82,
+          "connector_id": "topology_j1",
+          "connector_ref": "J1",
+          "estimated_pin_count": 6,
+          "labels": [
+            "DTR",
+            "RXI",
+            "TXO",
+            "VCC",
+            "CTS",
+            "GND"
+          ],
+          "likely_roles": [
+            "power_or_ground",
+            "data_or_programming"
+          ],
+          "pin_map": [
+            {
+              "logic_voltage": null,
+              "net": "DTR",
+              "pin": "1",
+              "role": "uart_dtr",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "logic_voltage": 3.3,
+              "net": "RXI",
+              "pin": "2",
+              "role": "uart_rx",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "logic_voltage": 3.3,
+              "net": "TXO",
+              "pin": "3",
+              "role": "uart_tx",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "logic_voltage": null,
+              "net": "VCC",
+              "pin": "4",
+              "role": "power",
+              "status": "verified",
+              "voltage": 3.3
+            },
+            {
+              "logic_voltage": null,
+              "net": "CTS",
+              "pin": "5",
+              "role": "uart_cts",
+              "status": "verified",
+              "voltage": null
+            },
+            {
+              "logic_voltage": null,
+              "net": "GND",
+              "pin": "6",
+              "role": "ground",
+              "status": "verified",
+              "voltage": null
+            }
+          ],
+          "recommended_next_photo": "first-power setup photo",
+          "unknown_pin_count": 0
+        }
+      ],
+      "hazard_profile": {
+        "clearance_requirements": [],
+        "energy_domain": "measured_low_voltage_dc",
+        "hazards": [],
+        "schema_version": "hardware_hazard_profile.v1",
+        "source_policy": {
+          "raw_text_release_logic": false,
+          "structured_sources": [
+            "topology_evidence.v1"
+          ],
+          "topology_can_close_measurement_gates": true,
+          "topology_cannot_clear_external_hazards": true
+        }
+      },
+      "interfaces": [
+        {
+          "confidence": 0.82,
+          "connector_ref": "J1",
+          "labels": [
+            "VCC",
+            "GND"
+          ],
+          "pins": [
+            "4",
+            "6"
+          ],
+          "type": "power",
+          "validation": [
+            "confirm current limit",
+            "verify polarity"
+          ]
+        },
+        {
+          "confidence": 0.82,
+          "connector_ref": "J1",
+          "labels": [
+            "DTR",
+            "RXI",
+            "TXO",
+            "VCC",
+            "CTS",
+            "GND"
+          ],
+          "pins": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "type": "uart_serial",
+          "validation": [
+            "confirm logic voltage",
+            "cross TX/RX correctly",
+            "share ground"
+          ]
+        },
+        {
+          "confidence": 0.72,
+          "connector_ref": null,
+          "net": "VCC",
+          "type": "power",
+          "validation": [
+            "verify continuity and voltage under current limit"
+          ]
+        },
+        {
+          "confidence": 0.72,
+          "connector_ref": null,
+          "net": "GND",
+          "type": "ground",
+          "validation": [
+            "verify continuity and voltage under current limit"
+          ]
+        }
+      ],
+      "measurement_rows": [
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_continuity_1",
+          "notes": "connector ground to exposed ground",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "connector ground to exposed ground",
+          "type": "continuity",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_resistance_2",
+          "notes": "power to ground no-short",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "power to ground no-short",
+          "type": "resistance",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_voltage_3",
+          "notes": "J1:2 logic high voltage measured.",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "logic high voltage",
+          "type": "voltage",
+          "unit": "V",
+          "value": 3.3
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_voltage_5",
+          "notes": "J1:4 power pin voltage and polarity verified.",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "input voltage and polarity",
+          "type": "voltage",
+          "unit": "V",
+          "value": 3.3
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_supply_01",
+          "instrument_type": "current_limited_supply",
+          "measurement_id": "topology_current_9",
+          "notes": "topology current observation",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "current draw under current-limited supply",
+          "type": "current",
+          "unit": "A",
+          "value": 0.04
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_thermal_01",
+          "instrument_type": "thermal_probe",
+          "measurement_id": "topology_thermal_10",
+          "notes": "topology thermal observation",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "thermal behavior after first power",
+          "type": "thermal",
+          "unit": "C",
+          "value": "normal"
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_continuity_11",
+          "notes": "Measured topology includes a shared ground reference.",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "shared ground continuity",
+          "type": "continuity",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "measurement_id": "topology_logic_level_12",
+          "notes": "Measured topology identifies low-voltage signal pins; idle state still belongs in first-power outcome.",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z",
+          "status": "pass",
+          "target": "serial/I2C/SPI idle state if reused",
+          "type": "logic_level",
+          "unit": "",
+          "value": "pass"
+        }
+      ],
+      "pin_level_splice_contracts": [
+        {
+          "claim_boundary": "This contract is generated from measured topology only; it does not certify hidden board nets or external target compatibility.",
+          "connector_id": "topology_j1",
+          "connector_ref": "J1",
+          "contract_id": "topology_j1_breakout",
+          "do_not_connect_until": [
+            "Do not join to an external target until voltage domain and shared ground are compatible.",
+            "Do not connect the power pin without current limiting and polarity confirmation."
+          ],
+          "interfaces": [
+            "power",
+            "uart_serial"
+          ],
+          "label": "operator confirmed FTDI-style 6-pin header",
+          "pin_actions": [
+            "blue wire: J1:1 -> target reset/DTR (UART_DTR).",
+            "green wire: J1:2 -> target TX (UART_RX_to_target_TX).",
+            "yellow wire: J1:3 -> target RX (UART_TX_to_target_RX).",
+            "red wire: J1:4 -> current-limited supply positive (rail:3.3V).",
+            "orange wire: J1:5 -> target CTS (UART_CTS).",
+            "black wire: J1:6 -> target common ground (GND)."
+          ],
+          "pin_count": 6,
+          "safety_policy": {
+            "connect_ground_before_signals": true,
+            "current_limited_first_power": true,
+            "power_pin_requires_voltage_and_polarity": true,
+            "scope_excludes_unmeasured_board_nets": true,
+            "unknown_pins_are_no_connect": true
+          },
+          "schema_version": "pin_level_splice_contract.v1",
+          "scope": "measured connector breakout and external splice only",
+          "source": "topology_evidence.v1",
+          "status": "ready_for_controlled_splice",
+          "validation_gates": [
+            "Verify no-short resistance before wiring.",
+            "Verify shared ground continuity before signals.",
+            "Verify supply voltage, polarity, and current limit before joining power.",
+            "Verify UART logic voltage compatibility.",
+            "Run UART loopback or known-safe serial capture before target connection."
+          ],
+          "wire_bom": [
+            {
+              "color": "blue",
+              "from": {
+                "endpoint": "J1:1",
+                "net": "DTR",
+                "pin": "1"
+              },
+              "function": "UART_DTR",
+              "join": "control_signal",
+              "logic_voltage": null,
+              "net": "DTR",
+              "pin": "1",
+              "requirement": "Use DTR only after reset polarity and target compatibility are verified.",
+              "role": "uart_dtr",
+              "to": {
+                "endpoint": "target reset/DTR",
+                "role": "uart_dtr"
+              },
+              "voltage": null
+            },
+            {
+              "color": "green",
+              "from": {
+                "endpoint": "J1:2",
+                "net": "RXI",
+                "pin": "2"
+              },
+              "function": "UART_RX_to_target_TX",
+              "join": "cross_signal",
+              "logic_voltage": 3.3,
+              "net": "RXI",
+              "pin": "2",
+              "requirement": "Cross RX to target TX after voltage compatibility is confirmed. Measured logic high: 3.3 V.",
+              "role": "uart_rx",
+              "to": {
+                "endpoint": "target TX",
+                "role": "uart_rx"
+              },
+              "voltage": null
+            },
+            {
+              "color": "yellow",
+              "from": {
+                "endpoint": "J1:3",
+                "net": "TXO",
+                "pin": "3"
+              },
+              "function": "UART_TX_to_target_RX",
+              "join": "cross_signal",
+              "logic_voltage": 3.3,
+              "net": "TXO",
+              "pin": "3",
+              "requirement": "Cross TX to target RX after voltage compatibility is confirmed. Measured logic high: 3.3 V.",
+              "role": "uart_tx",
+              "to": {
+                "endpoint": "target RX",
+                "role": "uart_tx"
+              },
+              "voltage": null
+            },
+            {
+              "color": "red",
+              "from": {
+                "endpoint": "J1:4",
+                "net": "VCC",
+                "pin": "4"
+              },
+              "function": "rail:3.3V",
+              "join": "power",
+              "logic_voltage": null,
+              "net": "VCC",
+              "pin": "4",
+              "requirement": "Connect only after voltage and polarity are verified.",
+              "role": "power",
+              "to": {
+                "endpoint": "current-limited supply positive",
+                "role": "power"
+              },
+              "voltage": 3.3
+            },
+            {
+              "color": "orange",
+              "from": {
+                "endpoint": "J1:5",
+                "net": "CTS",
+                "pin": "5"
+              },
+              "function": "UART_CTS",
+              "join": "control_signal",
+              "logic_voltage": null,
+              "net": "CTS",
+              "pin": "5",
+              "requirement": "Use CTS only after flow-control compatibility is verified.",
+              "role": "uart_cts",
+              "to": {
+                "endpoint": "target CTS",
+                "role": "uart_cts"
+              },
+              "voltage": null
+            },
+            {
+              "color": "black",
+              "from": {
+                "endpoint": "J1:6",
+                "net": "GND",
+                "pin": "6"
+              },
+              "function": "GND",
+              "join": "common_reference",
+              "logic_voltage": null,
+              "net": "GND",
+              "pin": "6",
+              "requirement": "Connect ground/common reference first.",
+              "role": "ground",
+              "to": {
+                "endpoint": "target common ground",
+                "role": "ground"
+              },
+              "voltage": null
+            }
+          ]
+        }
+      ],
+      "policy": {
+        "failed_topology_blocks_power_or_splice": true,
+        "public_reference_topology_requires_bench_confirmation": false,
+        "release_decision_remains_in_hardware_plan_authority": true,
+        "structured_topology_is_measurement_evidence": true,
+        "unmeasured_pins_remain_gated": true
+      },
+      "reference_only": false,
+      "required_measurements": [
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "input voltage and polarity",
+        "current draw under current-limited supply",
+        "logic high voltage",
+        "shared ground continuity",
+        "serial/I2C/SPI idle state if reused"
+      ],
+      "resource_candidates": [
+        {
+          "capabilities": [
+            "connector",
+            "power",
+            "usb_serial"
+          ],
+          "confidence": 0.88,
+          "evidence_status": "measurement_backed",
+          "missing_evidence": [],
+          "name": "measured operator confirmed FTDI-style 6-pin header topology",
+          "notes": "Measured topology candidate; usable only inside the measured connector/pinout scope.",
+          "quantity": 1,
+          "required_tests": [],
+          "resource_id": "topology_j1",
+          "resource_kind": "salvaged",
+          "source": "topology_evidence.v1",
+          "source_refs": [
+            "J1"
+          ]
+        }
+      ],
+      "safest_entry_points": [
+        "topology_j1"
+      ],
+      "schema_version": "topology_evidence_bridge.v1",
+      "source": "measured_topology_evidence",
+      "topology_authority": {
+        "claim_boundary": "Topology authority covers only explicit measured endpoints, nets, and connector pins.",
+        "connector_count": 1,
+        "hazard_count": 0,
+        "known_pin_count": 6,
+        "measurement_backed": true,
+        "measurement_count": 8,
+        "net_count": 6,
+        "pinout_known": true,
+        "reference_backed": false,
+        "schema_version": "topology_authority.v1",
+        "shorts_detected": false,
+        "trusted_measurement_count": 8,
+        "unknown_pin_count": 0
+      },
+      "topology_evidence": {
+        "connectors": [
+          {
+            "confidence": 0.82,
+            "connector_id": "topology_j1",
+            "kind": "connector",
+            "label": "operator confirmed FTDI-style 6-pin header",
+            "pin_count": 6,
+            "pins": [
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:1",
+                "label": "DTR",
+                "logic_voltage": null,
+                "net": "DTR",
+                "pin": "1",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "uart_dtr",
+                "status": "verified",
+                "voltage": null
+              },
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:2",
+                "label": "RXI",
+                "logic_voltage": 3.3,
+                "net": "RXI",
+                "pin": "2",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "uart_rx",
+                "status": "verified",
+                "voltage": null
+              },
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:3",
+                "label": "TXO",
+                "logic_voltage": 3.3,
+                "net": "TXO",
+                "pin": "3",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "uart_tx",
+                "status": "verified",
+                "voltage": null
+              },
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:4",
+                "label": "VCC",
+                "logic_voltage": null,
+                "net": "VCC",
+                "pin": "4",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "power",
+                "status": "verified",
+                "voltage": 3.3
+              },
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:5",
+                "label": "CTS",
+                "logic_voltage": null,
+                "net": "CTS",
+                "pin": "5",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "uart_cts",
+                "status": "verified",
+                "voltage": null
+              },
+              {
+                "confidence": 0.82,
+                "connector_ref": "J1",
+                "endpoint": "J1:6",
+                "label": "GND",
+                "logic_voltage": null,
+                "net": "GND",
+                "pin": "6",
+                "provenance": {
+                  "calibration_status": "valid",
+                  "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+                  "instrument_id": "demo_dmm_01",
+                  "instrument_type": "calibrated_dmm",
+                  "operator_id": "operator-demo",
+                  "recorded_at": "2026-06-02T08:00:00Z"
+                },
+                "role": "ground",
+                "status": "verified",
+                "voltage": null
+              }
+            ],
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "ref": "J1",
+            "status": "verified"
+          }
+        ],
+        "continuity": [
+          {
+            "failed": false,
+            "from": "",
+            "kind": "continuity",
+            "notes": "",
+            "observation_id": "continuity_2",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "connector ground to exposed ground",
+            "to": "",
+            "unit": "ohm",
+            "value": "pass"
+          }
+        ],
+        "current": [
+          {
+            "failed": false,
+            "from": "",
+            "kind": "current",
+            "notes": "",
+            "observation_id": "current_4",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_supply_01",
+              "instrument_type": "current_limited_supply",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "current draw under current-limited supply",
+            "to": "",
+            "unit": "A",
+            "value": 0.04
+          }
+        ],
+        "hazards": [],
+        "nets": [
+          {
+            "net": "DTR",
+            "nodes": [
+              "J1:1"
+            ],
+            "nominal_v": null,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "uart_dtr",
+            "status": "verified"
+          },
+          {
+            "net": "RXI",
+            "nodes": [
+              "J1:2"
+            ],
+            "nominal_v": 3.3,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "uart_rx",
+            "status": "verified"
+          },
+          {
+            "net": "TXO",
+            "nodes": [
+              "J1:3"
+            ],
+            "nominal_v": 3.3,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "uart_tx",
+            "status": "verified"
+          },
+          {
+            "net": "VCC",
+            "nodes": [
+              "J1:4"
+            ],
+            "nominal_v": 3.3,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "power",
+            "status": "verified"
+          },
+          {
+            "net": "CTS",
+            "nodes": [
+              "J1:5"
+            ],
+            "nominal_v": null,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "uart_cts",
+            "status": "verified"
+          },
+          {
+            "net": "GND",
+            "nodes": [
+              "J1:6"
+            ],
+            "nominal_v": null,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "role": "ground",
+            "status": "verified"
+          }
+        ],
+        "provenance": {
+          "calibration_status": "valid",
+          "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+          "instrument_id": "demo_dmm_01",
+          "instrument_type": "calibrated_dmm",
+          "operator_id": "operator-demo",
+          "recorded_at": "2026-06-02T08:00:00Z"
+        },
+        "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+        "resistance": [
+          {
+            "failed": false,
+            "from": "",
+            "kind": "resistance",
+            "notes": "",
+            "observation_id": "resistance_1",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "power to ground no-short",
+            "to": "",
+            "unit": "ohm",
+            "value": "pass"
+          }
+        ],
+        "schema_version": "topology_evidence.v1",
+        "source": "bench_topology_capture.v1",
+        "source_type": "bench_measurement_capture",
+        "thermal": [
+          {
+            "failed": false,
+            "from": "",
+            "kind": "thermal",
+            "notes": "",
+            "observation_id": "thermal_5",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_thermal_01",
+              "instrument_type": "thermal_probe",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "thermal behavior after first power",
+            "to": "",
+            "unit": "C",
+            "value": "normal"
+          }
+        ],
+        "voltage": [
+          {
+            "failed": false,
+            "from": "",
+            "kind": "voltage",
+            "notes": "",
+            "observation_id": "voltage_3",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "input voltage and polarity",
+            "to": "",
+            "unit": "V",
+            "value": 3.3
+          },
+          {
+            "failed": false,
+            "from": "",
+            "kind": "voltage",
+            "notes": "",
+            "observation_id": "voltage_6",
+            "passed": true,
+            "provenance": {
+              "calibration_status": "valid",
+              "evidence_uri": "session://browsed/sparkfun_ch340c/pinout-confirmation",
+              "instrument_id": "demo_dmm_01",
+              "instrument_type": "calibrated_dmm",
+              "operator_id": "operator-demo",
+              "recorded_at": "2026-06-02T08:00:00Z"
+            },
+            "target": "logic high voltage",
+            "to": "",
+            "unit": "V",
+            "value": 3.3
+          }
+        ]
+      }
+    },
+    "topology_netlist_compilation": {
+      "available": true,
+      "claim_boundary": "Compiled netlists cover low-voltage measured rails, explicit load models, optional trace/regulator models, and voltage constraints only. Hidden nets, high-speed behavior, batteries, mains, and unmeasured loads remain outside this deterministic DC model.",
+      "constraints": {
+        "max_trace_drop_v": 0.25,
+        "source_limits": []
+      },
+      "coverage": {
+        "bounded_envelope_ready": true,
+        "dimensions": {
+          "ground_reference": true,
+          "load_model": true,
+          "power_rail": true,
+          "voltage_constraints": true
+        },
+        "score": 1.0,
+        "simulation_ready": true
+      },
+      "issues": [],
+      "load_envelope": {
+        "available": true,
+        "measured_total_load_a": 0.04,
+        "measurement_required": false,
+        "mode": "measured_load_model",
+        "pass_condition": "Use measured load simulation and source-limit checks.",
+        "reason": "Numeric load current is already modeled; no provisional envelope is needed.",
+        "scenarios": [],
+        "status": "measured_load_available"
+      },
+      "measurements_used": [
+        {
+          "measurement_id": "topology_continuity_1",
+          "status": "pass",
+          "target": "connector ground to exposed ground",
+          "type": "continuity",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "measurement_id": "topology_resistance_2",
+          "status": "pass",
+          "target": "power to ground no-short",
+          "type": "resistance",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "measurement_id": "topology_voltage_3",
+          "status": "pass",
+          "target": "logic high voltage",
+          "type": "voltage",
+          "unit": "V",
+          "value": 3.3
+        },
+        {
+          "measurement_id": "topology_voltage_5",
+          "status": "pass",
+          "target": "input voltage and polarity",
+          "type": "voltage",
+          "unit": "V",
+          "value": 3.3
+        },
+        {
+          "measurement_id": "topology_current_9",
+          "status": "pass",
+          "target": "current draw under current-limited supply",
+          "type": "current",
+          "unit": "A",
+          "value": 0.04
+        },
+        {
+          "measurement_id": "topology_thermal_10",
+          "status": "pass",
+          "target": "thermal behavior after first power",
+          "type": "thermal",
+          "unit": "C",
+          "value": "normal"
+        },
+        {
+          "measurement_id": "topology_continuity_11",
+          "status": "pass",
+          "target": "shared ground continuity",
+          "type": "continuity",
+          "unit": "ohm",
+          "value": "pass"
+        },
+        {
+          "measurement_id": "topology_logic_level_12",
+          "status": "pass",
+          "target": "serial/I2C/SPI idle state if reused",
+          "type": "logic_level",
+          "unit": "",
+          "value": "pass"
+        }
+      ],
+      "mode": "topology_netlist_compiler",
+      "netlist": {
+        "current_sources": [],
+        "ldos": [],
+        "loads_cc": [
+          {
+            "amps": 0.04,
+            "gnd": "0",
+            "min_v_off": 2.7,
+            "name": "current_draw_under_current_limited_supply",
+            "node": "VCC"
+          }
+        ],
+        "loads_cp": [],
+        "resistors": [],
+        "traces": [],
+        "version": 1,
+        "voltage_constraints": [
+          {
+            "gnd": "0",
+            "max_v": 3.6,
+            "min_v": 3.0,
+            "name": "vcc_voltage_window",
+            "node": "VCC",
+            "severity": "error"
+          }
+        ],
+        "voltage_sources": [
+          {
+            "n_minus": "0",
+            "n_plus": "VCC",
+            "name": "VS_VCC",
+            "volts": 3.3
+          }
+        ]
+      },
+      "reference_only": false,
+      "schema_version": "topology_netlist_compiler.v1",
+      "source": "measured_topology",
+      "topology_authority": {
+        "claim_boundary": "Topology authority covers only explicit measured endpoints, nets, and connector pins.",
+        "connector_count": 1,
+        "hazard_count": 0,
+        "known_pin_count": 6,
+        "measurement_backed": true,
+        "measurement_count": 8,
+        "net_count": 6,
+        "pinout_known": true,
+        "reference_backed": false,
+        "schema_version": "topology_authority.v1",
+        "shorts_detected": false,
+        "trusted_measurement_count": 8,
+        "unknown_pin_count": 0
+      }
+    }
+  },
+  "available": true,
+  "capture_integrity": {
+    "actionable_topology": true,
+    "artifact_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "capture_available": true,
+    "claim_boundary": "Integrity covers measurement packet auditability only; functional outcome and release manifest are separate gates.",
+    "connector_count": 1,
+    "known_pin_count": 6,
+    "measurement_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "measurement_count": 8,
+    "missing_artifact_categories": [],
+    "missing_measurement_categories": [],
+    "missing_root_provenance": [
+      "instrument_id",
+      "instrument_type",
+      "calibration_status",
+      "recorded_at",
+      "operator_id",
+      "evidence_uri"
+    ],
+    "missing_trusted_categories": [],
+    "pinout_known": true,
+    "reference_only": false,
+    "schema_version": "measurement_capture_integrity.v1",
+    "shorts_detected": false,
+    "topology_available": true,
+    "trusted_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "trusted_measurement_count": 8,
+    "trusted_root_provenance": false,
+    "unknown_pin_count": 0,
+    "verdict": "production_measurement_packet_ready"
+  },
+  "claim_boundary": "Session progress means the operator packet is becoming complete. It does not itself authorize power, splice, or repair; authority comes from measured topology closure and downstream outcome/release gates.",
+  "draft_bench_topology_capture": {
+    "artifacts": [
+      {
+        "kind": "photo",
+        "uri": "session://browsed/sparkfun_ch340c/pinout-confirmation"
+      },
+      {
+        "kind": "measurement_log",
+        "uri": "session://browsed/sparkfun_ch340c/measurement-log"
+      }
+    ],
+    "capture_id": "sparkfun-ch340c-operator-confirmed-demo",
+    "connectors": [
+      {
+        "label": "operator confirmed FTDI-style 6-pin header",
+        "pins": [
+          {
+            "net": "DTR",
+            "pin": "1",
+            "role": "dtr",
+            "status": "verified"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "RXI",
+            "pin": "2",
+            "role": "rxi",
+            "status": "verified"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "TXO",
+            "pin": "3",
+            "role": "txo",
+            "status": "verified"
+          },
+          {
+            "net": "VCC",
+            "pin": "4",
+            "role": "vcc",
+            "status": "verified",
+            "voltage": 3.3
+          },
+          {
+            "net": "CTS",
+            "pin": "5",
+            "role": "cts",
+            "status": "verified"
+          },
+          {
+            "net": "GND",
+            "pin": "6",
+            "role": "gnd",
+            "status": "verified"
+          }
+        ],
+        "ref": "J1"
+      }
+    ],
+    "instruments": [
+      {
+        "calibration_status": "valid",
+        "instrument_id": "demo_dmm_01",
+        "instrument_type": "calibrated_dmm"
+      },
+      {
+        "calibration_status": "valid",
+        "instrument_id": "demo_supply_01",
+        "instrument_type": "current_limited_supply"
+      },
+      {
+        "calibration_status": "valid",
+        "instrument_id": "demo_thermal_01",
+        "instrument_type": "thermal_probe"
+      }
+    ],
+    "measurements": [
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_dmm_01",
+        "kind": "resistance",
+        "measurement_id": "measurement_1",
+        "notes": "",
+        "status": "pass",
+        "target": "power to ground no-short",
+        "unit": "",
+        "value": "pass"
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_dmm_01",
+        "kind": "continuity",
+        "measurement_id": "measurement_2",
+        "notes": "",
+        "status": "pass",
+        "target": "connector ground to exposed ground",
+        "unit": "",
+        "value": "pass"
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_dmm_01",
+        "kind": "voltage",
+        "measurement_id": "measurement_3",
+        "notes": "",
+        "status": "pass",
+        "target": "input voltage and polarity",
+        "unit": "V",
+        "value": 3.3
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_supply_01",
+        "kind": "current",
+        "measurement_id": "measurement_4",
+        "notes": "",
+        "status": "pass",
+        "target": "current draw under current-limited supply",
+        "unit": "A",
+        "value": 0.04
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_thermal_01",
+        "kind": "thermal",
+        "measurement_id": "measurement_5",
+        "notes": "",
+        "status": "pass",
+        "target": "thermal behavior after first power",
+        "unit": "",
+        "value": "normal"
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "demo_dmm_01",
+        "kind": "voltage",
+        "measurement_id": "measurement_6",
+        "notes": "",
+        "status": "pass",
+        "target": "logic high voltage",
+        "unit": "V",
+        "value": 3.3
+      }
+    ],
+    "operator_id": "operator-demo",
+    "policy": {
+      "production_requires_instrument_operator_timestamp_and_artifact": true,
+      "reference_seed_is_not_evidence": true,
+      "set_pin_status_verified_only_after_continuity_or_voltage_confirmation": true
+    },
+    "recorded_at": "2026-06-02T08:00:00Z",
+    "schema_version": "bench_topology_capture.v1"
+  },
+  "mode": "measurement_session_progress",
+  "next_measurement": {
+    "action_id": "submit_authority_closure",
+    "prompt": "All template measurements are recorded; submit the packet to authority closure and continue outcome/release gates."
+  },
+  "progress": {
+    "authority_packet_ready": true,
+    "capture_verdict": "production_measurement_packet_ready",
+    "closed_count": 6,
+    "failed_count": 0,
+    "open_count": 12,
+    "progress_score": 0.333,
+    "required_count": 18,
+    "schema_version": "measurement_session_progress_summary.v1",
+    "submitted_count": 6,
+    "template_complete": false,
+    "unmatched_submitted_count": 0
+  },
+  "required_measurements": [
+    {
+      "evidence_uri": "",
+      "kind": "resistance",
+      "notes": "Unpowered resistance check between supply and ground.",
+      "requirement_id": "required_1",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_1",
+      "submitted_unit": "",
+      "submitted_value": "pass",
+      "target": "power to ground no-short",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": "",
+      "kind": "continuity",
+      "notes": "Confirm common ground reference.",
+      "requirement_id": "required_2",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_2",
+      "submitted_unit": "",
+      "submitted_value": "pass",
+      "target": "connector ground to exposed ground",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": "",
+      "kind": "voltage",
+      "notes": "Measure supply rail voltage and polarity under current limit.",
+      "requirement_id": "required_3",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_3",
+      "submitted_unit": "V",
+      "submitted_value": 3.3,
+      "target": "input voltage and polarity",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": "",
+      "kind": "current",
+      "notes": "Record first-power current at a safe current limit.",
+      "requirement_id": "required_4",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_4",
+      "submitted_unit": "A",
+      "submitted_value": 0.04,
+      "target": "current draw under current-limited supply",
+      "unit": "A"
+    },
+    {
+      "evidence_uri": "",
+      "kind": "thermal",
+      "notes": "Record no abnormal heating after first power.",
+      "requirement_id": "required_5",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_5",
+      "submitted_unit": "",
+      "submitted_value": "normal",
+      "target": "thermal behavior after first power",
+      "unit": "C"
+    },
+    {
+      "evidence_uri": "",
+      "kind": "voltage",
+      "notes": "Measure the reused signal voltage domain.",
+      "requirement_id": "required_6",
+      "status": "pass",
+      "submitted_measurement_id": "measurement_6",
+      "submitted_unit": "V",
+      "submitted_value": 3.3,
+      "target": "logic high voltage",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_7",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_8",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) supply-to-ground no-short: 4:VCC vs 6:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_9",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) supply voltage and polarity: 4:VCC",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_10",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) ground reference continuity: 6:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+      "requirement_id": "required_11",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) logic voltage domain: 1:DTR, 2:RXI, 3:TXO, 5:CTS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+      "requirement_id": "required_12",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "SparkFun Serial Basic FTDI-style 6-pin header (J1) signal pin continuity map: 1:DTR, 2:RXI, 3:TXO, 5:CTS",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_13",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_14",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) supply-to-ground no-short: VBUS:VBUS vs GND:GND, SHLD:SHLD",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_15",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) supply voltage and polarity: VBUS:VBUS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_16",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) ground reference continuity: GND:GND, SHLD:SHLD",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+      "requirement_id": "required_17",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) USB data pair protection/path confirmation: D+:UD+, D-:UD-",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_18",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C connector logical pins from schematic (USB-C) high-speed/shield reference check: D+:UD+, D-:UD-",
+      "unit": "ohm"
+    }
+  ],
+  "schema_version": "measurement_session_progress.v1",
+  "status": "authority_packet_ready",
+  "submitted_measurements": [
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_dmm_01",
+      "kind": "resistance",
+      "measurement_id": "measurement_1",
+      "notes": "",
+      "status": "pass",
+      "target": "power to ground no-short",
+      "unit": "",
+      "value": "pass"
+    },
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_dmm_01",
+      "kind": "continuity",
+      "measurement_id": "measurement_2",
+      "notes": "",
+      "status": "pass",
+      "target": "connector ground to exposed ground",
+      "unit": "",
+      "value": "pass"
+    },
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_dmm_01",
+      "kind": "voltage",
+      "measurement_id": "measurement_3",
+      "notes": "",
+      "status": "pass",
+      "target": "input voltage and polarity",
+      "unit": "V",
+      "value": 3.3
+    },
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_supply_01",
+      "kind": "current",
+      "measurement_id": "measurement_4",
+      "notes": "",
+      "status": "pass",
+      "target": "current draw under current-limited supply",
+      "unit": "A",
+      "value": 0.04
+    },
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_thermal_01",
+      "kind": "thermal",
+      "measurement_id": "measurement_5",
+      "notes": "",
+      "status": "pass",
+      "target": "thermal behavior after first power",
+      "unit": "",
+      "value": "normal"
+    },
+    {
+      "evidence_uri": "",
+      "instrument_id": "demo_dmm_01",
+      "kind": "voltage",
+      "measurement_id": "measurement_6",
+      "notes": "",
+      "status": "pass",
+      "target": "logic high voltage",
+      "unit": "V",
+      "value": 3.3
+    }
+  ],
+  "unmatched_submitted_measurements": []
+}

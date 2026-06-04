@@ -4,6 +4,18 @@ import os
 from pathlib import Path
 
 
+APP_ROOT = Path(__file__).resolve().parents[2]
+ENV_FILES = tuple(
+    str(path)
+    for path in (
+        APP_ROOT / "circuit-ai-frontend" / ".env.local",
+        APP_ROOT / ".env",
+        APP_ROOT / ".env.local",
+    )
+    if path.exists()
+)
+
+
 class Settings(BaseSettings):
     """Application settings using Pydantic."""
     
@@ -13,6 +25,28 @@ class Settings(BaseSettings):
     cohere_api_key: Optional[str] = None
     mistral_api_key: Optional[str] = None
     cerebras_api_key: Optional[str] = None
+    deepseek_api_key: Optional[str] = None
+    deepseek_model: Optional[str] = None
+    deepseek_base_url: Optional[str] = None
+    deepseek_thinking: str = "disabled"
+    deepseek_reasoning_effort: Optional[str] = None
+    qwen_api_key: Optional[str] = None
+    dashscope_api_key: Optional[str] = None
+    qwen_model: str = "qwen3.5-122b-a10b"
+    qwen_base_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    qwen_vision_model: str = "qwen3-vl-flash"
+    qwen_model_rotation: str = "qwen3.5-122b-a10b,qwen3-max,qwen3.5-plus-2026-02-15"
+    qwen_vision_model_rotation: str = "qwen3-vl-flash,qwen3-vl-30b-a3b-thinking,qwen-vl-ocr-2025-11-20"
+    qwen_low_quota_models: str = "qwen-plus,qwen-plus-2025-07-28"
+    qwen_json_mode_disabled: bool = False
+    qwen_disabled: bool = False
+    qwen_out_of_quota: bool = False
+    vision_monthly_usd_limit: float = 0.0
+    vision_daily_usd_limit: float = 1.0
+    vision_max_usd_per_call: float = 0.05
+    copilot_model: str = "gpt-4.1"
+    copilot_node_runner: str = "npx -y node@20"
+    copilot_timeout_seconds: float = 90
     
     # Database
     database_url: str = "sqlite:///./data/circuit_ai.db"
@@ -27,9 +61,9 @@ class Settings(BaseSettings):
     ocr_lang: str = "eng"
 
     # LLM provider configuration (defaults prefer non-OpenAI)
-    llm_provider: str = "cohere"  # options: "cohere", "mistral", "cerebras", "openai"
-    llm_model: str = "command-r"   # e.g., Cohere "command-r", Mistral "mistral-large-latest", Cerebras model name
-    llm_api_base: Optional[str] = None  # optional override for custom endpoints (e.g., Cerebras)
+    llm_provider: str = "copilot"  # options: "copilot", "cohere", "mistral", "cerebras", "openai", "deepseek", "qwen"
+    llm_model: str = "gpt-4.1"   # e.g., Copilot "gpt-4.1", DeepSeek "deepseek-v4-flash", Qwen "qwen3.5-122b-a10b"
+    llm_api_base: Optional[str] = None  # optional override for custom endpoints (e.g., Cerebras/DeepSeek)
 
     # LLM toggles
     llm_enabled: bool = True
@@ -66,9 +100,8 @@ class Settings(BaseSettings):
     debug: bool = True
     
     model_config = SettingsConfigDict(
-        # Prioritize .env.local over .env
-        # If .env.local exists, use it; otherwise fall back to .env
-        env_file=".env.local" if Path(".env.local").exists() else ".env",
+        # Backend .env.local wins; frontend .env.local is only a dev fallback for shared model keys.
+        env_file=ENV_FILES or None,
         case_sensitive=False,
         extra="ignore",
     )
@@ -86,3 +119,7 @@ if settings.openai_api_key:
     logger.debug(f"OpenAI API key configured: {settings.openai_api_key[:10]}...")
 if settings.cohere_api_key:
     logger.debug(f"Cohere API key configured: {settings.cohere_api_key[:10]}...")
+if settings.deepseek_api_key:
+    logger.debug(f"DeepSeek API key configured: {settings.deepseek_api_key[:10]}...")
+if settings.qwen_api_key or settings.dashscope_api_key:
+    logger.debug("Qwen/DashScope API key configured")

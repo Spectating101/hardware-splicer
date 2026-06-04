@@ -1,0 +1,24 @@
+{
+  "model": "qwen3-vl-flash",
+  "max_tokens": 2600,
+  "response_format": {
+    "type": "json_object"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are Circuit-AI native vision. Inspect the board image and crops.\nReturn ONLY JSON. Include safety_level, explanation, components/modules as relevant, and board_evidence.\nboard_evidence must use schema_version board_evidence.v1.\nInside board_evidence, put localized parts under components, not detections.\nUse these board_evidence array keys exactly: components, markings, regions, damage, connectors, test_points, salvage_candidates.\nKeep the response compact: at most 10 components and one short sentence per description.\nNormalize all boxes to 0-1 coordinates relative to the full board image when possible.\nDo not invent pinouts, voltages, exact part numbers, nets, or reuse safety without visible evidence.\nDo not use product knowledge to name exact ICs unless their markings are legible in the image.\nPrefer unknown plus missing_evidence/recommended_checks when unsure.\nScenario: curated_raspberry_pi\nCurrent local baseline: board_type=single_board_computer, confidence=1.0, detections=None, connectors=None, ocr_resolved=None.\nCrop plan:\n- no local detections produced crops; inspect the full image carefully."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/jpeg;base64,/9j/4QCGR...omitted-236039-chars"
+          }
+        }
+      ]
+    }
+  ]
+}

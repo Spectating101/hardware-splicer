@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import subprocess
+import sys
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -245,6 +247,13 @@ def _wire_ohm_per_m(awg: str | None) -> float:
     return table.get(k, table["24"])
 
 
+def _power_row_current(row: Dict[str, Any], board_current_a: float) -> float:
+    for key in ("load_current_a", "current_a", "estimated_current_a"):
+        if key in row and row.get(key) not in (None, ""):
+            return max(_as_float(row.get(key), board_current_a), 0.0)
+    return board_current_a
+
+
 def simulate_power_distribution(machine: Dict[str, Any], placement: Dict[str, Any]) -> Dict[str, Any]:
     boards = {str(b.get("board_id") or "").strip(): b for b in (machine.get("boards") or []) if isinstance(b, dict)}
     power_tree = [p for p in (machine.get("power_tree") or []) if isinstance(p, dict)]
@@ -265,7 +274,7 @@ def simulate_power_distribution(machine: Dict[str, Any], placement: Dict[str, An
         source = str(row.get("source") or "").strip() or "unknown_source"
         bid = str(row.get("board_id") or "").strip()
         v_nom = _as_float(row.get("voltage_v"), 0.0)
-        i_need = board_currents.get(bid, 0.0)
+        i_need = _power_row_current(row, board_currents.get(bid, 0.0))
         c = interconnect_map.get((source.split(":")[0], bid)) if ":" in source else interconnect_map.get((source, bid))
         length_cm = _as_float((c or {}).get("length_cm"), 20.0)
         awg = str((c or {}).get("wire_awg") or "24")
@@ -358,6 +367,54 @@ def _extract_primary_anchor(machine: Dict[str, Any]) -> Dict[str, Any] | None:
     }
 
 
+def _mecha_cli_path(root: Path) -> Path:
+    return root / "scripts" / "mecha_splicer_spec.py"
+
+
+def _dedupe_paths(paths: List[Path]) -> List[Path]:
+    seen: set[str] = set()
+    deduped: List[Path] = []
+    for path in paths:
+        key = str(path.expanduser().resolve(strict=False))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(Path(key))
+    return deduped
+
+
+def candidate_mecha_splicer_roots() -> List[Path]:
+    """
+    Return likely Mecha-Splicer roots for both old standalone folders and the
+    consolidated Hardware-Splicer/apps layout.
+    """
+    candidates: List[Path] = []
+    for env_name in ("MECHA_SPLICER_ROOT", "MECHA_SPLICER_PATH"):
+        env_value = os.getenv(env_name)
+        if env_value:
+            candidates.append(Path(env_value))
+
+    circuit_root = Path(__file__).resolve().parents[2]
+    search_bases = [circuit_root.parent, *circuit_root.parents]
+    for base in search_bases:
+        candidates.extend(
+            [
+                base / "mecha-splicer",
+                base / "Mecha-Splicer",
+                base / "apps" / "mecha-splicer",
+                base / "apps" / "Mecha-Splicer",
+            ]
+        )
+    return _dedupe_paths(candidates)
+
+
+def resolve_mecha_splicer_root() -> Path | None:
+    for root in candidate_mecha_splicer_roots():
+        if _mecha_cli_path(root).exists():
+            return root
+    return None
+
+
 def _merge_machine_with_mechatronic_context(machine: Dict[str, Any], context: Dict[str, Any]) -> tuple[Dict[str, Any], Dict[str, Any]]:
     merged = dict(machine)
     raw_boards = [dict(board) for board in (machine.get("boards") or []) if isinstance(board, dict)]
@@ -413,10 +470,15 @@ def run_mecha_bridge(
     render_stl: bool = False,
     mechatronic_context: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    mecha_root = Path(__file__).resolve().parents[3] / "Mecha-Splicer"
-    cli = mecha_root / "scripts" / "mecha_splicer_spec.py"
-    if not cli.exists():
-        return {"ok": False, "error": "mecha_splicer_not_found"}
+    mecha_root = resolve_mecha_splicer_root()
+    if mecha_root is None:
+        return {
+            "ok": False,
+            "error": "mecha_splicer_not_found",
+            "searched_roots": [str(p) for p in candidate_mecha_splicer_roots()],
+            "hint": "Set MECHA_SPLICER_ROOT to the Mecha-Splicer app root.",
+        }
+    cli = _mecha_cli_path(mecha_root)
 
     mech_spec = dict(mechanism) if isinstance(mechanism, dict) else {}
     if not mech_spec.get("project_name"):
@@ -444,7 +506,7 @@ def run_mecha_bridge(
     spec_path.write_text(json.dumps(mech_spec, indent=2), encoding="utf-8")
 
     cmd = [
-        "python3",
+        sys.executable,
         str(cli),
         "--spec",
         str(spec_path),
@@ -469,6 +531,7 @@ def run_mecha_bridge(
         "ok": p.returncode == 0 and bool(parsed),
         "returncode": p.returncode,
         "command": cmd,
+        "mecha_root": str(mecha_root),
         "out_dir": str(out_dir),
         "bundle_file": str(bundle_path),
         "simulation": parsed.get("simulation") if isinstance(parsed, dict) else [],
@@ -721,6 +784,8 @@ def engineer_machine_system(
     mechanism_spec: Dict[str, Any] | None = None,
     simulation_fidelity: str = "high",
     board_design_files: Optional[Dict[str, Dict[str, Any]]] = None,
+    use_3d_splicer: bool = True,
+    render_stl: bool = False,
 ) -> Dict[str, Any]:
     mechatronic_context = build_mechatronic_context(machine, board_design_files=board_design_files)
     working_machine, inferred_context_overrides = _merge_machine_with_mechatronic_context(machine, mechatronic_context)
@@ -736,6 +801,8 @@ def engineer_machine_system(
             mechanism_spec,
             simulation_fidelity=simulation_fidelity,
             mechatronic_context=mechatronic_context,
+            use_3d_splicer=use_3d_splicer,
+            render_stl=render_stl,
         )
 
     results = {

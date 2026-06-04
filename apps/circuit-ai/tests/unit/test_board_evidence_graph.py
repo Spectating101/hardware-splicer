@@ -61,3 +61,72 @@ def test_board_session_store_returns_evidence_graph(tmp_path):
     assert graph["mode"] == "board_evidence_graph"
     assert graph["session_id"] == "board-1"
     assert store.evidence_graph("missing")["error"] == "session not found: missing"
+
+
+def test_board_evidence_graph_links_qwen_board_evidence_candidates():
+    session = _session()
+    session["analyses"].append(
+        {
+            "analysis_id": "analysis_2",
+            "source": "qwen_vl",
+            "results": {
+                "board_evidence": {
+                    "schema_version": "board_evidence.v1",
+                    "components": [
+                        {"id": "u1", "label": "CH340C USB serial bridge IC", "kind": "integrated_circuit", "confidence": 0.78}
+                    ],
+                    "connectors": [
+                        {"id": "h1", "label": "UART header", "kind": "header", "confidence": 0.7}
+                    ],
+                    "damage": [
+                        {"id": "d1", "label": "corrosion near connector", "severity": "review", "confidence": 0.68}
+                    ],
+                    "salvage_candidates": [
+                        {"id": "s1", "label": "USB UART bridge section", "capabilities": ["usb_serial", "connector"], "confidence": 0.7}
+                    ],
+                }
+            },
+        }
+    )
+
+    graph = BoardEvidenceGraphBuilder().build(session)
+
+    assert any(node["kind"] == "vision_evidence" for node in graph["nodes"])
+    assert any(node["kind"] == "qwen_component" and "CH340C" in node["label"] for node in graph["nodes"])
+    assert any(node["kind"] == "qwen_damage" for node in graph["nodes"])
+    assert any("Vision-language evidence proposes salvage candidate" in claim["claim"] for claim in graph["weak_claims"])
+
+
+def test_board_evidence_graph_links_topology_evidence_candidates():
+    session = _session()
+    session["analyses"].append(
+        {
+            "analysis_id": "analysis_3",
+            "source": "topology_evidence",
+            "results": {
+                "topology_evidence": {
+                    "schema_version": "topology_evidence.v1",
+                    "connectors": [
+                        {
+                            "ref": "J1",
+                            "label": "UART header",
+                            "pins": [
+                                {"pin": "1", "net": "GND", "role": "ground", "status": "verified"},
+                                {"pin": "2", "net": "3V3", "role": "power", "voltage": 3.3, "status": "verified"},
+                                {"pin": "3", "net": "UART_TX", "role": "uart_tx", "logic_voltage": 3.3, "status": "verified"},
+                                {"pin": "4", "net": "UART_RX", "role": "uart_rx", "logic_voltage": 3.3, "status": "verified"},
+                            ],
+                        }
+                    ],
+                    "nets": [{"net": "GND", "role": "ground", "nodes": ["J1:1"]}],
+                }
+            },
+        }
+    )
+
+    graph = BoardEvidenceGraphBuilder().build(session)
+
+    assert any(node["kind"] == "topology_evidence" for node in graph["nodes"])
+    assert any(node["kind"] == "topology_connector" and "UART" in node["label"] for node in graph["nodes"])
+    assert any(node["kind"] == "topology_pin" and node.get("role") == "uart_tx" for node in graph["nodes"])
+    assert any("Measured topology covers" in claim["claim"] for claim in graph["grounded_claims"])

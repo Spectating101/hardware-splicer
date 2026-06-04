@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit.AI 繁體中文摘要</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f7f8; color: #111827; font-family: Inter, Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif; line-height: 1.55; }
+.page { max-width: 880px; margin: 28px auto; background: white; border: 1px solid #dbe3ea; border-radius: 10px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); padding: 44px 54px; }
+h1 { margin: 0 0 22px; color: #07111f; font-size: 30px; line-height: 1.15; letter-spacing: 0; }
+h2 { margin: 30px 0 12px; padding-top: 12px; border-top: 1px solid #e5edf2; color: #102033; font-size: 20px; line-height: 1.25; }
+h3 { margin: 22px 0 8px; color: #102033; font-size: 16px; }
+p { margin: 0 0 12px; }
+ul, ol { margin: 0 0 14px 22px; padding: 0; }
+li { margin: 4px 0; }
+pre { margin: 12px 0 16px; padding: 13px 14px; border: 1px solid #d8e2e8; border-radius: 7px; background: #f8fafc; color: #0f172a; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; }
+code { font-family: "JetBrains Mono", Consolas, monospace; background: #f1f5f9; border-radius: 4px; padding: 1px 4px; font-size: 0.92em; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px; }
+th, td { border: 1px solid #dbe3ea; padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; color: #334155; }
+.hero-note { margin: -8px 0 24px; color: #52647a; font-size: 13px; }
+.appendix { margin-top: 34px; page-break-before: always; }
+.figure { margin: 18px 0 24px; }
+.figure img { width: 100%; border: 1px solid #d8e2e8; border-radius: 8px; display: block; }
+.figure figcaption { margin-top: 8px; color: #52647a; font-size: 12px; }
+@page { margin: 18mm 16mm; }
+@media print { body { background: white; } .page { margin: 0; border: 0; box-shadow: none; padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+<main class="page">
+<div class="hero-note">Prepared for Hsin Chuan Semiconductor Academy AI Agent Practical Competition, 2026.</div>
+<h1>Circuit.AI Hardware Splicer 摘要</h1>
+<h2>專題名稱</h2>
+<p>Circuit.AI Hardware Splicer：以證據閘門為核心的電路板理解、維修、再利用與硬體重組 AI Agent。</p>
+<h2>專題簡介</h2>
+<p>Circuit.AI Hardware Splicer 不是單純的 PCB 圖片辨識工具，而是一個面向實體電路板的 AI Agent。系統會整合多張電路板照片、IC 標記、連接器資訊、公開資料表、量測腳位、電壓、電流、熱狀態與功能測試結果，建立可稽核的維修與再利用權限檔案。</p>
+<p>此系統的重點是「不讓 AI 過度宣稱」。視覺模型可以協助找出元件、接頭與疑似可再利用功能，但不能直接授權上電、維修或拼接。只有在量測拓樸、電氣檢查、受控 bench test、release manifest 與證據附件完整後，系統才會提升到 scoped production repair authority。</p>
+<h2>解決問題</h2>
+<p>在電子維修、教學、硬體開發與回收再利用場景中，使用者常常拿到一片未知或資料不完整的電路板。即使 AI 能辨識部分元件，也不代表可以安全上電或重複利用。Circuit.AI 的目標是把「看起來可能可以用」轉換成「經過量測與測試，可以在明確範圍內使用」。</p>
+<h2>技術架構</h2>
+<p>系統包含：</p>
+<ul>
+<li>多照片視覺證據擷取</li>
+<li>Qwen 或類似多模態模型輔助辨識</li>
+<li>公開 pinout / datasheet 參考</li>
+<li>電路拓樸假設</li>
+<li>bench measurement packet</li>
+<li>continuity / resistance / voltage / current / thermal 量測</li>
+<li>controlled bench outcome</li>
+<li>production authority casefile</li>
+<li>deterministic verifier 安全閘門</li>
+</ul>
+<h2>目前成果</h2>
+<p>目前已有可執行的 backend 與 frontend showcase：</p>
+<pre><code>/showcase?state=release</code></pre>
+<p>展示結果：</p>
+<ul>
+<li>只有參考資料時：<code>visual_candidate</code>，分數 <code>0.18</code>，不能授權維修。</li>
+<li>完整 release evidence 時：<code>production_repair</code>，分數 <code>1.00</code>，可授權範圍限定的低電壓 UART 再利用。</li>
+</ul>
+<h2>七月至八月開發目標</h2>
+<p>若入選，補助 token 將用於：</p>
+<ul>
+<li>多張電路板照片的視覺證據整合</li>
+<li>Qwen/native vision 實驗</li>
+<li>真實或受控電路板案例集</li>
+<li>量測流程 UI</li>
+<li>中英文展示介面</li>
+<li>最終 10 分鐘競賽展示</li>
+</ul>
+<h2>專題價值</h2>
+<p>本專題將 AI Agent 應用於半導體與電子硬體的實務流程：電路板理解、測試規劃、維修判斷、再利用與安全授權。它不只是聊天機器人，而是能把模型推論、實體量測與安全閘門整合成工程工作流程的系統。</p>
+
+</main>
+</body>
+</html>

@@ -11,11 +11,33 @@ import urllib.request
 import urllib.error
 from typing import Dict, Any
 
+
+def _float_env(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except Exception:
+        return default
+
+
+def _default_script_endpoint(endpoint: str) -> str:
+    endpoint = (endpoint or "/v1/splice").strip() or "/v1/splice"
+    endpoint = endpoint.rstrip("/")
+    if endpoint.endswith("/script"):
+        return endpoint
+    if endpoint.endswith("/generate") or endpoint.endswith("/v1/splice"):
+        return f"{endpoint}/script"
+    return "/v1/splice/script"
+
+
 class SplicerEngine:
     def __init__(self):
         # Read env at runtime so callers can dynamically point to ephemeral/local splicer instances.
         self.api_url = (os.getenv("SPLICER_API_URL", "http://localhost:8000") or "http://localhost:8000").rstrip("/")
         self.endpoint = (os.getenv("SPLICER_ENDPOINT", "/v1/splice") or "/v1/splice").strip() or "/v1/splice"
+        self.script_endpoint = (
+            os.getenv("SPLICER_SCRIPT_ENDPOINT", _default_script_endpoint(self.endpoint)) or "/v1/splice/script"
+        ).strip()
+        self.timeout_s = _float_env("SPLICER_TIMEOUT_S", 30.0)
 
     def generate_enclosure(self, vision_data: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -33,7 +55,7 @@ class SplicerEngine:
                 headers={"Content-Type": "application/json"}
             )
             
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=self.timeout_s) as response:
                 result = json.loads(response.read().decode('utf-8'))
                 return result
                 
@@ -41,11 +63,11 @@ class SplicerEngine:
             # Try script-only mode for environments without CadQuery / offline STL generation.
             try:
                 req2 = urllib.request.Request(
-                    f"{self.api_url}/v1/splice/script",
+                    f"{self.api_url}{self.script_endpoint}",
                     data=json.dumps(spec).encode("utf-8"),
                     headers={"Content-Type": "application/json"},
                 )
-                with urllib.request.urlopen(req2) as response:
+                with urllib.request.urlopen(req2, timeout=self.timeout_s) as response:
                     result = json.loads(response.read().decode("utf-8"))
                     result["mode"] = "script"
                     return result

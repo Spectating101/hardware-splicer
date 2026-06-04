@@ -14,6 +14,8 @@ import { usePageTitle } from "@/components/use-page-title";
 import { useWorkbenchStore } from "@/lib/workbench-store";
 import { addInventoryItem } from "@/lib/inventory/storage";
 import type { SafetyLevel, SalvageModule } from "@/lib/cad-types";
+import type { BoardEvidence, BoardEvidenceTrust } from "@/lib/jarvis/board-evidence";
+import type { RepairAuthority, RepairMeasurementEvidence } from "@/lib/jarvis/repair-authority";
 
 interface IdentifyResponse {
   safety_level: SafetyLevel;
@@ -23,7 +25,13 @@ interface IdentifyResponse {
   error?: string;
   fromCache?: boolean;
   model?: string;
-  source?: "local" | "jarvis";
+  source?: "local" | "jarvis" | "copilot_evidence_bridge" | "qwen_native_vision";
+  cost_usd_estimate?: number;
+  board_evidence?: BoardEvidence;
+  evidence_trust?: BoardEvidenceTrust;
+  evidence?: {
+    board_evidence?: BoardEvidence;
+  };
   backend?: string;
   reviewRequired?: boolean;
   rawAnalysis?: Record<string, unknown>;
@@ -68,6 +76,28 @@ interface IdentifyResponse {
       candidate_labels?: string[];
     };
   };
+}
+
+interface VerifyResponse {
+  safety_level?: SafetyLevel;
+  verifier_status?: string;
+  summary?: string;
+  contradictions?: string[];
+  unsupported_claims?: string[];
+  missing_measurements?: string[];
+  recommended_next_actions?: string[];
+  launch_readiness?: {
+    level?: string;
+    blockers?: string[];
+  };
+  model?: string;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
+  deterministic_trust?: BoardEvidenceTrust;
+  repair_authority?: RepairAuthority;
+  error?: string;
 }
 
 type LocalAnalyzeDetection = {
@@ -143,6 +173,140 @@ type LocalAnalyzeResponse = {
 
 type Mode = "identify" | "salvage";
 
+type MeasurementDraft = {
+  type: string;
+  target: string;
+  value: string;
+  unit: string;
+  notes: string;
+};
+
+type MeasurementQueueItem = {
+  id: string;
+  prompt: string;
+  type: string;
+  unit: string;
+  source: string;
+  recorded: boolean;
+  matchedValue?: string;
+};
+
+function inferMeasurementType(prompt: string) {
+  const normalized = prompt.toLowerCase();
+  if (normalized.includes("resistance") || normalized.includes("no-short") || normalized.includes("short")) return "resistance";
+  if (normalized.includes("continuity") || normalized.includes("ground")) return "continuity";
+  if (normalized.includes("thermal") || normalized.includes("temperature") || normalized.includes("heat")) return "thermal";
+  if (normalized.includes("current") || normalized.includes("load")) return "current";
+  if (normalized.includes("logic") || normalized.includes("uart") || normalized.includes("i2c") || normalized.includes("spi")) return "logic_level";
+  if (normalized.includes("voltage") || normalized.includes("rail") || normalized.includes("vbus") || normalized.includes("+3v3") || normalized.includes("5v")) return "voltage";
+  if (normalized.includes("functional") || normalized.includes("loopback") || normalized.includes("scan")) return "functional";
+  return "measurement";
+}
+
+function inferMeasurementUnit(type: string) {
+  if (type === "voltage" || type === "logic_level") return "V";
+  if (type === "resistance") return "ohm";
+  if (type === "current") return "mA";
+  return "";
+}
+
+function measurementValuePlaceholder(type: string) {
+  if (type === "voltage" || type === "logic_level") return "3.31";
+  if (type === "resistance") return "open, 10k, 47k";
+  if (type === "current") return "18";
+  if (type === "thermal") return "normal";
+  if (type === "continuity" || type === "functional") return "pass";
+  return "pass, 4.91, 10k";
+}
+
+function draftFromMeasurementPrompt(prompt: string): MeasurementDraft {
+  const type = inferMeasurementType(prompt);
+  return {
+    type,
+    target: prompt,
+    value: "",
+    unit: inferMeasurementUnit(type),
+    notes: `Verifier requested: ${prompt}`,
+  };
+}
+
+function normalizeQueueText(value: string | undefined) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9+.-]+/g, " ")
+    .trim();
+}
+
+function measurementDisplayValue(measurement: RepairMeasurementEvidence) {
+  return `${String(measurement.value ?? "")}${measurement.unit ? ` ${measurement.unit}` : ""}`.trim();
+}
+
+function measurementMatchesPrompt(measurement: RepairMeasurementEvidence, prompt: string, type: string) {
+  const promptText = normalizeQueueText(prompt);
+  const targetText = normalizeQueueText(measurement.target);
+  if (!promptText || !targetText) return false;
+  if (targetText === promptText || targetText.includes(promptText) || promptText.includes(targetText)) return true;
+
+  const measurementText = normalizeQueueText(`${measurement.type ?? ""} ${measurement.target ?? ""} ${measurement.notes ?? ""}`);
+  const typeMatches = normalizeQueueText(measurement.type).includes(normalizeQueueText(type));
+  const promptTokens = promptText.split(" ").filter((token) => token.length > 3);
+  const tokenMatches = promptTokens.filter((token) => measurementText.includes(token)).length;
+  return typeMatches && tokenMatches >= Math.min(3, promptTokens.length);
+}
+
+function addQueuePrompts(rows: Array<{ prompt: string; source: string }>, prompts: string[] | undefined, source: string) {
+  for (const prompt of prompts ?? []) {
+    const trimmed = prompt.trim();
+    if (trimmed) rows.push({ prompt: trimmed, source });
+  }
+}
+
+function buildMeasurementQueue({
+  evidence,
+  verification,
+  measurements,
+  trust,
+  certaintyLedger,
+}: {
+  evidence: BoardEvidence | null;
+  verification: VerifyResponse | null;
+  measurements: RepairMeasurementEvidence[];
+  trust?: BoardEvidenceTrust;
+  certaintyLedger?: IdentifyResponse["certaintyLedger"];
+}): MeasurementQueueItem[] {
+  const rows: Array<{ prompt: string; source: string }> = [];
+  addQueuePrompts(rows, verification?.repair_authority?.required_measurements, "repair authority");
+  addQueuePrompts(rows, verification?.recommended_next_actions, "verifier next check");
+  addQueuePrompts(rows, trust?.required_evidence, "trust gate");
+  addQueuePrompts(rows, evidence?.recommended_checks, "board evidence");
+  addQueuePrompts(rows, evidence?.uncertainty?.next_actions, "visual uncertainty");
+  addQueuePrompts(rows, certaintyLedger?.missing_evidence, "certainty ledger");
+  addQueuePrompts(rows, certaintyLedger?.next_actions, "certainty next action");
+
+  const seen = new Set<string>();
+  return rows
+    .filter((row) => {
+      const key = normalizeQueueText(row.prompt);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 12)
+    .map((row, index) => {
+      const type = inferMeasurementType(row.prompt);
+      const matched = measurements.find((measurement) => measurementMatchesPrompt(measurement, row.prompt, type));
+      return {
+        id: `${row.source}-${index}-${normalizeQueueText(row.prompt).slice(0, 24)}`,
+        prompt: row.prompt,
+        type,
+        unit: inferMeasurementUnit(type),
+        source: row.source,
+        recorded: Boolean(matched),
+        matchedValue: matched ? measurementDisplayValue(matched) : undefined,
+      };
+    });
+}
+
 function formatPercent(value: number | undefined) {
   if (typeof value !== "number" || Number.isNaN(value)) return "N/A";
   return `${Math.round(value * 100)}%`;
@@ -173,8 +337,20 @@ function ScanPageInner() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [savingSession, setSavingSession] = useState(false);
+  const [verifyingEvidence, setVerifyingEvidence] = useState(false);
+  const [verification, setVerification] = useState<VerifyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [savedSessionId, setSavedSessionId] = useState<string | null>(null);
+  const [measurements, setMeasurements] = useState<RepairMeasurementEvidence[]>([]);
+  const [measurementDraft, setMeasurementDraft] = useState<MeasurementDraft>({
+    type: "continuity",
+    target: "",
+    value: "",
+    unit: "",
+    notes: "",
+  });
+  const [addingMeasurement, setAddingMeasurement] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -191,6 +367,77 @@ function ScanPageInner() {
     () => modules.find((m) => m.id === selectedId) ?? null,
     [modules, selectedId],
   );
+
+  const boardEvidence = useMemo(() => (
+    result?.board_evidence ?? result?.evidence?.board_evidence ?? null
+  ), [result]);
+
+  const measurementQueue = useMemo(
+    () => buildMeasurementQueue({
+      evidence: boardEvidence,
+      verification,
+      measurements,
+      trust: result?.evidence_trust,
+      certaintyLedger: result?.certaintyLedger,
+    }),
+    [boardEvidence, measurements, result?.certaintyLedger, result?.evidence_trust, verification],
+  );
+
+  const buildSessionAnalysis = useCallback((nextVerification?: VerifyResponse | null) => {
+    if (!result) return {};
+    const productionAoi = result.productionAoi;
+    const componentsByType = modules.reduce<Record<string, number>>((counts, module) => {
+      const key = module.kind ?? "unknown";
+      counts[key] = (counts[key] ?? 0) + 1;
+      return counts;
+    }, {});
+    const moduleDetections = modules.map((module) => ({
+      class_name: module.kind ?? "unknown",
+      label: module.label,
+      confidence: undefined,
+      bbox: module.bbox,
+      safety: module.safety,
+      warnings: module.warnings ?? [],
+    }));
+    const base = result.rawAnalysis && typeof result.rawAnalysis === "object" ? { ...result.rawAnalysis } : {};
+    return {
+      ...base,
+      detections: Array.isArray(base.detections) ? base.detections : moduleDetections,
+      detection_summary: typeof base.detection_summary === "object" && base.detection_summary
+        ? base.detection_summary
+        : {
+            total_components: modules.length,
+            components_by_type: componentsByType,
+            review_required: Boolean(result.reviewRequired),
+          },
+      board_evidence: boardEvidence,
+      evidence_trust: nextVerification?.deterministic_trust ?? result.evidence_trust,
+      deterministic_trust: nextVerification?.deterministic_trust,
+      repair_authority: nextVerification?.repair_authority,
+      verification: nextVerification ? {
+        safety_level: nextVerification.safety_level,
+        verifier_status: nextVerification.verifier_status,
+        summary: nextVerification.summary,
+        launch_readiness: nextVerification.launch_readiness,
+        contradictions: nextVerification.contradictions,
+        unsupported_claims: nextVerification.unsupported_claims,
+        missing_measurements: nextVerification.missing_measurements,
+        recommended_next_actions: nextVerification.recommended_next_actions,
+        model: nextVerification.model,
+        usage: nextVerification.usage,
+      } : undefined,
+      production_aoi: productionAoi ? {
+        disposition: productionAoi.disposition,
+        release_authorized: productionAoi.releaseAuthorized,
+        certainty_score: productionAoi.certaintyScore,
+        certainty_level: productionAoi.certaintyLevel,
+        blockers: productionAoi.blockers,
+        required_evidence: productionAoi.requiredEvidence,
+        gates: productionAoi.gates,
+      } : undefined,
+      certainty_ledger: result.certaintyLedger,
+    };
+  }, [boardEvidence, modules, result]);
 
   const addScannedModuleToInventory = useCallback((module: SalvageModule) => {
     const part = {
@@ -307,6 +554,8 @@ function ScanPageInner() {
     img.src = nextUrl;
     setResult(null);
     setSelectedId(null);
+    setSavedSessionId(null);
+    setMeasurements([]);
     setError(null);
     setSaveMessage(null);
   }, [imageUrl]);
@@ -316,13 +565,19 @@ function ScanPageInner() {
     setLoading(true);
     setError(null);
     setSaveMessage(null);
+    setVerification(null);
     setResult(null);
 
     const fd = new FormData();
-    const endpoint = mode === "salvage" ? "/api/jarvis/plan-salvage" : "/api/proxy/analyze";
+    const needsLocalAoi = Boolean(goldenFile || referenceCounts.trim() || referenceTopology.trim() || aoiProfile.trim());
+    const endpoint = mode === "salvage"
+      ? "/api/jarvis/plan-salvage"
+      : needsLocalAoi
+        ? "/api/proxy/analyze"
+        : "/api/jarvis/identify";
     if (mode === "salvage") {
       fd.append("image", imageFile);
-    } else {
+    } else if (needsLocalAoi) {
       fd.append("file", imageFile);
       fd.append("backend", "hybrid");
       fd.append("enable_ocr", "false");
@@ -330,12 +585,16 @@ function ScanPageInner() {
       if (referenceCounts.trim()) fd.append("reference_counts", referenceCounts.trim());
       if (referenceTopology.trim()) fd.append("reference_topology", referenceTopology.trim());
       if (aoiProfile.trim()) fd.append("aoi_profile", aoiProfile.trim());
+    } else {
+      fd.append("image", imageFile);
     }
 
     try {
       const resp = await fetch(endpoint, { method: "POST", body: fd });
       const rawJson = await resp.json() as IdentifyResponse | LocalAnalyzeResponse;
-      const json = mode === "salvage" ? rawJson as IdentifyResponse : mapLocalAnalysis(rawJson as LocalAnalyzeResponse);
+      const json = mode === "salvage" || !needsLocalAoi
+        ? rawJson as IdentifyResponse
+        : mapLocalAnalysis(rawJson as LocalAnalyzeResponse);
       if (!resp.ok || json.error) {
         setError(json.error ?? `Request failed (${resp.status})`);
         return;
@@ -351,24 +610,73 @@ function ScanPageInner() {
     }
   }, [aoiProfile, goldenFile, imageFile, mapLocalAnalysis, mode, referenceCounts, referenceTopology, setSalvageModules, setSafetyLevel]);
 
+  const verifyBoardEvidence = useCallback(async (measurementOverride?: RepairMeasurementEvidence[]) => {
+    if (!boardEvidence || !result) return;
+    const activeMeasurements = measurementOverride ?? measurements;
+    setVerifyingEvidence(true);
+    setError(null);
+    setVerification(null);
+    try {
+      const response = await fetch("/api/jarvis/verify-board-evidence", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          board_evidence: boardEvidence,
+          scan_summary: {
+            safety_level: result.safety_level,
+            explanation: result.explanation,
+            source: result.source,
+            model: result.model,
+            modules: modules.slice(0, 20),
+            measurements: activeMeasurements,
+          },
+          measurements: activeMeasurements,
+        }),
+      });
+      const payload = await response.json() as VerifyResponse;
+      if (!response.ok || payload.error) {
+        throw new Error(payload.error ?? `Verification failed (${response.status})`);
+      }
+      setVerification(payload);
+      if (savedSessionId) {
+        try {
+          const persistResponse = await fetch(`/api/proxy/board-sessions/${encodeURIComponent(savedSessionId)}/analysis`, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              source: "scan_verification",
+              summary: {
+                summary_text: payload.summary,
+                verifier_status: payload.verifier_status,
+                repair_authority_status: payload.repair_authority?.status,
+                launch_readiness: payload.launch_readiness?.level,
+              },
+              analysis: buildSessionAnalysis(payload),
+            }),
+          });
+          const persistPayload = await persistResponse.json() as { error?: string };
+          if (!persistResponse.ok || persistPayload.error) {
+            throw new Error(persistPayload.error ?? `Case update failed (${persistResponse.status})`);
+          }
+          setSaveMessage(`Updated authority snapshot for ${savedSessionId}`);
+        } catch (persistError) {
+          setSaveMessage(`Verified, but case snapshot was not updated: ${persistError instanceof Error ? persistError.message : String(persistError)}`);
+        }
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not verify board evidence.");
+    } finally {
+      setVerifyingEvidence(false);
+    }
+  }, [boardEvidence, buildSessionAnalysis, measurements, modules, result, savedSessionId]);
+
   const saveReviewCase = useCallback(async () => {
     if (!result) return;
     setSavingSession(true);
     setError(null);
     setSaveMessage(null);
     const productionAoi = result.productionAoi;
-    const analysis = result.rawAnalysis ?? {
-      production_aoi: productionAoi ? {
-        disposition: productionAoi.disposition,
-        release_authorized: productionAoi.releaseAuthorized,
-        certainty_score: productionAoi.certaintyScore,
-        certainty_level: productionAoi.certaintyLevel,
-        blockers: productionAoi.blockers,
-        required_evidence: productionAoi.requiredEvidence,
-        gates: productionAoi.gates,
-      } : undefined,
-      certainty_ledger: result.certaintyLedger,
-    };
+    const analysis = buildSessionAnalysis(verification);
     try {
       const response = await fetch("/api/proxy/board-sessions", {
         method: "POST",
@@ -387,13 +695,65 @@ function ScanPageInner() {
       if (!response.ok || payload.error) {
         throw new Error(payload.error ?? `Save failed (${response.status})`);
       }
-      setSaveMessage(`Saved review case ${payload.session?.session_id ?? ""}`.trim());
+      const nextSessionId = payload.session?.session_id ?? "";
+      setSavedSessionId(nextSessionId || null);
+      setSaveMessage(`Saved review case ${nextSessionId}`.trim());
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Could not save review case.");
     } finally {
       setSavingSession(false);
     }
-  }, [mode, result]);
+  }, [buildSessionAnalysis, mode, result, verification]);
+
+  const addMeasurementEvidence = useCallback(async () => {
+    if (!savedSessionId) {
+      setError("Save the case before adding bench measurements.");
+      return;
+    }
+    const target = measurementDraft.target.trim();
+    const value = measurementDraft.value.trim();
+    if (!target || !value) {
+      setError("Measurement target and value are required.");
+      return;
+    }
+    setAddingMeasurement(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/proxy/board-sessions/${encodeURIComponent(savedSessionId)}/measurement`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          type: measurementDraft.type.trim() || "measurement",
+          target,
+          value,
+          unit: measurementDraft.unit.trim(),
+          notes: measurementDraft.notes.trim(),
+          confidence: 1,
+        }),
+      });
+      const payload = await response.json() as {
+        result?: {
+          measurement?: RepairMeasurementEvidence;
+          session?: { evidence?: { measurements?: RepairMeasurementEvidence[] } };
+        };
+        error?: string;
+      };
+      if (!response.ok || payload.error) {
+        throw new Error(payload.error ?? `Measurement save failed (${response.status})`);
+      }
+      const nextMeasurements = payload.result?.session?.evidence?.measurements
+        ?? (payload.result?.measurement ? [...measurements, payload.result.measurement] : measurements);
+      setMeasurements(nextMeasurements);
+      setMeasurementDraft({ type: "voltage", target: "", value: "", unit: "", notes: "" });
+      setVerification(null);
+      setSaveMessage(`Added measurement to ${savedSessionId}`);
+      void verifyBoardEvidence(nextMeasurements);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Could not save measurement.");
+    } finally {
+      setAddingMeasurement(false);
+    }
+  }, [measurementDraft, measurements, savedSessionId, verifyBoardEvidence]);
 
   const reset = () => {
     if (imageUrl) URL.revokeObjectURL(imageUrl);
@@ -402,7 +762,10 @@ function ScanPageInner() {
     setGoldenFile(null);
     setImageSize(null);
     setResult(null);
+    setVerification(null);
     setSelectedId(null);
+    setSavedSessionId(null);
+    setMeasurements([]);
     setError(null);
     setSaveMessage(null);
   };
@@ -575,6 +938,31 @@ function ScanPageInner() {
                   </div>
                   <p className="text-sm leading-6 text-slate-200">{result.explanation}</p>
                 </div>
+              )}
+
+              {boardEvidence && (
+                <>
+                  <BoardEvidencePanel
+                    evidence={boardEvidence}
+                    result={result}
+                    verification={verification}
+                    verifying={verifyingEvidence}
+                    onVerify={verifyBoardEvidence}
+                    onUseMeasurementPrompt={(prompt) => setMeasurementDraft(draftFromMeasurementPrompt(prompt))}
+                  />
+                  <MeasurementEvidencePanel
+                    sessionId={savedSessionId}
+                    measurements={measurements}
+                    queue={measurementQueue}
+                    draft={measurementDraft}
+                    adding={addingMeasurement}
+                    authorityStatus={verification?.repair_authority?.status ?? result?.evidence_trust?.launch_readiness}
+                    authorityScore={verification?.repair_authority?.score ?? result?.evidence_trust?.score}
+                    onDraftChange={setMeasurementDraft}
+                    onUsePrompt={(prompt) => setMeasurementDraft(draftFromMeasurementPrompt(prompt))}
+                    onAdd={() => void addMeasurementEvidence()}
+                  />
+                </>
               )}
 
               {result?.aoiInspection && (
@@ -753,6 +1141,438 @@ function ScanPageInner() {
   );
 }
 
+function statusTone(status?: string) {
+  const normalized = (status ?? "").toLowerCase();
+  if (normalized.includes("pass") || normalized.includes("experimental") || normalized.includes("private_alpha") || normalized.includes("authoritative") || normalized.includes("measurement_backed")) return "border-emerald-300/30 bg-emerald-300/10 text-emerald-100";
+  if (normalized.includes("blocked") || normalized.includes("unsafe") || normalized.includes("hold")) return "border-rose-300/30 bg-rose-300/10 text-rose-100";
+  return "border-amber-300/30 bg-amber-300/10 text-amber-100";
+}
+
+function EvidencePill({ label, value }: { label: string; value: string | number | undefined }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 px-3 py-2">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</div>
+      <div className="mt-1 truncate text-xs text-white">{value ?? "unknown"}</div>
+    </div>
+  );
+}
+
+function EvidenceList({ title, items, empty }: { title: string; items: string[]; empty: string }) {
+  return (
+    <div>
+      <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</div>
+      <div className="space-y-1.5">
+        {items.slice(0, 5).map((item) => (
+          <div key={item} className="rounded-md border border-white/5 bg-white/[0.02] px-2.5 py-1.5 text-xs leading-5 text-slate-300">
+            {item}
+          </div>
+        ))}
+        {!items.length && <div className="text-xs text-slate-500">{empty}</div>}
+      </div>
+    </div>
+  );
+}
+
+function ActionableEvidenceList({
+  title,
+  items,
+  empty,
+  onUse,
+}: {
+  title: string;
+  items: string[];
+  empty: string;
+  onUse(prompt: string): void;
+}) {
+  return (
+    <div>
+      <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</div>
+      <div className="space-y-1.5">
+        {items.slice(0, 5).map((item) => (
+          <div key={item} className="flex items-start justify-between gap-2 rounded-md border border-white/5 bg-white/[0.02] px-2.5 py-1.5">
+            <div className="min-w-0 text-xs leading-5 text-slate-300">{item}</div>
+            <button
+              type="button"
+              onClick={() => onUse(item)}
+              className="shrink-0 rounded-full border border-cyan-300/30 bg-cyan-300/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-cyan-100 hover:bg-cyan-300/15"
+            >
+              Use
+            </button>
+          </div>
+        ))}
+        {!items.length && <div className="text-xs text-slate-500">{empty}</div>}
+      </div>
+    </div>
+  );
+}
+
+function BoardEvidencePanel({
+  evidence,
+  result,
+  verification,
+  verifying,
+  onVerify,
+  onUseMeasurementPrompt,
+}: {
+  evidence: BoardEvidence;
+  result: IdentifyResponse | null;
+  verification: VerifyResponse | null;
+  verifying: boolean;
+  onVerify(): void;
+  onUseMeasurementPrompt(prompt: string): void;
+}) {
+  const markings = (evidence.markings ?? []).map((marking) => marking.text).filter(Boolean);
+  const damage = (evidence.damage ?? []).map((item) => `${item.label}${item.severity ? ` · ${item.severity}` : ""}`);
+  const testPoints = (evidence.test_points ?? []).map((item) => `${item.label}${item.expected_signal ? ` · ${item.expected_signal}` : ""}`);
+  const salvage = (evidence.salvage_candidates ?? []).map((item) => `${item.label}${item.rationale ? ` · ${item.rationale}` : ""}`);
+  const uncertaintyReasons = [
+    ...(evidence.uncertainty?.reasons ?? []),
+    ...(evidence.uncertainty?.missing_evidence ?? []),
+  ];
+  const sourceLabel = result?.source?.replace(/_/g, " ") ?? evidence.source.provider;
+  const cost = typeof result?.cost_usd_estimate === "number" ? `$${result.cost_usd_estimate.toFixed(6)}` : undefined;
+  const trust = result?.evidence_trust ?? verification?.deterministic_trust;
+  const trustScore = typeof trust?.score === "number" ? `${Math.round(trust.score * 100)}%` : "unknown";
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+            <Search className="h-4 w-4" />
+            Board evidence
+          </div>
+          <div className="mt-1 text-xs text-slate-500">
+            {sourceLabel} · {result?.model ?? evidence.source.model ?? evidence.source.provider}
+          </div>
+        </div>
+        <Button
+          onClick={onVerify}
+          disabled={verifying}
+          size="sm"
+          variant="outline"
+          className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10"
+        >
+          {verifying ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+          Verify evidence
+        </Button>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-4">
+        <EvidencePill label="Components" value={(evidence.components ?? []).length} />
+        <EvidencePill label="Markings" value={markings.length} />
+        <EvidencePill label="Uncertainty" value={evidence.uncertainty?.level} />
+        <EvidencePill label="Cost" value={cost ?? "cached/free"} />
+      </div>
+
+      {trust && (
+        <div className={`mt-4 rounded-xl border p-3 ${statusTone(trust.launch_readiness)}`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.18em]">
+                Evidence trust · {trust.launch_readiness.replace(/_/g, " ")}
+              </div>
+              <div className="mt-1 text-[11px] opacity-80">{trust.level} confidence · {trustScore}</div>
+            </div>
+            <div className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px]">
+              image-only gate
+            </div>
+          </div>
+          <p className="mt-2 text-sm leading-6">{trust.summary}</p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <EvidenceList title="Strengths" items={trust.strengths ?? []} empty="No trust strengths yet." />
+            <EvidenceList title="Required evidence" items={trust.required_evidence ?? []} empty="No extra evidence required." />
+          </div>
+          {(trust.blockers ?? []).length ? (
+            <div className="mt-3">
+              <EvidenceList title="Trust blockers" items={trust.blockers} empty="No blockers listed." />
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <EvidenceList title="Markings" items={markings} empty="No readable markings returned." />
+        <EvidenceList title="Salvage candidates" items={salvage} empty="No independent salvage candidates yet." />
+        <EvidenceList title="Damage / risk" items={damage} empty="No damage regions flagged." />
+        <EvidenceList title="Test points" items={testPoints} empty="No test points localized." />
+      </div>
+
+      <div className="mt-4">
+        <EvidenceList title="Uncertainty / missing evidence" items={uncertaintyReasons} empty="No major uncertainty listed." />
+      </div>
+
+      {verification && (
+        <div className={`mt-4 rounded-xl border p-3 ${statusTone(verification.verifier_status ?? verification.launch_readiness?.level)}`}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em]">
+              {verification.verifier_status ?? "verified"}
+            </div>
+            <div className="text-[11px] opacity-80">{verification.model}</div>
+          </div>
+          {verification.summary && <p className="mt-2 text-sm leading-6">{verification.summary}</p>}
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <EvidenceList title="Unsupported claims" items={verification.unsupported_claims ?? []} empty="No unsupported claims listed." />
+            <ActionableEvidenceList
+              title="Next checks"
+              items={verification.recommended_next_actions ?? []}
+              empty="No next checks listed."
+              onUse={onUseMeasurementPrompt}
+            />
+          </div>
+          {verification.repair_authority && (
+            <div className={`mt-3 rounded-lg border p-3 ${statusTone(verification.repair_authority.status)}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-xs font-semibold uppercase tracking-[0.18em]">
+                  Repair authority · {verification.repair_authority.status.replace(/_/g, " ")}
+                </div>
+                <div className="text-[11px] opacity-80">{Math.round(verification.repair_authority.score * 100)}%</div>
+              </div>
+              <p className="mt-2 text-xs leading-5">{verification.repair_authority.summary}</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <ActionableEvidenceList
+                  title="Required measurements"
+                  items={verification.repair_authority.required_measurements ?? []}
+                  empty="No missing measurements listed."
+                  onUse={onUseMeasurementPrompt}
+                />
+                <EvidenceList title="Blocked decisions" items={verification.repair_authority.blocked_decisions ?? []} empty="No blocked decisions listed." />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AuthorityStep({ label, done }: { label: string; done: boolean }) {
+  return (
+    <div className={`rounded-lg border px-2.5 py-2 ${
+      done
+        ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
+        : "border-white/10 bg-black/15 text-slate-400"
+    }`}>
+      <div className="text-[10px] font-semibold uppercase tracking-[0.12em]">{done ? "done" : "open"}</div>
+      <div className="mt-1 text-xs leading-4">{label}</div>
+    </div>
+  );
+}
+
+function MeasurementEvidencePanel({
+  sessionId,
+  measurements,
+  queue,
+  draft,
+  adding,
+  authorityStatus,
+  authorityScore,
+  onDraftChange,
+  onUsePrompt,
+  onAdd,
+}: {
+  sessionId: string | null;
+  measurements: RepairMeasurementEvidence[];
+  queue: MeasurementQueueItem[];
+  draft: MeasurementDraft;
+  adding: boolean;
+  authorityStatus?: string;
+  authorityScore?: number;
+  onDraftChange(next: MeasurementDraft): void;
+  onUsePrompt(prompt: string): void;
+  onAdd(): void;
+}) {
+  const completedQueue = queue.filter((item) => item.recorded).length;
+  const nextPending = queue.find((item) => !item.recorded);
+  const authorityLabel = authorityStatus?.replace(/_/g, " ") ?? "visual evidence not verified";
+  const authorityScoreLabel = typeof authorityScore === "number" ? `${Math.round(authorityScore * 100)}%` : "N/A";
+  const hasVerifiedAuthority = Boolean(authorityStatus);
+  const hasBenchEvidence = measurements.length > 0;
+  const queueClosed = queue.length > 0 && completedQueue === queue.length;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-300/80">
+            <ClipboardList className="h-4 w-4" />
+            Bench measurements
+          </div>
+          <div className="mt-1 text-xs text-slate-500">
+            {sessionId ? `case ${sessionId}` : "save case to attach readings"}
+          </div>
+        </div>
+        <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-slate-200">
+          {measurements.length} recorded
+        </span>
+      </div>
+
+      <div className={`mb-4 rounded-xl border p-3 ${statusTone(authorityStatus)}`}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.18em]">Authority path</div>
+            <div className="mt-1 text-[11px] opacity-80">{authorityLabel} · {authorityScoreLabel}</div>
+          </div>
+          <div className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px]">
+            {queue.length ? `${completedQueue}/${queue.length} checks recorded` : "verify to build queue"}
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-4">
+          <AuthorityStep label="Visual candidate" done={Boolean(queue.length || hasVerifiedAuthority || measurements.length)} />
+          <AuthorityStep label="Verifier run" done={hasVerifiedAuthority} />
+          <AuthorityStep label="Bench readings" done={hasBenchEvidence} />
+          <AuthorityStep label="Authority upgrade" done={queueClosed || authorityStatus === "authoritative_low_risk"} />
+        </div>
+      </div>
+
+      <div className="mb-4 rounded-xl border border-white/10 bg-black/20 p-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Measurement queue</div>
+            <div className="mt-1 text-xs text-slate-400">
+              {queue.length ? "Close these checks, then re-run verification for an authority upgrade." : "Verify board evidence to generate the first measurement queue."}
+            </div>
+          </div>
+          <Button
+            type="button"
+            onClick={() => nextPending && onUsePrompt(nextPending.prompt)}
+            disabled={!nextPending}
+            size="sm"
+            variant="outline"
+            className="rounded-full border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15 disabled:opacity-50"
+          >
+            Use next pending
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {queue.slice(0, 8).map((item) => (
+            <div
+              key={item.id}
+              className={`rounded-lg border p-3 ${
+                item.recorded
+                  ? "border-emerald-300/25 bg-emerald-300/10"
+                  : "border-white/10 bg-white/[0.02]"
+              }`}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] ${
+                      item.recorded
+                        ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
+                        : "border-amber-300/30 bg-amber-300/10 text-amber-100"
+                    }`}>
+                      {item.recorded ? "recorded" : "pending"}
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-black/20 px-2 py-0.5 text-[10px] uppercase tracking-[0.12em] text-slate-300">
+                      {item.type.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-[0.12em] text-slate-500">{item.source}</span>
+                  </div>
+                  <div className="mt-2 text-xs leading-5 text-slate-200">{item.prompt}</div>
+                  {item.matchedValue ? (
+                    <div className="mt-1 text-[11px] text-emerald-100/80">Recorded value: {item.matchedValue}</div>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onUsePrompt(item.prompt)}
+                  className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-white hover:bg-white/10"
+                >
+                  Use
+                </button>
+              </div>
+            </div>
+          ))}
+          {!queue.length ? (
+            <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.01] p-3 text-xs leading-5 text-slate-500">
+              The queue appears after evidence verification or when the vision result includes required evidence.
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Type</span>
+          <select
+            value={draft.type}
+            onChange={(event) => onDraftChange({ ...draft, type: event.target.value })}
+            className="mt-1 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 text-xs text-white outline-none focus:border-cyan-300/60"
+          >
+            <option value="continuity">continuity</option>
+            <option value="resistance">resistance</option>
+            <option value="voltage">voltage</option>
+            <option value="current">current</option>
+            <option value="logic_level">logic level</option>
+            <option value="functional">functional</option>
+            <option value="thermal">thermal</option>
+            <option value="measurement">measurement</option>
+          </select>
+        </label>
+        <label className="block">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Target</span>
+          <input
+            value={draft.target}
+            onChange={(event) => onDraftChange({ ...draft, target: event.target.value })}
+            placeholder="5V rail to GND"
+            className="mt-1 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+          />
+        </label>
+        <label className="block">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Value</span>
+          <input
+            value={draft.value}
+            onChange={(event) => onDraftChange({ ...draft, value: event.target.value })}
+            placeholder={measurementValuePlaceholder(draft.type)}
+            className="mt-1 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+          />
+        </label>
+        <label className="block">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Unit</span>
+          <input
+            value={draft.unit}
+            onChange={(event) => onDraftChange({ ...draft, unit: event.target.value })}
+            placeholder="V, ohm, mA"
+            className="mt-1 w-full rounded-md border border-white/10 bg-black/30 px-2 py-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+          />
+        </label>
+      </div>
+      <label className="mt-2 block">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Notes</span>
+        <textarea
+          value={draft.notes}
+          onChange={(event) => onDraftChange({ ...draft, notes: event.target.value })}
+          rows={2}
+          placeholder="current-limited bench supply, no short observed"
+          className="mt-1 w-full resize-none rounded-md border border-white/10 bg-black/30 px-2 py-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-cyan-300/60"
+        />
+      </label>
+      <Button
+        onClick={onAdd}
+        disabled={adding || !sessionId}
+        size="sm"
+        variant="outline"
+        className="mt-3 rounded-full border-cyan-300/30 bg-cyan-300/10 text-cyan-100 hover:bg-cyan-300/15 disabled:opacity-50"
+      >
+        {adding ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+        Add measurement
+      </Button>
+
+      <div className="mt-4 space-y-1.5">
+        {measurements.slice(-5).map((measurement) => (
+          <div key={measurement.measurement_id ?? `${measurement.type}-${measurement.target}-${measurement.value}`} className="rounded-md border border-white/5 bg-white/[0.02] px-2.5 py-1.5 text-xs leading-5 text-slate-300">
+            <span className="font-medium text-white">{measurement.type ?? "measurement"}</span>
+            {" · "}
+            {measurement.target ?? "target"} = {String(measurement.value ?? "")} {measurement.unit ?? ""}
+          </div>
+        ))}
+        {!measurements.length && <div className="text-xs text-slate-500">No bench readings attached.</div>}
+      </div>
+    </div>
+  );
+}
+
 function UploadZone({ onPick, fileInputRef, onOpenCamera }: { onPick(file: File): void; fileInputRef: React.RefObject<HTMLInputElement | null>; onOpenCamera(): void }) {
   const [dragging, setDragging] = useState(false);
   return (
@@ -800,7 +1620,9 @@ function UploadZone({ onPick, fileInputRef, onOpenCamera }: { onPick(file: File)
         type="file"
         accept="image/*"
         capture="environment"
-        hidden
+        className="sr-only"
+        tabIndex={-1}
+        suppressHydrationWarning
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) onPick(f);

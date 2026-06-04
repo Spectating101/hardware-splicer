@@ -4,7 +4,7 @@ Demo: LLM vs Keywords - Side by Side Comparison
 Shows what WOULD happen with LLM vs what ACTUALLY happens with keywords.
 
 Since API keys are expired, this simulates LLM responses based on
-what a smart LLM (like Llama 3.3 70B or Gemini) would understand.
+what a smart LLM (like Llama 3.3 70B or Copilot) would understand.
 """
 
 import sys
@@ -16,7 +16,7 @@ from intelligence.design_generator import DesignGenerator
 from intelligence.resource_manager import ResourceManager
 
 
-# Simulated LLM responses (what Gemini/Llama would understand)
+# Simulated LLM responses (what Copilot/Llama would understand)
 SIMULATED_LLM_RESULTS = {
     "make a water-powered electricity maker": {
         "project_type": "power_generation",
@@ -188,7 +188,7 @@ def main():
     print("█" * 70)
     print()
     print("Note: API keys expired, so showing SIMULATED LLM results")
-    print("(This is what Gemini/Llama would understand)")
+    print("(This is what Copilot/Llama would understand)")
     print()
 
     test_comparison()

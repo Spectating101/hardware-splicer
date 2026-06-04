@@ -98,4 +98,6 @@ circuit-ai-api = "src.api.server:main"
 circuit-ai-fastapi = "src.api.v1.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["src*"]
+namespaces = true

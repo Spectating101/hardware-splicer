@@ -1,8 +1,8 @@
 """
-Circuit-AI Generative Design Agent (Cerebras / Gemini Optimized)
+Circuit-AI Generative Design Agent (Copilot / Cerebras Optimized)
 ================================================================
 Uses High-Performance LLMs to translate Natural Language -> Circuit Actions.
-Targeting: Llama-3.3-70b (Cerebras) or Gemini 1.5 Pro (Google)
+Targeting: local GitHub Copilot CLI/OAuth first, with Cerebras as API fallback.
 """
 
 import os
@@ -48,6 +48,24 @@ def load_env_if_needed():
 
 load_env_if_needed()
 
+
+def _parse_json_text(text: str) -> Dict[str, Any]:
+    cleaned = str(text or "").strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("\n", 1)[1] if "\n" in cleaned else cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned.rsplit("```", 1)[0]
+        cleaned = cleaned.strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}") + 1
+        if start >= 0 and end > start:
+            return json.loads(cleaned[start:end])
+        raise
+
+
 # Standard Schema for Circuit Actions
 SYSTEM_PROMPT = """
 You are an expert PCB Design Engineer AI. 
@@ -89,30 +107,50 @@ Return raw JSON only.
 
 class GenerativeAgent:
     def __init__(self):
-        # Prefer Cerebras for speed, then Gemini, then fallback
+        # Prefer the local Copilot CLI/OAuth path for engine testing, then Cerebras.
+        self.provider = "unknown"
+        self.model = None
+        self.api_url = None
+        self.api_key = None
+        try:
+            from src.intelligence.copilot_provider import DEFAULT_COPILOT_MODEL, copilot_provider_status
+
+            copilot_model = os.getenv("COPILOT_MODEL") or DEFAULT_COPILOT_MODEL
+            if copilot_provider_status(copilot_model).get("ready_for_live_model"):
+                self.provider = "copilot"
+                self.model = copilot_model
+                return
+        except Exception:
+            pass
+
         self.cerebras_key = os.getenv("CEREBRAS_API_KEY")
-        self.gemini_key = os.getenv("GEMINI_API_KEY")
-        
         if self.cerebras_key:
             self.provider = "cerebras"
             self.model = "llama-3.3-70b"
             self.api_url = "https://api.cerebras.ai/v1/chat/completions"
             self.api_key = self.cerebras_key
-        elif self.gemini_key:
-            self.provider = "gemini"
-            self.model = "gemini-1.5-pro" # Mapped internally if using OpenAI Compat
-            self.api_url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
-            self.api_key = self.gemini_key
-        else:
-            self.provider = "unknown"
-            self.api_key = None
 
     def _call_llm(self, user_prompt: str) -> Dict[str, Any]:
         """Makes a raw HTTP request."""
+        if self.provider == "copilot":
+            try:
+                from src.intelligence.copilot_provider import call_copilot_prompt
+
+                text, _model = call_copilot_prompt(
+                    f"{SYSTEM_PROMPT}\n\nUser request:\n{user_prompt}",
+                    model=self.model,
+                )
+                return _parse_json_text(text)
+            except Exception as exc:
+                return {
+                    "type": "error",
+                    "narrative": f"Copilot CLI call failed: {exc}",
+                }
+
         if not self.api_key:
             return {
                 "type": "error",
-                "narrative": "Error: No API Keys (CEREBRAS_API_KEY or GEMINI_API_KEY) found."
+                "narrative": "Error: No local Copilot CLI/OAuth provider or CEREBRAS_API_KEY found."
             }
 
         payload = {
@@ -123,8 +161,7 @@ class GenerativeAgent:
             ],
             "temperature": 0.2,
         }
-        # Google’s OpenAI-compat endpoint does not reliably support `response_format`.
-        # Cerebras does; keep it there to enforce JSON output.
+        # Cerebras supports response_format, which helps enforce JSON output.
         if self.provider == "cerebras":
             payload["response_format"] = {"type": "json_object"}
 
@@ -135,9 +172,6 @@ class GenerativeAgent:
             }
 
             headers["Authorization"] = f"Bearer {self.api_key}"
-            # Some Google endpoints also accept/expect this header for API keys.
-            if self.provider == "gemini" and (self.api_key or "").startswith("AIza"):
-                headers["x-goog-api-key"] = self.api_key
 
             req = urllib.request.Request(
                 url,
@@ -148,7 +182,7 @@ class GenerativeAgent:
             with urllib.request.urlopen(req) as response:
                 result = json.loads(response.read().decode('utf-8'))
                 content = result['choices'][0]['message']['content']
-                return json.loads(content)
+                return _parse_json_text(content)
 
         except urllib.error.HTTPError as e:
             body = ""
@@ -189,11 +223,11 @@ if __name__ == "__main__":
     agent = GenerativeAgent()
     
     # Test
-    if agent.api_key:
+    if agent.provider != "unknown":
         try:
             res = agent.generate_solution("Design a USB-C power delivery circuit")
             print(json.dumps(res, indent=2))
         except Exception as e:
             print(f"Test failed: {e}")
     else:
-        print("Skipping test: No API keys found in environment.")
+        print("Skipping test: No local Copilot CLI/OAuth provider or API fallback found.")

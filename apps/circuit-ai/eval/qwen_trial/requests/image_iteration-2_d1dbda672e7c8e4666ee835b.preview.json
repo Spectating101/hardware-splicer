@@ -1,0 +1,54 @@
+{
+  "model": "qwen3-vl-flash",
+  "max_tokens": 1800,
+  "response_format": {
+    "type": "json_object"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are Circuit-AI native vision. Inspect the board image and crops.\nReturn ONLY JSON. Include safety_level, explanation, components/modules as relevant, and board_evidence.\nboard_evidence must use schema_version board_evidence.v1.\nNormalize all boxes to 0-1 coordinates relative to the full board image when possible.\nDo not invent pinouts, voltages, exact part numbers, nets, or reuse safety without visible evidence.\nPrefer unknown plus missing_evidence/recommended_checks when unsure.\nScenario: image_iteration-2\nCurrent local baseline: board_type=io_interface_or_adapter, confidence=0.738, detections=3, connectors=3, ocr_resolved=3.\nCrop plan:\n- crop 01_intelllgentsuggestionsfo: Intelllgentsuggestionsfored, source_bbox=[0.0, 724.904541015625, 228.622802734375, 990.409912109375], crop_bbox=[0, 625, 314, 1046]\n- crop 02_componentsanalyzed: ComponentsAnalyzed, source_bbox=[0.0, 874.40478515625, 210.6340789794922, 1046.0], crop_bbox=[0, 810, 290, 1046]\n- crop 03_intelllgentsuggestionsfo: Intelllgentsuggestionsforedu, source_bbox=[0.0, 642.5147094726562, 238.48883056640625, 882.9232177734375], crop_bbox=[0, 552, 328, 973]"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-115254-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 01_intelllgentsuggestionsfo: Intelllgentsuggestionsfored. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-36598-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 02_componentsanalyzed: ComponentsAnalyzed. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-23454-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 03_intelllgentsuggestionsfo: Intelllgentsuggestionsforedu. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-37862-chars"
+          }
+        }
+      ]
+    }
+  ]
+}

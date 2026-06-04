@@ -315,7 +315,10 @@ def build_mechatronic_context(machine: Dict[str, Any], board_design_files: Optio
     topology: Dict[str, Any] = {}
     if extracted_structures:
         topology = synthesize_machine_topology(extracted_structures, machine_name=machine_name)
-        questions.extend(topology.get("questions") or [])
+        topology_questions = list(topology.get("questions") or [])
+        if isinstance(machine.get("power_tree"), list) and machine.get("power_tree"):
+            topology_questions = [q for q in topology_questions if not str(q).startswith("Provide power_tree[]")]
+        questions.extend(topology_questions)
 
     primary_board = None
     if board_contexts:

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Boxes, Camera, CircuitBoard, ClipboardList, Menu, Recycle, ShieldCheck, Sparkles, Wrench, X, Zap } from "lucide-react";
+import { Boxes, Camera, CircuitBoard, ClipboardList, Cpu, Menu, Recycle, ShieldCheck, Sparkles, Wrench, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ const primaryNav = [
   { href: "/start", label: "Start", icon: Sparkles },
   { href: "/cases", label: "Cases", icon: ClipboardList },
   { href: "/reuse", label: "Reuse", icon: Recycle },
+  { href: "/hardware", label: "Hardware", icon: Cpu },
   { href: "/portfolio", label: "Portfolio", icon: Boxes },
   { href: "/scan", label: "Scan", icon: Camera },
   { href: "/repair", label: "Repair", icon: ShieldCheck },
@@ -20,7 +21,10 @@ const primaryNav = [
 ];
 
 const secondaryNav = [
+  { href: "/showcase", label: "Showcase" },
+  { href: "/authority", label: "Authority" },
   { href: "/cad", label: "Advanced" },
+  { href: "/library", label: "Library" },
   { href: "/docs", label: "Docs" },
 ];
 
@@ -46,7 +50,7 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        <nav className="ml-auto hidden items-center gap-1 lg:flex">
+        <nav className="ml-auto hidden items-center gap-1 2xl:flex">
           {primaryNav.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
@@ -83,7 +87,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
+        <div className="hidden items-center gap-2 2xl:flex">
           <Button asChild size="sm" className="rounded-full bg-white text-slate-900 hover:bg-slate-100">
             <Link href="/start">
               <Zap className="mr-1.5 h-3.5 w-3.5" />
@@ -95,7 +99,7 @@ export function SiteHeader() {
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 lg:hidden"
+          className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 2xl:hidden"
           aria-label="Toggle navigation"
         >
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -103,7 +107,7 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <div className="border-t border-white/5 bg-[#0a0f1a] px-4 py-4 lg:hidden">
+        <div className="border-t border-white/5 bg-[#0a0f1a] px-4 py-4 2xl:hidden">
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
             {primaryNav.map((item) => {
               const Icon = item.icon;

@@ -1,0 +1,446 @@
+[
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "usb_serial_debug_bridge",
+      "grounded_parts": 2,
+      "production_readiness_score": 0.139,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.279,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_only_uart_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "usb_serial_debug_bridge",
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "usb_serial_debug_bridge",
+      "grounded_parts": 0,
+      "production_readiness_score": 0.649,
+      "repair_authority": "authoritative_low_risk",
+      "reuse_readiness": "controlled_splice_ready",
+      "status": "ready_for_build_plan",
+      "trust_level": "controlled_reuse_ready",
+      "trust_score": 0.557,
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "case_id": "measured_uart_controlled_reuse",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "usb_serial_debug_bridge",
+      "reuse_readiness": "controlled_splice_ready",
+      "trust_level": "controlled_reuse_ready",
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "usb_serial_debug_bridge",
+      "grounded_parts": 0,
+      "production_readiness_score": 0.949,
+      "repair_authority": "authoritative_low_risk",
+      "reuse_readiness": "controlled_splice_ready",
+      "status": "ready_for_build_plan",
+      "trust_level": "production_release_candidate",
+      "trust_score": 0.772,
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "case_id": "completed_uart_production_release_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "usb_serial_debug_bridge",
+      "reuse_readiness": "controlled_splice_ready",
+      "trust_level": "production_release_candidate",
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "hard_conflict",
+      "fault_state": "blocked_safety_hold",
+      "function": "usb_serial_debug_bridge",
+      "grounded_parts": 0,
+      "production_readiness_score": 0.0,
+      "repair_authority": "blocked",
+      "reuse_readiness": "blocked_safety_hold",
+      "status": "safety_hold",
+      "trust_level": "blocked_safety_hold",
+      "trust_score": 0.0,
+      "value_decision": "safety_hold_or_salvage_only"
+    },
+    "case_id": "shorted_uart_blocks_bad_authority",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "hard_conflict",
+      "fault_state": "blocked_safety_hold",
+      "function": "usb_serial_debug_bridge",
+      "reuse_readiness": "blocked_safety_hold",
+      "trust_level": "blocked_safety_hold",
+      "value_decision": "safety_hold_or_salvage_only"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "sensor_or_adc_module",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.24,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_only_i2c_sensor_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "sensor_or_adc_module",
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "load_or_motor_driver",
+      "grounded_parts": 0,
+      "production_readiness_score": 0.649,
+      "repair_authority": "authoritative_low_risk",
+      "reuse_readiness": "controlled_splice_ready",
+      "status": "ready_for_build_plan",
+      "trust_level": "controlled_reuse_ready",
+      "trust_score": 0.557,
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "case_id": "measured_motor_driver_controlled_load_reuse",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": true,
+      "contradictions": "clear",
+      "fault_state": "diagnostic_ready",
+      "function": "load_or_motor_driver",
+      "reuse_readiness": "controlled_splice_ready",
+      "trust_level": "controlled_reuse_ready",
+      "value_decision": "controlled_reuse_or_repair_trial"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "power_distribution_or_regulator",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.121,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.268,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_ams1117_power_stage_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "power_distribution_or_regulator",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "battery_or_charger",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.253,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_tp4056_charger_requires_specialist_path",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "battery_or_charger",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "controller_module",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.256,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_esp32_controller_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "controller_module",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "display_or_ui_module",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.253,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_ssd1306_ui_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "display_or_ui_module",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "audio_or_alert_module",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.253,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_pam8403_audio_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "audio_or_alert_module",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  },
+  {
+    "actual": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "wireless_or_rf_module",
+      "grounded_parts": 1,
+      "production_readiness_score": 0.111,
+      "repair_authority": "visual_only",
+      "reuse_readiness": "visual_mapping_only",
+      "status": "prototype_after_evidence",
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.253,
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "case_id": "vision_marked_max485_network_interface_candidate",
+    "checks": {
+      "can_power_or_splice": true,
+      "contradictions": true,
+      "fault_state": true,
+      "function": true,
+      "grounded_parts": true,
+      "reuse_readiness": true,
+      "trust_level": true,
+      "value_decision": true
+    },
+    "expected": {
+      "can_power_or_splice": false,
+      "contradictions": "soft_gaps",
+      "fault_state": "needs_measurements",
+      "function": "wireless_or_rf_module",
+      "grounded_parts": 1,
+      "reuse_readiness": "visual_mapping_only",
+      "trust_level": "grounded_visual_candidate",
+      "value_decision": "identify_and_measure_before_value_decision"
+    },
+    "passed": true
+  }
+]

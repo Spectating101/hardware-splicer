@@ -8,9 +8,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
+from src.intelligence.active_evidence_closure import enrich_payload_with_active_evidence_closure_plan
+from src.intelligence.arbitrary_board_workflow import enrich_payload_with_arbitrary_board_workflow
+from src.intelligence.bench_topology_capture import enrich_payload_with_bench_topology_capture
 from src.intelligence.board_evidence_graph import BoardEvidenceGraphBuilder
 from src.intelligence.board_dossier import BoardDossierBuilder
+from src.intelligence.multiview_board_evidence import enrich_payload_with_multiview_board_evidence
 from src.intelligence.production_aoi_calibration import ProductionAOICalibrator
+from src.intelligence.repair_authority import enrich_payload_with_repair_authority
+from src.intelligence.topology_evidence import enrich_payload_with_topology_evidence
+from src.intelligence.vision_board_evidence import enrich_payload_with_board_evidence
+from src.intelligence.visual_topology_hypothesis import enrich_payload_with_visual_topology_hypothesis
 
 try:
     import numpy as np
@@ -45,7 +53,10 @@ class BoardSessionStore:
         repair_guide = payload.get("repair_guide") if isinstance(payload.get("repair_guide"), dict) else {}
         salvage_splice_plan = self._salvage_splice_plan_from_payload(payload, analysis)
         tasks = self._dedupe_tasks(
-            self._tasks_from_salvage_splice_plan(salvage_splice_plan)
+            self._tasks_from_salvage_splice_plan(
+                salvage_splice_plan,
+                closed_prompts=self._closed_hardware_plan_prompts(analysis),
+            )
             + self._tasks_from_analysis(analysis)
             + self._tasks_from_repair_guide(repair_guide)
         )
@@ -108,6 +119,55 @@ class BoardSessionStore:
             self.sessions.append(session)
             self._save()
         return session
+
+    def append_analysis(
+        self,
+        session_id: str,
+        analysis: Dict[str, Any],
+        *,
+        source: str = "board_intelligence",
+        summary: Dict[str, Any] | None = None,
+        commit: bool = True,
+    ) -> Dict[str, Any]:
+        session = self.get_session(session_id)
+        if not session:
+            return {"error": f"session not found: {session_id}"}
+        analyses = session.setdefault("analyses", [])
+        record = {
+            "analysis_id": f"analysis_{len(analyses) + 1}",
+            "source": source,
+            "created_at": self._now(),
+            "summary": summary if isinstance(summary, dict) else {},
+            "results": self._json_safe(analysis),
+        }
+        analyses.append(record)
+
+        existing_tasks = session.setdefault("evidence_tasks", [])
+        existing_keys = {
+            (str(task.get("type") or ""), str(task.get("prompt") or "").strip().lower())
+            for task in existing_tasks
+            if isinstance(task, dict)
+        }
+        new_count = 0
+        for task in self._tasks_from_analysis(analysis):
+            key = (str(task.get("type") or "evidence"), str(task.get("prompt") or "").strip().lower())
+            if not key[1] or key in existing_keys:
+                continue
+            task = dict(task)
+            task["task_id"] = f"task_{len(existing_tasks) + 1}"
+            task.setdefault("status", "open")
+            existing_tasks.append(task)
+            existing_keys.add(key)
+            new_count += 1
+
+        if isinstance(analysis.get("certainty_ledger"), dict):
+            session["certainty"] = self._certainty_snapshot(analysis)
+        self._resolve_authority_tasks(session, analysis)
+        session["metrics"] = self._session_metrics(existing_tasks, analysis)
+        self._touch(session)
+        if commit:
+            self._save()
+        return {"session": session, "analysis": record, "new_task_count": new_count}
 
     def attach_capture(
         self,
@@ -240,11 +300,27 @@ class BoardSessionStore:
             "outcome_id": f"outcome_{len(session.get('outcomes') or []) + 1}",
             "decision": str(payload.get("decision") or "undecided"),
             "value_recovered_usd": float(payload.get("value_recovered_usd", 0.0) or 0.0),
+            "cash_spent_usd": float(payload.get("cash_spent_usd", 0.0) or 0.0),
             "time_saved_minutes": float(payload.get("time_saved_minutes", 0.0) or 0.0),
+            "time_spent_minutes": float(payload.get("time_spent_minutes", payload.get("time_saved_minutes", 0.0)) or 0.0),
             "notes": str(payload.get("notes") or ""),
             "created_at": self._now(),
         }
         for key in [
+            "selected_resource_ids_used",
+            "resource_ids",
+            "measurements_recorded",
+            "measurement_ids",
+            "deviations_from_plan",
+            "failure_or_stop_reason",
+            "output_function_verified",
+            "first_power_result",
+            "thermal_result",
+            "current_limit_used",
+            "plan_id",
+            "build_id",
+            "recommended_build_id",
+            "photos",
             "aoi_actual_status",
             "actual_status",
             "aoi_release_ok",
@@ -478,6 +554,7 @@ class BoardSessionStore:
         tasks: List[Dict[str, Any]] = []
         now = self._now()
         seen = set()
+        closed_hardware_prompts = self._closed_hardware_plan_prompts(analysis)
 
         def add(task_type: str, prompt: str, *, priority: int = 3, source: str = "certainty_ledger", claim_id: str | None = None, usable_for: Iterable[str] | None = None) -> None:
             key = (task_type, prompt.strip().lower())
@@ -498,9 +575,126 @@ class BoardSessionStore:
                 }
             )
 
+        for item in (analysis.get("next_evidence_tasks") or [])[:30]:
+            if not isinstance(item, dict):
+                continue
+            prompt = str(item.get("prompt") or item.get("action") or item.get("title") or "")
+            add(
+                str(item.get("task_type") or item.get("type") or self._task_type_for_missing(prompt)),
+                prompt,
+                priority=self._priority_value(item.get("priority")),
+                source=str(item.get("source") or "board_intelligence"),
+                claim_id=str(item.get("gate_id") or item.get("claim_id") or ""),
+                usable_for=item.get("usable_for") or ["board_intelligence", "bringup", "repair", "reuse", "training"],
+            )
+
         for missing in (ledger.get("missing_evidence") or [])[:14]:
             text = str(missing)
             add(self._task_type_for_missing(text), text, priority=self._priority_for_missing(text), usable_for=["repair", "salvage", "aoi", "training"])
+
+        repair_authority = analysis.get("repair_authority") if isinstance(analysis.get("repair_authority"), dict) else {}
+        evidence_trust = analysis.get("evidence_trust") if isinstance(analysis.get("evidence_trust"), dict) else {}
+        if evidence_trust:
+            readiness = str(evidence_trust.get("launch_readiness") or "unknown")
+            if readiness not in {
+                "private_alpha_candidate",
+                "experimental_mvp",
+                "experimental_mvp_candidate",
+                "experimental_mvp_authority_ready",
+            }:
+                add(
+                    "review",
+                    f"evidence trust readiness is {readiness}; authoritative repair use is blocked",
+                    priority=1,
+                    source="evidence_trust_gate",
+                    usable_for=["repair", "salvage", "training"],
+                )
+            for blocker in (evidence_trust.get("blockers") or [])[:8]:
+                text = str(blocker)
+                if self._skip_stale_electrical_evidence_gap(text, repair_authority):
+                    continue
+                add(
+                    self._task_type_for_missing(text),
+                    text,
+                    priority=self._priority_for_missing(text),
+                    source="evidence_trust_blocker",
+                    usable_for=["repair", "salvage", "training"],
+                )
+            for required in (evidence_trust.get("required_evidence") or [])[:10]:
+                text = str(required)
+                if self._skip_stale_electrical_evidence_gap(text, repair_authority):
+                    continue
+                add(
+                    self._task_type_for_missing(text),
+                    text,
+                    priority=self._priority_for_missing(text),
+                    source="evidence_trust_required",
+                    usable_for=["repair", "salvage", "training"],
+                )
+            for gate in (evidence_trust.get("gates") or [])[:10]:
+                if not isinstance(gate, dict):
+                    continue
+                status = str(gate.get("status") or "")
+                if status not in {"warn", "fail"}:
+                    continue
+                label = str(gate.get("label") or gate.get("id") or "evidence gate")
+                reason = str(gate.get("reason") or "needs review")
+                if self._skip_stale_electrical_evidence_gap(f"{label}: {reason}", repair_authority):
+                    continue
+                add(
+                    "review",
+                    f"{label}: {reason}",
+                    priority=1 if status == "fail" else 2,
+                    source="evidence_trust_gate",
+                    claim_id=str(gate.get("id") or ""),
+                    usable_for=["repair", "salvage", "training"],
+                )
+
+        if repair_authority:
+            status = str(repair_authority.get("status") or "unknown")
+            if status != "authoritative_low_risk":
+                add(
+                    "review",
+                    f"repair authority is {status}; production repair release is blocked",
+                    priority=0 if status == "blocked" else 1,
+                    source="repair_authority_gate",
+                    usable_for=["repair", "safety", "training"],
+                )
+            for required in (repair_authority.get("required_measurements") or [])[:10]:
+                text = str(required)
+                if text.strip().lower() in closed_hardware_prompts:
+                    continue
+                add(
+                    "measurement",
+                    text,
+                    priority=self._priority_for_missing(text),
+                    source="repair_authority_required",
+                    usable_for=["repair", "safety", "training"],
+                )
+            for blocked in (repair_authority.get("blocked_decisions") or [])[:8]:
+                add(
+                    "review",
+                    f"blocked repair decision: {blocked}",
+                    priority=2,
+                    source="repair_authority_blocked_decision",
+                    usable_for=["repair", "safety", "training"],
+                )
+            for gate in (repair_authority.get("gates") or [])[:10]:
+                if not isinstance(gate, dict):
+                    continue
+                status = str(gate.get("status") or "")
+                if status not in {"warn", "fail"}:
+                    continue
+                label = str(gate.get("label") or gate.get("id") or "repair authority gate")
+                reason = str(gate.get("reason") or "needs review")
+                add(
+                    "measurement" if self._looks_like_measurement(reason) else "review",
+                    f"{label}: {reason}",
+                    priority=1 if status == "fail" else 2,
+                    source="repair_authority_gate",
+                    claim_id=str(gate.get("id") or ""),
+                    usable_for=["repair", "safety", "training"],
+                )
 
         for item in (ledger.get("items") or [])[:40]:
             if not isinstance(item, dict):
@@ -529,6 +723,10 @@ class BoardSessionStore:
 
         connection = analysis.get("machine_connection_map") if isinstance(analysis.get("machine_connection_map"), dict) else {}
         for measurement in ((connection.get("splice_plan") or {}).get("required_measurements") or [])[:8]:
+            if str(measurement).strip().lower() in closed_hardware_prompts:
+                continue
+            if self._skip_stale_electrical_evidence_gap(str(measurement), repair_authority):
+                continue
             add("measurement", str(measurement), priority=1, source="splice_measurement_gate", usable_for=["repair", "splicing", "salvage"])
 
         aoi = analysis.get("aoi_inspection") if isinstance(analysis.get("aoi_inspection"), dict) else {}
@@ -565,7 +763,12 @@ class BoardSessionStore:
 
         return self._trim_tasks(tasks)
 
-    def _tasks_from_salvage_splice_plan(self, plan: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _tasks_from_salvage_splice_plan(
+        self,
+        plan: Dict[str, Any],
+        *,
+        closed_prompts: Iterable[str] | None = None,
+    ) -> List[Dict[str, Any]]:
         if not plan:
             return []
         tasks: List[Dict[str, Any]] = []
@@ -573,6 +776,7 @@ class BoardSessionStore:
         splice = plan.get("splice_plan") if isinstance(plan.get("splice_plan"), dict) else {}
         evidence = plan.get("evidence_plan") if isinstance(plan.get("evidence_plan"), dict) else {}
         verdict = str(plan.get("verdict") or "")
+        closed_prompt_keys = {str(item).strip().lower() for item in closed_prompts or []}
 
         def add(
             task_type: str,
@@ -618,6 +822,8 @@ class BoardSessionStore:
 
         if verdict != "unsafe_hold":
             for measurement in (splice.get("required_measurements") or evidence.get("measurement_prompts") or [])[:10]:
+                if str(measurement).strip().lower() in closed_prompt_keys:
+                    continue
                 add("measurement", str(measurement), priority=1, source="salvage_splice_measurement_gate")
 
         for prompt in (evidence.get("capture_prompts") or [])[:8]:
@@ -922,9 +1128,22 @@ class BoardSessionStore:
         }
 
     def _analysis_from_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        analysis = payload.get("analysis")
+        enriched = enrich_payload_with_active_evidence_closure_plan(
+            enrich_payload_with_arbitrary_board_workflow(
+                enrich_payload_with_repair_authority(
+                    enrich_payload_with_topology_evidence(
+                        enrich_payload_with_bench_topology_capture(
+                            enrich_payload_with_visual_topology_hypothesis(
+                                enrich_payload_with_board_evidence(enrich_payload_with_multiview_board_evidence(payload))
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        analysis = enriched.get("analysis")
         if not isinstance(analysis, dict):
-            analysis = payload.get("results")
+            analysis = enriched.get("results")
         return analysis if isinstance(analysis, dict) else {}
 
     def _salvage_splice_plan_from_payload(self, payload: Dict[str, Any], analysis: Dict[str, Any]) -> Dict[str, Any]:
@@ -1080,6 +1299,20 @@ class BoardSessionStore:
             kept.append(task)
         return kept
 
+    def _closed_hardware_plan_prompts(self, analysis: Dict[str, Any]) -> set[str]:
+        if not isinstance(analysis, dict):
+            return set()
+        prompts = set()
+        for gate in analysis.get("hardware_plan_gates") or []:
+            if not isinstance(gate, dict):
+                continue
+            if str(gate.get("status", "open")) not in {"closed", "pass"}:
+                continue
+            prompt = str(gate.get("prompt") or "").strip().lower()
+            if prompt:
+                prompts.add(prompt)
+        return prompts
+
     def _priority_for_missing(self, text: str) -> int:
         lower = text.lower()
         if any(term in lower for term in ["voltage", "continuity", "resistance", "current", "power", "safety", "high-voltage", "mains", "tester readings", "charger rating", "thermal fuse", "flashlight-test", "driver output"]):
@@ -1090,7 +1323,45 @@ class BoardSessionStore:
 
     def _looks_like_measurement(self, text: str) -> bool:
         lower = text.lower()
-        return any(term in lower for term in ["voltage", "continuity", "resistance", "current", "logic level", "measure", "powered", "reading", "tester", "rating", "output"])
+        return any(
+            term in lower
+            for term in [
+                "voltage",
+                "continuity",
+                "resistance",
+                "current",
+                "thermal",
+                "logic",
+                "serial",
+                "i2c",
+                "spi",
+                "idle",
+                "measure",
+                "powered",
+                "reading",
+                "tester",
+                "rating",
+                "output",
+            ]
+        )
+
+    def _skip_stale_electrical_evidence_gap(self, text: str, repair_authority: Dict[str, Any]) -> bool:
+        if not repair_authority:
+            return False
+        lower = text.lower()
+        summary = repair_authority.get("measurement_summary") if isinstance(repair_authority.get("measurement_summary"), dict) else {}
+        measurement_count = int(summary.get("count") or 0)
+        if measurement_count and any(term in lower for term in ["no electrical measurements", "no bench measurements"]):
+            return True
+        status = str(repair_authority.get("status") or "")
+        if status not in {"measurement_backed", "authoritative_low_risk"}:
+            return False
+        if not self._looks_like_measurement(lower):
+            return False
+        required = [str(item).lower() for item in (repair_authority.get("required_measurements") or [])]
+        if not required:
+            return True
+        return not any(lower in item or item in lower for item in required)
 
     @staticmethod
     def _priority_value(value: Any) -> int:
@@ -1112,6 +1383,23 @@ class BoardSessionStore:
                 task["resolved_at"] = self._now()
                 task["review"] = resolution
                 return
+
+    def _resolve_authority_tasks(self, session: Dict[str, Any], analysis: Dict[str, Any]) -> None:
+        repair_authority = analysis.get("repair_authority") if isinstance(analysis.get("repair_authority"), dict) else {}
+        if str(repair_authority.get("status") or "") != "authoritative_low_risk":
+            return
+        now = self._now()
+        for task in session.get("evidence_tasks", []) or []:
+            if not isinstance(task, dict) or task.get("status", "open") != "open":
+                continue
+            if not str(task.get("source") or "").startswith("repair_authority"):
+                continue
+            task["status"] = "resolved"
+            task["resolved_at"] = now
+            task["review"] = {
+                "action": "authority_superseded",
+                "notes": "Resolved by a newer measurement-backed repair authority snapshot.",
+            }
 
     def _benchmark_next_actions(self, session_count: int, review_completion: float, avg_capture_burden: float, training_exports: int) -> List[str]:
         actions = []

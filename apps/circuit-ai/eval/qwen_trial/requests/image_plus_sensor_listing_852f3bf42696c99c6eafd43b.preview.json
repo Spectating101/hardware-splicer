@@ -1,0 +1,54 @@
+{
+  "model": "qwen3-vl-flash",
+  "max_tokens": 1800,
+  "response_format": {
+    "type": "json_object"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are Circuit-AI native vision. Inspect the board image and crops.\nReturn ONLY JSON. Include safety_level, explanation, components/modules as relevant, and board_evidence.\nboard_evidence must use schema_version board_evidence.v1.\nNormalize all boxes to 0-1 coordinates relative to the full board image when possible.\nDo not invent pinouts, voltages, exact part numbers, nets, or reuse safety without visible evidence.\nPrefer unknown plus missing_evidence/recommended_checks when unsure.\nScenario: image_plus_sensor_listing\nCurrent local baseline: board_type=controller_or_embedded_compute, confidence=0.371, detections=3, connectors=0, ocr_resolved=1.\nCrop plan:\n- crop 01_fm: fm, source_bbox=[48.0, 148.0, 103.0, 203.0], crop_bbox=[27, 127, 124, 224]\n- crop 02_jeo: Jeo, source_bbox=[48.0, 48.0, 153.0, 103.0], crop_bbox=[9, 27, 192, 124]\n- crop 03_ic_chip: ic_chip, source_bbox=[198.0, 48.0, 253.0, 83.0], crop_bbox=[177, 35, 274, 96]"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-3182-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 01_fm: fm. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-886-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 02_jeo: Jeo. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-1066-chars"
+          }
+        },
+        {
+          "type": "text",
+          "text": "Crop 03_ic_chip: ic_chip. Read markings/package/connector context for this candidate region."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-822-chars"
+          }
+        }
+      ]
+    }
+  ]
+}

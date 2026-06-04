@@ -151,6 +151,32 @@ class BoardEvidenceGraphBuilder:
                     usable_for=["identification", "training"],
                 )
 
+        board_evidence = analysis.get("board_evidence") if isinstance(analysis.get("board_evidence"), dict) else {}
+        if board_evidence:
+            self._board_evidence_claims(
+                session_id,
+                board_evidence,
+                claims,
+                add_node,
+                add_edge,
+                analysis_node,
+                support_pool,
+                task_nodes,
+            )
+
+        topology_evidence = analysis.get("topology_evidence") if isinstance(analysis.get("topology_evidence"), dict) else {}
+        if topology_evidence:
+            self._topology_evidence_claims(
+                session_id,
+                topology_evidence,
+                claims,
+                add_node,
+                add_edge,
+                analysis_node,
+                support_pool,
+                task_nodes,
+            )
+
         board = analysis.get("board_understanding") if isinstance(analysis.get("board_understanding"), dict) else {}
         identity = board.get("board_identity") if isinstance(board.get("board_identity"), dict) else {}
         if identity:
@@ -231,6 +257,243 @@ class BoardEvidenceGraphBuilder:
                 missing=task_nodes[:3],
                 usable_for=item.get("usable_for") or ["training"],
                 force_weak=str(item.get("certainty") or "") in {"unknown", "possible"},
+            )
+
+    def _board_evidence_claims(
+        self,
+        session_id: str,
+        board_evidence: Dict[str, Any],
+        claims: List[Dict[str, Any]],
+        add_node: Any,
+        add_edge: Any,
+        analysis_node: str,
+        support_pool: List[str],
+        task_nodes: List[str],
+    ) -> None:
+        source_node = add_node(
+            f"vision:{session_id}:board_evidence",
+            "vision_evidence",
+            "board_evidence.v1",
+            schema_version=board_evidence.get("schema_version"),
+        )
+        add_edge(analysis_node, source_node, "includes")
+        component_nodes = []
+        for index, component in enumerate((board_evidence.get("components") or [])[:18], start=1):
+            if not isinstance(component, dict):
+                continue
+            label = str(component.get("label") or component.get("kind") or "component")
+            node = add_node(
+                f"qwen_component:{session_id}:{component.get('id') or index}",
+                "qwen_component",
+                label,
+                component_kind=component.get("kind"),
+                bbox=component.get("bbox") or [],
+                confidence=component.get("confidence"),
+            )
+            add_edge(source_node, node, "proposes_component")
+            component_nodes.append(node)
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:qwen-component:{index}",
+                f"Vision-language evidence proposes visible component: {label}",
+                score=self._float(component.get("confidence"), 0.62),
+                evidence=[node] + support_pool[:1],
+                missing=task_nodes[:2],
+                usable_for=["identification", "salvage", "training"],
+                force_weak=True,
+            )
+
+        for index, connector in enumerate((board_evidence.get("connectors") or [])[:12], start=1):
+            if not isinstance(connector, dict):
+                continue
+            label = str(connector.get("label") or connector.get("kind") or "connector")
+            node = add_node(
+                f"qwen_connector:{session_id}:{connector.get('id') or index}",
+                "qwen_connector",
+                label,
+                bbox=connector.get("bbox") or [],
+                pin_count=connector.get("pin_count"),
+            )
+            add_edge(source_node, node, "proposes_connector")
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:qwen-connector:{index}",
+                f"Vision-language evidence proposes connector: {label}",
+                score=self._float(connector.get("confidence"), 0.62),
+                evidence=[node] + support_pool[:1],
+                missing=task_nodes[:3],
+                usable_for=["splice_planning", "salvage", "training"],
+                force_weak=True,
+            )
+
+        for index, candidate in enumerate((board_evidence.get("salvage_candidates") or [])[:12], start=1):
+            if not isinstance(candidate, dict):
+                continue
+            label = str(candidate.get("label") or candidate.get("function") or "salvage candidate")
+            node = add_node(
+                f"qwen_salvage:{session_id}:{candidate.get('id') or index}",
+                "qwen_salvage_candidate",
+                label,
+                capabilities=candidate.get("capabilities") or [],
+            )
+            add_edge(source_node, node, "proposes_salvage")
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:qwen-salvage:{index}",
+                f"Vision-language evidence proposes salvage candidate: {label}",
+                score=self._float(candidate.get("confidence"), 0.58),
+                evidence=[node] + support_pool[:1],
+                missing=task_nodes[:4],
+                usable_for=["reuse", "salvage", "build"],
+                force_weak=True,
+            )
+
+        for index, damage in enumerate((board_evidence.get("damage") or [])[:12], start=1):
+            if not isinstance(damage, dict):
+                continue
+            label = str(damage.get("label") or damage.get("kind") or "visible damage")
+            node = add_node(
+                f"qwen_damage:{session_id}:{damage.get('id') or index}",
+                "qwen_damage",
+                label,
+                severity=damage.get("severity"),
+                bbox=damage.get("bbox") or [],
+            )
+            add_edge(source_node, node, "proposes_damage")
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:qwen-damage:{index}",
+                f"Vision-language evidence flags possible damage: {label}",
+                score=self._float(damage.get("confidence"), 0.66),
+                evidence=[node] + support_pool[:1],
+                missing=task_nodes[:4],
+                usable_for=["safety", "repair", "training"],
+                force_weak=True,
+            )
+
+        if component_nodes:
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:qwen-component-count",
+                f"Vision-language evidence proposes {len(component_nodes)} visible component candidate(s)",
+                score=0.64,
+                evidence=[source_node] + component_nodes[:4],
+                missing=task_nodes[:3],
+                usable_for=["identification", "salvage", "training"],
+                force_weak=True,
+            )
+
+    def _topology_evidence_claims(
+        self,
+        session_id: str,
+        topology_evidence: Dict[str, Any],
+        claims: List[Dict[str, Any]],
+        add_node: Any,
+        add_edge: Any,
+        analysis_node: str,
+        support_pool: List[str],
+        task_nodes: List[str],
+    ) -> None:
+        source_node = add_node(
+            f"topology:{session_id}:topology_evidence",
+            "topology_evidence",
+            "topology_evidence.v1",
+            schema_version=topology_evidence.get("schema_version"),
+        )
+        add_edge(analysis_node, source_node, "includes")
+        connector_nodes = []
+        for index, connector in enumerate((topology_evidence.get("connectors") or [])[:12], start=1):
+            if not isinstance(connector, dict):
+                continue
+            label = str(connector.get("label") or connector.get("ref") or "connector")
+            pins = connector.get("pins") if isinstance(connector.get("pins"), list) else []
+            node = add_node(
+                f"topology_connector:{session_id}:{connector.get('ref') or index}",
+                "topology_connector",
+                label,
+                pin_count=len(pins) or connector.get("pin_count"),
+                confidence=connector.get("confidence"),
+                status=connector.get("status"),
+            )
+            add_edge(source_node, node, "measures_connector")
+            connector_nodes.append(node)
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:topology-connector:{index}",
+                f"Measured topology maps connector {label}",
+                score=self._float(connector.get("confidence"), 0.72),
+                evidence=[node] + support_pool[:2],
+                missing=task_nodes[:3],
+                usable_for=["splice_planning", "repair", "reuse"],
+                force_weak=not pins,
+            )
+            for pin_index, pin in enumerate(pins[:16], start=1):
+                if not isinstance(pin, dict):
+                    continue
+                pin_label = f"{label} pin {pin.get('pin')}: {pin.get('role') or pin.get('net') or 'unknown'}"
+                pin_node = add_node(
+                    f"topology_pin:{session_id}:{connector.get('ref') or index}:{pin.get('pin') or pin_index}",
+                    "topology_pin",
+                    pin_label,
+                    net=pin.get("net"),
+                    role=pin.get("role"),
+                    voltage=pin.get("voltage"),
+                    logic_voltage=pin.get("logic_voltage"),
+                    status=pin.get("status"),
+                )
+                add_edge(node, pin_node, "has_pin")
+
+        net_nodes = []
+        for index, net in enumerate((topology_evidence.get("nets") or [])[:20], start=1):
+            if not isinstance(net, dict):
+                continue
+            label = str(net.get("net") or f"net {index}")
+            node = add_node(
+                f"topology_net:{session_id}:{label}",
+                "topology_net",
+                label,
+                role=net.get("role"),
+                nominal_v=net.get("nominal_v"),
+                status=net.get("status"),
+            )
+            add_edge(source_node, node, "measures_net")
+            net_nodes.append(node)
+
+        if connector_nodes or net_nodes:
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:topology-scope",
+                f"Measured topology covers {len(connector_nodes)} connector(s) and {len(net_nodes)} net(s)",
+                score=0.76 if connector_nodes else 0.58,
+                evidence=[source_node] + connector_nodes[:3] + net_nodes[:3],
+                missing=task_nodes[:4],
+                usable_for=["splice_planning", "repair", "reuse", "safety"],
+                force_weak=False,
+            )
+
+        bridge = topology_evidence.get("topology_evidence_bridge") if isinstance(topology_evidence.get("topology_evidence_bridge"), dict) else {}
+        hazards = topology_evidence.get("hazards") if isinstance(topology_evidence.get("hazards"), list) else []
+        hazards = hazards or (bridge.get("hazard_profile") or {}).get("hazards") or []
+        for index, hazard in enumerate(hazards[:8], start=1):
+            if not isinstance(hazard, dict):
+                continue
+            label = str(hazard.get("hazard_id") or "topology hazard")
+            node = add_node(
+                f"topology_hazard:{session_id}:{index}",
+                "topology_hazard",
+                label,
+                severity=hazard.get("severity"),
+            )
+            add_edge(source_node, node, "flags_hazard")
+            self._add_claim(
+                claims,
+                f"claim:{session_id}:topology-hazard:{index}",
+                f"Topology evidence flags hazard: {label}",
+                score=0.82,
+                evidence=[node] + support_pool[:2],
+                missing=task_nodes[:4],
+                usable_for=["safety", "repair", "production_gate"],
+                force_weak=False,
             )
 
     def _workflow_claims(

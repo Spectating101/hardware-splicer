@@ -9,6 +9,11 @@ Canonical entrypoints (start here):
 - `docs/CERTAINTY_LEDGER.md` (evidence/certainty gate for repair, salvage, AOI, and training capture)
 - `docs/BOARD_SESSION_LAUNCH_LOOP.md` (persistent case/review/training loop and launch benchmark)
 - `docs/REAL_REPAIR_CASE_EVAL.md` (sourced repair-case workflow evaluation and honest coverage)
+- `docs/CIRCUIT_AI_MASTER_BLUEPRINT.md` (canonical circuit-first functional salvage and structured AI reasoning blueprint)
+- `docs/DEEPSEEK_INTEGRATION.md` (DeepSeek backend/frontend provider wiring and smoke/status checks)
+- `docs/COPILOT_INTEGRATION.md` (local Copilot OAuth/CLI provider wiring and smoke/status checks)
+- `docs/QWEN_NATIVE_VISION_TRIAL.md` ($5 capped Qwen native-vision trial setup and budget guardrails)
+- `data/real_board_corpus/manifest.example.json` plus `scripts/evaluate_real_board_corpus.py` (real-board corpus contract and backend authority eval)
 - `docs/SALVAGE_TO_PRODUCT_WORKFLOW.md`
 - `docs/REPAIR_MARKET_COVERAGE.md`
 - `docs/REPAIR_VIDEO_TO_PLAYBOOK_WORKFLOW.md`

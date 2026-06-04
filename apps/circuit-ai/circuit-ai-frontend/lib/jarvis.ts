@@ -179,6 +179,243 @@ export interface JarvisContext {
   selectedRef?: string;
 }
 
+const PROJECT_ACTION_TOKENS = new Set([
+  "assemble",
+  "build",
+  "create",
+  "diy",
+  "engineer",
+  "help",
+  "make",
+  "need",
+  "prototype",
+  "solve",
+  "want",
+]);
+
+const HARDWARE_CONTEXT_TOKENS = new Set([
+  "adapter",
+  "adapters",
+  "arduino",
+  "audio",
+  "board",
+  "boards",
+  "budget",
+  "buzzer",
+  "camera",
+  "capture",
+  "cheap",
+  "circuit",
+  "cooling",
+  "device",
+  "electronics",
+  "esp32",
+  "fan",
+  "fans",
+  "hardware",
+  "hot",
+  "humidity",
+  "image",
+  "indicator",
+  "internet",
+  "irrigation",
+  "junk",
+  "keypad",
+  "lamp",
+  "led",
+  "leds",
+  "light",
+  "module",
+  "modules",
+  "moisture",
+  "motor",
+  "mosfet",
+  "network",
+  "parts",
+  "pcb",
+  "photo",
+  "plant",
+  "plants",
+  "pump",
+  "random",
+  "robot",
+  "router",
+  "rover",
+  "salvage",
+  "sensor",
+  "solenoid",
+  "speaker",
+  "spare",
+  "splice",
+  "smoke",
+  "system",
+  "switches",
+  "temperature",
+  "thing",
+  "tool",
+  "trigger",
+  "usb",
+  "valve",
+  "water",
+  "watering",
+  "wheel",
+  "wheels",
+  "wifi",
+  "wires",
+]);
+
+function wordTokens(text: string): Set<string> {
+  return new Set(
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .map((token) => token.trim())
+      .filter(Boolean),
+  );
+}
+
+export function shouldRouteToDiyProjectPlanner(text: string): boolean {
+  const tokens = wordTokens(text);
+  const hasProjectAction = [...PROJECT_ACTION_TOKENS].some((token) => tokens.has(token));
+  const hasHardwareContext = [...HARDWARE_CONTEXT_TOKENS].some((token) => tokens.has(token));
+  return hasProjectAction && hasHardwareContext;
+}
+
+export function shouldContinueDiyProjectPlanner(text: string): boolean {
+  const tokens = wordTokens(text);
+  return [...HARDWARE_CONTEXT_TOKENS].some((token) => tokens.has(token));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function numberValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function stringList(value: unknown, limit = 5): string[] {
+  return Array.isArray(value)
+    ? value.flatMap((item) => {
+        const text = stringValue(item);
+        return text ? [text] : [];
+      }).slice(0, limit)
+    : [];
+}
+
+function recordList(value: unknown, limit = 5): Record<string, unknown>[] {
+  return Array.isArray(value)
+    ? value.flatMap((item) => isRecord(item) ? [item] : []).slice(0, limit)
+    : [];
+}
+
+function humanizeId(value: string | undefined) {
+  return value ? value.replace(/_/g, " ") : undefined;
+}
+
+function percentText(value: unknown): string | undefined {
+  const n = numberValue(value);
+  if (n === undefined) return undefined;
+  return `${Math.round(n * 100)}%`;
+}
+
+export function summarizeDiyProjectPlannerResponse(payload: unknown, originalPrompt: string): string {
+  const root = isRecord(payload) ? payload : {};
+  const plan = isRecord(root.diy_project_engineering) ? root.diy_project_engineering : root;
+  const session = isRecord(root.diy_project_session) ? root.diy_project_session : {};
+  const intake = isRecord(session.intake_state) ? session.intake_state : {};
+  if (!isRecord(plan) || plan.available === false) {
+    return [
+      "I can treat that as a DIY hardware build, but I need a clearer target before I can make it authoritative.",
+      "Give me the output behavior, available boards/modules, power source, budget, and what counts as pass/fail.",
+    ].join("  \n");
+  }
+
+  const intent = isRecord(plan.project_intent) ? plan.project_intent : {};
+  const requirements = isRecord(plan.requirements) ? plan.requirements : {};
+  const resourcePlan = isRecord(plan.resource_plan) ? plan.resource_plan : {};
+  const coverage = isRecord(resourcePlan.coverage) ? resourcePlan.coverage : {};
+  const procurement = isRecord(resourcePlan.procurement) ? resourcePlan.procurement : {};
+  const readiness = isRecord(plan.readiness) ? plan.readiness : {};
+
+  const label =
+    stringValue(intent.profile_label) ??
+    humanizeId(stringValue(intent.profile_id)) ??
+    originalPrompt;
+  const readinessLevel = humanizeId(stringValue(readiness.level)) ?? "evidence gated";
+  const readinessScore = percentText(readiness.score);
+  const coverageScore = percentText(coverage.coverage_score);
+  const missing = stringList(coverage.missing_capabilities, 4);
+  const selected = recordList(resourcePlan.selected_resources, 5)
+    .map((resource) => stringValue(resource.name) ?? stringValue(resource.resource_id))
+    .filter((name): name is string => !!name);
+  const blocks = recordList(plan.architecture_blocks, 6)
+    .map((block) => stringValue(block.block_id))
+    .filter((id): id is string => !!id)
+    .map(humanizeId)
+    .filter((id): id is string => !!id);
+  const gates = recordList(plan.engineering_gates, 3)
+    .map((gate) => stringValue(gate.prompt))
+    .filter((prompt): prompt is string => !!prompt);
+  const actions = stringList(plan.next_actions, 3);
+  const capabilities = stringList(requirements.required_capabilities, 6).map(humanizeId).filter((v): v is string => !!v);
+  const estimatedCost = numberValue(procurement.estimated_cost_usd);
+  const budget = numberValue(procurement.budget_usd);
+  const withinBudget = procurement.within_budget;
+  const canPower = readiness.can_build_or_power_now === true;
+  const capturedResources = recordList(intake.available_resources, 5)
+    .map((resource) => stringValue(resource.name) ?? stringValue(resource.resource_id))
+    .filter((name): name is string => !!name);
+  const absentResources = recordList(intake.known_absent_resources, 4)
+    .map((resource) => stringValue(resource.name) ?? stringValue(resource.resource_id))
+    .filter((name): name is string => !!name);
+  const turnCount = isRecord(session.conversation) ? numberValue(session.conversation.turn_count) : undefined;
+
+  const lines = [
+    `I can ${turnCount && turnCount > 1 ? "update" : "start"} this as a real build plan: **${label}**.`,
+    `Readiness: **${readinessLevel}**${readinessScore ? ` (${readinessScore})` : ""}. Coverage: **${coverageScore ?? "unknown"}**${missing.length ? `; missing ${missing.map(humanizeId).join(", ")}.` : "; no required capability gaps reported."}`,
+  ];
+
+  if (capturedResources.length || absentResources.length) {
+    const captured = capturedResources.length ? `Captured inventory: ${capturedResources.join(", ")}.` : "";
+    const absent = absentResources.length ? ` Not currently available: ${absentResources.join(", ")}.` : "";
+    lines.push(`${captured}${absent}`);
+  }
+  if (capabilities.length) {
+    lines.push(`Required capabilities: ${capabilities.join(", ")}.`);
+  }
+  if (blocks.length) {
+    lines.push(`Architecture path: ${blocks.join(" -> ")}.`);
+  }
+  if (selected.length || estimatedCost !== undefined) {
+    const cost = estimatedCost !== undefined ? ` Estimated buy gap: **$${estimatedCost.toFixed(2)}**.` : "";
+    const budgetNote = budget !== undefined
+      ? withinBudget === false
+        ? ` Budget target: **$${budget.toFixed(2)}**, so this needs reuse, cheaper substitutes, or scope reduction.`
+        : ` Budget target: **$${budget.toFixed(2)}**.`
+      : "";
+    lines.push(`Resources to review first: ${selected.length ? selected.join(", ") : "none selected yet"}.${cost}${budgetNote}`);
+  }
+  if (gates.length) {
+    lines.push(`First proof gate: ${gates[0]}`);
+  }
+  if (actions.length) {
+    lines.push(`Next action: ${actions[0]}`);
+  }
+  lines.push(
+    canPower
+      ? "Power-up is allowed by the planner, but still use current limiting and no-short checks."
+      : "Do not power it yet; close the evidence gates first: pass/fail behavior, block diagram, no-short checks, polarity, and current budget.",
+  );
+  lines.push("To continue, tell me the parts actually in the junk pile, any labels/ratings on the power source, and the hard budget ceiling.");
+
+  return lines.join("  \n");
+}
+
 export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): string {
   switch (intent.type) {
     case "validate":
@@ -261,6 +498,7 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
     case "help":
       return [
         "Here's what I understand:",
+        "**describe a build** — turn a DIY hardware goal into architecture, resources, proof gates, and next action",
         "**validate** — run ERC and DFM check on the board",
         "**manufacture** — generate Gerbers, BOM, and assembly guide",
         "**show issues** — open the validation panel",
@@ -270,7 +508,7 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
         "**acknowledge warnings** — dismiss all non-critical issues",
         "**undo** — undo the last action (or Ctrl+Z)",
         "**clear** — reset the workspace",
-        "Or drop a `.kicad_pcb` file directly onto the canvas.",
+        "Drop a `.kicad_pcb` file for board validation, or describe what you want to build from modules/components.",
       ].join("  \n");
 
     case "next": {
@@ -308,7 +546,7 @@ export function contextualResponse(intent: JarvisIntent, ctx: JarvisContext): st
 
       if (!ctx.hasBoardNode)
         return text
-          ? `I heard you — but I need a board to work with first. Drop a \`.kicad_pcb\` file on the canvas.`
+          ? `I heard you. If this is a new hardware build, describe the target function, available parts, power source, and pass/fail behavior. If it is an existing PCB, drop a \`.kicad_pcb\` file on the canvas.`
           : "Drop a `.kicad_pcb` file on the canvas or describe what you want to build.";
 
       // Fab ordering questions

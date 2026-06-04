@@ -1,0 +1,2652 @@
+{
+  "available": true,
+  "ceiling_projection": {
+    "authority_ceiling_if_next_batch_closes": 0.55,
+    "blocking_unlocks": [
+      {
+        "blockers": [
+          "No measured topology_evidence.v1 is attached."
+        ],
+        "next_unlock": "Measure ground, no-short resistance, voltage, current, thermal, and unknown pins into topology_evidence.v1.",
+        "stage_id": "measured_topology",
+        "status": "open",
+        "title": "Measured Pinout/Topology Authority"
+      },
+      {
+        "blockers": [
+          "No deterministic simulation model has run."
+        ],
+        "next_unlock": "Supply measured topology/netlist with source limits and load current.",
+        "stage_id": "electrical_simulation",
+        "status": "open",
+        "title": "Electrical Simulation Authority"
+      },
+      {
+        "blockers": [
+          "No terminal controlled bench outcome proves the target function."
+        ],
+        "next_unlock": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+        "stage_id": "controlled_bench",
+        "status": "open",
+        "title": "Controlled Bench Authority"
+      },
+      {
+        "blockers": [
+          "No selected resources are available for production repair authority.",
+          "The plan is not authority-ready for first power or splice.",
+          "A terminal successful outcome is not fully recorded.",
+          "Repair authority is not authoritative_low_risk.",
+          "Open evidence gates remain.",
+          "Required production measurement categories are missing.",
+          "Required production measurements lack trusted provenance.",
+          "Required production measurements lack audit artifacts.",
+          "Output function is not verified in the terminal outcome.",
+          "First-power result is not recorded as passing.",
+          "Thermal result is not recorded as passing.",
+          "Terminal outcome lacks an audit artifact URI.",
+          "Production repair authority is not authorized by the casefile."
+        ],
+        "next_unlock": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+        "stage_id": "production_repair",
+        "status": "open",
+        "title": "Production Repair Authority"
+      }
+    ],
+    "current_authority_level": "visual_candidate",
+    "score_if_next_batch_closes_estimate": 0.659
+  },
+  "claim_control": {
+    "can": {
+      "claim_controlled_reuse": false,
+      "claim_production_repair_release": false,
+      "power_or_splice_now": false,
+      "run_controlled_bench": false,
+      "use_electrical_simulation": false,
+      "use_measured_pinout": false,
+      "use_visual_candidates": true
+    },
+    "cannot_claim_yet": [
+      "measured pinout/topology",
+      "simulation-backed electrical behavior",
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release",
+      "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+      "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "No terminal controlled bench outcome proves the target function.",
+      "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI."
+    ],
+    "claim_boundary": "This map can rank hypotheses and evidence. It cannot infer hidden nets, safe power, or repair release from images alone. Authority still comes from measured topology, simulation, controlled outcome, and release artifacts."
+  },
+  "dimensions": {
+    "active_closure": {
+      "evidence": [
+        "closure_run_bench_protocol",
+        "closure_capture_2",
+        "closure_capture_5",
+        "closure_capture_6",
+        "closure_capture_1",
+        "closure_capture_overview",
+        "closure_capture_4",
+        "closure_capture_3"
+      ],
+      "score": 0.663,
+      "status": "open",
+      "summary": "Whether the engine has a concrete route to collapse unknowns."
+    },
+    "bench_outcome": {
+      "evidence": [
+        "No terminal controlled bench outcome proves the target function."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Controlled first-power/function outcome."
+    },
+    "function_hypothesis": {
+      "evidence": [
+        "single_board_computer_module",
+        "usb_serial_debug_bridge",
+        "audio_or_alert_module",
+        "sensor_or_adc_module",
+        "power_distribution_or_regulator"
+      ],
+      "score": 0.96,
+      "status": "pass",
+      "summary": "Likely board purpose inferred from markings, connectors, capabilities, and topology."
+    },
+    "measured_topology": {
+      "evidence": [
+        "No measured topology_evidence.v1 is attached."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Measured pinout/topology authority."
+    },
+    "part_identity": {
+      "evidence": [
+        "BCM2711",
+        "SBC",
+        "RASPBERRY PI"
+      ],
+      "score": 0.995,
+      "status": "pass",
+      "summary": "Component/marking identity confidence."
+    },
+    "release_authority": {
+      "evidence": [
+        "casefile: evidence_required",
+        "decision: not_authorized_evidence_required",
+        "No selected resources are available for production repair authority.",
+        "The plan is not authority-ready for first power or splice.",
+        "A terminal successful outcome is not fully recorded.",
+        "Repair authority is not authoritative_low_risk.",
+        "Open evidence gates remain.",
+        "Required production measurement categories are missing.",
+        "Required production measurements lack trusted provenance.",
+        "Required production measurements lack audit artifacts."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Scoped production repair/reuse release authority."
+    },
+    "simulation": {
+      "evidence": [
+        "release decision: test_fixture_required",
+        "No deterministic simulation model has run."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Deterministic low-voltage simulation or bounded source/load envelope."
+    },
+    "visual_observability": {
+      "evidence": [
+        "2 component candidate(s)",
+        "7 connector candidate(s)",
+        "2 marking candidate(s)"
+      ],
+      "score": 0.72,
+      "status": "candidate",
+      "summary": "Photos and visual evidence are enough to create candidate inventory."
+    },
+    "visual_topology": {
+      "evidence": [
+        "0 component anchors",
+        "7 connector hypotheses",
+        "14 connection hypotheses"
+      ],
+      "score": 0.0,
+      "status": "pass",
+      "summary": "Candidate component/connector/trace topology from layout evidence."
+    }
+  },
+  "evidence_graph": {
+    "claim_boundary": "This graph shows evidence available inside the board session. Claims without capture, measurement, review, reference, or outcome support remain weak.",
+    "grounded_claims": [],
+    "next_grounding_actions": [
+      "Resolve evidence for: Vision-language evidence proposes visible component: RAM module",
+      "Resolve evidence for: Vision-language evidence proposes visible component: SoC (Broadcom BCM2711)",
+      "Resolve evidence for: Vision-language evidence proposes connector: 3.5mm audio jack",
+      "Resolve evidence for: Vision-language evidence proposes connector: 40-pin GPIO header",
+      "Resolve evidence for: Vision-language evidence proposes connector: Ethernet RJ45",
+      "Resolve evidence for: Vision-language evidence proposes connector: HDMI",
+      "Resolve evidence for: Vision-language evidence proposes connector: USB-A port 1",
+      "Resolve evidence for: Vision-language evidence proposes connector: USB-A port 2"
+    ],
+    "summary": {
+      "claim_count": 15,
+      "edge_count": 134,
+      "grounded_claim_count": 0,
+      "node_count": 51,
+      "source_count": 1,
+      "weak_claim_count": 15
+    },
+    "weak_claims": [
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes visible component: RAM module",
+        "claim_id": "claim:omniscience-map:qwen-component:1",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol"
+        ],
+        "score": 0.9,
+        "supporting_evidence": [
+          "qwen_component:omniscience-map:ram",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "identification",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes visible component: SoC (Broadcom BCM2711)",
+        "claim_id": "claim:omniscience-map:qwen-component:2",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_component:omniscience-map:cpu",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "identification",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: 3.5mm audio jack",
+        "claim_id": "claim:omniscience-map:qwen-connector:1",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:audio_jack",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: 40-pin GPIO header",
+        "claim_id": "claim:omniscience-map:qwen-connector:2",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:gpio_header",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: Ethernet RJ45",
+        "claim_id": "claim:omniscience-map:qwen-connector:3",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:ethernet",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: HDMI",
+        "claim_id": "claim:omniscience-map:qwen-connector:4",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:hdmip",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: USB-A port 1",
+        "claim_id": "claim:omniscience-map:qwen-connector:5",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:usb_a_1",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      },
+      {
+        "certainty": "weak",
+        "claim": "Vision-language evidence proposes connector: USB-A port 2",
+        "claim_id": "claim:omniscience-map:qwen-connector:6",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:capture_topology_or_supply_netlist",
+          "task:closure_run_bench_protocol",
+          "task:closure_capture_2"
+        ],
+        "score": 0.95,
+        "supporting_evidence": [
+          "qwen_connector:omniscience-map:usb_a_2",
+          "capture:raspberry_pi_wide_live_qwen"
+        ],
+        "usable_for": [
+          "splice_planning",
+          "salvage",
+          "training"
+        ]
+      }
+    ]
+  },
+  "hardware_plan_summary": {
+    "can_power_or_splice": false,
+    "open_gate_count": 29,
+    "recommended_path": "blocked_until_resource_gap_closed",
+    "status": "blocked_missing_resources"
+  },
+  "hypothesis_lattice": {
+    "candidates": [
+      {
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "confidence": 0.96,
+        "confirmation_required": [
+          "baseline no-short",
+          "pinout",
+          "voltage/current/thermal measurements"
+        ],
+        "evidence": [
+          "text hit: raspberry pi",
+          "text hit: single board computer",
+          "text hit: bcm2711",
+          "text hit: soc",
+          "text hit: ram",
+          "text hit: gpio",
+          "text hit: ethernet",
+          "text hit: hdmi"
+        ],
+        "hypothesis_id": "single_board_computer_module",
+        "label": "Single-board embedded compute module",
+        "status": "leading"
+      },
+      {
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "confidence": 0.54,
+        "confirmation_required": [
+          "measured pinout",
+          "logic voltage",
+          "loopback or safe serial capture"
+        ],
+        "evidence": [
+          "text hit: usb"
+        ],
+        "hypothesis_id": "usb_serial_debug_bridge",
+        "label": "USB/UART debug or bridge module",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "speaker_or_audio",
+          "connector"
+        ],
+        "confidence": 0.53,
+        "confirmation_required": [
+          "load impedance",
+          "idle current",
+          "low-level output test"
+        ],
+        "evidence": [
+          "text hit: audio",
+          "text hit: speaker"
+        ],
+        "hypothesis_id": "audio_or_alert_module",
+        "label": "Audio, buzzer, microphone, or alert board",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "sensor_or_adc",
+          "connector"
+        ],
+        "confidence": 0.5,
+        "confirmation_required": [
+          "supply voltage",
+          "bus pullups",
+          "low-speed bus scan"
+        ],
+        "evidence": [
+          "text hit: sensor"
+        ],
+        "hypothesis_id": "sensor_or_adc_module",
+        "label": "Sensor or ADC module",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "power"
+        ],
+        "confidence": 0.48,
+        "confirmation_required": [
+          "no-short",
+          "output voltage",
+          "load current",
+          "thermal behavior"
+        ],
+        "evidence": [
+          "text hit: power"
+        ],
+        "hypothesis_id": "power_distribution_or_regulator",
+        "label": "Power distribution or regulator stage",
+        "status": "alternate"
+      },
+      {
+        "capabilities": [
+          "controller",
+          "connector"
+        ],
+        "confidence": 0.48,
+        "confirmation_required": [
+          "power rails",
+          "boot/current behavior",
+          "I/O voltage domain"
+        ],
+        "evidence": [
+          "text hit: controller"
+        ],
+        "hypothesis_id": "controller_module",
+        "label": "Controller or embedded compute module",
+        "status": "alternate"
+      }
+    ],
+    "grounded_parts": [
+      {
+        "canonical_part": "BCM2711",
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "common_faults": [
+          "damaged power connector",
+          "corrupt storage",
+          "shorted GPIO",
+          "overheated SoC",
+          "unknown firmware or data state"
+        ],
+        "confidence": 0.94,
+        "family": "single-board computer",
+        "function_id": "single_board_computer_module",
+        "key_specs": {
+          "requires": "known power input, boot evidence, connector map, and storage state",
+          "type": "Linux-capable embedded compute board"
+        },
+        "matched_text": "SoC (Broadcom BCM2711)  integrated_circuit",
+        "part_id": "single_board_computer_family",
+        "replacement_parts": [
+          "Raspberry Pi board",
+          "RP2040/ESP32 board for simpler controller use"
+        ],
+        "source": "component",
+        "source_ref": "cpu",
+        "verification_required": [
+          "power input voltage/current",
+          "boot/current behavior",
+          "GPIO voltage domain",
+          "connector map",
+          "storage/media state"
+        ]
+      },
+      {
+        "canonical_part": "SBC",
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "common_faults": [
+          "damaged power connector",
+          "corrupt storage",
+          "shorted GPIO",
+          "overheated SoC",
+          "unknown firmware or data state"
+        ],
+        "confidence": 0.94,
+        "family": "single-board computer",
+        "function_id": "single_board_computer_module",
+        "key_specs": {
+          "requires": "known power input, boot evidence, connector map, and storage state",
+          "type": "Linux-capable embedded compute board"
+        },
+        "matched_text": "USB-C Power In  connector",
+        "part_id": "single_board_computer_family",
+        "replacement_parts": [
+          "Raspberry Pi board",
+          "RP2040/ESP32 board for simpler controller use"
+        ],
+        "source": "connector",
+        "source_ref": "usb_c",
+        "verification_required": [
+          "power input voltage/current",
+          "boot/current behavior",
+          "GPIO voltage domain",
+          "connector map",
+          "storage/media state"
+        ]
+      },
+      {
+        "canonical_part": "RASPBERRY PI",
+        "capabilities": [
+          "controller",
+          "network_interface",
+          "display_or_ui",
+          "connector",
+          "power"
+        ],
+        "common_faults": [
+          "damaged power connector",
+          "corrupt storage",
+          "shorted GPIO",
+          "overheated SoC",
+          "unknown firmware or data state"
+        ],
+        "confidence": 0.94,
+        "family": "single-board computer",
+        "function_id": "single_board_computer_module",
+        "key_specs": {
+          "requires": "known power input, boot evidence, connector map, and storage state",
+          "type": "Linux-capable embedded compute board"
+        },
+        "matched_text": "Raspberry Pi 4 Model B  silkscreen",
+        "part_id": "single_board_computer_family",
+        "replacement_parts": [
+          "Raspberry Pi board",
+          "RP2040/ESP32 board for simpler controller use"
+        ],
+        "source": "marking",
+        "source_ref": "model",
+        "verification_required": [
+          "power input voltage/current",
+          "boot/current behavior",
+          "GPIO voltage domain",
+          "connector map",
+          "storage/media state"
+        ]
+      }
+    ],
+    "primary": "single_board_computer_module",
+    "visual_topology_candidates": {
+      "available": true,
+      "connection_hypotheses": [
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.726,
+          "evidence": [
+            "sensor/ADC component",
+            "bus connector candidate",
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_gpio_header",
+          "required_measurements": [
+            "Verify bus pins, pullups, address/CS behavior, and voltage domain."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "40-pin GPIO header",
+            "ref": "gpio_header",
+            "source_type": "connector"
+          },
+          "type": "candidate_sensor_bus_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_gpio_header",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "40-pin GPIO header",
+            "ref": "gpio_header",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_ethernet",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "Ethernet RJ45",
+            "ref": "ethernet",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_hdmip",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "HDMI",
+            "ref": "hdmip",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_usb_a_1",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-A port 1",
+            "ref": "usb_a_1",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_usb_a_2",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-A port 2",
+            "ref": "usb_a_2",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "RAM module",
+            "ref": "ram",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_ram_usb_c",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-C Power In",
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_ethernet",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "Ethernet RJ45",
+            "ref": "ethernet",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_hdmip",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "HDMI",
+            "ref": "hdmip",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_usb_a_1",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-A port 1",
+            "ref": "usb_a_1",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_usb_a_2",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-A port 2",
+            "ref": "usb_a_2",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        },
+        {
+          "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+          "confidence": 0.586,
+          "evidence": [
+            "same photo observation"
+          ],
+          "from": {
+            "label": "SoC (Broadcom BCM2711)",
+            "ref": "cpu",
+            "source_type": "component"
+          },
+          "hypothesis_id": "visual_path_cpu_usb_c",
+          "required_measurements": [
+            "Continuity-test the candidate path and record positive or negative result."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "status": "needs_continuity_and_pinout",
+          "to": {
+            "label": "USB-C Power In",
+            "ref": "usb_c",
+            "source_type": "connector"
+          },
+          "type": "candidate_component_connector_path",
+          "visual_distance": null
+        }
+      ],
+      "connector_hypotheses": [
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "controller"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "gpio_header",
+          "estimated_pin_count": 40,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:gpio_header",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_gpio_header",
+          "kind": "header",
+          "label": "40-pin GPIO header",
+          "likely_roles": [
+            "debug_or_gpio_header"
+          ],
+          "pin_count_status": "explicit_visual_pin_count",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "network_interface"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "ethernet",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:ethernet",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_ethernet",
+          "kind": "connector",
+          "label": "Ethernet RJ45",
+          "likely_roles": [
+            "network_or_fieldbus"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "display_or_ui"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "hdmip",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:hdmip",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_hdmip",
+          "kind": "connector",
+          "label": "HDMI",
+          "likely_roles": [
+            "display_or_ui"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "usb"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "usb_a_1",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:usb_a_1",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_usb_a_1",
+          "kind": "connector",
+          "label": "USB-A port 1",
+          "likely_roles": [
+            "usb2_connector"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection.",
+            "Map USB D+/D- continuity and ESD/protection path."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "usb"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "usb_a_2",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:usb_a_2",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_usb_a_2",
+          "kind": "connector",
+          "label": "USB-A port 2",
+          "likely_roles": [
+            "usb2_connector"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection.",
+            "Map USB D+/D- continuity and ESD/protection path."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector",
+            "power",
+            "usb"
+          ],
+          "confidence": 0.88,
+          "connector_ref": "usb_c",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:usb_c",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_usb_c",
+          "kind": "connector",
+          "label": "USB-C Power In",
+          "likely_roles": [
+            "usb2_connector",
+            "power_input_or_rail"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection.",
+            "Map USB D+/D- continuity and ESD/protection path."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        },
+        {
+          "blocked_until": [
+            "measured pinout",
+            "ground reference",
+            "power-to-ground no-short",
+            "voltage and logic-domain confirmation"
+          ],
+          "can_power_or_splice": false,
+          "candidate_capabilities": [
+            "connector"
+          ],
+          "confidence": 0.84,
+          "connector_ref": "audio_jack",
+          "estimated_pin_count": null,
+          "geometry": {
+            "board_zone": "unmapped",
+            "geometry_status": "pixel_only",
+            "map_id": "connectors:audio_jack",
+            "normalized_bbox": null
+          },
+          "hypothesis_id": "visual_connector_audio_jack",
+          "kind": "connector",
+          "label": "3.5mm audio jack",
+          "likely_roles": [
+            "unknown_external_interface"
+          ],
+          "pin_count_status": "pin_count_unknown",
+          "required_measurements": [
+            "Confirm pin count and orientation.",
+            "Find ground/reference by continuity.",
+            "Measure no-short between candidate supply pins and ground.",
+            "Measure voltage and polarity before external connection."
+          ],
+          "source_photo_ids": [
+            "raspberry_pi_wide_live_qwen"
+          ],
+          "source_type": "connector",
+          "status": "visual_candidate_measurement_required",
+          "support_count": 1
+        }
+      ]
+    }
+  },
+  "known_facts": [
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [
+            470,
+            394,
+            626,
+            536
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ram_module_integrated_circuit",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              470.0,
+              394.0,
+              626.0,
+              536.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "ram",
+          "kind": "integrated_circuit",
+          "label": "RAM module",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                470,
+                394,
+                626,
+                536
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ram",
+              "label": "RAM module",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            336,
+            273,
+            540,
+            444
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "soc_broadcom_bcm2711_integrated_circuit",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              336.0,
+              273.0,
+              540.0,
+              444.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "cpu",
+          "kind": "integrated_circuit",
+          "label": "SoC (Broadcom BCM2711)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                336,
+                273,
+                540,
+                444
+              ],
+              "bbox_role": "pixel",
+              "item_id": "cpu",
+              "label": "SoC (Broadcom BCM2711)",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_components",
+      "label": "component candidates",
+      "value": "2 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [
+            308,
+            550,
+            470,
+            742
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "3_5mm_audio_jack_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              308.0,
+              550.0,
+              470.0,
+              742.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "audio_jack",
+          "kind": "connector",
+          "label": "3.5mm audio jack",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                308,
+                550,
+                470,
+                742
+              ],
+              "bbox_role": "pixel",
+              "item_id": "audio_jack",
+              "label": "3.5mm audio jack",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            430,
+            24,
+            778,
+            372
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "40_pin_gpio_header_header",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              430.0,
+              24.0,
+              778.0,
+              372.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "gpio_header",
+          "kind": "header",
+          "label": "40-pin GPIO header",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                430,
+                24,
+                778,
+                372
+              ],
+              "bbox_role": "pixel",
+              "item_id": "gpio_header",
+              "label": "40-pin GPIO header",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            722,
+            278,
+            986,
+            694
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "ethernet_rj45_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              722.0,
+              278.0,
+              986.0,
+              694.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "ethernet",
+          "kind": "connector",
+          "label": "Ethernet RJ45",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                722,
+                278,
+                986,
+                694
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ethernet",
+              "label": "Ethernet RJ45",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            222,
+            540,
+            292,
+            640
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "hdmi_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              222.0,
+              540.0,
+              292.0,
+              640.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "hdmip",
+          "kind": "connector",
+          "label": "HDMI",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                222,
+                540,
+                292,
+                640
+              ],
+              "bbox_role": "pixel",
+              "item_id": "hdmip",
+              "label": "HDMI",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            468,
+            502,
+            706,
+            906
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_a_port_1_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              468.0,
+              502.0,
+              706.0,
+              906.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "usb_a_1",
+          "kind": "connector",
+          "label": "USB-A port 1",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                468,
+                502,
+                706,
+                906
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb_a_1",
+              "label": "USB-A port 1",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            614,
+            394,
+            840,
+            792
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_a_port_2_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              614.0,
+              394.0,
+              840.0,
+              792.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "usb_a_2",
+          "kind": "connector",
+          "label": "USB-A port 2",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                614,
+                394,
+                840,
+                792
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb_a_2",
+              "label": "USB-A port 2",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            39,
+            350,
+            152,
+            488
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_c_power_in_connector",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              39.0,
+              350.0,
+              152.0,
+              488.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "usb_c",
+          "kind": "connector",
+          "label": "USB-C Power In",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                39,
+                350,
+                152,
+                488
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb_c",
+              "label": "USB-C Power In",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_connectors",
+      "label": "connector candidates",
+      "value": "7 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": [
+        {
+          "bbox": [
+            256,
+            382,
+            386,
+            482
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "fcc_id_2a0cd_rp14b_silkscreen",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              256.0,
+              382.0,
+              386.0,
+              482.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "fcc_id",
+          "kind": "silkscreen",
+          "label": "FCC ID: 2A0CD-RP14B",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                256,
+                382,
+                386,
+                482
+              ],
+              "bbox_role": "pixel",
+              "item_id": "fcc_id",
+              "label": "FCC ID: 2A0CD-RP14B",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            546,
+            290,
+            682,
+            412
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "raspberry_pi_4_model_b_silkscreen",
+            "supporting_photo_ids": [
+              "raspberry_pi_wide_live_qwen"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": null,
+            "pixel_bbox": [
+              546.0,
+              290.0,
+              682.0,
+              412.0
+            ],
+            "status": "pixel_only"
+          },
+          "id": "model",
+          "kind": "silkscreen",
+          "label": "Raspberry Pi 4 Model B",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                546,
+                290,
+                682,
+                412
+              ],
+              "bbox_role": "pixel",
+              "item_id": "model",
+              "label": "Raspberry Pi 4 Model B",
+              "photo_id": "raspberry_pi_wide_live_qwen",
+              "view_hint": "wide board photo from live Qwen probe"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "fact_id": "visual_markings",
+      "label": "marking candidates",
+      "value": "2 item(s)"
+    },
+    {
+      "authority": "visual_candidate",
+      "evidence": {
+        "capture_coverage_complete": false,
+        "capture_coverage_score": 0.622,
+        "counts": {
+          "components": 2,
+          "connectors": 7,
+          "damage": 0,
+          "markings": 2,
+          "regions": 1,
+          "salvage_candidates": 3,
+          "test_points": 0
+        },
+        "evidence_item_count": 15,
+        "identity_link_count": 0,
+        "layout_confidence": 0.32,
+        "level": "single_view_visual_candidate",
+        "mapped_item_count": 0,
+        "open_capture_lanes": [
+          "marking_identity_detail",
+          "layout_geometry"
+        ],
+        "photo_count": 1,
+        "source_policy": "Repeated visual observations raise candidate confidence but do not prove pinout, nets, voltage, or safe reuse.",
+        "unmapped_item_count": 15,
+        "usable_photo_count": 1
+      },
+      "fact_id": "multiview_reconstruction",
+      "label": "multi-photo reconstruction",
+      "value": "1 usable observation(s)"
+    },
+    {
+      "authority": "candidate_only",
+      "evidence": {
+        "can_power_or_splice": false,
+        "component_anchor_count": 2,
+        "connection_hypothesis_count": 14,
+        "connector_hypothesis_count": 7,
+        "layout_confidence": 0.32,
+        "level": "visual_component_connector_topology_candidate",
+        "measured_topology_available": false,
+        "measurement_task_count": 35,
+        "multi_view_evidence": false,
+        "next_unlock": "Attach measured topology_evidence.v1 generated from the visual measurement queue.",
+        "score": 0.678
+      },
+      "fact_id": "visual_topology",
+      "label": "visual topology hypothesis",
+      "value": "35 measurement task(s)"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "2 component candidates",
+        "7 connector candidates",
+        "2 marking candidates",
+        "3 salvage candidates"
+      ],
+      "fact_id": "authority_visual_candidate",
+      "label": "Visual Candidate Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "economic",
+      "evidence": {
+        "claim_boundary": "Economic estimate is heuristic until a successful function outcome is recorded.",
+        "confidence": 0.54,
+        "decision": "identify_and_measure_before_value_decision",
+        "estimated_cash_to_continue_usd": 1.0,
+        "estimated_time_minutes": 25,
+        "expected_recoverable_value_usd": 1.5,
+        "primary_function_id": "single_board_computer_module",
+        "rationale": "Visual evidence can identify candidates, but value depends on measured function.",
+        "recommended_exit": "Collect baseline measurements before spending parts or time.",
+        "schema_version": "salvage_value_decision.v1",
+        "value_ratio": 1.5
+      },
+      "fact_id": "salvage_value_decision",
+      "label": "reuse/salvage value decision",
+      "value": "identify_and_measure_before_value_decision"
+    },
+    {
+      "authority": "planning",
+      "evidence": "Required capabilities are still missing from the selected resource set.",
+      "fact_id": "hardware_plan_status",
+      "label": "hardware plan status",
+      "value": "blocked_missing_resources"
+    }
+  ],
+  "mode": "board_omniscience_map",
+  "model_routes": {
+    "deepseek_or_text_reasoner": {
+      "never_treat_as": [
+        "instrument measurement",
+        "terminal outcome"
+      ],
+      "next_prompts": [
+        "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+        "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+        "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+        "Map 40-pin GPIO header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet."
+      ],
+      "use_for": [
+        "field advisory",
+        "measurement ordering",
+        "contradiction review",
+        "project/use-case planning"
+      ]
+    },
+    "deterministic_engine": {
+      "use_for": [
+        "topology-to-netlist",
+        "simulation gate",
+        "authority ledger",
+        "release gating"
+      ],
+      "visual_topology_available": true
+    },
+    "qwen_vision": {
+      "never_treat_as": [
+        "measured pinout",
+        "safe power authorization",
+        "production repair authority"
+      ],
+      "next_prompts": [
+        "Capture readable close-ups of every IC marking, connector label, regulator marking, crystal, and silkscreen model text.",
+        "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+        "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+        "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+        "Add more board photos from different distances or angles.",
+        "Capture a wider photo that includes readable markings and their surrounding component context."
+      ],
+      "use_for": [
+        "photo parsing",
+        "marking closeups",
+        "connector candidate extraction",
+        "damage observation"
+      ]
+    }
+  },
+  "next_evidence_batch": [
+    {
+      "action_id": "capture_topology_or_supply_netlist",
+      "category": "operator_next_action",
+      "priority": -4,
+      "procedure": [
+        "Use Qwen/vision to identify candidate connectors, rails, labels, and likely pin groups.",
+        "Measure ground continuity and power-to-ground no-short.",
+        "Measure rail voltage and polarity under current limit.",
+        "Measure load/source current when safe.",
+        "Submit topology_evidence.v1 or a versioned netlist and rerun the field operator."
+      ],
+      "prompt": "Capture measured topology or supply a versioned simulation netlist.",
+      "source": "field_operator",
+      "type": "capture_or_measurement",
+      "unlocks": "next authority gate",
+      "why": "The module-level test suite exists, but a versioned netlist is required before deterministic simulation."
+    },
+    {
+      "action_id": "closure_run_bench_protocol",
+      "category": "bench_protocol",
+      "priority": -3.0,
+      "procedure": [],
+      "prompt": "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "bench_protocol_pack",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_2",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_5",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Add more board photos from different distances or angles.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_6",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Capture a wider photo that includes readable markings and their surrounding component context.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_1",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Capture readable close-ups of every IC marking, connector label, regulator marking, crystal, and silkscreen model text.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_overview",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Capture several non-identical board observations: whole-board overview with scale, angled view, connector edge, and any backside/hidden area that exists.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_4",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_capture_3",
+      "category": "visual_coverage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+      "source": "active_evidence_closure",
+      "type": "capture",
+      "unlocks": "multiview_reconstruction",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_continuity",
+      "category": "continuity",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_current",
+      "category": "current",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_resistance",
+      "category": "resistance",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_thermal",
+      "category": "thermal",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_voltage",
+      "category": "voltage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "visual_topology_record",
+      "category": "topology",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1",
+      "why": null
+    },
+    {
+      "action_id": "pinout_gpio_header",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map 40-pin GPIO header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "pinout_ethernet",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map Ethernet RJ45: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "pinout_hdmip",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map HDMI: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "pinout_usb_a_1",
+      "category": "pinout",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Map USB-A port 1: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "why": null
+    },
+    {
+      "action_id": "protocol_1",
+      "category": "topology",
+      "priority": 1,
+      "procedure": [],
+      "prompt": "Attach measured connector pinout/topology evidence with no unknown pins.",
+      "source": "measurement_protocol",
+      "type": "measurement",
+      "unlocks": "repair_power_release",
+      "why": "Every used connector pin has a measured role and voltage/domain where relevant."
+    }
+  ],
+  "operator_playbook": {
+    "hold_until": [
+      "measured pinout/topology",
+      "simulation-backed electrical behavior",
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release"
+    ],
+    "level": "function_identity_candidate_map",
+    "now": [
+      "Capture measured topology or supply a versioned simulation netlist.",
+      "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+      "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "Add more board photos from different distances or angles.",
+      "Capture a wider photo that includes readable markings and their surrounding component context."
+    ],
+    "safe_posture": "measurement_capture_only"
+  },
+  "schema_version": "board_omniscience_map.v1",
+  "source_modules": {
+    "active_evidence_closure_plan": true,
+    "arbitrary_board_workflow": true,
+    "authority_ledger": true,
+    "hardware_plan": true,
+    "multiview_board_reconstruction": true,
+    "visual_topology_hypothesis": true
+  },
+  "summary": {
+    "authority_level": "visual_candidate",
+    "authority_score": 0.18,
+    "next_best_action_id": "capture_topology_or_supply_netlist",
+    "omniscience_level": "function_identity_candidate_map",
+    "omniscience_score": 0.349,
+    "primary_function": "single_board_computer_module",
+    "primary_function_confidence": 0.96,
+    "production_authorized": false,
+    "unknown_count": 48
+  },
+  "unknowns": [
+    {
+      "category": "bench_protocol",
+      "evidence_type": "measurement",
+      "priority": -1.0,
+      "resolution": "bench_protocol_pack",
+      "summary": "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+      "unknown_id": "closure_run_bench_protocol",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "continuity",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_continuity",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "controlled_bench",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+      "summary": "No terminal controlled bench outcome proves the target function.",
+      "unknown_id": "authority_controlled_bench",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "current",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_current",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "electrical_simulation",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Supply measured topology/netlist with source limits and load current.",
+      "summary": "No deterministic simulation model has run.",
+      "unknown_id": "authority_electrical_simulation",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "measured_topology",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Measure ground, no-short resistance, voltage, current, thermal, and unknown pins into topology_evidence.v1.",
+      "summary": "No measured topology_evidence.v1 is attached.",
+      "unknown_id": "authority_measured_topology",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted continuity measurement.",
+      "unknown_id": "missing_measurement_continuity",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted current measurement.",
+      "unknown_id": "missing_measurement_current",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted resistance measurement.",
+      "unknown_id": "missing_measurement_resistance",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted thermal measurement.",
+      "unknown_id": "missing_measurement_thermal",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "measurement",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record trusted instrument/operator/timestamp/artifact evidence.",
+      "summary": "Missing trusted voltage measurement.",
+      "unknown_id": "missing_measurement_voltage",
+      "unlocks": "production_authority"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "No selected resources are available for production repair authority.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "The plan is not authority-ready for first power or splice.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "A terminal successful outcome is not fully recorded.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Repair authority is not authoritative_low_risk.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Open evidence gates remain.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurement categories are missing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurements lack trusted provenance.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Required production measurements lack audit artifacts.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Output function is not verified in the terminal outcome.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "First-power result is not recorded as passing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Thermal result is not recorded as passing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Terminal outcome lacks an audit artifact URI.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Production repair authority is not authorized by the casefile.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "resistance",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_resistance",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "thermal",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_thermal",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Add a targeted photo observation.",
+      "summary": "Missing required capture lane: marking_identity_detail",
+      "unknown_id": "capture_marking_identity_detail",
+      "unlocks": "multiview_reconstruction"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Add a targeted photo observation.",
+      "summary": "Missing required capture lane: layout_geometry",
+      "unknown_id": "capture_layout_geometry",
+      "unlocks": "multiview_reconstruction"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Add an overview photo or annotated crop with normalized boxes for unmapped evidence items.",
+      "unknown_id": "closure_capture_2",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Add more board photos from different distances or angles.",
+      "unknown_id": "closure_capture_5",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Capture a wider photo that includes readable markings and their surrounding component context.",
+      "unknown_id": "closure_capture_6",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Capture readable close-ups of every IC marking, connector label, regulator marking, crystal, and silkscreen model text.",
+      "unknown_id": "closure_capture_1",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Capture several non-identical board observations: whole-board overview with scale, angled view, connector edge, and any backside/hidden area that exists.",
+      "unknown_id": "closure_capture_overview",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+      "unknown_id": "closure_capture_4",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "multiview_reconstruction",
+      "summary": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+      "unknown_id": "closure_capture_3",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "unknown_id": "visual_topology_record",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "capture",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Add an overview or annotated photo that maps unmapped connector/component evidence into normalized board coordinates.",
+      "unknown_id": "visual_topology_layout_reference",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map 40-pin GPIO header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_gpio_header",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on 40-pin GPIO header.",
+      "unknown_id": "short_gpio_header",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Power through a current limit and record voltage, polarity, and logic domain for 40-pin GPIO header before any external connection.",
+      "unknown_id": "voltage_gpio_header",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map Ethernet RJ45: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_ethernet",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on Ethernet RJ45.",
+      "unknown_id": "short_ethernet",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map HDMI: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_hdmip",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on HDMI.",
+      "unknown_id": "short_hdmip",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Map USB-A port 1: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "unknown_id": "pinout_usb_a_1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-A port 1.",
+      "unknown_id": "short_usb_a_1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "visual_topology",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "Measure or annotate the named topology candidate.",
+      "summary": "Power through a current limit and record voltage, polarity, and logic domain for USB-A port 1 before any external connection.",
+      "unknown_id": "voltage_usb_a_1",
+      "unlocks": "measured_topology"
+    },
+    {
+      "category": "voltage",
+      "evidence_type": "measurement",
+      "priority": 0.0,
+      "resolution": "trusted_measurement_provenance",
+      "summary": "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "unknown_id": "closure_missing_voltage",
+      "unlocks": "active_evidence_closure"
+    }
+  ]
+}

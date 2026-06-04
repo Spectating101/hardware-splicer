@@ -1,0 +1,742 @@
+{
+  "board_evidence": {
+    "components": [
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "confidence": 0.95,
+        "id": "cpu",
+        "kind": "integrated circuit",
+        "label": "System-on-Chip (SoC)",
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "bbox": [
+          182,
+          482,
+          422,
+          681
+        ],
+        "confidence": 0.9,
+        "id": "ram",
+        "kind": "integrated circuit",
+        "label": "DRAM chip",
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "connectors": [
+      {
+        "bbox": [
+          175,
+          632,
+          535,
+          998
+        ],
+        "confidence": 0.95,
+        "id": "usb-a-1",
+        "kind": "USB-A",
+        "label": "USB-A port (blue)",
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "bbox": [
+          392,
+          492,
+          747,
+          998
+        ],
+        "confidence": 0.95,
+        "id": "usb-a-2",
+        "kind": "USB-A",
+        "label": "USB-A port (blue)",
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "bbox": [
+          562,
+          337,
+          977,
+          842
+        ],
+        "confidence": 0.98,
+        "id": "ethernet",
+        "kind": "Ethernet",
+        "label": "RJ45 Ethernet port",
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "damage": [],
+    "markings": [
+      {
+        "bbox": [
+          292,
+          352,
+          510,
+          520
+        ],
+        "confidence": 0.98,
+        "id": "model",
+        "kind": "silkscreen text",
+        "label": "Raspberry Pi 4 Model B",
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "bbox": [
+          277,
+          392,
+          472,
+          542
+        ],
+        "confidence": 0.95,
+        "id": "year",
+        "kind": "silkscreen text",
+        "label": "\u00a9 Raspberry Pi 2018",
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "regions": [
+      {
+        "bbox": [
+          115,
+          0,
+          655,
+          478
+        ],
+        "confidence": 0.99,
+        "id": "gpio",
+        "kind": "header",
+        "label": "40-pin GPIO header",
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "salvage_candidates": [
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "confidence": 0.9,
+        "id": "cpu",
+        "kind": "integrated circuit",
+        "label": "SoC (BCM2711)",
+        "required_tests": [
+          "visual continuity",
+          "no thermal damage",
+          "power rail integrity"
+        ],
+        "warnings": []
+      }
+    ],
+    "schema_version": "board_evidence.v1",
+    "test_points": []
+  },
+  "claim_boundary": "Qwen vision returns candidate board evidence only; measurements and deterministic authority gates decide power, splice, and production release.",
+  "mode": "live",
+  "model": "qwen3-vl-flash",
+  "parse_diagnostics": {
+    "content_length": 2717,
+    "counts": {
+      "components": 2,
+      "connectors": 3,
+      "damage": 0,
+      "markings": 2,
+      "regions": 1,
+      "salvage_candidates": 1,
+      "test_points": 0
+    },
+    "finish_reason": "stop",
+    "json_error": "",
+    "json_valid": true,
+    "raw_board_evidence_available": true,
+    "recommendation": "",
+    "truncated": false
+  },
+  "parsed": {
+    "board_evidence": {
+      "components": [
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.95,
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "System-on-Chip (SoC)",
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "bbox": [
+            182,
+            482,
+            422,
+            681
+          ],
+          "confidence": 0.9,
+          "id": "ram",
+          "kind": "integrated circuit",
+          "label": "DRAM chip",
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "connectors": [
+        {
+          "bbox": [
+            175,
+            632,
+            535,
+            998
+          ],
+          "confidence": 0.95,
+          "id": "usb-a-1",
+          "kind": "USB-A",
+          "label": "USB-A port (blue)",
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "bbox": [
+            392,
+            492,
+            747,
+            998
+          ],
+          "confidence": 0.95,
+          "id": "usb-a-2",
+          "kind": "USB-A",
+          "label": "USB-A port (blue)",
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "bbox": [
+            562,
+            337,
+            977,
+            842
+          ],
+          "confidence": 0.98,
+          "id": "ethernet",
+          "kind": "Ethernet",
+          "label": "RJ45 Ethernet port",
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "damage": [],
+      "markings": [
+        {
+          "bbox": [
+            292,
+            352,
+            510,
+            520
+          ],
+          "confidence": 0.98,
+          "id": "model",
+          "kind": "silkscreen text",
+          "label": "Raspberry Pi 4 Model B",
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "bbox": [
+            277,
+            392,
+            472,
+            542
+          ],
+          "confidence": 0.95,
+          "id": "year",
+          "kind": "silkscreen text",
+          "label": "\u00a9 Raspberry Pi 2018",
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "regions": [
+        {
+          "bbox": [
+            115,
+            0,
+            655,
+            478
+          ],
+          "confidence": 0.99,
+          "id": "gpio",
+          "kind": "header",
+          "label": "40-pin GPIO header",
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "salvage_candidates": [
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.9,
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "SoC (BCM2711)",
+          "required_tests": [
+            "visual continuity",
+            "no thermal damage",
+            "power rail integrity"
+          ],
+          "warnings": []
+        }
+      ],
+      "schema_version": "board_evidence.v1",
+      "test_points": []
+    },
+    "explanation": "Visible board is a Raspberry Pi 4 Model B (2018), with standard USB-A, Ethernet, and GPIO header. No visible damage, corrosion, swelling, or high-voltage components. All connectors are standard I/O; no mains or battery present. Safe for visual inspection and non-invasive measurement planning.",
+    "parse_diagnostics": {
+      "content_length": 2717,
+      "counts": {
+        "components": 2,
+        "connectors": 3,
+        "damage": 0,
+        "markings": 2,
+        "regions": 1,
+        "salvage_candidates": 1,
+        "test_points": 0
+      },
+      "finish_reason": "stop",
+      "json_error": "",
+      "json_valid": true,
+      "raw_board_evidence_available": true,
+      "recommendation": "",
+      "truncated": false
+    },
+    "safety_level": "safe"
+  },
+  "preflight": {
+    "estimated_input_tokens": 5257,
+    "estimated_output_tokens": 2200,
+    "estimated_usd": 0.000589,
+    "image_sha256": "2b92727e44d59f359a932a04e6c8f00e41e9f71e2c4b36f2fee8c3b332c08081",
+    "model": "qwen3-vl-flash",
+    "prompt_version": "qwen_board_evidence_prompt.v1"
+  },
+  "provider": "qwen",
+  "schema_version": "qwen_board_vision_result.v1",
+  "usage": {
+    "elapsed_s": 11.345,
+    "estimated_usd": 0.000201,
+    "input_tokens": 703,
+    "output_tokens": 863
+  },
+  "vision_evidence_bridge": {
+    "available": true,
+    "board_evidence": {
+      "components": [
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.95,
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "System-on-Chip (SoC)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        },
+        {
+          "bbox": [
+            182,
+            482,
+            422,
+            681
+          ],
+          "confidence": 0.9,
+          "id": "ram",
+          "kind": "integrated circuit",
+          "label": "DRAM chip",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        }
+      ],
+      "connectors": [
+        {
+          "bbox": [
+            175,
+            632,
+            535,
+            998
+          ],
+          "confidence": 0.95,
+          "id": "usb-a-1",
+          "kind": "USB-A",
+          "label": "USB-A port (blue)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        },
+        {
+          "bbox": [
+            392,
+            492,
+            747,
+            998
+          ],
+          "confidence": 0.95,
+          "id": "usb-a-2",
+          "kind": "USB-A",
+          "label": "USB-A port (blue)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        },
+        {
+          "bbox": [
+            562,
+            337,
+            977,
+            842
+          ],
+          "confidence": 0.98,
+          "id": "ethernet",
+          "kind": "Ethernet",
+          "label": "RJ45 Ethernet port",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        }
+      ],
+      "damage": [],
+      "markings": [
+        {
+          "bbox": [
+            292,
+            352,
+            510,
+            520
+          ],
+          "confidence": 0.98,
+          "id": "model",
+          "kind": "silkscreen text",
+          "label": "Raspberry Pi 4 Model B",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        },
+        {
+          "bbox": [
+            277,
+            392,
+            472,
+            542
+          ],
+          "confidence": 0.95,
+          "id": "year",
+          "kind": "silkscreen text",
+          "label": "\u00a9 Raspberry Pi 2018",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        }
+      ],
+      "regions": [
+        {
+          "bbox": [
+            115,
+            0,
+            655,
+            478
+          ],
+          "confidence": 0.99,
+          "id": "gpio",
+          "kind": "header",
+          "label": "40-pin GPIO header",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "warnings": []
+        }
+      ],
+      "salvage_candidates": [
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.9,
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "SoC (BCM2711)",
+          "missing_evidence": [
+            "visual continuity",
+            "no thermal damage",
+            "power rail integrity"
+          ],
+          "source": "board_evidence.v1",
+          "warnings": []
+        }
+      ],
+      "schema_version": "board_evidence.v1",
+      "test_points": []
+    },
+    "detections": [
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "class_name": "integrated circuit",
+        "confidence": 0.95,
+        "label": "System-on-Chip (SoC)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          182,
+          482,
+          422,
+          681
+        ],
+        "class_name": "integrated circuit",
+        "confidence": 0.9,
+        "label": "DRAM chip",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          175,
+          632,
+          535,
+          998
+        ],
+        "class_name": "USB-A",
+        "confidence": 0.95,
+        "label": "USB-A port (blue)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          392,
+          492,
+          747,
+          998
+        ],
+        "class_name": "USB-A",
+        "confidence": 0.95,
+        "label": "USB-A port (blue)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          562,
+          337,
+          977,
+          842
+        ],
+        "class_name": "Ethernet",
+        "confidence": 0.98,
+        "label": "RJ45 Ethernet port",
+        "source": "board_evidence.v1"
+      }
+    ],
+    "hazard_profile": {
+      "clearance_requirements": [],
+      "energy_domain": "low_voltage_or_unknown_candidate",
+      "hazards": [],
+      "schema_version": "hardware_hazard_profile.v1",
+      "source_policy": {
+        "llm_outputs_must_be_structured_hazard_candidates": true,
+        "raw_text_release_logic": false,
+        "structured_sources": [
+          "board_evidence.v1"
+        ],
+        "vision_candidates_require_measurement_or_review": true
+      }
+    },
+    "policy": {
+      "hazards_can_block_release": true,
+      "hazards_cannot_be_cleared_by_vision_text": true,
+      "resources_require_measurement_or_review": true,
+      "vision_evidence_is_candidate_only": true
+    },
+    "resource_candidates": [
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing System-on-Chip (SoC)."
+        ],
+        "name": "System-on-Chip (SoC)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing System-on-Chip (SoC)."
+        ],
+        "resource_id": "vision_cpu",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "cpu"
+        ]
+      },
+      {
+        "capabilities": [
+          "unknown_reusable_part"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing DRAM chip."
+        ],
+        "name": "DRAM chip",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing DRAM chip."
+        ],
+        "resource_id": "vision_ram",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "ram"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A port (blue)."
+        ],
+        "name": "USB-A port (blue)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for USB-A port (blue)."
+        ],
+        "resource_id": "vision_usb_a_1",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "usb-a-1"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A port (blue)."
+        ],
+        "name": "USB-A port (blue)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for USB-A port (blue)."
+        ],
+        "resource_id": "vision_usb_a_2",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "usb-a-2"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "network_interface"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for RJ45 Ethernet port."
+        ],
+        "name": "RJ45 Ethernet port",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for RJ45 Ethernet port."
+        ],
+        "resource_id": "vision_ethernet",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "ethernet"
+        ]
+      },
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B."
+        ],
+        "name": "Raspberry Pi 4 Model B",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B."
+        ],
+        "resource_id": "vision_model",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "model"
+        ]
+      },
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing \u00a9 Raspberry Pi 2018."
+        ],
+        "name": "\u00a9 Raspberry Pi 2018",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing \u00a9 Raspberry Pi 2018."
+        ],
+        "resource_id": "vision_year",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "year"
+        ]
+      }
+    ],
+    "schema_version": "vision_board_evidence_bridge.v1",
+    "source": "vision_language_board_evidence"
+  }
+}

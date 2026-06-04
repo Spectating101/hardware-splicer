@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from src.api.v1.main import app
+from src.config import settings
 from src.ml.research_radar import (
     build_research_integration_plan,
     markdown_report,
@@ -46,7 +47,7 @@ def test_foundation_backend_statuses_are_dependency_light() -> None:
     statuses = foundation_backend_statuses()
     ids = {status["backend_id"] for status in statuses}
 
-    assert {"ultralytics", "sam2", "grounding_dino", "florence2", "paddleocr"} <= ids
+    assert {"ultralytics", "qwen_vl", "sam2", "grounding_dino", "florence2", "paddleocr"} <= ids
     assert all("missing_imports" in status for status in statuses)
 
 
@@ -68,6 +69,26 @@ def test_foundation_status_with_mocked_imports(monkeypatch) -> None:
     assert "sam2" in by_id["sam2"]["missing_imports"]
 
 
+def test_qwen_vl_backend_is_gated_by_api_key(monkeypatch) -> None:
+    monkeypatch.delenv("QWEN_API_KEY", raising=False)
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    monkeypatch.setattr(settings, "qwen_api_key", None)
+    monkeypatch.setattr(settings, "dashscope_api_key", None)
+    statuses = foundation_backend_statuses()
+    qwen = {status["backend_id"]: status for status in statuses}["qwen_vl"]
+
+    assert qwen["available"] is False
+    assert qwen["api_key_configured"] is False
+    assert "QWEN_API_KEY" in qwen["missing_env_vars"]
+
+    monkeypatch.setenv("QWEN_API_KEY", "test-qwen-key")
+    statuses = foundation_backend_statuses()
+    qwen = {status["backend_id"]: status for status in statuses}["qwen_vl"]
+
+    assert qwen["available"] is True
+    assert qwen["api_key_configured"] is True
+
+
 def test_foundation_assist_plan_builds_contextual_prompt_bank(monkeypatch) -> None:
     monkeypatch.setattr(foundation_adapters.importlib.util, "find_spec", lambda name: None)
     plan = build_foundation_assist_plan(
@@ -84,6 +105,9 @@ def test_foundation_assist_plan_builds_contextual_prompt_bank(monkeypatch) -> No
     assert "charging port" in prompts
     assert "useful module" in prompts
     assert "video_part_tracking" in step_ids
+    qwen_step = [step for step in plan["steps"] if step["id"] == "qwen_vl_board_reasoning"][0]
+    assert qwen_step["uses"] == "src/vision/qwen_board_vision.py"
+    assert qwen_step["api_endpoint"] == "/vision/qwen/board-evidence"
     assert "Foundation backends propose evidence" in plan["claim_boundary"]
 
 

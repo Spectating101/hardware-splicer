@@ -1,0 +1,335 @@
+{
+  "available": true,
+  "ceiling_projection": {
+    "authority_ceiling_if_next_batch_closes": "production_repair",
+    "blocking_unlocks": [],
+    "current_authority_level": "production_repair",
+    "score_if_next_batch_closes_estimate": 0.96
+  },
+  "claim_control": {
+    "can": {
+      "claim_controlled_reuse": true,
+      "claim_production_repair_release": true,
+      "power_or_splice_now": true,
+      "run_controlled_bench": true,
+      "use_electrical_simulation": true,
+      "use_measured_pinout": true,
+      "use_visual_candidates": true
+    },
+    "cannot_claim_yet": [],
+    "claim_boundary": "This map can rank hypotheses and evidence. It cannot infer hidden nets, safe power, or repair release from images alone. Authority still comes from measured topology, simulation, controlled outcome, and release artifacts."
+  },
+  "dimensions": {
+    "active_closure": {
+      "evidence": [],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Whether the engine has a concrete route to collapse unknowns."
+    },
+    "bench_outcome": {
+      "evidence": [
+        "session://outcomes/known-ch340-release",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Controlled first-power/function outcome."
+    },
+    "function_hypothesis": {
+      "evidence": [
+        "usb_serial_debug_bridge"
+      ],
+      "score": 0.7,
+      "status": "candidate",
+      "summary": "Likely board purpose inferred from markings, connectors, capabilities, and topology."
+    },
+    "measured_topology": {
+      "evidence": [
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Measured pinout/topology authority."
+    },
+    "part_identity": {
+      "evidence": [],
+      "score": 0.7,
+      "status": "candidate",
+      "summary": "Component/marking identity confidence."
+    },
+    "release_authority": {
+      "evidence": [
+        "casefile: release_ready",
+        "decision: authorized_low_voltage_repair_release",
+        "release manifest attached"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Scoped production repair/reuse release authority."
+    },
+    "simulation": {
+      "evidence": [
+        "release decision: test_fixture_required",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Deterministic low-voltage simulation or bounded source/load envelope."
+    },
+    "visual_observability": {
+      "evidence": [
+        "0 component candidate(s)",
+        "0 connector candidate(s)",
+        "0 marking candidate(s)"
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Photos and visual evidence are enough to create candidate inventory."
+    },
+    "visual_topology": {
+      "evidence": [
+        "0 component anchors",
+        "0 connector hypotheses",
+        "0 connection hypotheses"
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Candidate component/connector/trace topology from layout evidence."
+    }
+  },
+  "evidence_graph": {
+    "claim_boundary": "This graph shows evidence available inside the board session. Claims without capture, measurement, review, reference, or outcome support remain weak.",
+    "grounded_claims": [
+      {
+        "certainty": "strong",
+        "claim": "Outcome recorded: built",
+        "claim_id": "claim:omniscience-map:outcome:1",
+        "grounding_status": "grounded",
+        "missing_evidence": [],
+        "score": 0.88,
+        "supporting_evidence": [
+          "outcome:outcome_1"
+        ],
+        "usable_for": [
+          "value_proof",
+          "calibration",
+          "training"
+        ]
+      }
+    ],
+    "next_grounding_actions": [],
+    "summary": {
+      "claim_count": 2,
+      "edge_count": 15,
+      "grounded_claim_count": 1,
+      "node_count": 12,
+      "source_count": 8,
+      "weak_claim_count": 1
+    },
+    "weak_claims": [
+      {
+        "certainty": "weak",
+        "claim": "Recommended reuse target: USB/UART debug adapter",
+        "claim_id": "claim:omniscience-map:reuse-target",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [],
+        "score": 0.65,
+        "supporting_evidence": [
+          "measurement:measurement_1",
+          "measurement:measurement_2",
+          "measurement:measurement_3"
+        ],
+        "usable_for": [
+          "reuse",
+          "salvage",
+          "build"
+        ]
+      }
+    ]
+  },
+  "hardware_plan_summary": {
+    "can_power_or_splice": true,
+    "open_gate_count": 0,
+    "recommended_path": "reuse_verified_inventory_first",
+    "status": "ready_for_build_plan"
+  },
+  "hypothesis_lattice": {
+    "candidates": [
+      {
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "confidence": 0.7,
+        "confirmation_required": [
+          "measured pinout",
+          "logic voltage",
+          "loopback or safe serial capture"
+        ],
+        "evidence": [
+          "text hit: usb",
+          "text hit: uart",
+          "text hit: serial"
+        ],
+        "hypothesis_id": "usb_serial_debug_bridge",
+        "label": "USB/UART debug or bridge module",
+        "status": "leading"
+      }
+    ],
+    "grounded_parts": [],
+    "primary": "usb_serial_debug_bridge",
+    "visual_topology_candidates": {
+      "available": false,
+      "connection_hypotheses": [],
+      "connector_hypotheses": []
+    }
+  },
+  "known_facts": [
+    {
+      "authority": "authority",
+      "evidence": [
+        "0 component candidates",
+        "0 connector candidates",
+        "0 marking candidates",
+        "0 salvage candidates",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "fact_id": "authority_visual_candidate",
+      "label": "Visual Candidate Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "fact_id": "authority_measured_topology",
+      "label": "Measured Pinout/Topology Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "release decision: test_fixture_required",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "fact_id": "authority_electrical_simulation",
+      "label": "Electrical Simulation Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "session://outcomes/known-ch340-release",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "fact_id": "authority_controlled_bench",
+      "label": "Controlled Bench Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "casefile: release_ready",
+        "decision: authorized_low_voltage_repair_release",
+        "release manifest attached"
+      ],
+      "fact_id": "authority_production_repair",
+      "label": "Production Repair Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "economic",
+      "evidence": {
+        "claim_boundary": "Economic estimate is heuristic until a successful function outcome is recorded.",
+        "confidence": 0.9,
+        "decision": "safety_hold_or_salvage_only",
+        "estimated_cash_to_continue_usd": 2.0,
+        "estimated_time_minutes": 35,
+        "expected_recoverable_value_usd": 9.6,
+        "primary_function_id": "usb_serial_debug_bridge",
+        "rationale": "Hard blockers exist; do not repair, reuse, or splice until isolated.",
+        "recommended_exit": "Stop normal repair; isolate hazard or harvest only safe passive/mechanical value after review.",
+        "schema_version": "salvage_value_decision.v1",
+        "value_ratio": 4.8
+      },
+      "fact_id": "salvage_value_decision",
+      "label": "reuse/salvage value decision",
+      "value": "safety_hold_or_salvage_only"
+    },
+    {
+      "authority": "planning",
+      "evidence": "Resource coverage and splice planning are connected; final authority depends on closed evidence gates.",
+      "fact_id": "hardware_plan_status",
+      "label": "hardware plan status",
+      "value": "ready_for_build_plan"
+    }
+  ],
+  "mode": "board_omniscience_map",
+  "model_routes": {
+    "deepseek_or_text_reasoner": {
+      "never_treat_as": [
+        "instrument measurement",
+        "terminal outcome"
+      ],
+      "next_prompts": [],
+      "use_for": [
+        "field advisory",
+        "measurement ordering",
+        "contradiction review",
+        "project/use-case planning"
+      ]
+    },
+    "deterministic_engine": {
+      "use_for": [
+        "topology-to-netlist",
+        "simulation gate",
+        "authority ledger",
+        "release gating"
+      ],
+      "visual_topology_available": false
+    },
+    "qwen_vision": {
+      "never_treat_as": [
+        "measured pinout",
+        "safe power authorization",
+        "production repair authority"
+      ],
+      "next_prompts": [],
+      "use_for": [
+        "photo parsing",
+        "marking closeups",
+        "connector candidate extraction",
+        "damage observation"
+      ]
+    }
+  },
+  "next_evidence_batch": [],
+  "operator_playbook": {
+    "hold_until": [],
+    "level": "scoped_production_repair_map",
+    "now": [],
+    "safe_posture": "production_release"
+  },
+  "schema_version": "board_omniscience_map.v1",
+  "source_modules": {
+    "active_evidence_closure_plan": false,
+    "arbitrary_board_workflow": true,
+    "authority_ledger": true,
+    "hardware_plan": true,
+    "multiview_board_reconstruction": false,
+    "visual_topology_hypothesis": false
+  },
+  "summary": {
+    "authority_level": "production_repair",
+    "authority_score": 1.0,
+    "next_best_action_id": null,
+    "omniscience_level": "scoped_production_repair_map",
+    "omniscience_score": 1.0,
+    "primary_function": "usb_serial_debug_bridge",
+    "primary_function_confidence": 0.7,
+    "production_authorized": true,
+    "unknown_count": 0
+  },
+  "unknowns": []
+}

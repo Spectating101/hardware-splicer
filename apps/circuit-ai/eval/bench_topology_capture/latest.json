@@ -1,0 +1,161 @@
+{
+  "mode": "bench_topology_capture_eval",
+  "schema_version": "bench_topology_capture_eval.v1",
+  "generated_at": "2026-06-01T08:37:29.952106+00:00",
+  "source_boundary": "Public pinout references seed templates; only synthetic operator measurement packets are evaluated as bench evidence.",
+  "summary": {
+    "case_count": 3,
+    "pass_rate": 1.0,
+    "production_authorized_count": 1,
+    "weak_cases": []
+  },
+  "cases": [
+    {
+      "case_id": "sparkfun_reference_template_only",
+      "title": "Public CH340C pinout creates a capture template, not measured authority",
+      "score": 1.0,
+      "all_passed": true,
+      "status": "blocked_missing_resources",
+      "production_authorized": false,
+      "selected_resources": [],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "blocked_missing_resources",
+          "expected": "blocked_missing_resources"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "actionable_capture",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        }
+      ]
+    },
+    {
+      "case_id": "sparkfun_measured_bench_capture_authorized",
+      "title": "CH340C bench capture reaches narrow production authority after outcome and release",
+      "score": 1.0,
+      "all_passed": true,
+      "status": "ready_for_build_plan",
+      "production_authorized": true,
+      "selected_resources": [
+        "topology_j1"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "ready_for_build_plan",
+          "expected": "ready_for_build_plan"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "actionable_capture",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "selected_contains",
+          "passed": true,
+          "actual": [
+            "topology_j1"
+          ],
+          "expected": [
+            "topology_j1"
+          ]
+        },
+        {
+          "name": "missing_artifacts",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    },
+    {
+      "case_id": "sparkfun_bench_capture_missing_artifacts",
+      "title": "Measured CH340C capture without audit artifacts remains blocked for production",
+      "score": 1.0,
+      "all_passed": true,
+      "status": "ready_for_build_plan",
+      "production_authorized": false,
+      "selected_resources": [
+        "topology_j1"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "ready_for_build_plan",
+          "expected": "ready_for_build_plan"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "actionable_capture",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "selected_contains",
+          "passed": true,
+          "actual": [
+            "topology_j1"
+          ],
+          "expected": [
+            "topology_j1"
+          ]
+        },
+        {
+          "name": "missing_artifacts_nonempty",
+          "passed": true,
+          "actual": [
+            "continuity",
+            "current",
+            "resistance",
+            "thermal",
+            "voltage"
+          ],
+          "expected": "nonempty"
+        }
+      ]
+    }
+  ]
+}

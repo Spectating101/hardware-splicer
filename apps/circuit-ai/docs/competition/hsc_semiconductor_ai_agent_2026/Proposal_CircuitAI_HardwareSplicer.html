@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit.AI Hardware Splicer Proposal</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f7f8; color: #111827; font-family: Inter, Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif; line-height: 1.55; }
+.page { max-width: 880px; margin: 28px auto; background: white; border: 1px solid #dbe3ea; border-radius: 10px; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); padding: 44px 54px; }
+h1 { margin: 0 0 22px; color: #07111f; font-size: 30px; line-height: 1.15; letter-spacing: 0; }
+h2 { margin: 30px 0 12px; padding-top: 12px; border-top: 1px solid #e5edf2; color: #102033; font-size: 20px; line-height: 1.25; }
+h3 { margin: 22px 0 8px; color: #102033; font-size: 16px; }
+p { margin: 0 0 12px; }
+ul, ol { margin: 0 0 14px 22px; padding: 0; }
+li { margin: 4px 0; }
+pre { margin: 12px 0 16px; padding: 13px 14px; border: 1px solid #d8e2e8; border-radius: 7px; background: #f8fafc; color: #0f172a; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; line-height: 1.45; }
+code { font-family: "JetBrains Mono", Consolas, monospace; background: #f1f5f9; border-radius: 4px; padding: 1px 4px; font-size: 0.92em; }
+pre code { background: transparent; padding: 0; }
+table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px; }
+th, td { border: 1px solid #dbe3ea; padding: 8px 10px; text-align: left; vertical-align: top; }
+th { background: #f1f5f9; color: #334155; }
+.hero-note { margin: -8px 0 24px; color: #52647a; font-size: 13px; }
+.appendix { margin-top: 34px; page-break-before: always; }
+.figure { margin: 18px 0 24px; }
+.figure img { width: 100%; border: 1px solid #d8e2e8; border-radius: 8px; display: block; }
+.figure figcaption { margin-top: 8px; color: #52647a; font-size: 12px; }
+@page { margin: 18mm 16mm; }
+@media print { body { background: white; } .page { margin: 0; border: 0; box-shadow: none; padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+<main class="page">
+<div class="hero-note">Prepared for Hsin Chuan Semiconductor Academy AI Agent Practical Competition, 2026.</div>
+<h1>Proposal: Circuit.AI Hardware Splicer</h1>
+<h2>Project Title</h2>
+<p>Circuit.AI Hardware Splicer: an evidence-gated AI agent for circuit board</p>
+<p>understanding, repair, reuse, and safe hardware recomposition.</p>
+<h2>Applicant</h2>
+<ul>
+<li>Applicant name: <code>&lt;fill in&gt;</code></li>
+<li>School / department: <code>&lt;fill in&gt;</code></li>
+<li>Student ID: <code>&lt;fill in&gt;</code></li>
+<li>Email: <code>&lt;fill in&gt;</code></li>
+<li>Team size: solo</li>
+</ul>
+<h2>Abstract</h2>
+<p>Circuit.AI Hardware Splicer is an AI-agent system that helps turn unknown or</p>
+<p>partially documented circuit boards into repairable, reusable, and recomposable</p>
+<p>engineering assets. Unlike a simple PCB image labeler, the system builds an</p>
+<p>authority casefile from board photos, markings, public references, measured</p>
+<p>pinouts, voltage/current/thermal evidence, and bench outcomes. The agent is</p>
+<p>designed to refuse unsafe overclaims: visual evidence can plan measurements, but</p>
+<p>only trusted physical evidence can authorize repair or reuse. During July-August</p>
+<p>2026, the project will extend the current backend prototype into a competition</p>
+<p>demo covering multi-photo board intake, Qwen/vision-assisted evidence extraction,</p>
+<p>measurement closure, and a bilingual frontend showcase for semiconductor and</p>
+<p>electronics repair workflows.</p>
+<h2>Problem</h2>
+<p>Electronics repair and reuse often fail because the useful circuit functions on</p>
+<p>a board are hard to identify safely. A physical board may have undocumented</p>
+<p>connectors, unknown voltage domains, missing schematics, damaged regions, or</p>
+<p>incomplete labels. Existing visual AI tools can identify components, but they</p>
+<p>often overstate confidence and do not know whether a board can be powered,</p>
+<p>repaired, spliced, or reused.</p>
+<p>For semiconductor and electronics education, this creates a practical gap:</p>
+<p>students and makers can see parts on a board, but still need a disciplined path</p>
+<p>from observation to electrical evidence, test planning, and safe functional</p>
+<p>reuse.</p>
+<h2>Proposed Solution</h2>
+<p>Circuit.AI Hardware Splicer is an AI agent that converts messy board evidence</p>
+<p>into a structured production authority casefile.</p>
+<p>The agent separates three levels of truth:</p>
+<ol>
+<li>Candidate evidence: photos, markings, OCR, visual model output, public</li>
+</ol>
+<p>datasheets, and reference pinouts.</p>
+<ol>
+<li>Measured evidence: continuity, resistance, voltage, current, thermal, and</li>
+</ol>
+<p>connector pinout records with instrument and artifact provenance.</p>
+<ol>
+<li>Release evidence: terminal bench outcomes, first-power results, functional</li>
+</ol>
+<p>proof, release manifest, scope statement, and audit artifacts.</p>
+<p>This creates a safety-focused workflow:</p>
+<pre><code>board evidence -&gt; topology hypothesis -&gt; measurement plan -&gt; measured topology
+-&gt; simulation/check envelope -&gt; controlled bench -&gt; scoped repair/reuse release</code></pre>
+<p>The current prototype already demonstrates this flow through a live backend</p>
+<p>casefile endpoint and frontend showcase.</p>
+<h2>Current Prototype State</h2>
+<p>The current repository contains a working backend and frontend showcase.</p>
+<p>Live showcase route:</p>
+<pre><code>/showcase?state=release</code></pre>
+<p>Backend endpoint demonstrated:</p>
+<pre><code>POST /hardware/production-casefile/run</code></pre>
+<p>Verified demo behavior:</p>
+<ul>
+<li>Reference-only packet:</li>
+<li>authority level: <code>visual_candidate</code></li>
+<li>authority score: <code>0.18</code></li>
+<li>production authorization: false</li>
+<li>result: measurement capture required</li>
+</ul>
+<ul>
+<li>Release-ready packet:</li>
+<li>authority level: <code>production_repair</code></li>
+<li>authority score: <code>1.00</code></li>
+<li>production authorization: true</li>
+<li>result: production repair authorized for the scoped low-voltage reuse claim</li>
+</ul>
+<p>This is important because the system does not merely produce an answer. It</p>
+<p>shows why a claim is blocked or authorized.</p>
+<h2>AI Agent Design</h2>
+<p>The agent is composed of deterministic and model-assisted layers.</p>
+<h3>1. Visual And Reference Intake</h3>
+<p>Inputs may include:</p>
+<ul>
+<li>multiple board photos</li>
+<li>connector closeups</li>
+<li>IC marking closeups</li>
+<li>public product pages or datasheets</li>
+<li>known pinout references</li>
+<li>optional Qwen vision model output</li>
+</ul>
+<p>The output is candidate <code>board_evidence.v1</code>, not final truth.</p>
+<h3>2. Topology Hypothesis</h3>
+<p>The system fuses multiple observations into a candidate map:</p>
+<ul>
+<li>probable ICs</li>
+<li>connectors and headers</li>
+<li>likely rails</li>
+<li>candidate reusable functions</li>
+<li>no-cut or unsafe zones</li>
+<li>next photos or measurements needed</li>
+</ul>
+<h3>3. Measurement Authority</h3>
+<p>The agent creates a bench capture packet requiring:</p>
+<ul>
+<li>instrument identity</li>
+<li>calibration status</li>
+<li>operator and timestamp</li>
+<li>artifact URI</li>
+<li>resistance/no-short checks</li>
+<li>continuity checks</li>
+<li>voltage and current readings</li>
+<li>thermal observation</li>
+<li>functional bring-up proof</li>
+</ul>
+<h3>4. Production Casefile</h3>
+<p>The final casefile contains:</p>
+<ul>
+<li>current authority level</li>
+<li>authority score</li>
+<li>evidence gates</li>
+<li>open blockers</li>
+<li>release decision</li>
+<li>terminal outcome</li>
+<li>release manifest</li>
+<li>allowed and forbidden claims</li>
+</ul>
+<h3>5. LLM / Vision Model Role</h3>
+<p>Models are used to accelerate interpretation, not to replace evidence:</p>
+<ul>
+<li>Qwen VL or similar model: native multi-photo board evidence extraction.</li>
+<li>DeepSeek/Copilot-class models: structured reasoning over evidence packets.</li>
+<li>Deterministic verifier: blocks unsupported, unsafe, or overconfident claims.</li>
+</ul>
+<p>This architecture is practical for semiconductor AI because it uses models where</p>
+<p>they are useful but keeps electrical authority tied to measured evidence.</p>
+<h2>July-August Development Plan</h2>
+<p>If shortlisted, the token subsidy will be used to develop and evaluate:</p>
+<ol>
+<li>Multi-photo board intake and evidence fusion.</li>
+<li>Qwen-assisted visual extraction for connectors, IC markings, damage, and</li>
+</ol>
+<p>candidate reusable functions.</p>
+<ol>
+<li>Real-board case corpus with at least 10 measured board sessions.</li>
+<li>Measurement workflow UI for continuity, voltage, current, thermal, and</li>
+</ol>
+<p>functional proof.</p>
+<ol>
+<li>Bilingual English/Traditional Chinese demo mode.</li>
+<li>Final competition presentation with a live CH340C USB-serial reuse case.</li>
+</ol>
+<h2>Demonstration Scenario</h2>
+<p>The planned final demo will use a low-voltage USB serial board as the controlled</p>
+<p>example.</p>
+<ol>
+<li>The agent receives visual/reference evidence only.</li>
+<li>It identifies the CH340C board and useful UART header candidate.</li>
+<li>It refuses production repair authority because there is no measured topology.</li>
+<li>The operator adds measured pinout, no-short, voltage, current, thermal, and</li>
+</ol>
+<p>bench-loopback evidence.</p>
+<ol>
+<li>The agent promotes the case to production repair authority for a scoped</li>
+</ol>
+<p>low-voltage reuse claim.</p>
+<ol>
+<li>The UI displays the casefile, authority ladder, board topology, measurement</li>
+</ol>
+<p>closure, and release result.</p>
+<h2>Expected Deliverables</h2>
+<p>By the final presentation:</p>
+<ul>
+<li>live frontend demonstration</li>
+<li>backend casefile engine</li>
+<li>multi-photo intake example</li>
+<li>measured topology capture example</li>
+<li>authority ladder and safety gates</li>
+<li>bilingual UI layer</li>
+<li>short demo video</li>
+<li>technical architecture diagram</li>
+<li>evaluation report over real or curated board cases</li>
+</ul>
+<h2>Evaluation Metrics</h2>
+<p>The project will be evaluated by:</p>
+<ul>
+<li>whether the system refuses unsafe or unsupported claims</li>
+<li>whether visual evidence converts into useful measurement tasks</li>
+<li>whether measured evidence changes the authority state correctly</li>
+<li>whether the final release is scoped and auditable</li>
+<li>whether the frontend makes the workflow understandable to non-authors</li>
+<li>whether real-board examples improve from visual-only to measured-authority</li>
+</ul>
+<p>states</p>
+<h2>Fit For The Competition</h2>
+<p>This project fits the semiconductor AI-agent theme because it applies AI agents</p>
+<p>to a practical electronics and circuit-board workflow: understanding physical</p>
+<p>hardware, extracting reusable circuit functions, planning measurements, and</p>
+<p>supporting safe repair or reuse. It is not only a chatbot; it is an agentic</p>
+<p>engineering workflow with evidence gates, structured artifacts, and verifiable</p>
+<p>authority transitions.</p>
+<p>The project is also suitable for the July-August development subsidy because</p>
+<p>vision model tokens can directly improve board-photo interpretation and create</p>
+<p>measurable progress toward a final demo.</p>
+<h2>Risks And Safety</h2>
+<p>The system is intentionally conservative:</p>
+<ul>
+<li>visual evidence cannot authorize power-up or splice</li>
+<li>high-voltage, battery, damaged, and unknown-power regions remain blocked</li>
+<li>production repair requires measured topology and bench outcome evidence</li>
+<li>model output is advisory until checked by deterministic gates</li>
+<li>the frontend displays claim boundaries and remaining blockers</li>
+</ul>
+<p>This makes the project safer and more credible than an unrestricted AI repair</p>
+<p>advisor.</p>
+<h2>Requested Support</h2>
+<p>The monthly token subsidy would be used for:</p>
+<ul>
+<li>Qwen/native vision experiments on board photos</li>
+<li>structured model reasoning over evidence packets</li>
+<li>real-board case evaluation</li>
+<li>bilingual demo refinement</li>
+<li>final presentation preparation</li>
+</ul>
+<h2>Summary</h2>
+<p>Circuit.AI Hardware Splicer aims to make unknown circuit boards legible,</p>
+<p>measurable, reusable, and safer to work with. The current prototype already</p>
+<p>shows the core authority transition. The competition period would be used to</p>
+<p>turn this into a polished AI-agent demo for semiconductor/electronics repair,</p>
+<p>reuse, and education.</p>
+
+<section class="appendix">
+  <h2>Appendix: Current Live Showcase Screenshots</h2>
+  <figure class="figure"><img src="assets/showcase_release_desktop.png" alt="Release-ready desktop showcase"><figcaption>Release-ready state: production repair authorized, authority score 1.00, 6/6 gates closed.</figcaption></figure>
+  <figure class="figure"><img src="assets/showcase_reference_desktop.png" alt="Reference-only desktop showcase"><figcaption>Reference-only state: visual candidate, authority score 0.18, measurement required.</figcaption></figure>
+  <figure class="figure"><img src="assets/showcase_release_mobile.png" alt="Mobile showcase"><figcaption>Mobile first viewport of the same integrated showcase.</figcaption></figure>
+</section>
+
+</main>
+</body>
+</html>

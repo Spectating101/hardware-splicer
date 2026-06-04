@@ -20,7 +20,10 @@ cite_agent_path = Path(__file__).parent.parent.parent.parent / "Cite-Agent"
 if cite_agent_path.exists():
     sys.path.insert(0, str(cite_agent_path))
 
-from groq import Groq
+try:
+    from groq import Groq
+except Exception:  # pragma: no cover - optional provider import
+    Groq = None
 
 # Load .env.local if it exists
 from pathlib import Path
@@ -59,11 +62,26 @@ class LLMIntentParser:
         self.provider = None
 
         if use_llm:
+            # Prefer the local Copilot CLI/OAuth provider for engine testing.
+            try:
+                from src.intelligence.copilot_provider import DEFAULT_COPILOT_MODEL, copilot_provider_status
+
+                copilot_model = os.getenv("COPILOT_MODEL") or DEFAULT_COPILOT_MODEL
+                if copilot_provider_status(copilot_model).get("ready_for_live_model"):
+                    self.client = None
+                    self.provider = "copilot"
+                    self.model = copilot_model
+                    logger.info("LLM-based intent parser initialized with local Copilot CLI")
+            except Exception as e:
+                logger.warning(f"Copilot initialization failed: {e}")
+
             # Try Cerebras first (from .env.local)
-            cerebras_key = (os.getenv('CEREBRAS_API_KEY') or
-                          os.getenv('CEREBRAS_API_KEY_1') or
-                          os.getenv('CEREBRAS_API_KEY_2'))
-            if cerebras_key:
+            cerebras_key = (
+                os.getenv('CEREBRAS_API_KEY')
+                or os.getenv('CEREBRAS_API_KEY_1')
+                or os.getenv('CEREBRAS_API_KEY_2')
+            )
+            if not self.provider and cerebras_key:
                 try:
                     from openai import OpenAI
                     self.client = OpenAI(
@@ -80,28 +98,17 @@ class LLMIntentParser:
                 groq_key = os.getenv('GROQ_API_KEY') or os.getenv('GROQ_API_KEY_1')
                 if groq_key:
                     try:
+                        if Groq is None:
+                            raise RuntimeError("groq package is not installed")
                         self.client = Groq(api_key=groq_key)
                         self.provider = 'groq'
                         logger.info("LLM-based intent parser initialized with Groq")
                     except Exception as e:
                         logger.warning(f"Groq initialization failed: {e}")
 
-            # Try Gemini as last resort
-            if not self.provider:
-                gemini_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
-                if gemini_key:
-                    try:
-                        import google.generativeai as genai
-                        genai.configure(api_key=gemini_key)
-                        self.client = genai.GenerativeModel('gemini-1.5-flash')
-                        self.provider = 'gemini'
-                        logger.info("LLM-based intent parser initialized with Gemini")
-                    except Exception as e:
-                        logger.warning(f"Gemini initialization failed: {e}")
-
             # No LLM available
             if not self.provider:
-                logger.warning("No LLM API key found - falling back to keyword matching")
+                logger.warning("No local Copilot provider or LLM API fallback found - falling back to keyword matching")
                 self.use_llm = False
 
         # Always initialize fallback keyword parser
@@ -209,9 +216,14 @@ Respond with ONLY valid JSON, no explanation outside the JSON.
             )
             result_text = response.choices[0].message.content.strip()
 
-        elif self.provider == 'gemini':
-            response = self.client.generate_content(prompt)
-            result_text = response.text.strip()
+        elif self.provider == "copilot":
+            from src.intelligence.copilot_provider import call_copilot_prompt
+
+            result_text, _model = call_copilot_prompt(
+                "You are an expert hardware design assistant. Always respond with valid JSON only.\n\n"
+                + prompt,
+                model=getattr(self, "model", None),
+            )
 
         else:
             raise ValueError("No LLM provider available")
@@ -270,7 +282,21 @@ def create_parser(use_llm: bool = None) -> LLMIntentParser:
         LLMIntentParser instance
     """
     if use_llm is None:
-        # Auto-detect: use LLM if API key available
-        use_llm = bool(os.getenv('GROQ_API_KEY') or os.getenv('GROQ_API_KEY_1'))
+        # Auto-detect: use LLM if local Copilot is ready or an API fallback is available.
+        copilot_ready = False
+        try:
+            from src.intelligence.copilot_provider import copilot_provider_status
+
+            copilot_ready = bool(copilot_provider_status().get("ready_for_live_model"))
+        except Exception:
+            copilot_ready = False
+        use_llm = bool(
+            copilot_ready
+            or os.getenv('CEREBRAS_API_KEY')
+            or os.getenv('CEREBRAS_API_KEY_1')
+            or os.getenv('CEREBRAS_API_KEY_2')
+            or os.getenv('GROQ_API_KEY')
+            or os.getenv('GROQ_API_KEY_1')
+        )
 
     return LLMIntentParser(use_llm=use_llm)

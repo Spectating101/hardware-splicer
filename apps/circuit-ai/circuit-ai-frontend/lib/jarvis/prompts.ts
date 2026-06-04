@@ -1,6 +1,8 @@
 // System prompts for each Jarvis flow. Keep short and opinionated; verbose
 // prompts waste tokens and drift model behavior.
 
+import { BOARD_EVIDENCE_OUTPUT_INSTRUCTION } from "./board-evidence";
+
 export type JarvisFlow = "chat" | "identify" | "salvage" | "project";
 
 const SAFETY_PREAMBLE = `
@@ -32,7 +34,8 @@ not generic datasheet recitation.`,
   identify: `${SAFETY_PREAMBLE}
 
 You're in IDENTIFY mode. You will be shown an image of a PCB, a component, or
-a broken device. Respond with a JSON object matching this schema:
+a broken device, or an image-derived evidence packet from local CV/OCR.
+Respond with a JSON object matching this schema:
 
 {
   "safety_level": "safe" | "caution" | "hazard",
@@ -50,13 +53,14 @@ a broken device. Respond with a JSON object matching this schema:
 }
 
 Bounding boxes are normalized (0–1). Omit bbox if you can't localize confidently.
+${BOARD_EVIDENCE_OUTPUT_INSTRUCTION}
 Output ONLY the JSON — no prose, no code fences.`,
 
   salvage: `${SAFETY_PREAMBLE}
 
 You're in SALVAGE mode. Given a photo/description of a dead or unwanted device,
-decompose it into functional modules the user could cut out and reuse. Output
-ONLY JSON:
+or an image-derived evidence packet from local CV/OCR, decompose it into
+functional modules the user could cut out and reuse. Output ONLY JSON:
 
 {
   "safety_level": "safe" | "caution" | "hazard",
@@ -76,7 +80,8 @@ ONLY JSON:
 }
 
 Prioritize modules that (a) still work independently, (b) are easy to extract
-with hand tools, (c) have obvious reuse value.`,
+with hand tools, (c) have obvious reuse value.
+${BOARD_EVIDENCE_OUTPUT_INSTRUCTION}`,
 
   project: `${SAFETY_PREAMBLE}
 

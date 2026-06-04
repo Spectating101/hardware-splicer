@@ -1,0 +1,396 @@
+{
+  "mode": "live",
+  "schema_version": "field_model_advisory.v1",
+  "live_requested": true,
+  "provider_status": {
+    "status": "ready",
+    "ready_for_live_model": true,
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "blockers": []
+  },
+  "field_action_id": "capture_topology_or_supply_netlist",
+  "field_action_type": "capture_or_measurement",
+  "field_authority": "operational_advisory",
+  "context_summary": {
+    "connector_count": 7,
+    "component_count": 2,
+    "marking_count": 2,
+    "measurement_task_count": 35,
+    "release_decision": "test_fixture_required",
+    "field_action_id": "capture_topology_or_supply_netlist"
+  },
+  "claim_boundary": "Live model advisory can prioritize and format field measurements only. It cannot verify power, no-short, pinout, current, thermal behavior, splice safety, repair authority, or production release.",
+  "ready_for_live_model": true,
+  "model": "deepseek/deepseek-v4-flash",
+  "raw_response_parsed": true,
+  "parse_diagnostics": {
+    "json_valid": true,
+    "content_length": 4162,
+    "raw_response_excerpt": "{\n  \"schema_version\": \"field_model_advisory.v1\",\n  \"field_call_alignment\": \"capture_topology_or_supply_netlist\",\n  \"measurement_priorities\": [\n    {\n      \"priority\": 1,\n      \"target\": \"gpio_header\",\n      \"action\": \"Measure continuity and no-short between all pins and ground\",\n      \"why\": \"GPIO header is primary salvage candidate; missing pin continuity and short evidence\",\n      \"expected_evidence\": \"Continuity map and no-short pass/fail for each pin\",\n      \"stop_condition\": \"All 40 pins measured with no short to ground\"\n    },\n    {\n      \"priority\": 2,\n      \"target\": \"gpio_header\",\n      \"action\": \"Measure voltage on supply pins under current-limited power\",\n      \"why\": \"Determine rail voltage and polarity before external connection\",\n      \"expected_evidence\": \"Voltage reading for each supply pin\",\n      \"stop_condition\": \"All supply pins measured\"\n    },\n    {\n      \"priority\": 3,\n      \"target\": \"usb_c\",\n      \"action\": \"Measure continuity from USB-C VBUS to candidate power rails\",\n      \"why\": \"USB-C is likely main power input; need to trace power distribution\",\n      \"expected_evidence\": \"Continuity between USB-C VBUS and board power rails\",\n      \"stop_condition\": \"VBUS continuity confirmed or ruled out\"\n    },\n    {\n      \"priority\": 4,\n      \"target\": \"ethernet\",\n      \"action\": \"Measure continuity and no-short on RJ45 pins\",\n      \"why\": \"Ethernet port is salvage candidate; need to verify pin integrity\",\n      \"expected_evidence\": \"Continuity map and no-short pass/fail\",\n      \"stop_condition\": \"All 8 pins measured\"\n    },\n    {\n      \"priority\": 5,\n      \"target\": \"usb_a_1\",\n      \"action\": \"Measure continuity and no-short on USB-A port 1 pins\",\n      \"why\": \"USB-A ports are salvage candidates; need to check for damage\",\n      \"expected_evidence\": \"Continuity map and no-short pass/fail\",\n      \"stop_condition\": \"All 4 pins measured\"\n    },\n    {\n      \"priority\": 6,\n      \"target\": \"hdmip\",\n      \"action\": \"Measure continuity and no-short on HDMI "
+  },
+  "advisory": {
+    "schema_version": "field_model_advisory.v1",
+    "field_call_alignment": "capture_topology_or_supply_netlist",
+    "measurement_priorities": [
+      {
+        "priority": 1,
+        "target": "gpio_header",
+        "action": "Measure continuity and no-short between all pins and ground",
+        "why": "GPIO header is primary salvage candidate; missing pin continuity and short evidence",
+        "expected_evidence": "Continuity map and no-short pass/fail for each pin",
+        "stop_condition": "All 40 pins measured with no short to ground"
+      },
+      {
+        "priority": 2,
+        "target": "gpio_header",
+        "action": "Measure voltage on supply pins under current-limited power",
+        "why": "Determine rail voltage and polarity before external connection",
+        "expected_evidence": "Voltage reading for each supply pin",
+        "stop_condition": "All supply pins measured"
+      },
+      {
+        "priority": 3,
+        "target": "usb_c",
+        "action": "Measure continuity from USB-C VBUS to candidate power rails",
+        "why": "USB-C is likely main power input; need to trace power distribution",
+        "expected_evidence": "Continuity between USB-C VBUS and board power rails",
+        "stop_condition": "VBUS continuity confirmed or ruled out"
+      },
+      {
+        "priority": 4,
+        "target": "ethernet",
+        "action": "Measure continuity and no-short on RJ45 pins",
+        "why": "Ethernet port is salvage candidate; need to verify pin integrity",
+        "expected_evidence": "Continuity map and no-short pass/fail",
+        "stop_condition": "All 8 pins measured"
+      },
+      {
+        "priority": 5,
+        "target": "usb_a_1",
+        "action": "Measure continuity and no-short on USB-A port 1 pins",
+        "why": "USB-A ports are salvage candidates; need to check for damage",
+        "expected_evidence": "Continuity map and no-short pass/fail",
+        "stop_condition": "All 4 pins measured"
+      },
+      {
+        "priority": 6,
+        "target": "hdmip",
+        "action": "Measure continuity and no-short on HDMI pins",
+        "why": "HDMI port may be salvageable; need pin integrity data",
+        "expected_evidence": "Continuity map and no-short pass/fail",
+        "stop_condition": "All 19 pins measured"
+      }
+    ],
+    "qwen_evidence_uses": [
+      {
+        "evidence_label": "gpio_header",
+        "use": "Identify pin-1 orientation and likely supply/ground pins from visual inspection",
+        "limitation": "Cannot confirm actual connectivity or voltage without measurement"
+      },
+      {
+        "evidence_label": "usb_c",
+        "use": "Identify USB-C as power input candidate",
+        "limitation": "Cannot confirm VBUS routing or voltage without measurement"
+      },
+      {
+        "evidence_label": "ethernet",
+        "use": "Identify RJ45 connector and pin count",
+        "limitation": "Cannot confirm signal integrity or shielding without measurement"
+      },
+      {
+        "evidence_label": "usb_a_1",
+        "use": "Identify USB-A port and pin locations",
+        "limitation": "Cannot confirm contact integrity or data line continuity without measurement"
+      },
+      {
+        "evidence_label": "hdmip",
+        "use": "Identify HDMI connector and pin count",
+        "limitation": "Cannot confirm pin mapping or signal presence without measurement"
+      }
+    ],
+    "warnings": [
+      "Do not apply power until ground continuity and no-short are confirmed on all candidate supply pins",
+      "GPIO header pin-1 orientation must be verified by visual inspection before measurement",
+      "USB-C may have multiple power roles; measure voltage under current limit only",
+      "Ethernet transformer may isolate signals; continuity tests may not reflect actual connectivity",
+      "HDMI pins are closely spaced; use fine probes to avoid shorts"
+    ],
+    "operator_prompt": "",
+    "structured_measurement_template": {
+      "connector_ref": "",
+      "pin": "",
+      "measurement_type": "continuity|no_short|voltage|current",
+      "value": "",
+      "unit": "ohm|V|A",
+      "notes": ""
+    },
+    "forbidden_claims": [
+      "Board is safe to power",
+      "Board is ready for splice",
+      "Board is reusable without repair",
+      "All connectors are functional",
+      "Power rail voltage is within specification",
+      "No damage present on board"
+    ]
+  },
+  "verifier": {
+    "status": "advisory_only",
+    "blocked_terms": [],
+    "model_claims_are_advisory": true,
+    "power_or_splice_authorized": false
+  },
+  "field_operator": {
+    "mode": "hardware_field_operator",
+    "schema_version": "hardware_field_operator_next_action.v1",
+    "available": true,
+    "operational_call": {
+      "action_id": "capture_topology_or_supply_netlist",
+      "action_type": "capture_or_measurement",
+      "priority": 2,
+      "authority": "operational_advisory",
+      "summary": "Capture measured topology or supply a versioned simulation netlist.",
+      "why": "The module-level test suite exists, but a versioned netlist is required before deterministic simulation.",
+      "tools": [
+        "Qwen vision pass for connector candidates",
+        "DMM continuity mode",
+        "current-limited supply",
+        "close-up camera"
+      ],
+      "procedure": [
+        "Use Qwen/vision to identify candidate connectors, rails, labels, and likely pin groups.",
+        "Measure ground continuity and power-to-ground no-short.",
+        "Measure rail voltage and polarity under current limit.",
+        "Measure load/source current when safe.",
+        "Submit topology_evidence.v1 or a versioned netlist and rerun the field operator."
+      ],
+      "pass_fail_thresholds": {
+        "minimum_required": [
+          "ground",
+          "power rail voltage",
+          "no-short",
+          "source/load current or source limit"
+        ]
+      },
+      "expected_input_schema": {
+        "topology_evidence": {
+          "connectors": [
+            {
+              "ref": "string",
+              "pins": [
+                {
+                  "pin": "string",
+                  "net": "string",
+                  "role": "power|ground|signal",
+                  "voltage": "number|null"
+                }
+              ]
+            }
+          ],
+          "resistance": [
+            {
+              "target": "power to ground no-short",
+              "value": "pass|fail"
+            }
+          ],
+          "current": [
+            {
+              "target": "current draw under current-limited supply",
+              "value": "number",
+              "unit": "A|mA"
+            }
+          ]
+        }
+      },
+      "on_pass": "Compiler should emit a netlist or bounded envelope.",
+      "on_fail": "Continue topology capture; do not power/splice without measured topology."
+    },
+    "candidate_actions": [
+      {
+        "action_id": "capture_topology_or_supply_netlist",
+        "action_type": "capture_or_measurement",
+        "priority": 2,
+        "authority": "operational_advisory",
+        "summary": "Capture measured topology or supply a versioned simulation netlist.",
+        "why": "The module-level test suite exists, but a versioned netlist is required before deterministic simulation.",
+        "tools": [
+          "Qwen vision pass for connector candidates",
+          "DMM continuity mode",
+          "current-limited supply",
+          "close-up camera"
+        ],
+        "procedure": [
+          "Use Qwen/vision to identify candidate connectors, rails, labels, and likely pin groups.",
+          "Measure ground continuity and power-to-ground no-short.",
+          "Measure rail voltage and polarity under current limit.",
+          "Measure load/source current when safe.",
+          "Submit topology_evidence.v1 or a versioned netlist and rerun the field operator."
+        ],
+        "pass_fail_thresholds": {
+          "minimum_required": [
+            "ground",
+            "power rail voltage",
+            "no-short",
+            "source/load current or source limit"
+          ]
+        },
+        "expected_input_schema": {
+          "topology_evidence": {
+            "connectors": [
+              {
+                "ref": "string",
+                "pins": [
+                  {
+                    "pin": "string",
+                    "net": "string",
+                    "role": "power|ground|signal",
+                    "voltage": "number|null"
+                  }
+                ]
+              }
+            ],
+            "resistance": [
+              {
+                "target": "power to ground no-short",
+                "value": "pass|fail"
+              }
+            ],
+            "current": [
+              {
+                "target": "current draw under current-limited supply",
+                "value": "number",
+                "unit": "A|mA"
+              }
+            ]
+          }
+        },
+        "on_pass": "Compiler should emit a netlist or bounded envelope.",
+        "on_fail": "Continue topology capture; do not power/splice without measured topology."
+      },
+      {
+        "action_id": "kit_next_1",
+        "action_type": "followup",
+        "priority": 6,
+        "summary": "Fill the simulation fixture with measured source voltage, source current limit, load current, trace/regulator model, and rail constraints.",
+        "authority": "operational_advisory"
+      },
+      {
+        "action_id": "kit_next_2",
+        "action_type": "followup",
+        "priority": 7,
+        "summary": "Record terminal outcome proof only after simulation and bench evidence agree.",
+        "authority": "operational_advisory"
+      }
+    ],
+    "model_assignments": [
+      {
+        "model": "qwen_vision",
+        "role": "field_visual_candidate",
+        "call": "extract candidate topology from board and connector photos",
+        "input_needed": [
+          "whole board photo",
+          "connector close-up",
+          "markings/source/load label photo"
+        ],
+        "output_schema": {
+          "candidate_connectors": [],
+          "candidate_power_ground_pins": [],
+          "candidate_markings": [],
+          "measurement_targets": [],
+          "confidence": "candidate_only"
+        },
+        "authority_boundary": "Qwen can propose where to probe; it cannot verify voltage, current, no-short, or safety."
+      },
+      {
+        "model": "deepseek_reasoner",
+        "role": "field_reasoning_assistant",
+        "call": "prioritize measurements needed to convert candidates into topology evidence",
+        "input_needed": [
+          "current field call",
+          "test-kit decision",
+          "operator notes",
+          "measurement results"
+        ],
+        "output_schema": {
+          "plain_language_steps": [],
+          "risk_explanation": "string",
+          "candidate_redesigns": [],
+          "structured_measurement_update": {}
+        },
+        "authority_boundary": "DeepSeek can structure notes, explain failures, and suggest next measurements; deterministic gates decide trust."
+      },
+      {
+        "model": "backend_validator",
+        "role": "deterministic_gatekeeper",
+        "call": "rerun topology compiler, power-tree simulation, and design test kit after new evidence",
+        "authority_boundary": "Only measured evidence plus deterministic gates can advance power/splice/release state."
+      }
+    ],
+    "decision_inputs": {
+      "release_decision": "test_fixture_required",
+      "release_reason": "The module-level test suite exists, but a versioned netlist is required before deterministic simulation.",
+      "test_score": 0.38,
+      "fail_count": 0,
+      "blocked_count": 0,
+      "pending_count": 6,
+      "simulation_available": false,
+      "simulation_issue_count": 0,
+      "compiled_topology_available": false,
+      "compiled_coverage": {
+        "score": 0.0,
+        "dimensions": {
+          "power_rail": false,
+          "ground_reference": false,
+          "load_model": false,
+          "voltage_constraints": false
+        }
+      }
+    },
+    "capture_packet": {
+      "packet_id": "field_packet_capture_topology_or_supply_netlist",
+      "action_id": "capture_topology_or_supply_netlist",
+      "expected_input_schema": {
+        "topology_evidence": {
+          "connectors": [
+            {
+              "ref": "string",
+              "pins": [
+                {
+                  "pin": "string",
+                  "net": "string",
+                  "role": "power|ground|signal",
+                  "voltage": "number|null"
+                }
+              ]
+            }
+          ],
+          "resistance": [
+            {
+              "target": "power to ground no-short",
+              "value": "pass|fail"
+            }
+          ],
+          "current": [
+            {
+              "target": "current draw under current-limited supply",
+              "value": "number",
+              "unit": "A|mA"
+            }
+          ]
+        }
+      },
+      "pass_fail_thresholds": {
+        "minimum_required": [
+          "ground",
+          "power rail voltage",
+          "no-short",
+          "source/load current or source limit"
+        ]
+      },
+      "on_pass": "Compiler should emit a netlist or bounded envelope.",
+      "on_fail": "Continue topology capture; do not power/splice without measured topology.",
+      "artifact_required": true
+    },
+    "claim_boundary": "The field operator can choose photos, measurements, stop calls, and redesign tasks. Qwen/DeepSeek outputs are advisory field observations until measured evidence and deterministic gates confirm them. The field operator cannot independently authorize high-risk power, splice, or production release."
+  }
+}

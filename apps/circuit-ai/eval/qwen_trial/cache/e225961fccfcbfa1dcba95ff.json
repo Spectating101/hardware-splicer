@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T08:49:14.382851+00:00",
+  "request_preview": "eval/qwen_trial/requests/single_test_pcb_e225961fccfcbfa1dcba95ff.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"unknown\",\n  \"explanation\": \"The board contains generic labeled components: 'IC Chip', 'Cap' (capacitor), and 'Res' (resistor). No visible safety-critical features, high-voltage traces, or medical/industrial markings. No evidence of hazardous voltages or dangerous configurations. However, no actual part numbers, voltage ratings, or circuit context are visible to assess safety beyond component type.\",\n  \"components/modules\": [\n    {\n      \"type\": \"IC Chip\",\n      \"label\": \"IC Chip\",\n      \"bbox\": [0.125, 0.1875, 0.375, 0.3125]\n    },\n    {\n      \"type\": \"Capacitor\",\n      \"label\": \"Cap\",\n      \"bbox\": [0.484375, 0.125, 0.625, 0.208333]\n    },\n    {\n      \"type\": \"Resistor\",\n      \"label\": \"Res\",\n      \"bbox\": [0.125, 0.484375, 0.25, 0.625]\n    }\n  ],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"detections\": [\n      {\n        \"type\": \"IC Chip\",\n        \"confidence\": 0.9,\n        \"bbox\": [0.125, 0.1875, 0.375, 0.3125],\n        \"source\": \"crop 01_fm\"\n      },\n      {\n        \"type\": \"Capacitor\",\n        \"confidence\": 0.9,\n        \"bbox\": [0.484375, 0.125, 0.625, 0.208333],\n        \"source\": \"crop 01_fm\"\n      },\n      {\n        \"type\": \"Resistor\",\n        \"confidence\": 0.9,\n        \"bbox\": [0.125, 0.484375, 0.25, 0.625],\n        \"source\": \"crop 01_fm\"\n      }\n    ]\n  }\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 413,
+      "completion_tokens": 501,
+      "total_tokens": 914,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 501
+      }
+    },
+    "created": 1779698954,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-be98fab1-32ed-92c2-877c-9fe4d5c7dbac"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "safety_level": "unknown",
+    "component_count": 0,
+    "module_count": 0,
+    "evidence_component_count": 0,
+    "marking_count": 0,
+    "connector_count": 0,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 413,
+    "output_tokens": 501,
+    "estimated_usd": 0.000117,
+    "elapsed_s": 7.014
+  }
+}

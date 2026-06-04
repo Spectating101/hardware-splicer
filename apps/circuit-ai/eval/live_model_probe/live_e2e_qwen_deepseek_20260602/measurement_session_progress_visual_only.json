@@ -1,0 +1,3125 @@
+{
+  "authority_closure": null,
+  "available": true,
+  "capture_integrity": {
+    "actionable_topology": false,
+    "artifact_categories": [],
+    "capture_available": false,
+    "claim_boundary": "Integrity covers measurement packet auditability only; functional outcome and release manifest are separate gates.",
+    "connector_count": 0,
+    "known_pin_count": 0,
+    "measurement_categories": [],
+    "measurement_count": 0,
+    "missing_artifact_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "missing_measurement_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "missing_root_provenance": [
+      "instrument_id",
+      "instrument_type",
+      "calibration_status",
+      "recorded_at",
+      "operator_id",
+      "evidence_uri"
+    ],
+    "missing_trusted_categories": [
+      "continuity",
+      "current",
+      "resistance",
+      "thermal",
+      "voltage"
+    ],
+    "pinout_known": false,
+    "reference_only": false,
+    "schema_version": "measurement_capture_integrity.v1",
+    "shorts_detected": false,
+    "topology_available": false,
+    "trusted_categories": [],
+    "trusted_measurement_count": 0,
+    "trusted_root_provenance": false,
+    "unknown_pin_count": 0,
+    "verdict": "measurement_capture_required"
+  },
+  "claim_boundary": "Session progress means the operator packet is becoming complete. It does not itself authorize power, splice, or repair; authority comes from measured topology closure and downstream outcome/release gates.",
+  "draft_bench_topology_capture": {
+    "artifacts": [
+      {
+        "kind": "photo",
+        "notes": "Pinout close-up with pin 1 marked.",
+        "uri": ""
+      },
+      {
+        "kind": "measurement_log",
+        "notes": "DMM/supply/thermal readings used for this capture.",
+        "uri": ""
+      }
+    ],
+    "capture_id": "",
+    "connectors": [
+      {
+        "kind": "connector",
+        "label": "3.5mm Audio Jack",
+        "pin_count": 0,
+        "pins": [],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "audio-jack",
+        "reference_note": "",
+        "reference_seed": false,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "40-pin GPIO Header",
+        "pin_count": 40,
+        "pins": [
+          {
+            "label": "3V3",
+            "logic_voltage": null,
+            "net": "3V3",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 3.3
+          },
+          {
+            "label": "5V",
+            "logic_voltage": null,
+            "net": "5V",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "GPIO2_SDA1",
+            "logic_voltage": 3.3,
+            "net": "GPIO2_SDA1",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_sda",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "5V",
+            "logic_voltage": null,
+            "net": "5V",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "GPIO3_SCL1",
+            "logic_voltage": 3.3,
+            "net": "GPIO3_SCL1",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "5",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_scl",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "6",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO4",
+            "logic_voltage": 3.3,
+            "net": "GPIO4",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "7",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO14_TXD0",
+            "logic_voltage": 3.3,
+            "net": "GPIO14_TXD0",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "8",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "uart_tx",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "9",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO15_RXD0",
+            "logic_voltage": 3.3,
+            "net": "GPIO15_RXD0",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "10",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "uart_rx",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO17",
+            "logic_voltage": 3.3,
+            "net": "GPIO17",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "11",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO18_PWM0",
+            "logic_voltage": 3.3,
+            "net": "GPIO18_PWM0",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "12",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO27",
+            "logic_voltage": 3.3,
+            "net": "GPIO27",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "13",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "14",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO22",
+            "logic_voltage": 3.3,
+            "net": "GPIO22",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "15",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO23",
+            "logic_voltage": 3.3,
+            "net": "GPIO23",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "16",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "3V3",
+            "logic_voltage": null,
+            "net": "3V3",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "17",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 3.3
+          },
+          {
+            "label": "GPIO24",
+            "logic_voltage": 3.3,
+            "net": "GPIO24",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "18",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO10_MOSI",
+            "logic_voltage": 3.3,
+            "net": "GPIO10_MOSI",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "19",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "spi_mosi",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "20",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO9_MISO",
+            "logic_voltage": 3.3,
+            "net": "GPIO9_MISO",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "21",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "spi_miso",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO25",
+            "logic_voltage": 3.3,
+            "net": "GPIO25",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "22",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO11_SCLK",
+            "logic_voltage": 3.3,
+            "net": "GPIO11_SCLK",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "23",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "spi_sck",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO8_CE0",
+            "logic_voltage": 3.3,
+            "net": "GPIO8_CE0",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "24",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "spi_cs",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "25",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO7_CE1",
+            "logic_voltage": 3.3,
+            "net": "GPIO7_CE1",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "26",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "spi_cs",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO0_ID_SD",
+            "logic_voltage": 3.3,
+            "net": "GPIO0_ID_SD",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "27",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_sda",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO1_ID_SC",
+            "logic_voltage": 3.3,
+            "net": "GPIO1_ID_SC",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "28",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_scl",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO5",
+            "logic_voltage": 3.3,
+            "net": "GPIO5",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "29",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "30",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO6",
+            "logic_voltage": 3.3,
+            "net": "GPIO6",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "31",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO12_PWM0",
+            "logic_voltage": 3.3,
+            "net": "GPIO12_PWM0",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "32",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO13_PWM1",
+            "logic_voltage": 3.3,
+            "net": "GPIO13_PWM1",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "33",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "34",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO19_PCM_FS",
+            "logic_voltage": 3.3,
+            "net": "GPIO19_PCM_FS",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "35",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO16",
+            "logic_voltage": 3.3,
+            "net": "GPIO16",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "36",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO26",
+            "logic_voltage": 3.3,
+            "net": "GPIO26",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "37",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO20_PCM_DIN",
+            "logic_voltage": 3.3,
+            "net": "GPIO20_PCM_DIN",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "38",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "39",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GPIO21_PCM_DOUT",
+            "logic_voltage": 3.3,
+            "net": "GPIO21_PCM_DOUT",
+            "notes": "Raspberry Pi 40-pin GPIO reference seed; confirm physical orientation and voltage before use.",
+            "pin": "40",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "logic_io",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "gpio",
+        "reference_note": "Raspberry Pi 40-pin GPIO reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "Display Port (eDP)",
+        "pin_count": 0,
+        "pins": [],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "display",
+        "reference_note": "",
+        "reference_seed": false,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "HDMI",
+        "pin_count": 19,
+        "pins": [
+          {
+            "label": "TMDS2+",
+            "logic_voltage": null,
+            "net": "TMDS2+",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS2_SHIELD",
+            "logic_voltage": null,
+            "net": "TMDS2_SHIELD",
+            "notes": "HDMI shield/reference; use reference only.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS2-",
+            "logic_voltage": null,
+            "net": "TMDS2-",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS1+",
+            "logic_voltage": null,
+            "net": "TMDS1+",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS1_SHIELD",
+            "logic_voltage": null,
+            "net": "TMDS1_SHIELD",
+            "notes": "HDMI shield/reference; use reference only.",
+            "pin": "5",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS1-",
+            "logic_voltage": null,
+            "net": "TMDS1-",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "6",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS0+",
+            "logic_voltage": null,
+            "net": "TMDS0+",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "7",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS0_SHIELD",
+            "logic_voltage": null,
+            "net": "TMDS0_SHIELD",
+            "notes": "HDMI shield/reference; use reference only.",
+            "pin": "8",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS0-",
+            "logic_voltage": null,
+            "net": "TMDS0-",
+            "notes": "HDMI high-speed pair; use reference only.",
+            "pin": "9",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS_CLK+",
+            "logic_voltage": null,
+            "net": "TMDS_CLK+",
+            "notes": "HDMI high-speed clock pair; use reference only.",
+            "pin": "10",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS_CLK_SHIELD",
+            "logic_voltage": null,
+            "net": "TMDS_CLK_SHIELD",
+            "notes": "HDMI shield/reference; use reference only.",
+            "pin": "11",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "TMDS_CLK-",
+            "logic_voltage": null,
+            "net": "TMDS_CLK-",
+            "notes": "HDMI high-speed clock pair; use reference only.",
+            "pin": "12",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "CEC",
+            "logic_voltage": null,
+            "net": "CEC",
+            "notes": "HDMI CEC signal; confirm before use.",
+            "pin": "13",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "UTILITY",
+            "logic_voltage": null,
+            "net": "UTILITY",
+            "notes": "Reserved/utility pin varies by implementation.",
+            "pin": "14",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "SCL",
+            "logic_voltage": 5.0,
+            "net": "SCL",
+            "notes": "HDMI DDC clock; confirm level and protection.",
+            "pin": "15",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_scl",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "SDA",
+            "logic_voltage": 5.0,
+            "net": "SDA",
+            "notes": "HDMI DDC data; confirm level and protection.",
+            "pin": "16",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "i2c_sda",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "DDC_GND",
+            "logic_voltage": null,
+            "net": "DDC_GND",
+            "notes": "HDMI DDC/CEC ground.",
+            "pin": "17",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "+5V",
+            "logic_voltage": null,
+            "net": "+5V",
+            "notes": "HDMI +5V; do not use as project power without measurement.",
+            "pin": "18",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "HPD",
+            "logic_voltage": null,
+            "net": "HPD",
+            "notes": "HDMI hot-plug detect; confirm before use.",
+            "pin": "19",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "hdmi",
+        "reference_note": "Common HDMI pin reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "RJ45 Ethernet",
+        "pin_count": 8,
+        "pins": [
+          {
+            "label": "BI_DA+",
+            "logic_voltage": null,
+            "net": "BI_DA+",
+            "notes": "RJ45 pair A positive; transformer/magnetics path must be confirmed.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DA-",
+            "logic_voltage": null,
+            "net": "BI_DA-",
+            "notes": "RJ45 pair A negative; transformer/magnetics path must be confirmed.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DB+",
+            "logic_voltage": null,
+            "net": "BI_DB+",
+            "notes": "RJ45 pair B positive; transformer/magnetics path must be confirmed.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DC+",
+            "logic_voltage": null,
+            "net": "BI_DC+",
+            "notes": "RJ45 pair C positive on gigabit interfaces.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DC-",
+            "logic_voltage": null,
+            "net": "BI_DC-",
+            "notes": "RJ45 pair C negative on gigabit interfaces.",
+            "pin": "5",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DB-",
+            "logic_voltage": null,
+            "net": "BI_DB-",
+            "notes": "RJ45 pair B negative; transformer/magnetics path must be confirmed.",
+            "pin": "6",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DD+",
+            "logic_voltage": null,
+            "net": "BI_DD+",
+            "notes": "RJ45 pair D positive on gigabit interfaces.",
+            "pin": "7",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DD-",
+            "logic_voltage": null,
+            "net": "BI_DD-",
+            "notes": "RJ45 pair D negative on gigabit interfaces.",
+            "pin": "8",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "ethernet",
+        "reference_note": "Common RJ45 logical pair reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "Ethernet",
+        "label": "RJ45 Ethernet port",
+        "pin_count": 8,
+        "pins": [
+          {
+            "label": "BI_DA+",
+            "logic_voltage": null,
+            "net": "BI_DA+",
+            "notes": "RJ45 pair A positive; transformer/magnetics path must be confirmed.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DA-",
+            "logic_voltage": null,
+            "net": "BI_DA-",
+            "notes": "RJ45 pair A negative; transformer/magnetics path must be confirmed.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DB+",
+            "logic_voltage": null,
+            "net": "BI_DB+",
+            "notes": "RJ45 pair B positive; transformer/magnetics path must be confirmed.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DC+",
+            "logic_voltage": null,
+            "net": "BI_DC+",
+            "notes": "RJ45 pair C positive on gigabit interfaces.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DC-",
+            "logic_voltage": null,
+            "net": "BI_DC-",
+            "notes": "RJ45 pair C negative on gigabit interfaces.",
+            "pin": "5",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DB-",
+            "logic_voltage": null,
+            "net": "BI_DB-",
+            "notes": "RJ45 pair B negative; transformer/magnetics path must be confirmed.",
+            "pin": "6",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DD+",
+            "logic_voltage": null,
+            "net": "BI_DD+",
+            "notes": "RJ45 pair D positive on gigabit interfaces.",
+            "pin": "7",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "BI_DD-",
+            "logic_voltage": null,
+            "net": "BI_DD-",
+            "notes": "RJ45 pair D negative on gigabit interfaces.",
+            "pin": "8",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "ethernet",
+        "reference_note": "Common RJ45 logical pair reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "USB-A Port 1 (blue)",
+        "pin_count": 4,
+        "pins": [
+          {
+            "label": "VBUS",
+            "logic_voltage": null,
+            "net": "VBUS",
+            "notes": "USB VBUS; confirm source/sink direction and current limit.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "D-",
+            "logic_voltage": null,
+            "net": "D-",
+            "notes": "USB D- differential signal.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dm",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "D+",
+            "logic_voltage": null,
+            "net": "D+",
+            "notes": "USB D+ differential signal.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dp",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "USB ground.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "usb-a-1",
+        "reference_note": "Common USB logical pin reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "USB-A Port 2 (black)",
+        "pin_count": 4,
+        "pins": [
+          {
+            "label": "VBUS",
+            "logic_voltage": null,
+            "net": "VBUS",
+            "notes": "USB VBUS; confirm source/sink direction and current limit.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "D-",
+            "logic_voltage": null,
+            "net": "D-",
+            "notes": "USB D- differential signal.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dm",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "D+",
+            "logic_voltage": null,
+            "net": "D+",
+            "notes": "USB D+ differential signal.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dp",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "USB ground.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "usb-a-2",
+        "reference_note": "Common USB logical pin reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "USB-A",
+        "label": "USB-A port (blue)",
+        "pin_count": 4,
+        "pins": [
+          {
+            "label": "VBUS",
+            "logic_voltage": null,
+            "net": "VBUS",
+            "notes": "USB VBUS; confirm source/sink direction and current limit.",
+            "pin": "1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "D-",
+            "logic_voltage": null,
+            "net": "D-",
+            "notes": "USB D- differential signal.",
+            "pin": "2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dm",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "D+",
+            "logic_voltage": null,
+            "net": "D+",
+            "notes": "USB D+ differential signal.",
+            "pin": "3",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dp",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "USB ground.",
+            "pin": "4",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "usb-a-2",
+        "reference_note": "Common USB logical pin reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      },
+      {
+        "kind": "connector",
+        "label": "USB-C Power In",
+        "pin_count": 6,
+        "pins": [
+          {
+            "label": "VBUS",
+            "logic_voltage": null,
+            "net": "VBUS",
+            "notes": "USB-C VBUS logical power pin; confirm negotiated role/current before use.",
+            "pin": "VBUS",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "power",
+            "status": "needs_measurement",
+            "voltage": 5.0
+          },
+          {
+            "label": "GND",
+            "logic_voltage": null,
+            "net": "GND",
+            "notes": "USB-C ground logical pin.",
+            "pin": "GND",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "ground",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "USB_DP",
+            "logic_voltage": null,
+            "net": "USB_DP",
+            "notes": "USB 2.0 D+ logical signal; do not splice without impedance-aware harness.",
+            "pin": "D+",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dp",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "USB_DM",
+            "logic_voltage": null,
+            "net": "USB_DM",
+            "notes": "USB 2.0 D- logical signal; do not splice without impedance-aware harness.",
+            "pin": "D-",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "usb_dm",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "CC1",
+            "logic_voltage": null,
+            "net": "CC1",
+            "notes": "USB-C configuration channel; identify orientation and role before use.",
+            "pin": "CC1",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          },
+          {
+            "label": "CC2",
+            "logic_voltage": null,
+            "net": "CC2",
+            "notes": "USB-C configuration channel; identify orientation and role before use.",
+            "pin": "CC2",
+            "provenance": {
+              "calibration_status": "",
+              "evidence_uri": "",
+              "instrument_id": "",
+              "instrument_type": "",
+              "operator_id": "",
+              "recorded_at": ""
+            },
+            "reference_seed": true,
+            "role": "",
+            "status": "needs_measurement",
+            "voltage": null
+          }
+        ],
+        "provenance": {
+          "calibration_status": "",
+          "evidence_uri": "",
+          "instrument_id": "",
+          "instrument_type": "",
+          "operator_id": "",
+          "recorded_at": ""
+        },
+        "ref": "usb-c",
+        "reference_note": "Common USB logical pin reference seed; visual/reference only until measured.",
+        "reference_seed": true,
+        "status": "needs_measurement",
+        "vision_seed": true
+      }
+    ],
+    "instruments": [
+      {
+        "calibration_status": "valid",
+        "instrument_id": "",
+        "instrument_type": "calibrated_dmm"
+      },
+      {
+        "calibration_status": "valid",
+        "instrument_id": "",
+        "instrument_type": "current_limited_supply"
+      },
+      {
+        "calibration_status": "valid",
+        "instrument_id": "",
+        "instrument_type": "thermal_probe"
+      }
+    ],
+    "measurements": [
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered resistance check between supply and ground.",
+        "status": "",
+        "target": "power to ground no-short",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm common ground reference.",
+        "status": "",
+        "target": "connector ground to exposed ground",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply rail voltage and polarity under current limit.",
+        "status": "",
+        "target": "input voltage and polarity",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "current",
+        "notes": "Record first-power current at a safe current limit.",
+        "status": "",
+        "target": "current draw under current-limited supply",
+        "unit": "A",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "thermal",
+        "notes": "Record no abnormal heating after first power.",
+        "status": "",
+        "target": "thermal behavior after first power",
+        "unit": "C",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure the reused signal voltage domain.",
+        "status": "",
+        "target": "logic high voltage",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) supply-to-ground no-short: 1:3V3, 2:5V, 4:5V, 17:3V3 vs 6:GND, 9:GND, 14:GND, 20:GND, 25:GND, 30:GND, 34:GND, 39:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) supply voltage and polarity: 1:3V3, 2:5V, 4:5V, 17:3V3",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) ground reference continuity: 6:GND, 9:GND, 14:GND, 20:GND, 25:GND, 30:GND, 34:GND, 39:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) logic voltage domain: 3:GPIO2_SDA1, 5:GPIO3_SCL1, 7:GPIO4, 8:GPIO14_TXD0, 10:GPIO15_RXD0, 11:GPIO17, 12:GPIO18_PWM0, 13:GPIO27, 15:GPIO22, 16:GPIO23, +18 more",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+        "status": "",
+        "target": "40-pin GPIO Header (gpio) signal pin continuity map: 3:GPIO2_SDA1, 5:GPIO3_SCL1, 7:GPIO4, 8:GPIO14_TXD0, 10:GPIO15_RXD0, 11:GPIO17, 12:GPIO18_PWM0, 13:GPIO27, 15:GPIO22, 16:GPIO23, +18 more",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "HDMI (hdmi) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "HDMI (hdmi) supply-to-ground no-short: 18:+5V vs 17:DDC_GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "HDMI (hdmi) supply voltage and polarity: 18:+5V",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "HDMI (hdmi) ground reference continuity: 17:DDC_GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+        "status": "",
+        "target": "HDMI (hdmi) logic voltage domain: 15:SCL, 16:SDA",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+        "status": "",
+        "target": "HDMI (hdmi) signal pin continuity map: 15:SCL, 16:SDA",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "HDMI (hdmi) high-speed/shield reference check: 1:TMDS2+, 2:TMDS2_SHIELD, 3:TMDS2-, 4:TMDS1+, 5:TMDS1_SHIELD, 6:TMDS1-, 7:TMDS0+, 8:TMDS0_SHIELD, +4 more",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "RJ45 Ethernet (ethernet) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "RJ45 Ethernet (ethernet) high-speed/shield reference check: 1:BI_DA+, 2:BI_DA-, 3:BI_DB+, 4:BI_DC+, 5:BI_DC-, 6:BI_DB-, 7:BI_DD+, 8:BI_DD-",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "RJ45 Ethernet port (ethernet) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "RJ45 Ethernet port (ethernet) high-speed/shield reference check: 1:BI_DA+, 2:BI_DA-, 3:BI_DB+, 4:BI_DC+, 5:BI_DC-, 6:BI_DB-, 7:BI_DD+, 8:BI_DD-",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) supply-to-ground no-short: 1:VBUS vs 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) supply voltage and polarity: 1:VBUS",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) ground reference continuity: 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "USB-A Port 1 (blue) (usb-a-1) high-speed/shield reference check: 2:D-, 3:D+",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) supply-to-ground no-short: 1:VBUS vs 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) supply voltage and polarity: 1:VBUS",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) ground reference continuity: 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "USB-A Port 2 (black) (usb-a-2) high-speed/shield reference check: 2:D-, 3:D+",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) supply-to-ground no-short: 1:VBUS vs 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) supply voltage and polarity: 1:VBUS",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) ground reference continuity: 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "USB-A port (blue) (usb-a-2) high-speed/shield reference check: 2:D-, 3:D+",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) pin-1/orientation confirmation",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "resistance",
+        "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) supply-to-ground no-short: VBUS:VBUS vs GND:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "voltage",
+        "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) supply voltage and polarity: VBUS:VBUS",
+        "unit": "V",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) ground reference continuity: GND:GND",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) USB data pair protection/path confirmation: VBUS:VBUS, GND:GND, D+:USB_DP, D-:USB_DM, CC1:CC1, CC2:CC2",
+        "unit": "ohm",
+        "value": ""
+      },
+      {
+        "evidence_uri": "",
+        "instrument_id": "",
+        "kind": "continuity",
+        "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+        "status": "",
+        "target": "USB-C Power In (usb-c) high-speed/shield reference check: D+:USB_DP, D-:USB_DM",
+        "unit": "ohm",
+        "value": ""
+      }
+    ],
+    "operator_id": "",
+    "policy": {
+      "production_requires_instrument_operator_timestamp_and_artifact": true,
+      "reference_seed_is_not_evidence": true,
+      "set_pin_status_verified_only_after_continuity_or_voltage_confirmation": true
+    },
+    "recorded_at": "",
+    "schema_version": "bench_topology_capture.v1"
+  },
+  "mode": "measurement_session_progress",
+  "next_measurement": {
+    "action_id": "record_resistance_power_to_ground_no_short",
+    "kind": "resistance",
+    "prompt": "Unpowered resistance check between supply and ground.",
+    "target": "power to ground no-short",
+    "target_geometry": {},
+    "unit": "ohm"
+  },
+  "progress": {
+    "authority_packet_ready": false,
+    "capture_verdict": "measurement_capture_required",
+    "closed_count": 0,
+    "failed_count": 0,
+    "open_count": 47,
+    "progress_score": 0.0,
+    "required_count": 47,
+    "schema_version": "measurement_session_progress_summary.v1",
+    "submitted_count": 0,
+    "template_complete": false,
+    "unmatched_submitted_count": 0
+  },
+  "required_measurements": [
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered resistance check between supply and ground.",
+      "requirement_id": "required_1",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "power to ground no-short",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm common ground reference.",
+      "requirement_id": "required_2",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "connector ground to exposed ground",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply rail voltage and polarity under current limit.",
+      "requirement_id": "required_3",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "input voltage and polarity",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "current",
+      "notes": "Record first-power current at a safe current limit.",
+      "requirement_id": "required_4",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "current draw under current-limited supply",
+      "unit": "A"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "thermal",
+      "notes": "Record no abnormal heating after first power.",
+      "requirement_id": "required_5",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "thermal behavior after first power",
+      "unit": "C"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure the reused signal voltage domain.",
+      "requirement_id": "required_6",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "logic high voltage",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_7",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_8",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) supply-to-ground no-short: 1:3V3, 2:5V, 4:5V, 17:3V3 vs 6:GND, 9:GND, 14:GND, 20:GND, 25:GND, 30:GND, 34:GND, 39:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_9",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) supply voltage and polarity: 1:3V3, 2:5V, 4:5V, 17:3V3",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_10",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) ground reference continuity: 6:GND, 9:GND, 14:GND, 20:GND, 25:GND, 30:GND, 34:GND, 39:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+      "requirement_id": "required_11",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) logic voltage domain: 3:GPIO2_SDA1, 5:GPIO3_SCL1, 7:GPIO4, 8:GPIO14_TXD0, 10:GPIO15_RXD0, 11:GPIO17, 12:GPIO18_PWM0, 13:GPIO27, 15:GPIO22, 16:GPIO23, +18 more",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+      "requirement_id": "required_12",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "40-pin GPIO Header (gpio) signal pin continuity map: 3:GPIO2_SDA1, 5:GPIO3_SCL1, 7:GPIO4, 8:GPIO14_TXD0, 10:GPIO15_RXD0, 11:GPIO17, 12:GPIO18_PWM0, 13:GPIO27, 15:GPIO22, 16:GPIO23, +18 more",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_13",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_14",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) supply-to-ground no-short: 18:+5V vs 17:DDC_GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_15",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) supply voltage and polarity: 18:+5V",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_16",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) ground reference continuity: 17:DDC_GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure idle/high logic level before connecting to another controller or adapter.",
+      "requirement_id": "required_17",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) logic voltage domain: 15:SCL, 16:SDA",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Map each reusable signal to a labeled pad, connector, or target net before splicing.",
+      "requirement_id": "required_18",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) signal pin continuity map: 15:SCL, 16:SDA",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_19",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "HDMI (hdmi) high-speed/shield reference check: 1:TMDS2+, 2:TMDS2_SHIELD, 3:TMDS2-, 4:TMDS1+, 5:TMDS1_SHIELD, 6:TMDS1-, 7:TMDS0+, 8:TMDS0_SHIELD, +4 more",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_20",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "RJ45 Ethernet (ethernet) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_21",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "RJ45 Ethernet (ethernet) high-speed/shield reference check: 1:BI_DA+, 2:BI_DA-, 3:BI_DB+, 4:BI_DC+, 5:BI_DC-, 6:BI_DB-, 7:BI_DD+, 8:BI_DD-",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_22",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "RJ45 Ethernet port (ethernet) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_23",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "RJ45 Ethernet port (ethernet) high-speed/shield reference check: 1:BI_DA+, 2:BI_DA-, 3:BI_DB+, 4:BI_DC+, 5:BI_DC-, 6:BI_DB-, 7:BI_DD+, 8:BI_DD-",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_24",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_25",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) supply-to-ground no-short: 1:VBUS vs 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_26",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) supply voltage and polarity: 1:VBUS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_27",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) ground reference continuity: 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+      "requirement_id": "required_28",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_29",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 1 (blue) (usb-a-1) high-speed/shield reference check: 2:D-, 3:D+",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_30",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_31",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) supply-to-ground no-short: 1:VBUS vs 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_32",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) supply voltage and polarity: 1:VBUS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_33",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) ground reference continuity: 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+      "requirement_id": "required_34",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_35",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A Port 2 (black) (usb-a-2) high-speed/shield reference check: 2:D-, 3:D+",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_36",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_37",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) supply-to-ground no-short: 1:VBUS vs 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_38",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) supply voltage and polarity: 1:VBUS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_39",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) ground reference continuity: 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+      "requirement_id": "required_40",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) USB data pair protection/path confirmation: 1:VBUS, 2:D-, 3:D+, 4:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_41",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-A port (blue) (usb-a-2) high-speed/shield reference check: 2:D-, 3:D+",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Mark physical pin 1/orientation in a close-up photo before trusting any seeded pin label.",
+      "requirement_id": "required_42",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) pin-1/orientation confirmation",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "resistance",
+      "notes": "Unpowered check from each candidate supply pin to confirmed ground before first power.",
+      "requirement_id": "required_43",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) supply-to-ground no-short: VBUS:VBUS vs GND:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "voltage",
+      "notes": "Measure supply pins under current limit and confirm source/sink direction before reuse.",
+      "requirement_id": "required_44",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) supply voltage and polarity: VBUS:VBUS",
+      "unit": "V"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm seeded ground pins to exposed ground, connector shell where applicable, and target common reference.",
+      "requirement_id": "required_45",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) ground reference continuity: GND:GND",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Confirm D+/D- routing through protection/connector path; do not hand-wire high-speed USB casually.",
+      "requirement_id": "required_46",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) USB data pair protection/path confirmation: VBUS:VBUS, GND:GND, D+:USB_DP, D-:USB_DM, CC1:CC1, CC2:CC2",
+      "unit": "ohm"
+    },
+    {
+      "evidence_uri": null,
+      "kind": "continuity",
+      "notes": "Treat high-speed pairs as reference-only unless connector, shield, and protection path are confirmed.",
+      "requirement_id": "required_47",
+      "status": "open",
+      "submitted_measurement_id": null,
+      "submitted_unit": null,
+      "submitted_value": null,
+      "target": "USB-C Power In (usb-c) high-speed/shield reference check: D+:USB_DP, D-:USB_DM",
+      "unit": "ohm"
+    }
+  ],
+  "schema_version": "measurement_session_progress.v1",
+  "status": "waiting_for_measurements",
+  "submitted_measurements": [],
+  "unmatched_submitted_measurements": []
+}

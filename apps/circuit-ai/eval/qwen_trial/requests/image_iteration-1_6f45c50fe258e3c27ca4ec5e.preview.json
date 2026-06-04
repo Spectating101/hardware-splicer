@@ -1,0 +1,24 @@
+{
+  "model": "qwen3-vl-flash",
+  "max_tokens": 1800,
+  "response_format": {
+    "type": "json_object"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are Circuit-AI native vision. Inspect the board image and crops.\nReturn ONLY JSON. Include safety_level, explanation, components/modules as relevant, and board_evidence.\nboard_evidence must use schema_version board_evidence.v1.\nNormalize all boxes to 0-1 coordinates relative to the full board image when possible.\nDo not invent pinouts, voltages, exact part numbers, nets, or reuse safety without visible evidence.\nPrefer unknown plus missing_evidence/recommended_checks when unsure.\nScenario: image_iteration-1\nCurrent local baseline: board_type=io_interface_or_adapter, confidence=0.635, detections=2, connectors=2, ocr_resolved=2.\nCrop plan:\n- no local detections produced crops; inspect the full image carefully."
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "data:image/png;base64,iVBORw0KGg...omitted-117918-chars"
+          }
+        }
+      ]
+    }
+  ]
+}

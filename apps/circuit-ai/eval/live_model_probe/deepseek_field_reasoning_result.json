@@ -1,0 +1,425 @@
+{
+  "mode": "circuit_ai_reasoning",
+  "schema_version": "circuit_ai_reasoning.v1",
+  "goal": "Given live Qwen board evidence and current backend gates, prioritize the exact measurements needed to turn this Raspberry Pi style board from visual salvage candidate into measured topology evidence. Do not authorize power or splice.",
+  "ai_integration": {
+    "role": "structured circuit reasoner",
+    "location": "circuit_graph_and_salvage_pipeline",
+    "not_chatbot": true,
+    "policy": "model claims are advisory until deterministic evidence gates verify them"
+  },
+  "model_runtime": {
+    "status": "ready",
+    "ready_for_live_model": true,
+    "blockers": [],
+    "selected": {
+      "provider": "deepseek",
+      "model": "deepseek-v4-flash",
+      "configured_model": "deepseek-v4-flash",
+      "selected_provider_key_configured": true,
+      "copilot_cli_provider": false,
+      "copilot_node_runner": "npx -y node@20",
+      "deepseek_native_openai_compatible": true,
+      "deepseek_base_url_configured": true,
+      "qwen_native_openai_compatible": false,
+      "qwen_base_url_configured": false
+    },
+    "providers": {
+      "openai": {
+        "api_key_configured": false
+      },
+      "anthropic": {
+        "api_key_configured": false
+      },
+      "cohere": {
+        "api_key_configured": true
+      },
+      "mistral": {
+        "api_key_configured": true
+      },
+      "cerebras": {
+        "api_key_configured": true
+      },
+      "deepseek": {
+        "api_key_configured": true
+      },
+      "qwen": {
+        "api_key_configured": true
+      },
+      "copilot": {
+        "api_key_configured": false,
+        "oauth_or_cli_auth_configured": true,
+        "cli_ready": true
+      }
+    },
+    "copilot_runtime": {
+      "status": "ready",
+      "ready_for_live_model": true,
+      "selected": {
+        "provider": "copilot",
+        "model": "gpt-4.1",
+        "command": "copilot",
+        "node_runner": "npx -y node@20"
+      },
+      "providers": {
+        "copilot_cli": {
+          "ready": true,
+          "command_available": true,
+          "command_runnable": true,
+          "gh_authenticated": true,
+          "token_marker_configured": true,
+          "node": {
+            "available": true,
+            "version": "v18.20.8",
+            "major": 18,
+            "supported_for_copilot_cli": false
+          }
+        }
+      },
+      "blockers": [],
+      "capabilities": {
+        "text_reasoning": true,
+        "structured_json_reasoning": true,
+        "vision_image_input": false,
+        "repo_mutation_allowed": false,
+        "model_claims_are_advisory": true,
+        "secrets_returned": false
+      }
+    },
+    "dependencies": {
+      "litellm_installed": false,
+      "openai_sdk_installed": true,
+      "legacy_llm_manager_module": true,
+      "legacy_model_dispatcher_module": false
+    },
+    "capabilities": {
+      "structured_circuit_reasoning": true,
+      "deterministic_verification": true,
+      "training_data_capture": true,
+      "copilot_cli_provider": true,
+      "deepseek_native_provider": true,
+      "qwen_native_provider": true,
+      "model_claims_are_advisory": true,
+      "automatic_model_training": false
+    }
+  },
+  "backend": {
+    "status": "llm_used",
+    "model": "deepseek/deepseek-v4-flash",
+    "raw_response_parsed": true
+  },
+  "input_summary": {
+    "board_count": 0,
+    "overall_readiness": null,
+    "workflow_state": null,
+    "functional_report_count": 0,
+    "functional_block_count": 0,
+    "known_connector_contract_count": 0,
+    "known_part_evidence_count": 0,
+    "ready_block_count": 0,
+    "blocked_block_count": 0,
+    "capabilities": [],
+    "entry_points": [],
+    "salvage_verdict": null
+  },
+  "evidence_packet": {
+    "candidate_blocks": [],
+    "connector_contracts": [],
+    "known_part_evidence": [],
+    "strict_block_id_required": true,
+    "known_entry_points": []
+  },
+  "deterministic_trace": [
+    "loaded circuit graph, functional salvage blocks, connector references, and evidence gates",
+    "ranked reuse candidates by status, extractability, missing gates, and confidence",
+    "kept board-section and unsafe reuse claims gated until physical evidence is present"
+  ],
+  "hypotheses": [
+    {
+      "id": "H1",
+      "source": "llm_reasoner",
+      "claim_type": "functional_identity",
+      "block_id": null,
+      "claim": "Board is a Raspberry Pi style single-board computer with likely BCM2835/2836/2837 SoC, USB, HDMI, and GPIO headers.",
+      "confidence": 0.6,
+      "entry_points": [
+        "power input",
+        "USB ports",
+        "HDMI port",
+        "GPIO header"
+      ],
+      "required_evidence": [
+        "visual confirmation of SoC marking",
+        "measure power rail voltages",
+        "identify crystal oscillator frequency",
+        "check for SD card slot"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    },
+    {
+      "id": "H2",
+      "source": "llm_reasoner",
+      "claim_type": "power_topology",
+      "block_id": null,
+      "claim": "Board requires 5V DC input via microUSB or USB-C, with onboard regulators producing 3.3V and 1.8V rails.",
+      "confidence": 0.5,
+      "entry_points": [
+        "power input connector",
+        "voltage regulator ICs"
+      ],
+      "required_evidence": [
+        "measure voltage at input connector",
+        "identify regulator part numbers",
+        "measure output voltages of regulators"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    },
+    {
+      "id": "H3",
+      "source": "llm_reasoner",
+      "claim_type": "salvage_potential",
+      "block_id": null,
+      "claim": "Board may be salvageable if power rail measurements are within spec and no visible damage.",
+      "confidence": 0.4,
+      "entry_points": [
+        "power input",
+        "SoC",
+        "voltage regulators"
+      ],
+      "required_evidence": [
+        "power rail voltages within 5% tolerance",
+        "no short circuits on power rails",
+        "visual inspection for burnt components"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    }
+  ],
+  "model_hypotheses": [
+    {
+      "id": "H1",
+      "source": "llm_reasoner",
+      "claim_type": "functional_identity",
+      "block_id": null,
+      "claim": "Board is a Raspberry Pi style single-board computer with likely BCM2835/2836/2837 SoC, USB, HDMI, and GPIO headers.",
+      "confidence": 0.6,
+      "entry_points": [
+        "power input",
+        "USB ports",
+        "HDMI port",
+        "GPIO header"
+      ],
+      "required_evidence": [
+        "visual confirmation of SoC marking",
+        "measure power rail voltages",
+        "identify crystal oscillator frequency",
+        "check for SD card slot"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    },
+    {
+      "id": "H2",
+      "source": "llm_reasoner",
+      "claim_type": "power_topology",
+      "block_id": null,
+      "claim": "Board requires 5V DC input via microUSB or USB-C, with onboard regulators producing 3.3V and 1.8V rails.",
+      "confidence": 0.5,
+      "entry_points": [
+        "power input connector",
+        "voltage regulator ICs"
+      ],
+      "required_evidence": [
+        "measure voltage at input connector",
+        "identify regulator part numbers",
+        "measure output voltages of regulators"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    },
+    {
+      "id": "H3",
+      "source": "llm_reasoner",
+      "claim_type": "salvage_potential",
+      "block_id": null,
+      "claim": "Board may be salvageable if power rail measurements are within spec and no visible damage.",
+      "confidence": 0.4,
+      "entry_points": [
+        "power input",
+        "SoC",
+        "voltage regulators"
+      ],
+      "required_evidence": [
+        "power rail voltages within 5% tolerance",
+        "no short circuits on power rails",
+        "visual inspection for burnt components"
+      ],
+      "requested_status": null,
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    }
+  ],
+  "proposed_splices": [
+    {
+      "source": "llm_reasoner",
+      "block_id": null,
+      "status": "proposed",
+      "entry_points": [
+        "power input connector",
+        "voltage regulator output capacitors"
+      ],
+      "rationale": "To measure power rail voltages without powering the board, use multimeter on diode mode or resistance mode to check for shorts and identify regulator outputs.",
+      "required_evidence": [
+        "multimeter readings on power input pins",
+        "continuity between input and regulator input",
+        "resistance to ground on regulator outputs"
+      ],
+      "verification": {
+        "status": "needs_review",
+        "reason": "claim_does_not_match_known_block"
+      }
+    }
+  ],
+  "proof_matrix": [],
+  "proof_summary": {
+    "schema_version": "circuit_ai_proof_matrix.v1",
+    "goal": "Given live Qwen board evidence and current backend gates, prioritize the exact measurements needed to turn this Raspberry Pi style board from visual salvage candidate into measured topology evidence. Do not authorize power or splice.",
+    "operational_verdict": "insufficient_circuit_evidence",
+    "candidate_count": 0,
+    "ready_now_count": 0,
+    "blocked_count": 0,
+    "status_counts": {},
+    "top_candidate": null,
+    "recommended_first_action_type": "collect_circuit_evidence"
+  },
+  "recommended_first_action": {
+    "action_type": "collect_circuit_evidence",
+    "block_id": null,
+    "instruction": "Provide circuit graph, netlist, board images, or connector measurements before reuse planning.",
+    "evidence": [
+      "Given live Qwen board evidence and current backend gates, prioritize the exact measurements needed to turn this Raspberry Pi style board from visual salvage candidate into measured topology evidence. Do not authorize power or splice."
+    ]
+  },
+  "measurement_plan": [],
+  "recommended_next_actions": [
+    "Provide circuit graph, board images, netlist, or measured connector evidence.",
+    "Visually inspect board for part numbers on SoC, regulators, and connectors.",
+    "Use multimeter in resistance mode to measure resistance to ground on power input pins (expect >1k\u03a9).",
+    "Identify voltage regulator ICs and note their markings.",
+    "Check for any visible damage (burnt components, cracked solder joints).",
+    "Document all connector types and pin counts for future reference."
+  ],
+  "adapter_recommendations": [],
+  "verifier": {
+    "status": "model_claims_need_review",
+    "blocked_model_claim_count": 0,
+    "needs_review_model_claim_count": 4,
+    "rules": [
+      "model block_id values must match exact known candidate block IDs",
+      "no reuse-ready claim passes while required evidence gates remain open",
+      "board-section salvage remains blocked until layout/continuity/isolation evidence exists",
+      "hard safety holds override all reuse proposals",
+      "entry points must match extracted connector references"
+    ]
+  },
+  "learning_loop": {
+    "operator_labels_needed": [
+      "accept_or_reject_hypothesis",
+      "measured_voltage_current_logic",
+      "actual_connector_pinout",
+      "splice_success_or_failure",
+      "post_build_function_value"
+    ],
+    "training_export_ready": true
+  },
+  "expert_training_record": {
+    "schema_version": "circuit_ai_expert_training_record.v1",
+    "goal": "Given live Qwen board evidence and current backend gates, prioritize the exact measurements needed to turn this Raspberry Pi style board from visual salvage candidate into measured topology evidence. Do not authorize power or splice.",
+    "verifier_status": "model_claims_need_review",
+    "features": {
+      "board_count": 0,
+      "functional_block_count": 0,
+      "known_connector_contract_count": 0,
+      "known_part_evidence_count": 0,
+      "candidate_block_ids": [],
+      "entry_points": [],
+      "proof_summary": {
+        "schema_version": "circuit_ai_proof_matrix.v1",
+        "goal": "Given live Qwen board evidence and current backend gates, prioritize the exact measurements needed to turn this Raspberry Pi style board from visual salvage candidate into measured topology evidence. Do not authorize power or splice.",
+        "operational_verdict": "insufficient_circuit_evidence",
+        "candidate_count": 0,
+        "ready_now_count": 0,
+        "blocked_count": 0,
+        "status_counts": {},
+        "top_candidate": null,
+        "recommended_first_action_type": "collect_circuit_evidence"
+      }
+    },
+    "labels": [
+      {
+        "source": "llm_reasoner",
+        "item_type": "hypothesis",
+        "block_id": null,
+        "claim_type": "functional_identity",
+        "verification_status": "needs_review",
+        "verification_reason": "claim_does_not_match_known_block",
+        "operator_label_needed": true
+      },
+      {
+        "source": "llm_reasoner",
+        "item_type": "hypothesis",
+        "block_id": null,
+        "claim_type": "power_topology",
+        "verification_status": "needs_review",
+        "verification_reason": "claim_does_not_match_known_block",
+        "operator_label_needed": true
+      },
+      {
+        "source": "llm_reasoner",
+        "item_type": "hypothesis",
+        "block_id": null,
+        "claim_type": "salvage_potential",
+        "verification_status": "needs_review",
+        "verification_reason": "claim_does_not_match_known_block",
+        "operator_label_needed": true
+      },
+      {
+        "source": "llm_reasoner",
+        "item_type": "splice",
+        "block_id": null,
+        "claim_type": null,
+        "verification_status": "needs_review",
+        "verification_reason": "claim_does_not_match_known_block",
+        "operator_label_needed": true
+      }
+    ],
+    "outcome_fields_required": [
+      "operator_accept_reject",
+      "corrected_block_id",
+      "measurement_values",
+      "splice_attempted",
+      "splice_success",
+      "damage_or_hazard_observed",
+      "value_recovered_usd"
+    ]
+  }
+}

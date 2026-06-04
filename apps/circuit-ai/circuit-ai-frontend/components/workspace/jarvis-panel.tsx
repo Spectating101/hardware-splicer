@@ -1,10 +1,19 @@
 "use client";
 
 import { useRef, useEffect, useState, KeyboardEvent } from "react";
+import type { ReactNode } from "react";
 import { Zap, AlertTriangle, ChevronRight, Send, Cpu, Layers, Network, Ruler, CornerDownLeft } from "lucide-react";
 import type { PcbGeometry, ValidationIssue } from "@/lib/cad-types";
 import type { JarvisMsg } from "@/lib/workbench-store";
-import { parseIntent, contextualResponse, generateBoardInsights, healthLabel } from "@/lib/jarvis";
+import {
+  parseIntent,
+  contextualResponse,
+  generateBoardInsights,
+  healthLabel,
+  shouldRouteToDiyProjectPlanner,
+  shouldContinueDiyProjectPlanner,
+  summarizeDiyProjectPlannerResponse,
+} from "@/lib/jarvis";
 import type { JarvisContext } from "@/lib/jarvis";
 import { tokenize, chipToken, type ChatChipKind } from "@/lib/chat-tokens";
 
@@ -45,7 +54,7 @@ function MessageBody({
   return (
     <>
       {parts.map((p, i) => {
-        if (p.kind === "text") return <span key={i}>{p.value}</span>;
+        if (p.kind === "text") return <MarkdownText key={i} text={p.value} />;
         const style =
           p.kind === "ref"   ? "bg-cyan-500/20 text-cyan-100 hover:bg-cyan-500/30"
         : p.kind === "net"   ? "bg-violet-500/20 text-violet-100 hover:bg-violet-500/30"
@@ -71,6 +80,30 @@ function MessageBody({
       })}
     </>
   );
+}
+
+function MarkdownText({ text }: { text: string }) {
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+  let key = 0;
+  while (cursor < text.length) {
+    const start = text.indexOf("**", cursor);
+    if (start === -1) {
+      nodes.push(<span key={key++}>{text.slice(cursor)}</span>);
+      break;
+    }
+    const end = text.indexOf("**", start + 2);
+    if (end === -1) {
+      nodes.push(<span key={key++}>{text.slice(cursor)}</span>);
+      break;
+    }
+    if (start > cursor) {
+      nodes.push(<span key={key++}>{text.slice(cursor, start)}</span>);
+    }
+    nodes.push(<strong key={key++} className="font-semibold text-white/90">{text.slice(start + 2, end)}</strong>);
+    cursor = end + 2;
+  }
+  return <>{nodes}</>;
 }
 
 function relativeTime(ts: number): string {
@@ -115,6 +148,7 @@ export function JarvisPanel({
   onIssueChip,
 }: JarvisPanelProps) {
   const [input, setInput] = useState("");
+  const [diyProjectSessionId, setDiyProjectSessionId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -134,7 +168,37 @@ export function JarvisPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  function submit() {
+  function jarvisContext(): JarvisContext {
+    const critCount = issues.filter((i) => {
+      const s = String(i.severity).toLowerCase();
+      return s === "critical" || s === "error";
+    }).length;
+    const boardName = filename?.replace(/\.kicad_pcb$/i, "") ?? undefined;
+    // Rank issues by severity; pluck up to 3 refs so the reply can surface
+    // them as chip tokens for one-click navigation from chat to canvas.
+    const sevOrder: Record<string, number> = { critical: 0, error: 1, warning: 2, info: 3 };
+    const topIssueRefs = [...issues]
+      .sort((a, b) => (sevOrder[String(a.severity).toLowerCase()] ?? 4) - (sevOrder[String(b.severity).toLowerCase()] ?? 4))
+      .map((i) => i.component)
+      .filter((r, i, arr) => !!r && arr.indexOf(r) === i)
+      .slice(0, 3);
+
+    return {
+      hasBoardNode: pipeline.parsed,
+      hasValidation: pipeline.validated,
+      hasManufacturing: pipeline.manufactured,
+      hasCriticals: critCount > 0,
+      activeIssueCount: issues.length,
+      healthScore: healthScore ?? undefined,
+      boardName,
+      componentCount: geometry?.footprints.length,
+      layerCount: geometry ? [...new Set(geometry.footprints.map(f => f.layer))].length : undefined,
+      topIssueRefs,
+      selectedRef: selectedRef ?? undefined,
+    };
+  }
+
+  async function submit() {
     const text = input.trim();
     if (!text) return;
     setInput("");
@@ -150,36 +214,67 @@ export function JarvisPanel({
       return;
     }
 
+    const activeDiyConversation = !!diyProjectSessionId || messages.some(
+      (msg) => msg.role === "jarvis" && (
+        msg.text.includes("I can start this as a real build plan") ||
+        msg.text.includes("I can update this as a real build plan")
+      ),
+    );
+    const shouldPlanDiy =
+      !pipeline.parsed &&
+      (shouldRouteToDiyProjectPlanner(text) || (activeDiyConversation && shouldContinueDiyProjectPlanner(text)));
+
+    if (shouldPlanDiy) {
+      const projectBrief = [
+        ...messages.filter((msg) => msg.role === "user").slice(-4).map((msg) => msg.text),
+        text,
+      ].join("\n");
+      onSetThinking(true);
+      try {
+        const response = await fetch("/api/proxy/hardware/diy-project/session", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            session_id: diyProjectSessionId ?? undefined,
+            user_message: text,
+            strategy_mode: "hybrid",
+            project_brief: projectBrief,
+            use_reference_catalog: true,
+          }),
+        });
+        const payload = await response.json().catch(() => null) as unknown;
+        if (!response.ok) {
+          throw new Error(`planner returned ${response.status}`);
+        }
+        if (payload && typeof payload === "object" && "metadata" in payload) {
+          const metadata = (payload as { metadata?: { session_id?: unknown } }).metadata;
+          if (typeof metadata?.session_id === "string" && metadata.session_id) {
+            setDiyProjectSessionId(metadata.session_id);
+          }
+        }
+        onAddMessage({
+          role: "jarvis",
+          text: summarizeDiyProjectPlannerResponse(payload, projectBrief),
+        });
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : "planner unavailable";
+        onAddMessage({
+          role: "jarvis",
+          text: [
+            `I can route this as a DIY hardware build, but the planning backend is not reachable right now (${detail}).`,
+            "For this prompt, start by locking pass/fail behavior, listing the exact modules you own, proving voltage/current ratings, then wiring controller -> sensor -> driver -> load with a shared ground and current-limited first power.",
+          ].join("  \n"),
+        });
+      } finally {
+        onSetThinking(false);
+      }
+      return;
+    }
+
     onSetThinking(true);
     setTimeout(() => {
       onSetThinking(false);
-      const critCount = issues.filter((i) => {
-        const s = String(i.severity).toLowerCase();
-        return s === "critical" || s === "error";
-      }).length;
-      const boardName = filename?.replace(/\.kicad_pcb$/i, "") ?? undefined;
-      // Rank issues by severity; pluck up to 3 refs so the reply can surface
-      // them as chip tokens for one-click navigation from chat to canvas.
-      const sevOrder: Record<string, number> = { critical: 0, error: 1, warning: 2, info: 3 };
-      const topIssueRefs = [...issues]
-        .sort((a, b) => (sevOrder[String(a.severity).toLowerCase()] ?? 4) - (sevOrder[String(b.severity).toLowerCase()] ?? 4))
-        .map((i) => i.component)
-        .filter((r, i, arr) => !!r && arr.indexOf(r) === i)
-        .slice(0, 3);
-      const ctx: JarvisContext = {
-        hasBoardNode: pipeline.parsed,
-        hasValidation: pipeline.validated,
-        hasManufacturing: pipeline.manufactured,
-        hasCriticals: critCount > 0,
-        activeIssueCount: issues.length,
-        healthScore: healthScore ?? undefined,
-        boardName,
-        componentCount: geometry?.footprints.length,
-        layerCount: geometry ? [...new Set(geometry.footprints.map(f => f.layer))].length : undefined,
-        topIssueRefs,
-        selectedRef: selectedRef ?? undefined,
-      };
-      const reply = contextualResponse(intent, ctx);
+      const reply = contextualResponse(intent, jarvisContext());
       onAddMessage({ role: "jarvis", text: reply });
     }, 600 + Math.random() * 400);
   }
@@ -390,7 +485,7 @@ export function JarvisPanel({
                         msg.role === "user"
                           ? "bg-cyan-500/15 text-cyan-100"
                           : "bg-white/5 text-white/75"
-                      }`}
+                      } whitespace-pre-wrap`}
                     >
                       <MessageBody
                         text={msg.text}

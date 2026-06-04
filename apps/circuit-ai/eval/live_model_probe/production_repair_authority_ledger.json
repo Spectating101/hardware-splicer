@@ -1,0 +1,974 @@
+{
+  "mode": "hardware_authority_ledger",
+  "schema_version": "hardware_authority_ledger.v1",
+  "available": true,
+  "current_authority_level": "production_repair",
+  "authority_score": 1.0,
+  "can": {
+    "use_visual_candidates": true,
+    "use_measured_pinout": true,
+    "use_electrical_simulation": true,
+    "run_controlled_bench": true,
+    "claim_controlled_reuse": true,
+    "claim_production_repair_release": true,
+    "power_or_splice_now": true
+  },
+  "stages": [
+    {
+      "stage_id": "visual_candidate",
+      "title": "Visual Candidate Authority",
+      "status": "pass",
+      "evidence": [
+        "0 component candidates",
+        "0 connector candidates",
+        "0 marking candidates",
+        "0 salvage candidates",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "candidate component/resource inventory",
+        "candidate connector list",
+        "salvage opportunity shortlist",
+        "measurement queue generation"
+      ],
+      "blocked_actions": [
+        "pinout claims",
+        "first power",
+        "physical splice",
+        "production repair release"
+      ]
+    },
+    {
+      "stage_id": "measured_topology",
+      "title": "Measured Pinout/Topology Authority",
+      "status": "pass",
+      "evidence": [
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "pin-level map for measured pins",
+        "source/load evidence input",
+        "topology-to-netlist compilation"
+      ],
+      "blocked_actions": [
+        "unmeasured pins",
+        "hidden nets",
+        "production repair release"
+      ]
+    },
+    {
+      "stage_id": "electrical_simulation",
+      "title": "Electrical Simulation Authority",
+      "status": "pass",
+      "evidence": [
+        "release decision: test_fixture_required",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "controlled bench setup planning",
+        "source/load budget decision"
+      ],
+      "blocked_actions": [
+        "unstated loads",
+        "unmeasured thermal behavior",
+        "production repair release"
+      ]
+    },
+    {
+      "stage_id": "controlled_bench",
+      "title": "Controlled Bench Authority",
+      "status": "pass",
+      "evidence": [
+        "session://outcomes/known-ch340-release"
+      ],
+      "blockers": [],
+      "next_unlock": "Attach a complete production_release/release_manifest with artifacts and scope.",
+      "allowed_actions": [
+        "scoped function demonstrated under recorded conditions"
+      ],
+      "blocked_actions": [
+        "repeatable release claim without release packet",
+        "unsupported hazard scope"
+      ]
+    },
+    {
+      "stage_id": "production_repair",
+      "title": "Production Repair Authority",
+      "status": "pass",
+      "evidence": [
+        "casefile: release_ready",
+        "decision: authorized_low_voltage_repair_release",
+        "release manifest attached"
+      ],
+      "blockers": [],
+      "next_unlock": "Authority is release-ready for the scoped low-risk claim.",
+      "allowed_actions": [
+        "portfolio/demo release packet",
+        "repeatable low-risk repair/reuse instruction"
+      ],
+      "blocked_actions": [
+        "claims outside recorded scope",
+        "hidden high-risk domains"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "board_visual_inventory",
+      "claim_type": "board_understanding",
+      "label": "Visible board objects and salvage candidates",
+      "current_authority_level": "visual_candidate",
+      "status": "authority_granted",
+      "evidence_stage": "visual_candidate",
+      "evidence": [
+        "0 component candidates",
+        "0 connector candidates",
+        "0 marking candidates",
+        "0 salvage candidates",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "candidate component/resource inventory",
+        "candidate connector list",
+        "salvage opportunity shortlist",
+        "measurement queue generation"
+      ],
+      "blocked_actions": [
+        "pinout claims",
+        "first power",
+        "physical splice",
+        "production repair release"
+      ]
+    },
+    {
+      "claim_id": "connector_pinout_topology",
+      "claim_type": "pinout_topology",
+      "label": "Measured connector pinout and net topology",
+      "current_authority_level": "measured_topology",
+      "status": "authority_granted",
+      "evidence_stage": "measured_topology",
+      "evidence": [
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "pin-level map for measured pins",
+        "source/load evidence input",
+        "topology-to-netlist compilation"
+      ],
+      "blocked_actions": [
+        "unmeasured pins",
+        "hidden nets",
+        "production repair release"
+      ]
+    },
+    {
+      "claim_id": "power_path_electrical_model",
+      "claim_type": "electrical_simulation",
+      "label": "Measured power path passes deterministic source/load checks",
+      "current_authority_level": "electrical_simulation",
+      "status": "authority_granted",
+      "evidence_stage": "electrical_simulation",
+      "evidence": [
+        "release decision: test_fixture_required",
+        "covered by authorized production repair casefile for this scoped claim"
+      ],
+      "blockers": [],
+      "next_unlock": "Covered by the production repair authority casefile for this scoped claim.",
+      "allowed_actions": [
+        "controlled bench setup planning",
+        "source/load budget decision"
+      ],
+      "blocked_actions": [
+        "unstated loads",
+        "unmeasured thermal behavior",
+        "production repair release"
+      ]
+    },
+    {
+      "claim_id": "controlled_functional_reuse",
+      "claim_type": "bench_outcome",
+      "label": "Target function works under controlled bench conditions",
+      "current_authority_level": "controlled_bench",
+      "status": "authority_granted",
+      "evidence_stage": "controlled_bench",
+      "evidence": [
+        "session://outcomes/known-ch340-release"
+      ],
+      "blockers": [],
+      "next_unlock": "Attach a complete production_release/release_manifest with artifacts and scope.",
+      "allowed_actions": [
+        "scoped function demonstrated under recorded conditions"
+      ],
+      "blocked_actions": [
+        "repeatable release claim without release packet",
+        "unsupported hazard scope"
+      ]
+    },
+    {
+      "claim_id": "production_repair_release",
+      "claim_type": "production_repair",
+      "label": "Scoped repair/reuse/splice path is repeatable and release-ready",
+      "current_authority_level": "production_repair",
+      "status": "authority_granted",
+      "evidence_stage": "production_repair",
+      "evidence": [
+        "casefile: release_ready",
+        "decision: authorized_low_voltage_repair_release",
+        "release manifest attached"
+      ],
+      "blockers": [],
+      "next_unlock": "Authority is release-ready for the scoped low-risk claim.",
+      "allowed_actions": [
+        "portfolio/demo release packet",
+        "repeatable low-risk repair/reuse instruction"
+      ],
+      "blocked_actions": [
+        "claims outside recorded scope",
+        "hidden high-risk domains"
+      ]
+    }
+  ],
+  "next_unlocks": [],
+  "evidence_summary": {
+    "visual": {
+      "components": 0,
+      "connectors": 0,
+      "markings": 0,
+      "damage": 0,
+      "salvage_candidates": 0,
+      "photo_observations": 0
+    },
+    "topology": {
+      "measurement_backed": false,
+      "pinout_known": false,
+      "shorts_detected": false,
+      "unknown_pin_count": 0,
+      "source": "unavailable"
+    },
+    "simulation": {
+      "available": false,
+      "decision": "test_fixture_required",
+      "issue_count": 0,
+      "simulation_model_source": "unavailable"
+    },
+    "bench": {
+      "outcome_count": 1,
+      "terminal_success": true,
+      "current_limit_used": true,
+      "thermal_normal": true
+    },
+    "production": {
+      "authorized": true,
+      "decision": "authorized_low_voltage_repair_release",
+      "casefile_status": "release_ready",
+      "blocked_claim_count": 0,
+      "release_manifest_attached": true
+    }
+  },
+  "source_authority": {
+    "repair_authority": {
+      "status": "authoritative_low_risk",
+      "score": 0.94,
+      "blocked_decisions": [],
+      "required_measurements": []
+    },
+    "trust_assessment": {
+      "level": null,
+      "score": null,
+      "production_readiness_score": null,
+      "blocking_gap_count": 0
+    },
+    "test_kit_release_gate": {
+      "decision": "test_fixture_required",
+      "can_advance_to_simulation_fixture": true,
+      "can_advance_to_controlled_bench": false,
+      "can_power_or_splice": false,
+      "can_production_release": false,
+      "reason": "The module-level test suite exists, but a versioned netlist is required before deterministic simulation."
+    },
+    "production_repair_authority": {
+      "schema_version": "production_repair_authority.v1",
+      "authorized": true,
+      "decision": "authorized_low_voltage_repair_release",
+      "level": "production_repair_authority",
+      "scope": "measured_low_voltage_dc_external_module_repair_or_reuse",
+      "goal": "release a measured low-voltage UART debug adapter repair",
+      "hazard_profile": {
+        "schema_version": "hardware_hazard_profile.v1",
+        "energy_domain": "low_voltage_dc",
+        "unsupported_for_production_authority": false,
+        "hazards": [],
+        "clearance_requirements": [],
+        "source_policy": {
+          "structured_sources": [
+            "resource.capabilities",
+            "resource.status",
+            "resource_strategy.blocked_resources",
+            "evidence_gates",
+            "hazard_profile"
+          ],
+          "raw_text_release_logic": false,
+          "llm_outputs_must_be_structured_hazard_candidates": true
+        }
+      },
+      "domain_authority": {
+        "schema_version": "production_domain_authority_matrix.v1",
+        "global_authorized": true,
+        "primary_lane": "low_voltage_dc_external",
+        "relevant_lane_count": 1,
+        "blocking_lane_count": 0,
+        "requirements": [],
+        "lanes": [
+          {
+            "lane_id": "low_voltage_dc_external",
+            "relevant": true,
+            "authorized": true,
+            "decision": "authorized",
+            "requirements": [],
+            "evidence": {
+              "capabilities": [
+                "connector",
+                "usb_serial"
+              ],
+              "hazard_ids": [],
+              "energy_domain": "low_voltage_dc",
+              "requested_domain": null,
+              "analysis_source": "payload_analysis"
+            }
+          },
+          {
+            "lane_id": "motor_mechanical_load",
+            "relevant": false,
+            "authorized": false,
+            "decision": "not_applicable",
+            "requirements": [],
+            "evidence": {
+              "capabilities": [
+                "connector",
+                "usb_serial"
+              ],
+              "hazard_ids": [],
+              "energy_domain": "low_voltage_dc",
+              "requested_domain": null,
+              "analysis_source": "payload_analysis"
+            }
+          },
+          {
+            "lane_id": "battery_pack_lithium",
+            "relevant": false,
+            "authorized": false,
+            "decision": "not_applicable",
+            "requirements": [],
+            "evidence": {
+              "capabilities": [
+                "connector",
+                "usb_serial"
+              ],
+              "hazard_ids": [],
+              "energy_domain": "low_voltage_dc",
+              "requested_domain": null,
+              "analysis_source": "payload_analysis",
+              "specialist_authority": {
+                "lane_id": "battery_pack_lithium",
+                "authorized": false,
+                "status": null,
+                "signed": false,
+                "certificate_id_present": false,
+                "issued_at_present": false,
+                "missing_requirements": [
+                  "Attach specialist authority with status certified_release, authorized, or authority_ready.",
+                  "Attach specialist authority signed_by or authorized_by.",
+                  "Attach specialist authority certificate_id or authority_id.",
+                  "Attach specialist authority issued_at or authorized_at timestamp.",
+                  "Verify battery chemistry and cell type.",
+                  "Verify cell count and pack topology.",
+                  "Verify BMS/protection behavior.",
+                  "Record cell balance result as passing.",
+                  "Record charge/discharge result as passing.",
+                  "Verify thermal containment.",
+                  "Verify battery enclosure and strain relief."
+                ],
+                "evidence": [
+                  {
+                    "evidence_id": "chemistry_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "cell_count_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "bms_protection_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "cell_balance_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "charge_discharge_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "thermal_containment_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "enclosure_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "lane_id": "mains_high_voltage",
+            "relevant": false,
+            "authorized": false,
+            "decision": "not_applicable",
+            "requirements": [],
+            "evidence": {
+              "capabilities": [
+                "connector",
+                "usb_serial"
+              ],
+              "hazard_ids": [],
+              "energy_domain": "low_voltage_dc",
+              "requested_domain": null,
+              "analysis_source": "payload_analysis",
+              "specialist_authority": {
+                "lane_id": "mains_high_voltage",
+                "authorized": false,
+                "status": null,
+                "signed": false,
+                "certificate_id_present": false,
+                "issued_at_present": false,
+                "missing_requirements": [
+                  "Attach specialist authority with status certified_release, authorized, or authority_ready.",
+                  "Attach specialist authority signed_by or authorized_by.",
+                  "Attach specialist authority certificate_id or authority_id.",
+                  "Attach specialist authority issued_at or authorized_at timestamp.",
+                  "Record isolation test result as passing.",
+                  "Record stored-energy discharge result as passing.",
+                  "Record earth-bond result as passing.",
+                  "Record leakage-current result as passing.",
+                  "Verify fuse/protection behavior.",
+                  "Verify creepage and clearance.",
+                  "Verify high-voltage enclosure."
+                ],
+                "evidence": [
+                  {
+                    "evidence_id": "isolation_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "discharge_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "earth_bond_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "leakage_current_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "fuse_protection_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "creepage_clearance_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "enclosure_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "lane_id": "laser_radiation",
+            "relevant": false,
+            "authorized": false,
+            "decision": "not_applicable",
+            "requirements": [],
+            "evidence": {
+              "capabilities": [
+                "connector",
+                "usb_serial"
+              ],
+              "hazard_ids": [],
+              "energy_domain": "low_voltage_dc",
+              "requested_domain": null,
+              "analysis_source": "payload_analysis",
+              "specialist_authority": {
+                "lane_id": "laser_radiation",
+                "authorized": false,
+                "status": null,
+                "signed": false,
+                "certificate_id_present": false,
+                "issued_at_present": false,
+                "missing_requirements": [
+                  "Attach specialist authority with status certified_release, authorized, or authority_ready.",
+                  "Attach specialist authority signed_by or authorized_by.",
+                  "Attach specialist authority certificate_id or authority_id.",
+                  "Attach specialist authority issued_at or authorized_at timestamp.",
+                  "Verify laser class.",
+                  "Verify optical containment.",
+                  "Record interlock result as passing.",
+                  "Verify labeling.",
+                  "Verify PPE and administrative controls.",
+                  "Verify exposure limit compliance."
+                ],
+                "evidence": [
+                  {
+                    "evidence_id": "laser_class_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "optical_containment_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "interlock_result",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "labeling_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "ppe_controls_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  },
+                  {
+                    "evidence_id": "exposure_limit_verified",
+                    "present": false,
+                    "passed": false,
+                    "value": null
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "policy": {
+          "all_relevant_lanes_must_authorize": true,
+          "unsupported_domains_require_specialist_authority": true,
+          "classification_uses_structured_semantics_not_regex": true
+        }
+      },
+      "measurement_requirements": {
+        "required_categories": [
+          "continuity",
+          "current",
+          "resistance",
+          "thermal",
+          "voltage"
+        ],
+        "passed_categories": [
+          "continuity",
+          "current",
+          "logic",
+          "resistance",
+          "thermal",
+          "voltage"
+        ],
+        "missing_categories": [],
+        "failed_measurement_count": 0
+      },
+      "measurement_provenance": {
+        "schema_version": "production_measurement_provenance.v1",
+        "trusted_categories": [
+          "continuity",
+          "current",
+          "logic",
+          "resistance",
+          "thermal",
+          "voltage"
+        ],
+        "missing_trusted_categories": [],
+        "artifact_categories": [
+          "continuity",
+          "current",
+          "logic",
+          "resistance",
+          "thermal",
+          "voltage"
+        ],
+        "missing_artifact_categories": [],
+        "trusted_measurement_count": 7,
+        "measurement_count": 7,
+        "requirements": [
+          "instrument_id or instrument_type",
+          "calibration_status valid/verified/current/not_required",
+          "recorded_at timestamp",
+          "operator_id or captured_by",
+          "evidence_uri or artifact_uri for audit trail"
+        ],
+        "measurements": [
+          {
+            "measurement_id": "measurement_1",
+            "categories": [
+              "resistance"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_2",
+            "categories": [
+              "continuity"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_3",
+            "categories": [
+              "logic",
+              "voltage"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_4",
+            "categories": [
+              "continuity"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_5",
+            "categories": [
+              "logic"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_6",
+            "categories": [
+              "current"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          },
+          {
+            "measurement_id": "measurement_7",
+            "categories": [
+              "thermal"
+            ],
+            "trusted": true,
+            "instrument_id_present": true,
+            "instrument_type_present": true,
+            "calibration_status": "valid",
+            "recorded_at_present": true,
+            "operator_id_present": true,
+            "evidence_uri_present": true
+          }
+        ]
+      },
+      "release_manifest": {
+        "schema_version": "production_release_manifest.v1",
+        "available": true,
+        "complete": true,
+        "release_id": "REL-LOW-LEDGER-001",
+        "release_operator_present": true,
+        "released_at_present": true,
+        "scope_statement_present": true,
+        "acceptance_reviewed": true,
+        "repeatability_count": 1,
+        "selected_resource_ids": [
+          "known_ch340"
+        ],
+        "manifest_resource_ids": [
+          "known_ch340"
+        ],
+        "selected_resource_ids_match": true,
+        "artifact_count": 3,
+        "measurement_artifact_count": 7,
+        "primary_production_lane": "low_voltage_dc_external",
+        "missing_requirements": [],
+        "claim_boundary": "Release manifest is an audit contract; it does not expand scope beyond measured resources and authorized domain lanes."
+      },
+      "authority_casefile": {
+        "schema_version": "production_authority_casefile.v1",
+        "status": "release_ready",
+        "claim_count": 8,
+        "passed_claim_count": 8,
+        "blocked_claim_count": 0,
+        "caution_claim_count": 0,
+        "claims": [
+          {
+            "claim_id": "selected_resource_scope",
+            "status": "pass",
+            "statement": "Selected resources are explicit and scoped.",
+            "evidence": [
+              "selected_resource:known_ch340"
+            ],
+            "gaps": [],
+            "details": {
+              "selected_resource_ids": [
+                "known_ch340"
+              ]
+            }
+          },
+          {
+            "claim_id": "safety_authority_low_risk",
+            "status": "pass",
+            "statement": "Safety authority permits first power or splice in the measured low-risk scope.",
+            "evidence": [
+              "assurance_level:authority_ready",
+              "repair_authority_status:authoritative_low_risk",
+              "hazard_energy_domain:low_voltage_dc"
+            ],
+            "gaps": [],
+            "details": {
+              "assurance_level": "authority_ready",
+              "repair_authority_status": "authoritative_low_risk",
+              "unsupported_hazard": false
+            }
+          },
+          {
+            "claim_id": "evidence_gates_closed",
+            "status": "pass",
+            "statement": "No open or failed evidence gates remain.",
+            "evidence": [
+              "evidence_gate_count:5",
+              "open_gate_count:0",
+              "failed_gate_count:0"
+            ],
+            "gaps": [],
+            "details": {
+              "open_gate_ids": [],
+              "failed_gate_ids": []
+            }
+          },
+          {
+            "claim_id": "required_measurement_coverage",
+            "status": "pass",
+            "statement": "Required production measurement categories are present and passing.",
+            "evidence": [
+              "passed_category:continuity",
+              "passed_category:current",
+              "passed_category:logic",
+              "passed_category:resistance",
+              "passed_category:thermal",
+              "passed_category:voltage"
+            ],
+            "gaps": [],
+            "details": {
+              "required_categories": [
+                "continuity",
+                "current",
+                "resistance",
+                "thermal",
+                "voltage"
+              ],
+              "passed_categories": [
+                "continuity",
+                "current",
+                "logic",
+                "resistance",
+                "thermal",
+                "voltage"
+              ],
+              "failed_measurement_count": 0
+            }
+          },
+          {
+            "claim_id": "measurement_provenance_auditable",
+            "status": "pass",
+            "statement": "Required measurements have trusted operator, instrument, calibration, timestamp, and audit artifacts.",
+            "evidence": [
+              "trusted_category:continuity",
+              "trusted_category:current",
+              "trusted_category:logic",
+              "trusted_category:resistance",
+              "trusted_category:thermal",
+              "trusted_category:voltage",
+              "artifact_category:continuity",
+              "artifact_category:current",
+              "artifact_category:logic",
+              "artifact_category:resistance",
+              "artifact_category:thermal",
+              "artifact_category:voltage"
+            ],
+            "gaps": [],
+            "details": {
+              "trusted_measurement_count": 7,
+              "measurement_count": 7,
+              "missing_artifact_categories": []
+            }
+          },
+          {
+            "claim_id": "terminal_outcome_verified",
+            "status": "pass",
+            "statement": "Terminal outcome verifies output function, first power, and thermal behavior.",
+            "evidence": [
+              "completion_state:workflow_complete",
+              "outcome_decision:built",
+              "output_function_verified:True",
+              "first_power_result:pass",
+              "thermal_result:normal",
+              "outcome_artifact_uri_present:True"
+            ],
+            "gaps": [],
+            "details": {
+              "outcome_required_fields_present": {
+                "decision": true,
+                "selected_resource_ids_used": true,
+                "measurements_recorded": true,
+                "cash_spent_usd": true,
+                "value_recovered_usd": true,
+                "time_spent_minutes": true,
+                "deviations_from_plan": true,
+                "failure_or_stop_reason": true,
+                "evidence_uri": true
+              }
+            }
+          },
+          {
+            "claim_id": "domain_authority_authorized",
+            "status": "pass",
+            "statement": "Relevant production authority lane is authorized.",
+            "evidence": [
+              "low_voltage_dc_external:authorized"
+            ],
+            "gaps": [],
+            "details": {
+              "primary_lane": "low_voltage_dc_external",
+              "blocking_lane_count": 0
+            }
+          },
+          {
+            "claim_id": "release_manifest_complete",
+            "status": "pass",
+            "statement": "Production release manifest is complete and matches the selected resources.",
+            "evidence": [
+              "release_id:REL-LOW-LEDGER-001",
+              "resource_ids_match:True",
+              "artifact_count:3"
+            ],
+            "gaps": [],
+            "details": {
+              "available": true,
+              "selected_resource_ids": [
+                "known_ch340"
+              ],
+              "manifest_resource_ids": [
+                "known_ch340"
+              ]
+            }
+          }
+        ],
+        "top_blockers": [],
+        "top_requirements": [],
+        "cannot_claim": [],
+        "reviewer_summary": "Production casefile is release-ready; every required claim has evidence.",
+        "claim_boundary": "Casefile explains the deterministic release decision; it is not an independent authorization path."
+      },
+      "outcome_requirements": {
+        "workflow_done": true,
+        "decision": "built",
+        "output_function_verified": true,
+        "first_power_result": "pass",
+        "thermal_result": "normal",
+        "evidence_uri_present": true
+      },
+      "blockers": [],
+      "requirements": [],
+      "claim_boundary": "Authorized only for the measured resources, relevant domain lanes, and terminal outcome recorded in this plan.",
+      "model_policy": {
+        "llm_can_add_hazard_candidates": true,
+        "llm_can_clear_hazards": false,
+        "release_decision_is_deterministic": true
+      }
+    }
+  },
+  "claim_boundary": "Authority is stage-scoped. Qwen/LLM evidence can create visual candidates and measurement tasks, but only measured topology, deterministic simulation, controlled bench outcome, and release artifacts can advance power, splice, or production repair claims."
+}

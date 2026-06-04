@@ -1,0 +1,4072 @@
+{
+  "available": true,
+  "board_evidence": {
+    "components": [
+      {
+        "bbox": [
+          182,
+          482,
+          422,
+          681
+        ],
+        "confidence": 0.9,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "dram_chip_integrated_circuit",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.1863,
+            0.483,
+            0.4319,
+            0.6824
+          ],
+          "pixel_bbox": [
+            182.0,
+            482.0,
+            422.0,
+            681.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "ram",
+        "kind": "integrated circuit",
+        "label": "DRAM chip",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              182,
+              482,
+              422,
+              681
+            ],
+            "bbox_role": "pixel",
+            "item_id": "ram",
+            "label": "DRAM chip",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          472,
+          391,
+          622,
+          535
+        ],
+        "confidence": 0.9,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "lpddr4_sdram_integrated_circuit",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "pixel_bbox": [
+            472.0,
+            391.0,
+            622.0,
+            535.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "ram",
+        "identity_status": "marking_linked_candidate",
+        "kind": "integrated_circuit",
+        "label": "LPDDR4 SDRAM",
+        "missing_evidence": [],
+        "resolved_markings": [
+          {
+            "confidence": 0.5,
+            "marking": "\u00a9 Raspberry Pi 2018",
+            "marking_id": "year",
+            "source_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          {
+            "confidence": 0.42,
+            "marking": "\u00a9 Raspberry Pi 2018",
+            "marking_id": "year",
+            "source_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "photo_3"
+            ]
+          }
+        ],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              472,
+              391,
+              622,
+              535
+            ],
+            "bbox_role": "pixel",
+            "item_id": "ram",
+            "label": "LPDDR4 SDRAM",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          338,
+          276,
+          540,
+          442
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "soc_bcm2711_integrated_circuit",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ],
+          "pixel_bbox": [
+            338.0,
+            276.0,
+            540.0,
+            442.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "cpu",
+        "kind": "integrated_circuit",
+        "label": "SoC (BCM2711)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              338,
+              276,
+              540,
+              442
+            ],
+            "bbox_role": "pixel",
+            "item_id": "cpu",
+            "label": "SoC (BCM2711)",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "system_on_chip_soc_integrated_circuit",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.0,
+            0.3377,
+            0.2886,
+            0.5872
+          ],
+          "pixel_bbox": [
+            0.0,
+            337.0,
+            282.0,
+            586.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "cpu",
+        "kind": "integrated circuit",
+        "label": "System-on-Chip (SoC)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              0,
+              337,
+              282,
+              586
+            ],
+            "bbox_role": "pixel",
+            "item_id": "cpu",
+            "label": "System-on-Chip (SoC)",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      }
+    ],
+    "connectors": [
+      {
+        "bbox": [
+          308,
+          550,
+          468,
+          738
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "3_5mm_audio_jack_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.3127,
+            0.6011,
+            0.4751,
+            0.8066
+          ],
+          "pixel_bbox": [
+            308.0,
+            550.0,
+            468.0,
+            738.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "audio-jack",
+        "kind": "connector",
+        "label": "3.5mm Audio Jack",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              308,
+              550,
+              468,
+              738
+            ],
+            "bbox_role": "pixel",
+            "item_id": "audio-jack",
+            "label": "3.5mm Audio Jack",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          432,
+          23,
+          778,
+          384
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "40_pin_gpio_header_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.4386,
+            0.0251,
+            0.7898,
+            0.4197
+          ],
+          "pixel_bbox": [
+            432.0,
+            23.0,
+            778.0,
+            384.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "gpio",
+        "kind": "connector",
+        "label": "40-pin GPIO Header",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              432,
+              23,
+              778,
+              384
+            ],
+            "bbox_role": "pixel",
+            "item_id": "gpio",
+            "label": "40-pin GPIO Header",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          156,
+          118,
+          338,
+          312
+        ],
+        "confidence": 0.9,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "display_port_edp_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.1584,
+            0.129,
+            0.3431,
+            0.341
+          ],
+          "pixel_bbox": [
+            156.0,
+            118.0,
+            338.0,
+            312.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "display",
+        "kind": "connector",
+        "label": "Display Port (eDP)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              156,
+              118,
+              338,
+              312
+            ],
+            "bbox_role": "pixel",
+            "item_id": "display",
+            "label": "Display Port (eDP)",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          222,
+          538,
+          312,
+          656
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "hdmi_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.2254,
+            0.588,
+            0.3168,
+            0.7169
+          ],
+          "pixel_bbox": [
+            222.0,
+            538.0,
+            312.0,
+            656.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "hdmi",
+        "kind": "connector",
+        "label": "HDMI",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              222,
+              538,
+              312,
+              656
+            ],
+            "bbox_role": "pixel",
+            "item_id": "hdmi",
+            "label": "HDMI",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          720,
+          276,
+          985,
+          694
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "rj45_ethernet_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.731,
+            0.3016,
+            1.0,
+            0.7585
+          ],
+          "pixel_bbox": [
+            720.0,
+            276.0,
+            985.0,
+            694.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "ethernet",
+        "kind": "connector",
+        "label": "RJ45 Ethernet",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              720,
+              276,
+              985,
+              694
+            ],
+            "bbox_role": "pixel",
+            "item_id": "ethernet",
+            "label": "RJ45 Ethernet",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          562,
+          337,
+          977,
+          842
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "rj45_ethernet_port_ethernet",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.5752,
+            0.3377,
+            1.0,
+            0.8437
+          ],
+          "pixel_bbox": [
+            562.0,
+            337.0,
+            977.0,
+            842.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "ethernet",
+        "kind": "Ethernet",
+        "label": "RJ45 Ethernet port",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              562,
+              337,
+              977,
+              842
+            ],
+            "bbox_role": "pixel",
+            "item_id": "ethernet",
+            "label": "RJ45 Ethernet port",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          612,
+          394,
+          838,
+          792
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "usb_a_port_1_blue_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.6213,
+            0.4306,
+            0.8508,
+            0.8656
+          ],
+          "pixel_bbox": [
+            612.0,
+            394.0,
+            838.0,
+            792.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "usb-a-1",
+        "kind": "connector",
+        "label": "USB-A Port 1 (blue)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              612,
+              394,
+              838,
+              792
+            ],
+            "bbox_role": "pixel",
+            "item_id": "usb-a-1",
+            "label": "USB-A Port 1 (blue)",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          468,
+          501,
+          708,
+          910
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "usb_a_port_2_black_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.4751,
+            0.5475,
+            0.7188,
+            0.9945
+          ],
+          "pixel_bbox": [
+            468.0,
+            501.0,
+            708.0,
+            910.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "usb-a-2",
+        "kind": "connector",
+        "label": "USB-A Port 2 (black)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              468,
+              501,
+              708,
+              910
+            ],
+            "bbox_role": "pixel",
+            "item_id": "usb-a-2",
+            "label": "USB-A Port 2 (black)",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          392,
+          492,
+          747,
+          998
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "usb_a_port_blue_usb_a",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 2,
+          "normalized_bbox": [
+            0.2902,
+            0.5632,
+            0.6561,
+            1.0
+          ],
+          "pixel_bbox": [
+            175.0,
+            632.0,
+            535.0,
+            998.0
+          ],
+          "provider_pixel_normalized_count": 2,
+          "status": "provider_pixel_normalized_consensus"
+        },
+        "id": "usb-a-2",
+        "kind": "USB-A",
+        "label": "USB-A port (blue)",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              175,
+              632,
+              535,
+              998
+            ],
+            "bbox_role": "pixel",
+            "item_id": "usb-a-1",
+            "label": "USB-A port (blue)",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          },
+          {
+            "bbox": [
+              392,
+              492,
+              747,
+              998
+            ],
+            "bbox_role": "pixel",
+            "item_id": "usb-a-2",
+            "label": "USB-A port (blue)",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          40,
+          351,
+          152,
+          488
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "usb_c_power_in_connector",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.0406,
+            0.3836,
+            0.1543,
+            0.5333
+          ],
+          "pixel_bbox": [
+            40.0,
+            351.0,
+            152.0,
+            488.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "usb-c",
+        "kind": "connector",
+        "label": "USB-C Power In",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              40,
+              351,
+              152,
+              488
+            ],
+            "bbox_role": "pixel",
+            "item_id": "usb-c",
+            "label": "USB-C Power In",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      }
+    ],
+    "damage": [],
+    "markings": [
+      {
+        "bbox": [
+          272,
+          381,
+          388,
+          482
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "fcc_id_2a0cd_rp14b_silkscreen",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.2761,
+            0.4164,
+            0.3939,
+            0.5268
+          ],
+          "pixel_bbox": [
+            272.0,
+            381.0,
+            388.0,
+            482.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "fcc",
+        "kind": "silkscreen",
+        "label": "FCC ID: 2A0CD-RP14B",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              272,
+              381,
+              388,
+              482
+            ],
+            "bbox_role": "pixel",
+            "item_id": "fcc",
+            "label": "FCC ID: 2A0CD-RP14B",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          277,
+          392,
+          472,
+          542
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "raspberry_pi_2018_silkscreen_text",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.2835,
+            0.3928,
+            0.4831,
+            0.5431
+          ],
+          "pixel_bbox": [
+            277.0,
+            392.0,
+            472.0,
+            542.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "year",
+        "kind": "silkscreen text",
+        "label": "\u00a9 Raspberry Pi 2018",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              277,
+              392,
+              472,
+              542
+            ],
+            "bbox_role": "pixel",
+            "item_id": "year",
+            "label": "\u00a9 Raspberry Pi 2018",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          542,
+          291,
+          682,
+          425
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "raspberry_pi_4_model_b_2018_silkscreen",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.5503,
+            0.318,
+            0.6924,
+            0.4645
+          ],
+          "pixel_bbox": [
+            542.0,
+            291.0,
+            682.0,
+            425.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "model",
+        "kind": "silkscreen",
+        "label": "Raspberry Pi 4 Model B 2018",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              542,
+              291,
+              682,
+              425
+            ],
+            "bbox_role": "pixel",
+            "item_id": "model",
+            "label": "Raspberry Pi 4 Model B 2018",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          292,
+          352,
+          510,
+          520
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "raspberry_pi_4_model_b_silkscreen_text",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.2989,
+            0.3527,
+            0.522,
+            0.521
+          ],
+          "pixel_bbox": [
+            292.0,
+            352.0,
+            510.0,
+            520.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "model",
+        "kind": "silkscreen text",
+        "label": "Raspberry Pi 4 Model B",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              292,
+              352,
+              510,
+              520
+            ],
+            "bbox_role": "pixel",
+            "item_id": "model",
+            "label": "Raspberry Pi 4 Model B",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      }
+    ],
+    "multiview_reconstruction": {
+      "capture_coverage_complete": true,
+      "capture_coverage_score": 1.0,
+      "identity_link_count": 1,
+      "layout_confidence": 0.78,
+      "photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "schema_version": "multiview_board_reconstruction.v1",
+      "usable_observation_count": 2
+    },
+    "regions": [
+      {
+        "bbox": [
+          115,
+          0,
+          655,
+          478
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "40_pin_gpio_header_header",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.1177,
+            0.0,
+            0.6704,
+            0.479
+          ],
+          "pixel_bbox": [
+            115.0,
+            0.0,
+            655.0,
+            478.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "gpio",
+        "kind": "header",
+        "label": "40-pin GPIO header",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              115,
+              0,
+              655,
+              478
+            ],
+            "bbox_role": "pixel",
+            "item_id": "gpio",
+            "label": "40-pin GPIO header",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          468,
+          276,
+          985,
+          915
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "i_o_connector_region_area",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.4751,
+            0.3016,
+            1.0,
+            1.0
+          ],
+          "pixel_bbox": [
+            468.0,
+            276.0,
+            985.0,
+            915.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "io",
+        "kind": "area",
+        "label": "I/O connector region",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              468,
+              276,
+              985,
+              915
+            ],
+            "bbox_role": "pixel",
+            "item_id": "io",
+            "label": "I/O connector region",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          40,
+          351,
+          240,
+          572
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "power_input_region_area",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.0406,
+            0.3836,
+            0.2437,
+            0.6251
+          ],
+          "pixel_bbox": [
+            40.0,
+            351.0,
+            240.0,
+            572.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "power",
+        "kind": "area",
+        "label": "Power input region",
+        "missing_evidence": [],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              40,
+              351,
+              240,
+              572
+            ],
+            "bbox_role": "pixel",
+            "item_id": "power",
+            "label": "Power input region",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      }
+    ],
+    "salvage_candidates": [
+      {
+        "bbox": [
+          338,
+          276,
+          540,
+          442
+        ],
+        "confidence": 0.95,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "bcm2711_soc_ic",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ],
+          "pixel_bbox": [
+            338.0,
+            276.0,
+            540.0,
+            442.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "cpu",
+        "kind": "ic",
+        "label": "BCM2711 SoC",
+        "missing_evidence": [
+          "visual continuity",
+          "no overheating discoloration",
+          "thermal pad integrity"
+        ],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              338,
+              276,
+              540,
+              442
+            ],
+            "bbox_role": "pixel",
+            "item_id": "cpu",
+            "label": "BCM2711 SoC",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          472,
+          391,
+          622,
+          535
+        ],
+        "confidence": 0.9,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "lpddr4_sdram_ic",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "pixel_bbox": [
+            472.0,
+            391.0,
+            622.0,
+            535.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "ram",
+        "kind": "ic",
+        "label": "LPDDR4 SDRAM",
+        "missing_evidence": [
+          "visual continuity",
+          "no delamination",
+          "no solder ball cracking"
+        ],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              472,
+              391,
+              622,
+              535
+            ],
+            "bbox_role": "pixel",
+            "item_id": "ram",
+            "label": "LPDDR4 SDRAM",
+            "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+            "view_hint": "whole board overview"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      },
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "confidence": 0.9,
+        "cross_view": {
+          "alternate_labels": [],
+          "item_key": "soc_bcm2711_integrated_circuit",
+          "supporting_photo_ids": [
+            "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+          ]
+        },
+        "geometry": {
+          "geometry_support_count": 1,
+          "normalized_bbox": [
+            0.0,
+            0.3377,
+            0.2886,
+            0.5872
+          ],
+          "pixel_bbox": [
+            0.0,
+            337.0,
+            282.0,
+            586.0
+          ],
+          "provider_pixel_normalized_count": 1,
+          "status": "provider_pixel_normalized_single"
+        },
+        "id": "cpu",
+        "kind": "integrated circuit",
+        "label": "SoC (BCM2711)",
+        "missing_evidence": [
+          "visual continuity",
+          "no thermal damage",
+          "power rail integrity"
+        ],
+        "source": "board_evidence.v1",
+        "source_refs": [
+          {
+            "bbox": [
+              0,
+              337,
+              282,
+              586
+            ],
+            "bbox_role": "pixel",
+            "item_id": "cpu",
+            "label": "SoC (BCM2711)",
+            "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+            "view_hint": "connector, SoC, and GPIO closeup crop"
+          }
+        ],
+        "support_count": 1,
+        "warnings": []
+      }
+    ],
+    "schema_version": "board_evidence.v1",
+    "test_points": []
+  },
+  "canonical_board_map": {
+    "claim_boundary": "Canonical map is a visual evidence index, not CAD, photogrammetry, netlist, or safe cut geometry.",
+    "item_count": 24,
+    "items": [
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.9,
+        "evidence_type": "components",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "integrated circuit",
+        "label": "DRAM chip",
+        "map_id": "components:ram",
+        "normalized_bbox": [
+          0.1863,
+          0.483,
+          0.4319,
+          0.6824
+        ],
+        "pixel_bbox": [
+          182.0,
+          482.0,
+          422.0,
+          681.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.9,
+        "evidence_type": "components",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "integrated_circuit",
+        "label": "LPDDR4 SDRAM",
+        "map_id": "components:ram",
+        "normalized_bbox": [
+          0.4792,
+          0.4273,
+          0.6315,
+          0.5847
+        ],
+        "pixel_bbox": [
+          472.0,
+          391.0,
+          622.0,
+          535.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "components",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "integrated_circuit",
+        "label": "SoC (BCM2711)",
+        "map_id": "components:cpu",
+        "normalized_bbox": [
+          0.3431,
+          0.3016,
+          0.5482,
+          0.4831
+        ],
+        "pixel_bbox": [
+          338.0,
+          276.0,
+          540.0,
+          442.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.95,
+        "evidence_type": "components",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "integrated circuit",
+        "label": "System-on-Chip (SoC)",
+        "map_id": "components:cpu",
+        "normalized_bbox": [
+          0.0,
+          0.3377,
+          0.2886,
+          0.5872
+        ],
+        "pixel_bbox": [
+          0.0,
+          337.0,
+          282.0,
+          586.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "bottom_center",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "3.5mm Audio Jack",
+        "map_id": "connectors:audio-jack",
+        "normalized_bbox": [
+          0.3127,
+          0.6011,
+          0.4751,
+          0.8066
+        ],
+        "pixel_bbox": [
+          308.0,
+          550.0,
+          468.0,
+          738.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "top_center",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "40-pin GPIO Header",
+        "map_id": "connectors:gpio",
+        "normalized_bbox": [
+          0.4386,
+          0.0251,
+          0.7898,
+          0.4197
+        ],
+        "pixel_bbox": [
+          432.0,
+          23.0,
+          778.0,
+          384.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "top_left",
+        "confidence": 0.9,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "Display Port (eDP)",
+        "map_id": "connectors:display",
+        "normalized_bbox": [
+          0.1584,
+          0.129,
+          0.3431,
+          0.341
+        ],
+        "pixel_bbox": [
+          156.0,
+          118.0,
+          338.0,
+          312.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "HDMI",
+        "map_id": "connectors:hdmi",
+        "normalized_bbox": [
+          0.2254,
+          0.588,
+          0.3168,
+          0.7169
+        ],
+        "pixel_bbox": [
+          222.0,
+          538.0,
+          312.0,
+          656.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_right",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "RJ45 Ethernet",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.731,
+          0.3016,
+          1.0,
+          0.7585
+        ],
+        "pixel_bbox": [
+          720.0,
+          276.0,
+          985.0,
+          694.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_right",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "Ethernet",
+        "label": "RJ45 Ethernet port",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.5752,
+          0.3377,
+          1.0,
+          0.8437
+        ],
+        "pixel_bbox": [
+          562.0,
+          337.0,
+          977.0,
+          842.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_right",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "USB-A Port 1 (blue)",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ],
+        "pixel_bbox": [
+          612.0,
+          394.0,
+          838.0,
+          792.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "bottom_center",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "USB-A Port 2 (black)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ],
+        "pixel_bbox": [
+          468.0,
+          501.0,
+          708.0,
+          910.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "bottom_center",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "kind": "USB-A",
+        "label": "USB-A port (blue)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ],
+        "pixel_bbox": [
+          175.0,
+          632.0,
+          535.0,
+          998.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.95,
+        "evidence_type": "connectors",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "connector",
+        "label": "USB-C Power In",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ],
+        "pixel_bbox": [
+          40.0,
+          351.0,
+          152.0,
+          488.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "markings",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "silkscreen",
+        "label": "FCC ID: 2A0CD-RP14B",
+        "map_id": "markings:fcc",
+        "normalized_bbox": [
+          0.2761,
+          0.4164,
+          0.3939,
+          0.5268
+        ],
+        "pixel_bbox": [
+          272.0,
+          381.0,
+          388.0,
+          482.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "markings",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "silkscreen text",
+        "label": "Raspberry Pi 4 Model B",
+        "map_id": "markings:model",
+        "normalized_bbox": [
+          0.2989,
+          0.3527,
+          0.522,
+          0.521
+        ],
+        "pixel_bbox": [
+          292.0,
+          352.0,
+          510.0,
+          520.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "markings",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "silkscreen",
+        "label": "Raspberry Pi 4 Model B 2018",
+        "map_id": "markings:model",
+        "normalized_bbox": [
+          0.5503,
+          0.318,
+          0.6924,
+          0.4645
+        ],
+        "pixel_bbox": [
+          542.0,
+          291.0,
+          682.0,
+          425.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "markings",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "silkscreen text",
+        "label": "\u00a9 Raspberry Pi 2018",
+        "map_id": "markings:year",
+        "normalized_bbox": [
+          0.2835,
+          0.3928,
+          0.4831,
+          0.5431
+        ],
+        "pixel_bbox": [
+          277.0,
+          392.0,
+          472.0,
+          542.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "top_center",
+        "confidence": 0.95,
+        "evidence_type": "regions",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "header",
+        "label": "40-pin GPIO header",
+        "map_id": "regions:gpio",
+        "normalized_bbox": [
+          0.1177,
+          0.0,
+          0.6704,
+          0.479
+        ],
+        "pixel_bbox": [
+          115.0,
+          0.0,
+          655.0,
+          478.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_right",
+        "confidence": 0.95,
+        "evidence_type": "regions",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "area",
+        "label": "I/O connector region",
+        "map_id": "regions:io",
+        "normalized_bbox": [
+          0.4751,
+          0.3016,
+          1.0,
+          1.0
+        ],
+        "pixel_bbox": [
+          468.0,
+          276.0,
+          985.0,
+          915.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.95,
+        "evidence_type": "regions",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "area",
+        "label": "Power input region",
+        "map_id": "regions:power",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.2437,
+          0.6251
+        ],
+        "pixel_bbox": [
+          40.0,
+          351.0,
+          240.0,
+          572.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.95,
+        "evidence_type": "salvage_candidates",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "ic",
+        "label": "BCM2711 SoC",
+        "map_id": "salvage_candidates:cpu",
+        "normalized_bbox": [
+          0.3431,
+          0.3016,
+          0.5482,
+          0.4831
+        ],
+        "pixel_bbox": [
+          338.0,
+          276.0,
+          540.0,
+          442.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "center",
+        "confidence": 0.9,
+        "evidence_type": "salvage_candidates",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "ic",
+        "label": "LPDDR4 SDRAM",
+        "map_id": "salvage_candidates:ram",
+        "normalized_bbox": [
+          0.4792,
+          0.4273,
+          0.6315,
+          0.5847
+        ],
+        "pixel_bbox": [
+          472.0,
+          391.0,
+          622.0,
+          535.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "support_count": 1
+      },
+      {
+        "board_zone": "middle_left",
+        "confidence": 0.9,
+        "evidence_type": "salvage_candidates",
+        "geometry_status": "provider_pixel_normalized_single",
+        "kind": "integrated circuit",
+        "label": "SoC (BCM2711)",
+        "map_id": "salvage_candidates:cpu",
+        "normalized_bbox": [
+          0.0,
+          0.3377,
+          0.2886,
+          0.5872
+        ],
+        "pixel_bbox": [
+          0.0,
+          337.0,
+          282.0,
+          586.0
+        ],
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "support_count": 1
+      }
+    ],
+    "layout_confidence": 0.78,
+    "map_type": "evidence_map_not_metric_cad",
+    "mapped_item_count": 24,
+    "photo_count": 2,
+    "schema_version": "canonical_board_map.v1",
+    "unmapped_item_count": 0,
+    "zone_counts": {
+      "bottom_center": 3,
+      "center": 8,
+      "middle_left": 6,
+      "middle_right": 4,
+      "top_center": 2,
+      "top_left": 1
+    }
+  },
+  "capture_coverage": {
+    "claim_boundary": "Capture coverage grades visual observability only; it cannot prove pinout, nets, voltage, or safe reuse.",
+    "complete_required_lane_count": 5,
+    "lanes": [
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "lane_id": "whole_board_context",
+        "purpose": "layout",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Whole-board context",
+        "weight": 0.2
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "lane_id": "connector_detail",
+        "purpose": "connector_map",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Connector and entry-point detail",
+        "weight": 0.2
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "lane_id": "marking_identity_detail",
+        "purpose": "identity",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Marking and identity detail",
+        "weight": 0.18
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "safety_damage_pass",
+        "purpose": "hazard_review",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Safety and damage pass",
+        "weight": 0.16
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "lane_id": "layout_geometry",
+        "purpose": "layout",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Layout geometry anchors",
+        "weight": 0.16
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "cross_view_confirmation",
+        "purpose": "confidence",
+        "request_prompt": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+        "required": false,
+        "status": "open",
+        "title": "Cross-view confirmation",
+        "weight": 0.0
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "hidden_side_context",
+        "purpose": "hidden_area",
+        "request_prompt": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+        "required": false,
+        "status": "open",
+        "title": "Backside or hidden-area context",
+        "weight": 0.0
+      }
+    ],
+    "open_required_lanes": [],
+    "recommended_open_lanes": [
+      "cross_view_confirmation",
+      "hidden_side_context"
+    ],
+    "required_complete": true,
+    "required_lane_count": 5,
+    "schema_version": "capture_coverage.v1",
+    "score": 1.0
+  },
+  "contradictions": {
+    "items": [],
+    "status": "clear"
+  },
+  "identity_links": [
+    {
+      "component_id": "ram",
+      "component_label": "DRAM chip",
+      "confidence": 0.5,
+      "evidence": [
+        "same photo observation: rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+        "overlapping normalized geometry",
+        "single unresolved nearby component candidate"
+      ],
+      "link_id": "identity_year_ram",
+      "marking": "\u00a9 Raspberry Pi 2018",
+      "marking_id": "year",
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "type": "marking_resolves_component"
+    }
+  ],
+  "input_observation_count": 2,
+  "next_capture_requests": [
+    {
+      "prompt": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+      "purpose": "confidence",
+      "request_id": "cross_view_confirmation",
+      "status": "open",
+      "type": "photo"
+    },
+    {
+      "prompt": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+      "purpose": "hidden_area",
+      "request_id": "hidden_side_context",
+      "status": "open",
+      "type": "photo"
+    }
+  ],
+  "photo_evidence": [
+    {
+      "json_valid": true,
+      "label": "qwen_1_raspberry_pi_whole_board.json",
+      "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+      "provider": "qwen",
+      "truncated": false,
+      "view_hint": "whole board overview"
+    },
+    {
+      "json_valid": true,
+      "label": "qwen_2_raspberry_pi_connector_soc_crop.json",
+      "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+      "provider": "qwen",
+      "truncated": false,
+      "view_hint": "connector, SoC, and GPIO closeup crop"
+    }
+  ],
+  "policy": {
+    "fixed_view_slots_required": false,
+    "fusion_is_candidate_only": true,
+    "measurements_still_required_for_power_or_splice": true,
+    "photos_are_observations": true
+  },
+  "reconstruction_summary": {
+    "capture_coverage_complete": true,
+    "capture_coverage_score": 1.0,
+    "counts": {
+      "components": 4,
+      "connectors": 10,
+      "damage": 0,
+      "markings": 4,
+      "regions": 3,
+      "salvage_candidates": 3,
+      "test_points": 0
+    },
+    "evidence_item_count": 24,
+    "identity_link_count": 1,
+    "layout_confidence": 0.78,
+    "level": "multi_view_reconstructed_visual_dossier",
+    "mapped_item_count": 24,
+    "open_capture_lanes": [],
+    "photo_count": 2,
+    "source_policy": "Repeated visual observations raise candidate confidence but do not prove pinout, nets, voltage, or safe reuse.",
+    "unmapped_item_count": 0,
+    "usable_photo_count": 2
+  },
+  "schema_version": "multiview_board_reconstruction.v1",
+  "usable_observation_count": 2,
+  "vision_evidence_bridge": {
+    "available": true,
+    "board_evidence": {
+      "components": [
+        {
+          "bbox": [
+            182,
+            482,
+            422,
+            681
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "dram_chip_integrated_circuit",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.1863,
+              0.483,
+              0.4319,
+              0.6824
+            ],
+            "pixel_bbox": [
+              182.0,
+              482.0,
+              422.0,
+              681.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "ram",
+          "kind": "integrated circuit",
+          "label": "DRAM chip",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                182,
+                482,
+                422,
+                681
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ram",
+              "label": "DRAM chip",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            472,
+            391,
+            622,
+            535
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "lpddr4_sdram_integrated_circuit",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.4792,
+              0.4273,
+              0.6315,
+              0.5847
+            ],
+            "pixel_bbox": [
+              472.0,
+              391.0,
+              622.0,
+              535.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "ram",
+          "identity_status": "marking_linked_candidate",
+          "kind": "integrated_circuit",
+          "label": "LPDDR4 SDRAM",
+          "missing_evidence": [],
+          "resolved_markings": [
+            {
+              "confidence": 0.5,
+              "marking": "\u00a9 Raspberry Pi 2018",
+              "marking_id": "year",
+              "source_photo_ids": [
+                "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+              ]
+            },
+            {
+              "confidence": 0.42,
+              "marking": "\u00a9 Raspberry Pi 2018",
+              "marking_id": "year",
+              "source_photo_ids": [
+                "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+                "photo_3"
+              ]
+            }
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                472,
+                391,
+                622,
+                535
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ram",
+              "label": "LPDDR4 SDRAM",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            338,
+            276,
+            540,
+            442
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "soc_bcm2711_integrated_circuit",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.3431,
+              0.3016,
+              0.5482,
+              0.4831
+            ],
+            "pixel_bbox": [
+              338.0,
+              276.0,
+              540.0,
+              442.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "cpu",
+          "kind": "integrated_circuit",
+          "label": "SoC (BCM2711)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                338,
+                276,
+                540,
+                442
+              ],
+              "bbox_role": "pixel",
+              "item_id": "cpu",
+              "label": "SoC (BCM2711)",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "system_on_chip_soc_integrated_circuit",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.0,
+              0.3377,
+              0.2886,
+              0.5872
+            ],
+            "pixel_bbox": [
+              0.0,
+              337.0,
+              282.0,
+              586.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "System-on-Chip (SoC)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                0,
+                337,
+                282,
+                586
+              ],
+              "bbox_role": "pixel",
+              "item_id": "cpu",
+              "label": "System-on-Chip (SoC)",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "connectors": [
+        {
+          "bbox": [
+            308,
+            550,
+            468,
+            738
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "3_5mm_audio_jack_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.3127,
+              0.6011,
+              0.4751,
+              0.8066
+            ],
+            "pixel_bbox": [
+              308.0,
+              550.0,
+              468.0,
+              738.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "audio-jack",
+          "kind": "connector",
+          "label": "3.5mm Audio Jack",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                308,
+                550,
+                468,
+                738
+              ],
+              "bbox_role": "pixel",
+              "item_id": "audio-jack",
+              "label": "3.5mm Audio Jack",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            432,
+            23,
+            778,
+            384
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "40_pin_gpio_header_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.4386,
+              0.0251,
+              0.7898,
+              0.4197
+            ],
+            "pixel_bbox": [
+              432.0,
+              23.0,
+              778.0,
+              384.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "gpio",
+          "kind": "connector",
+          "label": "40-pin GPIO Header",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                432,
+                23,
+                778,
+                384
+              ],
+              "bbox_role": "pixel",
+              "item_id": "gpio",
+              "label": "40-pin GPIO Header",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            156,
+            118,
+            338,
+            312
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "display_port_edp_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.1584,
+              0.129,
+              0.3431,
+              0.341
+            ],
+            "pixel_bbox": [
+              156.0,
+              118.0,
+              338.0,
+              312.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "display",
+          "kind": "connector",
+          "label": "Display Port (eDP)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                156,
+                118,
+                338,
+                312
+              ],
+              "bbox_role": "pixel",
+              "item_id": "display",
+              "label": "Display Port (eDP)",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            222,
+            538,
+            312,
+            656
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "hdmi_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.2254,
+              0.588,
+              0.3168,
+              0.7169
+            ],
+            "pixel_bbox": [
+              222.0,
+              538.0,
+              312.0,
+              656.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "hdmi",
+          "kind": "connector",
+          "label": "HDMI",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                222,
+                538,
+                312,
+                656
+              ],
+              "bbox_role": "pixel",
+              "item_id": "hdmi",
+              "label": "HDMI",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            720,
+            276,
+            985,
+            694
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "rj45_ethernet_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.731,
+              0.3016,
+              1.0,
+              0.7585
+            ],
+            "pixel_bbox": [
+              720.0,
+              276.0,
+              985.0,
+              694.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "ethernet",
+          "kind": "connector",
+          "label": "RJ45 Ethernet",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                720,
+                276,
+                985,
+                694
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ethernet",
+              "label": "RJ45 Ethernet",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            562,
+            337,
+            977,
+            842
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "rj45_ethernet_port_ethernet",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.5752,
+              0.3377,
+              1.0,
+              0.8437
+            ],
+            "pixel_bbox": [
+              562.0,
+              337.0,
+              977.0,
+              842.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "ethernet",
+          "kind": "Ethernet",
+          "label": "RJ45 Ethernet port",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                562,
+                337,
+                977,
+                842
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ethernet",
+              "label": "RJ45 Ethernet port",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            612,
+            394,
+            838,
+            792
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_a_port_1_blue_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.6213,
+              0.4306,
+              0.8508,
+              0.8656
+            ],
+            "pixel_bbox": [
+              612.0,
+              394.0,
+              838.0,
+              792.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "usb-a-1",
+          "kind": "connector",
+          "label": "USB-A Port 1 (blue)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                612,
+                394,
+                838,
+                792
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb-a-1",
+              "label": "USB-A Port 1 (blue)",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            468,
+            501,
+            708,
+            910
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_a_port_2_black_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.4751,
+              0.5475,
+              0.7188,
+              0.9945
+            ],
+            "pixel_bbox": [
+              468.0,
+              501.0,
+              708.0,
+              910.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "usb-a-2",
+          "kind": "connector",
+          "label": "USB-A Port 2 (black)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                468,
+                501,
+                708,
+                910
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb-a-2",
+              "label": "USB-A Port 2 (black)",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            392,
+            492,
+            747,
+            998
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_a_port_blue_usb_a",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 2,
+            "normalized_bbox": [
+              0.2902,
+              0.5632,
+              0.6561,
+              1.0
+            ],
+            "pixel_bbox": [
+              175.0,
+              632.0,
+              535.0,
+              998.0
+            ],
+            "provider_pixel_normalized_count": 2,
+            "status": "provider_pixel_normalized_consensus"
+          },
+          "id": "usb-a-2",
+          "kind": "USB-A",
+          "label": "USB-A port (blue)",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                175,
+                632,
+                535,
+                998
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb-a-1",
+              "label": "USB-A port (blue)",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            },
+            {
+              "bbox": [
+                392,
+                492,
+                747,
+                998
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb-a-2",
+              "label": "USB-A port (blue)",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            40,
+            351,
+            152,
+            488
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "usb_c_power_in_connector",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.0406,
+              0.3836,
+              0.1543,
+              0.5333
+            ],
+            "pixel_bbox": [
+              40.0,
+              351.0,
+              152.0,
+              488.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "usb-c",
+          "kind": "connector",
+          "label": "USB-C Power In",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                40,
+                351,
+                152,
+                488
+              ],
+              "bbox_role": "pixel",
+              "item_id": "usb-c",
+              "label": "USB-C Power In",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "damage": [],
+      "markings": [
+        {
+          "bbox": [
+            272,
+            381,
+            388,
+            482
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "fcc_id_2a0cd_rp14b_silkscreen",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.2761,
+              0.4164,
+              0.3939,
+              0.5268
+            ],
+            "pixel_bbox": [
+              272.0,
+              381.0,
+              388.0,
+              482.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "fcc",
+          "kind": "silkscreen",
+          "label": "FCC ID: 2A0CD-RP14B",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                272,
+                381,
+                388,
+                482
+              ],
+              "bbox_role": "pixel",
+              "item_id": "fcc",
+              "label": "FCC ID: 2A0CD-RP14B",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            277,
+            392,
+            472,
+            542
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "raspberry_pi_2018_silkscreen_text",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.2835,
+              0.3928,
+              0.4831,
+              0.5431
+            ],
+            "pixel_bbox": [
+              277.0,
+              392.0,
+              472.0,
+              542.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "year",
+          "kind": "silkscreen text",
+          "label": "\u00a9 Raspberry Pi 2018",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                277,
+                392,
+                472,
+                542
+              ],
+              "bbox_role": "pixel",
+              "item_id": "year",
+              "label": "\u00a9 Raspberry Pi 2018",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            542,
+            291,
+            682,
+            425
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "raspberry_pi_4_model_b_2018_silkscreen",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.5503,
+              0.318,
+              0.6924,
+              0.4645
+            ],
+            "pixel_bbox": [
+              542.0,
+              291.0,
+              682.0,
+              425.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "model",
+          "kind": "silkscreen",
+          "label": "Raspberry Pi 4 Model B 2018",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                542,
+                291,
+                682,
+                425
+              ],
+              "bbox_role": "pixel",
+              "item_id": "model",
+              "label": "Raspberry Pi 4 Model B 2018",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            292,
+            352,
+            510,
+            520
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "raspberry_pi_4_model_b_silkscreen_text",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.2989,
+              0.3527,
+              0.522,
+              0.521
+            ],
+            "pixel_bbox": [
+              292.0,
+              352.0,
+              510.0,
+              520.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "model",
+          "kind": "silkscreen text",
+          "label": "Raspberry Pi 4 Model B",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                292,
+                352,
+                510,
+                520
+              ],
+              "bbox_role": "pixel",
+              "item_id": "model",
+              "label": "Raspberry Pi 4 Model B",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "multiview_reconstruction": {
+        "capture_coverage_complete": true,
+        "capture_coverage_score": 1.0,
+        "identity_link_count": 1,
+        "layout_confidence": 0.78,
+        "photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "schema_version": "multiview_board_reconstruction.v1",
+        "usable_observation_count": 2
+      },
+      "regions": [
+        {
+          "bbox": [
+            115,
+            0,
+            655,
+            478
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "40_pin_gpio_header_header",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.1177,
+              0.0,
+              0.6704,
+              0.479
+            ],
+            "pixel_bbox": [
+              115.0,
+              0.0,
+              655.0,
+              478.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "gpio",
+          "kind": "header",
+          "label": "40-pin GPIO header",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                115,
+                0,
+                655,
+                478
+              ],
+              "bbox_role": "pixel",
+              "item_id": "gpio",
+              "label": "40-pin GPIO header",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            468,
+            276,
+            985,
+            915
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "i_o_connector_region_area",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.4751,
+              0.3016,
+              1.0,
+              1.0
+            ],
+            "pixel_bbox": [
+              468.0,
+              276.0,
+              985.0,
+              915.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "io",
+          "kind": "area",
+          "label": "I/O connector region",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                468,
+                276,
+                985,
+                915
+              ],
+              "bbox_role": "pixel",
+              "item_id": "io",
+              "label": "I/O connector region",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            40,
+            351,
+            240,
+            572
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "power_input_region_area",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.0406,
+              0.3836,
+              0.2437,
+              0.6251
+            ],
+            "pixel_bbox": [
+              40.0,
+              351.0,
+              240.0,
+              572.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "power",
+          "kind": "area",
+          "label": "Power input region",
+          "missing_evidence": [],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                40,
+                351,
+                240,
+                572
+              ],
+              "bbox_role": "pixel",
+              "item_id": "power",
+              "label": "Power input region",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "salvage_candidates": [
+        {
+          "bbox": [
+            338,
+            276,
+            540,
+            442
+          ],
+          "confidence": 0.95,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "bcm2711_soc_ic",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.3431,
+              0.3016,
+              0.5482,
+              0.4831
+            ],
+            "pixel_bbox": [
+              338.0,
+              276.0,
+              540.0,
+              442.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "cpu",
+          "kind": "ic",
+          "label": "BCM2711 SoC",
+          "missing_evidence": [
+            "visual continuity",
+            "no overheating discoloration",
+            "thermal pad integrity"
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                338,
+                276,
+                540,
+                442
+              ],
+              "bbox_role": "pixel",
+              "item_id": "cpu",
+              "label": "BCM2711 SoC",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            472,
+            391,
+            622,
+            535
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "lpddr4_sdram_ic",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.4792,
+              0.4273,
+              0.6315,
+              0.5847
+            ],
+            "pixel_bbox": [
+              472.0,
+              391.0,
+              622.0,
+              535.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "ram",
+          "kind": "ic",
+          "label": "LPDDR4 SDRAM",
+          "missing_evidence": [
+            "visual continuity",
+            "no delamination",
+            "no solder ball cracking"
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                472,
+                391,
+                622,
+                535
+              ],
+              "bbox_role": "pixel",
+              "item_id": "ram",
+              "label": "LPDDR4 SDRAM",
+              "photo_id": "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+              "view_hint": "whole board overview"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        },
+        {
+          "bbox": [
+            0,
+            337,
+            282,
+            586
+          ],
+          "confidence": 0.9,
+          "cross_view": {
+            "alternate_labels": [],
+            "item_key": "soc_bcm2711_integrated_circuit",
+            "supporting_photo_ids": [
+              "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+            ]
+          },
+          "geometry": {
+            "geometry_support_count": 1,
+            "normalized_bbox": [
+              0.0,
+              0.3377,
+              0.2886,
+              0.5872
+            ],
+            "pixel_bbox": [
+              0.0,
+              337.0,
+              282.0,
+              586.0
+            ],
+            "provider_pixel_normalized_count": 1,
+            "status": "provider_pixel_normalized_single"
+          },
+          "id": "cpu",
+          "kind": "integrated circuit",
+          "label": "SoC (BCM2711)",
+          "missing_evidence": [
+            "visual continuity",
+            "no thermal damage",
+            "power rail integrity"
+          ],
+          "source": "board_evidence.v1",
+          "source_refs": [
+            {
+              "bbox": [
+                0,
+                337,
+                282,
+                586
+              ],
+              "bbox_role": "pixel",
+              "item_id": "cpu",
+              "label": "SoC (BCM2711)",
+              "photo_id": "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+              "view_hint": "connector, SoC, and GPIO closeup crop"
+            }
+          ],
+          "support_count": 1,
+          "warnings": []
+        }
+      ],
+      "schema_version": "board_evidence.v1",
+      "test_points": []
+    },
+    "detections": [
+      {
+        "bbox": [
+          182,
+          482,
+          422,
+          681
+        ],
+        "class_name": "integrated circuit",
+        "confidence": 0.9,
+        "label": "DRAM chip",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          472,
+          391,
+          622,
+          535
+        ],
+        "class_name": "integrated_circuit",
+        "confidence": 0.9,
+        "label": "LPDDR4 SDRAM",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          338,
+          276,
+          540,
+          442
+        ],
+        "class_name": "integrated_circuit",
+        "confidence": 0.95,
+        "label": "SoC (BCM2711)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          0,
+          337,
+          282,
+          586
+        ],
+        "class_name": "integrated circuit",
+        "confidence": 0.95,
+        "label": "System-on-Chip (SoC)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          308,
+          550,
+          468,
+          738
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "3.5mm Audio Jack",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          432,
+          23,
+          778,
+          384
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "40-pin GPIO Header",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          156,
+          118,
+          338,
+          312
+        ],
+        "class_name": "connector",
+        "confidence": 0.9,
+        "label": "Display Port (eDP)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          222,
+          538,
+          312,
+          656
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "HDMI",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          720,
+          276,
+          985,
+          694
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "RJ45 Ethernet",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          562,
+          337,
+          977,
+          842
+        ],
+        "class_name": "Ethernet",
+        "confidence": 0.95,
+        "label": "RJ45 Ethernet port",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          612,
+          394,
+          838,
+          792
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "USB-A Port 1 (blue)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          468,
+          501,
+          708,
+          910
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "USB-A Port 2 (black)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          392,
+          492,
+          747,
+          998
+        ],
+        "class_name": "USB-A",
+        "confidence": 0.95,
+        "label": "USB-A port (blue)",
+        "source": "board_evidence.v1"
+      },
+      {
+        "bbox": [
+          40,
+          351,
+          152,
+          488
+        ],
+        "class_name": "connector",
+        "confidence": 0.95,
+        "label": "USB-C Power In",
+        "source": "board_evidence.v1"
+      }
+    ],
+    "hazard_profile": {
+      "clearance_requirements": [],
+      "energy_domain": "low_voltage_or_unknown_candidate",
+      "hazards": [],
+      "schema_version": "hardware_hazard_profile.v1",
+      "source_policy": {
+        "llm_outputs_must_be_structured_hazard_candidates": true,
+        "raw_text_release_logic": false,
+        "structured_sources": [
+          "board_evidence.v1"
+        ],
+        "vision_candidates_require_measurement_or_review": true
+      }
+    },
+    "policy": {
+      "hazards_can_block_release": true,
+      "hazards_cannot_be_cleared_by_vision_text": true,
+      "resources_require_measurement_or_review": true,
+      "vision_evidence_is_candidate_only": true
+    },
+    "resource_candidates": [
+      {
+        "capabilities": [
+          "unknown_reusable_part"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing DRAM chip."
+        ],
+        "name": "DRAM chip",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing DRAM chip."
+        ],
+        "resource_id": "vision_ram",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "ram"
+        ]
+      },
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing SoC (BCM2711)."
+        ],
+        "name": "SoC (BCM2711)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing SoC (BCM2711)."
+        ],
+        "resource_id": "vision_cpu",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "cpu"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "speaker_or_audio"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for 3.5mm Audio Jack."
+        ],
+        "name": "3.5mm Audio Jack",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for 3.5mm Audio Jack."
+        ],
+        "resource_id": "vision_audio_jack",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "audio-jack"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for 40-pin GPIO Header."
+        ],
+        "name": "40-pin GPIO Header",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for 40-pin GPIO Header."
+        ],
+        "resource_id": "vision_gpio",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "gpio"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "display_or_ui"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for Display Port (eDP)."
+        ],
+        "name": "Display Port (eDP)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for Display Port (eDP)."
+        ],
+        "resource_id": "vision_display",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "display"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "display_or_ui"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for HDMI."
+        ],
+        "name": "HDMI",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for HDMI."
+        ],
+        "resource_id": "vision_hdmi",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "hdmi"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "network_interface"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for RJ45 Ethernet."
+        ],
+        "name": "RJ45 Ethernet",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for RJ45 Ethernet."
+        ],
+        "resource_id": "vision_ethernet",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "ethernet"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A Port 1 (blue)."
+        ],
+        "name": "USB-A Port 1 (blue)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for USB-A Port 1 (blue)."
+        ],
+        "resource_id": "vision_usb_a_1",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "usb-a-1"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A Port 2 (black)."
+        ],
+        "name": "USB-A Port 2 (black)",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for USB-A Port 2 (black)."
+        ],
+        "resource_id": "vision_usb_a_2",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "usb-a-2"
+        ]
+      },
+      {
+        "capabilities": [
+          "connector",
+          "power"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Map pinout and continuity for USB-C Power In.",
+          "Measure voltage, polarity, current limit, and thermal behavior for USB-C Power In."
+        ],
+        "name": "USB-C Power In",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Map pinout and continuity for USB-C Power In.",
+          "Measure voltage, polarity, current limit, and thermal behavior for USB-C Power In."
+        ],
+        "resource_id": "vision_usb_c",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "usb-c"
+        ]
+      },
+      {
+        "capabilities": [
+          "unknown_reusable_part"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing FCC ID: 2A0CD-RP14B."
+        ],
+        "name": "FCC ID: 2A0CD-RP14B",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing FCC ID: 2A0CD-RP14B."
+        ],
+        "resource_id": "vision_fcc",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "fcc"
+        ]
+      },
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing \u00a9 Raspberry Pi 2018."
+        ],
+        "name": "\u00a9 Raspberry Pi 2018",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing \u00a9 Raspberry Pi 2018."
+        ],
+        "resource_id": "vision_year",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "year"
+        ]
+      },
+      {
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B 2018."
+        ],
+        "name": "Raspberry Pi 4 Model B 2018",
+        "notes": "Vision-language candidate; not verified until reviewed or measured.",
+        "required_tests": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B 2018."
+        ],
+        "resource_id": "vision_model",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "source_refs": [
+          "model"
+        ]
+      }
+    ],
+    "schema_version": "vision_board_evidence_bridge.v1",
+    "source": "vision_language_board_evidence"
+  }
+}

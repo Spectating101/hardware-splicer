@@ -1,0 +1,219 @@
+{
+  "cases": [
+    {
+      "actual": {
+        "active_closure": {
+          "authority_ceiling_if_next_batch_closes": 0.55,
+          "available": true,
+          "can_claim_now": [
+            "visible board candidate inventory",
+            "visual topology measurement plan"
+          ],
+          "current_stage": "active_topology_closure",
+          "next_best_task_count": 32,
+          "observability_score": 0.522,
+          "open_lane_count": 5
+        },
+        "bench_protocol": {
+          "primary_function_id": "wireless_or_rf_module",
+          "required_measurement_categories": [
+            "resistance",
+            "continuity",
+            "voltage",
+            "current",
+            "thermal",
+            "logic"
+          ],
+          "specialist_only": false,
+          "step_count": 5,
+          "title": "Wireless, RF, CAN, or differential network interface reuse"
+        },
+        "blocking_gaps": [
+          "Attach measured topology evidence for connector pinout, no-short, voltage, current, and thermal lanes by running the visual topology measurement queue.",
+          "Attach trusted measurement artifacts for: continuity, current, resistance, thermal, voltage.",
+          "Record terminal build/repair/reuse outcome.",
+          "Attach production_release or release_manifest.",
+          "Attach measured connector pinout/topology evidence with no unknown pins.",
+          "Record passing trusted resistance evidence.",
+          "Record passing trusted continuity evidence.",
+          "Record passing trusted voltage evidence.",
+          "Record passing trusted current evidence.",
+          "Record passing trusted thermal evidence.",
+          "Record passing ground/reference continuity and connector continuity evidence.",
+          "Record passing current draw/current-limit evidence during first power.",
+          "Record passing unpowered resistance/no-short evidence between power and ground.",
+          "Record passing thermal behavior after first power and output-function test.",
+          "Record passing voltage, polarity, and logic-level evidence under current limit.",
+          "Measure unpowered resistance between every power rail and ground."
+        ],
+        "can_power_or_splice": false,
+        "function": "wireless_or_rf_module",
+        "multiview_capture_coverage": {
+          "available": true,
+          "open_required_lanes": [
+            "whole_board_context",
+            "marking_identity_detail",
+            "layout_geometry"
+          ],
+          "recommended_open_lanes": [
+            "cross_view_confirmation",
+            "hidden_side_context"
+          ],
+          "required_complete": false,
+          "score": 0.4
+        },
+        "production_authorized": false,
+        "production_decision": "not_authorized_evidence_required",
+        "production_readiness_score": 0.111,
+        "status": "prototype_after_evidence",
+        "trust_level": "grounded_visual_candidate",
+        "trust_score": 0.253
+      },
+      "case_id": "example_visual_max485_rs485_board",
+      "checks": {
+        "can_power_or_splice": true,
+        "function": true,
+        "max_production_readiness_score": true,
+        "production_authorized": true,
+        "required_bench_categories": true,
+        "trust_level": true
+      },
+      "expected": {
+        "can_power_or_splice": false,
+        "function": "wireless_or_rf_module",
+        "max_production_readiness_score": 0.45,
+        "production_authorized": false,
+        "required_bench_categories": [
+          "resistance",
+          "continuity",
+          "voltage",
+          "current",
+          "thermal",
+          "logic"
+        ],
+        "trust_level": "grounded_visual_candidate"
+      },
+      "passed": true,
+      "source_quality": {
+        "has_board_evidence": true,
+        "has_measurements": false,
+        "has_release_manifest": false,
+        "has_terminal_outcome": false,
+        "has_topology_evidence": false,
+        "is_example_seed": true,
+        "photo_ref_count": 2
+      },
+      "title": "Visual MAX485 board remains a network-interface candidate until bench evidence exists"
+    },
+    {
+      "actual": {
+        "active_closure": {
+          "authority_ceiling_if_next_batch_closes": 1.0,
+          "available": true,
+          "can_claim_now": [
+            "visible board candidate inventory",
+            "visual topology measurement plan",
+            "measured connector topology for captured scope",
+            "terminal function outcome for selected resources",
+            "release package metadata is complete"
+          ],
+          "current_stage": "release_closure",
+          "next_best_task_count": 0,
+          "observability_score": 0.84,
+          "open_lane_count": 0
+        },
+        "bench_protocol": {
+          "primary_function_id": "usb_serial_debug_bridge",
+          "required_measurement_categories": [
+            "resistance",
+            "continuity",
+            "voltage",
+            "current",
+            "thermal",
+            "logic"
+          ],
+          "specialist_only": false,
+          "step_count": 5,
+          "title": "USB/UART debug bridge reuse"
+        },
+        "blocking_gaps": [],
+        "can_power_or_splice": true,
+        "function": "usb_serial_debug_bridge",
+        "multiview_capture_coverage": {
+          "available": true,
+          "open_required_lanes": [
+            "whole_board_context",
+            "marking_identity_detail",
+            "layout_geometry"
+          ],
+          "recommended_open_lanes": [
+            "cross_view_confirmation",
+            "hidden_side_context"
+          ],
+          "required_complete": false,
+          "score": 0.4
+        },
+        "production_authorized": true,
+        "production_decision": "authorized_low_voltage_repair_release",
+        "production_readiness_score": 0.983,
+        "status": "ready_for_build_plan",
+        "trust_level": "production_release_candidate",
+        "trust_score": 0.935
+      },
+      "case_id": "example_completed_uart_debug_adapter_release",
+      "checks": {
+        "can_power_or_splice": true,
+        "function": true,
+        "min_production_readiness_score": true,
+        "production_authorized": true,
+        "required_bench_categories": true,
+        "status": true,
+        "trust_level": true
+      },
+      "expected": {
+        "can_power_or_splice": true,
+        "function": "usb_serial_debug_bridge",
+        "min_production_readiness_score": 0.85,
+        "production_authorized": true,
+        "required_bench_categories": [
+          "resistance",
+          "continuity",
+          "voltage",
+          "current",
+          "thermal",
+          "logic"
+        ],
+        "status": "ready_for_build_plan",
+        "trust_level": "production_release_candidate"
+      },
+      "passed": true,
+      "source_quality": {
+        "has_board_evidence": true,
+        "has_measurements": true,
+        "has_release_manifest": true,
+        "has_terminal_outcome": true,
+        "has_topology_evidence": true,
+        "is_example_seed": true,
+        "photo_ref_count": 2
+      },
+      "title": "Measured UART adapter reaches production release candidate after outcome and release manifest"
+    }
+  ],
+  "summary": {
+    "avg_active_closure_open_lanes": 2.5,
+    "avg_multiview_capture_coverage_score": 0.4,
+    "case_count": 2,
+    "cases_with_active_closure": 2,
+    "cases_with_closure_complete": 1,
+    "cases_with_photo_refs": 2,
+    "cases_with_release_manifest": 1,
+    "cases_with_terminal_outcome": 1,
+    "cases_with_topology": 1,
+    "evaluated_at": "2026-06-01T08:37:30.816809+00:00",
+    "example_seed_cases": 2,
+    "manifest_schema_version": "real_board_corpus.v1",
+    "pass_rate": 1.0,
+    "passed": 2,
+    "schema_version": "real_board_corpus_eval.v1"
+  }
+}

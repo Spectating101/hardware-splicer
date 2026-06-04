@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections import Counter
 from typing import Any, Dict, Iterable, List, Sequence
 
+from src.intelligence.circuit_ai_reasoner import CircuitAIReasoner
+
 
 class SalvageSplicePlanner:
     """Turn junk-device evidence into reusable blocks and build/splice plans."""
@@ -146,32 +148,51 @@ class SalvageSplicePlanner:
         "crt",
         "microwave",
         "neon",
-            "inverter",
-            "high voltage",
-            "laser diode",
-            "exposed laser",
-            "swollen",
-            "punctured",
-            "leaking lithium",
+        "inverter",
+        "high voltage",
+        "laser diode",
+        "exposed laser",
+        "swollen",
+        "punctured",
+        "leaking lithium",
     }
 
     def plan(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         text = self._case_text(payload)
         analysis = payload.get("analysis") if isinstance(payload.get("analysis"), dict) else {}
+        functional_reports = self._functional_salvage_reports(payload, analysis)
+        functional_blocks = self._blocks_from_functional_salvage(functional_reports)
         inventory_blocks = self._blocks_from_inventory(payload.get("inventory") or payload.get("modules") or payload.get("available_parts"))
         text_blocks = self._text_blocks_for_case(payload, inventory_blocks)
         blocks = self._dedupe_blocks(
-            self._blocks_from_analysis(analysis)
+            functional_blocks
+            + self._blocks_from_analysis(analysis)
             + inventory_blocks
             + text_blocks
         )
         capability_counts = Counter(cap for block in blocks for cap in block.get("capabilities", []))
         hazards = self._hazards(text, blocks)
         candidates = self._build_candidates(capability_counts, blocks, hazards, text)
-        splice_plan = self._splice_plan(payload, analysis, blocks, candidates, hazards)
+        splice_plan = self._splice_plan(payload, analysis, blocks, candidates, hazards, functional_reports=functional_reports)
         evidence_plan = self._evidence_plan(blocks, splice_plan, hazards)
         verdict = self._verdict(blocks, candidates, hazards, evidence_plan)
         confidence = self._confidence(blocks, candidates, hazards, analysis)
+        functional_reuse_plan = self._functional_reuse_plan(functional_reports, blocks, splice_plan, verdict)
+        circuit_reasoning = CircuitAIReasoner(
+            enable_llm=bool(payload.get("use_llm_reasoner") or payload.get("use_llm")),
+        ).assess(
+            {
+                "goal": payload.get("goal"),
+                "analysis": analysis,
+                "salvage_plan": {
+                    "verdict": verdict,
+                    "splice_plan": splice_plan,
+                    "evidence_plan": evidence_plan,
+                    "functional_reuse_plan": functional_reuse_plan,
+                },
+                "functional_reuse_plan": functional_reuse_plan,
+            }
+        )
         if verdict == "unsafe_hold":
             top = {
                 "id": "safety_hold",
@@ -194,6 +215,8 @@ class SalvageSplicePlanner:
             "capability_summary": dict(sorted(capability_counts.items())),
             "build_candidates": candidates,
             "splice_plan": splice_plan,
+            "functional_reuse_plan": functional_reuse_plan,
+            "circuit_reasoning": circuit_reasoning,
             "integration_contract": self._integration_contract(blocks, top, splice_plan, hazards),
             "evidence_plan": evidence_plan,
             "stop_conditions": self._stop_conditions(hazards, blocks),
@@ -216,8 +239,110 @@ class SalvageSplicePlanner:
                 "prefer low-voltage modules, connectors, motors, sensors, UI parts, and enclosures",
                 "do not reuse unknown battery packs, mains sections, or high-voltage modules without a separate safety procedure",
             ],
-            "session_payload": self._session_payload(payload, blocks, candidates, splice_plan, evidence_plan, hazards, verdict, confidence),
+            "session_payload": self._session_payload(
+                payload,
+                blocks,
+                candidates,
+                splice_plan,
+                evidence_plan,
+                hazards,
+                verdict,
+                confidence,
+                functional_reports=functional_reports,
+                functional_reuse_plan=functional_reuse_plan,
+                circuit_reasoning=circuit_reasoning,
+            ),
         }
+
+    def _functional_salvage_reports(self, payload: Dict[str, Any], analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+        roots = [
+            analysis,
+            payload.get("circuit") if isinstance(payload.get("circuit"), dict) else {},
+            payload.get("functional_salvage") if isinstance(payload.get("functional_salvage"), dict) else {},
+        ]
+        reports: List[Dict[str, Any]] = []
+        seen = set()
+
+        def add_report(report: Any) -> None:
+            if not isinstance(report, dict) or report.get("mode") != "functional_salvage_assessment":
+                return
+            key = (report.get("schema_version"), report.get("board_id"), len(report.get("reusable_blocks") or []))
+            if key in seen:
+                return
+            seen.add(key)
+            reports.append(report)
+
+        for root in roots:
+            if not isinstance(root, dict):
+                continue
+            add_report(root)
+            fs = root.get("functional_salvage")
+            add_report(fs)
+            if isinstance(fs, dict) and fs.get("mode") == "functional_salvage_portfolio" and not root.get("boards"):
+                blocks = [row for row in fs.get("top_reusable_blocks") or [] if isinstance(row, dict)]
+                if blocks:
+                    add_report(
+                        {
+                            "mode": "functional_salvage_assessment",
+                            "schema_version": fs.get("schema_version"),
+                            "board_id": "circuit_portfolio",
+                            "verdict": fs.get("verdict"),
+                            "reusable_blocks": blocks,
+                            "evidence_gates": [],
+                        }
+                    )
+            for board in root.get("boards") or []:
+                if isinstance(board, dict):
+                    add_report(board.get("functional_salvage"))
+        return reports
+
+    def _blocks_from_functional_salvage(self, reports: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        blocks: List[Dict[str, Any]] = []
+        for report in reports:
+            board_id = str(report.get("board_id") or "board")
+            for row in report.get("reusable_blocks") or []:
+                if not isinstance(row, dict):
+                    continue
+                caps = [str(cap).lower() for cap in row.get("capabilities") or []]
+                if not caps:
+                    continue
+                source_refs = row.get("source_refs") or []
+                connector_refs = row.get("connector_refs") or []
+                block = self._block(
+                    str(row.get("block_id") or row.get("function_type") or row.get("name") or "functional_block"),
+                    str(row.get("name") or row.get("function_type") or "reusable function"),
+                    caps,
+                    "circuit_functional_salvage",
+                    confidence=row.get("confidence", 0.68),
+                )
+                block.update(
+                    {
+                        "board_id": board_id,
+                        "function_type": row.get("function_type"),
+                        "circuit_block_id": row.get("block_id"),
+                        "source_refs": source_refs,
+                        "connector_refs": connector_refs,
+                        "nets": row.get("nets") or [],
+                        "extractability": row.get("extractability") or {},
+                        "status": row.get("status"),
+                        "reuse_value_score": row.get("reuse_value_score"),
+                        "evidence_gates": row.get("evidence_gates") or [],
+                    }
+                )
+                prompts = [
+                    str(gate.get("prompt"))
+                    for gate in row.get("evidence_gates") or []
+                    if isinstance(gate, dict) and gate.get("prompt")
+                ]
+                block["required_tests"] = self._dedupe([*(block.get("required_tests") or []), *prompts])[:10]
+                if row.get("suggested_uses"):
+                    block["suggested_uses"] = self._dedupe(row.get("suggested_uses") or [])[:8]
+                if connector_refs:
+                    block["extraction_action"] = f"reuse through connector(s): {', '.join(str(ref) for ref in connector_refs[:4])}"
+                elif isinstance(row.get("extractability"), dict) and row["extractability"].get("action"):
+                    block["extraction_action"] = row["extractability"]["action"]
+                blocks.append(block)
+        return blocks
 
     def _blocks_from_analysis(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
         blocks: List[Dict[str, Any]] = []
@@ -404,14 +529,29 @@ class SalvageSplicePlanner:
         blocks: List[Dict[str, Any]],
         candidates: List[Dict[str, Any]],
         hazards: List[Dict[str, Any]],
+        *,
+        functional_reports: List[Dict[str, Any]] | None = None,
     ) -> Dict[str, Any]:
         connection = analysis.get("machine_connection_map") if isinstance(analysis.get("machine_connection_map"), dict) else {}
         raw_splice = connection.get("splice_plan") if isinstance(connection.get("splice_plan"), dict) else {}
-        entry_points = raw_splice.get("safest_entry_points") or [
+        topology_authority = raw_splice.get("topology_authority") if isinstance(raw_splice.get("topology_authority"), dict) else {}
+        raw_entry_points = raw_splice.get("safest_entry_points") or []
+        inferred_entry_points = [
             block["block_id"] for block in blocks if "connector" in block.get("capabilities", [])
         ][:6]
+        functional_entry_points = self._functional_entry_points(functional_reports or [])
+        entry_points = self._dedupe(
+            [*raw_entry_points, *functional_entry_points, *inferred_entry_points]
+            if raw_entry_points
+            else [*functional_entry_points, *inferred_entry_points]
+        )[:10]
         target = (candidates[0] if candidates else {}).get("id", "generic_reuse")
-        measurements = self._required_measurements(blocks, connection)
+        measurements = self._dedupe(
+            [
+                *self._required_measurements(blocks, connection),
+                *self._functional_gate_prompts(functional_reports or []),
+            ]
+        )[:16]
         return {
             "target_build_id": target,
             "safest_entry_points": entry_points,
@@ -419,6 +559,8 @@ class SalvageSplicePlanner:
             "adapter_circuits": self._adapter_circuits(blocks, target),
             "wiring_steps": self._wiring_steps(blocks, target, hazards),
             "mechanical_steps": self._mechanical_steps(blocks, target),
+            "topology_authority": topology_authority,
+            "pin_level_splice_contracts": raw_splice.get("pin_level_splice_contracts") if isinstance(raw_splice.get("pin_level_splice_contracts"), list) else [],
             "do_not_connect_until": [
                 "input polarity is known",
                 "rail voltage is measured under current limit",
@@ -427,6 +569,131 @@ class SalvageSplicePlanner:
                 "battery or mains hazards are cleared",
             ],
         }
+
+    def _functional_entry_points(self, reports: List[Dict[str, Any]]) -> List[str]:
+        entries = []
+        for report in reports:
+            board_id = str(report.get("board_id") or "board")
+            for block in report.get("reusable_blocks") or []:
+                if not isinstance(block, dict):
+                    continue
+                for ref in block.get("connector_refs") or []:
+                    entries.append(f"{board_id}:{ref}")
+        return self._dedupe(entries)[:10]
+
+    def _functional_gate_prompts(self, reports: List[Dict[str, Any]]) -> List[str]:
+        prompts = []
+        for report in reports:
+            for gate in report.get("evidence_gates") or []:
+                if isinstance(gate, dict) and gate.get("prompt"):
+                    prompts.append(str(gate["prompt"]))
+            for block in report.get("reusable_blocks") or []:
+                if not isinstance(block, dict):
+                    continue
+                prompts.extend(str(item) for item in block.get("missing_evidence") or [])
+        return self._dedupe(prompts)[:16]
+
+    def _functional_reuse_plan(
+        self,
+        reports: List[Dict[str, Any]],
+        blocks: List[Dict[str, Any]],
+        splice_plan: Dict[str, Any],
+        verdict: str,
+    ) -> Dict[str, Any]:
+        circuit_blocks = [block for block in blocks if block.get("source") == "circuit_functional_salvage"]
+        ready_blocks = [block for block in circuit_blocks if block.get("status") == "reuse_ready"]
+        blocked_blocks = [block for block in circuit_blocks if str(block.get("status") or "").startswith("blocked")]
+        statuses = Counter(str(block.get("status") or "unknown") for block in circuit_blocks)
+        extractability = Counter(
+            str((block.get("extractability") or {}).get("class") or "unknown")
+            for block in circuit_blocks
+        )
+        gates = [
+            gate
+            for report in reports
+            for gate in report.get("evidence_gates") or []
+            if isinstance(gate, dict)
+        ]
+        return {
+            "mode": "functional_reuse_plan",
+            "schema_version": "salvage_functional_reuse_plan.v1",
+            "verdict": verdict,
+            "circuit_backed": bool(circuit_blocks),
+            "report_count": len(reports),
+            "reusable_block_count": len(circuit_blocks),
+            "ready_block_count": len(ready_blocks),
+            "blocked_block_count": len(blocked_blocks),
+            "splice_readiness": "ready_for_first_splice"
+            if ready_blocks
+            else "blocked_until_evidence"
+            if circuit_blocks
+            else "inventory_only",
+            "status_summary": dict(sorted(statuses.items())),
+            "extractability_summary": dict(sorted(extractability.items())),
+            "open_evidence_gate_count": len([gate for gate in gates if str(gate.get("status", "open")) != "closed"]),
+            "safest_entry_points": splice_plan.get("safest_entry_points") or [],
+            "recommended_first_splice": self._recommended_first_splice(circuit_blocks),
+            "ready_blocks": [self._reuse_plan_block_summary(block) for block in ready_blocks[:8]],
+            "top_blocks": [
+                self._reuse_plan_block_summary(block)
+                for block in sorted(circuit_blocks, key=lambda row: float(row.get("reuse_value_score") or row.get("confidence") or 0.0), reverse=True)[:8]
+            ],
+        }
+
+    def _reuse_plan_block_summary(self, block: Dict[str, Any]) -> Dict[str, Any]:
+        board_id = str(block.get("board_id") or "board")
+        connector_refs = [str(ref) for ref in block.get("connector_refs") or []]
+        return {
+            "block_id": block.get("block_id"),
+            "circuit_block_id": block.get("circuit_block_id"),
+            "name": block.get("name"),
+            "board_id": board_id,
+            "capabilities": block.get("capabilities") or [],
+            "status": block.get("status"),
+            "extractability": block.get("extractability") or {},
+            "entry_points": [f"{board_id}:{ref}" for ref in connector_refs],
+            "missing_evidence": self._dedupe(
+                str(gate.get("prompt"))
+                for gate in block.get("evidence_gates") or []
+                if isinstance(gate, dict) and str(gate.get("status", "open")) != "closed" and gate.get("prompt")
+            )[:8],
+        }
+
+    def _recommended_first_splice(self, circuit_blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
+        if not circuit_blocks:
+            return {
+                "status": "inventory_only",
+                "reason": "No circuit-backed reusable function blocks were supplied.",
+            }
+
+        def rank(block: Dict[str, Any]) -> tuple:
+            status_rank = 0 if block.get("status") == "reuse_ready" else 1
+            extractability = (block.get("extractability") or {}).get("class")
+            extraction_rank = 0 if extractability == "connector_reuse" else 1 if extractability == "whole_board_reuse" else 2
+            missing = len(
+                [
+                    gate
+                    for gate in block.get("evidence_gates") or []
+                    if isinstance(gate, dict) and str(gate.get("status", "open")) != "closed"
+                ]
+            )
+            return (
+                status_rank,
+                extraction_rank,
+                missing,
+                -float(block.get("reuse_value_score") or block.get("confidence") or 0.0),
+                str(block.get("block_id") or ""),
+            )
+
+        selected = sorted(circuit_blocks, key=rank)[0]
+        summary = self._reuse_plan_block_summary(selected)
+        summary["status"] = selected.get("status") or "unknown"
+        summary["next_action"] = (
+            "Build the labeled splice through this entry point and run first-power under current limit."
+            if selected.get("status") == "reuse_ready"
+            else "Close the listed evidence gates before using this function in a splice."
+        )
+        return summary
 
     def _evidence_plan(
         self,
@@ -720,6 +987,10 @@ class SalvageSplicePlanner:
         hazards: List[Dict[str, Any]],
         verdict: str,
         confidence: float,
+        *,
+        functional_reports: List[Dict[str, Any]] | None = None,
+        functional_reuse_plan: Dict[str, Any] | None = None,
+        circuit_reasoning: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         if verdict == "unsafe_hold":
             top = {
@@ -738,6 +1009,19 @@ class SalvageSplicePlanner:
         capability_summary = dict(Counter(cap for block in blocks for cap in block.get("capabilities", [])))
         stop_conditions = self._stop_conditions(hazards, blocks)
         integration_contract = self._integration_contract(blocks, top, splice_plan, hazards)
+        functional_reuse_plan = functional_reuse_plan or self._functional_reuse_plan(functional_reports or [], blocks, splice_plan, verdict)
+        circuit_reasoning = circuit_reasoning or CircuitAIReasoner(enable_llm=False).assess(
+            {
+                "goal": payload.get("goal"),
+                "salvage_plan": {
+                    "verdict": verdict,
+                    "splice_plan": splice_plan,
+                    "evidence_plan": evidence_plan,
+                    "functional_reuse_plan": functional_reuse_plan,
+                },
+                "functional_reuse_plan": functional_reuse_plan,
+            }
+        )
         plan_record = {
             "mode": "salvage_splice_reuse_plan",
             "verdict": verdict,
@@ -752,6 +1036,8 @@ class SalvageSplicePlanner:
             "capability_summary": capability_summary,
             "build_candidates": candidates,
             "splice_plan": splice_plan,
+            "functional_reuse_plan": functional_reuse_plan,
+            "circuit_reasoning": circuit_reasoning,
             "integration_contract": integration_contract,
             "evidence_plan": evidence_plan,
             "stop_conditions": stop_conditions,

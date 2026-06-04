@@ -1,0 +1,438 @@
+{
+  "artifact_dir": "eval/live_model_probe/live_e2e_qwen_deepseek_20260602",
+  "canonical_board_map_summary": {
+    "layout_confidence": 0.78,
+    "mapped_item_count": 24,
+    "unmapped_item_count": 0,
+    "zone_counts": {
+      "bottom_center": 3,
+      "center": 8,
+      "middle_left": 6,
+      "middle_right": 4,
+      "top_center": 2,
+      "top_left": 1
+    }
+  },
+  "capture_coverage": {
+    "claim_boundary": "Capture coverage grades visual observability only; it cannot prove pinout, nets, voltage, or safe reuse.",
+    "complete_required_lane_count": 5,
+    "lanes": [
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "lane_id": "whole_board_context",
+        "purpose": "layout",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Whole-board context",
+        "weight": 0.2
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "lane_id": "connector_detail",
+        "purpose": "connector_map",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Connector and entry-point detail",
+        "weight": 0.2
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board",
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "lane_id": "marking_identity_detail",
+        "purpose": "identity",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Marking and identity detail",
+        "weight": 0.18
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "safety_damage_pass",
+        "purpose": "hazard_review",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Safety and damage pass",
+        "weight": 0.16
+      },
+      {
+        "evidence_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop",
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "lane_id": "layout_geometry",
+        "purpose": "layout",
+        "request_prompt": "",
+        "required": true,
+        "status": "complete",
+        "title": "Layout geometry anchors",
+        "weight": 0.16
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "cross_view_confirmation",
+        "purpose": "confidence",
+        "request_prompt": "Recapture the main components/connectors from another angle so single-photo claims can be cross-checked.",
+        "required": false,
+        "status": "open",
+        "title": "Cross-view confirmation",
+        "weight": 0.0
+      },
+      {
+        "evidence_photo_ids": [],
+        "lane_id": "hidden_side_context",
+        "purpose": "hidden_area",
+        "request_prompt": "If accessible, capture the backside, solder side, cable underside, or hidden area so hidden routes and damage are not silently assumed.",
+        "required": false,
+        "status": "open",
+        "title": "Backside or hidden-area context",
+        "weight": 0.0
+      }
+    ],
+    "open_required_lanes": [],
+    "recommended_open_lanes": [
+      "cross_view_confirmation",
+      "hidden_side_context"
+    ],
+    "required_complete": true,
+    "required_lane_count": 5,
+    "schema_version": "capture_coverage.v1",
+    "score": 1.0
+  },
+  "casefile_summary": {
+    "authority_score": 0.18,
+    "closure_stage": "active_topology_closure",
+    "current_authority_level": "visual_candidate",
+    "next_action_id": "capture_topology_or_supply_netlist",
+    "production_authorized": false,
+    "release_decision": "measurement_capture_required"
+  },
+  "deepseek_advisory": {
+    "field_action_id": "capture_topology_or_supply_netlist",
+    "json_valid": true,
+    "measurement_priorities": [
+      {
+        "action": "Measure continuity from USB-C VBUS to candidate power rail, and ground to ground plane.",
+        "expected_evidence": "VBUS to rail continuity < 1 ohm, ground continuity < 1 ohm, no short to ground.",
+        "priority": 1,
+        "stop_condition": "Continuity confirmed and no-short verified.",
+        "target": "USB-C Power In",
+        "why": "Primary power input; must identify rail and verify no-short before powering."
+      },
+      {
+        "action": "Map pinout: identify pin 1, ground pins, 3.3V and 5V supply pins via continuity to known rails.",
+        "expected_evidence": "Pin 1 identified, ground pins continuous to ground plane, 3.3V and 5V pins continuous to respective rails.",
+        "priority": 2,
+        "stop_condition": "All supply and ground pins mapped.",
+        "target": "40-pin GPIO Header",
+        "why": "Key interface for repair and salvage; supply pins must be known for safe power."
+      },
+      {
+        "action": "Measure unpowered resistance between each supply pin and ground to confirm no short.",
+        "expected_evidence": "Resistance > 1 kohm for all supply pins to ground.",
+        "priority": 3,
+        "stop_condition": "All supply pins show > 1 kohm to ground.",
+        "target": "40-pin GPIO Header",
+        "why": "Ensure no short before applying power."
+      },
+      {
+        "action": "Map pinout: identify ground and supply pins via continuity to ground plane and power rails.",
+        "expected_evidence": "Ground pins continuous to ground, supply pins (if any) continuous to known rail.",
+        "priority": 4,
+        "stop_condition": "All ground and supply pins identified.",
+        "target": "HDMI",
+        "why": "HDMI may carry power; must verify before use."
+      },
+      {
+        "action": "Map pinout: identify ground and supply pins via continuity.",
+        "expected_evidence": "Ground pins continuous to ground, supply pins continuous to known rail.",
+        "priority": 5,
+        "stop_condition": "All ground and supply pins identified.",
+        "target": "Display Port (eDP)",
+        "why": "eDP may have power rails; needed for salvage or reuse."
+      },
+      {
+        "action": "Map pinout: identify ground and any supply pins via continuity.",
+        "expected_evidence": "Ground pin continuous to ground, no unexpected supply pins.",
+        "priority": 6,
+        "stop_condition": "Pinout mapped and no short to ground.",
+        "target": "3.5mm Audio Jack",
+        "why": "Audio jack may have bias voltage; verify for safe use."
+      }
+    ],
+    "mode": "live",
+    "model": "deepseek/deepseek-v4-flash",
+    "raw_response_parsed": true,
+    "verifier": {
+      "blocked_terms": [],
+      "model_claims_are_advisory": true,
+      "power_or_splice_authorized": false,
+      "status": "advisory_only"
+    },
+    "warnings": [
+      "Do not apply power until ground continuity and no-short are verified on all candidate supply pins.",
+      "Visual labels are candidate only; actual pinout must be confirmed by continuity measurement.",
+      "Board model is identified as Raspberry Pi 4 Model B; use official documentation as reference but verify by measurement.",
+      "No damage observed in photos, but internal damage cannot be ruled out without thermal or electrical testing.",
+      "Salvage candidates (SoC, DRAM) require visual continuity and thermal pad integrity checks before removal."
+    ]
+  },
+  "field_action": {
+    "action_id": "capture_topology_or_supply_netlist",
+    "action_type": "capture_or_measurement",
+    "authority": "operational_advisory",
+    "expected_input_schema": {
+      "topology_evidence": {
+        "connectors": [
+          {
+            "pins": [
+              {
+                "net": "string",
+                "pin": "string",
+                "role": "power|ground|signal",
+                "voltage": "number|null"
+              }
+            ],
+            "ref": "string"
+          }
+        ],
+        "current": [
+          {
+            "target": "current draw under current-limited supply",
+            "unit": "A|mA",
+            "value": "number"
+          }
+        ],
+        "resistance": [
+          {
+            "target": "power to ground no-short",
+            "value": "pass|fail"
+          }
+        ]
+      }
+    },
+    "on_fail": "Continue topology capture; do not power/splice without measured topology.",
+    "on_pass": "Compiler should emit a netlist or bounded envelope.",
+    "pass_fail_thresholds": {
+      "minimum_required": [
+        "ground",
+        "power rail voltage",
+        "no-short",
+        "source/load current or source limit"
+      ]
+    },
+    "priority": 2,
+    "procedure": [
+      "Use Qwen/vision to identify candidate connectors, rails, labels, and likely pin groups.",
+      "Measure ground continuity and power-to-ground no-short.",
+      "Measure rail voltage and polarity under current limit.",
+      "Measure load/source current when safe.",
+      "Submit topology_evidence.v1 or a versioned netlist and rerun the field operator."
+    ],
+    "summary": "Capture measured topology or supply a versioned simulation netlist.",
+    "tools": [
+      "Qwen vision pass for connector candidates",
+      "DMM continuity mode",
+      "current-limited supply",
+      "close-up camera"
+    ],
+    "why": "A required module/resource/design contract is missing or failed."
+  },
+  "image_source": "assets/samples/curated/raspberry_pi.jpg",
+  "multiview_summary": {
+    "capture_coverage_complete": true,
+    "capture_coverage_score": 1.0,
+    "counts": {
+      "components": 4,
+      "connectors": 10,
+      "damage": 0,
+      "markings": 4,
+      "regions": 3,
+      "salvage_candidates": 3,
+      "test_points": 0
+    },
+    "evidence_item_count": 24,
+    "identity_link_count": 1,
+    "layout_confidence": 0.78,
+    "level": "multi_view_reconstructed_visual_dossier",
+    "mapped_item_count": 24,
+    "open_capture_lanes": [],
+    "photo_count": 2,
+    "source_policy": "Repeated visual observations raise candidate confidence but do not prove pinout, nets, voltage, or safe reuse.",
+    "unmapped_item_count": 0,
+    "usable_photo_count": 2
+  },
+  "omniscience_next_actions": [
+    {
+      "action_id": "capture_topology_or_supply_netlist",
+      "category": "operator_next_action",
+      "priority": -4,
+      "procedure": [
+        "Use Qwen/vision to identify candidate connectors, rails, labels, and likely pin groups.",
+        "Measure ground continuity and power-to-ground no-short.",
+        "Measure rail voltage and polarity under current limit.",
+        "Measure load/source current when safe.",
+        "Submit topology_evidence.v1 or a versioned netlist and rerun the field operator."
+      ],
+      "prompt": "Capture measured topology or supply a versioned simulation netlist.",
+      "source": "field_operator",
+      "type": "capture_or_measurement",
+      "unlocks": "next authority gate",
+      "why": "A required module/resource/design contract is missing or failed."
+    },
+    {
+      "action_id": "closure_run_bench_protocol",
+      "category": "bench_protocol",
+      "priority": -3.0,
+      "procedure": [],
+      "prompt": "Run the Unknown low-voltage board baseline protocol and attach trusted artifacts for: resistance, continuity, voltage, current, thermal, review.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "bench_protocol_pack",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_continuity",
+      "category": "continuity",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted continuity evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_current",
+      "category": "current",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted current evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_resistance",
+      "category": "resistance",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted resistance evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_thermal",
+      "category": "thermal",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted thermal evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "closure_missing_voltage",
+      "category": "voltage",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Attach trusted voltage evidence with instrument id, calibration status, operator, timestamp, and artifact URI.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "trusted_measurement_provenance",
+      "why": null
+    },
+    {
+      "action_id": "visual_topology_record",
+      "category": "topology",
+      "priority": -2.0,
+      "procedure": [],
+      "prompt": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "source": "active_evidence_closure",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1",
+      "why": null
+    }
+  ],
+  "omniscience_summary": {
+    "authority_level": "visual_candidate",
+    "authority_score": 0.18,
+    "next_best_action_id": "capture_topology_or_supply_netlist",
+    "omniscience_level": "function_identity_candidate_map",
+    "omniscience_score": 0.379,
+    "primary_function": "single_board_computer_module",
+    "primary_function_confidence": 0.96,
+    "production_authorized": false,
+    "unknown_count": 41
+  },
+  "qwen_total_estimated_usd": 0.000528,
+  "qwen_usage": [
+    {
+      "artifact": "qwen_1_raspberry_pi_whole_board.json",
+      "components": 2,
+      "connectors": 8,
+      "damage": 0,
+      "elapsed_s": 13.84,
+      "estimated_usd": 0.000327,
+      "input_tokens": 1131,
+      "json_valid": true,
+      "markings": 2,
+      "mode": "live",
+      "model": "qwen3-vl-flash",
+      "output_tokens": 1407,
+      "truncated": false
+    },
+    {
+      "artifact": "qwen_2_raspberry_pi_connector_soc_crop.json",
+      "components": 2,
+      "connectors": 3,
+      "damage": 0,
+      "elapsed_s": 11.345,
+      "estimated_usd": 0.000201,
+      "input_tokens": 703,
+      "json_valid": true,
+      "markings": 2,
+      "mode": "live",
+      "model": "qwen3-vl-flash",
+      "output_tokens": 863,
+      "truncated": false
+    }
+  ],
+  "regenerated_from_saved_evidence": true,
+  "regenerated_without_model_calls": true,
+  "schema_version": "live_qwen_deepseek_e2e_report.v1",
+  "visual_topology_claims": {
+    "component_anchor_count": 4,
+    "connection_hypothesis_count": 16,
+    "connector_hypothesis_count": 10,
+    "measurement_queue_count": 40,
+    "targeted_measurement_count": 39
+  },
+  "visual_topology_readiness": {
+    "can_power_or_splice": false,
+    "component_anchor_count": 4,
+    "connection_hypothesis_count": 16,
+    "connector_hypothesis_count": 10,
+    "layout_confidence": 0.78,
+    "level": "layout_grounded_visual_topology_candidate",
+    "measured_topology_available": false,
+    "measurement_task_count": 40,
+    "multi_view_evidence": true,
+    "next_unlock": "Attach measured topology_evidence.v1 generated from the visual measurement queue.",
+    "score": 0.72
+  }
+}

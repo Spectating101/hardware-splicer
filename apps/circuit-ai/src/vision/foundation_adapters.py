@@ -9,6 +9,7 @@ that the scan/intake/frontend layers can display or execute later.
 from __future__ import annotations
 
 import importlib.util
+import os
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -26,6 +27,7 @@ class FoundationBackend:
     best_for: tuple[str, ...]
     output_contract: tuple[str, ...]
     priority: int
+    env_any_names: tuple[str, ...] = ()
 
 
 def foundation_backend_registry() -> tuple[FoundationBackend, ...]:
@@ -46,6 +48,22 @@ def foundation_backend_registry() -> tuple[FoundationBackend, ...]:
             ),
             output_contract=("bbox", "class_name", "confidence", "model_id", "provenance"),
             priority=1,
+        ),
+        FoundationBackend(
+            backend_id="qwen_vl",
+            display_name="Qwen VL",
+            lane="native_vision_language_board_reasoning",
+            import_names=(),
+            source_url="https://www.alibabacloud.com/help/en/model-studio/",
+            install_hint="set QWEN_API_KEY or DASHSCOPE_API_KEY",
+            best_for=(
+                "native board-photo reasoning",
+                "component and connector description",
+                "hazard candidate extraction from images",
+            ),
+            output_contract=("board_evidence", "component_candidates", "hazard_candidates", "provenance"),
+            priority=1,
+            env_any_names=("QWEN_API_KEY", "DASHSCOPE_API_KEY"),
         ),
         FoundationBackend(
             backend_id="sam2",
@@ -136,6 +154,19 @@ def _module_available(module_name: str) -> bool:
     return importlib.util.find_spec(module_name) is not None
 
 
+def _configured_env_any(names: tuple[str, ...]) -> bool:
+    if any(os.getenv(name) for name in names):
+        return True
+    if {"QWEN_API_KEY", "DASHSCOPE_API_KEY"} & set(names):
+        try:
+            from src.config import settings
+
+            return bool(settings.qwen_api_key or settings.dashscope_api_key)
+        except Exception:
+            return False
+    return False
+
+
 def foundation_backend_status(backend: FoundationBackend) -> dict[str, Any]:
     """Return availability metadata for one backend without heavy imports."""
 
@@ -147,10 +178,16 @@ def foundation_backend_status(backend: FoundationBackend) -> dict[str, Any]:
         if not hf_missing:
             missing = []
             adapter_backend = "transformers"
+    missing_env_vars = []
+    env_configured = _configured_env_any(backend.env_any_names) if backend.env_any_names else False
+    if backend.env_any_names and not env_configured:
+        missing_env_vars = list(backend.env_any_names)
     return {
         **asdict(backend),
-        "available": len(missing) == 0,
+        "available": len(missing) == 0 and not missing_env_vars,
         "missing_imports": missing,
+        "missing_env_vars": missing_env_vars,
+        "api_key_configured": env_configured,
         "missing_native_imports": missing_native_imports,
         "adapter_backend": adapter_backend,
     }
@@ -254,6 +291,15 @@ def build_foundation_assist_plan(
             ),
             "why": "markings and labels connect vision to datasheets and repair evidence",
             "required": False,
+        },
+        {
+            "id": "qwen_vl_board_reasoning",
+            "uses": "src/vision/qwen_board_vision.py",
+            "backend": "qwen_vl" if status_by_id.get("qwen_vl", {}).get("available") else "not_configured",
+            "why": "ask native vision-language model for board evidence and hazard candidates; deterministic gates still decide release",
+            "required": False,
+            "output_contract": ("board_evidence", "component_candidates", "hazard_candidates", "provenance"),
+            "api_endpoint": "/vision/qwen/board-evidence",
         },
         {
             "id": "open_vocab_proposals",

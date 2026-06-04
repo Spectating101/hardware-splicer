@@ -117,3 +117,125 @@ def test_board_dossier_promotes_confirmed_repair_findings():
     assert any("cracked solder at motor harness" in item for item in dossier["known"])
     assert any("4.91 V" in item for item in dossier["known"])
     assert any("driver output voltage" in action for action in dossier["next_actions"])
+
+
+def test_board_dossier_surfaces_repair_authority_boundary():
+    session = {
+        "session_id": "authority-1",
+        "title": "Measured USB board",
+        "route": "repair",
+        "evidence": {
+            "captures": [],
+            "measurements": [
+                {"measurement_id": "measurement_1", "type": "voltage", "target": "5V rail", "value": 4.91, "unit": "V"}
+            ],
+        },
+        "evidence_tasks": [],
+        "analyses": [
+            {
+                "results": {
+                    "evidence_trust": {
+                        "score": 0.84,
+                        "level": "high",
+                        "launch_readiness": "private_alpha_candidate",
+                        "blockers": ["No electrical measurements are attached yet."],
+                        "required_evidence": [
+                            "Current-limited voltage measurement on expected rails.",
+                            "Functional output or symptom reproduction test after safe power-up.",
+                            "Readable close-up crops for important IC markings.",
+                        ],
+                    },
+                    "repair_authority": {
+                        "status": "measurement_backed",
+                        "score": 0.72,
+                        "safety_level": "caution",
+                        "summary": "Some repair claims are measurement-backed.",
+                        "supported_decisions": ["measurement-backed triage"],
+                        "blocked_decisions": ["production repair release"],
+                        "required_measurements": ["Functional output or symptom reproduction test after safe power-up."],
+                        "measurement_summary": {"count": 1, "voltage": 1},
+                    },
+                }
+            }
+        ],
+    }
+
+    dossier = BoardDossierBuilder().build(session)
+
+    assert dossier["status"] == "needs_measurements"
+    assert dossier["authority"]["available"] is True
+    assert dossier["authority"]["repair_authority"]["status"] == "measurement_backed"
+    assert dossier["authority"]["release_authorized"] is False
+    assert any("production repair release" in item for item in dossier["uncertain"])
+    assert not any("No electrical measurements" in item for item in dossier["uncertain"])
+    assert not any("Current-limited voltage" in action for action in dossier["next_actions"])
+    assert any("Functional output" in action for action in dossier["next_actions"])
+
+
+def test_board_dossier_surfaces_hardware_plan_section():
+    session = {
+        "session_id": "hardware-plan-1",
+        "title": "Hybrid sensor logger",
+        "route": "hardware_plan",
+        "evidence": {"captures": [], "measurements": []},
+        "evidence_tasks": [
+            {
+                "task_id": "task_1",
+                "type": "measurement",
+                "prompt": "Confirm UART idle high voltage before connecting target board.",
+                "status": "open",
+            }
+        ],
+        "analyses": [
+            {
+                "results": {
+                    "mode": "hardware_plan",
+                    "hardware_plan_summary": {
+                        "status": "prototype_after_evidence",
+                        "recommended_path": "hybrid_gap_fill",
+                        "selected_resource_count": 3,
+                        "selected_resource_ids": ["drawer_esp32", "buck", "sensor_breakout"],
+                        "procurement": {"estimated_cost_usd": 4.5, "within_budget": True, "item_count": 2},
+                        "authority": {"repair_authority_status": "measurement_backed"},
+                        "assurance": {
+                            "level": "prototype_gated",
+                            "score": 0.62,
+                            "can_build_now": False,
+                            "open_gate_count": 3,
+                        },
+                        "execution_package": {
+                            "current_stage": "bench_validation",
+                            "completion_state": "in_progress",
+                            "outcome_contract": {"required_fields": ["decision", "measurements_recorded"]},
+                        },
+                        "outcome_memory": {"available": True, "negative_count": 0, "positive_count": 1},
+                        "target": {"recommended_build_id": "sensor_logger"},
+                        "first_measurements": ["Confirm UART idle high voltage before connecting target board."],
+                        "first_build_steps": ["wire selected resources through a current-limited supply"],
+                        "claim_boundary": "Hardware plan is advisory until evidence gates close.",
+                    },
+                    "resource_strategy": {
+                        "strategy_mode": "hybrid",
+                        "coverage": {"coverage_score": 1.0},
+                    },
+                    "salvage_splice_plan": {
+                        "verdict": "ready_after_measurements",
+                        "target": {"recommended_build": "Sensor logger or alert module"},
+                    },
+                }
+            }
+        ],
+    }
+
+    dossier = BoardDossierBuilder().build(session)
+
+    assert dossier["hardware_plan"]["available"] is True
+    assert dossier["hardware_plan"]["status"] == "prototype_after_evidence"
+    assert dossier["hardware_plan"]["recommended_path"] == "hybrid_gap_fill"
+    assert dossier["hardware_plan"]["selected_resource_ids"] == ["drawer_esp32", "buck", "sensor_breakout"]
+    assert dossier["hardware_plan"]["procurement"]["estimated_cost_usd"] == 4.5
+    assert dossier["hardware_plan"]["assurance"]["level"] == "prototype_gated"
+    assert dossier["hardware_plan"]["execution_package"]["current_stage"] == "bench_validation"
+    assert dossier["hardware_plan"]["outcome_memory"]["positive_count"] == 1
+    assert dossier["repair_reuse"]["reuse_target"] == "Sensor logger or alert module"
+    assert any("Hardware plan status" in item for item in dossier["known"])

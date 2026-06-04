@@ -1,0 +1,118 @@
+{
+  "schema_version": "qwen_live_pipeline_assessment.v1",
+  "created_at": "2026-06-01T08:37:27.303535+00:00",
+  "source_report": "eval/qwen_trial/latest_report.json",
+  "summary": {
+    "row_count": 3,
+    "json_valid_count": 3,
+    "rows_with_resources": 2,
+    "rows_with_selected_resources": 2,
+    "rows_with_full_coverage": 2,
+    "rows_power_or_splice_authorized": 0,
+    "max_production_readiness_score": 0.137
+  },
+  "rows": [
+    {
+      "scenario": "curated_test_pcb",
+      "json_valid": true,
+      "truncated": false,
+      "vision_components": 3,
+      "vision_connectors": 0,
+      "vision_resources": 3,
+      "vision_hazards": 0,
+      "required_capabilities": [
+        "unknown_reusable_part"
+      ],
+      "function": "unknown_low_voltage_module",
+      "function_confidence": 0.3,
+      "selected_resources": [
+        "vision_1"
+      ],
+      "coverage": 1.0,
+      "resource_readiness": "prototype_after_evidence",
+      "status": "prototype_after_evidence",
+      "can_power_or_splice": false,
+      "trust_level": "visual_topology_candidate",
+      "trust_score": 0.109,
+      "production_readiness_score": 0.054,
+      "blocking_gap_count": 16,
+      "next_actions": [
+        "Record close-up evidence and bench-test the block before reuse.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Capture measured connector pinout, no-short, ground, and voltage evidence.",
+        "Run the Unknown low-voltage board baseline protocol bench protocol and attach artifacts for: resistance, continuity, voltage, current, thermal, review.",
+        "Run the listed bench measurements before generating pin-level splice instructions."
+      ]
+    },
+    {
+      "scenario": "curated_raspberry_pi",
+      "json_valid": true,
+      "truncated": false,
+      "vision_components": 2,
+      "vision_connectors": 6,
+      "vision_resources": 12,
+      "vision_hazards": 0,
+      "required_capabilities": [
+        "controller",
+        "power",
+        "connector",
+        "network_interface",
+        "display_or_ui"
+      ],
+      "function": "single_board_computer_module",
+      "function_confidence": 0.96,
+      "selected_resources": [
+        "vision_ethernet",
+        "vision_gpio_header",
+        "vision_hdc",
+        "vision_usb_type_c"
+      ],
+      "coverage": 1.0,
+      "resource_readiness": "prototype_after_evidence",
+      "status": "prototype_after_evidence",
+      "can_power_or_splice": false,
+      "trust_level": "grounded_visual_candidate",
+      "trust_score": 0.3,
+      "production_readiness_score": 0.137,
+      "blocking_gap_count": 16,
+      "next_actions": [
+        "Map pinout and ground continuity before cutting or splicing.",
+        "Confirm logic voltage, shared ground requirement, and idle bus state.",
+        "Measure no-short resistance between power and ground.",
+        "Measure voltage, polarity, and current limit before interconnect.",
+        "Run the listed bench measurements before generating pin-level splice instructions.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps."
+      ]
+    },
+    {
+      "scenario": "curated_deeppcb_trace",
+      "json_valid": true,
+      "truncated": false,
+      "vision_components": 0,
+      "vision_connectors": 0,
+      "vision_resources": 0,
+      "vision_hazards": 0,
+      "required_capabilities": [],
+      "function": "unknown_low_voltage_module",
+      "function_confidence": 0.3,
+      "selected_resources": [],
+      "coverage": 0.0,
+      "resource_readiness": "define_goal",
+      "status": "collect_more_evidence",
+      "can_power_or_splice": false,
+      "trust_level": "visual_candidate",
+      "trust_score": 0.065,
+      "production_readiness_score": 0.038,
+      "blocking_gap_count": 16,
+      "next_actions": [
+        "Select resources that cover the requested hardware capabilities.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Capture measured connector pinout, no-short, ground, and voltage evidence.",
+        "Run the Unknown low-voltage board baseline protocol bench protocol and attach artifacts for: resistance, continuity, voltage, current, thermal, review.",
+        "Provide owned, salvaged, or procurable resources for the required capabilities."
+      ]
+    }
+  ]
+}

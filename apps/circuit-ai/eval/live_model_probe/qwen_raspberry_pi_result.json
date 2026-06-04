@@ -1,0 +1,1218 @@
+{
+  "schema_version": "qwen_board_vision_result.v1",
+  "mode": "live",
+  "provider": "qwen",
+  "model": "qwen3-vl-flash",
+  "preflight": {
+    "estimated_input_tokens": 5341,
+    "estimated_output_tokens": 1800,
+    "estimated_usd": 0.000505,
+    "model": "qwen3-vl-flash",
+    "prompt_version": "qwen_board_evidence_prompt.v1",
+    "image_sha256": "a722baaaca7a606089a3d97dd8522136f3c4b1b88d3598719887096ad462808b"
+  },
+  "usage": {
+    "input_tokens": 1115,
+    "output_tokens": 1330,
+    "estimated_usd": 0.00031,
+    "elapsed_s": 34.277
+  },
+  "parse_diagnostics": {
+    "json_valid": true,
+    "json_error": "",
+    "finish_reason": "stop",
+    "truncated": false,
+    "content_length": 3992,
+    "raw_board_evidence_available": true,
+    "counts": {
+      "components": 2,
+      "markings": 2,
+      "regions": 1,
+      "damage": 0,
+      "connectors": 7,
+      "test_points": 0,
+      "salvage_candidates": 3
+    },
+    "recommendation": ""
+  },
+  "parsed": {
+    "safety_level": "safe",
+    "explanation": "Raspberry Pi 4 Model B (2018) with no visible damage, corrosion, or high-voltage components. All connectors are standard peripheral interfaces; no exposed mains or battery. Board is in good condition for salvage/reuse planning.",
+    "board_evidence": {
+      "schema_version": "board_evidence.v1",
+      "components": [
+        {
+          "id": "cpu",
+          "label": "SoC (Broadcom BCM2711)",
+          "kind": "integrated_circuit",
+          "confidence": 0.95,
+          "bbox": [
+            336,
+            273,
+            540,
+            444
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "ram",
+          "label": "RAM module",
+          "kind": "integrated_circuit",
+          "confidence": 0.9,
+          "bbox": [
+            470,
+            394,
+            626,
+            536
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "markings": [
+        {
+          "id": "model",
+          "label": "Raspberry Pi 4 Model B",
+          "kind": "silkscreen",
+          "confidence": 1.0,
+          "bbox": [
+            546,
+            290,
+            682,
+            412
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "fcc_id",
+          "label": "FCC ID: 2A0CD-RP14B",
+          "kind": "silkscreen",
+          "confidence": 1.0,
+          "bbox": [
+            256,
+            382,
+            386,
+            482
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "regions": [
+        {
+          "id": "power_region",
+          "label": "Power input and regulation area",
+          "kind": "region",
+          "confidence": 0.9,
+          "bbox": [
+            20,
+            320,
+            280,
+            650
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "damage": [],
+      "connectors": [
+        {
+          "id": "usb_c",
+          "label": "USB-C Power In",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            39,
+            350,
+            152,
+            488
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "hdmip",
+          "label": "HDMI",
+          "kind": "connector",
+          "confidence": 0.95,
+          "bbox": [
+            222,
+            540,
+            292,
+            640
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "ethernet",
+          "label": "Ethernet RJ45",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            722,
+            278,
+            986,
+            694
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "usb_a_1",
+          "label": "USB-A port 1",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            468,
+            502,
+            706,
+            906
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "usb_a_2",
+          "label": "USB-A port 2",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            614,
+            394,
+            840,
+            792
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "gpio_header",
+          "label": "40-pin GPIO header",
+          "kind": "header",
+          "confidence": 0.99,
+          "bbox": [
+            430,
+            24,
+            778,
+            372
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "audio_jack",
+          "label": "3.5mm audio jack",
+          "kind": "connector",
+          "confidence": 0.95,
+          "bbox": [
+            308,
+            550,
+            470,
+            742
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ],
+      "test_points": [],
+      "salvage_candidates": [
+        {
+          "id": "gpio_header",
+          "label": "40-pin GPIO header",
+          "kind": "header",
+          "confidence": 0.99,
+          "bbox": [
+            430,
+            24,
+            778,
+            372
+          ],
+          "required_tests": [
+            "pin continuity",
+            "no shorts to ground/vcc",
+            "verify no bent pins"
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "usb_a_ports",
+          "label": "USB-A ports (2x)",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            468,
+            502,
+            840,
+            906
+          ],
+          "required_tests": [
+            "check for damaged contacts",
+            "verify no solder bridges",
+            "test data lines with multimeter"
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        },
+        {
+          "id": "ethernet_port",
+          "label": "RJ45 Ethernet port",
+          "kind": "connector",
+          "confidence": 0.98,
+          "bbox": [
+            722,
+            278,
+            986,
+            694
+          ],
+          "required_tests": [
+            "test for open/shorted pairs",
+            "verify shielding integrity"
+          ],
+          "missing_evidence": [],
+          "warnings": []
+        }
+      ]
+    },
+    "parse_diagnostics": {
+      "json_valid": true,
+      "json_error": "",
+      "finish_reason": "stop",
+      "truncated": false,
+      "content_length": 3992,
+      "raw_board_evidence_available": true,
+      "counts": {
+        "components": 2,
+        "markings": 2,
+        "regions": 1,
+        "damage": 0,
+        "connectors": 7,
+        "test_points": 0,
+        "salvage_candidates": 3
+      },
+      "recommendation": ""
+    }
+  },
+  "board_evidence": {
+    "schema_version": "board_evidence.v1",
+    "components": [
+      {
+        "id": "cpu",
+        "label": "SoC (Broadcom BCM2711)",
+        "kind": "integrated_circuit",
+        "confidence": 0.95,
+        "bbox": [
+          336,
+          273,
+          540,
+          444
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "ram",
+        "label": "RAM module",
+        "kind": "integrated_circuit",
+        "confidence": 0.9,
+        "bbox": [
+          470,
+          394,
+          626,
+          536
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "markings": [
+      {
+        "id": "model",
+        "label": "Raspberry Pi 4 Model B",
+        "kind": "silkscreen",
+        "confidence": 1.0,
+        "bbox": [
+          546,
+          290,
+          682,
+          412
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "fcc_id",
+        "label": "FCC ID: 2A0CD-RP14B",
+        "kind": "silkscreen",
+        "confidence": 1.0,
+        "bbox": [
+          256,
+          382,
+          386,
+          482
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "regions": [
+      {
+        "id": "power_region",
+        "label": "Power input and regulation area",
+        "kind": "region",
+        "confidence": 0.9,
+        "bbox": [
+          20,
+          320,
+          280,
+          650
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "damage": [],
+    "connectors": [
+      {
+        "id": "usb_c",
+        "label": "USB-C Power In",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          39,
+          350,
+          152,
+          488
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "hdmip",
+        "label": "HDMI",
+        "kind": "connector",
+        "confidence": 0.95,
+        "bbox": [
+          222,
+          540,
+          292,
+          640
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "ethernet",
+        "label": "Ethernet RJ45",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          722,
+          278,
+          986,
+          694
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "usb_a_1",
+        "label": "USB-A port 1",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          468,
+          502,
+          706,
+          906
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "usb_a_2",
+        "label": "USB-A port 2",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          614,
+          394,
+          840,
+          792
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "gpio_header",
+        "label": "40-pin GPIO header",
+        "kind": "header",
+        "confidence": 0.99,
+        "bbox": [
+          430,
+          24,
+          778,
+          372
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "audio_jack",
+        "label": "3.5mm audio jack",
+        "kind": "connector",
+        "confidence": 0.95,
+        "bbox": [
+          308,
+          550,
+          470,
+          742
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ],
+    "test_points": [],
+    "salvage_candidates": [
+      {
+        "id": "gpio_header",
+        "label": "40-pin GPIO header",
+        "kind": "header",
+        "confidence": 0.99,
+        "bbox": [
+          430,
+          24,
+          778,
+          372
+        ],
+        "required_tests": [
+          "pin continuity",
+          "no shorts to ground/vcc",
+          "verify no bent pins"
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "usb_a_ports",
+        "label": "USB-A ports (2x)",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          468,
+          502,
+          840,
+          906
+        ],
+        "required_tests": [
+          "check for damaged contacts",
+          "verify no solder bridges",
+          "test data lines with multimeter"
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      },
+      {
+        "id": "ethernet_port",
+        "label": "RJ45 Ethernet port",
+        "kind": "connector",
+        "confidence": 0.98,
+        "bbox": [
+          722,
+          278,
+          986,
+          694
+        ],
+        "required_tests": [
+          "test for open/shorted pairs",
+          "verify shielding integrity"
+        ],
+        "missing_evidence": [],
+        "warnings": []
+      }
+    ]
+  },
+  "vision_evidence_bridge": {
+    "schema_version": "vision_board_evidence_bridge.v1",
+    "available": true,
+    "source": "vision_language_board_evidence",
+    "board_evidence": {
+      "schema_version": "board_evidence.v1",
+      "components": [
+        {
+          "id": "cpu",
+          "label": "SoC (Broadcom BCM2711)",
+          "kind": "integrated_circuit",
+          "bbox": [
+            336,
+            273,
+            540,
+            444
+          ],
+          "confidence": 0.95,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "ram",
+          "label": "RAM module",
+          "kind": "integrated_circuit",
+          "bbox": [
+            470,
+            394,
+            626,
+            536
+          ],
+          "confidence": 0.9,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        }
+      ],
+      "markings": [
+        {
+          "id": "model",
+          "label": "Raspberry Pi 4 Model B",
+          "kind": "silkscreen",
+          "bbox": [
+            546,
+            290,
+            682,
+            412
+          ],
+          "confidence": 1.0,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "fcc_id",
+          "label": "FCC ID: 2A0CD-RP14B",
+          "kind": "silkscreen",
+          "bbox": [
+            256,
+            382,
+            386,
+            482
+          ],
+          "confidence": 1.0,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        }
+      ],
+      "regions": [
+        {
+          "id": "power_region",
+          "label": "Power input and regulation area",
+          "kind": "region",
+          "bbox": [
+            20,
+            320,
+            280,
+            650
+          ],
+          "confidence": 0.9,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        }
+      ],
+      "damage": [],
+      "connectors": [
+        {
+          "id": "usb_c",
+          "label": "USB-C Power In",
+          "kind": "connector",
+          "bbox": [
+            39,
+            350,
+            152,
+            488
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "hdmip",
+          "label": "HDMI",
+          "kind": "connector",
+          "bbox": [
+            222,
+            540,
+            292,
+            640
+          ],
+          "confidence": 0.95,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "ethernet",
+          "label": "Ethernet RJ45",
+          "kind": "connector",
+          "bbox": [
+            722,
+            278,
+            986,
+            694
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "usb_a_1",
+          "label": "USB-A port 1",
+          "kind": "connector",
+          "bbox": [
+            468,
+            502,
+            706,
+            906
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "usb_a_2",
+          "label": "USB-A port 2",
+          "kind": "connector",
+          "bbox": [
+            614,
+            394,
+            840,
+            792
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "gpio_header",
+          "label": "40-pin GPIO header",
+          "kind": "header",
+          "bbox": [
+            430,
+            24,
+            778,
+            372
+          ],
+          "confidence": 0.99,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "audio_jack",
+          "label": "3.5mm audio jack",
+          "kind": "connector",
+          "bbox": [
+            308,
+            550,
+            470,
+            742
+          ],
+          "confidence": 0.95,
+          "warnings": [],
+          "missing_evidence": [],
+          "source": "board_evidence.v1"
+        }
+      ],
+      "test_points": [],
+      "salvage_candidates": [
+        {
+          "id": "gpio_header",
+          "label": "40-pin GPIO header",
+          "kind": "header",
+          "bbox": [
+            430,
+            24,
+            778,
+            372
+          ],
+          "confidence": 0.99,
+          "warnings": [],
+          "missing_evidence": [
+            "pin continuity",
+            "no shorts to ground/vcc",
+            "verify no bent pins"
+          ],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "usb_a_ports",
+          "label": "USB-A ports (2x)",
+          "kind": "connector",
+          "bbox": [
+            468,
+            502,
+            840,
+            906
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [
+            "check for damaged contacts",
+            "verify no solder bridges",
+            "test data lines with multimeter"
+          ],
+          "source": "board_evidence.v1"
+        },
+        {
+          "id": "ethernet_port",
+          "label": "RJ45 Ethernet port",
+          "kind": "connector",
+          "bbox": [
+            722,
+            278,
+            986,
+            694
+          ],
+          "confidence": 0.98,
+          "warnings": [],
+          "missing_evidence": [
+            "test for open/shorted pairs",
+            "verify shielding integrity"
+          ],
+          "source": "board_evidence.v1"
+        }
+      ]
+    },
+    "detections": [
+      {
+        "class_name": "integrated_circuit",
+        "label": "SoC (Broadcom BCM2711)",
+        "confidence": 0.95,
+        "bbox": [
+          336,
+          273,
+          540,
+          444
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "integrated_circuit",
+        "label": "RAM module",
+        "confidence": 0.9,
+        "bbox": [
+          470,
+          394,
+          626,
+          536
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "USB-C Power In",
+        "confidence": 0.98,
+        "bbox": [
+          39,
+          350,
+          152,
+          488
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "HDMI",
+        "confidence": 0.95,
+        "bbox": [
+          222,
+          540,
+          292,
+          640
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "Ethernet RJ45",
+        "confidence": 0.98,
+        "bbox": [
+          722,
+          278,
+          986,
+          694
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "USB-A port 1",
+        "confidence": 0.98,
+        "bbox": [
+          468,
+          502,
+          706,
+          906
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "USB-A port 2",
+        "confidence": 0.98,
+        "bbox": [
+          614,
+          394,
+          840,
+          792
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "header",
+        "label": "40-pin GPIO header",
+        "confidence": 0.99,
+        "bbox": [
+          430,
+          24,
+          778,
+          372
+        ],
+        "source": "board_evidence.v1"
+      },
+      {
+        "class_name": "connector",
+        "label": "3.5mm audio jack",
+        "confidence": 0.95,
+        "bbox": [
+          308,
+          550,
+          470,
+          742
+        ],
+        "source": "board_evidence.v1"
+      }
+    ],
+    "resource_candidates": [
+      {
+        "resource_id": "vision_cpu",
+        "name": "SoC (Broadcom BCM2711)",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "cpu"
+        ],
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing SoC (Broadcom BCM2711)."
+        ],
+        "required_tests": [
+          "Review visible marking and continuity before reusing SoC (Broadcom BCM2711)."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_ram",
+        "name": "RAM module",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "unknown_reusable_part"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "ram"
+        ],
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing RAM module."
+        ],
+        "required_tests": [
+          "Review visible marking and continuity before reusing RAM module."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_usb_c",
+        "name": "USB-C Power In",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "power"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "usb_c"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for USB-C Power In.",
+          "Measure voltage, polarity, current limit, and thermal behavior for USB-C Power In."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for USB-C Power In.",
+          "Measure voltage, polarity, current limit, and thermal behavior for USB-C Power In."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_hdmip",
+        "name": "HDMI",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "display_or_ui"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "hdmip"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for HDMI."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for HDMI."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_ethernet",
+        "name": "Ethernet RJ45",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "network_interface"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "ethernet"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for Ethernet RJ45."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for Ethernet RJ45."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_usb_a_1",
+        "name": "USB-A port 1",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "usb_a_1"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A port 1."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for USB-A port 1."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_usb_a_2",
+        "name": "USB-A port 2",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "usb_a_2"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for USB-A port 2."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for USB-A port 2."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_gpio_header",
+        "name": "40-pin GPIO header",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "gpio_header"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for 40-pin GPIO header."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for 40-pin GPIO header."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_audio_jack",
+        "name": "3.5mm audio jack",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "speaker_or_audio"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "audio_jack"
+        ],
+        "missing_evidence": [
+          "Map pinout and continuity for 3.5mm audio jack."
+        ],
+        "required_tests": [
+          "Map pinout and continuity for 3.5mm audio jack."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_usb_a_ports",
+        "name": "USB-A ports (2x)",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "usb_a_ports"
+        ],
+        "missing_evidence": [
+          "check for damaged contacts",
+          "verify no solder bridges",
+          "test data lines with multimeter",
+          "Map pinout and continuity for USB-A ports (2x)."
+        ],
+        "required_tests": [
+          "check for damaged contacts",
+          "verify no solder bridges",
+          "test data lines with multimeter",
+          "Map pinout and continuity for USB-A ports (2x)."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_ethernet_port",
+        "name": "RJ45 Ethernet port",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "connector",
+          "network_interface"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "ethernet_port"
+        ],
+        "missing_evidence": [
+          "test for open/shorted pairs",
+          "verify shielding integrity",
+          "Map pinout and continuity for RJ45 Ethernet port."
+        ],
+        "required_tests": [
+          "test for open/shorted pairs",
+          "verify shielding integrity",
+          "Map pinout and continuity for RJ45 Ethernet port."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_model",
+        "name": "Raspberry Pi 4 Model B",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "controller"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "model"
+        ],
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B."
+        ],
+        "required_tests": [
+          "Review visible marking and continuity before reusing Raspberry Pi 4 Model B."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      },
+      {
+        "resource_id": "vision_fcc_id",
+        "name": "FCC ID: 2A0CD-RP14B",
+        "resource_kind": "salvaged",
+        "source": "board_evidence.v1",
+        "capabilities": [
+          "unknown_reusable_part"
+        ],
+        "confidence": 0.82,
+        "evidence_status": "needs_evidence",
+        "source_refs": [
+          "fcc_id"
+        ],
+        "missing_evidence": [
+          "Review visible marking and continuity before reusing FCC ID: 2A0CD-RP14B."
+        ],
+        "required_tests": [
+          "Review visible marking and continuity before reusing FCC ID: 2A0CD-RP14B."
+        ],
+        "notes": "Vision-language candidate; not verified until reviewed or measured."
+      }
+    ],
+    "hazard_profile": {
+      "schema_version": "hardware_hazard_profile.v1",
+      "energy_domain": "low_voltage_or_unknown_candidate",
+      "hazards": [],
+      "clearance_requirements": [],
+      "source_policy": {
+        "structured_sources": [
+          "board_evidence.v1"
+        ],
+        "raw_text_release_logic": false,
+        "llm_outputs_must_be_structured_hazard_candidates": true,
+        "vision_candidates_require_measurement_or_review": true
+      }
+    },
+    "policy": {
+      "vision_evidence_is_candidate_only": true,
+      "resources_require_measurement_or_review": true,
+      "hazards_can_block_release": true,
+      "hazards_cannot_be_cleared_by_vision_text": true
+    }
+  },
+  "claim_boundary": "Qwen vision returns candidate board evidence only; measurements and deterministic authority gates decide power, splice, and production release."
+}

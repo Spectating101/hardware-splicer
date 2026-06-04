@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T09:11:36.175624+00:00",
+  "request_preview": "eval/qwen_trial/requests/curated_raspberry_pi_b7d1d700ed46604be7e95310.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"safe\",\n  \"explanation\": \"This is a Raspberry Pi 4 Model B (2018) board, a consumer-grade single-board computer with no exposed high-voltage or hazardous components; all connectors and interfaces are standard low-voltage USB, Ethernet, HDMI, and power inputs.\",\n  \"components\": [\n    {\n      \"id\": \"ic_cpu\",\n      \"label\": \"CPU\",\n      \"kind\": \"integrated_circuit\",\n      \"bbox\": [336, 276, 542, 444],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"ic_ram\",\n      \"label\": \"RAM\",\n      \"kind\": \"integrated_circuit\",\n      \"bbox\": [472, 392, 622, 537],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_a_1\",\n      \"label\": \"USB-A port 1\",\n      \"kind\": \"connector\",\n      \"bbox\": [470, 502, 708, 905],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_a_2\",\n      \"label\": \"USB-A port 2\",\n      \"kind\": \"connector\",\n      \"bbox\": [614, 394, 838, 792],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"ethernet\",\n      \"label\": \"Ethernet port\",\n      \"kind\": \"connector\",\n      \"bbox\": [720, 278, 987, 697],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_c\",\n      \"label\": \"USB-C port\",\n      \"kind\": \"connector\",\n      \"bbox\": [39, 352, 154, 492],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"hdmi\",\n      \"label\": \"HDMI port\",\n      \"kind\": \"connector\",\n      \"bbox\": [224, 537, 306, 650],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"gpio_header\",\n      \"label\": \"GPIO header\",\n      \"kind\": \"connector\",\n      \"bbox\": [434, 22, 778, 372],\n      \"warnings\": []\n    }\n  ],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"components\": [\n      {\n        \"id\": \"ic_cpu\",\n        \"bbox\": [336, 276, 542, 444],\n        \"label\": \"CPU\"\n      },\n      {\n        \"id\": \"ic_ram\",\n        \"bbox\": [472, 392, 622, 537],\n        \"label\": \"RAM\"\n      }\n    ],\n    \"markings\": [\n      {\n        \"text\": \"Raspberry Pi 4 Model\",\n        \"bbox\": [550, 292, 676, 387]\n      },\n      {\n        \"text\": \"FCC ID: 2A0CD-RP14B\",\n        \"bbox\": [274, 384, 386, 462]\n      }\n    ],\n    \"regions\": [\n      {\n        \"label\": \"Power input region\",\n        \"bbox\": [110, 442, 242, 572]\n      }\n    ],\n    \"damage\": [],\n    \"connectors\": [\n      {\n        \"id\": \"usb_a_1\",\n        \"bbox\": [470, 502, 708, 905],\n        \"label\": \"USB-A port 1\"\n      },\n      {\n        \"id\": \"usb_a_2\",\n        \"bbox\": [614, 394, 838, 792],\n        \"label\": \"USB-A port 2\"\n      },\n      {\n        \"id\": \"ethernet\",\n        \"bbox\": [720, 278, 987, 697],\n        \"label\": \"Ethernet port\"\n      },\n      {\n        \"id\": \"usb_c\",\n        \"bbox\": [39, 352, 154, 492],\n        \"label\": \"USB-C port\"\n      },\n      {\n        \"id\": \"hdmi\",\n        \"bbox\": [224, 537, 306, 650],\n        \"label\": \"HDMI port\"\n      },\n      {\n        \"id\": \"gpio_header\",\n        \"bbox\": [434, 22, 778, 372],\n        \"label\": \"GPIO header\"\n      }\n    ],\n    \"test_points\": [],\n    \"salvage_candidates\": []\n  }\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 1132,
+      "completion_tokens": 1094,
+      "total_tokens": 2226,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 1094
+      }
+    },
+    "created": 1779700296,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-1449afc1-dce5-9664-be34-0bf64b59c377"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "safety_level": "safe",
+    "component_count": 8,
+    "module_count": 0,
+    "evidence_component_count": 2,
+    "marking_count": 2,
+    "connector_count": 6,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 1132,
+    "output_tokens": 1094,
+    "estimated_usd": 0.00026,
+    "elapsed_s": 13.667
+  }
+}

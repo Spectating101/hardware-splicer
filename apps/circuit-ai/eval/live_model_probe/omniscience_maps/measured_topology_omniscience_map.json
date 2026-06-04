@@ -1,0 +1,657 @@
+{
+  "available": true,
+  "ceiling_projection": {
+    "authority_ceiling_if_next_batch_closes": 0.77,
+    "blocking_unlocks": [
+      {
+        "blockers": [
+          "No terminal controlled bench outcome proves the target function."
+        ],
+        "next_unlock": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+        "stage_id": "controlled_bench",
+        "status": "open",
+        "title": "Controlled Bench Authority"
+      },
+      {
+        "blockers": [
+          "A terminal successful outcome is not fully recorded.",
+          "Output function is not verified in the terminal outcome.",
+          "First-power result is not recorded as passing.",
+          "Terminal outcome lacks an audit artifact URI.",
+          "One or more production authority lanes are not authorized.",
+          "Production release manifest is incomplete.",
+          "Arbitrary-board trust assessment is not production_release_candidate.",
+          "Production repair authority is not authorized by the casefile."
+        ],
+        "next_unlock": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+        "stage_id": "production_repair",
+        "status": "open",
+        "title": "Production Repair Authority"
+      }
+    ],
+    "current_authority_level": "electrical_simulation",
+    "score_if_next_batch_closes_estimate": 0.756
+  },
+  "claim_control": {
+    "can": {
+      "claim_controlled_reuse": false,
+      "claim_production_repair_release": false,
+      "power_or_splice_now": false,
+      "run_controlled_bench": true,
+      "use_electrical_simulation": true,
+      "use_measured_pinout": true,
+      "use_visual_candidates": true
+    },
+    "cannot_claim_yet": [
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release",
+      "No terminal controlled bench outcome proves the target function.",
+      "A terminal successful outcome is not fully recorded.",
+      "Output function is not verified in the terminal outcome.",
+      "First-power result is not recorded as passing."
+    ],
+    "claim_boundary": "This map can rank hypotheses and evidence. It cannot infer hidden nets, safe power, or repair release from images alone. Authority still comes from measured topology, simulation, controlled outcome, and release artifacts."
+  },
+  "dimensions": {
+    "active_closure": {
+      "evidence": [
+        "closure_outcome_record_terminal_build_repair_reuse_outcome",
+        "closure_terminal_outcome",
+        "closure_release_attach_production_release_or_release_manifest",
+        "closure_release_manifest"
+      ],
+      "score": 0.407,
+      "status": "open",
+      "summary": "Whether the engine has a concrete route to collapse unknowns."
+    },
+    "bench_outcome": {
+      "evidence": [
+        "No terminal controlled bench outcome proves the target function."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Controlled first-power/function outcome."
+    },
+    "function_hypothesis": {
+      "evidence": [
+        "usb_serial_debug_bridge",
+        "power_distribution_or_regulator"
+      ],
+      "score": 0.78,
+      "status": "candidate",
+      "summary": "Likely board purpose inferred from markings, connectors, capabilities, and topology."
+    },
+    "measured_topology": {
+      "evidence": [
+        "topology source: measured_topology_evidence",
+        "measured connector/pin evidence attached",
+        "pinout known"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Measured pinout/topology authority."
+    },
+    "part_identity": {
+      "evidence": [],
+      "score": 0.78,
+      "status": "candidate",
+      "summary": "Component/marking identity confidence."
+    },
+    "release_authority": {
+      "evidence": [
+        "casefile: evidence_required",
+        "decision: not_authorized_evidence_required",
+        "A terminal successful outcome is not fully recorded.",
+        "Output function is not verified in the terminal outcome.",
+        "First-power result is not recorded as passing.",
+        "Terminal outcome lacks an audit artifact URI.",
+        "One or more production authority lanes are not authorized.",
+        "Production release manifest is incomplete.",
+        "Arbitrary-board trust assessment is not production_release_candidate.",
+        "Production repair authority is not authorized by the casefile."
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Scoped production repair/reuse release authority."
+    },
+    "simulation": {
+      "evidence": [
+        "release decision: simulation_passed_bench_evidence_required",
+        "deterministic power-tree simulation available",
+        "no hard simulation issues"
+      ],
+      "score": 1.0,
+      "status": "pass",
+      "summary": "Deterministic low-voltage simulation or bounded source/load envelope."
+    },
+    "visual_observability": {
+      "evidence": [
+        "0 component candidate(s)",
+        "0 connector candidate(s)",
+        "0 marking candidate(s)"
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Photos and visual evidence are enough to create candidate inventory."
+    },
+    "visual_topology": {
+      "evidence": [
+        "0 component anchors",
+        "0 connector hypotheses",
+        "0 connection hypotheses"
+      ],
+      "score": 0.0,
+      "status": "open",
+      "summary": "Candidate component/connector/trace topology from layout evidence."
+    }
+  },
+  "evidence_graph": {
+    "claim_boundary": "This graph shows evidence available inside the board session. Claims without capture, measurement, review, reference, or outcome support remain weak.",
+    "grounded_claims": [
+      {
+        "certainty": "supported",
+        "claim": "Recommended reuse target: Bench power adapter or breakout",
+        "claim_id": "claim:omniscience-map:reuse-target",
+        "grounding_status": "grounded",
+        "missing_evidence": [
+          "task:close_gate_profile_usb_uart_debug_adapter_2",
+          "task:closure_outcome_record_terminal_build_repair_reuse_outcome",
+          "task:closure_terminal_outcome",
+          "task:closure_release_attach_production_release_or_release_manifest"
+        ],
+        "score": 0.85,
+        "supporting_evidence": [
+          "measurement:topology_resistance_1",
+          "measurement:topology_voltage_2",
+          "measurement:topology_continuity_3"
+        ],
+        "usable_for": [
+          "reuse",
+          "salvage",
+          "build"
+        ]
+      }
+    ],
+    "next_grounding_actions": [
+      "Resolve evidence for: 10 open evidence task(s) must be resolved before strong certainty"
+    ],
+    "summary": {
+      "claim_count": 2,
+      "edge_count": 40,
+      "grounded_claim_count": 1,
+      "node_count": 22,
+      "source_count": 8,
+      "weak_claim_count": 1
+    },
+    "weak_claims": [
+      {
+        "certainty": "weak",
+        "claim": "10 open evidence task(s) must be resolved before strong certainty",
+        "claim_id": "claim:omniscience-map:open-evidence",
+        "grounding_status": "needs_evidence",
+        "missing_evidence": [
+          "task:close_gate_profile_usb_uart_debug_adapter_2",
+          "task:closure_outcome_record_terminal_build_repair_reuse_outcome",
+          "task:closure_terminal_outcome",
+          "task:closure_release_attach_production_release_or_release_manifest",
+          "task:closure_release_manifest",
+          "task:protocol_1"
+        ],
+        "score": 0.35,
+        "supporting_evidence": [
+          "task:close_gate_profile_usb_uart_debug_adapter_2",
+          "task:closure_outcome_record_terminal_build_repair_reuse_outcome",
+          "task:closure_terminal_outcome",
+          "task:closure_release_attach_production_release_or_release_manifest",
+          "task:closure_release_manifest",
+          "task:protocol_1"
+        ],
+        "usable_for": [
+          "review",
+          "training",
+          "certainty"
+        ]
+      }
+    ]
+  },
+  "hardware_plan_summary": {
+    "can_power_or_splice": true,
+    "open_gate_count": 0,
+    "recommended_path": "reuse_verified_inventory_first",
+    "status": "ready_for_build_plan"
+  },
+  "hypothesis_lattice": {
+    "candidates": [
+      {
+        "capabilities": [
+          "usb_serial",
+          "connector"
+        ],
+        "confidence": 0.78,
+        "confirmation_required": [
+          "measured pinout",
+          "logic voltage",
+          "loopback or safe serial capture"
+        ],
+        "evidence": [
+          "text hit: usb",
+          "text hit: uart",
+          "text hit: serial",
+          "measured interface: uart_serial"
+        ],
+        "hypothesis_id": "usb_serial_debug_bridge",
+        "label": "USB/UART debug or bridge module",
+        "status": "leading"
+      },
+      {
+        "capabilities": [
+          "power"
+        ],
+        "confidence": 0.48,
+        "confirmation_required": [
+          "no-short",
+          "output voltage",
+          "load current",
+          "thermal behavior"
+        ],
+        "evidence": [
+          "text hit: power"
+        ],
+        "hypothesis_id": "power_distribution_or_regulator",
+        "label": "Power distribution or regulator stage",
+        "status": "alternate"
+      }
+    ],
+    "grounded_parts": [],
+    "primary": "usb_serial_debug_bridge",
+    "visual_topology_candidates": {
+      "available": false,
+      "connection_hypotheses": [],
+      "connector_hypotheses": []
+    }
+  },
+  "known_facts": [
+    {
+      "authority": "authority",
+      "evidence": [
+        "0 component candidates",
+        "0 connector candidates",
+        "0 marking candidates",
+        "0 salvage candidates",
+        "measured topology evidence attached"
+      ],
+      "fact_id": "authority_visual_candidate",
+      "label": "Visual Candidate Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "topology source: measured_topology_evidence",
+        "measured connector/pin evidence attached",
+        "pinout known"
+      ],
+      "fact_id": "authority_measured_topology",
+      "label": "Measured Pinout/Topology Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "authority",
+      "evidence": [
+        "release decision: simulation_passed_bench_evidence_required",
+        "deterministic power-tree simulation available",
+        "no hard simulation issues"
+      ],
+      "fact_id": "authority_electrical_simulation",
+      "label": "Electrical Simulation Authority",
+      "value": "pass"
+    },
+    {
+      "authority": "economic",
+      "evidence": {
+        "claim_boundary": "Economic estimate is heuristic until a successful function outcome is recorded.",
+        "confidence": 0.82,
+        "decision": "controlled_reuse_or_repair_trial",
+        "estimated_cash_to_continue_usd": 0.5,
+        "estimated_time_minutes": 15,
+        "expected_recoverable_value_usd": 9.6,
+        "primary_function_id": "usb_serial_debug_bridge",
+        "rationale": "Measured authority lanes permit low-risk controlled use in the measured scope.",
+        "recommended_exit": "Run terminal outcome and preserve board session evidence for portfolio/demo proof.",
+        "schema_version": "salvage_value_decision.v1",
+        "value_ratio": 9.6
+      },
+      "fact_id": "salvage_value_decision",
+      "label": "reuse/salvage value decision",
+      "value": "controlled_reuse_or_repair_trial"
+    },
+    {
+      "authority": "planning",
+      "evidence": "Resource coverage and splice planning are connected; final authority depends on closed evidence gates.",
+      "fact_id": "hardware_plan_status",
+      "label": "hardware plan status",
+      "value": "ready_for_build_plan"
+    }
+  ],
+  "mode": "board_omniscience_map",
+  "model_routes": {
+    "deepseek_or_text_reasoner": {
+      "never_treat_as": [
+        "instrument measurement",
+        "terminal outcome"
+      ],
+      "next_prompts": [
+        "Verify USB-side current draw and no backfeed into the target board."
+      ],
+      "use_for": [
+        "field advisory",
+        "measurement ordering",
+        "contradiction review",
+        "project/use-case planning"
+      ]
+    },
+    "deterministic_engine": {
+      "use_for": [
+        "topology-to-netlist",
+        "simulation gate",
+        "authority ledger",
+        "release gating"
+      ],
+      "visual_topology_available": false
+    },
+    "qwen_vision": {
+      "never_treat_as": [
+        "measured pinout",
+        "safe power authorization",
+        "production repair authority"
+      ],
+      "next_prompts": [],
+      "use_for": [
+        "photo parsing",
+        "marking closeups",
+        "connector candidate extraction",
+        "damage observation"
+      ]
+    }
+  },
+  "next_evidence_batch": [
+    {
+      "action_id": "close_gate_profile_usb_uart_debug_adapter_2",
+      "category": "operator_next_action",
+      "priority": -4,
+      "procedure": [
+        "Run the named gate exactly once under current limit where applicable.",
+        "Record instrument, operator, timestamp, value, units, and artifact URI.",
+        "Attach the result to topology evidence or outcome history.",
+        "Rerun field operator/test kit."
+      ],
+      "prompt": "Verify USB-side current draw and no backfeed into the target board.",
+      "source": "field_operator",
+      "type": "measurement",
+      "unlocks": "next authority gate",
+      "why": "Verify USB-side current draw and no backfeed into the target board."
+    },
+    {
+      "action_id": "closure_outcome_record_terminal_build_repair_reuse_outcome",
+      "category": "terminal_outcome",
+      "priority": -1.0,
+      "procedure": [],
+      "prompt": "Record terminal build/repair/reuse outcome.",
+      "source": "active_evidence_closure",
+      "type": "outcome",
+      "unlocks": "outcome_history",
+      "why": null
+    },
+    {
+      "action_id": "closure_terminal_outcome",
+      "category": "terminal_outcome",
+      "priority": -1.0,
+      "procedure": [],
+      "prompt": "Record terminal outcome with selected resources used, first-power result, thermal result, output_function_verified, evidence URI, cost, value, time, and deviations.",
+      "source": "active_evidence_closure",
+      "type": "outcome",
+      "unlocks": "outcome_history",
+      "why": null
+    },
+    {
+      "action_id": "closure_release_attach_production_release_or_release_manifest",
+      "category": "release_manifest",
+      "priority": 0.0,
+      "procedure": [],
+      "prompt": "Attach production_release or release_manifest.",
+      "source": "active_evidence_closure",
+      "type": "release",
+      "unlocks": "production_release",
+      "why": null
+    },
+    {
+      "action_id": "closure_release_manifest",
+      "category": "release_manifest",
+      "priority": 0.0,
+      "procedure": [],
+      "prompt": "Attach production_release with release_id, selected_resource_ids, released_by, released_at, scope_statement, artifacts, acceptance_reviewed, and repeatability_count.",
+      "source": "active_evidence_closure",
+      "type": "release",
+      "unlocks": "production_release",
+      "why": null
+    },
+    {
+      "action_id": "protocol_1",
+      "category": "outcome",
+      "priority": 1,
+      "procedure": [],
+      "prompt": "Record successful first power, thermal behavior, and output_function_verified=true.",
+      "source": "measurement_protocol",
+      "type": "outcome",
+      "unlocks": "production_release",
+      "why": "Successful output function, first power, and thermal outcome are recorded."
+    },
+    {
+      "action_id": "resolve_authority_controlled_bench",
+      "category": "controlled_bench",
+      "priority": 2.0,
+      "procedure": [],
+      "prompt": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+      "source": "unknown_map",
+      "type": "evidence",
+      "unlocks": "authority_ledger",
+      "why": "No terminal controlled bench outcome proves the target function."
+    },
+    {
+      "action_id": "resolve_authority_production_repair",
+      "category": "production_repair",
+      "priority": 2.0,
+      "procedure": [],
+      "prompt": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "source": "unknown_map",
+      "type": "evidence",
+      "unlocks": "authority_ledger",
+      "why": "A terminal successful outcome is not fully recorded."
+    },
+    {
+      "action_id": "resolve_board_visual_evidence",
+      "category": "visual_coverage",
+      "priority": 2.0,
+      "procedure": [],
+      "prompt": "Provide Qwen/local/manual board evidence.",
+      "source": "unknown_map",
+      "type": "evidence",
+      "unlocks": "visual_inventory",
+      "why": "No normalized board_evidence.v1 is attached."
+    },
+    {
+      "action_id": "resolve_closure_outcome_record_terminal_build_repair_reuse_outcome",
+      "category": "terminal_outcome",
+      "priority": 3.0,
+      "procedure": [],
+      "prompt": "outcome_history",
+      "source": "unknown_map",
+      "type": "outcome",
+      "unlocks": "active_evidence_closure",
+      "why": "Record terminal build/repair/reuse outcome."
+    }
+  ],
+  "operator_playbook": {
+    "hold_until": [
+      "controlled reuse or bench-proven function",
+      "production repair/reuse release"
+    ],
+    "level": "simulation_backed_topology_map",
+    "now": [
+      "Verify USB-side current draw and no backfeed into the target board.",
+      "Record terminal build/repair/reuse outcome.",
+      "Record terminal outcome with selected resources used, first-power result, thermal result, output_function_verified, evidence URI, cost, value, time, and deviations.",
+      "Attach production_release or release_manifest.",
+      "Attach production_release with release_id, selected_resource_ids, released_by, released_at, scope_statement, artifacts, acceptance_reviewed, and repeatability_count."
+    ],
+    "safe_posture": "controlled_bench_only"
+  },
+  "schema_version": "board_omniscience_map.v1",
+  "source_modules": {
+    "active_evidence_closure_plan": true,
+    "arbitrary_board_workflow": true,
+    "authority_ledger": true,
+    "hardware_plan": true,
+    "multiview_board_reconstruction": false,
+    "visual_topology_hypothesis": false
+  },
+  "summary": {
+    "authority_level": "electrical_simulation",
+    "authority_score": 0.62,
+    "next_best_action_id": "close_gate_profile_usb_uart_debug_adapter_2",
+    "omniscience_level": "simulation_backed_topology_map",
+    "omniscience_score": 0.496,
+    "primary_function": "usb_serial_debug_bridge",
+    "primary_function_confidence": 0.78,
+    "production_authorized": false,
+    "unknown_count": 14
+  },
+  "unknowns": [
+    {
+      "category": "controlled_bench",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Record current-limited first power, voltage/current logs, thermal result, and target function proof.",
+      "summary": "No terminal controlled bench outcome proves the target function.",
+      "unknown_id": "authority_controlled_bench",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "A terminal successful outcome is not fully recorded.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Output function is not verified in the terminal outcome.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "First-power result is not recorded as passing.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Terminal outcome lacks an audit artifact URI.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "One or more production authority lanes are not authorized.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Production release manifest is incomplete.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Arbitrary-board trust assessment is not production_release_candidate.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "production_repair",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Close measurement provenance, terminal outcome, release manifest, and authority casefile claims.",
+      "summary": "Production repair authority is not authorized by the casefile.",
+      "unknown_id": "authority_production_repair",
+      "unlocks": "authority_ledger"
+    },
+    {
+      "category": "visual_coverage",
+      "evidence_type": null,
+      "priority": 0.0,
+      "resolution": "Provide Qwen/local/manual board evidence.",
+      "summary": "No normalized board_evidence.v1 is attached.",
+      "unknown_id": "board_visual_evidence",
+      "unlocks": "visual_inventory"
+    },
+    {
+      "category": "terminal_outcome",
+      "evidence_type": "outcome",
+      "priority": 1.0,
+      "resolution": "outcome_history",
+      "summary": "Record terminal build/repair/reuse outcome.",
+      "unknown_id": "closure_outcome_record_terminal_build_repair_reuse_outcome",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "terminal_outcome",
+      "evidence_type": "outcome",
+      "priority": 1.0,
+      "resolution": "outcome_history",
+      "summary": "Record terminal outcome with selected resources used, first-power result, thermal result, output_function_verified, evidence URI, cost, value, time, and deviations.",
+      "unknown_id": "closure_terminal_outcome",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "release_manifest",
+      "evidence_type": "release",
+      "priority": 2.0,
+      "resolution": "production_release",
+      "summary": "Attach production_release or release_manifest.",
+      "unknown_id": "closure_release_attach_production_release_or_release_manifest",
+      "unlocks": "active_evidence_closure"
+    },
+    {
+      "category": "release_manifest",
+      "evidence_type": "release",
+      "priority": 2.0,
+      "resolution": "production_release",
+      "summary": "Attach production_release with release_id, selected_resource_ids, released_by, released_at, scope_statement, artifacts, acceptance_reviewed, and repeatability_count.",
+      "unknown_id": "closure_release_manifest",
+      "unlocks": "active_evidence_closure"
+    }
+  ]
+}

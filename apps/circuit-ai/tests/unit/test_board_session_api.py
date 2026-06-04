@@ -34,6 +34,50 @@ def _aoi_analysis():
     return analysis
 
 
+def _authority_analysis():
+    analysis = _analysis()
+    analysis["evidence_trust"] = {
+        "score": 0.84,
+        "level": "high",
+        "launch_readiness": "private_alpha_candidate",
+        "blockers": ["No electrical measurements are attached yet."],
+        "required_evidence": [
+            "Continuity/no-short check on power rails and ground.",
+            "Current-limited voltage measurement on expected rails.",
+            "Functional output or symptom reproduction test after safe power-up.",
+        ],
+        "gates": [
+            {
+                "id": "electrical_validation",
+                "label": "Electrical validation",
+                "status": "fail",
+                "score": 0,
+                "reason": "Image-only evidence has no continuity, voltage, resistance, or power-on measurements.",
+            }
+        ],
+    }
+    analysis["repair_authority"] = {
+        "status": "visual_only",
+        "score": 0.46,
+        "required_measurements": [
+            "Continuity/no-short check on power rails and ground.",
+            "Unpowered resistance measurement between power input and ground.",
+            "Current-limited voltage measurement on expected rails.",
+        ],
+        "blocked_decisions": ["production repair release"],
+        "gates": [
+            {
+                "id": "measurement_presence",
+                "label": "Measurement presence",
+                "status": "fail",
+                "score": 0,
+                "reason": "No bench measurements are attached.",
+            }
+        ],
+    }
+    return analysis
+
+
 def test_board_session_api_create_review_export_and_benchmark(tmp_path):
     store = BoardSessionStore(tmp_path / "sessions.json")
     user = {"user_id": "user-1"}
@@ -79,11 +123,24 @@ def test_board_session_api_create_review_export_and_benchmark(tmp_path):
 
     outcome = main_module.board_sessions_record_outcome(
         session_id,
-        {"decision": "repaired", "value_recovered_usd": 12, "time_saved_minutes": 15},
+        {
+            "decision": "repaired",
+            "selected_resource_ids_used": ["usb_ground_repair"],
+            "measurements_recorded": True,
+            "cash_spent_usd": 0.5,
+            "value_recovered_usd": 12,
+            "time_spent_minutes": 15,
+            "deviations_from_plan": [],
+            "failure_or_stop_reason": "",
+            "output_function_verified": True,
+        },
         current_user=user,
         store=store,
     )
     assert outcome["result"]["outcome"]["decision"] == "repaired"
+    assert outcome["result"]["outcome"]["selected_resource_ids_used"] == ["usb_ground_repair"]
+    assert outcome["result"]["outcome"]["measurements_recorded"] is True
+    assert outcome["result"]["outcome"]["cash_spent_usd"] == 0.5
 
     exported = main_module.board_sessions_training_export(
         session_id,
@@ -95,6 +152,73 @@ def test_board_session_api_create_review_export_and_benchmark(tmp_path):
 
     benchmark = main_module.board_sessions_benchmark(current_user=user, store=store)
     assert benchmark["benchmark"]["summary"]["session_count"] == 1
+
+
+def test_board_session_api_creates_tasks_from_evidence_trust_and_repair_authority(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    user = {"user_id": "user-1"}
+
+    created = main_module.board_sessions_create(
+        {"description": "Measured repair authority board", "analysis": _authority_analysis(), "route": "repair"},
+        current_user=user,
+        store=store,
+    )
+
+    tasks = created["session"]["evidence_tasks"]
+    prompts = [task["prompt"] for task in tasks]
+    sources = {task["source"] for task in tasks}
+
+    assert any("Continuity/no-short" in prompt for prompt in prompts)
+    assert any("production repair release" in prompt for prompt in prompts)
+    assert "evidence_trust_required" in sources
+    assert "repair_authority_gate" in sources
+    assert any(task["type"] == "measurement" for task in tasks)
+
+
+def test_board_session_api_appends_latest_repair_authority_snapshot(tmp_path):
+    store = BoardSessionStore(tmp_path / "sessions.json")
+    user = {"user_id": "user-1"}
+
+    created = main_module.board_sessions_create(
+        {"description": "Repair authority board", "analysis": _authority_analysis(), "route": "repair"},
+        current_user=user,
+        store=store,
+    )
+    session_id = created["session"]["session_id"]
+
+    appended = main_module.board_sessions_append_analysis(
+        session_id,
+        {
+            "source": "scan_verification",
+            "summary": {"repair_authority_status": "authoritative_low_risk"},
+            "analysis": {
+                "repair_authority": {
+                    "status": "authoritative_low_risk",
+                    "score": 0.88,
+                    "safety_level": "caution",
+                    "summary": "Measurement-backed low-risk authority is available.",
+                    "supported_decisions": ["low-risk repair decision for measured claims"],
+                    "blocked_decisions": [],
+                    "required_measurements": [],
+                    "measurement_summary": {"count": 4, "failed": 0, "quality": "bench_recorded"},
+                    "gates": [{"id": "measurement_integrity", "status": "pass", "reason": "bench recorded"}],
+                }
+            },
+        },
+        current_user=user,
+        store=store,
+    )
+
+    session = appended["result"]["session"]
+    latest = session["analyses"][-1]
+    open_authority_tasks = [
+        task for task in session["evidence_tasks"]
+        if task.get("status", "open") == "open" and str(task.get("source") or "").startswith("repair_authority")
+    ]
+
+    assert latest["source"] == "scan_verification"
+    assert latest["results"]["repair_authority"]["status"] == "authoritative_low_risk"
+    assert open_authority_tasks == []
 
 
 def test_board_session_api_aoi_calibration_report(tmp_path):

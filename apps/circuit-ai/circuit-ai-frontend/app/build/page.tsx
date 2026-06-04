@@ -62,6 +62,297 @@ const nodeTypes: NodeTypes = { module: ModuleNode };
 
 type FlowNode = Node<ModuleNodeData>;
 
+type IndexedModule = {
+  node: FlowNode;
+  spec: ModuleSpec;
+};
+
+type WiringEndpoint = {
+  nodeId: string;
+  pinId: string;
+};
+
+type WiringInstruction = {
+  from: WiringEndpoint;
+  to: WiringEndpoint;
+  purpose?: string;
+};
+
+type WirePlan = {
+  wires: WiringInstruction[];
+  explanation?: string;
+  source: "jarvis" | "local";
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function normalizeKey(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function indexedModules(nodes: FlowNode[]): IndexedModule[] {
+  return nodes.flatMap((node) => {
+    const spec = findModule((node.data as ModuleNodeData).moduleId);
+    return spec ? [{ node, spec }] : [];
+  });
+}
+
+function moduleAliases(entry: IndexedModule): string[] {
+  return [
+    entry.node.id,
+    entry.spec.id,
+    entry.spec.label,
+    ...entry.spec.id.split(/[^a-z0-9]+/i),
+    ...entry.spec.label.split(/[^a-z0-9]+/i),
+  ].filter((alias) => normalizeKey(alias).length >= 2);
+}
+
+function resolveStringEndpoint(text: string, modules: IndexedModule[]): WiringEndpoint | null {
+  const normalized = normalizeKey(text);
+  const moduleEntry = modules.find((entry) =>
+    moduleAliases(entry).some((alias) => normalized.includes(normalizeKey(alias))),
+  );
+  if (!moduleEntry) return null;
+  const pin = moduleEntry.spec.pins.find((candidate) => {
+    const pinId = normalizeKey(candidate.id);
+    const label = normalizeKey(candidate.label);
+    return normalized.includes(pinId) || (label.length >= 2 && normalized.includes(label));
+  });
+  return pin ? { nodeId: moduleEntry.node.id, pinId: pin.id } : null;
+}
+
+function resolveEndpoint(raw: unknown, modules: IndexedModule[]): WiringEndpoint | null {
+  if (typeof raw === "string") return resolveStringEndpoint(raw, modules);
+  if (!isRecord(raw)) return null;
+  const nodeId = asString(raw.nodeId);
+  const pinId = asString(raw.pinId);
+  if (!nodeId || !pinId) return null;
+  const entry = modules.find((candidate) => candidate.node.id === nodeId);
+  if (!entry || !findPin(entry.spec, pinId)) return null;
+  return { nodeId, pinId };
+}
+
+function normalizeWire(raw: unknown, modules: IndexedModule[]): WiringInstruction | null {
+  if (!isRecord(raw)) return null;
+  const from = resolveEndpoint(raw.from, modules);
+  const to = resolveEndpoint(raw.to, modules);
+  if (!from || !to) return null;
+  if (from.nodeId === to.nodeId && from.pinId === to.pinId) return null;
+  return {
+    from,
+    to,
+    purpose: asString(raw.purpose),
+  };
+}
+
+function parseJarvisWirePlan(text: string, modules: IndexedModule[]): WirePlan | null {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    const parsed = JSON.parse(text.slice(start, end + 1)) as unknown;
+    if (!isRecord(parsed) || !Array.isArray(parsed.wires)) return null;
+    const wires = parsed.wires
+      .map((wire) => normalizeWire(wire, modules))
+      .filter((wire): wire is WiringInstruction => !!wire);
+    return {
+      wires,
+      explanation: asString(parsed.explanation),
+      source: "jarvis",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function firstPin(spec: ModuleSpec, roles: PinRole[]) {
+  return spec.pins.find((pin) => roles.includes(pin.role));
+}
+
+function voltageNumber(value: string | undefined): number | null {
+  if (!value) return null;
+  const match = value.match(/\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : null;
+}
+
+function pinAcceptsVoltage(pin: ReturnType<typeof firstPin>, sourceVoltage: string | undefined, spec: ModuleSpec): boolean {
+  if (!pin) return false;
+  const out = voltageNumber(sourceVoltage);
+  if (out == null) return true;
+  if (spec.inputVoltageRange) {
+    const [min, max] = spec.inputVoltageRange;
+    return out >= min && out <= max;
+  }
+  const text = `${pin.voltage ?? ""} ${pin.notes ?? ""}`.toLowerCase();
+  if (!text) return true;
+  if (text.includes("3") && out >= 3 && out <= 3.6) return true;
+  if (text.includes("5") && out >= 4.75 && out <= 5.25) return true;
+  return !text.includes("v");
+}
+
+function addWire(
+  wires: WiringInstruction[],
+  seen: Set<string>,
+  from: IndexedModule,
+  fromPinId: string | undefined,
+  to: IndexedModule,
+  toPinId: string | undefined,
+  purpose: string,
+) {
+  if (!fromPinId || !toPinId) return;
+  const key = `${from.node.id}:${fromPinId}->${to.node.id}:${toPinId}`;
+  const reverseKey = `${to.node.id}:${toPinId}->${from.node.id}:${fromPinId}`;
+  if (seen.has(key) || seen.has(reverseKey)) return;
+  seen.add(key);
+  wires.push({
+    from: { nodeId: from.node.id, pinId: fromPinId },
+    to: { nodeId: to.node.id, pinId: toPinId },
+    purpose,
+  });
+}
+
+function createLocalWirePlan(nodes: FlowNode[]): WirePlan {
+  const modules = indexedModules(nodes);
+  const wires: WiringInstruction[] = [];
+  const seen = new Set<string>();
+  const controller = modules.find((entry) => entry.spec.category === "mcu") ?? modules[0];
+  if (!controller) return { wires, source: "local", explanation: "No modules available to wire." };
+
+  const groundSource = modules.find((entry) => firstPin(entry.spec, ["gnd"])) ?? controller;
+  const powerSources = modules.filter((entry) => firstPin(entry.spec, ["power_out"]));
+
+  for (const target of modules) {
+    if (target.node.id === groundSource.node.id) continue;
+    addWire(
+      wires,
+      seen,
+      groundSource,
+      firstPin(groundSource.spec, ["gnd"])?.id,
+      target,
+      firstPin(target.spec, ["gnd"])?.id,
+      "common ground",
+    );
+  }
+
+  for (const target of modules) {
+    const powerIn = firstPin(target.spec, ["power_in"]);
+    if (!powerIn) continue;
+    const source = powerSources.find((candidate) => {
+      if (candidate.node.id === target.node.id) return false;
+      const powerOut = firstPin(candidate.spec, ["power_out"]);
+      return pinAcceptsVoltage(powerIn, powerOut?.voltage, target.spec);
+    });
+    addWire(
+      wires,
+      seen,
+      source ?? target,
+      source ? firstPin(source.spec, ["power_out"])?.id : undefined,
+      target,
+      powerIn.id,
+      "module power",
+    );
+  }
+
+  for (const target of modules) {
+    if (target.node.id === controller.node.id) continue;
+
+    const targetSda = firstPin(target.spec, ["i2c_sda"]);
+    const targetScl = firstPin(target.spec, ["i2c_scl"]);
+    if (targetSda && targetScl) {
+      addWire(wires, seen, controller, firstPin(controller.spec, ["i2c_sda"])?.id, target, targetSda.id, "I2C SDA");
+      addWire(wires, seen, controller, firstPin(controller.spec, ["i2c_scl"])?.id, target, targetScl.id, "I2C SCL");
+      continue;
+    }
+
+    const targetRx = firstPin(target.spec, ["uart_rx"]);
+    const targetTx = firstPin(target.spec, ["uart_tx"]);
+    if (targetRx || targetTx) {
+      addWire(wires, seen, controller, firstPin(controller.spec, ["uart_tx"])?.id, target, targetRx?.id, "UART TX to RX");
+      addWire(wires, seen, target, targetTx?.id, controller, firstPin(controller.spec, ["uart_rx"])?.id, "UART RX from TX");
+      continue;
+    }
+
+    const analogPin = target.spec.pins.find((pin) =>
+      pin.role === "analog_in" && ["a0", "ao", "out", "sig"].some((alias) => normalizeKey(pin.id).includes(alias)),
+    );
+    if (target.spec.category === "sensor" && analogPin) {
+      addWire(wires, seen, target, analogPin.id, controller, firstPin(controller.spec, ["analog_in"])?.id, "analog sensor signal");
+      continue;
+    }
+
+    const targetInput = firstPin(target.spec, ["digital_in", "pwm"]);
+    if (targetInput) {
+      addWire(wires, seen, controller, firstPin(controller.spec, ["digital_io", "pwm"])?.id, target, targetInput.id, "control signal");
+      continue;
+    }
+
+    const targetDigital = firstPin(target.spec, ["digital_io", "digital_out"]);
+    if (targetDigital) {
+      const controllerPin = firstPin(controller.spec, ["digital_io"]);
+      const source = target.spec.category === "sensor" && targetDigital.role === "digital_out" ? target : controller;
+      const destination = source.node.id === target.node.id ? controller : target;
+      addWire(
+        wires,
+        seen,
+        source,
+        source.node.id === target.node.id ? targetDigital.id : controllerPin?.id,
+        destination,
+        destination.node.id === target.node.id ? targetDigital.id : controllerPin?.id,
+        "digital signal",
+      );
+    }
+  }
+
+  return {
+    wires,
+    source: "local",
+    explanation: `Local pinout router connected ${wires.length} wire${wires.length === 1 ? "" : "s"} from known module pins.`,
+  };
+}
+
+function edgeKey(edge: Edge): string {
+  return `${edge.source}:${edge.sourceHandle ?? ""}->${edge.target}:${edge.targetHandle ?? ""}`;
+}
+
+function edgesFromWirePlan(plan: WirePlan, nodes: FlowNode[]): Edge[] {
+  return plan.wires.map((w, i) => {
+    const srcNode = nodes.find((n) => n.id === w.from.nodeId);
+    const spec = srcNode ? findModule((srcNode.data as ModuleNodeData).moduleId) : undefined;
+    const color = wireColorForPin(spec, w.from.pinId);
+    return {
+      id: `ai-${Date.now()}-${i}`,
+      source: w.from.nodeId,
+      sourceHandle: w.from.pinId,
+      target: w.to.nodeId,
+      targetHandle: w.to.pinId,
+      label: w.purpose,
+      animated: true,
+      style: { stroke: color, strokeWidth: 2.5 },
+      labelStyle: { fill: "#cbd5e1", fontSize: 10, fontFamily: "ui-monospace, monospace" },
+      labelBgStyle: { fill: "#0f172a", fillOpacity: 0.85 },
+      labelBgPadding: [4, 2] as [number, number],
+      labelBgBorderRadius: 4,
+    };
+  });
+}
+
+function dedupeNewEdges(current: Edge[], incoming: Edge[]): Edge[] {
+  const existing = new Set(current.map(edgeKey));
+  return incoming.filter((edge) => {
+    const key = edgeKey(edge);
+    const reverseKey = `${edge.target}:${edge.targetHandle ?? ""}->${edge.source}:${edge.sourceHandle ?? ""}`;
+    if (existing.has(key) || existing.has(reverseKey)) return false;
+    existing.add(key);
+    return true;
+  });
+}
+
 const WIRE_COLOR: Record<PinRole | "default", string> = {
   gnd: "#64748b",
   power_in: "#ef4444",
@@ -237,6 +528,22 @@ function BuildInner() {
     setAiBusy(true);
     setAiNote(null);
     try {
+      const applyPlan = (plan: WirePlan, notePrefix = "") => {
+        const uniqueEdges = dedupeNewEdges(edges, edgesFromWirePlan(plan, nodes));
+        setEdges((prev) => [...prev, ...uniqueEdges]);
+        const summary = uniqueEdges.length === 0
+          ? "Those modules were already wired with the same connections."
+          : `${notePrefix}${plan.explanation ?? `Added ${uniqueEdges.length} wire${uniqueEdges.length === 1 ? "" : "s"}.`}`;
+        setAiNote(summary);
+        setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+      };
+
+      const localPlan = createLocalWirePlan(nodes);
+      if (localPlan.wires.length > 0) {
+        applyPlan(localPlan);
+        return;
+      }
+
       const moduleList = nodes.map((n) => {
         const spec = findModule((n.data as ModuleNodeData).moduleId);
         return {
@@ -247,66 +554,55 @@ function BuildInner() {
         };
       });
       const prompt = `Wire these modules into a working project. Respond with JSON {"wires":[{"from":{"nodeId","pinId"},"to":{"nodeId","pinId"},"purpose"}], "explanation":"..."}. Use exact nodeId + pinId values. Modules:\n${JSON.stringify(moduleList, null, 2)}`;
-      const resp = await fetch("/api/jarvis/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: [{ role: "user", content: prompt }], context: "build-wiring" }),
-      });
-      if (!resp.ok || !resp.body) throw new Error(`Wiring request failed: ${resp.status}`);
-      const reader = resp.body.getReader();
-      const dec = new TextDecoder();
-      let buf = "";
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 10_000);
       let full = "";
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const frames = buf.split("\n\n");
-        buf = frames.pop() ?? "";
-        for (const f of frames) {
-          const line = f.split("\n").find((l) => l.startsWith("data: "));
-          if (!line) continue;
-          try {
-            const evt = JSON.parse(line.slice(6).trim()) as { delta?: string };
-            if (evt.delta) full += evt.delta;
-          } catch { /* skip */ }
+      try {
+        const resp = await fetch("/api/jarvis/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ messages: [{ role: "user", content: prompt }], context: "build-wiring" }),
+          signal: controller.signal,
+        });
+        if (!resp.ok || !resp.body) throw new Error(`Wiring request failed: ${resp.status}`);
+        const reader = resp.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const frames = buf.split("\n\n");
+          buf = frames.pop() ?? "";
+          for (const f of frames) {
+            const line = f.split("\n").find((l) => l.startsWith("data: "));
+            if (!line) continue;
+            try {
+              const evt = JSON.parse(line.slice(6).trim()) as { delta?: string };
+              if (evt.delta) full += evt.delta;
+            } catch { /* skip */ }
+          }
         }
+      } finally {
+        window.clearTimeout(timeout);
       }
-      const start = full.indexOf("{");
-      const end = full.lastIndexOf("}");
-      if (start === -1 || end === -1) throw new Error("No JSON in response");
-      const parsed = JSON.parse(full.slice(start, end + 1)) as {
-        wires?: Array<{ from: { nodeId: string; pinId: string }; to: { nodeId: string; pinId: string }; purpose?: string }>;
-        explanation?: string;
-      };
-      const newEdges: Edge[] = (parsed.wires ?? []).map((w, i) => {
-        const srcNode = nodes.find((n) => n.id === w.from.nodeId);
-        const spec = srcNode ? findModule((srcNode.data as ModuleNodeData).moduleId) : undefined;
-        const color = wireColorForPin(spec, w.from.pinId);
-        return {
-          id: `ai-${Date.now()}-${i}`,
-          source: w.from.nodeId,
-          sourceHandle: w.from.pinId,
-          target: w.to.nodeId,
-          targetHandle: w.to.pinId,
-          label: w.purpose,
-          animated: true,
-          style: { stroke: color, strokeWidth: 2.5 },
-          labelStyle: { fill: "#cbd5e1", fontSize: 10, fontFamily: "ui-monospace, monospace" },
-          labelBgStyle: { fill: "#0f172a", fillOpacity: 0.85 },
-          labelBgPadding: [4, 2] as [number, number],
-          labelBgBorderRadius: 4,
-        };
-      });
-      setEdges((prev) => [...prev, ...newEdges]);
-      if (parsed.explanation) setAiNote(parsed.explanation);
-      setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+      const moduleIndex = indexedModules(nodes);
+      const parsed = parseJarvisWirePlan(full, moduleIndex);
+      const plan = parsed && parsed.wires.length > 0 ? parsed : localPlan;
+      if (plan.wires.length === 0) {
+        throw new Error("Jarvis could not find pin-compatible wires for these modules.");
+      }
+
+      const fallbackPrefix = plan.source === "local" && (!parsed || parsed.wires.length === 0)
+        ? "Jarvis returned an unusable wiring schema, so I used the local pinout router. "
+        : "";
+      applyPlan(plan, fallbackPrefix);
     } catch (err) {
       setAiNote(`Wiring failed: ${(err as Error).message}`);
     } finally {
       setAiBusy(false);
     }
-  }, [nodes, setEdges, fitView]);
+  }, [edges, nodes, setEdges, fitView]);
 
   const clearAll = useCallback(() => {
     setNodes([]);

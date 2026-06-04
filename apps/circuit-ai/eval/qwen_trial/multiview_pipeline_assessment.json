@@ -1,0 +1,219 @@
+{
+  "cache_dir": "eval/qwen_trial/cache",
+  "created_at": "2026-06-01T08:39:59.401523+00:00",
+  "rows": [
+    {
+      "active_closure": {
+        "current_stage": null,
+        "next_best_task_count": 0,
+        "open_lane_count": 0
+      },
+      "can_power_or_splice": false,
+      "capture_coverage": {
+        "open_required_lanes": [],
+        "recommended_open_lanes": [],
+        "required_complete": false,
+        "score": null
+      },
+      "function": null,
+      "function_confidence": null,
+      "next_actions": [
+        "Select resources that cover the requested hardware capabilities.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Reach authority-ready state before first power or physical splice.",
+        "Record passing continuity evidence.",
+        "Record passing current evidence.",
+        "Provide owned, salvaged, or procurable resources for the required capabilities.",
+        "Add resources that satisfy the required capabilities."
+      ],
+      "observation_count": 4,
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "production_readiness_score": null,
+      "resource_coverage": 0.0,
+      "scenario": "curated_deeppcb_trace",
+      "selected_resources": [],
+      "status": "collect_more_evidence",
+      "trust_level": null,
+      "trust_score": null
+    },
+    {
+      "active_closure": {
+        "current_stage": "active_topology_closure",
+        "next_best_task_count": 32,
+        "open_lane_count": 5
+      },
+      "can_power_or_splice": false,
+      "capture_coverage": {
+        "open_required_lanes": [
+          "whole_board_context",
+          "layout_geometry"
+        ],
+        "recommended_open_lanes": [
+          "hidden_side_context"
+        ],
+        "required_complete": false,
+        "score": 0.6
+      },
+      "function": "single_board_computer_module",
+      "function_confidence": 0.96,
+      "next_actions": [
+        "Confirm logic voltage, shared ground requirement, and idle bus state.",
+        "Map pinout and ground continuity before cutting or splicing.",
+        "Measure no-short resistance between power and ground.",
+        "Measure voltage, polarity, and current limit before interconnect.",
+        "Run the listed bench measurements before generating pin-level splice instructions.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+        "identify reusable block pins or wires from labels, continuity, and close-up photos",
+        "power the reused block from a current-limited supply at the lowest plausible rated voltage"
+      ],
+      "observation_count": 3,
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "production_readiness_score": 0.143,
+      "resource_coverage": 1.0,
+      "scenario": "curated_raspberry_pi",
+      "selected_resources": [
+        "vision_gpio_header",
+        "vision_component_5",
+        "vision_component_7",
+        "vision_connector_1"
+      ],
+      "status": "prototype_after_evidence",
+      "trust_level": "multi_view_visual_topology_candidate",
+      "trust_score": 0.328
+    },
+    {
+      "active_closure": {
+        "current_stage": "active_topology_closure",
+        "next_best_task_count": 32,
+        "open_lane_count": 6
+      },
+      "can_power_or_splice": false,
+      "capture_coverage": {
+        "open_required_lanes": [
+          "connector_detail",
+          "marking_identity_detail"
+        ],
+        "recommended_open_lanes": [
+          "hidden_side_context"
+        ],
+        "required_complete": false,
+        "score": 0.578
+      },
+      "function": "unknown_low_voltage_module",
+      "function_confidence": 0.3,
+      "next_actions": [
+        "Record close-up evidence and bench-test the block before reuse.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Capture measured connector pinout, no-short, ground, and voltage evidence.",
+        "Run the Unknown low-voltage board baseline protocol bench protocol and attach artifacts for: resistance, continuity, voltage, current, thermal, review.",
+        "Run the listed bench measurements before generating pin-level splice instructions.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+        "identify reusable block pins or wires from labels, continuity, and close-up photos"
+      ],
+      "observation_count": 4,
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "production_readiness_score": 0.062,
+      "resource_coverage": 1.0,
+      "scenario": "curated_test_pcb",
+      "selected_resources": [
+        "vision_component_1"
+      ],
+      "status": "prototype_after_evidence",
+      "trust_level": "multi_view_visual_topology_candidate",
+      "trust_score": 0.139
+    },
+    {
+      "active_closure": {
+        "current_stage": null,
+        "next_best_task_count": 0,
+        "open_lane_count": 0
+      },
+      "can_power_or_splice": false,
+      "capture_coverage": {
+        "open_required_lanes": [],
+        "recommended_open_lanes": [],
+        "required_complete": false,
+        "score": null
+      },
+      "function": null,
+      "function_confidence": null,
+      "next_actions": [
+        "Select resources that cover the requested hardware capabilities.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Reach authority-ready state before first power or physical splice.",
+        "Record passing continuity evidence.",
+        "Record passing current evidence.",
+        "Provide owned, salvaged, or procurable resources for the required capabilities.",
+        "Add resources that satisfy the required capabilities."
+      ],
+      "observation_count": 1,
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "production_readiness_score": null,
+      "resource_coverage": 0.0,
+      "scenario": "image_iteration_2",
+      "selected_resources": [],
+      "status": "collect_more_evidence",
+      "trust_level": null,
+      "trust_score": null
+    },
+    {
+      "active_closure": {
+        "current_stage": "active_topology_closure",
+        "next_best_task_count": 32,
+        "open_lane_count": 6
+      },
+      "can_power_or_splice": false,
+      "capture_coverage": {
+        "open_required_lanes": [
+          "connector_detail"
+        ],
+        "recommended_open_lanes": [
+          "cross_view_confirmation",
+          "hidden_side_context"
+        ],
+        "required_complete": false,
+        "score": 0.778
+      },
+      "function": "unknown_low_voltage_module",
+      "function_confidence": 0.3,
+      "next_actions": [
+        "Record close-up evidence and bench-test the block before reuse.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Capture measured connector pinout, no-short, ground, and voltage evidence.",
+        "Run the Unknown low-voltage board baseline protocol bench protocol and attach artifacts for: resistance, continuity, voltage, current, thermal, review.",
+        "Run the listed bench measurements before generating pin-level splice instructions.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+        "identify reusable block pins or wires from labels, continuity, and close-up photos"
+      ],
+      "observation_count": 2,
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "production_readiness_score": 0.062,
+      "resource_coverage": 1.0,
+      "scenario": "single_test_pcb",
+      "selected_resources": [
+        "vision_component_1"
+      ],
+      "status": "prototype_after_evidence",
+      "trust_level": "multi_view_visual_topology_candidate",
+      "trust_score": 0.159
+    }
+  ],
+  "schema_version": "qwen_multiview_pipeline_assessment.v1",
+  "summary": {
+    "avg_capture_coverage_score": 0.391,
+    "capture_complete_count": 0,
+    "max_production_readiness_score": 0.143,
+    "production_authorized_count": 0,
+    "scenario_count": 5,
+    "selected_resource_count": 3
+  }
+}

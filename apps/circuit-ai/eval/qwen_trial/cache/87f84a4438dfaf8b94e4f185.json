@@ -1,0 +1,58 @@
+{
+  "created_at": "2026-05-26T08:42:04.396554+00:00",
+  "request_preview": "eval/qwen_trial/requests/curated_raspberry_pi_87f84a4438dfaf8b94e4f185.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"safe\",\n  \"explanation\": \"This is a Raspberry Pi 4 Model B (2018) board, a consumer-grade single-board computer with no exposed high-voltage or hazardous components; all connectors and interfaces are standard low-voltage USB, Ethernet, HDMI, and power inputs.\",\n  \"components\": [\n    {\n      \"id\": \"ic_cpu\",\n      \"label\": \"CPU\",\n      \"kind\": \"integrated_circuit\",\n      \"bbox\": [339, 276, 541, 444],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"ic_ram\",\n      \"label\": \"RAM\",\n      \"kind\": \"integrated_circuit\",\n      \"bbox\": [462, 389, 621, 537],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_type_c\",\n      \"label\": \"USB-C Power Input\",\n      \"kind\": \"connector\",\n      \"bbox\": [40, 351, 154, 488],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"ethernet\",\n      \"label\": \"Ethernet Connector\",\n      \"kind\": \"connector\",\n      \"bbox\": [720, 279, 987, 696],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_a_1\",\n      \"label\": \"USB-A Port 1\",\n      \"kind\": \"connector\",\n      \"bbox\": [472, 500, 707, 909],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"usb_a_2\",\n      \"label\": \"USB-A Port 2\",\n      \"kind\": \"connector\",\n      \"bbox\": [612, 394, 842, 795],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"hdc\",\n      \"label\": \"HDMI Connector\",\n      \"kind\": \"connector\",\n      \"bbox\": [224, 537, 309, 654],\n      \"warnings\": []\n    },\n    {\n      \"id\": \"gpio_header\",\n      \"label\": \"GPIO Header\",\n      \"kind\": \"connector\",\n      \"bbox\": [434, 22, 779, 375],\n      \"warnings\": []\n    }\n  ],\n  \"board_evidence\": {\n    \"schema_version\": \"board_evidence.v1\",\n    \"components\": [\n      {\n        \"id\": \"ic_cpu\",\n        \"label\": \"CPU\",\n        \"bbox\": [339, 276, 541, 444],\n        \"markings\": [\"Raspberry Pi 4 Model B\"],\n        \"regions\": [\"central area\"]\n      },\n      {\n        \"id\": \"ic_ram\",\n        \"label\": \"RAM\",\n        \"bbox\": [462, 389, 621, 537],\n        \"markings\": [],\n        \"regions\": [\"near CPU\"]\n      },\n      {\n        \"id\": \"usb_type_c\",\n        \"label\": \"USB-C Power Input\",\n        \"bbox\": [40, 351, 154, 488],\n        \"markings\": [\"POWER IN\"],\n        \"regions\": [\"left edge\"]\n      },\n      {\n        \"id\": \"ethernet\",\n        \"label\": \"Ethernet Connector\",\n        \"bbox\": [720, 279, 987, 696],\n        \"markings\": [],\n        \"regions\": [\"right edge\"]\n      },\n      {\n        \"id\": \"usb_a_1\",\n        \"label\": \"USB-A Port 1\",\n        \"bbox\": [472, 500, 707, 909],\n        \"markings\": [\"EDAC\"],\n        \"regions\": [\"lower right\"]\n      },\n      {\n        \"id\": \"usb_a_2\",\n        \"label\": \"USB-A Port 2\",\n        \"bbox\": [612, 394, 842, 795],\n        \"markings\": [],\n        \"regions\": [\"lower right\"]\n      },\n      {\n        \"id\": \"hdc\",\n        \"label\": \"HDMI Connector\",\n        \"bbox\": [224, 537, 309, 654],\n        \"markings\": [\"HDMI\"],\n        \"regions\": [\"lower left\"]\n      },\n      {\n        \"id\": \"gpio_header\",\n        \"label\": \"GPIO Header\",\n        \"bbox\": [434, 22, 779, 375],\n        \"markings\": [\"GPIO\"],\n        \"regions\": [\"top edge\"]\n      }\n    ],\n    \"markings\": [\n      {\n        \"text\": \"Raspberry Pi 4 Model B\",\n        \"bbox\": [550, 287, 678, 425]\n      },\n      {\n        \"text\": \"FCC ID: 2A0CD-RP14B\",\n        \"bbox\": [282, 389, 386, 460]\n      },\n      {\n        \"text\": \"IC: 20853-NP17B\",\n        \"bbox\": [282, 422, 386, 493]\n      },\n      {\n        \"text\": \"Made in UK\",\n        \"bbox\": [298, 481, 362, 529]\n      }\n    ],\n    \"regions\": [\n      {\n        \"name\": \"power_input_area\",\n        \"bbox\": [35, 340, 220, 520],\n        \"description\": \"Power input and micro-USB/USB-C area\"\n      }\n    ],\n    \"damage\": [],\n    \"connectors\": [],\n    \"test_points\": [],\n    \"salvage_candidates\": []\n  }\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 1132,
+      "completion_tokens": 1327,
+      "total_tokens": 2459,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 1327
+      }
+    },
+    "created": 1779784924,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-d638cab4-c995-9a53-b15e-6b6c9f88021b"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "truncated": false,
+    "finish_reason": "stop",
+    "safety_level": "safe",
+    "component_count": 8,
+    "module_count": 0,
+    "evidence_component_count": 8,
+    "normalized_component_count": 2,
+    "marking_count": 4,
+    "connector_count": 6,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "bridge_resource_count": 12,
+    "bridge_hazard_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 1132,
+    "output_tokens": 1327,
+    "estimated_usd": 0.00031,
+    "elapsed_s": 16.88
+  }
+}

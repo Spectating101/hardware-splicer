@@ -1,0 +1,253 @@
+{
+  "board_evidence": {
+    "components": [
+      {
+        "id": "u1",
+        "kind": "integrated_circuit",
+        "label": "CH340C USB-to-Serial bridge IC"
+      },
+      {
+        "id": "u2",
+        "kind": "regulator",
+        "label": "AP2112 voltage regulator"
+      }
+    ],
+    "connectors": [
+      {
+        "id": "j1",
+        "kind": "header",
+        "label": "DTR RXI TXO VCC CTS GND header"
+      },
+      {
+        "id": "usb_c",
+        "kind": "connector",
+        "label": "USB-C connector"
+      }
+    ],
+    "damage": [],
+    "markings": [
+      {
+        "id": "m1",
+        "marking": "CH340C"
+      },
+      {
+        "id": "m2",
+        "marking": "AP2112"
+      }
+    ],
+    "salvage_candidates": [
+      {
+        "id": "s1",
+        "label": "USB serial debug adapter reuse"
+      }
+    ],
+    "schema_version": "board_evidence.v1"
+  },
+  "casefile_id": "sparkfun_ch340c_public_reference_case",
+  "device_hint": "SparkFun Serial Basic Breakout CH340C and USB-C DEV-15096",
+  "goal": "Evaluate SparkFun Serial Basic CH340C USB-C board as a USB serial debug adapter reference case.",
+  "reference_topology": {
+    "connectors": [
+      {
+        "kind": "header",
+        "label": "SparkFun Serial Basic FTDI-style 6-pin header",
+        "pins": [
+          {
+            "net": "DTR",
+            "pin": "1",
+            "role": "dtr"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "RXI",
+            "pin": "2",
+            "role": "rxi"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "TXO",
+            "pin": "3",
+            "role": "txo"
+          },
+          {
+            "net": "VCC",
+            "pin": "4",
+            "role": "vcc",
+            "voltage": 3.3
+          },
+          {
+            "net": "CTS",
+            "pin": "5",
+            "role": "cts"
+          },
+          {
+            "net": "GND",
+            "pin": "6",
+            "role": "gnd"
+          }
+        ],
+        "ref": "J1"
+      },
+      {
+        "kind": "usb_c_connector",
+        "label": "USB-C connector logical pins from schematic",
+        "pins": [
+          {
+            "net": "VBUS",
+            "pin": "VBUS",
+            "role": "power",
+            "voltage": 5.0
+          },
+          {
+            "net": "GND",
+            "pin": "GND",
+            "role": "ground"
+          },
+          {
+            "net": "UD+",
+            "pin": "D+",
+            "role": "usb_dp"
+          },
+          {
+            "net": "UD-",
+            "pin": "D-",
+            "role": "usb_dm"
+          },
+          {
+            "net": "CC1",
+            "pin": "CC1",
+            "role": ""
+          },
+          {
+            "net": "CC2",
+            "pin": "CC2",
+            "role": ""
+          },
+          {
+            "net": "SHLD",
+            "pin": "SHLD",
+            "role": "ground"
+          }
+        ],
+        "ref": "USB-C"
+      }
+    ],
+    "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+    "schema_version": "topology_evidence.v1",
+    "source": "public_reference_topology",
+    "source_refs": [
+      "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+      "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+      "https://learn.sparkfun.com/tutorials/sparkfun-serial-basic-ch340c-hookup-guide/all"
+    ],
+    "source_type": "public_reference_topology"
+  },
+  "required_capabilities": [
+    "usb_serial",
+    "connector"
+  ],
+  "source_urls": [
+    "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+    "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+    "https://learn.sparkfun.com/tutorials/sparkfun-serial-basic-ch340c-hookup-guide/all"
+  ],
+  "strategy_mode": "constrained",
+  "target_authority_level": "production_repair",
+  "topology_evidence": {
+    "connectors": [
+      {
+        "kind": "header",
+        "label": "SparkFun Serial Basic FTDI-style 6-pin header",
+        "pins": [
+          {
+            "net": "DTR",
+            "pin": "1",
+            "role": "dtr"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "RXI",
+            "pin": "2",
+            "role": "rxi"
+          },
+          {
+            "logic_voltage": 3.3,
+            "net": "TXO",
+            "pin": "3",
+            "role": "txo"
+          },
+          {
+            "net": "VCC",
+            "pin": "4",
+            "role": "vcc",
+            "voltage": 3.3
+          },
+          {
+            "net": "CTS",
+            "pin": "5",
+            "role": "cts"
+          },
+          {
+            "net": "GND",
+            "pin": "6",
+            "role": "gnd"
+          }
+        ],
+        "ref": "J1"
+      },
+      {
+        "kind": "usb_c_connector",
+        "label": "USB-C connector logical pins from schematic",
+        "pins": [
+          {
+            "net": "VBUS",
+            "pin": "VBUS",
+            "role": "power",
+            "voltage": 5.0
+          },
+          {
+            "net": "GND",
+            "pin": "GND",
+            "role": "ground"
+          },
+          {
+            "net": "UD+",
+            "pin": "D+",
+            "role": "usb_dp"
+          },
+          {
+            "net": "UD-",
+            "pin": "D-",
+            "role": "usb_dm"
+          },
+          {
+            "net": "CC1",
+            "pin": "CC1",
+            "role": ""
+          },
+          {
+            "net": "CC2",
+            "pin": "CC2",
+            "role": ""
+          },
+          {
+            "net": "SHLD",
+            "pin": "SHLD",
+            "role": "ground"
+          }
+        ],
+        "ref": "USB-C"
+      }
+    ],
+    "reference_uri": "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+    "schema_version": "topology_evidence.v1",
+    "source": "public_reference_topology",
+    "source_refs": [
+      "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+      "https://cdn.sparkfun.com/assets/5/2/5/4/2/Serial-Basic-CH340C-and-USBC.pdf",
+      "https://learn.sparkfun.com/tutorials/sparkfun-serial-basic-ch340c-hookup-guide/all"
+    ],
+    "source_type": "public_reference_topology"
+  },
+  "use_reference_catalog": false
+}

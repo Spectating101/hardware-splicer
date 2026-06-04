@@ -1,0 +1,53 @@
+{
+  "created_at": "2026-05-25T09:10:09.848252+00:00",
+  "request_preview": "eval/qwen_trial/requests/curated_raspberry_pi_79fb6466553581d75b5a146c.preview.json",
+  "response": {
+    "choices": [
+      {
+        "message": {
+          "content": "{\n  \"safety_level\": \"low\",\n  \"explanation\": \"No visible hazards; all components are sealed or standard for consumer electronics with no exposed high-voltage parts.\",\n  \"components\": [\n    {\n      \"type\": \"system_on_chip\",\n      \"description\": \"Large square IC with metal heat spreader, labeled 'Raspberry Pi 4 Model', likely the BCM2711 SoC.\",\n      \"bbox_2d\": [335, 278, 540, 446]\n    },\n    {\n      \"type\": \"memory\",\n      \"description\": \"Black rectangular surface-mount chip adjacent to SoC, likely LPDDR4 RAM module.\",\n      \"bbox_2d\": [470, 392, 620, 538]\n    },\n    {\n      \"type\": \"power_regulator\",\n      \"description\": \"Small black SMD component near USB-C port, likely a voltage regulator (e.g., for USB power management).\",\n      \"bbox_2d\": [135, 342, 200, 412]\n    },\n    {\n      \"type\": \"usb_controller\",\n      \"description\": \"Metal-shielded USB-C connector on left edge, used for power and data.\",\n      \"bbox_2d\": [40, 350, 150, 488]\n    },\n    {\n      \"type\": \"hdmivideo\",\n      \"description\": \"HDMI Type-A port with 'HDMI' silkscreen nearby, located near bottom-left corner.\",\n      \"bbox_2d\": [225, 538, 305, 646]\n    },\n    {\n      \"type\": \"audio_jack\",\n      \"description\": \"3.5mm audio jack with black plastic housing, next to HDMI port.\",\n      \"bbox_2d\": [305, 544, 470, 740]\n    },\n    {\n      \"type\": \"ethernet\",\n      \"description\": \"RJ45 Ethernet port with metallic shield, right side of board.\",\n      \"bbox_2d\": [720, 278, 988, 696]\n    },\n    {\n      \"type\": \"usb_ports\",\n      \"description\": \"Two USB 3.0 ports with blue internal plastic, labeled 'USB2' and 'EDAC' nearby.\",\n      \"bbox_2d\": [470, 502, 710, 906]\n    },\n    {\n      \"type\": \"gpio_header\",\n      \"description\": \"2\u00d720 pin GPIO header along top edge, labeled 'GPIO' near center.\",\n      \"bbox_2d\": [430, 22, 778, 372]\n    },\n    {\n      \"type\": \"display_port\",\n      \"description\": \"Flat FPC connector labeled 'DISPLAY' near top-left, for MIPI DSI/DSI display interface.\",\n      \"bbox_2d\": [155, 118, 338, 314]\n    }\n  ],\n  \"markings\": [\n    {\n      \"text\": \"Raspberry Pi 4 Model\",\n      \"location\": \"center-right of board\",\n      \"bbox_2d\": [550, 292, 680, 418]\n    },\n    {\n      \"text\": \"FCC ID: 2A0CG-RP14B\",\n      \"location\": \"center-left, below logo\",\n      \"bbox_2d\": [275, 382, 385, 472]\n    },\n    {\n      \"text\": \"IC: 20853-NP17B\",\n      \"location\": \"center-left, below FCC ID\",\n      \"bbox_2d\": [275, 412, 385, 492]\n    },\n    {\n      \"text\": \"Made in UK\",\n      \"location\": \"bottom-center, near HDMI\",\n      \"bbox_2d\": [245, 458, 350, 532]\n    },\n    {\n      \"text\": \"USB2\",\n      \"location\": \"bottom-right near USB ports\",\n      \"bbox_2d\": [530, 852, 570, 888]\n    }\n  ],\n  \"regions\": [],\n  \"damage\": [],\n  \"connectors\": [\n    {\n      \"type\": \"USB-C\",\n      \"description\": \"Power/data input, left side, with metal shell and plastic insert.\",\n      \"bbox_2d\": [40, 350, 150, 488]\n    },\n    {\n      \"type\": \"HDMI\",\n      \"description\": \"Standard HDMI Type-A male connector, bottom-left area.\",\n      \"bbox_2d\": [225, 538, 305, 646]\n    },\n    {\n      \"type\": \"Audio Jack\",\n      \"description\": \"3.5mm stereo jack, adjacent to HDMI, black plastic housing.\",\n      \"bbox_2d\": [305, 544, 470, 740]\n    },\n    {\n      \"type\": \"Ethernet\",\n      \"description\": \"RJ45 port with metallic shield, right side, 8P8C style.\",\n      \"bbox_2d\": [720, 278, 988, 696]\n    },\n    {\n      \"type\": \"USB 3.0\",\n      \"description\": \"Dual USB 3.0 ports with blue internal plastic, two ports stacked vertically.\",\n      \"bbox_2d\": [615, 392, 840, 792]\n    },\n    {\n      \"type\": \"GPIO\",\n      \"description\": \"2\u00d720 pin header, gold-plated pins, top edge, labeled 'GPIO'.\",\n      \"bbox_2d\": [430, 22, 778, 372]\n    },\n    {\n      \"type\": \"Display\",\n      \"description\": \"Flat FPC connector, labeled 'DISPLAY', top-left, for LCD panel.\",\n      \"bbox_2d\": [155, 118, 338, 314]\n    }\n  ],\n  \"test_points\": [],\n  \"salvage_candidates\": [\n    {\n      \"component\": \"system_on_chip\",\n      \"reason\": \"Central SoC is critical but not easily salvageable without reballing; no visible damage.\"\n    },\n    {\n      \"component\": \"memory\",\n      \"reason\": \"SMD RAM; functional integrity unknown without testing, but no visible defects.\"\n    }\n  ]\n}",
+          "reasoning_content": "",
+          "role": "assistant"
+        },
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null
+      }
+    ],
+    "object": "chat.completion",
+    "usage": {
+      "prompt_tokens": 1081,
+      "completion_tokens": 1497,
+      "total_tokens": 2578,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "completion_tokens_details": {
+        "text_tokens": 1497
+      }
+    },
+    "created": 1779700210,
+    "system_fingerprint": null,
+    "model": "qwen3-vl-flash",
+    "id": "chatcmpl-5c642f63-c225-9621-b6f9-bd19b85fbe3d"
+  },
+  "qwen_summary": {
+    "json_valid": true,
+    "safety_level": "low",
+    "component_count": 10,
+    "module_count": 0,
+    "evidence_component_count": 0,
+    "marking_count": 0,
+    "connector_count": 0,
+    "damage_count": 0,
+    "test_point_count": 0,
+    "salvage_candidate_count": 0,
+    "uncertainty_level": null
+  },
+  "usage": {
+    "input_tokens": 1081,
+    "output_tokens": 1497,
+    "estimated_usd": 0.000346,
+    "elapsed_s": 15.502
+  }
+}

@@ -1,0 +1,2945 @@
+{
+  "available": true,
+  "blocked_claims": [
+    {
+      "claim": "pinout_known",
+      "reason": "Photos can suggest connector identity but cannot prove each pin role.",
+      "required_evidence": "Measured connector pinout with continuity or trusted datasheet grounding.",
+      "status": "blocked"
+    },
+    {
+      "claim": "netlist_or_trace_topology",
+      "reason": "Visible adjacency and approximate boxes do not prove hidden copper, vias, inner layers, or backside routing.",
+      "required_evidence": "Continuity map, schematic/CAD source, or inspected trace proof.",
+      "status": "blocked"
+    },
+    {
+      "claim": "safe_power_or_splice",
+      "reason": "Voltage, polarity, current draw, shorts, and thermal behavior are not visual facts.",
+      "required_evidence": "No-short, voltage, current-limited first-power, and thermal measurements.",
+      "status": "blocked"
+    }
+  ],
+  "component_anchors": [
+    {
+      "anchor_id": "component_ram",
+      "board_zone": "middle_left",
+      "candidate_capabilities": [],
+      "component_ref": "ram",
+      "confidence": 0.9,
+      "geometry": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "components:ram",
+        "normalized_bbox": [
+          0.4792,
+          0.4273,
+          0.6315,
+          0.5847
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "identity_text": "LPDDR4 SDRAM integrated_circuit     \u00a9 Raspberry Pi 2018   \u00a9 Raspberry Pi 2018",
+      "kind": "integrated_circuit",
+      "label": "LPDDR4 SDRAM",
+      "likely_roles": [
+        "unknown_component_anchor"
+      ],
+      "map_id": "components:ram",
+      "normalized_bbox": [
+        0.4792,
+        0.4273,
+        0.6315,
+        0.5847
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_policy": "Component identity is visual/catalog grounding only; connectivity must be measured.",
+      "support_count": 1
+    },
+    {
+      "anchor_id": "component_ram",
+      "board_zone": "middle_left",
+      "candidate_capabilities": [],
+      "component_ref": "ram",
+      "confidence": 0.88,
+      "geometry": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "components:ram",
+        "normalized_bbox": [
+          0.1863,
+          0.483,
+          0.4319,
+          0.6824
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "identity_text": "DRAM chip integrated circuit",
+      "kind": "integrated circuit",
+      "label": "DRAM chip",
+      "likely_roles": [
+        "unknown_component_anchor"
+      ],
+      "map_id": "components:ram",
+      "normalized_bbox": [
+        0.1863,
+        0.483,
+        0.4319,
+        0.6824
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "source_policy": "Component identity is visual/catalog grounding only; connectivity must be measured.",
+      "support_count": 1
+    },
+    {
+      "anchor_id": "component_cpu",
+      "board_zone": "center",
+      "candidate_capabilities": [],
+      "component_ref": "cpu",
+      "confidence": 0.88,
+      "geometry": {
+        "board_zone": "center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "components:cpu",
+        "normalized_bbox": [
+          0.3431,
+          0.3016,
+          0.5482,
+          0.4831
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "identity_text": "SoC (BCM2711) integrated_circuit",
+      "kind": "integrated_circuit",
+      "label": "SoC (BCM2711)",
+      "likely_roles": [
+        "unknown_component_anchor"
+      ],
+      "map_id": "components:cpu",
+      "normalized_bbox": [
+        0.3431,
+        0.3016,
+        0.5482,
+        0.4831
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_policy": "Component identity is visual/catalog grounding only; connectivity must be measured.",
+      "support_count": 1
+    },
+    {
+      "anchor_id": "component_cpu",
+      "board_zone": "center",
+      "candidate_capabilities": [],
+      "component_ref": "cpu",
+      "confidence": 0.88,
+      "geometry": {
+        "board_zone": "center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "components:cpu",
+        "normalized_bbox": [
+          0.0,
+          0.3377,
+          0.2886,
+          0.5872
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "identity_text": "System-on-Chip (SoC) integrated circuit",
+      "kind": "integrated circuit",
+      "label": "System-on-Chip (SoC)",
+      "likely_roles": [
+        "unknown_component_anchor"
+      ],
+      "map_id": "components:cpu",
+      "normalized_bbox": [
+        0.0,
+        0.3377,
+        0.2886,
+        0.5872
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "source_policy": "Component identity is visual/catalog grounding only; connectivity must be measured.",
+      "support_count": 1
+    }
+  ],
+  "connection_hypotheses": [
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.698,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_usb_a_1",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:usb-a-1",
+          "normalized_bbox": [
+            0.6213,
+            0.4306,
+            0.8508,
+            0.8656
+          ]
+        },
+        "label": "USB-A Port 1 (blue)",
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2299
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.693,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_gpio",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "top_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:gpio",
+          "normalized_bbox": [
+            0.4386,
+            0.0251,
+            0.7898,
+            0.4197
+          ]
+        },
+        "label": "40-pin GPIO Header",
+        "ref": "gpio",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2394
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.69,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_audio_jack",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:audio-jack",
+          "normalized_bbox": [
+            0.3127,
+            0.6011,
+            0.4751,
+            0.8066
+          ]
+        },
+        "label": "3.5mm Audio Jack",
+        "ref": "audio-jack",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2554
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.689,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_display",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "top_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:display",
+          "normalized_bbox": [
+            0.1584,
+            0.129,
+            0.3431,
+            0.341
+          ]
+        },
+        "label": "Display Port (eDP)",
+        "ref": "display",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2505
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.687,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.1863,
+            0.483,
+            0.4319,
+            0.6824
+          ]
+        },
+        "label": "DRAM chip",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_usb_a_2",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_consensus",
+          "map_id": "connectors:usb-a-2",
+          "normalized_bbox": [
+            0.2902,
+            0.5632,
+            0.6561,
+            1.0
+          ]
+        },
+        "label": "USB-A port (blue)",
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2578
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.679,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_gpio",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "top_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:gpio",
+          "normalized_bbox": [
+            0.4386,
+            0.0251,
+            0.7898,
+            0.4197
+          ]
+        },
+        "label": "40-pin GPIO Header",
+        "ref": "gpio",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.2896
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.672,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_ethernet",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:ethernet",
+          "normalized_bbox": [
+            0.731,
+            0.3016,
+            1.0,
+            0.7585
+          ]
+        },
+        "label": "RJ45 Ethernet",
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.3111
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.669,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_hdmi",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:hdmi",
+          "normalized_bbox": [
+            0.2254,
+            0.588,
+            0.3168,
+            0.7169
+          ]
+        },
+        "label": "HDMI",
+        "ref": "hdmi",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.3198
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.669,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_hdmi",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:hdmi",
+          "normalized_bbox": [
+            0.2254,
+            0.588,
+            0.3168,
+            0.7169
+          ]
+        },
+        "label": "HDMI",
+        "ref": "hdmi",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.3132
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.668,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_audio_jack",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:audio-jack",
+          "normalized_bbox": [
+            0.3127,
+            0.6011,
+            0.4751,
+            0.8066
+          ]
+        },
+        "label": "3.5mm Audio Jack",
+        "ref": "audio-jack",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.3158
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.656,
+      "evidence": [
+        "nearby on canonical board map"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.0,
+            0.3377,
+            0.2886,
+            0.5872
+          ]
+        },
+        "label": "System-on-Chip (SoC)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_usb_c",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:usb-c",
+          "normalized_bbox": [
+            0.0406,
+            0.3836,
+            0.1543,
+            0.5333
+          ]
+        },
+        "label": "USB-C Power In",
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.047
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.645,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_usb_a_1",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:usb-a-1",
+          "normalized_bbox": [
+            0.6213,
+            0.4306,
+            0.8508,
+            0.8656
+          ]
+        },
+        "label": "USB-A Port 1 (blue)",
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.387
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.64,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_display",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "top_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:display",
+          "normalized_bbox": [
+            0.1584,
+            0.129,
+            0.3431,
+            0.341
+          ]
+        },
+        "label": "Display Port (eDP)",
+        "ref": "display",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.4077
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.638,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_usb_a_2",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:usb-a-2",
+          "normalized_bbox": [
+            0.4751,
+            0.5475,
+            0.7188,
+            0.9945
+          ]
+        },
+        "label": "USB-A Port 2 (black)",
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.4078
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.627,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ]
+        },
+        "label": "SoC (BCM2711)",
+        "ref": "cpu",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_cpu_ethernet",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:ethernet",
+          "normalized_bbox": [
+            0.731,
+            0.3016,
+            1.0,
+            0.7585
+          ]
+        },
+        "label": "RJ45 Ethernet",
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.4419
+    },
+    {
+      "claim_boundary": "Visual adjacency suggests what to test; it does not prove a net, pinout, or safe splice.",
+      "confidence": 0.623,
+      "evidence": [
+        "nearby on canonical board map",
+        "same photo observation"
+      ],
+      "from": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ]
+        },
+        "label": "LPDDR4 SDRAM",
+        "ref": "ram",
+        "source_type": "component"
+      },
+      "hypothesis_id": "visual_path_ram_usb_c",
+      "required_measurements": [
+        "Continuity-test the candidate path and record positive or negative result."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "status": "needs_continuity_and_pinout",
+      "to": {
+        "geometry": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "map_id": "connectors:usb-c",
+          "normalized_bbox": [
+            0.0406,
+            0.3836,
+            0.1543,
+            0.5333
+          ]
+        },
+        "label": "USB-C Power In",
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "type": "candidate_component_connector_path",
+      "visual_distance": 0.4604
+    }
+  ],
+  "connector_hypotheses": [
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "bottom_center",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "audio-jack",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:audio-jack",
+        "normalized_bbox": [
+          0.3127,
+          0.6011,
+          0.4751,
+          0.8066
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_audio_jack",
+      "kind": "connector",
+      "label": "3.5mm Audio Jack",
+      "likely_roles": [
+        "unknown_external_interface"
+      ],
+      "map_id": "connectors:audio-jack",
+      "normalized_bbox": [
+        0.3127,
+        0.6011,
+        0.4751,
+        0.8066
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "top_center",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "controller"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "gpio",
+      "estimated_pin_count": 40,
+      "geometry": {
+        "board_zone": "top_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:gpio",
+        "normalized_bbox": [
+          0.4386,
+          0.0251,
+          0.7898,
+          0.4197
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_gpio",
+      "kind": "connector",
+      "label": "40-pin GPIO Header",
+      "likely_roles": [
+        "debug_or_gpio_header"
+      ],
+      "map_id": "connectors:gpio",
+      "normalized_bbox": [
+        0.4386,
+        0.0251,
+        0.7898,
+        0.4197
+      ],
+      "pin_count_status": "explicit_visual_pin_count",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "top_left",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "controller",
+        "display_or_ui"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "display",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "top_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:display",
+        "normalized_bbox": [
+          0.1584,
+          0.129,
+          0.3431,
+          0.341
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_display",
+      "kind": "connector",
+      "label": "Display Port (eDP)",
+      "likely_roles": [
+        "debug_or_gpio_header",
+        "display_or_ui"
+      ],
+      "map_id": "connectors:display",
+      "normalized_bbox": [
+        0.1584,
+        0.129,
+        0.3431,
+        0.341
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "middle_left",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "display_or_ui"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "hdmi",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:hdmi",
+        "normalized_bbox": [
+          0.2254,
+          0.588,
+          0.3168,
+          0.7169
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_hdmi",
+      "kind": "connector",
+      "label": "HDMI",
+      "likely_roles": [
+        "display_or_ui"
+      ],
+      "map_id": "connectors:hdmi",
+      "normalized_bbox": [
+        0.2254,
+        0.588,
+        0.3168,
+        0.7169
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "middle_right",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "network_interface"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "ethernet",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.731,
+          0.3016,
+          1.0,
+          0.7585
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_ethernet",
+      "kind": "connector",
+      "label": "RJ45 Ethernet",
+      "likely_roles": [
+        "network_or_fieldbus"
+      ],
+      "map_id": "connectors:ethernet",
+      "normalized_bbox": [
+        0.731,
+        0.3016,
+        1.0,
+        0.7585
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "middle_right",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "network_interface"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "ethernet",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.5752,
+          0.3377,
+          1.0,
+          0.8437
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_ethernet",
+      "kind": "Ethernet",
+      "label": "RJ45 Ethernet port",
+      "likely_roles": [
+        "network_or_fieldbus"
+      ],
+      "map_id": "connectors:ethernet",
+      "normalized_bbox": [
+        0.5752,
+        0.3377,
+        1.0,
+        0.8437
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "middle_right",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "usb"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "usb-a-1",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_usb_a_1",
+      "kind": "connector",
+      "label": "USB-A Port 1 (blue)",
+      "likely_roles": [
+        "usb2_connector"
+      ],
+      "map_id": "connectors:usb-a-1",
+      "normalized_bbox": [
+        0.6213,
+        0.4306,
+        0.8508,
+        0.8656
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection.",
+        "Map USB D+/D- continuity and ESD/protection path."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "bottom_center",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "usb"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "usb-a-2",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_usb_a_2",
+      "kind": "connector",
+      "label": "USB-A Port 2 (black)",
+      "likely_roles": [
+        "usb2_connector"
+      ],
+      "map_id": "connectors:usb-a-2",
+      "normalized_bbox": [
+        0.4751,
+        0.5475,
+        0.7188,
+        0.9945
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection.",
+        "Map USB D+/D- continuity and ESD/protection path."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "bottom_center",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "usb"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "usb-a-2",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_consensus",
+      "hypothesis_id": "visual_connector_usb_a_2",
+      "kind": "USB-A",
+      "label": "USB-A port (blue)",
+      "likely_roles": [
+        "usb2_connector"
+      ],
+      "map_id": "connectors:usb-a-2",
+      "normalized_bbox": [
+        0.2902,
+        0.5632,
+        0.6561,
+        1.0
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection.",
+        "Map USB D+/D- continuity and ESD/protection path."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    },
+    {
+      "blocked_until": [
+        "measured pinout",
+        "ground reference",
+        "power-to-ground no-short",
+        "voltage and logic-domain confirmation"
+      ],
+      "board_zone": "middle_left",
+      "can_power_or_splice": false,
+      "candidate_capabilities": [
+        "connector",
+        "power",
+        "usb"
+      ],
+      "confidence": 0.88,
+      "connector_ref": "usb-c",
+      "estimated_pin_count": null,
+      "geometry": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ]
+      },
+      "geometry_status": "provider_pixel_normalized_single",
+      "hypothesis_id": "visual_connector_usb_c",
+      "kind": "connector",
+      "label": "USB-C Power In",
+      "likely_roles": [
+        "usb2_connector",
+        "power_input_or_rail"
+      ],
+      "map_id": "connectors:usb-c",
+      "normalized_bbox": [
+        0.0406,
+        0.3836,
+        0.1543,
+        0.5333
+      ],
+      "pin_count_status": "pin_count_unknown",
+      "required_measurements": [
+        "Confirm pin count and orientation.",
+        "Find ground/reference by continuity.",
+        "Measure no-short between candidate supply pins and ground.",
+        "Measure voltage and polarity before external connection.",
+        "Map USB D+/D- continuity and ESD/protection path."
+      ],
+      "source_photo_ids": [
+        "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+      ],
+      "source_type": "connector",
+      "status": "visual_candidate_measurement_required",
+      "support_count": 1
+    }
+  ],
+  "measurement_queue": [
+    {
+      "category": "topology",
+      "priority": 0,
+      "prompt": "Create a topology_evidence.v1 record from measured connector pinout, continuity, no-short, voltage, current, and thermal observations.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "task_id": "visual_topology_record",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1",
+      "usable_for": [
+        "production_release",
+        "splice",
+        "repair",
+        "portfolio_demo"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map 3.5mm Audio Jack: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "3.5mm Audio Jack",
+        "map_id": "connectors:audio-jack",
+        "normalized_bbox": [
+          0.3127,
+          0.6011,
+          0.4751,
+          0.8066
+        ],
+        "ref": "audio-jack",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_audio_jack",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on 3.5mm Audio Jack.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "3.5mm Audio Jack",
+        "map_id": "connectors:audio-jack",
+        "normalized_bbox": [
+          0.3127,
+          0.6011,
+          0.4751,
+          0.8066
+        ],
+        "ref": "audio-jack",
+        "source_type": "connector"
+      },
+      "task_id": "short_audio_jack",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map 40-pin GPIO Header: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "40-pin GPIO Header",
+        "map_id": "connectors:gpio",
+        "normalized_bbox": [
+          0.4386,
+          0.0251,
+          0.7898,
+          0.4197
+        ],
+        "ref": "gpio",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_gpio",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on 40-pin GPIO Header.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "40-pin GPIO Header",
+        "map_id": "connectors:gpio",
+        "normalized_bbox": [
+          0.4386,
+          0.0251,
+          0.7898,
+          0.4197
+        ],
+        "ref": "gpio",
+        "source_type": "connector"
+      },
+      "task_id": "short_gpio",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for 40-pin GPIO Header before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "40-pin GPIO Header",
+        "map_id": "connectors:gpio",
+        "normalized_bbox": [
+          0.4386,
+          0.0251,
+          0.7898,
+          0.4197
+        ],
+        "ref": "gpio",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_gpio",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map Display Port (eDP): pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "Display Port (eDP)",
+        "map_id": "connectors:display",
+        "normalized_bbox": [
+          0.1584,
+          0.129,
+          0.3431,
+          0.341
+        ],
+        "ref": "display",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_display",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on Display Port (eDP).",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "Display Port (eDP)",
+        "map_id": "connectors:display",
+        "normalized_bbox": [
+          0.1584,
+          0.129,
+          0.3431,
+          0.341
+        ],
+        "ref": "display",
+        "source_type": "connector"
+      },
+      "task_id": "short_display",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for Display Port (eDP) before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "top_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "Display Port (eDP)",
+        "map_id": "connectors:display",
+        "normalized_bbox": [
+          0.1584,
+          0.129,
+          0.3431,
+          0.341
+        ],
+        "ref": "display",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_display",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map HDMI: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "HDMI",
+        "map_id": "connectors:hdmi",
+        "normalized_bbox": [
+          0.2254,
+          0.588,
+          0.3168,
+          0.7169
+        ],
+        "ref": "hdmi",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_hdmi",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on HDMI.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "HDMI",
+        "map_id": "connectors:hdmi",
+        "normalized_bbox": [
+          0.2254,
+          0.588,
+          0.3168,
+          0.7169
+        ],
+        "ref": "hdmi",
+        "source_type": "connector"
+      },
+      "task_id": "short_hdmi",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map RJ45 Ethernet: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "RJ45 Ethernet",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.731,
+          0.3016,
+          1.0,
+          0.7585
+        ],
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_ethernet",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on RJ45 Ethernet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "RJ45 Ethernet",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.731,
+          0.3016,
+          1.0,
+          0.7585
+        ],
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "task_id": "short_ethernet",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map RJ45 Ethernet port: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "RJ45 Ethernet port",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.5752,
+          0.3377,
+          1.0,
+          0.8437
+        ],
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_ethernet",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on RJ45 Ethernet port.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "RJ45 Ethernet port",
+        "map_id": "connectors:ethernet",
+        "normalized_bbox": [
+          0.5752,
+          0.3377,
+          1.0,
+          0.8437
+        ],
+        "ref": "ethernet",
+        "source_type": "connector"
+      },
+      "task_id": "short_ethernet",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map USB-A Port 1 (blue): pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 1 (blue)",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ],
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_usb_a_1",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-A Port 1 (blue).",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 1 (blue)",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ],
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "task_id": "short_usb_a_1",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for USB-A Port 1 (blue) before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 1 (blue)",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ],
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_usb_a_1",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test USB D+ and D- path from USB-A Port 1 (blue) to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_right",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 1 (blue)",
+        "map_id": "connectors:usb-a-1",
+        "normalized_bbox": [
+          0.6213,
+          0.4306,
+          0.8508,
+          0.8656
+        ],
+        "ref": "usb-a-1",
+        "source_type": "connector"
+      },
+      "task_id": "usb_path_usb_a_1",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map USB-A Port 2 (black): pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 2 (black)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-A Port 2 (black).",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 2 (black)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "short_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for USB-A Port 2 (black) before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 2 (black)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test USB D+ and D- path from USB-A Port 2 (black) to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-A Port 2 (black)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.4751,
+          0.5475,
+          0.7188,
+          0.9945
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "usb_path_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map USB-A port (blue): pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "label": "USB-A port (blue)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-A port (blue).",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "label": "USB-A port (blue)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "short_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for USB-A port (blue) before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "label": "USB-A port (blue)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test USB D+ and D- path from USB-A port (blue) to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "bottom_center",
+        "geometry_status": "provider_pixel_normalized_consensus",
+        "label": "USB-A port (blue)",
+        "map_id": "connectors:usb-a-2",
+        "normalized_bbox": [
+          0.2902,
+          0.5632,
+          0.6561,
+          1.0
+        ],
+        "ref": "usb-a-2",
+        "source_type": "connector"
+      },
+      "task_id": "usb_path_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "pinout",
+      "priority": 0,
+      "prompt": "Map USB-C Power In: pin count, pin-1/orientation, ground, supply pins, signal pins, and no-connect pins by continuity or datasheet.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-C Power In",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ],
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "task_id": "pinout_usb_c",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.connectors",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "resistance",
+      "priority": 0,
+      "prompt": "Measure unpowered resistance/no-short between every candidate supply pin and ground on USB-C Power In.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-C Power In",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ],
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "task_id": "short_usb_c",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.resistance",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "voltage",
+      "priority": 0,
+      "prompt": "Power through a current limit and record voltage, polarity, and logic domain for USB-C Power In before any external connection.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-C Power In",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ],
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "task_id": "voltage_usb_c",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.voltage",
+      "usable_for": [
+        "safety",
+        "repair",
+        "reuse",
+        "splice",
+        "production_release"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test USB D+ and D- path from USB-C Power In to the candidate USB bridge/protection network; keep polarity and pair orientation recorded.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "board_zone": "middle_left",
+        "geometry_status": "provider_pixel_normalized_single",
+        "label": "USB-C Power In",
+        "map_id": "connectors:usb-c",
+        "normalized_bbox": [
+          0.0406,
+          0.3836,
+          0.1543,
+          0.5333
+        ],
+        "ref": "usb-c",
+        "source_type": "connector"
+      },
+      "task_id": "usb_path_usb_c",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path LPDDR4 SDRAM to USB-A Port 1 (blue); record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "LPDDR4 SDRAM",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "USB-A Port 1 (blue)",
+          "map_id": "connectors:usb-a-1",
+          "normalized_bbox": [
+            0.6213,
+            0.4306,
+            0.8508,
+            0.8656
+          ],
+          "ref": "usb-a-1",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2299
+      },
+      "task_id": "path_visual_path_ram_usb_a_1",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path SoC (BCM2711) to 40-pin GPIO Header; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "SoC (BCM2711)",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ],
+          "ref": "cpu",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "top_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "40-pin GPIO Header",
+          "map_id": "connectors:gpio",
+          "normalized_bbox": [
+            0.4386,
+            0.0251,
+            0.7898,
+            0.4197
+          ],
+          "ref": "gpio",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2394
+      },
+      "task_id": "path_visual_path_cpu_gpio",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path LPDDR4 SDRAM to 3.5mm Audio Jack; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "LPDDR4 SDRAM",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "3.5mm Audio Jack",
+          "map_id": "connectors:audio-jack",
+          "normalized_bbox": [
+            0.3127,
+            0.6011,
+            0.4751,
+            0.8066
+          ],
+          "ref": "audio-jack",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2554
+      },
+      "task_id": "path_visual_path_ram_audio_jack",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path SoC (BCM2711) to Display Port (eDP); record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "SoC (BCM2711)",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ],
+          "ref": "cpu",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "top_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "Display Port (eDP)",
+          "map_id": "connectors:display",
+          "normalized_bbox": [
+            0.1584,
+            0.129,
+            0.3431,
+            0.341
+          ],
+          "ref": "display",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2505
+      },
+      "task_id": "path_visual_path_cpu_display",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path DRAM chip to USB-A port (blue); record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "DRAM chip",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.1863,
+            0.483,
+            0.4319,
+            0.6824
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_2_qwen_2_raspberry_pi_connector_soc_crop"
+        ],
+        "to": {
+          "board_zone": "bottom_center",
+          "geometry_status": "provider_pixel_normalized_consensus",
+          "label": "USB-A port (blue)",
+          "map_id": "connectors:usb-a-2",
+          "normalized_bbox": [
+            0.2902,
+            0.5632,
+            0.6561,
+            1.0
+          ],
+          "ref": "usb-a-2",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2578
+      },
+      "task_id": "path_visual_path_ram_usb_a_2",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path LPDDR4 SDRAM to 40-pin GPIO Header; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "LPDDR4 SDRAM",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "top_center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "40-pin GPIO Header",
+          "map_id": "connectors:gpio",
+          "normalized_bbox": [
+            0.4386,
+            0.0251,
+            0.7898,
+            0.4197
+          ],
+          "ref": "gpio",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.2896
+      },
+      "task_id": "path_visual_path_ram_gpio",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path LPDDR4 SDRAM to RJ45 Ethernet; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "LPDDR4 SDRAM",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "middle_right",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "RJ45 Ethernet",
+          "map_id": "connectors:ethernet",
+          "normalized_bbox": [
+            0.731,
+            0.3016,
+            1.0,
+            0.7585
+          ],
+          "ref": "ethernet",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.3111
+      },
+      "task_id": "path_visual_path_ram_ethernet",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path LPDDR4 SDRAM to HDMI; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "LPDDR4 SDRAM",
+          "map_id": "components:ram",
+          "normalized_bbox": [
+            0.4792,
+            0.4273,
+            0.6315,
+            0.5847
+          ],
+          "ref": "ram",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "HDMI",
+          "map_id": "connectors:hdmi",
+          "normalized_bbox": [
+            0.2254,
+            0.588,
+            0.3168,
+            0.7169
+          ],
+          "ref": "hdmi",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.3198
+      },
+      "task_id": "path_visual_path_ram_hdmi",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    },
+    {
+      "category": "continuity",
+      "priority": 1,
+      "prompt": "Continuity-test the visual candidate path SoC (BCM2711) to HDMI; record both positive and negative results as topology_evidence.v1.",
+      "source": "visual_topology_hypothesis",
+      "status": "open",
+      "target": {
+        "from": {
+          "board_zone": "center",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "SoC (BCM2711)",
+          "map_id": "components:cpu",
+          "normalized_bbox": [
+            0.3431,
+            0.3016,
+            0.5482,
+            0.4831
+          ],
+          "ref": "cpu",
+          "source_type": "component"
+        },
+        "relationship": "candidate_component_connector_path",
+        "source_photo_ids": [
+          "rebuilt_live_qwen_1_qwen_1_raspberry_pi_whole_board"
+        ],
+        "to": {
+          "board_zone": "middle_left",
+          "geometry_status": "provider_pixel_normalized_single",
+          "label": "HDMI",
+          "map_id": "connectors:hdmi",
+          "normalized_bbox": [
+            0.2254,
+            0.588,
+            0.3168,
+            0.7169
+          ],
+          "ref": "hdmi",
+          "source_type": "connector"
+        },
+        "visual_distance": 0.3132
+      },
+      "task_id": "path_visual_path_cpu_hdmi",
+      "type": "measurement",
+      "unlocks": "topology_evidence.v1.continuity",
+      "usable_for": [
+        "repair",
+        "reuse",
+        "splice",
+        "training"
+      ]
+    }
+  ],
+  "policy": {
+    "do_not_emit_measured_topology_from_photos": true,
+    "photo_geometry_is_not_netlist": true,
+    "pin_level_splice_requires_topology_evidence": true,
+    "visual_topology_is_candidate_only": true
+  },
+  "readiness": {
+    "can_power_or_splice": false,
+    "component_anchor_count": 4,
+    "connection_hypothesis_count": 16,
+    "connector_hypothesis_count": 10,
+    "layout_confidence": 0.78,
+    "level": "layout_grounded_visual_topology_candidate",
+    "measured_topology_available": false,
+    "measurement_task_count": 40,
+    "multi_view_evidence": true,
+    "next_unlock": "Attach measured topology_evidence.v1 generated from the visual measurement queue.",
+    "score": 0.72
+  },
+  "schema_version": "visual_topology_hypothesis.v1",
+  "source": "visual_board_evidence",
+  "topology_contract": {
+    "required_before_power_or_splice": [
+      "measured connector pinout",
+      "power-to-ground no-short result",
+      "measured voltage and polarity",
+      "logic/interface validation for external targets",
+      "current-limited first-power and thermal observation"
+    ],
+    "required_schema": "topology_evidence.v1",
+    "visual_hypotheses_can_seed_measurements": true,
+    "visual_hypotheses_do_not_close_measurement_gates": true
+  }
+}

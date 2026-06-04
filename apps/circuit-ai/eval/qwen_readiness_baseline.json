@@ -1,0 +1,206 @@
+{
+  "created_at": "2026-05-25T07:40:32.482336+00:00",
+  "method": "existing_artifact_summary_no_model_calls_v1",
+  "spend_usd": 0,
+  "inputs": [
+    "eval/capability_smoke_fixed/summary.json",
+    "eval/rerun_full_product/summary.json"
+  ],
+  "summary": {
+    "rows": 15,
+    "image_rows": 12,
+    "weak_image_rows_for_qwen_trial": 11,
+    "average_detections": 3.1667,
+    "average_connectors": 1.75,
+    "average_ocr_resolved": 1.9167,
+    "average_board_confidence": 0.5767,
+    "decisions": {
+      "inventory_and_collect_more_evidence": 2,
+      "validate_then_execute": 8,
+      "execute_top_opportunity": 5
+    },
+    "aoi_readiness": {
+      "research_preview": 4,
+      "prototype_ready": 8
+    }
+  },
+  "weak_cases": [
+    {
+      "artifact": "eval/capability_smoke_fixed/summary.json",
+      "scenario": "single_test_pcb",
+      "board_type": "controller_or_embedded_compute",
+      "board_confidence": 0.371,
+      "detections": 3,
+      "connectors": 0,
+      "ocr_resolved": 1,
+      "aoi_readiness": "research_preview",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/capability_smoke_fixed/summary.json",
+      "scenario": "single_iteration_1",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.635,
+      "detections": 2,
+      "connectors": 2,
+      "ocr_resolved": 2,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/capability_smoke_fixed/summary.json",
+      "scenario": "multiview_iteration_1_4",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.635,
+      "detections": 2,
+      "connectors": 2,
+      "ocr_resolved": 2,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/capability_smoke_fixed/summary.json",
+      "scenario": "image_plus_sensor_listing",
+      "board_type": "controller_or_embedded_compute",
+      "board_confidence": 0.371,
+      "detections": 3,
+      "connectors": 0,
+      "ocr_resolved": 1,
+      "aoi_readiness": "research_preview",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_iteration-1",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.635,
+      "detections": 2,
+      "connectors": 2,
+      "ocr_resolved": 2,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_iteration-2",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.738,
+      "detections": 3,
+      "connectors": 3,
+      "ocr_resolved": 3,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_iteration-3",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.635,
+      "detections": 2,
+      "connectors": 2,
+      "ocr_resolved": 2,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_iteration-4",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.738,
+      "detections": 3,
+      "connectors": 3,
+      "ocr_resolved": 3,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_test_pcb",
+      "board_type": "controller_or_embedded_compute",
+      "board_confidence": 0.371,
+      "detections": 3,
+      "connectors": 0,
+      "ocr_resolved": 1,
+      "aoi_readiness": "research_preview",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "multiview_iteration_1_4",
+      "board_type": "io_interface_or_adapter",
+      "board_confidence": 0.635,
+      "detections": 2,
+      "connectors": 2,
+      "ocr_resolved": 2,
+      "aoi_readiness": "prototype_ready",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    },
+    {
+      "artifact": "eval/rerun_full_product/summary.json",
+      "scenario": "image_test_pcb_plus_sensor_listing",
+      "board_type": "controller_or_embedded_compute",
+      "board_confidence": 0.371,
+      "detections": 3,
+      "connectors": 0,
+      "ocr_resolved": 1,
+      "aoi_readiness": "research_preview",
+      "why_qwen_should_help": [
+        "direct marking/package reading",
+        "region and connector localization",
+        "damage/test-point visual inspection"
+      ]
+    }
+  ],
+  "qwen_trial_success_bar": {
+    "minimum": [
+      "Return valid JSON with board_evidence.v1 on every sampled board.",
+      "Improve markings/connectors/regions on weak cases without hallucinating pinouts.",
+      "Stay under configured VISION_MAX_USD_PER_CALL and VISION_MONTHLY_USD_LIMIT."
+    ],
+    "strong": [
+      "Raise usable board confidence on weak image rows.",
+      "Add salvage_candidates with required_checks grounded in visible evidence.",
+      "Expose uncertainty and missing_evidence clearly enough for DeepSeek verification."
+    ]
+  }
+}

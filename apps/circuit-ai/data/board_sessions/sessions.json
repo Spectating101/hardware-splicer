@@ -102,10 +102,10 @@
                     "cmp_2_ic_chip"
                   ],
                   "bbox": [
-                    48,
-                    48,
-                    253,
-                    203
+                    48.0,
+                    48.0,
+                    253.0,
+                    203.0
                   ],
                   "confidence": 0.71,
                   "function": "Runs logic, timing, firmware, or protocol control",
@@ -209,10 +209,10 @@
                       "id": "cmp_0_ic_chip",
                       "class_name": "ic_chip",
                       "bbox_px": [
-                        48,
-                        148,
-                        103,
-                        203
+                        48.0,
+                        148.0,
+                        103.0,
+                        203.0
                       ],
                       "confidence": 0.94
                     },
@@ -220,10 +220,10 @@
                       "id": "cmp_1_ic_chip",
                       "class_name": "ic_chip",
                       "bbox_px": [
-                        198,
-                        48,
-                        253,
-                        83
+                        198.0,
+                        48.0,
+                        253.0,
+                        83.0
                       ],
                       "confidence": 0.938
                     },
@@ -231,10 +231,10 @@
                       "id": "cmp_2_ic_chip",
                       "class_name": "ic_chip",
                       "bbox_px": [
-                        48,
-                        48,
-                        153,
-                        103
+                        48.0,
+                        48.0,
+                        153.0,
+                        103.0
                       ],
                       "confidence": 0.914
                     }
@@ -606,10 +606,10 @@
                     {
                       "type": "bbox",
                       "value": [
-                        48,
-                        48,
-                        253,
-                        203
+                        48.0,
+                        48.0,
+                        253.0,
+                        203.0
                       ],
                       "weight": 0.12
                     },
@@ -689,7 +689,7 @@
                         48.0,
                         148.0,
                         103.0,
-                        203.0
+                        203
                       ],
                       "weight": 0.35
                     },
@@ -739,7 +739,7 @@
                       "value": [
                         198.0,
                         48.0,
-                        253.0,
+                        253,
                         83.0
                       ],
                       "weight": 0.35
@@ -788,8 +788,8 @@
                     {
                       "type": "visual_detection",
                       "value": [
-                        48.0,
-                        48.0,
+                        48,
+                        48,
                         153.0,
                         103.0
                       ],
@@ -1405,7 +1405,7 @@
                     48.0,
                     148.0,
                     103.0,
-                    203.0
+                    203
                   ],
                   "text": "Aes",
                   "part_tokens": [
@@ -1431,7 +1431,7 @@
                   "bbox": [
                     198.0,
                     48.0,
-                    253.0,
+                    253,
                     83.0
                   ],
                   "text": "Cap",
@@ -1456,8 +1456,8 @@
                   "component_id": "cmp_2_ic_chip",
                   "class_name": "ic_chip",
                   "bbox": [
-                    48.0,
-                    48.0,
+                    48,
+                    48,
                     153.0,
                     103.0
                   ],
@@ -2138,10 +2138,10 @@
                     {
                       "type": "visual_detection",
                       "value": [
-                        48.0,
-                        148.0,
-                        103.0,
-                        203.0
+                        48,
+                        148,
+                        103,
+                        203
                       ],
                       "weight": 0.35
                     },
@@ -2189,10 +2189,10 @@
                     {
                       "type": "visual_detection",
                       "value": [
-                        198.0,
-                        48.0,
-                        253.0,
-                        83.0
+                        198,
+                        48,
+                        253,
+                        83
                       ],
                       "weight": 0.35
                     },
@@ -2240,10 +2240,10 @@
                     {
                       "type": "visual_detection",
                       "value": [
-                        48.0,
-                        48.0,
-                        153.0,
-                        103.0
+                        48,
+                        48,
+                        153,
+                        103
                       ],
                       "weight": 0.35
                     },
@@ -5243,6 +5243,1602 @@
         "measurement_count_required": 3,
         "certainty_level": "unknown",
         "certainty_score": 0.0,
+        "training_capture_recommended": false
+      }
+    },
+    {
+      "session_id": "board_20260525_125449_591ee2",
+      "title": "Authority smoke test Raspberry Pi board",
+      "description": "Authority smoke test Raspberry Pi board",
+      "device_hint": "",
+      "symptoms": [],
+      "route": "repair",
+      "route_label": "repair",
+      "status": "open",
+      "user_id": "test_user",
+      "created_at": "2026-05-25T12:54:49.197913+00:00",
+      "updated_at": "2026-05-25T12:55:04.642159+00:00",
+      "evidence": {
+        "captures": [],
+        "measurements": [
+          {
+            "measurement_id": "measurement_1",
+            "type": "continuity",
+            "target": "5V rail to GND",
+            "value": "no short",
+            "unit": "",
+            "notes": "resistance to ground is not a dead short",
+            "confidence": 1,
+            "created_at": "2026-05-25T12:55:04.549536+00:00"
+          },
+          {
+            "measurement_id": "measurement_2",
+            "type": "resistance",
+            "target": "5V rail to GND",
+            "value": "10k",
+            "unit": "ohm",
+            "notes": "unpowered resistance check",
+            "confidence": 1,
+            "created_at": "2026-05-25T12:55:04.586369+00:00"
+          },
+          {
+            "measurement_id": "measurement_3",
+            "type": "voltage",
+            "target": "5V rail",
+            "value": "4.91",
+            "unit": "V",
+            "notes": "stable on current-limited supply",
+            "confidence": 1,
+            "created_at": "2026-05-25T12:55:04.611628+00:00"
+          },
+          {
+            "measurement_id": "measurement_4",
+            "type": "functional",
+            "target": "USB-C power input",
+            "value": "pass",
+            "unit": "",
+            "notes": "board boots and expected output signal works",
+            "confidence": 1,
+            "created_at": "2026-05-25T12:55:04.642139+00:00"
+          }
+        ],
+        "notes": []
+      },
+      "analyses": [
+        {
+          "analysis_id": "analysis_1",
+          "source": "authority_smoke",
+          "created_at": "2026-05-25T12:54:49.197913+00:00",
+          "summary": {
+            "summary_text": "This is a Raspberry Pi 4 Model B board, identifiable by visible markings and standard component layout. No immediate hazards are present in the image."
+          },
+          "results": {
+            "board_evidence": {
+              "schema_version": "board_evidence.v1",
+              "source": {
+                "provider": "qwen",
+                "mode": "native_vision",
+                "model": "qwen/qwen3-vl-flash",
+                "raw_pixels_sent_to_provider": true,
+                "generated_at": "2026-05-25T12:54:18.961Z",
+                "cost_usd_estimate": 0.000229,
+                "cache_key": "a722baaaca7a606089a3d97d_vision_qwen_auth_v9"
+              },
+              "image": {
+                "mediaType": "image/jpeg",
+                "sizeBytes": 177010,
+                "sha256": "a722baaaca7a606089a3d97dd8522136f3c4b1b88d3598719887096ad462808b",
+                "width": 1200,
+                "height": 706
+              },
+              "components": [
+                {
+                  "id": "C1",
+                  "label": "unknown",
+                  "kind": "unknown",
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "IC1",
+                  "label": "System-on-Chip",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.2792,
+                    "y": 0.3952,
+                    "w": 0.1692,
+                    "h": 0.2309
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "IC2",
+                  "label": "Memory module",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.5609,
+                    "w": 0.1267,
+                    "h": 0.1997
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                }
+              ],
+              "markings": [
+                {
+                  "text": "Raspberry Pi 4 Model B"
+                },
+                {
+                  "text": "© Raspberry Pi 2018"
+                },
+                {
+                  "text": "FCC ID: 2A0CD-RP14B"
+                },
+                {
+                  "text": "IC: 20853-NP17B"
+                }
+              ],
+              "regions": [],
+              "damage": [],
+              "connectors": [
+                {
+                  "id": "J1",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J2",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J3",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J4",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J5",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J6",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "evidence": []
+                }
+              ],
+              "test_points": [],
+              "salvage_candidates": [],
+              "recommended_checks": [],
+              "uncertainty": {
+                "level": "medium",
+                "reasons": [],
+                "missing_evidence": [],
+                "next_actions": []
+              }
+            },
+            "evidence_trust": {
+              "score": 0.84,
+              "level": "high",
+              "launch_readiness": "private_alpha_candidate",
+              "summary": "Strong image-grounded evidence for a private alpha, but electrical checks still gate reuse decisions.",
+              "supported_uses": [
+                "portfolio demo",
+                "candidate component review",
+                "salvage planning draft",
+                "measurement checklist generation"
+              ],
+              "blocked_uses": [
+                "autonomous repair diagnosis",
+                "safe-to-cut or safe-to-power authorization",
+                "exact pinout/voltage claims without measurement",
+                "production AOI release"
+              ],
+              "strengths": [
+                "8 localized item(s) can be reviewed on the image.",
+                "Native vision model saw the raw board photo.",
+                "4 marking(s) captured for follow-up.",
+                "12 connector(s) found for IO planning."
+              ],
+              "blockers": [
+                "No electrical measurements are attached yet."
+              ],
+              "required_evidence": [
+                "Reverse-side photo or board file for hidden nets.",
+                "Continuity checks for connector pins and suspected rails.",
+                "Unpowered resistance check between power and ground before powering.",
+                "Voltage measurements on known rails under current limit.",
+                "Readable close-up crops for important IC markings."
+              ],
+              "gates": [
+                {
+                  "id": "visible_localization",
+                  "label": "Visible localization",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "8 localized visible item(s) include image-space boxes."
+                },
+                {
+                  "id": "native_pixels",
+                  "label": "Native image evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "qwen received raw image pixels."
+                },
+                {
+                  "id": "readable_markings",
+                  "label": "Readable markings",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "4 marking(s) were captured."
+                },
+                {
+                  "id": "io_evidence",
+                  "label": "Connector/test-point evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "12 connector(s), 0 test point(s)."
+                },
+                {
+                  "id": "uncertainty",
+                  "label": "Uncertainty disclosure",
+                  "status": "pass",
+                  "score": 0.7,
+                  "reason": "Uncertainty is medium."
+                },
+                {
+                  "id": "safety_gate",
+                  "label": "Safety gate",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No critical visual safety hold was detected."
+                },
+                {
+                  "id": "exact_claims",
+                  "label": "Exact claim policy",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No unsupported exact IC/manufacturer claim was detected."
+                },
+                {
+                  "id": "electrical_validation",
+                  "label": "Electrical validation",
+                  "status": "fail",
+                  "score": 0,
+                  "reason": "Image-only evidence has no continuity, voltage, resistance, or power-on measurements."
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "certainty": {
+        "overall": {},
+        "counts": {},
+        "missing_evidence": [],
+        "training_queue": {}
+      },
+      "evidence_tasks": [],
+      "reviews": [],
+      "outcomes": [],
+      "training_exports": [],
+      "coverage": {},
+      "repair_guide": {},
+      "salvage_splice_plan": {},
+      "case_file": {},
+      "metrics": {
+        "task_count": 0,
+        "open_task_count": 0,
+        "resolved_task_count": 0,
+        "capture_burden": 0,
+        "measurement_count_required": 0,
+        "certainty_level": "unknown",
+        "certainty_score": 0,
+        "training_capture_recommended": false
+      }
+    },
+    {
+      "session_id": "board_20260525_130214_9aa1c7",
+      "title": "Authority task smoke test Raspberry Pi board",
+      "description": "Authority task smoke test Raspberry Pi board",
+      "device_hint": "",
+      "symptoms": [],
+      "route": "repair",
+      "route_label": "repair",
+      "status": "open",
+      "user_id": "test_user",
+      "created_at": "2026-05-25T13:02:14.270235+00:00",
+      "updated_at": "2026-05-25T13:02:14.270235+00:00",
+      "evidence": {
+        "captures": [],
+        "measurements": [],
+        "notes": []
+      },
+      "analyses": [
+        {
+          "analysis_id": "analysis_1",
+          "source": "authority_task_smoke",
+          "created_at": "2026-05-25T13:02:14.270235+00:00",
+          "summary": {
+            "summary_text": "This is a Raspberry Pi 4 Model B board, identifiable by visible markings and standard component layout. No immediate hazards are present in the image."
+          },
+          "results": {
+            "board_evidence": {
+              "schema_version": "board_evidence.v1",
+              "source": {
+                "provider": "qwen",
+                "mode": "native_vision",
+                "model": "qwen/qwen3-vl-flash",
+                "raw_pixels_sent_to_provider": true,
+                "generated_at": "2026-05-25T12:54:18.961Z",
+                "cost_usd_estimate": 0.000229,
+                "cache_key": "a722baaaca7a606089a3d97d_vision_qwen_auth_v9"
+              },
+              "image": {
+                "mediaType": "image/jpeg",
+                "sizeBytes": 177010,
+                "sha256": "a722baaaca7a606089a3d97dd8522136f3c4b1b88d3598719887096ad462808b",
+                "width": 1200,
+                "height": 706
+              },
+              "components": [
+                {
+                  "id": "C1",
+                  "label": "unknown",
+                  "kind": "unknown",
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "IC1",
+                  "label": "System-on-Chip",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.2792,
+                    "y": 0.3952,
+                    "w": 0.1692,
+                    "h": 0.2309
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "IC2",
+                  "label": "Memory module",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.5609,
+                    "w": 0.1267,
+                    "h": 0.1997
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                }
+              ],
+              "markings": [
+                {
+                  "text": "Raspberry Pi 4 Model B"
+                },
+                {
+                  "text": "© Raspberry Pi 2018"
+                },
+                {
+                  "text": "FCC ID: 2A0CD-RP14B"
+                },
+                {
+                  "text": "IC: 20853-NP17B"
+                }
+              ],
+              "regions": [],
+              "damage": [],
+              "connectors": [
+                {
+                  "id": "J1",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J2",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J3",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J4",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J5",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J6",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "evidence": []
+                }
+              ],
+              "test_points": [],
+              "salvage_candidates": [],
+              "recommended_checks": [],
+              "uncertainty": {
+                "level": "medium",
+                "reasons": [],
+                "missing_evidence": [],
+                "next_actions": []
+              }
+            },
+            "evidence_trust": {
+              "score": 0.84,
+              "level": "high",
+              "launch_readiness": "private_alpha_candidate",
+              "summary": "Strong image-grounded evidence for a private alpha, but electrical checks still gate reuse decisions.",
+              "supported_uses": [
+                "portfolio demo",
+                "candidate component review",
+                "salvage planning draft",
+                "measurement checklist generation"
+              ],
+              "blocked_uses": [
+                "autonomous repair diagnosis",
+                "safe-to-cut or safe-to-power authorization",
+                "exact pinout/voltage claims without measurement",
+                "production AOI release"
+              ],
+              "strengths": [
+                "8 localized item(s) can be reviewed on the image.",
+                "Native vision model saw the raw board photo.",
+                "4 marking(s) captured for follow-up.",
+                "12 connector(s) found for IO planning."
+              ],
+              "blockers": [
+                "No electrical measurements are attached yet."
+              ],
+              "required_evidence": [
+                "Reverse-side photo or board file for hidden nets.",
+                "Continuity checks for connector pins and suspected rails.",
+                "Unpowered resistance check between power and ground before powering.",
+                "Voltage measurements on known rails under current limit.",
+                "Readable close-up crops for important IC markings."
+              ],
+              "gates": [
+                {
+                  "id": "visible_localization",
+                  "label": "Visible localization",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "8 localized visible item(s) include image-space boxes."
+                },
+                {
+                  "id": "native_pixels",
+                  "label": "Native image evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "qwen received raw image pixels."
+                },
+                {
+                  "id": "readable_markings",
+                  "label": "Readable markings",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "4 marking(s) were captured."
+                },
+                {
+                  "id": "io_evidence",
+                  "label": "Connector/test-point evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "12 connector(s), 0 test point(s)."
+                },
+                {
+                  "id": "uncertainty",
+                  "label": "Uncertainty disclosure",
+                  "status": "pass",
+                  "score": 0.7,
+                  "reason": "Uncertainty is medium."
+                },
+                {
+                  "id": "safety_gate",
+                  "label": "Safety gate",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No critical visual safety hold was detected."
+                },
+                {
+                  "id": "exact_claims",
+                  "label": "Exact claim policy",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No unsupported exact IC/manufacturer claim was detected."
+                },
+                {
+                  "id": "electrical_validation",
+                  "label": "Electrical validation",
+                  "status": "fail",
+                  "score": 0,
+                  "reason": "Image-only evidence has no continuity, voltage, resistance, or power-on measurements."
+                }
+              ]
+            },
+            "repair_authority": {
+              "status": "visual_only",
+              "score": 0.46,
+              "summary": "This is still visual-only guidance; do not treat repair or reuse decisions as authoritative.",
+              "safety_level": "caution",
+              "supported_decisions": [
+                "visual triage",
+                "measurement checklist generation",
+                "human review"
+              ],
+              "blocked_decisions": [
+                "safe-to-power authorization",
+                "safe-to-cut authorization",
+                "final repair diagnosis",
+                "production repair release"
+              ],
+              "required_measurements": [
+                "Continuity/no-short check on power rails and ground.",
+                "Unpowered resistance measurement between power input and ground.",
+                "Current-limited voltage measurement on expected rails.",
+                "Functional output or symptom reproduction test after safe power-up.",
+                "Reverse-side photo or board file for hidden nets.",
+                "Continuity checks for connector pins and suspected rails.",
+                "Unpowered resistance check between power and ground before powering.",
+                "Voltage measurements on known rails under current limit.",
+                "Readable close-up crops for important IC markings."
+              ],
+              "measurement_summary": {
+                "count": 0,
+                "continuity": 0,
+                "resistance": 0,
+                "voltage": 0,
+                "current": 0,
+                "functional": 0
+              },
+              "gates": [
+                {
+                  "id": "visual_evidence",
+                  "label": "Visual evidence",
+                  "status": "pass",
+                  "score": 0.84,
+                  "reason": "Board evidence trust is 84%."
+                },
+                {
+                  "id": "measurement_presence",
+                  "label": "Measurement presence",
+                  "status": "fail",
+                  "score": 0,
+                  "reason": "No bench measurements are attached."
+                },
+                {
+                  "id": "no_short",
+                  "label": "No-short evidence",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No explicit no-short evidence yet."
+                },
+                {
+                  "id": "rail_voltage",
+                  "label": "Rail voltage",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No current-limited rail voltage measurement yet."
+                },
+                {
+                  "id": "functional_test",
+                  "label": "Functional test",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No functional output or symptom reproduction test yet."
+                },
+                {
+                  "id": "verifier",
+                  "label": "Verifier",
+                  "status": "pass",
+                  "score": 0.8,
+                  "reason": "Verifier status is needs_review."
+                },
+                {
+                  "id": "safety",
+                  "label": "Safety",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No hazard-level evidence is present."
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "certainty": {
+        "overall": {},
+        "counts": {},
+        "missing_evidence": [],
+        "training_queue": {}
+      },
+      "evidence_tasks": [],
+      "reviews": [],
+      "outcomes": [],
+      "training_exports": [],
+      "coverage": {},
+      "repair_guide": {},
+      "salvage_splice_plan": {},
+      "case_file": {},
+      "metrics": {
+        "task_count": 0,
+        "open_task_count": 0,
+        "resolved_task_count": 0,
+        "capture_burden": 0,
+        "measurement_count_required": 0,
+        "certainty_level": "unknown",
+        "certainty_score": 0,
+        "training_capture_recommended": false
+      }
+    },
+    {
+      "session_id": "board_20260525_130420_96043c",
+      "title": "Authority task smoke test Raspberry Pi board after backend reload",
+      "description": "Authority task smoke test Raspberry Pi board after backend reload",
+      "device_hint": "",
+      "symptoms": [],
+      "route": "repair",
+      "route_label": "repair",
+      "status": "open",
+      "user_id": "test_user",
+      "created_at": "2026-05-25T13:04:20.874143+00:00",
+      "updated_at": "2026-05-25T13:04:20.874143+00:00",
+      "evidence": {
+        "captures": [],
+        "measurements": [],
+        "notes": []
+      },
+      "analyses": [
+        {
+          "analysis_id": "analysis_1",
+          "source": "authority_task_smoke",
+          "created_at": "2026-05-25T13:04:20.874143+00:00",
+          "summary": {
+            "summary_text": "This is a Raspberry Pi 4 Model B board, identifiable by visible markings and standard component layout. No immediate hazards are present in the image."
+          },
+          "results": {
+            "board_evidence": {
+              "schema_version": "board_evidence.v1",
+              "source": {
+                "provider": "qwen",
+                "mode": "native_vision",
+                "model": "qwen/qwen3-vl-flash",
+                "raw_pixels_sent_to_provider": true,
+                "generated_at": "2026-05-25T12:54:18.961Z",
+                "cost_usd_estimate": 0.000229,
+                "cache_key": "a722baaaca7a606089a3d97d_vision_qwen_auth_v9"
+              },
+              "image": {
+                "mediaType": "image/jpeg",
+                "sizeBytes": 177010,
+                "sha256": "a722baaaca7a606089a3d97dd8522136f3c4b1b88d3598719887096ad462808b",
+                "width": 1200,
+                "height": 706
+              },
+              "components": [
+                {
+                  "id": "C1",
+                  "label": "unknown",
+                  "kind": "unknown",
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "IC1",
+                  "label": "System-on-Chip",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.2792,
+                    "y": 0.3952,
+                    "w": 0.1692,
+                    "h": 0.2309
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "IC2",
+                  "label": "Memory module",
+                  "kind": "integrated circuit",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.5609,
+                    "w": 0.1267,
+                    "h": 0.1997
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": [
+                    "uncertainty.missing_evidence"
+                  ]
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "kind": "connector",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "markings": [],
+                  "evidence": [],
+                  "warnings": []
+                }
+              ],
+              "markings": [
+                {
+                  "text": "Raspberry Pi 4 Model B"
+                },
+                {
+                  "text": "© Raspberry Pi 2018"
+                },
+                {
+                  "text": "FCC ID: 2A0CD-RP14B"
+                },
+                {
+                  "text": "IC: 20853-NP17B"
+                }
+              ],
+              "regions": [],
+              "damage": [],
+              "connectors": [
+                {
+                  "id": "J1",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J2",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J3",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J4",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J5",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "J6",
+                  "label": "unknown connector",
+                  "probable_pins": [],
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A1",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.3917,
+                    "y": 0.711,
+                    "w": 0.1967,
+                    "h": 0.5765
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-A2",
+                  "label": "USB-A port",
+                  "bbox": {
+                    "x": 0.5133,
+                    "y": 0.5581,
+                    "w": 0.1858,
+                    "h": 0.5637
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "ETH",
+                  "label": "Ethernet port",
+                  "bbox": {
+                    "x": 0.6,
+                    "y": 0.3952,
+                    "w": 0.2208,
+                    "h": 0.5878
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "USB-C",
+                  "label": "USB-C port",
+                  "bbox": {
+                    "x": 0.0333,
+                    "y": 0.5014,
+                    "w": 0.0917,
+                    "h": 0.1884
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "HDMI",
+                  "label": "HDMI port",
+                  "bbox": {
+                    "x": 0.1875,
+                    "y": 0.7677,
+                    "w": 0.0667,
+                    "h": 0.1445
+                  },
+                  "evidence": []
+                },
+                {
+                  "id": "JACK",
+                  "label": "3.5mm audio jack",
+                  "bbox": {
+                    "x": 0.2542,
+                    "y": 0.7677,
+                    "w": 0.1342,
+                    "h": 0.2762
+                  },
+                  "evidence": []
+                }
+              ],
+              "test_points": [],
+              "salvage_candidates": [],
+              "recommended_checks": [],
+              "uncertainty": {
+                "level": "medium",
+                "reasons": [],
+                "missing_evidence": [],
+                "next_actions": []
+              }
+            },
+            "evidence_trust": {
+              "score": 0.84,
+              "level": "high",
+              "launch_readiness": "private_alpha_candidate",
+              "summary": "Strong image-grounded evidence for a private alpha, but electrical checks still gate reuse decisions.",
+              "supported_uses": [
+                "portfolio demo",
+                "candidate component review",
+                "salvage planning draft",
+                "measurement checklist generation"
+              ],
+              "blocked_uses": [
+                "autonomous repair diagnosis",
+                "safe-to-cut or safe-to-power authorization",
+                "exact pinout/voltage claims without measurement",
+                "production AOI release"
+              ],
+              "strengths": [
+                "8 localized item(s) can be reviewed on the image.",
+                "Native vision model saw the raw board photo.",
+                "4 marking(s) captured for follow-up.",
+                "12 connector(s) found for IO planning."
+              ],
+              "blockers": [
+                "No electrical measurements are attached yet."
+              ],
+              "required_evidence": [
+                "Reverse-side photo or board file for hidden nets.",
+                "Continuity checks for connector pins and suspected rails.",
+                "Unpowered resistance check between power and ground before powering.",
+                "Voltage measurements on known rails under current limit.",
+                "Readable close-up crops for important IC markings."
+              ],
+              "gates": [
+                {
+                  "id": "visible_localization",
+                  "label": "Visible localization",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "8 localized visible item(s) include image-space boxes."
+                },
+                {
+                  "id": "native_pixels",
+                  "label": "Native image evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "qwen received raw image pixels."
+                },
+                {
+                  "id": "readable_markings",
+                  "label": "Readable markings",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "4 marking(s) were captured."
+                },
+                {
+                  "id": "io_evidence",
+                  "label": "Connector/test-point evidence",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "12 connector(s), 0 test point(s)."
+                },
+                {
+                  "id": "uncertainty",
+                  "label": "Uncertainty disclosure",
+                  "status": "pass",
+                  "score": 0.7,
+                  "reason": "Uncertainty is medium."
+                },
+                {
+                  "id": "safety_gate",
+                  "label": "Safety gate",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No critical visual safety hold was detected."
+                },
+                {
+                  "id": "exact_claims",
+                  "label": "Exact claim policy",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No unsupported exact IC/manufacturer claim was detected."
+                },
+                {
+                  "id": "electrical_validation",
+                  "label": "Electrical validation",
+                  "status": "fail",
+                  "score": 0,
+                  "reason": "Image-only evidence has no continuity, voltage, resistance, or power-on measurements."
+                }
+              ]
+            },
+            "repair_authority": {
+              "status": "visual_only",
+              "score": 0.46,
+              "summary": "This is still visual-only guidance; do not treat repair or reuse decisions as authoritative.",
+              "safety_level": "caution",
+              "supported_decisions": [
+                "visual triage",
+                "measurement checklist generation",
+                "human review"
+              ],
+              "blocked_decisions": [
+                "safe-to-power authorization",
+                "safe-to-cut authorization",
+                "final repair diagnosis",
+                "production repair release"
+              ],
+              "required_measurements": [
+                "Continuity/no-short check on power rails and ground.",
+                "Unpowered resistance measurement between power input and ground.",
+                "Current-limited voltage measurement on expected rails.",
+                "Functional output or symptom reproduction test after safe power-up.",
+                "Reverse-side photo or board file for hidden nets.",
+                "Continuity checks for connector pins and suspected rails.",
+                "Unpowered resistance check between power and ground before powering.",
+                "Voltage measurements on known rails under current limit.",
+                "Readable close-up crops for important IC markings."
+              ],
+              "measurement_summary": {
+                "count": 0,
+                "continuity": 0,
+                "resistance": 0,
+                "voltage": 0,
+                "current": 0,
+                "functional": 0
+              },
+              "gates": [
+                {
+                  "id": "visual_evidence",
+                  "label": "Visual evidence",
+                  "status": "pass",
+                  "score": 0.84,
+                  "reason": "Board evidence trust is 84%."
+                },
+                {
+                  "id": "measurement_presence",
+                  "label": "Measurement presence",
+                  "status": "fail",
+                  "score": 0,
+                  "reason": "No bench measurements are attached."
+                },
+                {
+                  "id": "no_short",
+                  "label": "No-short evidence",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No explicit no-short evidence yet."
+                },
+                {
+                  "id": "rail_voltage",
+                  "label": "Rail voltage",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No current-limited rail voltage measurement yet."
+                },
+                {
+                  "id": "functional_test",
+                  "label": "Functional test",
+                  "status": "warn",
+                  "score": 0.35,
+                  "reason": "No functional output or symptom reproduction test yet."
+                },
+                {
+                  "id": "verifier",
+                  "label": "Verifier",
+                  "status": "pass",
+                  "score": 0.8,
+                  "reason": "Verifier status is needs_review."
+                },
+                {
+                  "id": "safety",
+                  "label": "Safety",
+                  "status": "pass",
+                  "score": 1,
+                  "reason": "No hazard-level evidence is present."
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "certainty": {
+        "overall": {},
+        "counts": {},
+        "missing_evidence": [],
+        "training_queue": {}
+      },
+      "evidence_tasks": [
+        {
+          "task_id": "task_1",
+          "type": "measurement",
+          "prompt": "Continuity checks for connector pins and suspected rails.",
+          "priority": 1,
+          "status": "open",
+          "source": "evidence_trust_required",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_2",
+          "type": "measurement",
+          "prompt": "Unpowered resistance check between power and ground before powering.",
+          "priority": 1,
+          "status": "open",
+          "source": "evidence_trust_required",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_3",
+          "type": "measurement",
+          "prompt": "Voltage measurements on known rails under current limit.",
+          "priority": 1,
+          "status": "open",
+          "source": "evidence_trust_required",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_4",
+          "type": "review",
+          "prompt": "Electrical validation: Image-only evidence has no continuity, voltage, resistance, or power-on measurements.",
+          "priority": 1,
+          "status": "open",
+          "source": "evidence_trust_gate",
+          "claim_id": "electrical_validation",
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_5",
+          "type": "review",
+          "prompt": "repair authority is visual_only; production repair release is blocked",
+          "priority": 1,
+          "status": "open",
+          "source": "repair_authority_gate",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "safety",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_6",
+          "type": "capture",
+          "prompt": "Readable close-up crops for important IC markings.",
+          "priority": 2,
+          "status": "open",
+          "source": "evidence_trust_required",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_7",
+          "type": "review",
+          "prompt": "blocked repair decision: safe-to-power authorization",
+          "priority": 2,
+          "status": "open",
+          "source": "repair_authority_blocked_decision",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "safety",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        },
+        {
+          "task_id": "task_8",
+          "type": "capture",
+          "prompt": "Reverse-side photo or board file for hidden nets.",
+          "priority": 3,
+          "status": "open",
+          "source": "evidence_trust_required",
+          "claim_id": null,
+          "usable_for": [
+            "repair",
+            "salvage",
+            "training"
+          ],
+          "created_at": "2026-05-25T13:04:20.874208+00:00"
+        }
+      ],
+      "reviews": [],
+      "outcomes": [],
+      "training_exports": [],
+      "coverage": {},
+      "repair_guide": {},
+      "salvage_splice_plan": {},
+      "case_file": {},
+      "metrics": {
+        "task_count": 8,
+        "open_task_count": 8,
+        "resolved_task_count": 0,
+        "capture_burden": 2,
+        "measurement_count_required": 3,
+        "certainty_level": "unknown",
+        "certainty_score": 0,
         "training_capture_recommended": false
       }
     }
