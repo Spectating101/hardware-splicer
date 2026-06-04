@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .compiler import compile_hardware_bundle
+from .production_release_metrics import build_production_release_metrics
 from .robotics_platform_authority import LEVELS as ROBOTICS_PLATFORM_LEVELS
 from .schemas import HardwareCompileResult, HardwareCompileSpec
 
@@ -84,16 +85,33 @@ def run_hardware_scenario(
         request_id=request_id or _request_id_from_scenario(body),
     )
     project_authority = build_project_authority_packet(body, result=result, spec=spec)
+    production_metrics = build_production_release_metrics(result=result, project_authority=project_authority)
+    project_authority["dashboard"]["production_readiness_score"] = production_metrics["production_readiness_score"]
+    project_authority["dashboard"]["production_readiness_band"] = production_metrics["readiness_band"]
+    project_authority["production_release_metrics"] = {
+        "schema_version": production_metrics["schema_version"],
+        "production_ready": production_metrics["production_ready"],
+        "production_readiness_score": production_metrics["production_readiness_score"],
+        "production_gap_score": production_metrics["production_gap_score"],
+        "readiness_band": production_metrics["readiness_band"],
+        "gates_passed": production_metrics["gates_passed"],
+        "gates_total": production_metrics["gates_total"],
+        "evidence_gap_ids": production_metrics["evidence_gap_ids"],
+        "what_blocks_production": production_metrics["what_blocks_production"],
+    }
     out_path = Path(result.out_dir)
     project_authority_file = out_path / "PROJECT_AUTHORITY.json"
+    production_metrics_file = out_path / "PRODUCTION_RELEASE_METRICS.json"
     scenario_summary_file = out_path / "SCENARIO_SUMMARY.md"
     scenario_result_file = out_path / "SCENARIO_RESULT.json"
     project_authority_file.write_text(json.dumps(project_authority, indent=2), encoding="utf-8")
+    production_metrics_file.write_text(json.dumps(production_metrics, indent=2), encoding="utf-8")
     scenario_summary_file.write_text(render_scenario_summary(project_authority), encoding="utf-8")
 
     artifacts = {
         **result.artifacts,
         "project_authority": str(project_authority_file),
+        "production_release_metrics": str(production_metrics_file),
         "scenario_summary": str(scenario_summary_file),
         "scenario_result": str(scenario_result_file),
     }
@@ -107,6 +125,7 @@ def run_hardware_scenario(
         "request_id": result.request_id,
         "out_dir": result.out_dir,
         "project_authority": project_authority,
+        "production_release_metrics": production_metrics,
         "compile_result": result.to_dict(),
         "artifacts": artifacts,
     }
@@ -220,6 +239,8 @@ def render_scenario_summary(packet: Mapping[str, Any]) -> str:
         f"- Simulation ready: `{bool(dashboard.get('simulation_ready'))}`",
         f"- Robotics project release: `{bool(dashboard.get('robotics_project_release'))}`",
         f"- Hardware-Splicer release: `{bool(dashboard.get('hardware_splicer_release'))}`",
+        f"- Production readiness score: `{dashboard.get('production_readiness_score', 0)}`",
+        f"- Production readiness band: `{dashboard.get('production_readiness_band') or 'unknown'}`",
         f"- Required artifacts present: `{bool(dashboard.get('required_artifacts_present'))}`",
         "",
         "## Checks",

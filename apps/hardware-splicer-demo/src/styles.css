@@ -132,6 +132,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .topbar {
@@ -146,6 +148,7 @@ button {
   font-size: 30px;
   line-height: 1.05;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .topbar p {
@@ -240,11 +243,13 @@ button {
   border: 1px solid var(--line);
   border-radius: 8px;
   box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 .authority-panel,
 .margins-panel,
 .upgrade-panel,
+.production-panel,
 .artifact-panel,
 .lower-grid .panel {
   padding: 18px;
@@ -403,6 +408,115 @@ button {
   font-size: 12px;
 }
 
+.production-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.production-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+}
+
+.production-summary h2 {
+  margin: 12px 0 0;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.production-summary p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.production-meter {
+  width: 86px;
+  height: 86px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at center, #fff 57%, transparent 58%),
+    conic-gradient(var(--amber) var(--score), #e4ebe7 var(--score));
+}
+
+.production-meter strong,
+.production-meter span {
+  grid-area: 1 / 1;
+}
+
+.production-meter strong {
+  margin-top: -8px;
+  font-size: 22px;
+}
+
+.production-meter span {
+  margin-top: 31px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.gate-list {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gate-row {
+  min-height: 66px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  border-right: 1px solid var(--line);
+  background: #fbfcfb;
+}
+
+.gate-row:last-child {
+  border-right: 0;
+}
+
+.gate-row span {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.gate-row strong {
+  width: fit-content;
+  border-radius: 6px;
+  padding: 6px 7px;
+  color: var(--amber);
+  background: var(--amber-soft);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.blocker-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.blocker-strip span {
+  border-left: 3px solid var(--amber);
+  padding: 7px 10px;
+  color: var(--muted);
+  background: #fbfcfb;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .subsystems {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -513,6 +627,20 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .gate-list,
+  .blocker-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .gate-row {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .gate-row:last-child {
+    border-bottom: 0;
+  }
+
   .subsystems {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -530,6 +658,18 @@ th {
     flex-direction: column;
   }
 
+  .pipeline-step {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .primary-action,
+  .status-chip {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
   .topbar h1 {
     font-size: 25px;
   }
@@ -542,5 +682,50 @@ th {
   .metric-strip,
   .subsystems {
     grid-template-columns: 1fr;
+  }
+
+  .production-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .artifact-panel thead {
+    display: none;
+  }
+
+  .artifact-panel table,
+  .artifact-panel tbody,
+  .artifact-panel tr,
+  .artifact-panel td {
+    display: block;
+    width: 100%;
+  }
+
+  .artifact-panel tr {
+    border-bottom: 1px solid var(--line);
+    padding: 10px 0;
+  }
+
+  .artifact-panel td {
+    border-bottom: 0;
+    padding: 5px 0;
+  }
+
+  .artifact-panel td:nth-child(2)::before,
+  .artifact-panel td:nth-child(3)::before {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .artifact-panel td:nth-child(2)::before {
+    content: "Role";
+  }
+
+  .artifact-panel td:nth-child(3)::before {
+    content: "Status";
   }
 }

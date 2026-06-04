@@ -38,15 +38,21 @@ def test_rover_scenario_generates_claimable_project_authority(tmp_path):
     assert authority["dashboard"]["simulation_ready"] is True
     assert authority["dashboard"]["robotics_project_release"] is True
     assert authority["dashboard"]["hardware_splicer_release"] is True
+    assert authority["dashboard"]["production_readiness_score"] == 1.0
+    assert authority["production_release_metrics"]["production_ready"] is True
     assert authority["dashboard"]["required_artifacts_present"] is True
     assert authority["blockers"] == []
     assert Path(result["artifacts"]["project_authority"]).exists()
+    assert Path(result["artifacts"]["production_release_metrics"]).exists()
     assert Path(result["artifacts"]["scenario_summary"]).exists()
     assert Path(result["artifacts"]["scenario_result"]).exists()
 
     saved = json.loads(Path(result["artifacts"]["project_authority"]).read_text(encoding="utf-8"))
+    metrics = json.loads(Path(result["artifacts"]["production_release_metrics"]).read_text(encoding="utf-8"))
     assert saved["claimable"] is True
     assert saved["subsystem_authority"]["robotics_simulation"]["blocking_finding_count"] == 0
+    assert metrics["production_ready"] is True
+    assert metrics["gates_passed"] == metrics["gates_total"]
 
 
 def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
@@ -60,10 +66,13 @@ def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
     assert authority["claimable"] is False
     assert authority["project_authority_level"] == "control_safety_project_package"
     assert authority["dashboard"]["simulation_ready"] is False
+    assert authority["dashboard"]["production_readiness_score"] < 1.0
+    assert "deterministic_simulation" in authority["production_release_metrics"]["evidence_gap_ids"]
     assert authority["subsystem_authority"]["robotics_simulation"]["blocking_finding_count"] >= 1
     assert any("Available wheel speed" in blocker for blocker in authority["blockers"])
     assert any(row["id"] == "simulation_ready" and row["passed"] is False for row in authority["checks"])
     assert Path(result["artifacts"]["project_authority"]).exists()
+    assert Path(result["artifacts"]["production_release_metrics"]).exists()
 
 
 def test_scenario_run_api_returns_project_authority(tmp_path, monkeypatch):
@@ -88,4 +97,5 @@ def test_scenario_run_api_returns_project_authority(tmp_path, monkeypatch):
     data = response.json()
     assert data["ok"] is True
     assert data["project_authority"]["claimable"] is True
+    assert data["production_release_metrics"]["production_ready"] is True
     assert Path(data["artifacts"]["project_authority"]).exists()

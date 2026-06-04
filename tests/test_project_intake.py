@@ -44,6 +44,10 @@ def test_project_intake_runs_to_control_safety_package(tmp_path):
     assert authority["claimable"] is True
     assert authority["project_authority_level"] == "control_safety_project_package"
     assert authority["dashboard"]["simulation_ready"] is False
+    assert authority["dashboard"]["production_readiness_score"] < 1.0
+    assert result["production_release_metrics"]["production_ready"] is False
+    assert "integrated_bench" in result["production_release_metrics"]["evidence_gap_ids"]
+    assert "release_review" in result["production_release_metrics"]["evidence_gap_ids"]
     assert authority["blockers"] == []
     assert authority["next_actions"]
     assert simulation["power_budget"]["status"] == "pass"
@@ -53,10 +57,12 @@ def test_project_intake_runs_to_control_safety_package(tmp_path):
     assert Path(result["artifacts"]["project_intake"]).exists()
     assert Path(result["artifacts"]["planned_scenario"]).exists()
     assert Path(result["artifacts"]["authority_upgrade_plan"]).exists()
+    assert Path(result["artifacts"]["production_release_metrics"]).exists()
     assert result["authority_upgrade_plan"]["evidence_requests"]
     scenario_result = json.loads(Path(result["artifacts"]["scenario_result"]).read_text(encoding="utf-8"))
     assert scenario_result["intake_plan"]["archetype"] == "automatic_watering"
     assert scenario_result["authority_upgrade_plan"]["next_level"] == "simulation_bench_project_package"
+    assert scenario_result["production_release_metrics"]["production_ready"] is False
 
 
 def test_intake_run_api_returns_planning_authority(tmp_path, monkeypatch):
@@ -81,6 +87,7 @@ def test_intake_run_api_returns_planning_authority(tmp_path, monkeypatch):
     data = response.json()
     assert data["compile_ok"] is True
     assert data["project_authority"]["project_authority_level"] == "control_safety_project_package"
+    assert data["production_release_metrics"]["production_ready"] is False
     assert data["intake_plan"]["archetype"] == "automatic_watering"
     assert Path(data["artifacts"]["project_intake"]).exists()
 

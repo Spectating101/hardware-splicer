@@ -99,6 +99,8 @@ function App() {
           <UpgradePanel project={selected} />
         </section>
 
+        <ProductionMetrics project={selected} />
+
         <section className="subsystems">
           {selected.subsystems.map((subsystem) => (
             <SubsystemCard key={subsystem.id} subsystem={subsystem} />
@@ -111,6 +113,39 @@ function App() {
         </section>
       </section>
     </main>
+  );
+}
+
+function ProductionMetrics({ project }) {
+  const production = project.production;
+  const percent = Math.round(production.score * 100);
+  return (
+    <section className="panel production-panel" aria-label="Production release metrics">
+      <div className="production-summary">
+        <div>
+          <div className="panel-label"><Gauge size={16} /> Production metrics</div>
+          <h2>{percent}% production readiness</h2>
+          <p>{production.gatesPassed} of {production.gatesTotal} gates closed · {production.band}</p>
+        </div>
+        <div className="production-meter" style={{ '--score': `${percent}%` }}>
+          <strong>{percent}</strong>
+          <span>score</span>
+        </div>
+      </div>
+      <div className="gate-list">
+        {production.gaps.map((gap) => (
+          <div className="gate-row" key={gap}>
+            <span>{gap.replaceAll('_', ' ')}</span>
+            <strong>open</strong>
+          </div>
+        ))}
+      </div>
+      <div className="blocker-strip">
+        {production.blockers.map((blocker) => (
+          <span key={blocker}>{blocker}</span>
+        ))}
+      </div>
+    </section>
   );
 }
 

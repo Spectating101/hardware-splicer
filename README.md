@@ -70,7 +70,7 @@ python3 scripts/hardware_splicer.py intake --brief examples/intakes/rover_brief.
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/fan_controller_brief.json --out /tmp/hardware_splicer_intake_fan
 ```
 
-The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `AUTHORITY_UPGRADE_PLAN.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, bench evidence, and reviewed release scope as explicit next actions.
+The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, `AUTHORITY_UPGRADE_PLAN.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, bench evidence, and reviewed release scope as explicit next actions.
 
 Attach physical/project evidence through `evidence` fields in the intake file to upgrade the generated package:
 
@@ -83,6 +83,8 @@ Attach physical/project evidence through `evidence` fields in the intake file to
 - `evidence.release_review`
 
 `AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
+
+`PRODUCTION_RELEASE_METRICS.json` turns the release gap into weighted gates: compile/artifacts, circuit release, mechanical release, actuation release, deterministic simulation, packaging trace, integrated bench, field validation, and reviewed scoped release. Intake examples currently land as control-safety planning packages; a closed scenario such as `examples/scenarios/rover_project.json` reaches 9/9 gates and `production_ready_project_package`.
 
 Run the local dashboard:
 
