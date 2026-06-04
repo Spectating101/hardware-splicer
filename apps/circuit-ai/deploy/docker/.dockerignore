@@ -1,0 +1,75 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+data/test_images/
+*.db
+*.sqlite
+*.sqlite3
+logs/
+*.log
+.env.local
+.env.production
+
+# Documentation
+*.md
+docs/
+README.md
+STATUS.md
+CONSOLIDATION_SUMMARY.md
+PROJECT_STATUS_REPORT.md
+QUICK_START.md
+FINAL_COMPREHENSIVE_STATUS.md
+CORRECTED_FINAL_STATUS.md
+
+# Testing
+test_report.json
+ux_test_report.json
+simple_ux_test_report.json
+
+# Temporary files
+*.tmp
+*.temp

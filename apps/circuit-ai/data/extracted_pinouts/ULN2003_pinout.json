@@ -1,0 +1,76 @@
+{
+  "ic_name": "ULN2003",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Channel 1 through 7 Darlington base input"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Unknown"
+    },
+    {
+      "pin": 5,
+      "name": "PIN5",
+      "function": "Unknown"
+    },
+    {
+      "pin": 6,
+      "name": "PIN6",
+      "function": "Unknown"
+    },
+    {
+      "pin": 7,
+      "name": "PIN7",
+      "function": "Unknown"
+    },
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Channel 1 through 7 Darlington collector output"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Unknown"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Unknown"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Unknown"
+    },
+    {
+      "pin": 5,
+      "name": "PIN5",
+      "function": "Unknown"
+    },
+    {
+      "pin": 6,
+      "name": "PIN6",
+      "function": "Unknown"
+    },
+    {
+      "pin": 7,
+      "name": "PIN7",
+      "function": "Unknown"
+    }
+  ],
+  "total_pins": 14
+}

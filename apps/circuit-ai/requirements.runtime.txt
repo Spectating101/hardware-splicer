@@ -1,0 +1,5 @@
+# Minimal runtime deps for Circuit-AI backend (api_server.py).
+# Keep this small for cheap deploys; heavy CV/ML deps are not required for MCP monetization flow.
+Flask>=3.0.0
+requests>=2.31.0
+stripe>=12.0.0

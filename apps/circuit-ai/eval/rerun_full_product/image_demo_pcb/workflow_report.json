@@ -1,0 +1,3533 @@
+{
+  "mode": "salvage_to_product_workflow",
+  "inventory": {
+    "asset_count": 12,
+    "unique_records": 12,
+    "estimated_inventory_value_usd": 60.0,
+    "by_capability": {
+      "actuator_driver": 3,
+      "conn": 3,
+      "connector": 3,
+      "controller": 3,
+      "esp8266": 3,
+      "icchip": 3,
+      "known_ic_pinout": 3,
+      "power": 3,
+      "wireless": 3
+    },
+    "by_test_status": {
+      "untested": 12
+    },
+    "assets": [
+      {
+        "asset_id": "board_motor_or_actuator_driver_1",
+        "asset_type": "board_or_module",
+        "name": "motor_or_actuator_driver",
+        "capabilities": [
+          "actuator_driver",
+          "connector",
+          "controller",
+          "known_ic_pinout",
+          "power",
+          "wireless"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.785,
+        "estimated_value_usd": 17.0,
+        "quantity": 1,
+        "evidence": [
+          "board role: motor_or_actuator_driver",
+          "part marking: conn",
+          "part marking: icchip",
+          "part marking: esp8266",
+          "interface: known_ic_pinout"
+        ],
+        "metadata": {
+          "board_identity": {
+            "primary_type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.785,
+            "evidence": [
+              "4 mosfet",
+              "5 connector",
+              "1 inductor"
+            ],
+            "alternatives": [
+              {
+                "type": "io_interface_or_adapter",
+                "description": "Connector, adapter, breakout, or IO interface board",
+                "confidence": 0.84,
+                "evidence": [
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "power_supply_or_regulator",
+                "description": "Power conversion, protection, or distribution board",
+                "confidence": 0.66,
+                "evidence": [
+                  "1 inductor",
+                  "4 mosfet",
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "controller_or_embedded_compute",
+                "description": "Controller, development, or embedded compute board",
+                "confidence": 0.6,
+                "evidence": [
+                  "5 connector",
+                  "text hints: esp8266, mcu",
+                  "marking evidence: esp8266, mcu"
+                ]
+              }
+            ]
+          },
+          "functional_blocks": [
+            {
+              "block_type": "power_input_protection",
+              "label": "Input power/protection",
+              "component_count": 10,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_7_inductor",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                380,
+                201
+              ],
+              "confidence": 0.95,
+              "function": "Accepts incoming power and protects downstream circuitry",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  0,
+                  4,
+                  430,
+                  251
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "actuator_drive",
+              "label": "Actuator or high-current output",
+              "component_count": 9,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                300,
+                201
+              ],
+              "confidence": 0.85,
+              "function": "Switches higher current loads from low-power control signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  16,
+                  338,
+                  239
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "io_connectivity",
+              "label": "External IO/connectors",
+              "component_count": 5,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_6_connector"
+              ],
+              "bbox": [
+                50,
+                55,
+                300,
+                199
+              ],
+              "confidence": 0.85,
+              "function": "Provides external electrical connections to a machine or host",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  17,
+                  338,
+                  237
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "power_regulation",
+              "label": "Voltage regulation/filtering",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Converts, filters, or stabilizes board power rails",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "passive_conditioning",
+              "label": "Passive filtering/biasing",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Filters, biases, divides, limits current, or shapes signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            }
+          ],
+          "machine_connection_map": {
+            "mode": "machine_connection_map",
+            "connector_count": 5,
+            "connector_maps": [
+              {
+                "connector_id": "conn_0_connector",
+                "bbox": [
+                  250,
+                  152,
+                  300,
+                  196
+                ],
+                "center": [
+                  275,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_side"
+              },
+              {
+                "connector_id": "conn_1_connector",
+                "bbox": [
+                  52,
+                  56,
+                  151,
+                  98
+                ],
+                "center": [
+                  101,
+                  77
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 6,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_2_connector",
+                "bbox": [
+                  99,
+                  150,
+                  132,
+                  199
+                ],
+                "center": [
+                  116,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_3_connector",
+                "bbox": [
+                  203,
+                  55,
+                  300,
+                  97
+                ],
+                "center": [
+                  252,
+                  76
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 5,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_6_connector",
+                "bbox": [
+                  50,
+                  150,
+                  78,
+                  198
+                ],
+                "center": [
+                  64,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "known_ic_pinout",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "confidence": 0.74,
+                "validation": [
+                  "verify package orientation",
+                  "match pin 1 marker",
+                  "confirm continuity to connector"
+                ]
+              }
+            ],
+            "pinout_evidence": [
+              {
+                "component_id": "cmp_3_connector",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "package": "module",
+                "power_pins": [
+                  {
+                    "pin_number": 1,
+                    "pin_name": "VCC",
+                    "pin_type": "power",
+                    "description": "Power supply (3.3V ONLY!)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 300.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "3.3V regulator"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 9,
+                    "pin_name": "GND",
+                    "pin_type": "ground",
+                    "description": "Ground",
+                    "typical_voltage": 0.0,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Ground plane"
+                    ],
+                    "critical": true
+                  }
+                ],
+                "programming_or_clock_pins": []
+              }
+            ],
+            "splice_plan": {
+              "safest_entry_points": [],
+              "required_measurements": [
+                "continuity from connector to ground",
+                "unpowered resistance between power and ground",
+                "load output voltage",
+                "max load current",
+                "flyback/protection diode continuity"
+              ],
+              "do_not_assume": [
+                "pin order",
+                "voltage level",
+                "shared ground",
+                "connector current rating",
+                "firmware protocol"
+              ]
+            },
+            "confidence": 0.69,
+            "limitations": [
+              "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+              "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+              "do not power harvested modules until polarity, rails, and isolation are confirmed"
+            ]
+          }
+        },
+        "created_at": "2026-05-05T19:15:40.628823+00:00"
+      },
+      {
+        "asset_id": "part_conn_1",
+        "asset_type": "component",
+        "name": "CONN",
+        "capabilities": [
+          "conn"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: conn"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:15:40.628840+00:00"
+      },
+      {
+        "asset_id": "part_esp8266_1",
+        "asset_type": "component",
+        "name": "ESP8266",
+        "capabilities": [
+          "esp8266"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 3.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: esp8266"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:15:40.628850+00:00"
+      },
+      {
+        "asset_id": "part_icchip_1",
+        "asset_type": "component",
+        "name": "ICCHIP",
+        "capabilities": [
+          "icchip"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: icchip"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:15:40.628856+00:00"
+      },
+      {
+        "asset_id": "board_motor_or_actuator_driver_5",
+        "asset_type": "board_or_module",
+        "name": "motor_or_actuator_driver",
+        "capabilities": [
+          "actuator_driver",
+          "connector",
+          "controller",
+          "known_ic_pinout",
+          "power",
+          "wireless"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.785,
+        "estimated_value_usd": 17.0,
+        "quantity": 1,
+        "evidence": [
+          "board role: motor_or_actuator_driver",
+          "part marking: conn",
+          "part marking: icchip",
+          "part marking: esp8266",
+          "interface: known_ic_pinout"
+        ],
+        "metadata": {
+          "board_identity": {
+            "primary_type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.785,
+            "evidence": [
+              "4 mosfet",
+              "5 connector",
+              "1 inductor"
+            ],
+            "alternatives": [
+              {
+                "type": "io_interface_or_adapter",
+                "description": "Connector, adapter, breakout, or IO interface board",
+                "confidence": 0.84,
+                "evidence": [
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "power_supply_or_regulator",
+                "description": "Power conversion, protection, or distribution board",
+                "confidence": 0.66,
+                "evidence": [
+                  "1 inductor",
+                  "4 mosfet",
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "controller_or_embedded_compute",
+                "description": "Controller, development, or embedded compute board",
+                "confidence": 0.6,
+                "evidence": [
+                  "5 connector",
+                  "text hints: esp8266, mcu",
+                  "marking evidence: esp8266, mcu"
+                ]
+              }
+            ]
+          },
+          "functional_blocks": [
+            {
+              "block_type": "power_input_protection",
+              "label": "Input power/protection",
+              "component_count": 10,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_7_inductor",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                380,
+                201
+              ],
+              "confidence": 0.95,
+              "function": "Accepts incoming power and protects downstream circuitry",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  0,
+                  4,
+                  430,
+                  251
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "actuator_drive",
+              "label": "Actuator or high-current output",
+              "component_count": 9,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                300,
+                201
+              ],
+              "confidence": 0.85,
+              "function": "Switches higher current loads from low-power control signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  16,
+                  338,
+                  239
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "io_connectivity",
+              "label": "External IO/connectors",
+              "component_count": 5,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_6_connector"
+              ],
+              "bbox": [
+                50,
+                55,
+                300,
+                199
+              ],
+              "confidence": 0.85,
+              "function": "Provides external electrical connections to a machine or host",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  17,
+                  338,
+                  237
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "power_regulation",
+              "label": "Voltage regulation/filtering",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Converts, filters, or stabilizes board power rails",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "passive_conditioning",
+              "label": "Passive filtering/biasing",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Filters, biases, divides, limits current, or shapes signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            }
+          ],
+          "machine_connection_map": {
+            "mode": "machine_connection_map",
+            "connector_count": 5,
+            "connector_maps": [
+              {
+                "connector_id": "conn_0_connector",
+                "bbox": [
+                  250,
+                  152,
+                  300,
+                  196
+                ],
+                "center": [
+                  275,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_side"
+              },
+              {
+                "connector_id": "conn_1_connector",
+                "bbox": [
+                  52,
+                  56,
+                  151,
+                  98
+                ],
+                "center": [
+                  101,
+                  77
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 6,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_2_connector",
+                "bbox": [
+                  99,
+                  150,
+                  132,
+                  199
+                ],
+                "center": [
+                  116,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_3_connector",
+                "bbox": [
+                  203,
+                  55,
+                  300,
+                  97
+                ],
+                "center": [
+                  252,
+                  76
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 5,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_6_connector",
+                "bbox": [
+                  50,
+                  150,
+                  78,
+                  198
+                ],
+                "center": [
+                  64,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "known_ic_pinout",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "confidence": 0.74,
+                "validation": [
+                  "verify package orientation",
+                  "match pin 1 marker",
+                  "confirm continuity to connector"
+                ]
+              }
+            ],
+            "pinout_evidence": [
+              {
+                "component_id": "cmp_3_connector",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "package": "module",
+                "power_pins": [
+                  {
+                    "pin_number": 1,
+                    "pin_name": "VCC",
+                    "pin_type": "power",
+                    "description": "Power supply (3.3V ONLY!)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 300.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "3.3V regulator"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 9,
+                    "pin_name": "GND",
+                    "pin_type": "ground",
+                    "description": "Ground",
+                    "typical_voltage": 0.0,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Ground plane"
+                    ],
+                    "critical": true
+                  }
+                ],
+                "programming_or_clock_pins": []
+              }
+            ],
+            "splice_plan": {
+              "safest_entry_points": [],
+              "required_measurements": [
+                "continuity from connector to ground",
+                "unpowered resistance between power and ground",
+                "load output voltage",
+                "max load current",
+                "flyback/protection diode continuity"
+              ],
+              "do_not_assume": [
+                "pin order",
+                "voltage level",
+                "shared ground",
+                "connector current rating",
+                "firmware protocol"
+              ]
+            },
+            "confidence": 0.69,
+            "limitations": [
+              "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+              "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+              "do not power harvested modules until polarity, rails, and isolation are confirmed"
+            ]
+          }
+        },
+        "created_at": "2026-05-05T19:17:48.939639+00:00"
+      },
+      {
+        "asset_id": "part_conn_5",
+        "asset_type": "component",
+        "name": "CONN",
+        "capabilities": [
+          "conn"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: conn"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:17:48.939658+00:00"
+      },
+      {
+        "asset_id": "part_esp8266_5",
+        "asset_type": "component",
+        "name": "ESP8266",
+        "capabilities": [
+          "esp8266"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 3.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: esp8266"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:17:48.939668+00:00"
+      },
+      {
+        "asset_id": "part_icchip_5",
+        "asset_type": "component",
+        "name": "ICCHIP",
+        "capabilities": [
+          "icchip"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: icchip"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:17:48.939674+00:00"
+      },
+      {
+        "asset_id": "board_motor_or_actuator_driver_9",
+        "asset_type": "board_or_module",
+        "name": "motor_or_actuator_driver",
+        "capabilities": [
+          "actuator_driver",
+          "connector",
+          "controller",
+          "known_ic_pinout",
+          "power",
+          "wireless"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.785,
+        "estimated_value_usd": 17.0,
+        "quantity": 1,
+        "evidence": [
+          "board role: motor_or_actuator_driver",
+          "part marking: conn",
+          "part marking: icchip",
+          "part marking: esp8266",
+          "interface: known_ic_pinout"
+        ],
+        "metadata": {
+          "board_identity": {
+            "primary_type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.785,
+            "evidence": [
+              "4 mosfet",
+              "5 connector",
+              "1 inductor"
+            ],
+            "alternatives": [
+              {
+                "type": "io_interface_or_adapter",
+                "description": "Connector, adapter, breakout, or IO interface board",
+                "confidence": 0.84,
+                "evidence": [
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "power_supply_or_regulator",
+                "description": "Power conversion, protection, or distribution board",
+                "confidence": 0.66,
+                "evidence": [
+                  "1 inductor",
+                  "4 mosfet",
+                  "5 connector"
+                ]
+              },
+              {
+                "type": "controller_or_embedded_compute",
+                "description": "Controller, development, or embedded compute board",
+                "confidence": 0.6,
+                "evidence": [
+                  "5 connector",
+                  "text hints: esp8266, mcu",
+                  "marking evidence: esp8266, mcu"
+                ]
+              }
+            ]
+          },
+          "functional_blocks": [
+            {
+              "block_type": "power_input_protection",
+              "label": "Input power/protection",
+              "component_count": 10,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_7_inductor",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                380,
+                201
+              ],
+              "confidence": 0.95,
+              "function": "Accepts incoming power and protects downstream circuitry",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  0,
+                  4,
+                  430,
+                  251
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "actuator_drive",
+              "label": "Actuator or high-current output",
+              "component_count": 9,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_4_mosfet",
+                "cmp_5_mosfet",
+                "cmp_6_connector",
+                "cmp_8_mosfet",
+                "cmp_9_mosfet"
+              ],
+              "bbox": [
+                50,
+                54,
+                300,
+                201
+              ],
+              "confidence": 0.85,
+              "function": "Switches higher current loads from low-power control signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  16,
+                  338,
+                  239
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "io_connectivity",
+              "label": "External IO/connectors",
+              "component_count": 5,
+              "components": [
+                "cmp_0_connector",
+                "cmp_1_connector",
+                "cmp_2_connector",
+                "cmp_3_connector",
+                "cmp_6_connector"
+              ],
+              "bbox": [
+                50,
+                55,
+                300,
+                199
+              ],
+              "confidence": 0.85,
+              "function": "Provides external electrical connections to a machine or host",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  12,
+                  17,
+                  338,
+                  237
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "power_regulation",
+              "label": "Voltage regulation/filtering",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Converts, filters, or stabilizes board power rails",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            },
+            {
+              "block_type": "passive_conditioning",
+              "label": "Passive filtering/biasing",
+              "component_count": 1,
+              "components": [
+                "cmp_7_inductor"
+              ],
+              "bbox": [
+                350,
+                151,
+                380,
+                181
+              ],
+              "confidence": 0.37,
+              "function": "Filters, biases, divides, limits current, or shapes signals",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  346,
+                  147,
+                  384,
+                  185
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            }
+          ],
+          "machine_connection_map": {
+            "mode": "machine_connection_map",
+            "connector_count": 5,
+            "connector_maps": [
+              {
+                "connector_id": "conn_0_connector",
+                "bbox": [
+                  250,
+                  152,
+                  300,
+                  196
+                ],
+                "center": [
+                  275,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_side"
+              },
+              {
+                "connector_id": "conn_1_connector",
+                "bbox": [
+                  52,
+                  56,
+                  151,
+                  98
+                ],
+                "center": [
+                  101,
+                  77
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 6,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_2_connector",
+                "bbox": [
+                  99,
+                  150,
+                  132,
+                  199
+                ],
+                "center": [
+                  116,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_3_connector",
+                "bbox": [
+                  203,
+                  55,
+                  300,
+                  97
+                ],
+                "center": [
+                  252,
+                  76
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 5,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              },
+              {
+                "connector_id": "conn_6_connector",
+                "bbox": [
+                  50,
+                  150,
+                  78,
+                  198
+                ],
+                "center": [
+                  64,
+                  174
+                ],
+                "class_name": "connector",
+                "estimated_pin_count": 3,
+                "labels": [],
+                "likely_roles": [
+                  "unlabeled_external_interface"
+                ],
+                "candidate_pin_groups": [],
+                "confidence": 0.4,
+                "recommended_next_photo": "close_up_connector_label"
+              }
+            ],
+            "interfaces": [
+              {
+                "type": "known_ic_pinout",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "confidence": 0.74,
+                "validation": [
+                  "verify package orientation",
+                  "match pin 1 marker",
+                  "confirm continuity to connector"
+                ]
+              }
+            ],
+            "pinout_evidence": [
+              {
+                "component_id": "cmp_3_connector",
+                "part_number": "ESP8266",
+                "pin_count": 22,
+                "package": "module",
+                "power_pins": [
+                  {
+                    "pin_number": 1,
+                    "pin_name": "VCC",
+                    "pin_type": "power",
+                    "description": "Power supply (3.3V ONLY!)",
+                    "typical_voltage": 3.3,
+                    "max_current_ma": 300.0,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "3.3V regulator"
+                    ],
+                    "critical": true
+                  },
+                  {
+                    "pin_number": 9,
+                    "pin_name": "GND",
+                    "pin_type": "ground",
+                    "description": "Ground",
+                    "typical_voltage": 0.0,
+                    "max_current_ma": null,
+                    "alternate_functions": [],
+                    "typical_connections": [
+                      "Ground plane"
+                    ],
+                    "critical": true
+                  }
+                ],
+                "programming_or_clock_pins": []
+              }
+            ],
+            "splice_plan": {
+              "safest_entry_points": [],
+              "required_measurements": [
+                "continuity from connector to ground",
+                "unpowered resistance between power and ground",
+                "load output voltage",
+                "max load current",
+                "flyback/protection diode continuity"
+              ],
+              "do_not_assume": [
+                "pin order",
+                "voltage level",
+                "shared ground",
+                "connector current rating",
+                "firmware protocol"
+              ]
+            },
+            "confidence": 0.69,
+            "limitations": [
+              "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+              "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+              "do not power harvested modules until polarity, rails, and isolation are confirmed"
+            ]
+          }
+        },
+        "created_at": "2026-05-05T19:36:16.524191+00:00"
+      },
+      {
+        "asset_id": "part_conn_9",
+        "asset_type": "component",
+        "name": "CONN",
+        "capabilities": [
+          "conn"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: conn"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:36:16.524209+00:00"
+      },
+      {
+        "asset_id": "part_esp8266_9",
+        "asset_type": "component",
+        "name": "ESP8266",
+        "capabilities": [
+          "esp8266"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 3.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: esp8266"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:36:16.524219+00:00"
+      },
+      {
+        "asset_id": "part_icchip_9",
+        "asset_type": "component",
+        "name": "ICCHIP",
+        "capabilities": [
+          "icchip"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.36,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: icchip"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:36:16.524226+00:00"
+      }
+    ]
+  },
+  "opportunity_report": {
+    "mode": "salvage_and_arbitrage_opportunity_engine",
+    "asset_summary": {
+      "capabilities": {
+        "actuator_driver": 3,
+        "conn": 3,
+        "connector": 6,
+        "controller": 4,
+        "esp8266": 3,
+        "icchip": 3,
+        "known_ic_pinout": 3,
+        "power": 3,
+        "wireless": 4
+      },
+      "parts": {
+        "esp8266": 3
+      },
+      "connector_count": 3,
+      "defect_count": 0,
+      "evidence": [
+        "board role: motor_or_actuator_driver",
+        "part marking: conn",
+        "part marking: icchip",
+        "marking resolved: conn",
+        "marking resolved: esp8266",
+        "marking resolved: icchip",
+        "board role: motor_or_actuator_driver",
+        "part marking: conn",
+        "part marking: icchip",
+        "marking resolved: conn",
+        "marking resolved: esp8266",
+        "marking resolved: icchip",
+        "board role: inventory_bundle"
+      ]
+    },
+    "opportunities": [
+      {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.61,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "actuator_driver",
+          "controller"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector",
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "led_controller",
+        "name": "LED / Light Controller",
+        "category": "consumer_gadget",
+        "score": 0.61,
+        "estimated_output_value_usd": 16.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "actuator_driver",
+          "controller"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector",
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      {
+        "type": "resell_or_stock",
+        "id": "resell_esp8266",
+        "name": "Recover/stock ESP8266",
+        "score": 0.575,
+        "estimated_output_value_usd": 9.0,
+        "matched_assets": [
+          "esp8266"
+        ],
+        "missing_assets": [],
+        "next_steps": [
+          "test part",
+          "verify marking/package",
+          "sort into inventory",
+          "check live market price"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "wifi_relay_switch",
+        "name": "Smart WiFi Relay Switch",
+        "category": "upcycled_gadget",
+        "score": 0.53,
+        "estimated_output_value_usd": 18.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "actuator_driver",
+          "power",
+          "wireless"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "bench_power_module",
+        "name": "Bench Power Supply Module",
+        "category": "tooling",
+        "score": 0.53,
+        "estimated_output_value_usd": 22.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "power"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "connector"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "sensor_gateway",
+        "name": "Sensor Gateway / Data Logger",
+        "category": "iot",
+        "score": 0.305,
+        "estimated_output_value_usd": 24.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "controller"
+        ],
+        "missing_assets": [
+          "sensor_or_adc"
+        ],
+        "nice_to_have_matched": [
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: sensor_or_adc"
+        ]
+      }
+    ],
+    "best_opportunity": {
+      "type": "build_from_salvage",
+      "id": "robot_motor_controller",
+      "name": "Robot Motor Controller",
+      "category": "robotics",
+      "score": 0.61,
+      "estimated_output_value_usd": 28.0,
+      "build_complexity": "hard",
+      "matched_assets": [
+        "actuator_driver",
+        "controller"
+      ],
+      "missing_assets": [],
+      "nice_to_have_matched": [
+        "connector",
+        "wireless"
+      ],
+      "next_steps": [
+        "test harvested modules",
+        "create pin map",
+        "verify power rails",
+        "prototype build using harvested modules"
+      ]
+    },
+    "strategy": {
+      "recommendation": "build_now",
+      "reason": "Top opportunity is Robot Motor Controller with score 0.61.",
+      "inventory_focus": [
+        "actuator_driver",
+        "conn",
+        "connector",
+        "controller",
+        "esp8266",
+        "icchip",
+        "known_ic_pinout",
+        "power",
+        "wireless"
+      ]
+    },
+    "confidence": 0.9,
+    "limitations": [
+      "value estimates are planning estimates until parts are tested and market prices are verified",
+      "salvaged modules need electrical validation before resale or reuse",
+      "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+    ]
+  },
+  "recipe_report": {
+    "inventory_for_optimizer": [
+      {
+        "id": "relay",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "connector",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "esp32",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "arduino_nano",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "arduino_uno",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "known_ic_pinout",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "power_supply",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "esp8266",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_motor_or_actuator_driver_1"
+      },
+      {
+        "id": "conn",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "part_conn_1"
+      },
+      {
+        "id": "icchip",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "part_icchip_1"
+      }
+    ],
+    "recipes": [
+      {
+        "name": "IoT Smart Relay Controller",
+        "category": "home_automation",
+        "description": "WiFi-controlled relay for home automation. Control lights, fans, or appliances via phone.",
+        "difficulty": "medium",
+        "required_components": [
+          "esp8266",
+          "relay",
+          "led"
+        ],
+        "components_owned": [
+          "esp8266",
+          "relay"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 66.7,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 4.1,
+        "market_price_low": 25.0,
+        "market_price_high": 50.0,
+        "profit_margin": 33.4,
+        "roi_percent": 814.6,
+        "build_time_hours": 2.0
+      },
+      {
+        "name": "Smart Doorbell",
+        "category": "home_automation",
+        "description": "WiFi doorbell that sends notifications to your phone when pressed.",
+        "difficulty": "medium",
+        "required_components": [
+          "esp8266",
+          "relay",
+          "led"
+        ],
+        "components_owned": [
+          "esp8266",
+          "relay"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 66.7,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 4.1,
+        "market_price_low": 22.0,
+        "market_price_high": 38.0,
+        "profit_margin": 25.9,
+        "roi_percent": 631.7,
+        "build_time_hours": 2.5
+      },
+      {
+        "name": "Water Level Alarm",
+        "category": "sensors",
+        "description": "Alerts when water level too high/low. Good for tanks, basements.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "relay",
+          "led"
+        ],
+        "components_owned": [
+          "arduino_nano",
+          "relay"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 66.7,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 4.1,
+        "market_price_low": 15.0,
+        "market_price_high": 28.0,
+        "profit_margin": 17.4,
+        "roi_percent": 424.4,
+        "build_time_hours": 1.5
+      },
+      {
+        "name": "Soil Moisture Monitor",
+        "category": "sensors",
+        "description": "Monitor soil moisture for plants. Alerts when watering needed.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "led"
+        ],
+        "components_owned": [
+          "arduino_nano"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 3.1,
+        "market_price_low": 12.0,
+        "market_price_high": 24.0,
+        "profit_margin": 14.9,
+        "roi_percent": 480.6,
+        "build_time_hours": 1.0
+      },
+      {
+        "name": "Automatic Blind Controller",
+        "category": "home_automation",
+        "description": "Open/close blinds automatically based on time or light. WiFi controllable.",
+        "difficulty": "hard",
+        "required_components": [
+          "esp8266",
+          "servo_sg90"
+        ],
+        "components_owned": [
+          "esp8266"
+        ],
+        "components_needed": [
+          "servo_sg90"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 3.0,
+        "parts_cost": 6.0,
+        "market_price_low": 40.0,
+        "market_price_high": 70.0,
+        "profit_margin": 49.0,
+        "roi_percent": 816.7,
+        "build_time_hours": 4.5
+      },
+      {
+        "name": "Line Following Robot",
+        "category": "robotics",
+        "description": "Robot that follows black lines on white surface. Great for competitions.",
+        "difficulty": "medium",
+        "required_components": [
+          "arduino_uno",
+          "servo_sg90"
+        ],
+        "components_owned": [
+          "arduino_uno"
+        ],
+        "components_needed": [
+          "servo_sg90"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 3.0,
+        "parts_cost": 18.0,
+        "market_price_low": 35.0,
+        "market_price_high": 60.0,
+        "profit_margin": 29.5,
+        "roi_percent": 163.9,
+        "build_time_hours": 4.0
+      },
+      {
+        "name": "Motion Sensor Light",
+        "category": "home_automation",
+        "description": "Automatic light that turns on when motion detected. Perfect for closets/hallways.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "hc_sr04",
+          "relay",
+          "led"
+        ],
+        "components_owned": [
+          "arduino_nano",
+          "relay"
+        ],
+        "components_needed": [
+          "hc_sr04",
+          "led"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 3.1,
+        "parts_cost": 7.1,
+        "market_price_low": 18.0,
+        "market_price_high": 32.0,
+        "profit_margin": 17.9,
+        "roi_percent": 252.1,
+        "build_time_hours": 1.5
+      },
+      {
+        "name": "Energy Monitor",
+        "category": "sensors",
+        "description": "Monitor home electricity usage in real-time. Track consumption.",
+        "difficulty": "hard",
+        "required_components": [
+          "esp32",
+          "oled_ssd1306"
+        ],
+        "components_owned": [
+          "esp32"
+        ],
+        "components_needed": [
+          "oled_ssd1306"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 6.0,
+        "parts_cost": 11.0,
+        "market_price_low": 35.0,
+        "market_price_high": 65.0,
+        "profit_margin": 39.0,
+        "roi_percent": 354.5,
+        "build_time_hours": 4.0
+      }
+    ],
+    "best_recipe": {
+      "name": "IoT Smart Relay Controller",
+      "category": "home_automation",
+      "description": "WiFi-controlled relay for home automation. Control lights, fans, or appliances via phone.",
+      "difficulty": "medium",
+      "required_components": [
+        "esp8266",
+        "relay",
+        "led"
+      ],
+      "components_owned": [
+        "esp8266",
+        "relay"
+      ],
+      "components_needed": [
+        "led"
+      ],
+      "inventory_match_percent": 66.7,
+      "missing_parts_cost": 0.1,
+      "parts_cost": 4.1,
+      "market_price_low": 25.0,
+      "market_price_high": 50.0,
+      "profit_margin": 33.4,
+      "roi_percent": 814.6,
+      "build_time_hours": 2.0
+    }
+  },
+  "execution_plan": {
+    "status": "ready_to_execute",
+    "target": "Robot Motor Controller",
+    "target_type": "build_from_salvage",
+    "recipe_target": {
+      "name": "IoT Smart Relay Controller",
+      "category": "home_automation",
+      "description": "WiFi-controlled relay for home automation. Control lights, fans, or appliances via phone.",
+      "difficulty": "medium",
+      "required_components": [
+        "esp8266",
+        "relay",
+        "led"
+      ],
+      "components_owned": [
+        "esp8266",
+        "relay"
+      ],
+      "components_needed": [
+        "led"
+      ],
+      "inventory_match_percent": 66.7,
+      "missing_parts_cost": 0.1,
+      "parts_cost": 4.1,
+      "market_price_low": 25.0,
+      "market_price_high": 50.0,
+      "profit_margin": 33.4,
+      "roi_percent": 814.6,
+      "build_time_hours": 2.0
+    },
+    "steps": [
+      "reserve matched salvage assets",
+      "run electrical validation on every reused module",
+      "prototype interconnect between matched modules",
+      "generate wiring/pinout checklist",
+      "build first functional prototype",
+      "estimate enclosure, labor, and resale price"
+    ],
+    "validation_gates": [
+      "no unknown power polarity",
+      "all reused modules pass basic continuity",
+      "known voltage domains before interconnect",
+      "defect candidates reviewed"
+    ]
+  },
+  "decision": {
+    "action": "validate_then_execute",
+    "reason": "Robot Motor Controller",
+    "confidence": 0.9,
+    "next_step": "reserve matched salvage assets"
+  },
+  "build_package": {
+    "mode": "salvage_build_package",
+    "package_type": "salvage_project_build",
+    "target": {
+      "type": "build_from_salvage",
+      "id": "robot_motor_controller",
+      "name": "Robot Motor Controller",
+      "category": "robotics",
+      "score": 0.61,
+      "estimated_output_value_usd": 28.0,
+      "build_complexity": "hard",
+      "matched_assets": [
+        "actuator_driver",
+        "controller"
+      ],
+      "missing_assets": [],
+      "nice_to_have_matched": [
+        "connector",
+        "wireless"
+      ],
+      "next_steps": [
+        "test harvested modules",
+        "create pin map",
+        "verify power rails",
+        "prototype build using harvested modules"
+      ]
+    },
+    "target_source": "opportunity",
+    "candidate_recipe": {
+      "name": "IoT Smart Relay Controller",
+      "category": "home_automation",
+      "description": "WiFi-controlled relay for home automation. Control lights, fans, or appliances via phone.",
+      "difficulty": "medium",
+      "required_components": [
+        "esp8266",
+        "relay",
+        "led"
+      ],
+      "components_owned": [
+        "esp8266",
+        "relay"
+      ],
+      "components_needed": [
+        "led"
+      ],
+      "inventory_match_percent": 66.7,
+      "missing_parts_cost": 0.1,
+      "parts_cost": 4.1,
+      "market_price_low": 25.0,
+      "market_price_high": 50.0,
+      "profit_margin": 33.4,
+      "roi_percent": 814.6,
+      "build_time_hours": 2.0
+    },
+    "work_order": {
+      "status": "ready_to_execute",
+      "target_name": "Robot Motor Controller",
+      "steps": [
+        "reserve matched salvage assets",
+        "run electrical validation on every reused module",
+        "prototype interconnect between matched modules",
+        "generate wiring/pinout checklist",
+        "build first functional prototype",
+        "estimate enclosure, labor, and resale price",
+        "follow 6 generated assembly step(s)"
+      ],
+      "validation_gates": [
+        "no unknown power polarity",
+        "all reused modules pass basic continuity",
+        "known voltage domains before interconnect",
+        "defect candidates reviewed"
+      ],
+      "operator_notes": [
+        "treat salvaged parts as untrusted until tested",
+        "record test results back into inventory after each gate",
+        "separate resale-grade parts from build-only parts"
+      ]
+    },
+    "bom": {
+      "required": [
+        "actuator_driver",
+        "controller"
+      ],
+      "owned": [
+        "actuator_driver",
+        "controller"
+      ],
+      "missing": [],
+      "missing_parts_cost_usd": null,
+      "parts_cost_usd": null
+    },
+    "validation": {
+      "required_tests": [
+        "visual inspection",
+        "continuity power-to-ground",
+        "current-limited first power-up",
+        "connector pin map",
+        "load current measurement",
+        "flyback/protection check"
+      ],
+      "gates": [
+        "no unknown power polarity",
+        "all reused modules pass basic continuity",
+        "known voltage domains before interconnect",
+        "defect candidates reviewed"
+      ],
+      "pass_criteria": [
+        "no short on main rail",
+        "rails within expected voltage range",
+        "thermal behavior stable for first 5 minutes",
+        "all external pins labeled before integration"
+      ]
+    },
+    "wiring_plan": {
+      "known_wiring_steps": [],
+      "connector_maps": [],
+      "notes": [
+        "use workflow machine_connection_map when available for harvested modules",
+        "map every salvaged connector with continuity before connecting recipe wiring"
+      ]
+    },
+    "firmware_plan": {
+      "target_platform": "unknown_controller",
+      "features": [],
+      "starter_code": "/*\n * Circuit-AI salvage starter firmware\n * Target platform: unknown_controller\n * Features: manual validation\n */\n\nconst int STATUS_LED = 2;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(STATUS_LED, OUTPUT);\n  Serial.println(\"Circuit-AI salvage validation boot\");\n}\n\nvoid loop() {\n  digitalWrite(STATUS_LED, HIGH);\n  delay(250);\n  digitalWrite(STATUS_LED, LOW);\n  delay(750);\n}",
+      "starter_tasks": [
+        "blink/status LED test",
+        "serial boot log",
+        "read each attached sensor or toggle each output individually",
+        "add fault timeout before unattended use"
+      ]
+    },
+    "commercialization": {
+      "positioning": "robotics module or educational kit",
+      "estimated_market_price_low_usd": 28.0,
+      "estimated_market_price_high_usd": 28.0,
+      "adjusted_margin_usd": null,
+      "inventory_value_used_usd": 60.0,
+      "listing_checklist": [
+        "photograph tested module",
+        "include voltage/current limits",
+        "state salvaged/refurbished condition clearly",
+        "include safety disclaimers for high-voltage or load-switching products"
+      ]
+    },
+    "source_inventory": {
+      "asset_count": 12,
+      "unique_records": 12,
+      "estimated_inventory_value_usd": 60.0,
+      "by_capability": {
+        "actuator_driver": 3,
+        "conn": 3,
+        "connector": 3,
+        "controller": 3,
+        "esp8266": 3,
+        "icchip": 3,
+        "known_ic_pinout": 3,
+        "power": 3,
+        "wireless": 3
+      },
+      "by_test_status": {
+        "untested": 12
+      },
+      "assets": [
+        {
+          "asset_id": "board_motor_or_actuator_driver_1",
+          "asset_type": "board_or_module",
+          "name": "motor_or_actuator_driver",
+          "capabilities": [
+            "actuator_driver",
+            "connector",
+            "controller",
+            "known_ic_pinout",
+            "power",
+            "wireless"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.785,
+          "estimated_value_usd": 17.0,
+          "quantity": 1,
+          "evidence": [
+            "board role: motor_or_actuator_driver",
+            "part marking: conn",
+            "part marking: icchip",
+            "part marking: esp8266",
+            "interface: known_ic_pinout"
+          ],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "motor_or_actuator_driver",
+              "description": "Motor, relay, solenoid, or high-current actuator driver board",
+              "confidence": 0.785,
+              "evidence": [
+                "4 mosfet",
+                "5 connector",
+                "1 inductor"
+              ],
+              "alternatives": [
+                {
+                  "type": "io_interface_or_adapter",
+                  "description": "Connector, adapter, breakout, or IO interface board",
+                  "confidence": 0.84,
+                  "evidence": [
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "power_supply_or_regulator",
+                  "description": "Power conversion, protection, or distribution board",
+                  "confidence": 0.66,
+                  "evidence": [
+                    "1 inductor",
+                    "4 mosfet",
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "controller_or_embedded_compute",
+                  "description": "Controller, development, or embedded compute board",
+                  "confidence": 0.6,
+                  "evidence": [
+                    "5 connector",
+                    "text hints: esp8266, mcu",
+                    "marking evidence: esp8266, mcu"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "power_input_protection",
+                "label": "Input power/protection",
+                "component_count": 10,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_7_inductor",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  380,
+                  201
+                ],
+                "confidence": 0.95,
+                "function": "Accepts incoming power and protects downstream circuitry",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    0,
+                    4,
+                    430,
+                    251
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "actuator_drive",
+                "label": "Actuator or high-current output",
+                "component_count": 9,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  300,
+                  201
+                ],
+                "confidence": 0.85,
+                "function": "Switches higher current loads from low-power control signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    16,
+                    338,
+                    239
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "io_connectivity",
+                "label": "External IO/connectors",
+                "component_count": 5,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_6_connector"
+                ],
+                "bbox": [
+                  50,
+                  55,
+                  300,
+                  199
+                ],
+                "confidence": 0.85,
+                "function": "Provides external electrical connections to a machine or host",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    17,
+                    338,
+                    237
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "power_regulation",
+                "label": "Voltage regulation/filtering",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Converts, filters, or stabilizes board power rails",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "passive_conditioning",
+                "label": "Passive filtering/biasing",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Filters, biases, divides, limits current, or shapes signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 5,
+              "connector_maps": [
+                {
+                  "connector_id": "conn_0_connector",
+                  "bbox": [
+                    250,
+                    152,
+                    300,
+                    196
+                  ],
+                  "center": [
+                    275,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_side"
+                },
+                {
+                  "connector_id": "conn_1_connector",
+                  "bbox": [
+                    52,
+                    56,
+                    151,
+                    98
+                  ],
+                  "center": [
+                    101,
+                    77
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 6,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_2_connector",
+                  "bbox": [
+                    99,
+                    150,
+                    132,
+                    199
+                  ],
+                  "center": [
+                    116,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_3_connector",
+                  "bbox": [
+                    203,
+                    55,
+                    300,
+                    97
+                  ],
+                  "center": [
+                    252,
+                    76
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 5,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_6_connector",
+                  "bbox": [
+                    50,
+                    150,
+                    78,
+                    198
+                  ],
+                  "center": [
+                    64,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                }
+              ],
+              "interfaces": [
+                {
+                  "type": "known_ic_pinout",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "confidence": 0.74,
+                  "validation": [
+                    "verify package orientation",
+                    "match pin 1 marker",
+                    "confirm continuity to connector"
+                  ]
+                }
+              ],
+              "pinout_evidence": [
+                {
+                  "component_id": "cmp_3_connector",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "package": "module",
+                  "power_pins": [
+                    {
+                      "pin_number": 1,
+                      "pin_name": "VCC",
+                      "pin_type": "power",
+                      "description": "Power supply (3.3V ONLY!)",
+                      "typical_voltage": 3.3,
+                      "max_current_ma": 300.0,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "3.3V regulator"
+                      ],
+                      "critical": true
+                    },
+                    {
+                      "pin_number": 9,
+                      "pin_name": "GND",
+                      "pin_type": "ground",
+                      "description": "Ground",
+                      "typical_voltage": 0.0,
+                      "max_current_ma": null,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "Ground plane"
+                      ],
+                      "critical": true
+                    }
+                  ],
+                  "programming_or_clock_pins": []
+                }
+              ],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground",
+                  "load output voltage",
+                  "max load current",
+                  "flyback/protection diode continuity"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.69,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T19:15:40.628823+00:00"
+        },
+        {
+          "asset_id": "part_conn_1",
+          "asset_type": "component",
+          "name": "CONN",
+          "capabilities": [
+            "conn"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: conn"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:15:40.628840+00:00"
+        },
+        {
+          "asset_id": "part_esp8266_1",
+          "asset_type": "component",
+          "name": "ESP8266",
+          "capabilities": [
+            "esp8266"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 3.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: esp8266"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:15:40.628850+00:00"
+        },
+        {
+          "asset_id": "part_icchip_1",
+          "asset_type": "component",
+          "name": "ICCHIP",
+          "capabilities": [
+            "icchip"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: icchip"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:15:40.628856+00:00"
+        },
+        {
+          "asset_id": "board_motor_or_actuator_driver_5",
+          "asset_type": "board_or_module",
+          "name": "motor_or_actuator_driver",
+          "capabilities": [
+            "actuator_driver",
+            "connector",
+            "controller",
+            "known_ic_pinout",
+            "power",
+            "wireless"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.785,
+          "estimated_value_usd": 17.0,
+          "quantity": 1,
+          "evidence": [
+            "board role: motor_or_actuator_driver",
+            "part marking: conn",
+            "part marking: icchip",
+            "part marking: esp8266",
+            "interface: known_ic_pinout"
+          ],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "motor_or_actuator_driver",
+              "description": "Motor, relay, solenoid, or high-current actuator driver board",
+              "confidence": 0.785,
+              "evidence": [
+                "4 mosfet",
+                "5 connector",
+                "1 inductor"
+              ],
+              "alternatives": [
+                {
+                  "type": "io_interface_or_adapter",
+                  "description": "Connector, adapter, breakout, or IO interface board",
+                  "confidence": 0.84,
+                  "evidence": [
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "power_supply_or_regulator",
+                  "description": "Power conversion, protection, or distribution board",
+                  "confidence": 0.66,
+                  "evidence": [
+                    "1 inductor",
+                    "4 mosfet",
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "controller_or_embedded_compute",
+                  "description": "Controller, development, or embedded compute board",
+                  "confidence": 0.6,
+                  "evidence": [
+                    "5 connector",
+                    "text hints: esp8266, mcu",
+                    "marking evidence: esp8266, mcu"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "power_input_protection",
+                "label": "Input power/protection",
+                "component_count": 10,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_7_inductor",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  380,
+                  201
+                ],
+                "confidence": 0.95,
+                "function": "Accepts incoming power and protects downstream circuitry",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    0,
+                    4,
+                    430,
+                    251
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "actuator_drive",
+                "label": "Actuator or high-current output",
+                "component_count": 9,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  300,
+                  201
+                ],
+                "confidence": 0.85,
+                "function": "Switches higher current loads from low-power control signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    16,
+                    338,
+                    239
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "io_connectivity",
+                "label": "External IO/connectors",
+                "component_count": 5,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_6_connector"
+                ],
+                "bbox": [
+                  50,
+                  55,
+                  300,
+                  199
+                ],
+                "confidence": 0.85,
+                "function": "Provides external electrical connections to a machine or host",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    17,
+                    338,
+                    237
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "power_regulation",
+                "label": "Voltage regulation/filtering",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Converts, filters, or stabilizes board power rails",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "passive_conditioning",
+                "label": "Passive filtering/biasing",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Filters, biases, divides, limits current, or shapes signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 5,
+              "connector_maps": [
+                {
+                  "connector_id": "conn_0_connector",
+                  "bbox": [
+                    250,
+                    152,
+                    300,
+                    196
+                  ],
+                  "center": [
+                    275,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_side"
+                },
+                {
+                  "connector_id": "conn_1_connector",
+                  "bbox": [
+                    52,
+                    56,
+                    151,
+                    98
+                  ],
+                  "center": [
+                    101,
+                    77
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 6,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_2_connector",
+                  "bbox": [
+                    99,
+                    150,
+                    132,
+                    199
+                  ],
+                  "center": [
+                    116,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_3_connector",
+                  "bbox": [
+                    203,
+                    55,
+                    300,
+                    97
+                  ],
+                  "center": [
+                    252,
+                    76
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 5,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_6_connector",
+                  "bbox": [
+                    50,
+                    150,
+                    78,
+                    198
+                  ],
+                  "center": [
+                    64,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                }
+              ],
+              "interfaces": [
+                {
+                  "type": "known_ic_pinout",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "confidence": 0.74,
+                  "validation": [
+                    "verify package orientation",
+                    "match pin 1 marker",
+                    "confirm continuity to connector"
+                  ]
+                }
+              ],
+              "pinout_evidence": [
+                {
+                  "component_id": "cmp_3_connector",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "package": "module",
+                  "power_pins": [
+                    {
+                      "pin_number": 1,
+                      "pin_name": "VCC",
+                      "pin_type": "power",
+                      "description": "Power supply (3.3V ONLY!)",
+                      "typical_voltage": 3.3,
+                      "max_current_ma": 300.0,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "3.3V regulator"
+                      ],
+                      "critical": true
+                    },
+                    {
+                      "pin_number": 9,
+                      "pin_name": "GND",
+                      "pin_type": "ground",
+                      "description": "Ground",
+                      "typical_voltage": 0.0,
+                      "max_current_ma": null,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "Ground plane"
+                      ],
+                      "critical": true
+                    }
+                  ],
+                  "programming_or_clock_pins": []
+                }
+              ],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground",
+                  "load output voltage",
+                  "max load current",
+                  "flyback/protection diode continuity"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.69,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T19:17:48.939639+00:00"
+        },
+        {
+          "asset_id": "part_conn_5",
+          "asset_type": "component",
+          "name": "CONN",
+          "capabilities": [
+            "conn"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: conn"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:17:48.939658+00:00"
+        },
+        {
+          "asset_id": "part_esp8266_5",
+          "asset_type": "component",
+          "name": "ESP8266",
+          "capabilities": [
+            "esp8266"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 3.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: esp8266"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:17:48.939668+00:00"
+        },
+        {
+          "asset_id": "part_icchip_5",
+          "asset_type": "component",
+          "name": "ICCHIP",
+          "capabilities": [
+            "icchip"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: icchip"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:17:48.939674+00:00"
+        },
+        {
+          "asset_id": "board_motor_or_actuator_driver_9",
+          "asset_type": "board_or_module",
+          "name": "motor_or_actuator_driver",
+          "capabilities": [
+            "actuator_driver",
+            "connector",
+            "controller",
+            "known_ic_pinout",
+            "power",
+            "wireless"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.785,
+          "estimated_value_usd": 17.0,
+          "quantity": 1,
+          "evidence": [
+            "board role: motor_or_actuator_driver",
+            "part marking: conn",
+            "part marking: icchip",
+            "part marking: esp8266",
+            "interface: known_ic_pinout"
+          ],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "motor_or_actuator_driver",
+              "description": "Motor, relay, solenoid, or high-current actuator driver board",
+              "confidence": 0.785,
+              "evidence": [
+                "4 mosfet",
+                "5 connector",
+                "1 inductor"
+              ],
+              "alternatives": [
+                {
+                  "type": "io_interface_or_adapter",
+                  "description": "Connector, adapter, breakout, or IO interface board",
+                  "confidence": 0.84,
+                  "evidence": [
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "power_supply_or_regulator",
+                  "description": "Power conversion, protection, or distribution board",
+                  "confidence": 0.66,
+                  "evidence": [
+                    "1 inductor",
+                    "4 mosfet",
+                    "5 connector"
+                  ]
+                },
+                {
+                  "type": "controller_or_embedded_compute",
+                  "description": "Controller, development, or embedded compute board",
+                  "confidence": 0.6,
+                  "evidence": [
+                    "5 connector",
+                    "text hints: esp8266, mcu",
+                    "marking evidence: esp8266, mcu"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "power_input_protection",
+                "label": "Input power/protection",
+                "component_count": 10,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_7_inductor",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  380,
+                  201
+                ],
+                "confidence": 0.95,
+                "function": "Accepts incoming power and protects downstream circuitry",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    0,
+                    4,
+                    430,
+                    251
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "actuator_drive",
+                "label": "Actuator or high-current output",
+                "component_count": 9,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_4_mosfet",
+                  "cmp_5_mosfet",
+                  "cmp_6_connector",
+                  "cmp_8_mosfet",
+                  "cmp_9_mosfet"
+                ],
+                "bbox": [
+                  50,
+                  54,
+                  300,
+                  201
+                ],
+                "confidence": 0.85,
+                "function": "Switches higher current loads from low-power control signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    16,
+                    338,
+                    239
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "io_connectivity",
+                "label": "External IO/connectors",
+                "component_count": 5,
+                "components": [
+                  "cmp_0_connector",
+                  "cmp_1_connector",
+                  "cmp_2_connector",
+                  "cmp_3_connector",
+                  "cmp_6_connector"
+                ],
+                "bbox": [
+                  50,
+                  55,
+                  300,
+                  199
+                ],
+                "confidence": 0.85,
+                "function": "Provides external electrical connections to a machine or host",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    12,
+                    17,
+                    338,
+                    237
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "power_regulation",
+                "label": "Voltage regulation/filtering",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Converts, filters, or stabilizes board power rails",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              },
+              {
+                "block_type": "passive_conditioning",
+                "label": "Passive filtering/biasing",
+                "component_count": 1,
+                "components": [
+                  "cmp_7_inductor"
+                ],
+                "bbox": [
+                  350,
+                  151,
+                  380,
+                  181
+                ],
+                "confidence": 0.37,
+                "function": "Filters, biases, divides, limits current, or shapes signals",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    346,
+                    147,
+                    384,
+                    185
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 5,
+              "connector_maps": [
+                {
+                  "connector_id": "conn_0_connector",
+                  "bbox": [
+                    250,
+                    152,
+                    300,
+                    196
+                  ],
+                  "center": [
+                    275,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_side"
+                },
+                {
+                  "connector_id": "conn_1_connector",
+                  "bbox": [
+                    52,
+                    56,
+                    151,
+                    98
+                  ],
+                  "center": [
+                    101,
+                    77
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 6,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_2_connector",
+                  "bbox": [
+                    99,
+                    150,
+                    132,
+                    199
+                  ],
+                  "center": [
+                    116,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_3_connector",
+                  "bbox": [
+                    203,
+                    55,
+                    300,
+                    97
+                  ],
+                  "center": [
+                    252,
+                    76
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 5,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                },
+                {
+                  "connector_id": "conn_6_connector",
+                  "bbox": [
+                    50,
+                    150,
+                    78,
+                    198
+                  ],
+                  "center": [
+                    64,
+                    174
+                  ],
+                  "class_name": "connector",
+                  "estimated_pin_count": 3,
+                  "labels": [],
+                  "likely_roles": [
+                    "unlabeled_external_interface"
+                  ],
+                  "candidate_pin_groups": [],
+                  "confidence": 0.4,
+                  "recommended_next_photo": "close_up_connector_label"
+                }
+              ],
+              "interfaces": [
+                {
+                  "type": "known_ic_pinout",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "confidence": 0.74,
+                  "validation": [
+                    "verify package orientation",
+                    "match pin 1 marker",
+                    "confirm continuity to connector"
+                  ]
+                }
+              ],
+              "pinout_evidence": [
+                {
+                  "component_id": "cmp_3_connector",
+                  "part_number": "ESP8266",
+                  "pin_count": 22,
+                  "package": "module",
+                  "power_pins": [
+                    {
+                      "pin_number": 1,
+                      "pin_name": "VCC",
+                      "pin_type": "power",
+                      "description": "Power supply (3.3V ONLY!)",
+                      "typical_voltage": 3.3,
+                      "max_current_ma": 300.0,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "3.3V regulator"
+                      ],
+                      "critical": true
+                    },
+                    {
+                      "pin_number": 9,
+                      "pin_name": "GND",
+                      "pin_type": "ground",
+                      "description": "Ground",
+                      "typical_voltage": 0.0,
+                      "max_current_ma": null,
+                      "alternate_functions": [],
+                      "typical_connections": [
+                        "Ground plane"
+                      ],
+                      "critical": true
+                    }
+                  ],
+                  "programming_or_clock_pins": []
+                }
+              ],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground",
+                  "load output voltage",
+                  "max load current",
+                  "flyback/protection diode continuity"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.69,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T19:36:16.524191+00:00"
+        },
+        {
+          "asset_id": "part_conn_9",
+          "asset_type": "component",
+          "name": "CONN",
+          "capabilities": [
+            "conn"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: conn"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:36:16.524209+00:00"
+        },
+        {
+          "asset_id": "part_esp8266_9",
+          "asset_type": "component",
+          "name": "ESP8266",
+          "capabilities": [
+            "esp8266"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 3.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: esp8266"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:36:16.524219+00:00"
+        },
+        {
+          "asset_id": "part_icchip_9",
+          "asset_type": "component",
+          "name": "ICCHIP",
+          "capabilities": [
+            "icchip"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.36,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: icchip"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:36:16.524226+00:00"
+        }
+      ]
+    },
+    "confidence": 0.95
+  }
+}

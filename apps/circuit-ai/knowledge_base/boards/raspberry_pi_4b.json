@@ -1,0 +1,45 @@
+{
+  "name": "Raspberry Pi 4 Model B",
+  "id": "raspberry_pi_4b",
+  "type": "single_board_computer",
+  "microcontroller": "Broadcom BCM2711",
+  "operating_voltage": "3.3V",
+  "input_voltage": "5V USB-C",
+  "gpio_pins": 40,
+  "bbox_mm": {"x": 85.0, "y": 56.0, "z": 18.0},
+  "mounts": [
+    {"x": 3.5, "y": 3.5, "diameter": 2.7, "type": "m2.5_hole"},
+    {"x": 61.5, "y": 3.5, "diameter": 2.7, "type": "m2.5_hole"},
+    {"x": 3.5, "y": 52.5, "diameter": 2.7, "type": "m2.5_hole"},
+    {"x": 61.5, "y": 52.5, "diameter": 2.7, "type": "m2.5_hole"}
+  ],
+  "headers": [
+    {
+      "id": "gpio_header",
+      "type": "gpio",
+      "orientation": "top_edge",
+      "pins": [
+        {"name": "3V3", "x_mm": 7.0, "y_mm": 54.0}, {"name": "5V", "x_mm": 7.0, "y_mm": 51.46},
+        {"name": "GPIO2", "x_mm": 9.54, "y_mm": 54.0}, {"name": "5V", "x_mm": 9.54, "y_mm": 51.46},
+        {"name": "GPIO3", "x_mm": 12.08, "y_mm": 54.0}, {"name": "GND", "x_mm": 12.08, "y_mm": 51.46},
+        {"name": "GPIO4", "x_mm": 14.62, "y_mm": 54.0}, {"name": "TXD", "x_mm": 14.62, "y_mm": 51.46},
+        {"name": "GND", "x_mm": 17.16, "y_mm": 54.0}, {"name": "RXD", "x_mm": 17.16, "y_mm": 51.46},
+        {"name": "GPIO17", "x_mm": 19.7, "y_mm": 54.0}, {"name": "GPIO18", "x_mm": 19.7, "y_mm": 51.46},
+        {"name": "GPIO27", "x_mm": 22.24, "y_mm": 54.0}, {"name": "GND", "x_mm": 22.24, "y_mm": 51.46},
+        {"name": "GPIO22", "x_mm": 24.78, "y_mm": 54.0}, {"name": "GPIO23", "x_mm": 24.78, "y_mm": 51.46},
+        {"name": "3V3", "x_mm": 27.32, "y_mm": 54.0}, {"name": "GPIO24", "x_mm": 27.32, "y_mm": 51.46},
+        {"name": "GPIO10", "x_mm": 29.86, "y_mm": 54.0}, {"name": "GND", "x_mm": 29.86, "y_mm": 51.46},
+        {"name": "GPIO9", "x_mm": 32.4, "y_mm": 54.0}, {"name": "GPIO25", "x_mm": 32.4, "y_mm": 51.46},
+        {"name": "GPIO11", "x_mm": 34.94, "y_mm": 54.0}, {"name": "GPIO8", "x_mm": 34.94, "y_mm": 51.46},
+        {"name": "GND", "x_mm": 37.48, "y_mm": 54.0}, {"name": "GPIO7", "x_mm": 37.48, "y_mm": 51.46},
+        {"name": "ID_SD", "x_mm": 40.02, "y_mm": 54.0}, {"name": "ID_SC", "x_mm": 40.02, "y_mm": 51.46},
+        {"name": "GPIO5", "x_mm": 42.56, "y_mm": 54.0}, {"name": "GND", "x_mm": 42.56, "y_mm": 51.46},
+        {"name": "GPIO6", "x_mm": 45.1, "y_mm": 54.0}, {"name": "GPIO12", "x_mm": 45.1, "y_mm": 51.46},
+        {"name": "GPIO13", "x_mm": 47.64, "y_mm": 54.0}, {"name": "GND", "x_mm": 47.64, "y_mm": 51.46},
+        {"name": "GPIO19", "x_mm": 50.18, "y_mm": 54.0}, {"name": "GPIO16", "x_mm": 50.18, "y_mm": 51.46},
+        {"name": "GPIO26", "x_mm": 52.72, "y_mm": 54.0}, {"name": "GPIO20", "x_mm": 52.72, "y_mm": 51.46},
+        {"name": "GND", "x_mm": 55.26, "y_mm": 54.0}, {"name": "GPIO21", "x_mm": 55.26, "y_mm": 51.46}
+      ]
+    }
+  ]
+}

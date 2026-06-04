@@ -1,0 +1,598 @@
+{
+  "created_at": "2026-05-05T19:32:46.293796+00:00",
+  "method": "unlabeled_smoke_rank_v1",
+  "limitations": [
+    "This is not mAP; use labeled validation data for production qualification.",
+    "The ranking estimates practical utility on local sample photos only."
+  ],
+  "skipped_models": [],
+  "images": [
+    "assets/samples/demo_pcb.png",
+    "assets/samples/iteration-1.png",
+    "assets/samples/iteration-2.png",
+    "assets/samples/iteration-3.png",
+    "assets/samples/iteration-4.png",
+    "assets/samples/test_pcb.png"
+  ],
+  "rankings": [
+    {
+      "model_path": "models/pcb/electrocom61_nano_320.pt",
+      "score": 0.5713,
+      "image_count": 6,
+      "detected_images": 5,
+      "total_detections": 20,
+      "learned_detections": 20,
+      "average_confidence": 0.6655,
+      "class_diversity": 3,
+      "average_runtime_s": 1.4123,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 3.0746
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 2.0778
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 1.3018
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 1.8109
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.1673
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.0413
+        }
+      ]
+    },
+    {
+      "model_path": "pcb_runs/electrocom61_nano_320/weights/best.pt",
+      "score": 0.5566,
+      "image_count": 6,
+      "detected_images": 5,
+      "total_detections": 20,
+      "learned_detections": 20,
+      "average_confidence": 0.6655,
+      "class_diversity": 3,
+      "average_runtime_s": 2.0009,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 10,
+          "learned_detections": 10,
+          "average_confidence": 0.5647,
+          "classes": [
+            "connector",
+            "inductor",
+            "transistor"
+          ],
+          "elapsed_s": 2.8392
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 2.1778
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 2.1182
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 2,
+          "learned_detections": 2,
+          "average_confidence": 0.7451,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 0.5952
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 3,
+          "learned_detections": 3,
+          "average_confidence": 0.6362,
+          "classes": [
+            "connector"
+          ],
+          "elapsed_s": 2.1911
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 2.0841
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/pcb_components_yolo11n_thawed.pt",
+      "score": 0.1232,
+      "image_count": 6,
+      "detected_images": 1,
+      "total_detections": 1,
+      "learned_detections": 1,
+      "average_confidence": 0.3876,
+      "class_diversity": 1,
+      "average_runtime_s": 1.5033,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 3.1434
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.617
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.0175
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2223
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 2.4579
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.5617
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_thawed.pt",
+      "score": 0.1126,
+      "image_count": 6,
+      "detected_images": 1,
+      "total_detections": 1,
+      "learned_detections": 1,
+      "average_confidence": 0.3876,
+      "class_diversity": 1,
+      "average_runtime_s": 1.928,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3876,
+          "classes": [
+            "led"
+          ],
+          "elapsed_s": 1.7305
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.8712
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.843
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.3358
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.5886
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1986
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_fully_thawed.pt",
+      "score": 0.1098,
+      "image_count": 6,
+      "detected_images": 1,
+      "total_detections": 1,
+      "learned_detections": 1,
+      "average_confidence": 0.3683,
+      "class_diversity": 1,
+      "average_runtime_s": 1.8461,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 1,
+          "learned_detections": 1,
+          "average_confidence": 0.3683,
+          "classes": [
+            "resistor"
+          ],
+          "elapsed_s": 2.5605
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.2703
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.2107
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 2.5483
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.8046
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.6824
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_small_component.pt",
+      "score": 0.0,
+      "image_count": 6,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 1.2372,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 2.3327
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.9081
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.1285
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.3974
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.9604
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.6958
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/yolo11n_best_zoomed.pt",
+      "score": 0.0,
+      "image_count": 6,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 3.3463,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 4.3129
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.8476
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.603
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.8885
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 4.8039
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.6219
+        }
+      ]
+    },
+    {
+      "model_path": "models/pcb/electrocom61_v1.pt",
+      "score": 0.0,
+      "image_count": 6,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 2.4941,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 4.4083
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 4.3887
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.7023
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.035
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 1.9784
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 0.4521
+        }
+      ]
+    },
+    {
+      "model_path": "pcb_runs/electrocom61_v2/weights/best.pt",
+      "score": 0.0,
+      "image_count": 6,
+      "detected_images": 0,
+      "total_detections": 0,
+      "learned_detections": 0,
+      "average_confidence": 0.0,
+      "class_diversity": 0,
+      "average_runtime_s": 4.387,
+      "per_image": [
+        {
+          "image": "assets/samples/demo_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 5.66
+        },
+        {
+          "image": "assets/samples/iteration-1.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 2.8675
+        },
+        {
+          "image": "assets/samples/iteration-2.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 4.5754
+        },
+        {
+          "image": "assets/samples/iteration-3.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 6.1264
+        },
+        {
+          "image": "assets/samples/iteration-4.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.1665
+        },
+        {
+          "image": "assets/samples/test_pcb.png",
+          "detections": 0,
+          "learned_detections": 0,
+          "average_confidence": 0.0,
+          "classes": [],
+          "elapsed_s": 3.9264
+        }
+      ]
+    }
+  ]
+}

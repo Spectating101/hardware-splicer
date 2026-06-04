@@ -1,0 +1,13 @@
+{
+  "model_id": "yolo11n_best_fully_thawed",
+  "file": "models/pcb/yolo11n_best_fully_thawed.pt",
+  "sha256": "27c1db7cc4ca9f3495e51ff16e34892c2cb61eb67c4d7d1c92da7b16028d600c",
+  "source": {
+    "repository": "https://github.com/aryan-programmer/pcb-fault-detection",
+    "path": "yolo11n_best_fully_thawed.pt",
+    "url": "https://github.com/aryan-programmer/pcb-fault-detection/raw/master/pcb-components-detection/yolo11n_best_fully_thawed.pt",
+    "retrieved_at": "2026-05-05"
+  },
+  "task": "PCB component detection",
+  "updated_by": "scripts/fetch_pcb_component_model.py"
+}

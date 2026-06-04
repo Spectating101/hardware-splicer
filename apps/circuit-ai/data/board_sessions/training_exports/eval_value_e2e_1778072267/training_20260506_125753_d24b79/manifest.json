@@ -1,0 +1,172 @@
+{
+  "export_id": "training_20260506_125753_d24b79",
+  "mode": "board_session_training_package",
+  "created_at": "2026-05-06T12:57:53.393582+00:00",
+  "session": {
+    "session_id": "eval_value_e2e_1778072267",
+    "title": "USB fan warms but motor will not spin value trial",
+    "route": "repair",
+    "status": "open",
+    "device_hint": "USB fan controller board",
+    "created_at": "2026-05-06T12:57:49.955438+00:00",
+    "updated_at": "2026-05-06T12:57:52.708553+00:00",
+    "certainty": {
+      "overall": {},
+      "counts": {},
+      "missing_evidence": [],
+      "training_queue": {}
+    },
+    "metrics": {
+      "task_count": 5,
+      "open_task_count": 2,
+      "resolved_task_count": 3,
+      "capture_burden": 1,
+      "measurement_count_required": 3,
+      "certainty_level": "unknown",
+      "certainty_score": 0.0,
+      "training_capture_recommended": false
+    },
+    "open_task_count": 2,
+    "review_count": 1,
+    "training_export_count": 0
+  },
+  "counts": {
+    "component_labels": 0,
+    "ocr_examples": 0,
+    "defect_labels": 0,
+    "board_roles": 0,
+    "repair_cases": 1,
+    "reviews": 1,
+    "measurements": 1
+  },
+  "examples": {
+    "component_labels": [],
+    "ocr_examples": [],
+    "defect_labels": [],
+    "board_roles": [],
+    "repair_cases": [
+      {
+        "session_id": "eval_value_e2e_1778072267",
+        "title": "USB fan warms but motor will not spin value trial",
+        "route": "repair",
+        "device_hint": "USB fan controller board",
+        "symptoms": [
+          "motor will not spin",
+          "warm board",
+          "wire wiggle changes behavior"
+        ],
+        "repair_family": "small_dc_motor_gadget",
+        "top_fault_id": "driver_stage_or_load_fault",
+        "top_fault_name": "Driver stage or motor/load path fault",
+        "workflow_tasks": [
+          {
+            "task_id": "task_1",
+            "type": "measurement",
+            "prompt": "motor/load resistance and isolation reading",
+            "status": "resolved",
+            "source": "repair_guide_evidence"
+          },
+          {
+            "task_id": "task_2",
+            "type": "measurement",
+            "prompt": "connector continuity while gently flexing the harness",
+            "status": "resolved",
+            "source": "repair_guide_evidence"
+          },
+          {
+            "task_id": "task_3",
+            "type": "measurement",
+            "prompt": "driver output voltage with current limit and dummy load",
+            "status": "open",
+            "source": "repair_guide_evidence"
+          },
+          {
+            "task_id": "task_4",
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels",
+            "status": "open",
+            "source": "repair_guide_evidence"
+          },
+          {
+            "task_id": "task_5",
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos",
+            "status": "resolved",
+            "source": "repair_guide_evidence"
+          }
+        ],
+        "reviews": [
+          {
+            "review_id": "review_1",
+            "task_id": "task_2",
+            "task_type": "measurement",
+            "action": "accepted",
+            "payload": {
+              "task_id": "task_2",
+              "action": "accepted",
+              "notes": "operator confirmed cracked solder at motor harness",
+              "reviewer": "test_user"
+            },
+            "created_at": "2026-05-06T12:57:52.095361+00:00"
+          }
+        ],
+        "measurements": [
+          {
+            "measurement_id": "measurement_1",
+            "type": "voltage",
+            "target": "USB input under attempted startup",
+            "value": 4.91,
+            "unit": "V",
+            "notes": "supply holds up while fan fails to spin",
+            "confidence": 1.0,
+            "created_at": "2026-05-06T12:57:51.318315+00:00"
+          }
+        ],
+        "outcomes": [
+          {
+            "outcome_id": "outcome_1",
+            "decision": "repaired",
+            "value_recovered_usd": 19.0,
+            "time_saved_minutes": 32.0,
+            "notes": "reflowed harness joint and fan spins normally",
+            "created_at": "2026-05-06T12:57:52.708539+00:00"
+          }
+        ]
+      }
+    ],
+    "reviews": [
+      {
+        "review_id": "review_1",
+        "task_id": "task_2",
+        "task_type": "measurement",
+        "action": "accepted",
+        "payload": {
+          "task_id": "task_2",
+          "action": "accepted",
+          "notes": "operator confirmed cracked solder at motor harness",
+          "reviewer": "test_user"
+        },
+        "created_at": "2026-05-06T12:57:52.095361+00:00"
+      }
+    ],
+    "measurements": [
+      {
+        "measurement_id": "measurement_1",
+        "type": "voltage",
+        "target": "USB input under attempted startup",
+        "value": 4.91,
+        "unit": "V",
+        "notes": "supply holds up while fan fails to spin",
+        "confidence": 1.0,
+        "created_at": "2026-05-06T12:57:51.318315+00:00"
+      }
+    ]
+  },
+  "recommended_uses": [
+    "YOLO component label review",
+    "OCR crop/marking normalization",
+    "defect candidate validation",
+    "board-role and functional-block benchmark cases",
+    "repair-lane and evidence-task workflow tuning"
+  ]
+}

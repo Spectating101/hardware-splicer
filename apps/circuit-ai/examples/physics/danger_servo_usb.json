@@ -1,0 +1,6 @@
+{
+  "microcontroller": "esp32",
+  "components": ["servo_sg90"],
+  "power_source": {"type": "usb", "voltage_v": 5.0, "current_limit_a": 0.5},
+  "scenario": "max"
+}

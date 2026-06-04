@@ -1,0 +1,56 @@
+{
+  "name": "ESP32 DevKit V1",
+  "id": "esp32_devkit_v1",
+  "type": "microcontroller",
+  "microcontroller": "ESP32-WROOM-32",
+  "operating_voltage": "3.3V",
+  "input_voltage": "5V USB / VIN",
+  "gpio_pins": 30,
+  "bbox_mm": {"x": 52.0, "y": 28.5, "z": 13.0},
+  "headers": [
+    {
+      "id": "left_header",
+      "type": "gpio",
+      "orientation": "left_edge",
+      "pins": [
+        {"name": "EN", "x_mm": 1.5, "y_mm": 50.0},
+        {"name": "VP", "x_mm": 1.5, "y_mm": 47.46},
+        {"name": "VN", "x_mm": 1.5, "y_mm": 44.92},
+        {"name": "D34", "x_mm": 1.5, "y_mm": 42.38},
+        {"name": "D35", "x_mm": 1.5, "y_mm": 39.84},
+        {"name": "D32", "x_mm": 1.5, "y_mm": 37.3},
+        {"name": "D33", "x_mm": 1.5, "y_mm": 34.76},
+        {"name": "D25", "x_mm": 1.5, "y_mm": 32.22},
+        {"name": "D26", "x_mm": 1.5, "y_mm": 29.68},
+        {"name": "D27", "x_mm": 1.5, "y_mm": 27.14},
+        {"name": "D14", "x_mm": 1.5, "y_mm": 24.6},
+        {"name": "D12", "x_mm": 1.5, "y_mm": 22.06},
+        {"name": "D13", "x_mm": 1.5, "y_mm": 19.52},
+        {"name": "GND", "x_mm": 1.5, "y_mm": 16.98},
+        {"name": "VIN", "x_mm": 1.5, "y_mm": 14.44}
+      ]
+    },
+    {
+      "id": "right_header",
+      "type": "gpio",
+      "orientation": "right_edge",
+      "pins": [
+        {"name": "D23", "x_mm": 27.0, "y_mm": 50.0},
+        {"name": "D22", "x_mm": 27.0, "y_mm": 47.46},
+        {"name": "TX0", "x_mm": 27.0, "y_mm": 44.92},
+        {"name": "RX0", "x_mm": 27.0, "y_mm": 42.38},
+        {"name": "D21", "x_mm": 27.0, "y_mm": 39.84},
+        {"name": "D19", "x_mm": 27.0, "y_mm": 37.3},
+        {"name": "D18", "x_mm": 27.0, "y_mm": 34.76},
+        {"name": "D5", "x_mm": 27.0, "y_mm": 32.22},
+        {"name": "D17", "x_mm": 27.0, "y_mm": 29.68},
+        {"name": "D16", "x_mm": 27.0, "y_mm": 27.14},
+        {"name": "D4", "x_mm": 27.0, "y_mm": 24.6},
+        {"name": "D0", "x_mm": 27.0, "y_mm": 22.06},
+        {"name": "D2", "x_mm": 27.0, "y_mm": 19.52},
+        {"name": "D15", "x_mm": 27.0, "y_mm": 16.98},
+        {"name": "D23", "x_mm": 27.0, "y_mm": 14.44} 
+      ]
+    }
+  ]
+}

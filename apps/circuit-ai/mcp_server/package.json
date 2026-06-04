@@ -1,0 +1,36 @@
+{
+  "name": "circuit-ai-mcp-server",
+  "version": "0.4.0",
+  "description": "Circuit-AI MCP Server - Professional PCB validation, project recipes, and manufacturing tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "circuit-ai-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "circuit",
+    "pcb",
+    "electronics",
+    "kicad",
+    "validation",
+    "hardware"
+  ],
+  "author": "Circuit-AI",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "axios": "^1.6.0",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

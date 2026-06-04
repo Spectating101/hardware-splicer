@@ -1,0 +1,213 @@
+{
+  "mode": "salvage_build_package",
+  "package_type": "known_recipe_build",
+  "target": {
+    "name": "Automatic Blind Controller",
+    "category": "home_automation",
+    "description": "Open/close blinds automatically based on time or light. WiFi controllable.",
+    "difficulty": "hard",
+    "required_components": [
+      "esp8266",
+      "servo_sg90"
+    ],
+    "components_owned": [
+      "esp8266",
+      "servo_sg90"
+    ],
+    "components_needed": [],
+    "inventory_match_percent": 100.0,
+    "missing_parts_cost": 0.0,
+    "parts_cost": 4.5,
+    "market_price_low": 40.0,
+    "market_price_high": 70.0,
+    "profit_margin": 50.5,
+    "roi_percent": 1122.2,
+    "build_time_hours": 4.5
+  },
+  "work_order": {
+    "status": "ready_to_execute",
+    "target_name": "Automatic Blind Controller",
+    "steps": [
+      "verify listing photos and seller reliability",
+      "calculate shipping/tax/labor/failure-rate adjusted margin",
+      "buy only if adjusted margin remains positive",
+      "test and split listing into build/resale inventory",
+      "follow 12 generated assembly step(s)"
+    ],
+    "validation_gates": [
+      "no unknown power polarity",
+      "all reused modules pass basic continuity",
+      "known voltage domains before interconnect",
+      "defect candidates reviewed"
+    ],
+    "operator_notes": [
+      "treat salvaged parts as untrusted until tested",
+      "record test results back into inventory after each gate",
+      "separate resale-grade parts from build-only parts"
+    ]
+  },
+  "bom": {
+    "required": [
+      "esp8266",
+      "servo_sg90"
+    ],
+    "owned": [
+      "esp8266",
+      "servo_sg90"
+    ],
+    "missing": [],
+    "missing_parts_cost_usd": 0.0,
+    "parts_cost_usd": 4.5
+  },
+  "validation": {
+    "required_tests": [
+      "visual inspection",
+      "continuity power-to-ground",
+      "current-limited first power-up",
+      "connector pin map",
+      "load current measurement",
+      "flyback/protection check"
+    ],
+    "gates": [
+      "no unknown power polarity",
+      "all reused modules pass basic continuity",
+      "known voltage domains before interconnect",
+      "defect candidates reviewed"
+    ],
+    "pass_criteria": [
+      "no short on main rail",
+      "rails within expected voltage range",
+      "thermal behavior stable for first 5 minutes",
+      "all external pins labeled before integration"
+    ]
+  },
+  "wiring_plan": {
+    "known_wiring_steps": [
+      {
+        "from": "Servo Orange (Signal)",
+        "to": "ESP8266 D1 (GPIO5)",
+        "color": "orange"
+      },
+      {
+        "from": "Servo Red (VCC)",
+        "to": "5V Power Supply +",
+        "color": "red"
+      },
+      {
+        "from": "Servo Brown (GND)",
+        "to": "Power Supply - AND ESP8266 GND",
+        "color": "black"
+      },
+      {
+        "from": "WiFi LED +",
+        "to": "ESP8266 D2 (GPIO4)",
+        "color": "blue"
+      },
+      {
+        "from": "WiFi LED -",
+        "to": "GND (via 220\u03a9 resistor)",
+        "color": "black"
+      },
+      {
+        "from": "Status LED +",
+        "to": "ESP8266 D3 (GPIO0)",
+        "color": "green"
+      },
+      {
+        "from": "Status LED -",
+        "to": "GND (via 220\u03a9 resistor)",
+        "color": "black"
+      }
+    ],
+    "connector_maps": [],
+    "notes": [
+      "use workflow machine_connection_map when available for harvested modules",
+      "map every salvaged connector with continuity before connecting recipe wiring"
+    ]
+  },
+  "firmware_plan": {
+    "target_platform": "esp32",
+    "features": [
+      "wifi"
+    ],
+    "starter_code": "/*\n * Circuit-AI salvage starter firmware\n * Target platform: esp32\n * Features: wifi\n */\n\nconst int STATUS_LED = 2;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(STATUS_LED, OUTPUT);\n  Serial.println(\"Circuit-AI salvage validation boot\");\n}\n\nvoid loop() {\n  digitalWrite(STATUS_LED, HIGH);\n  delay(250);\n  digitalWrite(STATUS_LED, LOW);\n  delay(750);\n}",
+    "starter_tasks": [
+      "blink/status LED test",
+      "serial boot log",
+      "read each attached sensor or toggle each output individually",
+      "add fault timeout before unattended use"
+    ]
+  },
+  "commercialization": {
+    "positioning": "assembled/refurbished smart gadget or DIY kit",
+    "estimated_market_price_low_usd": 40.0,
+    "estimated_market_price_high_usd": 70.0,
+    "adjusted_margin_usd": 19.65,
+    "inventory_value_used_usd": 6.0,
+    "listing_checklist": [
+      "photograph tested module",
+      "include voltage/current limits",
+      "state salvaged/refurbished condition clearly",
+      "include safety disclaimers for high-voltage or load-switching products"
+    ]
+  },
+  "source_inventory": {
+    "asset_count": 1,
+    "unique_records": 1,
+    "estimated_inventory_value_usd": 6.0,
+    "by_capability": {
+      "actuator_driver": 1,
+      "esp32": 1,
+      "power": 1,
+      "relay": 1,
+      "wireless": 1
+    },
+    "by_test_status": {
+      "not_purchased": 1
+    },
+    "assets": [
+      {
+        "asset_id": "listing_esp32_relay_boards_lot_1",
+        "asset_type": "market_listing",
+        "name": "ESP32 relay boards lot",
+        "capabilities": [
+          "actuator_driver",
+          "esp32",
+          "power",
+          "relay",
+          "wireless"
+        ],
+        "source": "marketplace",
+        "condition": "unknown",
+        "test_status": "not_purchased",
+        "confidence": 0.45,
+        "estimated_value_usd": 6.0,
+        "quantity": 1,
+        "evidence": [
+          "listing price: $6.00",
+          "expected: wireless, actuator_driver, power, esp32, relay"
+        ],
+        "metadata": {
+          "id": "lot-esp32-relay",
+          "title": "ESP32 relay boards lot",
+          "price_usd": 6.0,
+          "shipping_usd": 1.5,
+          "labor_usd": 1.0,
+          "failure_rate": 0.08,
+          "fee_rate": 0.1,
+          "expected_capabilities": [
+            "wireless",
+            "actuator_driver",
+            "power"
+          ],
+          "expected_parts": [
+            "esp32",
+            "relay"
+          ]
+        },
+        "created_at": "2026-05-05T18:57:07.830163+00:00"
+      }
+    ]
+  },
+  "confidence": 0.775
+}

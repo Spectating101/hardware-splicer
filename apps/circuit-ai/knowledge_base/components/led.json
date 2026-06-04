@@ -1,0 +1,55 @@
+{
+  "name": "LED (Light Emitting Diode)",
+  "type": "output",
+  "category": "indicator",
+  "pins": 2,
+  "polarity": "Yes - anode (+) and cathode (-)",
+  "identification": {
+    "longer_leg": "Anode (+)",
+    "shorter_leg": "Cathode (-)",
+    "flat_edge": "Cathode side (on LED body)"
+  },
+  "typical_specs": {
+    "forward_voltage": {
+      "red": "1.8-2.2V",
+      "green": "2.0-3.0V",
+      "blue": "3.0-3.4V",
+      "white": "3.0-3.4V",
+      "yellow": "2.0-2.2V"
+    },
+    "forward_current": "20mA (typical)",
+    "max_current": "30mA"
+  },
+  "resistor_calculation": {
+    "formula": "R = (Vsupply - Vled) / I",
+    "example_5v_red": {
+      "supply": "5V",
+      "led_voltage": "2V",
+      "current": "0.02A",
+      "calculation": "(5 - 2) / 0.02 = 150Ω",
+      "recommended": "220Ω (next standard value, safer)"
+    },
+    "example_3v3_blue": {
+      "supply": "3.3V",
+      "led_voltage": "3.0V",
+      "current": "0.02A",
+      "calculation": "(3.3 - 3.0) / 0.02 = 15Ω",
+      "recommended": "100Ω (safer, LED will be dimmer)"
+    }
+  },
+  "arduino_connection": {
+    "anode": "Connect to Arduino digital pin (through resistor)",
+    "cathode": "Connect to GND",
+    "resistor_placement": "Between Arduino pin and LED anode (or between LED cathode and GND)"
+  },
+  "common_issues": [
+    "LED not lighting: Check polarity (swap legs)",
+    "LED too dim: Resistor value too high, try lower value",
+    "LED burning out: No resistor or value too low",
+    "Flickering: Insufficient power supply or PWM frequency issue"
+  ],
+  "code_example": {
+    "language": "arduino",
+    "code": "const int ledPin = 13;\n\nvoid setup() {\n  pinMode(ledPin, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(ledPin, HIGH);\n  delay(1000);\n  digitalWrite(ledPin, LOW);\n  delay(1000);\n}"
+  }
+}

@@ -1,0 +1,977 @@
+[
+  {
+    "asset_id": "board_io_interface_or_adapter_1",
+    "asset_type": "board_or_module",
+    "name": "io_interface_or_adapter",
+    "capabilities": [
+      "connector",
+      "power"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.635,
+    "estimated_value_usd": 5.0,
+    "quantity": 1,
+    "evidence": [
+      "board role: io_interface_or_adapter",
+      "part marking: comprehensivelearningresc",
+      "part marking: projecttdeas",
+      "part marking: intelllgentsuggestionsfored",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: projectscreated",
+      "part marking: valuegenerated"
+    ],
+    "metadata": {
+      "board_identity": {
+        "primary_type": "io_interface_or_adapter",
+        "description": "Connector, adapter, breakout, or IO interface board",
+        "confidence": 0.635,
+        "evidence": [
+          "2 connector",
+          "text hints: io, in"
+        ],
+        "alternatives": [
+          {
+            "type": "power_supply_or_regulator",
+            "description": "Power conversion, protection, or distribution board",
+            "confidence": 0.18,
+            "evidence": [
+              "2 connector",
+              "text hints: ac"
+            ]
+          },
+          {
+            "type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          },
+          {
+            "type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          }
+        ]
+      },
+      "functional_blocks": [
+        {
+          "block_type": "power_input_protection",
+          "label": "Input power/protection",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Accepts incoming power and protects downstream circuitry",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "io_connectivity",
+          "label": "External IO/connectors",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Provides external electrical connections to a machine or host",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_connection_map": {
+        "mode": "machine_connection_map",
+        "connector_count": 2,
+        "connector_maps": [
+          {
+            "connector_id": "conn_0_connector",
+            "bbox": [
+              0,
+              725,
+              227,
+              991
+            ],
+            "center": [
+              114,
+              858
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 15,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_side"
+          },
+          {
+            "connector_id": "conn_1_connector",
+            "bbox": [
+              0,
+              874,
+              211,
+              1046
+            ],
+            "center": [
+              105,
+              960
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 12,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          }
+        ],
+        "interfaces": [],
+        "pinout_evidence": [],
+        "splice_plan": {
+          "safest_entry_points": [],
+          "required_measurements": [
+            "continuity from connector to ground",
+            "unpowered resistance between power and ground"
+          ],
+          "do_not_assume": [
+            "pin order",
+            "voltage level",
+            "shared ground",
+            "connector current rating",
+            "firmware protocol"
+          ]
+        },
+        "confidence": 0.41,
+        "limitations": [
+          "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+          "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+          "do not power harvested modules until polarity, rails, and isolation are confirmed"
+        ]
+      }
+    },
+    "created_at": "2026-05-05T19:16:35.221143+00:00"
+  },
+  {
+    "asset_id": "part_activeusers_1",
+    "asset_type": "component",
+    "name": "ACTIVEUSERS",
+    "capabilities": [
+      "activeusers"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: activeusers"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221158+00:00"
+  },
+  {
+    "asset_id": "part_componentsanalyzed_1",
+    "asset_type": "component",
+    "name": "COMPONENTSANALYZED",
+    "capabilities": [
+      "componentsanalyzed"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: componentsanalyzed"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221166+00:00"
+  },
+  {
+    "asset_id": "part_comprehensivelearningresc_1",
+    "asset_type": "component",
+    "name": "COMPREHENSIVELEARNINGRESC",
+    "capabilities": [
+      "comprehensivelearningresc"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: comprehensivelearningresc"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221173+00:00"
+  },
+  {
+    "asset_id": "part_intelllgentsuggestionsfored_1",
+    "asset_type": "component",
+    "name": "INTELLLGENTSUGGESTIONSFORED",
+    "capabilities": [
+      "intelllgentsuggestionsfored"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: intelllgentsuggestionsfored"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221180+00:00"
+  },
+  {
+    "asset_id": "part_projectscreated_1",
+    "asset_type": "component",
+    "name": "PROJECTSCREATED",
+    "capabilities": [
+      "projectscreated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projectscreated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221186+00:00"
+  },
+  {
+    "asset_id": "part_projecttdeas_1",
+    "asset_type": "component",
+    "name": "PROJECTTDEAS",
+    "capabilities": [
+      "projecttdeas"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projecttdeas"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221190+00:00"
+  },
+  {
+    "asset_id": "part_valuegenerated_1",
+    "asset_type": "component",
+    "name": "VALUEGENERATED",
+    "capabilities": [
+      "valuegenerated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: valuegenerated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:16:35.221196+00:00"
+  },
+  {
+    "asset_id": "board_io_interface_or_adapter_9",
+    "asset_type": "board_or_module",
+    "name": "io_interface_or_adapter",
+    "capabilities": [
+      "connector",
+      "power"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.635,
+    "estimated_value_usd": 5.0,
+    "quantity": 1,
+    "evidence": [
+      "board role: io_interface_or_adapter",
+      "part marking: comprehensivelearningresc",
+      "part marking: projecttdeas",
+      "part marking: intelllgentsuggestionsfored",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: projectscreated",
+      "part marking: valuegenerated"
+    ],
+    "metadata": {
+      "board_identity": {
+        "primary_type": "io_interface_or_adapter",
+        "description": "Connector, adapter, breakout, or IO interface board",
+        "confidence": 0.635,
+        "evidence": [
+          "2 connector",
+          "text hints: io, in"
+        ],
+        "alternatives": [
+          {
+            "type": "power_supply_or_regulator",
+            "description": "Power conversion, protection, or distribution board",
+            "confidence": 0.18,
+            "evidence": [
+              "2 connector",
+              "text hints: ac"
+            ]
+          },
+          {
+            "type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          },
+          {
+            "type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          }
+        ]
+      },
+      "functional_blocks": [
+        {
+          "block_type": "power_input_protection",
+          "label": "Input power/protection",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Accepts incoming power and protects downstream circuitry",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "io_connectivity",
+          "label": "External IO/connectors",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Provides external electrical connections to a machine or host",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_connection_map": {
+        "mode": "machine_connection_map",
+        "connector_count": 2,
+        "connector_maps": [
+          {
+            "connector_id": "conn_0_connector",
+            "bbox": [
+              0,
+              725,
+              227,
+              991
+            ],
+            "center": [
+              114,
+              858
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 15,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_side"
+          },
+          {
+            "connector_id": "conn_1_connector",
+            "bbox": [
+              0,
+              874,
+              211,
+              1046
+            ],
+            "center": [
+              105,
+              960
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 12,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          }
+        ],
+        "interfaces": [],
+        "pinout_evidence": [],
+        "splice_plan": {
+          "safest_entry_points": [],
+          "required_measurements": [
+            "continuity from connector to ground",
+            "unpowered resistance between power and ground"
+          ],
+          "do_not_assume": [
+            "pin order",
+            "voltage level",
+            "shared ground",
+            "connector current rating",
+            "firmware protocol"
+          ]
+        },
+        "confidence": 0.41,
+        "limitations": [
+          "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+          "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+          "do not power harvested modules until polarity, rails, and isolation are confirmed"
+        ]
+      }
+    },
+    "created_at": "2026-05-05T19:18:43.519977+00:00"
+  },
+  {
+    "asset_id": "part_activeusers_9",
+    "asset_type": "component",
+    "name": "ACTIVEUSERS",
+    "capabilities": [
+      "activeusers"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: activeusers"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.519995+00:00"
+  },
+  {
+    "asset_id": "part_componentsanalyzed_9",
+    "asset_type": "component",
+    "name": "COMPONENTSANALYZED",
+    "capabilities": [
+      "componentsanalyzed"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: componentsanalyzed"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520003+00:00"
+  },
+  {
+    "asset_id": "part_comprehensivelearningresc_9",
+    "asset_type": "component",
+    "name": "COMPREHENSIVELEARNINGRESC",
+    "capabilities": [
+      "comprehensivelearningresc"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: comprehensivelearningresc"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520011+00:00"
+  },
+  {
+    "asset_id": "part_intelllgentsuggestionsfored_9",
+    "asset_type": "component",
+    "name": "INTELLLGENTSUGGESTIONSFORED",
+    "capabilities": [
+      "intelllgentsuggestionsfored"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: intelllgentsuggestionsfored"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520018+00:00"
+  },
+  {
+    "asset_id": "part_projectscreated_9",
+    "asset_type": "component",
+    "name": "PROJECTSCREATED",
+    "capabilities": [
+      "projectscreated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projectscreated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520023+00:00"
+  },
+  {
+    "asset_id": "part_projecttdeas_9",
+    "asset_type": "component",
+    "name": "PROJECTTDEAS",
+    "capabilities": [
+      "projecttdeas"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projecttdeas"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520028+00:00"
+  },
+  {
+    "asset_id": "part_valuegenerated_9",
+    "asset_type": "component",
+    "name": "VALUEGENERATED",
+    "capabilities": [
+      "valuegenerated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: valuegenerated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:18:43.520033+00:00"
+  },
+  {
+    "asset_id": "board_io_interface_or_adapter_17",
+    "asset_type": "board_or_module",
+    "name": "io_interface_or_adapter",
+    "capabilities": [
+      "connector",
+      "power"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.635,
+    "estimated_value_usd": 5.0,
+    "quantity": 1,
+    "evidence": [
+      "board role: io_interface_or_adapter",
+      "part marking: comprehensivelearningresc",
+      "part marking: projecttdeas",
+      "part marking: intelllgentsuggestionsfored",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: componentsanalyzed",
+      "part marking: activeusers",
+      "part marking: projectscreated",
+      "part marking: valuegenerated"
+    ],
+    "metadata": {
+      "board_identity": {
+        "primary_type": "io_interface_or_adapter",
+        "description": "Connector, adapter, breakout, or IO interface board",
+        "confidence": 0.635,
+        "evidence": [
+          "2 connector",
+          "text hints: io, in"
+        ],
+        "alternatives": [
+          {
+            "type": "power_supply_or_regulator",
+            "description": "Power conversion, protection, or distribution board",
+            "confidence": 0.18,
+            "evidence": [
+              "2 connector",
+              "text hints: ac"
+            ]
+          },
+          {
+            "type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          },
+          {
+            "type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.16,
+            "evidence": [
+              "2 connector"
+            ]
+          }
+        ]
+      },
+      "functional_blocks": [
+        {
+          "block_type": "power_input_protection",
+          "label": "Input power/protection",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Accepts incoming power and protects downstream circuitry",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        },
+        {
+          "block_type": "io_connectivity",
+          "label": "External IO/connectors",
+          "component_count": 2,
+          "components": [
+            "cmp_0_connector",
+            "cmp_1_connector"
+          ],
+          "bbox": [
+            0,
+            725,
+            227,
+            1046
+          ],
+          "confidence": 0.49,
+          "function": "Provides external electrical connections to a machine or host",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              0,
+              677,
+              275,
+              1046
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_connection_map": {
+        "mode": "machine_connection_map",
+        "connector_count": 2,
+        "connector_maps": [
+          {
+            "connector_id": "conn_0_connector",
+            "bbox": [
+              0,
+              725,
+              227,
+              991
+            ],
+            "center": [
+              114,
+              858
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 15,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_side"
+          },
+          {
+            "connector_id": "conn_1_connector",
+            "bbox": [
+              0,
+              874,
+              211,
+              1046
+            ],
+            "center": [
+              105,
+              960
+            ],
+            "class_name": "connector",
+            "estimated_pin_count": 12,
+            "labels": [],
+            "likely_roles": [
+              "unlabeled_external_interface"
+            ],
+            "candidate_pin_groups": [],
+            "confidence": 0.35,
+            "recommended_next_photo": "close_up_connector_label"
+          }
+        ],
+        "interfaces": [],
+        "pinout_evidence": [],
+        "splice_plan": {
+          "safest_entry_points": [],
+          "required_measurements": [
+            "continuity from connector to ground",
+            "unpowered resistance between power and ground"
+          ],
+          "do_not_assume": [
+            "pin order",
+            "voltage level",
+            "shared ground",
+            "connector current rating",
+            "firmware protocol"
+          ]
+        },
+        "confidence": 0.41,
+        "limitations": [
+          "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+          "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+          "do not power harvested modules until polarity, rails, and isolation are confirmed"
+        ]
+      }
+    },
+    "created_at": "2026-05-05T19:37:20.397010+00:00"
+  },
+  {
+    "asset_id": "part_activeusers_17",
+    "asset_type": "component",
+    "name": "ACTIVEUSERS",
+    "capabilities": [
+      "activeusers"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: activeusers"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397030+00:00"
+  },
+  {
+    "asset_id": "part_componentsanalyzed_17",
+    "asset_type": "component",
+    "name": "COMPONENTSANALYZED",
+    "capabilities": [
+      "componentsanalyzed"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 2,
+    "evidence": [
+      "marking resolved: componentsanalyzed"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397038+00:00"
+  },
+  {
+    "asset_id": "part_comprehensivelearningresc_17",
+    "asset_type": "component",
+    "name": "COMPREHENSIVELEARNINGRESC",
+    "capabilities": [
+      "comprehensivelearningresc"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: comprehensivelearningresc"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397047+00:00"
+  },
+  {
+    "asset_id": "part_intelllgentsuggestionsfored_17",
+    "asset_type": "component",
+    "name": "INTELLLGENTSUGGESTIONSFORED",
+    "capabilities": [
+      "intelllgentsuggestionsfored"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: intelllgentsuggestionsfored"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397054+00:00"
+  },
+  {
+    "asset_id": "part_projectscreated_17",
+    "asset_type": "component",
+    "name": "PROJECTSCREATED",
+    "capabilities": [
+      "projectscreated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projectscreated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397061+00:00"
+  },
+  {
+    "asset_id": "part_projecttdeas_17",
+    "asset_type": "component",
+    "name": "PROJECTTDEAS",
+    "capabilities": [
+      "projecttdeas"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: projecttdeas"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397066+00:00"
+  },
+  {
+    "asset_id": "part_valuegenerated_17",
+    "asset_type": "component",
+    "name": "VALUEGENERATED",
+    "capabilities": [
+      "valuegenerated"
+    ],
+    "source": "pipeline_scan",
+    "condition": "candidate",
+    "test_status": "untested",
+    "confidence": 0.18,
+    "estimated_value_usd": 0.0,
+    "quantity": 1,
+    "evidence": [
+      "marking resolved: valuegenerated"
+    ],
+    "metadata": {},
+    "created_at": "2026-05-05T19:37:20.397071+00:00"
+  }
+]

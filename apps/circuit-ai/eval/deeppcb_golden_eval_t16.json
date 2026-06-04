@@ -1,0 +1,270 @@
+{
+  "created_at": "2026-05-05T17:18:01.731340+00:00",
+  "manifest": "datasets/deeppcb_subset/manifest.json",
+  "iou_threshold": 0.1,
+  "diff_threshold": 16,
+  "metrics": {
+    "true_positive": 176,
+    "false_positive": 352,
+    "false_negative": 2,
+    "precision": 0.3333,
+    "recall": 0.9888,
+    "sample_count": 25
+  },
+  "samples": [
+    {
+      "sample_id": "20085291",
+      "annotation_count": 9,
+      "prediction_count": 43,
+      "true_positive": 9,
+      "false_positive": 34,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01625
+    },
+    {
+      "sample_id": "20085292",
+      "annotation_count": 7,
+      "prediction_count": 38,
+      "true_positive": 7,
+      "false_positive": 31,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01538
+    },
+    {
+      "sample_id": "20085293",
+      "annotation_count": 7,
+      "prediction_count": 21,
+      "true_positive": 7,
+      "false_positive": 14,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00892
+    },
+    {
+      "sample_id": "20085294",
+      "annotation_count": 9,
+      "prediction_count": 17,
+      "true_positive": 9,
+      "false_positive": 8,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00569
+    },
+    {
+      "sample_id": "20085295",
+      "annotation_count": 7,
+      "prediction_count": 25,
+      "true_positive": 7,
+      "false_positive": 18,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01426
+    },
+    {
+      "sample_id": "20085296",
+      "annotation_count": 9,
+      "prediction_count": 16,
+      "true_positive": 9,
+      "false_positive": 7,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00599
+    },
+    {
+      "sample_id": "20085297",
+      "annotation_count": 7,
+      "prediction_count": 33,
+      "true_positive": 7,
+      "false_positive": 26,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01367
+    },
+    {
+      "sample_id": "20085298",
+      "annotation_count": 6,
+      "prediction_count": 10,
+      "true_positive": 6,
+      "false_positive": 4,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0034
+    },
+    {
+      "sample_id": "20085299",
+      "annotation_count": 8,
+      "prediction_count": 20,
+      "true_positive": 8,
+      "false_positive": 12,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00772
+    },
+    {
+      "sample_id": "20085300",
+      "annotation_count": 8,
+      "prediction_count": 15,
+      "true_positive": 8,
+      "false_positive": 7,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00507
+    },
+    {
+      "sample_id": "20085301",
+      "annotation_count": 8,
+      "prediction_count": 28,
+      "true_positive": 8,
+      "false_positive": 20,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00997
+    },
+    {
+      "sample_id": "20085302",
+      "annotation_count": 7,
+      "prediction_count": 16,
+      "true_positive": 7,
+      "false_positive": 9,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00653
+    },
+    {
+      "sample_id": "20085303",
+      "annotation_count": 7,
+      "prediction_count": 25,
+      "true_positive": 7,
+      "false_positive": 18,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00711
+    },
+    {
+      "sample_id": "20085304",
+      "annotation_count": 8,
+      "prediction_count": 35,
+      "true_positive": 8,
+      "false_positive": 27,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01543
+    },
+    {
+      "sample_id": "20085305",
+      "annotation_count": 8,
+      "prediction_count": 33,
+      "true_positive": 8,
+      "false_positive": 25,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01447
+    },
+    {
+      "sample_id": "20085306",
+      "annotation_count": 6,
+      "prediction_count": 11,
+      "true_positive": 6,
+      "false_positive": 5,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00333
+    },
+    {
+      "sample_id": "20085307",
+      "annotation_count": 5,
+      "prediction_count": 10,
+      "true_positive": 4,
+      "false_positive": 6,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00319
+    },
+    {
+      "sample_id": "20085308",
+      "annotation_count": 7,
+      "prediction_count": 25,
+      "true_positive": 7,
+      "false_positive": 18,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01666
+    },
+    {
+      "sample_id": "20085309",
+      "annotation_count": 9,
+      "prediction_count": 31,
+      "true_positive": 9,
+      "false_positive": 22,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.02207
+    },
+    {
+      "sample_id": "20085310",
+      "annotation_count": 10,
+      "prediction_count": 28,
+      "true_positive": 10,
+      "false_positive": 18,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0081
+    },
+    {
+      "sample_id": "20085311",
+      "annotation_count": 2,
+      "prediction_count": 5,
+      "true_positive": 2,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00576
+    },
+    {
+      "sample_id": "20085312",
+      "annotation_count": 4,
+      "prediction_count": 6,
+      "true_positive": 4,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00164
+    },
+    {
+      "sample_id": "20085313",
+      "annotation_count": 6,
+      "prediction_count": 14,
+      "true_positive": 6,
+      "false_positive": 8,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00487
+    },
+    {
+      "sample_id": "20085314",
+      "annotation_count": 7,
+      "prediction_count": 14,
+      "true_positive": 6,
+      "false_positive": 8,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00596
+    },
+    {
+      "sample_id": "20085315",
+      "annotation_count": 7,
+      "prediction_count": 9,
+      "true_positive": 7,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00291
+    }
+  ],
+  "limitations": [
+    "Golden diff is a change localizer, not a class-specific trained DeepPCB detector.",
+    "Use this to qualify alignment/defect-region sensitivity before training a defect model."
+  ]
+}

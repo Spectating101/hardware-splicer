@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "circuit-ai"
+version = "0.4.0"
+description = "Circuit-AI: Vision + spectral intelligence for PCB analysis, validation, and manufacturing"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Circuit-AI Team"}]
+
+# Core runtime: everything needed to run the canonical Flask backend
+# (api_server.py) plus the FastAPI vision surface (src/api/v1/main.py) and
+# the CLI. Heavy CV/ML/LLM stacks live in optional extras so light deploys
+# (MCP / monetization flow) stay cheap. Pins track requirements.txt, which
+# remains the deploy lockfile referenced by the Dockerfiles and CI.
+dependencies = [
+    "flask>=3.0.0",
+    "fastapi==0.104.1",
+    "uvicorn[standard]==0.24.0",
+    "pydantic==2.5.0",
+    "pydantic-settings",
+    "pyjwt>=2.8.0",
+    "python-multipart==0.0.6",
+    "python-dotenv==1.0.0",
+    "loguru==0.7.2",
+    "numpy==1.24.3",
+    "Pillow==10.1.0",
+    "opencv-python==4.8.1.78",
+    "pytesseract==0.3.10",
+    "networkx==3.2.1",
+    "scipy==1.11.4",
+    "requests==2.31.0",
+    "httpx==0.25.2",
+    "aiohttp==3.9.1",
+    "redis==5.0.1",
+    "sqlalchemy==2.0.23",
+    "websockets==12.0",
+    "prometheus-client==0.19.0",
+    "psutil==5.9.6",
+    "pandas==2.1.4",
+    "scikit-learn==1.3.2",
+    "pyyaml==6.0.1",
+    "click==8.1.7",
+    "rich==13.7.0",
+    "stripe>=12.0.0",
+]
+
+[project.optional-dependencies]
+# Vision/ML/LLM stack — required for YOLO detection, OCR, and LLM synthesis.
+ml = [
+    "torch==2.1.1",
+    "torchvision==0.16.1",
+    "ultralytics==8.0.196",
+    "transformers==4.35.2",
+    "litellm==1.0.0",
+    "openai==1.3.7",
+    "anthropic==0.7.7",
+    "cohere==4.37",
+    "imageio==2.33.1",
+    "scikit-image==0.22.0",
+    "easyocr",
+]
+# Background job queue / async messaging (not required by the core API path).
+queue = [
+    "celery==5.3.4",
+    "rq==1.15.1",
+    "asyncio-mqtt==0.16.1",
+]
+dev = [
+    "pytest==7.4.3",
+    "pytest-asyncio==0.21.1",
+    "pytest-cov==4.1.0",
+    "ruff>=0.1.0",
+    "black==23.11.0",
+    "isort==5.12.0",
+    "mypy==1.7.1",
+    "pre-commit>=3.4.0",
+]
+docs = [
+    "mkdocs==1.5.3",
+    "mkdocs-material==9.4.8",
+]
+deploy = [
+    "gunicorn==21.2.0",
+    "docker==6.1.3",
+]
+# Heavy optional foundation-model backends (PaddleOCR, SAM 2, Grounding DINO,
+# Florence-2). Intentionally a newer, isolated stack — install per
+# docs/FOUNDATION_BACKENDS.md (pip install --no-deps -r
+# requirements-foundation.txt), NOT alongside the `ml` extra.
+
+[project.scripts]
+circuit-ai-cli = "src.cli:main"
+circuit-ai-api = "src.api.server:main"
+circuit-ai-fastapi = "src.api.v1.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

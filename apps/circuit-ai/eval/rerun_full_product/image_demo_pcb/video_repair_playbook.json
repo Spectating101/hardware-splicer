@@ -1,0 +1,622 @@
+{
+  "mode": "repair_video_to_playbook",
+  "source_video": {
+    "title": "Fixing a broken USB desk fan that will not spin",
+    "channel": "Repair video reference",
+    "url": "https://www.youtube.com/results?search_query=usb+desk+fan+repair+not+spinning",
+    "notes": null
+  },
+  "copyright_boundary": [
+    "Use the linked video as a reference source; do not clone the creator's edit, narration, or exact transcript.",
+    "This playbook is an independent safety and repair workflow derived from observed repair intent and Circuit-AI evidence."
+  ],
+  "video_pattern": {
+    "id": "board_level_fault_finding",
+    "label": "Board-level electronic fault finding",
+    "confidence": 0.8,
+    "evidence": [
+      "keyword hits: driver, fix, fixing, not spin, pcb, repair, will not spin"
+    ]
+  },
+  "watch_map": [
+    {
+      "moment": "before disassembly",
+      "capture": [
+        "device model",
+        "initial symptom",
+        "all labels",
+        "connector orientation",
+        "missing screws or parts"
+      ]
+    },
+    {
+      "moment": "first board view",
+      "capture": [
+        "top-side board photo",
+        "bottom-side board photo",
+        "chip markings",
+        "connector labels",
+        "corrosion/burn areas"
+      ]
+    },
+    {
+      "moment": "before power test",
+      "capture": [
+        "input voltage",
+        "polarity",
+        "rail-to-ground resistance",
+        "current limit setting"
+      ]
+    },
+    {
+      "moment": "after repair",
+      "capture": [
+        "retest result",
+        "current draw",
+        "thermal behavior",
+        "remaining symptoms"
+      ]
+    }
+  ],
+  "circuit_ai_inputs": [
+    "clear PCB image before cleaning or rework",
+    "closeups of damaged regions and IC markings",
+    "reported symptoms",
+    "input voltage and current draw"
+  ],
+  "recreation_flow": [
+    {
+      "order": 1,
+      "action": "capture symptoms and board history",
+      "circuit_ai_support": "image scan, board role inference, AOI defect candidates",
+      "done_when": "photos and notes are sufficient to reassemble and compare"
+    },
+    {
+      "order": 2,
+      "action": "inspect under magnification",
+      "circuit_ai_support": "image scan, board role inference, AOI defect candidates",
+      "done_when": "operator records pass/fail result"
+    },
+    {
+      "order": 3,
+      "action": "check input resistance and obvious shorts",
+      "circuit_ai_support": "repair guide measurement plan and stop conditions",
+      "done_when": "operator records pass/fail result"
+    },
+    {
+      "order": 4,
+      "action": "inject or apply current-limited power only after polarity is known",
+      "circuit_ai_support": "repair guide measurement plan and stop conditions",
+      "done_when": "rails and current draw are within expected limits"
+    },
+    {
+      "order": 5,
+      "action": "divide the circuit into power, control, IO, and load sections",
+      "circuit_ai_support": "repair guide measurement plan and stop conditions",
+      "done_when": "rails and current draw are within expected limits"
+    },
+    {
+      "order": 6,
+      "action": "replace or rework only after measurements isolate the fault",
+      "circuit_ai_support": "fault candidate playbooks and validation gates",
+      "done_when": "fault is confirmed fixed by measurement, not only by appearance"
+    },
+    {
+      "order": 7,
+      "action": "thermal and functional retest after repair",
+      "circuit_ai_support": "fault candidate playbooks and validation gates",
+      "done_when": "fault is confirmed fixed by measurement, not only by appearance"
+    },
+    {
+      "order": 8,
+      "action": "Document before touching",
+      "circuit_ai_support": "repair encyclopedia diagnostic branch",
+      "done_when": "device state and wiring are reproducible"
+    },
+    {
+      "order": 9,
+      "action": "Unpowered inspection",
+      "circuit_ai_support": "repair encyclopedia diagnostic branch",
+      "done_when": "no immediate stop-condition damage found"
+    },
+    {
+      "order": 10,
+      "action": "Power path check",
+      "circuit_ai_support": "repair encyclopedia diagnostic branch",
+      "done_when": "rails are present, stable, and not current-limited"
+    },
+    {
+      "order": 11,
+      "action": "Output/load isolation",
+      "circuit_ai_support": "repair encyclopedia diagnostic branch",
+      "done_when": "dummy load switches correctly and real load measures sane resistance"
+    }
+  ],
+  "repair_guide": {
+    "mode": "repair_encyclopedia_entry",
+    "scope": "small_low_voltage_electronic_gadgets_and_modules",
+    "device_family": {
+      "id": "small_dc_motor_gadget",
+      "label": "Small DC motor / actuator gadget",
+      "examples": [
+        "desk fan",
+        "toy car",
+        "pump",
+        "robot module",
+        "motorized tool attachment"
+      ],
+      "confidence": 0.95,
+      "evidence": [
+        "board role: motor_or_actuator_driver",
+        "multiple switching devices detected",
+        "multiple connectors/harness points detected",
+        "symptom/device hint: fan, motor, spin",
+        "capabilities: actuator_driver"
+      ]
+    },
+    "symptoms": [
+      "fan will not spin",
+      "driver board gets hot",
+      "works if the connector is wiggled"
+    ],
+    "scan_evidence": {
+      "board_type": "motor_or_actuator_driver",
+      "board_confidence": 0.785,
+      "components_detected": 10,
+      "components_by_type": {
+        "connector": 5,
+        "transistor": 4,
+        "inductor": 1
+      },
+      "connector_count": 5,
+      "resolved_markings": 3,
+      "aoi_readiness": "prototype_ready",
+      "aoi_blockers": [
+        "scan quality is below production threshold (0.50, tracked)",
+        "image-only topology confidence is below production threshold",
+        "calibrated camera/lighting fixture and focus checks",
+        "labeled defect dataset from the target production line",
+        "model/license review for any sourced checkpoints before redistribution"
+      ]
+    },
+    "safety_profile": {
+      "risk_level": "low_to_medium",
+      "high_voltage_possible": false,
+      "battery_risk_possible": false,
+      "rules": [
+        "disconnect power before inspection",
+        "start every powered test with a current-limited supply when possible",
+        "label connector polarity and voltage before reconnecting loads",
+        "treat unexpected heating as a fault; power only briefly under current limit while measuring",
+        "test inductive loads with flyback/protection in place"
+      ]
+    },
+    "subsystem_map": [
+      {
+        "subsystem": "power input and protection",
+        "scan_matches": [
+          {
+            "block_type": "power_input_protection",
+            "confidence": 0.95,
+            "component_count": 10,
+            "function": "Accepts incoming power and protects downstream circuitry"
+          },
+          {
+            "block_type": "power_regulation",
+            "confidence": 0.37,
+            "component_count": 1,
+            "function": "Converts, filters, or stabilizes board power rails"
+          }
+        ],
+        "status": "visible_candidate"
+      },
+      {
+        "subsystem": "voltage regulation",
+        "scan_matches": [],
+        "status": "not_confirmed_from_scan"
+      },
+      {
+        "subsystem": "controller or PWM logic",
+        "scan_matches": [],
+        "status": "not_confirmed_from_scan"
+      },
+      {
+        "subsystem": "driver stage",
+        "scan_matches": [
+          {
+            "block_type": "actuator_drive",
+            "confidence": 0.85,
+            "component_count": 9,
+            "function": "Switches higher current loads from low-power control signals"
+          }
+        ],
+        "status": "visible_candidate"
+      },
+      {
+        "subsystem": "motor/load wiring",
+        "scan_matches": [],
+        "status": "not_confirmed_from_scan"
+      },
+      {
+        "subsystem": "user switch or connector harness",
+        "scan_matches": [
+          {
+            "block_type": "power_input_protection",
+            "confidence": 0.95,
+            "component_count": 10,
+            "function": "Accepts incoming power and protects downstream circuitry"
+          },
+          {
+            "block_type": "io_connectivity",
+            "confidence": 0.85,
+            "component_count": 5,
+            "function": "Provides external electrical connections to a machine or host"
+          },
+          {
+            "block_type": "power_regulation",
+            "confidence": 0.37,
+            "component_count": 1,
+            "function": "Converts, filters, or stabilizes board power rails"
+          }
+        ],
+        "status": "visible_candidate"
+      }
+    ],
+    "fault_candidates": [
+      {
+        "fault_id": "driver_stage_or_load_fault",
+        "name": "Driver stage or motor/load path fault",
+        "category": "actuator",
+        "severity": "major",
+        "likelihood": 0.9,
+        "evidence": [
+          "actuator-driver family selected",
+          "reported output/motor symptom",
+          "reported motorized gadget symptom",
+          "driver/load heating symptom",
+          "switching devices detected"
+        ],
+        "likely_causes": [
+          "open motor winding or disconnected harness",
+          "shorted motor/load pulling supply down",
+          "failed MOSFET/transistor/relay contact",
+          "missing flyback/protection diode causing repeated driver damage"
+        ],
+        "diagnostic_tests": [
+          {
+            "name": "Load resistance and isolation check",
+            "equipment_needed": [
+              "multimeter"
+            ],
+            "steps": [
+              "Disconnect power and unplug the motor/load harness.",
+              "Measure resistance across the motor/load leads.",
+              "Measure each motor/load lead to board ground."
+            ],
+            "expected_result": "Finite winding/load resistance and no short to ground unless designed that way.",
+            "fault_indicated_if": "Near-zero resistance, open circuit, or unexpected ground short."
+          },
+          {
+            "name": "Driver output test with current limit",
+            "equipment_needed": [
+              "bench supply",
+              "multimeter",
+              "dummy load"
+            ],
+            "steps": [
+              "Power the board through a current-limited supply.",
+              "Command the output while using a dummy load before reconnecting the real motor.",
+              "Measure output voltage across the load terminals."
+            ],
+            "expected_result": "Output switches cleanly without current-limit collapse.",
+            "fault_indicated_if": "No switching, supply current limit trips, or driver overheats."
+          }
+        ],
+        "repair_steps": [
+          "Reseat or replace damaged harness/connectors.",
+          "Replace failed MOSFET/transistor/relay with equal or higher voltage/current rating.",
+          "Replace or add flyback/protection diode for inductive loads.",
+          "Retest with dummy load before reconnecting the motor or external load."
+        ],
+        "repair_difficulty": "medium_to_hard",
+        "estimated_time_minutes": 45
+      },
+      {
+        "fault_id": "power_input_or_regulator_fault",
+        "name": "Power input, protection, or regulator fault",
+        "category": "power",
+        "severity": "major",
+        "likelihood": 0.68,
+        "evidence": [
+          "reported power symptom"
+        ],
+        "likely_causes": [
+          "bad adapter, cable, fuse, switch, or jack",
+          "reverse-polarity protection damage",
+          "shorted downstream rail",
+          "failed regulator or dried output capacitor"
+        ],
+        "diagnostic_tests": [
+          {
+            "name": "Input-to-rail power tree check",
+            "equipment_needed": [
+              "multimeter",
+              "current-limited bench supply"
+            ],
+            "steps": [
+              "Identify input voltage and polarity before powering.",
+              "Measure resistance from main rail to ground with power disconnected.",
+              "Power through a current limit and measure input, regulator input, and regulator output."
+            ],
+            "expected_result": "Input and regulated rails match expected voltages within tolerance.",
+            "fault_indicated_if": "Shorted rail, zero regulator output, excessive current draw, or unstable rail."
+          }
+        ],
+        "repair_steps": [
+          "Replace damaged cable/jack/fuse/switch first.",
+          "If regulator input is present but output is wrong, replace regulator and nearby capacitors.",
+          "If rail is shorted, isolate loads until the short disappears.",
+          "Retest under current limit before normal power."
+        ],
+        "repair_difficulty": "medium",
+        "estimated_time_minutes": 30
+      },
+      {
+        "fault_id": "connector_or_harness_fault",
+        "name": "Connector, solder joint, or harness intermittency",
+        "category": "interconnect",
+        "severity": "minor_to_major",
+        "likelihood": 0.62,
+        "evidence": [
+          "5 connector candidate(s)",
+          "intermittent/connection symptom"
+        ],
+        "likely_causes": [
+          "cracked solder joint",
+          "loose crimp/contact",
+          "broken wire near strain relief",
+          "oxidized connector contact"
+        ],
+        "diagnostic_tests": [
+          {
+            "name": "Wiggle and continuity test",
+            "equipment_needed": [
+              "multimeter",
+              "magnification"
+            ],
+            "steps": [
+              "Power off and inspect connector solder joints under magnification.",
+              "Measure continuity from connector pin to next visible node.",
+              "Flex the cable gently while observing continuity."
+            ],
+            "expected_result": "Stable continuity with no visual cracking.",
+            "fault_indicated_if": "Continuity drops, joint ring cracks are visible, or cable movement changes behavior."
+          }
+        ],
+        "repair_steps": [
+          "Clean contacts with electronics-safe contact cleaner.",
+          "Reflow cracked connector joints with flux.",
+          "Replace damaged cable or connector shell.",
+          "Add strain relief before final reassembly."
+        ],
+        "repair_difficulty": "easy_to_medium",
+        "estimated_time_minutes": 20
+      }
+    ],
+    "diagnostic_flow": [
+      {
+        "order": 1,
+        "title": "Document before touching",
+        "purpose": "Preserve connector orientation, labels, screws, and cable routing.",
+        "actions": [
+          "photograph all sides, connectors, switch positions, and labels",
+          "record symptoms exactly and whether they are intermittent",
+          "mark unknown connectors before unplugging them"
+        ],
+        "pass_condition": "device state and wiring are reproducible",
+        "fail_branch": "capture more evidence before disassembly"
+      },
+      {
+        "order": 2,
+        "title": "Unpowered inspection",
+        "purpose": "Find obvious mechanical, thermal, liquid, or solder damage without adding risk.",
+        "actions": [
+          "inspect connectors, cables, switches, and battery compartment",
+          "look for burned areas, cracked solder joints, corrosion, bulged capacitors, and missing parts",
+          "compare to scan/AOI defect candidates when available"
+        ],
+        "pass_condition": "no immediate stop-condition damage found",
+        "fail_branch": "repair visible damage or quarantine unsafe battery/high-voltage assembly first"
+      },
+      {
+        "order": 3,
+        "title": "Power path check",
+        "purpose": "Confirm that input power reaches the board and regulated rails are not shorted.",
+        "actions": [
+          "measure input connector polarity and voltage",
+          "measure rail-to-ground resistance before applying power",
+          "power with current limit and check regulator outputs"
+        ],
+        "pass_condition": "rails are present, stable, and not current-limited",
+        "fail_branch": "follow power_input_or_regulator_fault playbook"
+      },
+      {
+        "order": 4,
+        "title": "Output/load isolation",
+        "purpose": "Separate a bad board driver from a bad motor, relay, solenoid, cable, or load.",
+        "actions": [
+          "disconnect the load harness",
+          "measure load resistance and check for shorts to chassis/ground",
+          "test the board output with a dummy load before reconnecting the real load"
+        ],
+        "pass_condition": "dummy load switches correctly and real load measures sane resistance",
+        "fail_branch": "follow driver_stage_or_load_fault or connector_or_harness_fault playbook"
+      },
+      {
+        "order": 5,
+        "title": "Confirm candidate: Driver stage or motor/load path fault",
+        "purpose": "Confirm the suspected fault before replacing parts.",
+        "actions": [
+          "Disconnect power and unplug the motor/load harness.",
+          "Measure resistance across the motor/load leads.",
+          "Measure each motor/load lead to board ground."
+        ],
+        "pass_condition": "Finite winding/load resistance and no short to ground unless designed that way.",
+        "fail_branch": "Near-zero resistance, open circuit, or unexpected ground short."
+      },
+      {
+        "order": 6,
+        "title": "Confirm candidate: Power input, protection, or regulator fault",
+        "purpose": "Confirm the suspected fault before replacing parts.",
+        "actions": [
+          "Identify input voltage and polarity before powering.",
+          "Measure resistance from main rail to ground with power disconnected.",
+          "Power through a current limit and measure input, regulator input, and regulator output."
+        ],
+        "pass_condition": "Input and regulated rails match expected voltages within tolerance.",
+        "fail_branch": "Shorted rail, zero regulator output, excessive current draw, or unstable rail."
+      },
+      {
+        "order": 7,
+        "title": "Confirm candidate: Connector, solder joint, or harness intermittency",
+        "purpose": "Confirm the suspected fault before replacing parts.",
+        "actions": [
+          "Power off and inspect connector solder joints under magnification.",
+          "Measure continuity from connector pin to next visible node.",
+          "Flex the cable gently while observing continuity."
+        ],
+        "pass_condition": "Stable continuity with no visual cracking.",
+        "fail_branch": "Continuity drops, joint ring cracks are visible, or cable movement changes behavior."
+      }
+    ],
+    "repair_playbooks": [
+      {
+        "fault_id": "driver_stage_or_load_fault",
+        "title": "Driver stage or motor/load path fault",
+        "difficulty": "medium_to_hard",
+        "estimated_time_minutes": 45,
+        "repair_steps": [
+          "Reseat or replace damaged harness/connectors.",
+          "Replace failed MOSFET/transistor/relay with equal or higher voltage/current rating.",
+          "Replace or add flyback/protection diode for inductive loads.",
+          "Retest with dummy load before reconnecting the motor or external load."
+        ],
+        "confirmation_after_repair": [
+          "retest on a current-limited supply",
+          "verify fault symptom is gone",
+          "run a short thermal check under normal load",
+          "record the repair and replaced parts"
+        ]
+      },
+      {
+        "fault_id": "power_input_or_regulator_fault",
+        "title": "Power input, protection, or regulator fault",
+        "difficulty": "medium",
+        "estimated_time_minutes": 30,
+        "repair_steps": [
+          "Replace damaged cable/jack/fuse/switch first.",
+          "If regulator input is present but output is wrong, replace regulator and nearby capacitors.",
+          "If rail is shorted, isolate loads until the short disappears.",
+          "Retest under current limit before normal power."
+        ],
+        "confirmation_after_repair": [
+          "retest on a current-limited supply",
+          "verify fault symptom is gone",
+          "run a short thermal check under normal load",
+          "record the repair and replaced parts"
+        ]
+      },
+      {
+        "fault_id": "connector_or_harness_fault",
+        "title": "Connector, solder joint, or harness intermittency",
+        "difficulty": "easy_to_medium",
+        "estimated_time_minutes": 20,
+        "repair_steps": [
+          "Clean contacts with electronics-safe contact cleaner.",
+          "Reflow cracked connector joints with flux.",
+          "Replace damaged cable or connector shell.",
+          "Add strain relief before final reassembly."
+        ],
+        "confirmation_after_repair": [
+          "retest on a current-limited supply",
+          "verify fault symptom is gone",
+          "run a short thermal check under normal load",
+          "record the repair and replaced parts"
+        ]
+      }
+    ],
+    "parts_and_tools": {
+      "tools": [
+        "ESD-safe tweezers",
+        "clip leads",
+        "current-limited bench supply",
+        "dummy load",
+        "flux",
+        "magnification",
+        "multimeter",
+        "soldering iron",
+        "thermal camera or IR thermometer"
+      ],
+      "likely_parts": [
+        "MOSFET/transistor with matching rating",
+        "flyback diode",
+        "heat shrink",
+        "input/output capacitors",
+        "replacement connector",
+        "voltage regulator",
+        "wire/crimp terminals"
+      ],
+      "consumables": [
+        "isopropyl alcohol",
+        "lint-free swabs",
+        "solder wick",
+        "quality solder",
+        "Kapton tape"
+      ]
+    },
+    "when_to_stop": [
+      "battery is swollen, punctured, hissing, smoking, or unusually hot",
+      "you cannot identify the input voltage or polarity",
+      "the board immediately hits current limit after disconnecting all loads",
+      "a replacement part rating cannot be verified",
+      "the repair requires live mains probing and you do not have the proper equipment"
+    ],
+    "evidence_to_collect_next": [
+      "input voltage measurement",
+      "rail-to-ground resistance before power-up",
+      "current draw at startup under current limit"
+    ],
+    "confidence": 0.92,
+    "limitations": [
+      "This guide is a diagnostic workflow, not proof of a fault until measurements confirm it.",
+      "Do not probe mains-powered equipment live. Isolate high voltage before board-level inspection.",
+      "Image-only PCB inference cannot see hidden layers, bottom-side components, or exact manufacturer revisions."
+    ],
+    "quick_summary": "Small DC motor / actuator gadget: start with Document before touching; top candidate is Driver stage or motor/load path fault."
+  },
+  "operator_capture_checklist": [
+    "device model and board revision",
+    "symptoms before repair",
+    "tool and chemical list",
+    "before/after photos for every repaired area",
+    "measurements before replacing parts",
+    "validation result after reassembly"
+  ],
+  "quality_gates": [
+    "no unknown input voltage or polarity",
+    "no powered testing before rail-to-ground resistance check",
+    "repair action tied to a confirmed fault candidate",
+    "post-repair thermal and functional test recorded",
+    "disconnect power before inspection",
+    "start every powered test with a current-limited supply when possible",
+    "label connector polarity and voltage before reconnecting loads",
+    "treat unexpected heating as a fault; power only briefly under current limit while measuring"
+  ],
+  "difficulty": "hard_to_expert",
+  "can_follow_score": 0.93,
+  "limitations": [
+    "A single video may omit failed attempts, safety setup, exact measurements, or model-specific differences.",
+    "The user still needs the actual device, photos, measurements, and replacement-part verification.",
+    "High-voltage, battery, microwave, CRT, and mains appliances require stricter procedures than generic gadget repairs."
+  ]
+}

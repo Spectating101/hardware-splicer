@@ -1,0 +1,127 @@
+{
+  "sources": [
+    {
+      "name": "Electromaker",
+      "url": "https://www.electromaker.io/rss",
+      "category": "project_blueprints",
+      "value": "High-quality, contest-winning projects with structured BOMs.",
+      "key_insights": [
+        "Contest-winning project architectures",
+        "New microcontroller application patterns",
+        "Detailed build logs"
+      ]
+    },
+    {
+      "name": "Maker.io (DigiKey)",
+      "url": "https://www.digikey.com/en/maker/feed/rss",
+      "category": "project_blueprints",
+      "value": "Commercial-grade maker projects with verified supply chain links.",
+      "key_insights": [
+        "Supply-chain verified designs",
+        "Commercialization-ready prototypes",
+        "DigiKey part integration"
+      ]
+    },
+    {
+      "name": "Circuit Digest",
+      "url": "https://circuitdigest.com/rss.xml",
+      "category": "project_blueprints",
+      "value": "Deep technical breakdowns and reference designs.",
+      "key_insights": [
+        "Embedded system reference designs",
+        "IoT protocol implementation guides",
+        "Power management topologies"
+      ]
+    },
+    {
+      "name": "OSHWLab",
+      "url": "https://oshwlab.com/",
+      "category": "project_blueprints",
+      "value": "Open Source Hardware Lab. The GitHub of EDA files.",
+      "key_insights": [
+        "Direct EDA file access (EasyEDA/KiCad)",
+        "Community-forked improvements",
+        "Component footprint libraries"
+      ]
+    },
+    {
+      "name": "Hackaday",
+      "url": "https://hackaday.com/blog/feed/",
+      "category": "hacks",
+      "value": "Creative reuse, hardware exploits, new maker tools.",
+      "key_insights": [
+        "RF dielectric measurement techniques",
+        "Apollo-era PCB reverse engineering methods",
+        "IoT hardware abandonment hacks"
+      ]
+    },
+    {
+      "name": "Hackster.io",
+      "url": "https://www.hackster.io/feed",
+      "category": "projects",
+      "value": "Structured project blueprints, full BOMs, and community-verified schematics.",
+      "key_insights": [
+        "AI-on-the-edge project patterns (ESP32-S3/Jetson)",
+        "Multi-component integration templates",
+        "Emerging sensor application demos"
+      ]
+    },
+    {
+      "name": "EEVblog",
+      "url": "https://www.eevblog.com/feed/",
+      "category": "engineering",
+      "value": "Deep technical analysis, debunking, test equipment reviews.",
+      "key_insights": [
+        "Troubleshooting without schematics (Sensory checks)",
+        "Fuse verification prioritization",
+        "Comparative analysis with known-good boards"
+      ]
+    },
+    {
+      "name": "CNX Software",
+      "url": "https://www.cnx-software.com/feed/",
+      "category": "embedded",
+      "value": "New development boards, RISC-V news, Chinese silicon.",
+      "key_insights": [
+        "WCH CH32V003 (<10 cent RISC-V MCU)",
+        "ESP32-C3 SuperMini pricing trends",
+        "New low-cost FPGA boards"
+      ]
+    },
+    {
+      "name": "Adafruit Blog",
+      "url": "https://blog.adafruit.com/feed/",
+      "category": "maker",
+      "value": "Python on Hardware, IoT trends, new sensors.",
+      "key_insights": [
+        "CircuitPython compatibility updates",
+        "New sensor breakout availability",
+        "RP2040/RP2350 platform shifts"
+      ]
+    },
+    {
+      "name": "All About Circuits",
+      "url": "https://www.allaboutcircuits.com/feed/",
+      "category": "industry",
+      "value": "Formal education, component news, technical whitepapers.",
+      "key_insights": [
+        "Power electronics reliability standards",
+        "MOSFET failure modes analysis",
+        "PCB layout best practices for EMI"
+      ]
+    },
+    {
+      "name": "SemiAnalysis",
+      "url": "https://www.semianalysis.com/feed",
+      "category": "silicon",
+      "value": "Chip manufacturing economics, supply chain insights.",
+      "key_insights": [
+        "Foundry capacity shifts",
+        "Chip shortage predictions",
+        "Advanced packaging cost analysis"
+      ]
+    }
+  ],
+  "update_frequency": "daily",
+  "integration_strategy": "LLM Summarization -> Knowledge Graph Update"
+}

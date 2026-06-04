@@ -1,0 +1,13 @@
+{
+  "model_id": "yolo11n_best_small_component",
+  "file": "models/pcb/yolo11n_best_small_component.pt",
+  "sha256": "d262cfea87beba1b188c2d30d98202beb52fcb8ec01974e46c1fd49ba0d86d2f",
+  "source": {
+    "repository": "https://github.com/aryan-programmer/pcb-fault-detection",
+    "path": "yolo11n_best_small_component.pt",
+    "url": "https://github.com/aryan-programmer/pcb-fault-detection/raw/master/pcb-components-detection/yolo11n_best_small_component.pt",
+    "retrieved_at": "2026-05-05"
+  },
+  "task": "PCB component detection",
+  "updated_by": "scripts/fetch_pcb_component_model.py"
+}

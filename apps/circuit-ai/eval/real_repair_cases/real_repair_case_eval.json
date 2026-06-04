@@ -1,0 +1,510 @@
+{
+  "mode": "real_repair_case_functional_eval",
+  "summary": {
+    "case_count": 7,
+    "solvable_now": 4,
+    "assistive_only": 3,
+    "not_ready": 0,
+    "average_workflow_score": 0.725,
+    "strongest_cases": [
+      "xbox_thumbstick_drift",
+      "dewalt_battery_not_charge",
+      "usb_fan_no_spin"
+    ],
+    "weakest_cases": [
+      "tv_sound_no_picture",
+      "coffee_not_hot",
+      "laptop_no_power"
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "xbox_thumbstick_drift",
+      "title": "Xbox One wireless controller has malfunctioning thumbstick",
+      "source_url": "https://www.ifixit.com/Troubleshooting/Xbox_One_Controller/Xbox%2BOne%2BWireless%2BController%2BHas%2BMalfunctioning%2BThumbstick/444889",
+      "expected_lane": "game_controller_input",
+      "coverage": {
+        "matched": true,
+        "top_item": "game_controller",
+        "top_label": "Game controllers",
+        "coverage_level": "usable_with_gaps",
+        "coverage": 0.74,
+        "strategic_score": 0.666
+      },
+      "repair_guide": {
+        "family": "game_controller_input",
+        "family_label": "Game controller input assembly",
+        "confidence": 0.734,
+        "safety_risk": "low_to_medium",
+        "top_fault": "analog_stick_or_button_contact_fault",
+        "top_fault_name": "Analog stick, trigger, or button contact fault",
+        "top_fault_likelihood": 0.86,
+        "diagnostic_step_count": 6,
+        "evidence_next_count": 5
+      },
+      "playbook": {
+        "pattern": "controller_input_repair",
+        "pattern_label": "Controller stick/button input repair",
+        "can_follow_score": 0.576,
+        "capture_checklist_count": 9,
+        "quality_gate_count": 8
+      },
+      "board_session": {
+        "route": "repair",
+        "task_count": 5,
+        "capture_burden": 1,
+        "measurement_count_required": 2,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "before/after controller tester readings for stick center, axis range, triggers, and buttons"
+          },
+          {
+            "type": "measurement",
+            "prompt": "measure input connector polarity and voltage"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          },
+          {
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos"
+          },
+          {
+            "type": "evidence",
+            "prompt": "closeups of analog stick modules, button membranes, flex cables, and PCB contacts"
+          }
+        ]
+      },
+      "workflow_score": 0.768,
+      "verdict": "solvable_now",
+      "blockers": [],
+      "recommended_next_builds": [
+        "controller calibration and stick-module compatibility database"
+      ]
+    },
+    {
+      "case_id": "laptop_no_power",
+      "title": "Laptop will not turn on",
+      "source_url": "https://www.ifixit.com/Troubleshooting/PC_Laptop/Laptop%2BWill%2BNot%2BTurn%2BOn/505262",
+      "expected_lane": "laptop_power_path",
+      "coverage": {
+        "matched": true,
+        "top_item": "battery_charging_gadget",
+        "top_label": "Battery charging gadgets",
+        "coverage_level": "usable_with_gaps",
+        "coverage": 0.66,
+        "strategic_score": 0.488
+      },
+      "repair_guide": {
+        "family": "laptop_power_path",
+        "family_label": "Laptop charging and power path",
+        "confidence": 0.668,
+        "safety_risk": "low_to_medium",
+        "top_fault": "power_input_or_regulator_fault",
+        "top_fault_name": "Power input, protection, or regulator fault",
+        "top_fault_likelihood": 0.68,
+        "diagnostic_step_count": 7,
+        "evidence_next_count": 8
+      },
+      "playbook": {
+        "pattern": "battery_charging_diagnostics",
+        "pattern_label": "Battery and charging-path diagnostics",
+        "can_follow_score": 0.56,
+        "capture_checklist_count": 10,
+        "quality_gate_count": 8
+      },
+      "board_session": {
+        "route": "repair",
+        "task_count": 6,
+        "capture_burden": 1,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "input fuse or main-rail resistance with power disconnected"
+          },
+          {
+            "type": "measurement",
+            "prompt": "input voltage measurement"
+          },
+          {
+            "type": "measurement",
+            "prompt": "rail-to-ground resistance before power-up"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          },
+          {
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos"
+          }
+        ]
+      },
+      "workflow_score": 0.718,
+      "verdict": "assistive_only",
+      "blockers": [
+        "boardview/schematic and model-specific teardown needed for deeper board repair"
+      ],
+      "recommended_next_builds": [
+        "battery chemistry, pack safety, and replacement compatibility workflow",
+        "laptop boardview/schematic connector for power-path diagnosis",
+        "collect board photos, measurements, and outcome data for this lane"
+      ]
+    },
+    {
+      "case_id": "coffee_not_hot",
+      "title": "Coffee maker not hot enough",
+      "source_url": "https://www.ifixit.com/Troubleshooting/Coffee_Maker/Not%2BHot%2BEnough/483047",
+      "expected_lane": "mains_heater_appliance",
+      "coverage": {
+        "matched": true,
+        "top_item": "simple_mains_heater_appliance",
+        "top_label": "Simple mains heater appliances",
+        "coverage_level": "partial",
+        "coverage": 0.48,
+        "strategic_score": 0.307
+      },
+      "repair_guide": {
+        "family": "mains_heater_appliance",
+        "family_label": "Mains heater appliance control path",
+        "confidence": 0.775,
+        "safety_risk": "high",
+        "top_fault": "heater_thermal_cutoff_or_control_fault",
+        "top_fault_name": "Heating element, thermal fuse, thermostat, or control relay fault",
+        "top_fault_likelihood": 0.72,
+        "diagnostic_step_count": 6,
+        "evidence_next_count": 6
+      },
+      "playbook": {
+        "pattern": "mains_or_backlight_safety_triage",
+        "pattern_label": "Mains heater or TV backlight safety triage",
+        "can_follow_score": 0.616,
+        "capture_checklist_count": 9,
+        "quality_gate_count": 9
+      },
+      "board_session": {
+        "route": "safety",
+        "task_count": 6,
+        "capture_burden": 1,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "confirm appliance is unplugged and capacitors are discharged before continuity checks"
+          },
+          {
+            "type": "measurement",
+            "prompt": "thermal fuse and thermostat continuity readings"
+          },
+          {
+            "type": "measurement",
+            "prompt": "heating element resistance compared with expected wattage"
+          },
+          {
+            "type": "review",
+            "prompt": "confirm safe isolation, discharge state, and no live high-voltage probing before continuing"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          }
+        ]
+      },
+      "workflow_score": 0.703,
+      "verdict": "assistive_only",
+      "blockers": [
+        "model-specific knowledge required before customer-facing claim",
+        "trained safety workflow required for high-voltage or mains portions"
+      ],
+      "recommended_next_builds": [
+        "mains heater appliance safety pack with thermal fuse/element rating tables",
+        "collect board photos, measurements, and outcome data for this lane"
+      ]
+    },
+    {
+      "case_id": "electric_toothbrush_not_charging",
+      "title": "Electric toothbrush not charging",
+      "source_url": "https://www.ifixit.com/Troubleshooting/Electric_Toothbrush/Not%2BCharging/564390",
+      "expected_lane": "battery_charging_gadget",
+      "coverage": {
+        "matched": true,
+        "top_item": "battery_charging_gadget",
+        "top_label": "Battery charging gadgets",
+        "coverage_level": "usable_with_gaps",
+        "coverage": 0.66,
+        "strategic_score": 0.488
+      },
+      "repair_guide": {
+        "family": "battery_charging_gadget",
+        "family_label": "Battery charging gadget or pack",
+        "confidence": 0.698,
+        "safety_risk": "low_to_medium",
+        "top_fault": "battery_charge_path_fault",
+        "top_fault_name": "Battery, charge contact, or charge-controller fault",
+        "top_fault_likelihood": 0.62,
+        "diagnostic_step_count": 5,
+        "evidence_next_count": 8
+      },
+      "playbook": {
+        "pattern": "battery_charging_diagnostics",
+        "pattern_label": "Battery and charging-path diagnostics",
+        "can_follow_score": 0.627,
+        "capture_checklist_count": 10,
+        "quality_gate_count": 8
+      },
+      "board_session": {
+        "route": "repair",
+        "task_count": 6,
+        "capture_burden": 1,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "charger rating and no-load output voltage"
+          },
+          {
+            "type": "measurement",
+            "prompt": "battery pack voltage compared with nominal rating"
+          },
+          {
+            "type": "measurement",
+            "prompt": "charge current or dock current draw during safe charging test"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          },
+          {
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos"
+          }
+        ]
+      },
+      "workflow_score": 0.723,
+      "verdict": "solvable_now",
+      "blockers": [],
+      "recommended_next_builds": [
+        "battery chemistry, pack safety, and replacement compatibility workflow"
+      ]
+    },
+    {
+      "case_id": "dewalt_battery_not_charge",
+      "title": "DeWalt DC970 battery will not charge",
+      "source_url": "https://www.ifixit.com/Wiki/DeWalt_DC970_Troubleshooting",
+      "expected_lane": "battery_charging_gadget",
+      "coverage": {
+        "matched": true,
+        "top_item": "battery_charging_gadget",
+        "top_label": "Battery charging gadgets",
+        "coverage_level": "usable_with_gaps",
+        "coverage": 0.66,
+        "strategic_score": 0.488
+      },
+      "repair_guide": {
+        "family": "battery_charging_gadget",
+        "family_label": "Battery charging gadget or pack",
+        "confidence": 0.727,
+        "safety_risk": "low_to_medium",
+        "top_fault": "battery_charge_path_fault",
+        "top_fault_name": "Battery, charge contact, or charge-controller fault",
+        "top_fault_likelihood": 0.7,
+        "diagnostic_step_count": 6,
+        "evidence_next_count": 8
+      },
+      "playbook": {
+        "pattern": "battery_charging_diagnostics",
+        "pattern_label": "Battery and charging-path diagnostics",
+        "can_follow_score": 0.634,
+        "capture_checklist_count": 10,
+        "quality_gate_count": 8
+      },
+      "board_session": {
+        "route": "repair",
+        "task_count": 6,
+        "capture_burden": 1,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "charger rating and no-load output voltage"
+          },
+          {
+            "type": "measurement",
+            "prompt": "battery pack voltage compared with nominal rating"
+          },
+          {
+            "type": "measurement",
+            "prompt": "charge current or dock current draw during safe charging test"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          },
+          {
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos"
+          }
+        ]
+      },
+      "workflow_score": 0.747,
+      "verdict": "solvable_now",
+      "blockers": [],
+      "recommended_next_builds": [
+        "battery chemistry, pack safety, and replacement compatibility workflow"
+      ]
+    },
+    {
+      "case_id": "tv_sound_no_picture",
+      "title": "TV has sound but no picture",
+      "source_url": "https://www.ifixit.com/Troubleshooting/Television/TV%2BHas%2BSound%2BBut%2BNo%2BPicture/493422",
+      "expected_lane": "tv_backlight_power",
+      "coverage": {
+        "matched": true,
+        "top_item": "tv_monitor_backlight",
+        "top_label": "TV/monitor backlight and power faults",
+        "coverage_level": "partial",
+        "coverage": 0.46,
+        "strategic_score": 0.331
+      },
+      "repair_guide": {
+        "family": "tv_backlight_power",
+        "family_label": "TV/monitor backlight or power board",
+        "confidence": 0.769,
+        "safety_risk": "high",
+        "top_fault": "display_backlight_or_power_supply_fault",
+        "top_fault_name": "Backlight LED strip, inverter/driver, or power-supply fault",
+        "top_fault_likelihood": 0.68,
+        "diagnostic_step_count": 5,
+        "evidence_next_count": 6
+      },
+      "playbook": {
+        "pattern": "mains_or_backlight_safety_triage",
+        "pattern_label": "Mains heater or TV backlight safety triage",
+        "can_follow_score": 0.615,
+        "capture_checklist_count": 9,
+        "quality_gate_count": 9
+      },
+      "board_session": {
+        "route": "safety",
+        "task_count": 8,
+        "capture_burden": 3,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "standby/main rail readings only if trained for high-voltage TV work"
+          },
+          {
+            "type": "capture",
+            "prompt": "flashlight-test result showing whether a faint image is present"
+          },
+          {
+            "type": "capture",
+            "prompt": "power-board and backlight connector photos with model labels"
+          },
+          {
+            "type": "review",
+            "prompt": "confirm safe isolation, discharge state, and no live high-voltage probing before continuing"
+          },
+          {
+            "type": "measurement",
+            "prompt": "measure input connector polarity and voltage"
+          }
+        ]
+      },
+      "workflow_score": 0.689,
+      "verdict": "assistive_only",
+      "blockers": [
+        "model-specific knowledge required before customer-facing claim",
+        "trained safety workflow required for high-voltage or mains portions"
+      ],
+      "recommended_next_builds": [
+        "TV model rail/backlight LED-strip reference library",
+        "collect board photos, measurements, and outcome data for this lane"
+      ]
+    },
+    {
+      "case_id": "usb_fan_no_spin",
+      "title": "USB fan warms but motor will not spin",
+      "source_url": "local sample assets/samples/test_pcb.png",
+      "expected_lane": "small_dc_motor_gadget",
+      "coverage": {
+        "matched": true,
+        "top_item": "game_controller",
+        "top_label": "Game controllers",
+        "coverage_level": "usable_with_gaps",
+        "coverage": 0.74,
+        "strategic_score": 0.666
+      },
+      "repair_guide": {
+        "family": "small_dc_motor_gadget",
+        "family_label": "Small DC motor / actuator gadget",
+        "confidence": 0.608,
+        "safety_risk": "low_to_medium",
+        "top_fault": "driver_stage_or_load_fault",
+        "top_fault_name": "Driver stage or motor/load path fault",
+        "top_fault_likelihood": 0.77,
+        "diagnostic_step_count": 6,
+        "evidence_next_count": 8
+      },
+      "playbook": {
+        "pattern": "board_level_fault_finding",
+        "pattern_label": "Board-level electronic fault finding",
+        "can_follow_score": 0.605,
+        "capture_checklist_count": 6,
+        "quality_gate_count": 7
+      },
+      "board_session": {
+        "route": "repair",
+        "task_count": 5,
+        "capture_burden": 1,
+        "measurement_count_required": 3,
+        "first_tasks": [
+          {
+            "type": "measurement",
+            "prompt": "motor/load resistance and isolation reading"
+          },
+          {
+            "type": "measurement",
+            "prompt": "connector continuity while gently flexing the harness"
+          },
+          {
+            "type": "measurement",
+            "prompt": "driver output voltage with current limit and dummy load"
+          },
+          {
+            "type": "evidence",
+            "prompt": "connector closeups with wire colors and labels"
+          },
+          {
+            "type": "capture",
+            "prompt": "top-side and bottom-side board photos"
+          }
+        ]
+      },
+      "workflow_score": 0.727,
+      "verdict": "solvable_now",
+      "blockers": [],
+      "recommended_next_builds": [
+        "controller calibration and stick-module compatibility database"
+      ]
+    }
+  ],
+  "portfolio_after_cases": {
+    "strong_count": 5,
+    "partial_count": 7,
+    "weak_count": 2,
+    "weighted_coverage": 0.542
+  },
+  "next_builds": [
+    "battery chemistry, pack safety, and replacement compatibility workflow",
+    "collect board photos, measurements, and outcome data for this lane",
+    "controller calibration and stick-module compatibility database",
+    "TV model rail/backlight LED-strip reference library",
+    "laptop boardview/schematic connector for power-path diagnosis",
+    "mains heater appliance safety pack with thermal fuse/element rating tables"
+  ]
+}

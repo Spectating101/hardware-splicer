@@ -1,0 +1,32 @@
+{
+  "hazards": [
+    {
+      "id": "li_ion_battery",
+      "keywords": ["li-ion", "lipo", "lithium", "polymer", "mah", "3.7v", "3.8v", "4.2v", "battery"],
+      "severity": "CRITICAL",
+      "warning": "LITHIUM BATTERY DETECTED. Do not puncture, bend, or short circuit. Fire hazard! Disconnect battery connector first before working.",
+      "action": "Locate and disconnect the battery connector immediately."
+    },
+    {
+      "id": "high_voltage_ac",
+      "keywords": ["110v", "220v", "230v", "240v", "ac", "~", "50hz", "60hz", "high voltage"],
+      "severity": "DANGER",
+      "warning": "MAINS VOLTAGE DETECTED. Risk of electrocution. Ensure device is unplugged. Capacitors may hold charge even when unplugged.",
+      "action": "Unplug device. Discharge large capacitors with a resistor before touching."
+    },
+    {
+      "id": "laser_warning",
+      "keywords": ["laser", "class 3b", "class 4", "radiation", "avoid exposure"],
+      "severity": "WARNING",
+      "warning": "LASER RADIATION. Avoid direct eye exposure. Do not look into the beam.",
+      "action": "Wear appropriate safety glasses if the laser is powered."
+    },
+    {
+      "id": "hot_surface",
+      "keywords": ["hot", "caution", "burn", "heatsink"],
+      "severity": "CAUTION",
+      "warning": "HOT SURFACE. Components may be extremely hot.",
+      "action": "Allow to cool before touching."
+    }
+  ]
+}

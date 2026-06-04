@@ -1,0 +1,71 @@
+{
+  "ic_name": "FT232RL",
+  "pins": [
+    {
+      "pin": 0,
+      "name": "TXDEN",
+      "function": "Enable transmit data for RS485"
+    },
+    {
+      "pin": 0,
+      "name": "PWREN#",
+      "function": "Output is low after the device has been configured\nby USB, then high during USB suspending mode.\nThis output can be used to control power to\nexternal logic P-Channel logic level MOSFET switch.\nEnable the interface pull-down option when using\nthe PWREN# in this way.*"
+    },
+    {
+      "pin": 0,
+      "name": "TXLED#",
+      "function": "Transmit data LED drive: Data from USB Host to\nFT232R. Pulses low when transmitting data via USB.\nSee Section 7.5 for more details."
+    },
+    {
+      "pin": 0,
+      "name": "RXLED#",
+      "function": "Receive data LED drive: Data from FT232R to USB\nHost. Pulses low when receiving data via USB. See\nSection 7.5 for more details."
+    },
+    {
+      "pin": 0,
+      "name": "TX&RXLED#",
+      "function": "LED drive \u2013 pulses low when transmitting or\nreceiving data via USB. See Section 7.5 for more\ndetails."
+    },
+    {
+      "pin": 0,
+      "name": "SLEEP#",
+      "function": "Goes low during USB suspend mode. Typically used\nto power down an external TTL to RS232 level\nconverter IC in USB to RS232 converter designs."
+    },
+    {
+      "pin": 0,
+      "name": "CLK48",
+      "function": "48MHz \u00b10.7% Clock output. **"
+    },
+    {
+      "pin": 0,
+      "name": "CLK24",
+      "function": "24 MHz Clock output. **"
+    },
+    {
+      "pin": 0,
+      "name": "CLK12",
+      "function": "12 MHz Clock output. **"
+    },
+    {
+      "pin": 0,
+      "name": "CLK6",
+      "function": "6 MHz \u00b10.7% Clock output. **"
+    },
+    {
+      "pin": 0,
+      "name": "CBitBangI/O",
+      "function": "CBUS bit bang mode option. Allows up to 4 of the\nCBUS pins to be used as general purpose I/O.\nConfigured individually for CBUS0, CBUS1, CBUS2\nand CBUS3 in the internal EEPROM. A separate\napplication note, AN232R-01, available from FTDI\nwebsite (www.ftdichip.com) describes in more detail\nhow to use CBUS bit bang mode."
+    },
+    {
+      "pin": 0,
+      "name": "BitBangWRn",
+      "function": "Synchronous and asynchronous bit bang mode WR#\nstrobe output."
+    },
+    {
+      "pin": 0,
+      "name": "BitBangRDn",
+      "function": "Synchronous and asynchronous bit bang mode RD#\nstrobe output."
+    }
+  ],
+  "total_pins": 13
+}

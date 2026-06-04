@@ -1,0 +1,316 @@
+{
+  "goal": "competitive_unknown_electronics_intake_engine",
+  "positioning": "Start from an unknown item or listing, then route into repair, salvage, build, source/sell, safety review, or evidence collection.",
+  "sources": [
+    {
+      "source_id": "electrocom61_local",
+      "name": "ElectroCom61 local YOLO corpus",
+      "category": "dataset",
+      "task": "component_detection",
+      "url": "datasets/electrocom61/data.yaml",
+      "access": "local",
+      "license_note": "local prepared dataset; verify upstream license before redistribution",
+      "signal": "multi-class electronic component boxes",
+      "gap_closed": "improves component localization and class diversity beyond smoke checkpoints",
+      "priority": 1,
+      "local_paths": [
+        "datasets/electrocom61/data.yaml",
+        "datasets/real_pcb_archive/data.yaml"
+      ],
+      "readiness": "ready",
+      "existing_paths": [
+        "datasets/electrocom61/data.yaml",
+        "datasets/real_pcb_archive/data.yaml"
+      ],
+      "missing_paths": []
+    },
+    {
+      "source_id": "deeppcb",
+      "name": "DeepPCB",
+      "category": "dataset",
+      "task": "golden_defect_detection",
+      "url": "https://github.com/tangsanli5201/DeepPCB",
+      "access": "public_git",
+      "license_note": "research dataset; confirm downstream redistribution terms",
+      "signal": "paired template/test PCB images with six defect classes",
+      "gap_closed": "adds golden-reference defect localization and AOI-style evaluation",
+      "priority": 1,
+      "local_paths": [
+        "datasets/deeppcb_subset/manifest.json"
+      ],
+      "readiness": "ready",
+      "existing_paths": [
+        "datasets/deeppcb_subset/manifest.json"
+      ],
+      "missing_paths": []
+    },
+    {
+      "source_id": "fpic",
+      "name": "FICS PCB Image Collection / FPIC",
+      "category": "dataset",
+      "task": "component_detection",
+      "url": "https://physicaldb.ece.ufl.edu/index.php/fics-pcb-image-collection-fpic/",
+      "access": "request_or_download_page",
+      "license_note": "academic dataset; follow site terms and attribution requirements",
+      "signal": "PCB images and component annotations for real boards",
+      "gap_closed": "improves generalization from synthetic/curated parts to real board photos",
+      "priority": 2,
+      "local_paths": [
+        "datasets/fpic_yolo/data.yaml",
+        "datasets/fpic_raw"
+      ],
+      "readiness": "partial",
+      "existing_paths": [
+        "datasets/fpic_raw"
+      ],
+      "missing_paths": [
+        "datasets/fpic_yolo/data.yaml"
+      ]
+    },
+    {
+      "source_id": "hripcb",
+      "name": "HRIPCB-style high-resolution PCB defect corpora",
+      "category": "dataset",
+      "task": "defect_detection",
+      "url": "https://github.com/Charmve/Surface-Defect-Detection/tree/master/DeepPCB",
+      "access": "public_or_mirrored",
+      "license_note": "mirror availability varies; verify original dataset terms",
+      "signal": "high-resolution defect samples for open, short, mousebite, spur, copper, pin-hole classes",
+      "gap_closed": "broadens defect samples beyond a small DeepPCB subset",
+      "priority": 3,
+      "local_paths": [
+        "datasets/hripcb"
+      ],
+      "readiness": "needs_fetch",
+      "existing_paths": [],
+      "missing_paths": [
+        "datasets/hripcb"
+      ]
+    },
+    {
+      "source_id": "ifixit",
+      "name": "iFixit",
+      "category": "repair_platform",
+      "task": "known_model_repair_guides",
+      "url": "https://www.ifixit.com/",
+      "access": "web_platform",
+      "license_note": "do not copy guides; use as market/coverage reference and link-out inspiration only",
+      "signal": "large repair-guide and parts ecosystem",
+      "gap_closed": "sets the bar for model-specific repair breadth",
+      "priority": 2,
+      "local_paths": [],
+      "readiness": "reference_only",
+      "existing_paths": [],
+      "missing_paths": []
+    },
+    {
+      "source_id": "daoai_aoi",
+      "name": "DaoAI AOI",
+      "category": "competitor",
+      "task": "production_aoi",
+      "url": "https://www.daoai.com/aoi",
+      "access": "commercial",
+      "license_note": "competitor reference only",
+      "signal": "AI AOI positioning around CAD-free setup and factory defect classes",
+      "gap_closed": "defines production AOI expectations for setup, defect classes, and false calls",
+      "priority": 2,
+      "local_paths": [],
+      "readiness": "reference_only",
+      "existing_paths": [],
+      "missing_paths": []
+    },
+    {
+      "source_id": "delvitech_horus",
+      "name": "Delvitech Horus",
+      "category": "competitor",
+      "task": "production_aoi",
+      "url": "https://delvi.tech/technology/horus/",
+      "access": "commercial",
+      "license_note": "competitor reference only",
+      "signal": "3D AOI/SPI, OCR, polarity, solder-joint inspection",
+      "gap_closed": "defines the calibrated-inspection ceiling we should not overclaim against",
+      "priority": 2,
+      "local_paths": [],
+      "readiness": "reference_only",
+      "existing_paths": [],
+      "missing_paths": []
+    },
+    {
+      "source_id": "flux_ai",
+      "name": "Flux",
+      "category": "competitor",
+      "task": "ai_pcb_design",
+      "url": "https://www.flux.ai/",
+      "access": "commercial_saas",
+      "license_note": "competitor reference only",
+      "signal": "AI-assisted schematic/PCB design and collaboration",
+      "gap_closed": "defines expectations for build/design UX after salvage modules are chosen",
+      "priority": 3,
+      "local_paths": [],
+      "readiness": "reference_only",
+      "existing_paths": [],
+      "missing_paths": []
+    },
+    {
+      "source_id": "circuit_mind",
+      "name": "Circuit Mind",
+      "category": "competitor",
+      "task": "ai_electronics_design",
+      "url": "https://www.circuitmind.io/",
+      "access": "commercial_saas",
+      "license_note": "competitor reference only",
+      "signal": "electronics design automation from requirements",
+      "gap_closed": "sets expectations for requirements-to-schematic automation",
+      "priority": 3,
+      "local_paths": [],
+      "readiness": "reference_only",
+      "existing_paths": [],
+      "missing_paths": []
+    }
+  ],
+  "competitors": [
+    {
+      "profile_id": "production_aoi",
+      "name": "Production AOI platforms",
+      "category": "factory_inspection",
+      "url": "https://www.daoai.com/aoi",
+      "strengths": [
+        "calibrated capture fixtures",
+        "factory defect classes",
+        "line integration and false-call reduction",
+        "reference-board or CAD-assisted inspection"
+      ],
+      "circuit_ai_response": [
+        "do not overclaim production AOI without calibrated fixtures",
+        "use DeepPCB/golden-reference evaluation for measured defect-localization progress",
+        "position random-object repair/salvage reasoning as the differentiated layer"
+      ]
+    },
+    {
+      "profile_id": "repair_guides",
+      "name": "Repair-guide platforms",
+      "category": "known_model_repair",
+      "url": "https://www.ifixit.com/",
+      "strengths": [
+        "large known-device guide library",
+        "parts/tools ecosystem",
+        "clear consumer repair UX"
+      ],
+      "circuit_ai_response": [
+        "win unknown-board intake and board-level diagnostic routing",
+        "build model-specific packs only for strongest verticals first",
+        "link evidence collection to measurements instead of generic advice"
+      ]
+    },
+    {
+      "profile_id": "ai_pcb_design",
+      "name": "AI PCB design platforms",
+      "category": "new_design",
+      "url": "https://www.flux.ai/",
+      "strengths": [
+        "schematic/PCB creation from requirements",
+        "collaboration and parts libraries",
+        "design-for-manufacturing flow"
+      ],
+      "circuit_ai_response": [
+        "differentiate by starting from junk, broken devices, and recovered modules",
+        "hand off salvage/build packages into KiCad/exportable design tools",
+        "keep design automation downstream of evidence and safety validation"
+      ]
+    },
+    {
+      "profile_id": "e_waste_marketplaces",
+      "name": "E-waste and recommerce platforms",
+      "category": "sourcing_resale",
+      "url": "https://www.ewastetrader.com/",
+      "strengths": [
+        "marketplace/logistics",
+        "bulk sourcing and resale channels",
+        "commercial transaction workflows"
+      ],
+      "circuit_ai_response": [
+        "score listings by recoverable module capability and build/resale value",
+        "turn lots into test plans and build packages",
+        "add marketplace integration only after reliable item-class coverage"
+      ]
+    }
+  ],
+  "local_training_datasets": [
+    {
+      "path": "datasets/ElectroCom61 A Multiclass Dataset for Detection of Electronic Components/ElectroCom-61_v2/data.yaml",
+      "bytes": 1255,
+      "has_train": true,
+      "has_val": true,
+      "has_names": true,
+      "task": "component_detection"
+    },
+    {
+      "path": "datasets/electrocom61/data.yaml",
+      "bytes": 758,
+      "has_train": true,
+      "has_val": true,
+      "has_names": true,
+      "task": "component_detection"
+    },
+    {
+      "path": "datasets/electrocom61_full/data.yaml",
+      "bytes": 1255,
+      "has_train": true,
+      "has_val": true,
+      "has_names": true,
+      "task": "component_detection"
+    },
+    {
+      "path": "datasets/real_pcb_archive/data.yaml",
+      "bytes": 199,
+      "has_train": true,
+      "has_val": true,
+      "has_names": true,
+      "task": "component_detection"
+    }
+  ],
+  "immediate_actions": [
+    {
+      "id": "fine_tune_component_detector",
+      "lane": "component_detection",
+      "why": "local YOLO datasets exist; smoke-ranked checkpoints can be replaced by measured mAP validation",
+      "command": "python3 scripts/train_pcb_detector.py --data-yaml datasets/electrocom61/data.yaml --base-model models/pcb/pcb_components_yolo11n_thawed.pt --epochs 50 --imgsz 640 --output-dir pcb_runs/competitive_component_v1"
+    },
+    {
+      "id": "expand_golden_defect_eval",
+      "lane": "defect_detection",
+      "why": "DeepPCB subset is available; expand sample count and track localization metrics",
+      "command": "python3 scripts/fetch_deeppcb_subset.py --split test --limit 250 --output-dir datasets/deeppcb_subset && python3 scripts/evaluate_deeppcb_golden.py --manifest datasets/deeppcb_subset/manifest.json --output eval/deeppcb_golden_metrics.json"
+    },
+    {
+      "id": "capture_protocol",
+      "lane": "production_aoi_readiness",
+      "why": "competitors win with controlled capture; random photos need quality gates and guided retake prompts",
+      "command": "document and enforce lighting/focus/angle retake gates in intake and scan flows"
+    },
+    {
+      "id": "repair_packs",
+      "lane": "repair_coverage",
+      "why": "iFixit-style breadth must be verticalized; strong lanes need model-specific packs first",
+      "command": "build packs for USB gadgets, retro handhelds/controllers, sensor/display modules"
+    }
+  ],
+  "production_gates": {
+    "component_detection": {
+      "minimum_map50": 0.65,
+      "target_map50": 0.8
+    },
+    "defect_detection": {
+      "minimum_iou50_recall": 0.7,
+      "target_iou50_recall": 0.9
+    },
+    "case_routing": {
+      "minimum_human_acceptance": 0.8,
+      "target_human_acceptance": 0.92
+    },
+    "safety": {
+      "minimum_hazard_recall": 0.98,
+      "target_hazard_recall": 0.995
+    }
+  }
+}

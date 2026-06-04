@@ -1,0 +1,1313 @@
+{
+  "mode": "single_image_pipeline_analysis",
+  "results": {
+    "detections": [
+      {
+        "bbox": [
+          48.0,
+          148.0,
+          103.0,
+          203.0
+        ],
+        "confidence": 0.9400247933884297,
+        "semantic_confidence": 0.65,
+        "class_id": 0,
+        "class_name": "ic_chip",
+        "center": [
+          75.5,
+          175.5
+        ],
+        "provenance": {
+          "backend": "classical-fallback",
+          "method": "contour_shape_heuristic",
+          "limitations": [
+            "candidate localization only",
+            "semantic class is shape-based and needs review"
+          ]
+        },
+        "ocr_text": "fm",
+        "part_number": null
+      },
+      {
+        "bbox": [
+          198.0,
+          48.0,
+          253.0,
+          83.0
+        ],
+        "confidence": 0.9380676948051947,
+        "semantic_confidence": 0.65,
+        "class_id": 0,
+        "class_name": "ic_chip",
+        "center": [
+          225.5,
+          65.5
+        ],
+        "provenance": {
+          "backend": "classical-fallback",
+          "method": "contour_shape_heuristic",
+          "limitations": [
+            "candidate localization only",
+            "semantic class is shape-based and needs review"
+          ]
+        },
+        "ocr_text": "",
+        "part_number": null
+      },
+      {
+        "bbox": [
+          48.0,
+          48.0,
+          153.0,
+          103.0
+        ],
+        "confidence": 0.9140831168831168,
+        "semantic_confidence": 0.65,
+        "class_id": 0,
+        "class_name": "ic_chip",
+        "center": [
+          100.5,
+          75.5
+        ],
+        "provenance": {
+          "backend": "classical-fallback",
+          "method": "contour_shape_heuristic",
+          "limitations": [
+            "candidate localization only",
+            "semantic class is shape-based and needs review"
+          ]
+        },
+        "ocr_text": "Jeo",
+        "part_number": "Jeo"
+      }
+    ],
+    "detection_summary": {
+      "total_components": 3,
+      "components_by_type": {
+        "ic_chip": 3
+      },
+      "backend_breakdown": {
+        "classical-fallback": 3
+      },
+      "average_confidence": 0.930725201692247,
+      "average_semantic_confidence": 0.65,
+      "detection_quality": "medium",
+      "semantic_quality": "candidate",
+      "review_required": true,
+      "limitations": [
+        "Some detections are heuristic candidates; verify class labels against the image."
+      ]
+    },
+    "functionality_analysis": {
+      "components": [
+        {
+          "id": "ic_chip_0",
+          "type": "ic_chip",
+          "capabilities": [
+            "arduino_projects",
+            "iot_devices",
+            "educational_electronics",
+            "signal_processing"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.9400247933884297,
+          "bbox": [
+            48.0,
+            148.0,
+            103.0,
+            203.0
+          ],
+          "market_value": 0.5,
+          "educational_value": "high",
+          "repair_guide": "Test with multimeter, check shorts, verify power",
+          "price_estimate": 0.87,
+          "llm_analysis": {
+            "educational_value": "high",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "ic_chip_1",
+          "type": "ic_chip",
+          "capabilities": [
+            "arduino_projects",
+            "iot_devices",
+            "educational_electronics",
+            "signal_processing"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.9380676948051947,
+          "bbox": [
+            198.0,
+            48.0,
+            253.0,
+            83.0
+          ],
+          "market_value": 0.5,
+          "educational_value": "high",
+          "repair_guide": "Test with multimeter, check shorts, verify power",
+          "price_estimate": 0.48,
+          "llm_analysis": {
+            "educational_value": "high",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        },
+        {
+          "id": "ic_chip_2",
+          "type": "ic_chip",
+          "capabilities": [
+            "arduino_projects",
+            "iot_devices",
+            "educational_electronics",
+            "signal_processing"
+          ],
+          "reuse_value": "high",
+          "difficulty": "beginner",
+          "detection_confidence": 0.9140831168831168,
+          "bbox": [
+            48.0,
+            48.0,
+            153.0,
+            103.0
+          ],
+          "market_value": 0.5,
+          "educational_value": "high",
+          "repair_guide": "Test with multimeter, check shorts, verify power",
+          "price_estimate": 0.86,
+          "llm_analysis": {
+            "educational_value": "high",
+            "reuse_potential": "high",
+            "failure_modes": [
+              "overheating",
+              "physical damage",
+              "electrical stress"
+            ],
+            "testing_procedures": [
+              "visual inspection",
+              "multimeter testing",
+              "functional test"
+            ],
+            "safety_considerations": [
+              "discharge capacitors",
+              "wear safety gear",
+              "work in well-ventilated area"
+            ],
+            "repair_difficulty": "medium",
+            "estimated_lifespan": "5-10 years",
+            "environmental_impact": "low"
+          }
+        }
+      ],
+      "capabilities": [
+        "arduino_projects",
+        "educational_electronics",
+        "signal_processing",
+        "iot_devices"
+      ],
+      "component_counts": {
+        "ic_chip": 3
+      },
+      "total_components": 3,
+      "total_market_value": 2.21,
+      "project_potential": "excellent",
+      "educational_potential": "excellent"
+    },
+    "marking_analysis": {
+      "mode": "ocr_marking_resolution",
+      "components": [
+        {
+          "component_id": "cmp_2_ic_chip",
+          "class_name": "ic_chip",
+          "bbox": [
+            48.0,
+            48.0,
+            153.0,
+            103.0
+          ],
+          "text": "Jeo",
+          "part_tokens": [
+            "JEO"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "JEO",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        }
+      ],
+      "connector_labels": [],
+      "confidence": 0.18,
+      "limitations": [
+        "OCR markings are noisy and should be verified against the photo",
+        "short top-mark codes may map to multiple parts",
+        "datasheet/pinout matches are evidence, not proof, until package and circuit context agree"
+      ]
+    },
+    "board_understanding": {
+      "mode": "image_only_board_function_inference",
+      "board_identity": {
+        "primary_type": "controller_or_embedded_compute",
+        "description": "Controller, development, or embedded compute board",
+        "confidence": 0.371,
+        "evidence": [
+          "3 ic_chip"
+        ],
+        "alternatives": [
+          {
+            "type": "sensor_or_signal_conditioning",
+            "description": "Sensor front-end or signal conditioning board",
+            "confidence": 0.36,
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "type": "motor_or_actuator_driver",
+            "description": "Motor, relay, solenoid, or high-current actuator driver board",
+            "confidence": 0.24,
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "type": "wireless_or_communications",
+            "description": "Wireless, RF, or communications module",
+            "confidence": 0.24,
+            "evidence": [
+              "3 ic_chip"
+            ]
+          }
+        ]
+      },
+      "functional_blocks": [
+        {
+          "block_type": "compute_control",
+          "label": "Compute/control logic",
+          "component_count": 3,
+          "components": [
+            "cmp_0_ic_chip",
+            "cmp_1_ic_chip",
+            "cmp_2_ic_chip"
+          ],
+          "bbox": [
+            48,
+            48,
+            253,
+            203
+          ],
+          "confidence": 0.71,
+          "function": "Runs logic, timing, firmware, or protocol control",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              17,
+              17,
+              284,
+              234
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_context": {
+        "likely_roles": [
+          {
+            "role": "machine_controller",
+            "confidence": 0.6,
+            "description": "Runs firmware/control logic and coordinates IO",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "sensor_node",
+            "confidence": 0.36,
+            "description": "Measures physical state or conditions analog signals",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "actuator_driver",
+            "confidence": 0.24,
+            "description": "Switches current for motors, relays, solenoids, or loads",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "communication_node",
+            "confidence": 0.24,
+            "description": "Adds wireless or protocol connectivity",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          }
+        ],
+        "integration_notes": [
+          "Treat as a control node; OCR chip markings and locate programming/debug headers before trying firmware reuse."
+        ],
+        "pinout_evidence": [],
+        "connector_label_evidence": []
+      },
+      "reuse_and_splice": {
+        "candidate_regions": [
+          {
+            "region_id": "crop_1_compute_control",
+            "source_block": "compute_control",
+            "bbox": [
+              48,
+              48,
+              253,
+              203
+            ],
+            "crop_bbox": [
+              11,
+              11,
+              290,
+              240
+            ],
+            "confidence": 0.71,
+            "reuse_mode": "reuse_or_reprogram_controller_region",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "identify MCU/IC markings",
+              "confirm programming/debug interface"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          }
+        ],
+        "board_spec_for_splicer": {
+          "coordinate_system": "image_pixels",
+          "bbox_px": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "confidence": 0.371,
+          "components": [
+            {
+              "id": "cmp_0_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                48,
+                148,
+                103,
+                203
+              ],
+              "confidence": 0.94
+            },
+            {
+              "id": "cmp_1_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                198,
+                48,
+                253,
+                83
+              ],
+              "confidence": 0.938
+            },
+            {
+              "id": "cmp_2_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                48,
+                48,
+                153,
+                103
+              ],
+              "confidence": 0.914
+            }
+          ],
+          "io_ports": [],
+          "keepouts": [],
+          "candidate_crops": [
+            {
+              "id": "crop_1_compute_control",
+              "bbox_px": [
+                11,
+                11,
+                290,
+                240
+              ],
+              "source_block": "compute_control",
+              "confidence": 0.71
+            }
+          ],
+          "splicer_notes": [
+            "pixel geometry must be calibrated to mm before mechanical placement",
+            "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+            "do electrical validation before powering any harvested/spliced module"
+          ]
+        },
+        "warnings": [
+          "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design",
+          "board role confidence is low; collect OCR, reverse-side image, or design files before reuse",
+          "visual topology confidence is low; hidden nets may make extracted modules unusable"
+        ]
+      },
+      "observed_inventory": {
+        "component_counts": {
+          "ic_chip": 3
+        },
+        "recognized_component_count": 3,
+        "resolved_marking_count": 1
+      },
+      "confidence": 0.371,
+      "limitations": [
+        "single-image inference estimates board role; it does not identify exact manufacturer model",
+        "bottom-side parts, hidden traces, multilayer routing, and unlabeled ICs can change function",
+        "use OCR markings, datasheets, electrical tests, Gerber/KiCad files, or a known golden board for high-confidence intent"
+      ]
+    },
+    "machine_connection_map": {
+      "mode": "machine_connection_map",
+      "connector_count": 0,
+      "connector_maps": [],
+      "interfaces": [],
+      "pinout_evidence": [],
+      "splice_plan": {
+        "safest_entry_points": [],
+        "required_measurements": [
+          "continuity from connector to ground",
+          "unpowered resistance between power and ground"
+        ],
+        "do_not_assume": [
+          "pin order",
+          "voltage level",
+          "shared ground",
+          "connector current rating",
+          "firmware protocol"
+        ]
+      },
+      "confidence": 0.0,
+      "limitations": [
+        "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+        "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+        "do not power harvested modules until polarity, rails, and isolation are confirmed"
+      ]
+    },
+    "salvage_opportunities": {
+      "mode": "salvage_and_arbitrage_opportunity_engine",
+      "asset_summary": {
+        "capabilities": {
+          "controller": 2
+        },
+        "parts": {
+          "jeo": 1
+        },
+        "connector_count": 0,
+        "defect_count": 0,
+        "evidence": [
+          "board role: controller_or_embedded_compute",
+          "part marking: jeo"
+        ]
+      },
+      "opportunities": [
+        {
+          "type": "build_from_salvage",
+          "id": "robot_motor_controller",
+          "name": "Robot Motor Controller",
+          "category": "robotics",
+          "score": 0.225,
+          "estimated_output_value_usd": 28.0,
+          "build_complexity": "hard",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "actuator_driver"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: actuator_driver"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "sensor_gateway",
+          "name": "Sensor Gateway / Data Logger",
+          "category": "iot",
+          "score": 0.225,
+          "estimated_output_value_usd": 24.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "sensor_or_adc"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: sensor_or_adc"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "led_controller",
+          "name": "LED / Light Controller",
+          "category": "consumer_gadget",
+          "score": 0.225,
+          "estimated_output_value_usd": 16.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "actuator_driver"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: actuator_driver"
+          ]
+        }
+      ],
+      "best_opportunity": {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.225,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "controller"
+        ],
+        "missing_assets": [
+          "actuator_driver"
+        ],
+        "nice_to_have_matched": [],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: actuator_driver"
+        ]
+      },
+      "strategy": {
+        "recommendation": "source_missing_parts_then_build",
+        "reason": "Top opportunity is Robot Motor Controller with score 0.225.",
+        "inventory_focus": [
+          "controller"
+        ]
+      },
+      "confidence": 0.48,
+      "limitations": [
+        "value estimates are planning estimates until parts are tested and market prices are verified",
+        "salvaged modules need electrical validation before resale or reuse",
+        "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+      ]
+    },
+    "visual_topology": {
+      "mode": "image_only_visual_estimate",
+      "trace_count": 2,
+      "connection_count": 0,
+      "scale_mm_per_px": null,
+      "analysis_resize_scale": 1.0,
+      "confidence": 0.112,
+      "uncertainty": "low",
+      "component_instances": [
+        {
+          "instance_id": "None",
+          "class_name": "ic_chip"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "ic_chip"
+        },
+        {
+          "instance_id": "None",
+          "class_name": "ic_chip"
+        }
+      ],
+      "traces": [
+        {
+          "trace_id": "trace_0",
+          "start_point": [
+            215,
+            64
+          ],
+          "end_point": [
+            227,
+            65
+          ],
+          "width_px": 6.0,
+          "length_px": 28.12310562561766,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [],
+          "trace_type": "signal"
+        },
+        {
+          "trace_id": "trace_1",
+          "start_point": [
+            65,
+            174
+          ],
+          "end_point": [
+            75,
+            174
+          ],
+          "width_px": 6.0,
+          "length_px": 20.0,
+          "width_mm": null,
+          "length_mm": null,
+          "current_capacity_a": null,
+          "connected_components": [],
+          "trace_type": "signal"
+        }
+      ],
+      "connections": [],
+      "issues": [],
+      "limitations": [
+        "single-image trace extraction is a visual estimate, not a verified netlist",
+        "hidden, internal, bottom-side, and solder-mask-covered traces may be missed",
+        "use Gerber/KiCad/netlist input for high-confidence circuit topology"
+      ]
+    },
+    "topology_aoi": {
+      "status": "unavailable",
+      "mode": "reference_topology_aoi",
+      "reference_signatures": [],
+      "observed_signatures": [],
+      "matched_clusters": 0,
+      "topology_delta": 0,
+      "missing": [],
+      "extra": [],
+      "reference_stats": {
+        "net_count": 0,
+        "component_count": 0,
+        "isolated_count": 0
+      },
+      "observed_stats": {
+        "net_count": 0,
+        "component_count": 0,
+        "isolated_count": 0
+      },
+      "summary": "Topology AOI comparison not run.",
+      "notes": [
+        "Topology AOI comparison not run."
+      ]
+    },
+    "defect_inspection": {
+      "mode": "candidate_visual_defect_inspection",
+      "defect_count": 0,
+      "max_severity": 0.0,
+      "analysis_resize_scale": 1.0,
+      "review_required": false,
+      "defects": [],
+      "limitations": [
+        "classical defect checks are candidate flags until validated against a golden board",
+        "lighting, glare, solder mask color, and board finish can cause false positives",
+        "production defect detection requires labeled line-specific defect data"
+      ]
+    },
+    "reference_aoi": {
+      "status": "unavailable",
+      "reference_counts": {},
+      "current_counts": {},
+      "missing": [],
+      "extra": [],
+      "matched": [],
+      "component_delta": 0,
+      "mode": "reference_component_count_aoi",
+      "summary": "Reference AOI comparison not run.",
+      "notes": [
+        "Reference AOI comparison not run."
+      ]
+    },
+    "golden_aoi": {
+      "status": "unavailable",
+      "mode": "golden_image_diff",
+      "defect_count": 0,
+      "defects": [],
+      "summary": "Golden image comparison not run.",
+      "notes": [
+        "Golden image comparison not run."
+      ]
+    },
+    "aoi_inspection": {
+      "readiness": "research_preview",
+      "score": 0.058,
+      "learned_detection_ratio": 0.0,
+      "semantic_confidence": 0.65,
+      "topology_confidence": 0.112,
+      "scan_quality": {
+        "score": 0.49,
+        "reason": "tracked"
+      },
+      "current_capabilities": [
+        "component localization and coarse class identification",
+        "candidate trace/connection extraction from visible copper geometry",
+        "candidate visual defect detection for burns, solder bridges, corrosion, and broken traces",
+        "explicit confidence, provenance, and review-required metadata"
+      ],
+      "defect_candidate_count": 0,
+      "reference_component_delta": 0,
+      "golden_status": "unavailable",
+      "golden_defect_count": 0,
+      "topology_status": "unavailable",
+      "topology_delta": 0,
+      "blockers": [
+        "scan quality is below production threshold (0.49, tracked)",
+        "some detections rely on heuristic supplements and need human review",
+        "image-only topology confidence is below production threshold",
+        "calibrated camera/lighting fixture and focus checks",
+        "labeled defect dataset from the target production line",
+        "model/license review for any sourced checkpoints before redistribution"
+      ]
+    },
+    "project_recommendations": [],
+    "analysis_metadata": {
+      "total_processing_time": "~2 seconds",
+      "detection_quality": "medium",
+      "semantic_quality": "candidate",
+      "review_required": true,
+      "limitations": [
+        "Some detections are heuristic candidates; verify class labels against the image."
+      ],
+      "preprocessing": {
+        "steps_applied": [
+          "white_balance",
+          "clahe",
+          "denoise",
+          "sharpen",
+          "gamma"
+        ],
+        "opencv_available": true,
+        "white_balance": {
+          "white_balance": "applied",
+          "channel_means_before": [
+            252.82440185546875,
+            251.89859008789062,
+            252.65623474121094
+          ],
+          "channel_gains": [
+            0.9985576272010803,
+            1.0022276639938354,
+            0.9992222785949707
+          ]
+        },
+        "clahe": {
+          "clahe": {
+            "clip_limit": 2.2,
+            "tile_grid": [
+              8,
+              8
+            ]
+          }
+        },
+        "denoise": {
+          "denoise": {
+            "h": 8.0,
+            "h_color": 10.0
+          }
+        },
+        "sharpen": {
+          "sharpen": {
+            "amount": 0.4,
+            "sigma": 1.0
+          }
+        },
+        "gamma": {
+          "gamma": 1.08
+        },
+        "scan_quality": {
+          "score": 0.4899,
+          "luminance_mean": 251.232,
+          "contrast": 25.057,
+          "blur_var": 1728.733,
+          "dynamic_range": 0.0,
+          "p05": 254.0,
+          "p95": 254.0
+        },
+        "input_shape": [
+          300,
+          400,
+          3
+        ],
+        "output_shape": [
+          300,
+          400,
+          3
+        ]
+      },
+      "circuit_understanding_confidence": 0.112,
+      "defect_count": 0,
+      "reference_aoi_status": "unavailable",
+      "reference_component_delta": 0,
+      "golden_aoi_status": "unavailable",
+      "golden_defect_count": 0,
+      "topology_aoi_status": "unavailable",
+      "topology_aoi_delta": 0,
+      "board_type": "controller_or_embedded_compute",
+      "board_function_confidence": 0.371,
+      "marking_confidence": 0.18,
+      "resolved_marking_count": 1,
+      "machine_connection_confidence": 0.0,
+      "connector_count": 0,
+      "salvage_opportunity_count": 3,
+      "best_salvage_opportunity": "Robot Motor Controller",
+      "functional_block_count": 1,
+      "aoi_readiness": "research_preview",
+      "scan_quality": {
+        "score": 0.49,
+        "reason": "tracked"
+      },
+      "project_potential": "excellent",
+      "backend": "hybrid",
+      "ocr": true
+    }
+  },
+  "summary": {
+    "summary_text": "Found 3 components on this PCB. Components include: 3 ic_chip. These are candidate detections and class labels should be reviewed against the photo. Visible topology estimate: 2 trace regions and 0 candidate connections at 0.11 confidence. Likely board role: controller_or_embedded_compute at 0.37 confidence with 1 functional block candidate(s). OCR/marking lookup resolved evidence on 1 component(s). Machine connection map: 0 connector candidate(s) at 0.00 confidence. Best salvage/build opportunity: Robot Motor Controller (build_from_salvage). Reference AOI not executed. Topology AOI not executed. Golden image AOI not executed. AOI readiness: research_preview. Project potential: excellent. No specific project recommendations available.",
+    "total_components": 3,
+    "project_potential": "excellent",
+    "visual_topology": {
+      "trace_count": 2,
+      "connection_count": 0,
+      "confidence": 0.112,
+      "uncertainty": "low"
+    },
+    "board_understanding": {
+      "primary_type": "controller_or_embedded_compute",
+      "confidence": 0.371,
+      "functional_blocks": [
+        {
+          "block_type": "compute_control",
+          "label": "Compute/control logic",
+          "component_count": 3,
+          "components": [
+            "cmp_0_ic_chip",
+            "cmp_1_ic_chip",
+            "cmp_2_ic_chip"
+          ],
+          "bbox": [
+            48,
+            48,
+            253,
+            203
+          ],
+          "confidence": 0.71,
+          "function": "Runs logic, timing, firmware, or protocol control",
+          "crop_hint": {
+            "suggested_crop_bbox": [
+              17,
+              17,
+              284,
+              234
+            ],
+            "include_margin": "15% around block bbox"
+          }
+        }
+      ],
+      "machine_context": {
+        "likely_roles": [
+          {
+            "role": "machine_controller",
+            "confidence": 0.6,
+            "description": "Runs firmware/control logic and coordinates IO",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "sensor_node",
+            "confidence": 0.36,
+            "description": "Measures physical state or conditions analog signals",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "actuator_driver",
+            "confidence": 0.24,
+            "description": "Switches current for motors, relays, solenoids, or loads",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          },
+          {
+            "role": "communication_node",
+            "confidence": 0.24,
+            "description": "Adds wireless or protocol connectivity",
+            "evidence": [
+              "3 ic_chip"
+            ]
+          }
+        ],
+        "integration_notes": [
+          "Treat as a control node; OCR chip markings and locate programming/debug headers before trying firmware reuse."
+        ],
+        "pinout_evidence": [],
+        "connector_label_evidence": []
+      },
+      "reuse_and_splice": {
+        "candidate_regions": [
+          {
+            "region_id": "crop_1_compute_control",
+            "source_block": "compute_control",
+            "bbox": [
+              48,
+              48,
+              253,
+              203
+            ],
+            "crop_bbox": [
+              11,
+              11,
+              290,
+              240
+            ],
+            "confidence": 0.71,
+            "reuse_mode": "reuse_or_reprogram_controller_region",
+            "splice_requirements": [
+              "confirm pinout",
+              "measure supply rails",
+              "inspect both sides",
+              "verify isolation/clearance",
+              "identify MCU/IC markings",
+              "confirm programming/debug interface"
+            ],
+            "risk": {
+              "level": "low",
+              "overlapping_defects": 0,
+              "penalty": 0.0
+            }
+          }
+        ],
+        "board_spec_for_splicer": {
+          "coordinate_system": "image_pixels",
+          "bbox_px": [
+            0,
+            0,
+            400,
+            300
+          ],
+          "confidence": 0.371,
+          "components": [
+            {
+              "id": "cmp_0_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                48,
+                148,
+                103,
+                203
+              ],
+              "confidence": 0.94
+            },
+            {
+              "id": "cmp_1_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                198,
+                48,
+                253,
+                83
+              ],
+              "confidence": 0.938
+            },
+            {
+              "id": "cmp_2_ic_chip",
+              "class_name": "ic_chip",
+              "bbox_px": [
+                48,
+                48,
+                153,
+                103
+              ],
+              "confidence": 0.914
+            }
+          ],
+          "io_ports": [],
+          "keepouts": [],
+          "candidate_crops": [
+            {
+              "id": "crop_1_compute_control",
+              "bbox_px": [
+                11,
+                11,
+                290,
+                240
+              ],
+              "source_block": "compute_control",
+              "confidence": 0.71
+            }
+          ],
+          "splicer_notes": [
+            "pixel geometry must be calibrated to mm before mechanical placement",
+            "mounting holes, board thickness, connector height, and cable clearance require measurement or CAD",
+            "do electrical validation before powering any harvested/spliced module"
+          ]
+        },
+        "warnings": [
+          "crop/splice output is planning metadata only; it is not a validated mechanical or electrical design",
+          "board role confidence is low; collect OCR, reverse-side image, or design files before reuse",
+          "visual topology confidence is low; hidden nets may make extracted modules unusable"
+        ]
+      }
+    },
+    "marking_analysis": {
+      "confidence": 0.18,
+      "resolved_component_count": 1,
+      "connector_labels": [],
+      "components": [
+        {
+          "component_id": "cmp_2_ic_chip",
+          "class_name": "ic_chip",
+          "bbox": [
+            48.0,
+            48.0,
+            153.0,
+            103.0
+          ],
+          "text": "Jeo",
+          "part_tokens": [
+            "JEO"
+          ],
+          "silk_labels": [],
+          "candidates": [
+            {
+              "part_number": "JEO",
+              "confidence": 0.18,
+              "match_type": "unresolved_marking",
+              "next_steps": [
+                "search datasheet",
+                "verify package",
+                "capture sharper crop"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "machine_connection_map": {
+      "mode": "machine_connection_map",
+      "connector_count": 0,
+      "connector_maps": [],
+      "interfaces": [],
+      "pinout_evidence": [],
+      "splice_plan": {
+        "safest_entry_points": [],
+        "required_measurements": [
+          "continuity from connector to ground",
+          "unpowered resistance between power and ground"
+        ],
+        "do_not_assume": [
+          "pin order",
+          "voltage level",
+          "shared ground",
+          "connector current rating",
+          "firmware protocol"
+        ]
+      },
+      "confidence": 0.0,
+      "limitations": [
+        "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+        "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+        "do not power harvested modules until polarity, rails, and isolation are confirmed"
+      ]
+    },
+    "salvage_opportunities": {
+      "confidence": 0.48,
+      "best_opportunity": {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.225,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "controller"
+        ],
+        "missing_assets": [
+          "actuator_driver"
+        ],
+        "nice_to_have_matched": [],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: actuator_driver"
+        ]
+      },
+      "strategy": {
+        "recommendation": "source_missing_parts_then_build",
+        "reason": "Top opportunity is Robot Motor Controller with score 0.225.",
+        "inventory_focus": [
+          "controller"
+        ]
+      },
+      "opportunities": [
+        {
+          "type": "build_from_salvage",
+          "id": "robot_motor_controller",
+          "name": "Robot Motor Controller",
+          "category": "robotics",
+          "score": 0.225,
+          "estimated_output_value_usd": 28.0,
+          "build_complexity": "hard",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "actuator_driver"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: actuator_driver"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "sensor_gateway",
+          "name": "Sensor Gateway / Data Logger",
+          "category": "iot",
+          "score": 0.225,
+          "estimated_output_value_usd": 24.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "sensor_or_adc"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: sensor_or_adc"
+          ]
+        },
+        {
+          "type": "build_from_salvage",
+          "id": "led_controller",
+          "name": "LED / Light Controller",
+          "category": "consumer_gadget",
+          "score": 0.225,
+          "estimated_output_value_usd": 16.0,
+          "build_complexity": "medium",
+          "matched_assets": [
+            "controller"
+          ],
+          "missing_assets": [
+            "actuator_driver"
+          ],
+          "nice_to_have_matched": [],
+          "next_steps": [
+            "test harvested modules",
+            "create pin map",
+            "verify power rails",
+            "source missing assets: actuator_driver"
+          ]
+        }
+      ],
+      "asset_summary": {
+        "capabilities": {
+          "controller": 2
+        },
+        "parts": {
+          "jeo": 1
+        },
+        "connector_count": 0,
+        "defect_count": 0,
+        "evidence": [
+          "board role: controller_or_embedded_compute",
+          "part marking: jeo"
+        ]
+      }
+    },
+    "aoi_readiness": "research_preview",
+    "top_recommendation": null,
+    "reference_aoi": {
+      "status": "unavailable",
+      "component_delta": 0,
+      "missing": [],
+      "extra": []
+    },
+    "golden_aoi": {
+      "status": "unavailable",
+      "defect_count": 0,
+      "defects": []
+    },
+    "topology_aoi": {
+      "status": "unavailable",
+      "topology_delta": 0,
+      "missing": [],
+      "extra": []
+    },
+    "component_breakdown": {
+      "ic_chip": 3
+    }
+  }
+}

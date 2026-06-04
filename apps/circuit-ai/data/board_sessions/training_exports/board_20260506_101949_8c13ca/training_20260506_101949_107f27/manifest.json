@@ -1,0 +1,280 @@
+{
+  "export_id": "training_20260506_101949_107f27",
+  "mode": "board_session_training_package",
+  "created_at": "2026-05-06T10:19:49.470547+00:00",
+  "session": {
+    "session_id": "board_20260506_101949_8c13ca",
+    "title": "USB fan controller board",
+    "route": "repair",
+    "status": "open",
+    "device_hint": "USB fan controller board",
+    "created_at": "2026-05-06T10:19:49.429097+00:00",
+    "updated_at": "2026-05-06T10:19:49.463355+00:00",
+    "certainty": {
+      "overall": {
+        "score": 0.33,
+        "level": "unknown",
+        "summary": "The scan is not reliable enough for action yet. Ledger score 0.33; 1 certain, 4 likely, 1 possible, 5 unknown claim(s). Top missing evidence: retake scan with sharper focus, flatter angle, and more even lighting.",
+        "claim_boundary": "Claims are evidence-weighted scan conclusions, not proof. Use measurements, known-good references, datasheets, or design files before powering, repairing, selling, or splicing hardware."
+      },
+      "counts": {
+        "certain": 1,
+        "likely": 4,
+        "possible": 1,
+        "unknown": 5,
+        "total": 11
+      },
+      "missing_evidence": [
+        "retake scan with sharper focus, flatter angle, and more even lighting",
+        "operator review of heuristic or low-confidence detections",
+        "device context, model number, symptoms, or known function",
+        "netlist, KiCad/Gerber files, reverse-side photo, or continuity map",
+        "reference component counts or known-good board for component AOI",
+        "reference topology/netlist for circuit-level AOI",
+        "golden reference image for defect AOI",
+        "calibrated camera/lighting fixture and labeled target-domain examples",
+        "learned detector or human confirmation for heuristic component class",
+        "datasheet match or trusted part database entry",
+        "pinout/package confirmation",
+        "sharper marking crop from the package top"
+      ],
+      "training_queue": {
+        "should_capture": true,
+        "reasons": [
+          "6 low-certainty claim(s) need labels or evidence",
+          "detector emitted review-required component candidates",
+          "retake scan with sharper focus, flatter angle, and more even lighting",
+          "operator review of heuristic or low-confidence detections",
+          "device context, model number, symptoms, or known function",
+          "netlist, KiCad/Gerber files, reverse-side photo, or continuity map",
+          "reference component counts or known-good board for component AOI",
+          "reference topology/netlist for circuit-level AOI"
+        ],
+        "candidate_labels": [
+          "Detected ic_chip",
+          "Marking Aes maps to AES",
+          "Marking Cap maps to CAP",
+          "Marking ICChip maps to ICCHIP",
+          "Compute/control logic exists"
+        ]
+      }
+    },
+    "metrics": {
+      "task_count": 10,
+      "open_task_count": 6,
+      "resolved_task_count": 4,
+      "capture_burden": 3,
+      "measurement_count_required": 3,
+      "certainty_level": "unknown",
+      "certainty_score": 0.33,
+      "training_capture_recommended": true
+    },
+    "open_task_count": 6,
+    "review_count": 1,
+    "training_export_count": 0
+  },
+  "counts": {
+    "component_labels": 3,
+    "ocr_examples": 3,
+    "defect_labels": 0,
+    "board_roles": 1,
+    "reviews": 1,
+    "measurements": 1
+  },
+  "examples": {
+    "component_labels": [
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_component_1",
+        "class_name": "ic_chip",
+        "bbox": [
+          48.0,
+          148.0,
+          103.0,
+          203.0
+        ],
+        "confidence": 0.9400247933884297,
+        "semantic_confidence": 0.65,
+        "ocr_text": "Aes",
+        "part_number": "Aes",
+        "review_status": "unreviewed",
+        "source": "board_session"
+      },
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_component_2",
+        "class_name": "ic_chip",
+        "bbox": [
+          198.0,
+          48.0,
+          253.0,
+          83.0
+        ],
+        "confidence": 0.9380676948051947,
+        "semantic_confidence": 0.65,
+        "ocr_text": "Cap",
+        "part_number": "Cap",
+        "review_status": "unreviewed",
+        "source": "board_session"
+      },
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_component_3",
+        "class_name": "ic_chip",
+        "bbox": [
+          48.0,
+          48.0,
+          153.0,
+          103.0
+        ],
+        "confidence": 0.9140831168831168,
+        "semantic_confidence": 0.65,
+        "ocr_text": "ICChip",
+        "part_number": "ICChip",
+        "review_status": "unreviewed",
+        "source": "board_session"
+      }
+    ],
+    "ocr_examples": [
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_ocr_1",
+        "component_id": "cmp_0_ic_chip",
+        "text": "Aes",
+        "part_tokens": [
+          "AES"
+        ],
+        "silk_labels": [],
+        "candidates": [
+          {
+            "part_number": "AES",
+            "confidence": 0.18,
+            "match_type": "unresolved_marking",
+            "next_steps": [
+              "search datasheet",
+              "verify package",
+              "capture sharper crop"
+            ]
+          }
+        ]
+      },
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_ocr_2",
+        "component_id": "cmp_1_ic_chip",
+        "text": "Cap",
+        "part_tokens": [
+          "CAP"
+        ],
+        "silk_labels": [],
+        "candidates": [
+          {
+            "part_number": "CAP",
+            "confidence": 0.18,
+            "match_type": "unresolved_marking",
+            "next_steps": [
+              "search datasheet",
+              "verify package",
+              "capture sharper crop"
+            ]
+          }
+        ]
+      },
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "example_id": "board_20260506_101949_8c13ca_ocr_3",
+        "component_id": "cmp_2_ic_chip",
+        "text": "ICChip",
+        "part_tokens": [
+          "ICCHIP"
+        ],
+        "silk_labels": [],
+        "candidates": [
+          {
+            "part_number": "ICCHIP",
+            "confidence": 0.18,
+            "match_type": "unresolved_marking",
+            "next_steps": [
+              "search datasheet",
+              "verify package",
+              "capture sharper crop"
+            ]
+          }
+        ]
+      }
+    ],
+    "defect_labels": [],
+    "board_roles": [
+      {
+        "session_id": "board_20260506_101949_8c13ca",
+        "role": "controller_or_embedded_compute",
+        "confidence": 0.371,
+        "evidence": [
+          "3 ic_chip"
+        ],
+        "functional_blocks": [
+          {
+            "block_type": "compute_control",
+            "label": "Compute/control logic",
+            "component_count": 3,
+            "components": [
+              "cmp_0_ic_chip",
+              "cmp_1_ic_chip",
+              "cmp_2_ic_chip"
+            ],
+            "bbox": [
+              48,
+              48,
+              253,
+              203
+            ],
+            "confidence": 0.71,
+            "function": "Runs logic, timing, firmware, or protocol control",
+            "crop_hint": {
+              "suggested_crop_bbox": [
+                17,
+                17,
+                284,
+                234
+              ],
+              "include_margin": "15% around block bbox"
+            }
+          }
+        ]
+      }
+    ],
+    "reviews": [
+      {
+        "review_id": "review_1",
+        "task_id": "task_2",
+        "task_type": "measurement",
+        "action": "accepted",
+        "payload": {
+          "task_id": "task_2",
+          "action": "accepted",
+          "notes": "smoke reviewed from operator queue",
+          "reviewer": "test_user"
+        },
+        "created_at": "2026-05-06T10:19:49.458014+00:00"
+      }
+    ],
+    "measurements": [
+      {
+        "measurement_id": "measurement_1",
+        "type": "continuity",
+        "target": "USB ground to motor connector ground",
+        "value": "pass",
+        "unit": "",
+        "notes": "",
+        "confidence": 1.0,
+        "created_at": "2026-05-06T10:19:49.449198+00:00"
+      }
+    ]
+  },
+  "recommended_uses": [
+    "YOLO component label review",
+    "OCR crop/marking normalization",
+    "defect candidate validation",
+    "board-role and functional-block benchmark cases"
+  ]
+}

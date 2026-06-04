@@ -1,0 +1,39 @@
+{
+  "image_path": "data/pcb_dataset/images/pcb_0000.jpg",
+  "image_size": {
+    "width": 640,
+    "height": 480
+  },
+  "components": [
+    {
+      "class": "ic_chip",
+      "bbox": [
+        100,
+        100,
+        200,
+        150
+      ],
+      "confidence": 0.95
+    },
+    {
+      "class": "capacitor",
+      "bbox": [
+        250,
+        100,
+        280,
+        130
+      ],
+      "confidence": 0.88
+    },
+    {
+      "class": "resistor",
+      "bbox": [
+        100,
+        200,
+        130,
+        230
+      ],
+      "confidence": 0.92
+    }
+  ]
+}

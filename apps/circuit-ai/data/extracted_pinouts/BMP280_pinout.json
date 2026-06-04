@@ -1,0 +1,26 @@
+{
+  "ic_name": "BMP280",
+  "pins": [
+    {
+      "pin": 2,
+      "name": "CSB",
+      "function": "Chip select"
+    },
+    {
+      "pin": 3,
+      "name": "SDI",
+      "function": "Serial data input"
+    },
+    {
+      "pin": 4,
+      "name": "SCK",
+      "function": "Serial clock input"
+    },
+    {
+      "pin": 5,
+      "name": "SDO",
+      "function": "Serial data output"
+    }
+  ],
+  "total_pins": 4
+}

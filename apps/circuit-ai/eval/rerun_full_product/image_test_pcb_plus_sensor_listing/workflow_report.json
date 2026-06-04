@@ -1,0 +1,1449 @@
+{
+  "mode": "salvage_to_product_workflow",
+  "inventory": {
+    "asset_count": 6,
+    "unique_records": 6,
+    "estimated_inventory_value_usd": 28.0,
+    "by_capability": {
+      "bme280": 2,
+      "controller": 4,
+      "display_or_ui": 2,
+      "esp32": 2,
+      "jeo": 2,
+      "oled_ssd1306": 2,
+      "sensor_or_adc": 2,
+      "wireless": 2
+    },
+    "by_test_status": {
+      "not_purchased": 2,
+      "untested": 4
+    },
+    "assets": [
+      {
+        "asset_id": "board_controller_or_embedded_compute_1",
+        "asset_type": "board_or_module",
+        "name": "controller_or_embedded_compute",
+        "capabilities": [
+          "controller"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.371,
+        "estimated_value_usd": 5.0,
+        "quantity": 1,
+        "evidence": [
+          "board role: controller_or_embedded_compute",
+          "part marking: jeo"
+        ],
+        "metadata": {
+          "board_identity": {
+            "primary_type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.371,
+            "evidence": [
+              "3 ic_chip"
+            ],
+            "alternatives": [
+              {
+                "type": "sensor_or_signal_conditioning",
+                "description": "Sensor front-end or signal conditioning board",
+                "confidence": 0.36,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              },
+              {
+                "type": "motor_or_actuator_driver",
+                "description": "Motor, relay, solenoid, or high-current actuator driver board",
+                "confidence": 0.24,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              },
+              {
+                "type": "wireless_or_communications",
+                "description": "Wireless, RF, or communications module",
+                "confidence": 0.24,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              }
+            ]
+          },
+          "functional_blocks": [
+            {
+              "block_type": "compute_control",
+              "label": "Compute/control logic",
+              "component_count": 3,
+              "components": [
+                "cmp_0_ic_chip",
+                "cmp_1_ic_chip",
+                "cmp_2_ic_chip"
+              ],
+              "bbox": [
+                48,
+                48,
+                253,
+                203
+              ],
+              "confidence": 0.71,
+              "function": "Runs logic, timing, firmware, or protocol control",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  17,
+                  17,
+                  284,
+                  234
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            }
+          ],
+          "machine_connection_map": {
+            "mode": "machine_connection_map",
+            "connector_count": 0,
+            "connector_maps": [],
+            "interfaces": [],
+            "pinout_evidence": [],
+            "splice_plan": {
+              "safest_entry_points": [],
+              "required_measurements": [
+                "continuity from connector to ground",
+                "unpowered resistance between power and ground"
+              ],
+              "do_not_assume": [
+                "pin order",
+                "voltage level",
+                "shared ground",
+                "connector current rating",
+                "firmware protocol"
+              ]
+            },
+            "confidence": 0.0,
+            "limitations": [
+              "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+              "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+              "do not power harvested modules until polarity, rails, and isolation are confirmed"
+            ]
+          }
+        },
+        "created_at": "2026-05-05T19:19:40.338686+00:00"
+      },
+      {
+        "asset_id": "part_jeo_1",
+        "asset_type": "component",
+        "name": "JEO",
+        "capabilities": [
+          "jeo"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.18,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: jeo"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:19:40.338699+00:00"
+      },
+      {
+        "asset_id": "listing_esp32_bme280_oled_salvage_lot_3",
+        "asset_type": "market_listing",
+        "name": "ESP32 BME280 OLED salvage lot",
+        "capabilities": [
+          "bme280",
+          "controller",
+          "display_or_ui",
+          "esp32",
+          "oled_ssd1306",
+          "sensor_or_adc",
+          "wireless"
+        ],
+        "source": "marketplace",
+        "condition": "unknown",
+        "test_status": "not_purchased",
+        "confidence": 0.45,
+        "estimated_value_usd": 9.0,
+        "quantity": 1,
+        "evidence": [
+          "listing price: $9.00",
+          "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306"
+        ],
+        "metadata": {
+          "id": "lot-sensor-display",
+          "title": "ESP32 BME280 OLED salvage lot",
+          "price_usd": 9.0,
+          "shipping_usd": 1.0,
+          "labor_usd": 1.0,
+          "failure_rate": 0.1,
+          "fee_rate": 0.1,
+          "expected_capabilities": [
+            "controller",
+            "wireless",
+            "sensor_or_adc",
+            "display_or_ui"
+          ],
+          "expected_parts": [
+            "esp32",
+            "bme280",
+            "oled_ssd1306"
+          ]
+        },
+        "created_at": "2026-05-05T19:19:40.339183+00:00"
+      },
+      {
+        "asset_id": "board_controller_or_embedded_compute_4",
+        "asset_type": "board_or_module",
+        "name": "controller_or_embedded_compute",
+        "capabilities": [
+          "controller"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.371,
+        "estimated_value_usd": 5.0,
+        "quantity": 1,
+        "evidence": [
+          "board role: controller_or_embedded_compute",
+          "part marking: jeo"
+        ],
+        "metadata": {
+          "board_identity": {
+            "primary_type": "controller_or_embedded_compute",
+            "description": "Controller, development, or embedded compute board",
+            "confidence": 0.371,
+            "evidence": [
+              "3 ic_chip"
+            ],
+            "alternatives": [
+              {
+                "type": "sensor_or_signal_conditioning",
+                "description": "Sensor front-end or signal conditioning board",
+                "confidence": 0.36,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              },
+              {
+                "type": "motor_or_actuator_driver",
+                "description": "Motor, relay, solenoid, or high-current actuator driver board",
+                "confidence": 0.24,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              },
+              {
+                "type": "wireless_or_communications",
+                "description": "Wireless, RF, or communications module",
+                "confidence": 0.24,
+                "evidence": [
+                  "3 ic_chip"
+                ]
+              }
+            ]
+          },
+          "functional_blocks": [
+            {
+              "block_type": "compute_control",
+              "label": "Compute/control logic",
+              "component_count": 3,
+              "components": [
+                "cmp_0_ic_chip",
+                "cmp_1_ic_chip",
+                "cmp_2_ic_chip"
+              ],
+              "bbox": [
+                48,
+                48,
+                253,
+                203
+              ],
+              "confidence": 0.71,
+              "function": "Runs logic, timing, firmware, or protocol control",
+              "crop_hint": {
+                "suggested_crop_bbox": [
+                  17,
+                  17,
+                  284,
+                  234
+                ],
+                "include_margin": "15% around block bbox"
+              }
+            }
+          ],
+          "machine_connection_map": {
+            "mode": "machine_connection_map",
+            "connector_count": 0,
+            "connector_maps": [],
+            "interfaces": [],
+            "pinout_evidence": [],
+            "splice_plan": {
+              "safest_entry_points": [],
+              "required_measurements": [
+                "continuity from connector to ground",
+                "unpowered resistance between power and ground"
+              ],
+              "do_not_assume": [
+                "pin order",
+                "voltage level",
+                "shared ground",
+                "connector current rating",
+                "firmware protocol"
+              ]
+            },
+            "confidence": 0.0,
+            "limitations": [
+              "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+              "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+              "do not power harvested modules until polarity, rails, and isolation are confirmed"
+            ]
+          }
+        },
+        "created_at": "2026-05-05T19:38:37.110919+00:00"
+      },
+      {
+        "asset_id": "part_jeo_4",
+        "asset_type": "component",
+        "name": "JEO",
+        "capabilities": [
+          "jeo"
+        ],
+        "source": "pipeline_scan",
+        "condition": "candidate",
+        "test_status": "untested",
+        "confidence": 0.18,
+        "estimated_value_usd": 0.0,
+        "quantity": 1,
+        "evidence": [
+          "marking resolved: jeo"
+        ],
+        "metadata": {},
+        "created_at": "2026-05-05T19:38:37.110934+00:00"
+      },
+      {
+        "asset_id": "listing_esp32_bme280_oled_salvage_lot_6",
+        "asset_type": "market_listing",
+        "name": "ESP32 BME280 OLED salvage lot",
+        "capabilities": [
+          "bme280",
+          "controller",
+          "display_or_ui",
+          "esp32",
+          "oled_ssd1306",
+          "sensor_or_adc",
+          "wireless"
+        ],
+        "source": "marketplace",
+        "condition": "unknown",
+        "test_status": "not_purchased",
+        "confidence": 0.45,
+        "estimated_value_usd": 9.0,
+        "quantity": 1,
+        "evidence": [
+          "listing price: $9.00",
+          "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306"
+        ],
+        "metadata": {
+          "id": "lot-sensor-display",
+          "title": "ESP32 BME280 OLED salvage lot",
+          "price_usd": 9.0,
+          "shipping_usd": 1.0,
+          "labor_usd": 1.0,
+          "failure_rate": 0.1,
+          "fee_rate": 0.1,
+          "expected_capabilities": [
+            "controller",
+            "wireless",
+            "sensor_or_adc",
+            "display_or_ui"
+          ],
+          "expected_parts": [
+            "esp32",
+            "bme280",
+            "oled_ssd1306"
+          ]
+        },
+        "created_at": "2026-05-05T19:38:37.111735+00:00"
+      }
+    ]
+  },
+  "opportunity_report": {
+    "mode": "salvage_and_arbitrage_opportunity_engine",
+    "asset_summary": {
+      "capabilities": {
+        "bme280": 2,
+        "controller": 5,
+        "display_or_ui": 2,
+        "esp32": 2,
+        "jeo": 2,
+        "oled_ssd1306": 2,
+        "sensor_or_adc": 2,
+        "wireless": 3
+      },
+      "parts": {
+        "esp32": 2
+      },
+      "connector_count": 0,
+      "defect_count": 0,
+      "evidence": [
+        "board role: controller_or_embedded_compute",
+        "part marking: jeo",
+        "marking resolved: jeo",
+        "listing price: $9.00",
+        "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306",
+        "board role: controller_or_embedded_compute",
+        "part marking: jeo",
+        "marking resolved: jeo",
+        "listing price: $9.00",
+        "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306",
+        "board role: inventory_bundle"
+      ]
+    },
+    "opportunities": [
+      {
+        "type": "ecommerce_arbitrage",
+        "id": "listing_lot-sensor-display",
+        "name": "Acquire ESP32 BME280 OLED salvage lot for parts/builds",
+        "score": 0.827,
+        "input_cost_usd": 9.0,
+        "estimated_output_value_usd": 33.0,
+        "adjusted_output_value_usd": 26.73,
+        "estimated_margin_usd": 24.0,
+        "adjusted_margin_usd": 15.73,
+        "assumptions": {
+          "shipping_usd": 1.0,
+          "labor_usd": 1.0,
+          "failure_rate": 0.1,
+          "fee_rate": 0.1
+        },
+        "matched_assets": [
+          "bme280",
+          "controller",
+          "display_or_ui",
+          "esp32",
+          "oled_ssd1306",
+          "sensor_or_adc",
+          "wireless"
+        ],
+        "missing_assets": [],
+        "next_steps": [
+          "verify listing photos",
+          "check shipping",
+          "estimate failure rate",
+          "compare sold prices"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "sensor_gateway",
+        "name": "Sensor Gateway / Data Logger",
+        "category": "iot",
+        "score": 0.61,
+        "estimated_output_value_usd": 24.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "controller",
+          "sensor_or_adc"
+        ],
+        "missing_assets": [],
+        "nice_to_have_matched": [
+          "display_or_ui",
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "prototype build using harvested modules"
+        ]
+      },
+      {
+        "type": "resell_or_stock",
+        "id": "resell_esp32",
+        "name": "Recover/stock ESP32",
+        "score": 0.6,
+        "estimated_output_value_usd": 10.0,
+        "matched_assets": [
+          "esp32"
+        ],
+        "missing_assets": [],
+        "next_steps": [
+          "test part",
+          "verify marking/package",
+          "sort into inventory",
+          "check live market price"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "robot_motor_controller",
+        "name": "Robot Motor Controller",
+        "category": "robotics",
+        "score": 0.305,
+        "estimated_output_value_usd": 28.0,
+        "build_complexity": "hard",
+        "matched_assets": [
+          "controller"
+        ],
+        "missing_assets": [
+          "actuator_driver"
+        ],
+        "nice_to_have_matched": [
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: actuator_driver"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "led_controller",
+        "name": "LED / Light Controller",
+        "category": "consumer_gadget",
+        "score": 0.305,
+        "estimated_output_value_usd": 16.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "controller"
+        ],
+        "missing_assets": [
+          "actuator_driver"
+        ],
+        "nice_to_have_matched": [
+          "wireless"
+        ],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: actuator_driver"
+        ]
+      },
+      {
+        "type": "build_from_salvage",
+        "id": "wifi_relay_switch",
+        "name": "Smart WiFi Relay Switch",
+        "category": "upcycled_gadget",
+        "score": 0.15,
+        "estimated_output_value_usd": 18.0,
+        "build_complexity": "medium",
+        "matched_assets": [
+          "wireless"
+        ],
+        "missing_assets": [
+          "actuator_driver",
+          "power"
+        ],
+        "nice_to_have_matched": [],
+        "next_steps": [
+          "test harvested modules",
+          "create pin map",
+          "verify power rails",
+          "source missing assets: actuator_driver, power"
+        ]
+      }
+    ],
+    "best_opportunity": {
+      "type": "ecommerce_arbitrage",
+      "id": "listing_lot-sensor-display",
+      "name": "Acquire ESP32 BME280 OLED salvage lot for parts/builds",
+      "score": 0.827,
+      "input_cost_usd": 9.0,
+      "estimated_output_value_usd": 33.0,
+      "adjusted_output_value_usd": 26.73,
+      "estimated_margin_usd": 24.0,
+      "adjusted_margin_usd": 15.73,
+      "assumptions": {
+        "shipping_usd": 1.0,
+        "labor_usd": 1.0,
+        "failure_rate": 0.1,
+        "fee_rate": 0.1
+      },
+      "matched_assets": [
+        "bme280",
+        "controller",
+        "display_or_ui",
+        "esp32",
+        "oled_ssd1306",
+        "sensor_or_adc",
+        "wireless"
+      ],
+      "missing_assets": [],
+      "next_steps": [
+        "verify listing photos",
+        "check shipping",
+        "estimate failure rate",
+        "compare sold prices"
+      ]
+    },
+    "strategy": {
+      "recommendation": "verify_listing_then_buy",
+      "reason": "Top opportunity is Acquire ESP32 BME280 OLED salvage lot for parts/builds with score 0.827.",
+      "inventory_focus": [
+        "bme280",
+        "controller",
+        "display_or_ui",
+        "esp32",
+        "jeo",
+        "oled_ssd1306",
+        "sensor_or_adc",
+        "wireless"
+      ]
+    },
+    "confidence": 0.84,
+    "limitations": [
+      "value estimates are planning estimates until parts are tested and market prices are verified",
+      "salvaged modules need electrical validation before resale or reuse",
+      "e-commerce arbitrage requires listing price, shipping, failure rate, labor, and demand checks"
+    ]
+  },
+  "recipe_report": {
+    "inventory_for_optimizer": [
+      {
+        "id": "esp32",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_controller_or_embedded_compute_1"
+      },
+      {
+        "id": "arduino_nano",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_controller_or_embedded_compute_1"
+      },
+      {
+        "id": "arduino_uno",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "board_controller_or_embedded_compute_1"
+      },
+      {
+        "id": "jeo",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "part_jeo_1"
+      },
+      {
+        "id": "bme280",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "esp32",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "arduino_nano",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "arduino_uno",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "oled_ssd1306",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "lcd_16x2",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "dht22",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      },
+      {
+        "id": "esp8266",
+        "condition": "used",
+        "quantity": 1,
+        "source_asset": "listing_esp32_bme280_oled_salvage_lot_3"
+      }
+    ],
+    "recipes": [
+      {
+        "name": "Energy Monitor",
+        "category": "sensors",
+        "description": "Monitor home electricity usage in real-time. Track consumption.",
+        "difficulty": "hard",
+        "required_components": [
+          "esp32",
+          "oled_ssd1306"
+        ],
+        "components_owned": [
+          "esp32",
+          "oled_ssd1306"
+        ],
+        "components_needed": [],
+        "inventory_match_percent": 100.0,
+        "missing_parts_cost": 0.0,
+        "parts_cost": 9.0,
+        "market_price_low": 35.0,
+        "market_price_high": 65.0,
+        "profit_margin": 41.0,
+        "roi_percent": 455.6,
+        "build_time_hours": 4.0
+      },
+      {
+        "name": "WiFi Environmental Monitor",
+        "category": "iot",
+        "description": "Monitor temp, humidity, pressure from anywhere. Cloud logging.",
+        "difficulty": "medium",
+        "required_components": [
+          "esp32",
+          "bme280",
+          "oled_ssd1306"
+        ],
+        "components_owned": [
+          "esp32",
+          "bme280",
+          "oled_ssd1306"
+        ],
+        "components_needed": [],
+        "inventory_match_percent": 100.0,
+        "missing_parts_cost": 0.0,
+        "parts_cost": 14.0,
+        "market_price_low": 28.0,
+        "market_price_high": 48.0,
+        "profit_margin": 24.0,
+        "roi_percent": 171.4,
+        "build_time_hours": 3.0
+      },
+      {
+        "name": "Desk Weather Display",
+        "category": "displays",
+        "description": "Compact desk display showing temperature, humidity, and time. USB powered.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "bme280",
+          "lcd_16x2"
+        ],
+        "components_owned": [
+          "arduino_nano",
+          "bme280",
+          "lcd_16x2"
+        ],
+        "components_needed": [],
+        "inventory_match_percent": 100.0,
+        "missing_parts_cost": 0.0,
+        "parts_cost": 13.0,
+        "market_price_low": 25.0,
+        "market_price_high": 45.0,
+        "profit_margin": 22.0,
+        "roi_percent": 169.2,
+        "build_time_hours": 1.5
+      },
+      {
+        "name": "Countdown Timer",
+        "category": "displays",
+        "description": "Programmable countdown timer with alarm. Good for kitchen/gym.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "lcd_16x2",
+          "led"
+        ],
+        "components_owned": [
+          "arduino_nano",
+          "lcd_16x2"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 66.7,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 8.1,
+        "market_price_low": 15.0,
+        "market_price_high": 26.0,
+        "profit_margin": 12.4,
+        "roi_percent": 153.1,
+        "build_time_hours": 1.0
+      },
+      {
+        "name": "Smart Plant Monitor",
+        "category": "home_automation",
+        "description": "Monitors soil moisture, temperature, and humidity. Displays readings on OLED and provides watering recommendations.",
+        "difficulty": "easy",
+        "required_components": [
+          "esp32",
+          "soil_moisture",
+          "oled_ssd1306"
+        ],
+        "components_owned": [
+          "esp32",
+          "oled_ssd1306"
+        ],
+        "components_needed": [
+          "soil_moisture"
+        ],
+        "inventory_match_percent": 66.7,
+        "missing_parts_cost": 4.0,
+        "parts_cost": 13.0,
+        "market_price_low": 45.0,
+        "market_price_high": 65.0,
+        "profit_margin": 42.0,
+        "roi_percent": 323.1,
+        "build_time_hours": 2.5
+      },
+      {
+        "name": "Soil Moisture Monitor",
+        "category": "sensors",
+        "description": "Monitor soil moisture for plants. Alerts when watering needed.",
+        "difficulty": "easy",
+        "required_components": [
+          "arduino_nano",
+          "led"
+        ],
+        "components_owned": [
+          "arduino_nano"
+        ],
+        "components_needed": [
+          "led"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 0.1,
+        "parts_cost": 3.1,
+        "market_price_low": 12.0,
+        "market_price_high": 24.0,
+        "profit_margin": 14.9,
+        "roi_percent": 480.6,
+        "build_time_hours": 1.0
+      },
+      {
+        "name": "Automatic Blind Controller",
+        "category": "home_automation",
+        "description": "Open/close blinds automatically based on time or light. WiFi controllable.",
+        "difficulty": "hard",
+        "required_components": [
+          "esp8266",
+          "servo_sg90"
+        ],
+        "components_owned": [
+          "esp8266"
+        ],
+        "components_needed": [
+          "servo_sg90"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 3.0,
+        "parts_cost": 6.0,
+        "market_price_low": 40.0,
+        "market_price_high": 70.0,
+        "profit_margin": 49.0,
+        "roi_percent": 816.7,
+        "build_time_hours": 4.5
+      },
+      {
+        "name": "Line Following Robot",
+        "category": "robotics",
+        "description": "Robot that follows black lines on white surface. Great for competitions.",
+        "difficulty": "medium",
+        "required_components": [
+          "arduino_uno",
+          "servo_sg90"
+        ],
+        "components_owned": [
+          "arduino_uno"
+        ],
+        "components_needed": [
+          "servo_sg90"
+        ],
+        "inventory_match_percent": 50.0,
+        "missing_parts_cost": 3.0,
+        "parts_cost": 18.0,
+        "market_price_low": 35.0,
+        "market_price_high": 60.0,
+        "profit_margin": 29.5,
+        "roi_percent": 163.9,
+        "build_time_hours": 4.0
+      }
+    ],
+    "best_recipe": {
+      "name": "Energy Monitor",
+      "category": "sensors",
+      "description": "Monitor home electricity usage in real-time. Track consumption.",
+      "difficulty": "hard",
+      "required_components": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_owned": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_needed": [],
+      "inventory_match_percent": 100.0,
+      "missing_parts_cost": 0.0,
+      "parts_cost": 9.0,
+      "market_price_low": 35.0,
+      "market_price_high": 65.0,
+      "profit_margin": 41.0,
+      "roi_percent": 455.6,
+      "build_time_hours": 4.0
+    }
+  },
+  "execution_plan": {
+    "status": "ready_to_execute",
+    "target": "Acquire ESP32 BME280 OLED salvage lot for parts/builds",
+    "target_type": "ecommerce_arbitrage",
+    "recipe_target": {
+      "name": "Energy Monitor",
+      "category": "sensors",
+      "description": "Monitor home electricity usage in real-time. Track consumption.",
+      "difficulty": "hard",
+      "required_components": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_owned": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_needed": [],
+      "inventory_match_percent": 100.0,
+      "missing_parts_cost": 0.0,
+      "parts_cost": 9.0,
+      "market_price_low": 35.0,
+      "market_price_high": 65.0,
+      "profit_margin": 41.0,
+      "roi_percent": 455.6,
+      "build_time_hours": 4.0
+    },
+    "steps": [
+      "verify listing photos and seller reliability",
+      "calculate shipping/tax/labor/failure-rate adjusted margin",
+      "buy only if adjusted margin remains positive",
+      "test and split listing into build/resale inventory"
+    ],
+    "validation_gates": [
+      "no unknown power polarity",
+      "all reused modules pass basic continuity",
+      "known voltage domains before interconnect",
+      "defect candidates reviewed"
+    ]
+  },
+  "decision": {
+    "action": "execute_top_opportunity",
+    "reason": "Acquire ESP32 BME280 OLED salvage lot for parts/builds",
+    "confidence": 0.84,
+    "next_step": "verify listing photos and seller reliability"
+  },
+  "build_package": {
+    "mode": "salvage_build_package",
+    "package_type": "known_recipe_build",
+    "target": {
+      "name": "Energy Monitor",
+      "category": "sensors",
+      "description": "Monitor home electricity usage in real-time. Track consumption.",
+      "difficulty": "hard",
+      "required_components": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_owned": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "components_needed": [],
+      "inventory_match_percent": 100.0,
+      "missing_parts_cost": 0.0,
+      "parts_cost": 9.0,
+      "market_price_low": 35.0,
+      "market_price_high": 65.0,
+      "profit_margin": 41.0,
+      "roi_percent": 455.6,
+      "build_time_hours": 4.0
+    },
+    "target_source": "recipe",
+    "candidate_recipe": {},
+    "work_order": {
+      "status": "ready_to_execute",
+      "target_name": "Energy Monitor",
+      "steps": [
+        "verify listing photos and seller reliability",
+        "calculate shipping/tax/labor/failure-rate adjusted margin",
+        "buy only if adjusted margin remains positive",
+        "test and split listing into build/resale inventory",
+        "follow 11 generated assembly step(s)"
+      ],
+      "validation_gates": [
+        "no unknown power polarity",
+        "all reused modules pass basic continuity",
+        "known voltage domains before interconnect",
+        "defect candidates reviewed"
+      ],
+      "operator_notes": [
+        "treat salvaged parts as untrusted until tested",
+        "record test results back into inventory after each gate",
+        "separate resale-grade parts from build-only parts"
+      ]
+    },
+    "bom": {
+      "required": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "owned": [
+        "esp32",
+        "oled_ssd1306"
+      ],
+      "missing": [],
+      "missing_parts_cost_usd": 0.0,
+      "parts_cost_usd": 9.0
+    },
+    "validation": {
+      "required_tests": [
+        "visual inspection",
+        "continuity power-to-ground",
+        "current-limited first power-up",
+        "connector pin map"
+      ],
+      "gates": [
+        "no unknown power polarity",
+        "all reused modules pass basic continuity",
+        "known voltage domains before interconnect",
+        "defect candidates reviewed"
+      ],
+      "pass_criteria": [
+        "no short on main rail",
+        "rails within expected voltage range",
+        "thermal behavior stable for first 5 minutes",
+        "all external pins labeled before integration"
+      ]
+    },
+    "wiring_plan": {
+      "known_wiring_steps": [
+        "1. ESP32 3.3V \u2192 First 10k\u03a9 resistor",
+        "2. First 10k\u03a9 resistor \u2192 Junction (this is 1.65V reference)",
+        "3. Junction \u2192 Second 10k\u03a9 resistor \u2192 ESP32 GND",
+        "4. Junction \u2192 10\u00b5F capacitor \u2192 3.5mm jack tip (SCT-013 signal)",
+        "5. 3.5mm jack sleeve (SCT-013 ground) \u2192 ESP32 GND",
+        "6. Junction \u2192 ESP32 GPIO34 (ADC1_CH6)"
+      ],
+      "connector_maps": [],
+      "notes": [
+        "use workflow machine_connection_map when available for harvested modules",
+        "map every salvaged connector with continuity before connecting recipe wiring"
+      ]
+    },
+    "firmware_plan": {
+      "target_platform": "esp32",
+      "features": [
+        "wifi",
+        "sensor_read_loop"
+      ],
+      "starter_code": "/*\n * Circuit-AI salvage starter firmware\n * Target platform: esp32\n * Features: wifi, sensor_read_loop\n */\n\nconst int STATUS_LED = 2;\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(STATUS_LED, OUTPUT);\n  Serial.println(\"Circuit-AI salvage validation boot\");\n}\n\nvoid loop() {\n  digitalWrite(STATUS_LED, HIGH);\n  delay(250);\n  digitalWrite(STATUS_LED, LOW);\n  delay(750);\n  // TODO: read each salvaged sensor one at a time after pinout validation.\n  Serial.println(\"sensor validation tick\");\n}",
+      "starter_tasks": [
+        "blink/status LED test",
+        "serial boot log",
+        "read each attached sensor or toggle each output individually",
+        "add fault timeout before unattended use"
+      ]
+    },
+    "commercialization": {
+      "positioning": "upcycled electronics module",
+      "estimated_market_price_low_usd": 35.0,
+      "estimated_market_price_high_usd": 65.0,
+      "adjusted_margin_usd": 15.73,
+      "inventory_value_used_usd": 28.0,
+      "listing_checklist": [
+        "photograph tested module",
+        "include voltage/current limits",
+        "state salvaged/refurbished condition clearly",
+        "include safety disclaimers for high-voltage or load-switching products"
+      ]
+    },
+    "source_inventory": {
+      "asset_count": 6,
+      "unique_records": 6,
+      "estimated_inventory_value_usd": 28.0,
+      "by_capability": {
+        "bme280": 2,
+        "controller": 4,
+        "display_or_ui": 2,
+        "esp32": 2,
+        "jeo": 2,
+        "oled_ssd1306": 2,
+        "sensor_or_adc": 2,
+        "wireless": 2
+      },
+      "by_test_status": {
+        "not_purchased": 2,
+        "untested": 4
+      },
+      "assets": [
+        {
+          "asset_id": "board_controller_or_embedded_compute_1",
+          "asset_type": "board_or_module",
+          "name": "controller_or_embedded_compute",
+          "capabilities": [
+            "controller"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.371,
+          "estimated_value_usd": 5.0,
+          "quantity": 1,
+          "evidence": [
+            "board role: controller_or_embedded_compute",
+            "part marking: jeo"
+          ],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "controller_or_embedded_compute",
+              "description": "Controller, development, or embedded compute board",
+              "confidence": 0.371,
+              "evidence": [
+                "3 ic_chip"
+              ],
+              "alternatives": [
+                {
+                  "type": "sensor_or_signal_conditioning",
+                  "description": "Sensor front-end or signal conditioning board",
+                  "confidence": 0.36,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "motor_or_actuator_driver",
+                  "description": "Motor, relay, solenoid, or high-current actuator driver board",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "wireless_or_communications",
+                  "description": "Wireless, RF, or communications module",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "compute_control",
+                "label": "Compute/control logic",
+                "component_count": 3,
+                "components": [
+                  "cmp_0_ic_chip",
+                  "cmp_1_ic_chip",
+                  "cmp_2_ic_chip"
+                ],
+                "bbox": [
+                  48,
+                  48,
+                  253,
+                  203
+                ],
+                "confidence": 0.71,
+                "function": "Runs logic, timing, firmware, or protocol control",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    17,
+                    17,
+                    284,
+                    234
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 0,
+              "connector_maps": [],
+              "interfaces": [],
+              "pinout_evidence": [],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.0,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T19:19:40.338686+00:00"
+        },
+        {
+          "asset_id": "part_jeo_1",
+          "asset_type": "component",
+          "name": "JEO",
+          "capabilities": [
+            "jeo"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.18,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: jeo"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:19:40.338699+00:00"
+        },
+        {
+          "asset_id": "listing_esp32_bme280_oled_salvage_lot_3",
+          "asset_type": "market_listing",
+          "name": "ESP32 BME280 OLED salvage lot",
+          "capabilities": [
+            "bme280",
+            "controller",
+            "display_or_ui",
+            "esp32",
+            "oled_ssd1306",
+            "sensor_or_adc",
+            "wireless"
+          ],
+          "source": "marketplace",
+          "condition": "unknown",
+          "test_status": "not_purchased",
+          "confidence": 0.45,
+          "estimated_value_usd": 9.0,
+          "quantity": 1,
+          "evidence": [
+            "listing price: $9.00",
+            "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306"
+          ],
+          "metadata": {
+            "id": "lot-sensor-display",
+            "title": "ESP32 BME280 OLED salvage lot",
+            "price_usd": 9.0,
+            "shipping_usd": 1.0,
+            "labor_usd": 1.0,
+            "failure_rate": 0.1,
+            "fee_rate": 0.1,
+            "expected_capabilities": [
+              "controller",
+              "wireless",
+              "sensor_or_adc",
+              "display_or_ui"
+            ],
+            "expected_parts": [
+              "esp32",
+              "bme280",
+              "oled_ssd1306"
+            ]
+          },
+          "created_at": "2026-05-05T19:19:40.339183+00:00"
+        },
+        {
+          "asset_id": "board_controller_or_embedded_compute_4",
+          "asset_type": "board_or_module",
+          "name": "controller_or_embedded_compute",
+          "capabilities": [
+            "controller"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.371,
+          "estimated_value_usd": 5.0,
+          "quantity": 1,
+          "evidence": [
+            "board role: controller_or_embedded_compute",
+            "part marking: jeo"
+          ],
+          "metadata": {
+            "board_identity": {
+              "primary_type": "controller_or_embedded_compute",
+              "description": "Controller, development, or embedded compute board",
+              "confidence": 0.371,
+              "evidence": [
+                "3 ic_chip"
+              ],
+              "alternatives": [
+                {
+                  "type": "sensor_or_signal_conditioning",
+                  "description": "Sensor front-end or signal conditioning board",
+                  "confidence": 0.36,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "motor_or_actuator_driver",
+                  "description": "Motor, relay, solenoid, or high-current actuator driver board",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                },
+                {
+                  "type": "wireless_or_communications",
+                  "description": "Wireless, RF, or communications module",
+                  "confidence": 0.24,
+                  "evidence": [
+                    "3 ic_chip"
+                  ]
+                }
+              ]
+            },
+            "functional_blocks": [
+              {
+                "block_type": "compute_control",
+                "label": "Compute/control logic",
+                "component_count": 3,
+                "components": [
+                  "cmp_0_ic_chip",
+                  "cmp_1_ic_chip",
+                  "cmp_2_ic_chip"
+                ],
+                "bbox": [
+                  48,
+                  48,
+                  253,
+                  203
+                ],
+                "confidence": 0.71,
+                "function": "Runs logic, timing, firmware, or protocol control",
+                "crop_hint": {
+                  "suggested_crop_bbox": [
+                    17,
+                    17,
+                    284,
+                    234
+                  ],
+                  "include_margin": "15% around block bbox"
+                }
+              }
+            ],
+            "machine_connection_map": {
+              "mode": "machine_connection_map",
+              "connector_count": 0,
+              "connector_maps": [],
+              "interfaces": [],
+              "pinout_evidence": [],
+              "splice_plan": {
+                "safest_entry_points": [],
+                "required_measurements": [
+                  "continuity from connector to ground",
+                  "unpowered resistance between power and ground"
+                ],
+                "do_not_assume": [
+                  "pin order",
+                  "voltage level",
+                  "shared ground",
+                  "connector current rating",
+                  "firmware protocol"
+                ]
+              },
+              "confidence": 0.0,
+              "limitations": [
+                "pin assignments are inferred from labels and known pinouts; verify with continuity and voltage measurements",
+                "image-only connector geometry cannot determine exact pin order without calibration or close-up photos",
+                "do not power harvested modules until polarity, rails, and isolation are confirmed"
+              ]
+            }
+          },
+          "created_at": "2026-05-05T19:38:37.110919+00:00"
+        },
+        {
+          "asset_id": "part_jeo_4",
+          "asset_type": "component",
+          "name": "JEO",
+          "capabilities": [
+            "jeo"
+          ],
+          "source": "pipeline_scan",
+          "condition": "candidate",
+          "test_status": "untested",
+          "confidence": 0.18,
+          "estimated_value_usd": 0.0,
+          "quantity": 1,
+          "evidence": [
+            "marking resolved: jeo"
+          ],
+          "metadata": {},
+          "created_at": "2026-05-05T19:38:37.110934+00:00"
+        },
+        {
+          "asset_id": "listing_esp32_bme280_oled_salvage_lot_6",
+          "asset_type": "market_listing",
+          "name": "ESP32 BME280 OLED salvage lot",
+          "capabilities": [
+            "bme280",
+            "controller",
+            "display_or_ui",
+            "esp32",
+            "oled_ssd1306",
+            "sensor_or_adc",
+            "wireless"
+          ],
+          "source": "marketplace",
+          "condition": "unknown",
+          "test_status": "not_purchased",
+          "confidence": 0.45,
+          "estimated_value_usd": 9.0,
+          "quantity": 1,
+          "evidence": [
+            "listing price: $9.00",
+            "expected: controller, wireless, sensor_or_adc, display_or_ui, esp32, bme280, oled_ssd1306"
+          ],
+          "metadata": {
+            "id": "lot-sensor-display",
+            "title": "ESP32 BME280 OLED salvage lot",
+            "price_usd": 9.0,
+            "shipping_usd": 1.0,
+            "labor_usd": 1.0,
+            "failure_rate": 0.1,
+            "fee_rate": 0.1,
+            "expected_capabilities": [
+              "controller",
+              "wireless",
+              "sensor_or_adc",
+              "display_or_ui"
+            ],
+            "expected_parts": [
+              "esp32",
+              "bme280",
+              "oled_ssd1306"
+            ]
+          },
+          "created_at": "2026-05-05T19:38:37.111735+00:00"
+        }
+      ]
+    },
+    "confidence": 0.95
+  }
+}

@@ -1,0 +1,59 @@
+[
+  {
+    "category": "ic",
+    "value": "ESP32",
+    "supplier": "DigiKey",
+    "part_number": "1965-ESP32-WROOM-32ECT-ND",
+    "description": "ESP32 module (WROOM-32 class) — verify exact module variant in KiCad fields"
+  },
+  {
+    "category": "ic",
+    "value": "AMS1117-3.3",
+    "supplier": "DigiKey",
+    "part_number": "1470-3603-1-ND",
+    "description": "LDO regulator 3.3V (AMS1117 class) — verify package/brand in KiCad fields"
+  },
+  {
+    "category": "ic",
+    "value": "BME280",
+    "supplier": "DigiKey",
+    "part_number": "828-1063-1-ND",
+    "description": "BME280 sensor breakout/module — verify exact SKU in KiCad fields"
+  },
+  {
+    "category": "resistor",
+    "value_re": "^(?:10K|10\\.0K)$",
+    "footprint_re": "R_0?603",
+    "unit_price_estimate": 0.02,
+    "description": "Resistor 10k (0603) — procurement-grade part number requires KiCad fields"
+  },
+  {
+    "category": "resistor",
+    "value_re": "^(?:100R|100\\.0R)$",
+    "footprint_re": "R_0?603",
+    "unit_price_estimate": 0.02,
+    "description": "Resistor 100Ω (0603) — procurement-grade part number requires KiCad fields"
+  },
+  {
+    "category": "capacitor",
+    "value_re": "^(?:100N?F|100nF)$",
+    "footprint_re": "C_0?603",
+    "unit_price_estimate": 0.03,
+    "description": "Capacitor 100nF (0603) — procurement-grade part number requires KiCad fields"
+  },
+  {
+    "category": "capacitor",
+    "value_re": "^(?:10U?F|10uF)$",
+    "footprint_re": "C_0?805",
+    "unit_price_estimate": 0.05,
+    "description": "Capacitor 10uF (0805) — procurement-grade part number requires KiCad fields"
+  },
+  {
+    "category": "capacitor",
+    "value_re": "^(?:1000N?F|1000nF|1uF)$",
+    "footprint_re": "C_0?603",
+    "unit_price_estimate": 0.04,
+    "description": "Capacitor 1uF (0603) — procurement-grade part number requires KiCad fields"
+  }
+]
+

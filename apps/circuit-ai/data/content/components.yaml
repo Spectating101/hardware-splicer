@@ -1,0 +1,58 @@
+ic_chip:
+  type: microcontroller
+  capabilities:
+    [arduino_projects, iot_devices, educational_electronics, signal_processing]
+  reuse_value: high
+  difficulty: beginner
+  market_value: 0.5
+  educational_value: high
+  repair_guide: "Test with multimeter, check shorts, verify power"
+capacitor:
+  type: passive_component
+  capabilities:
+    [power_filtering, audio_circuits, voltage_regulation, timing_circuits]
+  reuse_value: medium
+  difficulty: beginner
+  market_value: 0.25
+  educational_value: medium
+  repair_guide: "Measure capacitance and ESR; inspect for bulging"
+resistor:
+  type: passive_component
+  capabilities: [current_limiting, voltage_division, biasing, load_simulation]
+  reuse_value: low
+  difficulty: beginner
+  market_value: 0.01
+  educational_value: high
+  repair_guide: "Measure resistance; check tolerance"
+connector:
+  type: interface_component
+  capabilities:
+    [
+      signal_transmission,
+      power_distribution,
+      modular_design,
+      data_communication,
+    ]
+  reuse_value: high
+  difficulty: beginner
+  market_value: 0.1
+  educational_value: medium
+  repair_guide: "Check continuity; clean contacts"
+transformer:
+  type: power_component
+  capabilities:
+    [voltage_conversion, isolation, power_distribution, signal_coupling]
+  reuse_value: high
+  difficulty: intermediate
+  market_value: 2.0
+  educational_value: high
+  repair_guide: "Measure windings; test insulation"
+diode:
+  type: semiconductor
+  capabilities:
+    [rectification, voltage_regulation, signal_detection, protection]
+  reuse_value: medium
+  difficulty: beginner
+  market_value: 0.05
+  educational_value: medium
+  repair_guide: "Forward/reverse bias tests; check voltage drop"

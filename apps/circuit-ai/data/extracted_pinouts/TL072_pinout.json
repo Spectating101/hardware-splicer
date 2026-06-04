@@ -1,0 +1,66 @@
+{
+  "ic_name": "TL072",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Inverting input"
+    },
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Noninverting input"
+    },
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Output"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Inverting input"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Noninverting input"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Output"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Inverting input"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Noninverting input"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Output"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Inverting input"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Noninverting input"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Output"
+    }
+  ],
+  "total_pins": 12
+}

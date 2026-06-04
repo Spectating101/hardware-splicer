@@ -1,0 +1,54 @@
+{
+  "model_id": "pcb_components_yolo11n_thawed",
+  "file": "models/pcb/pcb_components_yolo11n_thawed.pt",
+  "sha256": "be7f320411e9f8bc75d2925e46c6516e1b2387819df1f672bf3b50ec546184f8",
+  "source": {
+    "repository": "https://github.com/aryan-programmer/pcb-fault-detection",
+    "path": "pcb-components-detection/yolo11n_best_thawed.pt",
+    "license": "not specified in upstream repository metadata",
+    "retrieved_at": "2026-05-05"
+  },
+  "architecture": "Ultralytics YOLO11n",
+  "task": "PCB component detection",
+  "classes": [
+    "battery",
+    "button",
+    "buzzer",
+    "capacitor",
+    "clock",
+    "connector",
+    "diode",
+    "display",
+    "fuse",
+    "heatsink",
+    "ic",
+    "inductor",
+    "led",
+    "pads",
+    "pins",
+    "potentiometer",
+    "relay",
+    "resistor",
+    "switch",
+    "transducer",
+    "transformer",
+    "transistor"
+  ],
+  "canonical_class_aliases": {
+    "clock": "crystal",
+    "ic": "ic_chip"
+  },
+  "reported_validation": {
+    "images": 834,
+    "instances": 10862,
+    "precision": 0.656,
+    "recall": 0.579,
+    "map50": 0.615,
+    "map50_95": 0.384,
+    "source_log": "pcb-components-detection/run3_thawed.log"
+  },
+  "notes": [
+    "Promoted over the prior electrocom61_v1 checkpoint because the upstream validation set is larger and the reported mAP50 is materially higher.",
+    "The detector normalizes selected raw labels to Circuit-AI's internal taxonomy while preserving raw_class_name in provenance."
+  ]
+}

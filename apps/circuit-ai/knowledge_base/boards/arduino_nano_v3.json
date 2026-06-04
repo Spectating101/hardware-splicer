@@ -1,0 +1,56 @@
+{
+  "name": "Arduino Nano V3",
+  "id": "arduino_nano_v3",
+  "type": "microcontroller",
+  "microcontroller": "ATmega328P",
+  "operating_voltage": "5V",
+  "input_voltage": "7-12V VIN / 5V USB",
+  "gpio_pins": 30,
+  "bbox_mm": {"x": 18.0, "y": 45.0, "z": 18.0},
+  "headers": [
+    {
+      "id": "left_header",
+      "type": "gpio",
+      "orientation": "left_edge",
+      "pins": [
+        {"name": "D1/TX", "x_mm": 1.4, "y_mm": 42.0},
+        {"name": "D0/RX", "x_mm": 1.4, "y_mm": 39.46},
+        {"name": "RST", "x_mm": 1.4, "y_mm": 36.92},
+        {"name": "GND", "x_mm": 1.4, "y_mm": 34.38},
+        {"name": "D2", "x_mm": 1.4, "y_mm": 31.84},
+        {"name": "D3", "x_mm": 1.4, "y_mm": 29.3},
+        {"name": "D4", "x_mm": 1.4, "y_mm": 26.76},
+        {"name": "D5", "x_mm": 1.4, "y_mm": 24.22},
+        {"name": "D6", "x_mm": 1.4, "y_mm": 21.68},
+        {"name": "D7", "x_mm": 1.4, "y_mm": 19.14},
+        {"name": "D8", "x_mm": 1.4, "y_mm": 16.6},
+        {"name": "D9", "x_mm": 1.4, "y_mm": 14.06},
+        {"name": "D10", "x_mm": 1.4, "y_mm": 11.52},
+        {"name": "D11", "x_mm": 1.4, "y_mm": 8.98},
+        {"name": "D12", "x_mm": 1.4, "y_mm": 6.44}
+      ]
+    },
+    {
+      "id": "right_header",
+      "type": "gpio",
+      "orientation": "right_edge",
+      "pins": [
+        {"name": "D13", "x_mm": 16.6, "y_mm": 6.44},
+        {"name": "3V3", "x_mm": 16.6, "y_mm": 8.98},
+        {"name": "AREF", "x_mm": 16.6, "y_mm": 11.52},
+        {"name": "A0", "x_mm": 16.6, "y_mm": 14.06},
+        {"name": "A1", "x_mm": 16.6, "y_mm": 16.6},
+        {"name": "A2", "x_mm": 16.6, "y_mm": 19.14},
+        {"name": "A3", "x_mm": 16.6, "y_mm": 21.68},
+        {"name": "A4", "x_mm": 16.6, "y_mm": 24.22},
+        {"name": "A5", "x_mm": 16.6, "y_mm": 26.76},
+        {"name": "A6", "x_mm": 16.6, "y_mm": 29.3},
+        {"name": "A7", "x_mm": 16.6, "y_mm": 31.84},
+        {"name": "5V", "x_mm": 16.6, "y_mm": 34.38},
+        {"name": "RST", "x_mm": 16.6, "y_mm": 36.92},
+        {"name": "GND", "x_mm": 16.6, "y_mm": 39.46},
+        {"name": "VIN", "x_mm": 16.6, "y_mm": 42.0}
+      ]
+    }
+  ]
+}

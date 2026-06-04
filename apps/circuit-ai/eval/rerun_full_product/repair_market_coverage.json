@@ -1,0 +1,552 @@
+{
+  "portfolio": {
+    "mode": "repair_market_coverage_portfolio",
+    "summary": {
+      "strong_count": 4,
+      "partial_count": 3,
+      "weak_count": 3,
+      "weighted_coverage": 0.518
+    },
+    "strong_fit": [
+      {
+        "item_id": "retro_handheld_console",
+        "label": "Retro handheld consoles",
+        "examples": [
+          "Game Boy",
+          "Game Boy Color",
+          "Game Gear",
+          "PS Vita"
+        ],
+        "coverage": 0.78,
+        "relevance": 0.92,
+        "strategic_score": 0.718,
+        "coverage_level": "strong",
+        "signal_hits": [],
+        "why": [
+          "strong overlap with cleaning/restoration videos",
+          "PCB, buttons, contacts, corrosion, battery terminals, speakers, screens are inspectable",
+          "repair flow can combine board scan, connector map, cleaning checklist, and functional validation"
+        ],
+        "gaps": [
+          "model-specific shell, screen, ribbon, and button-membrane parts catalog",
+          "before/after contact-resistance capture",
+          "known-good reference photos for popular revisions"
+        ]
+      },
+      {
+        "item_id": "small_usb_gadget",
+        "label": "Small USB powered gadgets",
+        "examples": [
+          "USB fan",
+          "LED gadget",
+          "desk toy",
+          "small pump",
+          "powered hub"
+        ],
+        "coverage": 0.86,
+        "relevance": 0.72,
+        "strategic_score": 0.619,
+        "coverage_level": "strong",
+        "signal_hits": [],
+        "why": [
+          "excellent match for low-voltage repair encyclopedia lane",
+          "power, connector, regulator, driver, load, and cable faults are covered",
+          "safe current-limited diagnostic flow is straightforward"
+        ],
+        "gaps": [
+          "device-specific enclosures and mechanical replacement parts",
+          "load libraries for motors, fans, pumps, heaters, and LEDs"
+        ]
+      },
+      {
+        "item_id": "game_controller",
+        "label": "Game controllers",
+        "examples": [
+          "DualSense",
+          "Xbox controller",
+          "Joy-Con",
+          "retro controller"
+        ],
+        "coverage": 0.66,
+        "relevance": 0.9,
+        "strategic_score": 0.594,
+        "coverage_level": "usable_with_gaps",
+        "signal_hits": [],
+        "why": [
+          "high customer demand and many cleaning/repair videos",
+          "cleaning, connector, button, flex, USB, and battery faults fit current repair playbooks",
+          "salvage/arbitrage workflow can rank lots and donor parts"
+        ],
+        "gaps": [
+          "analog stick drift-specific decision tree",
+          "calibration software workflow per platform",
+          "part compatibility catalog for stick modules, membranes, shells, and batteries"
+        ]
+      },
+      {
+        "item_id": "sensor_display_module",
+        "label": "Sensor/display modules",
+        "examples": [
+          "weather monitor",
+          "meter",
+          "thermostat module",
+          "panel display"
+        ],
+        "coverage": 0.74,
+        "relevance": 0.7,
+        "strategic_score": 0.518,
+        "coverage_level": "usable_with_gaps",
+        "signal_hits": [],
+        "why": [
+          "matches board understanding, OCR, connector mapping, recipe/build package flow",
+          "power, sensor, display, and firmware smoke-test plans are already present"
+        ],
+        "gaps": [
+          "calibration procedure database",
+          "display ribbon/backlight-specific guides",
+          "sensor accuracy validation fixtures"
+        ]
+      }
+    ],
+    "partial_fit": [
+      {
+        "item_id": "modern_game_console",
+        "label": "Modern game consoles",
+        "examples": [
+          "Nintendo Switch",
+          "PlayStation 5",
+          "Xbox Series",
+          "Steam Deck"
+        ],
+        "coverage": 0.52,
+        "relevance": 0.96,
+        "strategic_score": 0.499,
+        "coverage_level": "partial",
+        "signal_hits": [],
+        "why": [
+          "very valuable market, common on repair channels",
+          "system can help with triage, visual board evidence, connector inspection, corrosion, fans, power path, and resale math",
+          "basic cleaning/thermal service can be made reproducible"
+        ],
+        "gaps": [
+          "microsoldering workflows for HDMI/USB-C ports and torn pads",
+          "boardview/schematic integration per console revision",
+          "BGA/APU/storage faults are beyond image-only guidance",
+          "firmware/account/drive pairing constraints need model-specific knowledge"
+        ]
+      },
+      {
+        "item_id": "audio_retro_electronics",
+        "label": "Audio and retro electronics",
+        "examples": [
+          "cassette player",
+          "radio",
+          "speaker amp",
+          "VCR accessory"
+        ],
+        "coverage": 0.45,
+        "relevance": 0.76,
+        "strategic_score": 0.342,
+        "coverage_level": "partial",
+        "signal_hits": [],
+        "why": [
+          "cleaning and visual PCB triage are useful",
+          "power and connector faults fit current guide structure"
+        ],
+        "gaps": [
+          "analog audio signal-path diagnosis",
+          "belt, gear, head alignment, tape transport, and mechanical timing procedures",
+          "oscilloscope/audio injection workflows"
+        ]
+      },
+      {
+        "item_id": "phone_or_tablet",
+        "label": "Phones and tablets",
+        "examples": [
+          "iPhone",
+          "Samsung phone",
+          "iPad",
+          "Android tablet"
+        ],
+        "coverage": 0.36,
+        "relevance": 0.94,
+        "strategic_score": 0.338,
+        "coverage_level": "partial",
+        "signal_hits": [],
+        "why": [
+          "older repair-guide scaffolding exists",
+          "symptom intake and safety warnings are useful"
+        ],
+        "gaps": [
+          "model-specific disassembly and parts compatibility",
+          "battery/fire safety and adhesive workflows",
+          "micro-soldering, paired components, calibration, and waterproofing constraints",
+          "board-level phone diagnostics require schematics/boardviews and expert tooling"
+        ]
+      }
+    ],
+    "weak_fit": [
+      {
+        "item_id": "laptop_or_macbook",
+        "label": "Laptops and MacBooks",
+        "examples": [
+          "MacBook",
+          "Windows laptop",
+          "Chromebook"
+        ],
+        "coverage": 0.34,
+        "relevance": 0.88,
+        "strategic_score": 0.299,
+        "coverage_level": "weak",
+        "signal_hits": [],
+        "why": [
+          "symptom intake and basic power/charging flow exist",
+          "visual board scan can help with obvious damage"
+        ],
+        "gaps": [
+          "boardview/schematic integration",
+          "USB-C PD, battery authentication, and charger negotiation diagnostics",
+          "fine-pitch board repair and model-specific teardown"
+        ]
+      },
+      {
+        "item_id": "mains_appliance",
+        "label": "Mains appliances",
+        "examples": [
+          "coffee maker",
+          "microwave",
+          "vacuum",
+          "washing machine",
+          "power supply"
+        ],
+        "coverage": 0.24,
+        "relevance": 0.82,
+        "strategic_score": 0.197,
+        "coverage_level": "weak",
+        "signal_hits": [],
+        "why": [
+          "some control-board visual triage is possible",
+          "salvage and connector mapping can help after safe isolation"
+        ],
+        "gaps": [
+          "mains and high-voltage safety procedures",
+          "mechanical, plumbing, heater, compressor, and motor-load diagnostics",
+          "certification and liability boundaries"
+        ]
+      },
+      {
+        "item_id": "pure_mechanical_restoration",
+        "label": "Mostly mechanical restoration",
+        "examples": [
+          "tools",
+          "lighters",
+          "locks",
+          "bicycles",
+          "rusty mechanisms"
+        ],
+        "coverage": 0.18,
+        "relevance": 0.55,
+        "strategic_score": 0.099,
+        "coverage_level": "weak",
+        "signal_hits": [],
+        "why": [
+          "documentation and cleaning checklists are reusable",
+          "not a strong fit for PCB/electronics intelligence"
+        ],
+        "gaps": [
+          "mechanical geometry and part-fit reasoning",
+          "materials chemistry and surface finishing database",
+          "no electronics-specific value unless the item has control boards or motors"
+        ]
+      }
+    ],
+    "recommended_next_builds": [
+      "controller stick-drift and button/contact cleaning lane",
+      "retro handheld console revision/parts catalog",
+      "modern console triage lane with HDMI/USB-C caution and boardview hooks",
+      "audio/retro signal-path diagnostic lane",
+      "phone/laptop model-specific teardown and battery safety packs only after narrower gadget lanes are strong"
+    ]
+  },
+  "queries": [
+    {
+      "mode": "repair_market_coverage",
+      "query": "Odd Tinkering Game Boy restoration cleaning corrosion",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "retro_handheld_console",
+          "label": "Retro handheld consoles",
+          "examples": [
+            "Game Boy",
+            "Game Boy Color",
+            "Game Gear",
+            "PS Vita"
+          ],
+          "coverage": 0.78,
+          "relevance": 0.92,
+          "strategic_score": 0.718,
+          "coverage_level": "strong",
+          "signal_hits": [
+            "game boy"
+          ],
+          "why": [
+            "strong overlap with cleaning/restoration videos",
+            "PCB, buttons, contacts, corrosion, battery terminals, speakers, screens are inspectable",
+            "repair flow can combine board scan, connector map, cleaning checklist, and functional validation"
+          ],
+          "gaps": [
+            "model-specific shell, screen, ribbon, and button-membrane parts catalog",
+            "before/after contact-resistance capture",
+            "known-good reference photos for popular revisions"
+          ]
+        }
+      ],
+      "recommendation": "Good target now: build user-facing workflows and examples for this item class."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "TronicsFix broken PS5 HDMI repair",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "modern_game_console",
+          "label": "Modern game consoles",
+          "examples": [
+            "Nintendo Switch",
+            "PlayStation 5",
+            "Xbox Series",
+            "Steam Deck"
+          ],
+          "coverage": 0.52,
+          "relevance": 0.96,
+          "strategic_score": 0.499,
+          "coverage_level": "partial",
+          "signal_hits": [
+            "hdmi",
+            "ps5"
+          ],
+          "why": [
+            "very valuable market, common on repair channels",
+            "system can help with triage, visual board evidence, connector inspection, corrosion, fans, power path, and resale math",
+            "basic cleaning/thermal service can be made reproducible"
+          ],
+          "gaps": [
+            "microsoldering workflows for HDMI/USB-C ports and torn pads",
+            "boardview/schematic integration per console revision",
+            "BGA/APU/storage faults are beyond image-only guidance",
+            "firmware/account/drive pairing constraints need model-specific knowledge"
+          ]
+        }
+      ],
+      "recommendation": "Research/prototype only; needs model-specific knowledge before customer-facing use."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "iPhone charging port repair",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "phone_or_tablet",
+          "label": "Phones and tablets",
+          "examples": [
+            "iPhone",
+            "Samsung phone",
+            "iPad",
+            "Android tablet"
+          ],
+          "coverage": 0.36,
+          "relevance": 0.94,
+          "strategic_score": 0.338,
+          "coverage_level": "partial",
+          "signal_hits": [
+            "iphone",
+            "phone"
+          ],
+          "why": [
+            "older repair-guide scaffolding exists",
+            "symptom intake and safety warnings are useful"
+          ],
+          "gaps": [
+            "model-specific disassembly and parts compatibility",
+            "battery/fire safety and adhesive workflows",
+            "micro-soldering, paired components, calibration, and waterproofing constraints",
+            "board-level phone diagnostics require schematics/boardviews and expert tooling"
+          ]
+        }
+      ],
+      "recommendation": "Research/prototype only; needs model-specific knowledge before customer-facing use."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "USB desk fan not spinning repair",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "small_usb_gadget",
+          "label": "Small USB powered gadgets",
+          "examples": [
+            "USB fan",
+            "LED gadget",
+            "desk toy",
+            "small pump",
+            "powered hub"
+          ],
+          "coverage": 0.86,
+          "relevance": 0.72,
+          "strategic_score": 0.619,
+          "coverage_level": "strong",
+          "signal_hits": [
+            "desk fan",
+            "usb"
+          ],
+          "why": [
+            "excellent match for low-voltage repair encyclopedia lane",
+            "power, connector, regulator, driver, load, and cable faults are covered",
+            "safe current-limited diagnostic flow is straightforward"
+          ],
+          "gaps": [
+            "device-specific enclosures and mechanical replacement parts",
+            "load libraries for motors, fans, pumps, heaters, and LEDs"
+          ]
+        }
+      ],
+      "recommendation": "Good target now: build user-facing workflows and examples for this item class."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "Xbox controller stick drift cleaning repair",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "game_controller",
+          "label": "Game controllers",
+          "examples": [
+            "DualSense",
+            "Xbox controller",
+            "Joy-Con",
+            "retro controller"
+          ],
+          "coverage": 0.66,
+          "relevance": 0.9,
+          "strategic_score": 0.594,
+          "coverage_level": "usable_with_gaps",
+          "signal_hits": [
+            "controller",
+            "stick drift",
+            "xbox controller"
+          ],
+          "why": [
+            "high customer demand and many cleaning/repair videos",
+            "cleaning, connector, button, flex, USB, and battery faults fit current repair playbooks",
+            "salvage/arbitrage workflow can rank lots and donor parts"
+          ],
+          "gaps": [
+            "analog stick drift-specific decision tree",
+            "calibration software workflow per platform",
+            "part compatibility catalog for stick modules, membranes, shells, and batteries"
+          ]
+        },
+        {
+          "item_id": "modern_game_console",
+          "label": "Modern game consoles",
+          "examples": [
+            "Nintendo Switch",
+            "PlayStation 5",
+            "Xbox Series",
+            "Steam Deck"
+          ],
+          "coverage": 0.52,
+          "relevance": 0.96,
+          "strategic_score": 0.499,
+          "coverage_level": "partial",
+          "signal_hits": [
+            "xbox"
+          ],
+          "why": [
+            "very valuable market, common on repair channels",
+            "system can help with triage, visual board evidence, connector inspection, corrosion, fans, power path, and resale math",
+            "basic cleaning/thermal service can be made reproducible"
+          ],
+          "gaps": [
+            "microsoldering workflows for HDMI/USB-C ports and torn pads",
+            "boardview/schematic integration per console revision",
+            "BGA/APU/storage faults are beyond image-only guidance",
+            "firmware/account/drive pairing constraints need model-specific knowledge"
+          ]
+        }
+      ],
+      "recommendation": "Usable target with a narrow workflow; add the listed gaps before marketing it broadly."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "cassette player restoration no audio",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "audio_retro_electronics",
+          "label": "Audio and retro electronics",
+          "examples": [
+            "cassette player",
+            "radio",
+            "speaker amp",
+            "VCR accessory"
+          ],
+          "coverage": 0.45,
+          "relevance": 0.76,
+          "strategic_score": 0.342,
+          "coverage_level": "partial",
+          "signal_hits": [
+            "audio",
+            "cassette"
+          ],
+          "why": [
+            "cleaning and visual PCB triage are useful",
+            "power and connector faults fit current guide structure"
+          ],
+          "gaps": [
+            "analog audio signal-path diagnosis",
+            "belt, gear, head alignment, tape transport, and mechanical timing procedures",
+            "oscilloscope/audio injection workflows"
+          ]
+        }
+      ],
+      "recommendation": "Research/prototype only; needs model-specific knowledge before customer-facing use."
+    },
+    {
+      "mode": "repair_market_coverage",
+      "query": "microwave oven repair no heat",
+      "matched": true,
+      "top_matches": [
+        {
+          "item_id": "mains_appliance",
+          "label": "Mains appliances",
+          "examples": [
+            "coffee maker",
+            "microwave",
+            "vacuum",
+            "washing machine",
+            "power supply"
+          ],
+          "coverage": 0.24,
+          "relevance": 0.82,
+          "strategic_score": 0.197,
+          "coverage_level": "weak",
+          "signal_hits": [
+            "microwave"
+          ],
+          "why": [
+            "some control-board visual triage is possible",
+            "salvage and connector mapping can help after safe isolation"
+          ],
+          "gaps": [
+            "mains and high-voltage safety procedures",
+            "mechanical, plumbing, heater, compressor, and motor-load diagnostics",
+            "certification and liability boundaries"
+          ]
+        }
+      ],
+      "recommendation": "Do not sell this as covered yet; collect examples and build a dedicated lane first."
+    }
+  ]
+}

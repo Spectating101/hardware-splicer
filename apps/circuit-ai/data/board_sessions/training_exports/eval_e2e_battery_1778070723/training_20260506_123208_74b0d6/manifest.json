@@ -1,0 +1,80 @@
+{
+  "export_id": "training_20260506_123208_74b0d6",
+  "mode": "board_session_training_package",
+  "created_at": "2026-05-06T12:32:08.874672+00:00",
+  "session": {
+    "session_id": "eval_e2e_battery_1778070723",
+    "title": "Electric toothbrush not charging end-to-end smoke",
+    "route": "repair",
+    "status": "open",
+    "device_hint": "electric toothbrush charging dock",
+    "created_at": "2026-05-06T12:32:03.373756+00:00",
+    "updated_at": "2026-05-06T12:32:08.117697+00:00",
+    "certainty": {
+      "overall": {},
+      "counts": {},
+      "missing_evidence": [],
+      "training_queue": {}
+    },
+    "metrics": {
+      "task_count": 6,
+      "open_task_count": 3,
+      "resolved_task_count": 3,
+      "capture_burden": 1,
+      "measurement_count_required": 3,
+      "certainty_level": "unknown",
+      "certainty_score": 0.0,
+      "training_capture_recommended": false
+    },
+    "open_task_count": 3,
+    "review_count": 1,
+    "training_export_count": 0
+  },
+  "counts": {
+    "component_labels": 0,
+    "ocr_examples": 0,
+    "defect_labels": 0,
+    "board_roles": 0,
+    "reviews": 1,
+    "measurements": 1
+  },
+  "examples": {
+    "component_labels": [],
+    "ocr_examples": [],
+    "defect_labels": [],
+    "board_roles": [],
+    "reviews": [
+      {
+        "review_id": "review_1",
+        "task_id": "task_2",
+        "task_type": "measurement",
+        "action": "accepted",
+        "payload": {
+          "task_id": "task_2",
+          "action": "accepted",
+          "notes": "e2e accepted task after capture and measurement",
+          "reviewer": "test_user"
+        },
+        "created_at": "2026-05-06T12:32:07.095445+00:00"
+      }
+    ],
+    "measurements": [
+      {
+        "measurement_id": "measurement_1",
+        "type": "charger_output_voltage",
+        "target": "charging dock output pins",
+        "value": 5.08,
+        "unit": "V",
+        "notes": "measured at dock pins with no toothbrush seated",
+        "confidence": 1.0,
+        "created_at": "2026-05-06T12:32:06.004450+00:00"
+      }
+    ]
+  },
+  "recommended_uses": [
+    "YOLO component label review",
+    "OCR crop/marking normalization",
+    "defect candidate validation",
+    "board-role and functional-block benchmark cases"
+  ]
+}

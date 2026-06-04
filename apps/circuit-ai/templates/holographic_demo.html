@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DUM-E: Holographic Circuit Designer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #00ff00;
+            pointer-events: auto;
+        }
+
+        #header h1 {
+            font-size: 2em;
+            text-shadow: 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #00ff00; }
+            50% { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        #voice-input {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            width: 80%;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        #voice-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+            transform: scale(1.05);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        #info-panel {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            width: 350px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            pointer-events: auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        #info-panel h3 {
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .component-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 255, 0, 0.05);
+            border-left: 3px solid #00ff00;
+        }
+
+        .component-info h4 {
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .component-info p {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        #voice-status {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            pointer-events: none;
+            display: none;
+        }
+
+        #voice-status.active {
+            display: block;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .wire {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            text-shadow: 0 0 20px #00ff00;
+            z-index: 100;
+        }
+
+        .scanning-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+
+        /* Scrollbar styling for info panel */
+        #info-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #info-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        #info-panel::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="canvas-container"></div>
+
+        <div class="scanning-line"></div>
+
+        <div id="ui-overlay">
+            <div id="header">
+                <h1>⚡ DUM-E: HOLOGRAPHIC CIRCUIT DESIGNER</h1>
+                <input type="text" id="voice-input" placeholder='Say: "DUM-E, design a WiFi temperature sensor"' />
+            </div>
+
+            <div id="info-panel">
+                <h3>SYSTEM STATUS</h3>
+                <div id="circuit-info">
+                    <p>Awaiting design request...</p>
+                    <p style="margin-top: 10px; color: #00ffff;">Voice commands enabled. Gesture controls active.</p>
+                </div>
+            </div>
+
+            <div id="controls">
+                <button class="control-btn" onclick="rotateCircuit()">Rotate</button>
+                <button class="control-btn" onclick="explodeView()">Explode</button>
+                <button class="control-btn" onclick="assemblyAnimation()">Assemble</button>
+                <button class="control-btn" onclick="toggleWireflow()">Data Flow</button>
+                <button class="control-btn" onclick="resetView()">Reset</button>
+            </div>
+
+            <div id="voice-status">
+                🎤 LISTENING...
+            </div>
+
+            <div id="loading">
+                INITIALIZING HOLOGRAPHIC INTERFACE...
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Three.js Scene Setup
+        let scene, camera, renderer, controls;
+        let components = [];
+        let wires = [];
+        let exploded = false;
+        let autoRotate = false;
+        let dataFlowActive = false;
+
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000000, 10, 50);
+
+            // Create camera
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0.8);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0x00ff00, 0.3);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0x00ff00, 1, 50);
+            pointLight1.position.set(10, 10, 10);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0x00ffff, 0.8, 50);
+            pointLight2.position.set(-10, 10, -10);
+            scene.add(pointLight2);
+
+            // Add grid
+            const gridHelper = new THREE.GridHelper(20, 20, 0x00ff00, 0x003300);
+            scene.add(gridHelper);
+
+            // Remove loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+            }, 2000);
+
+            // Animation loop
+            animate();
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Voice input
+            setupVoiceInput();
+        }
+
+        function createComponent(name, position, dimensions, color = 0x00ff00) {
+            const geometry = new THREE.BoxGeometry(...dimensions);
+            const material = new THREE.MeshPhongMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.8,
+                emissive: color,
+                emissiveIntensity: 0.3,
+                shininess: 100
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(...position);
+            mesh.userData = { name: name, originalPosition: position };
+
+            // Add glow edges
+            const edges = new THREE.EdgesGeometry(geometry);
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x00ffff,
+                linewidth: 2
+            });
+            const wireframe = new THREE.LineSegments(edges, lineMaterial);
+            mesh.add(wireframe);
+
+            // Add label
+            createLabel(name, mesh);
+
+            scene.add(mesh);
+            components.push(mesh);
+
+            return mesh;
+        }
+
+        function createLabel(text, parent) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+
+            context.fillStyle = '#000000';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            context.font = 'Bold 24px Courier New';
+            context.fillStyle = '#00ff00';
+            context.textAlign = 'center';
+            context.fillText(text, canvas.width / 2, canvas.height / 2 + 8);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(2, 0.5, 1);
+            sprite.position.y = 2;
+
+            parent.add(sprite);
+        }
+
+        function createWire(from, to, color = 0xff0000) {
+            const points = [];
+            points.push(from.clone());
+
+            // Add bezier curve
+            const midpoint = new THREE.Vector3(
+                (from.x + to.x) / 2,
+                Math.max(from.y, to.y) + 1,
+                (from.z + to.z) / 2
+            );
+            points.push(midpoint);
+            points.push(to.clone());
+
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.05, 8, false);
+            const tubeMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.6
+            });
+
+            const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            scene.add(tube);
+            wires.push(tube);
+
+            return tube;
+        }
+
+        function loadSampleCircuit() {
+            // Create ESP8266
+            const esp8266 = createComponent('ESP8266', [-3, 0, 0], [2, 0.3, 4], 0x00ff00);
+
+            // Create DHT22
+            const dht22 = createComponent('DHT22', [3, 0, 2], [1, 0.5, 3], 0x00ffff);
+
+            // Create Regulator
+            const regulator = createComponent('LM7805', [0, 0, -3], [1, 0.3, 1.5], 0xff00ff);
+
+            // Create wires
+            createWire(esp8266.position, dht22.position, 0xff0000);
+            createWire(esp8266.position, regulator.position, 0xffff00);
+            createWire(dht22.position, regulator.position, 0xff00ff);
+
+            // Update info panel
+            updateInfoPanel({
+                project: 'WiFi Temperature Sensor',
+                components: [
+                    { name: 'ESP8266', cost: 4.00, reason: 'Low power WiFi' },
+                    { name: 'DHT22', cost: 3.50, reason: 'Accurate temp/humidity' },
+                    { name: 'LM7805', cost: 0.30, reason: '5V regulation' }
+                ],
+                total: 7.80
+            });
+        }
+
+        function updateInfoPanel(data) {
+            const panel = document.getElementById('circuit-info');
+            let html = `<h3 style="color: #00ffff;">PROJECT: ${data.project}</h3>`;
+
+            html += '<div style="margin-top: 15px;">';
+            data.components.forEach(comp => {
+                html += `
+                    <div class="component-info">
+                        <h4>${comp.name} - $${comp.cost.toFixed(2)}</h4>
+                        <p>AI Reasoning: ${comp.reason}</p>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            html += `<div style="margin-top: 20px; padding: 10px; background: rgba(0, 255, 0, 0.1); border: 2px solid #00ff00;">
+                        <h3>TOTAL COST: $${data.total.toFixed(2)}</h3>
+                     </div>`;
+
+            panel.innerHTML = html;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Auto-rotate if enabled
+            if (autoRotate) {
+                components.forEach(comp => {
+                    comp.rotation.y += 0.01;
+                });
+            }
+
+            // Data flow animation
+            if (dataFlowActive) {
+                animateDataFlow();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function animateDataFlow() {
+            // Animate particles flowing through wires
+            const time = Date.now() * 0.001;
+            wires.forEach((wire, index) => {
+                wire.material.opacity = 0.6 + 0.4 * Math.sin(time * 2 + index);
+            });
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        // Control functions
+        function rotateCircuit() {
+            autoRotate = !autoRotate;
+        }
+
+        function explodeView() {
+            exploded = !exploded;
+            components.forEach((comp, index) => {
+                if (exploded) {
+                    comp.position.x += (index - 1) * 3;
+                } else {
+                    const original = comp.userData.originalPosition;
+                    comp.position.set(...original);
+                }
+            });
+        }
+
+        function assemblyAnimation() {
+            // Animate components flying in
+            components.forEach((comp, index) => {
+                comp.position.y = -10;
+                animateComponent(comp, index);
+            });
+        }
+
+        function animateComponent(comp, index) {
+            const original = comp.userData.originalPosition;
+            const duration = 1000;
+            const startTime = Date.now() + index * 200;
+
+            function step() {
+                const now = Date.now();
+                const elapsed = now - startTime;
+
+                if (elapsed < 0) {
+                    requestAnimationFrame(step);
+                    return;
+                }
+
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+                comp.position.y = -10 + (original[1] + 10) * eased;
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            }
+
+            requestAnimationFrame(step);
+        }
+
+        function toggleWireflow() {
+            dataFlowActive = !dataFlowActive;
+        }
+
+        function resetView() {
+            components.forEach(comp => {
+                const original = comp.userData.originalPosition;
+                comp.position.set(...original);
+                comp.rotation.set(0, 0, 0);
+            });
+            autoRotate = false;
+            exploded = false;
+            dataFlowActive = false;
+        }
+
+        // Voice input
+        function setupVoiceInput() {
+            const input = document.getElementById('voice-input');
+
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    processCommand(this.value);
+                    this.value = '';
+                }
+            });
+        }
+
+        function processCommand(command) {
+            const lowerCommand = command.toLowerCase();
+
+            if (lowerCommand.includes('wifi') && lowerCommand.includes('sensor')) {
+                loadSampleCircuit();
+                speak("Designing WiFi temperature sensor. Selecting optimal components.");
+            } else if (lowerCommand.includes('rotate')) {
+                rotateCircuit();
+                speak("Rotating circuit view.");
+            } else if (lowerCommand.includes('explode')) {
+                explodeView();
+                speak(exploded ? "Exploded view activated." : "Reassembling circuit.");
+            } else if (lowerCommand.includes('assemble')) {
+                assemblyAnimation();
+                speak("Initiating assembly sequence.");
+            }
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Initialize
+        init();
+        setTimeout(() => {
+            loadSampleCircuit();
+            speak("Holographic interface initialized. Ready for design requests.");
+        }, 2500);
+
+        // Mouse interaction
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (event) => {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 2 + 5 - camera.position.y) * 0.05;
+            camera.lookAt(0, 0, 0);
+        });
+    </script>
+</body>
+</html>

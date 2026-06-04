@@ -1,0 +1,46 @@
+{
+  "ic_name": "W25Q128",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "/CS",
+      "function": "Chip Select Input"
+    },
+    {
+      "pin": 2,
+      "name": "DO (IO1)",
+      "function": "Data Output (Data Input Output 1)(1)"
+    },
+    {
+      "pin": 3,
+      "name": "/WP (IO2)",
+      "function": "Write Protect Input ( Data Input Output 2)(2)"
+    },
+    {
+      "pin": 4,
+      "name": "GND",
+      "function": "Ground"
+    },
+    {
+      "pin": 5,
+      "name": "DI (IO0)",
+      "function": "Data Input (Data Input Output 0)(1)"
+    },
+    {
+      "pin": 6,
+      "name": "CLK",
+      "function": "Serial Clock Input"
+    },
+    {
+      "pin": 7,
+      "name": "/HOLD or /RESET\n(IO3)",
+      "function": "Hold or Reset Input (Data Input Output 3)(2)"
+    },
+    {
+      "pin": 8,
+      "name": "VCC",
+      "function": "Power Supply"
+    }
+  ],
+  "total_pins": 8
+}

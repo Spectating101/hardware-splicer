@@ -1,0 +1,154 @@
+[
+  {
+    "case_id": "usb_fan_harness_solder_fault",
+    "session_id": "eval_value_e2e_1778072267",
+    "title": "USB fan warms, does not spin, and changes when the wire is moved",
+    "why_this_is_a_good_first_truth_case": "This is a low-voltage motor gadget where the known evidence is enough for a real diagnosis: supply voltage stays up, the symptom changes when the harness is moved, the operator confirmed cracked solder at the motor harness, and reflow made the fan spin normally.",
+    "assistant_oracle_deduction": {
+      "device_family": "small_dc_motor_gadget",
+      "most_likely_fault": "connector, solder joint, or motor harness intermittency",
+      "reasoning": [
+        "A 4.91 V USB input during attempted startup argues against the USB supply collapsing as the primary fault.",
+        "Behavior changes when the wire is moved, which strongly points to the harness, connector, crimp, or solder joint.",
+        "The operator confirmed cracked solder at the motor harness.",
+        "Reflowing the harness joint fixed the fan, so the diagnosis is confirmed by outcome."
+      ],
+      "correct_action": "reflow or repair the harness/connector solder joint, then add strain relief and verify continuity under flex.",
+      "still_uncertain_without_more_evidence": [
+        "driver output under dummy load",
+        "full connector closeups and labels",
+        "longer thermal/load run after repair"
+      ]
+    },
+    "assertions": [
+      {"id": "device_family", "description": "System keeps the case in the small DC motor gadget lane.", "must_contain": ["small_dc_motor_gadget"], "weight": 1.0},
+      {"id": "confirmed_fault_class", "description": "System identifies the confirmed fault class as connector/harness/solder intermittency.", "must_contain": ["harness"], "one_of": ["cracked solder", "solder joint", "intermittency"], "weight": 1.4},
+      {"id": "supply_measurement", "description": "System preserves the measured USB input evidence.", "must_contain": ["4.91", "V"], "weight": 0.8},
+      {"id": "repair_outcome", "description": "System preserves the confirmed fix/outcome.", "must_contain": ["reflowed", "fan spins normally"], "weight": 1.2},
+      {"id": "certainty_boundary", "description": "System still admits what remains unverified.", "must_contain": ["driver output voltage", "dummy load"], "weight": 1.0},
+      {"id": "evidence_workflow", "description": "System asks for concrete next evidence.", "must_contain": ["connector closeups", "wire colors"], "weight": 0.8}
+    ]
+  },
+  {
+    "case_id": "electric_toothbrush_charging_dock",
+    "session_id": "eval_e2e_battery_1778070723",
+    "title": "Electric toothbrush not charging through its dock",
+    "why_this_is_a_good_first_truth_case": "This checks whether the system handles a battery/charging gadget instead of a motor fan. It has a measured dock output, close-up evidence, a repair outcome, and remaining charge-current uncertainty.",
+    "assistant_oracle_deduction": {
+      "device_family": "battery_charging_gadget",
+      "most_likely_fault": "charging dock/contact/input path or battery charge path",
+      "reasoning": [
+        "The dock output measurement shows the dock produces about 5 V with no toothbrush seated.",
+        "Charging failures still need contact condition, charge current, and battery voltage checks before blaming a cell or charge controller.",
+        "The session is useful, but not fully closed because charge-current/current-draw evidence remains open."
+      ],
+      "correct_action": "verify dock/contact cleanliness, measure battery voltage and charge current, then decide whether the dock path or battery pack is responsible.",
+      "still_uncertain_without_more_evidence": ["charge current", "battery pack voltage", "contact closeups after cleaning"]
+    },
+    "assertions": [
+      {"id": "device_family", "description": "System routes the case to battery charging gadgets.", "must_contain": ["battery_charging_gadget"], "weight": 1.0},
+      {"id": "dock_voltage", "description": "System preserves the dock voltage evidence.", "must_contain": ["5.08", "V"], "weight": 0.9},
+      {"id": "top_fault", "description": "System summarizes the fault as a charging dock/input path rather than random PCB failure.", "must_contain": ["Charging input or dock path"], "weight": 1.1},
+      {"id": "outcome", "description": "System preserves that the case has a repaired outcome.", "must_contain": ["repaired"], "weight": 0.8},
+      {"id": "remaining_test", "description": "System still asks for charge-current evidence.", "must_contain": ["charge current", "dock current draw"], "weight": 1.0},
+      {"id": "contact_evidence", "description": "System asks for charge-contact closeups.", "must_contain": ["charge-contact closeups"], "weight": 0.7}
+    ]
+  },
+  {
+    "case_id": "xbox_thumbstick_drift_reference",
+    "title": "Xbox controller stick drift",
+    "system_source": {"type": "repair_eval_case", "report": "eval/real_repair_cases/real_repair_case_eval.json", "case_id": "xbox_thumbstick_drift"},
+    "why_this_is_a_good_first_truth_case": "This checks a customer-common repair lane with known expected actions: inspect/clean/replace the analog stick module and validate with controller tester readings.",
+    "assistant_oracle_deduction": {
+      "device_family": "game_controller_input",
+      "most_likely_fault": "analog stick, trigger, or button contact fault",
+      "correct_action": "record before/after controller tester readings, inspect the joystick module and contacts, clean if possible, replace the stick module if drift remains.",
+      "still_uncertain_without_more_evidence": ["calibration readings", "closeups of stick module", "platform-specific compatibility"]
+    },
+    "assertions": [
+      {"id": "lane", "description": "System selects the controller input lane.", "must_contain": ["game_controller_input"], "weight": 1.0},
+      {"id": "fault", "description": "System identifies analog stick/contact fault.", "must_contain": ["analog_stick_or_button_contact_fault"], "weight": 1.0},
+      {"id": "tester", "description": "System asks for before/after controller tester readings.", "must_contain": ["before/after controller tester readings"], "weight": 0.9},
+      {"id": "closeups", "description": "System requests closeups of the input assemblies.", "must_contain": ["analog stick modules", "button membranes"], "weight": 0.8},
+      {"id": "value_status", "description": "System considers this lane solvable now.", "must_contain": ["solvable_now"], "weight": 0.8}
+    ]
+  },
+  {
+    "case_id": "laptop_no_power_reference",
+    "title": "Laptop will not turn on",
+    "system_source": {"type": "repair_eval_case", "report": "eval/real_repair_cases/real_repair_case_eval.json", "case_id": "laptop_no_power"},
+    "why_this_is_a_good_first_truth_case": "This checks whether the system can be honest on a harder board-level case: laptop no-power is meaningful, but model-specific schematics/boardviews are needed for deeper diagnosis.",
+    "assistant_oracle_deduction": {
+      "device_family": "laptop_power_path",
+      "most_likely_fault": "power input, protection, charger, or main rail fault",
+      "correct_action": "start with known-good charger, charge port inspection, input fuse/main rail resistance, input voltage, and rail-to-ground resistance; do not claim model-specific board repair without schematic/boardview.",
+      "still_uncertain_without_more_evidence": ["boardview/schematic", "model-specific teardown", "measured rails"]
+    },
+    "assertions": [
+      {"id": "lane", "description": "System selects laptop power path.", "must_contain": ["laptop_power_path"], "weight": 1.0},
+      {"id": "fault", "description": "System identifies power input/regulator fault.", "must_contain": ["power_input_or_regulator_fault"], "weight": 1.0},
+      {"id": "measurements", "description": "System asks for input and rail resistance measurements.", "must_contain": ["input fuse or main-rail resistance", "rail-to-ground resistance"], "weight": 0.9},
+      {"id": "honesty", "description": "System marks the case assistive only.", "must_contain": ["assistive_only"], "weight": 0.9},
+      {"id": "blocker", "description": "System calls out boardview/schematic as a blocker.", "must_contain": ["boardview/schematic"], "weight": 1.0}
+    ]
+  },
+  {
+    "case_id": "coffee_not_hot_reference",
+    "title": "Coffee maker not hot enough",
+    "system_source": {"type": "repair_eval_case", "report": "eval/real_repair_cases/real_repair_case_eval.json", "case_id": "coffee_not_hot"},
+    "why_this_is_a_good_first_truth_case": "This checks high-voltage/mains honesty. The right behavior is to identify the heater/thermal chain but gate the workflow behind safety checks.",
+    "assistant_oracle_deduction": {
+      "device_family": "mains_heater_appliance",
+      "most_likely_fault": "thermal fuse, thermostat, heating element, or control relay/triac fault",
+      "correct_action": "unplug, verify discharge/isolation, check thermal fuse/thermostat continuity, measure heating element resistance against wattage, and avoid live mains probing.",
+      "still_uncertain_without_more_evidence": ["model-specific service data", "safe isolation proof", "thermal fuse and element measurements"]
+    },
+    "assertions": [
+      {"id": "lane", "description": "System selects mains heater appliance.", "must_contain": ["mains_heater_appliance"], "weight": 1.0},
+      {"id": "fault", "description": "System identifies heater thermal cutoff/control fault.", "must_contain": ["heater_thermal_cutoff_or_control_fault"], "weight": 1.0},
+      {"id": "safety", "description": "System marks safety risk as high.", "must_contain": ["high"], "weight": 0.9},
+      {"id": "unplugged", "description": "System requires unplug/discharge confirmation.", "must_contain": ["unplugged", "capacitors are discharged"], "weight": 0.9},
+      {"id": "measurements", "description": "System asks for thermal fuse and heating element checks.", "must_contain": ["thermal fuse", "heating element resistance"], "weight": 1.0},
+      {"id": "honesty", "description": "System does not call this broadly solved.", "must_contain": ["assistive_only"], "weight": 0.7}
+    ]
+  },
+  {
+    "case_id": "dewalt_battery_not_charge_reference",
+    "title": "Cordless drill battery will not charge",
+    "system_source": {"type": "repair_eval_case", "report": "eval/real_repair_cases/real_repair_case_eval.json", "case_id": "dewalt_battery_not_charge"},
+    "why_this_is_a_good_first_truth_case": "This is another battery lane but not a toothbrush. The expected workflow is charger/contact/pack voltage checks before deciding charger vs pack fault.",
+    "assistant_oracle_deduction": {
+      "device_family": "battery_charging_gadget",
+      "most_likely_fault": "battery, charge contact, charger, or charge-controller fault",
+      "correct_action": "check contacts, verify charger, measure pack voltage, then inspect terminals/protection path.",
+      "still_uncertain_without_more_evidence": ["charger output", "pack voltage", "contact condition"]
+    },
+    "assertions": [
+      {"id": "lane", "description": "System selects battery charging gadget.", "must_contain": ["battery_charging_gadget"], "weight": 1.0},
+      {"id": "fault", "description": "System identifies battery charge path fault.", "must_contain": ["battery_charge_path_fault"], "weight": 1.0},
+      {"id": "charger", "description": "System asks for charger rating/no-load voltage.", "must_contain": ["charger rating", "no-load output voltage"], "weight": 0.8},
+      {"id": "pack", "description": "System asks for battery pack voltage.", "must_contain": ["battery pack voltage"], "weight": 0.8},
+      {"id": "value_status", "description": "System considers this lane solvable now.", "must_contain": ["solvable_now"], "weight": 0.8}
+    ]
+  },
+  {
+    "case_id": "tv_sound_no_picture_reference",
+    "title": "TV has sound but no picture",
+    "system_source": {"type": "repair_eval_case", "report": "eval/real_repair_cases/real_repair_case_eval.json", "case_id": "tv_sound_no_picture"},
+    "why_this_is_a_good_first_truth_case": "This checks a high-voltage backlight/power workflow. The right response is backlight/power suspicion plus safety gating and model-specific limits.",
+    "assistant_oracle_deduction": {
+      "device_family": "tv_backlight_power",
+      "most_likely_fault": "backlight LED strip, backlight driver, or power-board fault",
+      "correct_action": "do flashlight test, inspect/model the power board and backlight connectors, and only measure rails if trained for TV high-voltage work.",
+      "still_uncertain_without_more_evidence": ["flashlight test result", "power-board photos", "model label", "trained high-voltage workflow"]
+    },
+    "assertions": [
+      {"id": "lane", "description": "System selects TV backlight/power lane.", "must_contain": ["tv_backlight_power"], "weight": 1.0},
+      {"id": "fault", "description": "System identifies backlight/power supply fault.", "must_contain": ["display_backlight_or_power_supply_fault"], "weight": 1.0},
+      {"id": "safety", "description": "System marks safety risk as high.", "must_contain": ["high"], "weight": 0.9},
+      {"id": "flashlight", "description": "System asks for flashlight-test evidence.", "must_contain": ["flashlight-test"], "weight": 0.8},
+      {"id": "photos", "description": "System asks for power-board/backlight connector photos.", "must_contain": ["power-board", "backlight connector"], "weight": 0.8},
+      {"id": "honesty", "description": "System marks the case assistive only.", "must_contain": ["assistive_only"], "weight": 0.8}
+    ]
+  }
+]

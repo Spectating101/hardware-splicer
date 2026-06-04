@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: circuit-ai-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: LLM_ENABLED
+        value: false
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        value: sqlite:///./data/circuit_ai.db
+    healthCheckPath: /health
+    autoDeploy: true
+
+  - type: web
+    name: circuit-ai-ui
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python3 src/ui/gradio_app.py
+    envVars:
+      - key: LLM_ENABLED
+        value: false
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        value: sqlite:///./data/circuit_ai.db
+    autoDeploy: true

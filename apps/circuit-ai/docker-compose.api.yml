@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  circuit-ai-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - JWT_SECRET=${JWT_SECRET:-change-me}
+      - TEST_API_KEYS=${TEST_API_KEYS:-test}
+      - YOLO_MODEL_PATH=${YOLO_MODEL_PATH:-/app/yolov8n.pt}
+      - DETECTION_BACKEND=${DETECTION_BACKEND:-yolo}
+      - ENABLE_OCR=${ENABLE_OCR:-0}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+

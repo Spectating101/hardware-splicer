@@ -1,0 +1,266 @@
+{
+  "backend_statuses": [
+    {
+      "backend_id": "ultralytics",
+      "display_name": "Ultralytics YOLO",
+      "lane": "production_component_detection",
+      "import_names": [
+        "ultralytics"
+      ],
+      "source_url": "https://docs.ultralytics.com/models/yolo11/",
+      "install_hint": "pip install ultralytics",
+      "best_for": [
+        "fast trained component boxes",
+        "batch model benchmarking",
+        "edge/deployment-friendly inference"
+      ],
+      "output_contract": [
+        "bbox",
+        "class_name",
+        "confidence",
+        "model_id",
+        "provenance"
+      ],
+      "priority": 1,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    },
+    {
+      "backend_id": "sam2",
+      "display_name": "Meta SAM 2",
+      "lane": "component_masks_and_video_tracking",
+      "import_names": [
+        "sam2"
+      ],
+      "source_url": "https://github.com/facebookresearch/sam2",
+      "install_hint": "install from facebookresearch/sam2 following the official README",
+      "best_for": [
+        "component and board masks",
+        "corrosion or burn-region masks",
+        "repair-video object tracking"
+      ],
+      "output_contract": [
+        "mask",
+        "bbox",
+        "prompt_source",
+        "confidence",
+        "provenance"
+      ],
+      "priority": 1,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    },
+    {
+      "backend_id": "grounding_dino",
+      "display_name": "Grounding DINO",
+      "lane": "open_vocab_discovery",
+      "import_names": [
+        "groundingdino"
+      ],
+      "source_url": "https://github.com/IDEA-Research/GroundingDINO",
+      "install_hint": "install from IDEA-Research/GroundingDINO following the official README",
+      "best_for": [
+        "open-vocabulary part proposals",
+        "defect prompt proposals",
+        "unknown electronics triage"
+      ],
+      "output_contract": [
+        "bbox",
+        "phrase",
+        "confidence",
+        "prompt",
+        "provenance"
+      ],
+      "priority": 1,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [
+        "groundingdino"
+      ],
+      "adapter_backend": "transformers"
+    },
+    {
+      "backend_id": "florence2",
+      "display_name": "Microsoft Florence-2",
+      "lane": "caption_ocr_grounding",
+      "import_names": [
+        "transformers",
+        "torch"
+      ],
+      "source_url": "https://huggingface.co/microsoft/Florence-2-base",
+      "install_hint": "pip install transformers torch",
+      "best_for": [
+        "dense captions",
+        "OCR-style region context",
+        "phrase grounding second opinions"
+      ],
+      "output_contract": [
+        "text",
+        "bbox",
+        "task",
+        "confidence",
+        "provenance"
+      ],
+      "priority": 2,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    },
+    {
+      "backend_id": "paddleocr",
+      "display_name": "PaddleOCR",
+      "lane": "marking_ocr",
+      "import_names": [
+        "paddleocr"
+      ],
+      "source_url": "https://github.com/PaddlePaddle/PaddleOCR",
+      "install_hint": "install paddleocr and the matching paddlepaddle CPU/GPU package",
+      "best_for": [
+        "IC markings",
+        "silkscreen and connector labels",
+        "manual or warning-label text"
+      ],
+      "output_contract": [
+        "text",
+        "bbox",
+        "confidence",
+        "language",
+        "provenance"
+      ],
+      "priority": 2,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    },
+    {
+      "backend_id": "easyocr",
+      "display_name": "EasyOCR",
+      "lane": "marking_ocr",
+      "import_names": [
+        "easyocr"
+      ],
+      "source_url": "https://github.com/JaidedAI/EasyOCR",
+      "install_hint": "pip install easyocr",
+      "best_for": [
+        "current OCR fallback",
+        "component crop text",
+        "silkscreen text"
+      ],
+      "output_contract": [
+        "text",
+        "confidence",
+        "provenance"
+      ],
+      "priority": 3,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    },
+    {
+      "backend_id": "supervision",
+      "display_name": "Roboflow supervision",
+      "lane": "dataset_evaluation_and_visualization",
+      "import_names": [
+        "supervision"
+      ],
+      "source_url": "https://github.com/roboflow/supervision",
+      "install_hint": "pip install supervision",
+      "best_for": [
+        "annotation transforms",
+        "visual QA overlays",
+        "offline dataset metrics"
+      ],
+      "output_contract": [
+        "dataset",
+        "annotations",
+        "metrics",
+        "visualization_path"
+      ],
+      "priority": 3,
+      "available": true,
+      "missing_imports": [],
+      "missing_native_imports": [],
+      "adapter_backend": "native"
+    }
+  ],
+  "smoke_tests": [
+    {
+      "backend": "paddleocr",
+      "status": "ok",
+      "selected_backend": "paddleocr",
+      "text": "ATMEGA328P VII",
+      "seconds": 17.002
+    },
+    {
+      "backend": "easyocr",
+      "status": "ok",
+      "selected_backend": "easyocr",
+      "text": "ATMEGA328P VIN",
+      "seconds": 4.972
+    },
+    {
+      "backend": "sam2",
+      "status": "ok",
+      "checkpoint": "models/foundation/sam2/sam2.1_hiera_tiny.pt",
+      "config": "configs/sam2.1/sam2.1_hiera_t.yaml",
+      "score": 4e-05,
+      "mask_pixels": 10300,
+      "seconds": 7.251
+    },
+    {
+      "backend": "grounding_dino_transformers",
+      "status": "ok",
+      "model_id": "IDEA-Research/grounding-dino-tiny",
+      "detections": [
+        {
+          "label": "a blue object",
+          "score": 0.65137,
+          "box": [
+            67.64,
+            57.31,
+            253.63,
+            183.21
+          ]
+        },
+        {
+          "label": "a rectangle",
+          "score": 0.47985,
+          "box": [
+            68.32,
+            58.34,
+            252.9,
+            182.33
+          ]
+        },
+        {
+          "label": "a rectangle",
+          "score": 0.27254,
+          "box": [
+            90.14,
+            69.66,
+            230.3,
+            165.67
+          ]
+        }
+      ],
+      "seconds": 36.952
+    },
+    {
+      "backend": "florence2",
+      "status": "ok",
+      "model_id": "microsoft/Florence-2-base",
+      "raw": "</s><s>ATMEGA328P VIN</s>",
+      "parsed": {
+        "<OCR>": "ATMEGA328P VIN"
+      },
+      "seconds": 29.13
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "model_id": "electrocom61_nano_320",
+  "file": "models/pcb/electrocom61_nano_320.pt",
+  "sha256": "daf4634686643c23c65721b4bee90e30ef6ba9cf918f3efb13df37185281f89b",
+  "architecture": "Ultralytics YOLOv8n",
+  "task": "PCB component detection",
+  "training": {
+    "dataset": "datasets/electrocom61/data.yaml",
+    "train_images": 140,
+    "val_images": 40,
+    "test_images": 20,
+    "epochs": 80,
+    "image_size": 320,
+    "batch": 32,
+    "device": "cpu",
+    "seed": 11,
+    "run_dir": "pcb_runs/electrocom61_nano_320"
+  },
+  "classes": [
+    "resistor",
+    "capacitor",
+    "inductor",
+    "diode",
+    "transistor",
+    "ic",
+    "connector",
+    "switch",
+    "led",
+    "crystal"
+  ],
+  "validation": {
+    "images": 40,
+    "instances": 188,
+    "precision": 0.5098437948886804,
+    "recall": 0.7045621316580148,
+    "map50": 0.6568665240226292,
+    "map50_95": 0.6292298747559238
+  },
+  "test": {
+    "images": 20,
+    "instances": 98,
+    "precision": 0.5582797340578433,
+    "recall": 0.7182839065054009,
+    "map50": 0.6718923036802142,
+    "map50_95": 0.6439879876926559
+  },
+  "notes": [
+    "Promoted as the local ElectroCom61 specialist fallback.",
+    "The promoted primary model remains pcb_components_yolo11n_thawed because it has broader 22-class PCB coverage and was trained/evaluated on a larger upstream component dataset."
+  ]
+}

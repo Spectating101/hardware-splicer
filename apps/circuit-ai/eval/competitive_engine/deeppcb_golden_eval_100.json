@@ -1,0 +1,1020 @@
+{
+  "created_at": "2026-05-06T07:44:42.205506+00:00",
+  "manifest": "datasets/deeppcb_subset/manifest.json",
+  "iou_threshold": 0.1,
+  "diff_threshold": 48,
+  "metrics": {
+    "true_positive": 567,
+    "false_positive": 213,
+    "false_negative": 16,
+    "precision": 0.7269,
+    "recall": 0.9726,
+    "sample_count": 100
+  },
+  "samples": [
+    {
+      "sample_id": "20085291",
+      "annotation_count": 9,
+      "prediction_count": 11,
+      "true_positive": 9,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00322
+    },
+    {
+      "sample_id": "20085292",
+      "annotation_count": 7,
+      "prediction_count": 8,
+      "true_positive": 7,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00208
+    },
+    {
+      "sample_id": "20085293",
+      "annotation_count": 7,
+      "prediction_count": 8,
+      "true_positive": 7,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00322
+    },
+    {
+      "sample_id": "20085294",
+      "annotation_count": 9,
+      "prediction_count": 9,
+      "true_positive": 9,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00229
+    },
+    {
+      "sample_id": "20085295",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00505
+    },
+    {
+      "sample_id": "20085296",
+      "annotation_count": 9,
+      "prediction_count": 9,
+      "true_positive": 9,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00277
+    },
+    {
+      "sample_id": "20085297",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00168
+    },
+    {
+      "sample_id": "20085298",
+      "annotation_count": 6,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00135
+    },
+    {
+      "sample_id": "20085299",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00326
+    },
+    {
+      "sample_id": "20085300",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00172
+    },
+    {
+      "sample_id": "20085301",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00229
+    },
+    {
+      "sample_id": "20085302",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0025
+    },
+    {
+      "sample_id": "20085303",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00237
+    },
+    {
+      "sample_id": "20085304",
+      "annotation_count": 8,
+      "prediction_count": 12,
+      "true_positive": 8,
+      "false_positive": 4,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0036
+    },
+    {
+      "sample_id": "20085305",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 7,
+      "false_positive": 1,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00264
+    },
+    {
+      "sample_id": "20085306",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00165
+    },
+    {
+      "sample_id": "20085307",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00168
+    },
+    {
+      "sample_id": "20085308",
+      "annotation_count": 7,
+      "prediction_count": 8,
+      "true_positive": 7,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00378
+    },
+    {
+      "sample_id": "20085309",
+      "annotation_count": 9,
+      "prediction_count": 14,
+      "true_positive": 9,
+      "false_positive": 5,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00337
+    },
+    {
+      "sample_id": "20085310",
+      "annotation_count": 10,
+      "prediction_count": 11,
+      "true_positive": 10,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00281
+    },
+    {
+      "sample_id": "20085311",
+      "annotation_count": 2,
+      "prediction_count": 5,
+      "true_positive": 2,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00379
+    },
+    {
+      "sample_id": "20085312",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00096
+    },
+    {
+      "sample_id": "20085313",
+      "annotation_count": 6,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00099
+    },
+    {
+      "sample_id": "20085314",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 5,
+      "false_positive": 2,
+      "false_negative": 2,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00158
+    },
+    {
+      "sample_id": "20085315",
+      "annotation_count": 7,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00206
+    },
+    {
+      "sample_id": "20085316",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00343
+    },
+    {
+      "sample_id": "20085317",
+      "annotation_count": 9,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00235
+    },
+    {
+      "sample_id": "20085318",
+      "annotation_count": 7,
+      "prediction_count": 9,
+      "true_positive": 7,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00247
+    },
+    {
+      "sample_id": "20085319",
+      "annotation_count": 4,
+      "prediction_count": 3,
+      "true_positive": 3,
+      "false_positive": 0,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00128
+    },
+    {
+      "sample_id": "20085320",
+      "annotation_count": 2,
+      "prediction_count": 2,
+      "true_positive": 2,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00031
+    },
+    {
+      "sample_id": "20085321",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00135
+    },
+    {
+      "sample_id": "20085322",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00238
+    },
+    {
+      "sample_id": "20085323",
+      "annotation_count": 7,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00148
+    },
+    {
+      "sample_id": "20085324",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0015
+    },
+    {
+      "sample_id": "13000198",
+      "annotation_count": 4,
+      "prediction_count": 9,
+      "true_positive": 4,
+      "false_positive": 5,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01127
+    },
+    {
+      "sample_id": "13000199",
+      "annotation_count": 8,
+      "prediction_count": 11,
+      "true_positive": 7,
+      "false_positive": 4,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01836
+    },
+    {
+      "sample_id": "13000200",
+      "annotation_count": 6,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00359
+    },
+    {
+      "sample_id": "13000201",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 4,
+      "false_positive": 1,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00941
+    },
+    {
+      "sample_id": "13000202",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 5,
+      "false_positive": 1,
+      "false_negative": 1,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.01787
+    },
+    {
+      "sample_id": "13000203",
+      "annotation_count": 7,
+      "prediction_count": 11,
+      "true_positive": 7,
+      "false_positive": 4,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00757
+    },
+    {
+      "sample_id": "13000204",
+      "annotation_count": 8,
+      "prediction_count": 9,
+      "true_positive": 8,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00603
+    },
+    {
+      "sample_id": "13000205",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00935
+    },
+    {
+      "sample_id": "13000206",
+      "annotation_count": 4,
+      "prediction_count": 5,
+      "true_positive": 4,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0034
+    },
+    {
+      "sample_id": "13000207",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0025
+    },
+    {
+      "sample_id": "13000208",
+      "annotation_count": 7,
+      "prediction_count": 9,
+      "true_positive": 7,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00709
+    },
+    {
+      "sample_id": "13000209",
+      "annotation_count": 6,
+      "prediction_count": 12,
+      "true_positive": 6,
+      "false_positive": 6,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00983
+    },
+    {
+      "sample_id": "13000210",
+      "annotation_count": 6,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00354
+    },
+    {
+      "sample_id": "13000211",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00306
+    },
+    {
+      "sample_id": "13000212",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00438
+    },
+    {
+      "sample_id": "13000213",
+      "annotation_count": 3,
+      "prediction_count": 3,
+      "true_positive": 3,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00074
+    },
+    {
+      "sample_id": "13000214",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00306
+    },
+    {
+      "sample_id": "13000215",
+      "annotation_count": 9,
+      "prediction_count": 9,
+      "true_positive": 9,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00341
+    },
+    {
+      "sample_id": "00041200",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00246
+    },
+    {
+      "sample_id": "00041201",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00337
+    },
+    {
+      "sample_id": "00041202",
+      "annotation_count": 4,
+      "prediction_count": 7,
+      "true_positive": 4,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0057
+    },
+    {
+      "sample_id": "00041203",
+      "annotation_count": 5,
+      "prediction_count": 6,
+      "true_positive": 5,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00438
+    },
+    {
+      "sample_id": "00041204",
+      "annotation_count": 6,
+      "prediction_count": 36,
+      "true_positive": 1,
+      "false_positive": 35,
+      "false_negative": 5,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.07072
+    },
+    {
+      "sample_id": "00041205",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00275
+    },
+    {
+      "sample_id": "00041206",
+      "annotation_count": 5,
+      "prediction_count": 15,
+      "true_positive": 5,
+      "false_positive": 10,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00364
+    },
+    {
+      "sample_id": "00041207",
+      "annotation_count": 4,
+      "prediction_count": 19,
+      "true_positive": 4,
+      "false_positive": 15,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.03259
+    },
+    {
+      "sample_id": "00041208",
+      "annotation_count": 4,
+      "prediction_count": 8,
+      "true_positive": 4,
+      "false_positive": 4,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00388
+    },
+    {
+      "sample_id": "00041209",
+      "annotation_count": 5,
+      "prediction_count": 6,
+      "true_positive": 5,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00428
+    },
+    {
+      "sample_id": "00041210",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00377
+    },
+    {
+      "sample_id": "00041211",
+      "annotation_count": 4,
+      "prediction_count": 5,
+      "true_positive": 4,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0026
+    },
+    {
+      "sample_id": "00041212",
+      "annotation_count": 5,
+      "prediction_count": 6,
+      "true_positive": 5,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00236
+    },
+    {
+      "sample_id": "00041213",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00567
+    },
+    {
+      "sample_id": "00041214",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00351
+    },
+    {
+      "sample_id": "00041215",
+      "annotation_count": 6,
+      "prediction_count": 8,
+      "true_positive": 6,
+      "false_positive": 2,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00412
+    },
+    {
+      "sample_id": "00041216",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00299
+    },
+    {
+      "sample_id": "00041217",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0044
+    },
+    {
+      "sample_id": "00041218",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00511
+    },
+    {
+      "sample_id": "00041219",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00196
+    },
+    {
+      "sample_id": "00041220",
+      "annotation_count": 6,
+      "prediction_count": 7,
+      "true_positive": 6,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00386
+    },
+    {
+      "sample_id": "77000100",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00179
+    },
+    {
+      "sample_id": "77000101",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00374
+    },
+    {
+      "sample_id": "77000102",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00293
+    },
+    {
+      "sample_id": "77000103",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00336
+    },
+    {
+      "sample_id": "77000104",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00495
+    },
+    {
+      "sample_id": "77000105",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00237
+    },
+    {
+      "sample_id": "77000106",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00467
+    },
+    {
+      "sample_id": "92000111",
+      "annotation_count": 3,
+      "prediction_count": 3,
+      "true_positive": 3,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00294
+    },
+    {
+      "sample_id": "92000112",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00577
+    },
+    {
+      "sample_id": "92000113",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00347
+    },
+    {
+      "sample_id": "92000114",
+      "annotation_count": 5,
+      "prediction_count": 5,
+      "true_positive": 5,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00638
+    },
+    {
+      "sample_id": "92000115",
+      "annotation_count": 7,
+      "prediction_count": 7,
+      "true_positive": 7,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0061
+    },
+    {
+      "sample_id": "92000116",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00771
+    },
+    {
+      "sample_id": "92000117",
+      "annotation_count": 8,
+      "prediction_count": 8,
+      "true_positive": 8,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00757
+    },
+    {
+      "sample_id": "92000118",
+      "annotation_count": 4,
+      "prediction_count": 4,
+      "true_positive": 4,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00306
+    },
+    {
+      "sample_id": "92000119",
+      "annotation_count": 6,
+      "prediction_count": 6,
+      "true_positive": 6,
+      "false_positive": 0,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00479
+    },
+    {
+      "sample_id": "50600050",
+      "annotation_count": 5,
+      "prediction_count": 25,
+      "true_positive": 5,
+      "false_positive": 20,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0396
+    },
+    {
+      "sample_id": "50600051",
+      "annotation_count": 5,
+      "prediction_count": 11,
+      "true_positive": 5,
+      "false_positive": 6,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.02976
+    },
+    {
+      "sample_id": "50600052",
+      "annotation_count": 5,
+      "prediction_count": 14,
+      "true_positive": 5,
+      "false_positive": 9,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00548
+    },
+    {
+      "sample_id": "50600053",
+      "annotation_count": 5,
+      "prediction_count": 8,
+      "true_positive": 5,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00297
+    },
+    {
+      "sample_id": "50600054",
+      "annotation_count": 6,
+      "prediction_count": 11,
+      "true_positive": 6,
+      "false_positive": 5,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.0068
+    },
+    {
+      "sample_id": "50600055",
+      "annotation_count": 4,
+      "prediction_count": 5,
+      "true_positive": 4,
+      "false_positive": 1,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00397
+    },
+    {
+      "sample_id": "50600056",
+      "annotation_count": 5,
+      "prediction_count": 9,
+      "true_positive": 5,
+      "false_positive": 4,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00424
+    },
+    {
+      "sample_id": "50600057",
+      "annotation_count": 6,
+      "prediction_count": 9,
+      "true_positive": 6,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00514
+    },
+    {
+      "sample_id": "50600058",
+      "annotation_count": 5,
+      "prediction_count": 8,
+      "true_positive": 5,
+      "false_positive": 3,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.00273
+    },
+    {
+      "sample_id": "50600059",
+      "annotation_count": 5,
+      "prediction_count": 21,
+      "true_positive": 5,
+      "false_positive": 16,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.02163
+    },
+    {
+      "sample_id": "50600060",
+      "annotation_count": 6,
+      "prediction_count": 22,
+      "true_positive": 6,
+      "false_positive": 16,
+      "false_negative": 0,
+      "golden_status": "FAIL",
+      "change_area_ratio": 0.03136
+    }
+  ],
+  "limitations": [
+    "Golden diff is a change localizer, not a class-specific trained DeepPCB detector.",
+    "Use this to qualify alignment/defect-region sensitivity before training a defect model."
+  ]
+}

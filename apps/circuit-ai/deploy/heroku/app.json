@@ -1,0 +1,37 @@
+{
+  "name": "Circuit.AI",
+  "description": "AI-powered PCB analysis platform for transforming e-waste into educational opportunities",
+  "repository": "https://github.com/yourusername/circuit-ai",
+  "logo": "https://raw.githubusercontent.com/yourusername/circuit-ai/main/assets/logo.png",
+  "keywords": ["python", "fastapi", "ai", "computer-vision", "electronics", "education"],
+  "env": {
+    "LLM_ENABLED": {
+      "description": "Enable LLM integration",
+      "value": "false"
+    },
+    "DEBUG": {
+      "description": "Debug mode",
+      "value": "false"
+    },
+    "DATABASE_URL": {
+      "description": "Database URL",
+      "value": "sqlite:///./data/circuit_ai.db"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ]
+}

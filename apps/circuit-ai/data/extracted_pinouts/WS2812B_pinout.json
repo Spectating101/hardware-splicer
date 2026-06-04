@@ -1,0 +1,26 @@
+{
+  "ic_name": "WS2812B",
+  "pins": [
+    {
+      "pin": 1,
+      "name": "PIN1",
+      "function": "Power supply LED"
+    },
+    {
+      "pin": 2,
+      "name": "PIN2",
+      "function": "Control data signal output"
+    },
+    {
+      "pin": 3,
+      "name": "PIN3",
+      "function": "Ground"
+    },
+    {
+      "pin": 4,
+      "name": "PIN4",
+      "function": "Control data signal input"
+    }
+  ],
+  "total_pins": 4
+}

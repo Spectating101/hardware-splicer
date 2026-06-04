@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuit-AI: The AlphaFold of Hardware Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .badge.success {
+            background: #28a745;
+        }
+
+        .badge.info {
+            background: #17a2b8;
+        }
+
+        .bom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .bom-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .bom-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .bom-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .reasoning {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .total-cost {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .total-cost h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .component-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .component-option.selected {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
+
+        .component-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .component-cost {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .checkmark {
+            color: #28a745;
+            font-size: 1.5em;
+            margin-right: 5px;
+        }
+
+        .examples {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .examples h3 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .example-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .example-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 Circuit-AI</h1>
+            <p>The AlphaFold of Hardware Design</p>
+            <p style="font-size: 1em; margin-top: 10px;">Natural Language → Complete Circuit Design</p>
+        </div>
+
+        <div class="main-card">
+            <div class="input-section">
+                <h2>What do you want to build?</h2>
+
+                <div class="input-group">
+                    <label>Describe your project in plain English:</label>
+                    <textarea id="userInput" placeholder="Example: I want to build a WiFi temperature sensor for my room"></textarea>
+                </div>
+
+                <button class="button" onclick="generateDesign()">
+                    ✨ Generate Complete Design
+                </button>
+
+                <div class="examples">
+                    <h3>Try these examples:</h3>
+                    <button class="example-btn" onclick="setExample('WiFi temperature sensor')">WiFi Temperature Sensor</button>
+                    <button class="example-btn" onclick="setExample('robot arm with Bluetooth control')">Robot Arm with Bluetooth</button>
+                    <button class="example-btn" onclick="setExample('battery-powered outdoor weather station')">Outdoor Weather Station</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI is analyzing your request and generating optimal design...</p>
+            </div>
+
+            <div class="results-section" id="results">
+                <!-- Results will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setExample(text) {
+            document.getElementById('userInput').value = text;
+        }
+
+        async function generateDesign() {
+            const userInput = document.getElementById('userInput').value.trim();
+
+            if (!userInput) {
+                alert('Please describe what you want to build!');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate_design', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ input: userInput })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error generating design: ' + error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+
+            let html = `
+                <div class="result-card">
+                    <h3><span class="checkmark">✓</span> AI Understanding</h3>
+                    <p><strong>Project Type:</strong> ${data.project_type}</p>
+                    <p><strong>Features:</strong></p>
+                    ${data.features.map(f => `<span class="badge">${f}</span>`).join('')}
+                    <p style="margin-top: 15px;"><strong>Confidence:</strong> <span class="badge success">${(data.confidence * 100).toFixed(0)}%</span></p>
+                </div>
+
+                <div class="result-card">
+                    <h3><span class="checkmark">✓</span> Bill of Materials</h3>
+                    <table class="bom-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Component</th>
+                                <th>Cost</th>
+                                <th>Why This Choice?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.bom.map((item, idx) => `
+                                <tr>
+                                    <td>${idx + 1}</td>
+                                    <td>${item.name}</td>
+                                    <td>$${item.cost.toFixed(2)}</td>
+                                    <td class="reasoning">${item.reasoning}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="total-cost">
+                        <p>Total Cost</p>
+                        <h3>$${data.total_cost.toFixed(2)}</h3>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h3><span class="checkmark">✓</span> Complete Design Package</h3>
+                    <p>Your design includes:</p>
+                    ${data.outputs.map(output => `<p>✓ ${output}</p>`).join('')}
+                </div>
+
+                <div class="result-card" style="background: #e8f5e9; border-left-color: #28a745;">
+                    <h3 style="color: #28a745;">🎯 Smart Decisions Made</h3>
+                    <p>The AI analyzed your requirements and made intelligent component choices based on:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Cost optimization (modules vs raw components)</li>
+                        <li>Feature requirements (WiFi, Bluetooth, sensors)</li>
+                        <li>Assembly complexity (beginner-friendly)</li>
+                        <li>Build quantity (prototype vs production)</li>
+                    </ul>
+                    <p style="margin-top: 15px; font-weight: 600; color: #28a745;">
+                        This is NOT template-based - the AI adapts to YOUR specific needs!
+                    </p>
+                </div>
+            `;
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    </script>
+</body>
+</html>
