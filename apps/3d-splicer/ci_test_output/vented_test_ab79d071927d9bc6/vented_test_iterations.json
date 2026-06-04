@@ -1,0 +1,100 @@
+[
+  {
+    "test_id": "envelope_constraint",
+    "passed": true,
+    "score": 1.0,
+    "margin": 0.02857142857142857,
+    "details": "Envelope: 68.0x48.0x12.0mm (limit: 70.0x50.0x15.0mm)"
+  },
+  {
+    "test_id": "board_clearance",
+    "passed": true,
+    "score": 1.0,
+    "margin": 3.0,
+    "details": "Board clearance: 4.00mm (target: 1.0mm)"
+  },
+  {
+    "test_id": "mount_accessibility_0",
+    "passed": true,
+    "score": 1.0,
+    "margin": 4.6,
+    "details": "Mount 0 accessibility: 14.00mm clearance (required: 2.50mm)"
+  },
+  {
+    "test_id": "mount_accessibility_1",
+    "passed": false,
+    "score": 0.0,
+    "margin": -7.4,
+    "details": "Mount 1 accessibility: -16.00mm clearance (required: 2.50mm)"
+  },
+  {
+    "test_id": "mesh_watertight",
+    "passed": true,
+    "score": 1.0,
+    "margin": null,
+    "details": "Mesh is watertight"
+  },
+  {
+    "test_id": "mesh_manifold",
+    "passed": true,
+    "score": 1.0,
+    "margin": null,
+    "details": "Mesh is manifold"
+  },
+  {
+    "test_id": "mesh_degenerate",
+    "passed": true,
+    "score": 1.0,
+    "margin": null,
+    "details": "Degenerate faces: 0"
+  },
+  {
+    "test_id": "overhang_angles",
+    "passed": false,
+    "score": 0.5009746588693957,
+    "margin": 0.0,
+    "details": "Overhang ratio: 49.90%, worst angle: 90.0\u00b0 (limit: 55.0\u00b0)"
+  },
+  {
+    "test_id": "wall_thickness",
+    "passed": true,
+    "score": 1.0,
+    "margin": 0.8749999999999999,
+    "details": "Shell thickness: 3.00mm (minimum: 1.60mm, nozzle: 0.80mm, walls: 2)"
+  },
+  {
+    "test_id": "minimum_features",
+    "passed": true,
+    "score": 1.0,
+    "margin": 28.999999999999996,
+    "details": "Smallest dimension: 12.00mm (minimum: 0.40mm)"
+  },
+  {
+    "test_id": "thermal_air_gap",
+    "passed": false,
+    "score": 0.5,
+    "margin": -0.5,
+    "details": "Air gap: 1.00mm (target: 2.00mm)"
+  },
+  {
+    "test_id": "thermal_ventilation",
+    "passed": false,
+    "score": 0.125,
+    "margin": -0.875,
+    "details": "Ventilation area: 53.9mm\u00b2 (minimum: 431.4mm\u00b2)"
+  },
+  {
+    "test_id": "io_alignment_0",
+    "passed": false,
+    "score": 0.0,
+    "margin": -1.0,
+    "details": "IO 0 alignment: x_error=0.00mm, y_error=4.00mm (tolerance: 1.0mm)"
+  },
+  {
+    "test_id": "io_clearance_0",
+    "passed": false,
+    "score": 0.8727272727272727,
+    "margin": -0.09090909090909091,
+    "details": "IO 0 clearance: slot=12.0x5.0mm, required=12.5x5.5mm, margin=-9.1%"
+  }
+]

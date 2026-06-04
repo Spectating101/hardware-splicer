@@ -1,0 +1,465 @@
+{
+  "job_id": "vented_test_ab79d071927d9bc6",
+  "spec": {
+    "id": "vented_test",
+    "context": {
+      "board_bbox_mm": {
+        "x": 60.0,
+        "y": 40.0,
+        "z": 2.0
+      },
+      "mounts": [
+        {
+          "type": "standoff",
+          "pos": [
+            10.0,
+            10.0
+          ],
+          "dia": 3.0,
+          "height": 4.0
+        },
+        {
+          "type": "standoff",
+          "pos": [
+            50.0,
+            30.0
+          ],
+          "dia": 3.0,
+          "height": 4.0
+        }
+      ],
+      "keepouts": [],
+      "io": [
+        {
+          "type": "usb",
+          "edge": "south",
+          "offset_mm": 30.0,
+          "slot": [
+            12.0,
+            5.0
+          ]
+        }
+      ]
+    },
+    "functional_requirements": [
+      {
+        "id": "F1",
+        "goal": "thermal_clearance",
+        "absorb_energy_J": null,
+        "max_strain_pct": null,
+        "min_air_gap_mm": 2.0,
+        "max_open_time_s": null,
+        "ip_rating": null,
+        "shielding_db": null,
+        "accessibility_rating": null
+      }
+    ],
+    "constraints": [
+      {
+        "id": "C1",
+        "rule": "overall_envelope_mm",
+        "value": "[70, 50, 15]",
+        "operator": "<="
+      }
+    ],
+    "materials": {
+      "primary": "PLA",
+      "infill_pct": 20,
+      "layer_height_mm": 0.2,
+      "wall_count": 2
+    },
+    "tolerances": {
+      "fit_mm": 0.3,
+      "hole_dia_mm": 0.2,
+      "surface_roughness_um": null
+    },
+    "iteration_budget": {
+      "max_iters": 2,
+      "max_seconds": 30
+    },
+    "outputs": {
+      "stl": true,
+      "glb_preview": true,
+      "report": "markdown"
+    }
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "parameters": {
+        "shell": {
+          "thickness_mm": 3.0,
+          "inner_fillet_mm": 1.0,
+          "outer_fillet_mm": 1.5
+        },
+        "bosses": [
+          {
+            "at": [
+              10.0,
+              10.0
+            ],
+            "dia_mm": 4.5,
+            "hole_mm": 3.0,
+            "height_mm": 4.0
+          },
+          {
+            "at": [
+              50.0,
+              30.0
+            ],
+            "dia_mm": 4.5,
+            "hole_mm": 3.0,
+            "height_mm": 4.0
+          }
+        ],
+        "vents": {
+          "pattern": "grid",
+          "cell_mm": 4.0,
+          "margin_mm": 2.0,
+          "region": "top"
+        },
+        "io_slots": [
+          {
+            "edge": "south",
+            "offset_mm": 30.0,
+            "size": [
+              12.0,
+              5.0
+            ]
+          }
+        ],
+        "latches": {
+          "type": "snap",
+          "count": 5,
+          "tab_mm": [
+            6.0,
+            1.4
+          ],
+          "lip_mm": 0.6
+        }
+      },
+      "evaluation": [
+        {
+          "test_id": "envelope_constraint",
+          "passed": true,
+          "score": 1.0,
+          "margin": 0.02857142857142857,
+          "details": "Envelope: 68.0x48.0x12.0mm (limit: 70.0x50.0x15.0mm)"
+        },
+        {
+          "test_id": "board_clearance",
+          "passed": true,
+          "score": 1.0,
+          "margin": 3.0,
+          "details": "Board clearance: 4.00mm (target: 1.0mm)"
+        },
+        {
+          "test_id": "mount_accessibility_0",
+          "passed": true,
+          "score": 1.0,
+          "margin": 4.6,
+          "details": "Mount 0 accessibility: 14.00mm clearance (required: 2.50mm)"
+        },
+        {
+          "test_id": "mount_accessibility_1",
+          "passed": false,
+          "score": 0.0,
+          "margin": -7.4,
+          "details": "Mount 1 accessibility: -16.00mm clearance (required: 2.50mm)"
+        },
+        {
+          "test_id": "mesh_watertight",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Mesh is watertight"
+        },
+        {
+          "test_id": "mesh_manifold",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Mesh is manifold"
+        },
+        {
+          "test_id": "mesh_degenerate",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Degenerate faces: 0"
+        },
+        {
+          "test_id": "overhang_angles",
+          "passed": false,
+          "score": 0.5009746588693957,
+          "margin": 0.0,
+          "details": "Overhang ratio: 49.90%, worst angle: 90.0\u00b0 (limit: 55.0\u00b0)"
+        },
+        {
+          "test_id": "wall_thickness",
+          "passed": true,
+          "score": 1.0,
+          "margin": 0.8749999999999999,
+          "details": "Shell thickness: 3.00mm (minimum: 1.60mm, nozzle: 0.80mm, walls: 2)"
+        },
+        {
+          "test_id": "minimum_features",
+          "passed": true,
+          "score": 1.0,
+          "margin": 28.999999999999996,
+          "details": "Smallest dimension: 12.00mm (minimum: 0.40mm)"
+        },
+        {
+          "test_id": "thermal_air_gap",
+          "passed": false,
+          "score": 0.5,
+          "margin": -0.5,
+          "details": "Air gap: 1.00mm (target: 2.00mm)"
+        },
+        {
+          "test_id": "thermal_ventilation",
+          "passed": false,
+          "score": 0.125,
+          "margin": -0.875,
+          "details": "Ventilation area: 53.9mm\u00b2 (minimum: 431.4mm\u00b2)"
+        },
+        {
+          "test_id": "io_alignment_0",
+          "passed": false,
+          "score": 0.0,
+          "margin": -1.0,
+          "details": "IO 0 alignment: x_error=0.00mm, y_error=4.00mm (tolerance: 1.0mm)"
+        },
+        {
+          "test_id": "io_clearance_0",
+          "passed": false,
+          "score": 0.8727272727272727,
+          "margin": -0.09090909090909091,
+          "details": "IO 0 clearance: slot=12.0x5.0mm, required=12.5x5.5mm, margin=-9.1%"
+        }
+      ],
+      "overall_score": 0.6907422790280977,
+      "all_passed": false,
+      "elapsed_time_s": 0.11438202857971191
+    },
+    {
+      "iteration": 2,
+      "parameters": {
+        "shell": {
+          "thickness_mm": 3.0,
+          "inner_fillet_mm": 1.0,
+          "outer_fillet_mm": 1.8
+        },
+        "bosses": [
+          {
+            "at": [
+              10.0,
+              10.0
+            ],
+            "dia_mm": 4.5,
+            "hole_mm": 3.0,
+            "height_mm": 4.0
+          },
+          {
+            "at": [
+              50.0,
+              30.0
+            ],
+            "dia_mm": 4.5,
+            "hole_mm": 3.0,
+            "height_mm": 4.0
+          }
+        ],
+        "vents": {
+          "pattern": "grid",
+          "cell_mm": 3.2,
+          "margin_mm": 2.1,
+          "region": "top"
+        },
+        "io_slots": [
+          {
+            "edge": "south",
+            "offset_mm": 30.0,
+            "size": [
+              12.0,
+              5.0
+            ]
+          }
+        ],
+        "latches": {
+          "type": "snap",
+          "count": 5,
+          "tab_mm": [
+            6.0,
+            1.4
+          ],
+          "lip_mm": 0.6
+        }
+      },
+      "evaluation": [
+        {
+          "test_id": "envelope_constraint",
+          "passed": true,
+          "score": 1.0,
+          "margin": 0.02857142857142857,
+          "details": "Envelope: 68.0x48.0x12.0mm (limit: 70.0x50.0x15.0mm)"
+        },
+        {
+          "test_id": "board_clearance",
+          "passed": true,
+          "score": 1.0,
+          "margin": 3.0,
+          "details": "Board clearance: 4.00mm (target: 1.0mm)"
+        },
+        {
+          "test_id": "mount_accessibility_0",
+          "passed": true,
+          "score": 1.0,
+          "margin": 4.6,
+          "details": "Mount 0 accessibility: 14.00mm clearance (required: 2.50mm)"
+        },
+        {
+          "test_id": "mount_accessibility_1",
+          "passed": false,
+          "score": 0.0,
+          "margin": -7.4,
+          "details": "Mount 1 accessibility: -16.00mm clearance (required: 2.50mm)"
+        },
+        {
+          "test_id": "mesh_watertight",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Mesh is watertight"
+        },
+        {
+          "test_id": "mesh_manifold",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Mesh is manifold"
+        },
+        {
+          "test_id": "mesh_degenerate",
+          "passed": true,
+          "score": 1.0,
+          "margin": null,
+          "details": "Degenerate faces: 0"
+        },
+        {
+          "test_id": "overhang_angles",
+          "passed": false,
+          "score": 0.5009746588693957,
+          "margin": 0.0,
+          "details": "Overhang ratio: 49.90%, worst angle: 90.0\u00b0 (limit: 55.0\u00b0)"
+        },
+        {
+          "test_id": "wall_thickness",
+          "passed": true,
+          "score": 1.0,
+          "margin": 0.8749999999999999,
+          "details": "Shell thickness: 3.00mm (minimum: 1.60mm, nozzle: 0.80mm, walls: 2)"
+        },
+        {
+          "test_id": "minimum_features",
+          "passed": true,
+          "score": 1.0,
+          "margin": 28.999999999999996,
+          "details": "Smallest dimension: 12.00mm (minimum: 0.40mm)"
+        },
+        {
+          "test_id": "thermal_air_gap",
+          "passed": false,
+          "score": 0.4,
+          "margin": -0.6,
+          "details": "Air gap: 0.80mm (target: 2.00mm)"
+        },
+        {
+          "test_id": "thermal_ventilation",
+          "passed": false,
+          "score": 0.19531249999999997,
+          "margin": -0.8046875,
+          "details": "Ventilation area: 84.3mm\u00b2 (minimum: 431.4mm\u00b2)"
+        },
+        {
+          "test_id": "io_alignment_0",
+          "passed": false,
+          "score": 0.0,
+          "margin": -1.0,
+          "details": "IO 0 alignment: x_error=0.00mm, y_error=4.00mm (tolerance: 1.0mm)"
+        },
+        {
+          "test_id": "io_clearance_0",
+          "passed": false,
+          "score": 0.8727272727272727,
+          "margin": -0.09090909090909091,
+          "details": "IO 0 clearance: slot=12.0x5.0mm, required=12.5x5.5mm, margin=-9.1%"
+        }
+      ],
+      "overall_score": 0.6895052998614312,
+      "all_passed": false,
+      "elapsed_time_s": 0.1134195327758789
+    }
+  ],
+  "final_parameters": {
+    "shell": {
+      "thickness_mm": 3.0,
+      "inner_fillet_mm": 1.0,
+      "outer_fillet_mm": 1.5
+    },
+    "bosses": [
+      {
+        "at": [
+          10.0,
+          10.0
+        ],
+        "dia_mm": 4.5,
+        "hole_mm": 3.0,
+        "height_mm": 4.0
+      },
+      {
+        "at": [
+          50.0,
+          30.0
+        ],
+        "dia_mm": 4.5,
+        "hole_mm": 3.0,
+        "height_mm": 4.0
+      }
+    ],
+    "vents": {
+      "pattern": "grid",
+      "cell_mm": 4.0,
+      "margin_mm": 2.0,
+      "region": "top"
+    },
+    "io_slots": [
+      {
+        "edge": "south",
+        "offset_mm": 30.0,
+        "size": [
+          12.0,
+          5.0
+        ]
+      }
+    ],
+    "latches": {
+      "type": "snap",
+      "count": 5,
+      "tab_mm": [
+        6.0,
+        1.4
+      ],
+      "lip_mm": 0.6
+    }
+  },
+  "artifacts": {
+    "stl": "ci_test_output/vented_test_ab79d071927d9bc6/vented_test_final.stl",
+    "parameters": "ci_test_output/vented_test_ab79d071927d9bc6/vented_test_params.json",
+    "iterations": "ci_test_output/vented_test_ab79d071927d9bc6/vented_test_iterations.json",
+    "report": "ci_test_output/vented_test_ab79d071927d9bc6/report.markdown"
+  },
+  "report": "# Optimization Report: vented_test\n\n**Specification ID**: vented_test\n**Total Iterations**: 2\n**Total Time**: 0.2s\n**Success**: No\n\n## Functional Requirements\n\n- **thermal_clearance**: F1\n\n## Final Results\n\n**Overall Score**: 0.691\n**All Tests Passed**: False\n\n### Test Results\n\n- **envelope_constraint**: \u2705 PASS (score: 1.000)\n  - Envelope: 68.0x48.0x12.0mm (limit: 70.0x50.0x15.0mm)\n- **board_clearance**: \u2705 PASS (score: 1.000)\n  - Board clearance: 4.00mm (target: 1.0mm)\n- **mount_accessibility_0**: \u2705 PASS (score: 1.000)\n  - Mount 0 accessibility: 14.00mm clearance (required: 2.50mm)\n- **mount_accessibility_1**: \u274c FAIL (score: 0.000)\n  - Mount 1 accessibility: -16.00mm clearance (required: 2.50mm)\n- **mesh_watertight**: \u2705 PASS (score: 1.000)\n  - Mesh is watertight\n- **mesh_manifold**: \u2705 PASS (score: 1.000)\n  - Mesh is manifold\n- **mesh_degenerate**: \u2705 PASS (score: 1.000)\n  - Degenerate faces: 0\n- **overhang_angles**: \u274c FAIL (score: 0.501)\n  - Overhang ratio: 49.90%, worst angle: 90.0\u00b0 (limit: 55.0\u00b0)\n- **wall_thickness**: \u2705 PASS (score: 1.000)\n  - Shell thickness: 3.00mm (minimum: 1.60mm, nozzle: 0.80mm, walls: 2)\n- **minimum_features**: \u2705 PASS (score: 1.000)\n  - Smallest dimension: 12.00mm (minimum: 0.40mm)\n- **thermal_air_gap**: \u274c FAIL (score: 0.500)\n  - Air gap: 1.00mm (target: 2.00mm)\n- **thermal_ventilation**: \u274c FAIL (score: 0.125)\n  - Ventilation area: 53.9mm\u00b2 (minimum: 431.4mm\u00b2)\n- **io_alignment_0**: \u274c FAIL (score: 0.000)\n  - IO 0 alignment: x_error=0.00mm, y_error=4.00mm (tolerance: 1.0mm)\n- **io_clearance_0**: \u274c FAIL (score: 0.873)\n  - IO 0 clearance: slot=12.0x5.0mm, required=12.5x5.5mm, margin=-9.1%\n\n## Iteration History\n\n| Iteration | Score | Passed | Time (s) | Key Changes |\n|-----------|-------|--------|----------|-------------|\n| 1 | 0.691 | \u274c | 0.1 | - |\n| 2 | 0.690 | \u274c | 0.1 | - |",
+  "success": false,
+  "total_time_s": 0.22803092002868652
+}

@@ -1,0 +1,25 @@
+{
+  "sources": [
+    {
+      "name": "Hackaday",
+      "url": "https://hackaday.com/blog/feed/",
+      "category": "hacks",
+      "value": "Broad maker feed; strong for identifying mounts/enclosures/jigs demand patterns."
+    },
+    {
+      "name": "CNX Software",
+      "url": "https://www.cnx-software.com/feed/",
+      "category": "embedded",
+      "value": "New devboards trigger enclosure/mount accessory needs."
+    },
+    {
+      "name": "Prusa Blog",
+      "url": "https://blog.prusa3d.com/feed/",
+      "category": "3dprint",
+      "value": "3D printing techniques and common mechanical problems."
+    }
+  ],
+  "update_frequency": "daily",
+  "integration_strategy": "RSS → categorize → mint bundles"
+}
+

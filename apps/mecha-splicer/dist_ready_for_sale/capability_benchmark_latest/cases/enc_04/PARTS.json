@@ -1,0 +1,9 @@
+[
+  {
+    "file": "enclosure.scad",
+    "module": "enclosure",
+    "kind": "structure",
+    "print_orientation": "flat_on_base",
+    "notes": "Print flat; verify first-layer squish for hole accuracy."
+  }
+]

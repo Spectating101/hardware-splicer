@@ -1,0 +1,57 @@
+# Local secrets and machine config
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+**/.claude/settings.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.venv/
+venv/
+
+# Node/frontend
+node_modules/
+.next/
+dist/
+build/
+coverage/
+test-results/
+playwright-report/
+
+# Local browser/tool state
+.playwright-mcp/
+.codex/
+.agents/
+
+# Generated outputs and local corpora/cache
+artifacts/
+data/
+logs/
+runs/
+output/
+outputs/
+demo_output/
+downloads/
+generated_code/
+generated_designs/
+pcb_runs/
+tmp/
+temp/
+
+# Migration safety backups
+.git-migration-backups/
+
+# OS/editor
+.DS_Store
+*.swp
+*.swo

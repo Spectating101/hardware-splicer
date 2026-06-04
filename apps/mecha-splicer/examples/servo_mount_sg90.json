@@ -1,0 +1,16 @@
+{
+  "project_name": "servo_mount_sg90_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "servo_mount": {
+    "name": "sg90_plate",
+    "servo_type": "sg90",
+    "plate_w_mm": 80.0,
+    "plate_h_mm": 40.0,
+    "plate_t_mm": 6.0,
+    "clearance_mm": 0.6,
+    "hole_d_mm": 2.2
+  },
+  "notes": "Demo: SG90 servo mounting plate. Verify dimensions against your servo batch/datasheet."
+}
+

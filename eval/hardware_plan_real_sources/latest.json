@@ -1,0 +1,639 @@
+{
+  "mode": "hardware_plan_real_source_eval",
+  "schema_version": "hardware_plan_real_source_eval.v1",
+  "generated_at": "2026-05-26T08:23:30.086992+00:00",
+  "summary": {
+    "case_count": 5,
+    "all_passed_count": 5,
+    "pass_rate": 1.0,
+    "average_assertion_score": 1.0,
+    "hallucinated_resource_case_count": 0,
+    "production_authorized_count": 1,
+    "production_authorized_cases": [
+      "sparkfun_ch340c_uart_complete"
+    ],
+    "safety_hold_case_count": 1,
+    "evidence_gated_case_count": 2,
+    "weak_cases": []
+  },
+  "cases": [
+    {
+      "case_id": "sparkfun_ch340c_uart_complete",
+      "title": "SparkFun CH340C USB-C serial adapter completes after bench proof",
+      "source": {
+        "name": "SparkFun Serial Basic Breakout - CH340C and USB-C",
+        "url": "https://www.sparkfun.com/sparkfun-serial-basic-breakout-ch340c-and-usb-c.html",
+        "grounding": [
+          "CH340C USB-to-Serial adapter.",
+          "Works with 5V and 3.3V systems.",
+          "Breaks out DTR/RXI/TXO/VCC/CTS/GND style serial pins."
+        ]
+      },
+      "score": 1.0,
+      "passed_assertions": 10,
+      "total_assertions": 10,
+      "all_passed": true,
+      "status": "ready_for_build_plan",
+      "assurance": "authority_ready",
+      "can_power_or_splice": true,
+      "completion_state": "workflow_complete",
+      "production_authorized": true,
+      "production_decision": "authorized_low_voltage_repair_release",
+      "selected_resources": [
+        "sparkfun_ch340c"
+      ],
+      "missing_capabilities": [],
+      "hallucinated_selected_resources": [],
+      "next_actions": [],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "ready_for_build_plan",
+          "expected": "ready_for_build_plan"
+        },
+        {
+          "name": "completion_state",
+          "passed": true,
+          "actual": "workflow_complete",
+          "expected": "workflow_complete"
+        },
+        {
+          "name": "execution_stage",
+          "passed": true,
+          "actual": "complete",
+          "expected": "complete"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "open_gate_count",
+          "passed": true,
+          "actual": 0,
+          "expected": 0
+        },
+        {
+          "name": "selected_exact",
+          "passed": true,
+          "actual": [
+            "sparkfun_ch340c"
+          ],
+          "expected": [
+            "sparkfun_ch340c"
+          ]
+        },
+        {
+          "name": "missing_equals",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        },
+        {
+          "name": "next_actions_empty",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "no_unallowed_selected_resources",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    },
+    {
+      "case_id": "adafruit_bme280_esp32_hybrid",
+      "title": "ESP32 plus BME280 logger buys only the missing sensor and remains evidence-gated",
+      "source": {
+        "name": "Adafruit BME280 Humidity + Barometric Pressure + Temperature Sensor Breakout",
+        "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout?view=all",
+        "grounding": [
+          "BME280 is a temperature, pressure, and humidity environmental sensor.",
+          "The breakout supports I2C or SPI.",
+          "Vin accepts 3-5V and GND is common power/data ground.",
+          "I2C wiring uses SCK as clock and SDI as data."
+        ]
+      },
+      "score": 1.0,
+      "passed_assertions": 11,
+      "total_assertions": 11,
+      "all_passed": true,
+      "status": "prototype_after_evidence",
+      "assurance": "prototype_gated",
+      "can_power_or_splice": false,
+      "completion_state": "evidence_required",
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "selected_resources": [
+        "owned_esp32",
+        "usb_power_bank",
+        "adafruit_bme280"
+      ],
+      "missing_capabilities": [],
+      "hallucinated_selected_resources": [],
+      "next_actions": [
+        "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit BME280 I2C or SPI sensor breakout.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "input voltage and polarity",
+        "current draw under current-limited supply",
+        "Review or procure Adafruit BME280 I2C or SPI sensor breakout (14.95 USD estimate).",
+        "Review procurement items against the budget before buying.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+        "identify reusable block pins or wires from labels, continuity, and close-up photos",
+        "power the reused block from a current-limited supply at the lowest plausible rated voltage"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "prototype_after_evidence",
+          "expected": "prototype_after_evidence"
+        },
+        {
+          "name": "completion_state",
+          "passed": true,
+          "actual": "evidence_required",
+          "expected": "evidence_required"
+        },
+        {
+          "name": "execution_stage",
+          "passed": true,
+          "actual": "procurement_gap_fill",
+          "expected": "procurement_gap_fill"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "selected_contains",
+          "passed": true,
+          "actual": [
+            "adafruit_bme280",
+            "owned_esp32",
+            "usb_power_bank"
+          ],
+          "expected": [
+            "adafruit_bme280",
+            "owned_esp32",
+            "usb_power_bank"
+          ]
+        },
+        {
+          "name": "missing_equals",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        },
+        {
+          "name": "procurement_within_budget",
+          "passed": true,
+          "actual": true,
+          "expected": true
+        },
+        {
+          "name": "next_actions_contain:Confirm datasheet",
+          "passed": true,
+          "actual": [
+            "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit BME280 I2C or SPI sensor breakout.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "input voltage and polarity",
+            "current draw under current-limited supply",
+            "Review or procure Adafruit BME280 I2C or SPI sensor breakout (14.95 USD estimate).",
+            "Review procurement items against the budget before buying.",
+            "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+            "identify reusable block pins or wires from labels, continuity, and close-up photos",
+            "power the reused block from a current-limited supply at the lowest plausible rated voltage"
+          ],
+          "expected": "Confirm datasheet"
+        },
+        {
+          "name": "next_actions_contain:unpowered resistance",
+          "passed": true,
+          "actual": [
+            "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit BME280 I2C or SPI sensor breakout.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "input voltage and polarity",
+            "current draw under current-limited supply",
+            "Review or procure Adafruit BME280 I2C or SPI sensor breakout (14.95 USD estimate).",
+            "Review procurement items against the budget before buying.",
+            "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+            "identify reusable block pins or wires from labels, continuity, and close-up photos",
+            "power the reused block from a current-limited supply at the lowest plausible rated voltage"
+          ],
+          "expected": "unpowered resistance"
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "no_unallowed_selected_resources",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    },
+    {
+      "case_id": "adafruit_bme280_constrained_no_sensor",
+      "title": "Constrained ESP32 logger refuses to invent the missing BME280 sensor",
+      "source": {
+        "name": "Adafruit BME280 Humidity + Barometric Pressure + Temperature Sensor Breakout",
+        "url": "https://learn.adafruit.com/adafruit-bme280-humidity-barometric-pressure-temperature-sensor-breakout?view=all",
+        "grounding": [
+          "The public example requires a real BME280 sensor breakout for environmental readings.",
+          "The logger goal alone is not evidence that the sensor exists in inventory."
+        ]
+      },
+      "score": 1.0,
+      "passed_assertions": 9,
+      "total_assertions": 9,
+      "all_passed": true,
+      "status": "blocked_missing_resources",
+      "assurance": "blocked",
+      "can_power_or_splice": false,
+      "completion_state": "blocked",
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "selected_resources": [
+        "owned_esp32",
+        "usb_power_bank"
+      ],
+      "missing_capabilities": [
+        "sensor_or_adc"
+      ],
+      "hallucinated_selected_resources": [],
+      "next_actions": [
+        "Required capabilities are still missing from the selected resource set.",
+        "Provide, procure, design, or remove requirement for missing capability: sensor_or_adc.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Close resource gap: sensor_or_adc",
+        "input voltage and polarity",
+        "input voltage or polarity cannot be identified",
+        "power-to-ground resistance suggests a short",
+        "load current exceeds the wire, connector, switch, driver, or supply rating",
+        "module overheats, smells, smokes, or pulls unexpected current"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "blocked_missing_resources",
+          "expected": "blocked_missing_resources"
+        },
+        {
+          "name": "completion_state",
+          "passed": true,
+          "actual": "blocked",
+          "expected": "blocked"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "selected_exact",
+          "passed": true,
+          "actual": [
+            "owned_esp32",
+            "usb_power_bank"
+          ],
+          "expected": [
+            "owned_esp32",
+            "usb_power_bank"
+          ]
+        },
+        {
+          "name": "selected_excludes",
+          "passed": true,
+          "actual": [
+            "owned_esp32",
+            "usb_power_bank"
+          ],
+          "expected": [
+            "adafruit_bme280",
+            "bme280",
+            "sensor"
+          ]
+        },
+        {
+          "name": "missing_equals",
+          "passed": true,
+          "actual": [
+            "sensor_or_adc"
+          ],
+          "expected": [
+            "sensor_or_adc"
+          ]
+        },
+        {
+          "name": "next_actions_contain:missing capability: sensor_or_adc",
+          "passed": true,
+          "actual": [
+            "Required capabilities are still missing from the selected resource set.",
+            "Provide, procure, design, or remove requirement for missing capability: sensor_or_adc.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "Close resource gap: sensor_or_adc",
+            "input voltage and polarity",
+            "input voltage or polarity cannot be identified",
+            "power-to-ground resistance suggests a short",
+            "load current exceeds the wire, connector, switch, driver, or supply rating",
+            "module overheats, smells, smokes, or pulls unexpected current"
+          ],
+          "expected": "missing capability: sensor_or_adc"
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "no_unallowed_selected_resources",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    },
+    {
+      "case_id": "adafruit_drv8833_motor_hybrid",
+      "title": "DRV8833 motor stage selects driver, motor, controller, and power but blocks first power",
+      "source": {
+        "name": "Adafruit DRV8833 DC/Stepper Motor Driver Breakout Board",
+        "url": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board?view=all",
+        "grounding": [
+          "DRV8833 is a motor driver breakout for DC/stepper motors.",
+          "Motor supply must stay in the specified low-voltage range.",
+          "Motors require external power, shared ground, and output coil/load wiring."
+        ]
+      },
+      "score": 1.0,
+      "passed_assertions": 10,
+      "total_assertions": 10,
+      "all_passed": true,
+      "status": "prototype_after_evidence",
+      "assurance": "prototype_gated",
+      "can_power_or_splice": false,
+      "completion_state": "evidence_required",
+      "production_authorized": false,
+      "production_decision": "not_authorized_evidence_required",
+      "selected_resources": [
+        "owned_feather",
+        "nine_volt_supply",
+        "adafruit_drv8833",
+        "small_dc_motors"
+      ],
+      "missing_capabilities": [],
+      "hallucinated_selected_resources": [],
+      "next_actions": [
+        "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit DRV8833 DC/Stepper Motor Driver Breakout.",
+        "Measure load resistance and startup current.",
+        "Verify driver flyback/protection path and thermal behavior.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "Review or procure Adafruit DRV8833 DC/Stepper Motor Driver Breakout (4.95 USD estimate).",
+        "Review procurement items against the budget before buying.",
+        "Run the listed bench measurements before generating pin-level splice instructions.",
+        "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+        "identify reusable block pins or wires from labels, continuity, and close-up photos"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "prototype_after_evidence",
+          "expected": "prototype_after_evidence"
+        },
+        {
+          "name": "completion_state",
+          "passed": true,
+          "actual": "evidence_required",
+          "expected": "evidence_required"
+        },
+        {
+          "name": "execution_stage",
+          "passed": true,
+          "actual": "procurement_gap_fill",
+          "expected": "procurement_gap_fill"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "selected_contains",
+          "passed": true,
+          "actual": [
+            "adafruit_drv8833",
+            "nine_volt_supply",
+            "owned_feather",
+            "small_dc_motors"
+          ],
+          "expected": [
+            "adafruit_drv8833",
+            "nine_volt_supply",
+            "owned_feather",
+            "small_dc_motors"
+          ]
+        },
+        {
+          "name": "missing_equals",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        },
+        {
+          "name": "next_actions_contain:Confirm datasheet",
+          "passed": true,
+          "actual": [
+            "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit DRV8833 DC/Stepper Motor Driver Breakout.",
+            "Measure load resistance and startup current.",
+            "Verify driver flyback/protection path and thermal behavior.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "Review or procure Adafruit DRV8833 DC/Stepper Motor Driver Breakout (4.95 USD estimate).",
+            "Review procurement items against the budget before buying.",
+            "Run the listed bench measurements before generating pin-level splice instructions.",
+            "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+            "identify reusable block pins or wires from labels, continuity, and close-up photos"
+          ],
+          "expected": "Confirm datasheet"
+        },
+        {
+          "name": "next_actions_contain:startup current",
+          "passed": true,
+          "actual": [
+            "Confirm datasheet, voltage/current rating, pinout, and seller part variant for Adafruit DRV8833 DC/Stepper Motor Driver Breakout.",
+            "Measure load resistance and startup current.",
+            "Verify driver flyback/protection path and thermal behavior.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "Review or procure Adafruit DRV8833 DC/Stepper Motor Driver Breakout (4.95 USD estimate).",
+            "Review procurement items against the budget before buying.",
+            "Run the listed bench measurements before generating pin-level splice instructions.",
+            "Pass selected resources into the splice/build planner for wiring, measurement, and first-power steps.",
+            "identify reusable block pins or wires from labels, continuity, and close-up photos"
+          ],
+          "expected": "startup current"
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "no_unallowed_selected_resources",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    },
+    {
+      "case_id": "adafruit_lipo_swollen_pack_safety",
+      "title": "Swollen LiPoly pack is blocked as unsafe power",
+      "source": {
+        "name": "Adafruit Li-Ion & LiPoly Batteries",
+        "url": "https://learn.adafruit.com/li-ion-and-lipoly-batteries?view=all",
+        "grounding": [
+          "Li-Ion/LiPoly batteries are power dense and require care during use and charging.",
+          "Datasheets and safety guidance matter for safe voltage, current, and temperature limits.",
+          "A swollen pack is treated as unsafe project power."
+        ]
+      },
+      "score": 1.0,
+      "passed_assertions": 9,
+      "total_assertions": 9,
+      "all_passed": true,
+      "status": "safety_hold",
+      "assurance": "blocked",
+      "can_power_or_splice": false,
+      "completion_state": "blocked",
+      "production_authorized": false,
+      "production_decision": "blocked_by_hazard_scope",
+      "selected_resources": [],
+      "missing_capabilities": [
+        "power"
+      ],
+      "hallucinated_selected_resources": [],
+      "next_actions": [
+        "Safety or repair-authority blockers are present; do not power, splice, or release this plan.",
+        "Required capabilities are still missing from the selected resource set.",
+        "No usable selected resources are attached to the plan.",
+        "Select resources that cover the requested hardware capabilities.",
+        "Close resource gap: power",
+        "Provide owned, salvaged, or procurable resources for the required capabilities.",
+        "unpowered resistance between power and ground",
+        "continuity from connector ground to exposed ground",
+        "swollen LiPoly pouch battery",
+        "swollen: exclude or isolate before reuse"
+      ],
+      "checks": [
+        {
+          "name": "status",
+          "passed": true,
+          "actual": "safety_hold",
+          "expected": "safety_hold"
+        },
+        {
+          "name": "completion_state",
+          "passed": true,
+          "actual": "blocked",
+          "expected": "blocked"
+        },
+        {
+          "name": "can_power_or_splice",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "selected_exact",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        },
+        {
+          "name": "selected_excludes",
+          "passed": true,
+          "actual": [],
+          "expected": [
+            "swollen_lipo"
+          ]
+        },
+        {
+          "name": "missing_equals",
+          "passed": true,
+          "actual": [
+            "power"
+          ],
+          "expected": [
+            "power"
+          ]
+        },
+        {
+          "name": "next_actions_contain:do not power",
+          "passed": true,
+          "actual": [
+            "Safety or repair-authority blockers are present; do not power, splice, or release this plan.",
+            "Required capabilities are still missing from the selected resource set.",
+            "No usable selected resources are attached to the plan.",
+            "Select resources that cover the requested hardware capabilities.",
+            "Close resource gap: power",
+            "Provide owned, salvaged, or procurable resources for the required capabilities.",
+            "unpowered resistance between power and ground",
+            "continuity from connector ground to exposed ground",
+            "swollen LiPoly pouch battery",
+            "swollen: exclude or isolate before reuse"
+          ],
+          "expected": "do not power"
+        },
+        {
+          "name": "production_authorized",
+          "passed": true,
+          "actual": false,
+          "expected": false
+        },
+        {
+          "name": "no_unallowed_selected_resources",
+          "passed": true,
+          "actual": [],
+          "expected": []
+        }
+      ]
+    }
+  ],
+  "trust_bar": {
+    "portfolio_demo_engine": "pass",
+    "serious_development_foundation": "pass",
+    "production_repair_authority": "narrow_low_voltage_pass",
+    "reason": "Production authority is only for measured low-voltage workflows with terminal outcome proof; broad repair authority still needs calibrated image/measurement capture and field validation."
+  }
+}

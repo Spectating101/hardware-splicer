@@ -1,0 +1,112 @@
+# Functional case template - simple version for v0.1
+import cadquery as cq
+
+# Board dimensions
+board_x = {{ board.x }}
+board_y = {{ board.y }}
+board_z = {{ board.z }}
+
+# Shell dimensions
+wall_thickness = {{ shell.thickness_mm }}
+inner_fillet = {{ shell.inner_fillet_mm }}
+outer_fillet = {{ shell.outer_fillet_mm }}
+
+# Calculate outer dimensions with clearance
+clearance = 1.0  # Default clearance
+outer_x = board_x + 2 * (wall_thickness + clearance)
+outer_y = board_y + 2 * (wall_thickness + clearance)
+outer_z = max(8.0, board_z + wall_thickness + 2.0)  # Minimum height
+
+# Create main case body
+case = (cq.Workplane("XY")
+        .rect(outer_x, outer_y)
+        .extrude(outer_z))
+
+# Apply outer fillet if specified (fillet vertical edges)
+if outer_fillet > 0:
+    try:
+        case = case.edges("|Z").fillet(outer_fillet)
+    except:
+        # Fallback: fillet all edges
+        pass
+
+# Create PCB pocket
+pocket_depth = board_z + 0.5
+pocket = (cq.Workplane("XY")
+          .rect(board_x + 2*clearance, board_y + 2*clearance)
+          .extrude(-pocket_depth))
+
+# Apply inner fillet if specified
+if inner_fillet > 0:
+    try:
+        pocket = pocket.edges("|Z").fillet(inner_fillet)
+    except:
+        # Fallback: skip fillet
+        pass
+
+case = case.cut(pocket)
+
+# Add mount bosses
+{% for boss in bosses %}
+boss_x = {{ boss.at[0] }} - board_x/2
+boss_y = {{ boss.at[1] }} - board_y/2
+boss_dia = {{ boss.dia_mm }}
+boss_hole = {{ boss.hole_mm }}
+boss_height = {{ boss.height_mm }}
+
+# Create boss
+case = case.faces(">Z").workplane().pushPoints([(boss_x, boss_y)]).cylinder(boss_height, boss_dia/2)
+# Create hole
+case = case.faces(">Z").workplane().pushPoints([(boss_x, boss_y)]).hole(boss_hole)
+{% endfor %}
+
+# Add IO slots
+{% for slot in io_slots %}
+slot_edge = "{{ slot.edge }}"
+slot_offset = {{ slot.offset_mm }}
+slot_w = {{ slot.size[0] }}
+slot_h = {{ slot.size[1] }}
+
+# Calculate slot position
+if slot_edge == "south":
+    slot_x = slot_offset - board_x/2
+    slot_y = -outer_y/2
+    case = case.cut(cq.Workplane("XY").center(slot_x, slot_y).rect(slot_w, slot_h).extrude(outer_z))
+elif slot_edge == "north":
+    slot_x = slot_offset - board_x/2
+    slot_y = outer_y/2
+    case = case.cut(cq.Workplane("XY").center(slot_x, slot_y).rect(slot_w, slot_h).extrude(outer_z))
+elif slot_edge == "east":
+    slot_x = outer_x/2
+    slot_y = slot_offset - board_y/2
+    case = case.cut(cq.Workplane("XY").center(slot_x, slot_y).rect(slot_h, slot_w).extrude(outer_z))
+elif slot_edge == "west":
+    slot_x = -outer_x/2
+    slot_y = slot_offset - board_y/2
+    case = case.cut(cq.Workplane("XY").center(slot_x, slot_y).rect(slot_h, slot_w).extrude(outer_z))
+{% endfor %}
+
+# Respect keepout regions
+{% for keepout in keepouts %}
+keepout_x = {{ keepout.at[0] if keepout.at is sequence else keepout.at.x }}
+keepout_y = {{ keepout.at[1] if keepout.at is sequence else keepout.at.y }}
+
+{% if keepout.size is sequence %}
+keepout_w = {{ keepout.size[0] }}
+keepout_h = {{ keepout.size[1] }}
+{% else %}
+# Handle object access (e.g. Pydantic model)
+keepout_w = {{ keepout.size.x if keepout.size else 10 }}
+keepout_h = {{ keepout.size.y if keepout.size else 10 }}
+{% endif %}
+
+# Create keepout cutout (ensure no geometry in this region)
+keepout_cut = (cq.Workplane("XY")
+               .center(keepout_x - board_x/2, keepout_y - board_y/2)
+               .rect(keepout_w, keepout_h)
+               .extrude(-outer_z))
+case = case.cut(keepout_cut)
+{% endfor %}
+
+# Set the result for export
+result = case

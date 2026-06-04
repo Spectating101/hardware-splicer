@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-03-01T09:58:21.637927+00:00",
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Axis torque (load+dynamic)\u22480.06 N\u00b7m; continuous-target margin\u22485.01x.",
+      "metrics": {
+        "torque_total_nm": 0.0559,
+        "torque_margin_x": 5.008
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Estimated rod deflection\u22480.06 mm (steel, simply-supported assumption).",
+      "metrics": {
+        "rod_deflection_mm": 0.0648
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "pybullet_linear_axis",
+      "message": "PyBullet axis scene: max speed\u224875.0 mm/s, travel\u2248150.0 mm, tracking ratio\u22481.00.",
+      "metrics": {
+        "target_speed_mm_s": 75.0,
+        "max_speed_mm_s": 75.0,
+        "tracking_ratio": 1.0,
+        "simulated_travel_mm": 150.0,
+        "steps": 480
+      }
+    }
+  ],
+  "severity_counts": {
+    "info": 3,
+    "warn": 0,
+    "block": 0
+  }
+}

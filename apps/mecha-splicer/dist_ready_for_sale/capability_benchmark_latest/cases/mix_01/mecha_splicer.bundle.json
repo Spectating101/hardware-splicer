@@ -1,0 +1,367 @@
+{
+  "project_name": "bench_mix_1",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [
+    {
+      "severity": "info",
+      "message": "Estimated rod deflection ~0.04mm (midspan, steel assumption)."
+    },
+    {
+      "severity": "info",
+      "message": "Estimated torque 0.05 N\u00b7m (pulley 20T, load-only)."
+    },
+    {
+      "severity": "info",
+      "message": "Accel estimate: a=600 mm/s\u00b2 \u2192 +0.49N, torque\u22480.05 N\u00b7m (very rough)."
+    },
+    {
+      "severity": "info",
+      "message": "Reduction ratio \u2248 3.00:1 (driven/motor)."
+    },
+    {
+      "severity": "info",
+      "message": "Approx belt pitch length \u2248 201 mm (open belt formula; verify)."
+    }
+  ],
+  "bom": [
+    {
+      "category": "motion",
+      "item": "smooth rod",
+      "spec": "8.0mm \u00d7 220.0mm",
+      "qty": 2,
+      "notes": "steel recommended",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "linear bearing",
+      "spec": "LM8UU (or printed bushings)",
+      "qty": 4,
+      "notes": "carriage",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "GT2 belt",
+      "spec": "6.0mm width, 600mm length",
+      "qty": 1,
+      "notes": "cut to fit",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "GT2 pulley",
+      "spec": "20T, 5mm bore",
+      "qty": 1,
+      "notes": "motor shaft",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "idler pulley",
+      "spec": "GT2 idler, 6.0mm",
+      "qty": 1,
+      "notes": "tensioner",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "stepper motor",
+      "spec": "NEMA17 (17HS) class",
+      "qty": 1,
+      "notes": "drive",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "assorted",
+      "qty": 1,
+      "notes": "mounts + carriage",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "hardware",
+      "item": "endstop switch",
+      "spec": "micro-switch",
+      "qty": 1,
+      "notes": "limit sensing",
+      "sku": ""
+    },
+    {
+      "category": "frame",
+      "item": "2020 extrusion",
+      "spec": "350.0mm length",
+      "qty": 2,
+      "notes": "rigid base rails",
+      "sku": ""
+    },
+    {
+      "category": "frame",
+      "item": "T-nuts",
+      "spec": "M5 for 2020",
+      "qty": 8,
+      "notes": "mount printed parts",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M5 screws",
+      "spec": "M5\u00d710",
+      "qty": 8,
+      "notes": "for T-nuts",
+      "sku": ""
+    },
+    {
+      "category": "hardware",
+      "item": "rod holders",
+      "spec": "printed",
+      "qty": 4,
+      "notes": "print `rod_holder.scad`",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 nuts",
+      "spec": "hex",
+      "qty": 8,
+      "notes": "rod holder clamp",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "M3\u00d716",
+      "qty": 8,
+      "notes": "rod holder clamp",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "motion",
+      "item": "GT2 pulley (motor)",
+      "spec": "20T, 5mm bore",
+      "qty": 1,
+      "notes": "ratio 60/20",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "GT2 pulley (driven)",
+      "spec": "60T, 5mm bore",
+      "qty": 1,
+      "notes": "ratio 60/20",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "bearing",
+      "spec": "625ZZ (5\u00d716\u00d75)",
+      "qty": 3,
+      "notes": "driven + idler support",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "shaft",
+      "spec": "5mm shaft/bolt",
+      "qty": 2,
+      "notes": "for bearings",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "GT2 belt",
+      "spec": "6.0mm width (length per center distance)",
+      "qty": 1,
+      "notes": "pick length after layout",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "stepper motor",
+      "spec": "NEMA17 (17HS) class",
+      "qty": 1,
+      "notes": "drive",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "assorted",
+      "qty": 1,
+      "notes": "mount plate to frame",
+      "sku": "m3_screw_assorted"
+    }
+  ],
+  "outputs": [
+    "motor_mount.scad",
+    "idler_mount.scad",
+    "carriage.scad",
+    "belt_clamp.scad",
+    "rod_holder.scad",
+    "tensioner_block.scad",
+    "endstop_mount.scad",
+    "assembly_preview.scad",
+    "br_reduction_plate.scad",
+    "br_preview.scad"
+  ],
+  "notes": "",
+  "parts": [
+    {
+      "file": "motor_mount.scad",
+      "module": "motor_mount",
+      "kind": "mount",
+      "print_orientation": "flat_on_plate",
+      "notes": "Increase perimeters for stiffness; consider PETG/ABS for heat."
+    },
+    {
+      "file": "idler_mount.scad",
+      "module": "idler_mount",
+      "kind": "mount",
+      "print_orientation": "flat_on_plate",
+      "notes": "Increase perimeters for stiffness; consider PETG/ABS for heat."
+    },
+    {
+      "file": "carriage.scad",
+      "module": "carriage",
+      "kind": "carriage",
+      "print_orientation": "flat_on_plate",
+      "notes": "Ream rod bores if tight; keep clearance >=0.4mm for FDM."
+    },
+    {
+      "file": "belt_clamp.scad",
+      "module": "belt_clamp",
+      "kind": "accessory",
+      "print_orientation": "flat_on_plate",
+      "notes": "Prototype-grade accessory; verify hole sizing."
+    },
+    {
+      "file": "rod_holder.scad",
+      "module": "rod_holder",
+      "kind": "clamp",
+      "print_orientation": "flat_on_plate",
+      "notes": "Print with high perimeters; tighten bolts gradually to avoid cracking."
+    },
+    {
+      "file": "tensioner_block.scad",
+      "module": "tensioner_block",
+      "kind": "accessory",
+      "print_orientation": "flat_on_plate",
+      "notes": "Prototype-grade accessory; verify hole sizing."
+    },
+    {
+      "file": "endstop_mount.scad",
+      "module": "endstop_mount",
+      "kind": "accessory",
+      "print_orientation": "flat_on_plate",
+      "notes": "Prototype-grade accessory; verify hole sizing."
+    },
+    {
+      "file": "assembly_preview.scad",
+      "module": "assembly_preview",
+      "kind": "part",
+      "print_orientation": "flat_on_plate",
+      "notes": ""
+    },
+    {
+      "file": "br_reduction_plate.scad",
+      "module": "br_reduction_plate",
+      "kind": "reduction",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use rigid mounting; plate thickness matters more than infill."
+    },
+    {
+      "file": "br_preview.scad",
+      "module": "br_preview",
+      "kind": "reduction",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use rigid mounting; plate thickness matters more than infill."
+    }
+  ],
+  "composition": {
+    "applied": true,
+    "goal": "mobile_robot",
+    "decisions": [
+      "Added linear-axis module for motion subsystem.",
+      "Added belt reduction stage for drivetrain torque margin."
+    ],
+    "added_modules": [
+      "belt_reduction",
+      "linear_axis"
+    ]
+  },
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Axis torque (load+dynamic)\u22480.06 N\u00b7m; continuous-target margin\u22484.90x.",
+      "metrics": {
+        "torque_total_nm": 0.0572,
+        "torque_margin_x": 4.899
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Estimated rod deflection\u22480.04 mm (steel, simply-supported assumption).",
+      "metrics": {
+        "rod_deflection_mm": 0.0441
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "control_profile": {
+    "controller_hz": 100,
+    "loops": [
+      {
+        "name": "linear_axis_stepper",
+        "type": "position",
+        "max_speed_mm_s": 72.0,
+        "max_accel_mm_s2": 600.0,
+        "microsteps": 16,
+        "suggested_driver_current_a": 1.0
+      }
+    ],
+    "notes": [
+      "Start with conservative accel; increase after missed-step test."
+    ]
+  },
+  "safety": [
+    {
+      "severity": "info",
+      "topic": "motion",
+      "message": "Motion subsystem present: add e-stop and startup interlock in controller firmware."
+    }
+  ],
+  "commerce": {
+    "digital_pack": {
+      "price_usd": 29.0,
+      "fees_usd": 3.77,
+      "chargeback_reserve_usd": 0.58,
+      "cogs_usd": 0.0,
+      "labor_usd": 0.0,
+      "support_usd": 3.33,
+      "profit_usd": 21.32,
+      "margin": 0.735
+    },
+    "assumptions": {
+      "price_usd": 29.0,
+      "support_minutes": 10.0
+    }
+  },
+  "evidence_files": [
+    "DESIGN_DECISIONS.md",
+    "SIM_RESULTS.json",
+    "RISK_REGISTER.md",
+    "REVISION_NOTES.md"
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "project_name": "controller_pan_tilt_demo",
+  "simulation_fidelity": "starter",
+  "run_mechanism_sim": true,
+  "use_3d_splicer": true,
+  "render_stl": false,
+  "board_design_files": {
+    "main_ctrl": {
+      "path": "main_ctrl_esp32_servo.net",
+      "kind": "netlist"
+    }
+  },
+  "machine": {
+    "machine_name": "ControllerPanTiltDemo",
+    "design_intent": "prototype",
+    "boards": [
+      {
+        "board_id": "main_ctrl",
+        "name": "main_ctrl",
+        "lane": "generic",
+        "estimated_current_a": 0.4,
+        "pcb_outline_mm": [80, 50, 1.6],
+        "capabilities": {
+          "pwm_channels": 2,
+          "stepper_channels": 0,
+          "actuation_current_budget_a": 0.8
+        },
+        "requirements": {
+          "meta": {
+            "lane": "generic",
+            "design_intent": "prototype",
+            "project_name": "ControllerPanTiltDemo::main_ctrl",
+            "client_name": "internal-demo",
+            "timezone": "UTC"
+          },
+          "deliverables": {
+            "schematic": true,
+            "pcb_layout": true,
+            "bom": true,
+            "pnp": true,
+            "gerbers": true,
+            "dfm_memo": true,
+            "bringup_notes": true
+          },
+          "board": {
+            "layers": 2,
+            "dimensions_mm": {"x": 80, "y": 50},
+            "stackup": {
+              "manufacturer": "JLCPCB standard 2-layer",
+              "notes": "1.6 mm FR-4, 1 oz copper, prototype impedance is not controlled."
+            },
+            "environment": {
+              "ambient_c": 25,
+              "max_c": 45,
+              "notes": "Indoor bench prototype."
+            },
+            "constraints": {
+              "min_trace_mm": 0.15,
+              "min_space_mm": 0.15,
+              "via_min_drill_mm": 0.3,
+              "copper_weight_oz": 1
+            }
+          },
+          "interfaces": [
+            {
+              "name": "USB programming and logic power",
+              "type": "USB2",
+              "voltage_v": 5.0,
+              "notes": "USB-UART bridge for firmware upload plus 5V logic input."
+            },
+            {
+              "name": "Servo PWM outputs",
+              "type": "PWM",
+              "voltage_v": 3.3,
+              "notes": "Two logic PWM outputs routed to the external servo header."
+            }
+          ],
+          "connectors": [
+            {
+              "name": "J1 USB",
+              "type": "USB micro-B",
+              "external": true,
+              "hotplug": true,
+              "notes": "Programming and logic input."
+            },
+            {
+              "name": "J3 servo header",
+              "type": "1x04 pin header",
+              "external": true,
+              "hotplug": false,
+              "notes": "GND, external 5V servo rail, pan PWM, tilt PWM."
+            },
+            {
+              "name": "J4 servo 5V input",
+              "type": "JST-XH 2-pin",
+              "external": true,
+              "hotplug": false,
+              "notes": "Dedicated external rail so servo current does not brown out logic."
+            }
+          ],
+          "bom": [
+            {"ref": "U1", "type": "mcu", "part": "ESP32-WROOM-32"},
+            {"ref": "U2", "type": "usb_uart", "part": "CP2102"},
+            {"ref": "U3", "type": "regulator", "part": "AMS1117-3.3"},
+            {"ref": "J1", "type": "connector", "part": "USB micro-B"},
+            {"ref": "J3", "type": "connector", "part": "1x04 servo header"},
+            {"ref": "J4", "type": "connector", "part": "JST-XH 2-pin"}
+          ],
+          "power": {
+            "sources": [
+              {
+                "name": "USB VBUS",
+                "voltage_v": 5.0,
+                "max_current_a": 0.5,
+                "notes": "Logic and USB-UART input."
+              },
+              {
+                "name": "External servo rail",
+                "voltage_v": 5.0,
+                "max_current_a": 1.5,
+                "notes": "Feeds J3 servo power only."
+              }
+            ],
+            "rails": [
+              {
+                "name": "3V3",
+                "voltage_v": 3.3,
+                "max_current_a": 0.6,
+                "notes": "ESP32, USB-UART, and sensor header logic."
+              },
+              {
+                "name": "SERVO_5V",
+                "voltage_v": 5.0,
+                "max_current_a": 1.5,
+                "notes": "External rail for SG90 pan/tilt servos."
+              }
+            ],
+            "loads": [
+              {
+                "name": "ESP32-WROOM-32",
+                "rail": "3V3",
+                "current_a": 0.24,
+                "notes": "WiFi peak budget."
+              },
+              {
+                "name": "CP2102",
+                "rail": "3V3",
+                "current_a": 0.03,
+                "notes": "USB-UART bridge."
+              },
+              {
+                "name": "Two SG90 servos",
+                "rail": "SERVO_5V",
+                "current_a": 1.0,
+                "notes": "Starter budget for unloaded prototype motion."
+              }
+            ],
+            "regulators": [
+              {
+                "name": "U3",
+                "type": "LDO",
+                "vin_min_v": 4.5,
+                "vin_max_v": 5.5,
+                "vout_v": 3.3,
+                "iout_max_a": 0.8,
+                "iout_est_a": 0.27,
+                "dropout_v": 1.1,
+                "theta_ja_c_per_w": 60,
+                "max_junction_c": 125,
+                "notes": "Prototype thermal check only; replace for production."
+              }
+            ],
+            "decoupling": {
+              "strategy": "USB bulk input, regulator output bulk, and local 100 nF per IC.",
+              "confirmed": true,
+              "notes": "Servo rail should have separate bulk capacitance at the header."
+            },
+            "protection": {
+              "reverse_polarity": "USB keyed input and JST keyed servo input",
+              "fuse_or_ptc": "USB source current limit; add PTC before release",
+              "tvs": "USB data ESD recommended",
+              "inrush_limit": "not required for starter bench prototype",
+              "notes": "Servo rail intentionally separated from logic regulator."
+            }
+          },
+          "manufacturing": {
+            "fab": {
+              "name": "JLCPCB",
+              "url": "https://jlcpcb.com",
+              "notes": "Prototype constraints."
+            },
+            "assembly": {
+              "name": "manual bring-up",
+              "notes": "Hand assembly is acceptable for the canonical demo."
+            },
+            "dnp_policy": "explicit",
+            "preferred_part_source": "LCSC/DigiKey"
+          },
+          "risk_and_validation": {
+            "what_good_looks_like": "Board enumerates over USB, firmware uploads through CP2102, 3V3 stays in tolerance, and both servo PWM outputs move the pan-tilt mechanism without MCU reset.",
+            "test_plan": "Check USB VBUS, 3V3 rail, USB serial upload, pan PWM, tilt PWM, servo rail isolation, and motion under the configured payload before closing the enclosure.",
+            "known_risks": [
+              "Servo rail needs separate bulk capacitance and a current limit before field use.",
+              "SG90 tilt torque margin is intentionally low so the workflow surfaces a mechanical finding."
+            ],
+            "explicit_exclusions": [
+              "No EMC certification.",
+              "No environmental qualification.",
+              "No production enclosure finish."
+            ]
+          }
+        },
+        "mounts": [
+          {"x_mm": 6, "y_mm": 6, "d_mm": 2.2},
+          {"x_mm": 74, "y_mm": 44, "d_mm": 2.2}
+        ],
+        "ports": [
+          {
+            "kind": "rect",
+            "label": "usb_c",
+            "face": "front",
+            "rect": {"x_mm": 36, "y_mm": 0, "w_mm": 9, "h_mm": 4}
+          }
+        ]
+      }
+    ],
+    "power_tree": [
+      {
+        "source": "usb_vbus",
+        "board_id": "main_ctrl",
+        "rail": "VIN/3V3",
+        "voltage_v": 5.0,
+        "voltage_nominal_v": 5.0,
+        "max_current_a": 0.5,
+        "load_current_a": 0.27,
+        "notes": "Logic and USB-UART current only; servo current is excluded."
+      },
+      {
+        "source": "servo_5v_supply",
+        "board_id": "main_ctrl",
+        "rail": "SERVO_5V",
+        "voltage_v": 5.0,
+        "voltage_nominal_v": 5.0,
+        "max_current_a": 1.5,
+        "load_current_a": 1.0,
+        "notes": "External servo rail for pan and tilt SG90 load."
+      }
+    ]
+  },
+  "mechanism": {
+    "project_name": "controller_pan_tilt_mech",
+    "mode": "prototype",
+    "process": "fdm",
+    "pan_tilt": {
+      "name": "camera_pan_tilt",
+      "pan_servo": "sg90",
+      "tilt_servo": "sg90",
+      "payload_g": 60,
+      "payload_offset_mm": 45
+    }
+  }
+}

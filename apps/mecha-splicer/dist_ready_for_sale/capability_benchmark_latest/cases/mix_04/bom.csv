@@ -1,0 +1,12 @@
+category,item,spec,qty,sku,notes
+fastener,servo screws,M3 (check servo),4,m3_screw_assorted,mount servo to plate
+fastener,washers,M3,4,,optional
+motion,bearing,608ZZ (8×22×7),1,,rotary joint support
+motion,shaft,8.0mm shaft/bolt,1,,must match bearing ID
+fastener,M3 screws,assorted,1,m3_screw_assorted,mount block + arm
+fastener,M3 nuts,hex,6,,if not threading into material
+fastener,washers,M3,6,,optional
+actuator,servo,MG996R,1,,gripper drive
+fastener,M3 screws,assorted,1,m3_screw_assorted,jaw pivots + linkage
+fastener,M3 nuts,hex,8,,pivot + linkage
+fastener,washers,M3,8,,reduce friction

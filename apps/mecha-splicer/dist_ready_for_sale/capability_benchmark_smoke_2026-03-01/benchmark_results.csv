@@ -1,0 +1,9 @@
+id,segment,status,outputs,dfm_count,sim_count,warn_or_block_reasons
+enc_01,enclosure,pass,1,0,2,
+enc_02,enclosure,pass,1,0,2,
+enc_03,enclosure,pass,1,0,2,
+enc_04,enclosure,pass,1,0,2,
+enc_05,enclosure,pass,1,0,2,
+enc_06,enclosure,pass,1,0,2,
+axis_01,linear_axis,pass,8,3,3,
+axis_02,linear_axis,pass,8,3,3,

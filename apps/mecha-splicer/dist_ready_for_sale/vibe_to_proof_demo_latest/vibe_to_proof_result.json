@@ -1,0 +1,149 @@
+{
+  "generated_at": "2026-02-28T16:15:48.573314+00:00",
+  "start_spec": {
+    "project_name": "vibe_pan_tilt_camera",
+    "simulation_fidelity": "high",
+    "mode": "prototype",
+    "pan_tilt": {
+      "pan_servo": "sg90",
+      "tilt_servo": "sg90",
+      "max_payload_n": 5.0,
+      "payload_offset_mm": 50.0
+    },
+    "electronics": {
+      "device": "camera_ctrl",
+      "pcb_w_mm": 60,
+      "pcb_h_mm": 35,
+      "pcb_t_mm": 1.6,
+      "mounts": [
+        {
+          "x_mm": 4,
+          "y_mm": 4,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 56,
+          "y_mm": 4,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 4,
+          "y_mm": 31,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 56,
+          "y_mm": 31,
+          "d_mm": 2.4
+        }
+      ],
+      "ports": [
+        {
+          "kind": "rect",
+          "face": "front",
+          "label": "usb-c",
+          "rect": {
+            "x_mm": 22,
+            "y_mm": 0,
+            "w_mm": 10,
+            "h_mm": 4
+          }
+        }
+      ]
+    }
+  },
+  "final_spec": {
+    "project_name": "vibe_pan_tilt_camera",
+    "simulation_fidelity": "high",
+    "mode": "prototype",
+    "pan_tilt": {
+      "pan_servo": "mg996r",
+      "tilt_servo": "mg996r",
+      "max_payload_n": 5.0,
+      "payload_offset_mm": 50.0
+    },
+    "electronics": {
+      "device": "camera_ctrl",
+      "pcb_w_mm": 60,
+      "pcb_h_mm": 35,
+      "pcb_t_mm": 1.6,
+      "mounts": [
+        {
+          "x_mm": 4,
+          "y_mm": 4,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 56,
+          "y_mm": 4,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 4,
+          "y_mm": 31,
+          "d_mm": 2.4
+        },
+        {
+          "x_mm": 56,
+          "y_mm": 31,
+          "d_mm": 2.4
+        }
+      ],
+      "ports": [
+        {
+          "kind": "rect",
+          "face": "front",
+          "label": "usb-c",
+          "rect": {
+            "x_mm": 22,
+            "y_mm": 0,
+            "w_mm": 10,
+            "h_mm": 4
+          }
+        }
+      ]
+    }
+  },
+  "iterations": [
+    {
+      "iter": 1,
+      "out_dir": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Mecha-Splicer/dist_ready_for_sale/vibe_to_proof_demo_latest/iter_01",
+      "blocked": true,
+      "gate_summary": {
+        "dfm": {
+          "info": 1,
+          "warn": 1,
+          "block": 0
+        },
+        "simulation": {
+          "info": 1,
+          "warn": 0,
+          "block": 1
+        }
+      },
+      "key_findings": [
+        "dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo.",
+        "simulation:block:Tilt torque safety-factor\u22480.71x (stall/reference)."
+      ]
+    },
+    {
+      "iter": 2,
+      "out_dir": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Mecha-Splicer/dist_ready_for_sale/vibe_to_proof_demo_latest/iter_02",
+      "blocked": false,
+      "gate_summary": {
+        "dfm": {
+          "info": 1,
+          "warn": 0,
+          "block": 0
+        },
+        "simulation": {
+          "info": 2,
+          "warn": 0,
+          "block": 0
+        }
+      },
+      "key_findings": []
+    }
+  ],
+  "final_status": "pass"
+}

@@ -1,0 +1,254 @@
+{
+  "project_name": "closed_pan_tilt_mechatronics_demo",
+  "simulation_fidelity": "high",
+  "run_mechanism_sim": true,
+  "use_3d_splicer": true,
+  "render_stl": false,
+  "board_design_files": {
+    "main_ctrl": {
+      "path": "main_ctrl_esp32_servo.net",
+      "kind": "netlist"
+    }
+  },
+  "machine": {
+    "machine_name": "ClosedPanTiltMechatronicsDemo",
+    "design_intent": "prototype",
+    "boards": [
+      {
+        "board_id": "main_ctrl",
+        "name": "main_ctrl",
+        "estimated_current_a": 0.4,
+        "pcb_outline_mm": [80, 50, 1.6],
+        "capabilities": {
+          "pwm_channels": 2,
+          "stepper_channels": 0,
+          "actuation_current_budget_a": 1.6
+        },
+        "requirements": {
+          "meta": {
+            "design_intent": "prototype",
+            "project_name": "ClosedPanTiltMechatronicsDemo::main_ctrl",
+            "client_name": "internal-demo"
+          },
+          "deliverables": {
+            "schematic": true,
+            "pcb_layout": true,
+            "bom": true,
+            "dfm_memo": true,
+            "bringup_notes": true
+          },
+          "board": {
+            "layers": 2,
+            "dimensions_mm": {"x": 80, "y": 50},
+            "stackup": {
+              "manufacturer": "JLCPCB standard 2-layer",
+              "notes": "1.6 mm FR-4, 1 oz copper, prototype impedance is not controlled."
+            },
+            "constraints": {
+              "min_trace_mm": 0.15,
+              "min_space_mm": 0.15,
+              "via_min_drill_mm": 0.3,
+              "copper_weight_oz": 1
+            },
+            "environment": {"ambient_c": 25, "max_c": 45}
+          },
+          "interfaces": [
+            {"name": "USB programming and logic power", "type": "USB2", "voltage_v": 5.0},
+            {"name": "Servo PWM outputs", "type": "PWM", "voltage_v": 3.3}
+          ],
+          "connectors": [
+            {"name": "J1 USB", "type": "USB micro-B", "external": true},
+            {"name": "J3 servo header", "type": "1x04 pin header", "external": true},
+            {"name": "J4 servo 5V input", "type": "JST-XH 2-pin", "external": true}
+          ],
+          "bom": [
+            {"ref": "U1", "type": "mcu", "part": "ESP32-WROOM-32"},
+            {"ref": "U2", "type": "usb_uart", "part": "CP2102"},
+            {"ref": "U3", "type": "regulator", "part": "AMS1117-3.3"},
+            {"ref": "J3", "type": "connector", "part": "1x04 servo header"}
+          ],
+          "power": {
+            "sources": [
+              {"name": "USB VBUS", "voltage_v": 5.0, "max_current_a": 0.5},
+              {"name": "External servo rail", "voltage_v": 5.0, "max_current_a": 1.5}
+            ],
+            "rails": [
+              {"name": "3V3", "voltage_v": 3.3, "max_current_a": 0.6},
+              {"name": "SERVO_5V", "voltage_v": 5.0, "max_current_a": 1.5}
+            ],
+            "loads": [
+              {"name": "ESP32-WROOM-32", "rail": "3V3", "current_a": 0.24},
+              {"name": "CP2102", "rail": "3V3", "current_a": 0.03},
+              {"name": "Two SG90 servos", "rail": "SERVO_5V", "current_a": 1.0}
+            ],
+            "protection": {
+              "reverse_polarity": "USB keyed input and JST keyed servo input",
+              "fuse_or_ptc": "USB source current limit; servo rail current-limited during bench validation",
+              "tvs": "USB data ESD recommended before field use",
+              "inrush_limit": "not required for this current-limited bench prototype"
+            }
+          },
+          "manufacturing": {
+            "fab": {
+              "name": "JLCPCB",
+              "url": "https://jlcpcb.com",
+              "notes": "Prototype constraints for review package."
+            },
+            "assembly": {
+              "name": "manual bring-up",
+              "notes": "Hand assembly is acceptable for this scoped demo release."
+            },
+            "dnp_policy": "explicit",
+            "preferred_part_source": "LCSC/DigiKey"
+          },
+          "risk_and_validation": {
+            "what_good_looks_like": "USB programming works, 3V3 stays in tolerance, and both SG90 servos move the pan-tilt without MCU reset.",
+            "test_plan": "Check USB VBUS, 3V3, firmware upload, PWM outputs, servo rail isolation, enclosure fit, and current-limited motion."
+          }
+        },
+        "mounts": [
+          {"x_mm": 6, "y_mm": 6, "d_mm": 2.2},
+          {"x_mm": 74, "y_mm": 44, "d_mm": 2.2}
+        ],
+        "ports": [
+          {
+            "kind": "rect",
+            "label": "usb_access",
+            "face": "front",
+            "rect": {"x_mm": 36, "y_mm": 0, "w_mm": 10, "h_mm": 5}
+          }
+        ]
+      }
+    ],
+    "power_tree": [
+      {
+        "source": "usb_vbus",
+        "board_id": "main_ctrl",
+        "rail": "VIN/3V3",
+        "voltage_v": 5.0,
+        "max_current_a": 0.5,
+        "load_current_a": 0.27
+      },
+      {
+        "source": "servo_5v_supply",
+        "board_id": "main_ctrl",
+        "rail": "SERVO_5V",
+        "voltage_v": 5.0,
+        "max_current_a": 1.5,
+        "load_current_a": 1.0
+      }
+    ]
+  },
+  "mechanism": {
+    "project_name": "closed_pan_tilt_mechatronics_mech",
+    "mode": "prototype",
+    "process": "fdm",
+    "enclosure": {
+      "name": "controller_case",
+      "inner_w_mm": 90,
+      "inner_d_mm": 62,
+      "inner_h_mm": 28,
+      "wall_mm": 2.4,
+      "floor_mm": 2.0,
+      "lid_mm": 2.0,
+      "clearance_mm": 0.5,
+      "mount_holes": [
+        {"x_mm": 6, "y_mm": 6, "d_mm": 2.2},
+        {"x_mm": 74, "y_mm": 44, "d_mm": 2.2}
+      ],
+      "cutouts": [
+        {
+          "kind": "rect",
+          "label": "usb_access",
+          "face": "front",
+          "rect": {"x_mm": 36, "y_mm": 0, "w_mm": 10, "h_mm": 5}
+        }
+      ]
+    },
+    "pan_tilt": {
+      "name": "camera_pan_tilt",
+      "pan_servo": "sg90",
+      "tilt_servo": "sg90",
+      "max_payload_n": 1.2,
+      "payload_offset_mm": 35
+    }
+  },
+  "circuit_release": {
+    "scope_statement": "Circuit release limited to ESP32 low-voltage controller, isolated SG90 servo rail, USB bring-up, and two PWM outputs.",
+    "artifact_uris": ["session://closed-pan-tilt/release-pack"],
+    "acceptance_reviewed": true
+  },
+  "mechanical_measurement_capture": {
+    "artifact_uris": ["session://closed-pan-tilt/measurement-log"],
+    "dimensions": [
+      {"target": "camera_pan_tilt base thickness", "value_mm": 6.0, "status": "verified"},
+      {"target": "camera_pan_tilt tilt bracket wall", "value_mm": 6.1, "status": "verified"},
+      {"target": "controller_case enclosure inner width", "value_mm": 90.0, "status": "verified"}
+    ],
+    "clearances": [
+      {"target": "servo body clearance", "clearance_mm": 0.55, "status": "pass"},
+      {"target": "enclosure lid cable clearance", "clearance_mm": 1.2, "status": "pass"}
+    ],
+    "materials": [
+      {"target": "printed PETG bracket and enclosure", "material": "PETG", "status": "verified"}
+    ]
+  },
+  "mechanical_bench_capture": {
+    "artifact_uris": ["session://closed-pan-tilt/mech-bench-video", "session://closed-pan-tilt/load-log"],
+    "fit_checks": [
+      {"target": "camera_pan_tilt servo insertion", "status": "pass"},
+      {"target": "controller_case board standoff fit", "status": "pass"}
+    ],
+    "load_tests": [
+      {"target": "camera_pan_tilt payload static hold", "status": "pass"}
+    ],
+    "motion_tests": [
+      {"target": "camera_pan_tilt sweep through enclosure cable path", "status": "pass"}
+    ]
+  },
+  "mechanical_release": {
+    "scope_statement": "Mechanical release limited to PETG controller enclosure plus SG90 pan-tilt bracket under 1.2 N payload.",
+    "artifact_uris": ["session://closed-pan-tilt/release-pack"],
+    "acceptance_reviewed": true
+  },
+  "robotics_actuation": {
+    "protections": ["servo_bulk_capacitance", "logic_power_isolation"]
+  },
+  "robotics_bench_capture": {
+    "artifact_uris": ["session://closed-pan-tilt/robotics-current-log"],
+    "motion_tests": [
+      {"target": "camera_pan_tilt pan tilt sweep", "status": "pass"}
+    ],
+    "load_tests": [
+      {"target": "camera_pan_tilt payload hold", "status": "pass"}
+    ],
+    "current_tests": [
+      {"target": "servo rail peak current below 1.5 A", "status": "pass"}
+    ]
+  },
+  "robotics_release": {
+    "scope_statement": "Robotics release limited to current-limited SG90 pan/tilt motion under 1.2 N payload.",
+    "artifact_uris": ["session://closed-pan-tilt/release-pack"],
+    "acceptance_reviewed": true
+  },
+  "integrated_bench_capture": {
+    "artifact_uris": ["session://closed-pan-tilt/system-bench-video", "session://closed-pan-tilt/current-log"],
+    "electrical_tests": [
+      {"target": "logic 3V3 rail remains in tolerance during servo motion", "status": "pass"}
+    ],
+    "motion_tests": [
+      {"target": "camera_pan_tilt motion inside controller_case enclosure", "status": "pass"}
+    ],
+    "packaging_tests": [
+      {"target": "controller_case lid, USB cutout, and servo cable clearance", "status": "pass"}
+    ],
+    "thermal_tests": [
+      {"target": "servo rail and regulator stay cool during five minute sweep", "status": "pass"}
+    ]
+  },
+  "mechatronics_release": {
+    "scope_statement": "Hardware-Splicer release limited to the integrated ESP32 controller, PETG enclosure, 3D-Splicer script output, and SG90 pan-tilt mechanism generated in this bundle.",
+    "artifact_uris": ["session://closed-pan-tilt/release-pack"],
+    "acceptance_reviewed": true
+  }
+}

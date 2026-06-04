@@ -1,0 +1,32 @@
+{
+  "project_name": "basic_enclosure_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "notes": "Minimal demo: box + one USB cutout. Replace with real board measurements.",
+  "enclosure": {
+    "name": "basic_box",
+    "inner_w_mm": 60.0,
+    "inner_d_mm": 35.0,
+    "inner_h_mm": 20.0,
+    "wall_mm": 2.4,
+    "floor_mm": 2.0,
+    "lid_mm": 2.0,
+    "clearance_mm": 0.5,
+    "lid_style": "screw",
+    "fastener": "m3",
+    "mount_holes": [
+      { "x_mm": 5.0, "y_mm": 5.0, "d_mm": 2.2 },
+      { "x_mm": 55.0, "y_mm": 5.0, "d_mm": 2.2 },
+      { "x_mm": 5.0, "y_mm": 30.0, "d_mm": 2.2 },
+      { "x_mm": 55.0, "y_mm": 30.0, "d_mm": 2.2 }
+    ],
+    "cutouts": [
+      {
+        "kind": "rect",
+        "label": "usb_c",
+        "face": "front",
+        "rect": { "x_mm": 24.0, "y_mm": 6.0, "w_mm": 12.0, "h_mm": 8.0 }
+      }
+    ]
+  }
+}

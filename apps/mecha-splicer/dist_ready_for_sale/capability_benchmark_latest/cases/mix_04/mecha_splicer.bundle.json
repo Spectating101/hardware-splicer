@@ -1,0 +1,266 @@
+{
+  "project_name": "bench_mix_4",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [
+    {
+      "severity": "info",
+      "message": "Torque sanity: payload moment\u22480.14 N\u00b7m vs servo stall\u22480.98 N\u00b7m (MG996R)."
+    }
+  ],
+  "bom": [
+    {
+      "category": "fastener",
+      "item": "servo screws",
+      "spec": "M3 (check servo)",
+      "qty": 4,
+      "notes": "mount servo to plate",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "fastener",
+      "item": "washers",
+      "spec": "M3",
+      "qty": 4,
+      "notes": "optional",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "bearing",
+      "spec": "608ZZ (8\u00d722\u00d77)",
+      "qty": 1,
+      "notes": "rotary joint support",
+      "sku": ""
+    },
+    {
+      "category": "motion",
+      "item": "shaft",
+      "spec": "8.0mm shaft/bolt",
+      "qty": 1,
+      "notes": "must match bearing ID",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "assorted",
+      "qty": 1,
+      "notes": "mount block + arm",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "fastener",
+      "item": "M3 nuts",
+      "spec": "hex",
+      "qty": 6,
+      "notes": "if not threading into material",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "washers",
+      "spec": "M3",
+      "qty": 6,
+      "notes": "optional",
+      "sku": ""
+    },
+    {
+      "category": "actuator",
+      "item": "servo",
+      "spec": "MG996R",
+      "qty": 1,
+      "notes": "gripper drive",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "assorted",
+      "qty": 1,
+      "notes": "jaw pivots + linkage",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "fastener",
+      "item": "M3 nuts",
+      "spec": "hex",
+      "qty": 8,
+      "notes": "pivot + linkage",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "washers",
+      "spec": "M3",
+      "qty": 8,
+      "notes": "reduce friction",
+      "sku": ""
+    }
+  ],
+  "outputs": [
+    "servo_mount.scad",
+    "rj_bearing_block.scad",
+    "rj_arm.scad",
+    "rj_preview.scad",
+    "gr_base.scad",
+    "gr_jaw_left.scad",
+    "gr_jaw_right.scad",
+    "gr_link.scad",
+    "gr_preview.scad"
+  ],
+  "notes": "",
+  "parts": [
+    {
+      "file": "servo_mount.scad",
+      "module": "servo_mount",
+      "kind": "structure",
+      "print_orientation": "flat_on_base",
+      "notes": "Print flat; verify first-layer squish for hole accuracy."
+    },
+    {
+      "file": "rj_bearing_block.scad",
+      "module": "rj_bearing_block",
+      "kind": "rotary_joint",
+      "print_orientation": "flat_on_plate",
+      "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+    },
+    {
+      "file": "rj_arm.scad",
+      "module": "rj_arm",
+      "kind": "rotary_joint",
+      "print_orientation": "flat_on_plate",
+      "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+    },
+    {
+      "file": "rj_preview.scad",
+      "module": "rj_preview",
+      "kind": "rotary_joint",
+      "print_orientation": "flat_on_plate",
+      "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+    },
+    {
+      "file": "gr_base.scad",
+      "module": "gr_base",
+      "kind": "gripper",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+    },
+    {
+      "file": "gr_jaw_left.scad",
+      "module": "gr_jaw_left",
+      "kind": "gripper",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+    },
+    {
+      "file": "gr_jaw_right.scad",
+      "module": "gr_jaw_right",
+      "kind": "gripper",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+    },
+    {
+      "file": "gr_link.scad",
+      "module": "gr_link",
+      "kind": "gripper",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+    },
+    {
+      "file": "gr_preview.scad",
+      "module": "gr_preview",
+      "kind": "gripper",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+    }
+  ],
+  "composition": {
+    "applied": true,
+    "goal": "quadruped",
+    "decisions": [
+      "Added rotary joint module for leg articulation.",
+      "Added servo mount module for actuation interface.",
+      "Added gripper module as default end effector."
+    ],
+    "added_modules": [
+      "gripper",
+      "rotary_joint",
+      "servo_mount"
+    ]
+  },
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "rotary_joint",
+      "model": "high",
+      "message": "Arm bending stress\u224816.7 MPa (reference load 20 N).",
+      "metrics": {
+        "bending_stress_mpa": 16.6667
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "gripper",
+      "model": "high",
+      "message": "Gripper torque safety-factor\u22487.00x (stall/reference).",
+      "metrics": {
+        "torque_safety_factor_x": 7.0047
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "control_profile": {
+    "controller_hz": 100,
+    "loops": [
+      {
+        "name": "gripper_servo",
+        "type": "position",
+        "open_deg": 10,
+        "close_deg": 85,
+        "update_hz": 50
+      }
+    ],
+    "notes": []
+  },
+  "safety": [
+    {
+      "severity": "info",
+      "topic": "motion",
+      "message": "Motion subsystem present: add e-stop and startup interlock in controller firmware."
+    },
+    {
+      "severity": "warn",
+      "topic": "environment",
+      "message": "Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+    }
+  ],
+  "commerce": {
+    "digital_pack": {
+      "price_usd": 29.0,
+      "fees_usd": 3.77,
+      "chargeback_reserve_usd": 0.58,
+      "cogs_usd": 0.0,
+      "labor_usd": 0.0,
+      "support_usd": 3.33,
+      "profit_usd": 21.32,
+      "margin": 0.735
+    },
+    "assumptions": {
+      "price_usd": 29.0,
+      "support_minutes": 10.0
+    }
+  },
+  "evidence_files": [
+    "DESIGN_DECISIONS.md",
+    "SIM_RESULTS.json",
+    "RISK_REGISTER.md",
+    "REVISION_NOTES.md"
+  ]
+}

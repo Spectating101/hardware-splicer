@@ -1,0 +1,2 @@
+"""Mecha-Splicer API (FastAPI)."""
+

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "enc_01",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_02",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_03",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_04",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  }
+]

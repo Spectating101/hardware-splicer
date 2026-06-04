@@ -1,0 +1,27 @@
+# Core dependencies
+trimesh
+jinja2
+fastapi
+uvicorn
+pydantic
+shapely
+numpy<2.0.0
+
+# CadQuery dependencies (excluding problematic nlopt/casadi)
+cadquery
+multimethod
+pyparsing
+typish
+ezdxf
+nptyping
+
+# Testing dependencies
+pytest
+pytest-asyncio
+pytest-cov
+httpx
+
+# Production dependencies
+redis
+python-multipart
+requests

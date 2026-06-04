@@ -1,0 +1,43 @@
+{
+  "shell": {
+    "thickness_mm": 1.7249999999999999,
+    "inner_fillet_mm": 1.0,
+    "outer_fillet_mm": 1.5
+  },
+  "bosses": [
+    {
+      "at": [
+        5.0,
+        5.0
+      ],
+      "dia_mm": 4.0,
+      "hole_mm": 2.5,
+      "height_mm": 3.0
+    }
+  ],
+  "vents": {
+    "pattern": "grid",
+    "cell_mm": 4.0,
+    "margin_mm": 2.0,
+    "region": "top"
+  },
+  "io_slots": [
+    {
+      "edge": "south",
+      "offset_mm": 20.0,
+      "size": [
+        12.0,
+        5.0
+      ]
+    }
+  ],
+  "latches": {
+    "type": "snap",
+    "count": 4,
+    "tab_mm": [
+      6.0,
+      1.4
+    ],
+    "lip_mm": 0.6
+  }
+}

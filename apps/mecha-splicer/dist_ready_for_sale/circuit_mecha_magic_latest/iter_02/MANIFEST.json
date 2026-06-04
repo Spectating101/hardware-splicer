@@ -1,0 +1,72 @@
+{
+  "files": [
+    {
+      "name": "BUILD_RECIPE.md",
+      "bytes": 506
+    },
+    {
+      "name": "DESIGN_DECISIONS.md",
+      "bytes": 547
+    },
+    {
+      "name": "MANIFEST.json",
+      "bytes": 1117
+    },
+    {
+      "name": "MECH_CHECK.md",
+      "bytes": 681
+    },
+    {
+      "name": "PARTS.json",
+      "bytes": 1018
+    },
+    {
+      "name": "PRINT_PLAN.md",
+      "bytes": 607
+    },
+    {
+      "name": "README.md",
+      "bytes": 553
+    },
+    {
+      "name": "REVISION_NOTES.md",
+      "bytes": 344
+    },
+    {
+      "name": "RISK_REGISTER.md",
+      "bytes": 273
+    },
+    {
+      "name": "SIM_RESULTS.json",
+      "bytes": 771
+    },
+    {
+      "name": "bom.csv",
+      "bytes": 443
+    },
+    {
+      "name": "enclosure.scad",
+      "bytes": 2010
+    },
+    {
+      "name": "mecha_splicer.bundle.json",
+      "bytes": 4837
+    },
+    {
+      "name": "pt_base.scad",
+      "bytes": 225
+    },
+    {
+      "name": "pt_bracket.scad",
+      "bytes": 230
+    },
+    {
+      "name": "pt_platform.scad",
+      "bytes": 96
+    },
+    {
+      "name": "pt_preview.scad",
+      "bytes": 173
+    }
+  ]
+}

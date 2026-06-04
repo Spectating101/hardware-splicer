@@ -1,0 +1,41 @@
+{
+  "id": "golden_io",
+  "context": {
+    "board_bbox_mm": {"x": 70, "y": 30, "z": 5},
+    "mounts": [
+      {"type": "standoff", "pos": [10, 8], "dia": 2.5, "height": 3},
+      {"type": "standoff", "pos": [60, 22], "dia": 2.5, "height": 3}
+    ],
+    "keepouts": [],
+    "io": [
+      {"type": "usb", "edge": "east", "offset_mm": 18.0, "slot": [11.6, 4.8]}
+    ]
+  },
+  "functional_requirements": [
+    {"id": "F3", "goal": "toolless_access", "max_open_time_s": 5}
+  ],
+  "constraints": [
+    {"id": "C1", "rule": "overall_envelope_mm", "value": "[82,42,10]"},
+    {"id": "C2", "rule": "printability:overhang_angle_deg", "value": 55},
+    {"id": "C3", "rule": "printability:min_wall_thickness_mm", "value": 0.8}
+  ],
+  "materials": {
+    "primary": "PLA",
+    "infill_pct": 20,
+    "layer_height_mm": 0.2,
+    "wall_count": 3
+  },
+  "tolerances": {
+    "fit_mm": 0.25,
+    "hole_dia_mm": 0.2
+  },
+  "iteration_budget": {
+    "max_iters": 5,
+    "max_seconds": 120
+  },
+  "outputs": {
+    "stl": true,
+    "glb_preview": true,
+    "report": "markdown"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "version": "v1",
+  "device": "test_brick",
+  "pcb": {
+    "width_mm": 50.0,
+    "height_mm": 30.0,
+    "thickness_mm": 1.6,
+    "corner_radius_mm": 2.0
+  },
+  "enclosure": {
+    "wall_mm": 1.6,
+    "clearance_mm": 0.6,
+    "lip_mm": 1.2,
+    "fillet_mm": 1.0
+  },
+  "ports": [
+    {
+      "name": "usb_c",
+      "type": "rect",
+      "x_mm": 25.0,
+      "y_mm": 0.0,
+      "w_mm": 6.0,
+      "h_mm": 2.5,
+      "side": "bottom"
+    }
+  ],
+  "mounts": [
+    {
+      "x_mm": 5.0,
+      "y_mm": 5.0,
+      "diameter_mm": 2.0
+    },
+    {
+      "x_mm": 45.0,
+      "y_mm": 25.0,
+      "diameter_mm": 2.0
+    }
+  ]
+}

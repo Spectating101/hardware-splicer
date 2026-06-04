@@ -1,0 +1,80 @@
+{
+  "files": [
+    {
+      "name": "BUILD_RECIPE.md",
+      "bytes": 907
+    },
+    {
+      "name": "DESIGN_DECISIONS.md",
+      "bytes": 600
+    },
+    {
+      "name": "MECH_CHECK.md",
+      "bytes": 725
+    },
+    {
+      "name": "PARTS.json",
+      "bytes": 1608
+    },
+    {
+      "name": "PRINT_PLAN.md",
+      "bytes": 878
+    },
+    {
+      "name": "README.md",
+      "bytes": 929
+    },
+    {
+      "name": "REVISION_NOTES.md",
+      "bytes": 344
+    },
+    {
+      "name": "RISK_REGISTER.md",
+      "bytes": 181
+    },
+    {
+      "name": "SIM_RESULTS.json",
+      "bytes": 874
+    },
+    {
+      "name": "assembly_preview.scad",
+      "bytes": 720
+    },
+    {
+      "name": "belt_clamp.scad",
+      "bytes": 308
+    },
+    {
+      "name": "bom.csv",
+      "bytes": 799
+    },
+    {
+      "name": "carriage.scad",
+      "bytes": 520
+    },
+    {
+      "name": "endstop_mount.scad",
+      "bytes": 312
+    },
+    {
+      "name": "idler_mount.scad",
+      "bytes": 504
+    },
+    {
+      "name": "mecha_splicer.bundle.json",
+      "bytes": 6729
+    },
+    {
+      "name": "motor_mount.scad",
+      "bytes": 1004
+    },
+    {
+      "name": "rod_holder.scad",
+      "bytes": 664
+    },
+    {
+      "name": "tensioner_block.scad",
+      "bytes": 254
+    }
+  ]
+}

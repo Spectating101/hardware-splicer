@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-02-28T14:42:43.009299+00:00",
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "general",
+      "model": "high",
+      "message": "No motion subsystem available for high-fidelity analysis."
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "severity_counts": {
+    "info": 2,
+    "warn": 0,
+    "block": 0
+  }
+}

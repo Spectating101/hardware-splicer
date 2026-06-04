@@ -1,0 +1,26 @@
+{
+  "client_name": "",
+  "project_title": "",
+  "project_type": "verified_prototype",
+  "domain": "electronics_mechatronics",
+  "target_use_case": "",
+  "environment": "indoor",
+  "budget_usd": 800,
+  "deadline_days": 14,
+  "risk_tolerance": "medium",
+  "needs": {
+    "pcb_validation": true,
+    "mechanical_design": true,
+    "pricing_lock": true,
+    "manufacturing_package": false,
+    "ongoing_support": false
+  },
+  "constraints": {
+    "max_voltage_v": 12,
+    "max_current_a": 2,
+    "envelope_w_mm": 140,
+    "envelope_d_mm": 100,
+    "envelope_h_mm": 60
+  },
+  "notes": ""
+}

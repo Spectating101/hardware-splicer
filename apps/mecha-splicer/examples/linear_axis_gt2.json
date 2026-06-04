@@ -1,0 +1,22 @@
+{
+  "project_name": "linear_axis_gt2_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "linear_axis": {
+    "name": "axis_gt2_demo",
+    "drive": "gt2_belt",
+    "travel_mm": 200.0,
+    "rod_d_mm": 8.0,
+    "rod_spacing_mm": 40.0,
+    "rod_length_mm": 320.0,
+    "belt_width_mm": 6.0,
+    "pulley_teeth": 20,
+    "motor": "nema17",
+    "target_speed_mm_s": 80.0,
+    "payload_n": 10.0,
+    "wall_mm": 3.0,
+    "clearance_mm": 0.6
+  },
+  "notes": "Demo: GT2 belt-driven linear axis printable mounts + carriage. For real builds, add a frame (extrusions/plates) and endstops."
+}
+

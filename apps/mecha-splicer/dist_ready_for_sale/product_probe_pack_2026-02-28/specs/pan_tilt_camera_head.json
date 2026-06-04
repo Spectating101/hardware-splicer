@@ -1,0 +1,19 @@
+{
+  "project_name": "pan_tilt_camera_head",
+  "simulation_fidelity": "high",
+  "mode": "professional",
+  "pan_tilt": {
+    "pan_servo": "mg996r",
+    "tilt_servo": "mg996r",
+    "max_payload_n": 8,
+    "payload_offset_mm": 45
+  },
+  "system_goal": {
+    "application": "pan_tilt_camera",
+    "payload_kg": 0.8,
+    "budget_usd": 80,
+    "environment": "indoor",
+    "workspace_w_mm": 120,
+    "workspace_h_mm": 80
+  }
+}

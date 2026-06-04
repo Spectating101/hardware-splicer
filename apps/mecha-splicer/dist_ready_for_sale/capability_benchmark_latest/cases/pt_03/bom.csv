@@ -1,0 +1,5 @@
+category,item,spec,qty,sku,notes
+actuator,servo (pan),SG90,1,,base rotation
+actuator,servo (tilt),SG90,1,,tilt axis
+fastener,M3 screws,assorted,1,m3_screw_assorted,mount plates/brackets
+fastener,M3 nuts,hex,8,,mounting

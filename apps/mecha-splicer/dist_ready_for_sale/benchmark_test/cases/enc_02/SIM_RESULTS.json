@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-05-21T15:37:01.964007+00:00",
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "general",
+      "model": "high",
+      "message": "No motion subsystem available for high-fidelity analysis."
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet",
+      "message": "PyBullet available, but no supported scene type requested (linear_axis / pan_tilt)."
+    }
+  ],
+  "severity_counts": {
+    "info": 2,
+    "warn": 0,
+    "block": 0
+  }
+}

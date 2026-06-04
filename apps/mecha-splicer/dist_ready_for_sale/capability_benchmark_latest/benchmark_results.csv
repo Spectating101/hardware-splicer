@@ -1,0 +1,25 @@
+id,segment,status,outputs,dfm_count,sim_count,warn_or_block_reasons
+enc_01,enclosure,pass,1,0,2,
+enc_02,enclosure,pass,1,0,2,
+enc_03,enclosure,pass,1,0,2,
+enc_04,enclosure,pass,1,0,2,
+enc_05,enclosure,pass,1,0,2,
+enc_06,enclosure,pass,1,0,2,
+axis_01,linear_axis,pass,8,3,3,
+axis_02,linear_axis,pass,8,3,3,
+axis_03,linear_axis,pass,8,3,3,
+axis_04,linear_axis,pass,8,3,3,
+axis_05,linear_axis,pass,8,3,3,
+axis_06,linear_axis,pass,8,3,3,"simulation:warn:Estimated rod deflection≈0.60 mm (steel, simply-supported assumption)."
+pt_01,pan_tilt,pass,4,2,2,dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:warn:Tilt torque safety-factor≈1.68x (stall/reference).
+pt_02,pan_tilt,fail,4,2,2,dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:block:Tilt torque safety-factor≈1.10x (stall/reference).
+pt_03,pan_tilt,fail,4,2,2,dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:block:Tilt torque safety-factor≈0.78x (stall/reference).
+pt_04,pan_tilt,pass,4,1,2,
+pt_05,pan_tilt,pass,4,1,2,
+pt_06,pan_tilt,pass,4,1,2,
+mix_01,mixed_system,pass,10,5,3,
+mix_02,mixed_system,pass,9,1,3,
+mix_03,mixed_system,pass,10,5,3,
+mix_04,mixed_system,pass,9,1,3,"safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+mix_05,mixed_system,pass,10,5,3,"safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+mix_06,mixed_system,pass,9,1,3,"safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."

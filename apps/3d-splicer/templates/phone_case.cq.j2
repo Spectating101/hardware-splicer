@@ -1,0 +1,85 @@
+# Rendered from Jinja2 with context = desc
+import cadquery as cq
+
+# PCB dimensions
+pcb_w  = {{ pcb.width_mm }}
+pcb_h  = {{ pcb.height_mm }}
+pcb_t  = {{ pcb.thickness_mm }}
+cr     = {{ pcb.corner_radius_mm }}
+
+# Enclosure parameters
+wall   = {{ enclosure.wall_mm }}
+clr    = {{ enclosure.clearance_mm }}
+lip    = {{ enclosure.lip_mm }}
+fil    = {{ enclosure.fillet_mm }}
+
+# Outer envelope (simple rectangle with filleted corners)
+outer_w = pcb_w + 2*(wall + clr)
+outer_h = pcb_h + 2*(wall + clr)
+outer_t = 1.2 if (pcb_t + lip) < 1.2 else (pcb_t + lip)
+
+# Create main case body
+# NOTE: apply fillet after extrusion (fillet requires a solid on the stack).
+case = (cq.Workplane("XY")
+        .rect(outer_w, outer_h)
+        .extrude(outer_t))
+
+# Outer fillet (best-effort)
+if fil and fil > 0:
+    try:
+        case = case.edges("|Z").fillet(fil)
+    except:
+        pass
+
+# Pocket for PCB
+pocket_depth = 0.8 if (pcb_t + 0.2) < 0.8 else (pcb_t + 0.2)
+pocket_fillet = 0.1 if cr < 0.1 else cr
+pocket = (cq.Workplane("XY")
+          .rect(pcb_w + 2*clr, pcb_h + 2*clr)
+          .extrude(-pocket_depth))
+
+# Inner pocket fillet (best-effort)
+if pocket_fillet and pocket_fillet > 0:
+    try:
+        pocket = pocket.edges("|Z").fillet(pocket_fillet)
+    except:
+        pass
+case = case.cut(pocket)
+
+# Mount holes
+{% for m in mounts %}
+mount_x = {{ m.x_mm }} - pcb_w/2
+mount_y = {{ m.y_mm }} - pcb_h/2
+case = case.faces(">Z").workplane().pushPoints([(mount_x, mount_y)]).hole({{ m.diameter_mm + 0.4 }})
+{% endfor %}
+
+# Port openings (projected cutouts)
+{% for p in ports %}
+# {{ p.name }}
+port_x = {{ p.x_mm }} - pcb_w/2
+port_y = {{ p.y_mm }} - pcb_h/2
+{% if p.side in ["bottom","top"] %}
+{% if p.side == "bottom" %}
+center_y = -outer_h/2
+{% else %}
+center_y = outer_h/2
+{% endif %}
+case = case.cut(cq.Workplane("XY")
+    .center(port_x, center_y)
+    .rect({{ p.w_mm + enclosure.clearance_mm }}, {{ p.h_mm + enclosure.clearance_mm }})
+    .extrude(outer_t))
+{% elif p.side in ["left","right"] %}
+{% if p.side == "left" %}
+center_x = -outer_w/2
+{% else %}
+center_x = outer_w/2
+{% endif %}
+case = case.cut(cq.Workplane("XY")
+    .center(center_x, port_y)
+    .rect({{ p.h_mm + enclosure.clearance_mm }}, {{ p.w_mm + enclosure.clearance_mm }})
+    .extrude(outer_t))
+{% endif %}
+{% endfor %}
+
+# Set the result for export
+result = case

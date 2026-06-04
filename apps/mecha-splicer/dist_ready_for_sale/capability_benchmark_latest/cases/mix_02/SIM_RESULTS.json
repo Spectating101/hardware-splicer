@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-02-28T14:42:43.037888+00:00",
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "rotary_joint",
+      "model": "high",
+      "message": "Arm bending stress\u224816.7 MPa (reference load 20 N).",
+      "metrics": {
+        "bending_stress_mpa": 16.6667
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "gripper",
+      "model": "high",
+      "message": "Gripper torque safety-factor\u22487.00x (stall/reference).",
+      "metrics": {
+        "torque_safety_factor_x": 7.0047
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "severity_counts": {
+    "info": 3,
+    "warn": 0,
+    "block": 0
+  }
+}

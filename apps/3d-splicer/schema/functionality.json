@@ -1,0 +1,161 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Functional Specification Schema",
+  "description": "Defines functional requirements, constraints, and iteration parameters for 3D case generation",
+  "type": "object",
+  "required": ["id", "context", "functional_requirements"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this specification"
+    },
+    "context": {
+      "type": "object",
+      "description": "Physical context and constraints",
+      "required": ["board_bbox_mm"],
+      "properties": {
+        "board_bbox_mm": {
+          "type": "object",
+          "description": "Bounding box of the PCB/board",
+          "properties": {
+            "x": {"type": "number", "minimum": 0},
+            "y": {"type": "number", "minimum": 0},
+            "z": {"type": "number", "minimum": 0}
+          },
+          "required": ["x", "y", "z"]
+        },
+        "mounts": {
+          "type": "array",
+          "description": "Mounting points and standoffs",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string", "enum": ["standoff", "screw", "snap"]},
+              "pos": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "dia": {"type": "number", "minimum": 0},
+              "height": {"type": "number", "minimum": 0}
+            },
+            "required": ["type", "pos", "dia"]
+          }
+        },
+        "keepouts": {
+          "type": "array",
+          "description": "Regions where no geometry should be placed",
+          "items": {
+            "type": "object",
+            "properties": {
+              "shape": {"type": "string", "enum": ["rect", "circle"]},
+              "at": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "size": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+              "z": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+            },
+            "required": ["shape", "at"]
+          }
+        },
+        "io": {
+          "type": "array",
+          "description": "Input/output connectors and ports",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {"type": "string", "enum": ["usb", "hdmi", "ethernet", "power", "audio", "custom"]},
+              "edge": {"type": "string", "enum": ["north", "south", "east", "west"]},
+              "offset_mm": {"type": "number"},
+              "slot": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+            },
+            "required": ["type", "edge", "offset_mm"]
+          }
+        }
+      }
+    },
+    "functional_requirements": {
+      "type": "array",
+      "description": "What the case must accomplish functionally",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "goal": {
+            "type": "string",
+            "enum": [
+              "drop_protection",
+              "thermal_clearance", 
+              "toolless_access",
+              "water_resistance",
+              "electromagnetic_shielding",
+              "accessibility"
+            ]
+          },
+          "absorb_energy_J": {"type": "number", "minimum": 0},
+          "max_strain_pct": {"type": "number", "minimum": 0, "maximum": 100},
+          "min_air_gap_mm": {"type": "number", "minimum": 0},
+          "max_open_time_s": {"type": "number", "minimum": 0},
+          "ip_rating": {"type": "string", "enum": ["IP54", "IP65", "IP67"]},
+          "shielding_db": {"type": "number", "minimum": 0},
+          "accessibility_rating": {"type": "string", "enum": ["basic", "enhanced", "universal"]}
+        },
+        "required": ["id", "goal"]
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "description": "Hard constraints that cannot be violated",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "rule": {
+            "type": "string",
+            "enum": [
+              "overall_envelope_mm",
+              "no_geometry_in_keepouts",
+              "printability:overhang_angle_deg",
+              "printability:min_wall_thickness_mm",
+              "printability:no_non_manifold",
+              "assembly:clearance_mm"
+            ]
+          },
+          "value": {"type": "number"},
+          "operator": {"type": "string", "enum": ["<=", ">=", "==", "!="]}
+        },
+        "required": ["id", "rule"]
+      }
+    },
+    "materials": {
+      "type": "object",
+      "description": "Material and printing parameters",
+      "properties": {
+        "primary": {"type": "string", "enum": ["PLA", "PETG", "ABS", "TPU", "Nylon"]},
+        "infill_pct": {"type": "number", "minimum": 0, "maximum": 100},
+        "layer_height_mm": {"type": "number", "minimum": 0.1, "maximum": 0.5},
+        "wall_count": {"type": "integer", "minimum": 1, "maximum": 10}
+      }
+    },
+    "tolerances": {
+      "type": "object",
+      "description": "Manufacturing tolerances",
+      "properties": {
+        "fit_mm": {"type": "number", "minimum": 0},
+        "hole_dia_mm": {"type": "number", "minimum": 0},
+        "surface_roughness_um": {"type": "number", "minimum": 0}
+      }
+    },
+    "iteration_budget": {
+      "type": "object",
+      "description": "Iteration limits and timeouts",
+      "properties": {
+        "max_iters": {"type": "integer", "minimum": 1, "maximum": 20},
+        "max_seconds": {"type": "integer", "minimum": 30, "maximum": 1800}
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "description": "Output format preferences",
+      "properties": {
+        "stl": {"type": "boolean"},
+        "glb_preview": {"type": "boolean"},
+        "report": {"type": "string", "enum": ["markdown", "json", "none"]}
+      }
+    }
+  }
+}

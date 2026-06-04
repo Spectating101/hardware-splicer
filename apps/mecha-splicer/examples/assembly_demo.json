@@ -1,0 +1,52 @@
+{
+  "project_name": "assembly_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "linear_axis": {
+    "name": "axis_gt2_demo",
+    "travel_mm": 200.0,
+    "rod_d_mm": 8.0,
+    "rod_spacing_mm": 40.0,
+    "rod_length_mm": 320.0,
+    "belt_width_mm": 6.0,
+    "pulley_teeth": 20,
+    "payload_n": 10.0
+  },
+  "rotary_joint": {
+    "name": "rj_demo",
+    "bearing": "608zz",
+    "shaft_d_mm": 8.0
+  },
+  "assembly": {
+    "name": "demo_assembly",
+    "instances": [
+      {
+        "id": "motor",
+        "output_file": "motor_mount.scad",
+        "module": "motor_mount",
+        "fixed": true,
+        "transform": {"x_mm": 0, "y_mm": 0, "z_mm": 0, "rx_deg": 0, "ry_deg": 0, "rz_deg": 0},
+        "anchors": [
+          {"name": "origin", "transform": {"x_mm": 0, "y_mm": 0, "z_mm": 0}}
+        ]
+      },
+      {
+        "id": "joint",
+        "output_file": "rj_bearing_block.scad",
+        "module": "rj_bearing_block",
+        "transform": {"x_mm": 120, "y_mm": 0, "z_mm": 0, "rx_deg": 0, "ry_deg": 0, "rz_deg": 0}
+      }
+    ],
+    "mates": [
+      {
+        "name": "place_joint_next_to_motor",
+        "a_instance": "motor",
+        "a_anchor": "origin",
+        "b_instance": "joint",
+        "b_anchor": "center",
+        "offset": {"x_mm": 120, "y_mm": 0, "z_mm": 0}
+      }
+    ]
+  },
+  "notes": "Demo: ASSEMBLY.scad imports generated modules and places them with transforms."
+}

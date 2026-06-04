@@ -1,0 +1,100 @@
+{
+  "project_name": "bench_enclosure_5",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [],
+  "bom": [
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "M3\u00d712",
+      "qty": 4,
+      "notes": "lid + standoffs",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "fastener",
+      "item": "M3 heat-set inserts",
+      "spec": "M3 heat-set",
+      "qty": 4,
+      "notes": "recommended",
+      "sku": "m3_heatset_inserts_100"
+    },
+    {
+      "category": "hardware",
+      "item": "rubber feet",
+      "spec": "self-adhesive",
+      "qty": 4,
+      "notes": "reduces desk rattle",
+      "sku": "rubber_feet_20"
+    }
+  ],
+  "outputs": [
+    "enclosure.scad"
+  ],
+  "notes": "",
+  "parts": [
+    {
+      "file": "enclosure.scad",
+      "module": "enclosure",
+      "kind": "structure",
+      "print_orientation": "flat_on_base",
+      "notes": "Print flat; verify first-layer squish for hole accuracy."
+    }
+  ],
+  "composition": {
+    "applied": false,
+    "reason": "auto_compose disabled or no system_goal"
+  },
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "general",
+      "model": "high",
+      "message": "No motion subsystem available for high-fidelity analysis."
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "control_profile": {
+    "controller_hz": 100,
+    "loops": [],
+    "notes": [
+      "No active motion subsystems detected; control profile is minimal."
+    ]
+  },
+  "safety": [
+    {
+      "severity": "info",
+      "topic": "general",
+      "message": "No rule-based safety flags raised."
+    }
+  ],
+  "commerce": {
+    "digital_pack": {
+      "price_usd": 29.0,
+      "fees_usd": 3.77,
+      "chargeback_reserve_usd": 0.58,
+      "cogs_usd": 0.0,
+      "labor_usd": 0.0,
+      "support_usd": 3.33,
+      "profit_usd": 21.32,
+      "margin": 0.735
+    },
+    "assumptions": {
+      "price_usd": 29.0,
+      "support_minutes": 10.0
+    }
+  },
+  "evidence_files": [
+    "DESIGN_DECISIONS.md",
+    "SIM_RESULTS.json",
+    "RISK_REGISTER.md",
+    "REVISION_NOTES.md"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-02-28T14:42:43.044850+00:00",
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Axis torque (load+dynamic)\u22480.11 N\u00b7m; continuous-target margin\u22482.66x.",
+      "metrics": {
+        "torque_total_nm": 0.1051,
+        "torque_margin_x": 2.663
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "linear_axis",
+      "model": "high",
+      "message": "Estimated rod deflection\u22480.08 mm (steel, simply-supported assumption).",
+      "metrics": {
+        "rod_deflection_mm": 0.0812
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "severity_counts": {
+    "info": 3,
+    "warn": 0,
+    "block": 0
+  }
+}

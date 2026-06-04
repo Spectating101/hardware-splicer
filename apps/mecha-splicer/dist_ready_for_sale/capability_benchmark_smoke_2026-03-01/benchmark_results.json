@@ -1,0 +1,74 @@
+[
+  {
+    "id": "enc_01",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_02",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_03",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_04",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_05",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_06",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_01",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_02",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  }
+]

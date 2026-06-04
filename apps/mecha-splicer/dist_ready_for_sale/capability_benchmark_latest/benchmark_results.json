@@ -1,0 +1,218 @@
+[
+  {
+    "id": "enc_01",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_02",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_03",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_04",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_05",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "enc_06",
+    "segment": "enclosure",
+    "status": "pass",
+    "outputs": 1,
+    "dfm_count": 0,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_01",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_02",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_03",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_04",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_05",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "axis_06",
+    "segment": "linear_axis",
+    "status": "pass",
+    "outputs": 8,
+    "dfm_count": 3,
+    "sim_count": 3,
+    "warn_or_block_reasons": "simulation:warn:Estimated rod deflection\u22480.60 mm (steel, simply-supported assumption)."
+  },
+  {
+    "id": "pt_01",
+    "segment": "pan_tilt",
+    "status": "pass",
+    "outputs": 4,
+    "dfm_count": 2,
+    "sim_count": 2,
+    "warn_or_block_reasons": "dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:warn:Tilt torque safety-factor\u22481.68x (stall/reference)."
+  },
+  {
+    "id": "pt_02",
+    "segment": "pan_tilt",
+    "status": "fail",
+    "outputs": 4,
+    "dfm_count": 2,
+    "sim_count": 2,
+    "warn_or_block_reasons": "dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:block:Tilt torque safety-factor\u22481.10x (stall/reference)."
+  },
+  {
+    "id": "pt_03",
+    "segment": "pan_tilt",
+    "status": "fail",
+    "outputs": 4,
+    "dfm_count": 2,
+    "sim_count": 2,
+    "warn_or_block_reasons": "dfm:warn:Tilt payload moment is high relative to servo; reduce payload/offset or use stronger servo. || simulation:block:Tilt torque safety-factor\u22480.78x (stall/reference)."
+  },
+  {
+    "id": "pt_04",
+    "segment": "pan_tilt",
+    "status": "pass",
+    "outputs": 4,
+    "dfm_count": 1,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "pt_05",
+    "segment": "pan_tilt",
+    "status": "pass",
+    "outputs": 4,
+    "dfm_count": 1,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "pt_06",
+    "segment": "pan_tilt",
+    "status": "pass",
+    "outputs": 4,
+    "dfm_count": 1,
+    "sim_count": 2,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "mix_01",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 10,
+    "dfm_count": 5,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "mix_02",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 9,
+    "dfm_count": 1,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "mix_03",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 10,
+    "dfm_count": 5,
+    "sim_count": 3,
+    "warn_or_block_reasons": ""
+  },
+  {
+    "id": "mix_04",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 9,
+    "dfm_count": 1,
+    "sim_count": 3,
+    "warn_or_block_reasons": "safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+  },
+  {
+    "id": "mix_05",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 10,
+    "dfm_count": 5,
+    "sim_count": 3,
+    "warn_or_block_reasons": "safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+  },
+  {
+    "id": "mix_06",
+    "segment": "mixed_system",
+    "status": "pass",
+    "outputs": 9,
+    "dfm_count": 1,
+    "sim_count": 3,
+    "warn_or_block_reasons": "safety:warn:Outdoor profile: validate ingress sealing, connector strain relief, and corrosion plan."
+  }
+]

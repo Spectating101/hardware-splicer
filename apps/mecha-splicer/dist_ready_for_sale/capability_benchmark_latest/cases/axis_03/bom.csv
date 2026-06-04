@@ -1,0 +1,15 @@
+category,item,spec,qty,sku,notes
+motion,smooth rod,8.0mm × 310.0mm,2,,steel recommended
+motion,linear bearing,LM8UU (or printed bushings),4,,carriage
+motion,GT2 belt,"6.0mm width, 620mm length",1,,cut to fit
+motion,GT2 pulley,"20T, 5mm bore",1,,motor shaft
+motion,idler pulley,"GT2 idler, 6.0mm",1,,tensioner
+motion,stepper motor,NEMA17 (17HS) class,1,,drive
+fastener,M3 screws,assorted,1,m3_screw_assorted,mounts + carriage
+hardware,endstop switch,micro-switch,1,,limit sensing
+frame,2020 extrusion,350.0mm length,2,,rigid base rails
+frame,T-nuts,M5 for 2020,8,,mount printed parts
+fastener,M5 screws,M5×10,8,,for T-nuts
+hardware,rod holders,printed,4,,print `rod_holder.scad`
+fastener,M3 nuts,hex,8,,rod holder clamp
+fastener,M3 screws,M3×16,8,m3_screw_assorted,rod holder clamp

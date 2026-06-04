@@ -1,0 +1,25 @@
+{
+  "project_name": "gripper_scissor_sg90_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "gripper": {
+    "name": "gr_scissor_demo",
+    "servo_type": "sg90",
+    "jaw_len_mm": 70.0,
+    "jaw_w_mm": 14.0,
+    "jaw_t_mm": 6.0,
+    "jaw_pivot_hole_d_mm": 3.2,
+    "jaw_tip_pad_len_mm": 12.0,
+    "base_w_mm": 110.0,
+    "base_h_mm": 60.0,
+    "base_t_mm": 6.0,
+    "link_w_mm": 12.0,
+    "link_t_mm": 4.0,
+    "link_hole_d_mm": 3.2,
+    "max_payload_n": 8.0,
+    "lever_arm_mm": 50.0,
+    "clearance_mm": 0.6
+  },
+  "notes": "Demo: scissor gripper. Use real pins/bushings and tune geometry for mechanical advantage."
+}
+

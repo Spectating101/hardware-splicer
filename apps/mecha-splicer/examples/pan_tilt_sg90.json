@@ -1,0 +1,24 @@
+{
+  "project_name": "pan_tilt_sg90_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "pan_tilt": {
+    "name": "pt_demo",
+    "pan_servo": "sg90",
+    "tilt_servo": "sg90",
+    "base_w_mm": 120.0,
+    "base_h_mm": 80.0,
+    "base_t_mm": 6.0,
+    "bracket_w_mm": 80.0,
+    "bracket_h_mm": 70.0,
+    "bracket_t_mm": 6.0,
+    "platform_w_mm": 60.0,
+    "platform_h_mm": 40.0,
+    "platform_t_mm": 4.0,
+    "max_payload_n": 6.0,
+    "payload_offset_mm": 45.0,
+    "clearance_mm": 0.6
+  },
+  "notes": "Demo: pan/tilt plates. For real builds you will add horns, spacers, and tune mounting holes."
+}
+

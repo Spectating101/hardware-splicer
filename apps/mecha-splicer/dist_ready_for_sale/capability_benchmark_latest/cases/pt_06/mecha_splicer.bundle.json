@@ -1,0 +1,153 @@
+{
+  "project_name": "bench_pt_6",
+  "mode": "prototype",
+  "process": "fdm",
+  "blockers": false,
+  "dfm": [
+    {
+      "severity": "info",
+      "message": "Tilt torque sanity: moment\u22480.48 N\u00b7m vs servo stall\u22480.98 N\u00b7m (MG996R)."
+    }
+  ],
+  "bom": [
+    {
+      "category": "actuator",
+      "item": "servo (pan)",
+      "spec": "MG996R",
+      "qty": 1,
+      "notes": "base rotation",
+      "sku": ""
+    },
+    {
+      "category": "actuator",
+      "item": "servo (tilt)",
+      "spec": "MG996R",
+      "qty": 1,
+      "notes": "tilt axis",
+      "sku": ""
+    },
+    {
+      "category": "fastener",
+      "item": "M3 screws",
+      "spec": "assorted",
+      "qty": 1,
+      "notes": "mount plates/brackets",
+      "sku": "m3_screw_assorted"
+    },
+    {
+      "category": "fastener",
+      "item": "M3 nuts",
+      "spec": "hex",
+      "qty": 8,
+      "notes": "mounting",
+      "sku": ""
+    }
+  ],
+  "outputs": [
+    "pt_base.scad",
+    "pt_bracket.scad",
+    "pt_platform.scad",
+    "pt_preview.scad"
+  ],
+  "notes": "",
+  "parts": [
+    {
+      "file": "pt_base.scad",
+      "module": "pt_base",
+      "kind": "pan_tilt",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use spacers to avoid interference at high tilt angles."
+    },
+    {
+      "file": "pt_bracket.scad",
+      "module": "pt_bracket",
+      "kind": "pan_tilt",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use spacers to avoid interference at high tilt angles."
+    },
+    {
+      "file": "pt_platform.scad",
+      "module": "pt_platform",
+      "kind": "pan_tilt",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use spacers to avoid interference at high tilt angles."
+    },
+    {
+      "file": "pt_preview.scad",
+      "module": "pt_preview",
+      "kind": "pan_tilt",
+      "print_orientation": "flat_on_plate",
+      "notes": "Use spacers to avoid interference at high tilt angles."
+    }
+  ],
+  "composition": {
+    "applied": false,
+    "reason": "auto_compose disabled or no system_goal"
+  },
+  "simulation": [
+    {
+      "severity": "info",
+      "domain": "pan_tilt",
+      "model": "high",
+      "message": "Tilt torque safety-factor\u22482.04x (stall/reference).",
+      "metrics": {
+        "tilt_torque_safety_factor_x": 2.0431
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "control_profile": {
+    "controller_hz": 100,
+    "loops": [
+      {
+        "name": "pan_servo",
+        "type": "angle",
+        "min_deg": -85,
+        "max_deg": 85,
+        "update_hz": 50
+      },
+      {
+        "name": "tilt_servo",
+        "type": "angle",
+        "min_deg": -60,
+        "max_deg": 60,
+        "update_hz": 50
+      }
+    ],
+    "notes": []
+  },
+  "safety": [
+    {
+      "severity": "info",
+      "topic": "motion",
+      "message": "Motion subsystem present: add e-stop and startup interlock in controller firmware."
+    }
+  ],
+  "commerce": {
+    "digital_pack": {
+      "price_usd": 29.0,
+      "fees_usd": 3.77,
+      "chargeback_reserve_usd": 0.58,
+      "cogs_usd": 0.0,
+      "labor_usd": 0.0,
+      "support_usd": 3.33,
+      "profit_usd": 21.32,
+      "margin": 0.735
+    },
+    "assumptions": {
+      "price_usd": 29.0,
+      "support_minutes": 10.0
+    }
+  },
+  "evidence_files": [
+    "DESIGN_DECISIONS.md",
+    "SIM_RESULTS.json",
+    "RISK_REGISTER.md",
+    "REVISION_NOTES.md"
+  ]
+}

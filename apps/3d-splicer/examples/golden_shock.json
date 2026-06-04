@@ -1,0 +1,41 @@
+{
+  "id": "golden_shock",
+  "context": {
+    "board_bbox_mm": {"x": 60, "y": 35, "z": 6},
+    "mounts": [
+      {"type": "standoff", "pos": [10, 10], "dia": 3.0, "height": 4},
+      {"type": "standoff", "pos": [50, 25], "dia": 3.0, "height": 4}
+    ],
+    "keepouts": [],
+    "io": [
+      {"type": "usb", "edge": "south", "offset_mm": 15.5, "slot": [12.0, 5.0]}
+    ]
+  },
+  "functional_requirements": [
+    {"id": "F1", "goal": "drop_protection", "absorb_energy_J": 3.0}
+  ],
+  "constraints": [
+    {"id": "C1", "rule": "overall_envelope_mm", "value": "[75,50,14]"},
+    {"id": "C2", "rule": "printability:overhang_angle_deg", "value": 55},
+    {"id": "C3", "rule": "printability:min_wall_thickness_mm", "value": 0.8}
+  ],
+  "materials": {
+    "primary": "PLA",
+    "infill_pct": 25,
+    "layer_height_mm": 0.2,
+    "wall_count": 3
+  },
+  "tolerances": {
+    "fit_mm": 0.3,
+    "hole_dia_mm": 0.2
+  },
+  "iteration_budget": {
+    "max_iters": 5,
+    "max_seconds": 120
+  },
+  "outputs": {
+    "stl": true,
+    "glb_preview": true,
+    "report": "markdown"
+  }
+}

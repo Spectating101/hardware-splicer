@@ -1,0 +1,5 @@
+id,segment,status,outputs,dfm_count,sim_count,warn_or_block_reasons
+enc_01,enclosure,pass,1,0,2,
+enc_02,enclosure,pass,1,0,2,
+enc_03,enclosure,pass,1,0,2,
+enc_04,enclosure,pass,1,0,2,

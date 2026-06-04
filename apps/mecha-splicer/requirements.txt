@@ -1,0 +1,11 @@
+# Core dependencies for Mecha-Splicer
+pydantic>=2.0
+httpx>=0.24
+feedparser>=6.0
+
+# High-fidelity runtime (optional but recommended)
+pybullet>=3.2.6
+
+# API server (optional, for src/api/)
+fastapi>=0.100
+uvicorn>=0.20

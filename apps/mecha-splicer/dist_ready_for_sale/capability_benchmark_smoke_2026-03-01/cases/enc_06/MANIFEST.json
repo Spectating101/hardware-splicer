@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "name": "BUILD_RECIPE.md",
+      "bytes": 428
+    },
+    {
+      "name": "DESIGN_DECISIONS.md",
+      "bytes": 457
+    },
+    {
+      "name": "MECH_CHECK.md",
+      "bytes": 428
+    },
+    {
+      "name": "PARTS.json",
+      "bytes": 206
+    },
+    {
+      "name": "PRINT_PLAN.md",
+      "bytes": 189
+    },
+    {
+      "name": "README.md",
+      "bytes": 194
+    },
+    {
+      "name": "REVISION_NOTES.md",
+      "bytes": 344
+    },
+    {
+      "name": "RISK_REGISTER.md",
+      "bytes": 181
+    },
+    {
+      "name": "SIM_RESULTS.json",
+      "bytes": 516
+    },
+    {
+      "name": "bom.csv",
+      "bytes": 249
+    },
+    {
+      "name": "enclosure.scad",
+      "bytes": 1349
+    },
+    {
+      "name": "mecha_splicer.bundle.json",
+      "bytes": 2245
+    }
+  ]
+}

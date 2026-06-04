@@ -1,0 +1,21 @@
+{
+  "project_name": "belt_reduction_gt2_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "belt_reduction": {
+    "name": "br_gt2_demo",
+    "belt_pitch_mm": 2.0,
+    "belt_width_mm": 6.0,
+    "motor_pulley_teeth": 20,
+    "driven_pulley_teeth": 60,
+    "center_distance_mm": 60.0,
+    "plate_w_mm": 120.0,
+    "plate_h_mm": 80.0,
+    "plate_t_mm": 6.0,
+    "clearance_mm": 0.4,
+    "include_idler": true,
+    "idler_offset_mm": 18.0
+  },
+  "notes": "Demo: GT2 belt reduction plate. Add real pulleys/belt/shafts; iterate thickness and mounting for real loads."
+}
+

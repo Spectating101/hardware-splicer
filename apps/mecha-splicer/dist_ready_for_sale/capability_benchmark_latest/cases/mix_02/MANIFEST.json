@@ -1,0 +1,84 @@
+{
+  "files": [
+    {
+      "name": "BUILD_RECIPE.md",
+      "bytes": 589
+    },
+    {
+      "name": "DESIGN_DECISIONS.md",
+      "bytes": 747
+    },
+    {
+      "name": "MECH_CHECK.md",
+      "bytes": 560
+    },
+    {
+      "name": "PARTS.json",
+      "bytes": 1951
+    },
+    {
+      "name": "PRINT_PLAN.md",
+      "bytes": 1132
+    },
+    {
+      "name": "README.md",
+      "bytes": 612
+    },
+    {
+      "name": "REVISION_NOTES.md",
+      "bytes": 344
+    },
+    {
+      "name": "RISK_REGISTER.md",
+      "bytes": 181
+    },
+    {
+      "name": "SIM_RESULTS.json",
+      "bytes": 801
+    },
+    {
+      "name": "bom.csv",
+      "bytes": 608
+    },
+    {
+      "name": "gr_base.scad",
+      "bytes": 365
+    },
+    {
+      "name": "gr_jaw_left.scad",
+      "bytes": 297
+    },
+    {
+      "name": "gr_jaw_right.scad",
+      "bytes": 263
+    },
+    {
+      "name": "gr_link.scad",
+      "bytes": 257
+    },
+    {
+      "name": "gr_preview.scad",
+      "bytes": 259
+    },
+    {
+      "name": "mecha_splicer.bundle.json",
+      "bytes": 6369
+    },
+    {
+      "name": "rj_arm.scad",
+      "bytes": 404
+    },
+    {
+      "name": "rj_bearing_block.scad",
+      "bytes": 712
+    },
+    {
+      "name": "rj_preview.scad",
+      "bytes": 1184
+    },
+    {
+      "name": "servo_mount.scad",
+      "bytes": 764
+    }
+  ]
+}

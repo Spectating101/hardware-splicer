@@ -1,0 +1,29 @@
+{
+  "project_name": "meshtastic_rugged_case",
+  "simulation_fidelity": "high",
+  "mode": "professional",
+  "electronics": {
+    "device": "heltec_v3_node",
+    "pcb_w_mm": 58,
+    "pcb_h_mm": 35,
+    "pcb_t_mm": 1.6,
+    "mounts": [
+      {"x_mm": 4, "y_mm": 4, "d_mm": 2.4},
+      {"x_mm": 54, "y_mm": 4, "d_mm": 2.4},
+      {"x_mm": 4, "y_mm": 31, "d_mm": 2.4},
+      {"x_mm": 54, "y_mm": 31, "d_mm": 2.4}
+    ],
+    "ports": [
+      {"kind": "rect", "face": "front", "label": "usb-c", "rect": {"x_mm": 22, "y_mm": 0, "w_mm": 10, "h_mm": 4}},
+      {"kind": "circle", "face": "top", "label": "antenna", "circle": {"x_mm": 52, "y_mm": 16, "d_mm": 8}}
+    ]
+  },
+  "system_goal": {
+    "application": "control_box",
+    "payload_kg": 0.2,
+    "budget_usd": 40,
+    "environment": "outdoor",
+    "workspace_w_mm": 90,
+    "workspace_h_mm": 60
+  }
+}

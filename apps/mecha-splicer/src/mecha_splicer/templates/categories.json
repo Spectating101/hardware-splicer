@@ -1,0 +1,9 @@
+{
+  "categories": {
+    "enclosure": ["enclosure", "case", "housing", "box", "shell", "3d printed case", "project box"],
+    "mount": ["mount", "bracket", "adapter", "holder", "stand", "tripod"],
+    "fixture_jig": ["jig", "fixture", "alignment", "drill", "template", "tooling"],
+    "cable_management": ["cable", "strain relief", "grommet", "clip", "cable tie", "organizer"],
+    "robotics": ["robot", "arm", "servo", "gear", "cnc", "actuator", "gripper"]
+  }
+}

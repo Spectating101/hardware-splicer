@@ -1,0 +1,14 @@
+{
+  "by_item_contains": {
+    "M3 screws": {
+      "sku": "shopee_m3_screw_100pcs",
+      "price_usd": 2.5,
+      "url": "https://example.com/m3-screw"
+    },
+    "M3 heat-set inserts": {
+      "sku": "shopee_m3_heatset_100pcs",
+      "price_usd": 3.9,
+      "url": "https://example.com/m3-heatset"
+    }
+  }
+}

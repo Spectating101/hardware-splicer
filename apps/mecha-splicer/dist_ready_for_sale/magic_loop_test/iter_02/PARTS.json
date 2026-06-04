@@ -1,0 +1,37 @@
+[
+  {
+    "file": "enclosure.scad",
+    "module": "enclosure",
+    "kind": "structure",
+    "print_orientation": "flat_on_base",
+    "notes": "Print flat; verify first-layer squish for hole accuracy."
+  },
+  {
+    "file": "pt_base.scad",
+    "module": "pt_base",
+    "kind": "pan_tilt",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use spacers to avoid interference at high tilt angles."
+  },
+  {
+    "file": "pt_bracket.scad",
+    "module": "pt_bracket",
+    "kind": "pan_tilt",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use spacers to avoid interference at high tilt angles."
+  },
+  {
+    "file": "pt_platform.scad",
+    "module": "pt_platform",
+    "kind": "pan_tilt",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use spacers to avoid interference at high tilt angles."
+  },
+  {
+    "file": "pt_preview.scad",
+    "module": "pt_preview",
+    "kind": "pan_tilt",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use spacers to avoid interference at high tilt angles."
+  }
+]

@@ -1,0 +1,223 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "3D Splicer v0.1 Production Dashboard",
+    "tags": ["3d-splicer", "production"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Optimization Requests",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(splicer_optimization_requests_total[5m]))",
+            "legendFormat": "Requests/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 0.5},
+                {"color": "red", "value": 1.0}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Pass Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(splicer_optimization_requests_total{status=\"success\"}[5m])) / sum(rate(splicer_optimization_requests_total[5m])) * 100",
+            "legendFormat": "Pass Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "green", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Active Jobs",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "splicer_active_jobs",
+            "legendFormat": "Active Jobs"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 5},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Satisfaction Score",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(splicer_satisfaction_score)",
+            "legendFormat": "Avg Satisfaction"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 85}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Optimization Duration (p95/p99)",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(splicer_optimization_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Duration"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(splicer_optimization_duration_seconds_bucket[5m]))",
+            "legendFormat": "p99 Duration"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "Test Results by Type",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(splicer_test_results_total{result=\"pass\"}[5m])) by (test_type)",
+            "legendFormat": "{{test_type}} - Pass"
+          },
+          {
+            "expr": "sum(rate(splicer_test_results_total{result=\"fail\"}[5m])) by (test_type)",
+            "legendFormat": "{{test_type}} - Fail"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 7,
+        "title": "Cache Hit Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(splicer_cache_hits_total[5m])) / (sum(rate(splicer_cache_hits_total[5m])) + sum(rate(splicer_cache_misses_total[5m]))) * 100",
+            "legendFormat": "Cache Hit Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 50},
+                {"color": "green", "value": 80}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Artifact Sizes",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(splicer_artifact_size_bytes_bucket[5m])) by (artifact_type)",
+            "legendFormat": "{{artifact_type}} - p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(splicer_artifact_size_bytes_bucket[5m])) by (artifact_type)",
+            "legendFormat": "{{artifact_type}} - p95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "color": {
+              "mode": "palette-classic"
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
+  }
+}

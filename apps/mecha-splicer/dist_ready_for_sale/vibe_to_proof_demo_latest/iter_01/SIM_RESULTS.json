@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-02-28T16:15:48.570562+00:00",
+  "simulation": [
+    {
+      "severity": "block",
+      "domain": "pan_tilt",
+      "model": "high",
+      "message": "Tilt torque safety-factor\u22480.71x (stall/reference).",
+      "metrics": {
+        "tilt_torque_safety_factor_x": 0.7061
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "rigid_body",
+      "model": "pybullet_skip",
+      "message": "PyBullet not installed; skipped mechanism dynamics scenes."
+    }
+  ],
+  "severity_counts": {
+    "info": 1,
+    "warn": 0,
+    "block": 1
+  }
+}

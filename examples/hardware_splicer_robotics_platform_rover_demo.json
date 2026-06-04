@@ -1,0 +1,248 @@
+{
+  "project_name": "robotics_platform_rover_demo",
+  "simulation_fidelity": "high",
+  "run_mechanism_sim": true,
+  "use_3d_splicer": false,
+  "render_stl": false,
+  "board_design_files": {
+    "main_ctrl": {
+      "path": "main_ctrl_esp32_servo.net",
+      "kind": "netlist"
+    }
+  },
+  "machine": {
+    "machine_name": "RoboticsPlatformRoverDemo",
+    "design_intent": "indoor inspection rover prototype",
+    "boards": [
+      {
+        "board_id": "main_ctrl",
+        "requirements": {
+          "meta": {
+            "design_intent": "prototype",
+            "project_name": "RoboticsPlatformRoverDemo::main_ctrl"
+          },
+          "deliverables": {
+            "schematic": true,
+            "pcb_layout": true,
+            "bom": true,
+            "bringup_notes": true
+          },
+          "power": {
+            "sources": [
+              {"name": "logic_5v", "voltage_v": 5.0, "max_current_a": 0.8},
+              {"name": "actuator_6v", "voltage_v": 6.0, "max_current_a": 4.0}
+            ],
+            "rails": [
+              {"name": "3V3", "voltage_v": 3.3, "max_current_a": 0.6},
+              {"name": "ACT_6V", "voltage_v": 6.0, "max_current_a": 4.0},
+              {"name": "SERVO_5V", "voltage_v": 5.0, "max_current_a": 1.5}
+            ],
+            "loads": [
+              {"name": "controller", "rail": "3V3", "current_a": 0.25},
+              {"name": "drive motors", "rail": "ACT_6V", "current_a": 1.8},
+              {"name": "pan tilt servos", "rail": "SERVO_5V", "current_a": 1.3}
+            ],
+            "protection": {
+              "fuse_or_ptc": "current-limited actuator rail",
+              "inrush_limit": "bench current limit during first motion"
+            }
+          }
+        },
+        "capabilities": {
+          "pwm_channels": 4,
+          "stepper_channels": 0,
+          "actuation_current_budget_a": 4.0
+        }
+      }
+    ]
+  },
+  "mechanism": {
+    "project_name": "robotics_platform_rover_mech",
+    "mode": "prototype",
+    "process": "fdm",
+    "enclosure": {
+      "name": "controller_case",
+      "inner_w_mm": 95,
+      "inner_d_mm": 70,
+      "inner_h_mm": 30,
+      "wall_mm": 2.4,
+      "floor_mm": 2.0,
+      "lid_mm": 2.0,
+      "clearance_mm": 0.5
+    },
+    "drive_base": {
+      "name": "wheel_drive_base",
+      "length_mm": 180,
+      "width_mm": 120,
+      "thickness_mm": 3,
+      "wheel_d_mm": 65,
+      "motor_spacing_mm": 96
+    },
+    "pan_tilt": {
+      "name": "sensor_head",
+      "pan_servo": "sg90",
+      "tilt_servo": "sg90",
+      "max_payload_n": 1.0,
+      "payload_offset_mm": 30
+    }
+  },
+  "robotics_project": {
+    "robot_class": "wheeled_rover",
+    "mission": [
+      "teleoperated indoor inspection with camera pan-tilt",
+      "low-speed bench and floor traversal inside marked boundary"
+    ],
+    "operating_environment": {
+      "domain": "indoor lab",
+      "boundaries": ["flat floor", "marked test area"],
+      "hazards": ["wheel pinch", "servo stall", "battery overcurrent"]
+    },
+    "constraints": {
+      "runtime_min": 15,
+      "max_speed_mps": 0.55,
+      "payload_kg": 0.2,
+      "mass_kg": 1.2,
+      "acceleration_mps2": 0.5,
+      "mission_duty_cycle": 0.65
+    },
+    "power": {
+      "battery": {
+        "chemistry": "2S Li-ion/LiPo",
+        "nominal_voltage_v": 7.4,
+        "capacity_mah": 2200,
+        "usable_fraction": 0.8
+      }
+    },
+    "platform": {
+      "type": "differential_drive_rover",
+      "domains": ["locomotion", "positioning"],
+      "degrees_of_freedom": 4,
+      "mobility": {"type": "differential_drive", "wheel_count": 2, "caster_count": 1}
+    }
+  },
+  "robotics_actuation": {
+    "actuators": [
+      {
+        "id": "left_drive_motor",
+        "type": "dc_motor",
+        "role": "left wheel drive",
+        "voltage_v": 6.0,
+        "run_current_a": 0.45,
+        "stall_current_a": 0.9,
+        "output_free_speed_rpm": 220,
+        "stall_torque_nm": 0.18
+      },
+      {
+        "id": "right_drive_motor",
+        "type": "dc_motor",
+        "role": "right wheel drive",
+        "voltage_v": 6.0,
+        "run_current_a": 0.45,
+        "stall_current_a": 0.9,
+        "output_free_speed_rpm": 220,
+        "stall_torque_nm": 0.18
+      }
+    ],
+    "sensors": [
+      {"id": "front_range", "type": "tof_range", "role": "obstacle awareness"},
+      {"id": "battery_current", "type": "current_sensor", "role": "drive current monitoring"}
+    ],
+    "protections": [
+      "flyback_or_tvs",
+      "current_limit",
+      "separate_actuator_supply",
+      "servo_bulk_capacitance",
+      "logic_power_isolation"
+    ]
+  },
+  "control_stack": {
+    "controllers": [{"id": "main_ctrl", "board_id": "main_ctrl", "firmware": "teleop_rover_control"}],
+    "loops": [
+      {"name": "drive_pwm", "rate_hz": 100, "status": "pass"},
+      {"name": "pan_tilt_pwm", "rate_hz": 50, "status": "pass"}
+    ],
+    "sensors": [
+      {"id": "front_range", "type": "tof_range"},
+      {"id": "battery_current", "type": "current_sensor"}
+    ],
+    "comms": [{"type": "rc_link", "failsafe": "signal_loss_stop"}],
+    "failsafes": ["e_stop", "watchdog", "signal_loss_stop", "current_limit"]
+  },
+  "safety_case": {
+    "hazards": [
+      {"id": "wheel_pinch", "mitigation": "low-speed marked boundary and wheel guard", "status": "mitigated"},
+      {"id": "servo_stall", "mitigation": "current limit and sweep timeout", "status": "mitigated"}
+    ],
+    "mitigations": [
+      "flyback_or_tvs",
+      "separate_actuator_supply",
+      "servo_bulk_capacitance",
+      "logic_power_isolation",
+      "guarded_wheels"
+    ]
+  },
+  "mechanical_measurement_capture": {
+    "artifact_uris": ["session://robotics-platform/measurements"],
+    "dimensions": [
+      {"target": "controller_case enclosure inner width", "value_mm": 95.0, "status": "verified"},
+      {"target": "wheel_drive_base motor spacing", "value_mm": 96.0, "status": "verified"},
+      {"target": "sensor_head base thickness", "value_mm": 6.0, "status": "verified"},
+      {"target": "sensor_head bracket wall", "value_mm": 6.1, "status": "verified"}
+    ],
+    "clearances": [{"target": "servo clearance", "clearance_mm": 0.55, "status": "pass"}]
+  },
+  "mechanical_bench_capture": {
+    "artifact_uris": ["session://robotics-platform/mech-bench"],
+    "fit_checks": [{"target": "sensor_head fit", "status": "pass"}],
+    "load_tests": [{"target": "sensor_head payload hold", "status": "pass"}],
+    "motion_tests": [
+      {"target": "sensor_head sweep", "status": "pass"},
+      {"target": "wheel_drive_base drive wheel clearance", "status": "pass"}
+    ]
+  },
+  "robotics_bench_capture": {
+    "artifact_uris": ["session://robotics-platform/motion-bench"],
+    "motion_tests": [
+      {"target": "drive motor spin", "status": "pass"},
+      {"target": "pan tilt sweep", "status": "pass"}
+    ],
+    "current_tests": [{"target": "drive current limit", "status": "pass"}]
+  },
+  "integrated_bench_capture": {
+    "artifact_uris": ["session://robotics-platform/integrated-bench"],
+    "electrical_tests": [{"target": "logic rail under motion", "status": "pass"}],
+    "motion_tests": [{"target": "drive and pan tilt command response", "status": "pass"}],
+    "packaging_tests": [{"target": "controller case cable clearance", "status": "pass"}]
+  },
+  "field_validation": {
+    "artifact_uris": ["session://robotics-platform/field-run-video", "session://robotics-platform/telemetry-log"],
+    "simulations": [{"target": "current and runtime budget", "status": "pass"}],
+    "bench_tests": [{"target": "tethered first motion", "status": "pass"}],
+    "field_tests": [{"target": "marked boundary floor traversal", "status": "pass"}]
+  },
+  "circuit_release": {
+    "scope_statement": "Circuit release limited to low-voltage controller, motor PWM outputs, servo PWM, and current-limited actuator rail.",
+    "artifact_uris": ["session://robotics-platform/release"],
+    "acceptance_reviewed": true
+  },
+  "mechanical_release": {
+    "scope_statement": "Mechanical release limited to rover controller enclosure and SG90 sensor pan-tilt bracket.",
+    "artifact_uris": ["session://robotics-platform/release"],
+    "acceptance_reviewed": true
+  },
+  "robotics_release": {
+    "scope_statement": "Robotics release limited to low-speed current-limited rover drive and SG90 pan-tilt motion.",
+    "artifact_uris": ["session://robotics-platform/release"],
+    "acceptance_reviewed": true
+  },
+  "mechatronics_release": {
+    "scope_statement": "Hardware-Splicer release limited to integrated indoor inspection rover prototype.",
+    "artifact_uris": ["session://robotics-platform/release"],
+    "acceptance_reviewed": true
+  },
+  "robotics_project_release": {
+    "scope_statement": "Robotics project release limited to indoor teleoperated rover traversal in a marked flat-floor boundary.",
+    "artifact_uris": ["session://robotics-platform/release"],
+    "acceptance_reviewed": true
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-05-21T15:37:02.780518+00:00",
+  "simulation": [
+    {
+      "severity": "block",
+      "domain": "pan_tilt",
+      "model": "high",
+      "message": "Tilt torque safety-factor\u22480.71x (stall/reference).",
+      "metrics": {
+        "tilt_torque_safety_factor_x": 0.7061
+      }
+    },
+    {
+      "severity": "info",
+      "domain": "pan_tilt",
+      "model": "pybullet_pan_tilt",
+      "message": "PyBullet pan-tilt scene: RMS error pan\u22483.06deg, tilt\u22481.91deg.",
+      "metrics": {
+        "pan_rms_error_deg": 3.0625,
+        "tilt_rms_error_deg": 1.9092,
+        "pan_target_deg": 25.0,
+        "tilt_target_deg": 20.0,
+        "steps": 720
+      }
+    }
+  ],
+  "severity_counts": {
+    "info": 1,
+    "warn": 0,
+    "block": 1
+  }
+}

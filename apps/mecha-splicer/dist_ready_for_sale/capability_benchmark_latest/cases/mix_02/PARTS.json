@@ -1,0 +1,65 @@
+[
+  {
+    "file": "servo_mount.scad",
+    "module": "servo_mount",
+    "kind": "structure",
+    "print_orientation": "flat_on_base",
+    "notes": "Print flat; verify first-layer squish for hole accuracy."
+  },
+  {
+    "file": "rj_bearing_block.scad",
+    "module": "rj_bearing_block",
+    "kind": "rotary_joint",
+    "print_orientation": "flat_on_plate",
+    "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+  },
+  {
+    "file": "rj_arm.scad",
+    "module": "rj_arm",
+    "kind": "rotary_joint",
+    "print_orientation": "flat_on_plate",
+    "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+  },
+  {
+    "file": "rj_preview.scad",
+    "module": "rj_preview",
+    "kind": "rotary_joint",
+    "print_orientation": "flat_on_plate",
+    "notes": "Bearing pockets may need clearance tuning (0.2\u20130.4mm typical)."
+  },
+  {
+    "file": "gr_base.scad",
+    "module": "gr_base",
+    "kind": "gripper",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+  },
+  {
+    "file": "gr_jaw_left.scad",
+    "module": "gr_jaw_left",
+    "kind": "gripper",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+  },
+  {
+    "file": "gr_jaw_right.scad",
+    "module": "gr_jaw_right",
+    "kind": "gripper",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+  },
+  {
+    "file": "gr_link.scad",
+    "module": "gr_link",
+    "kind": "gripper",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+  },
+  {
+    "file": "gr_preview.scad",
+    "module": "gr_preview",
+    "kind": "gripper",
+    "print_orientation": "flat_on_plate",
+    "notes": "Use washers/bushings at pivots; printed friction-fit is unreliable."
+  }
+]

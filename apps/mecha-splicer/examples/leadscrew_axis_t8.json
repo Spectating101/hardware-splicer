@@ -1,0 +1,27 @@
+{
+  "project_name": "leadscrew_axis_t8_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "leadscrew_axis": {
+    "name": "axis_t8_demo",
+    "screw": "t8",
+    "lead_mm_per_rev": 8.0,
+    "travel_mm": 200.0,
+    "screw_length_mm": 320.0,
+    "screw_d_mm": 8.0,
+    "rod_d_mm": 8.0,
+    "rod_spacing_mm": 40.0,
+    "rod_length_mm": 320.0,
+    "motor": "nema17",
+    "target_speed_mm_s": 30.0,
+    "payload_n": 20.0,
+    "wall_mm": 3.0,
+    "clearance_mm": 0.6,
+    "include_endstops": true,
+    "include_rod_holders": true,
+    "frame": "2020_extrusion",
+    "frame_length_mm": 350.0
+  },
+  "notes": "Demo: T8 lead-screw axis printable mounts + nut carriage. For real builds, prioritize alignment to avoid binding."
+}
+

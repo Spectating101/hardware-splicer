@@ -1,0 +1,30 @@
+[
+  {
+    "name": "meshtastic_rugged_case",
+    "blocked": false,
+    "outputs": 1,
+    "bom_lines": 3,
+    "cogs_usd": 35.0
+  },
+  {
+    "name": "pi_outdoor_enclosure",
+    "blocked": false,
+    "outputs": 1,
+    "bom_lines": 3,
+    "cogs_usd": 35.0
+  },
+  {
+    "name": "pan_tilt_camera_head",
+    "blocked": false,
+    "outputs": 4,
+    "bom_lines": 4,
+    "cogs_usd": 6.0
+  },
+  {
+    "name": "linear_axis_module",
+    "blocked": false,
+    "outputs": 10,
+    "bom_lines": 21,
+    "cogs_usd": 60.0
+  }
+]

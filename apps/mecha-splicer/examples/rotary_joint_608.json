@@ -1,0 +1,26 @@
+{
+  "project_name": "rotary_joint_608_demo",
+  "mode": "prototype",
+  "process": "fdm",
+  "rotary_joint": {
+    "name": "rj_608_demo",
+    "bearing": "608zz",
+    "shaft_d_mm": 8.0,
+    "wall_mm": 4.0,
+    "clearance_mm": 0.3,
+    "block_w_mm": 50.0,
+    "block_d_mm": 25.0,
+    "block_h_mm": 18.0,
+    "mount_hole_d_mm": 3.2,
+    "mount_hole_spacing_x_mm": 30.0,
+    "mount_hole_spacing_y_mm": 16.0,
+    "arm_len_mm": 80.0,
+    "arm_w_mm": 18.0,
+    "arm_t_mm": 6.0,
+    "arm_hole_d_mm": 3.2,
+    "arm_hole_pitch_mm": 20.0,
+    "arm_hole_count": 3
+  },
+  "notes": "Demo: bearing block + arm plate. Use a real shaft/hub for serious torque; printed friction-fit is not reliable."
+}
+

@@ -1,0 +1,15 @@
+include README.md
+include LICENSE
+include requirements*.txt
+include pytest.ini
+include Makefile
+
+recursive-include services *.py
+recursive-include src *.py
+recursive-include templates *.j2
+recursive-include tests *.py
+
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *~
+global-exclude .DS_Store

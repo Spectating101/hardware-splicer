@@ -1,0 +1,29 @@
+{
+  "project_name": "linear_axis_module",
+  "simulation_fidelity": "high",
+  "mode": "professional",
+  "linear_axis": {
+    "travel_mm": 220,
+    "rod_d_mm": 8,
+    "rod_spacing_mm": 40,
+    "rod_length_mm": 320,
+    "payload_n": 12,
+    "target_speed_mm_s": 90,
+    "target_accel_mm_s2": 650,
+    "pulley_teeth": 20,
+    "frame": "2020_extrusion"
+  },
+  "belt_reduction": {
+    "motor_pulley_teeth": 20,
+    "driven_pulley_teeth": 60,
+    "center_distance_mm": 60
+  },
+  "system_goal": {
+    "application": "mobile_robot",
+    "payload_kg": 1.2,
+    "budget_usd": 120,
+    "environment": "indoor",
+    "workspace_w_mm": 240,
+    "workspace_h_mm": 120
+  }
+}

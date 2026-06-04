@@ -1,0 +1,60 @@
+{
+  "version": "v1",
+  "device": "iphone_7",
+  "pcb": {
+    "width_mm": 70.0,
+    "height_mm": 35.0,
+    "thickness_mm": 1.2,
+    "corner_radius_mm": 3.0
+  },
+  "enclosure": {
+    "wall_mm": 1.6,
+    "clearance_mm": 0.6,
+    "lip_mm": 1.2,
+    "fillet_mm": 1.0
+  },
+  "ports": [
+    { 
+      "name": "lightning", 
+      "type": "rect", 
+      "x_mm": 35.0, 
+      "y_mm": 0.0, 
+      "w_mm": 8.0, 
+      "h_mm": 2.6, 
+      "side": "bottom" 
+    },
+    { 
+      "name": "sim_tray", 
+      "type": "rect", 
+      "x_mm": 5.0, 
+      "y_mm": 17.0, 
+      "w_mm": 9.0, 
+      "h_mm": 2.0, 
+      "side": "left" 
+    },
+    {
+      "name": "power_button",
+      "type": "rect",
+      "x_mm": 0.0,
+      "y_mm": 25.0,
+      "w_mm": 2.5,
+      "h_mm": 8.0,
+      "side": "right"
+    },
+    {
+      "name": "volume_buttons",
+      "type": "rect",
+      "x_mm": 0.0,
+      "y_mm": 15.0,
+      "w_mm": 1.8,
+      "h_mm": 6.0,
+      "side": "left"
+    }
+  ],
+  "mounts": [
+    { "x_mm": 8.0,  "y_mm": 8.0,  "diameter_mm": 2.0 },
+    { "x_mm": 62.0, "y_mm": 8.0,  "diameter_mm": 2.0 },
+    { "x_mm": 8.0,  "y_mm": 27.0, "diameter_mm": 2.0 },
+    { "x_mm": 62.0, "y_mm": 27.0, "diameter_mm": 2.0 }
+  ]
+}

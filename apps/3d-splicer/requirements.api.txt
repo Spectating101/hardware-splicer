@@ -1,0 +1,13 @@
+# API-only dependencies (CadQuery provided by base image)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2
+jinja2>=3.1
+trimesh>=4
+multimethod>=1.10
+pyparsing>=3.1
+typish>=1.9
+nptyping>=2.5
+ezdxf>=1.3
+# Keep NumPy ABI friendly with trimesh stack
+numpy<2
