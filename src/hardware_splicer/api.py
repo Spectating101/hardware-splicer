@@ -19,6 +19,7 @@ from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
 from .runtime import ServiceStartError, runtime_status
+from .scenario_runner import run_hardware_scenario, scenario_to_compile_spec
 from .schemas import HardwareCompileSpec
 from .validation import raise_for_validation_errors, validate_compile_spec, validation_errors
 
@@ -33,6 +34,14 @@ class CompileRequest(BaseModel):
 
 class ValidateRequest(BaseModel):
     spec: Dict[str, Any]
+
+
+class ScenarioRunRequest(BaseModel):
+    scenario: Dict[str, Any]
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    start_splicer: bool = True
+    splicer_port: int = 0
 
 
 class MechanicalAuthorityRequest(BaseModel):
@@ -226,6 +235,28 @@ def create_app() -> FastAPI:
             raise _error(503, "dependency_unavailable", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "compile_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/scenario-run")
+    def scenario_run(request: ScenarioRunRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            scenario = dict(request.scenario)
+            spec = scenario_to_compile_spec(scenario)
+            out_dir = _resolve_api_out_dir(request, spec, request_id)
+            return run_hardware_scenario(
+                scenario,
+                out_dir=out_dir,
+                start_splicer=bool(request.start_splicer),
+                splicer_port=int(request.splicer_port or 0),
+                request_id=request_id,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except (TimeoutError, ConnectionError, ServiceStartError) as exc:
+            raise _error(503, "dependency_unavailable", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "scenario_run_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/jobs", status_code=202)
     def submit_job(request: CompileRequest) -> Dict[str, Any]:

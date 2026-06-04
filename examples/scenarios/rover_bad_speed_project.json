@@ -1,0 +1,31 @@
+{
+  "scenario_name": "indoor_rover_bad_speed_project",
+  "intent": "Stress-test whether the same indoor rover package can honestly support a much faster floor speed without changing motors, wheels, or power.",
+  "compile_spec_path": "../hardware_splicer_robotics_platform_rover_demo.json",
+  "overrides": {
+    "robotics_project": {
+      "constraints": {
+        "max_speed_mps": 2.5
+      }
+    }
+  },
+  "expected": {
+    "minimum_authority_level": "production_robotics_project_release",
+    "mechanical_release": true,
+    "robotics_release": true,
+    "simulation_ready": true,
+    "mechatronics_release": true,
+    "robotics_project_release": true
+  },
+  "acceptance": {
+    "allowed_blockers": 0,
+    "must_have_artifacts": [
+      "ROBOTICS_SIMULATION.json",
+      "ROBOTICS_PLATFORM_AUTHORITY.json",
+      "MECHATRONICS_AUTHORITY.json",
+      "CASEFILE.json",
+      "PROJECT_LOG.json",
+      "HARDWARE_REVIEW.md"
+    ]
+  }
+}

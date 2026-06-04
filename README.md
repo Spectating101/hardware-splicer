@@ -52,6 +52,15 @@ python3 scripts/hardware_splicer.py compile --spec examples/hardware_splicer_rob
 
 The generated `ROBOTICS_SIMULATION.json` evaluates actuator current margin, battery runtime, differential-drive wheel speed, tractive force, pan-tilt servo payload torque, and safety-envelope blockers. Project-level robotics authority consumes this packet, so a design with impossible speed, insufficient current, weak servo torque, poor runtime, or unresolved integration gaps cannot silently pass as a scoped robotics release.
 
+Run a full project scenario and emit one frontend/demo-ready project authority packet:
+
+```bash
+python3 scripts/hardware_splicer.py scenario --scenario examples/scenarios/rover_project.json --out /tmp/hardware_splicer_scenario_rover
+python3 scripts/hardware_splicer.py scenario --scenario examples/scenarios/rover_bad_speed_project.json --out /tmp/hardware_splicer_scenario_bad_speed
+```
+
+Scenario files wrap a compile spec, optional overrides, expected authority milestones, and required artifacts. The runner writes `PROJECT_AUTHORITY.json`, `SCENARIO_SUMMARY.md`, and `SCENARIO_RESULT.json`; the clean rover scenario is claimable, while the bad-speed scenario still compiles but blocks the project claim because the declared speed exceeds the available wheel RPM.
+
 Run the lighter local Circuit-AI -> Mecha-Splicer -> 3D-Splicer smoke:
 
 ```bash
@@ -84,6 +93,7 @@ Useful API endpoints:
 - `POST /v1/robotics-platform-authority`
 - `POST /v1/mechatronics-authority`
 - `POST /v1/compile`
+- `POST /v1/scenario-run`
 - `POST /v1/jobs`
 - `GET /v1/jobs`
 - `GET /v1/jobs/{job_id}`
