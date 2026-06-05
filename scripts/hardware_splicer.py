@@ -109,6 +109,21 @@ def _run_scenario(args: argparse.Namespace) -> int:
 
 def _run_intake(args: argparse.Namespace) -> int:
     intake = load_project_intake(Path(args.brief))
+    vision_cfg = dict(intake.get("vision_assistance") or {})
+    if getattr(args, "vision_assist", False):
+        vision_cfg["enabled"] = True
+    if getattr(args, "vision_live", False):
+        vision_cfg["live"] = True
+        vision_cfg["enabled"] = True
+    if getattr(args, "vision_apply", False):
+        vision_cfg["apply"] = True
+        vision_cfg["enabled"] = True
+    if getattr(args, "vision_provider", None):
+        vision_cfg["provider"] = args.vision_provider
+    if getattr(args, "vision_model", None):
+        vision_cfg["model"] = args.vision_model
+    if vision_cfg:
+        intake["vision_assistance"] = vision_cfg
     result = run_project_intake(
         intake,
         out_dir=args.out,
@@ -132,6 +147,7 @@ def _run_intake(args: argparse.Namespace) -> int:
         print(f"out_dir={result['out_dir']}")
         print(f"project_intake={result['artifacts']['project_intake']}")
         print(f"planned_scenario={result['artifacts']['planned_scenario']}")
+        print(f"vision_evidence_report={result['artifacts']['vision_evidence_report']}")
         print(f"evidence_extraction_report={result['artifacts']['evidence_extraction_report']}")
         print(f"evidence_capture_kit={result['artifacts']['evidence_capture_kit']}")
         print(f"project_authority={result['artifacts']['project_authority']}")
@@ -211,6 +227,11 @@ def main() -> int:
     intake_parser.add_argument("--port", type=int, default=0, help="3D-Splicer port. Defaults to a free local port.")
     intake_parser.add_argument("--no-start-splicer", action="store_true", help="Use an already running 3D-Splicer service.")
     intake_parser.add_argument("--request-id", default=None, help="Stable build/request identifier for manifests and API parity.")
+    intake_parser.add_argument("--vision-assist", action="store_true", help="Enable vision evidence assistance for image attachments.")
+    intake_parser.add_argument("--vision-live", action="store_true", help="Allow live vision model calls. Requires provider credentials.")
+    intake_parser.add_argument("--vision-apply", action="store_true", help="Apply candidate vision evidence notes before deterministic extraction.")
+    intake_parser.add_argument("--vision-provider", default=None, help="Vision provider id. Currently supports qwen.")
+    intake_parser.add_argument("--vision-model", default=None, help="Vision model id, for example qwen3-vl-flash.")
     intake_parser.add_argument("--json", action="store_true", help="Print intake run result JSON.")
     intake_parser.set_defaults(func=_run_intake)
 

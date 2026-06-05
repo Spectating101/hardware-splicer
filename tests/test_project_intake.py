@@ -5,7 +5,13 @@ from pathlib import Path
 
 import pytest
 
-from hardware_splicer import build_evidence_extraction_report, load_project_intake, plan_project_from_intake, run_project_intake
+from hardware_splicer import (
+    build_evidence_extraction_report,
+    build_vision_evidence_report,
+    load_project_intake,
+    plan_project_from_intake,
+    run_project_intake,
+)
 from hardware_splicer.api import create_app
 
 
@@ -58,6 +64,7 @@ def test_project_intake_runs_to_control_safety_package(tmp_path):
     assert simulation["runtime_estimate"]["runtime_margin"] > 6.0
     assert Path(result["artifacts"]["project_intake"]).exists()
     assert Path(result["artifacts"]["planned_scenario"]).exists()
+    assert Path(result["artifacts"]["vision_evidence_report"]).exists()
     assert Path(result["artifacts"]["evidence_extraction_report"]).exists()
     assert Path(result["artifacts"]["authority_upgrade_plan"]).exists()
     assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
@@ -68,6 +75,7 @@ def test_project_intake_runs_to_control_safety_package(tmp_path):
     assert "mechanical_simulation_capture" in result["evidence_capture_kit"]["template_intake_patch"]["evidence"]
     scenario_result = json.loads(Path(result["artifacts"]["scenario_result"]).read_text(encoding="utf-8"))
     assert scenario_result["intake_plan"]["archetype"] == "automatic_watering"
+    assert scenario_result["vision_evidence_report"]["enabled"] is False
     assert scenario_result["evidence_extraction_report"]["accepted_count"] == 0
     assert scenario_result["authority_upgrade_plan"]["next_level"] == "simulation_bench_project_package"
     assert scenario_result["evidence_capture_kit"]["schema_version"] == "hardware_splicer.evidence_capture_kit.v1"
@@ -252,3 +260,49 @@ def test_evidence_extractor_indexes_images_as_pending_vision(tmp_path):
     assert report["pending_vision_count"] == 1
     assert report["pending_vision"][0]["path"] == str(photo)
     assert report["extracted_evidence"] == {}
+
+
+def test_vision_assistance_proposes_notes_without_applying():
+    intake = load_project_intake(PLANT_INTAKE)
+    intake["vision_assistance"] = {"enabled": True, "apply": False}
+    intake["attachments"] = [
+        {
+            "id": "annotated_top_view",
+            "kind": "image",
+            "vision_evidence_notes": [
+                "measure: pump_mount width value_mm=55 status=observed artifact=evidence://vision/top-view"
+            ],
+        }
+    ]
+
+    report = build_vision_evidence_report(intake)
+    plan = plan_project_from_intake(intake)
+
+    assert report["candidate_count"] == 1
+    assert report["applied_note_count"] == 0
+    assert plan["vision_evidence_report"]["candidate_count"] == 1
+    assert plan["evidence_extraction_report"]["accepted_count"] == 0
+    assert "measured dimensions" in plan["missing_info"]
+
+
+def test_vision_assistance_can_apply_annotation_notes_to_extractor():
+    intake = load_project_intake(PLANT_INTAKE)
+    intake["vision_assistance"] = {"enabled": True, "apply": True}
+    intake["attachments"] = [
+        {
+            "id": "annotated_top_view",
+            "kind": "image",
+            "vision_evidence_notes": [
+                "measure: pump_mount width value_mm=55 status=observed artifact=evidence://vision/top-view"
+            ],
+        }
+    ]
+
+    plan = plan_project_from_intake(intake)
+    spec = plan["scenario"]["compile_spec"]
+
+    assert plan["vision_evidence_report"]["candidate_count"] == 1
+    assert plan["vision_evidence_report"]["applied_note_count"] == 1
+    assert plan["evidence_extraction_report"]["accepted_count"] == 1
+    assert spec["mechanical_measurement_capture"]["dimensions"][0]["target"] == "pump_mount width"
+    assert spec["mechanical_measurement_capture"]["dimensions"][0]["value_mm"] == 55.0

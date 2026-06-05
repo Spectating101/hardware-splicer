@@ -20,6 +20,7 @@ from .scenario_runner import (
     scenario_to_compile_spec,
 )
 from .schemas import HardwareCompileResult, HardwareCompileSpec
+from .vision_evidence_assistant import build_vision_evidence_report, enrich_intake_with_vision_assistance
 
 __all__ = [
     "HardwareCompileResult",
@@ -34,8 +35,10 @@ __all__ = [
     "build_robotics_actuation_packet",
     "build_robotics_platform_authority",
     "build_robotics_simulation_packet",
+    "build_vision_evidence_report",
     "compile_hardware_bundle",
     "enrich_intake_with_extracted_evidence",
+    "enrich_intake_with_vision_assistance",
     "load_project_intake",
     "load_hardware_scenario",
     "plan_project_from_intake",

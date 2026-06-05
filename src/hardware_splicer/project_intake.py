@@ -7,6 +7,7 @@ from typing import Any, Dict, Iterable, List, Mapping
 
 from .evidence_extractor import enrich_intake_with_extracted_evidence
 from .scenario_runner import run_hardware_scenario
+from .vision_evidence_assistant import enrich_intake_with_vision_assistance
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
@@ -35,7 +36,8 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
 
 
 def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
-    body, extraction_report = enrich_intake_with_extracted_evidence(_to_dict(intake, "intake"))
+    body, vision_report = enrich_intake_with_vision_assistance(_to_dict(intake, "intake"))
+    body, extraction_report = enrich_intake_with_extracted_evidence(body)
     project_name = _slug(str(body.get("project_name") or body.get("name") or body.get("goal") or "hardware_splicer_project"))
     goal = str(body.get("goal") or body.get("intent") or body.get("brief") or project_name).strip()
     constraints = _to_dict(body.get("constraints") or {}, "intake.constraints")
@@ -74,6 +76,7 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
         "budget": budget,
         "normalized_parts": parts,
         "assumptions": assumptions,
+        "vision_evidence_report": vision_report,
         "evidence_extraction_report": extraction_report,
         "evidence_summary": _evidence_summary(evidence, base_dir),
         "missing_info": missing,
@@ -100,18 +103,22 @@ def run_project_intake(
     out_path = Path(result["out_dir"])
     intake_file = out_path / "PROJECT_INTAKE.json"
     planned_scenario_file = out_path / "PLANNED_SCENARIO.json"
+    vision_report = _to_dict(plan.get("vision_evidence_report") or {}, "intake_plan.vision_evidence_report")
     extraction_report = _to_dict(plan.get("evidence_extraction_report") or {}, "intake_plan.evidence_extraction_report")
     upgrade_plan = build_authority_upgrade_plan(plan, result)
     evidence_kit = build_evidence_capture_kit(plan, result, upgrade_plan)
+    vision_report_file = out_path / "VISION_EVIDENCE_REPORT.json"
     extraction_report_file = out_path / "EVIDENCE_EXTRACTION_REPORT.json"
     upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
     evidence_kit_file = out_path / "EVIDENCE_CAPTURE_KIT.json"
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
+    vision_report_file.write_text(json.dumps(vision_report, indent=2), encoding="utf-8")
     extraction_report_file.write_text(json.dumps(extraction_report, indent=2), encoding="utf-8")
     upgrade_plan_file.write_text(json.dumps(upgrade_plan, indent=2), encoding="utf-8")
     evidence_kit_file.write_text(json.dumps(evidence_kit, indent=2), encoding="utf-8")
     result["intake_plan"] = plan
+    result["vision_evidence_report"] = vision_report
     result["evidence_extraction_report"] = extraction_report
     result["authority_upgrade_plan"] = upgrade_plan
     result["evidence_capture_kit"] = evidence_kit
@@ -119,6 +126,7 @@ def run_project_intake(
         **result["artifacts"],
         "project_intake": str(intake_file),
         "planned_scenario": str(planned_scenario_file),
+        "vision_evidence_report": str(vision_report_file),
         "evidence_extraction_report": str(extraction_report_file),
         "authority_upgrade_plan": str(upgrade_plan_file),
         "evidence_capture_kit": str(evidence_kit_file),
