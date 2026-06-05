@@ -23,7 +23,9 @@
       "PROJECT_LOG.json",
       "HARDWARE_REVIEW.md",
       "splicer3d_response",
-      "splicer3d_script"
+      "splicer3d_script",
+      "physical_assembly_map",
+      "physical_assembly_preview"
     ]
   }
 }

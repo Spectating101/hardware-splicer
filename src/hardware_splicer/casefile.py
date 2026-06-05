@@ -174,6 +174,9 @@ def build_casefile(
         },
         "packaging_evaluation": {
             "packaging_ready": bool(packaging.get("packaging_ready")),
+            "physical_assembly_ready": bool(packaging.get("physical_assembly_ready")),
+            "physical_assembly_artifact_count": int(packaging.get("physical_assembly_artifact_count") or 0),
+            "physical_assembly_check_count": int(packaging.get("physical_assembly_check_count") or 0),
             "generated_output_count": max(
                 int(packaging.get("generated_output_count") or 0),
                 int(coverage.get("generated_output_count") or 0),
@@ -182,6 +185,7 @@ def build_casefile(
             "splicer3d_used": bool(packaging.get("splicer3d_used")),
             "mecha_bundle_file": packaging.get("mecha_bundle_file") or mechanism_analysis.get("bundle_file"),
             "splicer3d": _compact_splicer3d(_dict(mechanism_analysis.get("splicer3d"))),
+            "physical_assembly": _compact_physical_assembly(_dict(mechanism_analysis.get("physical_assembly"))),
             "warnings": _string_list(packaging.get("warnings")),
             "blockers": _string_list(packaging.get("blockers")),
         },
@@ -266,8 +270,8 @@ def build_project_log(casefile: Mapping[str, Any]) -> Dict[str, Any]:
         {
             "phase": "packaging",
             "status": "closed" if packaging.get("packaging_ready") else "open",
-            "summary": f"Packaging generated {packaging.get('generated_output_count') or 0} output(s); 3D-Splicer used: {bool(packaging.get('splicer3d_used'))}.",
-            "evidence": _artifact_names(data, ["splicer3d_script", "splicer3d_response", "mecha_bundle"]),
+            "summary": f"Packaging generated {packaging.get('generated_output_count') or 0} output(s); 3D-Splicer used: {bool(packaging.get('splicer3d_used'))}; physical assembly ready: {bool(packaging.get('physical_assembly_ready'))}.",
+            "evidence": _artifact_names(data, ["splicer3d_script", "splicer3d_response", "splicer3d_stl", "physical_assembly_map", "physical_assembly_preview", "mecha_bundle"]),
             "next": "; ".join(_string_list(packaging.get("blockers"))[:3]),
         },
         {
@@ -377,6 +381,8 @@ def render_hardware_review(casefile: Mapping[str, Any], project_log: Mapping[str
             "",
             "## Packaging and Build Outputs",
             f"- Packaging ready: `{bool(packaging.get('packaging_ready'))}`",
+            f"- Physical assembly ready: `{bool(packaging.get('physical_assembly_ready'))}`",
+            f"- Physical assembly checks: `{packaging.get('physical_assembly_check_count') or 0}`",
             f"- 3D-Splicer used: `{bool(packaging.get('splicer3d_used'))}`",
             f"- Mecha bundle: `{packaging.get('mecha_bundle_file') or project.get('mecha_bundle_dir') or 'not generated'}`",
         ]
@@ -553,6 +559,20 @@ def _compact_splicer3d(splicer3d: Dict[str, Any]) -> Dict[str, Any]:
         "script_present": bool(str(splicer3d.get("script") or "").strip()),
         "stl_path": splicer3d.get("stl_path"),
         "error": splicer3d.get("error"),
+    }
+
+
+def _compact_physical_assembly(assembly: Dict[str, Any]) -> Dict[str, Any]:
+    if not assembly:
+        return {}
+    return {
+        "schema_version": assembly.get("schema_version"),
+        "assembly_ready": bool(assembly.get("assembly_ready")),
+        "connector_keepout_count": len(_list_dicts(assembly.get("connector_keepouts"))),
+        "cable_route_count": len(_list_dicts(assembly.get("cable_routes"))),
+        "fastener_stackup_count": len(_list_dicts(assembly.get("fastener_stackups"))),
+        "clearance_check_count": len(_list_dicts(assembly.get("clearance_checks"))),
+        "blockers": _string_list(assembly.get("blockers")),
     }
 
 

@@ -1,13 +1,42 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
 
 def attach_robotics_platform_geometry(payload: Mapping[str, Any] | Any, *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
-    """Generate small robotics platform geometry supplements and attach them to engineering evidence."""
+    """Generate robotics/mechatronics geometry supplements and attach them to engineering evidence."""
 
     body = _to_dict(payload)
+    generated = False
+    artifacts: Dict[str, str] = {}
+    outputs: List[str] = []
+    dimensions: Dict[str, Any] = {}
+
+    physical = _attach_physical_assembly(body, engineering=engineering, out_dir=out_dir)
+    if physical.get("generated"):
+        generated = True
+        artifacts.update(_dict(physical.get("artifacts")))
+        outputs.extend(_string_list(physical.get("outputs")))
+        dimensions["physical_assembly"] = _dict(physical.get("dimensions"))
+
+    drive = _attach_drive_base(body, engineering=engineering, out_dir=out_dir)
+    if drive.get("generated"):
+        generated = True
+        artifacts.update(_dict(drive.get("artifacts")))
+        outputs.extend(_string_list(drive.get("outputs")))
+        dimensions["drive_base"] = _dict(drive.get("dimensions"))
+
+    return {
+        "generated": generated,
+        "artifacts": artifacts,
+        "outputs": _dedupe_strings(outputs),
+        "dimensions": dimensions,
+    }
+
+
+def _attach_drive_base(body: Dict[str, Any], *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
     project = _first_dict(body.get("robotics_project"), body.get("mechatronics_project"))
     platform = _first_dict(body.get("robotics_platform"), project.get("platform"))
     mobility = _first_dict(platform.get("mobility"), project.get("mobility"))
@@ -71,6 +100,449 @@ def attach_robotics_platform_geometry(payload: Mapping[str, Any] | Any, *, engin
         "outputs": [output_name],
         "dimensions": dimensions,
     }
+
+
+def _attach_physical_assembly(body: Dict[str, Any], *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
+    machine = _dict(body.get("machine"))
+    boards = _list_dicts(machine.get("boards"))
+    mechanism = _dict(body.get("mechanism"))
+    if not boards or not mechanism:
+        return {"generated": False, "artifacts": {}, "outputs": []}
+
+    board = boards[0]
+    board_geometry = _board_geometry(board)
+    enclosure = _enclosure_geometry(_dict(mechanism.get("enclosure")), board_geometry)
+    pan_tilt = _pan_tilt_geometry(_dict(mechanism.get("pan_tilt")))
+    placements = _assembly_placements(board_geometry, enclosure, pan_tilt)
+    connector_keepouts = _connector_keepouts(board, board_geometry, enclosure)
+    cable_routes = _cable_routes(board, board_geometry, enclosure, pan_tilt)
+    fastener_stackups = _fastener_stackups(board_geometry, enclosure)
+    clearance_checks = _clearance_checks(board_geometry, enclosure, cable_routes)
+    blockers = [row["message"] for row in clearance_checks if row.get("status") != "pass"]
+
+    assembly_map = {
+        "schema_version": "hardware_splicer.physical_assembly.v1",
+        "coordinate_frame": {
+            "origin": "enclosure_center_floor",
+            "units": "mm",
+            "axes": {"x": "board width", "y": "board depth", "z": "height above enclosure floor"},
+        },
+        "board": board_geometry,
+        "enclosure": enclosure,
+        "placements": placements,
+        "connector_keepouts": connector_keepouts,
+        "cable_routes": cable_routes,
+        "fastener_stackups": fastener_stackups,
+        "clearance_checks": clearance_checks,
+        "assembly_ready": not blockers,
+        "blockers": blockers,
+        "scope_limits": [
+            "Reference assembly uses declared outline, mount, cutout, and mechanism metadata; it is not a full KiCad STEP assembly.",
+            "Connector body height, harness diameter, and exact component keepouts must be replaced with measured data before enclosure tooling.",
+        ],
+    }
+
+    target_dir = out_dir / "physical_assembly"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    map_path = target_dir / "ASSEMBLY_MAP.json"
+    preview_path = target_dir / "assembly_preview.scad"
+    assembly_map["artifacts"] = [
+        {"id": "physical_assembly_map", "path": str(map_path)},
+        {"id": "physical_assembly_preview", "path": str(preview_path)},
+    ]
+    map_path.write_text(json.dumps(assembly_map, indent=2), encoding="utf-8")
+    preview_path.write_text(_assembly_preview_scad(assembly_map), encoding="utf-8")
+
+    analysis = engineering.setdefault("analysis", {})
+    if not isinstance(analysis, dict):
+        engineering["analysis"] = analysis = {}
+    mechanism_analysis = analysis.setdefault("mechanism", {})
+    if not isinstance(mechanism_analysis, dict):
+        analysis["mechanism"] = mechanism_analysis = {}
+
+    output_names = ["physical_assembly/assembly_preview.scad", "physical_assembly/ASSEMBLY_MAP.json"]
+    mechanism_analysis["outputs"] = _dedupe_strings(_string_list(mechanism_analysis.get("outputs")) + output_names)
+    mechanism_analysis["parts"] = _list_dicts(mechanism_analysis.get("parts")) + [
+        {
+            "file": "physical_assembly/assembly_preview.scad",
+            "module": "physical_assembly_preview",
+            "kind": "assembly",
+            "notes": "Board/enclosure/mechanism spatial assembly preview with connector keepouts, cable routes, and fastener stackups.",
+        },
+        {
+            "file": "physical_assembly/ASSEMBLY_MAP.json",
+            "module": "physical_assembly_map",
+            "kind": "assembly",
+            "notes": "Structured physical integration map for PCB placement, harness routing, fasteners, keepouts, and clearance checks.",
+        },
+    ]
+    mechanism_analysis["dfm"] = _list_dicts(mechanism_analysis.get("dfm")) + [
+        {
+            "severity": "info" if not blockers else "warn",
+            "domain": "physical_assembly",
+            "message": "Physical assembly map generated with PCB placement, connector keepouts, cable routes, and fastener stackups."
+            if not blockers
+            else "Physical assembly map generated with clearance warnings: " + "; ".join(blockers[:4]),
+        }
+    ]
+    mechanism_analysis["simulation"] = _list_dicts(mechanism_analysis.get("simulation")) + [
+        {
+            "severity": "info" if not blockers else "warn",
+            "domain": "physical_assembly",
+            "model": "spatial_clearance_budget",
+            "message": "Assembly spatial clearance budget is closed for declared board/enclosure/mechanism metadata."
+            if not blockers
+            else "Assembly spatial clearance budget has warnings that need measured follow-up.",
+            "metrics": {
+                "connector_keepout_count": len(connector_keepouts),
+                "cable_route_count": len(cable_routes),
+                "fastener_stackup_count": len(fastener_stackups),
+                "clearance_check_count": len(clearance_checks),
+            },
+        }
+    ]
+    mechanism_analysis["safety"] = _list_dicts(mechanism_analysis.get("safety")) + [
+        {
+            "severity": "info",
+            "domain": "physical_assembly",
+            "message": "Assembly map includes cable strain relief and service-loop routing markers for low-voltage bench validation.",
+        }
+    ]
+    mechanism_analysis["physical_assembly"] = assembly_map
+
+    return {
+        "generated": True,
+        "artifacts": {
+            "physical_assembly_map": str(map_path),
+            "physical_assembly_preview": str(preview_path),
+        },
+        "outputs": output_names,
+        "dimensions": {
+            "board": board_geometry.get("dimensions_mm"),
+            "enclosure": enclosure.get("outer_dimensions_mm"),
+            "assembly_ready": not blockers,
+        },
+    }
+
+
+def _board_geometry(board: Dict[str, Any]) -> Dict[str, Any]:
+    outline = board.get("pcb_outline_mm")
+    if isinstance(outline, list) and len(outline) >= 2:
+        pcb_w = _float(outline[0], 80.0)
+        pcb_d = _float(outline[1], 50.0)
+        pcb_t = _float(outline[2] if len(outline) > 2 else None, 1.6)
+    else:
+        board_req = _dict(_dict(board.get("requirements")).get("board"))
+        dims = _dict(board_req.get("dimensions_mm"))
+        pcb_w = _float(dims.get("x") or dims.get("width_mm"), 80.0)
+        pcb_d = _float(dims.get("y") or dims.get("height_mm") or dims.get("depth_mm"), 50.0)
+        pcb_t = _float(dims.get("z") or dims.get("thickness_mm"), 1.6)
+
+    mounts = []
+    for row in _list_dicts(board.get("mounts")):
+        mounts.append(
+            {
+                "id": str(row.get("id") or row.get("name") or f"M{len(mounts) + 1}"),
+                "x_mm": round(_float(row.get("x_mm"), 0.0), 3),
+                "y_mm": round(_float(row.get("y_mm"), 0.0), 3),
+                "diameter_mm": round(_float(row.get("d_mm") or row.get("diameter_mm"), 2.4), 3),
+            }
+        )
+    if not mounts:
+        margin = 6.0
+        mounts = [
+            {"id": "M1", "x_mm": margin, "y_mm": margin, "diameter_mm": 2.4},
+            {"id": "M2", "x_mm": max(pcb_w - margin, margin), "y_mm": max(pcb_d - margin, margin), "diameter_mm": 2.4},
+        ]
+
+    ports = []
+    for row in _list_dicts(board.get("ports")):
+        rect = _dict(row.get("rect"))
+        ports.append(
+            {
+                "id": str(row.get("label") or row.get("name") or f"P{len(ports) + 1}"),
+                "kind": str(row.get("kind") or "rect"),
+                "face": str(row.get("face") or "front"),
+                "x_mm": round(_float(rect.get("x_mm"), 0.0), 3),
+                "y_mm": round(_float(rect.get("y_mm"), 0.0), 3),
+                "w_mm": round(_float(rect.get("w_mm"), 8.0), 3),
+                "h_mm": round(_float(rect.get("h_mm"), 4.0), 3),
+            }
+        )
+
+    return {
+        "board_id": str(board.get("board_id") or board.get("name") or "main_board"),
+        "dimensions_mm": {"w": round(pcb_w, 3), "d": round(pcb_d, 3), "t": round(pcb_t, 3)},
+        "mounts": mounts,
+        "ports": ports,
+        "capabilities": _dict(board.get("capabilities")),
+    }
+
+
+def _enclosure_geometry(enclosure: Dict[str, Any], board: Dict[str, Any]) -> Dict[str, Any]:
+    board_dim = _dict(board.get("dimensions_mm"))
+    wall = _float(enclosure.get("wall_mm"), 2.4)
+    floor = _float(enclosure.get("floor_mm"), 2.0)
+    lid = _float(enclosure.get("lid_mm"), 2.0)
+    clearance = _float(enclosure.get("clearance_mm"), 0.5)
+    inner_w = _float(enclosure.get("inner_w_mm"), _float(board_dim.get("w"), 80.0) + 10.0)
+    inner_d = _float(enclosure.get("inner_d_mm"), _float(board_dim.get("d"), 50.0) + 10.0)
+    inner_h = _float(enclosure.get("inner_h_mm"), 25.0)
+    return {
+        "name": str(enclosure.get("name") or "controller_case"),
+        "inner_dimensions_mm": {"w": round(inner_w, 3), "d": round(inner_d, 3), "h": round(inner_h, 3)},
+        "outer_dimensions_mm": {
+            "w": round(inner_w + wall * 2.0, 3),
+            "d": round(inner_d + wall * 2.0, 3),
+            "h": round(inner_h + floor + lid, 3),
+        },
+        "wall_mm": round(wall, 3),
+        "floor_mm": round(floor, 3),
+        "lid_mm": round(lid, 3),
+        "clearance_mm": round(clearance, 3),
+        "standoff_height_mm": round(max(floor + 2.5, 4.0), 3),
+        "standoff_diameter_mm": round(max(wall * 2.1, 5.0), 3),
+    }
+
+
+def _pan_tilt_geometry(pan_tilt: Dict[str, Any]) -> Dict[str, Any]:
+    if not pan_tilt:
+        return {}
+    payload_n = _float(pan_tilt.get("max_payload_n") or pan_tilt.get("payload_n"), 0.0)
+    offset_mm = _float(pan_tilt.get("payload_offset_mm"), 0.0)
+    return {
+        "name": str(pan_tilt.get("name") or "pan_tilt"),
+        "pan_servo": str(pan_tilt.get("pan_servo") or "sg90"),
+        "tilt_servo": str(pan_tilt.get("tilt_servo") or "sg90"),
+        "payload_n": round(payload_n, 3),
+        "payload_offset_mm": round(offset_mm, 3),
+        "required_payload_torque_nm": round(payload_n * offset_mm / 1000.0, 4) if payload_n and offset_mm else 0.0,
+    }
+
+
+def _assembly_placements(board: Dict[str, Any], enclosure: Dict[str, Any], pan_tilt: Dict[str, Any]) -> Dict[str, Any]:
+    board_dim = _dict(board.get("dimensions_mm"))
+    enc_inner = _dict(enclosure.get("inner_dimensions_mm"))
+    z = _float(enclosure.get("standoff_height_mm"), 4.0) + _float(board_dim.get("t"), 1.6) / 2.0
+    placements = {
+        "pcb": {
+            "component": board.get("board_id"),
+            "origin_xyz_mm": [0.0, 0.0, round(z, 3)],
+            "dimensions_mm": board_dim,
+            "clearance_to_inner_wall_mm": {
+                "x_each_side": round(max((_float(enc_inner.get("w"), 0.0) - _float(board_dim.get("w"), 0.0)) / 2.0, 0.0), 3),
+                "y_each_side": round(max((_float(enc_inner.get("d"), 0.0) - _float(board_dim.get("d"), 0.0)) / 2.0, 0.0), 3),
+            },
+        }
+    }
+    if pan_tilt:
+        enc_outer = _dict(enclosure.get("outer_dimensions_mm"))
+        placements["pan_tilt"] = {
+            "component": pan_tilt.get("name"),
+            "origin_xyz_mm": [0.0, round(_float(enc_outer.get("d"), 0.0) / 2.0 + 18.0, 3), 8.0],
+            "mount_relation": "front/top edge reference placement for routing and clearance planning",
+        }
+    return placements
+
+
+def _connector_keepouts(board: Dict[str, Any], board_geometry: Dict[str, Any], enclosure: Dict[str, Any]) -> List[Dict[str, Any]]:
+    del enclosure
+    board_dim = _dict(board_geometry.get("dimensions_mm"))
+    keepouts: List[Dict[str, Any]] = []
+    for port in _list_dicts(board_geometry.get("ports")):
+        x = _float(port.get("x_mm"), 0.0) - _float(board_dim.get("w"), 0.0) / 2.0
+        y = _float(port.get("y_mm"), 0.0) - _float(board_dim.get("d"), 0.0) / 2.0
+        keepouts.append(
+            {
+                "id": str(port.get("id") or "port"),
+                "type": "connector_cutout_keepout",
+                "face": port.get("face"),
+                "center_xyz_mm": [round(x, 3), round(y, 3), 6.0],
+                "size_xyz_mm": [round(_float(port.get("w_mm"), 8.0) + 2.0, 3), round(_float(port.get("h_mm"), 4.0) + 2.0, 3), 8.0],
+                "rule": "no enclosure wall, fastener, or harness clamp may intrude into connector insertion volume",
+            }
+        )
+    return keepouts
+
+
+def _cable_routes(board: Dict[str, Any], board_geometry: Dict[str, Any], enclosure: Dict[str, Any], pan_tilt: Dict[str, Any]) -> List[Dict[str, Any]]:
+    del board
+    board_dim = _dict(board_geometry.get("dimensions_mm"))
+    enc_inner = _dict(enclosure.get("inner_dimensions_mm"))
+    z = round(_float(enclosure.get("standoff_height_mm"), 4.0) + _float(board_dim.get("t"), 1.6) + 3.0, 3)
+    routes: List[Dict[str, Any]] = []
+    for port in _list_dicts(board_geometry.get("ports")):
+        start_x = _float(port.get("x_mm"), 0.0) - _float(board_dim.get("w"), 0.0) / 2.0
+        start_y = _float(port.get("y_mm"), 0.0) - _float(board_dim.get("d"), 0.0) / 2.0
+        face = str(port.get("face") or "front")
+        exit_y = -_float(enc_inner.get("d"), 0.0) / 2.0 if face == "front" else _float(enc_inner.get("d"), 0.0) / 2.0
+        routes.append(
+            {
+                "id": f"{port.get('id')}_service_loop",
+                "type": "external_connector_service_loop",
+                "points_xyz_mm": [[round(start_x, 3), round(start_y, 3), z], [round(start_x, 3), round(exit_y, 3), z]],
+                "min_bend_radius_mm": 8.0,
+                "channel_width_mm": 7.0,
+                "strain_relief": {"type": "printed_saddle", "offset_from_exit_mm": 10.0},
+            }
+        )
+    if pan_tilt:
+        routes.append(
+            {
+                "id": "servo_harness_to_pan_tilt",
+                "type": "servo_power_pwm_harness",
+                "points_xyz_mm": [[0.0, 0.0, z], [0.0, round(_float(enc_inner.get("d"), 0.0) / 2.0, 3), z], [0.0, round(_float(enc_inner.get("d"), 0.0) / 2.0 + 18.0, 3), 12.0]],
+                "min_bend_radius_mm": 10.0,
+                "channel_width_mm": 8.0,
+                "strain_relief": {"type": "two_screw_cable_bridge", "offset_from_exit_mm": 12.0},
+            }
+        )
+    return routes
+
+
+def _fastener_stackups(board: Dict[str, Any], enclosure: Dict[str, Any]) -> List[Dict[str, Any]]:
+    board_dim = _dict(board.get("dimensions_mm"))
+    stacks: List[Dict[str, Any]] = []
+    for mount in _list_dicts(board.get("mounts")):
+        x = _float(mount.get("x_mm"), 0.0) - _float(board_dim.get("w"), 0.0) / 2.0
+        y = _float(mount.get("y_mm"), 0.0) - _float(board_dim.get("d"), 0.0) / 2.0
+        screw_d = _float(mount.get("diameter_mm"), 2.4)
+        stacks.append(
+            {
+                "id": str(mount.get("id") or f"M{len(stacks) + 1}"),
+                "center_xy_mm": [round(x, 3), round(y, 3)],
+                "screw_clearance_diameter_mm": round(screw_d + 0.4, 3),
+                "standoff_outer_diameter_mm": enclosure.get("standoff_diameter_mm"),
+                "standoff_height_mm": enclosure.get("standoff_height_mm"),
+                "stack": ["enclosure_floor", "printed_standoff", "pcb", "washer_optional", "M2_or_M2.5_screw"],
+            }
+        )
+    return stacks
+
+
+def _clearance_checks(board: Dict[str, Any], enclosure: Dict[str, Any], cable_routes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    board_dim = _dict(board.get("dimensions_mm"))
+    enc_inner = _dict(enclosure.get("inner_dimensions_mm"))
+    required = _float(enclosure.get("clearance_mm"), 0.5)
+    x_clear = (_float(enc_inner.get("w"), 0.0) - _float(board_dim.get("w"), 0.0)) / 2.0
+    y_clear = (_float(enc_inner.get("d"), 0.0) - _float(board_dim.get("d"), 0.0)) / 2.0
+    z_clear = _float(enc_inner.get("h"), 0.0) - _float(enclosure.get("standoff_height_mm"), 4.0) - _float(board_dim.get("t"), 1.6)
+    checks = [
+        {
+            "id": "pcb_x_clearance",
+            "status": "pass" if x_clear >= required else "warn",
+            "value_mm": round(x_clear, 3),
+            "required_mm": round(required, 3),
+            "message": "PCB width clearance to enclosure wall",
+        },
+        {
+            "id": "pcb_y_clearance",
+            "status": "pass" if y_clear >= required else "warn",
+            "value_mm": round(y_clear, 3),
+            "required_mm": round(required, 3),
+            "message": "PCB depth clearance to enclosure wall",
+        },
+        {
+            "id": "pcb_z_service_clearance",
+            "status": "pass" if z_clear >= 6.0 else "warn",
+            "value_mm": round(z_clear, 3),
+            "required_mm": 6.0,
+            "message": "Vertical PCB service clearance for connectors and harness service loop",
+        },
+    ]
+    for route in cable_routes:
+        width = _float(route.get("channel_width_mm"), 0.0)
+        checks.append(
+            {
+                "id": f"{route.get('id')}_channel_width",
+                "status": "pass" if width >= 6.0 else "warn",
+                "value_mm": round(width, 3),
+                "required_mm": 6.0,
+                "message": f"Cable route {route.get('id')} has printable/serviceable channel width",
+            }
+        )
+    return checks
+
+
+def _assembly_preview_scad(assembly: Dict[str, Any]) -> str:
+    board = _dict(assembly.get("board"))
+    board_dim = _dict(board.get("dimensions_mm"))
+    enclosure = _dict(assembly.get("enclosure"))
+    inner = _dict(enclosure.get("inner_dimensions_mm"))
+    outer = _dict(enclosure.get("outer_dimensions_mm"))
+    placements = _dict(assembly.get("placements"))
+    pcb_place = _dict(placements.get("pcb"))
+    pcb_origin = _float_list(pcb_place.get("origin_xyz_mm"), [0.0, 0.0, 5.0])
+    pan_place = _dict(placements.get("pan_tilt"))
+    pan_origin = _float_list(pan_place.get("origin_xyz_mm"), [0.0, _float(outer.get("d"), 60.0) / 2.0 + 18.0, 8.0])
+    lines = [
+        "// Hardware-Splicer physical assembly preview",
+        "// Visualizes PCB placement, enclosure envelope, connector keepouts, cable routes, fastener stackups, and mechanism reference position.",
+        f"pcb_w = {_float(board_dim.get('w'), 80.0):.3f};",
+        f"pcb_d = {_float(board_dim.get('d'), 50.0):.3f};",
+        f"pcb_t = {_float(board_dim.get('t'), 1.6):.3f};",
+        f"inner_w = {_float(inner.get('w'), 90.0):.3f};",
+        f"inner_d = {_float(inner.get('d'), 62.0):.3f};",
+        f"inner_h = {_float(inner.get('h'), 28.0):.3f};",
+        f"outer_w = {_float(outer.get('w'), 95.0):.3f};",
+        f"outer_d = {_float(outer.get('d'), 67.0):.3f};",
+        f"outer_h = {_float(outer.get('h'), 32.0):.3f};",
+        "",
+        "module enclosure_envelope() {",
+        "  color([0.85, 0.85, 0.85, 0.22])",
+        "    translate([0, 0, outer_h / 2]) cube([outer_w, outer_d, outer_h], center=true);",
+        "  color([0.15, 0.15, 0.15, 0.12])",
+        "    translate([0, 0, outer_h / 2 + 0.2]) cube([inner_w, inner_d, inner_h], center=true);",
+        "}",
+        "",
+        "module pcb() {",
+        "  color([0.0, 0.45, 0.2, 0.85]) cube([pcb_w, pcb_d, pcb_t], center=true);",
+        "}",
+        "",
+        "module fastener_stack(x, y, d, h) {",
+        "  color([0.1, 0.1, 0.1, 0.85]) translate([x, y, h / 2]) cylinder(h=h, d=d, $fn=32);",
+        "  color([0.8, 0.8, 0.8, 0.85]) translate([x, y, h + pcb_t / 2]) cylinder(h=pcb_t + 2, d=max(d - 2, 2.2), center=true, $fn=32);",
+        "}",
+        "",
+        "module keepout_box(x, y, z, sx, sy, sz) {",
+        "  color([1.0, 0.2, 0.05, 0.35]) translate([x, y, z]) cube([sx, sy, sz], center=true);",
+        "}",
+        "",
+        "module cable_route(points, width) {",
+        "  color([0.05, 0.15, 1.0, 0.70])",
+        "    for (i = [0:len(points)-2]) hull() {",
+        "      translate(points[i]) sphere(d=width, $fn=16);",
+        "      translate(points[i + 1]) sphere(d=width, $fn=16);",
+        "    }",
+        "}",
+        "",
+        "module pan_tilt_reference() {",
+        "  color([0.2, 0.2, 0.75, 0.72]) cylinder(h=6, d=34, center=true, $fn=48);",
+        "  color([0.25, 0.25, 0.85, 0.72]) translate([0, 0, 12]) cube([28, 18, 18], center=true);",
+        "  color([0.25, 0.25, 0.85, 0.72]) translate([0, 0, 28]) cube([38, 10, 22], center=true);",
+        "}",
+        "",
+        "enclosure_envelope();",
+        f"translate([{pcb_origin[0]:.3f}, {pcb_origin[1]:.3f}, {pcb_origin[2]:.3f}]) pcb();",
+    ]
+    for stack in _list_dicts(assembly.get("fastener_stackups")):
+        center = _float_list(stack.get("center_xy_mm"), [0.0, 0.0])
+        lines.append(
+            f"fastener_stack({center[0]:.3f}, {center[1]:.3f}, {_float(stack.get('standoff_outer_diameter_mm'), 5.0):.3f}, {_float(stack.get('standoff_height_mm'), 4.0):.3f});"
+        )
+    for keepout in _list_dicts(assembly.get("connector_keepouts")):
+        center = _float_list(keepout.get("center_xyz_mm"), [0.0, 0.0, 6.0])
+        size = _float_list(keepout.get("size_xyz_mm"), [8.0, 6.0, 8.0])
+        lines.append(f"keepout_box({center[0]:.3f}, {center[1]:.3f}, {center[2]:.3f}, {size[0]:.3f}, {size[1]:.3f}, {size[2]:.3f});")
+    for route in _list_dicts(assembly.get("cable_routes")):
+        points = _list_points(route.get("points_xyz_mm"))
+        if not points:
+            continue
+        point_expr = "[" + ", ".join(f"[{p[0]:.3f}, {p[1]:.3f}, {p[2]:.3f}]" for p in points) + "]"
+        lines.append(f"cable_route({point_expr}, {_float(route.get('channel_width_mm'), 6.0):.3f});")
+    if pan_place:
+        lines.append(f"translate([{pan_origin[0]:.3f}, {pan_origin[1]:.3f}, {pan_origin[2]:.3f}]) pan_tilt_reference();")
+    return "\n".join(lines).rstrip() + "\n"
 
 
 def _drive_base_dimensions(drive_base: Dict[str, Any], project: Dict[str, Any], mobility: Dict[str, Any]) -> Dict[str, float]:
@@ -185,3 +657,22 @@ def _float(value: Any, default: float) -> float:
         return float(value)
     except Exception:
         return default
+
+
+def _float_list(value: Any, default: List[float]) -> List[float]:
+    if not isinstance(value, list):
+        return list(default)
+    out = list(default)
+    for index, item in enumerate(value[: len(default)]):
+        out[index] = _float(item, out[index])
+    return out
+
+
+def _list_points(value: Any) -> List[List[float]]:
+    if not isinstance(value, list):
+        return []
+    points: List[List[float]] = []
+    for row in value:
+        if isinstance(row, list) and len(row) >= 3:
+            points.append(_float_list(row[:3], [0.0, 0.0, 0.0]))
+    return points

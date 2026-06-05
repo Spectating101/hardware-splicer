@@ -84,6 +84,7 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     authority = result["project_authority"]
     metrics = result["production_release_metrics"]
     splicer3d = json.loads(Path(result["artifacts"]["splicer3d_response"]).read_text(encoding="utf-8"))
+    assembly = json.loads(Path(result["artifacts"]["physical_assembly_map"]).read_text(encoding="utf-8"))
 
     assert result["compile_ok"] is True
     assert result["ok"] is True
@@ -96,8 +97,15 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     assert metrics["production_ready"] is True
     assert metrics["gates_passed"] == metrics["gates_total"] == 9
     assert Path(result["artifacts"]["splicer3d_script"]).exists()
+    assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
     assert splicer3d["mode"] in {"stl", "script_fallback"}
     assert splicer3d.get("ok") is True or splicer3d.get("script")
+    assert assembly["assembly_ready"] is True
+    assert assembly["placements"]["pcb"]["component"] == "main_ctrl"
+    assert assembly["placements"]["pan_tilt"]["component"] == "camera_pan_tilt"
+    assert assembly["connector_keepouts"]
+    assert assembly["cable_routes"]
+    assert assembly["fastener_stackups"]
 
 
 def test_scenario_run_api_returns_project_authority(tmp_path, monkeypatch):

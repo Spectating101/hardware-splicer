@@ -231,6 +231,7 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
     mechanism = _dict(_dict(engineering.get("analysis")).get("mechanism"))
     mechanism_spec = _dict(body.get("mechanism"))
     mechanism_bundle = _load_mecha_bundle(mechanism)
+    physical_assembly = _dict(mechanism.get("physical_assembly"))
     blockers: List[str] = []
     warnings: List[str] = []
 
@@ -256,11 +257,21 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
         if str(issue.get("severity") or "").lower() in {"block", "error", "critical"}:
             blockers.append(str(issue.get("message") or "Packaging DFM blocker."))
 
+    physical_ready = bool(physical_assembly.get("assembly_ready"))
+    physical_blockers = _string_list(physical_assembly.get("blockers"))
+    if mechanism_spec and physical_assembly and not physical_ready:
+        blockers.extend("Physical assembly: " + row for row in physical_blockers)
+    if mechanism_spec and not physical_assembly:
+        warnings.append("No physical assembly map was generated for board/package/mechanism spatial integration.")
+
     return {
         "packaging_ready": not blockers and bool(bundle_file),
         "mecha_bundle_file": bundle_file,
         "generated_output_count": len(outputs),
         "splicer3d_used": bool(body.get("use_3d_splicer", True)) and bool(mechanism_spec),
+        "physical_assembly_ready": physical_ready,
+        "physical_assembly_artifact_count": _artifact_count(physical_assembly),
+        "physical_assembly_check_count": len(_list_dicts(physical_assembly.get("clearance_checks"))),
         "blockers": _dedupe_strings(blockers),
         "warnings": _dedupe_strings(warnings),
     }
