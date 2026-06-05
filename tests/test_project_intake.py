@@ -11,6 +11,7 @@ from hardware_splicer.api import create_app
 
 ROOT = Path(__file__).resolve().parents[1]
 PLANT_INTAKE = ROOT / "examples" / "intakes" / "plant_watering_brief.json"
+PLANT_EVIDENCE_INTAKE = ROOT / "examples" / "intakes" / "plant_watering_evidence_pack.json"
 ROVER_INTAKE = ROOT / "examples" / "intakes" / "rover_brief.json"
 
 
@@ -22,7 +23,7 @@ def test_project_intake_plans_automatic_watering_scenario():
     assert plan["schema_version"] == "hardware_splicer.project_intake.v1"
     assert plan["archetype"] == "automatic_watering"
     assert plan["planning_confidence"] >= 0.75
-    assert plan["missing_info"] == ["measured dimensions", "bench evidence", "reviewed release scope"]
+    assert plan["missing_info"] == ["measured dimensions", "mechanical simulation", "bench evidence", "reviewed release scope"]
     spec = plan["scenario"]["compile_spec"]
     assert spec["mechanism"]["mode"] == "prototype"
     assert {"w_mm", "d_mm", "t_mm"} <= set(spec["mechanism"]["bracket"])
@@ -57,11 +58,16 @@ def test_project_intake_runs_to_control_safety_package(tmp_path):
     assert Path(result["artifacts"]["project_intake"]).exists()
     assert Path(result["artifacts"]["planned_scenario"]).exists()
     assert Path(result["artifacts"]["authority_upgrade_plan"]).exists()
+    assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
     assert Path(result["artifacts"]["production_release_metrics"]).exists()
     assert result["authority_upgrade_plan"]["evidence_requests"]
+    assert any(row["id"] == "mechanical_simulation_capture" for row in result["authority_upgrade_plan"]["evidence_requests"])
+    assert result["evidence_capture_kit"]["open_gate_count"] > 0
+    assert "mechanical_simulation_capture" in result["evidence_capture_kit"]["template_intake_patch"]["evidence"]
     scenario_result = json.loads(Path(result["artifacts"]["scenario_result"]).read_text(encoding="utf-8"))
     assert scenario_result["intake_plan"]["archetype"] == "automatic_watering"
     assert scenario_result["authority_upgrade_plan"]["next_level"] == "simulation_bench_project_package"
+    assert scenario_result["evidence_capture_kit"]["schema_version"] == "hardware_splicer.evidence_capture_kit.v1"
     assert scenario_result["production_release_metrics"]["production_ready"] is False
 
 
@@ -111,7 +117,7 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     intake = load_project_intake(PLANT_INTAKE)
     intake["evidence"] = {
         "board_design_files": [
-            {"path": "designs/controller.kicad_pcb", "kind": "kicad_pcb"}
+            {"path": "../main_ctrl_esp32_servo.net", "kind": "netlist"}
         ],
         "mechanical_measurement_capture": {
             "artifact_uris": ["evidence://plant/calipers"],
@@ -121,6 +127,15 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
                 {"target": "tube strain relief", "value_mm": 8, "status": "verified"}
             ],
             "clearances": [{"target": "pump wiring", "clearance_mm": 1.2, "status": "pass"}]
+        },
+        "mechanical_simulation_capture": {
+            "artifact_uris": ["evidence://plant/fit-load-sim"],
+            "simulation_verified": True,
+            "simulation": [
+                {"target": "controller_case clearance", "status": "pass"},
+                {"target": "pump_mount retained load", "status": "pass"},
+                {"target": "watering_module tube routing", "status": "pass"}
+            ]
         },
         "mechanical_bench_capture": {
             "artifact_uris": ["evidence://plant/fit"],
@@ -151,13 +166,44 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     spec = plan["scenario"]["compile_spec"]
 
     assert "measured dimensions" not in plan["missing_info"]
+    assert "mechanical simulation" not in plan["missing_info"]
     assert "bench evidence" not in plan["missing_info"]
     assert "reviewed release scope" not in plan["missing_info"]
-    assert spec["board_design_files"]["main_ctrl"]["kind"] == "kicad_pcb"
-    assert spec["board_design_files"]["main_ctrl"]["path"].endswith("examples/intakes/designs/controller.kicad_pcb")
+    assert spec["board_design_files"]["main_ctrl"]["kind"] == "netlist"
+    assert spec["board_design_files"]["main_ctrl"]["path"].endswith("examples/main_ctrl_esp32_servo.net")
     assert spec["mechanical_measurement_capture"]["artifact_uris"] == ["evidence://plant/calipers"]
+    assert spec["mechanical_simulation_capture"]["simulation_verified"] is True
     assert spec["robotics_bench_capture"]["current_tests"][0]["status"] == "pass"
     assert spec["mechatronics_release"]["acceptance_reviewed"] is True
     assert plan["evidence_summary"]["board_design_file_count"] == 1
+    assert plan["evidence_summary"]["has_mechanical_simulation"] is True
     assert plan["evidence_summary"]["release_reviewed"] is True
     assert plan["scenario"]["expected"]["minimum_authority_level"] == "field_validation_authority"
+
+
+def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
+    intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
+
+    result = run_project_intake(intake, out_dir=tmp_path / "plant-evidence", start_splicer=False, request_id="plant-evidence")
+
+    authority = result["project_authority"]
+    metrics = result["production_release_metrics"]
+    platform = result["compile_result"]["robotics_platform_authority"]
+    mechatronics = result["compile_result"]["mechatronics_authority"]
+    mechanical = result["compile_result"]["mechanical_authority"]
+    actuation = result["compile_result"]["robotics_actuation"]
+
+    assert result["ok"] is True
+    assert authority["project_authority_level"] == "production_ready_project_package"
+    assert authority["claimable"] is True
+    assert metrics["production_ready"] is True
+    assert metrics["production_readiness_score"] == 1.0
+    assert metrics["gates_passed"] == metrics["gates_total"] == 9
+    assert metrics["evidence_gap_ids"] == []
+    assert mechanical["current_authority_level"] == "production_mechanical_release"
+    assert actuation["current_authority_level"] == "production_robotics_release"
+    assert platform["current_authority_level"] == "production_robotics_project_release"
+    assert mechatronics["current_authority_level"] == "production_mechatronics_release"
+    assert mechatronics["integration_trace"]["open_gaps"] == []
+    assert result["evidence_capture_kit"]["open_gate_count"] == 0
+    assert Path(result["artifacts"]["evidence_capture_kit"]).exists()

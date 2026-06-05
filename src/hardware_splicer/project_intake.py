@@ -10,6 +10,7 @@ from .scenario_runner import run_hardware_scenario
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
 UPGRADE_SCHEMA_VERSION = "hardware_splicer.authority_upgrade_plan.v1"
+EVIDENCE_KIT_SCHEMA_VERSION = "hardware_splicer.evidence_capture_kit.v1"
 
 PROJECT_LEVELS = [
     "compile_failed",
@@ -98,17 +99,22 @@ def run_project_intake(
     intake_file = out_path / "PROJECT_INTAKE.json"
     planned_scenario_file = out_path / "PLANNED_SCENARIO.json"
     upgrade_plan = build_authority_upgrade_plan(plan, result)
+    evidence_kit = build_evidence_capture_kit(plan, result, upgrade_plan)
     upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
+    evidence_kit_file = out_path / "EVIDENCE_CAPTURE_KIT.json"
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
     upgrade_plan_file.write_text(json.dumps(upgrade_plan, indent=2), encoding="utf-8")
+    evidence_kit_file.write_text(json.dumps(evidence_kit, indent=2), encoding="utf-8")
     result["intake_plan"] = plan
     result["authority_upgrade_plan"] = upgrade_plan
+    result["evidence_capture_kit"] = evidence_kit
     result["artifacts"] = {
         **result["artifacts"],
         "project_intake": str(intake_file),
         "planned_scenario": str(planned_scenario_file),
         "authority_upgrade_plan": str(upgrade_plan_file),
+        "evidence_capture_kit": str(evidence_kit_file),
     }
     scenario_result_path = result["artifacts"].get("scenario_result")
     if scenario_result_path:
@@ -138,6 +144,295 @@ def build_authority_upgrade_plan(intake_plan: Mapping[str, Any], run_result: Map
         "engine_next_actions": next_actions[:16],
         "how_to_upgrade": _upgrade_recipe(evidence_requests),
     }
+
+
+def build_evidence_capture_kit(
+    intake_plan: Mapping[str, Any],
+    run_result: Mapping[str, Any],
+    upgrade_plan: Mapping[str, Any],
+) -> Dict[str, Any]:
+    plan = _to_dict(intake_plan, "intake_plan")
+    result = _to_dict(run_result, "run_result")
+    metrics = _to_dict(result.get("production_release_metrics") or {}, "run_result.production_release_metrics")
+    upgrade = _to_dict(upgrade_plan, "upgrade_plan")
+    gates = _list_dicts(metrics.get("weighted_gates"))
+    open_gates = [row for row in gates if not bool(row.get("passed"))]
+
+    capture_requests: List[Dict[str, Any]] = []
+    template_patch: Dict[str, Any] = {"evidence": {}}
+    for gate in open_gates:
+        gate_id = str(gate.get("id") or "").strip()
+        templates = _capture_templates_for_gate(gate_id, str(plan.get("archetype") or "generic_mechatronics"))
+        evidence_fields = []
+        for template in templates:
+            field_name = str(template.get("intake_field") or "").strip()
+            if field_name:
+                evidence_fields.append(field_name)
+            _merge_evidence_patch(template_patch["evidence"], _to_dict(template.get("template") or {}, "template"))
+            capture_requests.append(
+                {
+                    "gate_id": gate_id,
+                    "gate_label": gate.get("label"),
+                    "request_id": template.get("id"),
+                    "intake_field": field_name,
+                    "label": template.get("label"),
+                    "required_items": _string_list(template.get("required_items")),
+                    "example": template.get("template"),
+                }
+            )
+        gate["evidence_fields"] = _dedupe_strings(evidence_fields)
+
+    return {
+        "schema_version": EVIDENCE_KIT_SCHEMA_VERSION,
+        "project_name": plan.get("project_name"),
+        "archetype": plan.get("archetype"),
+        "current_level": upgrade.get("current_level"),
+        "target_level": "production_ready_project_package",
+        "production_readiness_score": metrics.get("production_readiness_score"),
+        "gates_passed": metrics.get("gates_passed"),
+        "gates_total": metrics.get("gates_total"),
+        "open_gate_count": len(open_gates),
+        "open_gates": [
+            {
+                "id": row.get("id"),
+                "label": row.get("label"),
+                "weight": row.get("weight"),
+                "score": row.get("score"),
+                "observed": row.get("observed"),
+                "blockers": _string_list(row.get("blockers")),
+                "evidence_fields": _string_list(row.get("evidence_fields")),
+            }
+            for row in open_gates
+        ],
+        "capture_requests": _dedupe_capture_requests(capture_requests),
+        "template_intake_patch": template_patch,
+        "manual_capture_order": [
+            "Attach board design files and reviewed circuit scope.",
+            "Capture measured geometry, then fit/load simulation tied to those measured interfaces.",
+            "Run subsystem bench checks for mechanical fit/load and actuator motion/current.",
+            "Run integrated electrical + motion + packaging bench checks.",
+            "Record field/mission validation only after subsystem and integrated bench evidence closes.",
+            "Attach final scoped release reviews for mechanical, robotics, mechatronics, and project authority.",
+        ],
+    }
+
+
+def _capture_templates_for_gate(gate_id: str, archetype: str) -> List[Dict[str, Any]]:
+    common_release = {
+        "release_review": {
+            "scope_statement": _release_scope_example(archetype),
+            "artifact_uris": ["evidence://project/release-review"],
+            "acceptance_reviewed": True,
+        }
+    }
+    templates = {
+        "circuit_release": [
+            {
+                "id": "board_design_files",
+                "label": "Circuit design files",
+                "intake_field": "evidence.board_design_files",
+                "required_items": ["board_id", "path", "kind"],
+                "template": {
+                    "board_design_files": [
+                        {"board_id": "main_ctrl", "path": "designs/main_ctrl.net", "kind": "netlist"}
+                    ]
+                },
+            },
+            {
+                "id": "release_review",
+                "label": "Reviewed circuit release scope",
+                "intake_field": "evidence.release_review",
+                "required_items": ["scope_statement", "acceptance_reviewed=true", "artifact_uris"],
+                "template": common_release,
+            },
+        ],
+        "mechanical_release": [
+            {
+                "id": "mechanical_measurement_capture",
+                "label": "Measured geometry",
+                "intake_field": "evidence.mechanical_measurement_capture",
+                "required_items": ["dimensions", "clearances", "materials or tolerances", "artifact_uris"],
+                "template": {
+                    "mechanical_measurement_capture": {
+                        "artifact_uris": ["evidence://mechanical/caliper-log"],
+                        "dimensions": [
+                            {"target": "controller_case inner width", "value_mm": 95, "status": "verified"},
+                            {"target": "pump_mount width", "value_mm": 55, "status": "verified"},
+                            {"target": "tube strain relief", "value_mm": 8, "status": "verified"},
+                        ],
+                        "clearances": [{"target": "cable and tube routing", "clearance_mm": 1.2, "status": "pass"}],
+                    }
+                },
+            },
+            {
+                "id": "mechanical_simulation_capture",
+                "label": "Fit/load simulation",
+                "intake_field": "evidence.mechanical_simulation_capture",
+                "required_items": ["simulation rows", "primitive targets", "pass/fail statuses", "artifact_uris"],
+                "template": {
+                    "mechanical_simulation_capture": {
+                        "artifact_uris": ["evidence://mechanical/fit-load-sim"],
+                        "simulation_verified": True,
+                        "simulation": [
+                            {"target": "controller_case enclosure clearance", "status": "pass", "message": "Measured envelope clears board, wiring, and lid."},
+                            {"target": "pump_mount retained load", "status": "pass", "message": "Mount load stays below printed bracket limit."},
+                            {"target": "watering_module tube routing", "status": "pass", "message": "Tube bend radius and strain relief are inside measured envelope."},
+                        ],
+                    }
+                },
+            },
+            {
+                "id": "mechanical_bench_capture",
+                "label": "Mechanical bench",
+                "intake_field": "evidence.mechanical_bench_capture",
+                "required_items": ["fit_checks", "load_tests", "motion_tests", "artifact_uris"],
+                "template": {
+                    "mechanical_bench_capture": {
+                        "artifact_uris": ["evidence://mechanical/fit-load-bench"],
+                        "fit_checks": [{"target": "pump_mount printed fit", "status": "pass"}],
+                        "load_tests": [{"target": "pump retained under tubing pull", "status": "pass"}],
+                        "motion_tests": [{"target": "tube routing during pump vibration", "status": "pass"}],
+                    }
+                },
+            },
+            {
+                "id": "release_review",
+                "label": "Reviewed mechanical release scope",
+                "intake_field": "evidence.release_review",
+                "required_items": ["scope_statement", "acceptance_reviewed=true", "artifact_uris"],
+                "template": common_release,
+            },
+        ],
+        "robotics_actuation_release": [
+            {
+                "id": "mechanical_simulation_capture",
+                "label": "Actuator load simulation",
+                "intake_field": "evidence.mechanical_simulation_capture",
+                "required_items": ["actuator load target", "measured geometry link", "pass/fail status", "artifact_uris"],
+                "template": {
+                    "mechanical_simulation_capture": {
+                        "artifact_uris": ["evidence://robotics/actuator-load-sim"],
+                        "fit_load_verified": True,
+                        "load_tests": [
+                            {"target": "pump_mount actuator load path", "status": "pass", "message": "Pump vibration and tubing load remain inside mount allowance."}
+                        ],
+                    }
+                },
+            },
+            {
+                "id": "robotics_bench_capture",
+                "label": "First-motion/current bench",
+                "intake_field": "evidence.robotics_bench_capture",
+                "required_items": ["motion_tests", "current_tests", "failsafe or timeout test", "artifact_uris"],
+                "template": {
+                    "robotics_bench_capture": {
+                        "artifact_uris": ["evidence://robotics/motion-current-bench"],
+                        "motion_tests": [{"target": "pump first run", "status": "pass"}],
+                        "current_tests": [{"target": "pump startup current below limit", "status": "pass"}],
+                        "cycle_tests": [{"target": "timeout shutoff", "status": "pass"}],
+                    }
+                },
+            },
+            {
+                "id": "release_review",
+                "label": "Reviewed robotics release scope",
+                "intake_field": "evidence.release_review",
+                "required_items": ["scope_statement", "acceptance_reviewed=true", "artifact_uris"],
+                "template": common_release,
+            },
+        ],
+        "deterministic_simulation": [
+            {
+                "id": "mechanical_simulation_capture",
+                "label": "Measured simulation evidence",
+                "intake_field": "evidence.mechanical_simulation_capture",
+                "required_items": ["mechanical simulation rows", "no blocking findings", "artifact_uris"],
+                "template": {
+                    "mechanical_simulation_capture": {
+                        "artifact_uris": ["evidence://simulation/measured-envelope"],
+                        "simulation_verified": True,
+                        "simulation": [
+                            {"target": "power, current, fit, and load margins", "status": "pass", "message": "No measured-envelope blocker found."}
+                        ],
+                    }
+                },
+            }
+        ],
+        "integrated_bench": [
+            {
+                "id": "integrated_bench_capture",
+                "label": "Integrated electrical/mechanical bench",
+                "intake_field": "evidence.integrated_bench_capture",
+                "required_items": ["electrical_tests", "motion_tests", "packaging_tests", "artifact_uris"],
+                "template": {
+                    "integrated_bench_capture": {
+                        "artifact_uris": ["evidence://system/integrated-bench"],
+                        "electrical_tests": [{"target": "logic rail during actuator run", "status": "pass"}],
+                        "motion_tests": [{"target": "controlled actuator run with timeout", "status": "pass"}],
+                        "packaging_tests": [{"target": "wet/dry separation and cable strain relief", "status": "pass"}],
+                    }
+                },
+            }
+        ],
+        "field_validation": [
+            {
+                "id": "field_validation",
+                "label": "Field or mission validation",
+                "intake_field": "evidence.field_validation",
+                "required_items": ["mission_tests", "field_tests", "logs/photos/video/telemetry", "artifact_uris"],
+                "template": {
+                    "field_validation": {
+                        "artifact_uris": ["evidence://field/mission-run"],
+                        "mission_tests": [{"target": "declared mission run in operating environment", "status": "pass"}],
+                        "field_tests": [{"target": "operator-observed safe stop after mission", "status": "pass"}],
+                    }
+                },
+            }
+        ],
+        "release_review": [
+            {
+                "id": "release_review",
+                "label": "Reviewed project release scope",
+                "intake_field": "evidence.release_review",
+                "required_items": ["scope_statement", "acceptance_reviewed=true", "artifact_uris"],
+                "template": common_release,
+            }
+        ],
+    }
+    return templates.get(gate_id, [])
+
+
+def _release_scope_example(archetype: str) -> str:
+    if archetype == "automatic_watering":
+        return "Release limited to supervised low-voltage desk plant watering prototype with current limit, timeout, and leak check."
+    if archetype == "rover":
+        return "Release limited to low-speed indoor rover testing inside a marked supervised boundary."
+    if archetype == "airflow_controller":
+        return "Release limited to guarded low-voltage fan/airflow prototype operation under supervised bench conditions."
+    return "Release limited to the declared low-voltage supervised Hardware-Splicer prototype envelope."
+
+
+def _merge_evidence_patch(target: Dict[str, Any], patch: Dict[str, Any]) -> None:
+    for key, value in patch.items():
+        if key not in target:
+            target[key] = value
+            continue
+        if isinstance(target[key], dict) and isinstance(value, Mapping):
+            _merge_evidence_patch(target[key], dict(value))
+        elif isinstance(target[key], list) and isinstance(value, list):
+            target[key].extend(item for item in value if item not in target[key])
+
+
+def _dedupe_capture_requests(requests: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    for request in requests:
+        key = (str(request.get("gate_id") or ""), str(request.get("request_id") or ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(request)
+    return out
 
 
 def _compile_spec(
@@ -188,6 +483,7 @@ def _evidence(body: Dict[str, Any]) -> Dict[str, Any]:
     aliases = {
         "board_design_files": ["board_design_files", "board_files"],
         "mechanical_measurement_capture": ["mechanical_measurement_capture", "mechanical_measurements", "measurements"],
+        "mechanical_simulation_capture": ["mechanical_simulation_capture", "mechanical_simulation", "simulation_capture", "fit_load_simulation"],
         "mechanical_bench_capture": ["mechanical_bench_capture", "mechanical_bench"],
         "robotics_bench_capture": ["robotics_bench_capture", "robotics_bench", "motion_bench"],
         "integrated_bench_capture": ["integrated_bench_capture", "integrated_bench", "bench_evidence"],
@@ -212,6 +508,7 @@ def _apply_evidence(spec: Dict[str, Any], evidence: Dict[str, Any], base_dir: Pa
 
     for field in [
         "mechanical_measurement_capture",
+        "mechanical_simulation_capture",
         "mechanical_bench_capture",
         "robotics_bench_capture",
         "integrated_bench_capture",
@@ -298,6 +595,7 @@ def _evidence_summary(evidence: Dict[str, Any], base_dir: Path) -> Dict[str, Any
     return {
         "board_design_file_count": len(_board_design_files_from_evidence(evidence, base_dir)),
         "has_measurements": _has_capture(evidence, "mechanical_measurement_capture"),
+        "has_mechanical_simulation": _has_capture(evidence, "mechanical_simulation_capture"),
         "has_mechanical_bench": _has_capture(evidence, "mechanical_bench_capture"),
         "has_robotics_bench": _has_capture(evidence, "robotics_bench_capture"),
         "has_integrated_bench": _has_capture(evidence, "integrated_bench_capture"),
@@ -310,7 +608,13 @@ def _has_capture(evidence: Dict[str, Any], key: str) -> bool:
     capture = _capture_from_evidence(evidence.get(key))
     if not capture:
         return False
-    if capture.get("geometry_verified") is True or capture.get("motion_verified") is True or capture.get("bench_verified") is True:
+    if (
+        capture.get("geometry_verified") is True
+        or capture.get("motion_verified") is True
+        or capture.get("bench_verified") is True
+        or capture.get("simulation_verified") is True
+        or capture.get("fit_load_verified") is True
+    ):
         return True
     for value in capture.values():
         if isinstance(value, list) and value:
@@ -604,6 +908,20 @@ def _evidence_requests(current_level: str, next_level: str | None, missing: List
                 ],
             }
         )
+    if "mechanical simulation" in missing or current_level in {"project_intake", "architecture_project_package", "control_safety_project_package"}:
+        requests.append(
+            {
+                "id": "mechanical_simulation_capture",
+                "label": "Measured-envelope fit/load simulation",
+                "unlocks": "fit/load simulation authority",
+                "intake_field": "evidence.mechanical_simulation_capture",
+                "required_items": [
+                    "simulation or load/fit findings tied to mechanism primitives",
+                    "pass/fail status for each simulated target",
+                    "artifact_uris for CAD, spreadsheet, notebook, solver output, or calculation log",
+                ],
+            }
+        )
     if "bench evidence" in missing or current_level in {"control_safety_project_package", "architecture_project_package"}:
         requests.extend(
             [
@@ -830,6 +1148,8 @@ def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict
         missing.append("budget limit")
     if not _has_capture(evidence, "mechanical_measurement_capture"):
         missing.append("measured dimensions")
+    if not _has_capture(evidence, "mechanical_simulation_capture"):
+        missing.append("mechanical simulation")
     if not (_has_capture(evidence, "mechanical_bench_capture") and _has_capture(evidence, "robotics_bench_capture") and _has_capture(evidence, "integrated_bench_capture")):
         missing.append("bench evidence")
     if not _release_closed(evidence):
@@ -840,7 +1160,8 @@ def _missing_info(archetype: str, parts: List[Dict[str, Any]], constraints: Dict
 def _planning_confidence(archetype: str, parts: List[Dict[str, Any]], missing: List[str]) -> float:
     base = 0.45 if archetype == "generic_mechatronics" else 0.62
     base += min(len(parts), 5) * 0.04
-    base -= len([item for item in missing if item not in {"measured dimensions", "bench evidence", "reviewed release scope"}]) * 0.06
+    production_evidence = {"measured dimensions", "mechanical simulation", "bench evidence", "reviewed release scope"}
+    base -= len([item for item in missing if item not in production_evidence]) * 0.06
     return round(max(0.2, min(base, 0.86)), 2)
 
 
@@ -981,3 +1302,21 @@ def _string_list(data: Any) -> List[str]:
                 values.append(text)
         return values
     return [str(data)]
+
+
+def _list_dicts(data: Any) -> List[Dict[str, Any]]:
+    if not isinstance(data, list):
+        return []
+    return [dict(item) for item in data if isinstance(item, Mapping)]
+
+
+def _dedupe_strings(rows: Iterable[str]) -> List[str]:
+    out = []
+    seen = set()
+    for row in rows:
+        text = str(row).strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text)
+    return out

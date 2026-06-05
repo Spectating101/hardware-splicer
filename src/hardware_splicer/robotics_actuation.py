@@ -420,7 +420,7 @@ def _source_currents(sources: List[Dict[str, Any]]) -> Dict[str, float]:
 
 
 def _mechanical_load_status(body: Dict[str, Any], mechanism_analysis: Dict[str, Any]) -> Dict[str, Any]:
-    simulation = _list_dicts(mechanism_analysis.get("simulation"))
+    simulation = _dedupe_by_id(_list_dicts(mechanism_analysis.get("simulation")) + _simulation_rows_from_body(body))
     blockers = [
         str(row.get("message") or row.get("domain") or "mechanical load simulation blocker")
         for row in simulation
@@ -433,6 +433,41 @@ def _mechanical_load_status(body: Dict[str, Any], mechanism_analysis: Dict[str, 
         "blockers": _dedupe_strings(blockers),
         "verified": bool(simulation) and measured and not blockers,
     }
+
+
+def _simulation_rows_from_body(body: Dict[str, Any]) -> List[Dict[str, Any]]:
+    capture = _first_dict(
+        body.get("mechanical_simulation_capture"),
+        body.get("fit_load_simulation_capture"),
+        body.get("mechanical_simulation"),
+    )
+    if not capture:
+        return []
+    rows: List[Dict[str, Any]] = []
+    for key in [
+        "simulation",
+        "simulations",
+        "simulation_findings",
+        "findings",
+        "tests",
+        "fit_checks",
+        "load_tests",
+        "motion_tests",
+        "thermal_tests",
+        "stress_tests",
+    ]:
+        rows.extend(_list_dicts(capture.get(key)))
+    explicit = bool(capture.get("simulation_verified") is True or capture.get("fit_load_verified") is True)
+    if explicit and not any(_row_passed(row) for row in rows):
+        rows.append(
+            {
+                "id": "mechanical_simulation_capture",
+                "target": "actuator measured load envelope",
+                "status": "pass",
+                "message": "Intake evidence explicitly verifies the actuator measured load envelope.",
+            }
+        )
+    return rows
 
 
 def _motion_bench_status(body: Dict[str, Any], robotics: Dict[str, Any]) -> Dict[str, Any]:

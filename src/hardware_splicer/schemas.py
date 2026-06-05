@@ -44,6 +44,7 @@ class HardwareCompileSpec:
     circuit_release: Dict[str, Any] = field(default_factory=dict)
     mechanical_evidence: Dict[str, Any] = field(default_factory=dict)
     mechanical_measurement_capture: Dict[str, Any] = field(default_factory=dict)
+    mechanical_simulation_capture: Dict[str, Any] = field(default_factory=dict)
     mechanical_bench_capture: Dict[str, Any] = field(default_factory=dict)
     mechanical_release: Dict[str, Any] = field(default_factory=dict)
     robotics_project: Dict[str, Any] = field(default_factory=dict)
@@ -92,6 +93,7 @@ class HardwareCompileSpec:
             circuit_release=_dict_or_empty(raw.get("circuit_release"), "circuit_release"),
             mechanical_evidence=_dict_or_empty(raw.get("mechanical_evidence"), "mechanical_evidence"),
             mechanical_measurement_capture=_dict_or_empty(raw.get("mechanical_measurement_capture"), "mechanical_measurement_capture"),
+            mechanical_simulation_capture=_dict_or_empty(raw.get("mechanical_simulation_capture"), "mechanical_simulation_capture"),
             mechanical_bench_capture=_dict_or_empty(raw.get("mechanical_bench_capture"), "mechanical_bench_capture"),
             mechanical_release=_dict_or_empty(raw.get("mechanical_release"), "mechanical_release"),
             robotics_project=_dict_or_empty(raw.get("robotics_project"), "robotics_project"),
@@ -135,6 +137,7 @@ class HardwareCompileSpec:
             "circuit_release": self.circuit_release,
             "mechanical_evidence": self.mechanical_evidence,
             "mechanical_measurement_capture": self.mechanical_measurement_capture,
+            "mechanical_simulation_capture": self.mechanical_simulation_capture,
             "mechanical_bench_capture": self.mechanical_bench_capture,
             "mechanical_release": self.mechanical_release,
             "robotics_project": self.robotics_project,

@@ -312,14 +312,20 @@ def _validation_status(
     integrated = _first_dict(body.get("integrated_bench_capture"), body.get("hardware_bench_capture"), body.get("system_bench_capture"))
     simulations = _list_dicts(validation.get("simulations") or validation.get("simulation_tests"))
     bench_tests = _rows_from(validation, "bench_tests", "motion_tests", "load_tests", "power_tests", "thermal_tests", "cycle_tests")
+    integrated_bench_tests = _rows_from(integrated, "tests", "electrical_tests", "motion_tests", "packaging_tests", "thermal_tests", "cycle_tests")
     field_tests = _rows_from(validation, "field_tests", "operational_tests", "mission_tests")
     passed_sim = [row for row in simulations if _row_passed(row)]
     passed_bench = [row for row in bench_tests if _row_passed(row)]
+    passed_integrated_bench = [row for row in integrated_bench_tests if _row_passed(row)]
     passed_field = [row for row in field_tests if _row_passed(row)]
-    failed = [row for row in simulations + bench_tests + field_tests if _row_failed(row)]
+    failed = [row for row in simulations + bench_tests + integrated_bench_tests + field_tests if _row_failed(row)]
     artifacts = _artifact_count(validation) + _artifact_count(integrated)
     explicit_field = bool(validation.get("field_verified") is True or validation.get("mission_verified") is True)
-    explicit_bench = bool(validation.get("bench_verified") is True or integrated.get("integrated_bench_ready") is True)
+    explicit_bench = bool(
+        validation.get("bench_verified") is True
+        or integrated.get("integrated_bench_ready") is True
+        or integrated.get("system_verified") is True
+    )
     integration_gaps = _string_list(_dict(mechatronics.get("integration_trace")).get("open_gaps"))
     simulation_ready = bool(simulation.get("simulation_ready"))
     simulation_blockers = _string_list(row.get("message") for row in _list_dicts(simulation.get("blocking_findings")))
@@ -337,8 +343,10 @@ def _validation_status(
         blockers.append("Robotics simulation has blocking findings: " + "; ".join(simulation_blockers[:6]))
     if failed:
         blockers.extend(str(row.get("message") or row.get("target") or "validation failure") for row in failed)
-    if not (simulation_ready or passed_sim or explicit_bench or passed_bench):
-        blockers.append("Record simulation or controlled bench validation for the robotics platform.")
+    if not (simulation_ready or passed_sim):
+        blockers.append("Record deterministic simulation validation for the robotics platform.")
+    if not (explicit_bench or passed_bench or passed_integrated_bench):
+        blockers.append("Record controlled bench validation for the robotics platform.")
     if not (passed_field or explicit_field):
         blockers.append("Record field/mission validation in the declared operating environment.")
     if artifacts < 1 and not explicit_field:
@@ -347,11 +355,11 @@ def _validation_status(
     return {
         "available": bool(validation or integrated),
         "simulation_pass_count": len(passed_sim),
-        "bench_pass_count": len(passed_bench),
+        "bench_pass_count": len(passed_bench) + len(passed_integrated_bench),
         "field_pass_count": len(passed_field),
         "failed_count": len(failed),
         "artifact_count": artifacts,
-        "bench_ready": bool(explicit_bench or passed_bench or passed_sim),
+        "bench_ready": bool(explicit_bench or passed_bench or passed_integrated_bench),
         "field_ready": bool(explicit_field or passed_field),
         "simulation_ready": simulation_ready,
         "simulation_blocker_count": int(simulation.get("blocking_finding_count") or len(simulation_blockers)),

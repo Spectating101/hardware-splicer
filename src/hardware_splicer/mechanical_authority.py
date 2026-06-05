@@ -79,6 +79,12 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         body.get("measured_geometry_capture"),
         body.get("mechanical_measurements"),
     )
+    simulation_capture = _first_dict(
+        body.get("mechanical_simulation_capture"),
+        body.get("fit_load_simulation_capture"),
+        body.get("mechanical_simulation"),
+    )
+    simulation_rows = _dedupe_rows(simulation_rows + _simulation_rows_from_capture(simulation_capture))
     bench_capture = _first_dict(
         body.get("mechanical_bench_capture"),
         body.get("bench_fit_capture"),
@@ -122,6 +128,11 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
         "can": _capabilities(stages),
         "evidence_counts": evidence_counts,
         "measurement_capture": measured,
+        "simulation_capture": {
+            "available": bool(simulation_capture),
+            "artifact_count": _artifact_count(simulation_capture),
+            "finding_count": len(_simulation_rows_from_capture(simulation_capture)),
+        },
         "bench_capture": bench,
         "risk_summary": {
             "dfm_blockers": len(blockers["dfm"]),
@@ -384,6 +395,48 @@ def _rows_from(mechanism_analysis: Dict[str, Any], mechanism_bundle: Dict[str, A
     if not rows:
         rows = _list_dicts(mechanism_bundle.get(key))
     return rows
+
+
+def _simulation_rows_from_capture(capture: Dict[str, Any]) -> List[Dict[str, Any]]:
+    if not capture:
+        return []
+    rows: List[Dict[str, Any]] = []
+    for key in [
+        "simulation",
+        "simulations",
+        "simulation_findings",
+        "findings",
+        "tests",
+        "fit_checks",
+        "load_tests",
+        "motion_tests",
+        "thermal_tests",
+        "stress_tests",
+    ]:
+        rows.extend(_list_dicts(capture.get(key)))
+    explicit = bool(capture.get("simulation_verified") is True or capture.get("fit_load_verified") is True)
+    if explicit and not any(_row_passed(row) for row in rows):
+        rows.append(
+            {
+                "id": "mechanical_simulation_capture",
+                "target": "measured fit/load envelope",
+                "status": "pass",
+                "message": "Intake evidence explicitly verifies the measured mechanical fit/load envelope.",
+            }
+        )
+    return rows
+
+
+def _dedupe_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    out: List[Dict[str, Any]] = []
+    seen = set()
+    for index, row in enumerate(rows):
+        key = str(row.get("id") or row.get("target") or row.get("name") or row.get("message") or index)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(row)
+    return out
 
 
 def _blocking_rows(rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:

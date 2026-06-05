@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
@@ -332,7 +333,7 @@ def _integration_trace(
     mechanism_bundle = _load_mecha_bundle(mechanism_analysis)
     outputs = _string_list(mechanism_analysis.get("outputs")) or _string_list(mechanism_bundle.get("outputs"))
     dfm_rows = _list_dicts(mechanism_analysis.get("dfm")) or _list_dicts(mechanism_bundle.get("dfm"))
-    simulation_rows = _list_dicts(mechanism_analysis.get("simulation")) or _list_dicts(mechanism_bundle.get("simulation"))
+    simulation_rows = (_list_dicts(mechanism_analysis.get("simulation")) or _list_dicts(mechanism_bundle.get("simulation"))) + _simulation_rows_from_body(body)
     safety_rows = _list_dicts(mechanism_analysis.get("safety")) or _list_dicts(mechanism_bundle.get("safety"))
     parts = _list_dicts(mechanism_bundle.get("parts")) + _list_dicts(mechanism_analysis.get("parts"))
     control = _dict(analysis.get("control_coupling"))
@@ -480,6 +481,15 @@ def _primitive_tokens(key: str, spec: Dict[str, Any]) -> List[str]:
     name = str(spec.get("name") or "").strip().lower()
     if name:
         tokens.add(name)
+        tokens.add(name.replace("_", " "))
+        tokens.update(part for part in re.split(r"[^a-z0-9]+", name) if len(part) > 2)
+    for value in _primitive_text_values(spec):
+        text = value.strip().lower()
+        if not text:
+            continue
+        tokens.add(text)
+        tokens.add(text.replace("_", " "))
+        tokens.update(part for part in re.split(r"[^a-z0-9]+", text) if len(part) > 2)
     if key == "pan_tilt":
         tokens.update(["pan", "tilt", "servo", "pt"])
     elif key == "linear_axis":
@@ -501,6 +511,52 @@ def _primitive_tokens(key: str, spec: Dict[str, Any]) -> List[str]:
     elif key == "assembly":
         tokens.update(["assembly", "drive", "wheel", "wheels", "motor", "motors", "chassis", "rover", "differential"])
     return sorted(token for token in tokens if token)
+
+
+def _primitive_text_values(spec: Dict[str, Any]) -> List[str]:
+    values: List[str] = []
+    for key in ["interfaces", "mounts", "joints", "links", "notes", "role"]:
+        value = spec.get(key)
+        if isinstance(value, str):
+            values.append(value)
+        elif isinstance(value, list):
+            values.extend(str(item) for item in value if item)
+    return values
+
+
+def _simulation_rows_from_body(body: Dict[str, Any]) -> List[Dict[str, Any]]:
+    capture = _first_dict(
+        body.get("mechanical_simulation_capture"),
+        body.get("fit_load_simulation_capture"),
+        body.get("mechanical_simulation"),
+    )
+    if not capture:
+        return []
+    rows: List[Dict[str, Any]] = []
+    for key in [
+        "simulation",
+        "simulations",
+        "simulation_findings",
+        "findings",
+        "tests",
+        "fit_checks",
+        "load_tests",
+        "motion_tests",
+        "thermal_tests",
+        "stress_tests",
+    ]:
+        rows.extend(_list_dicts(capture.get(key)))
+    explicit = bool(capture.get("simulation_verified") is True or capture.get("fit_load_verified") is True)
+    if explicit and not any(_row_passed(row) for row in rows):
+        rows.append(
+            {
+                "id": "mechanical_simulation_capture",
+                "target": "integrated measured fit/load envelope",
+                "status": "pass",
+                "message": "Intake evidence explicitly verifies the integrated measured fit/load envelope.",
+            }
+        )
+    return rows
 
 
 def _matching_strings(values: List[str], tokens: List[str]) -> List[str]:
