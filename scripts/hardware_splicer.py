@@ -132,6 +132,8 @@ def _run_intake(args: argparse.Namespace) -> int:
         print(f"out_dir={result['out_dir']}")
         print(f"project_intake={result['artifacts']['project_intake']}")
         print(f"planned_scenario={result['artifacts']['planned_scenario']}")
+        print(f"evidence_extraction_report={result['artifacts']['evidence_extraction_report']}")
+        print(f"evidence_capture_kit={result['artifacts']['evidence_capture_kit']}")
         print(f"project_authority={result['artifacts']['project_authority']}")
         if plan["missing_info"]:
             print("missing_info=" + " | ".join(plan["missing_info"][:8]))

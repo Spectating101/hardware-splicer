@@ -1,0 +1,67 @@
+{
+  "project_name": "desk_plant_watering_assistant_auto_evidence",
+  "goal": "Build a small automatic plant watering device from cheap or salvaged parts. It should read soil moisture and run a mini pump briefly when the plant is dry.",
+  "target_authority_level": "production_robotics_project_release",
+  "budget": {
+    "currency": "USD",
+    "amount": 10
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "capacitive soil moisture sensor",
+      "type": "soil_moisture"
+    },
+    {
+      "name": "5V mini water pump",
+      "type": "pump",
+      "voltage_v": 5.0,
+      "current_a": 0.55,
+      "stall_current_a": 0.95
+    },
+    {
+      "name": "logic-level MOSFET module",
+      "type": "driver_module"
+    },
+    {
+      "name": "USB power bank",
+      "type": "power_source",
+      "voltage_v": 5.0,
+      "capacity_mah": 2000
+    }
+  ],
+  "constraints": {
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.12,
+    "baseline_current_a": 0.18,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000
+  },
+  "evidence_notes": [
+    "board: board_id=main_ctrl path=../main_ctrl_esp32_servo.net kind=netlist",
+    "measure: controller_case inner width value_mm=95 status=verified artifact=evidence://plant/calipers",
+    "measure: pump_mount width value_mm=55 status=verified artifact=evidence://plant/calipers",
+    "measure: tube strain relief value_mm=8 status=verified artifact=evidence://plant/calipers",
+    "clearance: controller_case cable routing clearance_mm=1.2 status=pass artifact=evidence://plant/calipers",
+    "simulation: controller_case enclosure clearance status=pass artifact=evidence://plant/fit-load-simulation",
+    "simulation: pump_mount retained load status=pass artifact=evidence://plant/fit-load-simulation",
+    "simulation: watering_module tube routing status=pass artifact=evidence://plant/fit-load-simulation",
+    "mechanical_bench: pump_mount printed fit status=pass artifact=evidence://plant/mechanical-bench",
+    "load_test: pump retained under tubing pull status=pass artifact=evidence://plant/mechanical-bench",
+    "mechanical_motion: tube routing during pump vibration status=pass artifact=evidence://plant/mechanical-bench",
+    "robotics_bench: pump first run status=pass artifact=evidence://plant/robotics-bench",
+    "robotics_current: pump startup current current_a=0.82 status=pass artifact=evidence://plant/robotics-bench",
+    "cycle_test: five short watering cycles status=pass artifact=evidence://plant/robotics-bench",
+    "integrated_electrical: logic rail remains stable during pump run status=pass artifact=evidence://plant/integrated-bench",
+    "integrated_motion: soil dry command triggers timed pump run status=pass artifact=evidence://plant/integrated-bench",
+    "integrated_packaging: wet path separated from controller_case status=pass artifact=evidence://plant/integrated-bench",
+    "integrated_thermal: MOSFET module remains touch-safe after five cycles status=pass artifact=evidence://plant/integrated-bench",
+    "mission: desk plant dry-soil watering mission status=pass artifact=evidence://plant/field-run",
+    "field: supervised desk plant run with manual stop available status=pass artifact=evidence://plant/field-run",
+    "release: scope=\"Release limited to supervised low-voltage desk plant watering prototype with current limit, timeout, dry-run limit, leak check, and no unattended operation claim.\" accepted=true artifact=evidence://plant/release-review"
+  ]
+}

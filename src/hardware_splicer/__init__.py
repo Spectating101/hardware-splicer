@@ -1,4 +1,5 @@
 from .compiler import compile_hardware_bundle
+from .evidence_extractor import build_evidence_extraction_report, enrich_intake_with_extracted_evidence
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
 from .project_intake import (
@@ -28,11 +29,13 @@ __all__ = [
     "build_project_authority_packet",
     "build_authority_upgrade_plan",
     "build_evidence_capture_kit",
+    "build_evidence_extraction_report",
     "build_production_release_metrics",
     "build_robotics_actuation_packet",
     "build_robotics_platform_authority",
     "build_robotics_simulation_packet",
     "compile_hardware_bundle",
+    "enrich_intake_with_extracted_evidence",
     "load_project_intake",
     "load_hardware_scenario",
     "plan_project_from_intake",

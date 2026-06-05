@@ -66,12 +66,13 @@ Plan from a user-style project brief, then run the generated scenario:
 
 ```bash
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant
+python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_auto_evidence_notes.json --out /tmp/hardware_splicer_intake_plant_notes
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_evidence_pack.json --out /tmp/hardware_splicer_intake_plant_release
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/rover_brief.json --out /tmp/hardware_splicer_intake_rover
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/fan_controller_brief.json --out /tmp/hardware_splicer_intake_fan
 ```
 
-The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, `AUTHORITY_UPGRADE_PLAN.json`, `EVIDENCE_CAPTURE_KIT.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, measured-envelope simulation, bench evidence, and reviewed release scope as explicit next actions.
+The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, `EVIDENCE_EXTRACTION_REPORT.json`, `AUTHORITY_UPGRADE_PLAN.json`, `EVIDENCE_CAPTURE_KIT.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, measured-envelope simulation, bench evidence, and reviewed release scope as explicit next actions.
 
 Attach physical/project evidence through `evidence` fields in the intake file to upgrade the generated package:
 
@@ -83,6 +84,8 @@ Attach physical/project evidence through `evidence` fields in the intake file to
 - `evidence.integrated_bench_capture`
 - `evidence.field_validation`
 - `evidence.release_review`
+
+You can also attach `evidence_notes`, `evidence_sources`, or `attachments`. The deterministic extractor promotes structured notes, JSON evidence patches, and board files into the same `evidence.*` schema and writes `EVIDENCE_EXTRACTION_REPORT.json` with accepted/rejected rows. Image/video artifacts are indexed as pending vision evidence; they are not trusted as measurements until a vision model or human annotation produces structured pass/fail rows.
 
 `AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
 

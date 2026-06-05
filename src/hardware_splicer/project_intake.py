@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
+from .evidence_extractor import enrich_intake_with_extracted_evidence
 from .scenario_runner import run_hardware_scenario
 
 
@@ -34,7 +35,7 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
 
 
 def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
-    body = _to_dict(intake, "intake")
+    body, extraction_report = enrich_intake_with_extracted_evidence(_to_dict(intake, "intake"))
     project_name = _slug(str(body.get("project_name") or body.get("name") or body.get("goal") or "hardware_splicer_project"))
     goal = str(body.get("goal") or body.get("intent") or body.get("brief") or project_name).strip()
     constraints = _to_dict(body.get("constraints") or {}, "intake.constraints")
@@ -73,6 +74,7 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
         "budget": budget,
         "normalized_parts": parts,
         "assumptions": assumptions,
+        "evidence_extraction_report": extraction_report,
         "evidence_summary": _evidence_summary(evidence, base_dir),
         "missing_info": missing,
         "scenario": scenario,
@@ -98,21 +100,26 @@ def run_project_intake(
     out_path = Path(result["out_dir"])
     intake_file = out_path / "PROJECT_INTAKE.json"
     planned_scenario_file = out_path / "PLANNED_SCENARIO.json"
+    extraction_report = _to_dict(plan.get("evidence_extraction_report") or {}, "intake_plan.evidence_extraction_report")
     upgrade_plan = build_authority_upgrade_plan(plan, result)
     evidence_kit = build_evidence_capture_kit(plan, result, upgrade_plan)
+    extraction_report_file = out_path / "EVIDENCE_EXTRACTION_REPORT.json"
     upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
     evidence_kit_file = out_path / "EVIDENCE_CAPTURE_KIT.json"
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
+    extraction_report_file.write_text(json.dumps(extraction_report, indent=2), encoding="utf-8")
     upgrade_plan_file.write_text(json.dumps(upgrade_plan, indent=2), encoding="utf-8")
     evidence_kit_file.write_text(json.dumps(evidence_kit, indent=2), encoding="utf-8")
     result["intake_plan"] = plan
+    result["evidence_extraction_report"] = extraction_report
     result["authority_upgrade_plan"] = upgrade_plan
     result["evidence_capture_kit"] = evidence_kit
     result["artifacts"] = {
         **result["artifacts"],
         "project_intake": str(intake_file),
         "planned_scenario": str(planned_scenario_file),
+        "evidence_extraction_report": str(extraction_report_file),
         "authority_upgrade_plan": str(upgrade_plan_file),
         "evidence_capture_kit": str(evidence_kit_file),
     }
