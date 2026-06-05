@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 class PCB(BaseModel):
     width_mm: float
@@ -40,3 +40,7 @@ class SpliceResponse(BaseModel):
     validation: dict
     success: bool = True
     message: str = "STL generated successfully"
+    ok: Optional[bool] = None
+    mode: Optional[str] = None
+    script: Optional[str] = None
+    error: Optional[str] = None

@@ -117,6 +117,13 @@ def ensure_circuit_import_path() -> None:
     if path in sys.path:
         sys.path.remove(path)
     sys.path.insert(0, path)
+    circuit_src = (CIRCUIT_ROOT / "src").resolve()
+    existing = sys.modules.get("src")
+    existing_paths = [Path(str(item)).resolve() for item in getattr(existing, "__path__", [])] if existing else []
+    if existing is not None and circuit_src not in existing_paths:
+        for module_name in list(sys.modules):
+            if module_name == "src" or module_name.startswith("src."):
+                sys.modules.pop(module_name, None)
 
 
 @contextlib.contextmanager

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import importlib.util
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -48,6 +49,18 @@ def splice(desc: Description) -> SpliceResponse:
     """
     script = _render_phone_case_script(desc)
 
+    if importlib.util.find_spec("cadquery") is None:
+        return SpliceResponse(
+            stl_path="",
+            validation={"ok": False, "reason": "cadquery_unavailable", "script": script},
+            success=False,
+            ok=False,
+            mode="script_fallback",
+            script=script,
+            error="CadQuery is not available in this environment.",
+            message="CadQuery is not available in this environment. Use /v1/splice/script or run 3d-splicer via Docker.",
+        )
+
     try:
         # Lazy import so the module can load in "no cadquery" environments.
         from src.core.cadquery_generator import script_to_stl
@@ -56,6 +69,10 @@ def splice(desc: Description) -> SpliceResponse:
             stl_path="",
             validation={"ok": False, "reason": "cadquery_unavailable", "error": str(e), "script": script},
             success=False,
+            ok=False,
+            mode="script_fallback",
+            script=script,
+            error=str(e),
             message="CadQuery is not available in this environment. Use /v1/splice/script or run 3d-splicer via Docker.",
         )
 
@@ -67,7 +84,14 @@ def splice(desc: Description) -> SpliceResponse:
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"STL generation failed: {e}")
 
-    return SpliceResponse(stl_path=str(out_path), validation={"ok": True}, success=True, message="STL generated")
+    return SpliceResponse(
+        stl_path=str(out_path),
+        validation={"ok": True},
+        success=True,
+        ok=True,
+        mode="stl",
+        message="STL generated",
+    )
 
 
 # Back-compat aliases for older Circuit-AI clients.
@@ -79,4 +103,3 @@ def generate_alias(desc: Description) -> SpliceResponse:
 @router.post("/generate/script")
 def generate_script_alias(desc: Description) -> Dict[str, Any]:
     return splice_script(desc)
-

@@ -244,7 +244,12 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
 
     if bool(body.get("use_3d_splicer", True)) and mechanism_spec:
         splicer3d = _dict(mechanism.get("splicer3d"))
-        if not (splicer3d.get("ok") is True or str(splicer3d.get("script") or "").strip()):
+        if not (
+            splicer3d.get("ok") is True
+            or splicer3d.get("success") is True
+            or str(splicer3d.get("script") or "").strip()
+            or str(splicer3d.get("stl_path") or "").strip()
+        ):
             blockers.append("3D-Splicer did not return a usable script/STL packaging artifact.")
 
     for issue in _list_dicts(mechanism.get("dfm")) or _list_dicts(mechanism_bundle.get("dfm")):

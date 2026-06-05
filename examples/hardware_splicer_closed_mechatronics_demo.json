@@ -212,7 +212,70 @@
     "acceptance_reviewed": true
   },
   "robotics_actuation": {
-    "protections": ["servo_bulk_capacitance", "logic_power_isolation"]
+    "protections": ["servo_bulk_capacitance", "logic_power_isolation", "current_limit"]
+  },
+  "robotics_project": {
+    "robot_class": "stationary_pan_tilt_module",
+    "mission": [
+      "current-limited two-axis camera or sensor positioning on an indoor electronics bench",
+      "repeatable pan and tilt sweep while preserving ESP32 logic stability and enclosure cable clearance"
+    ],
+    "operating_environment": {
+      "domain": "indoor electronics bench",
+      "boundaries": [
+        "fixed non-mobile base",
+        "operator-attended low-voltage bench area",
+        "5 V current-limited servo rail"
+      ],
+      "hazards": ["servo pinch", "servo stall", "logic brownout", "USB cable strain"]
+    },
+    "constraints": {
+      "payload_kg": 0.12,
+      "mission_duty_cycle": 0.45,
+      "baseline_current_a": 0.18
+    },
+    "platform": {
+      "type": "stationary_pan_tilt_module",
+      "domains": ["positioning"],
+      "degrees_of_freedom": 2,
+      "mounting": "fixed PETG bracket attached to controller enclosure or bench base"
+    }
+  },
+  "control_stack": {
+    "controllers": [
+      {"id": "main_ctrl", "board_id": "main_ctrl", "firmware": "esp32_pan_tilt_servo_control"}
+    ],
+    "loops": [
+      {"name": "pan_servo_pwm", "rate_hz": 50, "status": "pass"},
+      {"name": "tilt_servo_pwm", "rate_hz": 50, "status": "pass"},
+      {"name": "servo_rail_current_monitor", "rate_hz": 20, "status": "pass"}
+    ],
+    "sensors": [
+      {"id": "servo_rail_current", "type": "current_sensor", "role": "stall/current-limit observation"},
+      {"id": "operator_enable", "type": "manual_switch", "role": "operator state and cutoff"}
+    ],
+    "comms": [
+      {"type": "usb_serial", "role": "operator command and telemetry", "failsafe": "timeout_stop"}
+    ],
+    "failsafes": ["watchdog", "timeout_stop", "manual_power_cutoff", "current_limit"]
+  },
+  "safety_case": {
+    "failsafes": ["watchdog", "timeout_stop", "manual_power_cutoff", "current_limit"],
+    "hazards": [
+      {"id": "servo_pinch", "mitigation": "operator-attended low-force bench sweep and guarded finger clearance", "status": "mitigated"},
+      {"id": "servo_stall", "mitigation": "current_limit, sweep timeout, and immediate PWM disable", "status": "mitigated"},
+      {"id": "logic_brownout", "mitigation": "logic_power_isolation and servo bulk capacitance on the 5 V rail", "status": "mitigated"},
+      {"id": "usb_cable_strain", "mitigation": "verified enclosure cable clearance and strain-relieved routing", "status": "mitigated"}
+    ],
+    "mitigations": [
+      "servo_bulk_capacitance",
+      "logic_power_isolation",
+      "current_limit",
+      "soft_sweep_limits",
+      "operator_attended_bench",
+      "cable_strain_relief"
+    ],
+    "protections": ["servo_bulk_capacitance", "logic_power_isolation", "current_limit"]
   },
   "robotics_bench_capture": {
     "artifact_uris": ["session://closed-pan-tilt/robotics-current-log"],
@@ -230,6 +293,21 @@
     "scope_statement": "Robotics release limited to current-limited SG90 pan/tilt motion under 1.2 N payload.",
     "artifact_uris": ["session://closed-pan-tilt/release-pack"],
     "acceptance_reviewed": true
+  },
+  "field_validation": {
+    "artifact_uris": [
+      "session://closed-pan-tilt/operator-bench-sweep-video",
+      "session://closed-pan-tilt/servo-current-telemetry"
+    ],
+    "simulations": [
+      {"target": "servo payload torque and rail current margin", "status": "pass"}
+    ],
+    "bench_tests": [
+      {"target": "current-limited first motion with ESP32 logic rail telemetry", "status": "pass"}
+    ],
+    "field_tests": [
+      {"target": "operator-attended indoor bench pan-tilt sweep inside declared cable and payload boundary", "status": "pass"}
+    ]
   },
   "integrated_bench_capture": {
     "artifact_uris": ["session://closed-pan-tilt/system-bench-video", "session://closed-pan-tilt/current-log"],
@@ -249,6 +327,11 @@
   "mechatronics_release": {
     "scope_statement": "Hardware-Splicer release limited to the integrated ESP32 controller, PETG enclosure, 3D-Splicer script output, and SG90 pan-tilt mechanism generated in this bundle.",
     "artifact_uris": ["session://closed-pan-tilt/release-pack"],
+    "acceptance_reviewed": true
+  },
+  "robotics_project_release": {
+    "scope_statement": "Robotics project release limited to an operator-attended stationary SG90 pan-tilt module on an indoor low-voltage electronics bench with current-limited 5 V servo supply.",
+    "artifact_uris": ["session://closed-pan-tilt/release-pack", "session://closed-pan-tilt/operator-bench-sweep-video"],
     "acceptance_reviewed": true
   }
 }

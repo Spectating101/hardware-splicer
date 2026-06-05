@@ -1,0 +1,29 @@
+{
+  "scenario_name": "closed_pan_tilt_mechatronics_project",
+  "intent": "Build and release a stationary two-axis pan-tilt mechatronics module that combines ESP32 servo control, current-limited motion, PETG packaging, and 3D-Splicer enclosure output.",
+  "compile_spec_path": "../hardware_splicer_closed_mechatronics_demo.json",
+  "overrides": {
+    "render_stl": true
+  },
+  "expected": {
+    "minimum_authority_level": "production_robotics_project_release",
+    "mechanical_release": true,
+    "robotics_release": true,
+    "simulation_ready": true,
+    "mechatronics_release": true,
+    "robotics_project_release": true
+  },
+  "acceptance": {
+    "allowed_blockers": 0,
+    "must_have_artifacts": [
+      "ROBOTICS_SIMULATION.json",
+      "ROBOTICS_PLATFORM_AUTHORITY.json",
+      "MECHATRONICS_AUTHORITY.json",
+      "CASEFILE.json",
+      "PROJECT_LOG.json",
+      "HARDWARE_REVIEW.md",
+      "splicer3d_response",
+      "splicer3d_script"
+    ]
+  }
+}

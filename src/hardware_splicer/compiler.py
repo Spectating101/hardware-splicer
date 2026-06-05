@@ -79,7 +79,24 @@ def _write_text_artifacts(engineering: Dict[str, Any], out_dir: Path) -> Dict[st
         script_path = out_dir / "splicer3d_script.py"
         script_path.write_text(script, encoding="utf-8")
         artifacts["splicer3d_script"] = str(script_path)
+    stl_path = Path(str(splicer3d.get("stl_path") or "")) if isinstance(splicer3d, dict) else Path("")
+    if stl_path.is_file():
+        target = out_dir / stl_path.name
+        if stl_path.resolve() != target.resolve():
+            shutil.copy2(stl_path, target)
+        artifacts["splicer3d_stl"] = str(target)
     return artifacts
+
+
+def _splicer3d_has_usable_artifact(splicer3d: Dict[str, Any]) -> bool:
+    if not splicer3d:
+        return False
+    if splicer3d.get("ok") is True or splicer3d.get("success") is True:
+        return True
+    if str(splicer3d.get("script") or "").strip():
+        return True
+    stl_path = str(splicer3d.get("stl_path") or "").strip()
+    return bool(stl_path)
 
 
 def _sha256(path: Path) -> str:
@@ -126,7 +143,9 @@ def _render_summary(result: HardwareCompileResult) -> str:
     splicer3d = mechanism.get("splicer3d") or {}
     trace = (result.mechatronics_authority or {}).get("integration_trace") or {}
     coverage = trace.get("coverage_summary") or {}
-    if splicer3d.get("ok"):
+    if splicer3d.get("success") is True and splicer3d.get("stl_path"):
+        splicer_status = str(splicer3d.get("mode") or "stl")
+    elif splicer3d.get("ok"):
         splicer_status = str(splicer3d.get("mode") or "ok")
     elif splicer3d.get("script"):
         splicer_status = str(splicer3d.get("mode") or "script_fallback")
@@ -278,7 +297,7 @@ def compile_hardware_bundle(
     ok = bool(engineering.get("compiled")) and (not run_spec.run_mechanism_sim or not run_spec.mechanism or bool(mechanism.get("ok")))
     if _needs_splicer3d(run_spec):
         splicer3d = mechanism.get("splicer3d") or {}
-        ok = ok and bool(splicer3d.get("ok") or splicer3d.get("script"))
+        ok = ok and _splicer3d_has_usable_artifact(splicer3d)
 
     mechanical_authority = build_mechanical_authority(run_spec.to_dict(), engineering=engineering)
     robotics_actuation = build_robotics_actuation_packet(run_spec.to_dict(), engineering=engineering)

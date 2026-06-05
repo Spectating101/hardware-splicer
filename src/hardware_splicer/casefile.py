@@ -548,6 +548,7 @@ def _compact_splicer3d(splicer3d: Dict[str, Any]) -> Dict[str, Any]:
         return {}
     return {
         "ok": splicer3d.get("ok"),
+        "success": splicer3d.get("success"),
         "mode": splicer3d.get("mode"),
         "script_present": bool(str(splicer3d.get("script") or "").strip()),
         "stl_path": splicer3d.get("stl_path"),
