@@ -1,0 +1,80 @@
+{
+  "schema_version": "hardware_splicer.kicad_pcb_fixtures.v1",
+  "source": {
+    "name": "KiCad official demo projects",
+    "repository": "https://gitlab.com/kicad/code/kicad",
+    "ref": "9.0.2",
+    "license": "GPL-3.0-or-later",
+    "license_file": "LICENSE.GPLv3.txt"
+  },
+  "fixtures": [
+    {
+      "id": "custom_pads_test",
+      "source_path": "demos/custom_pads_test/custom_pads_test.kicad_pcb",
+      "why": "Small custom-pad stress board for footprint/pad and STEP export edge cases.",
+      "file": "kicad_demos_9_0_2/custom_pads_test.kicad_pcb",
+      "source_url": "https://gitlab.com/kicad/code/kicad/-/raw/9.0.2/demos/custom_pads_test/custom_pads_test.kicad_pcb",
+      "license": "GPL-3.0-or-later",
+      "bytes": 124831,
+      "sha256": "a36d3d6f7e9f82412acee8636a76ee1cbd5d0790eaa9fd7aef99c555dbb29fc5",
+      "kicad_cli_step_export": {
+        "attempted": true,
+        "ready": true,
+        "kicad_cli_version": "9.0.2",
+        "returncode": 0,
+        "step_bytes": 15238
+      }
+    },
+    {
+      "id": "microwave",
+      "source_path": "demos/microwave/microwave.kicad_pcb",
+      "why": "RF-style board with unusual scale and geometry, useful for outline/placement extraction.",
+      "file": "kicad_demos_9_0_2/microwave.kicad_pcb",
+      "source_url": "https://gitlab.com/kicad/code/kicad/-/raw/9.0.2/demos/microwave/microwave.kicad_pcb",
+      "license": "GPL-3.0-or-later",
+      "bytes": 85718,
+      "sha256": "7f17191488b51f8782efc0a3b9ce7b5748a4e771ff0babb34ec0369ffcf43be5",
+      "kicad_cli_step_export": {
+        "attempted": true,
+        "ready": true,
+        "kicad_cli_version": "9.0.2",
+        "returncode": 0,
+        "step_bytes": 9010
+      }
+    },
+    {
+      "id": "pic_programmer",
+      "source_path": "demos/pic_programmer/pic_programmer.kicad_pcb",
+      "why": "Medium through-hole board with many components and holes.",
+      "file": "kicad_demos_9_0_2/pic_programmer.kicad_pcb",
+      "source_url": "https://gitlab.com/kicad/code/kicad/-/raw/9.0.2/demos/pic_programmer/pic_programmer.kicad_pcb",
+      "license": "GPL-3.0-or-later",
+      "bytes": 698533,
+      "sha256": "470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+      "kicad_cli_step_export": {
+        "attempted": true,
+        "ready": true,
+        "kicad_cli_version": "9.0.2",
+        "returncode": 0,
+        "step_bytes": 402314
+      }
+    },
+    {
+      "id": "stickhub",
+      "source_path": "demos/stickhub/StickHub.kicad_pcb",
+      "why": "Compact modern embedded board with dense footprints and routing.",
+      "file": "kicad_demos_9_0_2/StickHub.kicad_pcb",
+      "source_url": "https://gitlab.com/kicad/code/kicad/-/raw/9.0.2/demos/stickhub/StickHub.kicad_pcb",
+      "license": "GPL-3.0-or-later",
+      "bytes": 1030708,
+      "sha256": "eee1c88ee02d0101851c50e430fd98b18440ed828d633e6e3973a07cda1d34ce",
+      "kicad_cli_step_export": {
+        "attempted": true,
+        "ready": true,
+        "kicad_cli_version": "9.0.2",
+        "returncode": 0,
+        "step_bytes": 36438
+      }
+    }
+  ]
+}
