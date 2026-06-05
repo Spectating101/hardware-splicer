@@ -177,6 +177,11 @@ def build_casefile(
             "physical_assembly_ready": bool(packaging.get("physical_assembly_ready")),
             "physical_assembly_artifact_count": int(packaging.get("physical_assembly_artifact_count") or 0),
             "physical_assembly_check_count": int(packaging.get("physical_assembly_check_count") or 0),
+            "kicad_step_assembly_ready": bool(packaging.get("kicad_step_assembly_ready")),
+            "kicad_step_assembly_mode": packaging.get("kicad_step_assembly_mode"),
+            "kicad_step_assembly_source_precision": packaging.get("kicad_step_assembly_source_precision"),
+            "kicad_step_assembly_artifact_count": int(packaging.get("kicad_step_assembly_artifact_count") or 0),
+            "kicad_step_assembly_check_count": int(packaging.get("kicad_step_assembly_check_count") or 0),
             "generated_output_count": max(
                 int(packaging.get("generated_output_count") or 0),
                 int(coverage.get("generated_output_count") or 0),
@@ -186,6 +191,7 @@ def build_casefile(
             "mecha_bundle_file": packaging.get("mecha_bundle_file") or mechanism_analysis.get("bundle_file"),
             "splicer3d": _compact_splicer3d(_dict(mechanism_analysis.get("splicer3d"))),
             "physical_assembly": _compact_physical_assembly(_dict(mechanism_analysis.get("physical_assembly"))),
+            "kicad_step_assembly": _compact_kicad_step_assembly(_dict(mechanism_analysis.get("kicad_step_assembly"))),
             "warnings": _string_list(packaging.get("warnings")),
             "blockers": _string_list(packaging.get("blockers")),
         },
@@ -270,8 +276,21 @@ def build_project_log(casefile: Mapping[str, Any]) -> Dict[str, Any]:
         {
             "phase": "packaging",
             "status": "closed" if packaging.get("packaging_ready") else "open",
-            "summary": f"Packaging generated {packaging.get('generated_output_count') or 0} output(s); 3D-Splicer used: {bool(packaging.get('splicer3d_used'))}; physical assembly ready: {bool(packaging.get('physical_assembly_ready'))}.",
-            "evidence": _artifact_names(data, ["splicer3d_script", "splicer3d_response", "splicer3d_stl", "physical_assembly_map", "physical_assembly_preview", "mecha_bundle"]),
+            "summary": f"Packaging generated {packaging.get('generated_output_count') or 0} output(s); 3D-Splicer used: {bool(packaging.get('splicer3d_used'))}; physical assembly ready: {bool(packaging.get('physical_assembly_ready'))}; STEP assembly ready: {bool(packaging.get('kicad_step_assembly_ready'))}.",
+            "evidence": _artifact_names(
+                data,
+                [
+                    "splicer3d_script",
+                    "splicer3d_response",
+                    "splicer3d_stl",
+                    "physical_assembly_map",
+                    "physical_assembly_preview",
+                    "kicad_step_assembly_report",
+                    "kicad_step_placement",
+                    "kicad_step_assembly_model",
+                    "mecha_bundle",
+                ],
+            ),
             "next": "; ".join(_string_list(packaging.get("blockers"))[:3]),
         },
         {
@@ -383,6 +402,10 @@ def render_hardware_review(casefile: Mapping[str, Any], project_log: Mapping[str
             f"- Packaging ready: `{bool(packaging.get('packaging_ready'))}`",
             f"- Physical assembly ready: `{bool(packaging.get('physical_assembly_ready'))}`",
             f"- Physical assembly checks: `{packaging.get('physical_assembly_check_count') or 0}`",
+            f"- STEP assembly ready: `{bool(packaging.get('kicad_step_assembly_ready'))}`",
+            f"- STEP assembly mode: `{packaging.get('kicad_step_assembly_mode') or 'not generated'}`",
+            f"- STEP assembly source: `{packaging.get('kicad_step_assembly_source_precision') or 'not available'}`",
+            f"- STEP assembly checks: `{packaging.get('kicad_step_assembly_check_count') or 0}`",
             f"- 3D-Splicer used: `{bool(packaging.get('splicer3d_used'))}`",
             f"- Mecha bundle: `{packaging.get('mecha_bundle_file') or project.get('mecha_bundle_dir') or 'not generated'}`",
         ]
@@ -573,6 +596,24 @@ def _compact_physical_assembly(assembly: Dict[str, Any]) -> Dict[str, Any]:
         "fastener_stackup_count": len(_list_dicts(assembly.get("fastener_stackups"))),
         "clearance_check_count": len(_list_dicts(assembly.get("clearance_checks"))),
         "blockers": _string_list(assembly.get("blockers")),
+    }
+
+
+def _compact_kicad_step_assembly(assembly: Dict[str, Any]) -> Dict[str, Any]:
+    if not assembly:
+        return {}
+    placement = _dict(assembly.get("placement"))
+    return {
+        "schema_version": assembly.get("schema_version"),
+        "assembly_ready": bool(assembly.get("assembly_ready")),
+        "mode": assembly.get("mode"),
+        "source_precision": assembly.get("source_precision"),
+        "component_count": int(placement.get("component_count") or 0),
+        "mount_count": int(placement.get("mount_count") or 0),
+        "port_count": int(placement.get("port_count") or 0),
+        "check_count": len(_list_dicts(assembly.get("checks"))),
+        "blockers": _string_list(assembly.get("blockers")),
+        "warnings": _string_list(assembly.get("warnings")),
     }
 
 

@@ -85,6 +85,8 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     metrics = result["production_release_metrics"]
     splicer3d = json.loads(Path(result["artifacts"]["splicer3d_response"]).read_text(encoding="utf-8"))
     assembly = json.loads(Path(result["artifacts"]["physical_assembly_map"]).read_text(encoding="utf-8"))
+    step_report = json.loads(Path(result["artifacts"]["kicad_step_assembly_report"]).read_text(encoding="utf-8"))
+    step_placement = json.loads(Path(result["artifacts"]["kicad_step_placement"]).read_text(encoding="utf-8"))
 
     assert result["compile_ok"] is True
     assert result["ok"] is True
@@ -98,6 +100,8 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     assert metrics["gates_passed"] == metrics["gates_total"] == 9
     assert Path(result["artifacts"]["splicer3d_script"]).exists()
     assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
+    assert Path(result["artifacts"]["kicad_step_assembly_model"]).exists()
+    assert Path(result["artifacts"]["kicad_step_assembly_source"]).exists()
     assert splicer3d["mode"] in {"stl", "script_fallback"}
     assert splicer3d.get("ok") is True or splicer3d.get("script")
     assert assembly["assembly_ready"] is True
@@ -106,6 +110,15 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     assert assembly["connector_keepouts"]
     assert assembly["cable_routes"]
     assert assembly["fastener_stackups"]
+    assert step_report["assembly_ready"] is True
+    assert step_report["mode"] == "declared_geometry_cadquery_assembly"
+    assert step_report["placement"]["component_count"] >= 4
+    assert step_report["placement"]["mount_count"] >= 2
+    step_checks = {row["id"]: row for row in step_report["checks"]}
+    assert step_checks["system_step_assembly"]["status"] == "pass"
+    assert step_checks["board_outline_consistency"]["status"] == "pass"
+    assert step_placement["source_mode"] == "declared_board_metadata"
+    assert {row["ref"] for row in step_placement["components"]} >= {"U1", "U2", "U3", "J3"}
 
 
 def test_scenario_run_api_returns_project_authority(tmp_path, monkeypatch):

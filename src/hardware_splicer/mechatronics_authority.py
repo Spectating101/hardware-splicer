@@ -232,6 +232,7 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
     mechanism_spec = _dict(body.get("mechanism"))
     mechanism_bundle = _load_mecha_bundle(mechanism)
     physical_assembly = _dict(mechanism.get("physical_assembly"))
+    kicad_step_assembly = _dict(mechanism.get("kicad_step_assembly"))
     blockers: List[str] = []
     warnings: List[str] = []
 
@@ -264,6 +265,16 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
     if mechanism_spec and not physical_assembly:
         warnings.append("No physical assembly map was generated for board/package/mechanism spatial integration.")
 
+    kicad_step_ready = bool(kicad_step_assembly.get("assembly_ready"))
+    kicad_step_blockers = _string_list(kicad_step_assembly.get("blockers"))
+    kicad_step_warnings = _string_list(kicad_step_assembly.get("warnings"))
+    if mechanism_spec and kicad_step_assembly and not kicad_step_ready:
+        blockers.extend("KiCad/STEP assembly: " + row for row in kicad_step_blockers)
+    if mechanism_spec and kicad_step_assembly:
+        warnings.extend("KiCad/STEP assembly: " + row for row in kicad_step_warnings)
+    if mechanism_spec and not kicad_step_assembly:
+        warnings.append("No KiCad/STEP-level assembly package was generated for board/package/mechanism fit review.")
+
     return {
         "packaging_ready": not blockers and bool(bundle_file),
         "mecha_bundle_file": bundle_file,
@@ -272,6 +283,11 @@ def _packaging_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict
         "physical_assembly_ready": physical_ready,
         "physical_assembly_artifact_count": _artifact_count(physical_assembly),
         "physical_assembly_check_count": len(_list_dicts(physical_assembly.get("clearance_checks"))),
+        "kicad_step_assembly_ready": kicad_step_ready,
+        "kicad_step_assembly_mode": kicad_step_assembly.get("mode"),
+        "kicad_step_assembly_source_precision": kicad_step_assembly.get("source_precision"),
+        "kicad_step_assembly_artifact_count": _artifact_count(kicad_step_assembly),
+        "kicad_step_assembly_check_count": len(_list_dicts(kicad_step_assembly.get("checks"))),
         "blockers": _dedupe_strings(blockers),
         "warnings": _dedupe_strings(warnings),
     }

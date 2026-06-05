@@ -25,7 +25,11 @@
       "splicer3d_response",
       "splicer3d_script",
       "physical_assembly_map",
-      "physical_assembly_preview"
+      "physical_assembly_preview",
+      "kicad_step_assembly_report",
+      "kicad_step_placement",
+      "kicad_step_assembly_source",
+      "kicad_step_assembly_model"
     ]
   }
 }

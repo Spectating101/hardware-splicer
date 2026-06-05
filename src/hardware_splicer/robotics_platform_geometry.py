@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
+
+from .runtime import SPLICER3D_VENV_PYTHON
 
 
 def attach_robotics_platform_geometry(payload: Mapping[str, Any] | Any, *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
@@ -20,6 +26,13 @@ def attach_robotics_platform_geometry(payload: Mapping[str, Any] | Any, *, engin
         artifacts.update(_dict(physical.get("artifacts")))
         outputs.extend(_string_list(physical.get("outputs")))
         dimensions["physical_assembly"] = _dict(physical.get("dimensions"))
+
+    kicad_step = _attach_kicad_step_assembly(body, engineering=engineering, out_dir=out_dir)
+    if kicad_step.get("generated"):
+        generated = True
+        artifacts.update(_dict(kicad_step.get("artifacts")))
+        outputs.extend(_string_list(kicad_step.get("outputs")))
+        dimensions["kicad_step_assembly"] = _dict(kicad_step.get("dimensions"))
 
     drive = _attach_drive_base(body, engineering=engineering, out_dir=out_dir)
     if drive.get("generated"):
@@ -137,7 +150,7 @@ def _attach_physical_assembly(body: Dict[str, Any], *, engineering: Dict[str, An
         "assembly_ready": not blockers,
         "blockers": blockers,
         "scope_limits": [
-            "Reference assembly uses declared outline, mount, cutout, and mechanism metadata; it is not a full KiCad STEP assembly.",
+            "Reference assembly uses declared outline, mount, cutout, and mechanism metadata; STEP-level artifact generation records whether exact KiCad board data was available.",
             "Connector body height, harness diameter, and exact component keepouts must be replaced with measured data before enclosure tooling.",
         ],
     }
@@ -221,6 +234,234 @@ def _attach_physical_assembly(body: Dict[str, Any], *, engineering: Dict[str, An
             "board": board_geometry.get("dimensions_mm"),
             "enclosure": enclosure.get("outer_dimensions_mm"),
             "assembly_ready": not blockers,
+        },
+    }
+
+
+def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
+    machine = _dict(body.get("machine"))
+    boards = _list_dicts(machine.get("boards"))
+    mechanism = _dict(body.get("mechanism"))
+    if not boards or not mechanism:
+        return {"generated": False, "artifacts": {}, "outputs": []}
+
+    analysis = engineering.setdefault("analysis", {})
+    if not isinstance(analysis, dict):
+        engineering["analysis"] = analysis = {}
+    mechanism_analysis = analysis.setdefault("mechanism", {})
+    if not isinstance(mechanism_analysis, dict):
+        analysis["mechanism"] = mechanism_analysis = {}
+
+    physical_assembly = _dict(mechanism_analysis.get("physical_assembly"))
+    if not physical_assembly:
+        return {"generated": False, "artifacts": {}, "outputs": []}
+
+    board = boards[0]
+    board_id = str(board.get("board_id") or board.get("name") or "main_board")
+    board_meta = _board_design_meta(body, board_id)
+    board_path = _existing_path(board_meta.get("path"))
+    is_kicad_pcb = bool(board_path and board_path.suffix == ".kicad_pcb")
+
+    target_dir = out_dir / "kicad_step_assembly"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    report_path = target_dir / "KICAD_STEP_ASSEMBLY_REPORT.json"
+    placement_path = target_dir / "board_component_placement.json"
+    source_path = target_dir / "assembly_source.py"
+    assembly_step_path = target_dir / "hardware_splicer_assembly.step"
+    kicad_step_path = target_dir / f"{board_id}_kicad_board.step"
+    kicad_log_path = target_dir / "kicad_cli_export.log"
+
+    placement = _board_component_placement(board, physical_assembly, board_path=board_path if is_kicad_pcb else None)
+    placement_path.write_text(json.dumps(placement, indent=2), encoding="utf-8")
+    outline_delta = _board_outline_delta_mm(physical_assembly, placement)
+
+    kicad_export = _try_export_kicad_step(board_path, kicad_step_path) if is_kicad_pcb and board_path else {
+        "attempted": False,
+        "ready": False,
+        "reason": "No .kicad_pcb source file was supplied for this board; assembly STEP uses declared board geometry.",
+    }
+    if kicad_export.get("attempted"):
+        kicad_log_path.write_text(str(kicad_export.get("log") or ""), encoding="utf-8")
+
+    source_path.write_text(_cadquery_assembly_source(physical_assembly, placement, assembly_step_path), encoding="utf-8")
+    step_result = _run_cadquery_step_source(source_path)
+    assembly_step_ready = assembly_step_path.exists() and assembly_step_path.stat().st_size > 0
+    placement_from_kicad = placement.get("source_mode") == "kicad_pcb_geometry"
+    source_precision = _kicad_step_source_precision(
+        is_kicad_pcb=is_kicad_pcb,
+        native_step_ready=bool(kicad_export.get("ready")),
+        placement_from_kicad=bool(placement_from_kicad),
+    )
+
+    checks = [
+        {
+            "id": "component_placement_source",
+            "status": "pass" if placement.get("components") else "warn",
+            "message": "Board component placement was extracted from KiCad PCB data."
+            if placement_from_kicad
+            else "Board component placement was generated from declared board/BOM metadata.",
+            "component_count": len(_list_dicts(placement.get("components"))),
+        },
+        {
+            "id": "system_step_assembly",
+            "status": "pass" if assembly_step_ready else "block",
+            "message": "CadQuery generated the integrated board/enclosure/mechanism STEP assembly."
+            if assembly_step_ready
+            else "CadQuery did not generate a usable integrated STEP assembly.",
+            "bytes": assembly_step_path.stat().st_size if assembly_step_path.exists() else 0,
+        },
+        {
+            "id": "kicad_board_step_export",
+            "status": "pass" if kicad_export.get("ready") else ("warn" if is_kicad_pcb else "skipped"),
+            "message": "KiCad CLI exported the native board STEP model."
+            if kicad_export.get("ready")
+            else str(kicad_export.get("reason") or kicad_export.get("error") or "KiCad board STEP export was not run."),
+        },
+        {
+            "id": "board_outline_consistency",
+            "status": "pass" if outline_delta <= 0.5 else "warn",
+            "message": "Declared physical board outline matches the board placement source within 0.5 mm."
+            if outline_delta <= 0.5
+            else f"Declared physical board outline differs from board placement source by up to {outline_delta:.3f} mm.",
+            "max_delta_mm": round(outline_delta, 3),
+        },
+    ]
+    blockers = [str(row.get("message")) for row in checks if row.get("status") == "block"]
+    warnings = [str(row.get("message")) for row in checks if row.get("status") == "warn"]
+    if is_kicad_pcb and kicad_export.get("attempted") and not kicad_export.get("ready"):
+        blockers.append("Native KiCad board STEP export failed for the supplied .kicad_pcb file.")
+
+    artifacts = [
+        {"id": "kicad_step_assembly_report", "path": str(report_path)},
+        {"id": "kicad_step_placement", "path": str(placement_path)},
+        {"id": "kicad_step_assembly_source", "path": str(source_path)},
+    ]
+    if assembly_step_ready:
+        artifacts.append({"id": "kicad_step_assembly_model", "path": str(assembly_step_path)})
+    if kicad_export.get("ready"):
+        artifacts.append({"id": "kicad_board_step_model", "path": str(kicad_step_path)})
+    if kicad_export.get("attempted"):
+        artifacts.append({"id": "kicad_step_export_log", "path": str(kicad_log_path)})
+
+    report = {
+        "schema_version": "hardware_splicer.kicad_step_assembly.v1",
+        "board_id": board_id,
+        "assembly_ready": bool(assembly_step_ready and not blockers),
+        "mode": "kicad_cli_plus_cadquery_assembly" if kicad_export.get("ready") else "declared_geometry_cadquery_assembly",
+        "source_precision": source_precision,
+        "source_files": {
+            "board_design": str(board_path) if board_path else "",
+            "board_design_kind": _board_design_kind(board_meta, board_path),
+            "native_kicad_step": str(kicad_step_path) if kicad_export.get("ready") else "",
+        },
+        "artifacts": artifacts,
+        "placement": {
+            "source_mode": placement.get("source_mode"),
+            "component_count": len(_list_dicts(placement.get("components"))),
+            "mount_count": len(_list_dicts(placement.get("mounts"))),
+            "port_count": len(_list_dicts(placement.get("ports"))),
+        },
+        "cadquery": {
+            "python": step_result.get("python"),
+            "returncode": step_result.get("returncode"),
+            "stdout_tail": step_result.get("stdout_tail"),
+            "stderr_tail": step_result.get("stderr_tail"),
+        },
+        "checks": checks,
+        "blockers": _dedupe_strings(blockers),
+        "warnings": _dedupe_strings(warnings),
+        "scope_limits": [
+            "Assembly coordinates are millimeters in the physical assembly map coordinate frame.",
+            "Generated component bodies are envelope solids unless exact KiCad 3D models are available through native KiCad STEP export.",
+            "A declared-geometry STEP is fit/planning evidence, not a substitute for board manufacturer STEP and measured connector envelopes.",
+        ],
+    }
+    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    output_names = [
+        "kicad_step_assembly/KICAD_STEP_ASSEMBLY_REPORT.json",
+        "kicad_step_assembly/board_component_placement.json",
+        "kicad_step_assembly/assembly_source.py",
+    ]
+    if assembly_step_ready:
+        output_names.append("kicad_step_assembly/hardware_splicer_assembly.step")
+    if kicad_export.get("ready"):
+        output_names.append(f"kicad_step_assembly/{board_id}_kicad_board.step")
+    if kicad_export.get("attempted"):
+        output_names.append("kicad_step_assembly/kicad_cli_export.log")
+
+    mechanism_analysis["outputs"] = _dedupe_strings(_string_list(mechanism_analysis.get("outputs")) + output_names)
+    mechanism_analysis["parts"] = _list_dicts(mechanism_analysis.get("parts")) + [
+        {
+            "file": "kicad_step_assembly/hardware_splicer_assembly.step",
+            "module": "kicad_step_assembly",
+            "kind": "assembly_step",
+            "notes": "Integrated board/enclosure/mechanism STEP assembly generated from KiCad PCB geometry when available, otherwise declared board metadata.",
+        },
+        {
+            "file": "kicad_step_assembly/board_component_placement.json",
+            "module": "board_component_placement",
+            "kind": "board_placement",
+            "notes": "Board outline, component envelopes, mounts, and ports used to place the PCB into the physical assembly map.",
+        },
+    ]
+    mechanism_analysis["dfm"] = _list_dicts(mechanism_analysis.get("dfm")) + [
+        {
+            "severity": "info" if report["assembly_ready"] else "error",
+            "domain": "kicad_step_assembly",
+            "message": "KiCad/STEP-level assembly package generated with board placement, component envelopes, fasteners, cable routes, and mechanism reference geometry."
+            if report["assembly_ready"]
+            else "KiCad/STEP-level assembly package failed: " + "; ".join(report["blockers"][:4]),
+        }
+    ]
+    mechanism_analysis["simulation"] = _list_dicts(mechanism_analysis.get("simulation")) + [
+        {
+            "severity": "info" if report["assembly_ready"] else "error",
+            "domain": "kicad_step_assembly",
+            "model": "step_fit_evidence",
+            "message": "Integrated STEP assembly is available for cross-layer board/package/mechanism fit review."
+            if report["assembly_ready"]
+            else "Integrated STEP assembly is not available for cross-layer fit review.",
+            "metrics": {
+                "component_count": len(_list_dicts(placement.get("components"))),
+                "mount_count": len(_list_dicts(placement.get("mounts"))),
+                "port_count": len(_list_dicts(placement.get("ports"))),
+                "kicad_board_step_ready": bool(kicad_export.get("ready")),
+                "assembly_step_ready": bool(assembly_step_ready),
+            },
+        }
+    ]
+    mechanism_analysis["safety"] = _list_dicts(mechanism_analysis.get("safety")) + [
+        {
+            "severity": "info",
+            "domain": "kicad_step_assembly",
+            "message": "STEP assembly carries connector keepout and harness route envelopes for low-voltage fit review before powered bench operation.",
+        }
+    ]
+    mechanism_analysis["kicad_step_assembly"] = report
+
+    returned_artifacts = {
+        "kicad_step_assembly_report": str(report_path),
+        "kicad_step_placement": str(placement_path),
+        "kicad_step_assembly_source": str(source_path),
+    }
+    if assembly_step_ready:
+        returned_artifacts["kicad_step_assembly_model"] = str(assembly_step_path)
+    if kicad_export.get("ready"):
+        returned_artifacts["kicad_board_step_model"] = str(kicad_step_path)
+    if kicad_export.get("attempted"):
+        returned_artifacts["kicad_step_export_log"] = str(kicad_log_path)
+
+    return {
+        "generated": True,
+        "artifacts": returned_artifacts,
+        "outputs": output_names,
+        "dimensions": {
+            "assembly_ready": bool(report["assembly_ready"]),
+            "mode": report["mode"],
+            "source_precision": report["source_precision"],
+            "component_count": len(_list_dicts(placement.get("components"))),
+            "assembly_step_bytes": assembly_step_path.stat().st_size if assembly_step_path.exists() else 0,
         },
     }
 
@@ -613,6 +854,432 @@ module drive_base() {{
 
 drive_base();
 """
+
+
+def _board_design_meta(body: Dict[str, Any], board_id: str) -> Dict[str, Any]:
+    board_files = _dict(body.get("board_design_files"))
+    if board_id in board_files and isinstance(board_files[board_id], Mapping):
+        return dict(board_files[board_id])
+    for value in board_files.values():
+        if isinstance(value, Mapping):
+            return dict(value)
+    return {}
+
+
+def _board_design_kind(meta: Dict[str, Any], path: Path | None) -> str:
+    kind = str(meta.get("kind") or "").strip()
+    if kind:
+        return kind
+    return path.suffix.lstrip(".") if path else ""
+
+
+def _kicad_step_source_precision(*, is_kicad_pcb: bool, native_step_ready: bool, placement_from_kicad: bool) -> str:
+    if native_step_ready and placement_from_kicad:
+        return "exact_kicad_pcb"
+    if native_step_ready:
+        return "native_kicad_step_declared_placement"
+    if is_kicad_pcb and placement_from_kicad:
+        return "kicad_geometry_without_native_step"
+    return "declared_board_geometry"
+
+
+def _existing_path(value: Any) -> Path | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    path = Path(text)
+    if path.exists() and path.is_file():
+        return path
+    return None
+
+
+def _try_export_kicad_step(board_path: Path | None, output_path: Path) -> Dict[str, Any]:
+    if not board_path:
+        return {"attempted": False, "ready": False, "reason": "No KiCad PCB file was supplied."}
+    kicad_cli = shutil.which("kicad-cli")
+    if not kicad_cli:
+        return {"attempted": False, "ready": False, "reason": "kicad-cli is not installed or not on PATH."}
+    cmd = [
+        kicad_cli,
+        "pcb",
+        "export",
+        "step",
+        "--force",
+        "--include-tracks",
+        "--include-pads",
+        "--include-silkscreen",
+        "--output",
+        str(output_path),
+        str(board_path),
+    ]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=90, check=False)
+    except Exception as exc:
+        return {
+            "attempted": True,
+            "ready": False,
+            "cmd": cmd,
+            "error": str(exc),
+            "log": str(exc),
+        }
+    ready = proc.returncode == 0 and output_path.exists() and output_path.stat().st_size > 0
+    log = "\n".join(part for part in [proc.stdout, proc.stderr] if part)
+    return {
+        "attempted": True,
+        "ready": ready,
+        "cmd": cmd,
+        "returncode": proc.returncode,
+        "stdout_tail": (proc.stdout or "")[-4000:],
+        "stderr_tail": (proc.stderr or "")[-4000:],
+        "log": log[-8000:],
+        "reason": "" if ready else "kicad-cli returned no usable STEP output.",
+    }
+
+
+def _board_component_placement(board: Dict[str, Any], physical_assembly: Dict[str, Any], *, board_path: Path | None) -> Dict[str, Any]:
+    physical_board = _dict(physical_assembly.get("board"))
+    board_dim = _dict(physical_board.get("dimensions_mm"))
+    if board_path:
+        extracted = _extract_kicad_board_geometry(board_path)
+        if extracted.get("ok"):
+            return _placement_from_kicad_geometry(board, physical_assembly, board_path, extracted)
+    components = _declared_components(board, board_dim)
+    return {
+        "schema_version": "hardware_splicer.board_component_placement.v1",
+        "source_mode": "declared_board_metadata",
+        "source_file": str(board_path or ""),
+        "board": {
+            "board_id": physical_board.get("board_id") or board.get("board_id") or board.get("name") or "main_board",
+            "dimensions_mm": board_dim,
+            "origin": "physical_assembly.board_center",
+        },
+        "components": components,
+        "mounts": _list_dicts(physical_board.get("mounts")),
+        "ports": _list_dicts(physical_board.get("ports")),
+        "notes": [
+            "No .kicad_pcb placement was available, so component envelopes were laid out from declared BOM/connectors.",
+            "Replace with native KiCad placement before claiming exact component keepout authority.",
+        ],
+    }
+
+
+def _extract_kicad_board_geometry(board_path: Path) -> Dict[str, Any]:
+    try:
+        from src.engines.kicad_pcb_geometry import extract_pcb_geometry  # type: ignore
+
+        return {"ok": True, "geometry": extract_pcb_geometry(str(board_path))}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+def _placement_from_kicad_geometry(
+    board: Dict[str, Any],
+    physical_assembly: Dict[str, Any],
+    board_path: Path,
+    extracted: Dict[str, Any],
+) -> Dict[str, Any]:
+    geometry = _dict(extracted.get("geometry"))
+    physical_board = _dict(physical_assembly.get("board"))
+    physical_dim = _dict(physical_board.get("dimensions_mm"))
+    bbox = _dict(_dict(geometry.get("board")).get("bbox_mm"))
+    width = _float(bbox.get("width"), _float(physical_dim.get("w"), 80.0))
+    depth = _float(bbox.get("height"), _float(physical_dim.get("d"), 50.0))
+    min_x = _float(bbox.get("min_x"), 0.0)
+    min_y = _float(bbox.get("min_y"), 0.0)
+    center_x = min_x + width / 2.0
+    center_y = min_y + depth / 2.0
+    components = []
+    for fp in _list_dicts(geometry.get("footprints")):
+        at = _dict(fp.get("at"))
+        ref = str(fp.get("ref") or "?")
+        label = " ".join(str(fp.get(key) or "") for key in ("ref", "value", "footprint"))
+        size = _component_envelope(ref, label)
+        components.append(
+            {
+                "ref": ref,
+                "value": str(fp.get("value") or ""),
+                "footprint": str(fp.get("footprint") or ""),
+                "layer": str(fp.get("layer") or "F.Cu"),
+                "center_xy_mm": [round(_float(at.get("x"), center_x) - center_x, 3), round(_float(at.get("y"), center_y) - center_y, 3)],
+                "rotation_deg": round(_float(at.get("rot_deg"), 0.0), 3),
+                "size_xyz_mm": size,
+                "source": "kicad_pcb_footprint",
+            }
+        )
+    return {
+        "schema_version": "hardware_splicer.board_component_placement.v1",
+        "source_mode": "kicad_pcb_geometry",
+        "source_file": str(board_path),
+        "board": {
+            "board_id": physical_board.get("board_id") or board.get("board_id") or board.get("name") or "main_board",
+            "dimensions_mm": {"w": round(width, 3), "d": round(depth, 3), "t": _float(physical_dim.get("t"), 1.6)},
+            "bbox_mm": bbox,
+            "origin": "kicad_edge_cuts_center",
+        },
+        "components": components,
+        "mounts": _list_dicts(physical_board.get("mounts")),
+        "ports": _list_dicts(physical_board.get("ports")),
+        "notes": ["Component centers were extracted from KiCad footprint positions; bodies are envelope solids unless native KiCad 3D models are exported."],
+    }
+
+
+def _declared_components(board: Dict[str, Any], board_dim: Dict[str, Any]) -> List[Dict[str, Any]]:
+    requirements = _dict(board.get("requirements"))
+    bom = _list_dicts(requirements.get("bom"))
+    connectors = _list_dicts(requirements.get("connectors"))
+    width = _float(board_dim.get("w"), 80.0)
+    depth = _float(board_dim.get("d"), 50.0)
+    slots = [
+        (-0.18 * width, 0.0),
+        (0.08 * width, 0.0),
+        (-0.36 * width, 0.0),
+        (0.36 * width, 0.0),
+        (-0.22 * width, -0.28 * depth),
+        (0.22 * width, -0.28 * depth),
+        (-0.22 * width, 0.28 * depth),
+        (0.22 * width, 0.28 * depth),
+    ]
+    components: List[Dict[str, Any]] = []
+    for index, row in enumerate(bom):
+        ref = str(row.get("ref") or row.get("id") or f"BOM{index + 1}")
+        label = " ".join(str(row.get(key) or "") for key in ("type", "part", "value", "footprint"))
+        x, y = slots[index % len(slots)]
+        if ref.upper().startswith("J"):
+            x = width / 2.0 - 8.0
+            y = -depth / 2.0 + 8.0 + (index % 4) * 7.0
+        components.append(
+            {
+                "ref": ref,
+                "value": str(row.get("part") or row.get("value") or row.get("type") or ""),
+                "footprint": str(row.get("footprint") or row.get("type") or ""),
+                "layer": "F.Cu",
+                "center_xy_mm": [round(x, 3), round(y, 3)],
+                "rotation_deg": 0.0,
+                "size_xyz_mm": _component_envelope(ref, label),
+                "source": "declared_bom",
+            }
+        )
+    seen_refs = {str(row.get("ref") or "") for row in components}
+    for index, row in enumerate(connectors):
+        ref = str(row.get("ref") or row.get("name") or f"J{index + 1}")
+        if ref in seen_refs:
+            continue
+        label = " ".join(str(row.get(key) or "") for key in ("name", "type"))
+        components.append(
+            {
+                "ref": ref,
+                "value": str(row.get("type") or row.get("name") or "connector"),
+                "footprint": str(row.get("type") or "connector"),
+                "layer": "F.Cu",
+                "center_xy_mm": [round(width / 2.0 - 6.0, 3), round(-depth / 2.0 + 8.0 + index * 7.0, 3)],
+                "rotation_deg": 0.0,
+                "size_xyz_mm": _component_envelope(ref, label),
+                "source": "declared_connector",
+            }
+        )
+    return components
+
+
+def _component_envelope(ref: str, label: str) -> List[float]:
+    text = f"{ref} {label}".lower()
+    if "esp32" in text or "module" in text:
+        return [18.0, 25.0, 3.2]
+    if "usb" in text:
+        return [10.0, 8.0, 4.2]
+    if "jst" in text:
+        return [8.0, 7.0, 7.0]
+    if "header" in text or "pin" in text or ref.upper().startswith("J"):
+        return [14.0, 4.0, 6.5]
+    if "regulator" in text or "sot" in text or "ams1117" in text:
+        return [7.0, 8.0, 3.2]
+    if "cap" in text or ref.upper().startswith("C"):
+        return [3.2, 2.0, 2.2]
+    if "res" in text or ref.upper().startswith("R"):
+        return [2.2, 1.3, 1.0]
+    if "sensor" in text:
+        return [5.0, 5.0, 2.0]
+    if ref.upper().startswith("U"):
+        return [8.0, 8.0, 2.2]
+    return [6.0, 5.0, 2.0]
+
+
+def _board_outline_delta_mm(assembly: Dict[str, Any], placement: Dict[str, Any]) -> float:
+    physical_dim = _dict(_dict(assembly.get("board")).get("dimensions_mm"))
+    placement_dim = _dict(_dict(placement.get("board")).get("dimensions_mm"))
+    return max(
+        abs(_float(physical_dim.get("w"), 0.0) - _float(placement_dim.get("w"), _float(physical_dim.get("w"), 0.0))),
+        abs(_float(physical_dim.get("d"), 0.0) - _float(placement_dim.get("d"), _float(physical_dim.get("d"), 0.0))),
+        abs(_float(physical_dim.get("t"), 0.0) - _float(placement_dim.get("t"), _float(physical_dim.get("t"), 0.0))),
+    )
+
+
+def _run_cadquery_step_source(source_path: Path) -> Dict[str, Any]:
+    override = os.environ.get("SPLICER3D_PYTHON")
+    python = Path(override) if override else (SPLICER3D_VENV_PYTHON if SPLICER3D_VENV_PYTHON.exists() else Path(sys.executable))
+    try:
+        proc = subprocess.run([str(python), str(source_path)], capture_output=True, text=True, timeout=90, check=False)
+        return {
+            "python": str(python),
+            "returncode": proc.returncode,
+            "stdout_tail": (proc.stdout or "")[-4000:],
+            "stderr_tail": (proc.stderr or "")[-4000:],
+        }
+    except Exception as exc:
+        return {
+            "python": str(python),
+            "returncode": -1,
+            "stdout_tail": "",
+            "stderr_tail": str(exc),
+        }
+
+
+def _cadquery_assembly_source(assembly: Dict[str, Any], placement: Dict[str, Any], output_path: Path) -> str:
+    return f'''from pathlib import Path
+import json
+
+import cadquery as cq
+
+
+assembly = json.loads({json.dumps(json.dumps(assembly))})
+placement = json.loads({json.dumps(json.dumps(placement))})
+output_path = Path({json.dumps(str(output_path))})
+
+
+def _dict(value):
+    return dict(value) if isinstance(value, dict) else {{}}
+
+
+def _rows(value):
+    return [dict(item) for item in value] if isinstance(value, list) else []
+
+
+def _num(value, default):
+    try:
+        return float(value)
+    except Exception:
+        return default
+
+
+def _vec(value, default):
+    out = list(default)
+    if isinstance(value, list):
+        for index, item in enumerate(value[: len(out)]):
+            out[index] = _num(item, out[index])
+    return out
+
+
+def _name(value):
+    text = str(value or "part")
+    out = "".join(ch if ch.isalnum() or ch in "_-" else "_" for ch in text)
+    return out[:64] or "part"
+
+
+def _loc(center):
+    return cq.Location(cq.Vector(center[0], center[1], center[2]))
+
+
+def _add_box(asm, name, size, center, color):
+    sx, sy, sz = [_num(item, 0.0) for item in size]
+    if sx <= 0 or sy <= 0 or sz <= 0:
+        return
+    asm.add(cq.Workplane("XY").box(sx, sy, sz), name=_name(name), loc=_loc(center), color=color)
+
+
+def _add_cylinder(asm, name, diameter, height, center, color):
+    d = _num(diameter, 0.0)
+    h = _num(height, 0.0)
+    if d <= 0 or h <= 0:
+        return
+    asm.add(cq.Workplane("XY").cylinder(h, d / 2.0), name=_name(name), loc=_loc(center), color=color)
+
+
+def _add_route_segment(asm, name, start, end, width, color):
+    sx, sy, sz = start
+    ex, ey, ez = end
+    dx, dy, dz = ex - sx, ey - sy, ez - sz
+    center = [(sx + ex) / 2.0, (sy + ey) / 2.0, (sz + ez) / 2.0]
+    w = max(_num(width, 6.0), 0.5)
+    if abs(dx) >= abs(dy) and abs(dx) >= abs(dz):
+        size = [max(abs(dx), w), w, w]
+    elif abs(dy) >= abs(dx) and abs(dy) >= abs(dz):
+        size = [w, max(abs(dy), w), w]
+    else:
+        size = [w, w, max(abs(dz), w)]
+    _add_box(asm, name, size, center, color)
+
+
+model = cq.Assembly(name="hardware_splicer_kicad_step_assembly")
+board = _dict(assembly.get("board"))
+board_dim = _dict(board.get("dimensions_mm"))
+placement_board = _dict(placement.get("board"))
+placement_board_dim = _dict(placement_board.get("dimensions_mm"))
+if placement_board_dim:
+    board_dim = placement_board_dim
+enclosure = _dict(assembly.get("enclosure"))
+inner = _dict(enclosure.get("inner_dimensions_mm"))
+outer = _dict(enclosure.get("outer_dimensions_mm"))
+placements = _dict(assembly.get("placements"))
+pcb_origin = _vec(_dict(placements.get("pcb")).get("origin_xyz_mm"), [0.0, 0.0, 5.0])
+
+wall = _num(enclosure.get("wall_mm"), 2.4)
+floor_h = _num(enclosure.get("floor_mm"), 2.0)
+lid_h = _num(enclosure.get("lid_mm"), 2.0)
+outer_w = _num(outer.get("w"), 95.0)
+outer_d = _num(outer.get("d"), 67.0)
+inner_w = _num(inner.get("w"), 90.0)
+inner_d = _num(inner.get("d"), 62.0)
+inner_h = _num(inner.get("h"), 28.0)
+wall_z = floor_h + inner_h / 2.0
+
+_add_box(model, "enclosure_floor", [outer_w, outer_d, floor_h], [0.0, 0.0, floor_h / 2.0], cq.Color(0.72, 0.72, 0.70))
+_add_box(model, "enclosure_front_wall", [outer_w, wall, inner_h], [0.0, -inner_d / 2.0 - wall / 2.0, wall_z], cq.Color(0.78, 0.78, 0.76))
+_add_box(model, "enclosure_back_wall", [outer_w, wall, inner_h], [0.0, inner_d / 2.0 + wall / 2.0, wall_z], cq.Color(0.78, 0.78, 0.76))
+_add_box(model, "enclosure_left_wall", [wall, inner_d, inner_h], [-inner_w / 2.0 - wall / 2.0, 0.0, wall_z], cq.Color(0.78, 0.78, 0.76))
+_add_box(model, "enclosure_right_wall", [wall, inner_d, inner_h], [inner_w / 2.0 + wall / 2.0, 0.0, wall_z], cq.Color(0.78, 0.78, 0.76))
+_add_box(model, "lid_clearance_envelope", [outer_w, outer_d, lid_h], [0.0, 0.0, floor_h + inner_h + lid_h / 2.0], cq.Color(0.62, 0.62, 0.62))
+
+pcb_w = _num(board_dim.get("w"), 80.0)
+pcb_d = _num(board_dim.get("d"), 50.0)
+pcb_t = _num(board_dim.get("t"), 1.6)
+_add_box(model, "pcb_" + str(board.get("board_id") or "main"), [pcb_w, pcb_d, pcb_t], pcb_origin, cq.Color(0.0, 0.45, 0.20))
+pcb_top_z = pcb_origin[2] + pcb_t / 2.0
+
+for index, stack in enumerate(_rows(assembly.get("fastener_stackups"))):
+    xy = _vec(stack.get("center_xy_mm"), [0.0, 0.0])
+    h = _num(stack.get("standoff_height_mm"), 4.0)
+    d = _num(stack.get("standoff_outer_diameter_mm"), 5.0)
+    _add_cylinder(model, f"standoff_{{index + 1}}", d, h, [xy[0], xy[1], h / 2.0], cq.Color(0.18, 0.18, 0.18))
+    _add_cylinder(model, f"screw_clearance_{{index + 1}}", _num(stack.get("screw_clearance_diameter_mm"), 2.8), h + pcb_t + 1.2, [xy[0], xy[1], (h + pcb_t + 1.2) / 2.0], cq.Color(0.82, 0.82, 0.82))
+
+for index, comp in enumerate(_rows(placement.get("components"))):
+    xy = _vec(comp.get("center_xy_mm"), [0.0, 0.0])
+    size = _vec(comp.get("size_xyz_mm"), [6.0, 5.0, 2.0])
+    layer = str(comp.get("layer") or "F.Cu")
+    z = pcb_top_z + size[2] / 2.0 if not layer.startswith("B.") else pcb_origin[2] - pcb_t / 2.0 - size[2] / 2.0
+    _add_box(model, f"component_{{index + 1}}_{{comp.get('ref') or 'X'}}", size, [pcb_origin[0] + xy[0], pcb_origin[1] + xy[1], z], cq.Color(0.08, 0.08, 0.08))
+
+for index, keepout in enumerate(_rows(assembly.get("connector_keepouts"))):
+    center = _vec(keepout.get("center_xyz_mm"), [0.0, 0.0, 6.0])
+    size = _vec(keepout.get("size_xyz_mm"), [8.0, 6.0, 8.0])
+    _add_box(model, f"connector_keepout_{{index + 1}}_{{keepout.get('id') or 'port'}}", size, center, cq.Color(1.0, 0.12, 0.05))
+
+for route_index, route in enumerate(_rows(assembly.get("cable_routes"))):
+    points = [_vec(point, [0.0, 0.0, 0.0]) for point in route.get("points_xyz_mm", []) if isinstance(point, list)]
+    width = _num(route.get("channel_width_mm"), 6.0)
+    for seg_index in range(max(len(points) - 1, 0)):
+        _add_route_segment(model, f"cable_route_{{route_index + 1}}_{{seg_index + 1}}", points[seg_index], points[seg_index + 1], width, cq.Color(0.05, 0.16, 0.92))
+
+pan_place = _dict(placements.get("pan_tilt"))
+if pan_place:
+    pan_origin = _vec(pan_place.get("origin_xyz_mm"), [0.0, outer_d / 2.0 + 18.0, 8.0])
+    _add_cylinder(model, "pan_tilt_base", 34.0, 6.0, [pan_origin[0], pan_origin[1], pan_origin[2]], cq.Color(0.18, 0.18, 0.75))
+    _add_box(model, "pan_servo_body", [28.0, 18.0, 18.0], [pan_origin[0], pan_origin[1], pan_origin[2] + 12.0], cq.Color(0.23, 0.23, 0.82))
+    _add_box(model, "tilt_servo_bracket", [38.0, 10.0, 22.0], [pan_origin[0], pan_origin[1], pan_origin[2] + 28.0], cq.Color(0.25, 0.25, 0.88))
+
+output_path.parent.mkdir(parents=True, exist_ok=True)
+model.save(str(output_path))
+print(str(output_path))
+'''
 
 
 def _to_dict(value: Mapping[str, Any] | Any) -> Dict[str, Any]:
