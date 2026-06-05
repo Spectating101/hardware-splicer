@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CIRCUIT_ROOT = ROOT / "apps" / "circuit-ai"
 MECHA_ROOT = ROOT / "apps" / "mecha-splicer"
 SPLICER3D_ROOT = ROOT / "apps" / "3d-splicer"
+SPLICER3D_VENV_PYTHON = SPLICER3D_ROOT / ".venv" / "bin" / "python"
 
 
 class ServiceStartError(RuntimeError):
@@ -82,9 +83,15 @@ def start_splicer3d(port: int) -> subprocess.Popen[str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = str(SPLICER3D_ROOT)
     env["PYTHONUNBUFFERED"] = "1"
+    python_override = os.environ.get("SPLICER3D_PYTHON")
+    python = (
+        Path(python_override)
+        if python_override
+        else (SPLICER3D_VENV_PYTHON if SPLICER3D_VENV_PYTHON.exists() else Path(sys.executable))
+    )
     return subprocess.Popen(
         [
-            sys.executable,
+            str(python),
             "-m",
             "uvicorn",
             "src.api.main:app",
@@ -144,6 +151,22 @@ def patched_env(values: Dict[str, Optional[str]]) -> Iterator[None]:
                 os.environ[key] = value
 
 
+def _python_import_ok(python: Path, module: str) -> bool:
+    if not python.exists():
+        return False
+    try:
+        proc = subprocess.run(
+            [str(python), "-c", f"import {module}"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+            check=False,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
+
+
 def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
     roots = {
         "root": ROOT,
@@ -161,12 +184,26 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
         "cadquery": importlib.util.find_spec("cadquery") is not None,
         "ngspice": shutil.which("ngspice") is not None,
     }
+    splicer_python_override = os.environ.get("SPLICER3D_PYTHON")
+    splicer_python = (
+        Path(splicer_python_override)
+        if splicer_python_override
+        else (SPLICER3D_VENV_PYTHON if SPLICER3D_VENV_PYTHON.exists() else Path(sys.executable))
+    )
+    splicer_dependencies = {
+        "fastapi": _python_import_ok(splicer_python, "fastapi"),
+        "uvicorn": _python_import_ok(splicer_python, "uvicorn"),
+        "cadquery": _python_import_ok(splicer_python, "cadquery"),
+    }
     status: Dict[str, object] = {
         "ok": all(row["exists"] for row in app_roots.values()),
         "python": sys.executable,
         "python_version": platform.python_version(),
+        "splicer3d_python": str(splicer_python),
+        "splicer3d_local_venv": SPLICER3D_VENV_PYTHON.exists(),
         "app_roots": app_roots,
         "dependencies": dependencies,
+        "splicer3d_dependencies": splicer_dependencies,
     }
     if splicer_url:
         status["splicer3d_health"] = {"url": splicer_url, "ok": health_ok(splicer_url)}

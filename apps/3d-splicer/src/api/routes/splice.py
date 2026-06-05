@@ -90,6 +90,7 @@ def splice(desc: Description) -> SpliceResponse:
         success=True,
         ok=True,
         mode="stl",
+        script=script,
         message="STL generated",
     )
 
