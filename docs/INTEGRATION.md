@@ -48,7 +48,9 @@ This dump currently keeps three apps as separate runtimes:
 - Circuit-AI to Mecha-Splicer is covered by `apps/circuit-ai/tests/unit/test_hardware_splicer_integration.py`.
 - Mecha-Splicer to 3D-Splicer payload shape is covered by `apps/mecha-splicer/tests/test_splicer3d_payload.py`.
 - Canonical bundle compiler: `python3 scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo`.
-  - The demo spec uses `examples/main_ctrl_esp32_servo.net`, so controller identity, USB-UART programming, servo outputs, and power connectors come from extracted board evidence.
+  - The legacy quick demo still accepts `examples/main_ctrl_esp32_servo.net` for lightweight compile smoke coverage.
+- Closed pan-tilt compiler: `python3 scripts/hardware_splicer.py compile --spec examples/hardware_splicer_closed_mechatronics_demo.json --out /tmp/hardware_splicer_closed_mechatronics_demo --render-stl`.
+  - The closed pan-tilt spec uses `examples/main_ctrl_esp32_servo.kicad_pcb`, so controller identity, USB-UART programming, servo outputs, power connectors, board placement, and native KiCad STEP export come from project-specific board evidence.
   - The expected current status is `sim_ready`; remaining findings should be actionable engineering warnings, not intake blockers.
   - `--render-stl` may report `script_fallback` when CadQuery is unavailable, while still extracting `splicer3d_script.py`.
 - Compiler API: `python3 scripts/hardware_splicer.py serve --port 8090`, then `POST /v1/compile`.

@@ -37,13 +37,13 @@ python3 scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
 
 The output directory contains `SUMMARY.md`, `ENGINEERING_REPORT.md`, `MANIFEST.json`, `BUILD_METADATA.json`, `hardware_splicer.bundle.json`, extracted 3D-Splicer artifacts when present, and a copied `mecha_bundle/`. It also emits `CASEFILE.json`, `PROJECT_LOG.json`, `HARDWARE_REVIEW.md`, `ROBOTICS_ACTUATION.json`, `ROBOTICS_SIMULATION.json`, and `ROBOTICS_PLATFORM_AUTHORITY.json` so each build has a CNX-style review, Hackaday-style project log, Hackster-style build package index, deterministic robotics simulation gate, and generalized robotics/mechatronics mission authority packet.
 
-Compile the closed mechatronics proof bundle with circuit release, mechanical measurements, robotics bench evidence, 3D-Splicer script output, and the final integration trace:
+Compile the closed mechatronics proof bundle with project-specific KiCad PCB evidence, native KiCad STEP export, mechanical measurements, robotics bench evidence, 3D-Splicer script output, and the final integration trace:
 
 ```bash
 python3 scripts/hardware_splicer.py compile --spec examples/hardware_splicer_closed_mechatronics_demo.json --out /tmp/hardware_splicer_closed_mechatronics_demo
 ```
 
-The generated `MECHATRONICS_AUTHORITY.json` includes an `integration_trace` that maps mechanism primitives to CAD outputs, actuator requirements, power/control coupling, bench evidence, and release closure. The generated `CASEFILE.json` reuses that trace as the normalized evidence ledger for portfolio review, competition packaging, or later frontend visualization.
+The generated `MECHATRONICS_AUTHORITY.json` includes an `integration_trace` that maps mechanism primitives to CAD outputs, actuator requirements, power/control coupling, bench evidence, and release closure. The generated `kicad_step_assembly/` package includes the native board STEP, integrated board/enclosure/mechanism STEP, board placement JSON, and an audit report for portfolio review, competition packaging, or later frontend visualization.
 
 Compile the generalized robotics platform proof bundle with mission, locomotion, positioning, control stack, safety case, bench evidence, field validation, and release scope:
 

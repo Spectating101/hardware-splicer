@@ -6,8 +6,8 @@
   "render_stl": false,
   "board_design_files": {
     "main_ctrl": {
-      "path": "main_ctrl_esp32_servo.net",
-      "kind": "netlist"
+      "path": "main_ctrl_esp32_servo.kicad_pcb",
+      "kind": "pcb"
     }
   },
   "machine": {

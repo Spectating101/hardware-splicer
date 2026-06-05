@@ -29,7 +29,9 @@
       "kicad_step_assembly_report",
       "kicad_step_placement",
       "kicad_step_assembly_source",
-      "kicad_step_assembly_model"
+      "kicad_step_assembly_model",
+      "kicad_board_step_model",
+      "kicad_step_export_log"
     ]
   }
 }

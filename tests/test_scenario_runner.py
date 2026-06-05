@@ -102,6 +102,8 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
     assert Path(result["artifacts"]["kicad_step_assembly_model"]).exists()
     assert Path(result["artifacts"]["kicad_step_assembly_source"]).exists()
+    assert Path(result["artifacts"]["kicad_board_step_model"]).exists()
+    assert Path(result["artifacts"]["kicad_step_export_log"]).exists()
     assert splicer3d["mode"] in {"stl", "script_fallback"}
     assert splicer3d.get("ok") is True or splicer3d.get("script")
     assert assembly["assembly_ready"] is True
@@ -111,13 +113,15 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     assert assembly["cable_routes"]
     assert assembly["fastener_stackups"]
     assert step_report["assembly_ready"] is True
-    assert step_report["mode"] == "declared_geometry_cadquery_assembly"
-    assert step_report["placement"]["component_count"] >= 4
+    assert step_report["mode"] == "kicad_cli_plus_cadquery_assembly"
+    assert step_report["source_precision"] == "exact_kicad_pcb"
+    assert step_report["placement"]["component_count"] >= 10
     assert step_report["placement"]["mount_count"] >= 2
     step_checks = {row["id"]: row for row in step_report["checks"]}
     assert step_checks["system_step_assembly"]["status"] == "pass"
+    assert step_checks["kicad_board_step_export"]["status"] == "pass"
     assert step_checks["board_outline_consistency"]["status"] == "pass"
-    assert step_placement["source_mode"] == "declared_board_metadata"
+    assert step_placement["source_mode"] == "kicad_pcb_geometry"
     assert {row["ref"] for row in step_placement["components"]} >= {"U1", "U2", "U3", "J3"}
 
 
