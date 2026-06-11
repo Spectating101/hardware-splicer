@@ -12,7 +12,7 @@ demo:
 	$(PYTHON) scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
 
 smoke:
-	$(PYTHON) scripts/hardware_splicer_e2e.py
+	PYTHONPATH=src $(PYTHON) scripts/hardware_splicer_e2e.py
 
 test:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 pytest -q
