@@ -20,9 +20,11 @@ Optional:
 
 ```bash
 cd Hardware-Splicer
-python3 -m pip install -r requirements.txt
-python3 scripts/hardware_splicer.py doctor
+make setup
+source .venv/bin/activate   # created by setup_demo.sh
 ```
+
+`make setup` creates a venv, installs Python deps, runs `npm install` in **both** `apps/circuit-ai/circuit-ai-frontend` (required for the KiCad build compiler) and `apps/hardware-splicer-demo` (dashboard), then runs doctor.
 
 Expected `doctor` output for a full fab demo:
 

@@ -1,19 +1,24 @@
-.PHONY: setup doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify refresh-demo-data
+.PHONY: setup doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify refresh-demo-data explore
+
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 
 setup:
 	bash scripts/setup_demo.sh
 
 doctor:
-	python3 scripts/hardware_splicer.py doctor
+	$(PYTHON) scripts/hardware_splicer.py doctor
 
 demo:
-	python3 scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
+	$(PYTHON) scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
 
 smoke:
-	python3 scripts/hardware_splicer_e2e.py
+	$(PYTHON) scripts/hardware_splicer_e2e.py
 
 test:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 pytest -q
+
+explore:
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/exploration_test.py
 
 test-apps:
 	cd apps/circuit-ai && pytest -q
