@@ -218,6 +218,8 @@ def splice_and_build_from_intake(
         "archetype": plan.get("archetype"),
         "build_id": build_id,
         "salvage_verdict": salvage_package.get("verdict"),
+        "salvage_package": salvage_package,
+        "power_topology": salvage_package.get("power_topology"),
         "planning_confidence": plan.get("planning_confidence"),
         "build_compilation": compile_result.to_dict(),
         "design_quality_gate": gate,

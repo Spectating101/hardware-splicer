@@ -14,6 +14,7 @@ SCRIPTS_DIR = (ROOT / "scripts").resolve()
 sys.path = [str(SRC)] + [p for p in sys.path if Path(p).resolve() != SCRIPTS_DIR]
 
 from hardware_splicer.project_intake import load_project_intake, run_project_intake, splice_and_build_from_intake  # noqa: E402
+from hardware_splicer.runtime import scratch_path  # noqa: E402
 from hardware_splicer.scoring_summary import scorecard_from_artifacts  # noqa: E402
 TIERS = [
     ("tier1_brief", "examples/intakes/plant_watering_brief.json", False),
@@ -39,7 +40,9 @@ def _load_env_local() -> None:
 
 def main() -> int:
     _load_env_local()
-    out_root = Path(os.environ.get("HARDWARE_SPLICER_TIER_SCORE_OUT", "/tmp/hardware_splicer_tier_scores"))
+    out_root = Path(
+        os.environ.get("HARDWARE_SPLICER_TIER_SCORE_OUT", str(scratch_path("tier_scores"))),
+    )
     out_root.mkdir(parents=True, exist_ok=True)
     rows = []
 

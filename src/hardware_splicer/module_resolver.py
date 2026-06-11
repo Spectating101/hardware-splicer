@@ -31,7 +31,14 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"usb.*serial|cp210|ch340|ftdi", re.I), "usb-uart", "usb", 0.85),
     (re.compile(r"ssd1306|oled", re.I), "ssd1306", "ui", 0.85),
     (re.compile(r"barrel|12v.*supply|12v adapter", re.I), "dc-barrel-12v", "pwr", 0.8),
+    (re.compile(r"power.?bank|usb.*power|5v.*usb|phone charger", re.I), "usb-power-5v", "pwr", 0.92),
 ]
+
+_POWER_TOPOLOGY_USB = re.compile(
+    r"power.?bank|usb.*power|5v.*usb|phone charger|power_source",
+    re.I,
+)
+_POWER_TOPOLOGY_BARREL = re.compile(r"barrel|12v.*supply|12v adapter|wall wart", re.I)
 
 # 3.3V MCU + non-logic-level MOSFET → prefer logic-level FET.
 _SUBSTITUTIONS: Dict[str, str] = {
@@ -101,6 +108,50 @@ def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, A
     return resolved
 
 
+def infer_power_topology(
+    parts: List[Mapping[str, Any]],
+    resolved_modules: List[Mapping[str, Any]] | None = None,
+) -> str:
+    """Return usb_5v | barrel_12v | hybrid from inventory."""
+    resolved_modules = resolved_modules or []
+    texts = [_part_text(part) for part in parts]
+    has_usb = any(_POWER_TOPOLOGY_USB.search(t) for t in texts if t)
+    has_barrel = any(_POWER_TOPOLOGY_BARREL.search(t) for t in texts if t)
+    has_usb_module = any(str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules)
+    has_barrel_module = any(str(row.get("module_id") or "") == "dc-barrel-12v" for row in resolved_modules)
+    usb_only = (has_usb or has_usb_module) and not (has_barrel or has_barrel_module)
+    if usb_only:
+        return "usb_5v"
+    if has_barrel or has_barrel_module:
+        return "barrel_12v"
+    if has_usb or has_usb_module:
+        return "hybrid"
+    return "barrel_12v"
+
+
+def overrides_from_resource_plan(diy_plan: Mapping[str, Any]) -> Dict[str, str]:
+    """Map DIY resource_strategy selected_resources → role overrides."""
+    resource_plan = dict(diy_plan.get("resource_plan") or {})
+    selected = list(resource_plan.get("selected_resources") or [])
+    if not selected:
+        return {}
+    pseudo_parts: List[Dict[str, Any]] = []
+    for row in selected:
+        if not isinstance(row, dict):
+            continue
+        caps = [str(c).lower() for c in (row.get("capabilities") or [])]
+        pseudo_parts.append(
+            {
+                "name": str(row.get("name") or row.get("resource_id") or ""),
+                "type": caps[0] if caps else str(row.get("resource_kind") or ""),
+            }
+        )
+    if not pseudo_parts:
+        return {}
+    resolved = resolve_parts_to_modules(pseudo_parts)
+    return module_overrides_for_build(build_id=None, resolved_modules=resolved)
+
+
 def module_overrides_for_build(
     *,
     build_id: str | None,
@@ -128,11 +179,24 @@ def module_overrides_for_build(
     return overrides
 
 
+def merge_module_overrides(*maps: Mapping[str, str] | None) -> Dict[str, str]:
+    merged: Dict[str, str] = {}
+    for mapping in maps:
+        if not mapping:
+            continue
+        for key, value in mapping.items():
+            if value:
+                merged[str(key)] = str(value)
+    return merged
+
+
 def salvage_plan_input_from_intake(
     splice_plan: Mapping[str, Any],
     *,
     resolved_modules: List[Mapping[str, Any]] | None = None,
     module_overrides: Mapping[str, str] | None = None,
+    power_topology: str | None = None,
+    strategy_mode: str | None = None,
 ) -> Dict[str, Any]:
     """Shape consumed by plan-to-graph / compile_build_graph.cjs."""
     target = dict(splice_plan.get("target") or {})
@@ -145,4 +209,8 @@ def salvage_plan_input_from_intake(
         body["resolved_modules"] = [dict(row) for row in resolved_modules]
     if module_overrides:
         body["module_overrides"] = dict(module_overrides)
+    if power_topology:
+        body["power_topology"] = power_topology
+    if strategy_mode:
+        body["strategy_mode"] = strategy_mode
     return body

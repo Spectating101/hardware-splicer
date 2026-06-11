@@ -12,6 +12,7 @@ SCRIPTS_DIR = (ROOT / "scripts").resolve()
 sys.path = [str(SRC)] + [p for p in sys.path if Path(p).resolve() != SCRIPTS_DIR]
 
 from hardware_splicer.build_compiler import compile_catalog_build  # noqa: E402
+from hardware_splicer.runtime import scratch_path  # noqa: E402
 
 BUILD_IDS = [
     "automatic_plant_watering",
@@ -33,7 +34,7 @@ BUILD_IDS = [
 
 
 def main() -> int:
-    out_root = Path("/tmp/hardware_splicer_backend_benchmark")
+    out_root = scratch_path("backend_benchmark")
     out_root.mkdir(parents=True, exist_ok=True)
     rows = []
     for build_id in BUILD_IDS:

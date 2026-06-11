@@ -1,9 +1,17 @@
-.PHONY: setup doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify refresh-demo-data explore
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify refresh-demo-data explore explore-all
 
-PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
+ROOT_DIR := $(abspath .)
+PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
 
 setup:
 	bash scripts/setup_demo.sh
+
+setup-cadquery:
+	bash scripts/setup_demo.sh
+	$(PYTHON) -m pip install cadquery || apps/3d-splicer/.venv/bin/pip install cadquery
+
+cleanup:
+	bash scripts/cleanup_test_artifacts.sh
 
 doctor:
 	$(PYTHON) scripts/hardware_splicer.py doctor
@@ -23,10 +31,16 @@ explore:
 explore-all: explore test-apps
 	@echo "explore-all complete"
 
+SPLICER3D_PYTHON := $(if $(wildcard apps/3d-splicer/.venv/bin/python),$(abspath apps/3d-splicer/.venv/bin/python),$(PYTHON))
+
 test-apps:
-	cd apps/circuit-ai && pytest -q
-	cd apps/mecha-splicer && pytest -q
-	cd apps/3d-splicer && pytest -q
+	cd apps/mecha-splicer && $(PYTHON) -m pytest -q
+	cd apps/3d-splicer && $(SPLICER3D_PYTHON) -m pytest -q
+
+test-apps-full:
+	cd apps/circuit-ai && $(PYTHON) -m pip install -r requirements.txt && PYTHONPATH=. $(PYTHON) -m pytest -q
+	cd apps/mecha-splicer && $(PYTHON) -m pytest -q
+	cd apps/3d-splicer && $(SPLICER3D_PYTHON) -m pytest -q
 
 benchmark-backend:
 	PYTHONPATH=src $(PYTHON) scripts/benchmark_backend_design.py
@@ -43,5 +57,5 @@ score-intake-tiers:
 refresh-demo-data:
 	HARDWARE_SPLICER_SKIP_VISION_LIVE=1 python3 scripts/refresh_demo_sample_data.py
 
-verify: doctor test benchmark-backend audit-functional-delivery score-intake-tiers
+verify: cleanup doctor test benchmark-backend audit-functional-delivery score-intake-tiers smoke
 	@echo "Hardware-Splicer verify: all checks passed"

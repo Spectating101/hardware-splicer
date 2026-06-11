@@ -16,6 +16,22 @@ from typing import Dict, Iterator, Optional
 
 ROOT = Path(__file__).resolve().parents[2]
 CIRCUIT_ROOT = ROOT / "apps" / "circuit-ai"
+
+
+def scratch_root() -> Path:
+    """Writable scratch area for KiCad/Gerber trees (defaults to repo-local .cache)."""
+    raw = os.environ.get("HARDWARE_SPLICER_TMP_ROOT", "").strip()
+    root = Path(raw).expanduser() if raw else (ROOT / ".cache" / "hardware-splicer")
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def scratch_path(name: str) -> Path:
+    path = scratch_root() / name
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 MECHA_ROOT = ROOT / "apps" / "mecha-splicer"
 SPLICER3D_ROOT = ROOT / "apps" / "3d-splicer"
 SPLICER3D_VENV_PYTHON = SPLICER3D_ROOT / ".venv" / "bin" / "python"

@@ -17,6 +17,7 @@ sys.path = [str(SRC)] + [p for p in sys.path if Path(p).resolve() != SCRIPTS_DIR
 from hardware_splicer.build_compiler import CATALOG_BUILD_IDS, compile_catalog_build  # noqa: E402
 from hardware_splicer.functional_delivery import build_functional_delivery_score  # noqa: E402
 from hardware_splicer.project_intake import load_project_intake, splice_and_build_from_intake  # noqa: E402
+from hardware_splicer.runtime import scratch_path  # noqa: E402
 
 
 def _export_gerber_enabled() -> bool:
@@ -41,7 +42,7 @@ def main() -> int:
     }
     export_gerber = _export_gerber_enabled()
 
-    out_root = Path("/tmp/hardware_splicer_functional_audit")
+    out_root = scratch_path("functional_audit")
     out_root.mkdir(parents=True, exist_ok=True)
     rows = []
 

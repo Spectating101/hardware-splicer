@@ -4,7 +4,10 @@ from typing import Any, Dict, List, Mapping
 
 from .build_compiler import ensure_circuit_import_path, resolve_build_id
 from .module_resolver import (
+    infer_power_topology,
+    merge_module_overrides,
     module_overrides_for_build,
+    overrides_from_resource_plan,
     resolve_parts_to_modules,
     salvage_plan_input_from_intake,
 )
@@ -72,14 +75,28 @@ def build_intake_salvage_package(
         target = dict(splice_plan.get("target") or {})
         target["recommended_build_id"] = build_id
         splice_plan = {**splice_plan, "target": target}
-    module_overrides = module_overrides_for_build(
+    power_topology = infer_power_topology(parts, resolved_modules)
+    resource_overrides = overrides_from_resource_plan(diy_plan)
+    inventory_overrides = module_overrides_for_build(
         build_id=build_id or None,
         resolved_modules=resolved_modules,
+    )
+    module_overrides = merge_module_overrides(inventory_overrides, resource_overrides)
+    if power_topology == "usb_5v" and build_id == "automatic_plant_watering":
+        module_overrides["pwr"] = "usb-power-5v"
+        module_overrides.pop("buck", None)
+    constraints_map = dict(constraints or {})
+    strategy_mode = str(
+        ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
+        or constraints_map.get("strategy_mode")
+        or "constrained"
     )
     graph_input = salvage_plan_input_from_intake(
         splice_plan,
         resolved_modules=resolved_modules,
         module_overrides=module_overrides,
+        power_topology=power_topology,
+        strategy_mode=strategy_mode,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -87,6 +104,8 @@ def build_intake_salvage_package(
         "diy_plan": diy_plan,
         "resolved_modules": resolved_modules,
         "module_overrides": module_overrides,
+        "power_topology": power_topology,
+        "strategy_mode": strategy_mode,
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
         "verdict": splice_plan.get("verdict"),

@@ -131,6 +131,32 @@ const RECIPES: Record<string, Recipe> = {
     ],
   },
 
+  // Salvage path: USB power bank only (no 12V barrel). 5V rail feeds MCU + pump driver.
+  automatic_plant_watering_usb: {
+    modules: [
+      { role: "pwr", moduleId: "usb-power-5v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+      { role: "sns", moduleId: "soil_moisture" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
+    ],
+    wires: [
+      ...usbToMcu("pwr", "mcu", "VIN"),
+      { from: { role: "pwr", pin: "V+" }, to: { role: "drv", pin: "VIN" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "drv", pin: "VIN-" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "drv", pin: "GND" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
+      { from: { role: "sns", pin: "A0" }, to: { role: "mcu", pin: "GPIO34" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
+    ],
+    notes: [
+      "USB power bank feeds ESP32 VIN and pump driver — no buck converter in the salvage path.",
+      "Wire mini pump to driver VOUT+/VOUT-; add flyback diode if the module lacks one.",
+      "Keep electronics above the wet zone; common GND across all modules.",
+    ],
+  },
+
   // USB-in -> 3.3V breakout, with optional Li-ion charging from the same
   // 5V rail. tp4056.IN+ (5V) sits cleanly in the LDO's 4.75-15V input range
   // and both modules share GND.
@@ -391,6 +417,9 @@ export interface SalvagePlanInput {
   build_candidates?: Array<{ id?: string; name?: string }>;
   resolved_modules?: Array<{ module_id?: string | null; role?: string; part_name?: string; source?: string }>;
   module_overrides?: Record<string, string>;
+  power_topology?: "usb_5v" | "barrel_12v" | "hybrid" | string;
+  strategy_mode?: string;
+  custom_graph?: BuildGraph;
 }
 
 export interface TranslationResult {
@@ -415,7 +444,23 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     return { graph: { nodes: [], wires: [] }, buildId: null, notes, warnings };
   }
 
-  const recipe = RECIPES[buildId];
+  if (plan?.custom_graph?.nodes?.length) {
+    notes.push("Using inventory-composed custom_graph from salvage bridge.");
+    return { graph: plan.custom_graph, buildId, notes, warnings };
+  }
+
+  const overridesPreview = { ...(plan?.module_overrides || {}) };
+  let recipeKey = buildId;
+  if (buildId === "automatic_plant_watering") {
+    const topo = plan?.power_topology || "";
+    const pwr = overridesPreview.pwr || "";
+    if (topo === "usb_5v" || pwr === "usb-power-5v") {
+      recipeKey = "automatic_plant_watering_usb";
+      notes.push("Power topology: USB 5V salvage path (no 12V barrel).");
+    }
+  }
+
+  const recipe = RECIPES[recipeKey];
   if (!recipe) {
     // Fall-back: use capability matcher against the library to suggest modules
     // for this build's requires_any. Returns an unwired starter graph the user
@@ -436,7 +481,7 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     return { graph: { nodes: [], wires: [] }, buildId, notes, warnings };
   }
 
-  const overrides = { ...(plan?.module_overrides || {}) };
+  const overrides = { ...overridesPreview };
   for (const row of plan?.resolved_modules || []) {
     if (row?.role && row?.module_id && !overrides[row.role]) {
       overrides[row.role] = row.module_id;

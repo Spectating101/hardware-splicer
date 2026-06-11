@@ -67,11 +67,14 @@ def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path):
     assert scorecard["honest_fabrication_ready"] is True
     assert scorecard["functional_delivery_score"] >= 90.0
     inspection = scorecard["fabrication_inspection"]
-    assert inspection["pcb"]["footprint_count"] == 5
+    # USB salvage brief: 4 modules (no 12V barrel / buck on the 5V bank path).
+    assert inspection["pcb"]["footprint_count"] == 4
     assert inspection["pcb"]["generic_header_footprints"] == 0
     names = inspection["pcb"].get("footprint_names") or []
     assert any("ESP32" in name for name in names)
+    assert any("USB" in name.upper() for name in names)
     assert all("PinHeader" not in name for name in names)
+    assert all("BUCK" not in name.upper() for name in names)
     assert inspection["pcb"].get("has_fab_outlines") is True
 
 
@@ -80,8 +83,9 @@ def test_plant_pcb_has_module_footprints_and_fab_outlines(tmp_path):
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
     pcb_path = Path(result["artifacts"]["kicad_pcb"])
     text = pcb_path.read_text(encoding="utf-8")
-    assert "Power:BUCK-MP1584-MODULE" in text
+    assert "Connector:USB-MICRO-POWER" in text or "USB-MICRO" in text
     assert "Module:ESP32-WROOM-32" in text
+    assert "BUCK-MP1584" not in text
     assert "fp_rect" in text
     assert result["build_compilation"]["design_quality"].get("drc_pass") is True
 

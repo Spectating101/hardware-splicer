@@ -1,0 +1,8 @@
+# Minimal deps to run apps/circuit-ai unit tests in CI (not the full torch stack).
+numpy>=1.24
+loguru>=0.7
+pydantic>=2.5
+pydantic-settings>=2.0
+openai>=1.3
+httpx>=0.27
+PyJWT>=2.8

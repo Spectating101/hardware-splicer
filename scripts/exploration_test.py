@@ -20,12 +20,14 @@ from hardware_splicer.build_compiler import CATALOG_BUILD_IDS, compile_catalog_b
 from hardware_splicer.fabrication_inspection import inspect_fabrication_package  # noqa: E402
 from hardware_splicer.functional_delivery import build_functional_delivery_score  # noqa: E402
 from hardware_splicer.project_intake import load_project_intake, run_project_intake, splice_and_build_from_intake  # noqa: E402
-from hardware_splicer.runtime import runtime_status  # noqa: E402
+from hardware_splicer.runtime import runtime_status, scratch_path  # noqa: E402
 from hardware_splicer.schemas import HardwareCompileSpec  # noqa: E402
 from hardware_splicer import compile_hardware_bundle  # noqa: E402
 
 
-OUT = Path(os.environ.get("HARDWARE_SPLICER_EXPLORATION_OUT", "/tmp/hardware_splicer_exploration"))
+OUT = Path(
+    os.environ.get("HARDWARE_SPLICER_EXPLORATION_OUT", str(scratch_path("exploration"))),
+)
 OUT.mkdir(parents=True, exist_ok=True)
 
 
@@ -183,21 +185,29 @@ def test_splice_builds(rows: List[Dict[str, Any]], export_gerber: bool) -> None:
         intake = load_project_intake(plant)
         splice = splice_and_build_from_intake(intake, out_dir=target, export_gerber=export_gerber)
         fd = splice.get("functional_delivery") or {}
+        topo = str((splice.get("salvage_package") or {}).get("power_topology") or "")
         ok = bool(fd.get("functional_delivery_score", 0) >= 70) and bool(fd.get("honest_fabrication_ready"))
         rows.append(
             _row(
                 "splice_build",
                 "plant_watering_brief",
-                ok,
-                f"score={fd.get('functional_delivery_score')} honest={fd.get('honest_fabrication_ready')}",
+                ok and topo == "usb_5v",
+                f"score={fd.get('functional_delivery_score')} honest={fd.get('honest_fabrication_ready')} topo={topo}",
             )
         )
     except Exception as exc:
         rows.append(_row("splice_build", "plant_watering_brief", False, str(exc)))
 
 
+def _cleanup_stale_tmp() -> None:
+    cleanup = ROOT / "scripts" / "cleanup_test_artifacts.sh"
+    if cleanup.is_file():
+        subprocess.run(["bash", str(cleanup)], check=False)
+
+
 def main() -> int:
     os.environ.setdefault("HARDWARE_SPLICER_SKIP_VISION_LIVE", "1")
+    _cleanup_stale_tmp()
     export_gerber = shutil.which("kicad-cli") is not None and _check_frontend_deps()["frontend_npm_ready"]
     started = time.time()
     rows: List[Dict[str, Any]] = []
