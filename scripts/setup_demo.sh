@@ -22,6 +22,15 @@ else
   echo "WARN: npm not found — build compiler and dashboard will not work"
 fi
 
+echo "==> 3D-Splicer runtime (required for intake/compile demos with use_3d_splicer)"
+SPLICER3D_VENV="$ROOT/apps/3d-splicer/.venv"
+if [[ ! -x "$SPLICER3D_VENV/bin/python" ]]; then
+  python3 -m venv "$SPLICER3D_VENV"
+fi
+if [[ -f "$ROOT/apps/3d-splicer/requirements.txt" ]]; then
+  "$SPLICER3D_VENV/bin/pip" install -q -r "$ROOT/apps/3d-splicer/requirements.txt"
+fi
+
 echo "==> Doctor check"
 "$PYTHON" scripts/hardware_splicer.py doctor
 

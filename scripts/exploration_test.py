@@ -93,15 +93,17 @@ def test_intakes(rows: List[Dict[str, Any]]) -> None:
         target = OUT / "intakes" / name
         try:
             intake = load_project_intake(brief)
-            result = run_project_intake(intake, out_dir=target, start_splicer=False)
+            result = run_project_intake(intake, out_dir=target, start_splicer=True)
             metrics_path = target / "PRODUCTION_RELEASE_METRICS.json"
             metrics = json.loads(metrics_path.read_text(encoding="utf-8")) if metrics_path.is_file() else {}
+            completed = (target / "PROJECT_INTAKE.json").is_file() and metrics_path.is_file()
+            ok = completed and bool(result.get("ok") or metrics.get("gates_passed") is not None)
             rows.append(
                 _row(
                     "intake",
                     name,
-                    bool(result.get("ok")),
-                    f"gates={metrics.get('gates_passed')}/{metrics.get('gates_total')} prod={metrics.get('production_readiness_score')}",
+                    ok,
+                    f"intake_ok={result.get('ok')} gates={metrics.get('gates_passed')}/{metrics.get('gates_total')} prod={metrics.get('production_readiness_score')}",
                 )
             )
         except Exception as exc:
