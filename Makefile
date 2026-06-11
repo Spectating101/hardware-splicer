@@ -15,10 +15,13 @@ smoke:
 	PYTHONPATH=src $(PYTHON) scripts/hardware_splicer_e2e.py
 
 test:
-	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 pytest -q
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest -q
 
 explore:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/exploration_test.py
+
+explore-all: explore test-apps
+	@echo "explore-all complete"
 
 test-apps:
 	cd apps/circuit-ai && pytest -q
@@ -26,16 +29,16 @@ test-apps:
 	cd apps/3d-splicer && pytest -q
 
 benchmark-backend:
-	python3 scripts/benchmark_backend_design.py
+	PYTHONPATH=src $(PYTHON) scripts/benchmark_backend_design.py
 
 audit-functional-delivery:
-	python3 scripts/audit_functional_delivery.py --strict
+	PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
 
 plant-qwen-pipeline:
 	python3 scripts/run_qwen_plant_pipeline.py
 
 score-intake-tiers:
-	HARDWARE_SPLICER_SKIP_VISION_LIVE=1 python3 scripts/score_intake_tiers.py
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/score_intake_tiers.py
 
 refresh-demo-data:
 	HARDWARE_SPLICER_SKIP_VISION_LIVE=1 python3 scripts/refresh_demo_sample_data.py
