@@ -15,14 +15,21 @@ sys.path.insert(0, str(SRC))
 
 from hardware_splicer import (
     HardwareCompileSpec,
+    compile_catalog_build,
     compile_hardware_bundle,
     load_hardware_scenario,
     load_project_intake,
+    resolve_build_id,
     run_hardware_scenario,
     run_project_intake,
 )
+from hardware_splicer.build_compiler import CATALOG_BUILD_IDS
+from hardware_splicer.design_quality import build_design_quality_gate
 from hardware_splicer.runtime import runtime_status
 from hardware_splicer.validation import validate_compile_spec, validation_errors
+from hardware_splicer.fabrication_inspection import inspect_fabrication_package
+from hardware_splicer.vision_usage_ledger import usage_summary
+from hardware_splicer.vision_evidence_assistant import _env_key_present, DEFAULT_QWEN_MODEL
 
 
 DEMO_SPEC = ROOT / "examples" / "hardware_splicer_demo.json"
@@ -158,12 +165,50 @@ def _run_intake(args: argparse.Namespace) -> int:
     return 0 if result["compile_ok"] else 1
 
 
+def _run_build(args: argparse.Namespace) -> int:
+    build_id = resolve_build_id(archetype=args.archetype, explicit=args.build_id)
+    if not build_id:
+        print("error: provide --build-id or --archetype that maps to a catalog build", file=sys.stderr)
+        return 2
+    result = compile_catalog_build(
+        build_id,
+        args.out,
+        export_gerber=not args.no_gerber,
+    )
+    gate = build_design_quality_gate(result.design_quality)
+    out_path = Path(args.out)
+    out_path.mkdir(parents=True, exist_ok=True)
+    (out_path / "DESIGN_QUALITY_GATE.json").write_text(json.dumps(gate, indent=2), encoding="utf-8")
+    payload = {
+        **result.to_dict(),
+        "design_quality_gate": gate,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        quality = result.design_quality
+        print(f"ok={result.ok}")
+        print(f"build_id={build_id}")
+        print(f"out_dir={result.out_dir}")
+        print(f"kicad_pcb_file={result.kicad_pcb_file or ''}")
+        print(f"design_quality_file={result.design_quality_file}")
+        print(f"build_ready={bool(quality.get('build_ready'))}")
+        print(f"drc_pass={bool(quality.get('drc_pass'))}")
+        print(f"gerber_ready={bool(quality.get('gerber_ready'))}")
+        print(f"gerber_package_dir={result.gerber_package_dir or ''}")
+        if result.error:
+            print(f"error={result.error}")
+    return 0 if result.ok and gate.get("build_ready") else 1
+
+
 def _run_doctor(args: argparse.Namespace) -> int:
     status = runtime_status(splicer_url=args.splicer_url)
     if args.json:
         print(json.dumps(status, indent=2))
     else:
         print(f"ok={status.get('ok')}")
+        print(f"demo_ready={status.get('demo_ready')}")
+        print(f"fab_export_ready={status.get('fab_export_ready')}")
         print(f"python={status.get('python')}")
         deps = status.get("dependencies") or {}
         print("dependencies=" + ", ".join(f"{key}:{'ok' if value else 'missing'}" for key, value in sorted(deps.items())))
@@ -173,6 +218,10 @@ def _run_doctor(args: argparse.Namespace) -> int:
         if status.get("splicer3d_health"):
             health = status["splicer3d_health"]
             print(f"splicer3d={health.get('url')} ok={health.get('ok')}")
+        qwen_ready = _env_key_present("QWEN_API_KEY", "DASHSCOPE_API_KEY")
+        usage = usage_summary(provider="qwen")
+        print(f"qwen_vision_key={'configured' if qwen_ready else 'missing'} default_model={DEFAULT_QWEN_MODEL}")
+        print(f"vision_usage_calls={usage.get('call_count')} vision_usage_tokens={usage.get('total_tokens')}")
     return 0 if status.get("ok") else 1
 
 
@@ -185,6 +234,57 @@ def _run_serve(args: argparse.Namespace) -> int:
         port=int(args.port),
         reload=False,
     )
+    return 0
+
+
+def _run_inspect_fab(args: argparse.Namespace) -> int:
+    build_dir = Path(args.build_dir)
+    compilation_dir = build_dir / "build_compilation" if (build_dir / "build_compilation").is_dir() else build_dir
+    compilation_path = compilation_dir / "BUILD_COMPILATION.json"
+    if not compilation_path.is_file():
+        compilation_path = build_dir / "BUILD_COMPILATION.json"
+    build_compilation = {}
+    if compilation_path.is_file():
+        build_compilation = json.loads(compilation_path.read_text(encoding="utf-8"))
+    pcb_candidates = sorted(compilation_dir.glob("*.kicad_pcb"))
+    artifacts = {
+        "build_kicad_pcb": str(pcb_candidates[0]) if pcb_candidates else str(compilation_dir / "build.kicad_pcb"),
+        "fab_package_zip": str(compilation_dir / "fab_package.zip") if (compilation_dir / "fab_package.zip").is_file() else str(build_dir / "fab_package.zip"),
+        "bom": str(compilation_dir / "BOM.json"),
+        "out_dir": str(build_dir),
+    }
+    result = inspect_fabrication_package(build_compilation=build_compilation, artifacts=artifacts)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"inspection_score={result.get('inspection_score')}")
+        print(f"honest_fabrication_ready={result.get('honest_fabrication_ready')}")
+        print(f"prototype_breakout_only={result.get('prototype_breakout_only')}")
+        print(f"summary={result.get('summary')}")
+        for row in result.get("checks") or []:
+            if not row.get("passed"):
+                print(f"FAIL {row.get('id')}: {row.get('label')} (observed={row.get('observed')})")
+    return 0 if result.get("honest_fabrication_ready") else 1
+
+
+def _run_vision_usage(args: argparse.Namespace) -> int:
+    summary = usage_summary(provider=args.provider)
+    if args.json:
+        print(json.dumps(summary, indent=2))
+        return 0
+    print(f"provider={summary.get('provider')}")
+    print(f"ledger={summary.get('ledger_path')}")
+    print(f"calls={summary.get('call_count')} total_tokens={summary.get('total_tokens')}")
+    print(f"month_tokens={summary.get('month_tokens')} day_tokens={summary.get('day_tokens')}")
+    for model, stats in sorted((summary.get("by_model") or {}).items()):
+        print(f"{model}: calls={stats.get('calls')} tokens={stats.get('total_tokens')}")
+    for model, estimate in sorted((summary.get("free_tier_estimates") or {}).items()):
+        remaining = estimate.get("estimated_remaining_tokens")
+        if remaining is not None:
+            print(
+                f"{model}_estimated_remaining={remaining} "
+                f"(tracked_consumed={estimate.get('tracked_consumed_tokens')})"
+            )
     return 0
 
 
@@ -230,10 +330,18 @@ def main() -> int:
     intake_parser.add_argument("--vision-assist", action="store_true", help="Enable vision evidence assistance for image attachments.")
     intake_parser.add_argument("--vision-live", action="store_true", help="Allow live vision model calls. Requires provider credentials.")
     intake_parser.add_argument("--vision-apply", action="store_true", help="Apply candidate vision evidence notes before deterministic extraction.")
-    intake_parser.add_argument("--vision-provider", default=None, help="Vision provider id. Currently supports qwen.")
-    intake_parser.add_argument("--vision-model", default=None, help="Vision model id, for example qwen3-vl-flash.")
+    intake_parser.add_argument("--vision-provider", default=None, help="Vision provider id. Default: qwen.")
+    intake_parser.add_argument("--vision-model", default=None, help="Vision model id. Default for qwen: qwen3-vl-flash.")
     intake_parser.add_argument("--json", action="store_true", help="Print intake run result JSON.")
     intake_parser.set_defaults(func=_run_intake)
+
+    build_parser = sub.add_parser("build", help="Compile a catalog build to DRC-clean KiCad PCB (+ optional Gerbers).")
+    build_parser.add_argument("--build-id", default=None, help=f"Catalog build id. One of: {', '.join(CATALOG_BUILD_IDS[:5])}, ...")
+    build_parser.add_argument("--archetype", default=None, help="Intake archetype alias (e.g. automatic_watering, rover).")
+    build_parser.add_argument("--out", required=True, help="Output directory.")
+    build_parser.add_argument("--no-gerber", action="store_true", help="Skip kicad-cli Gerber export when available.")
+    build_parser.add_argument("--json", action="store_true", help="Print compile result JSON.")
+    build_parser.set_defaults(func=_run_build)
 
     demo_parser = sub.add_parser("demo", help="Compile the canonical controller plus pan-tilt demo.")
     demo_parser.add_argument("--out", default="/tmp/hardware_splicer_demo", help="Output directory.")
@@ -255,6 +363,19 @@ def main() -> int:
     serve_parser.add_argument("--host", default="127.0.0.1")
     serve_parser.add_argument("--port", type=int, default=8090)
     serve_parser.set_defaults(func=_run_serve)
+
+    vision_usage_parser = sub.add_parser("vision-usage", help="Show local Qwen/Gemini vision token usage tracked by Hardware-Splicer.")
+    vision_usage_parser.add_argument("--provider", default="qwen", choices=["qwen", "gemini"], help="Provider to summarize.")
+    vision_usage_parser.add_argument("--json", action="store_true", help="Print usage summary JSON.")
+    vision_usage_parser.set_defaults(func=_run_vision_usage)
+
+    inspect_fab_parser = sub.add_parser(
+        "inspect-fab",
+        help="Inspect fab outputs on disk (PCB, BOM, Gerbers) — not just whether files exist.",
+    )
+    inspect_fab_parser.add_argument("--build-dir", required=True, help="Catalog build or splice output directory.")
+    inspect_fab_parser.add_argument("--json", action="store_true", help="Print inspection JSON.")
+    inspect_fab_parser.set_defaults(func=_run_inspect_fab)
 
     args = parser.parse_args()
     return int(args.func(args))

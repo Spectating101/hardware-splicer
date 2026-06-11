@@ -1,5 +1,7 @@
 # Hardware-Splicer Integration
 
+For first-time setup and the 10-minute professor demo, see [`SETUP.md`](SETUP.md) and [`DEMO_10_MIN.md`](DEMO_10_MIN.md). Run `make verify` for an offline full check.
+
 This dump currently keeps three apps as separate runtimes:
 
 - `apps/circuit-ai`: electronics and machine-system analysis.

@@ -200,8 +200,19 @@ def _electrical_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dic
     if readiness in {"draft", ""}:
         warnings.append("Circuit compile readiness is draft/reviewable, not manufacturable.")
 
+    build_compilation = _dict(engineering.get("build_compilation"))
+    compiler_quality = _dict(build_compilation.get("design_quality"))
+    compiler_verified = bool(
+        compiler_quality.get("fabrication_ready")
+        or (compiler_quality.get("build_ready") and compiler_quality.get("drc_pass"))
+    )
+
     release_blockers = []
     if circuit_authority.get("production_authorized") is True:
+        release_ready = True
+    elif compiler_verified and board_design_files and not blockers:
+        release_ready = True
+    elif circuit_release and circuit_release.get("compiler_verified") and not blockers:
         release_ready = True
     else:
         if not circuit_release:

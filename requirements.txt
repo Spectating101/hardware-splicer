@@ -1,0 +1,8 @@
+# Core Hardware-Splicer compiler demo (lightweight profile)
+fastapi>=0.110
+uvicorn>=0.27
+pillow>=10.0
+pytest>=8.0
+
+# Optional — only needed for true STL/CadQuery rendering via 3D-Splicer
+# cadquery

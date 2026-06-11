@@ -1,0 +1,65 @@
+{
+  "project_name": "desk_plant_watering_assistant",
+  "goal": "Build a small automatic plant watering device from cheap or salvaged parts. It should read soil moisture and run a mini pump briefly when the plant is dry.",
+  "budget": {
+    "currency": "USD",
+    "amount": 10
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "capacitive soil moisture sensor",
+      "type": "soil_moisture"
+    },
+    {
+      "name": "5V mini water pump",
+      "type": "pump",
+      "voltage_v": 5.0,
+      "current_a": 0.55,
+      "stall_current_a": 0.95
+    },
+    {
+      "name": "logic-level MOSFET module",
+      "type": "driver_module"
+    },
+    {
+      "name": "USB power bank",
+      "type": "power_source",
+      "voltage_v": 5.0,
+      "capacity_mah": 2000
+    }
+  ],
+  "constraints": {
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.12,
+    "baseline_current_a": 0.18,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000
+  },
+  "vision_assistance": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "qwen3-vl-flash",
+    "live": false,
+    "apply": true
+  },
+  "attachments": [
+    {
+      "id": "plant_bench_reference",
+      "kind": "image",
+      "path": "assets/plant_bench_reference.png",
+      "description": "Human-reviewed bench annotations for plant watering measurements",
+      "vision_evidence_notes": [
+        "measure: controller_case inner width value_mm=95 status=verified artifact=evidence://plant/caliper-log",
+        "measure: pump_mount width value_mm=55 status=verified artifact=evidence://plant/board-photo-set",
+        "measure: tube strain relief value_mm=8 status=verified artifact=evidence://plant/board-photo-set",
+        "clearance: controller_case cable clearance clearance_mm=1.2 status=pass artifact=evidence://plant/caliper-log",
+        "clearance: pump_mount tube bend clearance clearance_mm=2.0 status=pass artifact=evidence://plant/board-photo-set"
+      ]
+    }
+  ]
+}

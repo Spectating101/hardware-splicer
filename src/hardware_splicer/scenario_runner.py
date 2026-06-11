@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .compiler import compile_hardware_bundle
+from .functional_delivery import build_functional_delivery_score
 from .production_release_metrics import build_production_release_metrics
 from .robotics_platform_authority import LEVELS as ROBOTICS_PLATFORM_LEVELS
 from .schemas import HardwareCompileResult, HardwareCompileSpec
@@ -86,8 +87,12 @@ def run_hardware_scenario(
     )
     project_authority = build_project_authority_packet(body, result=result, spec=spec)
     production_metrics = build_production_release_metrics(result=result, project_authority=project_authority)
+    functional_delivery = _functional_delivery_from_result(result)
     project_authority["dashboard"]["production_readiness_score"] = production_metrics["production_readiness_score"]
     project_authority["dashboard"]["production_readiness_band"] = production_metrics["readiness_band"]
+    if functional_delivery:
+        project_authority["dashboard"]["functional_delivery_score"] = functional_delivery.get("functional_delivery_score")
+        project_authority["dashboard"]["functional_delivery_grade"] = functional_delivery.get("grade")
     project_authority["production_release_metrics"] = {
         "schema_version": production_metrics["schema_version"],
         "production_ready": production_metrics["production_ready"],
@@ -126,6 +131,7 @@ def run_hardware_scenario(
         "out_dir": result.out_dir,
         "project_authority": project_authority,
         "production_release_metrics": production_metrics,
+        "functional_delivery": functional_delivery,
         "compile_result": result.to_dict(),
         "artifacts": artifacts,
     }
@@ -176,6 +182,11 @@ def build_project_authority_packet(
     if source_blockers_are_next_actions:
         next_actions = _dedupe_strings(source_blockers + next_actions)[:12]
 
+    engineering = _to_dict(result.engineering or {}, "engineering")
+    build_compilation = _to_dict(engineering.get("build_compilation") or {}, "build_compilation")
+    design_quality = _to_dict(build_compilation.get("design_quality") or {}, "design_quality")
+    design_quality_gate = _to_dict(build_compilation.get("design_quality_gate") or {}, "design_quality_gate")
+
     return {
         "schema_version": SCHEMA_VERSION,
         "scenario_name": _scenario_name(body, compile_spec),
@@ -194,7 +205,13 @@ def build_project_authority_packet(
             "hardware_splicer_release": bool(mechatronics.get("production_authorized")),
             "blocking_findings": len(blockers),
             "required_artifacts_present": artifact_status["required_present"],
+            "build_ready": bool(design_quality.get("build_ready")),
+            "drc_pass": bool(design_quality.get("drc_pass")),
+            "gerber_ready": bool(design_quality.get("gerber_ready")),
+            "design_quality_score": design_quality_gate.get("design_quality_score"),
         },
+        "design_quality": design_quality if design_quality else {},
+        "design_quality_gate": design_quality_gate if design_quality_gate else {},
         "component_scores": component_scores,
         "subsystem_authority": {
             "mechanical": _authority_summary(mechanical),
@@ -609,6 +626,21 @@ def _string_list(data: Any) -> List[str]:
                 values.append(text)
         return values
     return [str(data)]
+
+
+def _functional_delivery_from_result(result: HardwareCompileResult) -> Dict[str, Any]:
+    artifact_path = (result.artifacts or {}).get("functional_delivery")
+    if artifact_path and Path(str(artifact_path)).is_file():
+        return json.loads(Path(str(artifact_path)).read_text(encoding="utf-8"))
+    engineering = dict(result.engineering or {})
+    build_compilation = dict(engineering.get("build_compilation") or {})
+    if not build_compilation:
+        return {}
+    return build_functional_delivery_score(
+        build_compilation=build_compilation,
+        artifacts=result.artifacts or {},
+        engineering=engineering,
+    )
 
 
 def _dedupe_strings(values: Iterable[str]) -> List[str]:

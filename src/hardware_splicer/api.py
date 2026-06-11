@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 import uuid
@@ -11,11 +12,13 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
+from .build_compiler import compile_catalog_build, resolve_build_id
 from .compiler import _resolve_board_design_files, compile_hardware_bundle
+from .design_quality import build_design_quality_gate
 from .jobs import JobBackend, artifact_manifest, build_output_archive
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
-from .project_intake import plan_project_from_intake, run_project_intake
+from .project_intake import plan_project_from_intake, run_project_intake, splice_and_build_from_intake
 from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
@@ -51,6 +54,21 @@ class IntakeRunRequest(BaseModel):
     request_id: str | None = None
     start_splicer: bool = True
     splicer_port: int = 0
+
+
+class CompileBuildRequest(BaseModel):
+    build_id: str | None = None
+    archetype: str | None = None
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = True
+
+
+class SpliceAndBuildRequest(BaseModel):
+    intake: Dict[str, Any]
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = True
 
 
 class MechanicalAuthorityRequest(BaseModel):
@@ -266,6 +284,88 @@ def create_app() -> FastAPI:
             raise _error(503, "dependency_unavailable", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "scenario_run_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/compile-build")
+    def compile_build(request: CompileBuildRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            build_id = resolve_build_id(archetype=request.archetype, explicit=request.build_id)
+            if not build_id:
+                raise ValueError("build_id or archetype mapping to a catalog build is required")
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "builds" / _slug(build_id) / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            result = compile_catalog_build(build_id, resolved, export_gerber=bool(request.export_gerber))
+            gate = build_design_quality_gate(result.design_quality)
+            gate_path = resolved / "DESIGN_QUALITY_GATE.json"
+            gate_path.write_text(json.dumps(gate, indent=2), encoding="utf-8")
+            return {
+                "ok": bool(result.ok and gate.get("build_ready")),
+                "request_id": request_id,
+                "build_id": build_id,
+                **result.to_dict(),
+                "design_quality_gate": gate,
+                "artifacts": {
+                    "design_quality": result.design_quality_file,
+                    "design_quality_gate": str(gate_path),
+                    "kicad_pcb": result.kicad_pcb_file,
+                    "gerber_package_dir": result.gerber_package_dir,
+                },
+            }
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "compile_build_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/splice-and-build")
+    def splice_and_build(request: SpliceAndBuildRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                project_slug = _slug(
+                    str(
+                        request.intake.get("project_name")
+                        or request.intake.get("goal")
+                        or request.intake.get("name")
+                        or "splice_build"
+                    )
+                )
+                target = root / "splice_builds" / project_slug / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            return splice_and_build_from_intake(
+                request.intake,
+                out_dir=resolved,
+                export_gerber=bool(request.export_gerber),
+                request_id=request_id,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "splice_and_build_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/intake-run")
     def intake_run(request: IntakeRunRequest) -> Dict[str, Any]:

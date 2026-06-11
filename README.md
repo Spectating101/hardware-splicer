@@ -1,5 +1,15 @@
 # Hardware-Splicer
 
+Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard — with **honest** fabrication scoring and evidence-gated release.
+
+**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md) and [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md).
+
+```bash
+make setup          # pip install + doctor
+make verify         # tests + benchmark + strict audit + tier scoring
+make demo           # canonical compile bundle
+```
+
 This folder consolidates the hardware-oriented projects behind a top-level compiler/API:
 
 - `apps/circuit-ai/` - electronics intelligence, PCB/image analysis, BOM/DFM-style workflows, repair/reseller tooling, APIs/MCP wrappers.
@@ -68,7 +78,10 @@ Plan from a user-style project brief, then run the generated scenario:
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_auto_evidence_notes.json --out /tmp/hardware_splicer_intake_plant_notes
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_evidence_pack.json --out /tmp/hardware_splicer_intake_plant_release
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant_vision --vision-assist --vision-live --vision-provider qwen --vision-model qwen3-vl-flash
+python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_vision_brief.json --out /tmp/hardware_splicer_intake_plant_vision
+python3 scripts/hardware_splicer.py vision-usage --provider qwen
+make plant-qwen-pipeline
+make score-intake-tiers
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/rover_brief.json --out /tmp/hardware_splicer_intake_rover
 python3 scripts/hardware_splicer.py intake --brief examples/intakes/fan_controller_brief.json --out /tmp/hardware_splicer_intake_fan
 ```
@@ -88,7 +101,14 @@ Attach physical/project evidence through `evidence` fields in the intake file to
 
 You can also attach `evidence_notes`, `evidence_sources`, or `attachments`. The deterministic extractor promotes structured notes, JSON evidence patches, and board files into the same `evidence.*` schema and writes `EVIDENCE_EXTRACTION_REPORT.json` with accepted/rejected rows. Image/video artifacts are indexed as pending vision evidence; they are not trusted as measurements until a vision model or human annotation produces structured pass/fail rows.
 
-Vision assistance is opt-in through `vision_assistance` in the intake JSON or CLI flags. Qwen live calls use the Alibaba Model Studio OpenAI-compatible vision endpoint by default, with `DASHSCOPE_API_KEY`, `QWEN_API_KEY`, or `qwen_api_key`, model `qwen3-vl-flash`, and base URL `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`. Candidate model notes are written to `VISION_EVIDENCE_REPORT.json`; they only feed the authority engine when `apply=true` or `--vision-apply` is set, and even then they still pass through deterministic extraction and normal production gates.
+Vision assistance is opt-in through `vision_assistance` in the intake JSON or CLI flags. Copy `.env.example` to `.env.local` and set `QWEN_API_KEY` or `DASHSCOPE_API_KEY`. The default provider is **Qwen** with model `qwen3-vl-flash` on the Singapore international endpoint `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`. Text-only models such as `qwen-plus` are blocked for vision. Gemini is optional via `GEMINI_API_KEY` / `GOOGLE_API_KEY`. `examples/intakes/plant_watering_vision_brief.json` includes a bench photo and live Qwen settings.
+
+```bash
+make plant-qwen-pipeline    # live vision + splice + benchmark (requires API key)
+make score-intake-tiers     # offline tier progression (no API key)
+```
+
+Live vision token usage is tracked locally in `data/vision/hardware-splicer-vision-usage.json` and summarized in `VISION_EVIDENCE_REPORT.json` under `usage_tracking`; inspect it with `python3 scripts/hardware_splicer.py vision-usage --provider qwen`. Candidate model notes are written to `VISION_EVIDENCE_REPORT.json`; they only feed the authority engine when `apply=true` or `--vision-apply` is set, and even then they still pass through deterministic extraction and normal production gates.
 
 `AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
 
@@ -110,14 +130,36 @@ Run the lighter local Circuit-AI -> Mecha-Splicer -> 3D-Splicer smoke:
 python3 scripts/hardware_splicer_e2e.py
 ```
 
+Compile a catalog build to a DRC-clean KiCad PCB from the backend (no frontend required):
+
+```bash
+python3 scripts/hardware_splicer.py build --build-id automatic_plant_watering --out /tmp/plant_build
+node scripts/compile_build_graph.cjs --build-id automatic_plant_watering --out /tmp/plant_build
+python3 scripts/benchmark_backend_design.py
+node scripts/export_module_library.cjs --out /tmp/module_library.json
+```
+
+When `kicad-cli` is installed, `build` also emits `build_compilation/gerber_package/` with individual Gerber layers and `gerber_package.zip`.
+
+Plant-watering intake auto-emits `DESIGN_QUALITY.json`, `DESIGN_QUALITY_GATE.json`, and `build_compilation/main_ctrl_build.kicad_pcb`. `PRODUCTION_RELEASE_METRICS.json` now ties the circuit-release gate to build-compiler DRC/safety when `build_compilation` is present.
+
 Shortcuts:
 
 ```bash
+make setup
+make doctor
 make demo
 make smoke
 make test
 make test-apps
+make benchmark-backend
+make audit-functional-delivery
+make score-intake-tiers
+make verify
+make refresh-demo-data
 ```
+
+**Fab path vs frontend:** Production KiCad/Gerber output comes from the Python backend (`build_compiler.py` + `scripts/compile_build_graph.cjs`). The Circuit-AI frontend `/build` page is for visualization and DRC honesty — not the fab-grade pipeline used in audits and intake splice-and-build.
 
 Run the compiler API:
 
@@ -136,6 +178,7 @@ Useful API endpoints:
 - `POST /v1/robotics-platform-authority`
 - `POST /v1/mechatronics-authority`
 - `POST /v1/compile`
+- `POST /v1/compile-build`
 - `POST /v1/scenario-run`
 - `POST /v1/intake-run`
 - `POST /v1/jobs`

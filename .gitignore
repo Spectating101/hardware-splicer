@@ -55,3 +55,6 @@ temp/
 .DS_Store
 *.swp
 *.swo
+
+# Council Copilot local job output
+.council/

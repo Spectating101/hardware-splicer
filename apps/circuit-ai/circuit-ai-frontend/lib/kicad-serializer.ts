@@ -10,6 +10,7 @@
 import type { BuildGraph } from "@/lib/rules/safety-rules";
 import type { PcbGeometry } from "@/lib/cad-types";
 import { buildGraphToGeometry } from "@/lib/pcb/build-to-geometry";
+import { inferFootprintSize } from "@/lib/footprint-sizes";
 
 const HEADER = `(kicad_pcb (version 20221018) (generator circuit-ai)
   (general (thickness 1.6))
@@ -52,14 +53,28 @@ function buildNetTable(geo: PcbGeometry) {
   return { decls: decls.join("\n"), kidOf, nameOf };
 }
 
+function resolveFootprintLib(fp: PcbGeometry["footprints"][number]): string {
+  const named = String(fp.footprint || "").trim();
+  if (named && !/PinHeader_/i.test(named)) return named;
+  const pinCount = (fp.pads ?? []).length || 1;
+  return `Connector_PinHeader_2.54mm:PinHeader_1x${String(pinCount).padStart(2, "0")}_P2.54mm_Vertical`;
+}
+
+function footprintBodyOutline(fp: PcbGeometry["footprints"][number], lib: string): string {
+  const size = inferFootprintSize(lib, fp.ref || "U");
+  const hw = n(size.w_mm / 2);
+  const hh = n(size.h_mm / 2);
+  return `    (fp_rect (start ${-hw} ${-hh}) (end ${hw} ${hh}) (stroke (width 0.12) (type default)) (fill none) (layer "F.Fab"))`;
+}
+
 function footprintBlock(
   fp: PcbGeometry["footprints"][number],
   idx: number,
   kidOf: (id: number | null | undefined) => number,
   nameOf: (id: number | null | undefined) => string,
 ): string {
-  const pinCount = (fp.pads ?? []).length || 1;
-  const lib = `Connector_PinHeader_2.54mm:PinHeader_1x${String(pinCount).padStart(2, "0")}_P2.54mm_Vertical`;
+  const lib = resolveFootprintLib(fp);
+  const body = footprintBodyOutline(fp, lib);
   const pads = (fp.pads ?? [])
     .map((pad) => {
       // Footprint pads are local to the footprint origin; the router gives
@@ -83,6 +98,7 @@ function footprintBlock(
     (attr through_hole)
     (fp_text reference ${quote(fp.ref || `U${idx + 1}`)} (at 0 -3) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
     (fp_text value ${quote(fp.value || fp.ref)} (at 0 3) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+${body}
 ${pads}
   )`;
 }

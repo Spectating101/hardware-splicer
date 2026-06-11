@@ -1,0 +1,230 @@
+{
+  "project_name": "desk_plant_watering_assistant_tier5",
+  "goal": "Build a small automatic plant watering device from cheap or salvaged parts. It should read soil moisture and run a mini pump briefly when the plant is dry.",
+  "target_authority_level": "production_robotics_project_release",
+  "budget": {
+    "currency": "USD",
+    "amount": 10
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "capacitive soil moisture sensor",
+      "type": "soil_moisture"
+    },
+    {
+      "name": "5V mini water pump",
+      "type": "pump",
+      "voltage_v": 5.0,
+      "current_a": 0.55,
+      "stall_current_a": 0.95
+    },
+    {
+      "name": "logic-level MOSFET module",
+      "type": "driver_module"
+    },
+    {
+      "name": "USB power bank",
+      "type": "power_source",
+      "voltage_v": 5.0,
+      "capacity_mah": 2000
+    }
+  ],
+  "constraints": {
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.12,
+    "baseline_current_a": 0.18,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000
+  },
+  "evidence": {
+    "board_design_files": [
+      {
+        "board_id": "main_ctrl",
+        "path": "../main_ctrl_esp32_servo.net",
+        "kind": "netlist"
+      }
+    ],
+    "mechanical_measurement_capture": {
+      "artifact_uris": [
+        "evidence://plant/caliper-log",
+        "evidence://plant/board-photo-set"
+      ],
+      "dimensions": [
+        {
+          "target": "controller_case inner width",
+          "value_mm": 95,
+          "status": "verified"
+        },
+        {
+          "target": "pump_mount width",
+          "value_mm": 55,
+          "status": "verified"
+        },
+        {
+          "target": "tube strain relief",
+          "value_mm": 8,
+          "status": "verified"
+        }
+      ],
+      "clearances": [
+        {
+          "target": "controller_case cable clearance",
+          "clearance_mm": 1.2,
+          "status": "pass"
+        },
+        {
+          "target": "pump_mount tube bend clearance",
+          "clearance_mm": 2.0,
+          "status": "pass"
+        }
+      ]
+    },
+    "mechanical_simulation_capture": {
+      "artifact_uris": [
+        "evidence://plant/fit-load-simulation"
+      ],
+      "simulation_verified": true,
+      "simulation": [
+        {
+          "target": "controller_case enclosure clearance",
+          "status": "pass",
+          "message": "Measured board, wiring, and lid clearance remain inside the printed enclosure envelope."
+        },
+        {
+          "target": "pump_mount retained load",
+          "status": "pass",
+          "message": "Pump mass, vibration, and tubing pull are below the retained-load limit for the printed bracket."
+        },
+        {
+          "target": "watering_module tube routing",
+          "status": "pass",
+          "message": "Tube bend and strain-relief path do not collide with the controller case."
+        }
+      ]
+    },
+    "mechanical_bench_capture": {
+      "artifact_uris": [
+        "evidence://plant/mechanical-bench"
+      ],
+      "fit_checks": [
+        {
+          "target": "pump_mount printed fit",
+          "status": "pass"
+        }
+      ],
+      "load_tests": [
+        {
+          "target": "pump retained under tubing pull",
+          "status": "pass"
+        }
+      ],
+      "motion_tests": [
+        {
+          "target": "tube routing during pump vibration",
+          "status": "pass"
+        }
+      ]
+    },
+    "robotics_bench_capture": {
+      "artifact_uris": [
+        "evidence://plant/robotics-bench"
+      ],
+      "motion_tests": [
+        {
+          "target": "pump first run",
+          "status": "pass"
+        },
+        {
+          "target": "dry-run timeout stops pump",
+          "status": "pass"
+        }
+      ],
+      "current_tests": [
+        {
+          "target": "pump startup current below 1.1A limit",
+          "status": "pass"
+        }
+      ],
+      "cycle_tests": [
+        {
+          "target": "five short watering cycles",
+          "status": "pass"
+        }
+      ]
+    },
+    "integrated_bench_capture": {
+      "artifact_uris": [
+        "evidence://plant/integrated-bench"
+      ],
+      "electrical_tests": [
+        {
+          "target": "logic rail remains stable during pump run",
+          "status": "pass"
+        }
+      ],
+      "motion_tests": [
+        {
+          "target": "soil-dry command triggers timed pump run",
+          "status": "pass"
+        }
+      ],
+      "packaging_tests": [
+        {
+          "target": "wet path separated from controller_case",
+          "status": "pass"
+        }
+      ],
+      "thermal_tests": [
+        {
+          "target": "MOSFET module remains touch-safe after five cycles",
+          "status": "pass"
+        }
+      ]
+    },
+    "field_validation": {
+      "artifact_uris": [
+        "evidence://plant/field-run"
+      ],
+      "mission_tests": [
+        {
+          "target": "desk plant dry-soil watering mission",
+          "status": "pass"
+        }
+      ],
+      "field_tests": [
+        {
+          "target": "supervised desk plant run with manual stop available",
+          "status": "pass"
+        }
+      ]
+    },
+    "release_review": {
+      "scope_statement": "Release limited to supervised low-voltage desk plant watering prototype with current limit, timeout, dry-run limit, leak check, and no unattended operation claim.",
+      "artifact_uris": [
+        "evidence://plant/release-review"
+      ],
+      "acceptance_reviewed": true
+    }
+  },
+  "vision_assistance": {
+    "enabled": true,
+    "provider": "qwen",
+    "model": "qwen3-vl-flash",
+    "live": true,
+    "apply": true,
+    "max_images": 3
+  },
+  "attachments": [
+    {
+      "id": "plant_bench_reference",
+      "kind": "image",
+      "path": "assets/plant_bench_reference.png",
+      "description": "Bench photo with controller_case, pump_mount, and tube strain relief annotations"
+    }
+  ]
+}

@@ -58,6 +58,15 @@ class SalvageSplicePlanner:
             "output_function": "salvaged motion axis for plotters, camera sliders, test fixtures, or tiny CNC experiments",
         },
         {
+            "id": "automatic_plant_watering",
+            "name": "Automatic plant watering controller",
+            "requires_any": [{"controller"}, {"sensor_or_adc"}, {"actuator_driver"}, {"motor_or_load", "fan_or_pump"}, {"power"}],
+            "nice_to_have": {"wireless", "connector", "enclosure_candidate", "switch_or_button", "protection"},
+            "value_usd": 22.0,
+            "difficulty": "medium",
+            "output_function": "reads soil moisture and switches a mini pump with separated pump power",
+        },
+        {
             "id": "smart_relay_box",
             "name": "Smart relay or low-voltage load controller",
             "requires_any": [{"controller"}, {"actuator_driver"}, {"power"}],

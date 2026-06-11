@@ -23,6 +23,7 @@ import { findModulesByCapabilities, type ModuleSpec } from "@/lib/modules/module
 // uses; we match against the library's derived capabilityTags to suggest
 // concrete library modules for buildable products without a wired recipe.
 const BUILD_CATALOG_CAPS: Record<string, string[][]> = {
+  automatic_plant_watering: [["controller"], ["sensor_or_adc"], ["actuator_driver"], ["motor_or_load", "fan_or_pump"], ["power"]],
   usb_fume_extractor: [["motor_or_load", "fan_or_pump"], ["actuator_driver"], ["power"]],
   inspection_motion_fixture: [["mechanical_motion"], ["led_or_light", "camera_or_vision"], ["power"]],
   low_voltage_motor_test_jig: [["motor_or_load", "fan_or_pump", "mechanical_motion"], ["power"], ["connector", "switch_or_button"]],
@@ -72,6 +73,18 @@ const i2cBus = (
   { from: { role: ctrl, pin: scl }, to: { role: dev, pin: "SCL" } },
 ];
 
+/** 12V bench supply into a buck regulator (shared GND). */
+const barrelToBuck = (pwr: string, buck: string): Wire[] => [
+  { from: { role: pwr, pin: "V+" }, to: { role: buck, pin: "IN+" } },
+  { from: { role: pwr, pin: "GND" }, to: { role: buck, pin: "IN-" } },
+];
+
+/** 5V USB supply into a load pin that accepts 5V (ESP32 VIN, Pico VBUS, etc.). */
+const usbToMcu = (usb: string, mcu: string, mcuPin: string): Wire[] => [
+  { from: { role: usb, pin: "V+" }, to: { role: mcu, pin: mcuPin } },
+  { from: { role: usb, pin: "GND" }, to: { role: mcu, pin: "GND" } },
+];
+
 // One recipe per BUILD_CATALOG entry in salvage_splice_planner.BUILD_CATALOG.
 // Roles are local labels; module ids are canonical library ids.
 //
@@ -86,56 +99,97 @@ const i2cBus = (
 //     rpi-pico (3.3V logic) instead of arduino-nano (5V logic) to avoid a
 //     real level mismatch.
 const RECIPES: Record<string, Recipe> = {
+  // ESP32 USB-powered; soil sensor on 3V3/GPIO34; pump on a dedicated 5V buck +
+  // MOSFET rail so the MCU is not loaded by pump inrush.
+  automatic_plant_watering: {
+    modules: [
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+      { role: "sns", moduleId: "soil_moisture" },
+      { role: "buck", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
+    ],
+    wires: [
+      { from: { role: "pwr", pin: "V+" }, to: { role: "buck", pin: "IN+" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "buck", pin: "IN-" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
+      { from: { role: "buck", pin: "OUT+" }, to: { role: "mcu", pin: "VIN" } },
+      { from: { role: "buck", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
+      { from: { role: "buck", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
+      { from: { role: "buck", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
+      { from: { role: "sns", pin: "A0" }, to: { role: "mcu", pin: "GPIO34" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
+    ],
+    notes: [
+      "Set the MP1584 output to 5.0V with a multimeter before connecting the pump.",
+      "Wire the mini pump to driver VOUT+/VOUT-; keep electronics above the wet zone.",
+      "ESP32 may also be powered via USB for programming; share GND with the 12V supply.",
+      "Add a flyback diode across the pump if the module does not include one.",
+    ],
+  },
+
   // USB-in -> 3.3V breakout, with optional Li-ion charging from the same
   // 5V rail. tp4056.IN+ (5V) sits cleanly in the LDO's 4.75-15V input range
   // and both modules share GND.
   bench_power_adapter: {
     modules: [
-      { role: "usb", moduleId: "tp4056" },
+      { role: "usb", moduleId: "usb-power-5v" },
+      { role: "chg", moduleId: "tp4056" },
       { role: "ldo", moduleId: "ldo-ams1117-3v3" },
     ],
     wires: [
-      { from: { role: "usb", pin: "IN+" }, to: { role: "ldo", pin: "VIN" } },
-      { from: { role: "usb", pin: "IN-" }, to: { role: "ldo", pin: "GND" } },
+      { from: { role: "usb", pin: "V+" }, to: { role: "chg", pin: "IN+" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "chg", pin: "IN-" } },
+      { from: { role: "chg", pin: "OUT+" }, to: { role: "ldo", pin: "VIN" } },
+      { from: { role: "chg", pin: "OUT-" }, to: { role: "ldo", pin: "GND" } },
     ],
     notes: [
-      "USB-C/microUSB on TP4056 IN+/IN-; 3.3V/1A on LDO VOUT.",
+      "3.3V on LDO VOUT for sensors/MCU.",
       "Optional Li-ion cell on TP4056 BAT+/BAT- for charging.",
     ],
   },
 
   usb_fume_extractor: {
     modules: [
-      { role: "psu", moduleId: "buck-lm2596" },
-      { role: "drv", moduleId: "mosfet-irf520" },
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "psu", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
     ],
-    notes: ["Motor load wires to VOUT+/VOUT- of the driver."],
+    notes: ["Set buck to fan voltage (often 5V or 12V). Fan wires to driver VOUT+/VOUT-."],
   },
 
   indicator_or_task_light: {
     modules: [
-      { role: "psu", moduleId: "buck-lm2596" },
-      { role: "drv", moduleId: "mosfet-irf520" },
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "psu", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
     ],
-    notes: ["LED wires from VOUT+ to VOUT- with appropriate series resistor."],
+    notes: ["LED load on VOUT+/VOUT- with appropriate series resistor."],
   },
 
   low_voltage_motor_test_jig: {
     modules: [
-      { role: "psu", moduleId: "buck-lm2596" },
-      { role: "drv", moduleId: "mosfet-irf520" },
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "psu", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
@@ -143,41 +197,45 @@ const RECIPES: Record<string, Recipe> = {
     notes: ["Add a manual switch on SIG for benchtop on/off."],
   },
 
-  // MCU is USB-powered; its 5V output runs the relay coil.
   smart_relay_box: {
     modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "arduino-nano" },
       { role: "rly", moduleId: "relay-1ch-5v" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
       { from: { role: "mcu", pin: "5V" }, to: { role: "rly", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "rly", pin: "GND" } },
       { from: { role: "mcu", pin: "D2" }, to: { role: "rly", pin: "IN" } },
     ],
-    notes: ["Power the MCU via USB. Add a fly-back diode if switching inductive loads."],
+    notes: ["Add a fly-back diode if switching inductive loads."],
   },
 
-  // ESP32 USB-powered; its 3V3 output runs the I2C sensor directly.
   sensor_logger: {
     modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "sns", moduleId: "bme280" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
       ...i2cBus("mcu", "GPIO21", "GPIO22", "3V3", "GND", "sns"),
     ],
-    notes: ["Power the ESP32 via USB; 3V3 rail feeds the BME280 directly."],
+    notes: ["3V3 from ESP32 feeds the BME280 directly."],
   },
 
   network_status_indicator: {
     modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "ui", moduleId: "ssd1306-128x64" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
       ...i2cBus("mcu", "GPIO21", "GPIO22", "3V3", "GND", "ui"),
     ],
-    notes: ["ESP32 supplies the wireless interface natively; USB-powered."],
+    notes: ["ESP32 supplies Wi-Fi; OLED on shared 3V3 I2C bus."],
   },
 
   // Pico (3.3V logic) matches ssd1306 directly — no level shifter. The new
@@ -185,21 +243,26 @@ const RECIPES: Record<string, Recipe> = {
   // doesn't drag the MCU.
   inspection_motion_fixture: {
     modules: [
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "rpi-pico" },
       { role: "ui", moduleId: "ssd1306-128x64" },
       { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VBUS"),
+      { from: { role: "pwr", pin: "V+" }, to: { role: "svo_psu", pin: "VIN" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "svo_psu", pin: "GND" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       ...i2cBus("mcu", "GP4", "GP5", "3V3", "GND", "ui"),
       { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
       { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
-      { from: { role: "svo_psu", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "mcu", pin: "GP0" }, to: { role: "svo", pin: "SIG" } },
     ],
     notes: [
-      "Feed 7-15V to the AMS1117-5V VIN; it produces a clean 5V for the servo.",
-      "Pico is USB-powered; GND ties to the servo rail for a common signal reference.",
+      "12V barrel feeds the servo LDO; USB 5V feeds the Pico.",
+      "Common GND between Pico, display, and servo rail.",
     ],
   },
 
@@ -207,35 +270,43 @@ const RECIPES: Record<string, Recipe> = {
   // Servo gets its own dedicated 5V via AMS1117-5V — never the MCU rail.
   plotter_motion_stage: {
     modules: [
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "arduino-nano" },
       { role: "limit", moduleId: "hc-sr04" },
       { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
+      { from: { role: "pwr", pin: "V+" }, to: { role: "svo_psu", pin: "VIN" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "svo_psu", pin: "GND" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "mcu", pin: "5V" }, to: { role: "limit", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "limit", pin: "GND" } },
       { from: { role: "mcu", pin: "D2" }, to: { role: "limit", pin: "TRIG" } },
       { from: { role: "mcu", pin: "A0" }, to: { role: "limit", pin: "ECHO" } },
       { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
       { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
-      { from: { role: "svo_psu", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "mcu", pin: "D3" }, to: { role: "svo", pin: "SIG" } },
     ],
     notes: [
-      "Feed 7-15V to the AMS1117-5V VIN; it produces a clean 5V for the servo.",
-      "Arduino is USB-powered; HC-SR04 runs off the Arduino 5V rail.",
+      "12V barrel feeds servo LDO; USB 5V feeds Arduino.",
+      "HC-SR04 runs from Arduino 5V rail.",
     ],
   },
 
-  // L298N motor supply on its own buck; arduino USB-powered, drives IN1/IN2.
   robot_drive_base: {
     modules: [
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "arduino-nano" },
-      { role: "mot_psu", moduleId: "buck-lm2596" },
+      { role: "mot_psu", moduleId: "buck-mp1584" },
       { role: "drv", moduleId: "l298n" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "mot_psu"),
+      ...usbToMcu("usb", "mcu", "VIN"),
       { from: { role: "mot_psu", pin: "OUT+" }, to: { role: "drv", pin: "VCC" } },
       { from: { role: "mot_psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
@@ -243,8 +314,8 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "IN2" } },
     ],
     notes: [
-      "Motor connects to OUT1/OUT2 (external load wiring).",
-      "Set the motor buck to your motor's rated voltage. Arduino is USB-powered.",
+      "Set motor buck to motor rated voltage. Motors on OUT1/OUT2.",
+      "USB 5V feeds Arduino; 12V barrel feeds motor driver supply.",
     ],
   },
 
@@ -254,57 +325,62 @@ const RECIPES: Record<string, Recipe> = {
       { role: "target", moduleId: "arduino-nano" },
     ],
     wires: [
+      { from: { role: "adapter", pin: "VCC" }, to: { role: "target", pin: "VIN" } },
       { from: { role: "adapter", pin: "GND" }, to: { role: "target", pin: "GND" } },
-      // CH340 TX -> target RX, CH340 RX -> target TX (crossover).
-      // Arduino Nano exposes D2/D3 as generic digital_io; for serial bring-up
-      // wire to D2 (RX) and D3 (TX) to keep within library pin set.
       { from: { role: "adapter", pin: "TX" }, to: { role: "target", pin: "D2" } },
       { from: { role: "adapter", pin: "RX" }, to: { role: "target", pin: "D3" } },
     ],
-    notes: ["Wire to your target's native UART pins for production use."],
+    notes: [
+      "CH340 is powered from its USB cable; VCC feeds the target MCU.",
+      "Wire to native UART pins on your target for production use.",
+    ],
   },
 
   small_audio_amp_box: {
     modules: [
-      { role: "psu", moduleId: "buck-lm2596" },
-      { role: "drv", moduleId: "mosfet-irf520" },
+      { role: "pwr", moduleId: "dc-barrel-12v" },
+      { role: "psu", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
     ],
     notes: [
-      "No discrete audio-amp in the module library — using MOSFET as load driver",
-      "Substitute a real Class-D amp (PAM8403 / TPA3110) when adding to the library.",
+      "MOSFET stand-in until a Class-D amp module is added to the library.",
+      "Speaker load on VOUT+/VOUT- with series resistor where needed.",
     ],
   },
 
-  // Tester fixture: arduino reads inputs, CH340 surfaces results over USB serial.
   salvaged_input_panel: {
     modules: [
       { role: "mcu", moduleId: "arduino-nano" },
       { role: "adapter", moduleId: "ch340-usb-ttl" },
     ],
     wires: [
+      { from: { role: "adapter", pin: "VCC" }, to: { role: "mcu", pin: "VIN" } },
       { from: { role: "adapter", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
       { from: { role: "adapter", pin: "TX" }, to: { role: "mcu", pin: "D2" } },
       { from: { role: "adapter", pin: "RX" }, to: { role: "mcu", pin: "D3" } },
     ],
-    notes: ["Switches/buttons wire to A0 as digital inputs with pull-ups; results read over USB serial."],
+    notes: ["Switches wire to A0..A5; read over USB serial via CH340."],
   },
 
   camera_ir_light_or_sensor_mount: {
     modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "sns", moduleId: "bme280" },
     ],
     wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
       ...i2cBus("mcu", "GPIO21", "GPIO22", "3V3", "GND", "sns"),
     ],
     notes: [
-      "ESP32 USB-powered; 3V3 rail feeds the sensor.",
-      "Camera/IR-light module not in library — BME280 is a wired stand-in until a camera spec is added.",
+      "BME280 stand-in until a camera module spec is added.",
+      "Mount mechanics are handled by Mecha-Splicer enclosure output.",
     ],
   },
 };
@@ -313,6 +389,8 @@ export interface SalvagePlanInput {
   target?: { recommended_build_id?: string | null };
   reusable_blocks?: Array<{ id?: string; name?: string; capabilities?: string[]; source?: string }>;
   build_candidates?: Array<{ id?: string; name?: string }>;
+  resolved_modules?: Array<{ module_id?: string | null; role?: string; part_name?: string; source?: string }>;
+  module_overrides?: Record<string, string>;
 }
 
 export interface TranslationResult {
@@ -358,9 +436,24 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     return { graph: { nodes: [], wires: [] }, buildId, notes, warnings };
   }
 
+  const overrides = { ...(plan?.module_overrides || {}) };
+  for (const row of plan?.resolved_modules || []) {
+    if (row?.role && row?.module_id && !overrides[row.role]) {
+      overrides[row.role] = row.module_id;
+    }
+  }
+
+  const modules = recipe.modules.map((m) => ({
+    role: m.role,
+    moduleId: overrides[m.role] || m.moduleId,
+  }));
+  if (Object.keys(overrides).length > 0) {
+    notes.push(`Module overrides applied: ${JSON.stringify(overrides)}`);
+  }
+
   // Materialize role -> nodeId; build BuildGraph nodes.
   const idOf = new Map<string, string>();
-  const nodes = recipe.modules.map((m, i) => {
+  const nodes = modules.map((m, i) => {
     const nodeId = `n${i + 1}`;
     idOf.set(m.role, nodeId);
     return { id: nodeId, moduleId: m.moduleId };

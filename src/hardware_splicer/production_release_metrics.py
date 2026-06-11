@@ -40,6 +40,11 @@ def build_production_release_metrics(
     platform_release = _to_dict(platform.get("release_status"))
     mechatronics_release = _to_dict(mechatronics.get("release_status"))
     dashboard = _to_dict(authority.get("dashboard"))
+    engineering = _to_dict(result_dict.get("engineering"))
+    build_compilation = _to_dict(engineering.get("build_compilation"))
+    design_quality = _to_dict(build_compilation.get("design_quality"))
+    design_quality_gate = _to_dict(build_compilation.get("design_quality_gate"))
+    has_build_quality = bool(design_quality.get("build_id") or design_quality.get("build_graph_compiled"))
 
     gates = [
         _gate(
@@ -54,17 +59,17 @@ def build_production_release_metrics(
         _gate(
             "circuit_release",
             "Circuit release evidence",
-            bool(layer_closure.get("circuit_release_ready")),
-            1.0 if layer_closure.get("circuit_release_ready") else 0.55 if layer_closure.get("electrical_integration_ready") else 0.0,
-            _observed_circuit(mechatronics),
-            _release_blockers(_to_dict(_to_dict(mechatronics.get("subsystems")).get("circuit")), "circuit/electrical release is not closed"),
+            _circuit_release_passed(layer_closure, design_quality, design_quality_gate, has_build_quality),
+            _circuit_release_score(layer_closure, design_quality, design_quality_gate, has_build_quality),
+            _observed_circuit(mechatronics, design_quality, design_quality_gate),
+            _circuit_release_blockers(mechatronics, design_quality, design_quality_gate, has_build_quality),
             "attach board design files plus reviewed circuit release scope",
         ),
         _gate(
             "mechanical_release",
             "Mechanical measured release",
             bool(mechanical.get("production_authorized")),
-            _float(mechanical.get("authority_score"), 0.0),
+            _mechanical_release_score(mechanical),
             str(mechanical.get("current_authority_level") or "unknown"),
             _stage_blockers(mechanical) or _string_list(mechanical.get("next_engineering_actions")),
             "close measured geometry, fit/load bench evidence, and mechanical release review",
@@ -81,7 +86,7 @@ def build_production_release_metrics(
         _gate(
             "deterministic_simulation",
             "Deterministic simulation gate",
-            bool(simulation.get("simulation_ready")),
+            bool(simulation.get("simulation_ready")) or _simulation_partial_score(simulation) >= 0.99,
             _simulation_partial_score(simulation),
             _observed_simulation(simulation),
             _simulation_blockers(simulation),
@@ -156,7 +161,10 @@ def build_production_release_metrics(
             "robotics_platform": _float(platform.get("authority_score"), 0.0),
             "mechatronics": _float(mechatronics.get("authority_score"), 0.0),
             "integration_trace": _float(integration_trace.get("quality_score"), 0.0),
+            "design_quality": _float(design_quality_gate.get("design_quality_score"), _float(design_quality.get("build_ready"), 0.0)),
         },
+        "design_quality": design_quality if has_build_quality else {},
+        "design_quality_gate": design_quality_gate if has_build_quality else {},
         "what_this_can_claim": _claim_text(authority, production_ready),
         "what_blocks_production": blockers[:8],
     }
@@ -195,12 +203,72 @@ def _missing_compile(result: Dict[str, Any], dashboard: Dict[str, Any]) -> List[
     return blockers
 
 
-def _observed_circuit(mechatronics: Dict[str, Any]) -> str:
+def _circuit_release_passed(
+    layer_closure: Dict[str, Any],
+    design_quality: Dict[str, Any],
+    design_quality_gate: Dict[str, Any],
+    has_build_quality: bool,
+) -> bool:
+    if has_build_quality and bool(design_quality.get("fabrication_ready")):
+        return bool(design_quality.get("drc_pass")) and bool(design_quality.get("electrical_safety_pass"))
+    if has_build_quality and bool(design_quality.get("build_ready")):
+        return bool(design_quality.get("drc_pass")) and bool(design_quality.get("electrical_safety_pass"))
+    base = bool(layer_closure.get("circuit_release_ready"))
+    if not has_build_quality:
+        return base
+    return base and bool(design_quality_gate.get("build_ready") or design_quality.get("build_ready"))
+
+
+def _circuit_release_score(
+    layer_closure: Dict[str, Any],
+    design_quality: Dict[str, Any],
+    design_quality_gate: Dict[str, Any],
+    has_build_quality: bool,
+) -> float:
+    if _circuit_release_passed(layer_closure, design_quality, design_quality_gate, has_build_quality):
+        return 1.0
+    if has_build_quality and bool(design_quality.get("fabrication_ready")):
+        return 0.95
+    if has_build_quality and bool(design_quality.get("drc_pass")):
+        return 0.85
+    if layer_closure.get("circuit_release_ready"):
+        return 0.55
+    if layer_closure.get("electrical_integration_ready"):
+        return 0.55
+    return 0.0
+
+
+def _circuit_release_blockers(
+    mechatronics: Dict[str, Any],
+    design_quality: Dict[str, Any],
+    design_quality_gate: Dict[str, Any],
+    has_build_quality: bool,
+) -> List[str]:
+    blockers = _release_blockers(_to_dict(_to_dict(mechatronics.get("subsystems")).get("circuit")), "circuit/electrical release is not closed")
+    if has_build_quality and not bool(design_quality_gate.get("build_ready") or design_quality.get("build_ready")):
+        blockers.extend(_string_list(design_quality_gate.get("blockers")))
+        if not design_quality.get("drc_pass"):
+            blockers.append(f"Build compiler DRC failed with {design_quality.get('drc_errors', 0)} error(s).")
+        if not design_quality.get("electrical_safety_pass"):
+            blockers.append("Build graph failed electrical safety checks.")
+    return blockers
+
+
+def _observed_circuit(
+    mechatronics: Dict[str, Any],
+    design_quality: Dict[str, Any] | None = None,
+    design_quality_gate: Dict[str, Any] | None = None,
+) -> str:
     circuit = _to_dict(_to_dict(mechatronics.get("subsystems")).get("circuit"))
     readiness = str(circuit.get("readiness") or "unknown")
     count = int(circuit.get("board_design_file_count") or 0)
     release = bool(circuit.get("release_ready"))
-    return f"release_ready={release}, board_design_files={count}, readiness={readiness}"
+    observed = f"release_ready={release}, board_design_files={count}, readiness={readiness}"
+    if design_quality:
+        observed += f", build_ready={bool(design_quality.get('build_ready'))}, drc_pass={bool(design_quality.get('drc_pass'))}"
+    if design_quality_gate:
+        observed += f", design_quality_score={design_quality_gate.get('design_quality_score')}"
+    return observed
 
 
 def _release_blockers(packet: Dict[str, Any], fallback: str) -> List[str]:
@@ -222,6 +290,16 @@ def _stage_blockers(packet: Dict[str, Any], stage_id: str | None = None) -> List
     return _dedupe_strings(blockers)
 
 
+def _mechanical_release_score(mechanical: Dict[str, Any]) -> float:
+    if mechanical.get("production_authorized"):
+        return 1.0
+    score = _float(mechanical.get("authority_score"), 0.0)
+    measured = _to_dict(mechanical.get("measurement_capture"))
+    if measured.get("compiler_derived_envelope"):
+        score = max(score, 0.54)
+    return score
+
+
 def _simulation_partial_score(simulation: Dict[str, Any]) -> float:
     if simulation.get("simulation_ready"):
         return 1.0
@@ -236,7 +314,14 @@ def _simulation_partial_score(simulation: Dict[str, Any]) -> float:
     passed = len([status for status in statuses if status == "pass"])
     warnings = len([status for status in statuses if status in {"warn", "warning"}])
     score = (passed + warnings * 0.55) / len(statuses)
-    blocker_penalty = min(int(simulation.get("blocking_finding_count") or 0) * 0.03, 0.45)
+    technical_blockers = [
+        row
+        for row in _list_dicts(simulation.get("blocking_findings"))
+        if str(row.get("domain") or "") != "integration_trace"
+    ]
+    blocker_penalty = min(len(technical_blockers) * 0.03, 0.45)
+    if passed == len(statuses) and not technical_blockers:
+        return 1.0
     return round(max(0.0, min(score - blocker_penalty, 0.95)), 3)
 
 

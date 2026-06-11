@@ -112,7 +112,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     inputVoltageRange: [5, 12],
     typicalCurrentMa: 20,
     pins: [
-      { id: "VIN", label: "VIN", role: "power_in", voltage: "7-12V" },
+      { id: "VIN", label: "VIN", role: "power_in", voltage: "5-12V" },
       { id: "5V", label: "5V", role: "power_out", voltage: "5V", currentMaxMa: 500 },
       { id: "3V3", label: "3V3", role: "power_out", voltage: "3.3V", currentMaxMa: 50 },
       { id: "GND", label: "GND", role: "gnd" },
@@ -153,7 +153,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     pins: [
       { id: "IN+", label: "IN+", role: "power_in", voltage: "7-35V" },
       { id: "IN-", label: "IN-", role: "gnd" },
-      { id: "OUT+", label: "OUT+", role: "power_out", voltage: "1.2-30V (adjustable)", currentMaxMa: 2000 },
+      { id: "OUT+", label: "OUT+", role: "power_out", voltage: "1.2-30V adjustable", currentMaxMa: 2000, notes: "Set with trim pot" },
       { id: "OUT-", label: "OUT-", role: "gnd" },
     ],
     warnings: ["Always set output voltage with a multimeter BEFORE connecting your load."],
@@ -167,7 +167,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     pins: [
       { id: "IN+", label: "IN+", role: "power_in", voltage: "4.5-28V" },
       { id: "IN-", label: "IN-", role: "gnd" },
-      { id: "OUT+", label: "OUT+", role: "power_out", voltage: "0.8-20V", currentMaxMa: 3000 },
+      { id: "OUT+", label: "OUT+", role: "power_out", voltage: "0.8-20V adjustable", currentMaxMa: 3000, notes: "Set with trim pot" },
       { id: "OUT-", label: "OUT-", role: "gnd" },
     ],
   },
@@ -336,6 +336,45 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     warnings: ["If switching mains (>60V AC), isolate the load side completely. Beginners should stick to low-voltage DC."],
   },
   {
+    id: "usb-power-5v",
+    label: "USB 5V power input",
+    category: "power",
+    summary: "5V USB supply (power bank, charger, or host port) via USB connector.",
+    inputVoltageRange: [4.5, 5.5],
+    pins: [
+      { id: "V+", label: "V+", role: "power_out", voltage: "5V", notes: "USB VBUS" },
+      { id: "GND", label: "GND", role: "gnd" },
+    ],
+    warnings: ["Use a cable/charger rated for your load current; add a polyfuse for pumps and motors."],
+  },
+  {
+    id: "dc-barrel-12v",
+    label: "12V DC barrel input",
+    category: "power",
+    summary: "Bench 12V DC supply via barrel jack (off-board wall adapter).",
+    inputVoltageRange: [9, 15],
+    pins: [
+      { id: "V+", label: "V+", role: "power_out", voltage: "12V", notes: "Wall adapter input terminal" },
+      { id: "GND", label: "GND", role: "gnd" },
+    ],
+    warnings: ["Fuse the input and verify polarity before connecting electronics."],
+  },
+  {
+    id: "mosfet-irlz44n",
+    label: "IRLZ44N logic-level MOSFET module",
+    category: "actuator",
+    summary: "Logic-level N-channel switch, reliable from 3.3V GPIO.",
+    pins: [
+      { id: "VIN", label: "VIN+", role: "power_in", voltage: "load voltage" },
+      { id: "VIN-", label: "VIN-", role: "gnd" },
+      { id: "SIG", label: "SIG", role: "digital_in", voltage: "3.3V" },
+      { id: "GND", label: "SIG GND", role: "gnd" },
+      { id: "VOUT+", label: "VOUT+", role: "power_out" },
+      { id: "VOUT-", label: "VOUT-", role: "gnd" },
+    ],
+    warnings: ["Add flyback diode across inductive loads (pump/fan/solenoid)."],
+  },
+  {
     id: "mosfet-irf520",
     label: "IRF520 MOSFET module",
     category: "actuator",
@@ -405,7 +444,8 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     category: "interface",
     summary: "USB serial adapter, 3.3V or 5V selectable.",
     pins: [
-      { id: "VCC", label: "VCC", role: "power_out", voltage: "3.3V or 5V (jumper)", currentMaxMa: 300 },
+      { id: "USB", label: "USB", role: "power_in", voltage: "5V", notes: "Powered from USB host" },
+      { id: "VCC", label: "VCC", role: "power_out", voltage: "5V", currentMaxMa: 300, notes: "3.3V/5V jumper on many boards" },
       { id: "GND", label: "GND", role: "gnd" },
       { id: "TX", label: "TX", role: "uart_tx" },
       { id: "RX", label: "RX", role: "uart_rx" },

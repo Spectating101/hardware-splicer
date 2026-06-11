@@ -5,7 +5,13 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
-from .evidence_extractor import enrich_intake_with_extracted_evidence
+from .build_compiler import compile_catalog_build, resolve_build_id
+from .design_quality import build_design_quality_gate
+from .fabrication_inspection import inspect_fabrication_package
+from .functional_delivery import build_functional_delivery_score
+from .evidence_extractor import _merge_evidence, enrich_intake_with_extracted_evidence
+from .build_evidence import compiler_evidence_patch
+from .salvage_bridge import build_intake_salvage_package
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
 
@@ -35,9 +41,14 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
     return intake
 
 
-def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
-    body, vision_report = enrich_intake_with_vision_assistance(_to_dict(intake, "intake"))
-    body, extraction_report = enrich_intake_with_extracted_evidence(body)
+def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = False) -> Dict[str, Any]:
+    body = _to_dict(intake, "intake")
+    if skip_vision:
+        vision_report = {"enabled": False, "skipped": True}
+        body, extraction_report = enrich_intake_with_extracted_evidence(body)
+    else:
+        body, vision_report = enrich_intake_with_vision_assistance(body)
+        body, extraction_report = enrich_intake_with_extracted_evidence(body)
     project_name = _slug(str(body.get("project_name") or body.get("name") or body.get("goal") or "hardware_splicer_project"))
     goal = str(body.get("goal") or body.get("intent") or body.get("brief") or project_name).strip()
     constraints = _to_dict(body.get("constraints") or {}, "intake.constraints")
@@ -48,7 +59,26 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
     base_dir = _source_base_dir(body)
     assumptions = _assumptions(archetype, parts, constraints, budget)
     missing = _missing_info(archetype, parts, constraints, budget, evidence)
-    spec = _compile_spec(project_name, goal, archetype, parts, constraints, budget, assumptions, evidence, base_dir)
+    salvage_package = build_intake_salvage_package(
+        goal=goal,
+        parts=parts,
+        constraints=constraints,
+        project_name=project_name,
+    )
+    if salvage_package.get("recommended_build_id"):
+        archetype = _archetype_from_build_id(str(salvage_package["recommended_build_id"]), archetype)
+    spec = _compile_spec(
+        project_name,
+        goal,
+        archetype,
+        parts,
+        constraints,
+        budget,
+        assumptions,
+        evidence,
+        base_dir,
+        salvage_package=salvage_package,
+    )
     scenario = {
         "scenario_name": f"{project_name}_{archetype}",
         "intent": goal,
@@ -72,15 +102,148 @@ def plan_project_from_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
         "project_name": project_name,
         "goal": goal,
         "archetype": archetype,
-        "planning_confidence": _planning_confidence(archetype, parts, missing),
+        "planning_confidence": max(
+            _planning_confidence(archetype, parts, missing),
+            float(salvage_package.get("planning_confidence") or 0.0),
+        ),
         "budget": budget,
         "normalized_parts": parts,
+        "salvage_package": salvage_package,
+        "recommended_build_id": salvage_package.get("recommended_build_id"),
+        "salvage_verdict": salvage_package.get("verdict"),
         "assumptions": assumptions,
         "vision_evidence_report": vision_report,
         "evidence_extraction_report": extraction_report,
         "evidence_summary": _evidence_summary(evidence, base_dir),
         "missing_info": missing,
         "scenario": scenario,
+    }
+
+
+def splice_and_build_from_intake(
+    intake: Mapping[str, Any],
+    *,
+    out_dir: str | Path,
+    export_gerber: bool = True,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """Plan salvage splice + compile catalog build without full mecha/scenario pipeline."""
+    plan = plan_project_from_intake(intake)
+    salvage_package = _to_dict(plan.get("salvage_package") or {}, "intake_plan.salvage_package")
+    build_id = str(
+        salvage_package.get("recommended_build_id")
+        or resolve_build_id(archetype=str(plan.get("archetype") or ""))
+        or ""
+    ).strip()
+    if not build_id:
+        raise ValueError("intake did not resolve to a catalog build_id")
+
+    out_path = Path(out_dir)
+    out_path.mkdir(parents=True, exist_ok=True)
+    splice_plan_file = out_path / "SPLICE_PLAN.json"
+    intake_file = out_path / "PROJECT_INTAKE.json"
+    splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
+    intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+
+    graph_input = salvage_package.get("graph_input") or salvage_package.get("splice_package")
+    resolved_modules = salvage_package.get("resolved_modules") or []
+    compile_result = compile_catalog_build(
+        build_id,
+        out_path,
+        export_gerber=export_gerber,
+        splice_plan=graph_input if isinstance(graph_input, dict) else None,
+        resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+    )
+    gate = build_design_quality_gate(compile_result.design_quality)
+    gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
+    gate_path.parent.mkdir(parents=True, exist_ok=True)
+    gate_path.write_text(json.dumps(gate, indent=2), encoding="utf-8")
+
+    build_dir = out_path / "build_compilation"
+    functional_delivery = build_functional_delivery_score(
+        build_compilation=compile_result.to_dict(),
+        artifacts={
+            "splice_plan": str(splice_plan_file),
+            "build_graph": compile_result.build_graph_file,
+            "build_kicad_pcb": compile_result.kicad_pcb_file,
+        },
+    )
+    functional_delivery_file = out_path / "FUNCTIONAL_DELIVERY.json"
+    functional_delivery_file.write_text(json.dumps(functional_delivery, indent=2), encoding="utf-8")
+    fabrication_inspection = inspect_fabrication_package(
+        build_compilation=compile_result.to_dict(),
+        artifacts={
+            "splice_plan": str(splice_plan_file),
+            "build_graph": compile_result.build_graph_file,
+            "build_kicad_pcb": compile_result.kicad_pcb_file,
+            "fab_package_zip": str(build_dir / "fab_package.zip") if (build_dir / "fab_package.zip").is_file() else None,
+        },
+    )
+    inspection_file = out_path / "FABRICATION_INSPECTION.json"
+    inspection_file.write_text(json.dumps(fabrication_inspection, indent=2), encoding="utf-8")
+
+    scenario = _to_dict(plan.get("scenario"), "plan.scenario")
+    compile_spec = _to_dict(scenario.get("compile_spec"), "plan.scenario.compile_spec")
+    mechanism = _to_dict(compile_spec.get("mechanism"), "plan.scenario.compile_spec.mechanism")
+    compiler_patch = compiler_evidence_patch(compile_result.to_dict(), out_path, mechanism)
+    compiler_patch_file = out_path / "COMPILER_EVIDENCE_PATCH.json"
+    if compiler_patch:
+        compiler_patch_file.write_text(json.dumps(compiler_patch, indent=2), encoding="utf-8")
+    post_intake = _to_dict(intake, "intake")
+    if compiler_patch:
+        evidence = _to_dict(post_intake.get("evidence"), "intake.evidence")
+        _merge_evidence(evidence, compiler_patch)
+        post_intake["evidence"] = evidence
+    post_plan = plan_project_from_intake(post_intake, skip_vision=True) if compiler_patch else plan
+    post_metrics_file = out_path / "POST_SPLICE_SCORING.json"
+    post_metrics_file.write_text(
+        json.dumps(
+            {
+                "schema_version": "hardware_splicer.post_splice_scoring.v1",
+                "compiler_evidence_patch": compiler_patch,
+                "planning_confidence": post_plan.get("planning_confidence"),
+                "missing_info": post_plan.get("missing_info"),
+                "evidence_summary": post_plan.get("evidence_summary"),
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    return {
+        "ok": bool(compile_result.ok and gate.get("build_ready")),
+        "request_id": request_id or plan.get("project_name"),
+        "project_name": plan.get("project_name"),
+        "goal": plan.get("goal"),
+        "archetype": plan.get("archetype"),
+        "build_id": build_id,
+        "salvage_verdict": salvage_package.get("verdict"),
+        "planning_confidence": plan.get("planning_confidence"),
+        "build_compilation": compile_result.to_dict(),
+        "design_quality_gate": gate,
+        "functional_delivery": functional_delivery,
+        "artifacts": {
+            "project_intake": str(intake_file),
+            "splice_plan": str(splice_plan_file),
+            "design_quality": compile_result.design_quality_file,
+            "design_quality_gate": str(gate_path),
+            "build_graph": compile_result.build_graph_file,
+            "kicad_pcb": compile_result.kicad_pcb_file,
+            "gerber_package_dir": compile_result.gerber_package_dir,
+            "fab_package_zip": str(build_dir / "fab_package.zip")
+            if (build_dir / "fab_package.zip").is_file()
+            else None,
+            "functional_delivery": str(functional_delivery_file),
+            "fabrication_inspection": str(inspection_file),
+            "compiler_evidence_patch": str(compiler_patch_file) if compiler_patch else None,
+            "post_splice_scoring": str(post_metrics_file),
+        },
+        "compiler_evidence_patch": compiler_patch,
+        "post_splice_planning": {
+            "planning_confidence": post_plan.get("planning_confidence"),
+            "missing_info": post_plan.get("missing_info"),
+            "evidence_summary": post_plan.get("evidence_summary"),
+        },
     }
 
 
@@ -111,6 +274,10 @@ def run_project_intake(
     extraction_report_file = out_path / "EVIDENCE_EXTRACTION_REPORT.json"
     upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
     evidence_kit_file = out_path / "EVIDENCE_CAPTURE_KIT.json"
+    splice_plan_file = out_path / "SPLICE_PLAN.json"
+    salvage_package = _to_dict(plan.get("salvage_package") or {}, "intake_plan.salvage_package")
+    if salvage_package:
+        splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
     vision_report_file.write_text(json.dumps(vision_report, indent=2), encoding="utf-8")
@@ -130,6 +297,7 @@ def run_project_intake(
         "evidence_extraction_report": str(extraction_report_file),
         "authority_upgrade_plan": str(upgrade_plan_file),
         "evidence_capture_kit": str(evidence_kit_file),
+        "splice_plan": str(splice_plan_file) if salvage_package else "",
     }
     scenario_result_path = result["artifacts"].get("scenario_result")
     if scenario_result_path:
@@ -450,6 +618,18 @@ def _dedupe_capture_requests(requests: List[Dict[str, Any]]) -> List[Dict[str, A
     return out
 
 
+def _archetype_from_build_id(build_id: str, fallback: str) -> str:
+    mapping = {
+        "automatic_plant_watering": "automatic_watering",
+        "robot_drive_base": "rover",
+        "usb_fume_extractor": "airflow_controller",
+        "inspection_motion_fixture": "pan_tilt",
+        "low_voltage_motor_test_jig": "gripper",
+        "sensor_logger": "generic_mechatronics",
+    }
+    return mapping.get(build_id, fallback)
+
+
 def _compile_spec(
     project_name: str,
     goal: str,
@@ -460,6 +640,8 @@ def _compile_spec(
     assumptions: List[str],
     evidence: Dict[str, Any],
     base_dir: Path,
+    *,
+    salvage_package: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     board = _board(project_name, archetype, parts, constraints)
     mechanism = _mechanism(project_name, archetype, parts)
@@ -489,6 +671,22 @@ def _compile_spec(
             "release_status": "bench evidence and reviewed release are not attached by intake planning.",
         },
     }
+    salvage = dict(salvage_package or {})
+    build_id = str(salvage.get("recommended_build_id") or "") or resolve_build_id(archetype=archetype)
+    if build_id:
+        spec["build_compilation"] = {
+            "enabled": True,
+            "build_id": build_id,
+            "archetype": archetype,
+            "source": "project_intake",
+            "graph_input": salvage.get("graph_input"),
+            "resolved_modules": salvage.get("resolved_modules") or [],
+            "module_overrides": salvage.get("module_overrides") or {},
+            "splice_verdict": salvage.get("verdict"),
+        }
+        if salvage.get("splice_plan"):
+            spec["build_compilation"]["splice_plan"] = salvage["splice_plan"]
+        spec["machine"]["build_compilation"] = dict(spec["build_compilation"])
     _apply_evidence(spec, evidence, base_dir)
     return spec
 

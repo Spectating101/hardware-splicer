@@ -30,6 +30,14 @@ from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_platform_geometry import attach_robotics_platform_geometry
 from .robotics_simulation import build_robotics_simulation_packet
 from .schemas import HardwareCompileResult, HardwareCompileSpec
+from .build_compiler import (
+    attach_build_compilation_artifacts,
+    compile_catalog_build,
+    resolve_build_id,
+)
+from .build_evidence import enrich_compile_spec_from_build_compilation
+from .functional_delivery import build_functional_delivery_score
+from .design_quality import build_design_quality_gate
 from .validation import raise_for_validation_errors, validate_compile_spec
 
 
@@ -274,6 +282,35 @@ def compile_hardware_bundle(
     if splicer_url:
         env_values["SPLICER_API_URL"] = splicer_url
 
+    build_compilation_payload: Dict[str, Any] = {}
+    spec_dict = run_spec.to_dict()
+    build_compilation = dict(
+        spec_dict.get("build_compilation")
+        or (run_spec.machine.get("build_compilation") if isinstance(run_spec.machine, dict) else {})
+        or {}
+    )
+    if build_compilation.get("enabled", True) and (
+        build_compilation.get("build_id") or resolve_build_id(archetype=str(build_compilation.get("archetype") or ""))
+    ):
+        build_compilation_payload = attach_build_compilation_artifacts(spec_dict, out_path, export_gerber=True)
+        run_spec, build_compilation_payload = enrich_compile_spec_from_build_compilation(
+            run_spec,
+            build_compilation_payload,
+            out_path,
+        )
+        spec_dict = run_spec.to_dict()
+        attachment = build_compilation_payload.get("board_design_attachment")
+        if isinstance(attachment, dict) and attachment.get("path"):
+            board_design_files = dict(board_design_files)
+            board_design_files[str(attachment.get("board_id") or "main_ctrl")] = {
+                "path": str(attachment["path"]),
+                "kind": str(attachment.get("kind") or "kicad_pcb"),
+                "source": "build_compiler",
+                "build_id": attachment.get("build_id"),
+                "board_outline": attachment.get("board_outline"),
+            }
+            run_spec = replace(run_spec, board_design_files=board_design_files)
+
     try:
         with patched_env(env_values):
             ensure_circuit_import_path()
@@ -290,6 +327,21 @@ def compile_hardware_bundle(
             )
     finally:
         stop_process(proc)
+
+    if build_compilation_payload:
+        engineering = dict(engineering)
+        engineering["build_compilation"] = build_compilation_payload
+        design_quality = dict(build_compilation_payload.get("design_quality") or {})
+        if design_quality.get("build_ready"):
+            analysis = dict(engineering.get("analysis") or {})
+            circuit = dict(analysis.get("circuit") or {})
+            circuit["readiness_level"] = "build_ready"
+            circuit["readiness"] = "build_ready"
+            circuit["release_ready"] = bool(design_quality.get("fabrication_ready") or design_quality.get("build_ready"))
+            circuit["board_design_file_count"] = max(int(circuit.get("board_design_file_count") or 0), 1)
+            circuit["manufacturing_source"] = "build_compiler"
+            analysis["circuit"] = circuit
+            engineering["analysis"] = analysis
 
     mecha_bundle_dir = _copy_mecha_bundle(engineering, out_path)
     robotics_platform_geometry = attach_robotics_platform_geometry(run_spec.to_dict(), engineering=engineering, out_dir=out_path)
@@ -344,6 +396,35 @@ def compile_hardware_bundle(
     mechatronics_authority_file = out_path / "MECHATRONICS_AUTHORITY.json"
     mechatronics_authority_file.write_text(json.dumps(mechatronics_authority, indent=2), encoding="utf-8")
     artifacts["mechatronics_authority"] = str(mechatronics_authority_file)
+    if build_compilation_payload:
+        design_quality = dict(build_compilation_payload.get("design_quality") or {})
+        design_quality_gate = build_design_quality_gate(design_quality, engineering=engineering)
+        design_quality_file = out_path / "DESIGN_QUALITY.json"
+        if not design_quality_file.is_file() and build_compilation_payload.get("design_quality_file"):
+            source = Path(str(build_compilation_payload["design_quality_file"]))
+            if source.is_file():
+                shutil.copy2(source, design_quality_file)
+        if not design_quality_file.is_file():
+            design_quality_file.write_text(json.dumps(design_quality, indent=2), encoding="utf-8")
+        design_quality_gate_file = out_path / "DESIGN_QUALITY_GATE.json"
+        design_quality_gate_file.write_text(json.dumps(design_quality_gate, indent=2), encoding="utf-8")
+        build_compilation_payload["design_quality_gate"] = design_quality_gate
+        functional_delivery = build_functional_delivery_score(
+            build_compilation=build_compilation_payload,
+            artifacts=artifacts,
+            engineering=engineering,
+        )
+        functional_delivery_file = out_path / "FUNCTIONAL_DELIVERY.json"
+        functional_delivery_file.write_text(json.dumps(functional_delivery, indent=2), encoding="utf-8")
+        artifacts["design_quality"] = str(design_quality_file)
+        artifacts["design_quality_gate"] = str(design_quality_gate_file)
+        artifacts["functional_delivery"] = str(functional_delivery_file)
+        if build_compilation_payload.get("build_graph_file"):
+            artifacts["build_graph"] = str(build_compilation_payload["build_graph_file"])
+        if build_compilation_payload.get("kicad_pcb_file"):
+            artifacts["build_kicad_pcb"] = str(build_compilation_payload["kicad_pcb_file"])
+        if build_compilation_payload.get("gerber_package_dir"):
+            artifacts["build_gerber_package"] = str(build_compilation_payload["gerber_package_dir"])
     casefile_file = out_path / "CASEFILE.json"
     project_log_file = out_path / "PROJECT_LOG.json"
     hardware_review_file = out_path / "HARDWARE_REVIEW.md"

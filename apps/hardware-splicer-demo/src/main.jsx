@@ -125,7 +125,12 @@ function ProductionMetrics({ project }) {
         <div>
           <div className="panel-label"><Gauge size={16} /> Production metrics</div>
           <h2>{percent}% production readiness</h2>
-          <p>{production.gatesPassed} of {production.gatesTotal} gates closed · {production.band}</p>
+          <p>
+            {production.gatesPassed} of {production.gatesTotal} gates closed · {production.band}
+            {project.functionalDelivery ? (
+              <> · functional delivery {project.functionalDelivery.score}% ({project.functionalDelivery.grade})</>
+            ) : null}
+          </p>
         </div>
         <div className="production-meter" style={{ '--score': `${percent}%` }}>
           <strong>{percent}</strong>

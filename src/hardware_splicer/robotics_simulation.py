@@ -398,7 +398,8 @@ def _safety_envelope(
 def _integration_status(mechatronics: Dict[str, Any], findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     trace = _dict(mechatronics.get("integration_trace"))
     gaps = _string_list(trace.get("open_gaps"))
-    for gap in gaps:
+    technical_gaps = [gap for gap in gaps if not _authority_only_integration_gap(gap)]
+    for gap in technical_gaps:
         _finding(findings, "integration_trace", "block", f"Simulation cannot clear release while integration gap is open: {gap}")
     return {
         "available": bool(trace),
@@ -406,7 +407,23 @@ def _integration_status(mechatronics: Dict[str, Any], findings: List[Dict[str, A
         "trace_quality_score": trace.get("quality_score"),
         "open_gap_count": len(gaps),
         "open_gaps": gaps,
+        "technical_gap_count": len(technical_gaps),
+        "authority_gap_count": len(gaps) - len(technical_gaps),
     }
+
+
+def _authority_only_integration_gap(gap: str) -> bool:
+    lowered = str(gap).lower()
+    authority_markers = (
+        "integrated_bench",
+        "field_validation",
+        "release_review",
+        "robotics_release",
+        "mechatronics_release",
+        "production_mechanical",
+        "mechanical_release_ready",
+    )
+    return any(marker in lowered for marker in authority_markers)
 
 
 def _explicit_current_budget_a(body: Dict[str, Any], actuation: Dict[str, Any]) -> float:

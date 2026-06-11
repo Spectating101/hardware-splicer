@@ -94,6 +94,7 @@ const REQUIRED_WAVE2_IDS = [
   "scd41-co2",
 ];
 const REQUIRED_BUILD_IDS = [
+  "automatic_plant_watering",
   "bench_power_adapter",
   "camera_ir_light_or_sensor_mount",
   "indicator_or_task_light",

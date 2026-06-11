@@ -181,8 +181,13 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
     dependencies = {
         "fastapi": importlib.util.find_spec("fastapi") is not None,
         "uvicorn": importlib.util.find_spec("uvicorn") is not None,
+        "pillow": importlib.util.find_spec("PIL") is not None,
+        "pytest": importlib.util.find_spec("pytest") is not None,
         "cadquery": importlib.util.find_spec("cadquery") is not None,
         "ngspice": shutil.which("ngspice") is not None,
+        "node": shutil.which("node") is not None,
+        "npm": shutil.which("npm") is not None,
+        "kicad_cli": shutil.which("kicad-cli") is not None,
     }
     splicer_python_override = os.environ.get("SPLICER3D_PYTHON")
     splicer_python = (
@@ -195,8 +200,12 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
         "uvicorn": _python_import_ok(splicer_python, "uvicorn"),
         "cadquery": _python_import_ok(splicer_python, "cadquery"),
     }
+    required_for_demo = ("fastapi", "uvicorn", "node")
+    demo_ready = all(dependencies.get(key) for key in required_for_demo)
     status: Dict[str, object] = {
-        "ok": all(row["exists"] for row in app_roots.values()),
+        "ok": all(row["exists"] for row in app_roots.values()) and demo_ready,
+        "demo_ready": demo_ready,
+        "fab_export_ready": bool(dependencies.get("kicad_cli")),
         "python": sys.executable,
         "python_version": platform.python_version(),
         "splicer3d_python": str(splicer_python),

@@ -84,7 +84,7 @@ PROFILE_LIBRARY = [
             "protection",
         ],
         "optional_capabilities": ["wireless", "display_or_ui", "switch_or_button", "enclosure_candidate"],
-        "mapped_build_id": "smart_relay_box",
+        "mapped_build_id": "automatic_plant_watering",
         "blocks": [
             ("controller", "Control timing, threshold logic, and dry-run lockout.", ["controller"]),
             ("soil_sensor", "Measure soil moisture or tank/plant state.", ["sensor_or_adc"]),

@@ -1,4 +1,8 @@
+from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
+from .module_resolver import resolve_parts_to_modules
+from .salvage_bridge import build_intake_salvage_package
 from .compiler import compile_hardware_bundle
+from .design_quality import build_design_quality_gate
 from .evidence_extractor import build_evidence_extraction_report, enrich_intake_with_extracted_evidence
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
@@ -36,7 +40,13 @@ __all__ = [
     "build_robotics_platform_authority",
     "build_robotics_simulation_packet",
     "build_vision_evidence_report",
+    "build_design_quality_gate",
+    "CATALOG_BUILD_IDS",
+    "build_intake_salvage_package",
+    "compile_catalog_build",
     "compile_hardware_bundle",
+    "resolve_build_id",
+    "resolve_parts_to_modules",
     "enrich_intake_with_extracted_evidence",
     "enrich_intake_with_vision_assistance",
     "load_project_intake",

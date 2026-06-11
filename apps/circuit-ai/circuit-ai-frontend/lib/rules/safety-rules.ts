@@ -119,9 +119,19 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
       const src = a.pin.role === "power_out" ? a : b.pin.role === "power_out" ? b : null;
       const snk = src === a ? b : src === b ? a : null;
       if (src && snk) {
-        const srcV = parseVoltage(src.pin.voltage);
+        const srcRange = voltageRange(src.pin.voltage);
         const snkRange = voltageRange(snk.pin.voltage) ?? (snk.moduleSpec.inputVoltageRange ?? null);
-        if (srcV != null && snkRange) {
+        const srcV = parseVoltage(src.pin.voltage);
+        if (srcRange && snkRange && srcRange[1] >= snkRange[0] && srcRange[0] <= snkRange[1]) {
+          if (/adjust|trim|set/i.test(src.pin.voltage) || /adjust|trim|set/i.test(src.pin.notes ?? "")) {
+            warnings.push({
+              id: `${w.id}-adjustable`,
+              level: "info",
+              message: `${src.moduleSpec.label} is adjustable — set output to ${snkRange[0]}–${snkRange[1]}V with a multimeter before connecting ${snk.moduleSpec.label}.`,
+              wireId: w.id,
+            });
+          }
+        } else if (srcV != null && snkRange) {
           if (srcV < snkRange[0] - 0.2 || srcV > snkRange[1] + 0.2) {
             warnings.push({
               id: `${w.id}-voltage`,
@@ -161,8 +171,11 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
       }
     }
 
-    // IRF520-style non-logic-level MOSFET driven from 3.3V
-    if ((a.moduleSpec.id === "mosfet-irf520" && bLV === 3.3) || (b.moduleSpec.id === "mosfet-irf520" && aLV === 3.3)) {
+    // IRF520-style non-logic-level MOSFET driven from 3.3V (IRLZ44N is OK)
+    if (
+      (a.moduleSpec.id === "mosfet-irf520" && bLV === 3.3) ||
+      (b.moduleSpec.id === "mosfet-irf520" && aLV === 3.3)
+    ) {
       warnings.push({
         id: `${w.id}-fetDrive`,
         level: "warn",
@@ -177,13 +190,15 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
     const moduleSpec = findModule(n.moduleId);
     if (!moduleSpec) continue;
 
-    const powerInWired = moduleSpec.pins
-      .filter((p) => p.role === "power_in")
-      .some((p) => graph.wires.some((w) =>
-        (w.from.nodeId === n.id && w.from.pinId === p.id) ||
-        (w.to.nodeId === n.id && w.to.pinId === p.id)
-      ));
-    if (!powerInWired && moduleSpec.pins.some((p) => p.role === "power_in")) {
+    const powerInPins = moduleSpec.pins.filter((p) => p.role === "power_in");
+    const powerInWired = powerInPins.some((p) => graph.wires.some((w) =>
+      (w.from.nodeId === n.id && w.from.pinId === p.id) ||
+      (w.to.nodeId === n.id && w.to.pinId === p.id)
+    ));
+    const selfPoweredUsb = powerInPins.some(
+      (p) => /usb|host/i.test(`${p.notes ?? ""} ${p.label ?? ""} ${p.id}`)
+    );
+    if (!powerInWired && powerInPins.length > 0 && !selfPoweredUsb) {
       warnings.push({
         id: `${n.id}-unpowered`,
         level: "warn",

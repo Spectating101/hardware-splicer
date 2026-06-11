@@ -7,6 +7,7 @@
 import type { BuildGraph } from "@/lib/rules/safety-rules";
 import type { PcbGeometry, PcbPad } from "@/lib/cad-types";
 import { findModule, type ModuleSpec } from "@/lib/modules/module-library";
+import { resolveModuleBodyMm, resolveModuleFootprint } from "@/lib/modules/module-footprints";
 
 const PITCH = 2.54;              // mm between pins
 const PAD_DRILL = 1.0;            // mm
@@ -73,27 +74,27 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
     if (!spec) continue;
     const half = Math.ceil(spec.pins.length / 2);
     const rows = half;
-    const padW = 2 * PITCH;                       // horizontal gap between the two pin columns
-    const footprintW = padW + 2 * MODULE_MARGIN_X;
-    const footprintH = (rows - 1) * PITCH + 2 * MODULE_MARGIN_Y + PITCH;
+    const padW = 2 * PITCH;
+    const body = resolveModuleBodyMm(spec.id);
+    const footprintW = body?.w ?? padW + 2 * MODULE_MARGIN_X;
+    const footprintH = body?.h ?? (rows - 1) * PITCH + 2 * MODULE_MARGIN_Y + PITCH;
 
     const centerX = cursorX + footprintW / 2;
     const centerY = cursorY + footprintH / 2;
 
     const left = spec.pins.slice(0, half);
     const right = spec.pins.slice(half);
-
     const padPos = new Map<string, { x: number; y: number }>();
     const leftX = centerX - padW / 2;
     const rightX = centerX + padW / 2;
     const topY = centerY - ((rows - 1) * PITCH) / 2;
-
     for (let i = 0; i < left.length; i++) {
       padPos.set(left[i].id, { x: leftX, y: topY + i * PITCH });
     }
     for (let i = 0; i < right.length; i++) {
       padPos.set(right[i].id, { x: rightX, y: topY + i * PITCH });
     }
+    const pinOrder = [...left.map((p) => p.id), ...right.map((p) => p.id)];
 
     placed.push({
       nodeId: node.id,
@@ -103,7 +104,7 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
       hw: footprintW / 2,
       hh: footprintH / 2,
       padPos,
-      pinOrder: [...left.map((p) => p.id), ...right.map((p) => p.id)],
+      pinOrder,
     });
 
     rowMaxH = Math.max(rowMaxH, footprintH);
@@ -211,7 +212,7 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
     return {
       ref: `U${idx + 1}`,
       value: p.spec.label,
-      footprint: `Circuit.AI:${p.spec.id}`,
+      footprint: resolveModuleFootprint(p.spec.id),
       layer: "F.Cu",
       at: { x: p.x, y: p.y, rot_deg: 0 },
       pads,
@@ -299,7 +300,7 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
         const root = roots.get(key);
         if (root == null) return;
         const k = kOf.get(root);
-        if (k == null) return; // unrouted single-pad net
+        if (k == null) return;
         const net = rootToNet.get(root)!;
         const tag = { id: net.id, name: net.name };
         const p = pl.padPos.get(pid)!;
@@ -307,13 +308,10 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
         const ry = railY(k);
         const cx = convX(k);
 
-        // 1) F.Cu escape straight out of the pad to this side's channel
         seg(p, { x: laneX, y: p.y }, "F.Cu", tag);
         via(laneX, p.y, net);
-        // 2) B.Cu down the unique lane to the net's rail (below all modules)
         seg({ x: laneX, y: p.y }, { x: laneX, y: ry }, "B.Cu", tag);
         via(laneX, ry, net);
-        // 3) F.Cu along the net's unique rail to its convergence point
         seg({ x: laneX, y: ry }, { x: cx, y: ry }, "F.Cu", tag);
         via(cx, ry, net);
 
@@ -323,9 +321,6 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
       });
     };
 
-    // Right channel = left half of the gap to this module's right.
-    // Left channel  = right half of the gap to this module's left.
-    // Adjacent modules' channels are therefore disjoint (2 mm apart).
     const rEdge = pl.x + pl.hw;
     const lEdge = pl.x - pl.hw;
     routeSide(rightPads, rEdge + 1.0, rEdge + HALF - 1.0);

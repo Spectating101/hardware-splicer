@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,7 @@ from hardware_splicer import (
     plan_project_from_intake,
     run_project_intake,
 )
+from hardware_splicer.project_intake import splice_and_build_from_intake
 from hardware_splicer.api import create_app
 
 
@@ -107,6 +109,43 @@ def test_intake_run_api_returns_planning_authority(tmp_path, monkeypatch):
     assert data["production_release_metrics"]["production_ready"] is False
     assert data["intake_plan"]["archetype"] == "automatic_watering"
     assert Path(data["artifacts"]["project_intake"]).exists()
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
+def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path) -> None:
+    intake = load_project_intake(PLANT_INTAKE)
+    result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
+    assert result["ok"] is True
+    assert result["build_id"] == "automatic_plant_watering"
+    assert Path(result["artifacts"]["splice_plan"]).is_file()
+    assert Path(result["artifacts"]["kicad_pcb"]).is_file()
+    quality = json.loads(Path(result["artifacts"]["design_quality"]).read_text(encoding="utf-8"))
+    assert quality.get("electrical_warnings") == 0
+    assert quality.get("drc_pass") is True
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
+def test_splice_and_build_api(tmp_path, monkeypatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    intake = load_project_intake(PLANT_INTAKE)
+    client = TestClient(create_app())
+    response = client.post(
+        "/v1/splice-and-build",
+        json={
+            "intake": intake,
+            "out_dir": "plant-splice",
+            "request_id": "plant-splice",
+            "export_gerber": False,
+        },
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data["build_id"] == "automatic_plant_watering"
+    assert Path(data["artifacts"]["splice_plan"]).is_file()
 
 
 def test_project_intake_plans_rover_archetype():
@@ -304,5 +343,7 @@ def test_vision_assistance_can_apply_annotation_notes_to_extractor():
     assert plan["vision_evidence_report"]["candidate_count"] == 1
     assert plan["vision_evidence_report"]["applied_note_count"] == 1
     assert plan["evidence_extraction_report"]["accepted_count"] == 1
-    assert spec["mechanical_measurement_capture"]["dimensions"][0]["target"] == "pump_mount width"
-    assert spec["mechanical_measurement_capture"]["dimensions"][0]["value_mm"] == 55.0
+    dimensions = spec["mechanical_measurement_capture"]["dimensions"]
+    assert len(dimensions) == 1
+    assert dimensions[0]["target"] == "pump_mount width"
+    assert dimensions[0]["value_mm"] == 55.0

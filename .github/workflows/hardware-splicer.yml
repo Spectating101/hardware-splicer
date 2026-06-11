@@ -1,0 +1,61 @@
+name: Hardware-Splicer
+
+on:
+  push:
+    paths:
+      - "src/hardware_splicer/**"
+      - "scripts/**"
+      - "tests/**"
+      - "examples/intakes/**"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/**"
+      - "Makefile"
+      - "requirements.txt"
+      - ".github/workflows/hardware-splicer.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/**"
+      - "scripts/**"
+      - "tests/**"
+      - "examples/intakes/**"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/**"
+      - "Makefile"
+      - "requirements.txt"
+      - ".github/workflows/hardware-splicer.yml"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install KiCad CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y kicad
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Doctor
+        run: python3 scripts/hardware_splicer.py doctor
+      - name: Run unit tests
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: pytest -q
+      - name: Benchmark backend catalog builds
+        run: make benchmark-backend
+      - name: Audit functional delivery (strict)
+        env:
+          HARDWARE_SPLICER_AUDIT_STRICT: "1"
+        run: make audit-functional-delivery
+      - name: Score intake tiers without live vision
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: make score-intake-tiers

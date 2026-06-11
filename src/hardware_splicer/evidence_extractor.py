@@ -104,13 +104,27 @@ def build_evidence_extraction_report(intake: Mapping[str, Any]) -> Dict[str, Any
             _add_board_file(extracted, board_id, str(path), _normalize_board_kind(board_kind))
             accepted.append(_accepted(source_id, "evidence.board_design_files", "board_file", board_id, 0.95))
         elif suffix in IMAGE_EXTENSIONS or suffix in VIDEO_EXTENSIONS or kind in {"image", "photo", "vision", "video"}:
-            pending_vision.append(
-                {
-                    "source_id": source_id,
-                    "path": str(path),
-                    "reason": "Visual artifact is indexed but not promoted to trusted measurements without vision/human extraction.",
-                }
-            )
+            processed_ids = set(_string_list(body.get("vision_processed_source_ids")))
+            annotation_notes = _attachment_annotation_notes(source)
+            if annotation_notes and source_id not in processed_ids:
+                _extract_notes(
+                    "\n".join(annotation_notes),
+                    extracted=extracted,
+                    accepted=accepted,
+                    rejected=rejected,
+                    source_id=source_id,
+                    artifact_uri=_artifact_uri(source, base_dir) or str(path),
+                )
+            if source_id in processed_ids or annotation_notes:
+                accepted.append(_accepted(source_id, "attachments", "vision_processed", source_id, 0.7))
+            else:
+                pending_vision.append(
+                    {
+                        "source_id": source_id,
+                        "path": str(path),
+                        "reason": "Visual artifact is indexed but not promoted to trusted measurements without vision/human extraction.",
+                    }
+                )
             field = _evidence_field_from_source(source)
             if field:
                 _add_artifacts(extracted.setdefault(field, {}), [str(path)])
@@ -118,6 +132,7 @@ def build_evidence_extraction_report(intake: Mapping[str, Any]) -> Dict[str, Any
         else:
             rejected.append(_reject(source_id, "unsupported_source_kind", f"Unsupported evidence source kind or extension: {kind or suffix}"))
 
+    _dedupe_extracted_rows(extracted)
     return {
         "schema_version": SCHEMA_VERSION,
         "source_count": len(sources),
@@ -130,6 +145,16 @@ def build_evidence_extraction_report(intake: Mapping[str, Any]) -> Dict[str, Any
         "extracted_evidence": extracted,
         "extracted_evidence_summary": _evidence_summary(extracted),
     }
+
+
+def _dedupe_extracted_rows(extracted: Dict[str, Any]) -> None:
+    for capture in extracted.values():
+        if not isinstance(capture, dict):
+            continue
+        for key in EVIDENCE_ROW_LIST_KEYS:
+            rows = capture.get(key)
+            if isinstance(rows, list) and rows:
+                capture[key] = _merge_evidence_rows([], rows)
 
 
 def _source_rows(body: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -416,6 +441,46 @@ def _evidence_field_from_source(source: Dict[str, Any]) -> str:
     return value if value in EVIDENCE_FIELDS else ""
 
 
+EVIDENCE_ROW_LIST_KEYS = {
+    "dimensions",
+    "clearances",
+    "interfaces",
+    "materials",
+    "tolerances",
+    "simulation",
+    "fit_checks",
+    "load_tests",
+    "motion_tests",
+    "thermal_tests",
+    "cycle_tests",
+    "current_tests",
+    "electrical_tests",
+    "packaging_tests",
+    "mission_tests",
+    "field_tests",
+    "tests",
+}
+
+EVIDENCE_BOOL_KEYS = {
+    "geometry_verified",
+    "measured_geometry_verified",
+    "simulation_verified",
+    "acceptance_reviewed",
+    "compiler_derived_envelope",
+}
+
+STATUS_RANK = {
+    "verified": 5,
+    "pass": 4,
+    "passed": 4,
+    "accepted": 4,
+    "derived": 3,
+    "observed": 2,
+    "draft": 1,
+    "": 0,
+}
+
+
 def _merge_evidence(target: Dict[str, Any], patch: Mapping[str, Any]) -> None:
     for key, value in patch.items():
         if key not in target:
@@ -425,9 +490,46 @@ def _merge_evidence(target: Dict[str, Any], patch: Mapping[str, Any]) -> None:
         if isinstance(existing, dict) and isinstance(value, Mapping):
             _merge_evidence(existing, value)
         elif isinstance(existing, list) and isinstance(value, list):
-            for item in value:
-                if item not in existing:
-                    existing.append(item)
+            if key in EVIDENCE_ROW_LIST_KEYS:
+                target[key] = _merge_evidence_rows(existing, value)
+            else:
+                for item in value:
+                    if item not in existing:
+                        existing.append(item)
+        elif key in EVIDENCE_BOOL_KEYS:
+            target[key] = bool(existing) or bool(value)
+
+
+def _merge_evidence_rows(existing: List[Any], incoming: List[Any]) -> List[Dict[str, Any]]:
+    rows: Dict[str, Dict[str, Any]] = {}
+    order: List[str] = []
+    for item in [*existing, *incoming]:
+        if not isinstance(item, Mapping):
+            continue
+        row = dict(item)
+        target = str(row.get("target") or row.get("name") or "").strip() or f"row_{len(order)}"
+        if target not in rows:
+            rows[target] = row
+            order.append(target)
+            continue
+        rows[target] = _merge_evidence_row(rows[target], row)
+    return [rows[key] for key in order]
+
+
+def _merge_evidence_row(left: Dict[str, Any], right: Dict[str, Any]) -> Dict[str, Any]:
+    if _status_rank(right) > _status_rank(left):
+        preferred, other = right, left
+    else:
+        preferred, other = left, right
+    merged = dict(other)
+    merged.update(preferred)
+    merged["status"] = preferred.get("status") or other.get("status")
+    return merged
+
+
+def _status_rank(row: Mapping[str, Any]) -> int:
+    status = str(row.get("status") or row.get("result") or row.get("decision") or "").strip().lower()
+    return STATUS_RANK.get(status, 0)
 
 
 def _evidence_summary(evidence: Dict[str, Any]) -> Dict[str, Any]:
@@ -508,6 +610,23 @@ def _base_dir(body: Dict[str, Any]) -> Path:
 
 def _dict(value: Any) -> Dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _attachment_annotation_notes(source: Mapping[str, Any]) -> List[str]:
+    for key in ["vision_evidence_notes", "vision_notes", "annotation_notes", "candidate_evidence_notes"]:
+        notes = _string_list(source.get(key))
+        if notes:
+            return notes
+    annotation = source.get("vision_annotation") or source.get("annotation")
+    if isinstance(annotation, Mapping):
+        notes = _string_list(annotation.get("evidence_notes"))
+        if notes:
+            return notes
+    return []
+
+
+def _attachment_has_vision_annotation(source: Mapping[str, Any]) -> bool:
+    return bool(_attachment_annotation_notes(source))
 
 
 def _string_list(value: Any) -> List[str]:
