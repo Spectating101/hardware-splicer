@@ -12,6 +12,7 @@ from .functional_delivery import build_functional_delivery_score
 from .evidence_extractor import _merge_evidence, enrich_intake_with_extracted_evidence
 from .build_evidence import compiler_evidence_patch
 from .salvage_bridge import build_intake_salvage_package
+from .scratch_pipeline import compile_scratch_build
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
 
@@ -147,13 +148,39 @@ def splice_and_build_from_intake(
 
     graph_input = salvage_package.get("graph_input") or salvage_package.get("splice_package")
     resolved_modules = salvage_package.get("resolved_modules") or []
-    compile_result = compile_catalog_build(
-        build_id,
-        out_path,
-        export_gerber=export_gerber,
-        splice_plan=graph_input if isinstance(graph_input, dict) else None,
-        resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
-    )
+    goal = str(plan.get("goal") or intake.get("goal") or "").strip()
+    if salvage_package.get("graph_mode") == "scratch":
+        scratch = compile_scratch_build(
+            out_dir=str(out_path),
+            goal=goal,
+            resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+            export_gerber=export_gerber,
+            constraints=dict(intake.get("constraints") or {}),
+            salvage_mode=bool(intake.get("salvage_mode")),
+        )
+        compile_result = scratch.compile_result
+        if compile_result is None:
+            from .build_compiler import BuildCompileResult
+
+            compile_result = BuildCompileResult(
+                ok=False,
+                build_id=build_id,
+                out_dir=out_path,
+                design_quality={"build_ready": False, "circuit_readiness": "compile_failed"},
+                build_graph_file=None,
+                kicad_pcb_file=None,
+                design_quality_file=str(out_path / "build_compilation" / "DESIGN_QUALITY.json"),
+                error=scratch.error or "scratch compile failed",
+            )
+        build_id = scratch.build_id
+    else:
+        compile_result = compile_catalog_build(
+            build_id,
+            out_path,
+            export_gerber=export_gerber,
+            splice_plan=graph_input if isinstance(graph_input, dict) else None,
+            resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+        )
     gate = build_design_quality_gate(compile_result.design_quality)
     gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
     gate_path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,29 @@
+{
+  "project_name": "wifi_relay_box",
+  "goal": "Build a smart relay box to switch a desk lamp from salvaged Arduino and relay module parts.",
+  "budget": {
+    "currency": "USD",
+    "amount": 9
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "Arduino Nano clone",
+      "type": "microcontroller"
+    },
+    {
+      "name": "5V relay module",
+      "type": "relay"
+    },
+    {
+      "name": "USB wall adapter",
+      "type": "power_source",
+      "voltage_v": 5.0
+    }
+  ],
+  "constraints": {
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.05,
+    "battery_voltage_v": 5.0
+  }
+}

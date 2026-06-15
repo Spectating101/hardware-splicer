@@ -30,15 +30,34 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"fan|blower", re.I), "fan-5v", "load", 0.8),
     (re.compile(r"usb.*serial|cp210|ch340|ftdi", re.I), "usb-uart", "usb", 0.85),
     (re.compile(r"ssd1306|oled", re.I), "ssd1306", "ui", 0.85),
-    (re.compile(r"barrel|12v.*supply|12v adapter", re.I), "dc-barrel-12v", "pwr", 0.8),
-    (re.compile(r"power.?bank|usb.*power|5v.*usb|phone charger", re.I), "usb-power-5v", "pwr", 0.92),
+    (
+        re.compile(
+            r"power.?bank|usb.*power|5v.*usb|phone charger|(?:usb|5v).*wall wart|wall wart.*(?:usb|5v)",
+            re.I,
+        ),
+        "usb-power-5v",
+        "pwr",
+        0.92,
+    ),
+    (
+        re.compile(r"barrel|12v.*(?:supply|adapter)|(?:wall wart.*12v|12v.*wall wart)", re.I),
+        "dc-barrel-12v",
+        "pwr",
+        0.8,
+    ),
 ]
 
 _POWER_TOPOLOGY_USB = re.compile(
-    r"power.?bank|usb.*power|5v.*usb|phone charger|power_source",
+    r"power.?bank|usb.*power|5v.*usb|phone charger|(?:usb|5v).*wall wart|wall wart.*(?:usb|5v)",
     re.I,
 )
-_POWER_TOPOLOGY_BARREL = re.compile(r"barrel|12v.*supply|12v adapter|wall wart", re.I)
+_POWER_TOPOLOGY_BARREL = re.compile(
+    r"barrel|12v.*(?:supply|adapter)|(?:wall wart.*12v|12v.*wall wart)",
+    re.I,
+)
+
+_USB_WALL_MODULE_IDS = frozenset({"usb-power-5v"})
+_BARREL_POWER_MODULE_IDS = frozenset({"dc-barrel-12v"})
 
 # 3.3V MCU + non-logic-level MOSFET → prefer logic-level FET.
 _SUBSTITUTIONS: Dict[str, str] = {
@@ -67,12 +86,95 @@ def _part_text(part: Mapping[str, Any]) -> str:
     return " ".join(bits).strip()
 
 
+def _part_voltage_v(part: Mapping[str, Any]) -> Optional[float]:
+    raw = part.get("voltage_v")
+    if raw is None:
+        return None
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return None
+
+
+def _part_implies_usb_5v(part: Mapping[str, Any]) -> bool:
+    text = _part_text(part)
+    if not text:
+        return False
+    if str(part.get("module_id") or "").strip() in _USB_WALL_MODULE_IDS | {"tp4056"}:
+        return True
+    voltage = _part_voltage_v(part)
+    if voltage is not None and voltage <= 5.5:
+        if _POWER_TOPOLOGY_USB.search(text) or "wall wart" in text.lower():
+            return True
+    return bool(_POWER_TOPOLOGY_USB.search(text))
+
+
+def _part_implies_barrel_12v(part: Mapping[str, Any]) -> bool:
+    if _part_implies_usb_5v(part):
+        return False
+    text = _part_text(part)
+    return bool(text and _POWER_TOPOLOGY_BARREL.search(text))
+
+
+def _role_for_module_id(module_id: str, part: Mapping[str, Any]) -> str:
+    for _pattern, mid, role, _confidence in _MODULE_PATTERNS:
+        if mid == module_id:
+            return role
+    cap = str(part.get("part_class") or part.get("type") or "").lower()
+    return _ROLE_ALIASES.get(cap, cap or "misc")
+
+
+def coalesce_resolved_modules(
+    parts: List[Mapping[str, Any]],
+    resolved_modules: List[Mapping[str, Any]],
+    *,
+    power_topology: str | None = None,
+) -> List[Dict[str, Any]]:
+    """Drop conflicting power modules after fuzzy resolve / goal merge."""
+    topology = power_topology or infer_power_topology(parts, resolved_modules)
+    rows: List[Dict[str, Any]] = [dict(row) for row in resolved_modules if isinstance(row, Mapping)]
+    if topology == "usb_5v":
+        rows = [row for row in rows if str(row.get("module_id") or "") not in _BARREL_POWER_MODULE_IDS]
+    elif topology == "barrel_12v":
+        rows = [row for row in rows if str(row.get("module_id") or "") not in _USB_WALL_MODULE_IDS]
+
+    by_id: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        module_id = str(row.get("module_id") or "").strip()
+        if not module_id:
+            continue
+        existing = by_id.get(module_id)
+        if not existing:
+            by_id[module_id] = row
+            continue
+        if existing.get("source") != "user_inventory" and row.get("source") == "user_inventory":
+            by_id[module_id] = row
+    return list(by_id.values())
+
+
 def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     """Map intake-normalized parts to module-library IDs with role hints."""
     resolved: List[Dict[str, Any]] = []
     seen_ids: set[str] = set()
     for part in parts:
         text = _part_text(part)
+        explicit_id = str(part.get("module_id") or "").strip()
+        if explicit_id:
+            if explicit_id in seen_ids:
+                continue
+            seen_ids.add(explicit_id)
+            resolved.append(
+                {
+                    "schema_version": SCHEMA_VERSION,
+                    "part_name": str(part.get("name") or text or explicit_id),
+                    "module_id": explicit_id,
+                    "role": _role_for_module_id(explicit_id, part),
+                    "source": "user_inventory",
+                    "confidence": 1.0,
+                    "matched_on": "explicit_module_id",
+                }
+            )
+            continue
         if not text:
             continue
         match: Optional[Dict[str, Any]] = None
@@ -88,6 +190,10 @@ def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, A
                     "matched_on": pattern.pattern,
                 }
                 break
+        if match and match.get("module_id") in _SUBSTITUTIONS:
+            match = dict(match)
+            match["module_id"] = _SUBSTITUTIONS[str(match["module_id"])]
+
         if not match:
             cap = str(part.get("part_class") or part.get("type") or "").lower()
             role = _ROLE_ALIASES.get(cap, cap or "misc")
@@ -105,7 +211,7 @@ def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, A
         if match.get("module_id"):
             seen_ids.add(str(match["module_id"]))
         resolved.append(match)
-    return resolved
+    return coalesce_resolved_modules(parts, resolved)
 
 
 def infer_power_topology(
@@ -114,9 +220,8 @@ def infer_power_topology(
 ) -> str:
     """Return usb_5v | barrel_12v | hybrid from inventory."""
     resolved_modules = resolved_modules or []
-    texts = [_part_text(part) for part in parts]
-    has_usb = any(_POWER_TOPOLOGY_USB.search(t) for t in texts if t)
-    has_barrel = any(_POWER_TOPOLOGY_BARREL.search(t) for t in texts if t)
+    has_usb = any(_part_implies_usb_5v(part) for part in parts)
+    has_barrel = any(_part_implies_barrel_12v(part) for part in parts)
     has_usb_module = any(str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules)
     has_barrel_module = any(str(row.get("module_id") or "") == "dc-barrel-12v" for row in resolved_modules)
     usb_only = (has_usb or has_usb_module) and not (has_barrel or has_barrel_module)
@@ -197,6 +302,7 @@ def salvage_plan_input_from_intake(
     module_overrides: Mapping[str, str] | None = None,
     power_topology: str | None = None,
     strategy_mode: str | None = None,
+    compose_from_inventory: bool | None = None,
 ) -> Dict[str, Any]:
     """Shape consumed by plan-to-graph / compile_build_graph.cjs."""
     target = dict(splice_plan.get("target") or {})
@@ -213,4 +319,18 @@ def salvage_plan_input_from_intake(
         body["power_topology"] = power_topology
     if strategy_mode:
         body["strategy_mode"] = strategy_mode
+    resolved_ids = [
+        str(row.get("module_id") or "").strip()
+        for row in (resolved_modules or [])
+        if isinstance(row, dict) and str(row.get("module_id") or "").strip()
+    ]
+    build_id = str((target.get("recommended_build_id") or "")).strip()
+    if compose_from_inventory is True:
+        body["compose_from_inventory"] = True
+    elif (
+        strategy_mode == "constrained"
+        and len(set(resolved_ids)) >= 2
+        and build_id == "generic_low_voltage_build"
+    ):
+        body["compose_from_inventory"] = True
     return body

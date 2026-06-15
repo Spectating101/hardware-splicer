@@ -30,6 +30,7 @@ BUILD_IDS = [
     "smart_relay_box",
     "usb_fume_extractor",
     "usb_uart_debug_adapter",
+    "generic_low_voltage_build",
 ]
 
 

@@ -188,6 +188,26 @@ export const MODULE_FOOTPRINTS: Record<string, ModuleFootprintMeta> = {
     bodyMm: { w: 15, h: 12 },
     pads: row(["LV", "HV", "GND", "LV1", "HV1", "LV2", "HV2"], 0, 0, P),
   },
+  "a4988-stepper": {
+    kicadFootprint: "Driver:A4988-STEPSTICK",
+    bodyMm: { w: 20, h: 15 },
+    pads: row(["VDD", "GND_LOGIC", "STEP", "DIR", "EN", "VMOT", "GND_MOTOR"], 0, 0, P * 1.4),
+  },
+  "max98357a-i2s-amp": {
+    kicadFootprint: "Driver:MAX98357A-I2S",
+    bodyMm: { w: 18, h: 12 },
+    pads: row(["VIN", "GND", "BCLK", "LRC", "DIN", "SD", "SPK+", "SPK-"], 0, 0, P),
+  },
+  "limit-switch-3pin": {
+    kicadFootprint: "Sensor:LIMIT-SWITCH-3PIN",
+    bodyMm: { w: 20, h: 10 },
+    pads: row(["VCC", "GND", "SIG"], 0, 0, P),
+  },
+  "esp32-cam-module": {
+    kicadFootprint: "Module:ESP32-CAM",
+    bodyMm: { w: 27, h: 40 },
+    pads: row(["5V", "GND", "U0T", "U0R", "GPIO4"], -6, 0, P),
+  },
 };
 
 export function resolveModuleFootprint(moduleId: string): string {

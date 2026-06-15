@@ -1,0 +1,99 @@
+{
+  "schema_version": "hardware_splicer.netlist.v1",
+  "source": "fixture:motor_driver_minimal",
+  "components": [
+    {
+      "ref": "U1",
+      "value": "USB 5V power input",
+      "footprint": "usb-power-5v",
+      "module_id": "usb-power-5v",
+      "metadata": {
+        "graph_node_id": "n1"
+      }
+    },
+    {
+      "ref": "U2",
+      "value": "ESP32 DevKit",
+      "footprint": "esp32-devkit",
+      "module_id": "esp32-devkit",
+      "metadata": {
+        "graph_node_id": "n2"
+      }
+    },
+    {
+      "ref": "U3",
+      "value": "L298N motor driver",
+      "footprint": "l298n",
+      "module_id": "l298n",
+      "metadata": {
+        "graph_node_id": "n3"
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "N1",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "GND"
+        }
+      ]
+    },
+    {
+      "name": "N2",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "V+"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "VIN"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "VCC"
+        }
+      ]
+    },
+    {
+      "name": "N3",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO2"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "IN2"
+        }
+      ]
+    },
+    {
+      "name": "N4",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO4"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "IN1"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "node_count": 3,
+    "wire_count": 6
+  }
+}

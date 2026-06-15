@@ -4,12 +4,18 @@ from typing import Any, Dict, List, Mapping
 
 from .build_compiler import ensure_circuit_import_path, resolve_build_id
 from .module_resolver import (
+    coalesce_resolved_modules,
     infer_power_topology,
     merge_module_overrides,
     module_overrides_for_build,
     overrides_from_resource_plan,
     resolve_parts_to_modules,
     salvage_plan_input_from_intake,
+)
+from .scratch_pipeline import (
+    merge_goal_modules_with_inventory,
+    module_ids_from_resolved,
+    should_use_scratch_compose,
 )
 
 
@@ -35,6 +41,18 @@ def _pick_build_id(
         return "robot_drive_base"
     if any(word in text for word in ["fan", "airflow", "vent", "blower", "fume"]):
         return "usb_fume_extractor"
+    if any(
+        word in text
+        for word in ["tft", "oled", "display station", "room display", "room temp", "ili9341"]
+    ):
+        return "room_display_station"
+    if any(word in text for word in ["relay box", "smart relay", "relay module", "desk lamp"]):
+        return "smart_relay_box"
+    if any(
+        word in text
+        for word in ["sensor logger", "bme280", "log temperature", "environment sensor", "data logger"]
+    ):
+        return "sensor_logger"
     if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal"]):
         return "inspection_motion_fixture"
     if any(word in text for word in ["gripper", "claw", "grab"]):
@@ -71,41 +89,62 @@ def build_intake_salvage_package(
     diy_plan = build_diy_project_engineering_plan(payload)
     resolved_modules = resolve_parts_to_modules(parts)
     build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
-    if build_id:
-        target = dict(splice_plan.get("target") or {})
-        target["recommended_build_id"] = build_id
-        splice_plan = {**splice_plan, "target": target}
-    power_topology = infer_power_topology(parts, resolved_modules)
-    resource_overrides = overrides_from_resource_plan(diy_plan)
-    inventory_overrides = module_overrides_for_build(
-        build_id=build_id or None,
-        resolved_modules=resolved_modules,
-    )
-    module_overrides = merge_module_overrides(inventory_overrides, resource_overrides)
-    if power_topology == "usb_5v" and build_id == "automatic_plant_watering":
-        module_overrides["pwr"] = "usb-power-5v"
-        module_overrides.pop("buck", None)
     constraints_map = dict(constraints or {})
     strategy_mode = str(
         ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
         or constraints_map.get("strategy_mode")
         or "constrained"
     )
+    constrained = strategy_mode == "constrained" or constraints_map.get("compose_from_inventory") is True
+    merged_modules = merge_goal_modules_with_inventory(
+        goal,
+        resolved_modules,
+        constrained=constrained,
+    )
+    power_topology = infer_power_topology(parts, merged_modules)
+    merged_modules = coalesce_resolved_modules(parts, merged_modules, power_topology=power_topology)
+    use_scratch = should_use_scratch_compose(
+        goal=goal,
+        build_id=build_id or None,
+        resolved_modules=merged_modules,
+        constraints=constraints_map,
+        strategy_mode=strategy_mode,
+    )
+    if use_scratch:
+        build_id = "generic_low_voltage_build"
+    if build_id:
+        target = dict(splice_plan.get("target") or {})
+        target["recommended_build_id"] = build_id
+        splice_plan = {**splice_plan, "target": target}
+    resource_overrides = overrides_from_resource_plan(diy_plan)
+    inventory_overrides = module_overrides_for_build(
+        build_id=build_id or None,
+        resolved_modules=merged_modules if use_scratch else resolved_modules,
+    )
+    module_overrides = merge_module_overrides(inventory_overrides, resource_overrides)
+    if power_topology == "usb_5v":
+        module_overrides["pwr"] = "usb-power-5v"
+        for drop_role in ("buck", "psu", "mot_psu", "svo_psu"):
+            module_overrides.pop(drop_role, None)
     graph_input = salvage_plan_input_from_intake(
         splice_plan,
-        resolved_modules=resolved_modules,
+        resolved_modules=merged_modules if use_scratch else resolved_modules,
         module_overrides=module_overrides,
         power_topology=power_topology,
         strategy_mode=strategy_mode,
+        compose_from_inventory=use_scratch,
     )
+    graph_mode = "scratch" if use_scratch else "catalog"
     return {
         "schema_version": SCHEMA_VERSION,
         "splice_plan": splice_plan,
         "diy_plan": diy_plan,
-        "resolved_modules": resolved_modules,
+        "resolved_modules": merged_modules if use_scratch else resolved_modules,
         "module_overrides": module_overrides,
         "power_topology": power_topology,
         "strategy_mode": strategy_mode,
+        "graph_mode": graph_mode,
+        "compose_module_ids": module_ids_from_resolved(merged_modules) if use_scratch else [],
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
         "verdict": splice_plan.get("verdict"),

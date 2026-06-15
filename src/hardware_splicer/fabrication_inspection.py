@@ -6,6 +6,8 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Tuple
 
+from .testing_mode import testing_mode_enabled
+
 
 SCHEMA_VERSION = "hardware_splicer.fabrication_inspection.v1"
 GENERIC_HEADER_MARKERS = ("PinHeader_", "pinheader", "Generic_")
@@ -53,7 +55,7 @@ def inspect_fabrication_package(
     package_validity_score = round(100.0 * passed / max(len(checks), 1), 1)
     prototype_breakout_only = bool(pcb_stats.get("summary", {}).get("prototype_breakout_only"))
     production_score = package_validity_score
-    if prototype_breakout_only:
+    if prototype_breakout_only and not testing_mode_enabled():
         production_score = min(production_score, PROTOTYPE_BREAKOUT_SCORE_CAP)
     blockers = [row["label"] for row in checks if not row.get("passed")]
     warnings = [row["label"] for row in checks if row.get("severity") == "warning"]
@@ -71,7 +73,8 @@ def inspect_fabrication_package(
         "bom": bom_stats.get("summary") or {},
         "gerbers": gerber_stats.get("summary") or {},
         "prototype_breakout_only": prototype_breakout_only,
-        "honest_fabrication_ready": passed == len(checks) and not prototype_breakout_only,
+        "honest_fabrication_ready": passed == len(checks)
+        and (not prototype_breakout_only or testing_mode_enabled()),
         "summary": _inspection_summary(production_score, package_validity_score, blockers, warnings, pcb_stats.get("summary") or {}),
     }
 

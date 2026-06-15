@@ -1,0 +1,35 @@
+{
+  "project_name": "desk_room_display",
+  "goal": "Build a small room display station with a color TFT screen and temperature/humidity readout from salvaged parts.",
+  "budget": {
+    "currency": "USD",
+    "amount": 18
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "ILI9341 TFT display",
+      "type": "display"
+    },
+    {
+      "name": "DHT22 temperature sensor",
+      "type": "temperature"
+    },
+    {
+      "name": "USB power bank",
+      "type": "power_source",
+      "voltage_v": 5.0,
+      "capacity_mah": 2600
+    }
+  ],
+  "constraints": {
+    "runtime_min": 120,
+    "mission_duty_cycle": 0.35,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2600
+  }
+}

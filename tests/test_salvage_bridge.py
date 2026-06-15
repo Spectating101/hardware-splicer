@@ -9,6 +9,7 @@ from hardware_splicer.module_resolver import (
     infer_power_topology,
     module_overrides_for_build,
     resolve_parts_to_modules,
+    salvage_plan_input_from_intake,
 )
 from hardware_splicer.salvage_bridge import build_intake_salvage_package
 from hardware_splicer.project_intake import load_project_intake
@@ -34,6 +35,47 @@ def test_module_overrides_substitutes_irf520_on_3v3() -> None:
     assert overrides.get("drv") == "mosfet-irlz44n"
 
 
+def test_compose_from_inventory_when_constrained() -> None:
+    body = salvage_plan_input_from_intake(
+        {"target": {"recommended_build_id": "generic_low_voltage_build"}},
+        resolved_modules=[
+            {"module_id": "usb-power-5v", "role": "pwr"},
+            {"module_id": "esp32-devkit", "role": "mcu"},
+            {"module_id": "mosfet-irlz44n", "role": "drv"},
+        ],
+        strategy_mode="constrained",
+        power_topology="usb_5v",
+    )
+    assert body.get("compose_from_inventory") is True
+
+
+def test_compose_from_inventory_builds_wired_graph(tmp_path: Path) -> None:
+    from hardware_splicer.build_compiler import compile_catalog_build
+
+    graph_input = salvage_plan_input_from_intake(
+        {"target": {"recommended_build_id": "generic_low_voltage_build"}},
+        resolved_modules=[
+            {"module_id": "usb-power-5v"},
+            {"module_id": "esp32-devkit"},
+            {"module_id": "soil_moisture"},
+        ],
+        strategy_mode="constrained",
+        power_topology="usb_5v",
+    )
+    result = compile_catalog_build(
+        "generic_low_voltage_build",
+        tmp_path,
+        export_gerber=False,
+        splice_plan=graph_input,
+    )
+    assert result.ok is True, result.error
+    import json
+
+    graph = json.loads(Path(result.build_graph_file).read_text(encoding="utf-8"))
+    assert len(graph.get("nodes") or []) >= 3
+    assert len(graph.get("wires") or []) >= 2
+
+
 def test_infer_power_topology_usb_bank_only() -> None:
     parts = [
         {"name": "USB power bank", "type": "power_source"},
@@ -41,6 +83,21 @@ def test_infer_power_topology_usb_bank_only() -> None:
     ]
     resolved = resolve_parts_to_modules(parts)
     assert infer_power_topology(parts, resolved) == "usb_5v"
+
+
+def test_wifi_salvage_intake_resolves_usb_wall_wart_without_barrel() -> None:
+    intake = load_project_intake(ROOT / "examples" / "intakes" / "salvage_wifi_logger_brief.json")
+    package = build_intake_salvage_package(
+        goal=str(intake.get("goal") or ""),
+        parts=list(intake.get("available_parts") or []),
+        constraints=dict(intake.get("constraints") or {}),
+        project_name=str(intake.get("project_name") or "wifi_logger"),
+    )
+    module_ids = [row.get("module_id") for row in package.get("resolved_modules") or []]
+    assert package.get("power_topology") == "usb_5v"
+    assert "dc-barrel-12v" not in module_ids
+    assert module_ids == ["esp32-devkit", "dht22", "usb-power-5v"]
+    assert package.get("compose_module_ids") == module_ids
 
 
 def test_plant_watering_brief_uses_usb_topology_not_barrel() -> None:
@@ -88,6 +145,35 @@ def test_plant_usb_salvage_graph_omits_barrel_module(tmp_path: Path) -> None:
     assert result.design_quality.get("drc_pass") is True
 
 
+@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
+def test_fume_extractor_usb_inventory_drops_barrel_and_buck(tmp_path: Path) -> None:
+    from hardware_splicer.build_compiler import compile_catalog_build
+
+    package = build_intake_salvage_package(
+        goal="USB powered solder fume extractor fan",
+        parts=[
+            {"name": "USB power bank", "type": "power_source"},
+            {"name": "MOSFET driver", "type": "driver"},
+        ],
+        project_name="fume_usb",
+    )
+    assert package.get("power_topology") == "usb_5v"
+    result = compile_catalog_build(
+        "usb_fume_extractor",
+        tmp_path,
+        export_gerber=False,
+        splice_plan=package.get("graph_input"),
+        resolved_modules=package.get("resolved_modules"),
+    )
+    assert result.ok is True, result.error
+    import json
+
+    graph = json.loads(Path(result.build_graph_file).read_text(encoding="utf-8"))
+    module_ids = [n.get("moduleId") for n in graph.get("nodes") or []]
+    assert module_ids == ["usb-power-5v", "mosfet-irlz44n"]
+    assert result.design_quality.get("drc_pass") is True
+
+
 def test_salvage_package_for_plant_watering_goal() -> None:
     package = build_intake_salvage_package(
         goal="automatic plant waterer with ESP32 soil sensor and mini pump",
@@ -113,6 +199,8 @@ def test_plant_watering_compiles_with_salvage_graph_input(tmp_path: Path) -> Non
             {"name": "ESP32", "type": "microcontroller"},
             {"name": "soil sensor", "type": "sensor"},
             {"name": "IRLZ44N", "type": "driver"},
+            {"name": "12V barrel supply", "type": "power_source"},
+            {"name": "MP1584 buck", "type": "power_regulator"},
         ],
         project_name="plant_compile",
     )

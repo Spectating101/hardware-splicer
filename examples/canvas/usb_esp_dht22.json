@@ -1,0 +1,7 @@
+{
+  "nodes": [
+    {"id": "n1", "moduleId": "usb-power-5v"},
+    {"id": "n2", "moduleId": "esp32-devkit"},
+    {"id": "n3", "moduleId": "dht22"}
+  ]
+}

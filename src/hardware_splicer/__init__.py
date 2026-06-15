@@ -1,6 +1,19 @@
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .module_resolver import resolve_parts_to_modules
 from .salvage_bridge import build_intake_salvage_package
+from .scratch_pipeline import compile_scratch_build, prove_module_ids
+from .sdk import (
+    compose_design,
+    dump_json,
+    engine_doctor,
+    list_catalog_builds,
+    plan_salvage,
+    resolve_inventory_parts,
+    salvage_bringup,
+    sdk_info,
+    suggest_modules,
+    verify_engine,
+)
 from .compiler import compile_hardware_bundle
 from .design_quality import build_design_quality_gate
 from .evidence_extractor import build_evidence_extraction_report, enrich_intake_with_extracted_evidence
@@ -39,6 +52,18 @@ __all__ = [
     "build_robotics_actuation_packet",
     "build_robotics_platform_authority",
     "build_robotics_simulation_packet",
+    "compile_scratch_build",
+    "compose_design",
+    "dump_json",
+    "engine_doctor",
+    "list_catalog_builds",
+    "plan_salvage",
+    "prove_module_ids",
+    "resolve_inventory_parts",
+    "salvage_bringup",
+    "sdk_info",
+    "suggest_modules",
+    "verify_engine",
     "build_vision_evidence_report",
     "build_design_quality_gate",
     "CATALOG_BUILD_IDS",

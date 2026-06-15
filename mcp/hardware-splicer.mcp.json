@@ -1,0 +1,12 @@
+{
+  "hardware-splicer": {
+    "command": "python3",
+    "args": ["-m", "hardware_splicer.mcp_server"],
+    "env": {
+      "PYTHONPATH": "${HARDWARE_SPLICER_ROOT}/src",
+      "HARDWARE_SPLICER_AUTOROUTE": "0",
+      "HARDWARE_SPLICER_JLC_ENRICH": "0",
+      "HARDWARE_SPLICER_DRC_FIX_LOOP": "1"
+    }
+  }
+}

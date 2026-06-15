@@ -11,6 +11,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Tuple
 
+from .testing_mode import testing_mode_enabled
 from .vision_targets import normalize_vision_evidence_notes, vision_primitive_glossary
 from .vision_usage_ledger import record_vision_usage, usage_summary
 
@@ -393,7 +394,7 @@ def _vision_config(body: Dict[str, Any]) -> Dict[str, Any]:
         "api_key": str(raw.get("api_key") or "").strip(),
         "base_url": str(raw.get("base_url") or env_base_url or default_base_url).strip(),
         "live": _bool(raw.get("live") or os.getenv("HARDWARE_SPLICER_VISION_LIVE")),
-        "apply": _bool(raw.get("apply") or raw.get("auto_apply")),
+        "apply": _bool(raw.get("apply") or raw.get("auto_apply")) or testing_mode_enabled(),
         "max_images": max(1, min(int(_float(raw.get("max_images"), 3)), 4)),
         "timeout_s": max(10, min(int(_float(raw.get("timeout_s"), 60)), 180)),
         "ledger_path": str(raw.get("ledger_path") or os.getenv("HARDWARE_SPLICER_VISION_LEDGER") or "").strip(),

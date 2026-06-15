@@ -45,6 +45,15 @@ interface ResolvedEndpoint {
   pin: ModulePin;
 }
 
+/** Pin notes/voltage that explicitly allow a range of logic levels (e.g. opto relay IN). */
+function pinAcceptsPeerLogic(pin: ModulePin, peerLogicV: number): boolean {
+  const text = `${pin.voltage ?? ""} ${pin.notes ?? ""}`;
+  if (/3\.3\s*[-–to]+\s*5|3\.3-5/i.test(text)) {
+    return peerLogicV === 3.3 || peerLogicV === 5;
+  }
+  return false;
+}
+
 function resolve(graph: BuildGraph, nodeId: string, pinId: string): ResolvedEndpoint | null {
   const node = graph.nodes.find((n) => n.id === nodeId);
   if (!node) return null;
@@ -150,12 +159,15 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
     const aDigital = a.pin.role !== "power_in" && a.pin.role !== "power_out" && a.pin.role !== "gnd" && a.pin.role !== "other";
     const bDigital = b.pin.role !== "power_in" && b.pin.role !== "power_out" && b.pin.role !== "gnd" && b.pin.role !== "other";
     if (aDigital && bDigital && aLV && bLV && aLV !== bLV) {
-      warnings.push({
-        id: `${w.id}-logic`,
-        level: "error",
-        message: `${a.moduleSpec.label} uses ${aLV}V logic, ${b.moduleSpec.label} uses ${bLV}V logic. Add a level shifter.`,
-        wireId: w.id,
-      });
+      const tolerant = pinAcceptsPeerLogic(a.pin, bLV) || pinAcceptsPeerLogic(b.pin, aLV);
+      if (!tolerant) {
+        warnings.push({
+          id: `${w.id}-logic`,
+          level: "error",
+          message: `${a.moduleSpec.label} uses ${aLV}V logic, ${b.moduleSpec.label} uses ${bLV}V logic. Add a level shifter.`,
+          wireId: w.id,
+        });
+      }
     }
 
     // I2C / open-drain needs pull-ups (at least one end must have them)

@@ -1,0 +1,111 @@
+{
+  "schema_version": "hardware_splicer.netlist_fixtures.v1",
+  "fixtures": [
+    {
+      "id": "esp32_servo_kicad",
+      "type": "kicad_netlist",
+      "path": "kicad/esp32_servo.net",
+      "description": "KiCad netlist ingest (ESP32 + USB + servo ports)"
+    },
+    {
+      "id": "usb_esp_dht22",
+      "type": "netlist_json",
+      "path": "json/usb_esp_dht22.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "dht22"
+      ]
+    },
+    {
+      "id": "usb_esp_bme280",
+      "type": "netlist_json",
+      "path": "json/usb_esp_bme280.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "bme280"
+      ]
+    },
+    {
+      "id": "usb_esp_relay",
+      "type": "netlist_json",
+      "path": "json/usb_esp_relay.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "relay-1ch-5v"
+      ]
+    },
+    {
+      "id": "usb_esp_soil",
+      "type": "netlist_json",
+      "path": "json/usb_esp_soil.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "soil_moisture"
+      ]
+    },
+    {
+      "id": "usb_esp_servo",
+      "type": "netlist_json",
+      "path": "json/usb_esp_servo.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "sg90"
+      ]
+    },
+    {
+      "id": "usb_esp_oled",
+      "type": "netlist_json",
+      "path": "json/usb_esp_oled.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "ssd1306-128x64"
+      ]
+    },
+    {
+      "id": "usb_pico_dht22",
+      "type": "netlist_json",
+      "path": "json/usb_pico_dht22.json",
+      "module_ids": [
+        "usb-power-5v",
+        "rpi-pico",
+        "dht22"
+      ]
+    },
+    {
+      "id": "usb_arduino_relay",
+      "type": "netlist_json",
+      "path": "json/usb_arduino_relay.json",
+      "module_ids": [
+        "usb-power-5v",
+        "arduino-nano",
+        "relay-1ch-5v"
+      ]
+    },
+    {
+      "id": "usb_esp_ch340",
+      "type": "netlist_json",
+      "path": "json/usb_esp_ch340.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "ch340-usb-ttl"
+      ]
+    },
+    {
+      "id": "motor_driver_minimal",
+      "type": "netlist_json",
+      "path": "json/motor_driver_minimal.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "l298n"
+      ]
+    }
+  ]
+}

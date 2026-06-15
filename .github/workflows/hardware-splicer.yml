@@ -6,7 +6,7 @@ on:
       - "src/hardware_splicer/**"
       - "scripts/**"
       - "tests/**"
-      - "examples/intakes/**"
+      - "examples/netlist_fixtures/**"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
       - "Makefile"
@@ -17,7 +17,7 @@ on:
       - "src/hardware_splicer/**"
       - "scripts/**"
       - "tests/**"
-      - "examples/intakes/**"
+      - "examples/netlist_fixtures/**"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
       - "Makefile"
@@ -41,6 +41,13 @@ jobs:
           sudo apt-get install -y kicad
       - name: Bootstrap (venv, npm, 3D-Splicer)
         run: make setup
+      - name: Engine verify (KiCad DRC bar, no FreeRouting)
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_JLC_ENRICH: "0"
+        run: |
+          source .venv/bin/activate
+          make verify-engine
       - name: Core verify (tests, benchmark, audit, tiers, smoke)
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"

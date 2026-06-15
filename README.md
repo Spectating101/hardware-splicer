@@ -2,7 +2,7 @@
 
 Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard — with **honest** fabrication scoring and evidence-gated release.
 
-**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md) and [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md).
+**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md), [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md), and [`docs/TESTING.md`](docs/TESTING.md).
 
 ```bash
 make setup          # pip install + doctor
@@ -18,6 +18,8 @@ This folder consolidates the hardware-oriented projects behind a top-level compi
 - `apps/hardware-splicer-demo/` - frontend authority dashboard for showing intake results, deterministic margins, evidence gaps, and generated artifacts.
 
 The production-facing path is `scripts/hardware_splicer.py` and the `hardware_splicer` Python package. It validates compile specs, starts/stops the optional local 3D-Splicer service, copies mechanical outputs into the final bundle, and writes manifest/metadata files for downstream automation.
+
+**Engine target and completion gates (canonical):** [`docs/ENGINE_DONE.md`](docs/ENGINE_DONE.md) — bootstrap vs Flux-class engine, phases, PASS/OPEN checklist.
 
 ## Doctor
 

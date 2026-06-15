@@ -12,7 +12,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
-from .build_compiler import compile_catalog_build, resolve_build_id
+from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, compile_from_netlist, resolve_build_id
+from .canvas_compose import compile_canvas_build
+from .material_modes import material_mode_summary, resolve_material_mode
+from .scratch_pipeline import compile_scratch_build
 from .compiler import _resolve_board_design_files, compile_hardware_bundle
 from .design_quality import build_design_quality_gate
 from .jobs import JobBackend, artifact_manifest, build_output_archive
@@ -71,6 +74,40 @@ class SpliceAndBuildRequest(BaseModel):
     export_gerber: bool = True
 
 
+class ComposeRequest(BaseModel):
+    phrase: str | None = None
+    module_ids: list[str] | None = None
+    netlist: Dict[str, Any] | None = None
+    canvas_nodes: list[Dict[str, Any]] | None = None
+    canvas_wires: list[Dict[str, Any]] | None = None
+    constraints: Dict[str, Any] | None = None
+    material_mode: str | None = Field(default=None, description="scratch | salvage (auto if omitted)")
+    strategy_mode: str | None = Field(default=None, description="open | constrained")
+    salvage_mode: bool = False
+    allowed_purchases: list[str] | None = None
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = True
+
+
+class ComposeCanvasRequest(BaseModel):
+    nodes: list[Dict[str, Any]]
+    wires: list[Dict[str, Any]] | None = None
+    constraints: Dict[str, Any] | None = None
+    material_mode: str | None = None
+    strategy_mode: str | None = None
+    salvage_mode: bool = False
+    allowed_purchases: list[str] | None = None
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = True
+
+
+class EngineVerifyRequest(BaseModel):
+    build_ids: list[str] | None = None
+    max_kicad_drc_warnings: int = 500
+
+
 class MechanicalAuthorityRequest(BaseModel):
     spec: Dict[str, Any]
     engineering: Dict[str, Any] | None = None
@@ -102,6 +139,19 @@ class RoboticsSimulationRequest(BaseModel):
     engineering: Dict[str, Any] | None = None
     robotics_actuation: Dict[str, Any] | None = None
     mechatronics_authority: Dict[str, Any] | None = None
+
+
+def _compose_constraints(request: ComposeRequest | ComposeCanvasRequest) -> Dict[str, Any]:
+    body = dict(getattr(request, "constraints", None) or {})
+    if getattr(request, "strategy_mode", None):
+        body["strategy_mode"] = request.strategy_mode
+    if getattr(request, "allowed_purchases", None):
+        body["allowed_purchases"] = list(request.allowed_purchases or [])
+    if isinstance(request, ComposeCanvasRequest) or getattr(request, "canvas_nodes", None):
+        body.setdefault("graph_mode", "canvas")
+    else:
+        body.setdefault("graph_mode", "scratch")
+    return body
 
 
 def _slug(value: str) -> str:
@@ -328,6 +378,149 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "compile_build_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/compose")
+    def compose(request: ComposeRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "compose" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+
+            constraints = _compose_constraints(request)
+            material_mode = request.material_mode or resolve_material_mode(
+                constraints=constraints,
+                salvage_mode=bool(request.salvage_mode),
+            )
+
+            if request.canvas_nodes:
+                canvas = compile_canvas_build(
+                    out_dir=str(resolved),
+                    nodes=request.canvas_nodes,
+                    wires=request.canvas_wires,
+                    constraints=constraints,
+                    salvage_mode=bool(request.salvage_mode),
+                    material_mode=material_mode,
+                    export_gerber=bool(request.export_gerber),
+                )
+                quality = (canvas.compile_result.design_quality if canvas.compile_result else {}) or {}
+                gate = build_design_quality_gate(quality)
+                return {
+                    "ok": bool(canvas.ok and gate.get("build_ready")),
+                    "request_id": request_id,
+                    "mode": "canvas",
+                    **canvas.to_dict(),
+                    "design_quality_gate": gate,
+                    **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
+                }
+
+            if request.netlist:
+                result = compile_from_netlist(
+                    request.netlist,
+                    resolved,
+                    export_gerber=bool(request.export_gerber),
+                )
+                gate = build_design_quality_gate(result.design_quality)
+                return {
+                    "ok": bool(result.ok and gate.get("build_ready")),
+                    "request_id": request_id,
+                    "mode": "netlist",
+                    **result.to_dict(),
+                    "design_quality_gate": gate,
+                }
+
+            if not request.phrase and not request.module_ids:
+                raise ValueError("phrase, module_ids, or netlist is required")
+
+            scratch = compile_scratch_build(
+                out_dir=str(resolved),
+                goal=request.phrase,
+                module_ids=request.module_ids,
+                export_gerber=bool(request.export_gerber),
+                constraints=constraints,
+                salvage_mode=bool(request.salvage_mode),
+            )
+            compile_result = scratch.compile_result
+            quality = (compile_result.design_quality if compile_result else {}) or {}
+            gate = build_design_quality_gate(quality)
+            return {
+                "ok": bool(scratch.ok and gate.get("build_ready")),
+                "request_id": request_id,
+                "mode": "scratch",
+                **scratch.to_dict(),
+                "design_quality_gate": gate,
+                **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
+            }
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "compose_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/compose-canvas")
+    def compose_canvas(request: ComposeCanvasRequest) -> Dict[str, Any]:
+        """Editor/canvas nodes → same compile engine (material_mode explicit)."""
+        wrapped = ComposeRequest(
+            canvas_nodes=request.nodes,
+            canvas_wires=request.wires,
+            constraints=request.constraints,
+            material_mode=request.material_mode,
+            strategy_mode=request.strategy_mode,
+            salvage_mode=request.salvage_mode,
+            allowed_purchases=request.allowed_purchases,
+            out_dir=request.out_dir,
+            request_id=request.request_id,
+            export_gerber=request.export_gerber,
+        )
+        return compose(wrapped)
+
+    @app.post("/v1/engine-verify")
+    def engine_verify(request: EngineVerifyRequest) -> Dict[str, Any]:
+        """Compile catalog builds headlessly (no FreeRouting) for agent/CI verify backends."""
+        request_id = _request_id(None)
+        os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
+        os.environ["HARDWARE_SPLICER_JLC_ENRICH"] = "0"
+        build_ids = list(request.build_ids or CATALOG_BUILD_IDS)
+        root = _api_output_root() / "engine_verify" / request_id
+        rows = []
+        for build_id in build_ids:
+            out = root / build_id
+            result = compile_catalog_build(build_id, str(out), export_gerber=False)
+            q = result.design_quality or {}
+            warn = int(q.get("kicad_drc_warnings") or 0)
+            rows.append(
+                {
+                    "build_id": build_id,
+                    "ok": bool(result.ok),
+                    "kicad_drc_errors": int(q.get("kicad_drc_errors") or 0),
+                    "kicad_drc_warnings": warn,
+                    "copper_tier": q.get("copper_tier"),
+                    "fab_recommendation": q.get("fab_recommendation"),
+                    "warnings_over_budget": warn > int(request.max_kicad_drc_warnings),
+                    "error": result.error,
+                }
+            )
+        clean = [r for r in rows if r.get("ok") and r.get("kicad_drc_errors", 1) == 0]
+        return {
+            "ok": len(clean) == len(rows),
+            "request_id": request_id,
+            "autoroute": False,
+            "verified": len(clean),
+            "total": len(rows),
+            "rows": rows,
+        }
 
     @app.post("/v1/splice-and-build")
     def splice_and_build(request: SpliceAndBuildRequest) -> Dict[str, Any]:

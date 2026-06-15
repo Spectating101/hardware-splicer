@@ -1,20 +1,17 @@
 from __future__ import annotations
 
 import json
-import shutil
-import subprocess
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 
-from .bom_generator import build_bom_from_graph, write_bom_artifacts
+from .catalog import CATALOG_BUILD_IDS
+from .compile_stages import run_artifact_stage, run_graph_stage_node
 from .design_quality import build_design_quality_gate
+from .netlist.ir import CircuitNetlist
+from .netlist.lower import netlist_to_build_graph
 from .runtime import ROOT
-
-
-COMPILE_SCRIPT = ROOT / "scripts" / "compile_build_graph.cjs"
-FRONTEND_ROOT = ROOT / "apps" / "circuit-ai" / "circuit-ai-frontend"
 
 ARCHETYPE_BUILD_IDS: Dict[str, str] = {
     "automatic_watering": "automatic_plant_watering",
@@ -28,27 +25,9 @@ ARCHETYPE_BUILD_IDS: Dict[str, str] = {
     "sensor_logger": "sensor_logger",
     "bench_power_adapter": "bench_power_adapter",
     "inspection_fixture": "inspection_motion_fixture",
-    "generic_mechatronics": "sensor_logger",
+    "generic_mechatronics": "generic_low_voltage_build",
+    "generic_low_voltage_build": "generic_low_voltage_build",
 }
-
-CATALOG_BUILD_IDS: List[str] = [
-    "automatic_plant_watering",
-    "bench_power_adapter",
-    "camera_ir_light_or_sensor_mount",
-    "indicator_or_task_light",
-    "inspection_motion_fixture",
-    "low_voltage_motor_test_jig",
-    "network_status_indicator",
-    "plotter_motion_stage",
-    "robot_drive_base",
-    "salvaged_input_panel",
-    "sensor_logger",
-    "small_audio_amp_box",
-    "smart_relay_box",
-    "usb_fume_extractor",
-    "usb_uart_debug_adapter",
-]
-
 
 @dataclass(frozen=True)
 class BuildCompileResult:
@@ -84,10 +63,6 @@ def resolve_build_id(*, archetype: str | None = None, explicit: str | None = Non
     return None
 
 
-def _node_available() -> bool:
-    return shutil.which("node") is not None
-
-
 def compile_catalog_build(
     build_id: str,
     out_dir: str | Path,
@@ -101,123 +76,103 @@ def compile_catalog_build(
     build_dir = target / "build_compilation"
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    if not COMPILE_SCRIPT.is_file():
+    graph_stage = run_graph_stage_node(build_id, build_dir, splice_plan=splice_plan)
+    if graph_stage.error and not graph_stage.paths.build_graph:
         return BuildCompileResult(
             ok=False,
             build_id=build_id,
             out_dir=target,
-            design_quality={"build_ready": False, "circuit_readiness": "compiler_missing"},
+            design_quality=graph_stage.quality,
             build_graph_file=None,
             kicad_pcb_file=None,
             design_quality_file=str(build_dir / "DESIGN_QUALITY.json"),
-            error=f"compile script missing: {COMPILE_SCRIPT}",
+            error=graph_stage.error,
         )
 
-    if not _node_available():
-        return BuildCompileResult(
-            ok=False,
-            build_id=build_id,
-            out_dir=target,
-            design_quality={"build_ready": False, "circuit_readiness": "node_missing"},
-            build_graph_file=None,
-            kicad_pcb_file=None,
-            design_quality_file=str(build_dir / "DESIGN_QUALITY.json"),
-            error="node is not available on PATH",
-        )
-
-    splice_plan_path: str | None = None
-    if splice_plan:
-        splice_input = build_dir / "splice_plan_input.json"
-        splice_input.write_text(json.dumps(dict(splice_plan), indent=2), encoding="utf-8")
-        splice_plan_path = str(splice_input)
-
-    node_argv = [
-        "node",
-        str(COMPILE_SCRIPT),
-        "--build-id",
-        build_id,
-        "--out",
-        str(build_dir),
-        "--json",
-    ]
-    if splice_plan_path:
-        node_argv.extend(["--splice-plan", splice_plan_path])
-
-    proc = subprocess.run(
-        node_argv,
-        cwd=str(ROOT),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        check=False,
-        timeout=120,
+    artifact = run_artifact_stage(
+        build_id=build_id,
+        build_dir=build_dir,
+        graph_stage=graph_stage,
+        resolved_modules=resolved_modules,
+        export_gerber=export_gerber,
+        export_gerber_fn=_export_gerber_if_possible if export_gerber else None,
     )
-    if proc.returncode not in {0, 1} or not proc.stdout.strip():
-        tail = (proc.stderr or proc.stdout or "build compile failed").strip()
-        return BuildCompileResult(
-            ok=False,
-            build_id=build_id,
-            out_dir=target,
-            design_quality={"build_ready": False, "circuit_readiness": "compile_failed"},
-            build_graph_file=None,
-            kicad_pcb_file=None,
-            design_quality_file=str(build_dir / "DESIGN_QUALITY.json"),
-            error=tail[-2000:],
-        )
-
-    try:
-        payload = json.loads(proc.stdout)
-    except json.JSONDecodeError as exc:
-        return BuildCompileResult(
-            ok=False,
-            build_id=build_id,
-            out_dir=target,
-            design_quality={"build_ready": False, "circuit_readiness": "invalid_compiler_output"},
-            build_graph_file=None,
-            kicad_pcb_file=None,
-            design_quality_file=str(build_dir / "DESIGN_QUALITY.json"),
-            error=str(exc),
-        )
-
-    quality = dict(payload.get("quality") or {})
-    paths = dict(payload.get("paths") or {})
-    kicad_path = paths.get("kicad_pcb")
-    gerber_dir: str | None = None
-
-    build_graph_path = paths.get("build_graph")
-    bom_paths: Dict[str, str] = {}
-    if build_graph_path and Path(build_graph_path).is_file():
-        graph = json.loads(Path(build_graph_path).read_text(encoding="utf-8"))
-        bom = build_bom_from_graph(graph, resolved_modules=list(resolved_modules or []))
-        bom_paths = write_bom_artifacts(bom, build_dir)
-        quality["bom_ready"] = bool(bom.get("line_count"))
-
-    if export_gerber and kicad_path and Path(kicad_path).is_file():
-        gerber_dir = _export_gerber_if_possible(Path(kicad_path), build_dir)
-        if gerber_dir:
-            quality["gerber_ready"] = True
-            quality["gerber_package_dir"] = gerber_dir
-        else:
-            quality["gerber_ready"] = False
+    quality = artifact["quality"]
+    bom_paths = artifact["bom_paths"]
+    gerber_dir = artifact["gerber_dir"]
+    kicad_path = graph_stage.paths.kicad_pcb
 
     fab_zip = _write_fab_package(build_dir, quality, bom_paths, gerber_dir)
     if fab_zip:
         quality["fab_package_zip"] = fab_zip
+        quality_path = Path(quality.get("design_quality_file") or build_dir / "DESIGN_QUALITY.json")
+        quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
-    quality_path = Path(paths.get("design_quality") or build_dir / "DESIGN_QUALITY.json")
-    quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
-
-    ok = bool(payload.get("ok"))
+    ok = graph_stage.ok
     return BuildCompileResult(
         ok=ok,
         build_id=build_id,
         out_dir=target,
         design_quality=quality,
-        build_graph_file=paths.get("build_graph"),
+        build_graph_file=graph_stage.paths.build_graph,
         kicad_pcb_file=kicad_path,
-        design_quality_file=paths.get("design_quality") or str(build_dir / "DESIGN_QUALITY.json"),
+        design_quality_file=quality.get("design_quality_file")
+        or graph_stage.paths.design_quality
+        or str(build_dir / "DESIGN_QUALITY.json"),
         gerber_package_dir=gerber_dir,
         error=None if ok else _summarize_blockers(quality),
+    )
+
+
+def compile_from_netlist(
+    netlist: Mapping[str, Any] | CircuitNetlist,
+    out_dir: str | Path,
+    *,
+    build_id: str = "generic_low_voltage_build",
+    export_gerber: bool = True,
+) -> BuildCompileResult:
+    """Compile netlist IR → ERC → PCB artifacts (general engine entry)."""
+    target = Path(out_dir)
+    target.mkdir(parents=True, exist_ok=True)
+    build_dir = target / "build_compilation"
+    build_dir.mkdir(parents=True, exist_ok=True)
+
+    circuit = netlist if isinstance(netlist, CircuitNetlist) else CircuitNetlist.from_dict(netlist)
+    graph = netlist_to_build_graph(circuit)
+    splice_plan = {
+        "custom_graph": graph,
+        "target": {"recommended_build_id": build_id},
+        "netlist_source": circuit.source,
+    }
+
+    graph_stage = run_graph_stage_node(build_id, build_dir, splice_plan=splice_plan)
+    artifact = run_artifact_stage(
+        build_id=build_id,
+        build_dir=build_dir,
+        graph_stage=graph_stage,
+        export_gerber=export_gerber,
+        export_gerber_fn=_export_gerber_if_possible if export_gerber else None,
+    )
+    quality = artifact["quality"]
+    fab_zip = _write_fab_package(build_dir, quality, artifact["bom_paths"], artifact["gerber_dir"])
+    if fab_zip:
+        quality["fab_package_zip"] = fab_zip
+        quality_path = Path(quality.get("design_quality_file") or build_dir / "DESIGN_QUALITY.json")
+        quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
+
+    ok = graph_stage.ok
+    return BuildCompileResult(
+        ok=ok,
+        build_id=build_id,
+        out_dir=target,
+        design_quality=quality,
+        build_graph_file=graph_stage.paths.build_graph,
+        kicad_pcb_file=graph_stage.paths.kicad_pcb,
+        design_quality_file=quality.get("design_quality_file")
+        or graph_stage.paths.design_quality
+        or str(build_dir / "DESIGN_QUALITY.json"),
+        gerber_package_dir=artifact["gerber_dir"],
+        error=None if ok else (graph_stage.error or _summarize_blockers(quality)),
     )
 
 

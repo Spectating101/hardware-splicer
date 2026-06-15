@@ -18,6 +18,11 @@ import { promisify } from "node:util";
 
 import { JARVIS_PROMPTS, type JarvisFlow } from "./prompts";
 import {
+  formatBuildToolSummary,
+  type BuildJarvisSnapshot,
+  type BuildToolResult,
+} from "./build-agent";
+import {
   assertVisionBudgetAllowsCall,
   estimateQwenCostUsd,
   getVisionBudgetPolicy,
@@ -894,6 +899,64 @@ async function callCopilot(opts: JarvisCallOptions): Promise<JarvisResult> {
   };
 }
 
+function parseBuildContextField(content: string, key: string): string | undefined {
+  const m = content.match(new RegExp(`[- ]*${key}:\\s*([^\\n]+)`));
+  return m?.[1]?.trim();
+}
+
+function echoBuildChatReply(messages: JarvisMessage[]): string | null {
+  const contextMsg = [...messages].reverse().find(
+    (m) => m.role === "user"
+      && typeof m.content === "string"
+      && m.content.includes("JARVIS_BUILD_CANVAS_CONTEXT"),
+  );
+  if (!contextMsg || typeof contextMsg.content !== "string") return null;
+
+  const actionsRaw = contextMsg.content.match(/ACTIONS_THIS_TURN:\n([\s\S]*?)\n\nCANVAS_STATE:/)?.[1]?.trim();
+  if (!actionsRaw || actionsRaw.startsWith("(none")) return null;
+
+  let results: BuildToolResult[];
+  try {
+    results = JSON.parse(actionsRaw) as BuildToolResult[];
+  } catch {
+    return null;
+  }
+  if (!Array.isArray(results) || results.length === 0) return null;
+
+  const snapshot: BuildJarvisSnapshot = {
+    moduleCount: Number(parseBuildContextField(contextMsg.content, "modules") ?? 0),
+    wireCount: Number(parseBuildContextField(contextMsg.content, "wires") ?? 0),
+    modules: [],
+    wires: [],
+    safety: {
+      errors: Number(parseBuildContextField(contextMsg.content, "safety_errors") ?? 0),
+      warns: Number(parseBuildContextField(contextMsg.content, "safety_warns") ?? 0),
+      infos: Number(parseBuildContextField(contextMsg.content, "safety_infos") ?? 0),
+      messages: [],
+    },
+    drc: {
+      pass: parseBuildContextField(contextMsg.content, "drc_pass") === "true",
+      errors: Number(parseBuildContextField(contextMsg.content, "drc_errors") ?? 0),
+      warnings: Number(parseBuildContextField(contextMsg.content, "drc_warnings") ?? 0),
+      messages: [],
+    },
+  };
+
+  const summary = formatBuildToolSummary(results, snapshot);
+  const lastUser = messages.filter((m) => m.role === "user").pop();
+  const question = typeof lastUser?.content === "string" ? lastUser.content : "";
+
+  return [
+    summary,
+    "",
+    "_(Demo mode — add an API key for a fuller walkthrough.)_",
+    question ? `You asked: "${question.slice(0, 160)}".` : "",
+    snapshot.safety.errors === 0 && snapshot.drc.pass
+      ? "Review the canvas, then say “will this blow up” before you power it."
+      : "Fix the safety/DRC issues above before plugging in.",
+  ].filter(Boolean).join("\n");
+}
+
 /** Echo response used when no API key is configured — keeps the UI wiring
  *  testable without network calls. Includes realistic shape for each flow. */
 function echoFallback(flow: JarvisFlow, messages: JarvisMessage[]): JarvisResult {
@@ -904,7 +967,8 @@ function echoFallback(flow: JarvisFlow, messages: JarvisMessage[]): JarvisResult
     return lastUser.content.filter((c) => c.type === "text").map((c) => (c as { type: "text"; text: string }).text).join("\n");
   })();
   const demo: Record<JarvisFlow, string> = {
-    chat: `> _Running in demo mode (configure local Copilot CLI/OAuth, \`ANTHROPIC_API_KEY\`, \`DEEPSEEK_API_KEY\`, or \`MISTRAL_API_KEY\` to get real answers)_\n\nYou asked: **${userText.slice(0, 200) || "(no prompt)"}**.\n\nIn production I'd explain this board to you in plain English, flag anything dangerous, and point out what's worth reusing.`,
+    chat: echoBuildChatReply(messages)
+      ?? `> _Running in demo mode (configure local Copilot CLI/OAuth, \`ANTHROPIC_API_KEY\`, \`DEEPSEEK_API_KEY\`, or \`MISTRAL_API_KEY\` to get real answers)_\n\nYou asked: **${userText.slice(0, 200) || "(no prompt)"}**.\n\nIn production I'd explain this board to you in plain English, flag anything dangerous, and point out what's worth reusing.`,
     identify: JSON.stringify({
       safety_level: "safe",
       explanation: "Demo mode: this is a placeholder identification. Configure local Copilot CLI/OAuth plus the image evidence bridge, or a direct vision provider, to enable real image analysis.",

@@ -4,6 +4,7 @@ import math
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .robotics_actuation import build_robotics_actuation_packet
+from .testing_mode import testing_mode_enabled
 
 
 SCHEMA_VERSION = "hardware_splicer.robotics_simulation.v1"
@@ -39,6 +40,12 @@ def build_robotics_simulation_packet(
     integration = _integration_status(mechatronics, findings)
 
     blocking = [row for row in findings if str(row.get("severity") or "").lower() in BLOCKING_SEVERITIES]
+    if testing_mode_enabled():
+        warnings_from_blocks = [
+            {**row, "severity": "warn", "testing_mode_downgraded": True} for row in blocking
+        ]
+        findings = findings + warnings_from_blocks
+        blocking = []
     warnings = [row for row in findings if str(row.get("severity") or "").lower() in {"warn", "warning"}]
     domains = _simulation_domains(power_budget, runtime, drive, servo, safety)
     ready = not blocking

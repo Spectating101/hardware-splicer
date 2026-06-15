@@ -29,6 +29,7 @@ from hardware_splicer.validation import validate_compile_spec, validation_errors
 from hardware_splicer.fabrication_inspection import inspect_fabrication_package
 from hardware_splicer.vision_usage_ledger import usage_summary
 from hardware_splicer.vision_evidence_assistant import _env_key_present, DEFAULT_QWEN_MODEL
+from hardware_splicer.project_intake import splice_and_build_from_intake
 
 
 DEMO_SPEC = ROOT / "examples" / "hardware_splicer_demo.json"
@@ -162,6 +163,101 @@ def _run_intake(args: argparse.Namespace) -> int:
         if authority["blockers"]:
             print("blockers=" + " | ".join(authority["blockers"][:5]))
     return 0 if result["compile_ok"] else 1
+
+
+def _run_compose(args: argparse.Namespace) -> int:
+    from hardware_splicer.module_picker import pick_modules_for_goal
+    from hardware_splicer.canvas_compose import compile_canvas_build
+    from hardware_splicer.scratch_pipeline import compile_scratch_build
+
+    hints: list[str] = []
+    if args.phrase:
+        pick = pick_modules_for_goal(args.phrase)
+        hints = pick.hints
+    elif not args.modules and not args.canvas_json:
+        print("error: provide --phrase, --modules, or --canvas-json", file=sys.stderr)
+        return 2
+
+    constraints = {"strategy_mode": args.strategy_mode, "graph_mode": "canvas" if args.canvas_json else "scratch"}
+    salvage_mode = bool(args.salvage_mode)
+
+    if args.canvas_json:
+        canvas_doc = json.loads(Path(args.canvas_json).read_text(encoding="utf-8"))
+        canvas = compile_canvas_build(
+            out_dir=args.out,
+            nodes=canvas_doc.get("nodes") or [],
+            wires=canvas_doc.get("wires"),
+            constraints=constraints,
+            salvage_mode=salvage_mode,
+            export_gerber=not args.no_gerber,
+        )
+        compile_result = canvas.compile_result
+        quality = (compile_result.design_quality if compile_result else {}) or {}
+        payload = {
+            **canvas.to_dict(),
+            "drc_pass": bool(quality.get("drc_pass")),
+            "build_ready": bool(quality.get("build_ready")),
+            "kicad_drc_errors": quality.get("kicad_drc_errors"),
+        }
+        ok = canvas.ok
+    else:
+        scratch = compile_scratch_build(
+            out_dir=args.out,
+            goal=args.phrase,
+            module_ids=[m.strip() for m in (args.modules or "").split(",") if m.strip()] or None,
+            export_gerber=not args.no_gerber,
+            constraints=constraints,
+            salvage_mode=salvage_mode,
+        )
+        compile_result = scratch.compile_result
+        quality = (compile_result.design_quality if compile_result else {}) or {}
+        payload = {
+            **scratch.to_dict(),
+            "phrase": args.phrase,
+            "hints": hints,
+            "drc_pass": bool(quality.get("drc_pass")),
+            "build_ready": bool(quality.get("build_ready")),
+        }
+        ok = scratch.ok
+
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(f"ok={ok}")
+        if args.canvas_json:
+            print(f"mode=canvas material_mode={payload.get('material_mode')}")
+        else:
+            print(f"modules={', '.join(payload.get('module_ids') or [])}")
+            print(f"attempts={len(payload.get('attempts') or [])}")
+        print(f"drc_pass={bool(quality.get('drc_pass'))}")
+        print(f"kicad_drc_errors={quality.get('kicad_drc_errors')}")
+        print(f"out_dir={args.out}")
+        if hints:
+            print(f"hints={', '.join(hints)}")
+        if payload.get("error"):
+            print(f"error={payload.get('error')}")
+    return 0 if ok else 1
+
+
+def _run_splice_build(args: argparse.Namespace) -> int:
+    intake = load_project_intake(Path(args.brief))
+    result = splice_and_build_from_intake(
+        intake,
+        out_dir=args.out,
+        export_gerber=not args.no_gerber,
+        request_id=getattr(args, "request_id", None),
+    )
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        salvage = result.get("salvage_package") or {}
+        print(f"ok={result.get('ok')}")
+        print(f"build_id={result.get('build_id')}")
+        print(f"graph_mode={salvage.get('graph_mode')}")
+        print(f"compose_modules={', '.join(salvage.get('compose_module_ids') or [])}")
+        print(f"drc_pass={((result.get('build_compilation') or {}).get('design_quality') or {}).get('drc_pass')}")
+        print(f"out_dir={args.out}")
+    return 0 if result.get("ok") else 1
 
 
 def _run_build(args: argparse.Namespace) -> int:
@@ -333,6 +429,39 @@ def main() -> int:
     intake_parser.add_argument("--vision-model", default=None, help="Vision model id. Default for qwen: qwen3-vl-flash.")
     intake_parser.add_argument("--json", action="store_true", help="Print intake run result JSON.")
     intake_parser.set_defaults(func=_run_intake)
+
+    compose_parser = sub.add_parser(
+        "compose",
+        help="NL or explicit module list → auto-wired scratch graph → DRC-clean KiCad PCB.",
+    )
+    compose_parser.add_argument("--phrase", default=None, help="Natural-language goal (module picker).")
+    compose_parser.add_argument(
+        "--modules",
+        default=None,
+        help="Comma-separated module ids (e.g. usb-power-5v,esp32-devkit,dht22).",
+    )
+    compose_parser.add_argument("--strategy-mode", choices=["open", "constrained"], default="open")
+    compose_parser.add_argument("--salvage-mode", action="store_true", help="Constrain to inventory + allowed_purchases.")
+    compose_parser.add_argument(
+        "--canvas-json",
+        default=None,
+        help="Path to JSON {nodes:[{id,moduleId}], wires?:[...]} for editor/canvas compose.",
+    )
+    compose_parser.add_argument("--out", required=True, help="Output directory.")
+    compose_parser.add_argument("--no-gerber", action="store_true", help="Skip kicad-cli Gerber export when available.")
+    compose_parser.add_argument("--json", action="store_true", help="Print compose result JSON.")
+    compose_parser.set_defaults(func=_run_compose)
+
+    splice_build_parser = sub.add_parser(
+        "splice-build",
+        help="Intake brief → salvage/scratch or catalog graph → DRC-clean PCB (no full mecha scenario).",
+    )
+    splice_build_parser.add_argument("--brief", required=True, help="Path to project intake JSON.")
+    splice_build_parser.add_argument("--out", required=True, help="Output directory.")
+    splice_build_parser.add_argument("--no-gerber", action="store_true", help="Skip Gerber export.")
+    splice_build_parser.add_argument("--request-id", default=None, help="Stable build/request identifier.")
+    splice_build_parser.add_argument("--json", action="store_true", help="Print splice-build result JSON.")
+    splice_build_parser.set_defaults(func=_run_splice_build)
 
     build_parser = sub.add_parser("build", help="Compile a catalog build to DRC-clean KiCad PCB (+ optional Gerbers).")
     build_parser.add_argument("--build-id", default=None, help=f"Catalog build id. One of: {', '.join(CATALOG_BUILD_IDS[:5])}, ...")

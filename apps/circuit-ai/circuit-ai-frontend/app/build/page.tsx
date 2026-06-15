@@ -21,11 +21,18 @@ import {
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Sparkles, Trash2, Download, GraduationCap, CircuitBoard, X, Factory, Recycle } from "lucide-react";
+import { Trash2, Download, GraduationCap, CircuitBoard, X, Factory } from "lucide-react";
 import { downloadKicadPcb, serializeBuildToKicadPcb } from "@/lib/kicad-serializer";
+import { BuildJarvisPanel } from "@/components/build/build-jarvis-panel";
 import { ManufacturePanel, type MfgResult } from "@/components/build/manufacture-panel";
-import { SalvageImportModal } from "@/components/build/salvage-import-modal";
-import type { TranslationResult } from "@/lib/salvage/plan-to-graph";
+import { snapshotFromBuild, wantsAutoWireAfterCompose } from "@/lib/jarvis/build-agent";
+import { formatManufactureJarvisSummary } from "@/lib/jarvis/manufacture-summary";
+import { pickModulesForGoal } from "@/lib/jarvis/build-module-picker";
+import {
+  composeBuildGraphFromCanvasNodes,
+  splicePlanToBuildGraph,
+  type TranslationResult,
+} from "@/lib/salvage/plan-to-graph";
 import { SiteHeader } from "@/components/site-header";
 import { ModuleLibraryPanel } from "@/components/build/module-library-panel";
 import { ModuleNode, type ModuleNodeData } from "@/components/build/module-node";
@@ -36,6 +43,9 @@ import { PcbViewport } from "@/components/cad/pcb-viewport";
 import { buildGraphToGeometry } from "@/lib/pcb/build-to-geometry";
 import { analyzeBuild, type BuildGraph } from "@/lib/rules/safety-rules";
 import { findModule, findPin, MODULE_LIBRARY, type ModuleSpec, type PinRole } from "@/lib/modules/module-library";
+import { buildFirmwareBundle, downloadFirmwareBundle } from "@/lib/firmware/firmware-bundle";
+import { inferBuildIdFromGraph } from "@/lib/firmware/firmware-scaffold";
+import { runLocalManufacturePreflight } from "@/lib/manufacture/local-preflight";
 
 function fuzzyFindModule(needle: string): ModuleSpec | undefined {
   const direct = findModule(needle);
@@ -81,16 +91,8 @@ type WiringInstruction = {
 type WirePlan = {
   wires: WiringInstruction[];
   explanation?: string;
-  source: "jarvis" | "local";
+  source: "local";
 };
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
-}
 
 function normalizeKey(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -101,74 +103,6 @@ function indexedModules(nodes: FlowNode[]): IndexedModule[] {
     const spec = findModule((node.data as ModuleNodeData).moduleId);
     return spec ? [{ node, spec }] : [];
   });
-}
-
-function moduleAliases(entry: IndexedModule): string[] {
-  return [
-    entry.node.id,
-    entry.spec.id,
-    entry.spec.label,
-    ...entry.spec.id.split(/[^a-z0-9]+/i),
-    ...entry.spec.label.split(/[^a-z0-9]+/i),
-  ].filter((alias) => normalizeKey(alias).length >= 2);
-}
-
-function resolveStringEndpoint(text: string, modules: IndexedModule[]): WiringEndpoint | null {
-  const normalized = normalizeKey(text);
-  const moduleEntry = modules.find((entry) =>
-    moduleAliases(entry).some((alias) => normalized.includes(normalizeKey(alias))),
-  );
-  if (!moduleEntry) return null;
-  const pin = moduleEntry.spec.pins.find((candidate) => {
-    const pinId = normalizeKey(candidate.id);
-    const label = normalizeKey(candidate.label);
-    return normalized.includes(pinId) || (label.length >= 2 && normalized.includes(label));
-  });
-  return pin ? { nodeId: moduleEntry.node.id, pinId: pin.id } : null;
-}
-
-function resolveEndpoint(raw: unknown, modules: IndexedModule[]): WiringEndpoint | null {
-  if (typeof raw === "string") return resolveStringEndpoint(raw, modules);
-  if (!isRecord(raw)) return null;
-  const nodeId = asString(raw.nodeId);
-  const pinId = asString(raw.pinId);
-  if (!nodeId || !pinId) return null;
-  const entry = modules.find((candidate) => candidate.node.id === nodeId);
-  if (!entry || !findPin(entry.spec, pinId)) return null;
-  return { nodeId, pinId };
-}
-
-function normalizeWire(raw: unknown, modules: IndexedModule[]): WiringInstruction | null {
-  if (!isRecord(raw)) return null;
-  const from = resolveEndpoint(raw.from, modules);
-  const to = resolveEndpoint(raw.to, modules);
-  if (!from || !to) return null;
-  if (from.nodeId === to.nodeId && from.pinId === to.pinId) return null;
-  return {
-    from,
-    to,
-    purpose: asString(raw.purpose),
-  };
-}
-
-function parseJarvisWirePlan(text: string, modules: IndexedModule[]): WirePlan | null {
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1 || end <= start) return null;
-  try {
-    const parsed = JSON.parse(text.slice(start, end + 1)) as unknown;
-    if (!isRecord(parsed) || !Array.isArray(parsed.wires)) return null;
-    const wires = parsed.wires
-      .map((wire) => normalizeWire(wire, modules))
-      .filter((wire): wire is WiringInstruction => !!wire);
-    return {
-      wires,
-      explanation: asString(parsed.explanation),
-      source: "jarvis",
-    };
-  } catch {
-    return null;
-  }
 }
 
 function firstPin(spec: ModuleSpec, roles: PinRole[]) {
@@ -217,7 +151,7 @@ function addWire(
   });
 }
 
-function createLocalWirePlan(nodes: FlowNode[]): WirePlan {
+function createHeuristicWirePlan(nodes: FlowNode[]): WirePlan {
   const modules = indexedModules(nodes);
   const wires: WiringInstruction[] = [];
   const seen = new Set<string>();
@@ -316,6 +250,24 @@ function createLocalWirePlan(nodes: FlowNode[]): WirePlan {
   };
 }
 
+function createLocalWirePlan(nodes: FlowNode[]): WirePlan {
+  const composed = composeBuildGraphFromCanvasNodes(
+    nodes.map((n) => ({ id: n.id, moduleId: (n.data as ModuleNodeData).moduleId })),
+  );
+  if (composed.wires.length > 0) {
+    return {
+      wires: composed.wires.map((w) => ({
+        from: w.from,
+        to: w.to,
+        purpose: "auto-route",
+      })),
+      source: "local",
+      explanation: `Pad-aware auto-router connected ${composed.wires.length} wire${composed.wires.length === 1 ? "" : "s"} from module pin roles.`,
+    };
+  }
+  return createHeuristicWirePlan(nodes);
+}
+
 function edgeKey(edge: Edge): string {
   return `${edge.source}:${edge.sourceHandle ?? ""}->${edge.target}:${edge.targetHandle ?? ""}`;
 }
@@ -384,15 +336,22 @@ function wireColorForPin(spec: ModuleSpec | undefined, pinId: string | null | un
 function BuildInner() {
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiNote, setAiNote] = useState<string | null>(null);
   const [pcbOpen, setPcbOpen] = useState(false);
   const [mfg, setMfg] = useState<MfgResult | null>(null);
-  const [salvageOpen, setSalvageOpen] = useState(false);
 
-  const importSalvage = useCallback((result: TranslationResult) => {
-    // Replace the canvas with the recipe's modules + role-tagged wires. Layout
-    // mirrors addModule's column grid so nodes don't pile up at the origin.
+  useEffect(() => {
+    if (pcbOpen) document.documentElement.classList.add("pcb-modal-open");
+    else document.documentElement.classList.remove("pcb-modal-open");
+    return () => document.documentElement.classList.remove("pcb-modal-open");
+  }, [pcbOpen]);
+  const idRef = useRef(0);
+  const search = useSearchParams();
+  const preloadParam = search?.get("modules") ?? null;
+  const preloadedRef = useRef(false);
+  const { fitView } = useReactFlow();
+  const nodesInitialized = useNodesInitialized();
+
+  const applyTranslation = useCallback((result: TranslationResult) => {
     const newNodes = result.graph.nodes.map((bn, i) => {
       const col = i % 3;
       const row = Math.floor(i / 3);
@@ -412,32 +371,13 @@ function BuildInner() {
     }));
     setNodes(newNodes);
     setEdges(newEdges);
-    // Keep idRef aligned so future manual additions don't collide.
     const maxN = newNodes.reduce(
       (m, n) => Math.max(m, parseInt(n.id.replace(/^n/, ""), 10) || 0),
       0,
     );
     idRef.current = maxN;
-    setAiNote(
-      [
-        `Imported "${result.buildId}" recipe.`,
-        ...result.notes,
-        ...(result.warnings.length ? ["⚠ " + result.warnings.join(" ")] : []),
-      ].join(" "),
-    );
-    setSalvageOpen(false);
-  }, [setNodes, setEdges, setAiNote]);
-  useEffect(() => {
-    if (pcbOpen) document.documentElement.classList.add("pcb-modal-open");
-    else document.documentElement.classList.remove("pcb-modal-open");
-    return () => document.documentElement.classList.remove("pcb-modal-open");
-  }, [pcbOpen]);
-  const idRef = useRef(0);
-  const search = useSearchParams();
-  const preloadParam = search?.get("modules") ?? null;
-  const preloadedRef = useRef(false);
-  const { fitView } = useReactFlow();
-  const nodesInitialized = useNodesInitialized();
+    setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+  }, [setNodes, setEdges, fitView]);
 
   const onConnect = useCallback(
     (c: Connection) => {
@@ -520,94 +460,160 @@ function BuildInner() {
   const pcbGeometry = useMemo(() => buildGraphToGeometry(graph), [graph]);
   const drc = useMemo(() => runDrc(pcbGeometry), [pcbGeometry]);
 
-  const askJarvisToWire = useCallback(async () => {
-    if (nodes.length < 2) {
-      setAiNote("Add at least 2 modules first.");
-      return;
+  const getJarvisSnapshot = useCallback(
+    () => snapshotFromBuild(graph, warnings, drc),
+    [graph, warnings, drc],
+  );
+
+  const graphFromEdges = useCallback((edgeList: Edge[]): BuildGraph => ({
+    nodes: nodes.map((n) => ({ id: n.id, moduleId: (n.data as ModuleNodeData).moduleId })),
+    wires: edgeList.map((e) => ({
+      id: e.id,
+      from: { nodeId: e.source, pinId: e.sourceHandle ?? "" },
+      to: { nodeId: e.target, pinId: e.targetHandle ?? "" },
+    })),
+  }), [nodes]);
+
+  const snapshotForGraph = useCallback((g: BuildGraph) => {
+    const w = analyzeBuild(g);
+    const geo = buildGraphToGeometry(g);
+    const d = runDrc(geo);
+    return snapshotFromBuild(g, w, d);
+  }, []);
+
+  const jarvisAutoWire = useCallback(() => {
+    const plan = createLocalWirePlan(nodes);
+    const uniqueEdges = dedupeNewEdges(edges, edgesFromWirePlan(plan, nodes));
+    const merged = uniqueEdges.length > 0 ? [...edges, ...uniqueEdges] : edges;
+    if (uniqueEdges.length > 0) {
+      setEdges(merged);
+      setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
     }
-    setAiBusy(true);
-    setAiNote(null);
-    try {
-      const applyPlan = (plan: WirePlan, notePrefix = "") => {
-        const uniqueEdges = dedupeNewEdges(edges, edgesFromWirePlan(plan, nodes));
-        setEdges((prev) => [...prev, ...uniqueEdges]);
-        const summary = uniqueEdges.length === 0
-          ? "Those modules were already wired with the same connections."
-          : `${notePrefix}${plan.explanation ?? `Added ${uniqueEdges.length} wire${uniqueEdges.length === 1 ? "" : "s"}.`}`;
-        setAiNote(summary);
-        setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+    const postGraph = graphFromEdges(merged);
+    return {
+      added: uniqueEdges.length,
+      wireCount: merged.length,
+      detail: uniqueEdges.length > 0
+        ? (plan.explanation ?? `Added ${uniqueEdges.length} wire(s).`)
+        : (plan.wires.length > 0
+          ? "Those connections were already on the canvas."
+          : "No pinout rules matched these modules."),
+      snapshot: snapshotForGraph(postGraph),
+    };
+  }, [nodes, edges, setEdges, fitView, graphFromEdges, snapshotForGraph]);
+
+  const jarvisRebuildWires = useCallback(() => {
+    const plan = createLocalWirePlan(nodes);
+    const newEdges = edgesFromWirePlan(plan, nodes);
+    setEdges(newEdges);
+    setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+    const postGraph = graphFromEdges(newEdges);
+    return {
+      added: plan.wires.length,
+      wireCount: plan.wires.length,
+      detail: plan.wires.length > 0
+        ? `Rebuilt wiring: ${plan.explanation ?? `${plan.wires.length} connection(s).`}`
+        : "Could not rebuild — no pin-compatible wiring for these modules.",
+      snapshot: snapshotForGraph(postGraph),
+    };
+  }, [nodes, setEdges, fitView, graphFromEdges, snapshotForGraph]);
+
+  const jarvisComposeModules = useCallback((userText: string) => {
+    const pick = pickModulesForGoal(userText);
+    if (pick.moduleIds.length === 0) {
+      return {
+        ok: false,
+        added: 0,
+        moduleIds: [],
+        hints: [],
+        detail: "I'm not sure which part you mean yet — try \"temperature sensor\", \"small screen\", \"pump for watering\", or \"relay to switch a lamp\".",
+        snapshot: snapshotForGraph(graph),
       };
-
-      const localPlan = createLocalWirePlan(nodes);
-      if (localPlan.wires.length > 0) {
-        applyPlan(localPlan);
-        return;
-      }
-
-      const moduleList = nodes.map((n) => {
-        const spec = findModule((n.data as ModuleNodeData).moduleId);
-        return {
-          nodeId: n.id,
-          moduleId: spec?.id,
-          label: spec?.label,
-          pins: spec?.pins.map((p) => ({ id: p.id, role: p.role, voltage: p.voltage })),
-        };
-      });
-      const prompt = `Wire these modules into a working project. Respond with JSON {"wires":[{"from":{"nodeId","pinId"},"to":{"nodeId","pinId"},"purpose"}], "explanation":"..."}. Use exact nodeId + pinId values. Modules:\n${JSON.stringify(moduleList, null, 2)}`;
-      const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 10_000);
-      let full = "";
-      try {
-        const resp = await fetch("/api/jarvis/chat", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ messages: [{ role: "user", content: prompt }], context: "build-wiring" }),
-          signal: controller.signal,
-        });
-        if (!resp.ok || !resp.body) throw new Error(`Wiring request failed: ${resp.status}`);
-        const reader = resp.body.getReader();
-        const dec = new TextDecoder();
-        let buf = "";
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          buf += dec.decode(value, { stream: true });
-          const frames = buf.split("\n\n");
-          buf = frames.pop() ?? "";
-          for (const f of frames) {
-            const line = f.split("\n").find((l) => l.startsWith("data: "));
-            if (!line) continue;
-            try {
-              const evt = JSON.parse(line.slice(6).trim()) as { delta?: string };
-              if (evt.delta) full += evt.delta;
-            } catch { /* skip */ }
-          }
-        }
-      } finally {
-        window.clearTimeout(timeout);
-      }
-      const moduleIndex = indexedModules(nodes);
-      const parsed = parseJarvisWirePlan(full, moduleIndex);
-      const plan = parsed && parsed.wires.length > 0 ? parsed : localPlan;
-      if (plan.wires.length === 0) {
-        throw new Error("Jarvis could not find pin-compatible wires for these modules.");
-      }
-
-      const fallbackPrefix = plan.source === "local" && (!parsed || parsed.wires.length === 0)
-        ? "Jarvis returned an unusable wiring schema, so I used the local pinout router. "
-        : "";
-      applyPlan(plan, fallbackPrefix);
-    } catch (err) {
-      setAiNote(`Wiring failed: ${(err as Error).message}`);
-    } finally {
-      setAiBusy(false);
     }
-  }, [edges, nodes, setEdges, fitView]);
+
+    const existingIds = new Set(nodes.map((n) => (n.data as ModuleNodeData).moduleId));
+    const toAdd = pick.moduleIds.filter((id) => !existingIds.has(id) && findModule(id));
+    let nextId = idRef.current;
+    const newNodes: FlowNode[] = toAdd.map((moduleId, i) => {
+      nextId += 1;
+      const idx = nodes.length + i;
+      const col = idx % 3;
+      const row = Math.floor(idx / 3);
+      return {
+        id: `n${nextId}`,
+        type: "module" as const,
+        position: { x: 60 + col * 340, y: 60 + row * 320 },
+        data: { moduleId },
+      };
+    });
+    idRef.current = nextId;
+    const mergedNodes = [...nodes, ...newNodes];
+
+    let mergedEdges = edges;
+    let wireNote = "";
+    if (wantsAutoWireAfterCompose(userText, {
+      moduleCount: nodes.length,
+      wireCount: edges.length,
+      addingModules: toAdd.length,
+    })) {
+      const plan = createLocalWirePlan(mergedNodes);
+      mergedEdges = edgesFromWirePlan(plan, mergedNodes);
+      wireNote = plan.wires.length > 0
+        ? ` Wired ${plan.wires.length} connection(s).`
+        : "";
+    }
+
+    setNodes(mergedNodes);
+    setEdges(mergedEdges);
+    setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
+
+    const postGraph = graphFromEdges(mergedEdges);
+    postGraph.nodes = mergedNodes.map((n) => ({
+      id: n.id,
+      moduleId: (n.data as ModuleNodeData).moduleId,
+    }));
+
+    const addedLabels = toAdd.map((id) => findModule(id)?.label ?? id).join(", ");
+    return {
+      ok: toAdd.length > 0 || mergedNodes.length > 0,
+      added: toAdd.length,
+      moduleIds: toAdd,
+      hints: pick.hints,
+      detail: toAdd.length > 0
+        ? `Added ${toAdd.length} part(s) for ${pick.hints.join(", ")}: ${addedLabels}.${wireNote}`
+        : `Those parts are already on the board.${wireNote}`,
+      snapshot: snapshotForGraph(postGraph),
+    };
+  }, [nodes, edges, graph, setNodes, setEdges, fitView, graphFromEdges, snapshotForGraph]);
+
+  const jarvisSpliceRecipe = useCallback((buildId: string) => {
+    const result = splicePlanToBuildGraph({ target: { recommended_build_id: buildId } });
+    if (result.graph.nodes.length === 0) {
+      return {
+        ok: false,
+        buildId,
+        moduleCount: 0,
+        wireCount: 0,
+        detail: result.warnings.join(" ") || `No recipe found for "${buildId}".`,
+        snapshot: snapshotForGraph({ nodes: [], wires: [] }),
+      };
+    }
+    applyTranslation(result);
+    const notes = result.notes.length ? ` ${result.notes.join(" ")}` : "";
+    const warns = result.warnings.length ? ` ⚠ ${result.warnings.join(" ")}` : "";
+    return {
+      ok: true,
+      buildId,
+      moduleCount: result.graph.nodes.length,
+      wireCount: result.graph.wires.length,
+      detail: `Spliced "${buildId}" — ${result.graph.nodes.length} modules, ${result.graph.wires.length} wires.${notes}${warns}`,
+      snapshot: snapshotForGraph(result.graph),
+    };
+  }, [applyTranslation, snapshotForGraph]);
 
   const clearAll = useCallback(() => {
     setNodes([]);
     setEdges([]);
-    setAiNote(null);
     idRef.current = 0;
     preloadedRef.current = false;
   }, [setNodes, setEdges]);
@@ -651,7 +657,11 @@ function BuildInner() {
   // preflight + Gerber generation. The client DRC is the instant local check;
   // this is the authoritative second opinion + actual fab files.
   const manufactureReal = useCallback(async () => {
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) {
+      return formatManufactureJarvisSummary({
+        error: "Put some parts on the board first, then ask me to order boards.",
+      });
+    }
     setMfg({ busy: true });
     try {
       const pcb = serializeBuildToKicadPcb(graph);
@@ -705,13 +715,77 @@ function BuildInner() {
       }
 
       if (!result.dfm && !result.gerber && !result.error) {
-        result.error = "Backend unreachable — start circuit-ai-api (:5000).";
+        result.error = "Backend unreachable — using local layout check.";
       }
+
+      if (!result.dfm?.manufacturing_ready && (result.error || !result.dfm)) {
+        const local = runLocalManufacturePreflight(graph);
+        setMfg({
+          busy: false,
+          error: result.error,
+          dfm: {
+            manufacturing_ready: local.manufacturing_ready,
+            critical: local.critical,
+            errors: local.errors,
+            warnings: local.warnings,
+            issues: local.issues,
+          },
+        });
+        return formatManufactureJarvisSummary({ local });
+      }
+
       setMfg(result);
+      return formatManufactureJarvisSummary(result);
     } catch (e: unknown) {
-      setMfg({ busy: false, error: e instanceof Error ? e.message : String(e) });
+      const err = e instanceof Error ? e.message : String(e);
+      const local = runLocalManufacturePreflight(graph);
+      setMfg({
+        busy: false,
+        error: err,
+        dfm: {
+          manufacturing_ready: local.manufacturing_ready,
+          critical: local.critical,
+          errors: local.errors,
+          warnings: local.warnings,
+          issues: local.issues,
+        },
+      });
+      return formatManufactureJarvisSummary({ local });
     }
   }, [graph, nodes.length]);
+
+  const jarvisGenerateFirmware = useCallback(() => {
+    if (graph.nodes.length === 0) {
+      return {
+        ok: false,
+        filename: "",
+        buildId: "",
+        detail: "Put some parts on the board first — then ask me for code.",
+      };
+    }
+    const buildId = inferBuildIdFromGraph(graph);
+    const bundle = buildFirmwareBundle(buildId, graph);
+    downloadFirmwareBundle(bundle);
+    return {
+      ok: true,
+      filename: bundle.zipName,
+      buildId,
+      detail: `Downloaded ${bundle.zipName} — open in VS Code with PlatformIO, click Upload. Pins match your wiring. ${bundle.installSteps[bundle.installSteps.length - 1]}`,
+    };
+  }, [graph]);
+
+  const jarvisHandlers = useMemo(() => ({
+    autoWire: jarvisAutoWire,
+    rebuildWires: jarvisRebuildWires,
+    spliceRecipe: jarvisSpliceRecipe,
+    composeModules: jarvisComposeModules,
+    clearCanvas: clearAll,
+    openPcb: () => setPcbOpen(true),
+    exportKicad: () => downloadKicadPcb(graph),
+    exportBom,
+    manufacture: manufactureReal,
+    generateFirmware: jarvisGenerateFirmware,
+  }), [jarvisAutoWire, jarvisRebuildWires, jarvisSpliceRecipe, jarvisComposeModules, clearAll, graph, exportBom, manufactureReal, jarvisGenerateFirmware]);
 
   const empty = nodes.length === 0;
 
@@ -726,20 +800,6 @@ function BuildInner() {
       >
         <div data-build-toolbar className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center pt-3">
           <div className="pointer-events-auto flex gap-2 rounded-full border border-white/10 bg-black/60 px-2 py-1 backdrop-blur">
-            <button
-              onClick={() => setSalvageOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-400/25"
-            >
-              <Recycle className="h-3.5 w-3.5" /> Salvage
-            </button>
-            <button
-              onClick={askJarvisToWire}
-              disabled={aiBusy || nodes.length < 2}
-              className="inline-flex items-center gap-1.5 rounded-full bg-cyan-400 px-3 py-1.5 text-xs font-semibold text-slate-900 shadow-[0_0_12px_rgba(34,211,238,0.4)] hover:bg-cyan-300 disabled:bg-white/10 disabled:text-slate-400 disabled:shadow-none"
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              {aiBusy ? "Wiring…" : "Ask Jarvis to wire it"}
-            </button>
             <button
               onClick={exportJson}
               disabled={empty}
@@ -831,43 +891,37 @@ function BuildInner() {
       </div>
 
       <aside
-        style={{ width: 320, overflowWrap: "anywhere" }}
-        className="flex shrink-0 flex-col gap-3 overflow-y-auto overflow-x-hidden border-l border-white/10 bg-black/40 p-4"
+        style={{ width: 340, overflowWrap: "anywhere" }}
+        className="flex min-h-0 shrink-0 flex-col gap-3 overflow-hidden border-l border-white/10 bg-black/40 p-4"
       >
-        <div>
+        <div className="shrink-0">
           <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Build</div>
           <h2 className="mt-1 text-base font-semibold text-white">
             {nodes.length} modules · {edges.length} wires
           </h2>
           <p className="mt-1 text-xs leading-5 text-slate-400">
-            Drag modules in from the left. Draw wires by dragging between pin dots. Ask Jarvis
-            to wire them up when you&apos;re ready.
+            Drag parts in or tell Jarvis what you want it to do — no part numbers needed.
           </p>
         </div>
 
-        {aiNote && (
-          <div className="break-words rounded-xl border border-cyan-400/30 bg-cyan-400/5 p-3 text-xs leading-5 text-cyan-100">
-            {aiNote}
-          </div>
-        )}
+        <BuildJarvisPanel
+          getSnapshot={getJarvisSnapshot}
+          handlers={jarvisHandlers}
+        />
 
+        <div className="min-h-0 shrink overflow-y-auto space-y-3">
         <SafetyCheckPanel warnings={warnings} />
 
         <DrcPanel drc={drc} />
 
         <ManufacturePanel mfg={mfg} />
 
-        <div className="mt-auto rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[10px] leading-4 text-slate-400">
+        <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3 text-[10px] leading-4 text-slate-400">
           <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Wire legend</div>
           <Legend />
         </div>
+        </div>
       </aside>
-
-      <SalvageImportModal
-        open={salvageOpen}
-        onClose={() => setSalvageOpen(false)}
-        onImport={importSalvage}
-      />
 
       {pcbOpen && pcbGeometry && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[100] flex flex-col bg-[#05080f]">

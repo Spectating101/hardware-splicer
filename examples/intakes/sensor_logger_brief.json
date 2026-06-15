@@ -1,0 +1,29 @@
+{
+  "project_name": "bench_sensor_logger",
+  "goal": "Log temperature, humidity, and pressure to serial using a BME280 and ESP32 over USB power.",
+  "budget": {
+    "currency": "USD",
+    "amount": 12
+  },
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller"
+    },
+    {
+      "name": "BME280 breakout",
+      "type": "environment_sensor"
+    },
+    {
+      "name": "USB phone charger",
+      "type": "power_source",
+      "voltage_v": 5.0
+    }
+  ],
+  "constraints": {
+    "runtime_min": 240,
+    "mission_duty_cycle": 0.08,
+    "battery_voltage_v": 5.0
+  }
+}

@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, List, Mapping, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .integrations.jlcsearch_client import JlcSearchClient
 
 
 SCHEMA_VERSION = "hardware_splicer.bom.v1"
@@ -112,6 +116,59 @@ def build_bom_from_graph(
     }
 
 
+def _jlc_enrich_enabled() -> bool:
+    return os.environ.get("HARDWARE_SPLICER_JLC_ENRICH", "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+        "off",
+    )
+
+
+def enrich_bom_with_jlcsearch(
+    bom: Mapping[str, Any],
+    *,
+    client: Optional["JlcSearchClient"] = None,
+) -> Dict[str, Any]:
+    """Attach LCSC/JLC hints for passives when jlcsearch API is reachable."""
+    if not _jlc_enrich_enabled():
+        return dict(bom)
+
+    from .integrations.jlcsearch_client import JlcSearchClient
+
+    client = client or JlcSearchClient()
+    enriched_lines: List[Dict[str, Any]] = []
+    for row in bom.get("lines") or []:
+        line = dict(row)
+        module_id = str(line.get("module_id") or "")
+        if module_id.startswith("resistor-"):
+            try:
+                value = module_id.replace("resistor-", "").replace("_", ".")
+                hits = client.search_resistors(resistance=value, package="0603", limit=1)
+                if hits:
+                    hit = hits[0]
+                    line["jlc_lcsc"] = str(hit.get("lcsc") or hit.get("lcsc_id") or "")
+                    line["jlc_mpn"] = str(hit.get("mpn") or hit.get("manufacturer_part_number") or "")
+            except Exception:
+                pass
+        elif module_id.startswith("capacitor-"):
+            try:
+                value = module_id.replace("capacitor-", "").replace("_", ".")
+                hits = client.search_capacitors(capacitance=value, package="0603", limit=1)
+                if hits:
+                    hit = hits[0]
+                    line["jlc_lcsc"] = str(hit.get("lcsc") or hit.get("lcsc_id") or "")
+                    line["jlc_mpn"] = str(hit.get("mpn") or hit.get("manufacturer_part_number") or "")
+            except Exception:
+                pass
+        enriched_lines.append(line)
+
+    out = dict(bom)
+    out["lines"] = enriched_lines
+    out["jlc_enriched"] = True
+    return out
+
+
 def write_bom_artifacts(bom: Mapping[str, Any], out_dir: str | Path) -> Dict[str, str]:
     target = Path(out_dir)
     target.mkdir(parents=True, exist_ok=True)
@@ -128,6 +185,8 @@ def write_bom_artifacts(bom: Mapping[str, Any], out_dir: str | Path) -> Dict[str
                 "mpn",
                 "footprint",
                 "supplier_sku",
+                "jlc_lcsc",
+                "jlc_mpn",
                 "qty",
                 "source",
                 "salvaged_part",

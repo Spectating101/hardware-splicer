@@ -1,0 +1,9 @@
+{
+  "project_name": "scratch_temp_sensor",
+  "goal": "something that measures temperature and shows readings",
+  "available_parts": [],
+  "constraints": {
+    "graph_mode": "scratch",
+    "strategy_mode": "constrained"
+  }
+}

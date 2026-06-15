@@ -343,7 +343,7 @@ PROFILE_LIBRARY = [
         "phrases": [],
         "required_capabilities": ["controller", "power", "connector"],
         "optional_capabilities": ["sensor_or_adc", "actuator_driver", "switch_or_button", "enclosure_candidate"],
-        "mapped_build_id": "",
+        "mapped_build_id": "generic_low_voltage_build",
         "blocks": [
             ("controller_or_logic", "Implement the behavior or state machine.", ["controller"]),
             ("power", "Provide safe low-voltage power.", ["power"]),

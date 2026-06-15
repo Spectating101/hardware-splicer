@@ -105,10 +105,12 @@ const REQUIRED_BUILD_IDS = [
   "robot_drive_base",
   "salvaged_input_panel",
   "sensor_logger",
+  "room_display_station",
   "small_audio_amp_box",
   "smart_relay_box",
   "usb_fume_extractor",
   "usb_uart_debug_adapter",
+  "generic_low_voltage_build",
 ];
 
 if (MODULE_LIBRARY.length < MIN_MODULES) {

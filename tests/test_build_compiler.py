@@ -20,7 +20,6 @@ ROOT = Path(__file__).resolve().parents[1]
 COMPILE_SCRIPT = ROOT / "scripts" / "compile_build_graph.cjs"
 
 
-@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
 @pytest.mark.parametrize("build_id", CATALOG_BUILD_IDS)
 def test_catalog_build_compiles_drc_clean(build_id: str, tmp_path: Path) -> None:
     result = compile_catalog_build(build_id, tmp_path, export_gerber=False)

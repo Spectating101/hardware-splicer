@@ -1,0 +1,78 @@
+{
+  "schema_version": "hardware_splicer.golden_intake_compile.v2",
+  "cases": [
+    {
+      "id": "plant_watering_usb",
+      "intake": "plant_watering_brief.json",
+      "expected_build_id": "automatic_plant_watering",
+      "expected_power_topology": "usb_5v",
+      "min_modules": 4,
+      "min_wires": 8
+    },
+    {
+      "id": "rover_drive",
+      "intake": "rover_brief.json",
+      "expected_build_id": "robot_drive_base",
+      "min_modules": 4,
+      "min_wires": 6
+    },
+    {
+      "id": "fan_controller",
+      "intake": "fan_controller_brief.json",
+      "expected_build_id": "usb_fume_extractor",
+      "min_modules": 3,
+      "min_wires": 4
+    },
+    {
+      "id": "room_display",
+      "intake": "room_display_brief.json",
+      "expected_build_id": "room_display_station",
+      "expected_power_topology": "usb_5v",
+      "min_modules": 4,
+      "min_wires": 10
+    },
+    {
+      "id": "sensor_logger",
+      "intake": "sensor_logger_brief.json",
+      "expected_build_id": "sensor_logger",
+      "expected_power_topology": "usb_5v",
+      "min_modules": 3,
+      "min_wires": 6
+    },
+    {
+      "id": "smart_relay",
+      "intake": "smart_relay_brief.json",
+      "expected_build_id": "smart_relay_box",
+      "expected_power_topology": "usb_5v",
+      "min_modules": 3,
+      "min_wires": 4
+    },
+    {
+      "id": "scratch_compose",
+      "intake": "scratch_compose_brief.json",
+      "expected_build_id": "generic_low_voltage_build",
+      "min_modules": 3,
+      "min_wires": 3
+    }
+  ],
+  "catalog_direct": [
+    {"id": "catalog_automatic_plant_watering", "build_id": "automatic_plant_watering"},
+    {"id": "catalog_automatic_plant_watering_usb", "build_id": "automatic_plant_watering_usb"},
+    {"id": "catalog_bench_power_adapter", "build_id": "bench_power_adapter"},
+    {"id": "catalog_camera_ir_light_or_sensor_mount", "build_id": "camera_ir_light_or_sensor_mount"},
+    {"id": "catalog_generic_low_voltage_build", "build_id": "generic_low_voltage_build"},
+    {"id": "catalog_indicator_or_task_light", "build_id": "indicator_or_task_light"},
+    {"id": "catalog_inspection_motion_fixture", "build_id": "inspection_motion_fixture"},
+    {"id": "catalog_low_voltage_motor_test_jig", "build_id": "low_voltage_motor_test_jig"},
+    {"id": "catalog_network_status_indicator", "build_id": "network_status_indicator"},
+    {"id": "catalog_plotter_motion_stage", "build_id": "plotter_motion_stage"},
+    {"id": "catalog_robot_drive_base", "build_id": "robot_drive_base"},
+    {"id": "catalog_room_display_station", "build_id": "room_display_station"},
+    {"id": "catalog_salvaged_input_panel", "build_id": "salvaged_input_panel"},
+    {"id": "catalog_sensor_logger", "build_id": "sensor_logger"},
+    {"id": "catalog_small_audio_amp_box", "build_id": "small_audio_amp_box"},
+    {"id": "catalog_smart_relay_box", "build_id": "smart_relay_box"},
+    {"id": "catalog_usb_fume_extractor", "build_id": "usb_fume_extractor"},
+    {"id": "catalog_usb_uart_debug_adapter", "build_id": "usb_uart_debug_adapter"}
+  ]
+}

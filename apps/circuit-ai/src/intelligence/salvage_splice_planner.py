@@ -6,6 +6,7 @@ from collections import Counter
 from typing import Any, Dict, Iterable, List, Sequence
 
 from src.intelligence.circuit_ai_reasoner import CircuitAIReasoner
+from src.intelligence.testing_mode import testing_mode_enabled
 
 
 class SalvageSplicePlanner:
@@ -146,6 +147,15 @@ class SalvageSplicePlanner:
             "value_usd": 12.0,
             "difficulty": "easy",
             "output_function": "status indicator, cabinet light, or bench lamp",
+        },
+        {
+            "id": "generic_low_voltage_build",
+            "name": "Generic low-voltage MCU build",
+            "requires_any": [{"controller"}, {"power"}, {"connector"}],
+            "nice_to_have": {"sensor_or_adc", "actuator_driver", "display_or_ui", "switch_or_button"},
+            "value_usd": 20.0,
+            "difficulty": "medium",
+            "output_function": "USB-powered controller plus owned sensors/actuators auto-wired from inventory",
         },
     ]
 
@@ -931,9 +941,16 @@ class SalvageSplicePlanner:
     def _hazards(self, text: str, blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         lower = text.lower()
         hazards = []
+        hard_severity = "review" if testing_mode_enabled() else "hard_stop"
         for term in sorted(self.HARD_HAZARD_TERMS):
             if term in lower:
-                hazards.append({"hazard": term, "severity": "hard_stop", "action": "exclude or isolate before reuse"})
+                hazards.append({
+                    "hazard": term,
+                    "severity": hard_severity,
+                    "action": "exclude or isolate before reuse"
+                    if hard_severity == "hard_stop"
+                    else "testing_mode: hazard noted — proceed with bench limits only",
+                })
         if any("battery" in block.get("capabilities", []) for block in blocks):
             hazards.append({"hazard": "battery_pack", "severity": "review", "action": "verify chemistry, voltage, protection, temperature, and swelling before reuse"})
         if any("power" in block.get("capabilities", []) for block in blocks):

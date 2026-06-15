@@ -26,8 +26,6 @@ const BOARD_MARGIN = 3;
 // Single row: nothing is ever "below" another module, so escape jogs and net
 // rails reach the channel band without crossing a footprint.
 const COLS = Number.MAX_SAFE_INTEGER;
-// Tall devkits: custom pad maps are accurate but side-channel escapes cross dense pin fields.
-const CUSTOM_PAD_BLOCKLIST = new Set(["esp32-devkit", "rpi-pico", "arduino-nano"]);
 
 type PadLayoutKind = "dual" | "row" | "general";
 
@@ -40,6 +38,9 @@ type Placed = {
   /** footprint outline half-widths */
   hw: number;
   hh: number;
+  /** world-space pad envelope (for escape channels outside real pads) */
+  padMinX: number;
+  padMaxX: number;
   /** map from pinId to world-space (mm) pad position */
   padPos: Map<string, { x: number; y: number }>;
   /** pin order used for net assignment */
@@ -58,17 +59,6 @@ function detectPadLayout(padDefs: ModulePadDef[]): PadLayoutKind {
   const hasRight = padDefs.some((p) => p.x > PITCH * 0.25);
   if (hasLeft && hasRight && ySpan >= PITCH * 0.5) return "dual";
   return "general";
-}
-
-/** True when left/right columns each have unique Y (safe for side-channel router). */
-function padsAreDualRoutable(padDefs: ModulePadDef[]): boolean {
-  if (detectPadLayout(padDefs) !== "dual") return false;
-  const left = padDefs.filter((p) => p.x < -0.05);
-  const right = padDefs.filter((p) => p.x > 0.05);
-  if (!left.length || !right.length) return false;
-  const uniqueY = (pads: ModulePadDef[]) =>
-    new Set(pads.map((p) => Math.round(p.y / 0.05))).size === pads.length;
-  return uniqueY(left) && uniqueY(right);
 }
 
 function syntheticDualColumnPads(
@@ -147,10 +137,7 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
     const spec = findModule(node.moduleId);
     if (!spec) continue;
     const padDefs = resolveModulePads(spec.id, spec) ?? [];
-    const useCustomPads =
-      padDefs.length > 0 &&
-      padsAreDualRoutable(padDefs) &&
-      !CUSTOM_PAD_BLOCKLIST.has(spec.id);
+    const useCustomPads = padDefs.length > 0;
     const half = Math.ceil(spec.pins.length / 2);
     const rows = half;
     const padW = 2 * PITCH;
@@ -178,6 +165,9 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
       ({ padPos, pinOrder } = syntheticDualColumnPads(spec, centerX, centerY));
     }
 
+    const padXs = [...padPos.values()].map((p) => p.x);
+    const padMinX = Math.min(...padXs);
+    const padMaxX = Math.max(...padXs);
     placed.push({
       nodeId: node.id,
       spec,
@@ -185,6 +175,8 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
       y: centerY,
       hw: footprintW / 2,
       hh: footprintH / 2,
+      padMinX,
+      padMaxX,
       padPos,
       pinOrder,
       padLayout,
@@ -268,15 +260,20 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
   // Ensure unique names if collisions happen (e.g. two GND clusters)
   const seen = new Map<string, number>();
   for (const net of rootToNet.values()) {
-    const c = seen.get(net.name) ?? 0;
-    if (c > 0) net.name = `${net.name}-${c + 1}`;
-    seen.set(net.name, c + 1);
+    const base = net.name;
+    const c = seen.get(base) ?? 0;
+    if (c > 0) net.name = `${base}-${c + 1}`;
+    seen.set(base, c + 1);
   }
 
   // --- 4) Build footprints with pads ---
   const footprints: PcbGeometry["footprints"] = placed.map((p, idx) => {
+    const padDefs = resolveModulePads(p.spec.id, p.spec) ?? [];
     const pads: PcbPad[] = p.pinOrder.map((pinId, i) => {
-      const pos = p.padPos.get(pinId)!;
+      const def = padDefs.find((d) => d.pinId === pinId);
+      const pos = def
+        ? { x: p.x + def.x, y: p.y + def.y }
+        : p.padPos.get(pinId)!;
       const netKey = `${p.nodeId}|${pinId}`;
       const root = roots.get(netKey) ?? netKey;
       const net = rootToNet.get(root) ?? { id: 0, name: "" };
@@ -303,6 +300,10 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
   });
 
   // --- 5) Correct-by-construction 2-layer router -------------------------
+  // Pad positions always come from module-footprints.ts. Escapes are per-pad:
+  // row footprints and same-Y side groups jog down on F.Cu (unique X per pad)
+  // before any shared horizontal; dual-column footprints use side channels
+  // when each pad Y is unique on that side.
   //
   // The previous router drew every trace on F.Cu with a cosmetic lane offset,
   // so different nets crossed and shorted. This one is short-free by
@@ -346,41 +347,57 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
   const kOf = new Map<string, number>();
   orderedRoots.forEach((r, i) => kOf.set(r, i));
 
-  // Modules are a single row, so the band below every footprint is empty.
-  const railY0 = maxY + GAP;
+  let routedPadCount = 0;
+  for (const pl of placed) {
+    for (const pid of pl.pinOrder) {
+      const root = roots.get(`${pl.nodeId}|${pid}`);
+      if (root != null && kOf.has(root) && (netSize.get(root) ?? 0) >= 2) routedPadCount += 1;
+    }
+  }
+  let globalBusSlot = 0;
+  const nextBusY = () => {
+    const y = maxY + 2 + globalBusSlot * TRK;
+    globalBusSlot += 1;
+    return y;
+  };
+  const railY0 = maxY + 2 + routedPadCount * TRK + GAP;
   const railY = (k: number) => railY0 + k * TRK;
-  // Convergence columns sit to the right of every module and every channel.
-  const lastRight = placed.reduce((m, p) => Math.max(m, p.x + p.hw), -Infinity);
-  const convX0 = lastRight + MODULE_GAP + GAP;
+  const lastRight = placed.reduce(
+    (m, p) => Math.max(m, p.padMaxX + PAD_SIZE / 2, p.x + p.hw),
+    -Infinity,
+  );
+  let bCuColSlot = 0;
+  const allocBCuX = () => {
+    const x = lastRight + MODULE_GAP + 2 + bCuColSlot * TRK;
+    bCuColSlot += 1;
+    return x;
+  };
+  const convX0 = lastRight + MODULE_GAP + GAP + routedPadCount * TRK;
   const convX = (k: number) => convX0 + k * TRK;
 
-  // Pads escape via the nearest free edge channel (left / right / bottom).
-  // Row/quad/custom layouts from module-footprints.ts use bottom or per-edge
-  // channels so F.Cu hops never cut through foreign pads.
   const HALF = MODULE_GAP / 2;
   let routeMinX = Infinity;
   let routeMaxX = -Infinity;
   let routeMaxY = -Infinity;
+  const yEq = (a: number, b: number) => Math.abs(a - b) < 0.05;
 
   const finishFromChannel = (
     at: { x: number; y: number },
-    laneX: number,
     net: { id: number; name: string },
     tag: { id: number; name: string },
     k: number,
   ) => {
+    const dropX = allocBCuX();
     const ry = railY(k);
     const cx = convX(k);
-    if (at.x !== laneX) {
-      seg(at, { x: laneX, y: at.y }, "F.Cu", tag);
-    }
-    via(laneX, at.y, net);
-    seg({ x: laneX, y: at.y }, { x: laneX, y: ry }, "B.Cu", tag);
-    via(laneX, ry, net);
-    seg({ x: laneX, y: ry }, { x: cx, y: ry }, "F.Cu", tag);
+    if (at.x !== dropX) seg(at, { x: dropX, y: at.y }, "F.Cu", tag);
+    via(dropX, at.y, net);
+    seg({ x: dropX, y: at.y }, { x: dropX, y: ry }, "B.Cu", tag);
+    via(dropX, ry, net);
+    seg({ x: dropX, y: ry }, { x: cx, y: ry }, "F.Cu", tag);
     via(cx, ry, net);
-    routeMinX = Math.min(routeMinX, laneX, at.x, cx);
-    routeMaxX = Math.max(routeMaxX, laneX, at.x, cx);
+    routeMinX = Math.min(routeMinX, dropX, at.x, cx);
+    routeMaxX = Math.max(routeMaxX, dropX, at.x, cx);
     routeMaxY = Math.max(routeMaxY, ry, at.y);
   };
 
@@ -391,7 +408,9 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
 
     for (const pid of pl.pinOrder) {
       const pos = pl.padPos.get(pid)!;
-      if (pl.padLayout === "general") {
+      if (pl.padLayout === "row") {
+        bottomPads.push({ pid, x: pos.x, y: pos.y });
+      } else if (pl.padLayout === "general") {
         const edge = pickEscapeEdge(pos, pl, pl.padLayout);
         if (edge === "left") leftPads.push({ pid, y: pos.y });
         else if (edge === "right") rightPads.push({ pid, y: pos.y });
@@ -403,49 +422,89 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
 
     const routeSide = (
       side: Array<{ pid: string; y: number }>,
-      chLo: number,
-      chHi: number,
+      outward: "left" | "right",
     ) => {
-      const m = side.length;
-      side.forEach(({ pid }, idx) => {
+      const routed = side.filter(({ pid }) => {
+        const root = roots.get(`${pl.nodeId}|${pid}`);
+        return root != null && kOf.has(root) && (netSize.get(root) ?? 0) >= 2;
+      });
+      const m = routed.length;
+      const padEdge = outward === "right"
+        ? pl.padMaxX + PAD_SIZE / 2
+        : pl.padMinX - PAD_SIZE / 2;
+      const chLo = outward === "right" ? padEdge + 0.6 : padEdge - HALF + 0.6;
+      const chHi = outward === "right" ? padEdge + HALF - 0.6 : padEdge - 0.6;
+      let idx = 0;
+      for (const { pid, y } of routed) {
         const key = `${pl.nodeId}|${pid}`;
-        const root = roots.get(key);
-        if (root == null) return;
-        const k = kOf.get(root);
-        if (k == null) return;
+        const root = roots.get(key)!;
+        const k = kOf.get(root)!;
         const net = rootToNet.get(root)!;
         const tag = { id: net.id, name: net.name };
         const p = pl.padPos.get(pid)!;
-        const laneX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
-        finishFromChannel(p, laneX, net, tag, k);
-      });
+        const escapeX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
+        idx += 1;
+
+        let hopY = p.y;
+        const sameY = routed.filter((s) => yEq(s.y, y));
+        if (sameY.length > 1) {
+          const tier = sameY.findIndex((s) => s.pid === pid);
+          const bump =
+            (tier % 2 === 0 ? -1.3 : 1.3) * (Math.floor(tier / 2) + 1);
+          hopY = p.y + bump;
+        }
+        const stageY = nextBusY();
+        if (!yEq(p.y, hopY)) seg(p, { x: p.x, y: hopY }, "F.Cu", tag);
+        if (p.x !== escapeX) seg({ x: p.x, y: hopY }, { x: escapeX, y: hopY }, "F.Cu", tag);
+        if (!yEq(hopY, stageY)) {
+          via(escapeX, hopY, net);
+          seg({ x: escapeX, y: hopY }, { x: escapeX, y: stageY }, "B.Cu", tag);
+          via(escapeX, stageY, net);
+        }
+        finishFromChannel({ x: escapeX, y: stageY }, net, tag, k);
+      }
     };
 
     const routeBottom = (side: Array<{ pid: string; x: number; y: number }>) => {
-      const m = side.length;
-      const chLo = pl.x - pl.hw - HALF + 1.0;
-      const chHi = pl.x + pl.hw + HALF - 1.0;
-      side.forEach(({ pid }, idx) => {
+      const routed = side.filter(({ pid }) => {
+        const root = roots.get(`${pl.nodeId}|${pid}`);
+        return root != null && kOf.has(root) && (netSize.get(root) ?? 0) >= 2;
+      });
+      const m = routed.length;
+      const chLo = pl.padMinX - PAD_SIZE / 2 - HALF + 0.6;
+      const chHi = pl.padMaxX + PAD_SIZE / 2 + HALF - 0.6;
+      let idx = 0;
+      for (const { pid } of routed) {
         const key = `${pl.nodeId}|${pid}`;
-        const root = roots.get(key);
-        if (root == null) return;
-        const k = kOf.get(root);
-        if (k == null) return;
+        const root = roots.get(key)!;
+        const k = kOf.get(root)!;
         const net = rootToNet.get(root)!;
         const tag = { id: net.id, name: net.name };
         const p = pl.padPos.get(pid)!;
-        const stripY = pl.y + pl.hh + 1.2 + idx * TRK;
-        const laneX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
+        const stageY = nextBusY();
+        const escapeX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
+        idx += 1;
 
-        seg(p, { x: p.x, y: stripY }, "F.Cu", tag);
-        finishFromChannel({ x: p.x, y: stripY }, laneX, net, tag, k);
-      });
+        let hopY = p.y;
+        if (routed.filter((s) => yEq(s.y, p.y)).length > 1) {
+          const tier = idx - 1;
+          const bump =
+            (tier % 2 === 0 ? -1.3 : 1.3) * (Math.floor(tier / 2) + 1);
+          hopY = p.y + bump;
+        }
+        if (!yEq(p.y, hopY)) seg(p, { x: p.x, y: hopY }, "F.Cu", tag);
+        if (p.x !== escapeX) seg({ x: p.x, y: hopY }, { x: escapeX, y: hopY }, "F.Cu", tag);
+        if (!yEq(hopY, stageY)) {
+          via(escapeX, hopY, net);
+          seg({ x: escapeX, y: hopY }, { x: escapeX, y: stageY }, "B.Cu", tag);
+          via(escapeX, stageY, net);
+        }
+        finishFromChannel({ x: escapeX, y: stageY }, net, tag, k);
+      }
     };
 
-    const rEdge = pl.x + pl.hw;
-    const lEdge = pl.x - pl.hw;
-    routeSide(rightPads, rEdge + 1.0, rEdge + HALF - 1.0);
-    routeSide(leftPads, lEdge - HALF + 1.0, lEdge - 1.0);
+    routeSide(rightPads, "right");
+    routeSide(leftPads, "left");
     routeBottom(bottomPads);
   }
   // Every pad of net k terminates at the identical point (convX(k),railY(k)),

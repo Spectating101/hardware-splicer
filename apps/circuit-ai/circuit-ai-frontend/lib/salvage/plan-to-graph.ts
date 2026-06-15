@@ -15,7 +15,13 @@
 // Pure, deterministic, no deps. Pin names match lib/modules/module-library.
 
 import type { BuildGraph } from "@/lib/rules/safety-rules";
-import { findModulesByCapabilities, type ModuleSpec } from "@/lib/modules/module-library";
+import {
+  findModule,
+  findModulesByCapabilities,
+  type ModulePin,
+  type ModuleSpec,
+} from "@/lib/modules/module-library";
+import { adaptRecipeToInventory } from "./inventory-topology";
 
 // Mirror of the backend BUILD_CATALOG (src/intelligence/salvage_splice_planner.py)
 // — used as a fall-back when no hand-curated recipe matches the build_id.
@@ -31,6 +37,7 @@ const BUILD_CATALOG_CAPS: Record<string, string[][]> = {
   plotter_motion_stage: [["mechanical_motion"], ["switch_or_button", "sensor_or_adc"], ["power"]],
   smart_relay_box: [["controller"], ["actuator_driver"], ["power"]],
   sensor_logger: [["controller"], ["sensor_or_adc"], ["power"]],
+  room_display_station: [["controller"], ["sensor_or_adc"], ["display_or_ui"], ["power"]],
   network_status_indicator: [["wireless", "network_interface"], ["display_or_ui", "led_or_light"], ["power"]],
   small_audio_amp_box: [["speaker_or_audio"], ["power"], ["switch_or_button", "connector"]],
   salvaged_input_panel: [["switch_or_button"], ["connector"], ["power", "controller"]],
@@ -38,6 +45,7 @@ const BUILD_CATALOG_CAPS: Record<string, string[][]> = {
   bench_power_adapter: [["power"], ["connector"]],
   usb_uart_debug_adapter: [["usb_serial"], ["connector"]],
   indicator_or_task_light: [["led_or_light"], ["power"]],
+  generic_low_voltage_build: [["controller"], ["power"], ["connector"]],
 };
 
 /** Pick one module per requirement group (set-cover) — fallback composer. */
@@ -53,6 +61,374 @@ function pickModulesForRequirements(reqAny: string[][]): ModuleSpec[] {
     chosenIds.add(candidates[0].id);
   }
   return chosen;
+}
+
+function pinByRole(mod: ModuleSpec, role: ModulePin["role"]): string | undefined {
+  return mod.pins.find((p) => p.role === role)?.id;
+}
+
+function mcuPowerInPin(mod: ModuleSpec): string | undefined {
+  return mod.pins.find((p) => p.id === "VIN")?.id
+    ?? mod.pins.find((p) => p.id === "VBUS")?.id
+    ?? mod.pins.find((p) => p.id === "5V")?.id
+    ?? pinByRole(mod, "power_in");
+}
+
+function powerOutPin(mod: ModuleSpec): string | undefined {
+  return mod.pins.find((p) => p.id === "V+")?.id
+    ?? mod.pins.find((p) => p.role === "power_out")?.id
+    ?? pinByRole(mod, "power_in");
+}
+
+function firstPin(mod: ModuleSpec, pred: (p: ModulePin) => boolean): string | undefined {
+  return mod.pins.find(pred)?.id;
+}
+
+function allocGpio(mcu: ModuleSpec, used: Set<string>): string | undefined {
+  const order = [
+    "GPIO4", "GPIO2", "GPIO16", "GPIO17", "GP4", "GP5", "GP0", "GP1", "GP26",
+    "D2", "D3", "A0", "A1", "A2", "A3", "A4", "A5",
+  ];
+  for (const id of order) {
+    if (mcu.pins.some((p) => p.id === id) && !used.has(id)) {
+      used.add(id);
+      return id;
+    }
+  }
+  const fallback = mcu.pins.find(
+    (p) => (p.role === "digital_io" || p.role === "pwm" || p.role === "analog_in") && !used.has(p.id),
+  );
+  if (fallback) used.add(fallback.id);
+  return fallback?.id;
+}
+
+/** Heuristic auto-wiring for capability-matched or inventory-composed module sets. */
+function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
+  const roles = modules.map((m, i) => ({ role: `m${i + 1}`, moduleId: m.id }));
+  const roleOf = new Map(modules.map((m, i) => [m.id, `m${i + 1}`]));
+  const wires: Wire[] = [];
+  const wireKeys = new Set<string>();
+  const wire = (fromId: string, fromPin: string, toId: string, toPin: string) => {
+    const fr = roleOf.get(fromId);
+    const tr = roleOf.get(toId);
+    if (!fr || !tr) return;
+    const key = `${fr}:${fromPin}->${tr}:${toPin}`;
+    const rev = `${tr}:${toPin}->${fr}:${fromPin}`;
+    if (wireKeys.has(key) || wireKeys.has(rev)) return;
+    wireKeys.add(key);
+    wires.push({ from: { role: fr, pin: fromPin }, to: { role: tr, pin: toPin } });
+  };
+
+  const barrel = modules.find((m) => m.id === "dc-barrel-12v");
+  const usb = modules.find((m) => /usb-power/.test(m.id));
+  const buck = modules.find((m) => /buck/.test(m.id));
+  const ldo = modules.find((m) => /ldo-ams1117/.test(m.id));
+  const power = usb ?? barrel ?? modules.find((m) => m.category === "power");
+  const mcu = modules.find((m) => m.category === "mcu");
+  const gndPin = (m: ModuleSpec) => pinByRole(m, "gnd");
+  const usedGpio = new Set<string>();
+
+  if (barrel && buck) {
+    wire(barrel.id, "V+", buck.id, "IN+");
+    wire(barrel.id, "GND", buck.id, "IN-");
+  }
+  if (buck && power && power.id !== buck.id) {
+    const pOut = powerOutPin(power) ?? firstPin(power, (p) => p.role === "power_in");
+    const pGnd = gndPin(power);
+    if (pOut) wire(power.id, pOut, buck.id, "IN+");
+    if (pGnd) wire(power.id, pGnd, buck.id, "IN-");
+  }
+  if (power && mcu) {
+    const pOut = powerOutPin(power);
+    const mIn = mcuPowerInPin(mcu);
+    const gnd = gndPin(power);
+    const mGnd = gndPin(mcu);
+    if (pOut && mIn) wire(power.id, pOut, mcu.id, mIn);
+    if (gnd && mGnd) wire(power.id, gnd, mcu.id, mGnd);
+  }
+  if (barrel && ldo && !buck) {
+    wire(barrel.id, "V+", ldo.id, "VIN");
+    wire(barrel.id, "GND", ldo.id, "GND");
+  }
+
+  const railPos = buck
+    ? { id: buck.id, pin: "OUT+" }
+    : ldo
+      ? { id: ldo.id, pin: "VOUT" }
+      : usb
+        ? { id: usb.id, pin: powerOutPin(usb) ?? "5V" }
+        : mcu
+          ? { id: mcu.id, pin: mcu.pins.find((p) => p.id === "5V")?.id ?? "3V3" }
+          : null;
+  const railGnd = buck
+    ? { id: buck.id, pin: "OUT-" }
+    : ldo
+      ? { id: ldo.id, pin: "GND" }
+      : usb && gndPin(usb)
+        ? { id: usb.id, pin: gndPin(usb)! }
+        : mcu && gndPin(mcu)
+          ? { id: mcu.id, pin: gndPin(mcu)! }
+          : null;
+
+  const mcuSda = mcu?.pins.find((p) => p.role === "i2c_sda")?.id;
+  const mcuScl = mcu?.pins.find((p) => p.role === "i2c_scl")?.id;
+  const mcuVout = mcu?.pins.find((p) => p.id === "3V3")?.id ?? mcu?.pins.find((p) => p.id === "5V")?.id;
+  const levelShifter = modules.find((m) => /level-shifter/.test(m.id));
+  const loadSwitch = modules.find((m) => /mosfet-irlz44n|mosfet-irf520/.test(m.id));
+
+  if (levelShifter && mcu && railPos && railGnd) {
+    const hvRail = firstPin(levelShifter, (p) => p.id === "HV");
+    const lvRail = firstPin(levelShifter, (p) => p.id === "LV");
+    const shGnd = gndPin(levelShifter);
+    if (hvRail && railPos) wire(railPos.id, railPos.pin, levelShifter.id, hvRail);
+    if (shGnd && railGnd) wire(railGnd.id, railGnd.pin, levelShifter.id, shGnd);
+    if (lvRail && mcuVout) wire(mcu.id, mcuVout, levelShifter.id, lvRail);
+    if (shGnd && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, levelShifter.id, shGnd);
+  }
+
+  const switchedLoads = new Set(["water_pump_5v", "cooling_fan_5v"]);
+
+  for (const dev of modules) {
+    if ([power, mcu, barrel, buck, ldo, levelShifter].filter(Boolean).includes(dev)) continue;
+    const devGnd = gndPin(dev);
+    if (mcu && devGnd && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, dev.id, devGnd);
+    else if (railGnd && devGnd) wire(railGnd.id, railGnd.pin, dev.id, devGnd);
+
+    const devVccPin = dev.pins.find((p) => p.id === "VCC" || p.id === "VIN" || p.role === "power_in");
+    const devVcc = devVccPin?.id;
+    const wants5V = (dev.inputVoltageRange?.[0] ?? 0) >= 4.5
+      || /5\s*v/i.test(devVccPin?.voltage ?? "");
+    const viaSwitch = loadSwitch && switchedLoads.has(dev.id) && devVcc;
+    if (viaSwitch) {
+      if (railPos) wire(railPos.id, railPos.pin, loadSwitch!.id, "VIN");
+      if (railGnd) wire(railGnd.id, railGnd.pin, loadSwitch!.id, "VIN-");
+      wire(loadSwitch!.id, "VOUT+", dev.id, devVcc);
+      if (gndPin(loadSwitch!) && devGnd) wire(loadSwitch!.id, gndPin(loadSwitch!)!, dev.id, devGnd);
+    } else if (wants5V && railPos && devVcc) {
+      wire(railPos.id, railPos.pin, dev.id, devVcc);
+    } else if (mcu && mcuVout && devVcc) {
+      wire(mcu.id, mcuVout, dev.id, devVcc);
+    } else if (railPos && devVcc) {
+      wire(railPos.id, railPos.pin, dev.id, devVcc);
+    }
+
+    const devSda = dev.pins.find((p) => p.role === "i2c_sda")?.id;
+    const devScl = dev.pins.find((p) => p.role === "i2c_scl")?.id;
+    if (mcu && mcuSda && mcuScl && devSda && devScl) {
+      wire(mcu.id, mcuSda, dev.id, devSda);
+      wire(mcu.id, mcuScl, dev.id, devScl);
+    }
+
+    if (mcu && /mosfet/.test(dev.id)) {
+      const sig = allocGpio(mcu, usedGpio);
+      const vin = firstPin(dev, (p) => p.id === "VIN");
+      const gnd = firstPin(dev, (p) => p.role === "gnd");
+      if (sig && firstPin(dev, (p) => p.id === "SIG")) wire(mcu.id, sig, dev.id, "SIG");
+      if (railPos && vin) wire(railPos.id, railPos.pin, dev.id, vin);
+      if (railGnd && gnd) wire(railGnd.id, railGnd.pin, dev.id, gnd);
+    }
+    if (mcu && dev.id === "relay-1ch-5v") {
+      const sig = allocGpio(mcu, usedGpio);
+      if (sig) wire(mcu.id, sig, dev.id, "IN");
+    }
+    if (mcu && dev.id === "l298n") {
+      const in1 = allocGpio(mcu, usedGpio);
+      const in2 = allocGpio(mcu, usedGpio);
+      if (in1) wire(mcu.id, in1, dev.id, "IN1");
+      if (in2) wire(mcu.id, in2, dev.id, "IN2");
+      if (railPos) wire(railPos.id, railPos.pin, dev.id, "VCC");
+      if (mcu && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, dev.id, "GND");
+    }
+    if (mcu && dev.id === "a4988-stepper") {
+      const step = allocGpio(mcu, usedGpio);
+      const dir = allocGpio(mcu, usedGpio);
+      if (step) wire(mcu.id, step, dev.id, "STEP");
+      if (dir) wire(mcu.id, dir, dev.id, "DIR");
+      if (mcuVout) wire(mcu.id, mcuVout, dev.id, "VDD");
+      if (railPos) wire(railPos.id, railPos.pin, dev.id, "VMOT");
+      if (mcu && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, dev.id, "GND_LOGIC");
+      if (railGnd) wire(railGnd.id, railGnd.pin, dev.id, "GND_MOTOR");
+    }
+    if (mcu && dev.id === "sg90") {
+      const sig = allocGpio(mcu, usedGpio);
+      if (sig) wire(mcu.id, sig, dev.id, "SIG");
+    }
+    if (mcu && dev.id === "hc-sr04") {
+      const trig = allocGpio(mcu, usedGpio);
+      const echo = allocGpio(mcu, usedGpio);
+      if (levelShifter && trig && echo) {
+        wire(mcu.id, trig, levelShifter.id, "LV1");
+        wire(levelShifter.id, "HV1", dev.id, "TRIG");
+        wire(dev.id, "ECHO", levelShifter.id, "HV2");
+        wire(levelShifter.id, "LV2", mcu.id, echo);
+      } else {
+        if (trig) wire(mcu.id, trig, dev.id, "TRIG");
+        if (echo) wire(mcu.id, echo, dev.id, "ECHO");
+      }
+    }
+    if (mcu && dev.id === "dht22") {
+      const data = allocGpio(mcu, usedGpio);
+      if (data) wire(mcu.id, data, dev.id, "DATA");
+    }
+    if (mcu && dev.id === "soil_moisture") {
+      const ao = allocGpio(mcu, usedGpio);
+      if (ao) wire(mcu.id, ao, dev.id, "A0");
+    }
+    if (mcu && dev.id === "limit-switch-3pin") {
+      const sig = allocGpio(mcu, usedGpio);
+      if (sig) wire(mcu.id, sig, dev.id, "SIG");
+    }
+    if (mcu && /ili9341|st7735/.test(dev.id)) {
+      const pickMcuPin = (preferred: string[], devPinId: string) => {
+        for (const p of preferred) {
+          if (mcu!.pins.some((pin) => pin.id === p) && !usedGpio.has(p)) {
+            usedGpio.add(p);
+            wire(mcu!.id, p, dev.id, devPinId);
+            return;
+          }
+        }
+        const sig = allocGpio(mcu, usedGpio);
+        if (sig) wire(mcu.id, sig, dev.id, devPinId);
+      };
+      const mosiPin = dev.pins.find((p) => p.role === "spi_mosi" || p.id === "SDI" || p.id === "SDA")?.id;
+      const sckPin = dev.pins.find((p) => p.role === "spi_sck" || p.id === "SCK" || p.id === "SCL")?.id;
+      const csPin = dev.pins.find((p) => p.role === "spi_cs" || p.id === "CS")?.id;
+      const rstPin = dev.pins.find((p) => p.id === "RST" || p.id === "RES")?.id;
+      const dcPin = dev.pins.find((p) => p.id === "DC")?.id;
+      if (mosiPin) pickMcuPin(["GPIO23", "GPIO21", "GPIO17"], mosiPin);
+      if (sckPin) pickMcuPin(["GPIO18", "GPIO22", "GPIO5"], sckPin);
+      if (csPin) pickMcuPin(["GPIO15", "GPIO4", "GPIO2"], csPin);
+      if (rstPin) pickMcuPin(["GPIO2", "GPIO4", "GPIO16"], rstPin);
+      if (dcPin) pickMcuPin(["GPIO4", "GPIO16", "GPIO17"], dcPin);
+      if (railPos && dev.pins.find((p) => p.id === "VCC")) {
+        wire(railPos.id, railPos.pin, dev.id, "VCC");
+      }
+    }
+    if (mcu && dev.id === "max98357a-i2s-amp") {
+      const bclk = mcu.pins.find((p) => p.id === "GPIO22" || p.role === "i2c_scl")?.id;
+      const lrc = mcu.pins.find((p) => p.id === "GPIO21" || p.role === "i2c_sda")?.id;
+      const din = allocGpio(mcu, usedGpio);
+      if (mcuVout) wire(mcu.id, mcuVout, dev.id, "VIN");
+      if (mcu && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, dev.id, "GND");
+      if (bclk) wire(mcu.id, bclk, dev.id, "BCLK");
+      if (lrc) wire(mcu.id, lrc, dev.id, "LRC");
+      if (din) wire(mcu.id, din, dev.id, "DIN");
+    }
+    if (power && dev.id === "esp32-cam-module") {
+      const pOut = powerOutPin(power);
+      const gnd = gndPin(power);
+      if (pOut) wire(power.id, pOut, dev.id, "5V");
+      if (gnd && gndPin(dev)) wire(power.id, gnd, dev.id, "GND");
+    }
+
+    if (mcu) {
+      const wiredPins = new Set(
+        wires
+          .filter((w) => w.from.role === roleOf.get(dev.id) || w.to.role === roleOf.get(dev.id))
+          .flatMap((w) => [w.from.pin, w.to.pin]),
+      );
+      const analog = dev.pins.find((p) => p.role === "analog_in" && !wiredPins.has(p.id));
+      if (analog) {
+        const mcuAnalog = mcu.pins.find((p) => p.role === "analog_in")?.id ?? allocGpio(mcu, usedGpio);
+        if (mcuAnalog) wire(mcu.id, mcuAnalog, dev.id, analog.id);
+      } else {
+        const digital = dev.pins.find(
+          (p) => (p.role === "digital_io" || p.role === "digital_in" || p.role === "digital_out")
+            && p.id !== "VCC"
+            && !wiredPins.has(p.id),
+        );
+        if (digital) {
+          const sig = allocGpio(mcu, usedGpio);
+          if (sig) wire(mcu.id, sig, dev.id, digital.id);
+        }
+      }
+    }
+  }
+
+  return {
+    modules: roles,
+    wires,
+    notes: ["Auto-wired via inventory/capability composer — review pins before fab."],
+  };
+}
+
+/** Materialize a Recipe into a BuildGraph. */
+export function recipeToBuildGraph(recipe: Recipe): BuildGraph {
+  const idOf = new Map<string, string>();
+  const nodes = recipe.modules.map((m, i) => {
+    const nodeId = `n${i + 1}`;
+    idOf.set(m.role, nodeId);
+    return { id: nodeId, moduleId: m.moduleId };
+  });
+  const wires = recipe.wires.flatMap((w, i) => {
+    const from = idOf.get(w.from.role);
+    const to = idOf.get(w.to.role);
+    if (!from || !to) return [];
+    return [{
+      id: `w${i + 1}`,
+      from: { nodeId: from, pinId: w.from.pin },
+      to: { nodeId: to, pinId: w.to.pin },
+    }];
+  });
+  return { nodes, wires };
+}
+
+/** Auto-wire canvas nodes while preserving their ReactFlow node ids. */
+export function composeBuildGraphFromCanvasNodes(
+  nodes: Array<{ id: string; moduleId: string }>,
+): BuildGraph {
+  const specs: ModuleSpec[] = [];
+  const nodeIds: string[] = [];
+  for (const node of nodes) {
+    const spec = findModule(node.moduleId);
+    if (!spec) continue;
+    specs.push(spec);
+    nodeIds.push(node.id);
+  }
+  if (specs.length < 2) {
+    return {
+      nodes: nodes.map((n) => ({ id: n.id, moduleId: n.moduleId })),
+      wires: [],
+    };
+  }
+  const recipe = autoWirePickedModules(specs);
+  const roleToNodeId = new Map(
+    recipe.modules.map((m, i) => [m.role, nodeIds[i]] as const),
+  );
+  const buildNodes = nodeIds.map((id, i) => ({ id, moduleId: specs[i].id }));
+  const wires = recipe.wires.flatMap((w, i) => {
+    const fromId = roleToNodeId.get(w.from.role);
+    const toId = roleToNodeId.get(w.to.role);
+    if (!fromId || !toId) return [];
+    return [{
+      id: `w${i + 1}`,
+      from: { nodeId: fromId, pinId: w.from.pin },
+      to: { nodeId: toId, pinId: w.to.pin },
+    }];
+  });
+  return { nodes: buildNodes, wires };
+}
+
+/** Compose and wire a graph from explicit library module ids. */
+export function composeBuildGraphFromModuleIds(moduleIds: string[]): TranslationResult {
+  const modules = moduleIds
+    .map((id) => findModule(id))
+    .filter((m): m is ModuleSpec => !!m);
+  if (modules.length < 2) {
+    return {
+      graph: { nodes: [], wires: [] },
+      buildId: "generic_low_voltage_build",
+      notes: [],
+      warnings: ["Need at least two known module ids to compose a graph."],
+    };
+  }
+  const recipe = autoWirePickedModules(modules);
+  return {
+    graph: recipeToBuildGraph(recipe),
+    buildId: "generic_low_voltage_build",
+    notes: recipe.notes ? [...recipe.notes] : [],
+    warnings: [],
+  };
 }
 
 type Wire = { from: { role: string; pin: string }; to: { role: string; pin: string } };
@@ -251,6 +627,32 @@ const RECIPES: Record<string, Recipe> = {
     notes: ["3V3 from ESP32 feeds the BME280 directly."],
   },
 
+  room_display_station: {
+    modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+      { role: "ui", moduleId: "ili9341_tft" },
+      { role: "sns", moduleId: "dht22" },
+    ],
+    wires: [
+      ...usbToMcu("usb", "mcu", "VIN"),
+      { from: { role: "usb", pin: "V+" }, to: { role: "ui", pin: "VCC" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "ui", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO23" }, to: { role: "ui", pin: "SDI" } },
+      { from: { role: "mcu", pin: "GPIO18" }, to: { role: "ui", pin: "SCK" } },
+      { from: { role: "mcu", pin: "GPIO15" }, to: { role: "ui", pin: "CS" } },
+      { from: { role: "mcu", pin: "GPIO2" }, to: { role: "ui", pin: "RST" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "ui", pin: "DC" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO16" }, to: { role: "sns", pin: "DATA" } },
+    ],
+    notes: [
+      "ILI9341 color TFT on SPI; DHT22 on GPIO16.",
+      "Install TFT_eSPI + DHT libraries — match User_Setup pins to wiring above.",
+    ],
+  },
+
   network_status_indicator: {
     modules: [
       { role: "usb", moduleId: "usb-power-5v" },
@@ -299,26 +701,38 @@ const RECIPES: Record<string, Recipe> = {
       { role: "pwr", moduleId: "dc-barrel-12v" },
       { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "arduino-nano" },
-      { role: "limit", moduleId: "hc-sr04" },
+      { role: "mot_psu", moduleId: "buck-mp1584" },
+      { role: "drv", moduleId: "a4988-stepper" },
+      { role: "lim_x", moduleId: "limit-switch-3pin" },
+      { role: "lim_y", moduleId: "limit-switch-3pin" },
       { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
     ],
     wires: [
+      ...barrelToBuck("pwr", "mot_psu"),
       ...usbToMcu("usb", "mcu", "VIN"),
+      { from: { role: "pwr", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
+      { from: { role: "mot_psu", pin: "OUT+" }, to: { role: "drv", pin: "VMOT" } },
+      { from: { role: "mot_psu", pin: "OUT-" }, to: { role: "drv", pin: "GND_MOTOR" } },
+      { from: { role: "mcu", pin: "5V" }, to: { role: "drv", pin: "VDD" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND_LOGIC" } },
+      { from: { role: "mcu", pin: "D2" }, to: { role: "drv", pin: "STEP" } },
+      { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "DIR" } },
+      { from: { role: "mcu", pin: "5V" }, to: { role: "lim_x", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "lim_x", pin: "GND" } },
+      { from: { role: "mcu", pin: "A0" }, to: { role: "lim_x", pin: "SIG" } },
+      { from: { role: "mcu", pin: "5V" }, to: { role: "lim_y", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "lim_y", pin: "GND" } },
+      { from: { role: "mcu", pin: "A4" }, to: { role: "lim_y", pin: "SIG" } },
       { from: { role: "pwr", pin: "V+" }, to: { role: "svo_psu", pin: "VIN" } },
       { from: { role: "pwr", pin: "GND" }, to: { role: "svo_psu", pin: "GND" } },
-      { from: { role: "pwr", pin: "GND" }, to: { role: "mcu", pin: "GND" } },
-      { from: { role: "mcu", pin: "5V" }, to: { role: "limit", pin: "VCC" } },
-      { from: { role: "mcu", pin: "GND" }, to: { role: "limit", pin: "GND" } },
-      { from: { role: "mcu", pin: "D2" }, to: { role: "limit", pin: "TRIG" } },
-      { from: { role: "mcu", pin: "A0" }, to: { role: "limit", pin: "ECHO" } },
       { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
       { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
-      { from: { role: "mcu", pin: "D3" }, to: { role: "svo", pin: "SIG" } },
+      { from: { role: "mcu", pin: "A5" }, to: { role: "svo", pin: "SIG" } },
     ],
     notes: [
-      "12V barrel feeds servo LDO; USB 5V feeds Arduino.",
-      "HC-SR04 runs from Arduino 5V rail.",
+      "A4988 stepper on motor buck; dual limit switches on A0/A4; tie EN to GND to enable driver.",
+      "12V barrel feeds motor buck + servo LDO; USB 5V feeds Arduino.",
     ],
   },
 
@@ -364,19 +778,20 @@ const RECIPES: Record<string, Recipe> = {
 
   small_audio_amp_box: {
     modules: [
-      { role: "pwr", moduleId: "dc-barrel-12v" },
-      { role: "psu", moduleId: "buck-mp1584" },
-      { role: "drv", moduleId: "mosfet-irlz44n" },
+      { role: "usb", moduleId: "usb-power-5v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+      { role: "amp", moduleId: "max98357a-i2s-amp" },
     ],
     wires: [
-      ...barrelToBuck("pwr", "psu"),
-      { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
-      { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
-      { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
+      ...usbToMcu("usb", "mcu", "VIN"),
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "amp", pin: "VIN" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "amp", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO21" }, to: { role: "amp", pin: "LRC" } },
+      { from: { role: "mcu", pin: "GPIO22" }, to: { role: "amp", pin: "BCLK" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "amp", pin: "DIN" } },
     ],
     notes: [
-      "MOSFET stand-in until a Class-D amp module is added to the library.",
-      "Speaker load on VOUT+/VOUT- with series resistor where needed.",
+      "MAX98357A I2S Class-D mono amp — connect 4Ω+ speaker across SPK+/SPK-.",
     ],
   },
 
@@ -397,16 +812,26 @@ const RECIPES: Record<string, Recipe> = {
   camera_ir_light_or_sensor_mount: {
     modules: [
       { role: "usb", moduleId: "usb-power-5v" },
-      { role: "mcu", moduleId: "esp32-devkit" },
-      { role: "sns", moduleId: "bme280" },
+      { role: "cam", moduleId: "esp32-cam-module" },
     ],
     wires: [
-      ...usbToMcu("usb", "mcu", "VIN"),
-      ...i2cBus("mcu", "GPIO21", "GPIO22", "3V3", "GND", "sns"),
+      { from: { role: "usb", pin: "V+" }, to: { role: "cam", pin: "5V" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "cam", pin: "GND" } },
     ],
     notes: [
-      "BME280 stand-in until a camera module spec is added.",
+      "ESP32-CAM OV2640 module — use U0T/U0R for flashing when GPIO0 strapped.",
       "Mount mechanics are handled by Mecha-Splicer enclosure output.",
+    ],
+  },
+
+  generic_low_voltage_build: {
+    modules: [
+      { role: "usb", moduleId: "usb-power-5v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+    ],
+    wires: [...usbToMcu("usb", "mcu", "VIN")],
+    notes: [
+      "Flexible USB-powered starter — use compose_from_inventory to auto-wire owned modules.",
     ],
   },
 };
@@ -420,6 +845,8 @@ export interface SalvagePlanInput {
   power_topology?: "usb_5v" | "barrel_12v" | "hybrid" | string;
   strategy_mode?: string;
   custom_graph?: BuildGraph;
+  /** When true, wire resolved_modules via autoWirePickedModules instead of recipe-only modules. */
+  compose_from_inventory?: boolean;
 }
 
 export interface TranslationResult {
@@ -449,6 +876,23 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     return { graph: plan.custom_graph, buildId, notes, warnings };
   }
 
+  if (plan?.compose_from_inventory && plan.resolved_modules?.length) {
+    const ids = [
+      ...new Set(
+        plan.resolved_modules
+          .map((r) => r.module_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0),
+      ),
+    ];
+    if (ids.length >= 2) {
+      const composed = composeBuildGraphFromModuleIds(ids);
+      notes.push(...composed.notes);
+      if (composed.warnings.length) warnings.push(...composed.warnings);
+      notes.push(`Inventory compose: ${ids.join(", ")}`);
+      return { graph: composed.graph, buildId, notes, warnings };
+    }
+  }
+
   const overridesPreview = { ...(plan?.module_overrides || {}) };
   let recipeKey = buildId;
   if (buildId === "automatic_plant_watering") {
@@ -469,43 +913,50 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     if (reqAny) {
       const picked = pickModulesForRequirements(reqAny);
       if (picked.length > 0) {
-        const nodes = picked.map((m, i) => ({ id: `n${i + 1}`, moduleId: m.id }));
+        const auto = autoWirePickedModules(picked);
+        notes.push(...(auto.notes || []));
         warnings.push(
-          `No hand-curated recipe for "${buildId}" — suggested ${picked.length} module(s) ` +
-          `via capability matching: ${picked.map((m) => m.id).join(", ")}. Wire them on the canvas.`,
+          `No hand-curated recipe for "${buildId}" — auto-wired ${picked.length} module(s): ` +
+          `${picked.map((m) => m.id).join(", ")}.`,
         );
-        return { graph: { nodes, wires: [] }, buildId, notes, warnings };
+        return { graph: recipeToBuildGraph(auto), buildId, notes, warnings };
       }
     }
     warnings.push(`No translator recipe and no capability fall-back for "${buildId}".`);
     return { graph: { nodes: [], wires: [] }, buildId, notes, warnings };
   }
 
-  const overrides = { ...overridesPreview };
+  const planWithOverrides: SalvagePlanInput = {
+    ...plan,
+    module_overrides: { ...overridesPreview },
+  };
   for (const row of plan?.resolved_modules || []) {
-    if (row?.role && row?.module_id && !overrides[row.role]) {
-      overrides[row.role] = row.module_id;
+    if (row?.role && row?.module_id && !planWithOverrides.module_overrides![row.role]) {
+      planWithOverrides.module_overrides![row.role] = row.module_id;
     }
   }
+  if (Object.keys(planWithOverrides.module_overrides || {}).length > 0) {
+    notes.push(`Module overrides applied: ${JSON.stringify(planWithOverrides.module_overrides)}`);
+  }
 
-  const modules = recipe.modules.map((m) => ({
-    role: m.role,
-    moduleId: overrides[m.role] || m.moduleId,
-  }));
-  if (Object.keys(overrides).length > 0) {
-    notes.push(`Module overrides applied: ${JSON.stringify(overrides)}`);
+  const { recipe: adaptedRecipe, notes: topoNotes } = adaptRecipeToInventory(recipe, planWithOverrides);
+  notes.push(...topoNotes);
+  if (adaptedRecipe.modules.length !== recipe.modules.length) {
+    notes.push(
+      `Inventory topology: ${adaptedRecipe.modules.length} modules (was ${recipe.modules.length}).`,
+    );
   }
 
   // Materialize role -> nodeId; build BuildGraph nodes.
   const idOf = new Map<string, string>();
-  const nodes = modules.map((m, i) => {
+  const nodes = adaptedRecipe.modules.map((m, i) => {
     const nodeId = `n${i + 1}`;
     idOf.set(m.role, nodeId);
     return { id: nodeId, moduleId: m.moduleId };
   });
 
   // Resolve wires; drop (with warning) any whose roles aren't present.
-  const wires = recipe.wires.flatMap((w, i) => {
+  const wires = adaptedRecipe.wires.flatMap((w, i) => {
     const from = idOf.get(w.from.role);
     const to = idOf.get(w.to.role);
     if (!from || !to) {
@@ -519,7 +970,7 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     }];
   });
 
-  if (recipe.notes) notes.push(...recipe.notes);
+  if (adaptedRecipe.notes) notes.push(...adaptedRecipe.notes);
 
   const reused = plan?.reusable_blocks?.filter(Boolean) ?? [];
   if (reused.length > 0) {
@@ -537,3 +988,7 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
 
 /** All build ids this translator knows how to materialize. */
 export const SUPPORTED_BUILD_IDS = Object.keys(RECIPES).sort();
+
+/** Engine export: hand-curated recipes + capability fallback map for Python parity. */
+export const CATALOG_RECIPES = RECIPES;
+export const BUILD_CATALOG_CAPABILITY_GROUPS = BUILD_CATALOG_CAPS;

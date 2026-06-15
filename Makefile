@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify refresh-demo-data explore explore-all
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -57,5 +57,32 @@ score-intake-tiers:
 refresh-demo-data:
 	HARDWARE_SPLICER_SKIP_VISION_LIVE=1 python3 scripts/refresh_demo_sample_data.py
 
-verify: cleanup doctor test benchmark-backend audit-functional-delivery score-intake-tiers smoke
+verify-engine:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/verify_engine.py
+
+salvage-demo:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 PYTHONPATH=src $(PYTHON) scripts/salvage_bringup_demo.py --out /tmp/hs_salvage_bringup
+
+verify-catalog:
+	node scripts/verify_catalog_parity.cjs
+
+export-catalog-recipes:
+	node scripts/export_catalog_recipes.cjs
+
+export-engine-pcb-data:
+	node scripts/export_engine_pcb_data.cjs
+
+test-golden-intakes:
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest tests/test_golden_intake_compile.py tests/test_golden_catalog_direct.py -q
+
+test-compose-scenarios:
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_compose_scenarios.py -q
+
+test-scratch-pipeline:
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_scratch_pipeline.py -q
+
+run-mcp:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) -m hardware_splicer.mcp_server
+
+verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers smoke
 	@echo "Hardware-Splicer verify: all checks passed"

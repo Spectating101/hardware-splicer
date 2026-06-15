@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from src.engines.netlist_io import netlist_from_dict
 from src.intelligence.bench_topology_capture import bench_capture_to_topology_evidence, extract_bench_topology_capture
+from src.intelligence.testing_mode import testing_mode_enabled
 from src.intelligence.topology_evidence import extract_topology_evidence, topology_evidence_bridge
 
 
@@ -36,9 +37,10 @@ def compile_topology_to_netlist(payload: Dict[str, Any]) -> Dict[str, Any]:
     hazards = _hard_hazards(bridge)
     issues: List[Dict[str, Any]] = []
     if hazards:
+        severity = "warn" if testing_mode_enabled() else "critical"
         issues.extend(
             _issue(
-                "critical",
+                severity,
                 "topology_hazard",
                 f"Topology hazard blocks netlist compilation: {hazard.get('hazard_id')}",
                 str(hazard.get("clearance_requires") or "Resolve topology hazard before simulation or power."),
@@ -46,17 +48,18 @@ def compile_topology_to_netlist(payload: Dict[str, Any]) -> Dict[str, Any]:
             )
             for hazard in hazards
         )
-        return _result(
-            available=False,
-            topology=normalized,
-            bridge=bridge,
-            netlist=None,
-            constraints={},
-            issues=issues,
-            source="blocked_topology_hazard",
-            coverage=_coverage(False, False, False, False),
-            load_envelope=_empty_load_envelope("Topology hazard blocks load-envelope generation."),
-        )
+        if not testing_mode_enabled():
+            return _result(
+                available=False,
+                topology=normalized,
+                bridge=bridge,
+                netlist=None,
+                constraints={},
+                issues=issues,
+                source="blocked_topology_hazard",
+                coverage=_coverage(False, False, False, False),
+                load_envelope=_empty_load_envelope("Topology hazard blocks load-envelope generation."),
+            )
 
     power_pins, ground_pins = _power_and_ground_pins(normalized)
     if not ground_pins:

@@ -19,24 +19,37 @@ export interface UseJarvisChatOptions {
   onComplete?: (finalText: string) => void;
 }
 
+export interface JarvisSendOptions {
+  /** Shown immediately before streamed LLM text (e.g. deterministic tool results). */
+  assistantPrefix?: string;
+}
+
 /** Hook for any UI that wants to talk to /api/jarvis/chat. Handles SSE parsing,
  *  streaming state, cancellation. */
 export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<ChatMsg[]>([]);
 
-  const send = useCallback(async (userText: string) => {
+  const send = useCallback(async (userText: string, sendOpts: JarvisSendOptions = {}) => {
     if (!userText.trim()) return;
+    const prefix = sendOpts.assistantPrefix?.trim() ?? "";
     const userMsg: ChatMsg = { role: "user", content: userText.trim() };
-    const assistantMsg: ChatMsg = { role: "assistant", content: "", streaming: true };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    const assistantMsg: ChatMsg = {
+      role: "assistant",
+      content: prefix ? `${prefix}\n\n` : "",
+      streaming: true,
+    };
+    const nextHistory = [...messagesRef.current, userMsg];
+    messagesRef.current = [...nextHistory, assistantMsg];
+    setMessages(messagesRef.current);
     setIsStreaming(true);
 
     const ctl = new AbortController();
     abortRef.current = ctl;
 
-    const outgoing = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+    const outgoing = nextHistory.map((m) => ({ role: m.role, content: m.content }));
     const context = opts.contextProvider?.();
 
     try {
@@ -77,8 +90,10 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
                 const next = prev.slice();
                 const last = next[next.length - 1];
                 if (last?.role === "assistant") {
-                  next[next.length - 1] = { ...last, content: final };
+                  const body = prefix ? `${prefix}\n\n${final}` : final;
+                  next[next.length - 1] = { ...last, content: body };
                 }
+                messagesRef.current = next;
                 return next;
               });
             }
@@ -88,15 +103,21 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
         }
       }
 
+      const merged = prefix ? (final.trim() ? `${prefix}\n\n${final}` : prefix) : final;
       setMessages((prev) => {
         const next = prev.slice();
         const last = next[next.length - 1];
         if (last?.role === "assistant") {
-          next[next.length - 1] = { ...last, streaming: false };
+          next[next.length - 1] = {
+            ...last,
+            content: merged || prefix || last.content,
+            streaming: false,
+          };
         }
+        messagesRef.current = next;
         return next;
       });
-      opts.onComplete?.(final);
+      opts.onComplete?.(merged);
     } catch (err) {
       if ((err as Error).name === "AbortError") {
         setMessages((prev) => {
@@ -105,6 +126,7 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
           if (last?.role === "assistant") {
             next[next.length - 1] = { ...last, streaming: false };
           }
+          messagesRef.current = next;
           return next;
         });
       } else {
@@ -113,8 +135,15 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
           const next = prev.slice();
           const last = next[next.length - 1];
           if (last?.role === "assistant") {
-            next[next.length - 1] = { ...last, streaming: false, error: msg };
+            const fallback = prefix || last.content;
+            next[next.length - 1] = {
+              ...last,
+              streaming: false,
+              content: fallback,
+              error: prefix ? undefined : msg,
+            };
           }
+          messagesRef.current = next;
           return next;
         });
       }
@@ -122,7 +151,7 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
       setIsStreaming(false);
       abortRef.current = null;
     }
-  }, [messages, opts]);
+  }, [opts]);
 
   const cancel = useCallback(() => {
     abortRef.current?.abort();
@@ -130,6 +159,7 @@ export function useJarvisChat(opts: UseJarvisChatOptions = {}) {
 
   const reset = useCallback(() => {
     abortRef.current?.abort();
+    messagesRef.current = [];
     setMessages([]);
     setIsStreaming(false);
   }, []);
