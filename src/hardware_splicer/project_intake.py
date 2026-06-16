@@ -12,6 +12,7 @@ from .functional_delivery import build_functional_delivery_score
 from .evidence_extractor import _merge_evidence, enrich_intake_with_extracted_evidence
 from .build_evidence import compiler_evidence_patch
 from .salvage_bridge import build_intake_salvage_package
+from .compile_casefile import write_compile_casefile
 from .scratch_pipeline import compile_scratch_build
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
@@ -181,8 +182,9 @@ def splice_and_build_from_intake(
 
     graph_input = salvage_package.get("graph_input") or salvage_package.get("splice_package")
     resolved_modules = salvage_package.get("resolved_modules") or []
+    scratch_result = None
     if salvage_package.get("graph_mode") == "scratch":
-        scratch = compile_scratch_build(
+        scratch_result = compile_scratch_build(
             out_dir=str(out_path),
             goal=goal,
             resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
@@ -190,7 +192,7 @@ def splice_and_build_from_intake(
             constraints=dict(intake.get("constraints") or {}),
             salvage_mode=bool(intake.get("salvage_mode")),
         )
-        compile_result = scratch.compile_result
+        compile_result = scratch_result.compile_result
         if compile_result is None:
             from .build_compiler import BuildCompileResult
 
@@ -202,9 +204,9 @@ def splice_and_build_from_intake(
                 build_graph_file=None,
                 kicad_pcb_file=None,
                 design_quality_file=str(out_path / "build_compilation" / "DESIGN_QUALITY.json"),
-                error=scratch.error or "scratch compile failed",
+                error=scratch_result.error or "scratch compile failed",
             )
-        build_id = scratch.build_id
+        build_id = scratch_result.build_id
     else:
         compile_result = compile_catalog_build(
             build_id,
@@ -217,6 +219,21 @@ def splice_and_build_from_intake(
     gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
     gate_path.parent.mkdir(parents=True, exist_ok=True)
     gate_path.write_text(json.dumps(gate, indent=2), encoding="utf-8")
+
+    compile_casefile: str | None = None
+    if scratch_result and scratch_result.compile_casefile:
+        compile_casefile = scratch_result.compile_casefile
+    elif not (compile_result.ok and gate.get("build_ready")):
+        build_dir = out_path / "build_compilation"
+        compile_casefile = write_compile_casefile(
+            build_dir,
+            build_id=build_id,
+            error=compile_result.error or "intake_compile_failed",
+            stage="intake_splice",
+            quality=compile_result.design_quality,
+            splice_plan=graph_input if isinstance(graph_input, dict) else None,
+            intake=dict(intake),
+        )
 
     build_dir = out_path / "build_compilation"
     functional_delivery = build_functional_delivery_score(
@@ -296,6 +313,7 @@ def splice_and_build_from_intake(
             else None,
             "functional_delivery": str(functional_delivery_file),
             "fabrication_inspection": str(inspection_file),
+            "compile_casefile": compile_casefile,
             "compiler_evidence_patch": str(compiler_patch_file) if compiler_patch else None,
             "post_splice_scoring": str(post_metrics_file),
         },
@@ -775,6 +793,10 @@ def _compile_spec(
             "build_id": build_id,
             "archetype": archetype,
             "source": "project_intake",
+            "goal": goal,
+            "graph_mode": salvage.get("graph_mode"),
+            "constraints": dict(constraints or {}),
+            "salvage_mode": bool(salvage.get("graph_mode") == "scratch"),
             "graph_input": salvage.get("graph_input"),
             "resolved_modules": salvage.get("resolved_modules") or [],
             "module_overrides": salvage.get("module_overrides") or {},

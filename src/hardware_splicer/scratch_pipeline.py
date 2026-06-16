@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from .auto_wire import compose_build_graph_from_module_ids
@@ -13,6 +14,7 @@ from .material_modes import (
     material_mode_summary,
     resolve_material_mode,
 )
+from .compile_casefile import write_compile_casefile
 from .build_compiler import BuildCompileResult, compile_catalog_build
 from .module_picker import pick_modules_for_goal, wants_module_composition
 from .pcb.safety_rules import analyze_build
@@ -41,6 +43,7 @@ class ScratchCompileResult:
     attempts: List[Dict[str, Any]] = field(default_factory=list)
     graph_mode: str = "scratch"
     error: Optional[str] = None
+    compile_casefile: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -50,6 +53,7 @@ class ScratchCompileResult:
             "graph_mode": self.graph_mode,
             "attempts": self.attempts,
             "error": self.error,
+            "compile_casefile": self.compile_casefile,
             "compile_result": self.compile_result.to_dict() if self.compile_result else None,
         }
 
@@ -207,6 +211,31 @@ def _llm_enabled() -> bool:
     return os.environ.get("HARDWARE_SPLICER_LLM_COMPOSE", "").strip().lower() in {"1", "true", "yes"}
 
 
+def _write_scratch_failure_casefile(
+    *,
+    out_dir: str | Path,
+    build_id: str,
+    error: str,
+    module_ids: Sequence[str],
+    attempts: Sequence[Mapping[str, Any]],
+    quality: Mapping[str, Any],
+    splice_plan: Mapping[str, Any] | None = None,
+    intake: Mapping[str, Any] | None = None,
+    graph: Mapping[str, Any] | None = None,
+) -> str:
+    build_dir = Path(out_dir) / "build_compilation"
+    return write_compile_casefile(
+        build_dir,
+        build_id=build_id,
+        error=error,
+        stage="scratch_compose",
+        graph=graph,
+        quality=dict(quality),
+        splice_plan=splice_plan,
+        intake=intake,
+    )
+
+
 def _llm_adjust_modules(goal: str, module_ids: List[str], quality: Mapping[str, Any]) -> Optional[List[str]]:
     from .integrations.llm_policy import qwen_llm_first
     from .integrations.qwen_module_pick import call_qwen_module_pick
@@ -252,17 +281,30 @@ def compile_scratch_build(
         return ScratchCompileResult(ok=False, build_id="generic_low_voltage_build", module_ids=[], error="goal or module_ids required")
 
     if len(ids) < 2:
+        err = f"need >=2 modules, got {ids}"
+        casefile = _write_scratch_failure_casefile(
+            out_dir=out_dir,
+            build_id="generic_low_voltage_build",
+            error=err,
+            module_ids=ids,
+            attempts=[],
+            quality={"build_ready": False, "circuit_readiness": "module_pick_failed"},
+        )
         return ScratchCompileResult(
             ok=False,
             build_id="generic_low_voltage_build",
             module_ids=ids,
-            error=f"need >=2 modules, got {ids}",
+            error=err,
+            compile_casefile=casefile,
         )
 
     build_id = "generic_low_voltage_build"
     attempts: List[Dict[str, Any]] = []
     last_result: Optional[BuildCompileResult] = None
     last_quality: Dict[str, Any] = {}
+
+    last_splice_plan: Dict[str, Any] | None = None
+    last_graph: Dict[str, Any] = {}
 
     for attempt in range(max_retries + 1):
         inventory_rows = resolved_rows_for_module_ids(ids, resolved_modules)
@@ -272,6 +314,7 @@ def compile_scratch_build(
             constraints=constraints_map,
             salvage_mode=salvage_mode,
         )
+        last_splice_plan = splice_plan
         last_result = compile_catalog_build(
             build_id,
             out_dir,
@@ -301,6 +344,7 @@ def compile_scratch_build(
 
         preview = compose_build_graph_from_module_ids(ids).get("graph") or {}
         graph_q = _graph_quality(preview)
+        last_graph = dict(preview)
         if graph_q.get("drc_pass") and not graph_q.get("safety_errors") and not last_result.ok:
             # Graph is fine but artifact stage failed — stop retrying modules.
             break
@@ -363,13 +407,29 @@ def compile_scratch_build(
                     attempts=attempts,
                 )
 
+    failed = not (last_result and last_result.ok)
+    error = None if not failed else (last_result.error if last_result else "compile failed")
+    casefile: str | None = None
+    if failed:
+        casefile = _write_scratch_failure_casefile(
+            out_dir=out_dir,
+            build_id=build_id,
+            error=error or "scratch_compile_failed",
+            module_ids=ids,
+            attempts=attempts,
+            quality=last_quality,
+            splice_plan=last_splice_plan,
+            graph=last_graph,
+        )
+
     return ScratchCompileResult(
         ok=bool(last_result and last_result.ok),
         build_id=build_id,
         module_ids=ids,
         compile_result=last_result,
         attempts=attempts,
-        error=None if last_result and last_result.ok else (last_result.error if last_result else "compile failed"),
+        error=error,
+        compile_casefile=casefile,
     )
 
 

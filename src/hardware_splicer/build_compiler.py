@@ -307,14 +307,56 @@ def attach_build_compilation_artifacts(
 
     splice_payload = build_compilation.get("graph_input") or build_compilation.get("splice_package")
     resolved_modules = build_compilation.get("resolved_modules") or []
-    result = compile_catalog_build(
-        build_id,
-        out_dir,
-        export_gerber=export_gerber,
-        splice_plan=splice_payload if isinstance(splice_payload, dict) else None,
-        resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+    graph_input = dict(splice_payload) if isinstance(splice_payload, dict) else {}
+    graph_mode = str(
+        build_compilation.get("graph_mode") or graph_input.get("graph_mode") or ""
+    ).strip().lower()
+    goal = str(build_compilation.get("goal") or graph_input.get("goal") or "").strip()
+    constraints = dict(build_compilation.get("constraints") or graph_input.get("constraints") or {})
+    salvage_mode = bool(
+        build_compilation.get("salvage_mode")
+        or graph_input.get("compose_from_inventory")
+        or graph_mode == "salvage"
     )
-    payload = result.to_dict()
+
+    if graph_mode == "scratch":
+        from .scratch_pipeline import compile_scratch_build
+
+        scratch = compile_scratch_build(
+            out_dir=str(out_dir),
+            goal=goal or None,
+            resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+            export_gerber=export_gerber,
+            constraints=constraints,
+            salvage_mode=salvage_mode,
+        )
+        if scratch.compile_result is not None:
+            result = scratch.compile_result
+        else:
+            result = BuildCompileResult(
+                ok=False,
+                build_id=scratch.build_id,
+                out_dir=out_dir,
+                design_quality={"build_ready": False, "circuit_readiness": "compile_failed"},
+                build_graph_file=None,
+                kicad_pcb_file=None,
+                design_quality_file=str(out_dir / "build_compilation" / "DESIGN_QUALITY.json"),
+                error=scratch.error or "scratch compile failed",
+            )
+        build_id = scratch.build_id
+        payload = result.to_dict()
+        payload["graph_mode"] = "scratch"
+        payload["scratch_attempts"] = scratch.attempts
+        payload["compile_casefile"] = scratch.compile_casefile
+    else:
+        result = compile_catalog_build(
+            build_id,
+            out_dir,
+            export_gerber=export_gerber,
+            splice_plan=splice_payload if isinstance(splice_payload, dict) else None,
+            resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
+        )
+        payload = result.to_dict()
     design_quality = dict(payload.get("design_quality") or {})
     if design_quality.get("drc_pass") and design_quality.get("electrical_safety_pass"):
         design_quality["compiler_verified"] = True

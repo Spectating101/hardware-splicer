@@ -243,11 +243,6 @@ def _run_netlist_compile(args: argparse.Namespace) -> int:
 
 def _run_compose(args: argparse.Namespace) -> int:
     _apply_simulate_env(args)
-    from hardware_splicer.module_picker import pick_modules_for_goal
-    from hardware_splicer.canvas_compose import compile_canvas_build
-    from hardware_splicer.scratch_pipeline import compile_scratch_build
-
-    hints: list[str] = []
     if getattr(args, "netlist_json", None):
         return _run_netlist_compile(
             argparse.Namespace(
@@ -280,61 +275,48 @@ def _run_compose(args: argparse.Namespace) -> int:
             print(f"out_dir={args.out}")
         return 0 if result.get("ok") else 1
 
-    if args.phrase:
-        pick = pick_modules_for_goal(args.phrase)
-        hints = pick.hints
-    elif not args.modules and not args.canvas_json:
+    if not args.phrase and not args.modules and not args.canvas_json:
         print("error: provide --phrase, --modules, --canvas-json, or --netlist-json", file=sys.stderr)
         return 2
 
+    from hardware_splicer.compose_dispatch import compose_dispatch
+
     constraints = {"strategy_mode": args.strategy_mode, "graph_mode": "canvas" if args.canvas_json else "scratch"}
     salvage_mode = bool(args.salvage_mode)
-
+    canvas_nodes = None
+    canvas_wires = None
     if args.canvas_json:
         canvas_doc = json.loads(Path(args.canvas_json).read_text(encoding="utf-8"))
-        canvas = compile_canvas_build(
-            out_dir=args.out,
-            nodes=canvas_doc.get("nodes") or [],
-            wires=canvas_doc.get("wires"),
-            constraints=constraints,
-            salvage_mode=salvage_mode,
-            export_gerber=not args.no_gerber,
-        )
-        compile_result = canvas.compile_result
-        quality = (compile_result.design_quality if compile_result else {}) or {}
-        payload = {
-            **canvas.to_dict(),
-            "drc_pass": bool(quality.get("drc_pass")),
-            "build_ready": bool(quality.get("build_ready")),
-            "kicad_drc_errors": quality.get("kicad_drc_errors"),
-        }
-        ok = canvas.ok
-    else:
-        scratch = compile_scratch_build(
-            out_dir=args.out,
-            goal=args.phrase,
-            module_ids=[m.strip() for m in (args.modules or "").split(",") if m.strip()] or None,
-            export_gerber=not args.no_gerber,
-            constraints=constraints,
-            salvage_mode=salvage_mode,
-        )
-        compile_result = scratch.compile_result
-        quality = (compile_result.design_quality if compile_result else {}) or {}
-        payload = {
-            **scratch.to_dict(),
-            "phrase": args.phrase,
-            "hints": hints,
-            "drc_pass": bool(quality.get("drc_pass")),
-            "build_ready": bool(quality.get("build_ready")),
-        }
-        ok = scratch.ok
+        canvas_nodes = canvas_doc.get("nodes") or []
+        canvas_wires = canvas_doc.get("wires")
+
+    payload = compose_dispatch(
+        out_dir=args.out,
+        phrase=args.phrase,
+        module_ids=[m.strip() for m in (args.modules or "").split(",") if m.strip()] or None,
+        canvas_nodes=canvas_nodes,
+        canvas_wires=canvas_wires,
+        constraints=constraints,
+        salvage_mode=salvage_mode,
+        export_gerber=not args.no_gerber,
+        allow_llm_first=False,
+    )
+    quality = payload.get("design_quality") or {}
+    ok = bool(payload.get("ok"))
+    hints: list[str] = []
+    if args.phrase and not args.canvas_json:
+        from hardware_splicer.module_picker import pick_modules_for_goal
+
+        hints = pick_modules_for_goal(args.phrase).hints
+        payload = {**payload, "phrase": args.phrase, "hints": hints}
 
     if args.json:
-        print(json.dumps(payload, indent=2))
+        print(json.dumps(payload, indent=2, default=str))
     else:
         print(f"ok={ok}")
+        print(f"mode={payload.get('mode')}")
         if args.canvas_json:
-            print(f"mode=canvas material_mode={payload.get('material_mode')}")
+            print(f"material_mode={payload.get('material_mode')}")
         else:
             print(f"modules={', '.join(payload.get('module_ids') or [])}")
             print(f"attempts={len(payload.get('attempts') or [])}")

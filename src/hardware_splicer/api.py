@@ -12,13 +12,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
-from .auto_wire import compose_build_graph_from_module_ids
-from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, compile_from_netlist, resolve_build_id
-from .canvas_compose import build_canvas_graph, compile_canvas_build
-from .material_modes import material_mode_summary, resolve_material_mode
-from .scratch_pipeline import compile_scratch_build
+from .compose_dispatch import compose_dispatch
+from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .compiler import _resolve_board_design_files, compile_hardware_bundle
 from .design_quality import build_design_quality_gate
+from .material_modes import material_mode_summary, resolve_material_mode
 from .jobs import JobBackend, artifact_manifest, build_output_archive
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
@@ -433,107 +431,24 @@ def create_app() -> FastAPI:
                 salvage_mode=bool(request.salvage_mode),
             )
 
-            if request.canvas_nodes:
-                if request.wire_only:
-                    graph = build_canvas_graph(
-                        nodes=request.canvas_nodes,
-                        wires=request.canvas_wires,
-                        constraints=constraints,
-                        salvage_mode=bool(request.salvage_mode),
-                        material_mode=material_mode,
-                    )
-                    return {
-                        "ok": bool(graph.get("nodes")),
-                        "request_id": request_id,
-                        "mode": "canvas",
-                        "wire_only": True,
-                        "graph": graph,
-                        **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
-                    }
-                canvas = compile_canvas_build(
-                    out_dir=str(resolved),
-                    nodes=request.canvas_nodes,
-                    wires=request.canvas_wires,
-                    constraints=constraints,
-                    salvage_mode=bool(request.salvage_mode),
-                    material_mode=material_mode,
-                    export_gerber=bool(request.export_gerber),
-                )
-                quality = (canvas.compile_result.design_quality if canvas.compile_result else {}) or {}
-                gate = build_design_quality_gate(quality)
-                return {
-                    "ok": bool(canvas.ok and gate.get("build_ready")),
-                    "request_id": request_id,
-                    "mode": "canvas",
-                    "design_quality": quality,
-                    **canvas.to_dict(),
-                    "design_quality_gate": gate,
-                    **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
-                }
-
-            if request.netlist:
-                result = compile_from_netlist(
-                    request.netlist,
-                    resolved,
-                    export_gerber=bool(request.export_gerber),
-                )
-                quality = result.design_quality or {}
-                gate = build_design_quality_gate(quality)
-                return _attach_inline_graph(
-                    {
-                        "ok": bool(result.ok and gate.get("build_ready")),
-                        "request_id": request_id,
-                        "mode": "netlist",
-                        **result.to_dict(),
-                        "design_quality_gate": gate,
-                    }
-                )
-
-            if not request.phrase and not request.module_ids:
-                raise ValueError("phrase, module_ids, canvas_nodes, or netlist is required")
-
-            if request.wire_only:
-                from .module_picker import pick_modules_for_goal
-
-                ids = list(request.module_ids or [])
-                if not ids and request.phrase:
-                    ids = list(pick_modules_for_goal(request.phrase).module_ids)
-                if len(ids) < 2:
-                    raise ValueError(f"wire_only compose needs >=2 modules, got {ids}")
-                composed = compose_build_graph_from_module_ids(ids)
-                graph = composed.get("graph") or {}
-                return {
-                    "ok": bool(graph.get("nodes")),
-                    "request_id": request_id,
-                    "mode": "scratch",
-                    "wire_only": True,
-                    "module_ids": ids,
-                    "graph": graph,
-                    "warnings": composed.get("warnings") or [],
-                    **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
-                }
-
-            scratch = compile_scratch_build(
+            payload = compose_dispatch(
                 out_dir=str(resolved),
-                goal=request.phrase,
+                phrase=request.phrase,
                 module_ids=request.module_ids,
-                export_gerber=bool(request.export_gerber),
+                canvas_nodes=request.canvas_nodes,
+                canvas_wires=request.canvas_wires,
+                netlist=request.netlist,
                 constraints=constraints,
+                material_mode=material_mode,
                 salvage_mode=bool(request.salvage_mode),
+                export_gerber=bool(request.export_gerber),
+                wire_only=bool(request.wire_only),
+                allow_llm_first=False,
+                request_id=request_id,
             )
-            compile_result = scratch.compile_result
-            quality = (compile_result.design_quality if compile_result else {}) or {}
-            gate = build_design_quality_gate(quality)
-            return _attach_inline_graph(
-                {
-                    "ok": bool(scratch.ok and gate.get("build_ready")),
-                    "request_id": request_id,
-                    "mode": "scratch",
-                    **scratch.to_dict(),
-                    "design_quality_gate": gate,
-                    **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
-                }
-            )
+            if payload.get("wire_only"):
+                return payload
+            return _attach_inline_graph(payload)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:

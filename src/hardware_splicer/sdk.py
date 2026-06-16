@@ -24,6 +24,7 @@ from .runtime import ROOT, runtime_status, scratch_path
 from .salvage_bridge import build_intake_salvage_package
 from .integrations.qwen_netlist_compose import compose_netlist_from_goal
 from .salvage_bringup import run_salvage_bringup
+from .compose_dispatch import compose_dispatch
 from .scratch_pipeline import compile_scratch_build
 
 SCHEMA_VERSION = "hardware_splicer.sdk.v1"
@@ -229,124 +230,19 @@ def compose_design(
     constraints_map = dict(constraints or {})
     mode = material_mode or resolve_material_mode(constraints=constraints_map, salvage_mode=salvage_mode)
     target = Path(out_dir) if out_dir else _out_dir("compose")
-    target.mkdir(parents=True, exist_ok=True)
-
-    if canvas_nodes:
-        result = compile_canvas_build(
-            out_dir=str(target),
-            nodes=list(canvas_nodes),
-            wires=list(canvas_wires or []),
-            constraints=constraints_map,
-            salvage_mode=salvage_mode,
-            material_mode=mode,  # type: ignore[arg-type]
-            export_gerber=export_gerber,
-        )
-        quality = (result.compile_result.design_quality if result.compile_result else {}) or {}
-        gate = build_design_quality_gate(quality)
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "ok": bool(result.ok and gate.get("build_ready")),
-            "mode": "canvas",
-            "out_dir": str(target),
-            **result.to_dict(),
-            "design_quality_gate": gate,
-            **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
-        }
-
-    if not phrase and not module_ids:
-        raise ValueError("phrase, module_ids, or canvas_nodes is required")
-
-    if (
-        phrase
-        and not module_ids
-        and not resolved_modules
-        and not salvage_mode
-    ):
-        from .jarvis_build import _enrich_trust, _open_compose_llm_first, llm_first_enabled
-
-        if llm_first_enabled():
-            open_result = _open_compose_llm_first(
-                phrase,
-                target,
-                constraints=constraints_map,
-                export_gerber=export_gerber,
-                allow_qwen=True,
-            )
-            compile_result = open_result.get("compile_result")
-            quality = dict(compile_result.design_quality if compile_result else {})
-            gate = build_design_quality_gate(quality)
-            build_dir = target / "build_compilation"
-            _enrich_trust(
-                build_dir,
-                goal=phrase,
-                compose_mode=str(open_result.get("compose_mode") or "unknown"),
-                design_quality=quality,
-            )
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "ok": bool(open_result.get("ok") and gate.get("build_ready")),
-                "mode": "llm_first",
-                "compose_mode": open_result.get("compose_mode"),
-                "qwen_usage": open_result.get("qwen_usage"),
-                "out_dir": str(target),
-                "build_id": getattr(compile_result, "build_id", None) if compile_result else None,
-                "module_ids": open_result.get("module_ids") or [],
-                "attempts": open_result.get("attempts") or [],
-                "design_quality": quality,
-                "design_quality_gate": gate,
-                "fallback": open_result.get("fallback"),
-                "artifacts": {
-                    "build_graph": str(build_dir / "build_graph.json") if (build_dir / "build_graph.json").is_file() else None,
-                    "circuit_netlist": str(build_dir / "circuit_netlist.json")
-                    if (build_dir / "circuit_netlist.json").is_file()
-                    else None,
-                    "kicad_pcb": str(compile_result.kicad_pcb_file) if compile_result else None,
-                    "trust_report": str(build_dir / "TRUST_REPORT.json")
-                    if (build_dir / "TRUST_REPORT.json").is_file()
-                    else None,
-                },
-                **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
-                "error": open_result.get("error"),
-            }
-
-    scratch = compile_scratch_build(
-        out_dir=str(target),
-        goal=phrase,
+    return compose_dispatch(
+        out_dir=target,
+        phrase=phrase,
         module_ids=list(module_ids) if module_ids else None,
         resolved_modules=resolved_modules,
-        export_gerber=export_gerber,
+        canvas_nodes=list(canvas_nodes) if canvas_nodes else None,
+        canvas_wires=list(canvas_wires or []),
         constraints=constraints_map,
+        material_mode=mode,
         salvage_mode=salvage_mode,
+        export_gerber=export_gerber,
+        allow_llm_first=True,
     )
-    compile_result = scratch.compile_result
-    quality = (compile_result.design_quality if compile_result else {}) or {}
-    gate = build_design_quality_gate(quality)
-    build_dir = target / "build_compilation"
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "ok": bool(scratch.ok and gate.get("build_ready")),
-        "mode": "scratch",
-        "out_dir": str(target),
-        "build_id": scratch.build_id,
-        "module_ids": scratch.module_ids,
-        "attempts": scratch.attempts,
-        "design_quality": quality,
-        "design_quality_gate": gate,
-        "artifacts": {
-            "build_graph": str(build_dir / "build_graph.json") if (build_dir / "build_graph.json").is_file() else None,
-            "circuit_netlist": str(build_dir / "circuit_netlist.json")
-            if (build_dir / "circuit_netlist.json").is_file()
-            else None,
-            "kicad_pcb": str(compile_result.kicad_pcb_file) if compile_result else None,
-            "bom": str(build_dir / "BOM.json") if (build_dir / "BOM.json").is_file() else None,
-            "firmware": str(build_dir / "firmware") if (build_dir / "firmware").is_dir() else None,
-            "design_quality": str(build_dir / "DESIGN_QUALITY.json")
-            if (build_dir / "DESIGN_QUALITY.json").is_file()
-            else None,
-        },
-        **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
-        "error": scratch.error,
-    }
 
 
 def jarvis_build(
