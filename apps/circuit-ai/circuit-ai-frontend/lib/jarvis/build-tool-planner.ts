@@ -1,6 +1,8 @@
 import type { BuildIntentContext, BuildToolInvocation, BuildToolName } from "@/lib/jarvis/build-agent";
 import { detectBuildToolInvocations } from "@/lib/jarvis/build-agent";
-import { SUPPORTED_BUILD_IDS } from "@/lib/salvage/plan-to-graph";
+import catalogIds from "@/lib/hardware-splicer/catalog-build-ids.json";
+
+const SUPPORTED_BUILD_IDS = catalogIds.build_ids;
 import { expandUserPhrase } from "@/lib/jarvis/phrase-expander";
 
 export const BUILD_TOOL_CATALOG = `

@@ -41,6 +41,11 @@ _MODULE_LABELS: Dict[str, str] = {
     "relay-1ch-5v": "1-channel 5V relay module",
     "mpu6050": "MPU6050 6-axis IMU",
     "level-shifter-4ch": "4-channel logic level shifter",
+    "ili9341_tft": "ILI9341 2.4\" SPI color TFT",
+    "max98357a-i2s-amp": "MAX98357A I2S class-D amplifier",
+    "esp32-cam-module": "ESP32-CAM camera module",
+    "a4988-stepper": "A4988 stepper motor driver",
+    "limit-switch-3pin": "3-pin mechanical limit switch",
 }
 
 _PART_HINTS: Dict[str, Dict[str, str]] = {
@@ -72,6 +77,11 @@ _PART_HINTS: Dict[str, Dict[str, str]] = {
     "relay-1ch-5v": {"mpn": "SRD-05VDC-SL-C", "footprint": "RELAY-1CH-5V", "supplier_sku": "RELAY-1CH-5V"},
     "mpu6050": {"mpn": "MPU-6050", "footprint": "MPU6050-IMU", "supplier_sku": "MPU6050-BREAKOUT"},
     "level-shifter-4ch": {"mpn": "TXS0108E", "footprint": "LEVEL-SHIFTER-4CH", "supplier_sku": "LOGIC-LEVEL-4CH"},
+    "ili9341_tft": {"mpn": "ILI9341", "footprint": "ILI9341-TFT-2.4", "supplier_sku": "ILI9341-SPI-240"},
+    "max98357a-i2s-amp": {"mpn": "MAX98357A", "footprint": "MAX98357A-I2S-AMP", "supplier_sku": "MAX98357A-BRK"},
+    "esp32-cam-module": {"mpn": "ESP32-CAM", "footprint": "ESP32-CAM-MODULE", "supplier_sku": "ESP32-CAM"},
+    "a4988-stepper": {"mpn": "A4988", "footprint": "A4988-STEPPER", "supplier_sku": "A4988-DRIVER"},
+    "limit-switch-3pin": {"mpn": "SS-5GL2", "footprint": "LIMIT-SWITCH-3PIN", "supplier_sku": "LIMIT-SW-3P"},
 }
 
 

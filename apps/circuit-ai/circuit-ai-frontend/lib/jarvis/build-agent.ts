@@ -1,12 +1,13 @@
 import type { BuildGraph } from "@/lib/rules/safety-rules";
 import type { BuildWarning } from "@/lib/rules/safety-rules";
 import type { DrcResult } from "@/lib/pcb/drc";
+import type { EngineCompileProof } from "@/lib/hardware-splicer/engine-proof";
 import { findModule } from "@/lib/modules/module-library";
 import { pickModulesForGoal, wantsModuleComposition } from "@/lib/jarvis/build-module-picker";
 import { expandUserPhrase } from "@/lib/jarvis/phrase-expander";
 import { formatManufactureJarvisSummary, type ManufactureJarvisResult } from "@/lib/jarvis/manufacture-summary";
 import { suggestJarvisNextSteps } from "@/lib/jarvis/next-steps";
-import { SUPPORTED_BUILD_IDS } from "@/lib/salvage/plan-to-graph";
+import catalogIds from "@/lib/hardware-splicer/catalog-build-ids.json";
 
 export type BuildToolName =
   | "auto_wire"
@@ -21,7 +22,7 @@ export type BuildToolName =
   | "manufacture"
   | "clear_canvas";
 
-export { SUPPORTED_BUILD_IDS };
+export const SUPPORTED_BUILD_IDS: string[] = catalogIds.build_ids;
 
 export interface BuildToolInvocation {
   name: BuildToolName;
@@ -51,10 +52,10 @@ export interface BuildJarvisSnapshot {
 }
 
 export interface BuildJarvisHandlers {
-  autoWire(): { added: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot };
-  rebuildWires(): { added: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot };
-  spliceRecipe(buildId: string): { ok: boolean; buildId: string; moduleCount: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot };
-  composeModules(userText: string): { ok: boolean; added: number; moduleIds: string[]; hints: string[]; detail: string; snapshot?: BuildJarvisSnapshot };
+  autoWire(): Promise<{ added: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot }>;
+  rebuildWires(): Promise<{ added: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot }>;
+  spliceRecipe(buildId: string): Promise<{ ok: boolean; buildId: string; moduleCount: number; wireCount: number; detail: string; snapshot?: BuildJarvisSnapshot }>;
+  composeModules(userText: string): Promise<{ ok: boolean; added: number; moduleIds: string[]; hints: string[]; detail: string; snapshot?: BuildJarvisSnapshot }>;
   clearCanvas(): void;
   openPcb(): void;
   exportKicad(): void;
@@ -443,6 +444,7 @@ export function snapshotFromBuild(
   graph: BuildGraph,
   warnings: BuildWarning[],
   drc: DrcResult,
+  engineProof?: EngineCompileProof | null,
 ): BuildJarvisSnapshot {
   const modules = graph.nodes.map((n) => {
     const spec = findModule(n.moduleId);
@@ -461,10 +463,21 @@ export function snapshotFromBuild(
     .sort((a, b) => severityRank(a.level) - severityRank(b.level))
     .slice(0, 8)
     .map((w) => `[${w.level}] ${w.message}`);
-  const drcMsgs = drc.violations
-    .filter((v) => v.severity === "error" || v.severity === "warn")
-    .slice(0, 8)
-    .map((v) => `[${v.severity}] ${v.message}`);
+  const drcMsgs = engineProof
+    ? [
+        engineProof.kicadDrcPass
+          ? `[kicad] DRC clean (${engineProof.kicadDrcWarnings} warning(s))`
+          : `[kicad] ${engineProof.kicadDrcErrors} DRC error(s), ${engineProof.kicadDrcWarnings} warning(s)`,
+        ...engineProof.blockers.slice(0, 4).map((b) => `[engine] ${b}`),
+      ]
+    : drc.violations
+        .filter((v) => v.severity === "error" || v.severity === "warn")
+        .slice(0, 8)
+        .map((v) => `[${v.severity}] ${v.message}`);
+
+  const drcPass = engineProof ? engineProof.kicadDrcPass && engineProof.buildReady : drc.pass;
+  const drcErrors = engineProof ? engineProof.kicadDrcErrors : drc.summary.errors;
+  const drcWarnings = engineProof ? engineProof.kicadDrcWarnings : drc.summary.warnings;
 
   return {
     moduleCount: graph.nodes.length,
@@ -478,9 +491,9 @@ export function snapshotFromBuild(
       messages: safetyMsgs,
     },
     drc: {
-      pass: drc.pass,
-      errors: drc.summary.errors,
-      warnings: drc.summary.warnings,
+      pass: drcPass,
+      errors: drcErrors,
+      warnings: drcWarnings,
       messages: drcMsgs,
     },
   };
@@ -503,7 +516,7 @@ export async function runBuildTools(
   for (const { name, buildId } of invocations) {
     switch (name) {
       case "auto_wire": {
-        const r = handlers.autoWire();
+        const r = await handlers.autoWire();
         if (r.snapshot) snapshot = r.snapshot;
         results.push({
           tool: "auto_wire",
@@ -515,7 +528,7 @@ export async function runBuildTools(
         break;
       }
       case "rebuild_wires": {
-        const r = handlers.rebuildWires();
+        const r = await handlers.rebuildWires();
         if (r.snapshot) snapshot = r.snapshot;
         results.push({
           tool: "rebuild_wires",
@@ -576,7 +589,7 @@ export async function runBuildTools(
           });
           break;
         }
-        const r = handlers.spliceRecipe(buildId);
+        const r = await handlers.spliceRecipe(buildId);
         if (r.snapshot) snapshot = r.snapshot;
         results.push({
           tool: "splice_recipe",
@@ -589,7 +602,7 @@ export async function runBuildTools(
         break;
       }
       case "compose_modules": {
-        const r = handlers.composeModules(userText);
+        const r = await handlers.composeModules(userText);
         if (r.snapshot) snapshot = r.snapshot;
         results.push({
           tool: "compose_modules",

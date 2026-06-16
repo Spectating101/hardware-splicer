@@ -1,13 +1,14 @@
 /** Plain-language manufacture / DFM feedback for Jarvis. */
 
 import type { LocalPreflightResult } from "@/lib/manufacture/local-preflight";
+import type { EngineCompileProof } from "@/lib/hardware-splicer/engine-proof";
 
 export interface ManufactureJarvisResult {
   ok: boolean;
   detail: string;
   manufacturingReady?: boolean;
   blockers?: string[];
-  source?: "backend" | "local";
+  source?: "backend" | "local" | "engine";
 }
 
 interface DfmIssue {
@@ -52,6 +53,41 @@ export function formatLocalManufactureSummary(local: LocalPreflightResult): Manu
   };
 }
 
+export function formatEngineManufactureSummary(proof: EngineCompileProof): ManufactureJarvisResult {
+  const blockers = [
+    ...proof.blockers,
+    ...(proof.kicadDrcPass ? [] : [`KiCad DRC reported ${proof.kicadDrcErrors} error(s).`]),
+    ...(proof.electricalErrors > 0 ? [`${proof.electricalErrors} electrical safety error(s).`] : []),
+    ...(proof.bomReady ? [] : ["BOM is not ready on the engine compile."]),
+    ...(proof.gerberReady ? [] : ["Gerber export was not produced — re-run Manufacture with the engine online."]),
+  ].filter(Boolean);
+
+  const ready = proof.fabricationReady && proof.kicadDrcPass && proof.electricalErrors === 0;
+
+  if (ready) {
+    return {
+      ok: true,
+      manufacturingReady: true,
+      source: "engine",
+      blockers: [],
+      detail:
+        "KiCad compile + DRC passed on the Python engine. Gerbers and BOM were generated — this is the authoritative fab check, not the canvas preview.",
+    };
+  }
+
+  const blockerText = blockers.length > 0
+    ? blockers.slice(0, 3).join("; ")
+    : "Engine compile did not reach fabrication-ready.";
+
+  return {
+    ok: false,
+    manufacturingReady: false,
+    source: "engine",
+    blockers: blockers.slice(0, 5),
+    detail: `Engine blocked manufacturing — ${blockerText} Fix wiring or module choice, then tap Manufacture again.`,
+  };
+}
+
 export function formatManufactureJarvisSummary(input: {
   dfm?: {
     manufacturing_ready: boolean;
@@ -63,7 +99,12 @@ export function formatManufactureJarvisSummary(input: {
   gerber?: { manufacturing_ready?: boolean; filename?: string };
   error?: string;
   local?: LocalPreflightResult;
+  engine?: EngineCompileProof;
 }): ManufactureJarvisResult {
+  if (input.engine) {
+    return formatEngineManufactureSummary(input.engine);
+  }
+
   if (input.local) {
     return formatLocalManufactureSummary(input.local);
   }

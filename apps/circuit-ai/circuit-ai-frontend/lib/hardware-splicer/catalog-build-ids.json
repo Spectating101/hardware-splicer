@@ -1,0 +1,23 @@
+{
+  "schema_version": "hardware_splicer.catalog_build_ids.v1",
+  "build_ids": [
+    "automatic_plant_watering",
+    "automatic_plant_watering_usb",
+    "bench_power_adapter",
+    "camera_ir_light_or_sensor_mount",
+    "generic_low_voltage_build",
+    "indicator_or_task_light",
+    "inspection_motion_fixture",
+    "low_voltage_motor_test_jig",
+    "network_status_indicator",
+    "plotter_motion_stage",
+    "robot_drive_base",
+    "room_display_station",
+    "salvaged_input_panel",
+    "sensor_logger",
+    "small_audio_amp_box",
+    "smart_relay_box",
+    "usb_fume_extractor",
+    "usb_uart_debug_adapter"
+  ]
+}

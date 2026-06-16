@@ -106,7 +106,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 1.2 | Scratch `compose_from_inventory` wired in Python | PASS |
 | 1.3 | CLI `build`, `compose`, `splice-build` share same stack | PASS |
 | 1.4 | Browser compile documented as non-authoritative demo | OPEN |
-| 1.5 | Production UI calls API/CLI only — no TS `plan-to-graph` compile | OPEN |
+| 1.5 | Production UI calls API/CLI only — no TS `plan-to-graph` compile | PASS (Python-first via proxy; `wire_only` for editor auto-wire; TS fallback when API offline or salvage inventory topology) |
 | 1.6 | Library/recipe changes require export make targets in PR | PASS |
 
 ### 2. Catalog kits
@@ -118,7 +118,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 2.3 | Golden manifest covers all 18 builds (or documented exclude list) | PASS |
 | 2.4 | Power variants (USB vs barrel) tested per sensitive kits | PARTIAL |
 | 2.5 | Success emits graph, KiCad, DESIGN_QUALITY, BOM | PASS |
-| 2.6 | Gerber + `inspect-fab` in CI when `kicad-cli` present | OPEN |
+| 2.6 | Gerber + `inspect-fab` in CI when `kicad-cli` present | PASS (`make verify-fab`, CI step) |
 
 ### 3. Scratch compose (bootstrap NL path)
 
@@ -154,7 +154,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 5.2 | Empty graph never succeeds | PASS |
 | 5.3 | 3.3 V / 5 V safety on wired graphs | PASS |
 | 5.4 | Golden geometry snapshots (≥3 graphs) | OPEN |
-| 5.5 | Failure casefiles (graph, quality, intake) | OPEN |
+| 5.5 | Failure casefiles (graph, quality, intake) | PARTIAL (ERC/DRC casefiles + pytest; intake hook OPEN) |
 | 5.6 | `testing_mode` off by default in production | OPEN |
 
 ### 6. Headless API
@@ -175,7 +175,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 
 ### Phase 1 blockers for frontend (critical OPEN)
 
-- **1.5** — one compiler (TS `plan-to-graph` still in frontend)
+- None — **1.5** closed (Python-first `/build` with TS offline fallback)
 
 ---
 
@@ -213,7 +213,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 
 Start only when:
 
-- Phase **1** critical blocker **1.5** remains **OPEN** (frontend still duplicates TS `plan-to-graph`)
+- Phase **1** complete (including **1.5** Python-first UI compile path)
 - Phase **2** IR exists and bootstrap lowers into it
 - Phase **3** routing path exists for at least non-trivial arbitrary fixtures
 
@@ -231,7 +231,7 @@ Rule: **every editor action maps to an engine API call that already has a pytest
 | Explicit footprints in Python | ~28 |
 | Golden intake cases | 6 / 18 |
 | Compose pytest phrases | 12 |
-| Duplicate TS compiler (browser) | Still present |
+| Duplicate TS compiler (browser) | Offline fallback only (`plan-to-graph.ts`; runtime tries Python first) |
 
 ---
 
@@ -263,6 +263,12 @@ PYTHONPATH=src python3 scripts/hardware_splicer.py splice-build \
 
 # Full unit tests
 PYTHONPATH=src pytest tests/ -q --ignore=tests/integration
+
+# Fab bar (Gerber + inspect-fab; requires kicad-cli)
+make verify-fab
+
+# Compile failure casefiles
+make verify-casefiles
 ```
 
 ---

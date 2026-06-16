@@ -9,9 +9,11 @@ const SEV_COLOR = {
   warn: "text-amber-300 border-amber-400/40 bg-amber-500/5",
 } as const;
 
-export function DrcPanel({ drc, onFocus }: {
+export function DrcPanel({ drc, onFocus, title = "Canvas layout preview", subtitle = "Approximate fab rules — use KiCad verification above before ordering." }: {
   drc: DrcResult | null;
   onFocus?(at: { x: number; y: number }): void;
+  title?: string;
+  subtitle?: string;
 }) {
   if (!drc || drc.violations.length === 0) {
     return (
@@ -31,8 +33,11 @@ export function DrcPanel({ drc, onFocus }: {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-          Design rule check
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            {title}
+          </div>
+          <div className="mt-0.5 text-[10px] text-slate-500">{subtitle}</div>
         </div>
         <div
           className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium ${

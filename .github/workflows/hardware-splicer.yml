@@ -48,6 +48,18 @@ jobs:
         run: |
           source .venv/bin/activate
           make verify-engine
+      - name: Fab verify (Gerber + inspect-fab)
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_JLC_ENRICH: "0"
+          CI: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-fab
+      - name: Compile casefile gate
+        run: |
+          source .venv/bin/activate
+          make verify-casefiles
       - name: Core verify (tests, benchmark, audit, tiers, smoke)
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"

@@ -9,6 +9,7 @@ import path from "node:path";
 // They are separate processes on separate ports and must not be conflated.
 const DEFAULT_FLASK_BASE_URL = "http://localhost:5000";
 const DEFAULT_VISION_BASE_URL = "http://127.0.0.1:8000";
+const DEFAULT_HARDWARE_SPLICER_URL = "http://127.0.0.1:8090";
 
 function parseEnvFile(text: string): Record<string, string> {
   const parsed: Record<string, string> = {};
@@ -61,6 +62,15 @@ export function getVisionApiBaseUrl() {
     envValue("CIRCUIT_AI_VISION_URL") ||
     envValue("NEXT_PUBLIC_VISION_API_URL") ||
     DEFAULT_VISION_BASE_URL
+  );
+}
+
+/** Headless Python compile engine (scripts/hardware_splicer.py serve). */
+export function getHardwareSplicerApiUrl() {
+  return (
+    envValue("HARDWARE_SPLICER_API_URL") ||
+    envValue("NEXT_PUBLIC_HARDWARE_SPLICER_API_URL") ||
+    DEFAULT_HARDWARE_SPLICER_URL
   );
 }
 

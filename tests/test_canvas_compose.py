@@ -80,3 +80,50 @@ def test_schematic_export_fixture(tmp_path: Path) -> None:
     body = path.read_text(encoding="utf-8")
     assert "HS:MCU" in body
     assert "Device:R" in body
+
+
+def test_compose_api_wire_only_canvas(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    from hardware_splicer.api import create_app
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    client = TestClient(create_app())
+    nodes = [
+        {"id": "n1", "moduleId": "usb-power-5v"},
+        {"id": "n2", "moduleId": "esp32-devkit"},
+        {"id": "n3", "moduleId": "dht22"},
+    ]
+    response = client.post(
+        "/v1/compose",
+        json={"canvas_nodes": nodes, "wire_only": True, "export_gerber": False},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data.get("wire_only") is True
+    assert len(data["graph"]["nodes"]) == 3
+    assert len(data["graph"]["wires"]) >= 2
+    assert data.get("compile_result") is None
+
+
+def test_compose_api_wire_only_phrase(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    from hardware_splicer.api import create_app
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OUTPUT_ROOT", str(tmp_path))
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    client = TestClient(create_app())
+    response = client.post(
+        "/v1/compose",
+        json={"phrase": "plant watering with soil moisture sensor and pump", "wire_only": True},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    assert data.get("wire_only") is True
+    assert len(data.get("module_ids") or []) >= 2
+    assert len(data["graph"]["wires"]) >= 2

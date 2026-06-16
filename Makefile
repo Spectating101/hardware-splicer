@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -63,11 +63,25 @@ verify-engine:
 verify-netlist-engine:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/verify_netlist_engine.py
 
+export-catalog-build-ids:
+	PYTHONPATH=src $(PYTHON) scripts/export_catalog_build_ids.py
+
+verify-fab:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/verify_fab.py --all
+
+verify-casefiles:
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_compile_casefile.py -q
+
+verify-tier-c:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest tests/test_tier_c_delivery.py -q
+
 salvage-demo:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 PYTHONPATH=src $(PYTHON) scripts/salvage_bringup_demo.py --out /tmp/hs_salvage_bringup
 
 verify-catalog:
 	node scripts/verify_catalog_parity.cjs
+	$(MAKE) export-catalog-build-ids
 
 export-catalog-recipes:
 	node scripts/export_catalog_recipes.cjs

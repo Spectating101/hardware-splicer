@@ -62,6 +62,7 @@ def compile_netlist_to_artifacts(
             out,
             build_id=build_id,
             error="erc_failed",
+            stage="erc",
             netlist=netlist.to_dict(),
             erc=erc,
         )

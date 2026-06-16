@@ -114,15 +114,6 @@ def compile_graph_to_artifacts(
                 ),
                 encoding="utf-8",
             )
-        if int(kicad_drc.get("errors") or 0) > 0:
-            write_compile_casefile(
-                out,
-                build_id=resolved_build_id,
-                error="kicad_drc_failed",
-                graph=dict(graph),
-                quality={"kicad_drc_errors": kicad_drc.get("errors")},
-            )
-
     bbox = (geometry.get("board") or {}).get("bbox_mm") or {}
     board_outline = None
     if geometry:
@@ -180,6 +171,16 @@ def compile_graph_to_artifacts(
     }
 
     quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
+
+    if int(kicad_drc.get("errors") or 0) > 0:
+        write_compile_casefile(
+            out,
+            build_id=resolved_build_id,
+            error="kicad_drc_failed",
+            stage="kicad_drc",
+            graph=dict(graph),
+            quality=quality,
+        )
 
     return {
         "ok": build_ready,

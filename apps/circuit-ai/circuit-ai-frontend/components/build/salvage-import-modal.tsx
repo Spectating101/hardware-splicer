@@ -8,6 +8,7 @@ import {
   type SalvagePlanInput,
   type TranslationResult,
 } from "@/lib/salvage/plan-to-graph";
+import { compileCatalogBuildRemote, preferPythonEngine } from "@/lib/hardware-splicer/client";
 
 const EXAMPLE_PLAN: SalvagePlanInput = {
   target: { recommended_build_id: "sensor_logger" },
@@ -30,19 +31,44 @@ export function SalvageImportModal({
 }) {
   const [text, setText] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (!open) return null;
 
-  const tryImport = () => {
+  const tryImport = async () => {
     setErr(null);
+    setBusy(true);
     let plan: SalvagePlanInput;
     try {
       plan = JSON.parse(text);
     } catch (e) {
+      setBusy(false);
       setErr(`Plan JSON is invalid: ${e instanceof Error ? e.message : String(e)}`);
       return;
     }
+
+    const buildId = plan.target?.recommended_build_id;
+    const hasInventoryTopology = Boolean(
+      (plan.reusable_blocks?.length ?? 0) > 0 || (plan.resolved_modules?.length ?? 0) > 0,
+    );
+
+    if (buildId && preferPythonEngine() && !hasInventoryTopology) {
+      try {
+        const remote = await compileCatalogBuildRemote(buildId);
+        setBusy(false);
+        onImport({
+          graph: remote.graph,
+          notes: remote.notes ?? [`Imported "${buildId}" via Python engine.`],
+          warnings: remote.warnings ?? [],
+        });
+        return;
+      } catch {
+        // Fall back to local translator for offline dev or complex salvage topology.
+      }
+    }
+
     const result = splicePlanToBuildGraph(plan);
+    setBusy(false);
     if (result.graph.nodes.length === 0) {
       setErr(result.warnings.join(" ") || "Plan produced an empty graph.");
       return;
@@ -101,11 +127,11 @@ export function SalvageImportModal({
                 Load example
               </button>
               <button
-                onClick={tryImport}
-                disabled={!text.trim()}
+                onClick={() => void tryImport()}
+                disabled={!text.trim() || busy}
                 className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 px-3 py-1.5 text-xs font-semibold text-slate-900 hover:bg-emerald-300 disabled:bg-white/10 disabled:text-slate-500"
               >
-                <CheckCircle2 className="h-3.5 w-3.5" /> Import
+                <CheckCircle2 className="h-3.5 w-3.5" /> {busy ? "Importing…" : "Import"}
               </button>
             </div>
           </div>

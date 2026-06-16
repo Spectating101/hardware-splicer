@@ -16,7 +16,7 @@ Not “clone their marketing.” It means a user can do in Circuit.AI what they 
 | DRC | Yes | Internal + **KiCad CLI DRC** on routed PCB | KiCad DRC clean on shipped boards |
 | KiCad in/out | Yes | PCB export; netlist import | `.kicad_sch` + `.kicad_pcb` round-trip |
 | AI from intent | Copilot | Jarvis compose + salvage | NL → netlist → compile |
-| One compiler | Yes | **OPEN** — TS fork still in frontend | Python only |
+| One compiler | Yes | **PASS** — Python-first `/build`; TS offline fallback | Python only |
 
 ## Where we already pull ahead (if engine holds)
 
@@ -37,7 +37,7 @@ Not “clone their marketing.” It means a user can do in Circuit.AI what they 
 ## Honest score
 
 - **Bootstrap kits + compose:** competitive for makers
-- **Flux-class arbitrary PCB:** engine path complete — routing + schematic + KiCad DRC/ERC; remaining gap is editor (Phase 4) and TS compiler fork (1.5)
+- **Flux-class arbitrary PCB:** engine path complete — routing + schematic + KiCad DRC/ERC; Tier C product bar = honest fab on all kits + KiCad truth in UI; Tier D = full schematic editor
 - **Worth doing:** yes, if we keep measuring against this table, not against “18 kits pass”
 
 See `docs/ENGINE_DONE.md` for gate IDs and CI status.

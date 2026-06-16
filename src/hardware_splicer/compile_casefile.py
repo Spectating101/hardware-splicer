@@ -16,11 +16,13 @@ def write_compile_casefile(
     *,
     build_id: str,
     error: str,
+    stage: Optional[str] = None,
     graph: Optional[Mapping[str, Any]] = None,
     netlist: Optional[Mapping[str, Any]] = None,
     erc: Optional[Mapping[str, Any]] = None,
     quality: Optional[Mapping[str, Any]] = None,
     splice_plan: Optional[Mapping[str, Any]] = None,
+    intake: Optional[Mapping[str, Any]] = None,
 ) -> str:
     build_dir.mkdir(parents=True, exist_ok=True)
     path = build_dir / "COMPILE_CASEFILE.json"
@@ -29,11 +31,13 @@ def write_compile_casefile(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "build_id": build_id,
         "error": error,
+        "stage": stage,
         "graph": dict(graph) if graph else None,
         "netlist": dict(netlist) if netlist else None,
         "erc": dict(erc) if erc else None,
         "quality": dict(quality) if quality else None,
         "splice_plan": dict(splice_plan) if splice_plan else None,
+        "intake": dict(intake) if intake else None,
     }
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     return str(path)

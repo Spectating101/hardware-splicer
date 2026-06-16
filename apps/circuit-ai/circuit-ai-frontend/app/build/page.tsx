@@ -24,6 +24,7 @@ import "@xyflow/react/dist/style.css";
 import { Trash2, Download, GraduationCap, CircuitBoard, X, Factory } from "lucide-react";
 import { downloadKicadPcb, serializeBuildToKicadPcb } from "@/lib/kicad-serializer";
 import { BuildJarvisPanel } from "@/components/build/build-jarvis-panel";
+import { EngineProofPanel } from "@/components/build/engine-proof-panel";
 import { ManufacturePanel, type MfgResult } from "@/components/build/manufacture-panel";
 import { snapshotFromBuild, wantsAutoWireAfterCompose } from "@/lib/jarvis/build-agent";
 import { formatManufactureJarvisSummary } from "@/lib/jarvis/manufacture-summary";
@@ -33,6 +34,17 @@ import {
   splicePlanToBuildGraph,
   type TranslationResult,
 } from "@/lib/salvage/plan-to-graph";
+import {
+  composeCanvasRemote,
+  compileCatalogBuildRemote,
+  preferPythonEngine,
+} from "@/lib/hardware-splicer/client";
+import {
+  engineProofUnavailableMessage,
+  shouldRequireEngineForManufacture,
+  verifyCanvasBuildRemote,
+  type EngineCompileProof,
+} from "@/lib/hardware-splicer/engine-proof";
 import { SiteHeader } from "@/components/site-header";
 import { ModuleLibraryPanel } from "@/components/build/module-library-panel";
 import { ModuleNode, type ModuleNodeData } from "@/components/build/module-node";
@@ -91,7 +103,7 @@ type WiringInstruction = {
 type WirePlan = {
   wires: WiringInstruction[];
   explanation?: string;
-  source: "local";
+  source: "local" | "python";
 };
 
 function normalizeKey(value: string): string {
@@ -268,6 +280,30 @@ function createLocalWirePlan(nodes: FlowNode[]): WirePlan {
   return createHeuristicWirePlan(nodes);
 }
 
+async function createWirePlanAsync(nodes: FlowNode[]): Promise<WirePlan> {
+  if (preferPythonEngine() && nodes.length >= 2) {
+    try {
+      const graph = await composeCanvasRemote(
+        nodes.map((n) => ({ id: n.id, moduleId: (n.data as ModuleNodeData).moduleId })),
+      );
+      if (graph.wires.length > 0) {
+        return {
+          wires: graph.wires.map((w) => ({
+            from: w.from,
+            to: w.to,
+            purpose: "auto-route",
+          })),
+          source: "python",
+          explanation: `Python pad-aware auto-router connected ${graph.wires.length} wire${graph.wires.length === 1 ? "" : "s"} from module pin roles.`,
+        };
+      }
+    } catch {
+      // Fall back to local TS router when API is offline or misconfigured.
+    }
+  }
+  return createLocalWirePlan(nodes);
+}
+
 function edgeKey(edge: Edge): string {
   return `${edge.source}:${edge.sourceHandle ?? ""}->${edge.target}:${edge.targetHandle ?? ""}`;
 }
@@ -338,6 +374,9 @@ function BuildInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [pcbOpen, setPcbOpen] = useState(false);
   const [mfg, setMfg] = useState<MfgResult | null>(null);
+  const [engineProof, setEngineProof] = useState<EngineCompileProof | null>(null);
+  const [engineProofBusy, setEngineProofBusy] = useState(false);
+  const [engineProofError, setEngineProofError] = useState<string | null>(null);
 
   useEffect(() => {
     if (pcbOpen) document.documentElement.classList.add("pcb-modal-open");
@@ -460,9 +499,40 @@ function BuildInner() {
   const pcbGeometry = useMemo(() => buildGraphToGeometry(graph), [graph]);
   const drc = useMemo(() => runDrc(pcbGeometry), [pcbGeometry]);
 
+  const refreshEngineProof = useCallback(async (exportGerber = false): Promise<EngineCompileProof | null> => {
+    if (!preferPythonEngine() || graph.nodes.length < 2) {
+      setEngineProof(null);
+      setEngineProofError(null);
+      return null;
+    }
+    setEngineProofBusy(true);
+    setEngineProofError(null);
+    try {
+      const proof = await verifyCanvasBuildRemote(graph, { exportGerber });
+      setEngineProof(proof);
+      return proof;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      setEngineProofError(message);
+      return null;
+    } finally {
+      setEngineProofBusy(false);
+    }
+  }, [graph]);
+
+  useEffect(() => {
+    if (!preferPythonEngine() || graph.nodes.length < 2) {
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      void refreshEngineProof(false);
+    }, 2500);
+    return () => window.clearTimeout(timer);
+  }, [graph, refreshEngineProof]);
+
   const getJarvisSnapshot = useCallback(
-    () => snapshotFromBuild(graph, warnings, drc),
-    [graph, warnings, drc],
+    () => snapshotFromBuild(graph, warnings, drc, engineProof),
+    [graph, warnings, drc, engineProof],
   );
 
   const graphFromEdges = useCallback((edgeList: Edge[]): BuildGraph => ({
@@ -478,11 +548,11 @@ function BuildInner() {
     const w = analyzeBuild(g);
     const geo = buildGraphToGeometry(g);
     const d = runDrc(geo);
-    return snapshotFromBuild(g, w, d);
-  }, []);
+    return snapshotFromBuild(g, w, d, engineProof);
+  }, [engineProof]);
 
-  const jarvisAutoWire = useCallback(() => {
-    const plan = createLocalWirePlan(nodes);
+  const jarvisAutoWire = useCallback(async () => {
+    const plan = await createWirePlanAsync(nodes);
     const uniqueEdges = dedupeNewEdges(edges, edgesFromWirePlan(plan, nodes));
     const merged = uniqueEdges.length > 0 ? [...edges, ...uniqueEdges] : edges;
     if (uniqueEdges.length > 0) {
@@ -502,8 +572,8 @@ function BuildInner() {
     };
   }, [nodes, edges, setEdges, fitView, graphFromEdges, snapshotForGraph]);
 
-  const jarvisRebuildWires = useCallback(() => {
-    const plan = createLocalWirePlan(nodes);
+  const jarvisRebuildWires = useCallback(async () => {
+    const plan = await createWirePlanAsync(nodes);
     const newEdges = edgesFromWirePlan(plan, nodes);
     setEdges(newEdges);
     setTimeout(() => fitView({ padding: 0.25, duration: 400 }), 100);
@@ -518,7 +588,7 @@ function BuildInner() {
     };
   }, [nodes, setEdges, fitView, graphFromEdges, snapshotForGraph]);
 
-  const jarvisComposeModules = useCallback((userText: string) => {
+  const jarvisComposeModules = useCallback(async (userText: string) => {
     const pick = pickModulesForGoal(userText);
     if (pick.moduleIds.length === 0) {
       return {
@@ -556,7 +626,7 @@ function BuildInner() {
       wireCount: edges.length,
       addingModules: toAdd.length,
     })) {
-      const plan = createLocalWirePlan(mergedNodes);
+      const plan = await createWirePlanAsync(mergedNodes);
       mergedEdges = edgesFromWirePlan(plan, mergedNodes);
       wireNote = plan.wires.length > 0
         ? ` Wired ${plan.wires.length} connection(s).`
@@ -586,7 +656,31 @@ function BuildInner() {
     };
   }, [nodes, edges, graph, setNodes, setEdges, fitView, graphFromEdges, snapshotForGraph]);
 
-  const jarvisSpliceRecipe = useCallback((buildId: string) => {
+  const jarvisSpliceRecipe = useCallback(async (buildId: string) => {
+    if (preferPythonEngine()) {
+      try {
+        const remote = await compileCatalogBuildRemote(buildId);
+        const result: TranslationResult = {
+          graph: remote.graph,
+          notes: remote.notes ?? [],
+          warnings: remote.warnings ?? [],
+        };
+        applyTranslation(result);
+        const notes = result.notes.length ? ` ${result.notes.join(" ")}` : "";
+        const warns = result.warnings.length ? ` ⚠ ${result.warnings.join(" ")}` : "";
+        return {
+          ok: true,
+          buildId,
+          moduleCount: result.graph.nodes.length,
+          wireCount: result.graph.wires.length,
+          detail: `Spliced "${buildId}" via Python engine — ${result.graph.nodes.length} modules, ${result.graph.wires.length} wires.${notes}${warns}`,
+          snapshot: snapshotForGraph(result.graph),
+        };
+      } catch {
+        // Fall through to local TS recipe translator when API is unavailable.
+      }
+    }
+
     const result = splicePlanToBuildGraph({ target: { recommended_build_id: buildId } });
     if (result.graph.nodes.length === 0) {
       return {
@@ -653,9 +747,7 @@ function BuildInner() {
     URL.revokeObjectURL(url);
   }, [graph]);
 
-  // Send the routed board to the REAL backend pipeline: physics-engine DFM
-  // preflight + Gerber generation. The client DRC is the instant local check;
-  // this is the authoritative second opinion + actual fab files.
+  // Manufacture uses the Python engine (KiCad DRC + Gerbers). Canvas DRC is preview-only.
   const manufactureReal = useCallback(async () => {
     if (nodes.length === 0) {
       return formatManufactureJarvisSummary({
@@ -664,6 +756,36 @@ function BuildInner() {
     }
     setMfg({ busy: true });
     try {
+      if (shouldRequireEngineForManufacture()) {
+        let proof: EngineCompileProof | null = null;
+        try {
+          proof = await verifyCanvasBuildRemote(graph, { exportGerber: true });
+          setEngineProof(proof);
+          setEngineProofError(null);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          setEngineProofError(message);
+          setMfg({ busy: false, error: `${message} ${engineProofUnavailableMessage()}` });
+          return formatManufactureJarvisSummary({ error: message });
+        }
+
+        const summary = formatManufactureJarvisSummary({ engine: proof });
+        setMfg({
+          busy: false,
+          dfm: {
+            manufacturing_ready: Boolean(summary.manufacturingReady),
+            critical: 0,
+            errors: proof.kicadDrcErrors + proof.electricalErrors,
+            warnings: proof.kicadDrcWarnings + proof.electricalWarnings,
+            issues: (summary.blockers ?? []).map((issue) => ({
+              severity: "error",
+              issue,
+            })),
+          },
+        });
+        return summary;
+      }
+
       const pcb = serializeBuildToKicadPcb(graph);
       const mkForm = () => {
         const f = new FormData();
@@ -752,7 +874,7 @@ function BuildInner() {
       });
       return formatManufactureJarvisSummary({ local });
     }
-  }, [graph, nodes.length]);
+  }, [nodes.length, graph, setMfg]);
 
   const jarvisGenerateFirmware = useCallback(() => {
     if (graph.nodes.length === 0) {
@@ -911,6 +1033,13 @@ function BuildInner() {
 
         <div className="min-h-0 shrink overflow-y-auto space-y-3">
         <SafetyCheckPanel warnings={warnings} />
+
+        <EngineProofPanel
+          proof={engineProof}
+          busy={engineProofBusy}
+          error={engineProofError}
+          onRefresh={() => { void refreshEngineProof(false); }}
+        />
 
         <DrcPanel drc={drc} />
 

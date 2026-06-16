@@ -48,7 +48,7 @@ export function ManufacturePanel({ mfg }: { mfg: MfgResult | null }) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-          Backend DFM preflight
+          Manufacture preflight
         </div>
         {dfm && (
           <div
