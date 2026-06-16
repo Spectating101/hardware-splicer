@@ -44,6 +44,33 @@ def _first_pin(mod: ModuleSpec, pred: Callable[[Mapping[str, Any]], bool]) -> Op
     return None
 
 
+def _device_wants_5v(dev: ModuleSpec, dev_vcc_pin: Optional[Mapping[str, Any]]) -> bool:
+    """True when a peripheral's primary supply should come from the 5V rail (not MCU 3V3)."""
+    ivr = dev.get("inputVoltageRange") or []
+    if ivr and float(ivr[0]) >= 4.5:
+        return True
+    pin_text = " ".join(
+        str((dev_vcc_pin or {}).get(key) or "")
+        for key in ("voltage", "notes", "label")
+    )
+    if re.search(r"\b5\s*V\b", pin_text, re.I):
+        return True
+    if re.search(r"4\.5\s*-\s*5(?:\.5)?\s*V", pin_text, re.I):
+        return True
+    return False
+
+
+_SKIP_GENERIC_POWER_IDS = frozenset(
+    {
+        "a4988-stepper",
+        "max98357a-i2s-amp",
+        "l298n",
+        "relay-1ch-5v",
+        "esp32-cam-module",
+    }
+)
+
+
 def _alloc_gpio(mcu: ModuleSpec, used: Set[str]) -> Optional[str]:
     order = [
         "GPIO4", "GPIO2", "GPIO16", "GPIO17", "GP4", "GP5", "GP0", "GP1", "GP26",
@@ -174,11 +201,13 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         if sh_gnd and mcu_g:
             wire(mcu["id"], mcu_g, level_shifter["id"], sh_gnd)
 
-    switched_loads = {"water_pump_5v", "cooling_fan_5v"}
+    switched_loads = {"water_pump_5v", "cooling_fan_5v", "mini-pump-5v"}
 
     for dev in modules:
         if dev.get("id") in skip_ids or dev is level_shifter:
             continue
+        dev_id = str(dev.get("id") or "")
+        is_mosfet_driver = bool(re.search(r"mosfet", dev_id))
         dev_gnd = gnd_pin(dev)
         mcu_g = gnd_pin(mcu) if mcu else None
         if mcu and dev_gnd and mcu_g:
@@ -186,31 +215,34 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         elif rail_gnd and dev_gnd:
             wire(rail_gnd[0], rail_gnd[1], dev["id"], dev_gnd)
 
-        dev_vcc_pin = next(
-            (p for p in dev.get("pins") or [] if p.get("id") in ("VCC", "VIN") or p.get("role") == "power_in"),
-            None,
+        has_dedicated_power = (
+            is_mosfet_driver
+            or dev_id in _SKIP_GENERIC_POWER_IDS
+            or bool(re.search(r"ili9341|st7735", dev_id))
         )
-        dev_vcc = dev_vcc_pin.get("id") if dev_vcc_pin else None
-        ivr = dev.get("inputVoltageRange") or [0]
-        wants_5v = (ivr[0] if ivr else 0) >= 4.5 or bool(
-            re.search(r"5\s*v", str(dev_vcc_pin.get("voltage") if dev_vcc_pin else ""), re.I)
-        )
-        via_switch = bool(load_switch and dev.get("id") in switched_loads and dev_vcc)
-        if via_switch and load_switch:
-            if rail_pos:
-                wire(rail_pos[0], rail_pos[1], load_switch["id"], "VIN")
-            if rail_gnd:
-                wire(rail_gnd[0], rail_gnd[1], load_switch["id"], "VIN-")
-            wire(load_switch["id"], "VOUT+", dev["id"], dev_vcc)
-            ls_gnd = gnd_pin(load_switch)
-            if ls_gnd and dev_gnd:
-                wire(load_switch["id"], ls_gnd, dev["id"], dev_gnd)
-        elif wants_5v and rail_pos and dev_vcc:
-            wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
-        elif mcu and mcu_vout and dev_vcc:
-            wire(mcu["id"], mcu_vout, dev["id"], dev_vcc)
-        elif rail_pos and dev_vcc:
-            wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
+        if not has_dedicated_power:
+            dev_vcc_pin = next(
+                (p for p in dev.get("pins") or [] if p.get("id") in ("VCC", "VIN", "V+") or p.get("role") == "power_in"),
+                None,
+            )
+            dev_vcc = dev_vcc_pin.get("id") if dev_vcc_pin else None
+            wants_5v = _device_wants_5v(dev, dev_vcc_pin)
+            via_switch = bool(load_switch and dev_id in switched_loads and dev_vcc)
+            if via_switch and load_switch:
+                if rail_pos:
+                    wire(rail_pos[0], rail_pos[1], load_switch["id"], "VIN")
+                if rail_gnd:
+                    wire(rail_gnd[0], rail_gnd[1], load_switch["id"], "VIN-")
+                wire(load_switch["id"], "VOUT+", dev["id"], dev_vcc)
+                vout_neg = _first_pin(load_switch, lambda p: p.get("id") == "VOUT-")
+                if vout_neg and dev_gnd:
+                    wire(load_switch["id"], vout_neg, dev["id"], dev_gnd)
+            elif wants_5v and rail_pos and dev_vcc:
+                wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
+            elif mcu and mcu_vout and dev_vcc:
+                wire(mcu["id"], mcu_vout, dev["id"], dev_vcc)
+            elif rail_pos and dev_vcc:
+                wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
 
         dev_sda = next((p.get("id") for p in dev.get("pins") or [] if p.get("role") == "i2c_sda"), None)
         dev_scl = next((p.get("id") for p in dev.get("pins") or [] if p.get("role") == "i2c_scl"), None)
@@ -222,13 +254,16 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         if mcu and re.search(r"mosfet", dev_id):
             sig = _alloc_gpio(mcu, used_gpio)
             vin = _first_pin(dev, lambda p: p.get("id") == "VIN")
-            gnd = _first_pin(dev, lambda p: p.get("role") == "gnd")
+            vin_neg = _first_pin(dev, lambda p: p.get("id") == "VIN-")
+            sig_gnd = _first_pin(dev, lambda p: p.get("id") == "GND")
             if sig and _first_pin(dev, lambda p: p.get("id") == "SIG"):
                 wire(mcu["id"], sig, dev["id"], "SIG")
             if rail_pos and vin:
                 wire(rail_pos[0], rail_pos[1], dev["id"], vin)
-            if rail_gnd and gnd:
-                wire(rail_gnd[0], rail_gnd[1], dev["id"], gnd)
+            if rail_gnd and vin_neg:
+                wire(rail_gnd[0], rail_gnd[1], dev["id"], vin_neg)
+            if mcu_g and sig_gnd:
+                wire(mcu["id"], mcu_g, dev["id"], "GND")
         if mcu and dev_id == "relay-1ch-5v":
             sig = _alloc_gpio(mcu, used_gpio)
             if sig:
@@ -353,7 +388,9 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 None,
             )
             din = _alloc_gpio(mcu, used_gpio)
-            if mcu_vout:
+            if rail_pos:
+                wire(rail_pos[0], rail_pos[1], dev["id"], "VIN")
+            elif mcu_vout:
                 wire(mcu["id"], mcu_vout, dev["id"], "VIN")
             if mcu_g:
                 wire(mcu["id"], mcu_g, dev["id"], "GND")

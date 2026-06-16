@@ -44,18 +44,27 @@ def load_project_intake(path: str | Path) -> Dict[str, Any]:
 
 def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = False) -> Dict[str, Any]:
     body = _to_dict(intake, "intake")
+    from .vision_inventory import merge_attachment_inventory_into_intake
+
+    body, offline_inventory = merge_attachment_inventory_into_intake(body)
     if skip_vision:
-        vision_report = {"enabled": False, "skipped": True}
+        vision_report = {"enabled": False, "skipped": True, "offline_inventory": offline_inventory}
         body, extraction_report = enrich_intake_with_extracted_evidence(body)
     else:
         body, vision_report = enrich_intake_with_vision_assistance(body)
+        vision_report = {**vision_report, "offline_inventory": offline_inventory}
         body, extraction_report = enrich_intake_with_extracted_evidence(body)
     project_name = _slug(str(body.get("project_name") or body.get("name") or body.get("goal") or "hardware_splicer_project"))
     goal = str(body.get("goal") or body.get("intent") or body.get("brief") or project_name).strip()
     constraints = _to_dict(body.get("constraints") or {}, "intake.constraints")
     budget = _budget(body)
-    parts = _normalized_parts(body.get("available_parts") or body.get("parts") or body.get("resources") or [])
-    archetype = _detect_archetype(goal, parts)
+    parts = _normalized_parts(
+        body.get("available_parts") or body.get("parts") or body.get("resources") or [],
+        goal=goal,
+    )
+    from .integrations.qwen_intake_normalize import detect_archetype_llm
+
+    archetype = detect_archetype_llm(goal, parts)
     evidence = _evidence(body)
     base_dir = _source_base_dir(body)
     assumptions = _assumptions(archetype, parts, constraints, budget)
@@ -65,6 +74,7 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
         parts=parts,
         constraints=constraints,
         project_name=project_name,
+        budget=budget,
     )
     if salvage_package.get("recommended_build_id"):
         archetype = _archetype_from_build_id(str(salvage_package["recommended_build_id"]), archetype)
@@ -144,11 +154,33 @@ def splice_and_build_from_intake(
     splice_plan_file = out_path / "SPLICE_PLAN.json"
     intake_file = out_path / "PROJECT_INTAKE.json"
     splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
+    gap_file = out_path / "SALVAGE_GAP_ANALYSIS.json"
+    bringup_json = out_path / "BRINGUP_CARD.json"
+    bringup_md = out_path / "BRINGUP_CARD.md"
+    bom_file = out_path / "SALVAGE_BOM.json"
+    goal = str(plan.get("goal") or intake.get("goal") or "").strip()
+    if salvage_package.get("gap_analysis"):
+        gap_file.write_text(json.dumps(salvage_package["gap_analysis"], indent=2), encoding="utf-8")
+    if salvage_package.get("bringup_card"):
+        bringup_json.write_text(json.dumps(salvage_package["bringup_card"], indent=2), encoding="utf-8")
+        bringup_md.write_text(str(salvage_package["bringup_card"].get("markdown") or ""), encoding="utf-8")
+    if salvage_package.get("bom_estimate"):
+        from .salvage_bom_estimate import write_salvage_bom_artifacts
+
+        write_salvage_bom_artifacts(salvage_package["bom_estimate"], out_path)
+    if salvage_package.get("firmware_scaffold"):
+        from .firmware_scaffold import write_salvage_firmware
+
+        write_salvage_firmware(
+            build_id=build_id,
+            salvage_package=salvage_package,
+            goal=goal,
+            out_dir=out_path,
+        )
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
 
     graph_input = salvage_package.get("graph_input") or salvage_package.get("splice_package")
     resolved_modules = salvage_package.get("resolved_modules") or []
-    goal = str(plan.get("goal") or intake.get("goal") or "").strip()
     if salvage_package.get("graph_mode") == "scratch":
         scratch = compile_scratch_build(
             out_dir=str(out_path),
@@ -304,9 +336,38 @@ def run_project_intake(
     upgrade_plan_file = out_path / "AUTHORITY_UPGRADE_PLAN.json"
     evidence_kit_file = out_path / "EVIDENCE_CAPTURE_KIT.json"
     splice_plan_file = out_path / "SPLICE_PLAN.json"
+    gap_file = out_path / "SALVAGE_GAP_ANALYSIS.json"
+    bringup_json = out_path / "BRINGUP_CARD.json"
+    bringup_md = out_path / "BRINGUP_CARD.md"
+    bom_file = out_path / "SALVAGE_BOM.json"
+    firmware_meta = out_path / "firmware" / "FIRMWARE_SCAFFOLD.json"
     salvage_package = _to_dict(plan.get("salvage_package") or {}, "intake_plan.salvage_package")
     if salvage_package:
         splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
+        gap = salvage_package.get("gap_analysis")
+        bringup = salvage_package.get("bringup_card")
+        bom = salvage_package.get("bom_estimate")
+        fw = salvage_package.get("firmware_scaffold")
+        if gap:
+            gap_file.write_text(json.dumps(gap, indent=2), encoding="utf-8")
+        if bringup:
+            bringup_json.write_text(json.dumps(bringup, indent=2), encoding="utf-8")
+            bringup_md.write_text(str(bringup.get("markdown") or ""), encoding="utf-8")
+        if bom:
+            from .salvage_bom_estimate import write_salvage_bom_artifacts
+
+            bom_paths = write_salvage_bom_artifacts(bom, out_path)
+            bom_file = Path(bom_paths["salvage_bom_json"])
+        if fw:
+            from .firmware_scaffold import write_salvage_firmware
+
+            firmware_meta.parent.mkdir(parents=True, exist_ok=True)
+            write_salvage_firmware(
+                build_id=str(salvage_package.get("recommended_build_id") or "salvage_build"),
+                salvage_package=salvage_package,
+                goal=str(plan.get("goal") or ""),
+                out_dir=out_path,
+            )
     intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
     planned_scenario_file.write_text(json.dumps(plan["scenario"], indent=2), encoding="utf-8")
     vision_report_file.write_text(json.dumps(vision_report, indent=2), encoding="utf-8")
@@ -327,6 +388,12 @@ def run_project_intake(
         "authority_upgrade_plan": str(upgrade_plan_file),
         "evidence_capture_kit": str(evidence_kit_file),
         "splice_plan": str(splice_plan_file) if salvage_package else "",
+        "salvage_gap_analysis": str(gap_file) if gap_file.is_file() else "",
+        "bringup_card": str(bringup_json) if bringup_json.is_file() else "",
+        "bringup_card_md": str(bringup_md) if bringup_md.is_file() else "",
+        "salvage_bom": str(bom_file) if bom_file.is_file() else "",
+        "salvage_bom_csv": str(out_path / "SALVAGE_BOM.csv") if (out_path / "SALVAGE_BOM.csv").is_file() else "",
+        "firmware_scaffold": str(firmware_meta) if firmware_meta.is_file() else "",
     }
     scenario_result_path = result["artifacts"].get("scenario_result")
     if scenario_result_path:
@@ -1119,18 +1186,9 @@ def _expected_authority(archetype: str, body: Dict[str, Any], evidence: Dict[str
 
 
 def _detect_archetype(goal: str, parts: List[Dict[str, Any]]) -> str:
-    text = " ".join([goal] + [str(part.get("name") or "") + " " + str(part.get("type") or "") for part in parts]).lower()
-    if any(word in text for word in ["soil", "water", "watering", "pump", "irrigation", "plant"]):
-        return "automatic_watering"
-    if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor"]):
-        return "rover"
-    if any(word in text for word in ["fan", "airflow", "vent", "blower"]):
-        return "airflow_controller"
-    if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal"]):
-        return "pan_tilt"
-    if any(word in text for word in ["gripper", "claw", "grab"]):
-        return "gripper"
-    return "generic_mechatronics"
+    from .integrations.qwen_intake_normalize import detect_archetype_llm
+
+    return detect_archetype_llm(goal, parts)
 
 
 def _evidence_requests(current_level: str, next_level: str | None, missing: List[str], plan: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1240,7 +1298,7 @@ def _next_project_level(current_level: str) -> str | None:
     return PROJECT_LEVELS[index + 1]
 
 
-def _normalized_parts(data: Any) -> List[Dict[str, Any]]:
+def _normalized_parts(data: Any, *, goal: str = "") -> List[Dict[str, Any]]:
     if isinstance(data, Mapping):
         rows = data.get("available_parts") or data.get("parts") or []
     else:
@@ -1257,10 +1315,21 @@ def _normalized_parts(data: Any) -> List[Dict[str, Any]]:
             part = {"name": name}
         normalized = _classify_part(name, part)
         parts.append(normalized)
+    if goal:
+        from .integrations.qwen_intake_normalize import classify_intake_parts_llm
+
+        parts = classify_intake_parts_llm(goal, parts)
     return parts
 
 
 def _classify_part(name: str, part: Dict[str, Any]) -> Dict[str, Any]:
+    from .integrations.llm_policy import offline_salvage_enabled, qwen_llm_first
+
+    if qwen_llm_first() and not offline_salvage_enabled():
+        ptype = str(part.get("type") or "part").strip()
+        pclass = str(part.get("class") or part.get("part_class") or "material").strip()
+        return _part(name, ptype, pclass, part)
+
     text = f"{name} {part.get('type') or ''} {part.get('kind') or ''}".lower()
     if any(word in text for word in ["pump", "solenoid"]):
         return _part(name, "pump" if "pump" in text else "solenoid", "actuator", part)

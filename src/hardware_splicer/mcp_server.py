@@ -161,6 +161,26 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_jarvis_build",
+            description=(
+                "Primary electrical JARVIS path: NL goal (+ optional salvage parts) → "
+                "Qwen netlist when keyed → KiCad compile → simulation → TRUST_REPORT + JARVIS narrative."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "goal": {"type": "string"},
+                    "parts": {"type": "array", "items": {"type": "object"}},
+                    "constraints": {"type": "object"},
+                    "project_name": {"type": "string"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                    "allow_qwen": {"type": "boolean", "default": True},
+                },
+                "required": ["goal"],
+            },
+        ),
+        Tool(
             name="hs_verify_engine",
             description=(
                 "Compile catalog builds headlessly and check KiCad DRC errors=0. "
@@ -234,6 +254,18 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 args.get("intake") or {},
                 out_dir=args.get("out_dir"),
                 export_gerber=bool(args.get("export_gerber")),
+            )
+        )
+    if name == "hs_jarvis_build":
+        return _tool_result(
+            sdk.jarvis_build(
+                str(args.get("goal") or ""),
+                parts=args.get("parts"),
+                constraints=args.get("constraints"),
+                project_name=args.get("project_name"),
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+                allow_qwen=bool(args.get("allow_qwen", True)),
             )
         )
     if name == "hs_verify_engine":

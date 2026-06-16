@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -27,7 +28,8 @@ from hardware_splicer.design_quality import build_design_quality_gate
 from hardware_splicer.runtime import runtime_status
 from hardware_splicer.validation import validate_compile_spec, validation_errors
 from hardware_splicer.fabrication_inspection import inspect_fabrication_package
-from hardware_splicer.vision_usage_ledger import usage_summary
+from hardware_splicer.vision_usage_ledger import usage_summary as vision_usage_summary
+from hardware_splicer.text_usage_ledger import usage_summary as text_usage_summary
 from hardware_splicer.vision_evidence_assistant import _env_key_present, DEFAULT_QWEN_MODEL
 from hardware_splicer.project_intake import splice_and_build_from_intake
 
@@ -165,17 +167,124 @@ def _run_intake(args: argparse.Namespace) -> int:
     return 0 if result["compile_ok"] else 1
 
 
+def _print_electrical_trust(quality: dict) -> None:
+    sim = dict(quality.get("electrical_simulation") or {})
+    print(f"simulation_pass={sim.get('pass')}")
+    if sim.get("estimated_load_a") is not None:
+        print(f"estimated_load_a={sim.get('estimated_load_a')}")
+    if quality.get("trust_report_path"):
+        print(f"trust_report={quality.get('trust_report_path')}")
+
+
+def _apply_simulate_env(args: argparse.Namespace) -> None:
+    if getattr(args, "no_simulate", False):
+        os.environ["HARDWARE_SPLICER_SIMULATE"] = "0"
+
+
+def _run_netlist_compile(args: argparse.Namespace) -> int:
+    _apply_simulate_env(args)
+    from hardware_splicer.build_compiler import compile_from_netlist
+    from hardware_splicer.integrations.circuit_json_import import circuit_json_to_netlist
+    from hardware_splicer.netlist.import_kicad import parse_kicad_netlist
+    from hardware_splicer.netlist.ir import CircuitNetlist
+
+    source = Path(args.netlist)
+    if not source.is_file():
+        print(f"error: netlist file not found: {source}", file=sys.stderr)
+        return 2
+
+    text = source.read_text(encoding="utf-8")
+    if args.kicad_netlist or source.suffix.lower() == ".net":
+        netlist = parse_kicad_netlist(text)
+    elif args.circuit_json:
+        docs = json.loads(text)
+        if not isinstance(docs, list):
+            print("error: circuit-json input must be a JSON array", file=sys.stderr)
+            return 2
+        netlist = circuit_json_to_netlist(docs, source=str(source))
+    else:
+        payload = json.loads(text)
+        netlist = CircuitNetlist.from_dict(payload)
+
+    build_id = str(args.build_id or "generic_low_voltage_build").strip()
+    result = compile_from_netlist(
+        netlist,
+        args.out,
+        build_id=build_id,
+        export_gerber=not args.no_gerber,
+    )
+    quality = result.design_quality or {}
+    payload = {
+        **result.to_dict(),
+        "netlist_source": str(source),
+        "compile_engine": quality.get("compile_engine"),
+        "copper_tier": quality.get("copper_tier"),
+        "fab_recommendation": quality.get("fab_recommendation"),
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(f"ok={result.ok}")
+        print(f"build_id={result.build_id}")
+        print(f"compile_engine={quality.get('compile_engine')}")
+        print(f"drc_pass={quality.get('drc_pass')}")
+        print(f"kicad_drc_errors={quality.get('kicad_drc_errors')}")
+        print(f"electrical_safety_pass={quality.get('electrical_safety_pass')}")
+        print(f"copper_tier={quality.get('copper_tier')}")
+        _print_electrical_trust(quality)
+        print(f"out_dir={args.out}")
+        if result.error:
+            print(f"error={result.error}")
+        casefile = Path(args.out) / "build_compilation" / "COMPILE_CASEFILE.json"
+        if casefile.is_file():
+            print(f"compile_casefile={casefile}")
+    return 0 if result.ok else 1
+
+
 def _run_compose(args: argparse.Namespace) -> int:
+    _apply_simulate_env(args)
     from hardware_splicer.module_picker import pick_modules_for_goal
     from hardware_splicer.canvas_compose import compile_canvas_build
     from hardware_splicer.scratch_pipeline import compile_scratch_build
 
     hints: list[str] = []
+    if getattr(args, "netlist_json", None):
+        return _run_netlist_compile(
+            argparse.Namespace(
+                netlist=args.netlist_json,
+                kicad_netlist=False,
+                circuit_json=False,
+                build_id=getattr(args, "build_id", None),
+                out=args.out,
+                no_gerber=args.no_gerber,
+                json=args.json,
+            )
+        )
+    if getattr(args, "arbitrary", False) and args.phrase:
+        from hardware_splicer import sdk
+
+        sdk.apply_engine_defaults()
+        result = sdk.compose_arbitrary(
+            args.phrase,
+            out_dir=args.out,
+            export_gerber=not args.no_gerber,
+        )
+        quality = (result.get("design_quality") or {}) if isinstance(result, dict) else {}
+        if args.json:
+            print(json.dumps(result, indent=2, default=str))
+        else:
+            print(f"ok={result.get('ok')}")
+            print(f"mode={result.get('mode')}")
+            print(f"compose_mode={result.get('compose_mode')}")
+            print(f"drc_pass={quality.get('drc_pass')}")
+            print(f"out_dir={args.out}")
+        return 0 if result.get("ok") else 1
+
     if args.phrase:
         pick = pick_modules_for_goal(args.phrase)
         hints = pick.hints
     elif not args.modules and not args.canvas_json:
-        print("error: provide --phrase, --modules, or --canvas-json", file=sys.stderr)
+        print("error: provide --phrase, --modules, --canvas-json, or --netlist-json", file=sys.stderr)
         return 2
 
     constraints = {"strategy_mode": args.strategy_mode, "graph_mode": "canvas" if args.canvas_json else "scratch"}
@@ -231,6 +340,7 @@ def _run_compose(args: argparse.Namespace) -> int:
             print(f"attempts={len(payload.get('attempts') or [])}")
         print(f"drc_pass={bool(quality.get('drc_pass'))}")
         print(f"kicad_drc_errors={quality.get('kicad_drc_errors')}")
+        _print_electrical_trust(quality)
         print(f"out_dir={args.out}")
         if hints:
             print(f"hints={', '.join(hints)}")
@@ -239,7 +349,218 @@ def _run_compose(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def _run_jarvis_build(args: argparse.Namespace) -> int:
+    _apply_simulate_env(args)
+    import os
+    from hardware_splicer.jarvis_build import jarvis_build
+
+    if getattr(args, "workshop_trace", False):
+        os.environ["HARDWARE_SPLICER_LLM_WORKSHOP"] = "1"
+    if getattr(args, "workshop_review", False):
+        os.environ["HARDWARE_SPLICER_QWEN_WORKSHOP"] = "1"
+
+    parts = None
+    if args.parts_json:
+        parts = json.loads(Path(args.parts_json).read_text(encoding="utf-8"))
+        if isinstance(parts, dict):
+            parts = parts.get("available_parts") or parts.get("parts") or []
+
+    result = jarvis_build(
+        args.goal,
+        parts=parts,
+        out_dir=args.out,
+        export_gerber=not args.no_gerber,
+        allow_qwen=not args.no_qwen,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, default=str))
+    else:
+        jarvis = result.get("jarvis") or {}
+        quality = result.get("design_quality") or {}
+        print(f"ok={result.get('ok')}")
+        print(f"mode={result.get('mode')}")
+        print(f"compose_mode={result.get('compose_mode')}")
+        print(f"llm_first={result.get('llm_first')}")
+        print(f"build_id={result.get('build_id')}")
+        print(f"module_ids={', '.join(result.get('module_ids') or [])}")
+        print(f"drc_pass={quality.get('drc_pass')}")
+        print(f"simulation_pass={(quality.get('electrical_simulation') or {}).get('pass')}")
+        if jarvis.get("headline"):
+            print(f"jarvis_headline={jarvis.get('headline')}")
+        if jarvis.get("summary"):
+            print(f"jarvis_summary={jarvis.get('summary')}")
+        if result.get("artifacts", {}).get("trust_report"):
+            print(f"trust_report={result['artifacts']['trust_report']}")
+        if result.get("workshop_trace"):
+            print(f"workshop_trace={args.out}/LLM_WORKSHOP_TRACE.json")
+        print(f"out_dir={args.out}")
+    return 0 if result.get("ok") else 1
+
+
+def _run_llm_workshop(args: argparse.Namespace) -> int:
+    import os
+    from hardware_splicer.integrations.llm_workshop import (
+        run_open_workshop,
+        run_salvage_workshop,
+        write_workshop_trace,
+    )
+    from hardware_splicer.project_intake import load_project_intake
+
+    if args.workshop_review:
+        os.environ["HARDWARE_SPLICER_QWEN_WORKSHOP"] = "1"
+
+    out = Path(args.out)
+    if args.intake:
+        intake = load_project_intake(args.intake)
+        trace = run_salvage_workshop(
+            goal=str(intake.get("goal") or ""),
+            parts=list(intake.get("available_parts") or []),
+            constraints=dict(intake.get("constraints") or {}),
+            compile_probe=args.compile_probe,
+            out_dir=out if args.compile_probe else None,
+        )
+    elif args.goal:
+        trace = run_open_workshop(goal=args.goal, constraints={})
+    else:
+        raise SystemExit("llm-workshop requires --goal or --intake")
+
+    path = write_workshop_trace(trace, out)
+    if args.json:
+        print(json.dumps(trace, indent=2))
+    else:
+        print(f"recommendation={trace.get('recommendation')}")
+        for step in trace.get("steps") or []:
+            tag = "Qwen" if step.get("llm_used") else "det"
+            print(f"  [{tag}] {step.get('id')}: {step.get('summary')}")
+        print(f"trace={path}")
+    return 0
+
+
+def _run_qwen_models(args: argparse.Namespace) -> int:
+    from hardware_splicer.integrations.qwen_model_policy import model_studio_summary
+
+    summary = model_studio_summary()
+    if args.json:
+        print(json.dumps(summary, indent=2))
+        return 0
+    active = summary.get("active") or {}
+    print(summary.get("quota_note", ""))
+    print()
+    print("Text stages (primary → rotation):")
+    for stage, row in (active.get("text_stages") or {}).items():
+        rotation = row.get("rotation") or []
+        primary = rotation[0] if rotation else row.get("primary")
+        print(f"  [{stage}] {primary}")
+        for model in rotation[1:4]:
+            print(f"    → {model}")
+        if len(rotation) > 4:
+            print(f"    … +{len(rotation) - 4} more")
+    print()
+    print("Vision stages:")
+    for stage, row in (active.get("vision_stages") or {}).items():
+        rotation = row.get("rotation") or []
+        primary = rotation[0] if rotation else row.get("primary")
+        print(f"  [{stage}] {primary}")
+    print()
+    print("Global fallback text rotation:", ", ".join(active.get("text_general") or []))
+    print()
+    print("Catalog tiers:")
+    for tier_id, row in (summary.get("catalog_tiers") or {}).items():
+        print(f"  [{tier_id}] {row.get('role')}")
+        print(f"    models: {row.get('models')}")
+    return 0
+
+
+def _run_audit_scaffolds(args: argparse.Namespace) -> int:
+    import subprocess
+
+    script = Path(__file__).resolve().parent / "audit_weak_scaffolds.py"
+    cmd = [sys.executable, str(script)]
+    if args.out:
+        cmd.append(args.out)
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    print(proc.stdout)
+    if proc.stderr:
+        print(proc.stderr, file=sys.stderr)
+    if args.json and args.out:
+        print(Path(args.out).read_text(encoding="utf-8"))
+    elif args.json:
+        out = ROOT / "WEAK_SCAFFOLD_AUDIT.json"
+        if out.is_file():
+            print(out.read_text(encoding="utf-8"))
+    return proc.returncode
+
+
+def _run_salvage_edit(args: argparse.Namespace) -> int:
+    intake = load_project_intake(Path(args.brief))
+    edits_path = Path(args.edits)
+    edits = json.loads(edits_path.read_text(encoding="utf-8"))
+    if not isinstance(edits, list):
+        raise SystemExit("edits file must be a JSON array of edit ops")
+
+    from hardware_splicer.project_intake import plan_project_from_intake
+    from hardware_splicer.salvage_revision import apply_salvage_edits
+
+    plan = plan_project_from_intake(intake, skip_vision=bool(args.skip_vision))
+    base = plan.get("salvage_package") or {}
+    goal = str(plan.get("goal") or intake.get("goal") or "").strip()
+    parts = list(intake.get("available_parts") or intake.get("parts") or [])
+    constraints = dict(intake.get("constraints") or {})
+    budget = plan.get("budget") or intake.get("budget")
+    revision = apply_salvage_edits(
+        goal=goal,
+        parts=parts,
+        constraints=constraints,
+        edits=edits,
+        project_name=str(intake.get("project_name") or ""),
+        base_package=base,
+        budget=budget if isinstance(budget, dict) else None,
+    )
+
+    out_path = Path(args.out)
+    out_path.mkdir(parents=True, exist_ok=True)
+    (out_path / "SALVAGE_REVISION.json").write_text(json.dumps(revision, indent=2), encoding="utf-8")
+    pkg = revision.get("package") or {}
+    if pkg:
+        (out_path / "SPLICE_PLAN.json").write_text(json.dumps(pkg, indent=2), encoding="utf-8")
+        if pkg.get("gap_analysis"):
+            (out_path / "SALVAGE_GAP_ANALYSIS.json").write_text(
+                json.dumps(pkg["gap_analysis"], indent=2), encoding="utf-8"
+            )
+        if pkg.get("bringup_card"):
+            (out_path / "BRINGUP_CARD.json").write_text(json.dumps(pkg["bringup_card"], indent=2), encoding="utf-8")
+            (out_path / "BRINGUP_CARD.md").write_text(
+                str(pkg["bringup_card"].get("markdown") or ""), encoding="utf-8"
+            )
+        if pkg.get("bom_estimate"):
+            from hardware_splicer.salvage_bom_estimate import write_salvage_bom_artifacts
+
+            write_salvage_bom_artifacts(pkg["bom_estimate"], out_path)
+        if pkg.get("firmware_scaffold"):
+            from hardware_splicer.firmware_scaffold import write_salvage_firmware
+
+            write_salvage_firmware(
+                build_id=str(pkg.get("recommended_build_id") or "salvage_build"),
+                salvage_package=pkg,
+                goal=goal,
+                out_dir=out_path,
+            )
+
+    if args.json:
+        print(json.dumps(revision, indent=2))
+    else:
+        diff = revision.get("diff") or {}
+        print(f"out_dir={out_path}")
+        print(f"parts_after={len(revision.get('parts_after') or [])}")
+        if diff:
+            print(f"modules_added={', '.join(diff.get('modules_added') or [])}")
+            print(f"modules_removed={', '.join(diff.get('modules_removed') or [])}")
+            print(f"ready_before={diff.get('ready_before')} ready_after={diff.get('ready_after')}")
+    return 0
+
+
 def _run_splice_build(args: argparse.Namespace) -> int:
+    _apply_simulate_env(args)
     intake = load_project_intake(Path(args.brief))
     result = splice_and_build_from_intake(
         intake,
@@ -255,12 +576,15 @@ def _run_splice_build(args: argparse.Namespace) -> int:
         print(f"build_id={result.get('build_id')}")
         print(f"graph_mode={salvage.get('graph_mode')}")
         print(f"compose_modules={', '.join(salvage.get('compose_module_ids') or [])}")
-        print(f"drc_pass={((result.get('build_compilation') or {}).get('design_quality') or {}).get('drc_pass')}")
+        quality = (result.get("build_compilation") or {}).get("design_quality") or {}
+        print(f"drc_pass={quality.get('drc_pass')}")
+        _print_electrical_trust(quality)
         print(f"out_dir={args.out}")
     return 0 if result.get("ok") else 1
 
 
 def _run_build(args: argparse.Namespace) -> int:
+    _apply_simulate_env(args)
     build_id = resolve_build_id(archetype=args.archetype, explicit=args.build_id)
     if not build_id:
         print("error: provide --build-id or --archetype that maps to a catalog build", file=sys.stderr)
@@ -290,6 +614,7 @@ def _run_build(args: argparse.Namespace) -> int:
         print(f"build_ready={bool(quality.get('build_ready'))}")
         print(f"drc_pass={bool(quality.get('drc_pass'))}")
         print(f"gerber_ready={bool(quality.get('gerber_ready'))}")
+        _print_electrical_trust(quality)
         print(f"gerber_package_dir={result.gerber_package_dir or ''}")
         if result.error:
             print(f"error={result.error}")
@@ -314,7 +639,7 @@ def _run_doctor(args: argparse.Namespace) -> int:
             health = status["splicer3d_health"]
             print(f"splicer3d={health.get('url')} ok={health.get('ok')}")
         qwen_ready = _env_key_present("QWEN_API_KEY", "DASHSCOPE_API_KEY")
-        usage = usage_summary(provider="qwen")
+        usage = vision_usage_summary(provider="qwen")
         print(f"qwen_vision_key={'configured' if qwen_ready else 'missing'} default_model={DEFAULT_QWEN_MODEL}")
         print(f"vision_usage_calls={usage.get('call_count')} vision_usage_tokens={usage.get('total_tokens')}")
     return 0 if status.get("ok") else 1
@@ -363,7 +688,7 @@ def _run_inspect_fab(args: argparse.Namespace) -> int:
 
 
 def _run_vision_usage(args: argparse.Namespace) -> int:
-    summary = usage_summary(provider=args.provider)
+    summary = vision_usage_summary(provider=args.provider)
     if args.json:
         print(json.dumps(summary, indent=2))
         return 0
@@ -381,6 +706,40 @@ def _run_vision_usage(args: argparse.Namespace) -> int:
                 f"(tracked_consumed={estimate.get('tracked_consumed_tokens')})"
             )
     return 0
+
+
+def _run_text_usage(args: argparse.Namespace) -> int:
+    summary = text_usage_summary(provider=args.provider or None)
+    if args.json:
+        print(json.dumps(summary, indent=2))
+        return 0
+    print(f"ledger={summary.get('ledger_path')}")
+    print(
+        f"calls={summary.get('call_count')} cache_hits={summary.get('cache_hits')} "
+        f"total_tokens={summary.get('total_tokens')}"
+    )
+    print(f"month_tokens={summary.get('month_tokens')} day_tokens={summary.get('day_tokens')}")
+    for stage, stats in sorted((summary.get("by_stage") or {}).items()):
+        print(
+            f"stage={stage} calls={stats.get('calls')} cached={stats.get('cached_calls')} "
+            f"tokens={stats.get('total_tokens')}"
+        )
+    for model, stats in sorted((summary.get("by_model") or {}).items()):
+        print(f"{model}: calls={stats.get('calls')} tokens={stats.get('total_tokens')}")
+    return 0
+
+
+def _run_llm_quota(args: argparse.Namespace) -> int:
+    import subprocess
+
+    cmd = [sys.executable, str(ROOT / "scripts" / "qwen_quota_audit.py")]
+    if args.json:
+        cmd.append("--json")
+    if args.probe:
+        cmd.append("--probe")
+    if args.probe_limit:
+        cmd.extend(["--probe-limit", str(args.probe_limit)])
+    return int(subprocess.call(cmd))
 
 
 def main() -> int:
@@ -449,8 +808,34 @@ def main() -> int:
     )
     compose_parser.add_argument("--out", required=True, help="Output directory.")
     compose_parser.add_argument("--no-gerber", action="store_true", help="Skip kicad-cli Gerber export when available.")
+    compose_parser.add_argument("--no-simulate", action="store_true", help="Skip ngspice power simulation gate.")
+    compose_parser.add_argument(
+        "--netlist-json",
+        default=None,
+        help="Compile hardware_splicer.netlist.v1 JSON directly (general engine path).",
+    )
+    compose_parser.add_argument(
+        "--arbitrary",
+        action="store_true",
+        help="NL → Qwen text netlist IR → compile (requires API key).",
+    )
+    compose_parser.add_argument("--build-id", default=None, help="Target build id for netlist compile.")
     compose_parser.add_argument("--json", action="store_true", help="Print compose result JSON.")
     compose_parser.set_defaults(func=_run_compose)
+
+    netlist_compile_parser = sub.add_parser(
+        "netlist-compile",
+        help="Compile netlist IR (JSON, KiCad .net, or circuit-json) → KiCad PCB + DESIGN_QUALITY.",
+    )
+    netlist_compile_parser.add_argument("--netlist", required=True, help="Path to netlist file.")
+    netlist_compile_parser.add_argument("--out", required=True, help="Output directory.")
+    netlist_compile_parser.add_argument("--build-id", default="generic_low_voltage_build")
+    netlist_compile_parser.add_argument("--kicad-netlist", action="store_true", help="Parse KiCad .net format.")
+    netlist_compile_parser.add_argument("--circuit-json", action="store_true", help="Parse circuit-json array.")
+    netlist_compile_parser.add_argument("--no-gerber", action="store_true")
+    netlist_compile_parser.add_argument("--no-simulate", action="store_true")
+    netlist_compile_parser.add_argument("--json", action="store_true")
+    netlist_compile_parser.set_defaults(func=_run_netlist_compile)
 
     splice_build_parser = sub.add_parser(
         "splice-build",
@@ -459,15 +844,70 @@ def main() -> int:
     splice_build_parser.add_argument("--brief", required=True, help="Path to project intake JSON.")
     splice_build_parser.add_argument("--out", required=True, help="Output directory.")
     splice_build_parser.add_argument("--no-gerber", action="store_true", help="Skip Gerber export.")
+    splice_build_parser.add_argument("--no-simulate", action="store_true", help="Skip ngspice power simulation gate.")
     splice_build_parser.add_argument("--request-id", default=None, help="Stable build/request identifier.")
     splice_build_parser.add_argument("--json", action="store_true", help="Print splice-build result JSON.")
     splice_build_parser.set_defaults(func=_run_splice_build)
+
+    salvage_edit_parser = sub.add_parser(
+        "salvage-edit",
+        help="Apply incremental salvage edits (add/remove parts or modules) and emit revised artifacts.",
+    )
+    salvage_edit_parser.add_argument("--brief", required=True, help="Path to project intake JSON.")
+    salvage_edit_parser.add_argument("--edits", required=True, help="JSON file: array of edit ops.")
+    salvage_edit_parser.add_argument("--out", required=True, help="Output directory.")
+    salvage_edit_parser.add_argument("--skip-vision", action="store_true", help="Skip vision API during replan.")
+    salvage_edit_parser.add_argument("--json", action="store_true", help="Print revision JSON.")
+    salvage_edit_parser.set_defaults(func=_run_salvage_edit)
+
+    jarvis_parser = sub.add_parser(
+        "jarvis-build",
+        help="LLM-aware electrical build: goal (+ optional parts JSON) → compile → trust → JARVIS narrative.",
+    )
+    jarvis_parser.add_argument("--goal", required=True, help="Natural-language build goal.")
+    jarvis_parser.add_argument("--parts-json", default=None, help="Optional intake/salvage parts JSON file.")
+    jarvis_parser.add_argument("--out", required=True, help="Output directory.")
+    jarvis_parser.add_argument("--no-gerber", action="store_true", help="Skip Gerber export.")
+    jarvis_parser.add_argument("--no-qwen", action="store_true", help="Disable Qwen netlist + JARVIS narrative.")
+    jarvis_parser.add_argument("--workshop-trace", action="store_true", help="Write LLM_WORKSHOP_TRACE.json per build step.")
+    jarvis_parser.add_argument("--workshop-review", action="store_true", help="Enable Qwen salvage workshop review (HARDWARE_SPLICER_QWEN_WORKSHOP=1).")
+    jarvis_parser.add_argument("--no-simulate", action="store_true", help="Skip ngspice power simulation gate.")
+    jarvis_parser.add_argument("--json", action="store_true", help="Print full result JSON.")
+    jarvis_parser.set_defaults(func=_run_jarvis_build)
+
+    workshop_parser = sub.add_parser(
+        "llm-workshop",
+        help="Step-by-step probe: where Qwen helps vs heuristics (no full build unless --compile-probe).",
+    )
+    workshop_parser.add_argument("--goal", default=None, help="Open-mode NL goal.")
+    workshop_parser.add_argument("--intake", default=None, help="Salvage intake JSON path.")
+    workshop_parser.add_argument("--out", default="/tmp/llm_workshop_probe", help="Output directory.")
+    workshop_parser.add_argument("--workshop-review", action="store_true", help="Enable Qwen workshop review step.")
+    workshop_parser.add_argument("--compile-probe", action="store_true", help="Run DRC compile probe (salvage).")
+    workshop_parser.add_argument("--json", action="store_true", help="Print trace JSON.")
+    workshop_parser.set_defaults(func=_run_llm_workshop)
+
+    audit_parser = sub.add_parser(
+        "audit-scaffolds",
+        help="List regex/keyword weak paths vs LLM-first replacements.",
+    )
+    audit_parser.add_argument("--out", default=None, help="Write WEAK_SCAFFOLD_AUDIT.json path.")
+    audit_parser.add_argument("--json", action="store_true", help="Print full audit JSON.")
+    audit_parser.set_defaults(func=_run_audit_scaffolds)
+
+    qwen_models_parser = sub.add_parser(
+        "qwen-models",
+        help="Show Qwen Model Studio tiers and active text/vision rotation.",
+    )
+    qwen_models_parser.add_argument("--json", action="store_true", help="Print full catalog JSON.")
+    qwen_models_parser.set_defaults(func=_run_qwen_models)
 
     build_parser = sub.add_parser("build", help="Compile a catalog build to DRC-clean KiCad PCB (+ optional Gerbers).")
     build_parser.add_argument("--build-id", default=None, help=f"Catalog build id. One of: {', '.join(CATALOG_BUILD_IDS[:5])}, ...")
     build_parser.add_argument("--archetype", default=None, help="Intake archetype alias (e.g. automatic_watering, rover).")
     build_parser.add_argument("--out", required=True, help="Output directory.")
     build_parser.add_argument("--no-gerber", action="store_true", help="Skip kicad-cli Gerber export when available.")
+    build_parser.add_argument("--no-simulate", action="store_true", help="Skip ngspice power simulation gate.")
     build_parser.add_argument("--json", action="store_true", help="Print compile result JSON.")
     build_parser.set_defaults(func=_run_build)
 
@@ -496,6 +936,17 @@ def main() -> int:
     vision_usage_parser.add_argument("--provider", default="qwen", choices=["qwen", "gemini"], help="Provider to summarize.")
     vision_usage_parser.add_argument("--json", action="store_true", help="Print usage summary JSON.")
     vision_usage_parser.set_defaults(func=_run_vision_usage)
+
+    text_usage_parser = sub.add_parser("text-usage", help="Show local text LLM usage (Qwen, agy) and cache hits.")
+    text_usage_parser.add_argument("--provider", default=None, help="Optional provider filter (qwen, agy).")
+    text_usage_parser.add_argument("--json", action="store_true", help="Print usage summary JSON.")
+    text_usage_parser.set_defaults(func=_run_text_usage)
+
+    llm_quota_parser = sub.add_parser("llm-quota", help="Audit DashScope pools from local ledgers + optional probe.")
+    llm_quota_parser.add_argument("--probe", action="store_true", help="Ping each rotation model (costs a few tokens).")
+    llm_quota_parser.add_argument("--probe-limit", type=int, default=0, help="Max models to probe (0 = all).")
+    llm_quota_parser.add_argument("--json", action="store_true", help="Print JSON report.")
+    llm_quota_parser.set_defaults(func=_run_llm_quota)
 
     inspect_fab_parser = sub.add_parser(
         "inspect-fab",

@@ -251,8 +251,77 @@ button {
 .upgrade-panel,
 .production-panel,
 .artifact-panel,
-.lower-grid .panel {
+.lower-grid .panel,
+.salvage-grid .panel {
   padding: 18px;
+}
+
+.salvage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.salvage-headline strong {
+  display: block;
+  font-size: 18px;
+}
+
+.salvage-headline span,
+.salvage-note {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.salvage-metrics {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.salvage-list,
+.salvage-checks {
+  margin-top: 14px;
+}
+
+.salvage-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.salvage-row small {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.salvage-checks p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.salvage-table {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.salvage-table th,
+.salvage-table td {
+  text-align: left;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--line);
 }
 
 .panel-label {
@@ -680,7 +749,8 @@ th {
 
   .score-row,
   .metric-strip,
-  .subsystems {
+  .subsystems,
+  .salvage-grid {
     grid-template-columns: 1fr;
   }
 

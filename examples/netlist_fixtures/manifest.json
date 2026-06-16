@@ -106,6 +106,81 @@
         "esp32-devkit",
         "l298n"
       ]
+    },
+    {
+      "id": "usb_esp_pir",
+      "type": "netlist_json",
+      "path": "json/usb_esp_pir.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "pir-hc-sr501"
+      ]
+    },
+    {
+      "id": "usb_esp_mpu6050",
+      "type": "netlist_json",
+      "path": "json/usb_esp_mpu6050.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "mpu6050"
+      ]
+    },
+    {
+      "id": "usb_esp_plant_watering",
+      "type": "netlist_json",
+      "path": "json/usb_esp_plant_watering.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "soil_moisture",
+        "mosfet-irlz44n",
+        "mini-pump-5v"
+      ]
+    },
+    {
+      "id": "usb_esp_hc_sr04",
+      "type": "netlist_json",
+      "path": "json/usb_esp_hc_sr04.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "hc-sr04",
+        "level-shifter-4ch"
+      ]
+    },
+    {
+      "id": "usb_esp_fan_mosfet",
+      "type": "netlist_json",
+      "path": "json/usb_esp_fan_mosfet.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "mosfet-irlz44n",
+        "cooling_fan_5v"
+      ]
+    },
+    {
+      "id": "usb_esp_audio_amp",
+      "type": "netlist_json",
+      "path": "json/usb_esp_audio_amp.json",
+      "module_ids": [
+        "usb-power-5v",
+        "esp32-devkit",
+        "max98357a-i2s-amp"
+      ]
+    },
+    {
+      "id": "barrel_esp_stepper",
+      "type": "netlist_json",
+      "path": "json/barrel_esp_stepper.json",
+      "module_ids": [
+        "dc-barrel-12v",
+        "buck-lm2596",
+        "esp32-devkit",
+        "a4988-stepper"
+      ]
     }
   ]
 }

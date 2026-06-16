@@ -12,6 +12,15 @@ from typing import Any, Dict, List, Mapping, Optional
 
 DEFAULT_BASE = os.environ.get("HARDWARE_SPLICER_JLCSEARCH_BASE", "https://jlcsearch.tscircuit.com")
 
+_MPN_SEARCH_CATEGORIES = (
+    "microcontrollers",
+    "mosfets",
+    "diodes",
+    "leds",
+    "capacitors",
+    "resistors",
+)
+
 
 @dataclass
 class JlcSearchClient:
@@ -64,6 +73,26 @@ class JlcSearchClient:
             if isinstance(value, list):
                 return list(value)
         return []
+
+    def search_by_mpn(self, mpn: str, *, limit: int = 1) -> Optional[Dict[str, Any]]:
+        """Best-effort LCSC match by manufacturer part number substring."""
+        needle = str(mpn or "").strip().lower()
+        if len(needle) < 4:
+            return None
+        for category in _MPN_SEARCH_CATEGORIES:
+            try:
+                rows = self.search_keyword(category)
+            except Exception:
+                continue
+            for row in rows:
+                mfr = str(row.get("mfr") or row.get("mpn") or "").lower()
+                if needle in mfr or mfr in needle:
+                    return row
+                if len(needle) >= 6 and needle[:6] in mfr:
+                    return row
+            if limit <= 0:
+                break
+        return None
 
 
 def search_passives(

@@ -72,3 +72,60 @@ def test_compile_from_netlist_produces_erc_artifacts(tmp_path: Path) -> None:
     assert (build_dir / "ERC.json").is_file()
     netlist_data = json.loads((build_dir / "circuit_netlist.json").read_text(encoding="utf-8"))
     assert netlist_data.get("schema_version") == "hardware_splicer.netlist.v1"
+
+
+def test_plant_watering_netlist_compiles_with_pump(tmp_path: Path) -> None:
+    graph = compose_build_graph_from_module_ids(
+        [
+            "usb-power-5v",
+            "esp32-devkit",
+            "soil_moisture",
+            "mosfet-irlz44n",
+            "mini-pump-5v",
+        ]
+    )["graph"]
+    module_ids = {n["moduleId"] for n in graph.get("nodes") or []}
+    assert "mini-pump-5v" in module_ids
+    netlist = build_graph_to_netlist(graph)
+    roundtrip = netlist_to_build_graph(netlist)
+    from hardware_splicer.pcb.safety_rules import analyze_build
+
+    assert not [w for w in analyze_build(roundtrip) if w.get("level") == "error"]
+    result = compile_from_netlist(netlist, tmp_path, export_gerber=False)
+    quality = result.design_quality or {}
+    assert result.ok is True, result.error
+    assert quality.get("electrical_safety_pass") is True
+    assert int(quality.get("kicad_drc_errors") or 0) == 0
+
+
+def _assert_netlist_stack_compiles(module_ids: list[str], tmp_path: Path, *, require: set[str] | None = None) -> None:
+    graph = compose_build_graph_from_module_ids(module_ids)["graph"]
+    present = {n["moduleId"] for n in graph.get("nodes") or []}
+    if require:
+        assert require <= present, f"missing modules: {require - present}"
+    netlist = build_graph_to_netlist(graph)
+    roundtrip = netlist_to_build_graph(netlist)
+    from hardware_splicer.pcb.safety_rules import analyze_build
+
+    assert not [w for w in analyze_build(roundtrip) if w.get("level") == "error"]
+    result = compile_from_netlist(netlist, tmp_path, export_gerber=False)
+    quality = result.design_quality or {}
+    assert result.ok is True, result.error
+    assert quality.get("electrical_safety_pass") is True
+    assert int(quality.get("kicad_drc_errors") or 0) == 0
+
+
+def test_ultrasonic_netlist_compiles_with_level_shifter(tmp_path: Path) -> None:
+    _assert_netlist_stack_compiles(
+        ["usb-power-5v", "esp32-devkit", "hc-sr04", "level-shifter-4ch"],
+        tmp_path,
+        require={"hc-sr04", "level-shifter-4ch"},
+    )
+
+
+def test_fan_mosfet_netlist_compiles_switched_load(tmp_path: Path) -> None:
+    _assert_netlist_stack_compiles(
+        ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "cooling_fan_5v"],
+        tmp_path,
+        require={"mosfet-irlz44n", "cooling_fan_5v"},
+    )

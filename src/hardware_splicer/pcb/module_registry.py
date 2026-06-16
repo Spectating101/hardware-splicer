@@ -250,6 +250,10 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
 
 _MODULE_LIBRARY: Optional[dict[str, dict]] = None
 
+_MODULE_ALIASES: dict[str, str] = {
+    "mini-pump-5v": "water_pump_5v",
+}
+
 
 def _load_library() -> dict[str, dict]:
     global _MODULE_LIBRARY
@@ -257,7 +261,16 @@ def _load_library() -> dict[str, dict]:
         return _MODULE_LIBRARY
     with open(_DATA_PATH, "r", encoding="utf-8") as fh:
         data = json.load(fh)
-    _MODULE_LIBRARY = {m["id"]: m for m in data.get("module_library", [])}
+    lib = {m["id"]: m for m in data.get("module_library", [])}
+    for alias, target in _MODULE_ALIASES.items():
+        if alias in lib or target not in lib:
+            continue
+        spec = dict(lib[target])
+        spec["id"] = alias
+        if alias == "mini-pump-5v":
+            spec["label"] = "5V mini water pump"
+        lib[alias] = spec
+    _MODULE_LIBRARY = lib
     return _MODULE_LIBRARY
 
 

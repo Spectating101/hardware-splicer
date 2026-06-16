@@ -50,6 +50,15 @@ REWRITES: list[tuple[re.Pattern[str], str]] = [
 
 
 def expand_user_phrase(text: str) -> str:
+    """Offline-only phrase rewriting. LLM-first paths pass user text through unchanged."""
+    try:
+        from .integrations.llm_policy import offline_phrase_expand_enabled
+    except ImportError:
+        from hardware_splicer.integrations.llm_policy import offline_phrase_expand_enabled
+
+    if not offline_phrase_expand_enabled():
+        return text.strip()
+
     t = text.strip()
     for pat, fix in TYPO_FIXES:
         t = pat.sub(fix, t)

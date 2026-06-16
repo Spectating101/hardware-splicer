@@ -22,9 +22,14 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"soil|moisture", re.I), "soil_moisture", "sns", 0.92),
     (re.compile(r"dht22|dht11|temp.*humid", re.I), "dht22", "sns", 0.88),
     (re.compile(r"bme280", re.I), "bme280", "sns", 0.9),
+    (re.compile(r"vl53|tof|time.?of.?flight|range sensor|lidar", re.I), "vl53l0x_tof", "sns", 0.88),
+    (re.compile(r"vl6180", re.I), "vl6180x-tof", "sns", 0.86),
+    (re.compile(r"ultrasonic|hc-?sr04|sonar", re.I), "hc-sr04", "sns", 0.85),
     (re.compile(r"sg90", re.I), "sg90", "act", 0.92),
     (re.compile(r"mg996r", re.I), "mg996r", "act", 0.9),
     (re.compile(r"l298n", re.I), "l298n", "drv", 0.9),
+    (re.compile(r"dc.*gear.*motor|gear.*motor|brushed.*motor|dc[_ ]motor|6v.*motor", re.I), "dc_motor_3v_6v", "mot", 0.86),
+    (re.compile(r"12v.*gear.*motor|geared.*motor.*12", re.I), "dc_geared_motor_12v", "mot", 0.84),
     (re.compile(r"relay", re.I), "relay-1ch", "drv", 0.85),
     (re.compile(r"pump|peristaltic", re.I), "mini-pump-5v", "load", 0.8),
     (re.compile(r"fan|blower", re.I), "fan-5v", "load", 0.8),
@@ -73,6 +78,9 @@ _ROLE_ALIASES = {
     "power": "buck",
     "pump": "load",
     "fan": "load",
+    "motor": "load",
+    "dc_motor": "load",
+    "tof_range": "sns",
 }
 
 
@@ -133,6 +141,8 @@ def coalesce_resolved_modules(
     """Drop conflicting power modules after fuzzy resolve / goal merge."""
     topology = power_topology or infer_power_topology(parts, resolved_modules)
     rows: List[Dict[str, Any]] = [dict(row) for row in resolved_modules if isinstance(row, Mapping)]
+    unresolved = [row for row in rows if not str(row.get("module_id") or "").strip()]
+    rows = [row for row in rows if str(row.get("module_id") or "").strip()]
     if topology == "usb_5v":
         rows = [row for row in rows if str(row.get("module_id") or "") not in _BARREL_POWER_MODULE_IDS]
     elif topology == "barrel_12v":
@@ -149,7 +159,7 @@ def coalesce_resolved_modules(
             continue
         if existing.get("source") != "user_inventory" and row.get("source") == "user_inventory":
             by_id[module_id] = row
-    return list(by_id.values())
+    return list(by_id.values()) + unresolved
 
 
 def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
@@ -214,12 +224,179 @@ def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, A
     return coalesce_resolved_modules(parts, resolved)
 
 
+def resolve_parts_to_modules_with_llm(
+    parts: List[Mapping[str, Any]],
+    *,
+    goal: str = "",
+) -> tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Map intake parts → module_id. LLM-first when keyed; regex is offline fallback only."""
+    from .integrations.qwen_salvage_resolver import (
+        call_qwen_salvage_map_intake,
+        merge_qwen_intake_map,
+        merge_qwen_salvage_into_resolved,
+        qwen_salvage_enabled,
+        salvage_resolve_mode,
+    )
+
+    mode = salvage_resolve_mode()
+    heuristic = resolve_parts_to_modules(parts) if mode != "llm_only" else []
+    meta: Dict[str, Any] = {
+        "resolve_mode": mode,
+        "heuristic": mode in {"heuristic", "llm_first"},
+        "qwen": {"used": False},
+    }
+
+    explicit_rows: List[Dict[str, Any]] = [
+        dict(row)
+        for row in heuristic
+        if str(row.get("matched_on") or "") == "explicit_module_id" and row.get("module_id")
+    ]
+    if not explicit_rows:
+        for part in parts:
+            explicit_id = str(part.get("module_id") or "").strip()
+            if explicit_id:
+                explicit_rows.append(
+                    {
+                        "schema_version": SCHEMA_VERSION,
+                        "part_name": str(part.get("name") or explicit_id),
+                        "module_id": explicit_id,
+                        "role": _role_for_module_id(explicit_id, part),
+                        "source": "user_inventory",
+                        "confidence": 1.0,
+                        "matched_on": "explicit_module_id",
+                    }
+                )
+
+    if mode in {"llm_first", "llm_only"} and qwen_salvage_enabled():
+        qwen = call_qwen_salvage_map_intake(
+            goal=goal,
+            parts=parts,
+            heuristic_hints=heuristic if mode == "llm_first" else None,
+        )
+        if qwen.get("ok"):
+            if mode == "llm_only":
+                merged = merge_qwen_intake_map(parts, qwen, explicit_rows=explicit_rows)
+            else:
+                merged = merge_qwen_salvage_into_resolved(heuristic, qwen)
+            merged = coalesce_resolved_modules(parts, merged)
+            meta["qwen"] = {
+                "used": True,
+                "model": qwen.get("model"),
+                "reasoning": qwen.get("reasoning"),
+                "power_notes": qwen.get("power_notes"),
+                "rejected": qwen.get("rejected") or [],
+                "suggested_purchases": qwen.get("suggested_purchases") or [],
+                "unresolved_after": [r.get("part_name") for r in merged if not r.get("module_id")],
+            }
+            return merged, meta
+        meta["qwen"] = {
+            "used": False,
+            "reason": qwen.get("error") or qwen.get("reason") or "qwen_map_failed",
+            "fallback": "heuristic",
+        }
+        if mode == "llm_only":
+            merged = coalesce_resolved_modules(parts, explicit_rows + [r for r in heuristic if not r.get("module_id")])
+            return merged, meta
+
+    unresolved = [row for row in heuristic if not row.get("module_id")]
+    if unresolved and qwen_salvage_enabled() and mode == "heuristic":
+        qwen = call_qwen_salvage_map_intake(
+            goal=goal,
+            parts=parts,
+            heuristic_hints=unresolved,
+        )
+        merged = coalesce_resolved_modules(parts, merge_qwen_salvage_into_resolved(heuristic, qwen))
+        meta["qwen"] = {
+            "used": bool(qwen.get("ok")),
+            "model": qwen.get("model"),
+            "reasoning": qwen.get("reasoning"),
+            "rejected": qwen.get("rejected") or [],
+            "suggested_purchases": qwen.get("suggested_purchases") or [],
+            "unresolved_after": [r.get("part_name") for r in merged if not r.get("module_id")],
+        }
+        return merged, meta
+
+    meta["qwen"] = {
+        "used": False,
+        "reason": "heuristic_only" if mode == "heuristic" else "qwen_unavailable",
+    }
+    return heuristic, meta
+
+
+_MOTOR_PART_TYPES = frozenset({"dc_motor", "motor", "gear_motor", "brushed_motor"})
+_MOTOR_MODULE_PREFIXES = ("dc_motor", "dc_geared_motor", "vibration_motor")
+_DRIVER_MODULE_IDS = frozenset(
+    {"l298n", "drv8833-motor", "l9110-motor", "tb6612fng-motor", "bts7960-motor", "mosfet-irlz44n"}
+)
+
+
+def _inventory_has_dc_motors(
+    parts: List[Mapping[str, Any]] | None,
+    resolved_modules: List[Mapping[str, Any]],
+) -> bool:
+    for part in parts or []:
+        if str(part.get("type") or "").lower() in _MOTOR_PART_TYPES:
+            return True
+        text = _part_text(part).lower()
+        if "motor" in text and "driver" not in text:
+            return True
+    for row in resolved_modules:
+        role = str(row.get("role") or "")
+        module_id = str(row.get("module_id") or "")
+        if role in {"mot", "load"} and module_id.startswith(_MOTOR_MODULE_PREFIXES):
+            return True
+    return False
+
+
+def fill_salvage_gaps(
+    resolved_modules: List[Dict[str, Any]],
+    *,
+    parts: List[Mapping[str, Any]] | None = None,
+) -> List[Dict[str, Any]]:
+    """Deterministic gap-fill for salvage (driver for motors, etc.) — no LLM."""
+    rows = [dict(row) for row in resolved_modules]
+    module_ids = {str(row.get("module_id") or "").strip() for row in rows if row.get("module_id")}
+    has_driver = bool(module_ids & _DRIVER_MODULE_IDS) or any(
+        str(row.get("role") or "") == "drv" and row.get("module_id") for row in rows
+    )
+    if _inventory_has_dc_motors(parts, rows) and not has_driver:
+        rows.append(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "part_name": "motor driver (gap fill)",
+                "module_id": "l298n",
+                "role": "drv",
+                "source": "gap_fill",
+                "confidence": 0.7,
+                "matched_on": "dc_motor_without_driver",
+            }
+        )
+    return coalesce_resolved_modules(parts or [], rows)
+
+
 def infer_power_topology(
     parts: List[Mapping[str, Any]],
     resolved_modules: List[Mapping[str, Any]] | None = None,
+    *,
+    constraints: Mapping[str, Any] | None = None,
 ) -> str:
     """Return usb_5v | barrel_12v | hybrid from inventory."""
     resolved_modules = resolved_modules or []
+    constraints_map = dict(constraints or {})
+    battery_v = constraints_map.get("battery_voltage_v")
+    if battery_v is not None:
+        try:
+            if float(battery_v) >= 6.0:
+                has_usb = any(_part_implies_usb_5v(part) for part in parts)
+                has_usb_module = any(
+                    str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules
+                )
+                if has_usb or has_usb_module:
+                    return "hybrid"
+                return "barrel_12v"
+        except (TypeError, ValueError):
+            pass
+
     has_usb = any(_part_implies_usb_5v(part) for part in parts)
     has_barrel = any(_part_implies_barrel_12v(part) for part in parts)
     has_usb_module = any(str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules)

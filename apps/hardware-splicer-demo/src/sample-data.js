@@ -129,8 +129,55 @@ export const demoProjects = [
       {
         "name": "build_compilation/main_ctrl_build.kicad_pcb",
         "role": "DRC-clean KiCad PCB"
+      },
+      {
+        "name": "SALVAGE_GAP_ANALYSIS.json",
+        "role": "inventory gaps + shopping list"
+      },
+      {
+        "name": "SALVAGE_BOM.json",
+        "role": "MPN hints + USD estimate"
+      },
+      {
+        "name": "BRINGUP_CARD.md",
+        "role": "bench hookup + pre-power checks"
+      },
+      {
+        "name": "firmware/FIRMWARE_SCAFFOLD.json",
+        "role": "starter sketch metadata"
       }
-    ]
+    ],
+    "salvage": {
+      "readyToCompile": true,
+      "summary": "Inventory covers 5 mapped module(s) for this goal.",
+      "shoppingList": [],
+      "coveredCount": 5,
+      "bomTotalUsd": 22,
+      "bomPurchasesUsd": 0,
+      "withinBudget": true,
+      "bomLines": [
+        { "module_id": "esp32-devkit", "description": "ESP32 DevKit (Wi-Fi/BLE MCU)", "unit_price_usd": 8, "source": "salvage" },
+        { "module_id": "soil_moisture", "description": "Capacitive soil moisture sensor", "unit_price_usd": 2, "source": "salvage" },
+        { "module_id": "mini-pump-5v", "description": "5V mini water pump", "unit_price_usd": 5, "source": "salvage" },
+        { "module_id": "mosfet-irlz44n", "description": "IRLZ44N logic-level MOSFET module", "unit_price_usd": 2, "source": "salvage" },
+        { "module_id": "usb-power-5v", "description": "USB 5V power input", "unit_price_usd": 0, "source": "salvage" }
+      ],
+      "connections": [
+        { "from": "USB 5V power input (V+)", "to": "ESP32 DevKit (VIN)", "purpose": "power rail" },
+        { "from": "ESP32 DevKit (GPIO4)", "to": "Soil Moisture Sensor (SIG)", "purpose": "analog sensor" },
+        { "from": "ESP32 DevKit (GPIO16)", "to": "IRLZ44N (SIG)", "purpose": "pump driver" },
+        { "from": "IRLZ44N (LOAD+)", "to": "5V mini water pump (V+)", "purpose": "switched load" }
+      ],
+      "benchChecks": [
+        "Confirm common ground between MCU, driver, and load before energizing.",
+        "Measure supply voltage at the load before attaching pump/motor.",
+        "USB source should deliver ≥1A for small pumps; use a powered hub if the host port sags.",
+        "Dry-run: GPIO high → driver output ON → load sees supply (no MCU on same rail without driver)."
+      ],
+      "firmwareFile": "automatic_plant_watering.ino",
+      "firmwareFamily": "esp32",
+      "firmwarePins": { "soil": 4, "pump": 16, "sourced_from_bringup": true }
+    }
   },
   {
     "id": "plant_release",

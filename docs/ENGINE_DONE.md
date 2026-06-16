@@ -199,7 +199,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 3.2 | Placement for arbitrary components (not module-slot only) | PASS |
 | 3.3 | Copper routing (cosmetic segments; FreeRouting opt-in) | PASS |
 | 3.4 | DRC on routed board | PASS |
-| 3.5 | Arbitrary design ingest → fab package in CI (≥10 fixtures) | PASS |
+| 3.5 | Arbitrary design ingest → fab package in CI (≥10 fixtures) | PASS (18 fixtures) |
 | 3.6 | Bootstrap kits still pass via lowering → general pipeline | PASS |
 
 ### Engine done (Flux-class) when

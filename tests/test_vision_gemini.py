@@ -25,7 +25,7 @@ def test_vision_config_defaults_to_qwen_even_when_gemini_key_present(monkeypatch
     monkeypatch.setenv("GEMINI_API_KEY", "test-gemini-key")
     config = _vision_config({"vision_assistance": {"enabled": True}})
     assert config["provider"] == "qwen"
-    assert config["model"] == "qwen3-vl-flash"
+    assert config["model"] == "qwen3-vl-flash-2026-01-22"
 
 
 def test_gemini_live_call_parses_json_response(tmp_path):

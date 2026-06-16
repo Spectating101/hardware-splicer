@@ -2,7 +2,7 @@
 
 Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard — with **honest** fabrication scoring and evidence-gated release.
 
-**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md), [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md), and [`docs/TESTING.md`](docs/TESTING.md).
+**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md), [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md), [`docs/TESTING.md`](docs/TESTING.md), and [`docs/LLM_OPS.md`](docs/LLM_OPS.md) (text/vision LLM, quota, cache, agy fallback).
 
 ```bash
 make setup          # pip install + doctor
@@ -110,7 +110,7 @@ make plant-qwen-pipeline    # live vision + splice + benchmark (requires API key
 make score-intake-tiers     # offline tier progression (no API key)
 ```
 
-Live vision token usage is tracked locally in `data/vision/hardware-splicer-vision-usage.json` and summarized in `VISION_EVIDENCE_REPORT.json` under `usage_tracking`; inspect it with `python3 scripts/hardware_splicer.py vision-usage --provider qwen`. Candidate model notes are written to `VISION_EVIDENCE_REPORT.json`; they only feed the authority engine when `apply=true` or `--vision-apply` is set, and even then they still pass through deterministic extraction and normal production gates.
+Live vision token usage is tracked locally in `data/vision/hardware-splicer-vision-usage.json` and summarized in `VISION_EVIDENCE_REPORT.json` under `usage_tracking`; inspect it with `python3 scripts/hardware_splicer.py vision-usage --provider qwen`. Text LLM calls (salvage, compose, build pick) are cached by default and logged to `data/llm/hardware-splicer-text-usage.json` — see [`docs/LLM_OPS.md`](docs/LLM_OPS.md) for provider chain (`qwen_then_agy`), quota console, and CLI (`text-usage`, `llm-quota`, `qwen-models`). Candidate model notes are written to `VISION_EVIDENCE_REPORT.json`; they only feed the authority engine when `apply=true` or `--vision-apply` is set, and even then they still pass through deterministic extraction and normal production gates.
 
 `AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
 
@@ -196,4 +196,4 @@ By default, API compile outputs are constrained to `HARDWARE_SPLICER_OUTPUT_ROOT
 
 Async jobs are persisted in SQLite under `HARDWARE_SPLICER_STATE_DIR` (`/tmp/hardware_splicer_state`) unless `HARDWARE_SPLICER_JOB_DB` is set. `HARDWARE_SPLICER_JOB_WORKERS` controls the in-process worker count.
 
-See `docs/INTEGRATION.md` for the current runtime flow and environment variables.
+See `docs/INTEGRATION.md` for the current runtime flow and environment variables. LLM provider, cache, quota, and benchmark details: [`docs/LLM_OPS.md`](docs/LLM_OPS.md).

@@ -14,7 +14,8 @@ One-time bootstrap for the professor/demo path. No API keys required for the def
 Optional:
 
 - **CadQuery** — true STL rendering via 3D-Splicer (without it, script fallback still works)
-- **Qwen/Gemini API key** — live vision intake only (offline tier scoring works without keys)
+- **Qwen/Gemini API key** — live vision and text LLM (offline tier scoring and hybrid compose work without keys)
+- **agy CLI** (Antigravity) — text fallback when DashScope quota is tight; see [`docs/LLM_OPS.md`](LLM_OPS.md)
 
 ## Quick install
 
@@ -60,6 +61,23 @@ cp .env.example .env.local
 ```
 
 Live vision is **not** required for `make score-intake-tiers` when `HARDWARE_SPLICER_SKIP_VISION_LIVE=1`.
+
+## Text LLM (optional)
+
+```bash
+cp .env.example .env.local
+# DASHSCOPE_API_KEY — Singapore intl endpoint
+# Default: qwen_then_agy (Qwen HTTP, fall back to agy CLI on quota errors)
+```
+
+Offline dev (no API keys):
+
+```bash
+export HARDWARE_SPLICER_OFFLINE_COMPOSE=1
+export HARDWARE_SPLICER_OFFLINE_SALVAGE=1
+```
+
+Inspect usage and quota: `python3 scripts/hardware_splicer.py text-usage` and `llm-quota`. Full reference: [`LLM_OPS.md`](LLM_OPS.md).
 
 ## Verify everything
 

@@ -18,7 +18,7 @@ from .canvas_compose import compile_canvas_build
 from .design_quality import build_design_quality_gate
 from .material_modes import material_mode_summary, resolve_material_mode
 from .module_picker import pick_modules_for_goal
-from .module_resolver import infer_power_topology, resolve_parts_to_modules
+from .module_resolver import infer_power_topology, resolve_parts_to_modules_with_llm
 from .env_local import load_env_local
 from .runtime import ROOT, runtime_status, scratch_path
 from .salvage_bridge import build_intake_salvage_package
@@ -35,6 +35,7 @@ def apply_engine_defaults() -> None:
     os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
     os.environ.setdefault("HARDWARE_SPLICER_JLC_ENRICH", "0")
     os.environ.setdefault("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
+    os.environ.setdefault("HARDWARE_SPLICER_SIMULATE", "1")
     scratch = scratch_path("tmp")
     os.environ.setdefault("TMPDIR", str(scratch))
     os.environ.setdefault("TEMP", str(scratch))
@@ -100,16 +101,17 @@ def list_catalog_builds() -> Dict[str, Any]:
     }
 
 
-def resolve_inventory_parts(parts: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
+def resolve_inventory_parts(parts: Sequence[Mapping[str, Any]], *, goal: str = "") -> Dict[str, Any]:
     """Map junk-drawer / inventory part rows to module-library IDs."""
     apply_engine_defaults()
-    resolved = resolve_parts_to_modules(list(parts))
+    resolved, meta = resolve_parts_to_modules_with_llm(list(parts), goal=goal)
     topology = infer_power_topology(list(parts), resolved)
     return {
         "schema_version": SCHEMA_VERSION,
         "power_topology": topology,
         "resolved_modules": resolved,
         "module_ids": [str(r.get("module_id")) for r in resolved if r.get("module_id")],
+        "salvage_resolution": meta,
     }
 
 
@@ -254,6 +256,59 @@ def compose_design(
     if not phrase and not module_ids:
         raise ValueError("phrase, module_ids, or canvas_nodes is required")
 
+    if (
+        phrase
+        and not module_ids
+        and not resolved_modules
+        and not salvage_mode
+    ):
+        from .jarvis_build import _enrich_trust, _open_compose_llm_first, llm_first_enabled
+
+        if llm_first_enabled():
+            open_result = _open_compose_llm_first(
+                phrase,
+                target,
+                constraints=constraints_map,
+                export_gerber=export_gerber,
+                allow_qwen=True,
+            )
+            compile_result = open_result.get("compile_result")
+            quality = dict(compile_result.design_quality if compile_result else {})
+            gate = build_design_quality_gate(quality)
+            build_dir = target / "build_compilation"
+            _enrich_trust(
+                build_dir,
+                goal=phrase,
+                compose_mode=str(open_result.get("compose_mode") or "unknown"),
+                design_quality=quality,
+            )
+            return {
+                "schema_version": SCHEMA_VERSION,
+                "ok": bool(open_result.get("ok") and gate.get("build_ready")),
+                "mode": "llm_first",
+                "compose_mode": open_result.get("compose_mode"),
+                "qwen_usage": open_result.get("qwen_usage"),
+                "out_dir": str(target),
+                "build_id": getattr(compile_result, "build_id", None) if compile_result else None,
+                "module_ids": open_result.get("module_ids") or [],
+                "attempts": open_result.get("attempts") or [],
+                "design_quality": quality,
+                "design_quality_gate": gate,
+                "fallback": open_result.get("fallback"),
+                "artifacts": {
+                    "build_graph": str(build_dir / "build_graph.json") if (build_dir / "build_graph.json").is_file() else None,
+                    "circuit_netlist": str(build_dir / "circuit_netlist.json")
+                    if (build_dir / "circuit_netlist.json").is_file()
+                    else None,
+                    "kicad_pcb": str(compile_result.kicad_pcb_file) if compile_result else None,
+                    "trust_report": str(build_dir / "TRUST_REPORT.json")
+                    if (build_dir / "TRUST_REPORT.json").is_file()
+                    else None,
+                },
+                **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
+                "error": open_result.get("error"),
+            }
+
     scratch = compile_scratch_build(
         out_dir=str(target),
         goal=phrase,
@@ -292,6 +347,30 @@ def compose_design(
         **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
         "error": scratch.error,
     }
+
+
+def jarvis_build(
+    goal: str,
+    *,
+    parts: Sequence[Mapping[str, Any]] | None = None,
+    constraints: Mapping[str, Any] | None = None,
+    project_name: str | None = None,
+    out_dir: str | Path | None = None,
+    export_gerber: bool = False,
+    allow_qwen: bool = True,
+) -> Dict[str, Any]:
+    """LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative."""
+    from .jarvis_build import jarvis_build as _jarvis_build
+
+    return _jarvis_build(
+        goal,
+        parts=parts,
+        constraints=constraints,
+        project_name=project_name,
+        out_dir=out_dir,
+        export_gerber=export_gerber,
+        allow_qwen=allow_qwen,
+    )
 
 
 def salvage_bringup(
@@ -391,7 +470,7 @@ def sdk_info() -> Dict[str, Any]:
             "Real autoroute is opt-in only: apply_fab_profile(autoroute=True) or HARDWARE_SPLICER_AUTOROUTE=1."
         ),
         "arbitrary_path": (
-            "compose_arbitrary() uses Qwen text (qwen-plus) → netlist IR when API key set; "
+            "compose_arbitrary() uses Qwen text (qwen-turbo by default) → netlist IR when API key set; "
             "falls back to module picker. Vision Qwen is separate (bench photos only)."
         ),
         "default_env": {

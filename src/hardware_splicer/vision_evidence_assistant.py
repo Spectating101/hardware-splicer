@@ -12,6 +12,14 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Tuple
 
 from .testing_mode import testing_mode_enabled
+from .integrations.qwen_model_policy import (
+    DEFAULT_QWEN_VISION_MODEL,
+    is_blocked_chat_model,
+    qwen_vision_model_candidates,
+    qwen_vision_model_rotation,
+    resolve_vision_stage,
+)
+from .vision_inventory import merge_vision_inventory_into_intake
 from .vision_targets import normalize_vision_evidence_notes, vision_primitive_glossary
 from .vision_usage_ledger import record_vision_usage, usage_summary
 
@@ -21,15 +29,12 @@ SCHEMA_VERSION = "hardware_splicer.vision_evidence_report.v1"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".heic"}
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".webm", ".avi"}
 DEFAULT_QWEN_BASE_URL = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-DEFAULT_QWEN_MODEL = "qwen3-vl-flash"
-QWEN_VISION_MODEL_ROTATION = (
-    "qwen3-vl-flash",
-    "qwen-vl-ocr-2025-11-20",
-)
+DEFAULT_QWEN_MODEL = DEFAULT_QWEN_VISION_MODEL
+QWEN_VISION_MODEL_ROTATION = qwen_vision_model_rotation()
 DEFAULT_GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 DEFAULT_GEMINI_MODEL = "gemini-2.5-flash-lite"
 DEFAULT_VISION_PROVIDER = "qwen"
-BLOCKED_QWEN_VISION_MODELS = {"qwen-plus", "qwen-plus-2025-07-28"}
+BLOCKED_QWEN_VISION_MODELS = {"qwen-plus", "qwen-plus-character-ja", "qwen-plus-2025-01-25"}
 LIVE_VISION_PROVIDERS = {"qwen", "gemini"}
 
 
@@ -53,6 +58,9 @@ def enrich_intake_with_vision_assistance(intake: Mapping[str, Any]) -> Tuple[Dic
             processed_ids.append(source_id)
     if processed_ids:
         body["vision_processed_source_ids"] = _dedupe_strings([*processed_ids, *_string_list(body.get("vision_processed_source_ids"))])
+    body, inventory_report = merge_vision_inventory_into_intake(body, report)
+    if inventory_report.get("merged_count"):
+        report = {**report, "vision_inventory": inventory_report}
     return body, report
 
 
@@ -231,6 +239,7 @@ def _call_gemini_vision(body: Dict[str, Any], sources: List[Dict[str, Any]], con
         "base_url": base_url,
         "evidence_notes": notes,
         "observations": _string_list(parsed.get("observations")),
+        "identified_parts": _list_dicts(parsed.get("identified_parts")),
         "needs_human_review": _string_list(parsed.get("needs_human_review")),
         "confidence": _float(parsed.get("confidence"), 0.45),
         "requires_review": True,
@@ -239,7 +248,13 @@ def _call_gemini_vision(body: Dict[str, Any], sources: List[Dict[str, Any]], con
     }
 
 
-def _call_qwen_vision(body: Dict[str, Any], sources: List[Dict[str, Any]], config: Dict[str, Any]) -> Dict[str, Any]:
+def _call_qwen_vision(
+    body: Dict[str, Any],
+    sources: List[Dict[str, Any]],
+    config: Dict[str, Any],
+    *,
+    allow_escalation: bool = True,
+) -> Dict[str, Any]:
     api_key = _provider_api_key(config, "qwen")
     if not api_key:
         raise VisionAssistantError(
@@ -301,35 +316,71 @@ def _call_qwen_vision(body: Dict[str, Any], sources: List[Dict[str, Any]], confi
         goal=str(body.get("goal") or body.get("intent") or body.get("brief") or ""),
         path=_ledger_path(config),
     )
-    return {
+    confidence = _float(parsed.get("confidence"), 0.45)
+    result = {
         "source_ids": source_ids,
         "provider": "qwen",
         "model": model,
         "base_url": base_url,
         "evidence_notes": notes,
         "observations": _string_list(parsed.get("observations")),
+        "identified_parts": _list_dicts(parsed.get("identified_parts")),
         "needs_human_review": _string_list(parsed.get("needs_human_review")),
-        "confidence": _float(parsed.get("confidence"), 0.45),
+        "confidence": confidence,
         "requires_review": True,
         "raw_response_excerpt": content_text[:1200],
         "usage": usage,
+        "vision_stage": str(config.get("vision_stage") or "board"),
         "model_rotation": {
+            "stage": str(config.get("vision_stage") or "board"),
             "candidates": models,
             "selected_model": model,
             "quota_errors": quota_errors,
         },
     }
+    if (
+        allow_escalation
+        and _vision_escalation_enabled(config)
+        and confidence < 0.5
+        and len(notes) < 2
+        and str(config.get("vision_stage") or "board") != "escalation"
+    ):
+        try:
+            escalated = _call_qwen_vision(
+                body,
+                sources,
+                {**config, "vision_stage": "escalation", "model": ""},
+                allow_escalation=False,
+            )
+            esc_notes = escalated.get("evidence_notes") or []
+            esc_conf = _float(escalated.get("confidence"), 0.0)
+            if len(esc_notes) > len(notes) or esc_conf > confidence:
+                escalated["escalated_from"] = model
+                escalated["escalated_from_stage"] = result.get("vision_stage")
+                return escalated
+        except VisionAssistantError:
+            pass
+    return result
 
 
 def _qwen_vision_model_candidates(config: Dict[str, Any]) -> List[str]:
-    requested = str(config.get("model") or DEFAULT_QWEN_MODEL).strip()
+    requested = str(config.get("model") or "").strip()
+    stage = str(config.get("vision_stage") or "board")
     blocked = set(BLOCKED_QWEN_VISION_MODELS)
+    candidates = qwen_vision_model_candidates(requested or None, stage=stage)
     out: List[str] = []
-    for candidate in [requested, *QWEN_VISION_MODEL_ROTATION]:
-        if candidate in blocked or candidate in out:
+    for candidate in candidates:
+        if candidate in blocked or is_blocked_chat_model(candidate) or candidate in out:
             continue
         out.append(candidate)
     return out or [DEFAULT_QWEN_MODEL]
+
+
+def _vision_escalation_enabled(config: Dict[str, Any]) -> bool:
+    if "escalate_on_low_confidence" in config:
+        return _bool(config.get("escalate_on_low_confidence"))
+    env = os.getenv("HARDWARE_SPLICER_VISION_ESCALATE_ON_LOW_CONFIDENCE", "1").strip().lower()
+    return env not in {"0", "false", "no", "off"}
 
 
 def _dedupe_strings(values: Iterable[str]) -> List[str]:
@@ -360,7 +411,10 @@ def _vision_prompt(body: Dict[str, Any]) -> str:
         )
     return (
         "You are assisting Hardware-Splicer evidence capture for a mechatronics project.\n"
-        "Return strict JSON only with keys: evidence_notes, observations, needs_human_review, confidence.\n"
+        "Return strict JSON only with keys: evidence_notes, observations, needs_human_review, confidence, identified_parts.\n"
+        "identified_parts is an array of visible/salient components: "
+        '[{"name":"ESP32 dev board","type":"microcontroller","confidence":0.8}]. '
+        "Only list parts you can see or read labels for; do not guess hidden modules.\n"
         "Use evidence_notes in this DSL, one note per string:\n"
         "- measure: <target> value_mm=<number> status=observed artifact=<uri>\n"
         "- clearance: <target> clearance_mm=<number> status=observed artifact=<uri>\n"
@@ -385,12 +439,20 @@ def _vision_config(body: Dict[str, Any]) -> Dict[str, Any]:
     model = str(raw.get("model") or os.getenv("HARDWARE_SPLICER_VISION_MODEL") or default_model).strip()
     if provider == "qwen":
         model = _normalize_qwen_vision_model(model)
+    vision_stage = resolve_vision_stage({**body, "vision_assistance": raw})
     default_base_url = DEFAULT_GEMINI_BASE_URL if provider == "gemini" else DEFAULT_QWEN_BASE_URL
     env_base_url = os.getenv("GEMINI_BASE_URL") if provider == "gemini" else os.getenv("DASHSCOPE_BASE_URL")
     return {
         "enabled": enabled,
         "provider": provider,
         "model": model,
+        "vision_stage": vision_stage,
+        "escalate_on_low_confidence": (
+            _bool(raw.get("escalate_on_low_confidence"))
+            if "escalate_on_low_confidence" in raw
+            else os.getenv("HARDWARE_SPLICER_VISION_ESCALATE_ON_LOW_CONFIDENCE", "1").strip().lower()
+            not in {"0", "false", "no", "off"}
+        ),
         "api_key": str(raw.get("api_key") or "").strip(),
         "base_url": str(raw.get("base_url") or env_base_url or default_base_url).strip(),
         "live": _bool(raw.get("live") or os.getenv("HARDWARE_SPLICER_VISION_LIVE")),

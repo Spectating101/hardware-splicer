@@ -140,7 +140,7 @@ MODULE_HINTS: list[ModuleHint] = [
         priority=6,
     ),
     ModuleHint(
-        patterns=[re.compile(r"pump|water flow|move water", re.I)],
+        patterns=[re.compile(r"pump|water flow|move water|watering|irrigation|auto water", re.I)],
         label="pump",
         requires_any=[["fan_or_pump", "motor_or_load"]],
         prefer_id="water_pump_5v",
@@ -282,6 +282,8 @@ def _filter_redundant_hints(
             r"pressure|barometric|environmental|bme|bmp", text, re.I
         ):
             continue
+        if hint.prefer_id == "ssd1306-128x64" and has("ili9341_tft"):
+            continue
         if hint.label == "wireless" and len(picked) > 1:
             continue
         out.append(hint)
@@ -289,6 +291,31 @@ def _filter_redundant_hints(
 
 
 def pick_modules_for_goal(text: str) -> ModulePick:
+    """NL goal → module ids. Regex for trained phrases; Qwen for novel goals when keyed."""
+    from .integrations.llm_policy import offline_compose_enabled
+    from .integrations.qwen_module_pick import call_qwen_module_pick, qwen_module_pick_enabled
+
+    goal = text.strip()
+    regex_pick = _pick_modules_regex(goal)
+
+    if not qwen_module_pick_enabled() or offline_compose_enabled():
+        return regex_pick
+
+    # MODULE_HINTS + phrase_expander are regression-tested on compose_phrases.json (56 cases).
+    if len(regex_pick.module_ids) >= 2 and regex_pick.hints:
+        return regex_pick
+
+    picked = call_qwen_module_pick(goal)
+    if picked.get("ok"):
+        return ModulePick(
+            module_ids=list(picked.get("module_ids") or []),
+            labels=[],
+            hints=[str(picked.get("reasoning") or "qwen_module_pick")],
+        )
+    return regex_pick
+
+
+def _pick_modules_regex(text: str) -> ModulePick:
     t = _normalize_user_text(expand_user_phrase(text))
     ranked = [
         (hint, _hint_match_score(hint, t))
@@ -348,11 +375,15 @@ def pick_modules_for_goal(text: str) -> ModulePick:
             module_ids.add(pick_id)
             labels.append(str(pick.get("label") or pick_id))
 
-    if needs_brain and re.search(r"pump|motor|relay|servo|stepper|fan", t):
-        if re.search(r"pump|fan", t) and "mosfet-irlz44n" not in module_ids:
+    if needs_brain and re.search(r"pump|motor|relay|servo|stepper|fan|watering|irrigation", t):
+        if re.search(r"pump|fan|watering|irrigation|auto water|drip irrig", t) and "mosfet-irlz44n" not in module_ids:
             module_ids.add("mosfet-irlz44n")
             mod = find_module("mosfet-irlz44n")
             labels.append(mod.get("label") if mod else "MOSFET driver")
+        if re.search(r"watering|irrigation|auto water|drip irrig|water my", t) and "water_pump_5v" not in module_ids:
+            module_ids.add("water_pump_5v")
+            mod = find_module("water_pump_5v")
+            labels.append(mod.get("label") if mod else "5V water pump")
         if re.search(r"stepper|cnc|plotter|12v|barrel|buck", t) and "buck-lm2596" not in module_ids:
             module_ids.add("buck-lm2596")
             mod = find_module("buck-lm2596")

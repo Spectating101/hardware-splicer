@@ -14,6 +14,8 @@ import {
   ShieldCheck,
   Wrench,
   Zap,
+  ShoppingCart,
+  Cpu,
 } from 'lucide-react';
 import { demoProjects } from './sample-data.js';
 import './styles.css';
@@ -100,6 +102,8 @@ function App() {
         </section>
 
         <ProductionMetrics project={selected} />
+
+        {selected.salvage ? <SalvageWorkbench salvage={selected.salvage} /> : null}
 
         <section className="subsystems">
           {selected.subsystems.map((subsystem) => (
@@ -210,6 +214,89 @@ function UpgradePanel({ project }) {
         ))}
       </div>
     </article>
+  );
+}
+
+function SalvageWorkbench({ salvage }) {
+  return (
+    <section className="salvage-grid" aria-label="Salvage workbench">
+      <article className="panel salvage-gap">
+        <div className="panel-label"><ShoppingCart size={16} /> Gap + shopping</div>
+        <div className="salvage-headline">
+          <strong>{salvage.readyToCompile ? 'Ready to compile' : 'Gaps remain'}</strong>
+          <span>{salvage.summary}</span>
+        </div>
+        <div className="salvage-metrics">
+          <Metric label="Covered modules" value={String(salvage.coveredCount)} tone="good" />
+          <Metric label="To buy" value={String(salvage.shoppingList.length)} tone={salvage.shoppingList.length ? 'warn' : 'good'} />
+          <Metric label="BOM total" value={salvage.bomTotalUsd != null ? `$${salvage.bomTotalUsd}` : '—'} />
+        </div>
+        {salvage.shoppingList.length > 0 && (
+          <div className="salvage-list">
+            {salvage.shoppingList.map((row) => (
+              <div className="salvage-row" key={row.module_id}>
+                <span>{row.label || row.module_id}</span>
+                <small>{row.priority}</small>
+              </div>
+            ))}
+          </div>
+        )}
+      </article>
+
+      <article className="panel salvage-bom">
+        <div className="panel-label"><PackageCheck size={16} /> Salvage BOM</div>
+        <p className="salvage-note">
+          {salvage.withinBudget === true ? 'Within budget' : salvage.withinBudget === false ? 'Over budget' : 'Budget not set'}
+          {salvage.bomPurchasesUsd ? ` · purchases ~$${salvage.bomPurchasesUsd}` : ''}
+        </p>
+        <table className="salvage-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>USD</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {salvage.bomLines.map((row) => (
+              <tr key={row.module_id}>
+                <td>{row.description}</td>
+                <td>{row.unit_price_usd != null ? `$${row.unit_price_usd}` : '—'}</td>
+                <td>{row.source}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </article>
+
+      <article className="panel salvage-bringup">
+        <div className="panel-label"><Wrench size={16} /> Bring-up card</div>
+        <div className="salvage-list">
+          {salvage.connections.map((row) => (
+            <div className="salvage-row" key={`${row.from}-${row.to}`}>
+              <span>{row.from} → {row.to}</span>
+              <small>{row.purpose}</small>
+            </div>
+          ))}
+        </div>
+        <div className="salvage-checks">
+          {salvage.benchChecks.map((check) => (
+            <p key={check}>{check}</p>
+          ))}
+        </div>
+      </article>
+
+      <article className="panel salvage-firmware">
+        <div className="panel-label"><Cpu size={16} /> Firmware scaffold</div>
+        <div className="salvage-metrics">
+          <Metric label="File" value={salvage.firmwareFile} />
+          <Metric label="MCU" value={salvage.firmwareFamily} />
+          <Metric label="Soil pin" value={String(salvage.firmwarePins?.soil ?? '—')} />
+          <Metric label="Pump pin" value={String(salvage.firmwarePins?.pump ?? '—')} />
+        </div>
+        <p className="salvage-note">Pins from bring-up card; starter sketch emitted under <code>firmware/</code>.</p>
+      </article>
+    </section>
   );
 }
 

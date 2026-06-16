@@ -53,6 +53,13 @@ PYTHONPATH=src python3 scripts/hardware_splicer.py build \
 PYTHONPATH=src python3 scripts/hardware_splicer.py compose \
   --phrase "something that measures temperature" --out /tmp/out
 
+# General engine: netlist IR → KiCad (no module picker)
+PYTHONPATH=src python3 scripts/hardware_splicer.py netlist-compile \
+  --netlist examples/netlist_fixtures/json/usb_esp_dht22.json --out /tmp/out
+
+PYTHONPATH=src python3 scripts/hardware_splicer.py compose \
+  --netlist-json examples/netlist_fixtures/json/usb_esp_dht22.json --out /tmp/out
+
 # Intake brief → salvage → compile
 PYTHONPATH=src python3 scripts/hardware_splicer.py splice-build \
   --brief examples/intakes/scratch_compose_brief.json --out /tmp/out
@@ -64,7 +71,8 @@ PYTHONPATH=src python3 scripts/hardware_splicer.py splice-build \
 |----------|----------------|
 | `POST /v1/compile-build` | `build` |
 | `POST /v1/splice-and-build` | `splice-build` |
-| `POST /v1/compose` | `compose` — **not implemented yet** (gate 6.3) |
+| `POST /v1/compose` | `compose` |
+| `POST /v1/netlist-compile` | `netlist-compile` (general IR path) |
 
 ---
 
@@ -74,11 +82,18 @@ PYTHONPATH=src python3 scripts/hardware_splicer.py splice-build \
 |-------|--------|
 | 0 Bootstrap compiler | Mostly done |
 | 1 Bootstrap hardening | In progress — see [ENGINE_DONE.md §7](./ENGINE_DONE.md#7-phase-1-gates--bootstrap-hardening) |
-| 2 General IR | Not started |
-| 3 General compile (Flux engine bar) | Not started |
-| 4 Frontend | Blocked |
+| 2 General IR | **Done** — netlist IR, lowering, KiCad import |
+| 3 General compile | **Done** — ERC, placement, cosmetic copper, DRC; 18 netlist fixtures |
+| 4 Frontend | Blocked on gate **1.5** (TS compile fork) |
 
 Detail and per-gate PASS/OPEN: [ENGINE_DONE.md](./ENGINE_DONE.md).
+
+### General engine verify
+
+```bash
+make verify-netlist-engine
+PYTHONPATH=src pytest tests/test_netlist_fixtures.py -q
+```
 
 ---
 

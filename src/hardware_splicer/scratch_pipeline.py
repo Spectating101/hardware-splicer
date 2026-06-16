@@ -208,31 +208,19 @@ def _llm_enabled() -> bool:
 
 
 def _llm_adjust_modules(goal: str, module_ids: List[str], quality: Mapping[str, Any]) -> Optional[List[str]]:
-    if not _llm_enabled():
-        return None
-    try:
-        from .build_compiler import ensure_circuit_import_path
+    from .integrations.llm_policy import qwen_llm_first
+    from .integrations.qwen_module_pick import call_qwen_module_pick
 
-        ensure_circuit_import_path()
-        from src.intelligence.circuit_ai_reasoner import CircuitAIReasoner
-
-        reasoning = CircuitAIReasoner(enable_llm=True).assess(
-            {
-                "goal": goal,
-                "mode": "scratch_compose_retry",
-                "module_ids": module_ids,
-                "design_quality": quality,
-            }
-        )
-        suggested = reasoning.get("scratch_compose") or {}
-        alt_ids = suggested.get("module_ids")
-        if isinstance(alt_ids, list) and len(alt_ids) >= 2:
-            return [str(mid) for mid in alt_ids]
-    except Exception:
+    if not qwen_llm_first():
         return None
-    pick = pick_modules_for_goal(f"{goal} — fix wiring: {'; '.join(quality.get('safety_error_messages') or [])}")
-    if len(pick.module_ids) >= 2:
-        return pick.module_ids
+
+    messages = "; ".join(str(m) for m in quality.get("safety_error_messages") or [])
+    picked = call_qwen_module_pick(
+        f"{goal} — fix electrical issues: {messages}",
+        constraints={"prior_module_ids": module_ids, "design_quality": dict(quality)},
+    )
+    if picked.get("ok") and len(picked.get("module_ids") or []) >= 2:
+        return [str(mid) for mid in picked["module_ids"]]
     return None
 
 
@@ -317,6 +305,12 @@ def compile_scratch_build(
             # Graph is fine but artifact stage failed — stop retrying modules.
             break
 
+        if goal:
+            alt = _llm_adjust_modules(goal, ids, {**quality, **graph_q})
+            if alt and alt != ids:
+                ids = alt
+                continue
+
         next_ids = _deterministic_fixup(ids, {**quality, **graph_q}, attempt, material_mode=material_mode)
         if next_ids != ids:
             ids = next_ids
@@ -333,7 +327,7 @@ def compile_scratch_build(
             continue
         break
 
-    if _llm_enabled() and goal:
+    if goal:
         alt = _llm_adjust_modules(goal, ids, last_quality)
         if alt and alt != ids:
             ids = alt

@@ -11,6 +11,7 @@ def test_compose_netlist_fallback_without_qwen_key(monkeypatch: pytest.MonkeyPat
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
     monkeypatch.delenv("QWEN_API_KEY", raising=False)
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_COMPOSE", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
     result = compose_netlist_from_goal("wifi temperature logger with esp32 and dht22")
     assert result.get("compose_mode") == "module_picker_fallback"
     assert result.get("ok") is True

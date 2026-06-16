@@ -40,6 +40,7 @@ def test_qwen_live_call_records_usage_in_report(tmp_path, monkeypatch):
             "live": True,
             "apply": False,
             "api_key": "test-qwen-key",
+            "escalate_on_low_confidence": False,
         },
         "attachments": [{"id": "bench_photo", "kind": "image", "path": str(image)}],
     }
@@ -59,6 +60,6 @@ def test_qwen_live_call_records_usage_in_report(tmp_path, monkeypatch):
     assert ledger.exists()
 
 
-def test_qwen_plus_is_routed_to_qwen3_vl_flash():
+def test_qwen_plus_is_routed_to_default_vision_model():
     config = _vision_config({"vision_assistance": {"provider": "qwen", "model": "qwen-plus"}})
-    assert config["model"] == "qwen3-vl-flash"
+    assert config["model"] == "qwen3-vl-flash-2026-01-22"

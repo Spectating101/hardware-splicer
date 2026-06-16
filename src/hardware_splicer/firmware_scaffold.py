@@ -207,6 +207,119 @@ while True:
 """
 
 
+def generate_firmware_from_salvage(
+    *,
+    build_id: str,
+    bringup_card: Mapping[str, Any],
+    module_ids: List[str],
+    goal: str = "",
+) -> Dict[str, Any]:
+    """Starter sketch using bring-up GPIO assignments (salvage path without KiCad graph)."""
+    family = _mcu_family(module_ids)
+    pins = _pins_from_bringup(bringup_card, module_ids)
+    goal_l = goal.lower()
+    generator = "bringup_card"
+    sketch_fn = _BUILD_SKETCHES.get(build_id)
+
+    if family == "pico":
+        body = _pico_sketch(build_id, module_ids)
+        filename = f"{build_id}_main.py"
+    elif sketch_fn is not None:
+        body = sketch_fn(build_id, module_ids, pins)
+        filename = f"{build_id}.ino"
+        generator = "catalog_sketch+bringup_pins"
+    elif "soil" in " ".join(module_ids) and pins.get("pump") is not None:
+        body = _plant_watering_esp32(build_id, module_ids, pins)
+        filename = f"{build_id}.ino"
+    elif "dht22" in module_ids:
+        body = _dht22_esp32_sketch(build_id, module_ids, pins)
+        filename = f"{build_id}.ino"
+    elif "motor" in goal_l or "l298n" in module_ids:
+        body = _robot_arduino(build_id, module_ids, pins)
+        filename = f"{build_id}.ino"
+    else:
+        body = _bringup_generic_sketch(build_id, module_ids, pins, bringup_card)
+        filename = f"{build_id}.ino"
+
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "build_id": build_id,
+        "mcu_family": family,
+        "filename": filename,
+        "modules": module_ids,
+        "pins": pins,
+        "source": body,
+        "claim_boundary": "Pins derived from bring-up card — verify on bench before upload.",
+        "generator": generator,
+    }
+
+
+def _parse_gpio_number(pin_id: str) -> Optional[int]:
+    import re
+
+    for pat in (r"GPIO(\d+)", r"GP(\d+)", r"D(\d+)", r"A(\d+)"):
+        m = re.search(pat, pin_id, re.I)
+        if m:
+            return int(m.group(1))
+    return None
+
+
+def _pins_from_bringup(bringup_card: Mapping[str, Any], module_ids: List[str]) -> Dict[str, Any]:
+    pins: Dict[str, Any] = {"sourced_from_graph": False, "sourced_from_bringup": True}
+    joined = " ".join(module_ids).lower()
+    for row in bringup_card.get("gpio_assignments") or bringup_card.get("connections") or []:
+        fp = str(row.get("from_pin") or "")
+        purpose = str(row.get("purpose") or "").lower()
+        to_label = str(row.get("to") or row.get("to_role") or "").lower()
+        num = _parse_gpio_number(fp)
+        if num is None:
+            continue
+        if "soil" in joined and ("sns" in purpose or "sensor" in to_label or "soil" in to_label):
+            pins.setdefault("soil", num)
+        if "pump" in joined or "mosfet" in joined:
+            if "control" in purpose or "mosfet" in to_label or "pump" in to_label or "load" in to_label:
+                pins.setdefault("pump", num)
+        if "dht22" in joined and ("dht" in to_label or "sensor" in to_label):
+            pins.setdefault("dht", num)
+    return pins
+
+
+def _bringup_generic_sketch(
+    build_id: str,
+    module_ids: List[str],
+    pins: Mapping[str, Any],
+    bringup_card: Mapping[str, Any],
+) -> str:
+    assigns = []
+    for row in bringup_card.get("gpio_assignments") or []:
+        assigns.append(f"// {row.get('from')} -> {row.get('to')} ({row.get('purpose')})")
+    assign_block = "\n".join(assigns) if assigns else "// See BRINGUP_CARD.md for hookups"
+    pump = pins.get("pump")
+    if pump is not None:
+        return f"""// {build_id} — bring-up actuator stub
+#include <Arduino.h>
+{assign_block}
+const int ACTUATOR_PIN = {pump};
+void setup() {{
+  Serial.begin(115200);
+  pinMode(ACTUATOR_PIN, OUTPUT);
+  digitalWrite(ACTUATOR_PIN, LOW);
+}}
+void loop() {{
+  digitalWrite(ACTUATOR_PIN, HIGH);
+  delay(500);
+  digitalWrite(ACTUATOR_PIN, LOW);
+  delay(2000);
+}}
+"""
+    return f"""// {build_id} — generated from bring-up card
+#include <Arduino.h>
+{assign_block}
+void setup() {{ Serial.begin(115200); }}
+void loop() {{ Serial.println(F("bringup: wire pins per BRINGUP_CARD")); delay(1000); }}
+"""
+
+
 def generate_firmware_scaffold(
     *,
     build_id: str,
@@ -244,6 +357,37 @@ def generate_firmware_scaffold(
         "source": body,
         "claim_boundary": claim,
     }
+
+
+def write_salvage_firmware(
+    *,
+    build_id: str,
+    salvage_package: Mapping[str, Any],
+    goal: str,
+    out_dir: str | Path,
+) -> Optional[Path]:
+    bringup = dict(salvage_package.get("bringup_card") or {})
+    module_ids = [
+        str(r.get("module_id") or "")
+        for r in salvage_package.get("resolved_modules") or []
+        if r.get("module_id")
+    ]
+    if not bringup or not module_ids:
+        return None
+    payload = generate_firmware_from_salvage(
+        build_id=build_id or "salvage_build",
+        bringup_card=bringup,
+        module_ids=module_ids,
+        goal=goal,
+    )
+    target = Path(out_dir)
+    target.mkdir(parents=True, exist_ok=True)
+    fw_path = target / "firmware" / str(payload["filename"])
+    fw_path.parent.mkdir(parents=True, exist_ok=True)
+    fw_path.write_text(str(payload["source"]), encoding="utf-8")
+    meta = target / "firmware" / "FIRMWARE_SCAFFOLD.json"
+    meta.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    return fw_path
 
 
 def write_firmware_scaffold(

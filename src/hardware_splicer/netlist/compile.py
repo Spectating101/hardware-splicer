@@ -15,6 +15,8 @@ from ..pcb.kicad_cli_erc import run_kicad_cli_erc, summarize_erc_for_quality
 from .erc import run_erc, verify_net_coverage
 from .ir import CircuitNetlist
 from .lower import build_graph_to_netlist, netlist_to_build_graph
+from ..electrical_simulation import run_electrical_simulation, simulate_strict
+from ..trust_report import write_trust_report
 from .passives import suggest_passives
 from .quality_flags import finalize_launch_quality
 
@@ -107,7 +109,34 @@ def compile_netlist_to_artifacts(
     quality.update(summarize_erc_for_quality(sch_erc))
     quality["compile_engine"] = "netlist_v2"
     quality["passive_suggestions"] = passive_suggestions
+
+    simulation = run_electrical_simulation(netlist)
+    budget = dict(simulation.get("power_budget") or {})
+    quality["electrical_simulation"] = {
+        "pass": simulation.get("simulation_pass"),
+        "skipped": simulation.get("skipped"),
+        "estimated_load_a": budget.get("estimated_load_a"),
+        "margin_a": budget.get("margin_a"),
+        "ngspice_ok": (simulation.get("spice") or {}).get("ok"),
+    }
+    quality["simulation_pass"] = simulation.get("simulation_pass")
+    if simulate_strict() and simulation.get("simulation_pass") is False:
+        quality["build_ready"] = False
+        warnings.append("Electrical simulation strict gate failed.")
+
     quality = finalize_launch_quality(quality)
+    trust_path = write_trust_report(
+        out,
+        design_quality=quality,
+        simulation=simulation,
+        erc=erc,
+        build_id=build_id,
+    )
+    quality["trust_report_path"] = trust_path
+    sim_path = out / "ELECTRICAL_SIMULATION.json"
+    sim_path.write_text(json.dumps(simulation, indent=2), encoding="utf-8")
+    quality["electrical_simulation_path"] = str(sim_path)
+
     quality_path = out / "DESIGN_QUALITY.json"
     quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
     payload["quality"] = quality
@@ -120,6 +149,8 @@ def compile_netlist_to_artifacts(
         "circuit_json": str(circuit_json_path),
         "kicad_sch": str(sch_path),
         "kicad_erc": sch_erc.get("report_path"),
+        "electrical_simulation": str(sim_path),
+        "trust_report": trust_path,
     }
     payload["ok"] = bool(payload.get("ok")) and erc.get("pass")
     return payload

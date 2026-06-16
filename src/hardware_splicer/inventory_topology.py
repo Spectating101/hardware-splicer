@@ -179,5 +179,30 @@ def adapt_recipe_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Tuple[
                 break
 
     adapted = _apply_module_overrides(adapted, overrides)
+    adapted = _append_inventory_sensors(adapted, overrides)
     adapted = _prune_to_inventory(adapted, plan)
     return adapted, notes
+
+
+def _append_inventory_sensors(recipe: Recipe, overrides: Mapping[str, str]) -> Recipe:
+    """Add salvaged sensor module + I2C wires when catalog recipe lacks an sns slot."""
+    sns_id = str(overrides.get("sns") or "").strip()
+    modules = list(recipe.get("modules") or [])
+    if not sns_id or _has_role(modules, "sns"):
+        return recipe
+
+    new_modules = [dict(m) for m in modules]
+    new_modules.append({"role": "sns", "moduleId": sns_id})
+    wires = [dict(w) for w in recipe.get("wires") or []]
+    if _has_role(new_modules, "mcu"):
+        wires.extend(
+            [
+                {"from": {"role": "mcu", "pin": "GPIO21"}, "to": {"role": "sns", "pin": "SDA"}},
+                {"from": {"role": "mcu", "pin": "GPIO22"}, "to": {"role": "sns", "pin": "SCL"}},
+                {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+                {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+            ]
+        )
+    notes = list(recipe.get("notes") or [])
+    notes.append(f"Inventory: salvaged sensor wired on I2C ({sns_id}).")
+    return {"modules": new_modules, "wires": wires, "notes": notes}

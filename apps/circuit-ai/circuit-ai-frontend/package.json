@@ -7,7 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "validate:library": "node scripts/validate-module-library.cjs"
+    "validate:library": "node scripts/validate-module-library.cjs",
+    "validate:topology": "node scripts/test-inventory-topology.cjs",
+    "test:build-intent": "node scripts/test-build-intent.cjs",
+    "test:compose-scenarios": "node scripts/test-compose-scenarios.cjs",
+    "test:jarvis-build": "node scripts/test-build-intent.cjs && node scripts/test-compose-scenarios.cjs",
+    "test:backend": "node scripts/test-build-intent.cjs && node scripts/test-compose-scenarios.cjs && node scripts/test-phrase-expander.cjs && node scripts/test-phrase-eval.cjs && node scripts/test-firmware-scaffold.cjs && node scripts/test-firmware-bundle.cjs && node scripts/test-local-manufacture.cjs && node scripts/test-golden-path.cjs && node scripts/validate-module-library.cjs && node scripts/test-inventory-topology.cjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

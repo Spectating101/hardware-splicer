@@ -1,0 +1,127 @@
+{
+  "schema_version": "hardware_splicer.netlist.v1",
+  "source": "fixture:usb_esp_fan_mosfet",
+  "components": [
+    {
+      "ref": "U1",
+      "value": "USB 5V power input",
+      "footprint": "usb-power-5v",
+      "module_id": "usb-power-5v",
+      "metadata": {
+        "graph_node_id": "n1"
+      }
+    },
+    {
+      "ref": "U2",
+      "value": "ESP32 DevKit",
+      "footprint": "esp32-devkit",
+      "module_id": "esp32-devkit",
+      "metadata": {
+        "graph_node_id": "n2"
+      }
+    },
+    {
+      "ref": "U3",
+      "value": "IRLZ44N logic-level MOSFET module",
+      "footprint": "mosfet-irlz44n",
+      "module_id": "mosfet-irlz44n",
+      "metadata": {
+        "graph_node_id": "n3"
+      }
+    },
+    {
+      "ref": "U4",
+      "value": "5V DC Cooling Fan 40mm",
+      "footprint": "cooling_fan_5v",
+      "module_id": "cooling_fan_5v",
+      "metadata": {
+        "graph_node_id": "n4"
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "+5V",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "V+"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "VIN"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "VIN"
+        }
+      ]
+    },
+    {
+      "name": "N2",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO4"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "SIG"
+        }
+      ]
+    },
+    {
+      "name": "+5V_2",
+      "pins": [
+        {
+          "component_ref": "U3",
+          "pin": "VOUT+"
+        },
+        {
+          "component_ref": "U4",
+          "pin": "VCC"
+        }
+      ]
+    },
+    {
+      "name": "GND",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "VIN-"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U4",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "VOUT-"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "node_count": 4,
+    "wire_count": 10,
+    "module_ids": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "mosfet-irlz44n",
+      "cooling_fan_5v"
+    ],
+    "compose_warnings": []
+  }
+}

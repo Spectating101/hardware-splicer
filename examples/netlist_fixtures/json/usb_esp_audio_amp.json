@@ -1,0 +1,131 @@
+{
+  "schema_version": "hardware_splicer.netlist.v1",
+  "source": "fixture:usb_esp_audio_amp",
+  "components": [
+    {
+      "ref": "U1",
+      "value": "USB 5V power input",
+      "footprint": "usb-power-5v",
+      "module_id": "usb-power-5v",
+      "metadata": {
+        "graph_node_id": "n1"
+      }
+    },
+    {
+      "ref": "U2",
+      "value": "ESP32 DevKit",
+      "footprint": "esp32-devkit",
+      "module_id": "esp32-devkit",
+      "metadata": {
+        "graph_node_id": "n2"
+      }
+    },
+    {
+      "ref": "U3",
+      "value": "MAX98357A I2S Class-D mono amp",
+      "footprint": "max98357a-i2s-amp",
+      "module_id": "max98357a-i2s-amp",
+      "metadata": {
+        "graph_node_id": "n3"
+      }
+    }
+  ],
+  "nets": [
+    {
+      "name": "GND",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "GND"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "GND"
+        }
+      ]
+    },
+    {
+      "name": "+5V",
+      "pins": [
+        {
+          "component_ref": "U1",
+          "pin": "V+"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "VIN"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "VIN"
+        }
+      ]
+    },
+    {
+      "name": "GPIO2",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO2"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "GAIN"
+        }
+      ]
+    },
+    {
+      "name": "SDA",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO21"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "LRC"
+        }
+      ]
+    },
+    {
+      "name": "SCL",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO22"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "BCLK"
+        }
+      ]
+    },
+    {
+      "name": "N6",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO4"
+        },
+        {
+          "component_ref": "U3",
+          "pin": "DIN"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "node_count": 3,
+    "wire_count": 8,
+    "module_ids": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "max98357a-i2s-amp"
+    ],
+    "compose_warnings": []
+  }
+}

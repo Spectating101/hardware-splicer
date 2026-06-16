@@ -106,6 +106,26 @@ class LLMIntentParser:
                     except Exception as e:
                         logger.warning(f"Groq initialization failed: {e}")
 
+            # Qwen / DashScope (Hardware-Splicer default when keyed)
+            if not self.provider:
+                qwen_key = os.getenv("DASHSCOPE_API_KEY") or os.getenv("QWEN_API_KEY")
+                if qwen_key:
+                    try:
+                        from openai import OpenAI
+
+                        base_url = (
+                            os.getenv("DASHSCOPE_BASE_URL")
+                            or os.getenv("QWEN_BASE_URL")
+                            or "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+                        )
+                        model = os.getenv("QWEN_MODEL") or os.getenv("DASHSCOPE_MODEL") or "qwen-turbo"
+                        self.client = OpenAI(api_key=qwen_key, base_url=base_url)
+                        self.provider = "qwen"
+                        self.model = model
+                        logger.info("LLM-based intent parser initialized with Qwen")
+                    except Exception as e:
+                        logger.warning(f"Qwen initialization failed: {e}")
+
             # No LLM available
             if not self.provider:
                 logger.warning("No local Copilot provider or LLM API fallback found - falling back to keyword matching")
@@ -225,6 +245,18 @@ Respond with ONLY valid JSON, no explanation outside the JSON.
                 model=getattr(self, "model", None),
             )
 
+        elif self.provider == "qwen":
+            response = self.client.chat.completions.create(
+                model=getattr(self, "model", "qwen-turbo"),
+                messages=[
+                    {"role": "system", "content": "You are an expert hardware design assistant. Always respond with valid JSON only."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.3,
+                max_tokens=500,
+            )
+            result_text = response.choices[0].message.content.strip()
+
         else:
             raise ValueError("No LLM provider available")
 
@@ -292,11 +324,13 @@ def create_parser(use_llm: bool = None) -> LLMIntentParser:
             copilot_ready = False
         use_llm = bool(
             copilot_ready
-            or os.getenv('CEREBRAS_API_KEY')
-            or os.getenv('CEREBRAS_API_KEY_1')
-            or os.getenv('CEREBRAS_API_KEY_2')
-            or os.getenv('GROQ_API_KEY')
-            or os.getenv('GROQ_API_KEY_1')
+            or os.getenv("DASHSCOPE_API_KEY")
+            or os.getenv("QWEN_API_KEY")
+            or os.getenv("CEREBRAS_API_KEY")
+            or os.getenv("CEREBRAS_API_KEY_1")
+            or os.getenv("CEREBRAS_API_KEY_2")
+            or os.getenv("GROQ_API_KEY")
+            or os.getenv("GROQ_API_KEY_1")
         )
 
     return LLMIntentParser(use_llm=use_llm)

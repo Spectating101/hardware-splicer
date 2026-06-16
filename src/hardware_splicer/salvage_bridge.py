@@ -5,13 +5,19 @@ from typing import Any, Dict, List, Mapping
 from .build_compiler import ensure_circuit_import_path, resolve_build_id
 from .module_resolver import (
     coalesce_resolved_modules,
+    fill_salvage_gaps,
     infer_power_topology,
     merge_module_overrides,
     module_overrides_for_build,
     overrides_from_resource_plan,
     resolve_parts_to_modules,
+    resolve_parts_to_modules_with_llm,
     salvage_plan_input_from_intake,
 )
+from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick
+from .salvage_intelligence import analyze_salvage_gaps, build_bringup_card
+from .salvage_bom_estimate import build_salvage_bom_estimate
+from .firmware_scaffold import generate_firmware_from_salvage
 from .scratch_pipeline import (
     merge_goal_modules_with_inventory,
     module_ids_from_resolved,
@@ -22,47 +28,65 @@ from .scratch_pipeline import (
 SCHEMA_VERSION = "hardware_splicer.salvage_bridge.v1"
 
 
+def _keyword_build_id(
+    goal: str,
+    parts: List[Mapping[str, Any]],
+    *,
+    salvage_id: str = "",
+) -> str | None:
+    return keyword_build_id(goal, parts, salvage_id=salvage_id)
+
+
 def _pick_build_id(
     goal: str,
     parts: List[Mapping[str, Any]],
     splice_plan: Mapping[str, Any],
     diy_plan: Mapping[str, Any],
 ) -> str | None:
-    text = " ".join(
-        [goal]
-        + [str(part.get("name") or "") + " " + str(part.get("type") or "") for part in parts]
-    ).lower()
     salvage_id = str((splice_plan.get("target") or {}).get("recommended_build_id") or "")
     diy_id = str(((diy_plan.get("project_intent") or {}).get("mapped_build_id")) or "")
 
-    if any(word in text for word in ["soil", "water", "watering", "pump", "irrigation", "plant"]):
-        return "automatic_plant_watering"
-    if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor"]):
-        return "robot_drive_base"
-    if any(word in text for word in ["fan", "airflow", "vent", "blower", "fume"]):
-        return "usb_fume_extractor"
-    if any(
-        word in text
-        for word in ["tft", "oled", "display station", "room display", "room temp", "ili9341"]
-    ):
-        return "room_display_station"
-    if any(word in text for word in ["relay box", "smart relay", "relay module", "desk lamp"]):
-        return "smart_relay_box"
-    if any(
-        word in text
-        for word in ["sensor logger", "bme280", "log temperature", "environment sensor", "data logger"]
-    ):
-        return "sensor_logger"
-    if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal"]):
-        return "inspection_motion_fixture"
-    if any(word in text for word in ["gripper", "claw", "grab"]):
-        return "low_voltage_motor_test_jig"
+    from .integrations.llm_policy import offline_salvage_enabled
+    from .integrations.qwen_build_pick import call_qwen_build_pick, qwen_build_pick_enabled
+
+    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id)
+    llm_id: str | None = None
+    llm_confidence = 0.0
+
+    if qwen_build_pick_enabled() and not offline_salvage_enabled():
+        pick = call_qwen_build_pick(
+            goal=goal,
+            parts=parts,
+            planner_hints={
+                "diy_mapped_build_id": diy_id,
+                "splice_recommended_build_id": salvage_id,
+                "planners_agree": bool(diy_id and diy_id == salvage_id),
+                "keyword_build_hint": keyword_id,
+            },
+        )
+        if pick.get("ok") and pick.get("build_id"):
+            llm_id = str(pick["build_id"])
+            llm_confidence = float(pick.get("confidence") or 0.75)
+
+    reconciled = reconcile_build_pick(
+        llm_id,
+        keyword_id,
+        diy_build_id=diy_id,
+        splice_build_id=salvage_id,
+        llm_confidence=llm_confidence,
+    )
+    if reconciled:
+        return reconciled
+
+    if keyword_id:
+        return keyword_id
+    if diy_id and salvage_id and diy_id == salvage_id:
+        return diy_id
     if diy_id:
         return diy_id
     if salvage_id:
         return salvage_id
-    if salvage_id == "sensor_logger" and any("pump" in str(part.get("type") or "").lower() for part in parts):
-        return "automatic_plant_watering"
+
     return resolve_build_id(archetype="generic_mechatronics")
 
 
@@ -72,6 +96,7 @@ def build_intake_salvage_package(
     parts: List[Mapping[str, Any]],
     constraints: Mapping[str, Any] | None = None,
     project_name: str | None = None,
+    budget: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Run Circuit-AI salvage + DIY planners on intake-normalized parts."""
     ensure_circuit_import_path()
@@ -85,11 +110,44 @@ def build_intake_salvage_package(
         "inventory": parts,
         "constraints": dict(constraints or {}),
     }
+    constraints_map = dict(constraints or {})
     splice_plan = SalvageSplicePlanner().plan(payload)
     diy_plan = build_diy_project_engineering_plan(payload)
-    resolved_modules = resolve_parts_to_modules(parts)
+    resolved_modules, salvage_resolution = resolve_parts_to_modules_with_llm(parts, goal=goal)
+    resolved_modules = fill_salvage_gaps(resolved_modules, parts=parts)
     build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
-    constraints_map = dict(constraints or {})
+
+    from .integrations.qwen_workshop_review import (
+        apply_workshop_review,
+        call_qwen_workshop_review,
+        workshop_review_enabled,
+    )
+
+    workshop_review: Dict[str, Any] = {"ok": False, "skipped": True}
+    if workshop_review_enabled():
+        workshop_review = call_qwen_workshop_review(
+            goal=goal,
+            parts=parts,
+            resolved_modules=resolved_modules,
+            constraints=constraints_map,
+            recommended_build_id=build_id or None,
+        )
+        if workshop_review.get("ok"):
+            resolved_modules = fill_salvage_gaps(
+                apply_workshop_review(resolved_modules, workshop_review),
+                parts=parts,
+            )
+            suggested = str(workshop_review.get("suggested_build_id") or "").strip()
+            if suggested:
+                build_id = (
+                    reconcile_build_pick(
+                        suggested,
+                        keyword_build_id(goal, parts),
+                        splice_build_id=build_id,
+                    )
+                    or build_id
+                )
+    salvage_resolution["workshop_review"] = workshop_review
     strategy_mode = str(
         ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
         or constraints_map.get("strategy_mode")
@@ -101,7 +159,7 @@ def build_intake_salvage_package(
         resolved_modules,
         constrained=constrained,
     )
-    power_topology = infer_power_topology(parts, merged_modules)
+    power_topology = infer_power_topology(parts, merged_modules, constraints=constraints_map)
     merged_modules = coalesce_resolved_modules(parts, merged_modules, power_topology=power_topology)
     use_scratch = should_use_scratch_compose(
         goal=goal,
@@ -135,6 +193,33 @@ def build_intake_salvage_package(
         compose_from_inventory=use_scratch,
     )
     graph_mode = "scratch" if use_scratch else "catalog"
+    bringup_card = build_bringup_card(
+        goal=goal,
+        resolved_modules=merged_modules if use_scratch else resolved_modules,
+        module_overrides=module_overrides,
+        power_topology=power_topology,
+        graph_input=graph_input,
+    )
+    resolved_for_bom = merged_modules if use_scratch else resolved_modules
+    gap_analysis = analyze_salvage_gaps(
+        goal=goal,
+        parts=parts,
+        resolved_modules=resolved_for_bom,
+        constraints=constraints_map,
+        power_topology=power_topology,
+    )
+    bom_estimate = build_salvage_bom_estimate(
+        resolved_modules=resolved_for_bom,
+        gap_analysis=gap_analysis,
+        budget=budget,
+    )
+    module_id_list = [str(r.get("module_id") or "") for r in resolved_for_bom if r.get("module_id")]
+    firmware_scaffold = generate_firmware_from_salvage(
+        build_id=build_id or "salvage_build",
+        bringup_card=bringup_card,
+        module_ids=module_id_list,
+        goal=goal,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "splice_plan": splice_plan,
@@ -149,4 +234,9 @@ def build_intake_salvage_package(
         "recommended_build_id": build_id or None,
         "verdict": splice_plan.get("verdict"),
         "planning_confidence": float(splice_plan.get("confidence") or 0.0),
+        "salvage_resolution": salvage_resolution,
+        "gap_analysis": gap_analysis,
+        "bringup_card": bringup_card,
+        "bom_estimate": bom_estimate,
+        "firmware_scaffold": firmware_scaffold,
     }

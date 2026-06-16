@@ -5,26 +5,25 @@ from __future__ import annotations
 import json
 import os
 import re
-import urllib.error
-import urllib.request
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, Mapping
 
 from ..netlist import run_erc
 from ..netlist.ir import CircuitNetlist
 from ..pcb.module_registry import find_module
-from ..env_local import load_env_local
-from ..vision_evidence_assistant import DEFAULT_QWEN_BASE_URL, _provider_api_key
+from .catalog_context import catalog_context_for_goal
+from .qwen_model_policy import qwen_text_model_rotation
+from .qwen_text_client import call_qwen_chat, qwen_configured
 
-DEFAULT_QWEN_TEXT_MODEL = os.environ.get("HARDWARE_SPLICER_QWEN_TEXT_MODEL", "qwen-turbo")
-QWEN_TEXT_MODEL_ROTATION = ("qwen-turbo", "qwen3-vl-flash", "qwen-plus")
+# Back-compat
+QWEN_TEXT_MODEL_ROTATION = qwen_text_model_rotation()
 
-_MODULE_CATALOG_HINT = """
-Prefer these module_id values when they fit (breakout modules, not bare ICs):
-usb-power-5v, esp32-devkit, arduino-nano, rpi-pico, dht22, bme280, soil_moisture,
-ssd1306-128x64, relay-1ch-5v, mosfet-irlz44n, buck-mp1584, level-shifter-4ch,
-hc-sr04, ch340-usb-ttl, fan-5v, mini-pump-5v, sg90, l298n, mpu6050
-Use footprint = module_id when unsure. Pin names must match the module (e.g. DHT22 DATA, ESP32 GPIO4).
-"""
+
+def _catalog_hint_for_goal(goal: str) -> str:
+    return catalog_context_for_goal(goal, max_entries=100)
+
+
+# Back-compat alias for imports; prefer _catalog_hint_for_goal(goal).
+_MODULE_CATALOG_HINT = ""
 
 
 def _extract_json_object(text: str) -> Dict[str, Any]:
@@ -58,9 +57,7 @@ def call_qwen_netlist_compose(
     timeout_s: int = 90,
 ) -> Dict[str, Any]:
     """Ask Qwen for a circuit netlist IR JSON. Requires DASHSCOPE_API_KEY or QWEN_API_KEY."""
-    load_env_local()
-    api_key = _provider_api_key({"provider": "qwen"}, "qwen")
-    if not api_key:
+    if not qwen_configured():
         return {
             "ok": False,
             "error": "missing_api_key",
@@ -86,61 +83,44 @@ Rules:
 - At least 2 components and 2 nets; every net needs >=2 pins.
 - If the design is USB or 5V powered, include usb-power-5v as U1 and wire V+/GND to loads.
 - Name power nets GND, +5V, +3V3, SDA, SCL, DATA where appropriate.
-- Only use module_id values from the catalog hint unless truly custom.
-{_MODULE_CATALOG_HINT}
+- Only use module_id values from the catalog below unless truly custom.
+{_catalog_hint_for_goal(goal)}
 """
 
-    payload_base = {
-        "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0,
-        "response_format": {"type": "json_object"},
-    }
-    base_url = os.environ.get("HARDWARE_SPLICER_QWEN_BASE_URL") or os.environ.get("QWEN_BASE_URL") or DEFAULT_QWEN_BASE_URL
-    base_url = str(base_url).rstrip("/")
-    models = [model] if model else list(QWEN_TEXT_MODEL_ROTATION)
-    body: Dict[str, Any] = {}
-    last_error: Dict[str, Any] = {}
-    selected_model = models[0]
-    for candidate in models:
-        payload = {**payload_base, "model": candidate}
-        request = urllib.request.Request(
-            f"{base_url}/chat/completions",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            method="POST",
-        )
-        try:
-            with urllib.request.urlopen(request, timeout=timeout_s) as response:
-                body = json.loads(response.read().decode("utf-8"))
-                selected_model = candidate
-                break
-        except urllib.error.HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")[:800]
-            last_error = {"ok": False, "error": "qwen_http_error", "status": exc.code, "detail": detail}
-            if exc.code in (403, 429) and candidate != models[-1]:
-                continue
-            return last_error
-        except Exception as exc:
-            return {"ok": False, "error": "qwen_request_failed", "message": str(exc)}
-    else:
-        return last_error or {"ok": False, "error": "qwen_http_error"}
+    response = call_qwen_chat(
+        prompt,
+        model=model,
+        stage="compose",
+        json_mode=True,
+        timeout_s=timeout_s,
+        system="Emit hardware_splicer.netlist.v1 JSON only.",
+    )
+    if not response.get("ok"):
+        return response
 
-    content = str((body.get("choices") or [{}])[0].get("message", {}).get("content") or "")
+    content = str(response.get("content") or "")
     try:
         netlist_dict = _normalize_netlist_payload(_extract_json_object(content), source="qwen_compose")
         netlist = CircuitNetlist.from_dict(netlist_dict)
     except Exception as exc:
-        return {"ok": False, "error": "invalid_netlist_json", "message": str(exc), "raw_excerpt": content[:1200]}
+        return {
+            "ok": False,
+            "error": "invalid_netlist_json",
+            "message": str(exc),
+            "raw_excerpt": content[:1200],
+            "model_rotation": response.get("model_rotation"),
+        }
 
     erc = run_erc(netlist)
     return {
         "ok": bool(erc.get("pass")),
         "provider": "qwen",
-        "model": body.get("model") or selected_model,
+        "model": response.get("model"),
         "netlist": netlist.to_dict(),
         "erc": erc,
-        "usage": body.get("usage"),
+        "usage": response.get("usage"),
         "module_ids": [c.module_id for c in netlist.components if c.module_id],
+        "model_rotation": response.get("model_rotation"),
     }
 
 
@@ -151,16 +131,46 @@ def compose_netlist_from_goal(
     allow_qwen: bool = True,
 ) -> Dict[str, Any]:
     """Deterministic module fallback, optional Qwen text when keyed."""
-    if allow_qwen and os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", "1").strip().lower() not in (
+    from .llm_policy import offline_compose_enabled
+
+    qwen_disabled = os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", "1").strip().lower() in (
         "0",
         "false",
         "no",
-    ):
+    )
+    offline_ok = not allow_qwen or qwen_disabled or offline_compose_enabled()
+
+    if allow_qwen and not qwen_disabled:
         qwen = call_qwen_netlist_compose(goal, constraints=constraints)
         if qwen.get("ok"):
             return {**qwen, "compose_mode": "qwen_netlist"}
         if qwen.get("error") != "missing_api_key":
-            return {**qwen, "compose_mode": "qwen_netlist_failed"}
+            from .qwen_module_pick import call_qwen_module_pick, qwen_module_pick_enabled
+
+            if qwen_module_pick_enabled():
+                picked = call_qwen_module_pick(goal, constraints=constraints)
+                if picked.get("ok") and picked.get("module_ids"):
+                    from ..auto_wire import compose_build_graph_from_module_ids
+                    from ..netlist.lower import build_graph_to_netlist
+
+                    graph = compose_build_graph_from_module_ids(picked["module_ids"])["graph"]
+                    netlist = build_graph_to_netlist(graph, source="qwen_module_pick")
+                    erc = run_erc(netlist)
+                    if erc.get("pass"):
+                        return {
+                            "ok": True,
+                            "compose_mode": "qwen_module_pick",
+                            "netlist": netlist.to_dict(),
+                            "erc": erc,
+                            "module_ids": picked["module_ids"],
+                            "usage": picked.get("usage"),
+                            "reasoning": picked.get("reasoning"),
+                        }
+            if not offline_ok:
+                return {**qwen, "compose_mode": "qwen_netlist_failed"}
+
+    if not offline_ok:
+        return {"ok": False, "error": "no_llm_compose", "compose_mode": "llm_required"}
 
     from ..module_picker import pick_modules_for_goal
     from ..auto_wire import compose_build_graph_from_module_ids
