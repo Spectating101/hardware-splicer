@@ -131,7 +131,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 3.5 | NL-only intake routes to scratch (no empty graph) | PASS |
 | 3.6 | Named kits stay on recipes (no silent scratch) | PASS |
 | 3.7 | Deterministic compose retries | PASS |
-| 3.8 | Optional LLM retry (`HARDWARE_SPLICER_LLM_COMPOSE`) | PASS |
+| 3.8 | Optional LLM retry (`HARDWARE_SPLICER_QWEN_COMPOSE_RETRY`) | PASS |
 | 3.9 | Structured API failure payloads | PASS (`compose_failure`, HTTP 200 prove failures) |
 | 3.10 | Canvas partial-add (`compose_build_graph_from_canvas_nodes`) tested | PASS |
 
@@ -153,7 +153,7 @@ See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 | 5.1 | `build_ready` ⇒ `drc_pass` + no electrical errors | PASS |
 | 5.2 | Empty graph never succeeds | PASS |
 | 5.3 | 3.3 V / 5 V safety on wired graphs | PASS |
-| 5.4 | Golden geometry snapshots (≥3 graphs) | OPEN |
+| 5.4 | Golden geometry snapshots (≥3 graphs) | PASS (`make verify-geometry`, 3 catalog builds) |
 | 5.5 | Failure casefiles (graph, quality, intake) | PASS (ERC/DRC + scratch/intake casefiles) |
 | 5.6 | `testing_mode` off by default in production | PASS (`engine_doctor` + strict audit fail when set) |
 

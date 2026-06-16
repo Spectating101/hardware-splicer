@@ -181,6 +181,20 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_inspect_fab",
+            description=(
+                "Inspect fabrication package on disk (PCB, BOM, Gerbers) without recompiling. "
+                "Pass a catalog build dir or splice output dir."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string", "description": "Compile or splice output directory"},
+                },
+                "required": ["build_dir"],
+            },
+        ),
+        Tool(
             name="hs_verify_engine",
             description=(
                 "Compile catalog builds headlessly and check KiCad DRC errors=0. "
@@ -268,6 +282,8 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 allow_qwen=bool(args.get("allow_qwen", True)),
             )
         )
+    if name == "hs_inspect_fab":
+        return _tool_result(sdk.inspect_fab_build_dir(str(args.get("build_dir") or "")))
     if name == "hs_verify_engine":
         return _tool_result(
             sdk.verify_engine(

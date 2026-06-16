@@ -27,7 +27,6 @@ from hardware_splicer.build_compiler import CATALOG_BUILD_IDS
 from hardware_splicer.design_quality import build_design_quality_gate
 from hardware_splicer.runtime import runtime_status
 from hardware_splicer.validation import validate_compile_spec, validation_errors
-from hardware_splicer.fabrication_inspection import inspect_fabrication_package
 from hardware_splicer.vision_usage_ledger import usage_summary as vision_usage_summary
 from hardware_splicer.text_usage_ledger import usage_summary as text_usage_summary
 from hardware_splicer.vision_evidence_assistant import _env_key_present, DEFAULT_QWEN_MODEL
@@ -184,27 +183,15 @@ def _apply_simulate_env(args: argparse.Namespace) -> None:
 def _run_netlist_compile(args: argparse.Namespace) -> int:
     _apply_simulate_env(args)
     from hardware_splicer.build_compiler import compile_from_netlist
-    from hardware_splicer.integrations.circuit_json_import import circuit_json_to_netlist
-    from hardware_splicer.netlist.import_kicad import parse_kicad_netlist
-    from hardware_splicer.netlist.ir import CircuitNetlist
+    from hardware_splicer.netlist.ingest import load_netlist_file
 
     source = Path(args.netlist)
-    if not source.is_file():
-        print(f"error: netlist file not found: {source}", file=sys.stderr)
+    netlist_format = "kicad_netlist" if args.kicad_netlist else ("circuit_json" if args.circuit_json else "auto")
+    try:
+        netlist = load_netlist_file(source, netlist_format=netlist_format)  # type: ignore[arg-type]
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
         return 2
-
-    text = source.read_text(encoding="utf-8")
-    if args.kicad_netlist or source.suffix.lower() == ".net":
-        netlist = parse_kicad_netlist(text)
-    elif args.circuit_json:
-        docs = json.loads(text)
-        if not isinstance(docs, list):
-            print("error: circuit-json input must be a JSON array", file=sys.stderr)
-            return 2
-        netlist = circuit_json_to_netlist(docs, source=str(source))
-    else:
-        payload = json.loads(text)
-        netlist = CircuitNetlist.from_dict(payload)
 
     build_id = str(args.build_id or "generic_low_voltage_build").strip()
     result = compile_from_netlist(
@@ -642,22 +629,9 @@ def _run_serve(args: argparse.Namespace) -> int:
 
 
 def _run_inspect_fab(args: argparse.Namespace) -> int:
-    build_dir = Path(args.build_dir)
-    compilation_dir = build_dir / "build_compilation" if (build_dir / "build_compilation").is_dir() else build_dir
-    compilation_path = compilation_dir / "BUILD_COMPILATION.json"
-    if not compilation_path.is_file():
-        compilation_path = build_dir / "BUILD_COMPILATION.json"
-    build_compilation = {}
-    if compilation_path.is_file():
-        build_compilation = json.loads(compilation_path.read_text(encoding="utf-8"))
-    pcb_candidates = sorted(compilation_dir.glob("*.kicad_pcb"))
-    artifacts = {
-        "build_kicad_pcb": str(pcb_candidates[0]) if pcb_candidates else str(compilation_dir / "build.kicad_pcb"),
-        "fab_package_zip": str(compilation_dir / "fab_package.zip") if (compilation_dir / "fab_package.zip").is_file() else str(build_dir / "fab_package.zip"),
-        "bom": str(compilation_dir / "BOM.json"),
-        "out_dir": str(build_dir),
-    }
-    result = inspect_fabrication_package(build_compilation=build_compilation, artifacts=artifacts)
+    from hardware_splicer.sdk import inspect_fab_build_dir
+
+    result = inspect_fab_build_dir(args.build_dir)
     if args.json:
         print(json.dumps(result, indent=2))
     else:

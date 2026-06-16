@@ -56,3 +56,31 @@ def offline_phrase_expand_enabled() -> bool:
     if _truthy("HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND"):
         return True
     return offline_compose_enabled()
+
+
+def compose_retry_enabled() -> bool:
+    """Optional Qwen module-pick retries during scratch compose."""
+    if _falsy("HARDWARE_SPLICER_QWEN_COMPOSE_RETRY"):
+        return False
+    return qwen_llm_first()
+
+
+def llm_policy_summary() -> dict[str, object]:
+    """Single source of truth for compose/salvage LLM env knobs."""
+    return {
+        "offline_compose": offline_compose_enabled(),
+        "offline_salvage": offline_salvage_enabled(),
+        "offline_phrase_expand": offline_phrase_expand_enabled(),
+        "qwen_llm_first": qwen_llm_first(),
+        "compose_retry": compose_retry_enabled(),
+        "llm_configured": _llm_configured(),
+        "qwen_configured": _qwen_configured(),
+        "env": {
+            "HARDWARE_SPLICER_OFFLINE_COMPOSE": os.environ.get("HARDWARE_SPLICER_OFFLINE_COMPOSE", ""),
+            "HARDWARE_SPLICER_OFFLINE_SALVAGE": os.environ.get("HARDWARE_SPLICER_OFFLINE_SALVAGE", ""),
+            "HARDWARE_SPLICER_LLM_FIRST": os.environ.get("HARDWARE_SPLICER_LLM_FIRST", ""),
+            "HARDWARE_SPLICER_QWEN_COMPOSE": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", ""),
+            "HARDWARE_SPLICER_QWEN_COMPOSE_RETRY": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE_RETRY", ""),
+            "HARDWARE_SPLICER_QWEN_SALVAGE": os.environ.get("HARDWARE_SPLICER_QWEN_SALVAGE", ""),
+        },
+    }

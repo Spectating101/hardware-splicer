@@ -1,0 +1,55 @@
+{
+  "schema_version": "hardware_splicer.geometry_snapshot.v1",
+  "build_id": "automatic_plant_watering",
+  "module_count": 5,
+  "wire_count": 12,
+  "node_positions": [
+    {
+      "id": "n1",
+      "module_id": "dc-barrel-12v",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n2",
+      "module_id": "esp32-devkit",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n3",
+      "module_id": "soil_moisture",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n4",
+      "module_id": "buck-mp1584",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n5",
+      "module_id": "mosfet-irlz44n",
+      "x": 0.0,
+      "y": 0.0
+    }
+  ],
+  "board_outline": {
+    "width_mm": 210.04999999999998,
+    "height_mm": 89.05000000000001,
+    "bbox_mm": {
+      "min_x": -0.8250000000000001,
+      "min_y": -0.8250000000000001,
+      "max_x": 209.225,
+      "max_y": 88.22500000000001,
+      "width": 210.04999999999998,
+      "height": 89.05000000000001
+    },
+    "footprint_count": 5,
+    "trace_segments": 99,
+    "via_count": 90
+  },
+  "drc_pass": true,
+  "kicad_drc_errors": 0
+}

@@ -106,6 +106,24 @@ class ComposeCanvasRequest(BaseModel):
     export_gerber: bool = True
 
 
+class NetlistCompileRequest(BaseModel):
+    netlist: Dict[str, Any] | None = None
+    circuit_json: list[Dict[str, Any]] | None = None
+    kicad_netlist_text: str | None = None
+    build_id: str = "generic_low_voltage_build"
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = True
+
+
+class ComposeJobRequest(ComposeRequest):
+    pass
+
+
+class SpliceBuildJobRequest(SpliceAndBuildRequest):
+    pass
+
+
 class EngineVerifyRequest(BaseModel):
     build_ids: list[str] | None = None
     max_kicad_drc_warnings: int = 500
@@ -155,6 +173,19 @@ def _compose_constraints(request: ComposeRequest | ComposeCanvasRequest) -> Dict
     else:
         body.setdefault("graph_mode", "scratch")
     return body
+
+
+def _netlist_from_request(request: NetlistCompileRequest):
+    from .netlist.import_kicad import parse_kicad_netlist
+    from .netlist.ingest import load_netlist_payload
+
+    if request.kicad_netlist_text:
+        return parse_kicad_netlist(request.kicad_netlist_text)
+    if request.circuit_json is not None:
+        return load_netlist_payload({"documents": request.circuit_json}, netlist_format="circuit_json")
+    if request.netlist is not None:
+        return load_netlist_payload(request.netlist, netlist_format="ir_json")
+    raise ValueError("netlist, circuit_json, or kicad_netlist_text is required")
 
 
 def _slug(value: str) -> str:
@@ -475,6 +506,41 @@ def create_app() -> FastAPI:
         )
         return compose(wrapped)
 
+    @app.post("/v1/netlist-compile")
+    def netlist_compile(request: NetlistCompileRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "netlist" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            netlist = _netlist_from_request(request)
+            payload = compose_dispatch(
+                out_dir=str(resolved),
+                netlist=netlist.to_dict(),
+                export_gerber=bool(request.export_gerber),
+                allow_llm_first=False,
+                request_id=request_id,
+                build_id=request.build_id,
+            )
+            return _attach_inline_graph(payload)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "netlist_compile_error", str(exc), request_id=request_id) from exc
+
     @app.post("/v1/engine-verify")
     def engine_verify(request: EngineVerifyRequest) -> Dict[str, Any]:
         """Compile catalog builds headlessly (no FreeRouting) for agent/CI verify backends."""
@@ -587,6 +653,92 @@ def create_app() -> FastAPI:
                 output_dir=out_dir,
                 start_splicer=bool(request.start_splicer),
                 splicer_port=int(request.splicer_port or 0),
+            )
+            status_code = 200 if job.status != "queued" else 202
+            return JSONResponse(status_code=status_code, content=job.to_dict(include_result=False))
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "job_submit_error", str(exc)) from exc
+
+    @app.post("/v1/jobs/compose", status_code=202)
+    def submit_compose_job(request: ComposeJobRequest) -> Dict[str, Any]:
+        try:
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "compose" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            constraints = _compose_constraints(request)
+            material_mode = request.material_mode or resolve_material_mode(
+                constraints=constraints,
+                salvage_mode=bool(request.salvage_mode),
+            )
+            payload = {
+                "phrase": request.phrase,
+                "module_ids": request.module_ids,
+                "canvas_nodes": request.canvas_nodes,
+                "canvas_wires": request.canvas_wires,
+                "netlist": request.netlist,
+                "constraints": constraints,
+                "material_mode": material_mode,
+                "salvage_mode": bool(request.salvage_mode),
+                "export_gerber": bool(request.export_gerber),
+                "wire_only": bool(request.wire_only),
+            }
+            project_name = request.phrase or "-".join(request.module_ids or []) or "compose"
+            job = job_backend.submit_task(
+                job_id=request_id,
+                request_id=request_id,
+                project_name=_slug(project_name)[:80],
+                output_dir=resolved,
+                job_type="compose",
+                payload=payload,
+            )
+            status_code = 200 if job.status != "queued" else 202
+            return JSONResponse(status_code=status_code, content=job.to_dict(include_result=False))
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "job_submit_error", str(exc)) from exc
+
+    @app.post("/v1/jobs/splice-build", status_code=202)
+    def submit_splice_build_job(request: SpliceBuildJobRequest) -> Dict[str, Any]:
+        try:
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "splice" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            intake = dict(request.intake)
+            project_name = str(intake.get("project_name") or intake.get("goal") or "splice-build")
+            job = job_backend.submit_task(
+                job_id=request_id,
+                request_id=request_id,
+                project_name=_slug(project_name)[:80],
+                output_dir=resolved,
+                job_type="splice_build",
+                payload={"intake": intake, "export_gerber": bool(request.export_gerber)},
             )
             status_code = 200 if job.status != "queued" else 202
             return JSONResponse(status_code=status_code, content=job.to_dict(include_result=False))

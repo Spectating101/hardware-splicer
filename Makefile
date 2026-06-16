@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -75,6 +75,9 @@ verify-casefiles:
 verify-tier-c:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest tests/test_tier_c_delivery.py -q
+
+verify-geometry:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/verify_geometry.py
 
 salvage-demo:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 PYTHONPATH=src $(PYTHON) scripts/salvage_bringup_demo.py --out /tmp/hs_salvage_bringup

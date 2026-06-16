@@ -337,7 +337,11 @@ class JobBackend:
         start_splicer: bool = True,
         splicer_port: int = 0,
     ) -> JobRecord:
-        options = {"start_splicer": bool(start_splicer), "splicer_port": int(splicer_port or 0)}
+        options = {
+            "job_type": "compile_bundle",
+            "start_splicer": bool(start_splicer),
+            "splicer_port": int(splicer_port or 0),
+        }
         job = self.store.create_job(
             job_id=job_id,
             request_id=request_id,
@@ -345,6 +349,29 @@ class JobBackend:
             output_dir=str(output_dir),
             spec=spec.to_dict(),
             options=options,
+        )
+        self.start()
+        return job
+
+    def submit_task(
+        self,
+        *,
+        job_id: str,
+        request_id: str,
+        project_name: str,
+        output_dir: str | Path,
+        job_type: str,
+        payload: Dict[str, Any],
+        options: Dict[str, Any] | None = None,
+    ) -> JobRecord:
+        task_options = {"job_type": job_type, "payload": payload, **(options or {})}
+        job = self.store.create_job(
+            job_id=job_id,
+            request_id=request_id,
+            project_name=project_name,
+            output_dir=str(output_dir),
+            spec={"project_name": project_name, "job_type": job_type},
+            options=task_options,
         )
         self.start()
         return job
@@ -367,7 +394,34 @@ class JobBackend:
             self._run_job(job)
 
     def _run_job(self, job: JobRecord) -> None:
+        job_type = str(job.options.get("job_type") or "compile_bundle")
         try:
+            if job_type == "compose":
+                from .compose_dispatch import compose_dispatch
+
+                payload = dict(job.options.get("payload") or {})
+                result = compose_dispatch(
+                    out_dir=job.output_dir,
+                    allow_llm_first=False,
+                    request_id=job.request_id,
+                    **payload,
+                )
+                self.store.complete_job(job.job_id, result)
+                return
+            if job_type == "splice_build":
+                from .project_intake import splice_and_build_from_intake
+
+                payload = dict(job.options.get("payload") or {})
+                intake = payload.get("intake") or {}
+                result = splice_and_build_from_intake(
+                    intake,
+                    out_dir=job.output_dir,
+                    export_gerber=bool(payload.get("export_gerber")),
+                    request_id=job.request_id,
+                )
+                self.store.complete_job(job.job_id, result)
+                return
+
             spec = HardwareCompileSpec.from_dict(job.spec)
             result = compile_hardware_bundle(
                 spec,

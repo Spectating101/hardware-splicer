@@ -7,6 +7,7 @@ on:
       - "scripts/**"
       - "tests/**"
       - "examples/netlist_fixtures/**"
+      - "examples/geometry_snapshots/**"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
       - "Makefile"
@@ -18,6 +19,7 @@ on:
       - "scripts/**"
       - "tests/**"
       - "examples/netlist_fixtures/**"
+      - "examples/geometry_snapshots/**"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
       - "Makefile"
@@ -71,10 +73,17 @@ jobs:
         run: |
           source .venv/bin/activate
           make verify-tier-c
-      - name: Compose dispatch + failure payload tests
+      - name: Geometry snapshot verify
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_JLC_ENRICH: "0"
         run: |
           source .venv/bin/activate
-          PYTHONPATH=src python -m pytest tests/test_compose_dispatch.py tests/test_compose_failure.py -q
+          make verify-geometry
+      - name: Sprint C integration tests
+        run: |
+          source .venv/bin/activate
+          PYTHONPATH=src python -m pytest tests/test_sprint_c.py tests/test_compose_jobs.py tests/test_compose_dispatch.py tests/test_compose_failure.py -q
       - name: Compile casefile gate
         run: |
           source .venv/bin/activate

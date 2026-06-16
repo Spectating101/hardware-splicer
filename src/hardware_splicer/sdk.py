@@ -21,6 +21,7 @@ from .module_picker import pick_modules_for_goal
 from .module_resolver import infer_power_topology, resolve_parts_to_modules_with_llm
 from .env_local import load_env_local
 from .runtime import ROOT, runtime_status, scratch_path
+from .integrations.llm_policy import llm_policy_summary
 from .testing_mode import testing_mode_enabled
 from .salvage_bridge import build_intake_salvage_package
 from .integrations.qwen_netlist_compose import compose_netlist_from_goal
@@ -91,6 +92,7 @@ def engine_doctor() -> Dict[str, Any]:
             "jlc_enrich": os.environ.get("HARDWARE_SPLICER_JLC_ENRICH", "0"),
             "drc_fix_loop": os.environ.get("HARDWARE_SPLICER_DRC_FIX_LOOP", "1"),
         },
+        "llm_policy": llm_policy_summary(),
         "capability_boundary": (
             "KiCad ERC/DRC is external truth. Default copper is cosmetic preview, not autorouted. "
             "Salvage and scratch share one engine; material_mode only changes the parts budget."
@@ -347,6 +349,43 @@ def compile_netlist(
     }
 
 
+def inspect_fab_build_dir(build_dir: str | Path) -> Dict[str, Any]:
+    """Inspect fabrication package on disk without recompiling."""
+    from .fabrication_inspection import inspect_fabrication_package
+
+    root = Path(build_dir)
+    compilation_dir = root / "build_compilation" if (root / "build_compilation").is_dir() else root
+    compilation_path = compilation_dir / "BUILD_COMPILATION.json"
+    if not compilation_path.is_file():
+        compilation_path = root / "BUILD_COMPILATION.json"
+    build_compilation: Dict[str, Any] = {}
+    if compilation_path.is_file():
+        build_compilation = json.loads(compilation_path.read_text(encoding="utf-8"))
+    if not build_compilation and (compilation_dir / "DESIGN_QUALITY.json").is_file():
+        quality = json.loads((compilation_dir / "DESIGN_QUALITY.json").read_text(encoding="utf-8"))
+        build_compilation = {
+            "design_quality": quality,
+            "build_graph_file": str(compilation_dir / "build_graph.json"),
+            "kicad_pcb_file": str(compilation_dir / "main_ctrl_build.kicad_pcb"),
+            "out_dir": str(root),
+        }
+    pcb_candidates = sorted(compilation_dir.glob("*.kicad_pcb"))
+    artifacts = {
+        "build_kicad_pcb": str(pcb_candidates[0]) if pcb_candidates else str(compilation_dir / "main_ctrl_build.kicad_pcb"),
+        "fab_package_zip": str(compilation_dir / "fab_package.zip")
+        if (compilation_dir / "fab_package.zip").is_file()
+        else str(root / "fab_package.zip"),
+        "bom": str(compilation_dir / "BOM.json"),
+        "out_dir": str(root),
+    }
+    inspection = inspect_fabrication_package(build_compilation=build_compilation, artifacts=artifacts)
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "build_dir": str(root),
+        **inspection,
+    }
+
+
 def sdk_info() -> Dict[str, Any]:
     """Capability card for agents choosing tools."""
     return {
@@ -378,6 +417,7 @@ def sdk_info() -> Dict[str, Any]:
             "HARDWARE_SPLICER_JLC_ENRICH": "0",
             "HARDWARE_SPLICER_DRC_FIX_LOOP": "1",
         },
+        "llm_policy": llm_policy_summary(),
         "http_api": "uvicorn hardware_splicer.api:app (see scripts/hardware_splicer.py serve)",
         "mcp": "python -m hardware_splicer.mcp_server",
     }

@@ -1,0 +1,43 @@
+{
+  "schema_version": "hardware_splicer.geometry_snapshot.v1",
+  "build_id": "sensor_logger",
+  "module_count": 3,
+  "wire_count": 6,
+  "node_positions": [
+    {
+      "id": "n1",
+      "module_id": "usb-power-5v",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n2",
+      "module_id": "esp32-devkit",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n3",
+      "module_id": "bme280",
+      "x": 0.0,
+      "y": 0.0
+    }
+  ],
+  "board_outline": {
+    "width_mm": 114.05000000000001,
+    "height_mm": 81.05000000000001,
+    "bbox_mm": {
+      "min_x": -0.8250000000000001,
+      "min_y": -0.8250000000000001,
+      "max_x": 113.22500000000001,
+      "max_y": 80.22500000000001,
+      "width": 114.05000000000001,
+      "height": 81.05000000000001
+    },
+    "footprint_count": 3,
+    "trace_segments": 59,
+    "via_count": 55
+  },
+  "drc_pass": true,
+  "kicad_drc_errors": 0
+}

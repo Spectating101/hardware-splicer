@@ -207,10 +207,6 @@ def _deterministic_fixup(
     return list(dict.fromkeys(ids))
 
 
-def _llm_enabled() -> bool:
-    return os.environ.get("HARDWARE_SPLICER_LLM_COMPOSE", "").strip().lower() in {"1", "true", "yes"}
-
-
 def _write_scratch_failure_casefile(
     *,
     out_dir: str | Path,
@@ -237,10 +233,10 @@ def _write_scratch_failure_casefile(
 
 
 def _llm_adjust_modules(goal: str, module_ids: List[str], quality: Mapping[str, Any]) -> Optional[List[str]]:
-    from .integrations.llm_policy import qwen_llm_first
+    from .integrations.llm_policy import compose_retry_enabled, qwen_llm_first
     from .integrations.qwen_module_pick import call_qwen_module_pick
 
-    if not qwen_llm_first():
+    if not compose_retry_enabled() or not qwen_llm_first():
         return None
 
     messages = "; ".join(str(m) for m in quality.get("safety_error_messages") or [])

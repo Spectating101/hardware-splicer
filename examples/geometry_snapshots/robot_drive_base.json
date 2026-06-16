@@ -1,0 +1,55 @@
+{
+  "schema_version": "hardware_splicer.geometry_snapshot.v1",
+  "build_id": "robot_drive_base",
+  "module_count": 5,
+  "wire_count": 9,
+  "node_positions": [
+    {
+      "id": "n1",
+      "module_id": "dc-barrel-12v",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n2",
+      "module_id": "usb-power-5v",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n3",
+      "module_id": "arduino-nano",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n4",
+      "module_id": "buck-mp1584",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n5",
+      "module_id": "l298n",
+      "x": 0.0,
+      "y": 0.0
+    }
+  ],
+  "board_outline": {
+    "width_mm": 202.48,
+    "height_mm": 83.05000000000001,
+    "bbox_mm": {
+      "min_x": -4.255000000000001,
+      "min_y": -0.8250000000000001,
+      "max_x": 198.225,
+      "max_y": 82.22500000000001,
+      "width": 202.48,
+      "height": 83.05000000000001
+    },
+    "footprint_count": 5,
+    "trace_segments": 84,
+    "via_count": 80
+  },
+  "drc_pass": true,
+  "kicad_drc_errors": 0
+}

@@ -55,6 +55,7 @@ def compose_dispatch(
     wire_only: bool = False,
     allow_llm_first: bool = False,
     request_id: str | None = None,
+    build_id: str | None = None,
 ) -> Dict[str, Any]:
     """Route compose requests through one implementation (bootstrap default; LLM-first opt-in)."""
     constraints_map = dict(constraints or {})
@@ -111,7 +112,12 @@ def compose_dispatch(
         )
 
     if netlist is not None:
-        result = compile_from_netlist(netlist, target, export_gerber=export_gerber)
+        result = compile_from_netlist(
+            netlist,
+            target,
+            build_id=build_id or "generic_low_voltage_build",
+            export_gerber=export_gerber,
+        )
         quality = result.design_quality or {}
         return _finalize_payload(
             {
