@@ -18,6 +18,7 @@ from hardware_splicer.build_compiler import CATALOG_BUILD_IDS, compile_catalog_b
 from hardware_splicer.functional_delivery import build_functional_delivery_score  # noqa: E402
 from hardware_splicer.project_intake import load_project_intake, splice_and_build_from_intake  # noqa: E402
 from hardware_splicer.runtime import scratch_path  # noqa: E402
+from hardware_splicer.testing_mode import testing_mode_enabled  # noqa: E402
 
 
 def _export_gerber_enabled() -> bool:
@@ -90,6 +91,7 @@ def main() -> int:
         "schema_version": "hardware_splicer.functional_delivery_audit.v1",
         "export_gerber": export_gerber,
         "strict": strict,
+        "testing_mode": testing_mode_enabled(),
         "row_count": len(rows),
         "average_score": round(sum(float(r["functional_delivery_score"]) for r in rows) / max(len(rows), 1), 1),
         "below_70_count": len(below_70),
@@ -116,6 +118,9 @@ def main() -> int:
     if below_70:
         return 1
     if strict and not_honest:
+        return 1
+    if strict and testing_mode_enabled():
+        print(json.dumps({"testing_mode": True, "error": "testing_mode_enabled_in_strict_audit"}, indent=2))
         return 1
     return 0
 

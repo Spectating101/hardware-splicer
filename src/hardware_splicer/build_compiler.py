@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Mapping, Optional
 from .catalog import CATALOG_BUILD_IDS
 from .compile_stages import run_artifact_stage, run_graph_stage_node
 from .design_quality import build_design_quality_gate
+from .fabrication_inspection import inspect_fabrication_package
+from .functional_delivery import build_functional_delivery_score
 from .netlist.ir import CircuitNetlist
 from .netlist.lower import netlist_to_build_graph
 from .runtime import ROOT
@@ -78,7 +80,7 @@ def compile_catalog_build(
 
     graph_stage = run_graph_stage_node(build_id, build_dir, splice_plan=splice_plan)
     if graph_stage.error and not graph_stage.paths.build_graph:
-        return BuildCompileResult(
+        result = BuildCompileResult(
             ok=False,
             build_id=build_id,
             out_dir=target,
@@ -88,6 +90,8 @@ def compile_catalog_build(
             design_quality_file=str(build_dir / "DESIGN_QUALITY.json"),
             error=graph_stage.error,
         )
+        write_fabrication_artifacts(target, result.to_dict())
+        return result
 
     artifact = run_artifact_stage(
         build_id=build_id,
@@ -109,7 +113,7 @@ def compile_catalog_build(
         quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
     ok = graph_stage.ok
-    return BuildCompileResult(
+    result = BuildCompileResult(
         ok=ok,
         build_id=build_id,
         out_dir=target,
@@ -122,6 +126,8 @@ def compile_catalog_build(
         gerber_package_dir=gerber_dir,
         error=None if ok else _summarize_blockers(quality),
     )
+    write_fabrication_artifacts(target, result.to_dict())
+    return result
 
 
 def compile_from_netlist(
@@ -161,7 +167,7 @@ def compile_from_netlist(
         quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
     ok = graph_stage.ok
-    return BuildCompileResult(
+    result = BuildCompileResult(
         ok=ok,
         build_id=build_id,
         out_dir=target,
@@ -174,6 +180,8 @@ def compile_from_netlist(
         gerber_package_dir=artifact["gerber_dir"],
         error=None if ok else (graph_stage.error or _summarize_blockers(quality)),
     )
+    write_fabrication_artifacts(target, result.to_dict())
+    return result
 
 
 def _write_fab_package(
@@ -287,6 +295,82 @@ def _summarize_blockers(quality: Dict[str, Any]) -> str:
     return "; ".join(parts) or "build not ready"
 
 
+def write_fabrication_artifacts(
+    out_dir: str | Path,
+    compile_payload: Mapping[str, Any],
+    *,
+    extra_artifacts: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Write FUNCTIONAL_DELIVERY.json and FABRICATION_INSPECTION.json for a compile tree."""
+    out_path = Path(out_dir)
+    build_dir = out_path / "build_compilation"
+    design_quality = dict(compile_payload.get("design_quality") or {})
+    artifact_inputs: Dict[str, Any] = {
+        "build_graph": compile_payload.get("build_graph_file"),
+        "build_kicad_pcb": compile_payload.get("kicad_pcb_file"),
+        "fab_package_zip": design_quality.get("fab_package_zip")
+        or (str(build_dir / "fab_package.zip") if (build_dir / "fab_package.zip").is_file() else None),
+    }
+    if extra_artifacts:
+        artifact_inputs.update(dict(extra_artifacts))
+
+    functional = build_functional_delivery_score(
+        build_compilation=compile_payload,
+        artifacts=artifact_inputs,
+    )
+    fd_path = out_path / "FUNCTIONAL_DELIVERY.json"
+    fd_path.write_text(json.dumps(functional, indent=2), encoding="utf-8")
+    inspection = inspect_fabrication_package(
+        build_compilation=compile_payload,
+        artifacts=artifact_inputs,
+    )
+    insp_path = out_path / "FABRICATION_INSPECTION.json"
+    insp_path.write_text(json.dumps(inspection, indent=2), encoding="utf-8")
+    return {
+        "functional_delivery": str(fd_path),
+        "fabrication_inspection": str(insp_path),
+        "functional_delivery_score": functional.get("functional_delivery_score"),
+        "honest_fabrication_ready": functional.get("honest_fabrication_ready"),
+    }
+
+
+def merge_fabrication_into_payload(
+    payload: Dict[str, Any],
+    *,
+    compile_payload: Mapping[str, Any] | None = None,
+    extra_artifacts: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Persist fabrication artifacts and merge paths/scores into an API payload."""
+    out_dir = payload.get("out_dir") or (compile_payload or {}).get("out_dir")
+    if not out_dir:
+        return payload
+    compile_body = dict(compile_payload or {})
+    if not compile_body.get("design_quality") and payload.get("design_quality"):
+        compile_body = {
+            "ok": payload.get("ok"),
+            "build_id": payload.get("build_id"),
+            "out_dir": out_dir,
+            "design_quality": payload.get("design_quality"),
+            "build_graph_file": payload.get("build_graph_file"),
+            "kicad_pcb_file": payload.get("kicad_pcb_file"),
+        }
+    compile_result = payload.get("compile_result")
+    if isinstance(compile_result, Mapping) and not compile_body.get("design_quality"):
+        compile_body = dict(compile_result)
+
+    fab = write_fabrication_artifacts(out_dir, compile_body, extra_artifacts=extra_artifacts)
+    out = dict(payload)
+    out["functional_delivery"] = {
+        "functional_delivery_score": fab.get("functional_delivery_score"),
+        "honest_fabrication_ready": fab.get("honest_fabrication_ready"),
+    }
+    artifacts = dict(out.get("artifacts") or {})
+    artifacts["functional_delivery"] = fab["functional_delivery"]
+    artifacts["fabrication_inspection"] = fab["fabrication_inspection"]
+    out["artifacts"] = artifacts
+    return out
+
+
 def attach_build_compilation_artifacts(
     spec_dict: Dict[str, Any],
     out_dir: Path,
@@ -372,4 +456,10 @@ def attach_build_compilation_artifacts(
             "build_id": build_id,
             "board_outline": outline,
         }
+    fab = write_fabrication_artifacts(out_dir, payload)
+    payload["functional_delivery"] = {
+        "functional_delivery_score": fab.get("functional_delivery_score"),
+        "honest_fabrication_ready": fab.get("honest_fabrication_ready"),
+    }
+    payload["fabrication_inspection_path"] = fab.get("fabrication_inspection")
     return payload

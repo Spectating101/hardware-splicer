@@ -21,6 +21,7 @@ from .module_picker import pick_modules_for_goal
 from .module_resolver import infer_power_topology, resolve_parts_to_modules_with_llm
 from .env_local import load_env_local
 from .runtime import ROOT, runtime_status, scratch_path
+from .testing_mode import testing_mode_enabled
 from .salvage_bridge import build_intake_salvage_package
 from .integrations.qwen_netlist_compose import compose_netlist_from_goal
 from .salvage_bringup import run_salvage_bringup
@@ -75,11 +76,14 @@ def engine_doctor() -> Dict[str, Any]:
     """Runtime readiness: Python deps, app roots, KiCad/node paths."""
     apply_engine_defaults()
     status = dict(runtime_status())
+    testing_mode = testing_mode_enabled()
     return {
         "schema_version": SCHEMA_VERSION,
         "ok": bool(status.get("ok")),
         "demo_ready": status.get("demo_ready"),
         "fab_export_ready": status.get("fab_export_ready"),
+        "testing_mode": testing_mode,
+        "testing_mode_blocker": status.get("testing_mode_blocker"),
         "dependencies": status.get("dependencies"),
         "app_roots": status.get("app_roots"),
         "engine_defaults": {

@@ -56,6 +56,25 @@ jobs:
         run: |
           source .venv/bin/activate
           make verify-fab
+      - name: Netlist engine verify
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_JLC_ENRICH: "0"
+        run: |
+          source .venv/bin/activate
+          make verify-netlist-engine
+      - name: Tier C verify
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_JLC_ENRICH: "0"
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-tier-c
+      - name: Compose dispatch + failure payload tests
+        run: |
+          source .venv/bin/activate
+          PYTHONPATH=src python -m pytest tests/test_compose_dispatch.py tests/test_compose_failure.py -q
       - name: Compile casefile gate
         run: |
           source .venv/bin/activate

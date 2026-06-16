@@ -384,6 +384,8 @@ def create_app() -> FastAPI:
             gate = build_design_quality_gate(result.design_quality)
             gate_path = resolved / "DESIGN_QUALITY_GATE.json"
             gate_path.write_text(json.dumps(gate, indent=2), encoding="utf-8")
+            fd_path = resolved / "FUNCTIONAL_DELIVERY.json"
+            insp_path = resolved / "FABRICATION_INSPECTION.json"
             return _attach_inline_graph(
                 {
                     "ok": bool(result.ok and gate.get("build_ready")),
@@ -396,6 +398,8 @@ def create_app() -> FastAPI:
                         "design_quality_gate": str(gate_path),
                         "kicad_pcb": result.kicad_pcb_file,
                         "gerber_package_dir": result.gerber_package_dir,
+                        "functional_delivery": str(fd_path) if fd_path.is_file() else None,
+                        "fabrication_inspection": str(insp_path) if insp_path.is_file() else None,
                     },
                 }
             )

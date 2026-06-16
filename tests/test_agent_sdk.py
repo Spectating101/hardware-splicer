@@ -36,6 +36,7 @@ def test_engine_doctor_returns_shape() -> None:
     assert "ok" in doc
     assert "dependencies" in doc
     assert doc["engine_defaults"]["autoroute"] == "0"
+    assert doc.get("testing_mode") is False
 
 
 def test_resolve_usb_wall_wart() -> None:

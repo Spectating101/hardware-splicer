@@ -13,6 +13,8 @@ import urllib.request
 from pathlib import Path
 from typing import Dict, Iterator, Optional
 
+from .testing_mode import testing_mode_enabled
+
 
 ROOT = Path(__file__).resolve().parents[2]
 CIRCUIT_ROOT = ROOT / "apps" / "circuit-ai"
@@ -218,10 +220,18 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
     }
     required_for_demo = ("fastapi", "uvicorn", "node")
     demo_ready = all(dependencies.get(key) for key in required_for_demo)
+    testing_mode = testing_mode_enabled()
+    roots_ok = all(row["exists"] for row in app_roots.values())
     status: Dict[str, object] = {
-        "ok": all(row["exists"] for row in app_roots.values()) and demo_ready,
+        "ok": roots_ok and demo_ready and not testing_mode,
         "demo_ready": demo_ready,
         "fab_export_ready": bool(dependencies.get("kicad_cli")),
+        "testing_mode": testing_mode,
+        "testing_mode_blocker": (
+            "HARDWARE_SPLICER_TESTING_MODE relaxes fabrication gates — unset for production."
+            if testing_mode
+            else None
+        ),
         "python": sys.executable,
         "python_version": platform.python_version(),
         "splicer3d_python": str(splicer_python),

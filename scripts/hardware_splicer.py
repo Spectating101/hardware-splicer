@@ -624,6 +624,8 @@ def _run_doctor(args: argparse.Namespace) -> int:
         usage = vision_usage_summary(provider="qwen")
         print(f"qwen_vision_key={'configured' if qwen_ready else 'missing'} default_model={DEFAULT_QWEN_MODEL}")
         print(f"vision_usage_calls={usage.get('call_count')} vision_usage_tokens={usage.get('total_tokens')}")
+        if status.get("testing_mode"):
+            print(f"testing_mode=on blocker={status.get('testing_mode_blocker')}")
     return 0 if status.get("ok") else 1
 
 

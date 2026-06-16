@@ -6,8 +6,9 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from .auto_wire import compose_build_graph_from_module_ids
-from .build_compiler import compile_from_netlist
+from .build_compiler import compile_from_netlist, merge_fabrication_into_payload
 from .canvas_compose import build_canvas_graph, compile_canvas_build
+from .compose_failure import attach_compose_failure
 from .design_quality import build_design_quality_gate
 from .material_modes import material_mode_summary, resolve_material_mode
 from .module_picker import pick_modules_for_goal
@@ -21,6 +22,7 @@ def _finalize_payload(
     *,
     quality: Mapping[str, Any],
     request_id: str | None = None,
+    compile_payload: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     gate = build_design_quality_gate(dict(quality))
     out = {
@@ -33,7 +35,8 @@ def _finalize_payload(
         out["request_id"] = request_id
     compile_ok = bool(payload.get("ok"))
     out["ok"] = bool(compile_ok and gate.get("build_ready"))
-    return out
+    out = merge_fabrication_into_payload(out, compile_payload=compile_payload)
+    return attach_compose_failure(out)
 
 
 def compose_dispatch(
@@ -71,15 +74,17 @@ def compose_dispatch(
                 salvage_mode=salvage_mode,
                 material_mode=mode,
             )
-            return {
-                "ok": bool(graph.get("nodes")),
-                "mode": "canvas",
-                "wire_only": True,
-                "out_dir": str(target),
-                "graph": graph,
-                **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
-                **({"request_id": request_id} if request_id else {}),
-            }
+            return attach_compose_failure(
+                {
+                    "ok": bool(graph.get("nodes")),
+                    "mode": "canvas",
+                    "wire_only": True,
+                    "out_dir": str(target),
+                    "graph": graph,
+                    **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
+                    **({"request_id": request_id} if request_id else {}),
+                }
+            )
 
         canvas = compile_canvas_build(
             out_dir=str(target),
@@ -91,6 +96,7 @@ def compose_dispatch(
             export_gerber=export_gerber,
         )
         quality = (canvas.compile_result.design_quality if canvas.compile_result else {}) or {}
+        compile_payload = canvas.compile_result.to_dict() if canvas.compile_result else None
         return _finalize_payload(
             {
                 "ok": canvas.ok,
@@ -101,6 +107,7 @@ def compose_dispatch(
             },
             quality=quality,
             request_id=request_id,
+            compile_payload=compile_payload,
         )
 
     if netlist is not None:
@@ -115,6 +122,7 @@ def compose_dispatch(
             },
             quality=quality,
             request_id=request_id,
+            compile_payload=result.to_dict(),
         )
 
     if not phrase and not module_ids:
@@ -128,17 +136,19 @@ def compose_dispatch(
             raise ValueError(f"wire_only compose needs >=2 modules, got {ids}")
         composed = compose_build_graph_from_module_ids(ids)
         graph = composed.get("graph") or {}
-        return {
-            "ok": bool(graph.get("nodes")),
-            "mode": "scratch",
-            "wire_only": True,
-            "out_dir": str(target),
-            "module_ids": ids,
-            "graph": graph,
-            "warnings": composed.get("warnings") or [],
-            **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
-            **({"request_id": request_id} if request_id else {}),
-        }
+        return attach_compose_failure(
+            {
+                "ok": bool(graph.get("nodes")),
+                "mode": "scratch",
+                "wire_only": True,
+                "out_dir": str(target),
+                "module_ids": ids,
+                "graph": graph,
+                "warnings": composed.get("warnings") or [],
+                **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
+                **({"request_id": request_id} if request_id else {}),
+            }
+        )
 
     if (
         allow_llm_first
@@ -194,6 +204,7 @@ def compose_dispatch(
                 },
                 quality=quality,
                 request_id=request_id,
+                compile_payload=compile_result.to_dict() if compile_result else None,
             )
 
     scratch = compile_scratch_build(
@@ -238,4 +249,5 @@ def compose_dispatch(
         },
         quality=quality,
         request_id=request_id,
+        compile_payload=compile_result.to_dict() if compile_result else None,
     )
