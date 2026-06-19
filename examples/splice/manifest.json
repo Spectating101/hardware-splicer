@@ -1,0 +1,64 @@
+{
+  "schema_version": "hardware_splicer.splice_demo_manifest.v1",
+  "description": "Canonical splice demos — donor dissection → splice plan → carrier compile. Used by make splice-demo, verify-splice, and CI.",
+  "maturity_tiers": {
+    "S1_plan": "Splice plan + reusable blocks + evidence gates (no KiCad compile required)",
+    "S2_compile": "S1 + DRC-clean carrier board via splice-build",
+    "S3_bench": "S2 + bring-up card + measured evidence gates closed (operator)",
+    "S4_product": "S3 + mech envelope + field validation (future)"
+  },
+  "cases": [
+    {
+      "case_id": "robot_drive_from_rc_toy",
+      "tier": "S2_compile",
+      "title": "RC toy motor stage → robot drive base",
+      "product_story": "Dissect dual H-bridge donor section, keep motor harnesses, compile ESP32 carrier for differential drive.",
+      "intake": "examples/intakes/splice_robot_drive_brief.json",
+      "donor_fixture": "examples/fixtures/splice_donor_rc_motor_board.json",
+      "expected_build_id": "robot_drive_base",
+      "requires_compile": true,
+      "min_circuit_backed_blocks": 2,
+      "required_extractability_classes": ["connector_reuse", "board_section_cut_candidate"],
+      "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
+    },
+    {
+      "case_id": "robot_drive_vision_junk",
+      "tier": "S3_bench",
+      "title": "RC toy donor — vision evidence + bench closure",
+      "product_story": "Junk board photo path (offline board_evidence) → splice compile → bench capture closes power-on gates.",
+      "intake": "examples/intakes/splice_robot_drive_vision_brief.json",
+      "expected_build_id": "robot_drive_base",
+      "requires_compile": true,
+      "requires_golden_loop": true,
+      "min_circuit_backed_blocks": 1,
+      "required_extractability_classes": ["connector_reuse"],
+      "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
+    },
+    {
+      "case_id": "robot_repair_cafe_s3",
+      "tier": "S3_bench",
+      "title": "Repair-café RC donor — symptoms + PSU ramp gates + bench closure",
+      "product_story": "repair_intake symptoms, board_evidence, synthetic donor photo, Rossmann-style PSU/thermal gates → golden loop.",
+      "intake": "examples/intakes/splice_robot_drive_vision_repair_brief.json",
+      "expected_build_id": "robot_drive_base",
+      "requires_compile": true,
+      "requires_golden_loop": true,
+      "min_circuit_backed_blocks": 1,
+      "required_extractability_classes": ["connector_reuse"],
+      "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
+    },
+    {
+      "case_id": "printer_motion_stage",
+      "tier": "S2_compile",
+      "title": "Inkjet printer motion → plotter motion stage",
+      "product_story": "Salvage stepper driver section and limit harness from printer electronics; compile motion-controller carrier.",
+      "intake": "examples/intakes/splice_printer_motion_brief.json",
+      "donor_fixture": "examples/fixtures/splice_donor_inkjet_motion_board.json",
+      "expected_build_id": "plotter_motion_stage",
+      "requires_compile": true,
+      "min_circuit_backed_blocks": 2,
+      "required_extractability_classes": ["connector_reuse", "board_section_cut_candidate"],
+      "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
+    }
+  ]
+}

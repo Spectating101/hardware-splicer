@@ -13,6 +13,7 @@ BUILD_ID_GUIDE: dict[str, str] = {
     "automatic_plant_watering": "Soil moisture / plant watering / drip pump / irrigation",
     "automatic_plant_watering_usb": "USB-powered plant watering variant",
     "robot_drive_base": "Rover, wheels, mobile robot, differential drive",
+    "plotter_motion_stage": "Plotter, inkjet printer salvage, stepper motion, CNC axis, scanner rail",
     "usb_fume_extractor": "Desk fan, solder fumes, airflow, cooling fan, ventilation, temp-controlled fan",
     "room_display_station": "Room monitor, TFT/OLED display station, environmental panel",
     "smart_relay_box": "Relay switching lamp, outlet, desk lamp, smart switch",
@@ -42,7 +43,24 @@ def keyword_build_id(
 
     if any(word in text for word in ["soil", "water", "watering", "pump", "irrigation", "plant"]):
         return "automatic_plant_watering"
-    if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor"]):
+    if any(
+        word in text
+        for word in [
+            "plotter",
+            "inkjet",
+            "printer motion",
+            "printer parts",
+            "dead inkjet",
+            "cnc",
+            "stepper",
+            "linear rail",
+            "scanner motion",
+            "motion stage",
+            "motion test jig",
+        ]
+    ):
+        return "plotter_motion_stage"
+    if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor", "rc toy"]):
         return "robot_drive_base"
     if any(word in text for word in ["fan", "airflow", "vent", "blower", "fume"]):
         return "usb_fume_extractor"

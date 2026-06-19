@@ -1,0 +1,89 @@
+{
+  "schema_version": "functional_salvage.v1",
+  "mode": "functional_salvage_assessment",
+  "board_id": "donor_inkjet_motion",
+  "board_role": "actuator_driver",
+  "verdict": "ready_after_measurements",
+  "reusable_blocks": [
+    {
+      "block_id": "donor_inkjet_stepper_driver_section",
+      "board_id": "donor_inkjet_motion",
+      "name": "Dual stepper driver section",
+      "function_type": "actuator_driver",
+      "capabilities": ["actuator_driver", "mechanical_motion", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["U_STEP1", "U_STEP2", "J_MOTOR_X", "J_MOTOR_Y"],
+      "connector_refs": ["J_MOTOR_X", "J_MOTOR_Y", "J_LOGIC"],
+      "nets": ["VMOTOR", "STEP_X", "DIR_X", "STEP_Y", "DIR_Y", "GND"],
+      "confidence": 0.8,
+      "extractability": {
+        "class": "connector_reuse",
+        "action": "Reuse through labeled connector or harness after pinout, voltage, and ground gates close.",
+        "requires_layout_confirmation": false
+      },
+      "status": "reuse_ready",
+      "reuse_value_score": 0.84,
+      "suggested_uses": ["salvaged motion axis for plotters", "camera sliders", "test fixtures"],
+      "rationale": "Stepper driver outputs still route to carriage motor harnesses; keep connectors intact."
+    },
+    {
+      "block_id": "donor_inkjet_limit_switch_harness",
+      "board_id": "donor_inkjet_motion",
+      "name": "Carriage limit switch harness",
+      "function_type": "sensor_io",
+      "capabilities": ["sensor_or_adc", "switch_or_button", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["SW_HOME", "SW_END", "J_LIMIT"],
+      "connector_refs": ["J_LIMIT"],
+      "confidence": 0.76,
+      "extractability": {
+        "class": "connector_reuse",
+        "action": "Reuse through labeled connector or harness after pinout, voltage, and ground gates close.",
+        "requires_layout_confirmation": false
+      },
+      "status": "reuse_ready",
+      "reuse_value_score": 0.78,
+      "suggested_uses": ["trigger or feedback sensor", "motion end-stop bundle"]
+    },
+    {
+      "block_id": "donor_inkjet_24v_input_section",
+      "board_id": "donor_inkjet_motion",
+      "name": "24V input and bulk regulation section",
+      "function_type": "power_regulation",
+      "capabilities": ["power", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["J_PWR", "F1", "U_BUCK"],
+      "connector_refs": ["J_PWR"],
+      "confidence": 0.7,
+      "extractability": {
+        "class": "board_section_cut_candidate",
+        "action": "Treat as a possible board-section salvage only after layout continuity, isolation, and thermal checks.",
+        "requires_layout_confirmation": true
+      },
+      "status": "layout_review_required",
+      "reuse_value_score": 0.61,
+      "suggested_uses": ["protected power breakout", "known-voltage supply stage"],
+      "rationale": "Only cut this section after input fuse path and output rails are measured under current limit."
+    }
+  ],
+  "evidence_gates": [
+    {
+      "gate_id": "vmotor_24v",
+      "gate_type": "voltage",
+      "prompt": "Measure 24V rail at J_LOGIC with motors disconnected",
+      "status": "open"
+    }
+  ],
+  "extractability_summary": {
+    "connector_reuse": 2,
+    "board_section_cut_candidate": 1
+  },
+  "safety_policy": {
+    "reuse_ready_requires": [
+      "power and ground gates closed",
+      "logic or load compatibility proven",
+      "current limit or load current known before interconnect"
+    ],
+    "default_for_unknowns": "blocked_until_evidence"
+  }
+}

@@ -22,6 +22,45 @@ PLANT_INTAKE = ROOT / "examples" / "intakes" / "plant_watering_brief.json"
 PLANT_EVIDENCE_INTAKE = ROOT / "examples" / "intakes" / "plant_watering_evidence_pack.json"
 PLANT_NOTES_INTAKE = ROOT / "examples" / "intakes" / "plant_watering_auto_evidence_notes.json"
 ROVER_INTAKE = ROOT / "examples" / "intakes" / "rover_brief.json"
+SPLICE_ROBOT_INTAKE = ROOT / "examples" / "intakes" / "splice_robot_drive_brief.json"
+
+
+def test_splice_robot_intake_resolves_donor_fixture():
+    intake = load_project_intake(SPLICE_ROBOT_INTAKE)
+    boards = intake["circuit"]["boards"]
+    functional = boards[0]["functional_salvage"]
+    assert functional["mode"] == "functional_salvage_assessment"
+    classes = {
+        (block.get("extractability") or {}).get("class")
+        for block in functional.get("reusable_blocks") or []
+    }
+    assert "connector_reuse" in classes
+    assert "board_section_cut_candidate" in classes
+
+
+def test_splice_robot_plan_merges_circuit_functional_blocks():
+    intake = load_project_intake(SPLICE_ROBOT_INTAKE)
+    plan = plan_project_from_intake(intake, skip_vision=True)
+    splice_plan = (plan.get("salvage_package") or {}).get("splice_plan") or {}
+    circuit_blocks = [
+        row for row in (splice_plan.get("reusable_blocks") or []) if row.get("source") == "circuit_functional_salvage"
+    ]
+    assert len(circuit_blocks) >= 2
+    assert plan.get("recommended_build_id") == "robot_drive_base"
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
+def test_splice_robot_drive_demo_intake_compiles(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
+    intake = load_project_intake(SPLICE_ROBOT_INTAKE)
+    result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice_robot", export_gerber=False)
+    assert result["build_id"] == "robot_drive_base"
+    assert Path(result["artifacts"]["splice_plan"]).is_file()
+    quality = json.loads(Path(result["artifacts"]["design_quality"]).read_text(encoding="utf-8"))
+    assert quality.get("drc_pass") is True
+    salvage = result.get("salvage_package") or {}
+    splice_plan = salvage.get("splice_plan") or {}
+    assert any(row.get("source") == "circuit_functional_salvage" for row in splice_plan.get("reusable_blocks") or [])
 
 
 def test_project_intake_plans_automatic_watering_scenario():

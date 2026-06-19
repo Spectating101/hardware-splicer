@@ -16,6 +16,24 @@ def test_keyword_fan_airflow_maps_to_fume_extractor() -> None:
     assert got == "usb_fume_extractor"
 
 
+def test_keyword_printer_motion_maps_to_plotter_stage() -> None:
+    intake = load_project_intake("examples/intakes/splice_printer_motion_brief.json")
+    got = keyword_build_id(str(intake.get("goal") or ""), list(intake.get("available_parts") or []))
+    assert got == "plotter_motion_stage"
+
+
+def test_printer_splice_intake_resolves_plotter_build_id() -> None:
+    intake = load_project_intake("examples/intakes/splice_printer_motion_brief.json")
+    pkg = build_intake_salvage_package(
+        goal=str(intake.get("goal") or ""),
+        parts=list(intake.get("available_parts") or []),
+        constraints=dict(intake.get("constraints") or {}),
+        project_name=str(intake.get("project_name") or "printer"),
+        donor_context={"circuit": intake.get("circuit")},
+    )
+    assert pkg.get("recommended_build_id") == "plotter_motion_stage"
+
+
 def test_reconcile_prefers_keyword_over_generic_llm() -> None:
     got = reconcile_build_pick(
         "generic_low_voltage_build",

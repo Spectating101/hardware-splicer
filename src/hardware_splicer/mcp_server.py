@@ -181,6 +181,140 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_donor_board_vision",
+            description=(
+                "Donor board photo or embedded board_evidence.v1 → functional_salvage blocks on "
+                "circuit.boards (Qwen board vision when live + image path). Use before or inside splice build."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intake": {"type": "object"},
+                },
+                "required": ["intake"],
+            },
+        ),
+        Tool(
+            name="hs_vision_capabilities",
+            description="Inventory camera/vision/bench-capture modules already in the repo and how to reach them.",
+            inputSchema={"type": "object", "properties": {}},
+        ),
+        Tool(
+            name="hs_vision_enrich_intake",
+            description=(
+                "Run intake vision on attachments (Qwen/Gemini when keyed). "
+                "Set vision_assistance in intake or pass apply/live flags. "
+                "Does not close splice bench gates by itself."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intake": {"type": "object"},
+                    "apply": {"type": "boolean", "description": "Apply vision notes into intake evidence"},
+                    "live": {"type": "boolean", "description": "Call live vision provider"},
+                },
+                "required": ["intake"],
+            },
+        ),
+        Tool(
+            name="hs_splice_bench_capture_template",
+            description=(
+                "Get BENCH_CAPTURE_TEMPLATE.json for open splice gates — fill measurements "
+                "then submit with hs_splice_bench_submit_capture."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {"build_dir": {"type": "string"}},
+                "required": ["build_dir"],
+            },
+        ),
+        Tool(
+            name="hs_splice_bench_submit_capture",
+            description=(
+                "Submit bench_topology_capture.v1 packet to close matching splice bench gates. "
+                "Use after hs_splice_build when instrument/camera rig produces structured capture JSON."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string"},
+                    "capture": {"type": "object", "description": "bench_topology_capture.v1 packet"},
+                },
+                "required": ["build_dir", "capture"],
+            },
+        ),
+        Tool(
+            name="hs_splice_golden_loop",
+            description=(
+                "One-shot S3 golden loop: donor intake → splice compile → bench template → "
+                "capture submit → gate closure. simulate_bench=true fills pass readings for CI; "
+                "set false when submitting real instrument capture yourself."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intake": {"type": "object", "description": "PROJECT_INTAKE-shaped splice brief"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                    "simulate_bench": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "Auto-fill template with simulated pass measurements",
+                    },
+                },
+                "required": ["intake"],
+            },
+        ),
+        Tool(
+            name="hs_splice_build",
+            description=(
+                "Primary splice path: donor PROJECT_INTAKE JSON → splice plan → carrier KiCad compile. "
+                "Opens SPLICE_BENCH_SESSION.json automatically. Use before bench submit."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intake": {"type": "object", "description": "PROJECT_INTAKE-shaped splice brief"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                },
+                "required": ["intake"],
+            },
+        ),
+        Tool(
+            name="hs_splice_bench_status",
+            description=(
+                "S3 bench gate status for a splice build directory. "
+                "Returns open/closed evidence gates and power_on_authorized flag."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string", "description": "Splice output directory"},
+                },
+                "required": ["build_dir"],
+            },
+        ),
+        Tool(
+            name="hs_splice_bench_submit",
+            description=(
+                "Submit bench measurements to close evidence gates. "
+                "Each item: gate_id, status (closed|pass|fail|open), optional value/unit/notes."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string"},
+                    "measurements": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": '[{"gate_id":"vmotor_rail","status":"closed","value":6.1,"unit":"V"}]',
+                    },
+                },
+                "required": ["build_dir", "measurements"],
+            },
+        ),
+        Tool(
             name="hs_inspect_fab",
             description=(
                 "Inspect fabrication package on disk (PCB, BOM, Gerbers) without recompiling. "
@@ -280,6 +414,53 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 out_dir=args.get("out_dir"),
                 export_gerber=bool(args.get("export_gerber")),
                 allow_qwen=bool(args.get("allow_qwen", True)),
+            )
+        )
+    if name == "hs_donor_board_vision":
+        return _tool_result(sdk.donor_board_vision_enrich(args.get("intake") or {}))
+    if name == "hs_vision_capabilities":
+        return _tool_result(sdk.vision_capabilities())
+    if name == "hs_vision_enrich_intake":
+        return _tool_result(
+            sdk.vision_enrich_intake(
+                args.get("intake") or {},
+                apply=args.get("apply"),
+                live=args.get("live"),
+            )
+        )
+    if name == "hs_splice_bench_capture_template":
+        return _tool_result(sdk.splice_bench_capture_template(str(args.get("build_dir") or "")))
+    if name == "hs_splice_bench_submit_capture":
+        return _tool_result(
+            sdk.splice_bench_submit_capture(
+                str(args.get("build_dir") or ""),
+                args.get("capture") or {},
+            )
+        )
+    if name == "hs_splice_golden_loop":
+        return _tool_result(
+            sdk.splice_golden_loop(
+                args.get("intake") or {},
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+                simulate_bench=bool(args.get("simulate_bench", True)),
+            )
+        )
+    if name == "hs_splice_build":
+        return _tool_result(
+            sdk.splice_build(
+                args.get("intake") or {},
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+            )
+        )
+    if name == "hs_splice_bench_status":
+        return _tool_result(sdk.splice_bench_status(str(args.get("build_dir") or "")))
+    if name == "hs_splice_bench_submit":
+        return _tool_result(
+            sdk.splice_bench_submit(
+                str(args.get("build_dir") or ""),
+                args.get("measurements") or [],
             )
         )
     if name == "hs_inspect_fab":

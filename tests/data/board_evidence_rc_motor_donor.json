@@ -1,0 +1,45 @@
+{
+  "schema_version": "board_evidence.v1",
+  "components": [
+    {
+      "id": "u3_u4",
+      "label": "Dual H-bridge motor driver section",
+      "kind": "motor_driver",
+      "confidence": 0.8,
+      "recommended_checks": [
+        "Measure VMOTOR at J_LOGIC under no load and with one motor connected",
+        "Confirm motor harness pairs are not shorted to ground before splice"
+      ]
+    },
+    {
+      "id": "motor_harness",
+      "label": "Left and right geared DC motors with harnesses",
+      "kind": "motor",
+      "confidence": 0.76
+    }
+  ],
+  "connectors": [
+    {"id": "j_logic", "label": "J_LOGIC logic harness", "kind": "header", "confidence": 0.74},
+    {"id": "j_motor_l", "label": "J_MOTOR_L motor harness", "kind": "connector", "confidence": 0.78},
+    {"id": "j_motor_r", "label": "J_MOTOR_R motor harness", "kind": "connector", "confidence": 0.78}
+  ],
+  "markings": [],
+  "regions": [],
+  "damage": [],
+  "test_points": [],
+  "salvage_candidates": [
+    {
+      "id": "motor_stage",
+      "label": "RC toy dual motor driver stage",
+      "function": "actuator_driver",
+      "confidence": 0.82,
+      "recommended_checks": [
+        "Measure VMOTOR at J_LOGIC under no load and with one motor connected"
+      ]
+    }
+  ],
+  "recommended_checks": [
+    "Do not connect logic until VMOTOR rail is measured",
+    "Verify battery section chemistry before reusing J_BATT"
+  ]
+}

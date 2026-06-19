@@ -1,0 +1,73 @@
+{
+  "project_name": "splice_golden_real_rc_motor",
+  "goal": "Salvage motor driver from dead RC toy — golden real photo + manual bench capture",
+  "salvage_mode": true,
+  "repair_intake": {
+    "device_hint": "Playmobil / RC toy motor controller PCB (real donor photo)",
+    "symptoms": [
+      "vehicle does not move when throttle applied",
+      "donor board visually intact but silent after storage"
+    ],
+    "when_it_fails": "as soon as batteries are inserted — no motor response",
+    "repro_steps": [
+      "Insert fresh AA pack in donor compartment",
+      "Operate throttle — no wheel movement"
+    ],
+    "operator_notes": "Golden S3 path: real board photo + hand-filled bench capture artifact"
+  },
+  "donor_board_vision": {
+    "enabled": true,
+    "live": false,
+    "merge_with_fixture": false
+  },
+  "available_parts": [
+    {
+      "name": "dead RC toy car donor board",
+      "type": "donor_board",
+      "condition": "salvaged"
+    },
+    {
+      "name": "left 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "condition": "salvaged"
+    },
+    {
+      "name": "right 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "condition": "salvaged"
+    },
+    {
+      "name": "ESP32 dev board",
+      "type": "microcontroller",
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "battery_voltage_v": 7.4,
+    "battery_capacity_mah": 2200
+  },
+  "circuit": {
+    "mode": "circuit_board_system",
+    "boards": [
+      {
+        "board_id": "donor_rc_car_ctrl",
+        "board_name": "RC toy motor controller donor (golden photo)",
+        "board_evidence": "@tests/data/golden/rc_toy_live_board_evidence.json",
+        "vision_source": {
+          "path": "tests/data/golden/rc_toy_motor_board.jpg",
+          "live": false,
+          "device_hint": "Playmobil RC module motor controller PCB"
+        }
+      }
+    ]
+  },
+  "evidence_notes": [
+    "golden:real_photo tests/data/golden/rc_toy_motor_board.jpg",
+    "splice:keep motor harness intact",
+    "splice:measure VMOTOR before ESP32 logic tie-in"
+  ]
+}

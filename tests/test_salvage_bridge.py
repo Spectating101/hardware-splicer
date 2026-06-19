@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from hardware_splicer.module_resolver import (
+    fill_salvage_gaps,
     infer_power_topology,
     module_overrides_for_build,
     resolve_parts_to_modules,
@@ -83,6 +84,56 @@ def test_infer_power_topology_usb_bank_only() -> None:
     ]
     resolved = resolve_parts_to_modules(parts)
     assert infer_power_topology(parts, resolved) == "usb_5v"
+
+
+def test_printer_motion_salvage_resolves_power_stepper_and_limits_offline() -> None:
+    parts = [
+        {"name": "dead inkjet printer donor motion board", "type": "donor_board"},
+        {"name": "stepper motor X axis", "type": "stepper_motor"},
+        {"name": "X axis limit switch", "type": "limit_switch"},
+        {"name": "24V power supply", "type": "power_source", "voltage_v": 24.0},
+        {"name": "Arduino Nano from parts bin", "type": "microcontroller"},
+    ]
+    resolved = fill_salvage_gaps(resolve_parts_to_modules(parts), parts=parts)
+    module_ids = {row.get("module_id") for row in resolved if row.get("module_id")}
+    assert infer_power_topology(parts, resolved) == "barrel_12v"
+    assert "dc-barrel-12v" in module_ids
+    assert "a4988-stepper" in module_ids
+    assert "limit-switch-3pin" in module_ids
+    assert "l298n" not in module_ids
+
+
+def test_printer_motion_salvage_graph_keeps_required_power_support() -> None:
+    from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+    intake = load_project_intake(ROOT / "examples" / "intakes" / "splice_printer_motion_brief.json")
+    package = build_intake_salvage_package(
+        goal=str(intake.get("goal") or ""),
+        parts=list(intake.get("available_parts") or []),
+        constraints=dict(intake.get("constraints") or {}),
+        project_name=str(intake.get("project_name") or "printer_motion"),
+    )
+    graph, build_id, _notes, warnings = splice_plan_to_build_graph(package.get("graph_input"))
+    module_ids = [node.get("moduleId") for node in graph.get("nodes") or []]
+    pins = {
+        str(end.get("pinId") or "")
+        for wire in graph.get("wires") or []
+        for end in (wire.get("from") or {}, wire.get("to") or {})
+    }
+    assert build_id == "plotter_motion_stage"
+    assert warnings == []
+    assert module_ids == [
+        "usb-power-5v",
+        "buck-mp1584",
+        "dc-barrel-12v",
+        "arduino-nano",
+        "a4988-stepper",
+        "limit-switch-3pin",
+        "limit-switch-3pin",
+    ]
+    assert "GPIO21" not in pins
+    assert "GPIO22" not in pins
+    assert {"A0", "A4", "VMOT", "VDD"}.issubset(pins)
 
 
 def test_wifi_salvage_intake_resolves_usb_wall_wart_without_barrel() -> None:

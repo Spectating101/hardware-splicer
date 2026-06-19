@@ -1,0 +1,69 @@
+{
+  "project_name": "splice_printer_motion_stage",
+  "goal": "Reuse printer stepper drivers, limit switches, and rails for a CNC or plotter motion test jig",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "dead inkjet printer donor motion board",
+      "type": "donor_board",
+      "condition": "salvaged",
+      "notes": "Stepper driver section and limit harness still intact"
+    },
+    {
+      "name": "stepper motor X axis",
+      "type": "stepper_motor",
+      "condition": "salvaged",
+      "notes": "On donor harness J_MOTOR_X"
+    },
+    {
+      "name": "stepper motor Y axis",
+      "type": "stepper_motor",
+      "condition": "salvaged",
+      "notes": "On donor harness J_MOTOR_Y"
+    },
+    {
+      "name": "X axis limit switch",
+      "type": "limit_switch",
+      "condition": "salvaged"
+    },
+    {
+      "name": "Y axis limit switch",
+      "type": "limit_switch",
+      "condition": "salvaged"
+    },
+    {
+      "name": "24V power supply",
+      "type": "power_source",
+      "voltage_v": 24.0,
+      "condition": "salvaged"
+    },
+    {
+      "name": "belts and linear rails",
+      "type": "mechanical_motion",
+      "condition": "salvaged"
+    },
+    {
+      "name": "Arduino Nano from parts bin",
+      "type": "microcontroller",
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained"
+  },
+  "circuit": {
+    "mode": "circuit_board_system",
+    "boards": [
+      {
+        "board_id": "donor_inkjet_motion",
+        "board_name": "Inkjet printer motion donor board",
+        "functional_salvage": "@examples/fixtures/splice_donor_inkjet_motion_board.json"
+      }
+    ]
+  },
+  "evidence_notes": [
+    "splice:keep stepper harnesses on J_MOTOR_X and J_MOTOR_Y",
+    "splice:measure 24V rail before connecting logic",
+    "splice:do not cut power section until fuse path is verified"
+  ]
+}

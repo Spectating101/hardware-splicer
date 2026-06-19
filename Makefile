@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry salvage-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -82,6 +82,31 @@ verify-geometry:
 salvage-demo:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 PYTHONPATH=src $(PYTHON) scripts/salvage_bringup_demo.py --out /tmp/hs_salvage_bringup
 
+splice-demo:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/splice_demo.py --case robot_drive_from_rc_toy --out /tmp/hs_splice_demo
+
+verify-splice:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/verify_splice_demos.py --out /tmp/hs_splice_verify
+
+splice-golden-loop:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/splice_golden_loop.py --out /tmp/hs_splice_golden_loop
+
+verify-splice-loop:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/verify_splice_golden_loop.py
+
+verify-splice-real-bench:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/verify_splice_real_bench.py
+
+pin-golden-live-evidence:
+	QWEN_DISABLED=0 QWEN_OUT_OF_QUOTA=0 VISION_MONTHLY_USD_LIMIT=5 VISION_DAILY_USD_LIMIT=2 VISION_MAX_USD_PER_CALL=0.25 PYTHONPATH=src $(PYTHON) scripts/pin_golden_live_board_evidence.py
+
+splice-golden-real:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/splice_golden_real.py --out /tmp/hs_splice_golden_real
+
+vision-donor-smoke:
+	PYTHONPATH=src $(PYTHON) scripts/generate_donor_test_image.py
+	PYTHONPATH=src $(PYTHON) scripts/vision_donor_live_smoke.py
+
 verify-catalog:
 	node scripts/verify_catalog_parity.cjs
 	$(MAKE) export-catalog-build-ids
@@ -104,5 +129,5 @@ test-scratch-pipeline:
 run-mcp:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) -m hardware_splicer.mcp_server
 
-verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers smoke
+verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers verify-splice smoke
 	@echo "Hardware-Splicer verify: all checks passed"

@@ -1,11 +1,21 @@
 # Hardware-Splicer
 
-Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard — with **honest** fabrication scoring and evidence-gated release.
+**Splice real hardware** — dissect donor PCBs, extract reusable functional blocks, plan safe splice contracts, and compile a carrier board with **honest** KiCad/DRC truth.
 
-**Professor quick start:** see [`docs/SETUP.md`](docs/SETUP.md), [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md), [`docs/TESTING.md`](docs/TESTING.md), and [`docs/LLM_OPS.md`](docs/LLM_OPS.md) (text/vision LLM, quota, cache, agy fallback).
+Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard.
+
+**Quick starts:**
+
+- **Handoff update (what changed):** [`docs/HANDOFF_UPDATE.md`](docs/HANDOFF_UPDATE.md)
+- **Agent handoff (start here for agents):** [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) — SDK, MCP, HTTP splice + bench flow
+- **Splice product (canonical):** [`docs/SPLICE_PRODUCT.md`](docs/SPLICE_PRODUCT.md) — thesis, tiers, roadmap, how to proceed
+- **Splice demo:** [`docs/DEMO_SPLICE.md`](docs/DEMO_SPLICE.md) — `make splice-demo` · `make verify-splice`
+- **Authority / fab demo:** [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md)
+- Setup: [`docs/SETUP.md`](docs/SETUP.md) · LLM ops: [`docs/LLM_OPS.md`](docs/LLM_OPS.md)
 
 ```bash
 make setup          # pip install + doctor
+make splice-demo    # donor PCB → splice plan → robot_drive_base carrier
 make verify         # tests + benchmark + strict audit + tier scoring
 make demo           # canonical compile bundle
 ```
@@ -145,11 +155,24 @@ When `kicad-cli` is installed, `build` also emits `build_compilation/gerber_pack
 
 Plant-watering intake auto-emits `DESIGN_QUALITY.json`, `DESIGN_QUALITY_GATE.json`, and `build_compilation/main_ctrl_build.kicad_pcb`. `PRODUCTION_RELEASE_METRICS.json` now ties the circuit-release gate to build-compiler DRC/safety when `build_compilation` is present.
 
+**Splice path (donor PCB → carrier board):**
+
+```bash
+make splice-demo
+# or
+python3 scripts/hardware_splicer.py splice-build \
+  --brief examples/intakes/splice_robot_drive_brief.json \
+  --out /tmp/hs_splice_build --no-gerber
+```
+
+See [`docs/DEMO_SPLICE.md`](docs/DEMO_SPLICE.md). Donor functional blocks live in `examples/fixtures/splice_donor_rc_motor_board.json`.
+
 Shortcuts:
 
 ```bash
 make setup
 make doctor
+make splice-demo
 make demo
 make smoke
 make test

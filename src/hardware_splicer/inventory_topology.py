@@ -8,12 +8,25 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Set, Tuple
 
+from .pcb.module_registry import find_module, resolve_module_pads
+
 Wire = Dict[str, Dict[str, str]]
 Recipe = Dict[str, Any]
 
 BUCK_ROLES = frozenset({"buck", "psu", "mot_psu"})
 BARREL_ID = "dc-barrel-12v"
 USB_ID = "usb-power-5v"
+SUPPORT_MODULE_IDS = frozenset(
+    {
+        BARREL_ID,
+        USB_ID,
+        "buck-mp1584",
+        "buck-lm2596",
+        "ldo-ams1117-3v3",
+        "ldo-ams1117-5v",
+        "tp4056",
+    }
+)
 
 
 def _has_role(modules: List[Mapping[str, str]], role: str) -> bool:
@@ -37,6 +50,78 @@ def _drop_wires_touching_roles(wires: List[Wire], roles: Set[str]) -> List[Wire]
         for w in wires
         if w.get("from", {}).get("role") not in roles and w.get("to", {}).get("role") not in roles
     ]
+
+
+def _module_pin_ids(module_id: str) -> Set[str]:
+    spec = find_module(module_id) or {}
+    ids = {str(pin.get("id") or "") for pin in spec.get("pins") or [] if pin.get("id")}
+    pads = resolve_module_pads(module_id, spec) or []
+    ids.update(str(pad.get("pinId") or "") for pad in pads if pad.get("pinId"))
+    return {pin_id for pin_id in ids if pin_id}
+
+
+def _module_supports_i2c(module_id: str) -> bool:
+    pins = _module_pin_ids(module_id)
+    return "SDA" in pins and "SCL" in pins
+
+
+def _i2c_pins_for_mcu(module_id: str) -> Optional[Tuple[str, str]]:
+    pins = _module_pin_ids(module_id)
+    if {"GPIO21", "GPIO22"}.issubset(pins):
+        return ("GPIO21", "GPIO22")
+    if {"A4", "A5"}.issubset(pins):
+        return ("A4", "A5")
+    if {"GP0", "GP1"}.issubset(pins):
+        return ("GP0", "GP1")
+    return None
+
+
+def _support_roles_needed_by_owned_modules(
+    recipe: Recipe,
+    *,
+    owned_roles: Set[str],
+    kept_roles: Set[str],
+    topology: str,
+) -> Set[str]:
+    """Keep power/support modules that make a pruned salvage recipe electrically valid."""
+    if topology == "usb_5v":
+        return set()
+
+    modules = list(recipe.get("modules") or [])
+    module_by_role = {str(m.get("role") or ""): str(m.get("moduleId") or "") for m in modules}
+    support_roles = {
+        role
+        for role, module_id in module_by_role.items()
+        if module_id in SUPPORT_MODULE_IDS or role in {"pwr", "usb", "buck", "psu", "mot_psu"}
+    }
+    functional_owned_roles = owned_roles - support_roles
+    needed: Set[str] = set()
+
+    # MCU catalog recipes often use USB/5V input for logic even when a higher-voltage
+    # barrel supply is present for motors.
+    if "mcu" in owned_roles and "usb" in support_roles:
+        needed.add("usb")
+
+    for wire in recipe.get("wires") or []:
+        from_role = str(wire.get("from", {}).get("role") or "")
+        to_role = str(wire.get("to", {}).get("role") or "")
+        pair = {from_role, to_role}
+        if not pair & functional_owned_roles:
+            continue
+        needed.update(pair & support_roles)
+
+    # If a buck/regulator is directly needed, keep its upstream source too.
+    expanded = True
+    while expanded:
+        expanded = False
+        for wire in recipe.get("wires") or []:
+            from_role = str(wire.get("from", {}).get("role") or "")
+            to_role = str(wire.get("to", {}).get("role") or "")
+            if from_role in support_roles and to_role in needed and from_role not in kept_roles | needed:
+                needed.add(from_role)
+                expanded = True
+
+    return needed
 
 
 def _usb_bench_load_topology(recipe: Recipe) -> Optional[Recipe]:
@@ -136,6 +221,23 @@ def _prune_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Recipe:
         return recipe
 
     kept_roles = {m.get("role") for m in modules}
+    owned_roles = {str(role) for role in kept_roles if role}
+    support_roles = _support_roles_needed_by_owned_modules(
+        recipe,
+        owned_roles=owned_roles,
+        kept_roles={str(role) for role in kept_roles if role},
+        topology=str(plan.get("power_topology") or ""),
+    )
+    if support_roles:
+        support_modules = [
+            dict(m)
+            for m in recipe.get("modules") or []
+            if str(m.get("role") or "") in support_roles
+            and str(m.get("role") or "") not in {str(role) for role in kept_roles if role}
+        ]
+        modules = [*support_modules, *modules]
+        kept_roles.update(m.get("role") for m in support_modules)
+
     wires = [
         w
         for w in recipe.get("wires") or []
@@ -143,6 +245,8 @@ def _prune_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Recipe:
     ]
     notes = list(recipe.get("notes") or [])
     notes.append(f"Inventory prune: {len(modules)}/{len(recipe.get('modules') or [])} modules from owned parts.")
+    if support_roles:
+        notes.append("Inventory prune: kept required power/support roles for electrical validity.")
     return {"modules": modules, "wires": wires, "notes": notes}
 
 
@@ -185,24 +289,35 @@ def adapt_recipe_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Tuple[
 
 
 def _append_inventory_sensors(recipe: Recipe, overrides: Mapping[str, str]) -> Recipe:
-    """Add salvaged sensor module + I2C wires when catalog recipe lacks an sns slot."""
+    """Add salvaged I2C sensor module when catalog recipe lacks that sensor."""
     sns_id = str(overrides.get("sns") or "").strip()
     modules = list(recipe.get("modules") or [])
     if not sns_id or _has_role(modules, "sns"):
+        return recipe
+    if any(str(m.get("moduleId") or "") == sns_id for m in modules):
+        return recipe
+    if not _module_supports_i2c(sns_id):
         return recipe
 
     new_modules = [dict(m) for m in modules]
     new_modules.append({"role": "sns", "moduleId": sns_id})
     wires = [dict(w) for w in recipe.get("wires") or []]
-    if _has_role(new_modules, "mcu"):
+    mcu_id = _module_id_for(new_modules, "mcu")
+    i2c_pins = _i2c_pins_for_mcu(mcu_id) if mcu_id else None
+    if _has_role(new_modules, "mcu") and i2c_pins:
+        sda_pin, scl_pin = i2c_pins
         wires.extend(
             [
-                {"from": {"role": "mcu", "pin": "GPIO21"}, "to": {"role": "sns", "pin": "SDA"}},
-                {"from": {"role": "mcu", "pin": "GPIO22"}, "to": {"role": "sns", "pin": "SCL"}},
+                {"from": {"role": "mcu", "pin": sda_pin}, "to": {"role": "sns", "pin": "SDA"}},
+                {"from": {"role": "mcu", "pin": scl_pin}, "to": {"role": "sns", "pin": "SCL"}},
                 {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
                 {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
             ]
         )
+    elif _has_role(new_modules, "mcu"):
+        notes = list(recipe.get("notes") or [])
+        notes.append(f"Inventory: skipped I2C sensor wiring; MCU has no known I2C pads ({mcu_id}).")
+        return {"modules": new_modules, "wires": wires, "notes": notes}
     notes = list(recipe.get("notes") or [])
     notes.append(f"Inventory: salvaged sensor wired on I2C ({sns_id}).")
     return {"modules": new_modules, "wires": wires, "notes": notes}

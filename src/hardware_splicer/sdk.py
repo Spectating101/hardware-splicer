@@ -287,6 +287,209 @@ def salvage_bringup(
     return run_salvage_bringup(dict(intake), out_dir=target, export_gerber=export_gerber)
 
 
+def splice_build(
+    intake: Mapping[str, Any] | str | Path,
+    *,
+    out_dir: str | Path | None = None,
+    export_gerber: bool = False,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """Primary splice path: donor intake → splice plan → carrier KiCad compile → bench session."""
+    from .project_intake import load_project_intake, splice_and_build_from_intake
+
+    apply_engine_defaults()
+    body = load_project_intake(intake) if not isinstance(intake, Mapping) else dict(intake)
+    target = Path(out_dir) if out_dir else _out_dir("splice")
+    result = splice_and_build_from_intake(
+        body,
+        out_dir=target,
+        export_gerber=export_gerber,
+        request_id=request_id,
+    )
+    return {"schema_version": SCHEMA_VERSION, **result}
+
+
+def splice_bench_open(build_dir: str | Path, *, force: bool = False) -> Dict[str, Any]:
+    """Open or reload SPLICE_BENCH_SESSION.json for a splice build directory."""
+    from .splice_bench import open_bench_session
+
+    apply_engine_defaults()
+    session = open_bench_session(build_dir, force=force)
+    return {"schema_version": SCHEMA_VERSION, **session}
+
+
+def splice_bench_status(build_dir: str | Path) -> Dict[str, Any]:
+    """Return bench gate status; opens a session if missing."""
+    from .splice_bench import bench_status
+
+    apply_engine_defaults()
+    session = bench_status(build_dir)
+    return {"schema_version": SCHEMA_VERSION, **session}
+
+
+def splice_bench_submit(
+    build_dir: str | Path,
+    measurements: Sequence[Mapping[str, Any]],
+) -> Dict[str, Any]:
+    """Record bench measurements and close matching evidence gates."""
+    from .splice_bench import submit_bench_measurements
+
+    apply_engine_defaults()
+    session = submit_bench_measurements(build_dir, measurements)
+    return {"schema_version": SCHEMA_VERSION, **session}
+
+
+def splice_bench_submit_capture(
+    build_dir: str | Path,
+    capture_packet: Mapping[str, Any],
+) -> Dict[str, Any]:
+    """Submit bench_topology_capture.v1 observations to close splice bench gates."""
+    from .bench_capture_bridge import submit_bench_capture
+
+    apply_engine_defaults()
+    result = submit_bench_capture(str(build_dir), capture_packet)
+    return result
+
+
+def splice_bench_capture_template(build_dir: str | Path) -> Dict[str, Any]:
+    """Return (and refresh) BENCH_CAPTURE_TEMPLATE.json for open splice gates."""
+    from .bench_capture_bridge import sync_bench_session_template
+
+    apply_engine_defaults()
+    payload = sync_bench_session_template(build_dir)
+    return {"schema_version": SCHEMA_VERSION, **payload}
+
+
+def splice_golden_loop(
+    intake: Mapping[str, Any] | str | Path,
+    *,
+    out_dir: str | Path | None = None,
+    export_gerber: bool = False,
+    simulate_bench: bool = True,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """End-to-end splice loop: build → bench template → capture submit → gate closure."""
+    from .golden_loop import run_splice_golden_loop
+    from .project_intake import load_project_intake
+
+    apply_engine_defaults()
+    body = load_project_intake(intake) if not isinstance(intake, Mapping) else dict(intake)
+    target = Path(out_dir) if out_dir else _out_dir("splice_golden")
+    report = run_splice_golden_loop(
+        body,
+        out_dir=target,
+        export_gerber=export_gerber,
+        simulate_bench=simulate_bench,
+        request_id=request_id,
+    )
+    return {"schema_version": SCHEMA_VERSION, **report}
+
+
+def splice_golden_real(
+    intake: Mapping[str, Any] | str | Path,
+    *,
+    out_dir: str | Path | None = None,
+    capture_path: str | Path | None = None,
+    export_gerber: bool = False,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """Golden real S3: build then submit committed manual bench capture (not simulator)."""
+    from .golden_real_bench import run_splice_golden_real
+    from .project_intake import load_project_intake
+
+    apply_engine_defaults()
+    body = load_project_intake(intake) if not isinstance(intake, Mapping) else dict(intake)
+    target = Path(out_dir) if out_dir else _out_dir("splice_golden_real")
+    report = run_splice_golden_real(
+        body,
+        out_dir=target,
+        capture_path=capture_path,
+        export_gerber=export_gerber,
+        request_id=request_id,
+    )
+    return {"schema_version": SCHEMA_VERSION, **report}
+
+
+def donor_board_vision_enrich(intake: Mapping[str, Any]) -> Dict[str, Any]:
+    """Run donor board photo / board_evidence → functional_salvage on intake."""
+    from .board_vision_salvage import enrich_intake_with_donor_board_vision
+
+    apply_engine_defaults()
+    body, report = enrich_intake_with_donor_board_vision(dict(intake))
+    return {"schema_version": SCHEMA_VERSION, "intake": body, "donor_board_vision_report": report}
+
+
+def vision_enrich_intake(
+    intake: Mapping[str, Any],
+    *,
+    apply: bool | None = None,
+    live: bool | None = None,
+) -> Dict[str, Any]:
+    """Run vision + evidence extraction on intake attachments (Qwen/Gemini when configured)."""
+    from .evidence_extractor import enrich_intake_with_extracted_evidence
+    from .vision_evidence_assistant import build_vision_evidence_report, enrich_intake_with_vision_assistance
+
+    apply_engine_defaults()
+    body = dict(intake)
+    if apply is not None or live is not None:
+        cfg = dict(body.get("vision_assistance") or {})
+        if apply is not None:
+            cfg["apply"] = bool(apply)
+            cfg["enabled"] = True
+        if live is not None:
+            cfg["live"] = bool(live)
+            cfg["enabled"] = True
+        body["vision_assistance"] = cfg
+    body, extraction_report = enrich_intake_with_extracted_evidence(body)
+    body, vision_report = enrich_intake_with_vision_assistance(body)
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "intake": body,
+        "vision_evidence_report": vision_report,
+        "evidence_extraction_report": extraction_report,
+    }
+
+
+def vision_capabilities() -> Dict[str, Any]:
+    """Inventory of camera/vision/bench capture already in this repo."""
+    root = ROOT
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "hardware_splicer": {
+            "intake_vision": "vision_evidence_assistant.enrich_intake_with_vision_assistance",
+            "offline_attachment_inventory": "vision_inventory.merge_attachment_inventory_into_intake",
+            "evidence_notes_extractor": "evidence_extractor.enrich_intake_with_extracted_evidence",
+            "splice_bench_gates": "splice_bench.submit_bench_measurements",
+            "bench_capture_bridge": "bench_capture_bridge.submit_bench_capture",
+            "sdk_entrypoints": [
+                "donor_board_vision_enrich",
+                "vision_enrich_intake",
+                "splice_bench_submit_capture",
+                "splice_golden_loop",
+                "splice_build (donor board_evidence / photos → functional_salvage automatically)",
+            ],
+            "example_vision_splice_intake": "examples/intakes/splice_robot_drive_vision_brief.json",
+            "cli": "scripts/hardware_splicer.py intake --vision-live --vision-apply",
+        },
+        "circuit_ai": {
+            "qwen_board_vision": "apps/circuit-ai/src/vision/qwen_board_vision.py",
+            "bench_topology_capture": "apps/circuit-ai/src/intelligence/bench_topology_capture.py",
+            "measurement_session_progress": "apps/circuit-ai/src/intelligence/measurement_session_progress.py",
+            "api_endpoints": [
+                "POST /vision/qwen/board-evidence",
+                "POST /hardware/topology-capture/template",
+                "POST /hardware/topology-capture/convert",
+            ],
+            "dum_e_archive": "apps/circuit-ai/docs/archive/2026-01-27_root_docs/DUM_E_STATUS.md",
+            "multi_view_capture": "apps/circuit-ai/scripts/multi_view_capture.py",
+        },
+        "policy": (
+            "Vision and photos produce candidates and measurement queues — they do not close "
+            "splice power-on gates without bench_topology_capture or splice_bench_submit rows."
+        ),
+    }
+
+
 def verify_engine(
     *,
     build_ids: Sequence[str] | None = None,
@@ -393,12 +596,39 @@ def sdk_info() -> Dict[str, Any]:
         "name": "Hardware-Splicer Engine",
         "repo_root": str(ROOT),
         "strengths": [
+            "Donor splice: dissect boards → evidence gates → carrier KiCad compile (S2 demos)",
+            "S3 bench sessions: close measurement gates before power-on (agent/MCP/API)",
             "Inventory-constrained salvage bring-up from junk-drawer parts",
             "NL phrase / module list / canvas graph → wired schematic + placed PCB",
             "KiCad ERC/DRC as external compile truth (not LLM self-grade)",
             "Honest quality flags: copper_tier, fab_recommendation, build_ready",
             "Scratch and salvage share one engine (material_mode = parts budget only)",
         ],
+        "agent_handoff": {
+            "doc": "docs/AGENT_HANDOFF.md",
+            "recommended_flow": [
+                "hs_sdk_info",
+                "hs_vision_capabilities",
+                "hs_donor_board_vision (photos/board_evidence → functional_salvage)",
+                "hs_splice_build",
+                "hs_splice_bench_capture_template",
+                "fill template → hs_splice_bench_submit_capture",
+                "hs_inspect_fab",
+            ],
+            "shortcut_flow": [
+                "hs_splice_golden_loop (build + template + simulated bench closure for CI/demo)",
+            ],
+            "primary_tools": [
+                "hs_splice_build",
+                "hs_splice_golden_loop",
+                "hs_donor_board_vision",
+                "hs_vision_enrich_intake",
+                "hs_splice_bench_capture_template",
+                "hs_splice_bench_status",
+                "hs_splice_bench_submit_capture",
+                "hs_inspect_fab",
+            ],
+        },
         "not_yet": [
             "Flux-class interactive editor and parts marketplace UX",
             "Guaranteed autoroute success on every topology (FreeRouting is opt-in/heavy)",

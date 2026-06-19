@@ -22,7 +22,9 @@ intent (NL, parts, schematic, netlist)
 
 The **editor comes after** the engine can compile without a human fixing wires on canvas.
 
-**Differentiators we keep on top of that core:** salvage, parts-bin intake, evidence/casefiles, deterministic prove gates.
+**Differentiators we keep on top of that core:** **splicing** (donor PCB dissection → carrier compile), salvage intake, evidence/casefiles, deterministic prove gates.
+
+**Splice product reference (thesis, tiers, roadmap):** [SPLICE_PRODUCT.md](./SPLICE_PRODUCT.md) · verify bar: `make verify-splice`
 
 ---
 

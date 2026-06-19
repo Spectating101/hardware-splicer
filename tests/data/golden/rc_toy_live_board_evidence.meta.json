@@ -1,0 +1,14 @@
+{
+  "source_image": "tests/data/golden/rc_toy_motor_board.jpg",
+  "provider": "qwen",
+  "mode": "live",
+  "model": "qwen3-vl-flash",
+  "image_sha256": "8e03196be3ada821d5d8e975d0f8913e22b98c4b6476e428f70dfffc6806b317",
+  "usage": {
+    "input_tokens": 2762,
+    "output_tokens": 548,
+    "estimated_usd": 0.000179,
+    "elapsed_s": 7.615
+  },
+  "estimated_usd": 0.000179
+}

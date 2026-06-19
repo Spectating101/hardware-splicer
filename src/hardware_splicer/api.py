@@ -21,6 +21,7 @@ from .jobs import JobBackend, artifact_manifest, build_output_archive
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
 from .project_intake import plan_project_from_intake, run_project_intake, splice_and_build_from_intake
+from .splice_bench import bench_status, submit_bench_measurements
 from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
@@ -71,6 +72,42 @@ class SpliceAndBuildRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+
+
+class SpliceBenchStatusRequest(BaseModel):
+    build_dir: str
+
+
+class SpliceBenchSubmitRequest(BaseModel):
+    build_dir: str
+    measurements: list[Dict[str, Any]] = Field(default_factory=list)
+
+
+class VisionEnrichRequest(BaseModel):
+    intake: Dict[str, Any]
+    apply: bool | None = None
+    live: bool | None = None
+
+
+class DonorBoardVisionRequest(BaseModel):
+    intake: Dict[str, Any]
+
+
+class SpliceBenchCaptureRequest(BaseModel):
+    build_dir: str
+    capture: Dict[str, Any]
+
+
+class SpliceBenchTemplateRequest(BaseModel):
+    build_dir: str
+
+
+class SpliceGoldenLoopRequest(BaseModel):
+    intake: Dict[str, Any]
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = False
+    simulate_bench: bool = True
 
 
 class ComposeRequest(BaseModel):
@@ -614,6 +651,133 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "splice_and_build_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/splice-bench/status")
+    def splice_bench_status_route(request: SpliceBenchStatusRequest) -> Dict[str, Any]:
+        try:
+            build_dir = Path(request.build_dir).resolve()
+            if not build_dir.is_dir():
+                raise ValueError(f"build_dir not found: {build_dir}")
+            session = bench_status(build_dir)
+            return {"ok": True, **session}
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "splice_bench_status_error", str(exc)) from exc
+
+    @app.post("/v1/splice-bench/submit")
+    def splice_bench_submit_route(request: SpliceBenchSubmitRequest) -> Dict[str, Any]:
+        try:
+            build_dir = Path(request.build_dir).resolve()
+            if not build_dir.is_dir():
+                raise ValueError(f"build_dir not found: {build_dir}")
+            session = submit_bench_measurements(build_dir, request.measurements)
+            return {"ok": True, **session}
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "splice_bench_submit_error", str(exc)) from exc
+
+    @app.get("/v1/vision/capabilities")
+    def vision_capabilities_route() -> Dict[str, Any]:
+        from .sdk import vision_capabilities
+
+        return vision_capabilities()
+
+    @app.post("/v1/vision/enrich-intake")
+    def vision_enrich_intake_route(request: VisionEnrichRequest) -> Dict[str, Any]:
+        from .sdk import vision_enrich_intake
+
+        try:
+            return vision_enrich_intake(
+                request.intake,
+                apply=request.apply,
+                live=request.live,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "vision_enrich_error", str(exc)) from exc
+
+    @app.post("/v1/donor-board-vision")
+    def donor_board_vision_route(request: DonorBoardVisionRequest) -> Dict[str, Any]:
+        from .sdk import donor_board_vision_enrich
+
+        try:
+            return donor_board_vision_enrich(request.intake)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "donor_board_vision_error", str(exc)) from exc
+
+    @app.post("/v1/splice-bench/submit-capture")
+    def splice_bench_submit_capture_route(request: SpliceBenchCaptureRequest) -> Dict[str, Any]:
+        from .sdk import splice_bench_submit_capture
+
+        try:
+            build_dir = Path(request.build_dir).resolve()
+            if not build_dir.is_dir():
+                raise ValueError(f"build_dir not found: {build_dir}")
+            return splice_bench_submit_capture(build_dir, request.capture)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "splice_bench_capture_error", str(exc)) from exc
+
+    @app.post("/v1/splice-bench/capture-template")
+    def splice_bench_capture_template_route(request: SpliceBenchTemplateRequest) -> Dict[str, Any]:
+        from .sdk import splice_bench_capture_template
+
+        try:
+            build_dir = Path(request.build_dir).resolve()
+            if not build_dir.is_dir():
+                raise ValueError(f"build_dir not found: {build_dir}")
+            return splice_bench_capture_template(build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "splice_bench_template_error", str(exc)) from exc
+
+    @app.post("/v1/splice-golden-loop")
+    def splice_golden_loop_route(request: SpliceGoldenLoopRequest) -> Dict[str, Any]:
+        from .sdk import splice_golden_loop
+
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                project_slug = _slug(
+                    str(
+                        request.intake.get("project_name")
+                        or request.intake.get("goal")
+                        or request.intake.get("name")
+                        or "splice_golden_loop"
+                    )
+                )
+                target = root / "splice_golden_loops" / project_slug / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            return splice_golden_loop(
+                request.intake,
+                out_dir=resolved,
+                export_gerber=bool(request.export_gerber),
+                simulate_bench=bool(request.simulate_bench),
+                request_id=request_id,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "splice_golden_loop_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/intake-run")
     def intake_run(request: IntakeRunRequest) -> Dict[str, Any]:

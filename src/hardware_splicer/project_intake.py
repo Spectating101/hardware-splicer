@@ -32,15 +32,42 @@ PROJECT_LEVELS = [
     "production_ready_project_package",
 ]
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _resolve_intake_fixture_refs(value: Any) -> Any:
+    """Expand @examples/... JSON file references inside intake payloads."""
+    if isinstance(value, str) and value.startswith("@"):
+        rel = value[1:].lstrip("/")
+        path = (REPO_ROOT / rel).resolve()
+        if not path.is_file():
+            raise ValueError(f"intake fixture not found: {value} -> {path}")
+        return _resolve_intake_fixture_refs(json.loads(path.read_text(encoding="utf-8")))
+    if isinstance(value, list):
+        return [_resolve_intake_fixture_refs(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _resolve_intake_fixture_refs(item) for key, item in value.items()}
+    return value
+
+
+def _donor_context_from_intake(body: Mapping[str, Any]) -> Dict[str, Any]:
+    context: Dict[str, Any] = {}
+    for key in ("analysis", "circuit", "functional_salvage", "donor_boards"):
+        if key in body and body.get(key) is not None:
+            context[key] = body[key]
+    return context
+
 
 def load_project_intake(path: str | Path) -> Dict[str, Any]:
     source = Path(path).resolve()
     data = json.loads(source.read_text(encoding="utf-8"))
     if not isinstance(data, Mapping):
         raise ValueError("project intake file must contain a JSON object")
-    intake = dict(data)
+    intake = _resolve_intake_fixture_refs(dict(data))
     intake.setdefault("source_file", str(source))
-    return intake
+    from .repair_intake import apply_repair_intake_context
+
+    return apply_repair_intake_context(intake)
 
 
 def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = False) -> Dict[str, Any]:
@@ -48,6 +75,9 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
     from .vision_inventory import merge_attachment_inventory_into_intake
 
     body, offline_inventory = merge_attachment_inventory_into_intake(body)
+    from .board_vision_salvage import enrich_intake_with_donor_board_vision
+
+    body, donor_board_vision_report = enrich_intake_with_donor_board_vision(body)
     if skip_vision:
         vision_report = {"enabled": False, "skipped": True, "offline_inventory": offline_inventory}
         body, extraction_report = enrich_intake_with_extracted_evidence(body)
@@ -76,6 +106,7 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
         constraints=constraints,
         project_name=project_name,
         budget=budget,
+        donor_context=_donor_context_from_intake(body),
     )
     if salvage_package.get("recommended_build_id"):
         archetype = _archetype_from_build_id(str(salvage_package["recommended_build_id"]), archetype)
@@ -126,6 +157,7 @@ def plan_project_from_intake(intake: Mapping[str, Any], *, skip_vision: bool = F
         "assumptions": assumptions,
         "vision_evidence_report": vision_report,
         "evidence_extraction_report": extraction_report,
+        "donor_board_vision_report": donor_board_vision_report,
         "evidence_summary": _evidence_summary(evidence, base_dir),
         "missing_info": missing,
         "scenario": scenario,
@@ -178,7 +210,11 @@ def splice_and_build_from_intake(
             goal=goal,
             out_dir=out_path,
         )
-    intake_file.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    intake_snapshot = dict(plan)
+    for key in ("circuit", "functional_salvage", "evidence_notes", "available_parts", "salvage_mode", "constraints"):
+        if key in intake and intake.get(key) is not None:
+            intake_snapshot[key] = intake[key]
+    intake_file.write_text(json.dumps(intake_snapshot, indent=2), encoding="utf-8")
 
     graph_input = salvage_package.get("graph_input") or salvage_package.get("splice_package")
     resolved_modules = salvage_package.get("resolved_modules") or []
@@ -286,6 +322,27 @@ def splice_and_build_from_intake(
         encoding="utf-8",
     )
 
+    from .splice_bench import open_bench_session
+    from .bench_capture_bridge import sync_bench_session_template
+
+    bench_session = open_bench_session(out_path)
+    template_sync = sync_bench_session_template(out_path)
+    bench_session = template_sync.get("session") or bench_session
+    bench_capture_template = (template_sync.get("template") or {}).get("template_path")
+
+    vision_report = _to_dict(plan.get("vision_evidence_report") or {}, "intake_plan.vision_evidence_report")
+    extraction_report = _to_dict(plan.get("evidence_extraction_report") or {}, "intake_plan.evidence_extraction_report")
+    donor_board_vision_report = _to_dict(
+        plan.get("donor_board_vision_report") or {},
+        "intake_plan.donor_board_vision_report",
+    )
+    vision_report_file = out_path / "VISION_EVIDENCE_REPORT.json"
+    extraction_report_file = out_path / "EVIDENCE_EXTRACTION_REPORT.json"
+    donor_vision_file = out_path / "DONOR_BOARD_VISION_REPORT.json"
+    vision_report_file.write_text(json.dumps(vision_report, indent=2), encoding="utf-8")
+    extraction_report_file.write_text(json.dumps(extraction_report, indent=2), encoding="utf-8")
+    donor_vision_file.write_text(json.dumps(donor_board_vision_report, indent=2), encoding="utf-8")
+
     return {
         "ok": bool(compile_result.ok and gate.get("build_ready")),
         "request_id": request_id or plan.get("project_name"),
@@ -316,7 +373,26 @@ def splice_and_build_from_intake(
             "compile_casefile": compile_casefile,
             "compiler_evidence_patch": str(compiler_patch_file) if compiler_patch else None,
             "post_splice_scoring": str(post_metrics_file),
+            "bench_session": bench_session.get("session_path"),
+            "bench_capture_template": bench_capture_template or "",
+            "bringup_card": str(bringup_json) if bringup_json.is_file() else "",
+            "bringup_card_md": str(bringup_md) if bringup_md.is_file() else "",
+            "vision_evidence_report": str(vision_report_file),
+            "evidence_extraction_report": str(extraction_report_file),
+            "donor_board_vision_report": str(donor_vision_file),
         },
+        "bench_session": {
+            "readiness": bench_session.get("readiness"),
+            "open_gate_count": bench_session.get("open_gate_count"),
+            "critical_open_count": bench_session.get("critical_open_count"),
+            "power_on_authorized": bench_session.get("power_on_authorized"),
+            "next_actions": bench_session.get("next_actions"),
+            "session_path": bench_session.get("session_path"),
+            "bench_capture_template": bench_capture_template,
+        },
+        "vision_evidence_report": vision_report,
+        "evidence_extraction_report": extraction_report,
+        "donor_board_vision_report": donor_board_vision_report,
         "compiler_evidence_patch": compiler_patch,
         "post_splice_planning": {
             "planning_confidence": post_plan.get("planning_confidence"),

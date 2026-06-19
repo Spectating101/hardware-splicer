@@ -25,8 +25,16 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"vl53|tof|time.?of.?flight|range sensor|lidar", re.I), "vl53l0x_tof", "sns", 0.88),
     (re.compile(r"vl6180", re.I), "vl6180x-tof", "sns", 0.86),
     (re.compile(r"ultrasonic|hc-?sr04|sonar", re.I), "hc-sr04", "sns", 0.85),
+    (re.compile(r"limit.?switch|endstop|end.?stop", re.I), "limit-switch-3pin", "sns", 0.9),
     (re.compile(r"sg90", re.I), "sg90", "act", 0.92),
     (re.compile(r"mg996r", re.I), "mg996r", "act", 0.9),
+    (
+        re.compile(r"a4988|stepper.*driver|driver.*stepper|stepper.*section|inkjet.*motion.*board|printer.*motion.*board", re.I),
+        "a4988-stepper",
+        "drv",
+        0.86,
+    ),
+    (re.compile(r"stepper.*motor|28byj|nema", re.I), "28byj48_stepper", "mot", 0.84),
     (re.compile(r"l298n", re.I), "l298n", "drv", 0.9),
     (re.compile(r"dc.*gear.*motor|gear.*motor|brushed.*motor|dc[_ ]motor|6v.*motor", re.I), "dc_motor_3v_6v", "mot", 0.86),
     (re.compile(r"12v.*gear.*motor|geared.*motor.*12", re.I), "dc_geared_motor_12v", "mot", 0.84),
@@ -45,7 +53,10 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
         0.92,
     ),
     (
-        re.compile(r"barrel|12v.*(?:supply|adapter)|(?:wall wart.*12v|12v.*wall wart)", re.I),
+        re.compile(
+            r"barrel|(?:12|24)v.*(?:supply|adapter|psu)|(?:wall wart.*(?:12|24)v|(?:12|24)v.*wall wart)",
+            re.I,
+        ),
         "dc-barrel-12v",
         "pwr",
         0.8,
@@ -57,7 +68,7 @@ _POWER_TOPOLOGY_USB = re.compile(
     re.I,
 )
 _POWER_TOPOLOGY_BARREL = re.compile(
-    r"barrel|12v.*(?:supply|adapter)|(?:wall wart.*12v|12v.*wall wart)",
+    r"barrel|(?:12|24)v.*(?:supply|adapter|psu)|(?:wall wart.*(?:12|24)v|(?:12|24)v.*wall wart)",
     re.I,
 )
 
@@ -324,10 +335,38 @@ def resolve_parts_to_modules_with_llm(
 
 
 _MOTOR_PART_TYPES = frozenset({"dc_motor", "motor", "gear_motor", "brushed_motor"})
+_STEPPER_PART_TYPES = frozenset({"stepper_motor", "stepper"})
 _MOTOR_MODULE_PREFIXES = ("dc_motor", "dc_geared_motor", "vibration_motor")
 _DRIVER_MODULE_IDS = frozenset(
-    {"l298n", "drv8833-motor", "l9110-motor", "tb6612fng-motor", "bts7960-motor", "mosfet-irlz44n"}
+    {
+        "l298n",
+        "drv8833-motor",
+        "l9110-motor",
+        "tb6612fng-motor",
+        "bts7960-motor",
+        "mosfet-irlz44n",
+        "a4988-stepper",
+        "tmc2209-stepper",
+        "drv8825_stepper",
+    }
 )
+_STEPPER_DRIVER_MODULE_IDS = frozenset({"a4988-stepper", "tmc2209-stepper", "drv8825_stepper"})
+
+
+def _inventory_has_stepper_motors(
+    parts: List[Mapping[str, Any]] | None,
+    resolved_modules: List[Mapping[str, Any]],
+) -> bool:
+    for part in parts or []:
+        ptype = str(part.get("type") or "").lower()
+        text = _part_text(part).lower()
+        if ptype in _STEPPER_PART_TYPES or "stepper" in text:
+            return True
+    for row in resolved_modules:
+        module_id = str(row.get("module_id") or "")
+        if module_id in {"28byj48_stepper"}:
+            return True
+    return False
 
 
 def _inventory_has_dc_motors(
@@ -335,9 +374,12 @@ def _inventory_has_dc_motors(
     resolved_modules: List[Mapping[str, Any]],
 ) -> bool:
     for part in parts or []:
-        if str(part.get("type") or "").lower() in _MOTOR_PART_TYPES:
-            return True
+        ptype = str(part.get("type") or "").lower()
         text = _part_text(part).lower()
+        if ptype in _STEPPER_PART_TYPES or "stepper" in text:
+            continue
+        if ptype in _MOTOR_PART_TYPES:
+            return True
         if "motor" in text and "driver" not in text:
             return True
     for row in resolved_modules:
@@ -359,6 +401,20 @@ def fill_salvage_gaps(
     has_driver = bool(module_ids & _DRIVER_MODULE_IDS) or any(
         str(row.get("role") or "") == "drv" and row.get("module_id") for row in rows
     )
+    if _inventory_has_stepper_motors(parts, rows) and not (module_ids & _STEPPER_DRIVER_MODULE_IDS):
+        rows.append(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "part_name": "stepper driver (gap fill)",
+                "module_id": "a4988-stepper",
+                "role": "drv",
+                "source": "gap_fill",
+                "confidence": 0.72,
+                "matched_on": "stepper_motor_without_driver",
+            }
+        )
+        module_ids.add("a4988-stepper")
+        has_driver = True
     if _inventory_has_dc_motors(parts, rows) and not has_driver:
         rows.append(
             {

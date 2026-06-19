@@ -20,10 +20,13 @@ Not “clone their marketing.” It means a user can do in Circuit.AI what they 
 
 ## Where we already pull ahead (if engine holds)
 
+- **Splice** — donor PCB functional blocks → splice plan → carrier board (`make verify-splice`)
 - Salvage / junk-drawer → wired build
 - Headless CI compile (pytest, golden manifests, casefiles)
 - Robotics / mech proof bundles
 - Evidence-first fab gate (not “looks fine on canvas”)
+
+Product framing: [SPLICE_PRODUCT.md](./SPLICE_PRODUCT.md) — own splice first; Flux-class editor is expansion on the same spine, not a reposition.
 
 ## Engine order (no UI detour)
 

@@ -37,6 +37,8 @@ playwright-report/
 .cache/
 artifacts/
 data/
+!tests/data/
+!tests/data/**
 logs/
 runs/
 output/

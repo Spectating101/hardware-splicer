@@ -1,0 +1,70 @@
+{
+  "schema_version": "board_evidence.v1",
+  "components": [],
+  "markings": [
+    {
+      "id": "playmobil_logo",
+      "label": "Playmobil brand logo",
+      "kind": "text",
+      "confidence": 0.95,
+      "bbox": [
+        293,
+        470,
+        736,
+        552
+      ],
+      "missing_evidence": "",
+      "warnings": ""
+    }
+  ],
+  "regions": [
+    {
+      "id": "control_housing",
+      "label": "Controller housing with joysticks and steering wheel",
+      "kind": "plastic_shell",
+      "confidence": 0.98,
+      "bbox": [
+        68,
+        48,
+        948,
+        970
+      ],
+      "missing_evidence": "",
+      "warnings": ""
+    }
+  ],
+  "damage": [],
+  "connectors": [
+    {
+      "id": "power_cable_connector",
+      "label": "Blue power cable connector",
+      "kind": "cable",
+      "confidence": 0.9,
+      "bbox": [
+        448,
+        0,
+        560,
+        52
+      ],
+      "missing_evidence": "Internal PCB connection point not visible",
+      "warnings": ""
+    }
+  ],
+  "test_points": [],
+  "salvage_candidates": [
+    {
+      "id": "motor_driver_section",
+      "label": "Motor driver IC and associated circuitry",
+      "kind": "integrated_circuit",
+      "confidence": 0.7,
+      "bbox": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "missing_evidence": "Under plastic casing; no visible markings or pins. Requires disassembly to confirm location and part number.",
+      "warnings": "No visible voltage or current ratings; assume low-power DC motor control. Required tests: continuity between motor terminals and driver outputs, supply voltage at driver VCC, logic input response to joystick signals."
+    }
+  ]
+}

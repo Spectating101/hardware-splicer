@@ -1,0 +1,62 @@
+{
+  "project_name": "splice_salvaged_robot_drive_vision",
+  "goal": "Splice the motor driver and geared motors from a dead RC toy into a small robot drive base with a salvaged ESP32 controller",
+  "salvage_mode": true,
+  "donor_board_vision": {
+    "enabled": true,
+    "live": false,
+    "merge_with_fixture": false
+  },
+  "available_parts": [
+    {
+      "name": "dead RC toy car donor board",
+      "type": "donor_board",
+      "condition": "salvaged",
+      "notes": "Dual H-bridge section and motor harnesses still intact"
+    },
+    {
+      "name": "left 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "condition": "salvaged"
+    },
+    {
+      "name": "right 6V DC gear motor",
+      "type": "dc_motor",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "condition": "salvaged"
+    },
+    {
+      "name": "ESP32 dev board from parts bin",
+      "type": "microcontroller",
+      "condition": "salvaged"
+    },
+    {
+      "name": "front ToF range sensor",
+      "type": "tof_range"
+    }
+  ],
+  "constraints": {
+    "runtime_min": 20,
+    "max_speed_mps": 0.45,
+    "mass_kg": 1.1,
+    "battery_voltage_v": 7.4,
+    "battery_capacity_mah": 2200
+  },
+  "circuit": {
+    "mode": "circuit_board_system",
+    "boards": [
+      {
+        "board_id": "donor_rc_car_ctrl",
+        "board_name": "RC toy motor controller donor",
+        "board_evidence": "@tests/data/board_evidence_rc_motor_donor.json"
+      }
+    ]
+  },
+  "evidence_notes": [
+    "splice:keep motor harness intact on J_MOTOR_L and J_MOTOR_R",
+    "splice:measure VMOTOR before connecting ESP32 logic"
+  ]
+}

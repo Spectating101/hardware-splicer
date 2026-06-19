@@ -1,5 +1,11 @@
 # Proposal: Circuit.AI Hardware Splicer
 
+> **June 2026 update:** The canonical competition package lives at the repo root:
+> [`docs/COMPETITION_PROPOSAL.md`](../../../../../../docs/COMPETITION_PROPOSAL.md) (full proposal) and
+> [`docs/COMPETITION_HANDOFF.md`](../../../../../../docs/COMPETITION_HANDOFF.md) (5-minute judge path).
+> Agent entry: [`docs/AGENT_HANDOFF.md`](../../../../../../docs/AGENT_HANDOFF.md).
+> This file retains the Circuit-AI authority-casefile thread; the **splice spine** (donor → carrier → bench) is now the primary competition demo.
+
 ## Project Title
 
 Circuit.AI Hardware Splicer: an evidence-gated AI agent for circuit board
@@ -21,11 +27,11 @@ engineering assets. Unlike a simple PCB image labeler, the system builds an
 authority casefile from board photos, markings, public references, measured
 pinouts, voltage/current/thermal evidence, and bench outcomes. The agent is
 designed to refuse unsafe overclaims: visual evidence can plan measurements, but
-only trusted physical evidence can authorize repair or reuse. During July-August
-2026, the project will extend the current backend prototype into a competition
-demo covering multi-photo board intake, Qwen/vision-assisted evidence extraction,
-measurement closure, and a bilingual frontend showcase for semiconductor and
-electronics repair workflows.
+only trusted physical evidence can authorize repair or reuse. The June 2026 prototype adds an **agent-first splice spine** (SDK / MCP / HTTP):
+donor vision → splice plan → KiCad carrier compile → bench gate closure, with
+golden CI paths (`make verify-splice`, `verify-splice-loop`, `verify-splice-real-bench`).
+During July-August 2026, the project will extend this into a **measurement/capture
+interface**, bilingual showcase, and the CH340C authority-casefile demo described below.
 
 ## Problem
 
@@ -67,7 +73,21 @@ casefile endpoint and frontend showcase.
 
 ## Current Prototype State
 
-The current repository contains a working backend and frontend showcase.
+### Splice spine (primary — `src/hardware_splicer/`)
+
+| Tier | Command | Status |
+|------|---------|--------|
+| S2 compile | `make verify-splice` | ✅ CI |
+| S3 golden loop (simulated bench) | `make verify-splice-loop` | ✅ CI (3 cases) |
+| S3 golden real (photo + Qwen pin + manual capture) | `make verify-splice-real-bench` | ✅ |
+
+Agent surfaces: `hs_splice_build`, `hs_splice_golden_loop`, `hs_splice_bench_submit_capture` (see `docs/AGENT_HANDOFF.md`).
+
+Golden artifacts: `tests/data/golden/rc_toy_motor_board.jpg`, `rc_toy_live_board_evidence.json`, `rc_motor_manual_bench_capture.v1.json`.
+
+### Circuit-AI authority casefile (parallel — `apps/circuit-ai/`)
+
+The repository also contains a working backend and frontend showcase.
 
 Live showcase route:
 
@@ -166,16 +186,16 @@ they are useful but keeps electrical authority tied to measured evidence.
 
 ## July-August Development Plan
 
+**Spine complete (June 2026):** agent SDK/MCP/HTTP, golden splice loop CI, live Qwen pin workflow, repair-café intake fields, Rossmann-style PSU/thermal gates.
+
 If shortlisted, the token subsidy will be used to develop and evaluate:
 
-1. Multi-photo board intake and evidence fusion.
-2. Qwen-assisted visual extraction for connectors, IC markings, damage, and
-   candidate reusable functions.
-3. Real-board case corpus with at least 10 measured board sessions.
-4. Measurement workflow UI for continuity, voltage, current, thermal, and
-   functional proof.
-5. Bilingual English/Traditional Chinese demo mode.
-6. Final competition presentation with a live CH340C USB-serial reuse case.
+1. **Measurement / capture UI** — web form for `BENCH_CAPTURE_TEMPLATE` (interface phase).
+2. Multi-photo board intake and evidence fusion on the MCP path.
+3. Real-board case corpus with at least 10 measured board sessions (partner cafés / lab).
+4. Bilingual English/Traditional Chinese demo mode.
+5. Final presentation: **RC golden splice** + **CH340C authority casefile** in one narrative.
+6. Demo video and architecture diagram.
 
 ## Demonstration Scenario
 
@@ -257,8 +277,11 @@ The monthly token subsidy would be used for:
 ## Summary
 
 Circuit.AI Hardware Splicer aims to make unknown circuit boards legible,
-measurable, reusable, and safer to work with. The current prototype already
-shows the core authority transition. The competition period would be used to
-turn this into a polished AI-agent demo for semiconductor/electronics repair,
-reuse, and education.
+measurable, reusable, and safer to work with. The June 2026 prototype delivers
+an **agent-native splice spine** with honest validity separation (vision vs bench
+vs KiCad DRC) and reproducible golden verification. The competition period
+focuses on **interface and presentation** — measurement UI, bilingual demo, and
+the CH340C authority showcase — atop this foundation.
+
+**Canonical docs:** `docs/COMPETITION_PROPOSAL.md` · `docs/COMPETITION_HANDOFF.md` · `docs/AGENT_HANDOFF.md`
 

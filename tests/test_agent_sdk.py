@@ -26,6 +26,10 @@ def test_sdk_info_and_catalog() -> None:
     info = sdk_info()
     assert info["schema_version"] == "hardware_splicer.sdk.v1"
     assert "salvage" in " ".join(info["strengths"]).lower()
+    primary = info["agent_handoff"]["primary_tools"]
+    assert "hs_splice_golden_loop" in primary
+    shortcut = info["agent_handoff"].get("shortcut_flow") or []
+    assert any("hs_splice_golden_loop" in row for row in shortcut)
     builds = list_catalog_builds()
     assert builds["count"] >= 10
     assert "sensor_logger" in builds["build_ids"]

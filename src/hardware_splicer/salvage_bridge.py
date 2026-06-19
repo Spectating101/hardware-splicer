@@ -97,6 +97,7 @@ def build_intake_salvage_package(
     constraints: Mapping[str, Any] | None = None,
     project_name: str | None = None,
     budget: Mapping[str, Any] | None = None,
+    donor_context: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Run Circuit-AI salvage + DIY planners on intake-normalized parts."""
     ensure_circuit_import_path()
@@ -110,12 +111,24 @@ def build_intake_salvage_package(
         "inventory": parts,
         "constraints": dict(constraints or {}),
     }
+    if donor_context:
+        for key in ("analysis", "circuit", "functional_salvage", "donor_boards"):
+            if key in donor_context and donor_context.get(key) is not None:
+                payload[key] = donor_context[key]
     constraints_map = dict(constraints or {})
     splice_plan = SalvageSplicePlanner().plan(payload)
     diy_plan = build_diy_project_engineering_plan(payload)
     resolved_modules, salvage_resolution = resolve_parts_to_modules_with_llm(parts, goal=goal)
     resolved_modules = fill_salvage_gaps(resolved_modules, parts=parts)
     build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
+
+    from .catalog import CATALOG_BUILD_IDS
+
+    explicit_build = str(
+        constraints_map.get("target_build_id") or constraints_map.get("build_id") or ""
+    ).strip()
+    if explicit_build in CATALOG_BUILD_IDS:
+        build_id = explicit_build
 
     from .integrations.qwen_workshop_review import (
         apply_workshop_review,

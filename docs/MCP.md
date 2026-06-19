@@ -6,6 +6,17 @@ Expose the **compile engine** (not the legacy Circuit-AI generative stubs) to an
 
 | Capability | Tool / API |
 |------------|------------|
+| **Agent handoff (start here)** | [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md) |
+| Donor splice + carrier compile | `hs_splice_build` / `POST /v1/splice-and-build` |
+| S3 golden loop (one-shot) | `hs_splice_golden_loop` / `POST /v1/splice-golden-loop` |
+| S3 bench gate status | `hs_splice_bench_status` / `POST /v1/splice-bench/status` |
+| S3 bench measurements | `hs_splice_bench_submit` / `POST /v1/splice-bench/submit` |
+| Donor board → functional_salvage | `hs_donor_board_vision` / `POST /v1/donor-board-vision` |
+| S3 bench capture template | `hs_splice_bench_capture_template` / `POST /v1/splice-bench/capture-template` |
+| S3 bench capture packet | `hs_splice_bench_submit_capture` / `POST /v1/splice-bench/submit-capture` |
+| Intake photo vision | `hs_vision_enrich_intake` / `POST /v1/vision/enrich-intake` |
+| Vision inventory | `hs_vision_capabilities` / `GET /v1/vision/capabilities` |
+| Fab package review | `hs_inspect_fab` |
 | Junk-drawer parts → module IDs | `hs_resolve_parts` |
 | Salvage plan (fast, no KiCad) | `hs_plan_salvage` |
 | NL / modules / canvas → PCB | `hs_compose` |
@@ -76,6 +87,10 @@ from hardware_splicer.sdk import (
     resolve_inventory_parts,
     salvage_bringup,
     sdk_info,
+    splice_build,
+    splice_bench_status,
+    splice_bench_submit,
+    inspect_fab_build_dir,
 )
 
 print(sdk_info())
@@ -101,14 +116,17 @@ For remote agents or multi-tenant hosts:
 python scripts/hardware_splicer.py serve --host 127.0.0.1 --port 8787
 ```
 
-Key routes: `POST /v1/compose`, `POST /v1/splice-and-build`, `POST /v1/engine-verify`.
+Key routes: `POST /v1/splice-and-build`, `POST /v1/splice-bench/status`, `POST /v1/splice-bench/submit`, `POST /v1/compose`, `POST /v1/engine-verify`.
+
+Full agent flow: [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md).
 
 ## Suggested agent workflow
 
-1. `hs_engine_doctor` — abort early if KiCad/node missing
-2. `hs_resolve_parts` or `hs_plan_salvage` — understand inventory
-3. `hs_compose` or `hs_salvage_bringup` — compile
-4. Read `design_quality_gate` / `kicad_drc_errors` in response — **do not claim fab-ready if `fabrication_ready` is false**
+1. `hs_sdk_info` or read `docs/AGENT_HANDOFF.md`
+2. `hs_engine_doctor` — abort early if KiCad/node missing
+3. **Splice path:** `hs_splice_build` → `hs_splice_bench_status` → `hs_splice_bench_submit` → `hs_inspect_fab`
+4. **Scratch/salvage compose path:** `hs_resolve_parts` or `hs_plan_salvage` → `hs_compose` or `hs_salvage_bringup`
+5. Read `design_quality_gate` / `bench_session.power_on_authorized` — **do not claim fab-ready or power-on-safe without both**
 
 ## Environment
 

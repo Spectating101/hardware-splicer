@@ -1,0 +1,108 @@
+{
+  "schema_version": "functional_salvage.v1",
+  "mode": "functional_salvage_assessment",
+  "board_id": "donor_rc_car_ctrl",
+  "board_role": "actuator_driver",
+  "verdict": "ready_after_measurements",
+  "reusable_blocks": [
+    {
+      "block_id": "donor_rc_car_ctrl_motor_driver_hbridge",
+      "board_id": "donor_rc_car_ctrl",
+      "name": "Dual H-bridge motor driver section",
+      "function_type": "actuator_driver",
+      "capabilities": ["actuator_driver", "motor_or_load", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["U3", "U4", "MOTOR_A", "MOTOR_B"],
+      "connector_refs": ["J_MOTOR_L", "J_MOTOR_R", "J_LOGIC"],
+      "nets": ["VMOTOR", "MOTOR_A+", "MOTOR_A-", "MOTOR_B+", "MOTOR_B-", "GND"],
+      "confidence": 0.82,
+      "extractability": {
+        "class": "connector_reuse",
+        "action": "Reuse through labeled connector or harness after pinout, voltage, and ground gates close.",
+        "requires_layout_confirmation": false
+      },
+      "status": "reuse_ready",
+      "reuse_value_score": 0.88,
+      "suggested_uses": ["low-voltage load controller", "motor test jig", "motion or fan driver"],
+      "rationale": "Discrete dual H-bridge stage feeding geared motor harnesses; keep motor connectors intact.",
+      "evidence_gates": [
+        {
+          "gate_id": "vmotor_rail",
+          "gate_type": "voltage",
+          "prompt": "Measure VMOTOR at J_LOGIC under no load and with one motor connected",
+          "status": "open"
+        },
+        {
+          "gate_id": "motor_harness_continuity",
+          "gate_type": "continuity",
+          "prompt": "Confirm motor harness pairs are not shorted to ground before splice",
+          "status": "open"
+        }
+      ],
+      "missing_evidence": [
+        "Measure VMOTOR at J_LOGIC under no load and with one motor connected",
+        "Confirm motor harness pairs are not shorted to ground before splice"
+      ]
+    },
+    {
+      "block_id": "donor_rc_car_ctrl_geared_motors",
+      "board_id": "donor_rc_car_ctrl",
+      "name": "Left and right geared DC motors with wheels",
+      "function_type": "mechanical_motion",
+      "capabilities": ["motor_or_load", "wheel_or_drive", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["MOTOR_L", "MOTOR_R"],
+      "connector_refs": ["J_MOTOR_L", "J_MOTOR_R"],
+      "confidence": 0.79,
+      "extractability": {
+        "class": "connector_reuse",
+        "action": "Reuse through labeled connector or harness after pinout, voltage, and ground gates close.",
+        "requires_layout_confirmation": false
+      },
+      "status": "reuse_ready",
+      "reuse_value_score": 0.86,
+      "suggested_uses": ["mobile base for toy robotics", "camera sliders", "small automation experiments"],
+      "rationale": "Motors remain on original gearbox mounts; recover with harness intact when possible."
+    },
+    {
+      "block_id": "donor_rc_car_ctrl_power_input",
+      "board_id": "donor_rc_car_ctrl",
+      "name": "Battery input and protection section",
+      "function_type": "power_regulation",
+      "capabilities": ["power", "connector"],
+      "source": "circuit_functional_salvage",
+      "source_refs": ["J_BATT", "F1", "D1"],
+      "connector_refs": ["J_BATT"],
+      "confidence": 0.71,
+      "extractability": {
+        "class": "board_section_cut_candidate",
+        "action": "Treat as a possible board-section salvage only after layout continuity, isolation, and thermal checks.",
+        "requires_layout_confirmation": true
+      },
+      "status": "layout_review_required",
+      "reuse_value_score": 0.62,
+      "suggested_uses": ["protected power breakout", "known-voltage supply stage"],
+      "rationale": "Possible cut candidate only if battery chemistry and fuse path are verified; prefer external USB pack for new build."
+    }
+  ],
+  "evidence_gates": [
+    {
+      "gate_id": "vmotor_rail",
+      "gate_type": "voltage",
+      "prompt": "Measure VMOTOR at J_LOGIC under no load and with one motor connected",
+      "status": "open"
+    }
+  ],
+  "extractability_summary": {
+    "connector_reuse": 2,
+    "board_section_cut_candidate": 1
+  },
+  "safety_policy": {
+    "reuse_ready_requires": [
+      "power and ground gates closed",
+      "logic or load compatibility proven",
+      "current limit or load current known before interconnect"
+    ],
+    "default_for_unknowns": "blocked_until_evidence"
+  }
+}

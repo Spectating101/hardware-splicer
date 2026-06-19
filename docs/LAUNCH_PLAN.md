@@ -77,6 +77,17 @@ PYTHONPATH=src python3 scripts/salvage_bringup_demo.py \
 
 Writes `SALVAGE_BRINGUP_REPORT.json` with artifact paths, KiCad truth, and review checklist.
 
+## Splice demos (product wedge)
+
+Canonical cases live in `examples/splice/manifest.json`. Product reference: [`docs/SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md).
+
+```bash
+make splice-demo       # robot_drive_from_rc_toy (default)
+make verify-splice     # all manifest cases — regression bar
+```
+
+Maturity today: **S2** (splice plan + DRC-clean carrier). **S3** (bench gate closure) is next product leap.
+
 ## DRC fix loop (neurosymbolic)
 
 KiCad DRC errors → structured `drc_fixup` hints on the build graph → recompile (default on).
