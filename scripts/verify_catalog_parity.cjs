@@ -34,7 +34,16 @@ function loadTsCatalog() {
     console.error(proc.stderr || proc.stdout || "failed to load TS catalog");
     process.exit(1);
   }
-  return JSON.parse(proc.stdout.trim());
+  const raw = (proc.stdout || "").trim();
+  if (raw) {
+    return JSON.parse(raw);
+  }
+  const { SUPPORTED_BUILD_IDS } = require(compileScript);
+  if (!Array.isArray(SUPPORTED_BUILD_IDS)) {
+    console.error("failed to load TS catalog: empty child output and no exported SUPPORTED_BUILD_IDS");
+    process.exit(1);
+  }
+  return SUPPORTED_BUILD_IDS;
 }
 
 function main() {

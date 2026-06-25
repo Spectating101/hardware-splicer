@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
-from .bench_capture_bridge import load_bench_capture_template, submit_bench_capture
+from .bench_capture_bridge import submit_bench_capture, sync_bench_session_template
 from .project_intake import splice_and_build_from_intake
-from .splice_bench import bench_status
+from .splice_bench import bench_status, open_bench_session
 
 SCHEMA = "hardware_splicer.splice_golden_real.v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -71,8 +71,9 @@ def run_splice_golden_real(
         export_gerber=export_gerber,
         request_id=request_id,
     )
-    before = bench_status(out_path)
-    template = load_bench_capture_template(out_path)
+    before = open_bench_session(out_path, force=True)
+    template_sync = sync_bench_session_template(out_path)
+    template = dict(template_sync.get("template") or {})
     golden = load_golden_bench_capture(capture_path)
     capture = filter_capture_for_template(golden, template)
     if not capture.get("measurements"):

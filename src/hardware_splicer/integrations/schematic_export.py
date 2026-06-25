@@ -41,6 +41,7 @@ def netlist_to_kicad_schematic(
         lib_id, _prefix, footprint = schematic_symbol_for_module(
             comp.module_id, ref=comp.ref, value=str(comp.value or "")
         )
+        footprint = str(comp.footprint or footprint)
         sheet_lib = lib_id if lib_id in EMBEDDED_LIB_IDS else "HS:ModuleBlock"
         ref_positions[comp.ref] = (x, y)
         pin_positions[comp.ref] = {"1": (x, y)}

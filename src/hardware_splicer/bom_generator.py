@@ -102,21 +102,28 @@ def build_bom_from_graph(
         module_id = str(node.get("moduleId") or node.get("module_id") or "")
         if not module_id:
             continue
-        ref = f"U{index}"
+        ref = str(node.get("ref") or f"U{index}")
         salvaged = inventory_by_module.get(module_id) or (salvaged_refs or {}).get(module_id)
         hints = dict(_PART_HINTS.get(module_id) or {})
+        synthetic_support = bool(node.get("supportComponentId"))
         lines.append(
             {
                 "ref": ref,
                 "module_id": module_id,
-                "description": _MODULE_LABELS.get(module_id, module_id),
+                "description": str(node.get("value") or _MODULE_LABELS.get(module_id, module_id)),
                 "mpn": hints.get("mpn", ""),
-                "footprint": hints.get("footprint", "MOD-2.54HDR"),
+                "footprint": str(node.get("footprint") or hints.get("footprint") or "MOD-2.54HDR"),
                 "supplier_sku": hints.get("supplier_sku", ""),
                 "qty": 1,
-                "source": "salvage" if salvaged else "catalog",
+                "source": "synthetic_support" if synthetic_support else "salvage" if salvaged else "catalog",
                 "salvaged_part": salvaged or "",
                 "node_id": str(node.get("id") or ""),
+                **(
+                    {"support_component_id": node.get("supportComponentId")}
+                    if node.get("supportComponentId")
+                    else {}
+                ),
+                **({"operator_id": node.get("operatorId")} if node.get("operatorId") else {}),
             }
         )
     return {

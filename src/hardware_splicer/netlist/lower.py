@@ -109,19 +109,29 @@ def build_graph_to_netlist(graph: Mapping[str, Any], *, source: str = "build_gra
 
     components: List[ComponentInstance] = []
     ref_by_node: Dict[str, str] = {}
+    used_refs: Set[str] = set()
     for index, node in enumerate(nodes):
         node_id = str(node.get("id") or f"n{index + 1}")
         module_id = str(node.get("moduleId") or "")
         spec = find_module(module_id) if module_id else None
-        ref = f"U{index + 1}"
+        ref = _unique_component_ref(str(node.get("ref") or f"U{index + 1}"), used_refs)
         ref_by_node[node_id] = ref
         components.append(
             ComponentInstance(
                 ref=ref,
-                value=spec.get("label") if spec else module_id,
-                footprint=str((spec or {}).get("footprint") or module_id),
+                value=str((spec or {}).get("label") or node.get("value") or module_id),
+                footprint=str((spec or {}).get("footprint") or node.get("footprint") or module_id),
                 module_id=module_id or None,
-                metadata={"graph_node_id": node_id},
+                metadata={
+                    "graph_node_id": node_id,
+                    **(
+                        {"support_component_id": node.get("supportComponentId")}
+                        if node.get("supportComponentId")
+                        else {}
+                    ),
+                    **({"operator_id": node.get("operatorId")} if node.get("operatorId") else {}),
+                    **({"synthetic": True} if node.get("synthetic") else {}),
+                },
             )
         )
 
@@ -180,7 +190,35 @@ def build_graph_to_netlist(graph: Mapping[str, Any], *, source: str = "build_gra
         source=source,
         components=components,
         nets=nets,
-        metadata={"node_count": len(nodes), "wire_count": len(wires)},
+        metadata={
+            "node_count": len(nodes),
+            "wire_count": len(wires),
+            **(
+                {"terminal_semantics": dict(graph.get("terminal_semantics") or {})}
+                if isinstance(graph.get("terminal_semantics"), Mapping)
+                else {}
+            ),
+            **(
+                {"topology_lowering": dict(graph.get("topology_lowering") or {})}
+                if isinstance(graph.get("topology_lowering"), Mapping)
+                else {}
+            ),
+            **(
+                {"support_components": [dict(row) for row in graph.get("support_components") or [] if isinstance(row, Mapping)]}
+                if isinstance(graph.get("support_components"), list)
+                else {}
+            ),
+            **(
+                {"topology_nets": [dict(row) for row in graph.get("topology_nets") or [] if isinstance(row, Mapping)]}
+                if isinstance(graph.get("topology_nets"), list)
+                else {}
+            ),
+            **(
+                {"physical_support_lowering": dict(graph.get("physical_support_lowering") or {})}
+                if isinstance(graph.get("physical_support_lowering"), Mapping)
+                else {}
+            ),
+        },
     )
 
 
@@ -207,6 +245,13 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
                 "value": comp.value,
                 "footprint": comp.footprint,
                 "pinIds": pins_by_ref.get(comp.ref) or [],
+                **(
+                    {"supportComponentId": comp.metadata.get("support_component_id")}
+                    if comp.metadata.get("support_component_id")
+                    else {}
+                ),
+                **({"operatorId": comp.metadata.get("operator_id")} if comp.metadata.get("operator_id") else {}),
+                **({"synthetic": True} if comp.metadata.get("synthetic") else {}),
             }
         )
 
@@ -239,4 +284,33 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
                 }
             )
 
-    return {"nodes": nodes, "wires": wires}
+    graph: BuildGraph = {"nodes": nodes, "wires": wires}
+    if isinstance(netlist.metadata.get("terminal_semantics"), Mapping):
+        graph["terminal_semantics"] = dict(netlist.metadata.get("terminal_semantics") or {})
+    if isinstance(netlist.metadata.get("topology_lowering"), Mapping):
+        graph["topology_lowering"] = dict(netlist.metadata.get("topology_lowering") or {})
+    if isinstance(netlist.metadata.get("support_components"), list):
+        graph["support_components"] = [
+            dict(row) for row in netlist.metadata.get("support_components") or [] if isinstance(row, Mapping)
+        ]
+    if isinstance(netlist.metadata.get("topology_nets"), list):
+        graph["topology_nets"] = [
+            dict(row) for row in netlist.metadata.get("topology_nets") or [] if isinstance(row, Mapping)
+        ]
+    if isinstance(netlist.metadata.get("physical_support_lowering"), Mapping):
+        graph["physical_support_lowering"] = dict(netlist.metadata.get("physical_support_lowering") or {})
+    return graph
+
+
+def _unique_component_ref(candidate: str, used: Set[str]) -> str:
+    ref = candidate.strip() or "U"
+    if ref not in used:
+        used.add(ref)
+        return ref
+    prefix = ref.rstrip("0123456789") or ref
+    index = 2
+    while f"{prefix}{index}" in used:
+        index += 1
+    unique = f"{prefix}{index}"
+    used.add(unique)
+    return unique

@@ -11,12 +11,11 @@ import os
 import time
 import uuid
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Sequence
 
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, compile_from_netlist
-from .canvas_compose import compile_canvas_build
 from .design_quality import build_design_quality_gate
-from .material_modes import material_mode_summary, resolve_material_mode
+from .material_modes import resolve_material_mode
 from .module_picker import pick_modules_for_goal
 from .module_resolver import infer_power_topology, resolve_parts_to_modules_with_llm
 from .env_local import load_env_local
@@ -27,7 +26,6 @@ from .salvage_bridge import build_intake_salvage_package
 from .integrations.qwen_netlist_compose import compose_netlist_from_goal
 from .salvage_bringup import run_salvage_bringup
 from .compose_dispatch import compose_dispatch
-from .scratch_pipeline import compile_scratch_build
 
 SCHEMA_VERSION = "hardware_splicer.sdk.v1"
 
@@ -427,7 +425,7 @@ def vision_enrich_intake(
 ) -> Dict[str, Any]:
     """Run vision + evidence extraction on intake attachments (Qwen/Gemini when configured)."""
     from .evidence_extractor import enrich_intake_with_extracted_evidence
-    from .vision_evidence_assistant import build_vision_evidence_report, enrich_intake_with_vision_assistance
+    from .vision_evidence_assistant import enrich_intake_with_vision_assistance
 
     apply_engine_defaults()
     body = dict(intake)
@@ -452,7 +450,6 @@ def vision_enrich_intake(
 
 def vision_capabilities() -> Dict[str, Any]:
     """Inventory of camera/vision/bench capture already in this repo."""
-    root = ROOT
     return {
         "schema_version": SCHEMA_VERSION,
         "hardware_splicer": {
@@ -552,6 +549,123 @@ def compile_netlist(
     }
 
 
+def plan_motor_driver_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for MCU-controlled DC motor/pump loads."""
+    from .circuit_synthesis import plan_motor_driver
+
+    apply_engine_defaults()
+    return plan_motor_driver(dict(intent)).to_dict()
+
+
+def plan_power_rail_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for regulated power rails."""
+    from .circuit_synthesis import plan_power_rail
+
+    apply_engine_defaults()
+    return plan_power_rail(dict(intent)).to_dict()
+
+
+def plan_level_shift_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for logic-level translation."""
+    from .circuit_synthesis import plan_level_shift
+
+    apply_engine_defaults()
+    return plan_level_shift(dict(intent)).to_dict()
+
+
+def plan_sensor_interface_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for MCU sensor/display interfaces."""
+    from .circuit_synthesis import plan_sensor_interface
+
+    apply_engine_defaults()
+    return plan_sensor_interface(dict(intent)).to_dict()
+
+
+def plan_h_bridge_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for reversible DC motor H-bridge paths."""
+    from .circuit_synthesis import plan_h_bridge
+
+    apply_engine_defaults()
+    return plan_h_bridge(dict(intent)).to_dict()
+
+
+def plan_relay_switch_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for relay-controlled switched loads."""
+    from .circuit_synthesis import plan_relay_switch
+
+    apply_engine_defaults()
+    return plan_relay_switch(dict(intent)).to_dict()
+
+
+def plan_analog_conditioning_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for analog sensor-to-ADC conditioning."""
+    from .circuit_synthesis import plan_analog_conditioning
+
+    apply_engine_defaults()
+    return plan_analog_conditioning(dict(intent)).to_dict()
+
+
+def plan_battery_power_circuit(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Bounded circuit-synthesis plan for single-cell battery/charger power paths."""
+    from .circuit_synthesis import plan_battery_power
+
+    apply_engine_defaults()
+    return plan_battery_power(dict(intent)).to_dict()
+
+
+def circuit_synthesis_capability() -> Dict[str, Any]:
+    """Return the trusted low-voltage mechatronics topology ceiling."""
+    from .circuit_synthesis import topology_library_card
+
+    apply_engine_defaults()
+    return topology_library_card()
+
+
+def plan_circuit_synthesis(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Safe arbitrary circuit-synthesis dispatcher.
+
+    Supported domains produce bounded topology candidates. Unsupported domains
+    return structured blockers rather than generated schematics.
+    """
+    from .circuit_synthesis import evaluate_topology_authority, plan_circuit
+
+    apply_engine_defaults()
+    candidate = plan_circuit(dict(intent))
+    body = candidate.to_dict()
+    body.setdefault("metadata", {})["topology_authority"] = evaluate_topology_authority(candidate)
+    return body
+
+
+def synthesize_circuit(
+    intent: Mapping[str, Any],
+    *,
+    out_dir: str | Path | None = None,
+    export_gerber: bool = False,
+    compile_build: bool = True,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """Plan arbitrary circuit intent and optionally compile ready candidates."""
+    from .circuit_synthesis import compile_synthesis_candidate, evaluate_topology_authority, plan_circuit
+
+    apply_engine_defaults()
+    candidate = plan_circuit(dict(intent))
+    if not compile_build:
+        return {
+            "schema_version": "hardware_splicer.circuit_synthesis_sdk.v1",
+            "ok": not candidate.blocked,
+            "compiled": False,
+            "candidate": candidate.to_dict(),
+            "topology_authority": evaluate_topology_authority(candidate),
+        }
+    target = Path(out_dir) if out_dir else _out_dir("circuit_synthesis")
+    return compile_synthesis_candidate(
+        candidate,
+        out_dir=target,
+        export_gerber=export_gerber,
+        request_id=request_id,
+    )
+
+
 def inspect_fab_build_dir(build_dir: str | Path) -> Dict[str, Any]:
     """Inspect fabrication package on disk without recompiling."""
     from .fabrication_inspection import inspect_fabrication_package
@@ -598,6 +712,12 @@ def sdk_info() -> Dict[str, Any]:
         "strengths": [
             "Donor splice: dissect boards → evidence gates → carrier KiCad compile (S2 demos)",
             "S3 bench sessions: close measurement gates before power-on (agent/MCP/API)",
+            "Bounded circuit-synthesis planning for MCU-controlled DC motor/pump drive paths",
+            "Bounded power-rail, level-shift, sensor-interface, analog-conditioning, relay, H-bridge, and battery-power topology planning",
+            "Topology-operator lowering into graph terminal semantics for strict compile safety",
+            "Bounded physical support-passive lowering for analog divider/filter and I2C pull-up networks",
+            "Topology library authority report for the trusted low-voltage mechatronics ceiling",
+            "Safe arbitrary circuit-synthesis dispatcher: supported planners compile, unsupported goals block",
             "Inventory-constrained salvage bring-up from junk-drawer parts",
             "NL phrase / module list / canvas graph → wired schematic + placed PCB",
             "KiCad ERC/DRC as external compile truth (not LLM self-grade)",
@@ -626,6 +746,17 @@ def sdk_info() -> Dict[str, Any]:
                 "hs_splice_bench_capture_template",
                 "hs_splice_bench_status",
                 "hs_splice_bench_submit_capture",
+                "hs_plan_motor_driver_circuit",
+                "hs_plan_power_rail_circuit",
+                "hs_plan_level_shift_circuit",
+                "hs_plan_sensor_interface_circuit",
+                "hs_plan_h_bridge_circuit",
+                "hs_plan_relay_switch_circuit",
+                "hs_plan_analog_conditioning_circuit",
+                "hs_plan_battery_power_circuit",
+                "hs_circuit_synthesis_capability",
+                "hs_plan_circuit_synthesis",
+                "hs_synthesize_circuit",
                 "hs_inspect_fab",
             ],
         },

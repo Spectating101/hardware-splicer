@@ -20,7 +20,7 @@ demo:
 	$(PYTHON) scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
 
 smoke:
-	PYTHONPATH=src $(PYTHON) scripts/hardware_splicer_e2e.py
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic HARDWARE_SPLICER_JLC_ENRICH=0 $(PYTHON) scripts/hardware_splicer_e2e.py
 
 test:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest -q
@@ -43,16 +43,16 @@ test-apps-full:
 	cd apps/3d-splicer && $(SPLICER3D_PYTHON) -m pytest -q
 
 benchmark-backend:
-	PYTHONPATH=src $(PYTHON) scripts/benchmark_backend_design.py
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/benchmark_backend_design.py
 
 audit-functional-delivery:
-	PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
 
 plant-qwen-pipeline:
 	python3 scripts/run_qwen_plant_pipeline.py
 
 score-intake-tiers:
-	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/score_intake_tiers.py
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic HARDWARE_SPLICER_QWEN_WORKSHOP=0 HARDWARE_SPLICER_SKIP_KICAD_STEP_EXPORT=1 $(PYTHON) scripts/score_intake_tiers.py
 
 refresh-demo-data:
 	HARDWARE_SPLICER_SKIP_VISION_LIVE=1 python3 scripts/refresh_demo_sample_data.py
@@ -73,7 +73,7 @@ verify-casefiles:
 	PYTHONPATH=src $(PYTHON) -m pytest tests/test_compile_casefile.py -q
 
 verify-tier-c:
-	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic PYTHONPATH=src $(PYTHON) scripts/audit_functional_delivery.py --strict
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest tests/test_tier_c_delivery.py -q
 
 verify-geometry:
@@ -118,7 +118,7 @@ export-engine-pcb-data:
 	node scripts/export_engine_pcb_data.cjs
 
 test-golden-intakes:
-	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest tests/test_golden_intake_compile.py tests/test_golden_catalog_direct.py -q
+	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic HARDWARE_SPLICER_JLC_ENRICH=0 $(PYTHON) -m pytest tests/test_golden_intake_compile.py tests/test_golden_catalog_direct.py -q
 
 test-compose-scenarios:
 	PYTHONPATH=src $(PYTHON) -m pytest tests/test_compose_scenarios.py -q

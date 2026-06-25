@@ -31,6 +31,33 @@ def _resolve(graph: BuildGraph, node_id: str, pin_id: str) -> Optional[Dict[str,
     return {"node": node, "moduleSpec": module_spec, "pin": pin}
 
 
+def _terminal_semantics(graph: BuildGraph, node_id: str, pin_id: str) -> Dict[str, Any]:
+    semantics = graph.get("terminal_semantics")
+    if not isinstance(semantics, Mapping):
+        return {}
+    row = semantics.get(f"{node_id}:{pin_id}")
+    return dict(row) if isinstance(row, Mapping) else {}
+
+
+def _effective_role(graph: BuildGraph, resolved: Mapping[str, Any]) -> str:
+    node = dict(resolved.get("node") or {})
+    pin = dict(resolved.get("pin") or {})
+    semantic = _terminal_semantics(graph, str(node.get("id") or ""), str(pin.get("id") or ""))
+    return str(semantic.get("role") or pin.get("role") or "")
+
+
+def _effective_pin_role(graph: BuildGraph, node: Mapping[str, Any], pin: Mapping[str, Any]) -> str:
+    semantic = _terminal_semantics(graph, str(node.get("id") or ""), str(pin.get("id") or ""))
+    return str(semantic.get("role") or pin.get("role") or "")
+
+
+def _has_support_component(graph: BuildGraph, role: str) -> bool:
+    return any(
+        isinstance(row, Mapping) and row.get("role") == role
+        for row in graph.get("support_components") or []
+    )
+
+
 def _parse_voltage(v: Optional[str]) -> Optional[float]:
     if not v:
         return None
@@ -57,8 +84,10 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         if not a or not b:
             continue
 
-        a_gnd = a["pin"].get("role") == "gnd"
-        b_gnd = b["pin"].get("role") == "gnd"
+        a_role = _effective_role(graph, a)
+        b_role = _effective_role(graph, b)
+        a_gnd = a_role == "gnd"
+        b_gnd = b_role == "gnd"
         if a_gnd != b_gnd:
             warnings.append(
                 {
@@ -75,7 +104,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         if a_gnd and b_gnd:
             continue
 
-        if a["pin"].get("role") == "power_in" and b["pin"].get("role") == "power_in":
+        if a_role == "power_in" and b_role == "power_in":
             warnings.append(
                 {
                     "id": f"{w['id']}-noSource",
@@ -84,7 +113,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                     "wireId": w["id"],
                 }
             )
-        if a["pin"].get("role") == "power_out" and b["pin"].get("role") == "power_out":
+        if a_role == "power_out" and b_role == "power_out":
             warnings.append(
                 {
                     "id": f"{w['id']}-twoSources",
@@ -97,11 +126,11 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                 }
             )
 
-        def is_power(p: Mapping[str, Any]) -> bool:
-            return p.get("role") in ("power_in", "power_out")
+        def is_power(role: str) -> bool:
+            return role in ("power_in", "power_out")
 
-        if is_power(a["pin"]) and is_power(b["pin"]):
-            src = a if a["pin"].get("role") == "power_out" else b if b["pin"].get("role") == "power_out" else None
+        if is_power(a_role) and is_power(b_role):
+            src = a if a_role == "power_out" else b if b_role == "power_out" else None
             snk = b if src is a else a if src is b else None
             if src and snk:
                 src_range = _voltage_range(src["pin"].get("voltage"))
@@ -143,10 +172,10 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         a_lv = a["moduleSpec"].get("logicVoltage")
         b_lv = b["moduleSpec"].get("logicVoltage")
 
-        def is_digital(p: Mapping[str, Any]) -> bool:
-            return p.get("role") not in ("power_in", "power_out", "gnd", "other")
+        def is_digital(role: str) -> bool:
+            return role not in ("power_in", "power_out", "gnd", "other", "floating_motor_terminal", "isolated_relay_contact")
 
-        if is_digital(a["pin"]) and is_digital(b["pin"]) and a_lv and b_lv and a_lv != b_lv:
+        if is_digital(a_role) and is_digital(b_role) and a_lv and b_lv and a_lv != b_lv:
             if not (_pin_accepts_peer_logic(a["pin"], float(b_lv)) or _pin_accepts_peer_logic(b["pin"], float(a_lv))):
                 warnings.append(
                     {
@@ -160,9 +189,9 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                     }
                 )
 
-        if any(r in (a["pin"].get("role"), b["pin"].get("role")) for r in ("i2c_sda", "i2c_scl")):
+        if any(r in (a_role, b_role) for r in ("i2c_sda", "i2c_scl")):
             any_builtin = any(re.search(r"pull", (e["pin"].get("notes") or ""), re.I) for e in (a, b))
-            if not any_builtin:
+            if not any_builtin and not _has_support_component(graph, "pull_up_resistor"):
                 warnings.append(
                     {
                         "id": f"{w['id']}-pullup",
@@ -189,7 +218,11 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
         if not module_spec:
             continue
 
-        power_in_pins = [p for p in module_spec.get("pins") or [] if p.get("role") == "power_in"]
+        power_in_pins = [
+            p
+            for p in module_spec.get("pins") or []
+            if _effective_pin_role(graph, n, p) == "power_in"
+        ]
         power_in_wired = any(
             any(
                 (w["from"]["nodeId"] == n["id"] and w["from"]["pinId"] == p["id"])
@@ -219,9 +252,9 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                 for w in graph.get("wires") or []
             )
             for p in module_spec.get("pins") or []
-            if p.get("role") == "gnd"
+            if _effective_pin_role(graph, n, p) == "gnd"
         )
-        if not gnd_wired and any(p.get("role") == "gnd" for p in module_spec.get("pins") or []):
+        if not gnd_wired and any(_effective_pin_role(graph, n, p) == "gnd" for p in module_spec.get("pins") or []):
             warnings.append(
                 {
                     "id": f"{n['id']}-nognd",
@@ -240,7 +273,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                 if not mine or not other:
                     continue
                 my_pin = find_pin(module_spec, mine["pinId"])
-                if my_pin and my_pin.get("role") == "power_in":
+                if my_pin and _effective_pin_role(graph, n, my_pin) == "power_in":
                     other_node = next((x for x in graph.get("nodes") or [] if x["id"] == other["nodeId"]), None)
                     other_mod = find_module(str(other_node.get("moduleId") or "")) if other_node else None
                     if other_mod and other_mod.get("category") == "mcu":

@@ -15,6 +15,10 @@ SCHEMA_VERSION = "hardware_splicer.qwen_salvage_resolver.v2"
 
 
 def qwen_salvage_enabled() -> bool:
+    from .llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        return False
     if os.environ.get("HARDWARE_SPLICER_QWEN_SALVAGE", "1").strip().lower() in {
         "0",
         "false",

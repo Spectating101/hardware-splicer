@@ -42,6 +42,7 @@ def test_fill_salvage_gaps_adds_driver() -> None:
 
 
 def test_qwen_salvage_merge_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_SALVAGE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_SALVAGE_RESOLVE", "llm_first")
     monkeypatch.setenv("DASHSCOPE_API_KEY", "test-key")

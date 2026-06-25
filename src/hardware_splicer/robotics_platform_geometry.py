@@ -11,6 +11,15 @@ from typing import Any, Dict, List, Mapping
 from .runtime import SPLICER3D_VENV_PYTHON
 
 
+def _skip_native_kicad_step_export() -> bool:
+    return os.environ.get("HARDWARE_SPLICER_SKIP_KICAD_STEP_EXPORT", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+
 def attach_robotics_platform_geometry(payload: Mapping[str, Any] | Any, *, engineering: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
     """Generate robotics/mechatronics geometry supplements and attach them to engineering evidence."""
 
@@ -275,11 +284,18 @@ def _attach_kicad_step_assembly(body: Dict[str, Any], *, engineering: Dict[str, 
     placement_path.write_text(json.dumps(placement, indent=2), encoding="utf-8")
     outline_delta = _board_outline_delta_mm(physical_assembly, placement)
 
-    kicad_export = _try_export_kicad_step(board_path, kicad_step_path) if is_kicad_pcb and board_path else {
-        "attempted": False,
-        "ready": False,
-        "reason": "No .kicad_pcb source file was supplied for this board; assembly STEP uses declared board geometry.",
-    }
+    if _skip_native_kicad_step_export():
+        kicad_export = {
+            "attempted": False,
+            "ready": False,
+            "reason": "Native KiCad board STEP export skipped by HARDWARE_SPLICER_SKIP_KICAD_STEP_EXPORT.",
+        }
+    else:
+        kicad_export = _try_export_kicad_step(board_path, kicad_step_path) if is_kicad_pcb and board_path else {
+            "attempted": False,
+            "ready": False,
+            "reason": "No .kicad_pcb source file was supplied for this board; assembly STEP uses declared board geometry.",
+        }
     if kicad_export.get("attempted"):
         kicad_log_path.write_text(str(kicad_export.get("log") or ""), encoding="utf-8")
 

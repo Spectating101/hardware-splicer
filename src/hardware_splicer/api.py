@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 import json
 import os
 import re
@@ -14,9 +15,22 @@ from pydantic import BaseModel, Field
 
 from .compose_dispatch import compose_dispatch
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
+from .circuit_synthesis import (
+    compile_synthesis_candidate,
+    plan_analog_conditioning,
+    plan_battery_power,
+    plan_circuit,
+    plan_h_bridge,
+    plan_level_shift,
+    plan_motor_driver,
+    plan_power_rail,
+    plan_relay_switch,
+    plan_sensor_interface,
+    topology_library_card,
+)
 from .compiler import _resolve_board_design_files, compile_hardware_bundle
 from .design_quality import build_design_quality_gate
-from .material_modes import material_mode_summary, resolve_material_mode
+from .material_modes import resolve_material_mode
 from .jobs import JobBackend, artifact_manifest, build_output_archive
 from .mechatronics_authority import build_mechatronics_authority
 from .mechanical_authority import build_mechanical_authority
@@ -199,6 +213,49 @@ class RoboticsSimulationRequest(BaseModel):
     mechatronics_authority: Dict[str, Any] | None = None
 
 
+class CircuitMotorDriverPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitPowerRailPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitLevelShiftPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitSensorInterfacePlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitHBridgePlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitRelaySwitchPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitAnalogConditioningPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitBatteryPowerPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitSynthesisPlanRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class CircuitSynthesisCompileRequest(BaseModel):
+    intent: Dict[str, Any]
+    out_dir: str | None = Field(default=None)
+    request_id: str | None = None
+    export_gerber: bool = False
+
+
 def _compose_constraints(request: ComposeRequest | ComposeCanvasRequest) -> Dict[str, Any]:
     body = dict(getattr(request, "constraints", None) or {})
     if getattr(request, "strategy_mode", None):
@@ -294,16 +351,21 @@ def _error(status_code: int, error_type: str, message: str, *, request_id: str |
 
 def create_app() -> FastAPI:
     job_backend = JobBackend.from_env()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        try:
+            yield
+        finally:
+            job_backend.stop()
+
     app = FastAPI(
         title="Hardware-Splicer Compiler",
         version="0.3.0",
         description="Top-level compiler API for Circuit-AI -> Mecha-Splicer -> 3D-Splicer build bundles.",
+        lifespan=lifespan,
     )
     app.state.job_backend = job_backend
-
-    @app.on_event("shutdown")
-    def shutdown_jobs() -> None:
-        job_backend.stop()
 
     @app.get("/health")
     def health() -> Dict[str, Any]:
@@ -381,6 +443,102 @@ def create_app() -> FastAPI:
             )
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/motor-driver")
+    def circuit_synthesis_motor_driver(request: CircuitMotorDriverPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_motor_driver(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/power-rail")
+    def circuit_synthesis_power_rail(request: CircuitPowerRailPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_power_rail(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/level-shift")
+    def circuit_synthesis_level_shift(request: CircuitLevelShiftPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_level_shift(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/sensor-interface")
+    def circuit_synthesis_sensor_interface(request: CircuitSensorInterfacePlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_sensor_interface(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/h-bridge")
+    def circuit_synthesis_h_bridge(request: CircuitHBridgePlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_h_bridge(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/relay-switch")
+    def circuit_synthesis_relay_switch(request: CircuitRelaySwitchPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_relay_switch(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/analog-conditioning")
+    def circuit_synthesis_analog_conditioning(request: CircuitAnalogConditioningPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_analog_conditioning(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/battery-power")
+    def circuit_synthesis_battery_power(request: CircuitBatteryPowerPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_battery_power(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.get("/v1/circuit-synthesis/capability")
+    def circuit_synthesis_capability() -> Dict[str, Any]:
+        return topology_library_card()
+
+    @app.post("/v1/circuit-synthesis/plan")
+    def circuit_synthesis_plan(request: CircuitSynthesisPlanRequest) -> Dict[str, Any]:
+        try:
+            return plan_circuit(request.intent).to_dict()
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/circuit-synthesis/compile")
+    def circuit_synthesis_compile(request: CircuitSynthesisCompileRequest) -> Dict[str, Any]:
+        request_id: str | None = None
+        try:
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "circuit-synthesis" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+            candidate = plan_circuit(request.intent)
+            return compile_synthesis_candidate(
+                candidate,
+                out_dir=resolved,
+                export_gerber=bool(request.export_gerber),
+                request_id=request_id,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/compile")
     def compile_bundle(request: CompileRequest) -> Dict[str, Any]:
