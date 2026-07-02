@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build verify-splice-v1
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -144,6 +144,10 @@ splice-ui-dev: splice-ui-install
 
 splice-ui-build: splice-ui-install
 	cd apps/splice-ui && npm run build
+
+# Build UI + serve API and static frontend on one port (auditor / demo mode).
+splice-ui-serve: splice-ui-build
+	HARDWARE_SPLICER_SERVE_UI=1 PYTHONPATH=src $(PYTHON) -m uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
 
 verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers verify-splice smoke
 	@echo "Hardware-Splicer verify: all checks passed"

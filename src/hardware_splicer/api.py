@@ -1229,7 +1229,40 @@ def create_app() -> FastAPI:
         job = job_backend.store.get_job(job_id)
         return {"ok": True, "job": job.to_dict(include_result=False) if job else None}
 
+    _maybe_mount_splice_ui(app)
     return app
+
+
+def _maybe_mount_splice_ui(app: FastAPI) -> None:
+    flag = os.environ.get("HARDWARE_SPLICER_SERVE_UI", "").strip().lower()
+    if flag not in {"1", "true", "yes", "on"}:
+        return
+
+    ui_dist = Path(__file__).resolve().parents[2] / "apps" / "splice-ui" / "dist"
+    index_path = ui_dist / "index.html"
+    if not index_path.is_file():
+        return
+
+    assets_dir = ui_dist / "assets"
+    if assets_dir.is_dir():
+        from fastapi.staticfiles import StaticFiles
+
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="splice-ui-assets")
+
+    reserved = ("v1", "health", "openapi.json", "docs", "redoc")
+
+    @app.get("/", include_in_schema=False)
+    def splice_ui_root() -> FileResponse:
+        return FileResponse(index_path)
+
+    @app.get("/{spa_path:path}", include_in_schema=False)
+    def splice_ui_spa(spa_path: str) -> FileResponse:
+        if spa_path.split("/", 1)[0] in reserved:
+            raise HTTPException(status_code=404, detail="Not found")
+        candidate = ui_dist / spa_path
+        if candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(index_path)
 
 
 app = create_app()

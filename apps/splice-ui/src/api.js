@@ -1,4 +1,9 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "/api";
+const API_BASE =
+  import.meta.env.VITE_API_BASE !== undefined
+    ? import.meta.env.VITE_API_BASE
+    : import.meta.env.DEV
+      ? "/api"
+      : "";
 
 async function parseJson(res) {
   const body = await res.json().catch(() => ({}));
@@ -81,7 +86,8 @@ export async function fetchJobResult(jobId) {
 }
 
 export function jobBundleUrl(jobId) {
-  return `${API_BASE}/v1/jobs/${encodeURIComponent(jobId)}/bundle`;
+  const base = API_BASE || "";
+  return `${base}/v1/jobs/${encodeURIComponent(jobId)}/bundle`;
 }
 
 export async function benchStatus(buildDir) {

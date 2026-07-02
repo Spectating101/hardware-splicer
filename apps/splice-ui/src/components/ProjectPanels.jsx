@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MarkdownView from "./MarkdownView.jsx";
 
 export function StatusPill({ ok, label }) {
   return <span className={`status-pill ${ok ? "ok" : "warn"}`}>{label}</span>;
@@ -14,24 +15,19 @@ export function GateBadge({ status, critical }) {
   );
 }
 
-function MarkdownBlock({ text }) {
-  if (!text) return <p className="muted">No content.</p>;
-  return <pre className="markdown-block">{text}</pre>;
-}
-
 export function InfoPanel({ pkg }) {
   const info = pkg?.info || {};
   const clarifier = info.clarifier || {};
   return (
     <div className="panel-stack">
       <section className="card">
-        <h3>Project</h3>
+        <h3>Project overview</h3>
         <p className="lead">{info.goal || "—"}</p>
-        <p>{info.summary}</p>
+        <p className="summary-text">{info.summary}</p>
         <dl className="meta-grid">
           <div>
             <dt>Build ID</dt>
-            <dd>{info.build_id || "—"}</dd>
+            <dd className="mono">{info.build_id || "—"}</dd>
           </div>
           <div>
             <dt>Archetype</dt>
@@ -42,15 +38,15 @@ export function InfoPanel({ pkg }) {
             <dd>{info.cost_estimate_usd != null ? `$${info.cost_estimate_usd}` : "—"}</dd>
           </div>
           <div>
-            <dt>Clarification</dt>
-            <dd>{clarifier.needs_clarification ? "needed" : "clear"}</dd>
+            <dt>Intent</dt>
+            <dd>{clarifier.needs_clarification ? "needs clarification" : "clear"}</dd>
           </div>
         </dl>
       </section>
       {info.assumptions?.length > 0 && (
         <section className="card">
           <h3>Assumptions</h3>
-          <ul>
+          <ul className="clean-list">
             {info.assumptions.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -67,11 +63,16 @@ export function BomPanel({ pkg }) {
   return (
     <section className="card">
       <div className="card-header">
-        <h3>Bill of materials</h3>
-        <span className="muted">{bom.line_count || lines.length} lines</span>
+        <h3>Parts list</h3>
+        <span className="chip">{bom.line_count || lines.length} lines</span>
       </div>
+      {bom.estimated_total_usd != null && (
+        <p className="bom-total">
+          Estimated total: <strong>${bom.estimated_total_usd}</strong>
+        </p>
+      )}
       <div className="table-wrap">
-        <table>
+        <table className="data-table">
           <thead>
             <tr>
               <th>Ref</th>
@@ -86,7 +87,9 @@ export function BomPanel({ pkg }) {
                 <td className="mono">{row.ref || row.module_id || "—"}</td>
                 <td>{row.description || row.module_id || "—"}</td>
                 <td>{row.qty ?? 1}</td>
-                <td className="muted">{row.source || "—"}</td>
+                <td>
+                  <span className="chip muted-chip">{row.source || "—"}</span>
+                </td>
               </tr>
             ))}
             {lines.length === 0 && (
@@ -110,23 +113,25 @@ export function WiringPanel({ pkg }) {
     <div className="panel-stack">
       {ops.length > 0 && (
         <section className="card">
-          <h3>Topology operators</h3>
-          <ul className="operator-list">
+          <h3>Topology</h3>
+          <div className="operator-grid">
             {ops.map((op) => (
-              <li key={op.operator_id}>
-                <strong>{op.operator_id}</strong>
-                <span className="muted"> ({op.operator_type})</span>
-                <div className="mono small">
-                  {(op.inputs || []).join(", ")} → {(op.outputs || []).join(", ")}
-                </div>
-              </li>
+              <article key={op.operator_id} className="operator-card">
+                <header>
+                  <strong className="mono">{op.operator_id}</strong>
+                  <span className="chip">{op.operator_type}</span>
+                </header>
+                <p className="mono small flow-line">
+                  {(op.inputs || []).join(", ") || "—"} → {(op.outputs || []).join(", ") || "—"}
+                </p>
+              </article>
             ))}
-          </ul>
+          </div>
         </section>
       )}
       <section className="card">
         <h3>Wiring guide</h3>
-        <MarkdownBlock text={wiring.narrative_markdown} />
+        <MarkdownView text={wiring.narrative_markdown} />
       </section>
     </div>
   );
@@ -138,11 +143,16 @@ export function InstructionsPanel({ pkg }) {
   return (
     <div className="panel-stack">
       <section className="card">
-        <h3>Assembly steps</h3>
-        <ol className="step-list">
+        <h3>Build steps</h3>
+        <ol className="step-cards">
           {steps.map((step, index) => (
             <li key={index}>
-              {typeof step === "string" ? step : step.body || step.title || JSON.stringify(step)}
+              <span className="step-num">{index + 1}</span>
+              <div>
+                {typeof step === "string"
+                  ? step
+                  : step.body || step.title || JSON.stringify(step)}
+              </div>
             </li>
           ))}
           {steps.length === 0 && <li className="muted">No assembly steps.</li>}
@@ -150,8 +160,8 @@ export function InstructionsPanel({ pkg }) {
       </section>
       {instructions.bringup_markdown && (
         <section className="card">
-          <h3>Bring-up</h3>
-          <MarkdownBlock text={instructions.bringup_markdown} />
+          <h3>Bring-up notes</h3>
+          <MarkdownView text={instructions.bringup_markdown} />
         </section>
       )}
     </div>
@@ -165,59 +175,55 @@ export function GatesPanel({ pkg, benchSession }) {
     <div className="panel-stack">
       <section className="card">
         <div className="card-header">
-          <h3>Gate verdict</h3>
+          <h3>Safety gate verdict</h3>
           <StatusPill
             ok={gates.power_on_authorized || gates.verdict === "POWER_ON_AUTHORIZED"}
-            label={gates.verdict || "unknown"}
+            label={(gates.verdict || "unknown").replace(/_/g, " ")}
           />
         </div>
-        <dl className="meta-grid">
-          <div>
-            <dt>Compile</dt>
-            <dd>{gates.compile_ok ? "ok" : "blocked"}</dd>
-          </div>
-          <div>
-            <dt>Open gates</dt>
-            <dd>{gates.open_gate_count ?? items.filter((g) => g.status !== "closed").length}</dd>
-          </div>
-          <div>
-            <dt>Power-on</dt>
-            <dd>{gates.power_on_authorized ? "authorized" : "hold"}</dd>
-          </div>
-        </dl>
         {(gates.blockers || []).length > 0 && (
-          <>
+          <div className="blocker-box">
             <h4>Blockers</h4>
             <ul>
               {gates.blockers.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
-          </>
+          </div>
         )}
       </section>
       <section className="card">
-        <h3>Bench gates</h3>
-        <ul className="gate-list">
+        <h3>All gates ({items.length})</h3>
+        <div className="gate-card-grid">
           {items.map((gate) => (
-            <li key={gate.gate_id}>
-              <div className="gate-row">
+            <article
+              key={gate.gate_id}
+              className={`gate-card ${gate.status === "closed" ? "gate-closed" : "gate-open"}`}
+            >
+              <header>
                 <GateBadge status={gate.status} critical={gate.critical} />
                 <span className="mono small">{gate.gate_id}</span>
-              </div>
+              </header>
               <p>{gate.prompt}</p>
-            </li>
+              {gate.measurement?.value != null && (
+                <p className="measurement-line mono small">
+                  ✓ {gate.measurement.value}
+                  {gate.measurement.unit ? ` ${gate.measurement.unit}` : ""}
+                </p>
+              )}
+            </article>
           ))}
-          {items.length === 0 && <li className="muted">No bench gates yet.</li>}
-        </ul>
+          {items.length === 0 && <p className="muted">No bench gates in session.</p>}
+        </div>
       </section>
     </div>
   );
 }
 
-export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
+export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit, onSuccess }) {
   const [drafts, setDrafts] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [lastClosed, setLastClosed] = useState(null);
   const openGates = benchSession?.open_gates || [];
 
   const updateDraft = (gateId, field, value) => {
@@ -229,6 +235,7 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
 
   const handleSubmit = async (gate) => {
     const draft = drafts[gate.gate_id] || {};
+    if (!draft.value?.trim()) return;
     setSubmitting(true);
     try {
       await onSubmit([
@@ -240,6 +247,8 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
           status: "closed",
         },
       ]);
+      setLastClosed(gate.gate_id);
+      onSuccess?.(`Gate ${gate.gate_id} closed`);
       setDrafts((prev) => {
         const next = { ...prev };
         delete next[gate.gate_id];
@@ -252,7 +261,7 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
 
   if (!buildDir) {
     return (
-      <section className="card">
+      <section className="card empty-card">
         <p className="muted">Build a project first to open the bench session.</p>
       </section>
     );
@@ -260,16 +269,16 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
 
   return (
     <div className="panel-stack">
-      <section className="card">
+      <section className="card bench-hero">
         <div className="card-header">
-          <h3>Before you power on</h3>
+          <div>
+            <h3>Bench — before power-on</h3>
+            <p className="muted">Record real measurements. Critical gates must close first.</p>
+          </div>
           <button type="button" className="ghost" onClick={onRefresh}>
             Refresh
           </button>
         </div>
-        <p className="muted">
-          Record real measurements on the bench. Critical gates must close before power-on is authorized.
-        </p>
         {benchSession && (
           <dl className="meta-grid">
             <div>
@@ -277,47 +286,52 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
               <dd>{benchSession.level || "—"}</dd>
             </div>
             <div>
-              <dt>Open gates</dt>
+              <dt>Open</dt>
               <dd>{benchSession.open_gate_count ?? openGates.length}</dd>
             </div>
             <div>
-              <dt>Power-on OK</dt>
-              <dd>{benchSession.power_on_authorized ? "yes" : "not yet"}</dd>
+              <dt>Power-on</dt>
+              <dd>{benchSession.power_on_authorized ? "Authorized" : "Hold"}</dd>
             </div>
           </dl>
         )}
+        {lastClosed && <p className="success small">Last closed: {lastClosed}</p>}
       </section>
 
       <section className="card">
-        <h3>Measurements</h3>
+        <h3>Open measurements ({openGates.length})</h3>
         {openGates.length === 0 && (
-          <p className="muted">All gates closed — you’re clear for the next bring-up step.</p>
+          <div className="success-box">
+            <strong>All gates closed</strong>
+            <p>Review gate verdict before energizing the harness.</p>
+          </div>
         )}
         <ul className="bench-form-list">
           {openGates.map((gate) => (
-            <li key={gate.gate_id} className="bench-form">
-              <p>
+            <li key={gate.gate_id} className={`bench-form ${gate.critical ? "critical" : ""}`}>
+              <header>
                 <GateBadge status={gate.status} critical={gate.critical} />
-              </p>
+                {gate.critical && <span className="critical-tag">Must measure</span>}
+              </header>
               <p>{gate.prompt}</p>
               <div className="bench-inputs">
                 <input
-                  placeholder="Measured value"
+                  placeholder="Measured value (e.g. 5.02)"
                   value={drafts[gate.gate_id]?.value || ""}
                   onChange={(e) => updateDraft(gate.gate_id, "value", e.target.value)}
                 />
                 <input
-                  placeholder="Unit"
+                  placeholder="Unit (V, Ω, …)"
                   value={drafts[gate.gate_id]?.unit || ""}
                   onChange={(e) => updateDraft(gate.gate_id, "unit", e.target.value)}
                 />
                 <button
                   type="button"
-                  className="primary small"
-                  disabled={submitting}
+                  className="primary"
+                  disabled={submitting || !drafts[gate.gate_id]?.value?.trim()}
                   onClick={() => handleSubmit(gate)}
                 >
-                  Mark done
+                  Close gate
                 </button>
               </div>
             </li>
@@ -330,9 +344,9 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit }) {
 
 export const PROJECT_TABS = [
   { id: "info", label: "Overview" },
-  { id: "bom", label: "Parts list" },
+  { id: "bom", label: "Parts" },
   { id: "wiring", label: "Wiring" },
-  { id: "instructions", label: "Build steps" },
-  { id: "gates", label: "Safety gates" },
+  { id: "instructions", label: "Build" },
+  { id: "gates", label: "Gates" },
   { id: "bench", label: "Bench" },
 ];

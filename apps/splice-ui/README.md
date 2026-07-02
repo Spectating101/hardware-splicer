@@ -4,6 +4,16 @@ Real **consumer-facing** web interface for Hardware-Splicer — plain-English pr
 
 ## Quick start
 
+### Single port (auditor / demo)
+
+```bash
+make splice-ui-serve
+```
+
+Open http://127.0.0.1:8787 — API and built UI on one origin.
+
+### Dev (hot reload)
+
 Terminal 1 — API:
 
 ```bash
@@ -45,9 +55,10 @@ Open http://127.0.0.1:5178
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `VITE_API_BASE` | `/api` | API prefix (Vite dev proxy rewrites to `hs-serve`) |
+| `VITE_API_BASE` | `/api` (dev) · `""` (prod build) | API prefix; empty = same origin |
+| `HARDWARE_SPLICER_SERVE_UI` | off | When `1`, `hs-serve` / uvicorn serves `apps/splice-ui/dist` at `/` |
 
-Production: build with `npm run build` and serve `dist/` behind the same origin as the API, or set `VITE_API_BASE` to the API URL and enable CORS on the backend.
+Production: `make splice-ui-build` then `HARDWARE_SPLICER_SERVE_UI=1 hs-serve`, or serve `dist/` behind the same origin as the API.
 
 ## Related
 

@@ -5,7 +5,7 @@ const POLL_MS = 2000;
 
 const STAGE_LABELS = {
   queued: "Waiting in queue…",
-  running: "Compiling carrier board (KiCad)…",
+  running: "Compiling splice plan and KiCad carrier…",
   succeeded: "Build complete",
   failed: "Build failed",
   cancelled: "Cancelled",
@@ -16,13 +16,30 @@ export function useSpliceJob() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [active, setActive] = useState(false);
+  const [elapsedSec, setElapsedSec] = useState(0);
   const timerRef = useRef(null);
+  const elapsedRef = useRef(null);
+  const startedAtRef = useRef(null);
 
   const clearTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    if (elapsedRef.current) {
+      clearInterval(elapsedRef.current);
+      elapsedRef.current = null;
+    }
+  };
+
+  const startElapsed = () => {
+    startedAtRef.current = Date.now();
+    setElapsedSec(0);
+    elapsedRef.current = setInterval(() => {
+      if (startedAtRef.current) {
+        setElapsedSec(Math.floor((Date.now() - startedAtRef.current) / 1000));
+      }
+    }, 1000);
   };
 
   const pollJob = useCallback(async (jobId) => {
@@ -57,6 +74,7 @@ export function useSpliceJob() {
       setError(null);
       setResult(null);
       setJob(null);
+      startElapsed();
       try {
         const submitted = await submitSpliceJob(intake, options);
         const jobId = submitted.job_id;
@@ -75,6 +93,7 @@ export function useSpliceJob() {
       } catch (err) {
         setError(err.message);
         setActive(false);
+        clearTimer();
         throw err;
       }
     },
@@ -87,6 +106,8 @@ export function useSpliceJob() {
     setResult(null);
     setError(null);
     setActive(false);
+    setElapsedSec(0);
+    startedAtRef.current = null;
   }, []);
 
   useEffect(() => () => clearTimer(), []);
@@ -98,8 +119,10 @@ export function useSpliceJob() {
     result,
     error,
     active,
+    elapsedSec,
     stageLabel,
     startBuild,
     reset,
+    clearError: () => setError(null),
   };
 }
