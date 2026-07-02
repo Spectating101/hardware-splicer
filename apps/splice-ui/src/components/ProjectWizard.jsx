@@ -1,0 +1,410 @@
+import { useMemo, useState } from "react";
+import { clarifyIntent } from "../api.js";
+import {
+  INITIAL_WIZARD,
+  PART_TYPES,
+  buildIntakeFromWizard,
+  defaultPart,
+  getWizardSteps,
+  slugify,
+} from "../intakeBuilder.js";
+
+function StepIndicator({ steps, currentId }) {
+  const currentIndex = steps.findIndex((row) => row.id === currentId);
+  return (
+    <ol className="wizard-steps">
+      {steps.map((step, index) => (
+        <li
+          key={step.id}
+          className={
+            index < currentIndex ? "done" : index === currentIndex ? "active" : ""
+          }
+        >
+          <span className="wizard-step-num">{index + 1}</span>
+          <span className="wizard-step-label">{step.label}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+export default function ProjectWizard({
+  donorFixtures,
+  onCancel,
+  onBuild,
+  building,
+  buildError,
+  stageLabel,
+}) {
+  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD });
+  const [stepId, setStepId] = useState("goal");
+  const [clarifyLoading, setClarifyLoading] = useState(false);
+  const [clarifyError, setClarifyError] = useState(null);
+  const [enrichedIntent, setEnrichedIntent] = useState(null);
+
+  const steps = useMemo(() => getWizardSteps(wizard), [wizard]);
+  const stepIndex = steps.findIndex((row) => row.id === stepId);
+
+  const patchWizard = (patch) => setWizard((prev) => ({ ...prev, ...patch }));
+
+  const goNext = async () => {
+    setClarifyError(null);
+    if (stepId === "goal") {
+      if (!wizard.goal.trim() || wizard.goal.trim().length < 12) {
+        setClarifyError("Describe your project in at least one full sentence.");
+        return;
+      }
+      patchWizard({ projectName: slugify(wizard.projectName || wizard.goal) });
+      setClarifyLoading(true);
+      try {
+        const report = await clarifyIntent({
+          goal: wizard.goal.trim(),
+          project_name: slugify(wizard.projectName || wizard.goal),
+        });
+        patchWizard({ clarifier: report });
+        if (report.enriched_intent) setEnrichedIntent(report.enriched_intent);
+        setStepId("clarify");
+      } catch (err) {
+        setClarifyError(err.message);
+      } finally {
+        setClarifyLoading(false);
+      }
+      return;
+    }
+
+    if (stepId === "clarify") {
+      setClarifyLoading(true);
+      try {
+        const report = await clarifyIntent({
+          goal: wizard.goal.trim(),
+          project_name: slugify(wizard.projectName || wizard.goal),
+          clarification_answers: wizard.answers,
+        });
+        patchWizard({ clarifier: report });
+        if (report.enriched_intent) setEnrichedIntent(report.enriched_intent);
+      } catch (err) {
+        setClarifyError(err.message);
+        setClarifyLoading(false);
+        return;
+      } finally {
+        setClarifyLoading(false);
+      }
+    }
+
+    if (stepId === "parts") {
+      const named = wizard.parts.filter((row) => row.name.trim());
+      if (named.length === 0) {
+        setClarifyError("Add at least one part you have on hand.");
+        return;
+      }
+    }
+
+    if (stepId === "donor" && wizard.mode === "salvage" && !wizard.donorFixtureId) {
+      setClarifyError("Pick a donor board profile (or switch to “design from scratch”).");
+      return;
+    }
+
+    const next = steps[stepIndex + 1];
+    if (next) setStepId(next.id);
+  };
+
+  const goBack = () => {
+    setClarifyError(null);
+    const prev = steps[stepIndex - 1];
+    if (prev) setStepId(prev.id);
+  };
+
+  const handleBuild = () => {
+    const intake = buildIntakeFromWizard(wizard, { donorFixtures, enrichedIntent });
+    onBuild(intake);
+  };
+
+  const questions = wizard.clarifier?.questions || [];
+
+  return (
+    <div className="wizard-shell">
+      <div className="wizard-header">
+        <div>
+          <h2>Start a hardware project</h2>
+          <p className="muted">Describe what you want — we’ll turn it into a splice plan and carrier board.</p>
+        </div>
+        <button type="button" className="ghost" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+
+      <StepIndicator steps={steps} currentId={stepId} />
+
+      <div className="wizard-body card">
+        {stepId === "goal" && (
+          <>
+            <label className="field-label" htmlFor="goal">
+              What do you want to build?
+            </label>
+            <textarea
+              id="goal"
+              className="field-textarea"
+              rows={5}
+              placeholder="Example: I want to splice the motor driver from a dead RC car into a small robot with an ESP32 and a front distance sensor."
+              value={wizard.goal}
+              onChange={(e) => patchWizard({ goal: e.target.value })}
+            />
+            <p className="hint">Plain English is fine. We’ll ask a few follow-ups if anything’s unclear.</p>
+          </>
+        )}
+
+        {stepId === "clarify" && (
+          <>
+            <h3>Quick questions</h3>
+            <p className="muted">These help the engine pick power rails and modules — skip only if you’re unsure.</p>
+            {questions.length === 0 && (
+              <p className="hint">Your description already has enough detail. Continue when ready.</p>
+            )}
+            {questions.map((q) => (
+              <div key={q.id} className="field-block">
+                <label className="field-label" htmlFor={`q-${q.id}`}>
+                  {q.prompt}
+                </label>
+                <input
+                  id={`q-${q.id}`}
+                  value={wizard.answers[q.id] || ""}
+                  onChange={(e) =>
+                    patchWizard({
+                      answers: { ...wizard.answers, [q.id]: e.target.value },
+                    })
+                  }
+                  placeholder="Your answer"
+                />
+              </div>
+            ))}
+          </>
+        )}
+
+        {stepId === "mode" && (
+          <>
+            <h3>Are you reusing junk hardware?</h3>
+            <div className="choice-grid">
+              <button
+                type="button"
+                className={`choice-card ${wizard.mode === "salvage" ? "active" : ""}`}
+                onClick={() => patchWizard({ mode: "salvage" })}
+              >
+                <strong>Salvage / splice</strong>
+                <span>Reuse motors, drivers, or boards from dead gadgets</span>
+              </button>
+              <button
+                type="button"
+                className={`choice-card ${wizard.mode === "greenfield" ? "active" : ""}`}
+                onClick={() => patchWizard({ mode: "greenfield", donorFixtureId: "" })}
+              >
+                <strong>Mostly new parts</strong>
+                <span>Build from modules you already own — less donor PCB reuse</span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {stepId === "parts" && (
+          <>
+            <h3>What parts do you have?</h3>
+            <p className="muted">List salvaged or bin parts — motors, controllers, sensors, donor boards.</p>
+            <ul className="parts-editor">
+              {wizard.parts.map((row, index) => (
+                <li key={index} className="parts-row">
+                  <input
+                    placeholder="Part name"
+                    value={row.name}
+                    onChange={(e) => {
+                      const parts = [...wizard.parts];
+                      parts[index] = { ...parts[index], name: e.target.value };
+                      patchWizard({ parts });
+                    }}
+                  />
+                  <select
+                    value={row.type}
+                    onChange={(e) => {
+                      const parts = [...wizard.parts];
+                      parts[index] = { ...parts[index], type: e.target.value };
+                      patchWizard({ parts });
+                    }}
+                  >
+                    {PART_TYPES.map((type) => (
+                      <option key={type.id} value={type.id}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    placeholder="Notes (harness label, condition…)"
+                    value={row.notes}
+                    onChange={(e) => {
+                      const parts = [...wizard.parts];
+                      parts[index] = { ...parts[index], notes: e.target.value };
+                      patchWizard({ parts });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="ghost small"
+                    disabled={wizard.parts.length <= 1}
+                    onClick={() => patchWizard({ parts: wizard.parts.filter((_, i) => i !== index) })}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className="ghost"
+              onClick={() => patchWizard({ parts: [...wizard.parts, defaultPart()] })}
+            >
+              + Add part
+            </button>
+          </>
+        )}
+
+        {stepId === "donor" && (
+          <>
+            <h3>Which donor board are you reusing?</h3>
+            <p className="muted">Pick the closest profile — we’ll generate measurement gates for that harness.</p>
+            <div className="fixture-grid">
+              {donorFixtures.map((fixture) => (
+                <button
+                  key={fixture.id}
+                  type="button"
+                  className={`fixture-card ${wizard.donorFixtureId === fixture.id ? "active" : ""}`}
+                  onClick={() => patchWizard({ donorFixtureId: fixture.id })}
+                >
+                  <strong>{fixture.label}</strong>
+                  <span>{fixture.headline || fixture.board_id}</span>
+                  {fixture.suggested_uses?.length > 0 && (
+                    <span className="fixture-tags">{fixture.suggested_uses.join(" · ")}</span>
+                  )}
+                </button>
+              ))}
+              {donorFixtures.length === 0 && (
+                <p className="muted">No donor fixtures loaded from API.</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {stepId === "power" && (
+          <>
+            <h3>Power & runtime</h3>
+            <div className="field-grid">
+              <div className="field-block">
+                <label className="field-label" htmlFor="battery-v">
+                  Battery voltage (V)
+                </label>
+                <input
+                  id="battery-v"
+                  type="number"
+                  step="0.1"
+                  value={wizard.batteryVoltage}
+                  onChange={(e) => patchWizard({ batteryVoltage: e.target.value })}
+                />
+              </div>
+              <div className="field-block">
+                <label className="field-label" htmlFor="runtime">
+                  Target runtime (minutes)
+                </label>
+                <input
+                  id="runtime"
+                  type="number"
+                  value={wizard.runtimeMin}
+                  onChange={(e) => patchWizard({ runtimeMin: e.target.value })}
+                />
+              </div>
+              <div className="field-block">
+                <label className="field-label" htmlFor="mass">
+                  Approx. mass (kg, optional)
+                </label>
+                <input
+                  id="mass"
+                  type="number"
+                  step="0.1"
+                  value={wizard.massKg}
+                  onChange={(e) => patchWizard({ massKg: e.target.value })}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {stepId === "review" && (
+          <>
+            <h3>Review & build</h3>
+            <dl className="review-list">
+              <div>
+                <dt>Project</dt>
+                <dd>{wizard.goal}</dd>
+              </div>
+              <div>
+                <dt>Mode</dt>
+                <dd>{wizard.mode === "salvage" ? "Salvage / splice" : "Mostly new parts"}</dd>
+              </div>
+              <div>
+                <dt>Parts</dt>
+                <dd>{wizard.parts.filter((p) => p.name.trim()).map((p) => p.name).join(", ") || "—"}</dd>
+              </div>
+              {wizard.mode === "salvage" && (
+                <div>
+                  <dt>Donor fixture</dt>
+                  <dd>
+                    {donorFixtures.find((f) => f.id === wizard.donorFixtureId)?.label || "—"}
+                  </dd>
+                </div>
+              )}
+              <div>
+                <dt>Power</dt>
+                <dd>
+                  {wizard.batteryVoltage} V · {wizard.runtimeMin} min runtime
+                </dd>
+              </div>
+            </dl>
+            {building && (
+              <div className="build-progress">
+                <div className="spinner" aria-hidden />
+                <p>{stageLabel || "Building your project…"}</p>
+                <p className="muted small">KiCad compile usually takes 30–90 seconds.</p>
+              </div>
+            )}
+            {buildError && <p className="error">{buildError}</p>}
+          </>
+        )}
+
+        {clarifyError && <p className="error">{clarifyError}</p>}
+      </div>
+
+      <div className="wizard-footer">
+        {stepIndex > 0 && (
+          <button type="button" className="ghost" onClick={goBack} disabled={building || clarifyLoading}>
+            Back
+          </button>
+        )}
+        <div className="wizard-footer-spacer" />
+        {stepId !== "review" ? (
+          <button
+            type="button"
+            className="primary"
+            onClick={goNext}
+            disabled={building || clarifyLoading}
+          >
+            {clarifyLoading ? "Checking…" : "Continue"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="primary"
+            onClick={handleBuild}
+            disabled={building}
+          >
+            {building ? "Building…" : "Build my project"}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

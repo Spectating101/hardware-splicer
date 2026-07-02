@@ -1,6 +1,8 @@
 # Competition handoff — judges & reviewers (5 minutes)
 
-**Full proposal:** [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md)
+**Full proposal:** [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md)  
+**YZU 提案結果:** 2026 提案階段未入圍 — [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md)  
+**Strategy / funding / vs Blueprint:** [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md)  
 **Agent / developer entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md)
 
 ---

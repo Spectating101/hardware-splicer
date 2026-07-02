@@ -7,7 +7,7 @@ import re
 import uuid
 from dataclasses import replace
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
@@ -256,6 +256,15 @@ class CircuitSynthesisCompileRequest(BaseModel):
     export_gerber: bool = False
 
 
+class IntentClarifyRequest(BaseModel):
+    intent: Dict[str, Any]
+
+
+class ProjectPackageRequest(BaseModel):
+    build_dir: str
+    source: str = "api"
+
+
 def _compose_constraints(request: ComposeRequest | ComposeCanvasRequest) -> Dict[str, Any]:
     body = dict(getattr(request, "constraints", None) or {})
     if getattr(request, "strategy_mode", None):
@@ -360,17 +369,89 @@ def create_app() -> FastAPI:
             job_backend.stop()
 
     app = FastAPI(
-        title="Hardware-Splicer Compiler",
-        version="0.3.0",
-        description="Top-level compiler API for Circuit-AI -> Mecha-Splicer -> 3D-Splicer build bundles.",
+        title="Hardware-Splicer Splice Agent",
+        version="1.0.0",
+        description="Splice agent API: donor intake → KiCad carrier → bench gates → project package.",
         lifespan=lifespan,
     )
     app.state.job_backend = job_backend
 
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://127.0.0.1:5178",
+            "http://localhost:5178",
+            "http://127.0.0.1:5177",
+            "http://localhost:5177",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     @app.get("/health")
     def health() -> Dict[str, Any]:
+        from ._version import __version__
+
         status = runtime_status()
-        return {"ok": bool(status.get("ok")), "app_roots": status.get("app_roots")}
+        return {
+            "ok": bool(status.get("ok")),
+            "version": __version__,
+            "app_roots": status.get("app_roots"),
+        }
+
+    @app.get("/v1/examples/splice-intakes")
+    def splice_intake_examples() -> Dict[str, Any]:
+        root = Path(__file__).resolve().parents[2] / "examples" / "intakes"
+        examples: List[Dict[str, Any]] = []
+        for path in sorted(root.glob("splice_*.json")):
+            try:
+                intake = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            if not isinstance(intake, dict):
+                continue
+            examples.append(
+                {
+                    "id": path.stem,
+                    "label": str(intake.get("project_name") or path.stem),
+                    "goal": str(intake.get("goal") or ""),
+                    "intake": intake,
+                }
+            )
+        return {"ok": True, "examples": examples}
+
+    @app.get("/v1/examples/donor-fixtures")
+    def donor_fixture_examples() -> Dict[str, Any]:
+        root = Path(__file__).resolve().parents[2] / "examples" / "fixtures"
+        fixtures: List[Dict[str, Any]] = []
+        for path in sorted(root.glob("splice_donor_*.json")):
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                continue
+            if not isinstance(payload, dict):
+                continue
+            blocks = payload.get("reusable_blocks") or []
+            headline = ""
+            if blocks and isinstance(blocks[0], dict):
+                headline = str(blocks[0].get("name") or blocks[0].get("block_id") or "")
+            fixtures.append(
+                {
+                    "id": path.stem,
+                    "board_id": str(payload.get("board_id") or path.stem),
+                    "label": str(payload.get("board_role") or payload.get("board_id") or path.stem).replace("_", " "),
+                    "headline": headline,
+                    "verdict": str(payload.get("verdict") or ""),
+                    "intake_path": f"@examples/fixtures/{path.name}",
+                    "suggested_uses": list(blocks[0].get("suggested_uses") or [])[:4]
+                    if blocks and isinstance(blocks[0], dict)
+                    else [],
+                }
+            )
+        return {"ok": True, "fixtures": fixtures}
 
     @app.get("/v1/status")
     def status() -> Dict[str, Any]:
@@ -507,9 +588,23 @@ def create_app() -> FastAPI:
     @app.post("/v1/circuit-synthesis/plan")
     def circuit_synthesis_plan(request: CircuitSynthesisPlanRequest) -> Dict[str, Any]:
         try:
-            return plan_circuit(request.intent).to_dict()
+            from .sdk import plan_circuit_synthesis
+
+            return plan_circuit_synthesis(request.intent)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/intent/clarify")
+    def intent_clarify(request: IntentClarifyRequest) -> Dict[str, Any]:
+        from .sdk import clarify_hardware_intent
+
+        return clarify_hardware_intent(request.intent)
+
+    @app.post("/v1/project-package/render")
+    def project_package_render(request: ProjectPackageRequest) -> Dict[str, Any]:
+        from .sdk import render_project_package
+
+        return render_project_package(request.build_dir, source=request.source)
 
     @app.post("/v1/circuit-synthesis/compile")
     def circuit_synthesis_compile(request: CircuitSynthesisCompileRequest) -> Dict[str, Any]:

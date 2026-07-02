@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build verify-splice-v1
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -97,6 +97,10 @@ verify-splice-loop:
 verify-splice-real-bench:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/verify_splice_real_bench.py
 
+# Core v1 bar — run this before UI/packaging work. No npm, no splice-ui.
+verify-splice-v1: doctor test-project-package verify-splice verify-splice-loop verify-splice-real-bench
+	@echo "verify-splice-v1: engine + S2/S3 + project package — all passed"
+
 pin-golden-live-evidence:
 	QWEN_DISABLED=0 QWEN_OUT_OF_QUOTA=0 VISION_MONTHLY_USD_LIMIT=5 VISION_DAILY_USD_LIMIT=2 VISION_MAX_USD_PER_CALL=0.25 PYTHONPATH=src $(PYTHON) scripts/pin_golden_live_board_evidence.py
 
@@ -106,6 +110,9 @@ splice-golden-real:
 vision-donor-smoke:
 	PYTHONPATH=src $(PYTHON) scripts/generate_donor_test_image.py
 	PYTHONPATH=src $(PYTHON) scripts/vision_donor_live_smoke.py
+
+test-project-package:
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_project_package.py tests/test_circuit_synthesis_bridge.py -q
 
 verify-catalog:
 	node scripts/verify_catalog_parity.cjs
@@ -128,6 +135,15 @@ test-scratch-pipeline:
 
 run-mcp:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_JLC_ENRICH=0 PYTHONPATH=src $(PYTHON) -m hardware_splicer.mcp_server
+
+splice-ui-install:
+	cd apps/splice-ui && npm install
+
+splice-ui-dev: splice-ui-install
+	cd apps/splice-ui && npm run dev
+
+splice-ui-build: splice-ui-install
+	cd apps/splice-ui && npm run build
 
 verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers verify-splice smoke
 	@echo "Hardware-Splicer verify: all checks passed"

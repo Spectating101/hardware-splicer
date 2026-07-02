@@ -628,11 +628,15 @@ def plan_circuit_synthesis(intent: Mapping[str, Any]) -> Dict[str, Any]:
     return structured blockers rather than generated schematics.
     """
     from .circuit_synthesis import evaluate_topology_authority, plan_circuit
+    from .intent_clarifier import analyze_intent_clarifications, apply_clarification_answers
 
     apply_engine_defaults()
-    candidate = plan_circuit(dict(intent))
+    clarifier = analyze_intent_clarifications(dict(intent))
+    planning_intent = apply_clarification_answers(dict(intent))
+    candidate = plan_circuit(planning_intent)
     body = candidate.to_dict()
-    body.setdefault("metadata", {})["topology_authority"] = evaluate_topology_authority(candidate)
+    body.setdefault("metadata", {})["clarifier"] = clarifier
+    body["metadata"]["topology_authority"] = evaluate_topology_authority(candidate)
     return body
 
 
@@ -646,17 +650,35 @@ def synthesize_circuit(
 ) -> Dict[str, Any]:
     """Plan arbitrary circuit intent and optionally compile ready candidates."""
     from .circuit_synthesis import compile_synthesis_candidate, evaluate_topology_authority, plan_circuit
+    from .intent_clarifier import apply_clarification_answers
+    from .project_package import write_project_package_artifacts
 
     apply_engine_defaults()
-    candidate = plan_circuit(dict(intent))
+    planning_intent = apply_clarification_answers(dict(intent))
+    candidate = plan_circuit(planning_intent)
     if not compile_build:
-        return {
+        target = Path(out_dir) if out_dir else None
+        body = {
             "schema_version": "hardware_splicer.circuit_synthesis_sdk.v1",
             "ok": not candidate.blocked,
             "compiled": False,
             "candidate": candidate.to_dict(),
             "topology_authority": evaluate_topology_authority(candidate),
         }
+        if target is not None:
+            package_write = write_project_package_artifacts(
+                target,
+                result={
+                    **body,
+                    "project_name": candidate.candidate_id,
+                    "goal": str(planning_intent.get("goal") or ""),
+                },
+                source="circuit_synthesis_plan_only",
+                candidate=candidate.to_dict(),
+            )
+            body["artifacts"] = package_write.get("artifacts")
+            body["project_package"] = package_write.get("package")
+        return body
     target = Path(out_dir) if out_dir else _out_dir("circuit_synthesis")
     return compile_synthesis_candidate(
         candidate,
@@ -664,6 +686,27 @@ def synthesize_circuit(
         export_gerber=export_gerber,
         request_id=request_id,
     )
+
+
+def clarify_hardware_intent(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return clarifying questions and enriched intent for vague hardware goals."""
+    from .intent_clarifier import analyze_intent_clarifications
+
+    apply_engine_defaults()
+    return analyze_intent_clarifications(dict(intent))
+
+
+def render_project_package(
+    build_dir: str | Path,
+    *,
+    result: Mapping[str, Any] | None = None,
+    source: str = "auto",
+) -> Dict[str, Any]:
+    """Build or refresh Blueprint-shaped PROJECT_PACKAGE artifacts on disk."""
+    from .project_package import write_project_package_artifacts
+
+    apply_engine_defaults()
+    return write_project_package_artifacts(build_dir, result=result, source=source)
 
 
 def inspect_fab_build_dir(build_dir: str | Path) -> Dict[str, Any]:
@@ -705,8 +748,11 @@ def inspect_fab_build_dir(build_dir: str | Path) -> Dict[str, Any]:
 
 def sdk_info() -> Dict[str, Any]:
     """Capability card for agents choosing tools."""
+    from ._version import __version__
+
     return {
         "schema_version": SCHEMA_VERSION,
+        "package_version": __version__,
         "name": "Hardware-Splicer Engine",
         "repo_root": str(ROOT),
         "strengths": [
@@ -757,6 +803,8 @@ def sdk_info() -> Dict[str, Any]:
                 "hs_circuit_synthesis_capability",
                 "hs_plan_circuit_synthesis",
                 "hs_synthesize_circuit",
+                "hs_clarify_hardware_intent",
+                "hs_render_project_package",
                 "hs_inspect_fab",
             ],
         },

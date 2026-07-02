@@ -23,6 +23,10 @@ Expose the **compile engine** (not the legacy Circuit-AI generative stubs) to an
 | Full salvage bring-up + report | `hs_salvage_bringup` |
 | Catalog KiCad DRC bar | `hs_verify_engine` |
 | Runtime doctor | `hs_engine_doctor` |
+| Vague goal clarifier | `hs_clarify_hardware_intent` / `POST /v1/intent/clarify` |
+| Circuit synthesis plan | `hs_plan_circuit_synthesis` / `POST /v1/circuit-synthesis/plan` |
+| Circuit synthesis compile | `hs_synthesize_circuit` / `POST /v1/circuit-synthesis/compile` |
+| Project package refresh | `hs_render_project_package` / `POST /v1/project-package/render` |
 
 **Truth model:** KiCad ERC/DRC is external compile truth. Default copper is **cosmetic preview** (`copper_tier: cosmetic_preview`). FreeRouting is off unless `HARDWARE_SPLICER_AUTOROUTE=1`.
 

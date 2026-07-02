@@ -386,3 +386,38 @@ def test_vision_assistance_can_apply_annotation_notes_to_extractor():
     assert len(dimensions) == 1
     assert dimensions[0]["target"] == "pump_mount width"
     assert dimensions[0]["value_mm"] == 55.0
+
+
+def test_splice_intake_examples_api() -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    client = TestClient(create_app())
+    health = client.get("/health")
+    assert health.status_code == 200
+    assert health.json().get("version") == "1.0.0"
+
+    response = client.get("/v1/examples/splice-intakes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    examples = data["examples"]
+    assert len(examples) >= 1
+    first = examples[0]
+    assert first["id"].startswith("splice_")
+    assert isinstance(first["intake"], dict)
+    assert first["intake"].get("goal")
+
+
+def test_donor_fixture_examples_api() -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    client = TestClient(create_app())
+    response = client.get("/v1/examples/donor-fixtures")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ok"] is True
+    fixtures = data["fixtures"]
+    assert len(fixtures) >= 1
+    assert fixtures[0]["intake_path"].startswith("@examples/fixtures/")

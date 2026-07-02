@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hardware-splicer"
+version = "1.0.0"
+description = "Headless splice agent: donor intake → KiCad carrier → bench gates → project package"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "Proprietary" }
+authors = [{ name = "Hardware-Splicer" }]
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.27",
+  "httpx>=0.27",
+  "pillow>=10.0",
+  "pydantic>=2.0",
+  "python-multipart>=0.0.9",
+  "python-dotenv>=1.0",
+  "loguru>=0.7",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.2.0"]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+
+[project.scripts]
+hs-doctor = "hardware_splicer.cli_entry:main_doctor"
+hs-serve = "hardware_splicer.cli_entry:main_serve"
+hs-mcp = "hardware_splicer.cli_entry:main_mcp"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

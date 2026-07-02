@@ -2,7 +2,8 @@
 
 **Start here.** Any agent (MCP client, HTTP caller, Python script) can drive the splice product without a UI. The library/SDK is the primary handoff; MCP and HTTP are thin wrappers over the same functions.
 
-**What changed since May:** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — build/upgrade delta for continuity.
+**What changed since May:** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — build/upgrade delta for continuity.  
+**Strategy / funding / vs Blueprint:** [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) — do not kill HS because of Blueprint; Taiwan competition + grant path.
 
 ## What this engine does (splice thesis)
 
@@ -11,7 +12,7 @@
 3. **Compile** a **carrier board** — KiCad schematic + placed PCB wired to donor connectors
 4. **Bench** — close measurement gates before power-on (S3)
 
-**Honest bar today:** S2 compile demos pass KiCad DRC (`make verify-splice`). S3 golden paths close gates in CI (`verify-splice-loop`) or via hand-filled real capture (`verify-splice-real-bench`). Field validation on community junk is a future partner step.
+**Honest bar today:** S2 compile demos pass KiCad DRC (`make verify-splice`). S3 golden paths close gates in CI (`verify-splice-loop`) or via hand-filled real capture (`verify-splice-real-bench`). Circuit synthesis planners are test-covered (`88f1db8`) on a **parallel greenfield path** — not merged into splice verify yet. Splice and synthesis builds auto-emit **PROJECT_PACKAGE** artifacts (Blueprint-shaped tabs + **GATES**). Field validation on community junk is a future partner step.
 
 **Competition / judge entry:** [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) · full proposal [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md)
 
@@ -19,10 +20,12 @@
 
 ```
 hs_sdk_info
-  → hs_splice_build          # or hs_plan_salvage to explore feasibility first
-  → hs_splice_bench_status   # read open gates + next_actions
-  → hs_splice_bench_submit   # record measurements, close gates
-  → hs_inspect_fab           # review carrier fab package on disk
+  → hs_clarify_hardware_intent   # optional — vague goals → questions
+  → hs_splice_build              # or hs_plan_salvage to explore feasibility first
+  → hs_render_project_package    # refresh PROJECT_PAGE.md from build dir
+  → hs_splice_bench_status       # read open gates + next_actions
+  → hs_splice_bench_submit       # record measurements, close gates
+  → hs_inspect_fab               # review carrier fab package on disk
 ```
 
 **Shortcut (CI / demo):** `hs_splice_golden_loop` — build + template + capture submit in one call. Set `simulate_bench: false` for real instrument readings.
@@ -31,13 +34,82 @@ hs_sdk_info
 
 Do **not** claim fab-ready or power-on-safe from KiCad DRC alone. Read `design_quality_gate.fabrication_ready` and `bench_session.power_on_authorized`.
 
+## Circuit synthesis (greenfield path — `88f1db8`)
+
+Bounded **intent → topology → candidate → compile** for supported domains (motor driver, H-bridge, power rail, level shift, sensor interface, relay, battery, analog conditioning). Unsupported goals return **blocked candidates** with structured blockers — no fake schematics.
+
+```text
+plan_circuit_synthesis(intent)   # safe dispatcher
+  → SynthesisCandidate (blocked | ready_for_review)
+synthesize_circuit(intent)       # plan + compile when not blocked
+  → KiCad build dir + topology_authority metadata
+```
+
+Per-domain SDK helpers: `plan_motor_driver_circuit`, `plan_h_bridge_circuit`, `plan_power_rail_circuit`, etc. Capability card: `circuit_synthesis_capability()`.
+
+**HTTP** (synthesis + project package):
+
+| Route | Purpose |
+|-------|---------|
+| `GET /v1/circuit-synthesis/capability` | Supported topologies + authority ceiling |
+| `POST /v1/circuit-synthesis/plan` | Dispatcher plan only (includes clarifier metadata) |
+| `POST /v1/circuit-synthesis/compile` | Plan + compile ready candidates |
+| `POST /v1/circuit-synthesis/motor-driver` | … per-domain planners (h-bridge, power-rail, …) |
+| `POST /v1/intent/clarify` | Clarifying questions for vague hardware goals |
+| `POST /v1/project-package/render` | Refresh PROJECT_PACKAGE from build dir |
+
+```python
+from hardware_splicer.sdk import plan_circuit_synthesis, synthesize_circuit
+
+candidate = plan_circuit_synthesis({
+    "goal": "drive_brushed_dc_motor",
+    "supply_voltage_v": 12,
+    "motor_current_a": 1.5,
+    "logic_voltage_v": 3.3,
+})
+print(candidate.get("blocked"), candidate.get("blockers"))
+
+result = synthesize_circuit(candidate["intent"] if "intent" in candidate else {...}, export_gerber=False)
+```
+
+Deep reference: [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md). **Splice path and synthesis path are separate today** — RC demos still use donor fixtures + catalog `robot_drive_base`.
+
+## Project package (Blueprint-shaped output)
+
+Competitive positioning vs Blueprint.am: they win open-ended **generative planning + polished project page**; we win **verification discipline** (compile DRC, bench gates, casefiles). The project package layer packages our artifacts into their tab shape **plus GATES**:
+
+| Tab | Artifact |
+|-----|----------|
+| INFO | goal, supply, clarifier notes |
+| BOM | salvage or compile BOM lines |
+| WIRING | `WIRING_GUIDE.md` |
+| INSTRUCTIONS | `ASSEMBLY_GUIDE.md` |
+| **GATES** | compile / bench / blocked verdict |
+
+Emitted automatically on `splice_build` and `synthesize_circuit` (when `out_dir` set). Refresh anytime:
+
+```python
+from hardware_splicer.sdk import clarify_hardware_intent, render_project_package
+
+clarify_hardware_intent({"goal": "robot with motor"})
+render_project_package("/tmp/splice_out")
+```
+
+| Surface | Entry |
+|---------|-------|
+| SDK | `clarify_hardware_intent()`, `render_project_package()` |
+| MCP | `hs_clarify_hardware_intent`, `hs_render_project_package` |
+| HTTP | `POST /v1/intent/clarify`, `POST /v1/project-package/render` |
+| CLI | `python scripts/build_project_package.py --build-dir …` |
+| Verify | `make test-project-package` |
+
 ## Surfaces (pick one)
 
 | Surface | When to use |
 |---------|-------------|
 | **Python SDK** | Notebooks, CI, custom agents in-process |
-| **MCP** (`python -m hardware_splicer.mcp_server`) | Cursor, Claude Desktop, any MCP client |
-| **HTTP API** (`scripts/hardware_splicer.py serve`) | Remote agents, multi-tenant hosts |
+| **MCP** (`python -m hardware_splicer.mcp_server`) | Cursor, Claude Desktop, any MCP client — splice + synthesis + project package tools |
+| **HTTP API** (`scripts/hardware_splicer.py serve`) | Remote agents, multi-tenant hosts — splice + circuit-synthesis routes |
 
 All three call the same code in `src/hardware_splicer/sdk.py`.
 
@@ -198,6 +270,9 @@ python scripts/hardware_splicer.py serve --host 127.0.0.1 --port 8787
 | `POST /v1/splice-golden-loop` | `{"intake": {...}, "simulate_bench": true}` |
 | `POST /v1/splice-bench/status` | `{"build_dir": "/path/to/splice/output"}` |
 | `POST /v1/splice-bench/submit` | `{"build_dir": "...", "measurements": [...]}` |
+| `GET /v1/circuit-synthesis/capability` | topology library card |
+| `POST /v1/circuit-synthesis/plan` | `{"intent": {...}}` |
+| `POST /v1/circuit-synthesis/compile` | `{"intent": {...}, "export_gerber": false}` |
 
 `splice-and-build` returns `bench_session` summary and `artifacts.bench_session` path.
 
@@ -231,6 +306,7 @@ See `docs/SPLICE_BEST_PRACTICES.md`, `docs/COMPETITIVE_LANDSCAPE.md`, `docs/COMP
 ## Product docs
 
 - [`docs/SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — maturity S0–S5, personas, gaps
+- [`docs/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — topology planners + implementation status
 - [`docs/DEMO_SPLICE.md`](DEMO_SPLICE.md) — 10-minute walkthrough
 - [`examples/splice/manifest.json`](../examples/splice/manifest.json) — CI demo contract
 

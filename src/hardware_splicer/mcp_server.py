@@ -343,6 +343,81 @@ async def list_tools() -> list[Tool]:
                 },
             },
         ),
+        Tool(
+            name="hs_clarify_hardware_intent",
+            description=(
+                "Blueprint-style front-half clarifier: vague hardware goals → "
+                "clarifying questions + enriched intent fields. Use before plan/splice."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intent": {
+                        "type": "object",
+                        "description": "goal, supply_voltage_v, clarification_answers, …",
+                    }
+                },
+                "required": ["intent"],
+            },
+        ),
+        Tool(
+            name="hs_plan_circuit_synthesis",
+            description=(
+                "Bounded circuit synthesis planner: intent → SynthesisCandidate "
+                "(blocked | ready_for_review) with topology authority metadata."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intent": {"type": "object", "description": "CircuitIntent-shaped dict"},
+                },
+                "required": ["intent"],
+            },
+        ),
+        Tool(
+            name="hs_synthesize_circuit",
+            description=(
+                "Plan + optionally compile circuit synthesis candidate. "
+                "Writes PROJECT_PACKAGE.json + PROJECT_PAGE.md when out_dir is set."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "intent": {"type": "object"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                    "compile_build": {
+                        "type": "boolean",
+                        "default": True,
+                        "description": "false = plan-only package without KiCad compile",
+                    },
+                },
+                "required": ["intent"],
+            },
+        ),
+        Tool(
+            name="hs_render_project_package",
+            description=(
+                "Refresh Blueprint-shaped PROJECT_PACKAGE artifacts from a build dir "
+                "(splice or synthesis). Emits PROJECT_PAGE.md, WIRING_GUIDE.md, ASSEMBLY_GUIDE.md."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string"},
+                    "result": {
+                        "type": "object",
+                        "description": "Optional in-memory build result to merge",
+                    },
+                    "source": {
+                        "type": "string",
+                        "default": "auto",
+                        "description": "auto | splice_build | circuit_synthesis | …",
+                    },
+                },
+                "required": ["build_dir"],
+            },
+        ),
     ]
 
 
@@ -471,6 +546,27 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 build_ids=args.get("build_ids"),
                 max_warnings=int(args.get("max_warnings") or 500),
                 out_dir=args.get("out_dir"),
+            )
+        )
+    if name == "hs_clarify_hardware_intent":
+        return _tool_result(sdk.clarify_hardware_intent(args.get("intent") or {}))
+    if name == "hs_plan_circuit_synthesis":
+        return _tool_result(sdk.plan_circuit_synthesis(args.get("intent") or {}))
+    if name == "hs_synthesize_circuit":
+        return _tool_result(
+            sdk.synthesize_circuit(
+                args.get("intent") or {},
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+                compile_build=bool(args.get("compile_build", True)),
+            )
+        )
+    if name == "hs_render_project_package":
+        return _tool_result(
+            sdk.render_project_package(
+                str(args.get("build_dir") or ""),
+                result=args.get("result"),
+                source=str(args.get("source") or "auto"),
             )
         )
 

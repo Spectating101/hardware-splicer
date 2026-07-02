@@ -119,7 +119,9 @@ def compile_synthesis_candidate(
             "design_quality": compile_result.design_quality_file,
         },
     }
-    return {
+    from ..project_package import write_project_package_artifacts
+
+    bridge_result = {
         "schema_version": SCHEMA_VERSION,
         "ok": bool(payload.get("ok")),
         "request_id": request_id,
@@ -137,7 +139,19 @@ def compile_synthesis_candidate(
             "Compiled from bounded synthesis candidate. This is ready for review only; "
             "DRC/fabrication/bench gates still control readiness claims."
         ),
+        "goal": str((synthesis_candidate.metadata or {}).get("goal") or ""),
+        "project_name": synthesis_candidate.candidate_id,
+        "build_id": compile_result.build_id,
     }
+    package_write = write_project_package_artifacts(
+        target,
+        result=bridge_result,
+        source="circuit_synthesis",
+        candidate=candidate_body,
+    )
+    bridge_result["artifacts"] = {**bridge_result.get("artifacts", {}), **(package_write.get("artifacts") or {})}
+    bridge_result["project_package"] = package_write.get("package")
+    return bridge_result
 
 
 def _lowering_notes(report: Mapping[str, Any]) -> list[str]:
@@ -155,7 +169,9 @@ def _blocked_payload(
     error: str,
     message: str,
 ) -> Dict[str, Any]:
-    return {
+    from ..project_package import write_project_package_artifacts
+
+    blocked = {
         "schema_version": SCHEMA_VERSION,
         "ok": False,
         "request_id": request_id,
@@ -167,4 +183,14 @@ def _blocked_payload(
         "missing_evidence": list(candidate.get("missing_evidence") or []),
         "constraints": list(candidate.get("constraints") or []),
         "claim_boundary": "No compile was attempted because synthesis authority is not closed.",
+        "project_name": str(candidate.get("candidate_id") or "blocked_candidate"),
     }
+    package_write = write_project_package_artifacts(
+        out_dir,
+        result=blocked,
+        source="circuit_synthesis_blocked",
+        candidate=dict(candidate),
+    )
+    blocked["artifacts"] = package_write.get("artifacts") or {}
+    blocked["project_package"] = package_write.get("package")
+    return blocked

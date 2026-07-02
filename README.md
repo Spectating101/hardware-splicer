@@ -6,15 +6,24 @@ Consolidated hardware compiler: electronics intelligence, mechanical splicing, p
 
 **Quick starts:**
 
-- **Handoff update (what changed):** [`docs/HANDOFF_UPDATE.md`](docs/HANDOFF_UPDATE.md)
-- **Agent handoff (start here for agents):** [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) — SDK, MCP, HTTP splice + bench flow
+- **Documentation map (start here):** [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — all docs, canonical order, gaps
+- **Packaging & deployment:** [`docs/PACKAGING_AND_DEPLOYMENT.md`](docs/PACKAGING_AND_DEPLOYMENT.md) — v1 install, MCP, API, **splice-ui**, release
+- **Splice UI (v1 product):** [`apps/splice-ui/README.md`](apps/splice-ui/README.md) · [`docs/UI_V1.md`](docs/UI_V1.md) — real workbench wired to live API
+- **Agent handoff:** [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) — SDK, MCP, HTTP splice + bench flow
+- **Strategy / funding / vs Blueprint:** [`docs/BLUEPRINT_POSITIONING_AND_FUNDING.md`](docs/BLUEPRINT_POSITIONING_AND_FUNDING.md) — why not to kill HS; Taiwan competition path
+- **Finish line / ship v1.0:** [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md) — deploy, tag, call it a day
+- **Deploy · product · funding:** [`docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) — how to push commercially
+- **Monetization assessment:** [`docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) — buyers, pricing, risks, workbook
 - **Splice product (canonical):** [`docs/SPLICE_PRODUCT.md`](docs/SPLICE_PRODUCT.md) — thesis, tiers, roadmap, how to proceed
 - **Splice demo:** [`docs/DEMO_SPLICE.md`](docs/DEMO_SPLICE.md) — `make splice-demo` · `make verify-splice`
 - **Authority / fab demo:** [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md)
 - Setup: [`docs/SETUP.md`](docs/SETUP.md) · LLM ops: [`docs/LLM_OPS.md`](docs/LLM_OPS.md)
 
+**Ship & business:** [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md) · [`docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) · [`docs/BLUEPRINT_POSITIONING_AND_FUNDING.md`](docs/BLUEPRINT_POSITIONING_AND_FUNDING.md) · [`docs/HANDOFF_UPDATE.md`](docs/HANDOFF_UPDATE.md)
+
 ```bash
 make setup          # pip install + doctor
+make verify-splice-v1   # core engine bar (S2/S3) — run before UI work
 make splice-demo    # donor PCB → splice plan → robot_drive_base carrier
 make verify         # tests + benchmark + strict audit + tier scoring
 make demo           # canonical compile bundle

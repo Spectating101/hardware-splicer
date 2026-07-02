@@ -1,6 +1,6 @@
 # Handoff update — what changed since last time
 
-**Date:** June 2026
+**Date:** June 2026 (updated after `88f1db8` circuit synthesis push)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
 **Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
@@ -9,7 +9,7 @@
 
 ## One-paragraph delta
 
-Since the May handoff, the repo grew a **unified headless compiler** (`src/hardware_splicer/`, ~70 modules), then a **splice product spine** (donor → plan → KiCad carrier → bench gates), then **agent surfaces** (SDK / MCP / HTTP), then **S3 golden verification** (simulated CI loop + real-photo path with pinned Qwen evidence). The honest bar moved from “compile demos work” to “**S2 proven in CI, S3 proven in golden paths**.” UI is explicitly **not** done — next phase.
+Since the May handoff, the repo grew a **unified headless compiler** (`src/hardware_splicer/`), a **splice product spine** (donor → plan → carrier → bench gates), **agent surfaces** (SDK / MCP / HTTP), **S3 golden verification**, a **bounded circuit synthesis layer** (intent → topology operators → candidate → compile), and a **Blueprint-shaped project package** (INFO/BOM/WIRING/INSTRUCTIONS/**GATES** emitted from splice and synthesis builds). The honest bar: **S2/S3 proven in CI** for splice; synthesis planners are **test-covered**; project packages auto-emit on successful builds but **UI is still markdown/JSON**.
 
 ---
 
@@ -25,6 +25,8 @@ Since the May handoff, the repo grew a **unified headless compiler** (`src/hardw
 | Bench / power-on | Authority casefiles (CH340C showcase) | **`SPLICE_BENCH_SESSION`** + capture bridge on splice builds |
 | CI bar | Tests + pan-tilt scenario | **`verify-splice`**, **`verify-splice-loop`**, **`verify-splice-real-bench`** |
 | Builder-without-junk | Not addressed | **Golden artifacts** — real Wikimedia photo + pinned Qwen + manual capture |
+| Greenfield circuit planning | Module pick + heuristics only | **`circuit_synthesis/`** — bounded topology planners + operator lowering (`88f1db8`) |
+| Human-readable project page | Not addressed | **`project_package.py`** — PROJECT_PACKAGE.json + PROJECT_PAGE.md + wiring/assembly guides + **GATES** tab |
 
 ---
 
@@ -138,6 +140,70 @@ All call into `src/hardware_splicer/sdk.py`:
 | `docs/MCP.md` | MCP setup |
 | `tests/data/golden/README.md` | Golden artifact contract |
 
+### 8. Circuit synthesis layer (`88f1db8` — Codex)
+
+Bounded planning between NL/intent and the existing netlist compile spine. **Not** arbitrary schematic synthesis — produces `SynthesisCandidate` + blockers, then optionally compiles through `candidate_bridge.py`.
+
+```text
+CircuitIntent
+  → topology planner (motor, H-bridge, power rail, level shift, sensor, relay, battery, analog)
+  → TopologyOperator + Constraint + bench gates
+  → SynthesisCandidate
+  → operator_lowering → CircuitNetlist → KiCad compile
+```
+
+| Planner | Domain |
+|---------|--------|
+| `motor_driver_planner` | MCU-controlled DC motor / pump / fan |
+| `h_bridge_planner` | Reversible DC motor (L298N, DRV8833, TB6612, …) |
+| `power_rail_planner` | Buck/LDO rails from catalog |
+| `level_shift_planner` | 3.3V ↔ 5V logic |
+| `sensor_interface_planner` | I2C / 1-Wire / digital / analog modules |
+| `relay_switch_planner` | Low-voltage relay loads (blocks mains) |
+| `battery_power_planner` | Li-ion charge + boost + 3.3V paths |
+| `analog_conditioning_planner` | Divider + RC filter → ADC |
+| `planner.py` | Safe dispatcher — unsupported goals return blocked candidates |
+
+| Surface | Entry |
+|---------|-------|
+| SDK | `plan_circuit_synthesis()`, `synthesize_circuit()`, per-domain `plan_*_circuit()` |
+| HTTP | `POST /v1/circuit-synthesis/plan`, `/compile`, `/capability`, per-domain `/motor-driver`, … |
+| MCP | **Wired** — `hs_plan_circuit_synthesis`, `hs_synthesize_circuit`, `hs_clarify_hardware_intent`, `hs_render_project_package` |
+| Docs | `docs/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`, `docs/CIRCUIT_LOGIC_AUDIT.md` |
+| Tests | `pytest tests/test_circuit_synthesis_*.py tests/test_motor_driver_planner.py tests/test_topology_*.py` |
+
+**Policy:** blocked candidates refuse compile. Ready candidates compile with claim boundaries preserved. Topology authority report via `evaluate_topology_authority()`.
+
+**Not wired yet:** splice manifest cases still use fixture donors + catalog builds — synthesis is a **parallel greenfield path**, not merged into `verify-splice-loop`.
+
+### 9. Project package layer (Blueprint-shaped front-half)
+
+Closes the gap vs Blueprint.am-style **project pages** without copying their closed product. Every splice build and synthesis compile (or plan-only with `out_dir`) can emit a unified package:
+
+| Artifact | Purpose |
+|----------|---------|
+| `PROJECT_PACKAGE.json` | INFO, BOM, WIRING, INSTRUCTIONS, **GATES** (our differentiator) |
+| `PROJECT_PAGE.md` | Human-readable tabbed summary |
+| `WIRING_GUIDE.md` | Harness / net wiring steps |
+| `ASSEMBLY_GUIDE.md` | Build order + bench checklist |
+
+| Piece | Path |
+|-------|------|
+| Clarifier | `intent_clarifier.py` — questions for vague goals; `clarification_answers` enrichment |
+| Builder | `project_package.py` — `build_project_package()`, `write_project_package_artifacts()` |
+| Splice hook | `project_intake.py` — auto-writes on `splice_and_build_from_intake()` |
+| Synthesis hook | `circuit_synthesis/candidate_bridge.py` + `synthesize_circuit()` |
+| CLI | `scripts/build_project_package.py` |
+| Tests | `make test-project-package` → `tests/test_project_package.py` |
+
+| Surface | Entry |
+|---------|-------|
+| SDK | `clarify_hardware_intent()`, `render_project_package()` |
+| HTTP | `POST /v1/intent/clarify`, `POST /v1/project-package/render` |
+| MCP | `hs_clarify_hardware_intent`, `hs_render_project_package`, `hs_plan_circuit_synthesis`, `hs_synthesize_circuit` |
+
+**Gate verdicts** map compile DRC, bench session, and blocked synthesis into plain-language statuses (`COMPILE_READY_REVIEW_BENCH`, `BLOCKED`, …).
+
 ---
 
 ## Maturity snapshot (honest)
@@ -173,6 +239,11 @@ make verify-splice-real-bench   # S3 — real photo + manual capture
 # Optional live vision
 make vision-donor-smoke     # Qwen dry-run on golden photo
 make pin-golden-live-evidence   # refresh pinned evidence (API key)
+
+# Circuit synthesis (unit bar)
+pytest tests/test_circuit_synthesis_ir.py tests/test_circuit_synthesis_planners.py \
+  tests/test_circuit_synthesis_bridge.py tests/test_motor_driver_planner.py \
+  tests/test_topology_library.py tests/test_topology_operator_lowering.py
 ```
 
 Full regression: `make verify` (includes splice + smoke; slower).
@@ -194,6 +265,15 @@ hs_sdk_info
 **CI shortcut:** `hs_splice_golden_loop` (simulated bench).
 **Golden real:** SDK `splice_golden_real()` or `make verify-splice-real-bench`.
 
+**Greenfield synthesis (parallel path):**
+
+```text
+plan_circuit_synthesis(intent)     # or per-domain plan_h_bridge_circuit, etc.
+  → review candidate.blocked / blockers
+synthesize_circuit(intent)         # plan + compile if not blocked
+  → hs_inspect_fab
+```
+
 ---
 
 ## Key new / changed files (quick map)
@@ -208,10 +288,14 @@ src/hardware_splicer/
   standard_bench_gates.py   # PSU ramp, thermal
   repair_intake.py          # repair-café fields
   board_vision_salvage.py   # donor vision → salvage
-  mcp_server.py             # MCP tools
-  api.py                    # HTTP routes (+ golden loop, bench, netlist)
+  mcp_server.py             # MCP tools (splice; synthesis not yet)
+  circuit_synthesis/        # topology planners + bridge (88f1db8)
+  intent_clarifier.py       # vague goal → clarifying questions
+  project_package.py        # Blueprint-shaped PROJECT_PACKAGE + guides
+  api.py                    # HTTP routes (+ golden loop, bench, netlist, project package)
 
 scripts/
+  build_project_package.py
   verify_splice_demos.py
   verify_splice_golden_loop.py
   verify_splice_real_bench.py
@@ -228,6 +312,10 @@ tests/
   test_golden_real_bench.py
   test_golden_live_board_evidence.py
   test_standard_bench_gates.py
+  test_circuit_synthesis_*.py
+  test_project_package.py
+  test_motor_driver_planner.py
+  test_topology_*.py
 ```
 
 ---
@@ -236,7 +324,8 @@ tests/
 
 | Gap | Notes |
 |-----|-------|
-| **UI / capture form** | Next phase — bench template is JSON on disk today |
+| **UI / capture form** | Next phase — bench template is JSON on disk; project page is markdown today |
+| **Synthesis → splice merge** | Planners exist; RC golden path still uses fixtures + catalog `robot_drive_base` |
 | `hs_splice_golden_real` MCP tool | SDK + make targets only |
 | Multi-photo fuse on MCP path | `multi_view_capture.py` exists in Circuit-AI, not wired |
 | Serial DMM / PSU auto-fill | Schema ready; no instrument driver |
@@ -245,15 +334,20 @@ tests/
 
 ---
 
-## Next phase (agreed stop point)
+## Next phase (agreed direction)
 
-**Stop adding backend spine.** Next work is **interface**:
+**Splice spine:** done enough — stop extending unless merging synthesis.
 
-1. Web form for `BENCH_CAPTURE_TEMPLATE` (measurements, PSU ramp rows, thermal)
+**Interface (still primary for humans):**
+
+1. Web form for `BENCH_CAPTURE_TEMPLATE`
 2. Bilingual EN / Traditional Chinese demo layer
-3. Optional: wire `hs_splice_golden_real` into MCP for parity
 
-Competition copy / HTML — out of scope for this repo handoff (user handles via ChatGPT).
+**Optional backend follow-ups:**
+
+3. Wire `h_bridge_planner` into RC splice intake (replace static fixture assumptions)
+4. Static HTML renderer from `PROJECT_PACKAGE.json` (optional)
+5. `hs_splice_golden_real` MCP tool
 
 ---
 
@@ -275,7 +369,9 @@ Call `hs_engine_doctor` before long compile loops.
 ## Related docs (read order)
 
 1. **This file** — what changed
-2. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to drive it
-3. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — product tiers and roadmap
-4. [`ENGINE_DONE.md`](ENGINE_DONE.md) — compile engine completion gates
-5. May baseline: [`HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md)
+2. [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) — **why HS is not dead vs Blueprint; Taiwan funding + competition plan**
+3. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to drive it
+4. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — product tiers and roadmap
+5. [`ENGINE_DONE.md`](ENGINE_DONE.md) — compile engine completion gates
+6. [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — synthesis planners + status
+7. May baseline: [`HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md)

@@ -343,7 +343,7 @@ def splice_and_build_from_intake(
     extraction_report_file.write_text(json.dumps(extraction_report, indent=2), encoding="utf-8")
     donor_vision_file.write_text(json.dumps(donor_board_vision_report, indent=2), encoding="utf-8")
 
-    return {
+    result_body = {
         "ok": bool(compile_result.ok and gate.get("build_ready")),
         "request_id": request_id or plan.get("project_name"),
         "project_name": plan.get("project_name"),
@@ -400,6 +400,12 @@ def splice_and_build_from_intake(
             "evidence_summary": post_plan.get("evidence_summary"),
         },
     }
+    from .project_package import write_project_package_artifacts
+
+    package_write = write_project_package_artifacts(out_path, result=result_body, source="splice_build")
+    result_body["artifacts"].update(package_write.get("artifacts") or {})
+    result_body["project_package"] = package_write.get("package")
+    return result_body
 
 
 def run_project_intake(
