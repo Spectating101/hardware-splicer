@@ -32,6 +32,12 @@ playwright-report/
 .playwright-mcp/
 .codex/
 .agents/
+.cursor/
+.mcp.json
+
+# Local audit / scratch assets (not product)
+WEAK_SCAFFOLD_AUDIT.json
+canvas-autowire-pcb.png
 
 # Generated outputs and local corpora/cache
 .cache/

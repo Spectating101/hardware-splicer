@@ -15,9 +15,12 @@ if [[ ! -x "$PYTHON" ]]; then
 fi
 "$PIP" install --upgrade pip wheel
 "$PIP" install -r "$ROOT/requirements-splice-v1.txt"
-"$PIP" install -e "$ROOT[dev]"
+"$PIP" install -e "$ROOT"
 if [[ "${INSTALL_MCP:-1}" == "1" ]]; then
   "$PIP" install -e "$ROOT[mcp]"
+fi
+if [[ "${INSTALL_DEV:-0}" == "1" ]]; then
+  "$PIP" install -e "$ROOT[dev]"
 fi
 
 echo "==> KiCad build compiler (Node) — required for compile"
@@ -34,5 +37,5 @@ export PYTHONPATH="$ROOT/src"
 echo ""
 echo "Done. Activate: source $VENV/bin/activate"
 echo "  hs-doctor | hs-serve --port 8787 | hs-mcp"
-echo "  make verify-splice-loop"
+echo "  make verify-splice-v1   # developers: INSTALL_DEV=1 before running tests"
 echo "Prerequisites: kicad-cli 9+, Node 18+ — see docs/SETUP.md"

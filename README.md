@@ -2,7 +2,7 @@
 
 **Splice real hardware** — dissect donor PCBs, extract reusable functional blocks, plan safe splice contracts, and compile a carrier board with **honest** KiCad/DRC truth.
 
-Consolidated hardware compiler: electronics intelligence, mechanical splicing, parametric enclosures, and an authority dashboard.
+**Hardware-Splicer Splice Agent v1.0** is a self-hosted splice agent for donor hardware workflows: intake → carrier compile → bench gates → auditable **PROJECT_PACKAGE** (CLI, MCP, HTTP API, optional UI).
 
 **Quick starts:**
 
@@ -29,7 +29,9 @@ make verify         # tests + benchmark + strict audit + tier scoring
 make demo           # canonical compile bundle
 ```
 
-This folder consolidates the hardware-oriented projects behind a top-level compiler/API:
+### Beyond v1 (monorepo depth)
+
+This folder also consolidates broader hardware-oriented projects behind the top-level compiler/API:
 
 - `apps/circuit-ai/` - electronics intelligence, PCB/image analysis, BOM/DFM-style workflows, repair/reseller tooling, APIs/MCP wrappers.
 - `apps/mecha-splicer/` - mechanical splicing pipeline for enclosures, brackets, fixtures, DFM/BOM bundles, proposals, and product packs.

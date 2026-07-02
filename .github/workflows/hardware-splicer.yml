@@ -13,6 +13,11 @@ on:
       - "examples/intakes/splice_*"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
+      - "apps/splice-ui/**"
+      - "deploy/**"
+      - "pyproject.toml"
+      - "requirements-splice-v1.txt"
+      - "RELEASE_NOTES_v1.0.md"
       - "Makefile"
       - "requirements.txt"
       - ".github/workflows/hardware-splicer.yml"
@@ -28,11 +33,45 @@ on:
       - "examples/intakes/splice_*"
       - "apps/circuit-ai/circuit-ai-frontend/lib/**"
       - "apps/circuit-ai/tests/**"
+      - "apps/splice-ui/**"
+      - "deploy/**"
+      - "pyproject.toml"
+      - "requirements-splice-v1.txt"
+      - "RELEASE_NOTES_v1.0.md"
       - "Makefile"
       - "requirements.txt"
       - ".github/workflows/hardware-splicer.yml"
 
 jobs:
+  splice-v1:
+    name: Splice Agent v1 bar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install KiCad CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y kicad
+      - name: Splice v1 slim install (with dev for pytest)
+        run: INSTALL_DEV=1 bash scripts/install_splice_v1.sh
+      - name: verify-splice-v1
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_DRC_FIX_LOOP: "1"
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-splice-v1
+      - name: splice-ui production build
+        run: make splice-ui-build
+
   verify:
     runs-on: ubuntu-latest
     steps:

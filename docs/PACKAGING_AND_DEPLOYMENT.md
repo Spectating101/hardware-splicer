@@ -84,10 +84,17 @@ bash scripts/install_splice_v1.sh
 
 - Python venv  
 - `requirements-splice-v1.txt` (pinned core)  
-- `pip install -e ".[mcp]"`  
+- `pip install -e .` (engine + API entrypoints)  
+- `pip install -e ".[mcp]"` when `INSTALL_MCP=1` (default)  
 - **npm install** only in `apps/circuit-ai/circuit-ai-frontend` (KiCad graph compiler — **required for compile**)  
 
-**Skips:**
+**Developers / CI** (pytest for `verify-splice-v1`):
+
+```bash
+INSTALL_DEV=1 bash scripts/install_splice_v1.sh
+```
+
+**Skips (customer path):**
 
 - `apps/hardware-splicer-demo` npm  
 - CadQuery / 3d-splicer full stack  

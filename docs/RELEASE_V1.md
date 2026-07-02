@@ -2,6 +2,8 @@
 
 **Purpose:** Stop infinite “demo mode.” Ship **one finished product** you can tag, deploy, and walk away from (maintenance-only) until you deliberately start v2.
 
+**Status (July 2026):** **v1.0.0 tagged** after local `make verify-splice-v1` + `make splice-ui-build`. GitHub **splice-v1** CI job proves the product bar on push. Fresh VM install still recommended for pilot customers.
+
 **Product name (ship as):** **Hardware-Splicer Splice Agent v1.0**  
 **One sentence:** Donor intake → splice plan → KiCad carrier compile → bench gates → PROJECT_PACKAGE — with a **real web UI**, plus CLI/MCP/HTTP for agents.
 
@@ -22,9 +24,10 @@ v1.0 is **done** when all of these are true:
 | 5 | **Full test suite** — no regressions | `make test` → exit 0 |
 | 6 | **Install story** — stranger can run from README in &lt;30 min | peer or past-you follows `docs/SETUP.md` |
 | 7 | **Four surfaces documented** | CLI + MCP + HTTP + **splice-ui** with copy-paste commands |
-| 8 | **Git tag** | `v1.0.0` on `main` |
-| 9 | **Release notes** | `RELEASE_NOTES_v1.0.md` — what’s in / out |
-| 10 | **Deployment artifact** | Docker **or** pinned `install.sh` + `requirements.txt` lock |
+| 8 | **Git tag** | `v1.0.0` on `main` | ✅ |
+| 9 | **Release notes** | `RELEASE_NOTES_v1.0.md` — what’s in / out | ✅ |
+| 10 | **Deployment artifact** | `install_splice_v1.sh` + `requirements-splice-v1.txt` | ✅ |
+| 11 | **GitHub CI (splice bar)** | `splice-v1` job in `.github/workflows/hardware-splicer.yml` | ✅ |
 
 You do **not** need for v1.0:
 

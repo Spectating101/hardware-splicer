@@ -298,9 +298,10 @@ YZU finals favored **in-fab / yield / ESG / equipment** Agent stories. Your engi
 | Item | Status | Action |
 |------|--------|--------|
 | `make verify-splice-v1` green | ✅ on dev machine | Run on clean VM |
-| Git tag `v1.0.0` | Pending | [`RELEASE_V1.md`](RELEASE_V1.md) |
-| `RELEASE_NOTES_v1.0.md` | Pending | Write at tag |
-| `install_splice_v1.sh` | ✅ | Fresh Ubuntu test |
+| Git tag `v1.0.0` | ✅ | Tagged on `main` |
+| `RELEASE_NOTES_v1.0.md` | ✅ | Root release notes |
+| `install_splice_v1.sh` slim path | ✅ | `INSTALL_DEV=1` for pytest |
+| GitHub `splice-v1` CI job | ✅ | `.github/workflows/hardware-splicer.yml` |
 | One-page offer PDF | Pending | `OFFER_SPLICE_BENCH_KIT_v1.md` |
 | Liability boundary | Pending | `SUPPORT_AND_LIABILITY_v1.md` |
 | Pilot case study | Pending | Rung 1 customer |
