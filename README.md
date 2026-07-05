@@ -1,233 +1,106 @@
-# Hardware-Splicer
+# Hardware-Splicer Splice Agent
 
-**Splice real hardware** — dissect donor PCBs, extract reusable functional blocks, plan safe splice contracts, and compile a carrier board with **honest** KiCad/DRC truth.
+[![Splice Agent v1](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml/badge.svg)](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml)
 
-**Hardware-Splicer Splice Agent v1.0** is a self-hosted splice agent for donor hardware workflows: intake → carrier compile → bench gates → auditable **PROJECT_PACKAGE** (CLI, MCP, HTTP API, optional UI).
+**Auditable hardware bring-up** — donor intake → KiCad carrier with DRC truth → bench measurement gates → defensible **PROJECT_PACKAGE**.
 
-**Quick starts:**
+Self-hosted agent for teams who need compile honesty and a power-on checklist, not cosmetic copper or hand-wavy LLM excuses.
 
-- **Documentation map (start here):** [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) — all docs, canonical order, gaps
-- **Packaging & deployment:** [`docs/PACKAGING_AND_DEPLOYMENT.md`](docs/PACKAGING_AND_DEPLOYMENT.md) — v1 install, MCP, API, **splice-ui**, release
-- **Splice UI (v1 product):** [`apps/splice-ui/README.md`](apps/splice-ui/README.md) · [`docs/UI_V1.md`](docs/UI_V1.md) — real workbench wired to live API
-- **Agent handoff:** [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) — SDK, MCP, HTTP splice + bench flow
-- **Strategy / funding / vs Blueprint:** [`docs/BLUEPRINT_POSITIONING_AND_FUNDING.md`](docs/BLUEPRINT_POSITIONING_AND_FUNDING.md) — why not to kill HS; Taiwan competition path
-- **Finish line / ship v1.0:** [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md) — deploy, tag, call it a day
-- **Deploy · product · funding:** [`docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) — how to push commercially
-- **Monetization assessment:** [`docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) — buyers, pricing, risks, workbook
-- **Splice product (canonical):** [`docs/SPLICE_PRODUCT.md`](docs/SPLICE_PRODUCT.md) — thesis, tiers, roadmap, how to proceed
-- **Splice demo:** [`docs/DEMO_SPLICE.md`](docs/DEMO_SPLICE.md) — `make splice-demo` · `make verify-splice`
-- **Authority / fab demo:** [`docs/DEMO_10_MIN.md`](docs/DEMO_10_MIN.md)
-- Setup: [`docs/SETUP.md`](docs/SETUP.md) · LLM ops: [`docs/LLM_OPS.md`](docs/LLM_OPS.md)
+**Version:** `1.0.1` · **Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
 
-**Ship & business:** [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md) · [`docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) · [`docs/BLUEPRINT_POSITIONING_AND_FUNDING.md`](docs/BLUEPRINT_POSITIONING_AND_FUNDING.md) · [`docs/HANDOFF_UPDATE.md`](docs/HANDOFF_UPDATE.md)
+---
+
+## Quick start
 
 ```bash
-make setup          # pip install + doctor
-make verify-splice-v1   # core engine bar (S2/S3) — run before UI work
-make splice-demo    # donor PCB → splice plan → robot_drive_base carrier
-make verify         # tests + benchmark + strict audit + tier scoring
-make demo           # canonical compile bundle
+git clone https://github.com/Spectating101/hardware-splicer.git
+cd hardware-splicer
+bash scripts/install_splice_v1.sh
+source .venv/bin/activate
+hs-doctor
+make splice-ui-serve
 ```
 
-### Beyond v1 (monorepo depth)
+Open **http://127.0.0.1:8787** → **Quick demo** → **Gates** → **Bench** → **Download zip**.
 
-This folder also consolidates broader hardware-oriented projects behind the top-level compiler/API:
+Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) · 5-min demo: [`docs/DEMO_5_MIN_UI.md`](docs/DEMO_5_MIN_UI.md)
 
-- `apps/circuit-ai/` - electronics intelligence, PCB/image analysis, BOM/DFM-style workflows, repair/reseller tooling, APIs/MCP wrappers.
-- `apps/mecha-splicer/` - mechanical splicing pipeline for enclosures, brackets, fixtures, DFM/BOM bundles, proposals, and product packs.
-- `apps/3d-splicer/` - parametric enclosure generator API with CadQuery/STL-style outputs.
-- `apps/hardware-splicer-demo/` - frontend authority dashboard for showing intake results, deterministic margins, evidence gaps, and generated artifacts.
+---
 
-The production-facing path is `scripts/hardware_splicer.py` and the `hardware_splicer` Python package. It validates compile specs, starts/stops the optional local 3D-Splicer service, copies mechanical outputs into the final bundle, and writes manifest/metadata files for downstream automation.
-
-**Engine target and completion gates (canonical):** [`docs/ENGINE_DONE.md`](docs/ENGINE_DONE.md) — bootstrap vs Flux-class engine, phases, PASS/OPEN checklist.
-
-## Doctor
-
-Inspect local runtime readiness:
+## Verify (engineering bar)
 
 ```bash
-python3 scripts/hardware_splicer.py doctor
-python3 scripts/hardware_splicer.py doctor --json
+INSTALL_DEV=1 bash scripts/install_splice_v1.sh
+make verify-splice-v1
 ```
 
-This checks app roots and key dependencies. `cadquery` is optional unless true STL rendering is required; without it, `--render-stl` can still return a CadQuery script fallback.
+| Step | Proves |
+|------|--------|
+| `hs-doctor` | KiCad, Node, Python, API deps |
+| `verify-splice` | S2 manifest compile (4/4) |
+| `verify-splice-loop` | S3 bench closure (3/3) |
+| `verify-splice-real-bench` | Real capture → `power_on_authorized` |
 
-Validate a compile spec without running the expensive chain:
+CI runs the same bar on Ubuntu: workflow **Splice Agent v1**.
 
-```bash
-python3 scripts/hardware_splicer.py validate --spec examples/hardware_splicer_demo.json
-python3 scripts/hardware_splicer.py validate --spec examples/hardware_splicer_demo.json --json
-```
+---
 
-## Integration Smoke
+## Product surfaces
 
-Compile the canonical controller plus pan-tilt build bundle:
+| Surface | Command / path |
+|---------|----------------|
+| **Web UI** | `make splice-ui-serve` or `make splice-ui-dev` |
+| **HTTP API** | `hs-serve --port 8787` · OpenAPI at `/docs` |
+| **MCP** | `hs-mcp` · see [`docs/MCP.md`](docs/MCP.md) |
+| **CLI** | `hs-doctor`, `scripts/hardware_splicer.py` |
 
-```bash
-python3 scripts/hardware_splicer.py demo --out /tmp/hardware_splicer_demo
-```
+---
 
-The output directory contains `SUMMARY.md`, `ENGINEERING_REPORT.md`, `MANIFEST.json`, `BUILD_METADATA.json`, `hardware_splicer.bundle.json`, extracted 3D-Splicer artifacts when present, and a copied `mecha_bundle/`. It also emits `CASEFILE.json`, `PROJECT_LOG.json`, `HARDWARE_REVIEW.md`, `ROBOTICS_ACTUATION.json`, `ROBOTICS_SIMULATION.json`, and `ROBOTICS_PLATFORM_AUTHORITY.json` so each build has a CNX-style review, Hackaday-style project log, Hackster-style build package index, deterministic robotics simulation gate, and generalized robotics/mechatronics mission authority packet.
+## What you get (artifacts)
 
-Compile the closed mechatronics proof bundle with project-specific KiCad PCB evidence, native KiCad STEP export, mechanical measurements, robotics bench evidence, 3D-Splicer script output, and the final integration trace:
+- `PROJECT_PACKAGE.json` — BOM, wiring, build steps, **gates**
+- KiCad carrier + DRC report
+- `SPLICE_BENCH_SESSION.json` — measurements before power-on
+- `COMPILE_CASEFILE.json` on failure — debuggable, not vague errors
+- Job bundle zip via `GET /v1/jobs/{id}/bundle`
 
-```bash
-python3 scripts/hardware_splicer.py compile --spec examples/hardware_splicer_closed_mechatronics_demo.json --out /tmp/hardware_splicer_closed_mechatronics_demo
-```
+---
 
-The generated `MECHATRONICS_AUTHORITY.json` includes an `integration_trace` that maps mechanism primitives to CAD outputs, actuator requirements, power/control coupling, bench evidence, and release closure. The generated `kicad_step_assembly/` package includes the native board STEP, integrated board/enclosure/mechanism STEP, board placement JSON, and an audit report for portfolio review, competition packaging, or later frontend visualization.
+## In scope / out of scope (v1)
 
-Compile the generalized robotics platform proof bundle with mission, locomotion, positioning, control stack, safety case, bench evidence, field validation, and release scope:
+| In | Out |
+|----|-----|
+| Splice intake → carrier compile | Public multi-tenant SaaS |
+| Bench gates + gate verdict | Production autorouted copper (default) |
+| Async jobs, MCP + HTTP parity | Flux / Blueprint-class editor |
+| Optional splice-ui workbench | Certified donor harness safety |
 
-```bash
-python3 scripts/hardware_splicer.py compile --spec examples/hardware_splicer_robotics_platform_rover_demo.json --out /tmp/hardware_splicer_robotics_platform_rover_demo
-```
+Details: [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
 
-The generated `ROBOTICS_SIMULATION.json` evaluates actuator current margin, battery runtime, differential-drive wheel speed, tractive force, pan-tilt servo payload torque, and safety-envelope blockers. Project-level robotics authority consumes this packet, so a design with impossible speed, insufficient current, weak servo torque, poor runtime, or unresolved integration gaps cannot silently pass as a scoped robotics release.
+---
 
-Run a full project scenario and emit one frontend/demo-ready project authority packet:
+## Documentation
 
-```bash
-python3 scripts/hardware_splicer.py scenario --scenario examples/scenarios/rover_project.json --out /tmp/hardware_splicer_scenario_rover
-python3 scripts/hardware_splicer.py scenario --scenario examples/scenarios/rover_bad_speed_project.json --out /tmp/hardware_splicer_scenario_bad_speed
-```
+| Audience | Start here |
+|----------|------------|
+| **Everyone** | [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) |
+| **Full map** | [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) |
+| **Agents / CI** | [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) |
+| **Deploy / ops** | [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · [`docs/OPERATIONS_RUNBOOK_v1.md`](docs/OPERATIONS_RUNBOOK_v1.md) |
+| **Commercial** | [`docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) |
+| **Support & liability** | [`docs/SUPPORT_AND_LIABILITY_v1.md`](docs/SUPPORT_AND_LIABILITY_v1.md) |
+| **Engine depth** | [`docs/README_MONOREPO_DEPTH.md`](docs/README_MONOREPO_DEPTH.md) |
 
-Scenario files wrap a compile spec, optional overrides, expected authority milestones, and required artifacts. The runner writes `PROJECT_AUTHORITY.json`, `SCENARIO_SUMMARY.md`, and `SCENARIO_RESULT.json`; the clean rover scenario is claimable, while the bad-speed scenario still compiles but blocks the project claim because the declared speed exceeds the available wheel RPM.
+---
 
-Plan from a user-style project brief, then run the generated scenario:
+## Monorepo (platform depth)
 
-```bash
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_brief.json --out /tmp/hardware_splicer_intake_plant
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_auto_evidence_notes.json --out /tmp/hardware_splicer_intake_plant_notes
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_evidence_pack.json --out /tmp/hardware_splicer_intake_plant_release
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/plant_watering_vision_brief.json --out /tmp/hardware_splicer_intake_plant_vision
-python3 scripts/hardware_splicer.py vision-usage --provider qwen
-make plant-qwen-pipeline
-make score-intake-tiers
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/rover_brief.json --out /tmp/hardware_splicer_intake_rover
-python3 scripts/hardware_splicer.py intake --brief examples/intakes/fan_controller_brief.json --out /tmp/hardware_splicer_intake_fan
-```
+This repository also contains Circuit-AI, mecha-splicer, and 3d-splicer — **not** the v1.0 product SKU. See [`apps/README.md`](apps/README.md).
 
-The intake path detects the project archetype, normalizes available parts, creates a compile spec and scenario, then emits `PROJECT_INTAKE.json`, `PLANNED_SCENARIO.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, `VISION_EVIDENCE_REPORT.json`, `EVIDENCE_EXTRACTION_REPORT.json`, `AUTHORITY_UPGRADE_PLAN.json`, `EVIDENCE_CAPTURE_KIT.json`, and the usual engineering artifacts. This is the backend bridge for chat-style workflows such as "I want to build an automatic plant waterer with an ESP32, soil sensor, mini pump, and $10 budget." It can claim planning/control-safety authority while leaving measured dimensions, measured-envelope simulation, bench evidence, and reviewed release scope as explicit next actions.
+---
 
-Attach physical/project evidence through `evidence` fields in the intake file to upgrade the generated package:
+## License & limits
 
-- `evidence.board_design_files`
-- `evidence.mechanical_measurement_capture`
-- `evidence.mechanical_simulation_capture`
-- `evidence.mechanical_bench_capture`
-- `evidence.robotics_bench_capture`
-- `evidence.integrated_bench_capture`
-- `evidence.field_validation`
-- `evidence.release_review`
+Software license: **Proprietary** (see `pyproject.toml`). Support boundaries and power-on liability: [`docs/SUPPORT_AND_LIABILITY_v1.md`](docs/SUPPORT_AND_LIABILITY_v1.md).
 
-You can also attach `evidence_notes`, `evidence_sources`, or `attachments`. The deterministic extractor promotes structured notes, JSON evidence patches, and board files into the same `evidence.*` schema and writes `EVIDENCE_EXTRACTION_REPORT.json` with accepted/rejected rows. Image/video artifacts are indexed as pending vision evidence; they are not trusted as measurements until a vision model or human annotation produces structured pass/fail rows.
-
-Vision assistance is opt-in through `vision_assistance` in the intake JSON or CLI flags. Copy `.env.example` to `.env.local` and set `QWEN_API_KEY` or `DASHSCOPE_API_KEY`. The default provider is **Qwen** with model `qwen3-vl-flash` on the Singapore international endpoint `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`. Text-only models such as `qwen-plus` are blocked for vision. Gemini is optional via `GEMINI_API_KEY` / `GOOGLE_API_KEY`. `examples/intakes/plant_watering_vision_brief.json` includes a bench photo and live Qwen settings.
-
-```bash
-make plant-qwen-pipeline    # live vision + splice + benchmark (requires API key)
-make score-intake-tiers     # offline tier progression (no API key)
-```
-
-Live vision token usage is tracked locally in `data/vision/hardware-splicer-vision-usage.json` and summarized in `VISION_EVIDENCE_REPORT.json` under `usage_tracking`; inspect it with `python3 scripts/hardware_splicer.py vision-usage --provider qwen`. Text LLM calls (salvage, compose, build pick) are cached by default and logged to `data/llm/hardware-splicer-text-usage.json` — see [`docs/LLM_OPS.md`](docs/LLM_OPS.md) for provider chain (`qwen_then_agy`), quota console, and CLI (`text-usage`, `llm-quota`, `qwen-models`). Candidate model notes are written to `VISION_EVIDENCE_REPORT.json`; they only feed the authority engine when `apply=true` or `--vision-apply` is set, and even then they still pass through deterministic extraction and normal production gates.
-
-`AUTHORITY_UPGRADE_PLAN.json` lists the next evidence requests and the exact intake fields that unlock higher authority levels, from control-safety planning toward simulation/bench, field validation, and production-ready scoped release.
-
-`EVIDENCE_CAPTURE_KIT.json` turns any open production gate into a patch-shaped evidence checklist. `PRODUCTION_RELEASE_METRICS.json` turns the release gap into weighted gates: compile/artifacts, circuit release, mechanical release, actuation release, deterministic simulation, packaging trace, integrated bench, field validation, and reviewed scoped release. Rough intake briefs land as control-safety planning packages; closed evidence examples such as `examples/intakes/plant_watering_evidence_pack.json` and `examples/scenarios/rover_project.json` reach 9/9 gates and `production_ready_project_package`.
-
-Run the local dashboard:
-
-```bash
-cd apps/hardware-splicer-demo
-npm install
-npm run dev -- --port 5177
-```
-
-The dashboard currently uses seeded snapshots generated from backend intake runs, so it is suitable for portfolio/competition walkthroughs without relying on live model quota.
-
-Run the lighter local Circuit-AI -> Mecha-Splicer -> 3D-Splicer smoke:
-
-```bash
-python3 scripts/hardware_splicer_e2e.py
-```
-
-Compile a catalog build to a DRC-clean KiCad PCB from the backend (no frontend required):
-
-```bash
-python3 scripts/hardware_splicer.py build --build-id automatic_plant_watering --out /tmp/plant_build
-node scripts/compile_build_graph.cjs --build-id automatic_plant_watering --out /tmp/plant_build
-python3 scripts/benchmark_backend_design.py
-node scripts/export_module_library.cjs --out /tmp/module_library.json
-```
-
-When `kicad-cli` is installed, `build` also emits `build_compilation/gerber_package/` with individual Gerber layers and `gerber_package.zip`.
-
-Plant-watering intake auto-emits `DESIGN_QUALITY.json`, `DESIGN_QUALITY_GATE.json`, and `build_compilation/main_ctrl_build.kicad_pcb`. `PRODUCTION_RELEASE_METRICS.json` now ties the circuit-release gate to build-compiler DRC/safety when `build_compilation` is present.
-
-**Splice path (donor PCB → carrier board):**
-
-```bash
-make splice-demo
-# or
-python3 scripts/hardware_splicer.py splice-build \
-  --brief examples/intakes/splice_robot_drive_brief.json \
-  --out /tmp/hs_splice_build --no-gerber
-```
-
-See [`docs/DEMO_SPLICE.md`](docs/DEMO_SPLICE.md). Donor functional blocks live in `examples/fixtures/splice_donor_rc_motor_board.json`.
-
-Shortcuts:
-
-```bash
-make setup
-make doctor
-make splice-demo
-make demo
-make smoke
-make test
-make test-apps
-make benchmark-backend
-make audit-functional-delivery
-make score-intake-tiers
-make verify
-make refresh-demo-data
-```
-
-**Fab path vs frontend:** Production KiCad/Gerber output comes from the Python backend (`build_compiler.py` + `scripts/compile_build_graph.cjs`). The Circuit-AI frontend `/build` page is for visualization and DRC honesty — not the fab-grade pipeline used in audits and intake splice-and-build.
-
-Run the compiler API:
-
-```bash
-python3 scripts/hardware_splicer.py serve --port 8090
-```
-
-Useful API endpoints:
-
-- `GET /health`
-- `GET /v1/status`
-- `POST /v1/validate`
-- `POST /v1/mechanical-authority`
-- `POST /v1/robotics-actuation`
-- `POST /v1/robotics-simulation`
-- `POST /v1/robotics-platform-authority`
-- `POST /v1/mechatronics-authority`
-- `POST /v1/compile`
-- `POST /v1/compile-build`
-- `POST /v1/scenario-run`
-- `POST /v1/intake-run`
-- `POST /v1/jobs`
-- `GET /v1/jobs`
-- `GET /v1/jobs/{job_id}`
-- `GET /v1/jobs/{job_id}/result`
-- `GET /v1/jobs/{job_id}/artifacts`
-- `GET /v1/jobs/{job_id}/bundle`
-- `POST /v1/jobs/{job_id}/cancel`
-- `POST /v1/jobs/{job_id}/retry`
-
-By default, API compile outputs are constrained to `HARDWARE_SPLICER_OUTPUT_ROOT` (`/tmp/hardware_splicer_api`). Set `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1` only for trusted local development.
-
-Async jobs are persisted in SQLite under `HARDWARE_SPLICER_STATE_DIR` (`/tmp/hardware_splicer_state`) unless `HARDWARE_SPLICER_JOB_DB` is set. `HARDWARE_SPLICER_JOB_WORKERS` controls the in-process worker count.
-
-See `docs/INTEGRATION.md` for the current runtime flow and environment variables. LLM provider, cache, quota, and benchmark details: [`docs/LLM_OPS.md`](docs/LLM_OPS.md).
+The engine assists compile and gate workflows; **the operator authorizes energization** after bench measurements.

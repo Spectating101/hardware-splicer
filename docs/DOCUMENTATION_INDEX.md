@@ -19,8 +19,8 @@
 | **Technical depth** | **A** | Engine, splice, synthesis, gates well documented |
 | **Agent operability** | **A-** | `AGENT_HANDOFF`, `MCP.md`, SDK surfaces |
 | **Single entry point** | **B-** | README long; this index fixes navigation |
-| **v1.0 product clarity** | **B+** | `RELEASE_V1`, monetization doc — new |
-| **Beginner onboarding** | **B** | `SETUP`, `DEMO_SPLICE` — KiCad deps still heavy |
+| **v1.0 product clarity** | **A-** | Quickstart, support/liability, ops runbook — v1.0.1 |
+| **Beginner onboarding** | **B+** | `QUICKSTART_SPLICE_v1` + `SETUP` |
 | **Chinese B2B** | **C+** | Competition docs 中文; product docs mostly EN |
 | **API reference** | **C** | Scattered in `api.py` / `sdk.py`; no OpenAPI single page |
 | **Monorepo coherence** | **C** | `apps/circuit-ai/docs/` parallel universe |
@@ -69,17 +69,20 @@
 | [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) | One sentence + commands |
 | [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md) | Full narrative (longer) |
 
-### Customer / pilot (future)
+### Customer / pilot
 
 | Read | Status |
 |------|--------|
-| `OFFER_SPLICE_BENCH_KIT_v1.md` | **Not written yet** |
-| `SUPPORT_AND_LIABILITY_v1.md` | **Not written yet** |
+| [`QUICKSTART_SPLICE_v1.md`](QUICKSTART_SPLICE_v1.md) | **Core** — install + run |
+| [`DEMO_5_MIN_UI.md`](DEMO_5_MIN_UI.md) | **Core** — demo script |
+| [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Pilot offer template |
+| [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
+| [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
+| [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
-| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | **Deploy → product → funding** — 90-day plan, showcase scripts, SBIR/StarFab |
+| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |
 | [`deploy/DEPLOY.md`](../deploy/DEPLOY.md) | Short deploy quickstart |
-| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | Partial — technical demo |
-| [`MONETIZATION…`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) §11 | Offer templates (internal) |
+| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | CLI splice walkthrough |
 
 ---
 
@@ -170,30 +173,27 @@
 
 ### Root README
 
-[`README.md`](../README.md) — **too long** for v1.0; mixes:
-
-- Splice v1.0 quick start ✅  
-- Mechatronics / plant watering / tier-C authority 🟡 (out of v1.0 scope)  
-- Multiple demo paths 🟡  
-
-**v1.0 recommendation:** README = 30-line splice agent intro + link to **this index**; move long authority demos to appendix or `docs/DEMO_10_MIN.md` only.
+[`README.md`](../README.md) — **v1.0.1 product-first** (quick start, verify, doc map). Engine depth → [`README_MONOREPO_DEPTH.md`](README_MONOREPO_DEPTH.md).
 
 ---
 
-## 5. Gaps (documentation debt for v1.0)
+## 5. Gaps (documentation debt)
 
-| Gap | Priority | Action |
+| Gap | Priority | Status |
 |-----|----------|--------|
-| **`RELEASE_NOTES_v1.0.md`** | P0 | Write at tag |
-| **`DEPLOY.md`** | P1 | If Docker option chosen |
-| **`OFFER_SPLICE_BENCH_KIT_v1.md`** | P1 | Customer one-pager (中/EN) |
-| **`SUPPORT_AND_LIABILITY_v1.md`** | P1 | Before site license |
-| **`ROADMAP_v2.md`** | P2 | Park non-v1 ambitions |
-| **OpenAPI / HTTP route table** | P2 | Single generated or hand-maintained page |
-| **`docs/zh-TW/` one-pager** | P2 | Taiwan B2B |
-| **README trim** | P1 | Point to DOCUMENTATION_INDEX |
+| **`RELEASE_NOTES_v1.0.md`** | P0 | ✅ |
+| **`RELEASE_NOTES_v1.0.1.md`** | P0 | ✅ |
+| **`QUICKSTART_SPLICE_v1.md`** | P0 | ✅ |
+| **`SUPPORT_AND_LIABILITY_v1.md`** | P1 | ✅ |
+| **`OPERATIONS_RUNBOOK_v1.md`** | P1 | ✅ |
+| **`OFFER_SPLICE_BENCH_KIT_v1.md`** | P1 | ✅ |
+| **`INSTALL_REPORT_TEMPLATE.md`** | P1 | ✅ (fill on external test) |
+| **`CHANGELOG.md`** | P1 | ✅ |
+| **Fresh VM install report** | P1 | ❌ — use template when testing |
+| **`ROADMAP_v2.md`** | P2 | Not written |
+| **OpenAPI export in release** | P2 | Use `/docs` live |
+| **`docs/zh-TW/` one-pager** | P2 | Optional |
 | **Stale banner on `LAUNCH_PLAN`** | P3 | Add “Phases A–C met; see RELEASE_V1” |
-| **Duplicate competition docs** | P3 | `COMPETITION_PROPOSAL` vs `COMPETITION_HANDOFF` — keep both, cross-link |
 
 ---
 
@@ -225,10 +225,10 @@ Everything else → index.
 
 | Buyer stage | Doc they need | Exists? |
 |-------------|---------------|---------|
-| Curious engineer | README + DEMO_SPLICE | ✅ |
+| Curious engineer | README + QUICKSTART + DEMO_5_MIN_UI | ✅ |
 | Agent integrator | AGENT_HANDOFF + MCP | ✅ |
-| Pilot customer | Offer one-pager | ❌ |
-| Legal/procurement | Support & liability | ❌ |
+| Pilot customer | OFFER + QUICKSTART | ✅ |
+| Legal/procurement | SUPPORT_AND_LIABILITY | ✅ |
 | Grant reviewer | MONETIZATION §11 + HANDOFF_UPDATE | ✅ |
 | You assessing business | MONETIZATION full | ✅ |
 
@@ -254,6 +254,7 @@ Everything else → index.
 | `make setup` | SETUP.md |
 | `make verify-splice` | DEMO_SPLICE.md, SPLICE_PRODUCT.md |
 | `make verify-splice-loop` | AGENT_HANDOFF.md, HANDOFF_UPDATE.md |
+| `make splice-ui-serve` | QUICKSTART_SPLICE_v1.md, DEMO_5_MIN_UI.md |
 | `python -m hardware_splicer.mcp_server` | MCP.md, AGENT_HANDOFF.md |
 | `scripts/hardware_splicer.py serve` | AGENT_HANDOFF.md, INTEGRATION.md |
 | `make test-project-package` | HANDOFF_UPDATE.md §9 |
@@ -264,4 +265,5 @@ Everything else → index.
 
 | Date | Change |
 |------|--------|
+| 2026-07 | v1.0.1 doc set: quickstart, support, ops, demo, install template |
 | 2026-06 | Initial documentation index |

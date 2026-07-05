@@ -38,6 +38,7 @@ playwright-report/
 # Local audit / scratch assets (not product)
 WEAK_SCAFFOLD_AUDIT.json
 canvas-autowire-pcb.png
+splice-ui-auditor-demo.png
 
 # Generated outputs and local corpora/cache
 .cache/

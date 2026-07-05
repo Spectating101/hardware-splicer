@@ -2,7 +2,7 @@
 
 **Purpose:** Stop infinite “demo mode.” Ship **one finished product** you can tag, deploy, and walk away from (maintenance-only) until you deliberately start v2.
 
-**Status (July 2026):** **v1.0.0 tagged** after local `make verify-splice-v1` + `make splice-ui-build`. GitHub **splice-v1** CI job proves the product bar on push. Fresh VM install still recommended for pilot customers.
+**Status (July 2026):** **v1.0.1** packaging polish on **v1.0.0** engine. Git tag `v1.0.1` after doc/deploy pass. GitHub **splice-v1** CI job proves the product bar on push.
 
 **Product name (ship as):** **Hardware-Splicer Splice Agent v1.0**  
 **One sentence:** Donor intake → splice plan → KiCad carrier compile → bench gates → PROJECT_PACKAGE — with a **real web UI**, plus CLI/MCP/HTTP for agents.
