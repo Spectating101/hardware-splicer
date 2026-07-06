@@ -32,6 +32,12 @@
 
 ## 2. Start here (by audience)
 
+### GitHub / ChatGPT / external reviewer
+
+| Read | Why |
+|------|-----|
+| [`GITHUB_START_HERE.md`](GITHUB_START_HERE.md) | **Single landing page** — links to all canonical docs on GitHub |
+
 ### You (founder) — strategy & ship
 
 | Read | Why |
@@ -41,7 +47,7 @@
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
 | [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) | Competition loss lessons |
 | [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter (after Tier I–III) |
-| [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal product maturity** — `verify-product-v1` |
+| [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal product maturity** — `verify-product-internal` |
 | [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Technical delta since May |
 
 ### Agent / MCP / CI
@@ -80,6 +86,7 @@
 | [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Pilot offer template |
 | [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
 | [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
+| [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev-linux validation log |
 | [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |

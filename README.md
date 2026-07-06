@@ -84,10 +84,13 @@ Details: [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) · [`docs/RELEASE_
 
 ## Documentation
 
+**Browsing on GitHub / ChatGPT:** start at [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md) — one page with links to everything canonical.
+
 | Audience | Start here |
 |----------|------------|
 | **Everyone** | [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) |
 | **Full map** | [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) |
+| **Internal maturity** | [`docs/INTERNAL_MATURITY_PLAN.md`](docs/INTERNAL_MATURITY_PLAN.md) |
 | **Agents / CI** | [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) |
 | **Deploy / ops** | [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · [`docs/OPERATIONS_RUNBOOK_v1.md`](docs/OPERATIONS_RUNBOOK_v1.md) |
 | **Commercial** | [`docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) |
