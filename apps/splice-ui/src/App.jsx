@@ -34,6 +34,7 @@ const VIEWS = {
   example: "example",
   results: "results",
   lab: "lab",
+  preview: "preview",
 };
 
 function Toast({ message, onDismiss }) {
@@ -132,6 +133,7 @@ export default function App() {
   const [activeJobId, setActiveJobId] = useState(null);
   const [hydratedResult, setHydratedResult] = useState(null);
   const [toast, setToast] = useState("");
+  const [previewContext, setPreviewContext] = useState(null);
 
   const spliceJob = useSpliceJob();
 
@@ -142,7 +144,9 @@ export default function App() {
 
   const displayResult = spliceJob.result || hydratedResult;
   const displayPackage = displayResult?.project_package || null;
-  const displayBuildDir = displayResult?.build_dir || displayPackage?.build_dir || null;
+  const projectBuildDir = displayResult?.build_dir || displayPackage?.build_dir || null;
+  const displayBuildDir =
+    view === VIEWS.preview ? previewContext?.buildDir || projectBuildDir : projectBuildDir;
   const buildingName =
     displayPackage?.info?.project_name ||
     spliceJob.job?.project_name ||
@@ -162,13 +166,19 @@ export default function App() {
   const loadBootstrap = useCallback(async () => {
     setLoadError(null);
     try {
-      const [healthRes, examplesRes, fixturesRes, jobsRes] = await Promise.all([
-        fetchHealth(),
+      const healthRes = await fetchHealth();
+      setHealth(healthRes);
+    } catch (err) {
+      setHealth(null);
+      setLoadError(err.message);
+      return;
+    }
+    try {
+      const [examplesRes, fixturesRes, jobsRes] = await Promise.all([
         fetchExamples(),
         fetchDonorFixtures(),
         fetchJobs({ limit: 12 }),
       ]);
-      setHealth(healthRes);
       setExamples(examplesRes.examples || []);
       setDonorFixtures(fixturesRes.fixtures || []);
       setRecentJobs(jobsRes.jobs || []);
@@ -177,7 +187,6 @@ export default function App() {
       }
     } catch (err) {
       setLoadError(err.message);
-      setHealth(null);
     }
   }, [selectedExampleId]);
 
@@ -187,29 +196,31 @@ export default function App() {
 
   useEffect(() => {
     if (spliceJob.result) {
+      setPreviewContext(null);
       setView(VIEWS.results);
       setHydratedResult(null);
-      setActiveTab("gates");
+      setActiveTab("design");
       loadBootstrap();
-      setToast("Build complete — review safety gates");
+      setToast("Build complete — review the KiCad carrier, then close bench gates");
     }
   }, [spliceJob.result, loadBootstrap]);
 
   useEffect(() => {
-    if (!displayBuildDir) return;
-    benchStatus(displayBuildDir).then(setBenchSession).catch(() => {});
-  }, [displayBuildDir]);
+    if (!projectBuildDir) return;
+    benchStatus(projectBuildDir).then(setBenchSession).catch(() => {});
+  }, [projectBuildDir]);
 
   const refreshBench = useCallback(async () => {
-    if (!displayBuildDir) return;
-    const session = await benchStatus(displayBuildDir);
+    if (!projectBuildDir) return;
+    const session = await benchStatus(projectBuildDir);
     setBenchSession(session);
     return session;
-  }, [displayBuildDir]);
+  }, [projectBuildDir]);
 
   const startBuild = async (intake, { exampleId } = {}) => {
     spliceJob.clearError();
     setHydratedResult(null);
+    setPreviewContext(null);
     setView(VIEWS.results);
     setActiveTab("info");
     const jobId = await spliceJob.startBuild(intake, { exportGerber: false });
@@ -219,12 +230,13 @@ export default function App() {
 
   const loadJobResult = async (jobId) => {
     spliceJob.reset();
+    setPreviewContext(null);
     const payload = await fetchJobResult(jobId);
     if (payload.ok && payload.result) {
       setHydratedResult(payload.result);
       setActiveJobId(jobId);
       setView(VIEWS.results);
-      setActiveTab("gates");
+      setActiveTab("design");
       const dir = payload.result.build_dir || payload.result.project_package?.build_dir;
       if (dir) {
         const session = await benchStatus(dir);
@@ -238,9 +250,24 @@ export default function App() {
     if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
   };
 
+  const openDesignPreview = ({ buildDir, title, qualityHint }) => {
+    if (!buildDir) return;
+    setPreviewContext({ buildDir, title, qualityHint });
+    setView(VIEWS.preview);
+    setToast("KiCad preview opened");
+  };
+
+  const handleRunRepairCafeDemo = () => {
+    const ex =
+      examples.find((r) => r.id.includes("repair_cafe")) ||
+      examples.find((r) => r.id.includes("robot_drive_brief")) ||
+      examples[0];
+    if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
+  };
+
   const handleBenchSubmit = async (measurements) => {
-    if (!displayBuildDir) return;
-    const session = await benchSubmit(displayBuildDir, measurements);
+    if (!projectBuildDir) return;
+    const session = await benchSubmit(projectBuildDir, measurements);
     setBenchSession(session);
     if (displayResult?.project_package?.gates) {
       const pkg = hydratedResult?.project_package || spliceJob.result?.project_package;
@@ -287,13 +314,19 @@ export default function App() {
       case "instructions":
         return <InstructionsPanel pkg={displayPackage} />;
       case "design":
-        return <DesignPreviewPanel buildDir={displayBuildDir} pkg={displayPackage} />;
+        return (
+          <DesignPreviewPanel
+            buildDir={projectBuildDir}
+            pkg={displayPackage}
+            onGoGates={() => setActiveTab("gates")}
+          />
+        );
       case "gates":
         return <GatesPanel pkg={displayPackage} benchSession={benchSession} />;
       case "bench":
         return (
           <BenchPanel
-            buildDir={displayBuildDir}
+            buildDir={projectBuildDir}
             benchSession={benchSession}
             onRefresh={() => refreshBench()}
             onSubmit={handleBenchSubmit}
@@ -306,6 +339,7 @@ export default function App() {
   };
 
   const inResults = view === VIEWS.results;
+  const inPreview = view === VIEWS.preview;
 
   return (
     <div className="app-shell">
@@ -406,6 +440,7 @@ export default function App() {
               pkg={displayPackage}
               benchSession={benchSession}
               onGoBench={() => setActiveTab("bench")}
+              onGoDesign={() => setActiveTab("design")}
             />
             <TabNav
               tabs={PROJECT_TABS}
@@ -416,7 +451,7 @@ export default function App() {
           </>
         )}
 
-        <div className={`content ${inResults ? "content-results" : ""}`}>
+        <div className={`content ${inResults || inPreview ? "content-results" : ""}`}>
           {view === VIEWS.home && (
             <HomeHero
               apiOk={health?.ok}
@@ -472,7 +507,42 @@ export default function App() {
 
           {view === VIEWS.results && renderResults()}
 
-          {view === VIEWS.lab && <InterfaceLabPanel />}
+          {view === VIEWS.preview && (
+            <div className="preview-shell">
+              <div className="preview-toolbar card">
+                <button type="button" className="ghost" onClick={() => setView(VIEWS.lab)}>
+                  ← Back to Interface lab
+                </button>
+                <button
+                  type="button"
+                  className="ghost"
+                  onClick={() => {
+                    setPreviewContext(null);
+                    setView(displayPackage ? VIEWS.results : VIEWS.home);
+                  }}
+                >
+                  {displayPackage ? "Open full project" : "Home"}
+                </button>
+              </div>
+              <DesignPreviewPanel
+                buildDir={previewContext?.buildDir || displayBuildDir}
+                qualityHint={previewContext?.qualityHint}
+                title={previewContext?.title}
+                onGoGates={displayPackage ? () => {
+                  setPreviewContext(null);
+                  setView(VIEWS.results);
+                  setActiveTab("gates");
+                } : null}
+              />
+            </div>
+          )}
+
+          {view === VIEWS.lab && (
+            <InterfaceLabPanel
+              onOpenDesignPreview={openDesignPreview}
+              onRunFullDemo={handleRunRepairCafeDemo}
+            />
+          )}
         </div>
       </main>
     </div>

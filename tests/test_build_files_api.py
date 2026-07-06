@@ -38,6 +38,20 @@ def test_build_files_api(tmp_path: Path) -> None:
     comp = tmp_path / "build_compilation"
     comp.mkdir()
     (comp / "demo.kicad_pcb").write_text("(kicad_pcb (version 20241229))\n", encoding="utf-8")
+    (comp / "DESIGN_QUALITY.json").write_text(
+        json.dumps(
+            {
+                "drc_pass": True,
+                "drc_errors": 0,
+                "drc_warnings": 3,
+                "copper_tier": "cosmetic_preview",
+                "fab_recommendation": "review_required_preview_copper",
+                "build_ready": True,
+            }
+        ),
+        encoding="utf-8",
+    )
+    (comp / "KICAD_DRC.json").write_text(json.dumps({"pass": True, "errors": 0, "warnings": 3}), encoding="utf-8")
 
     client = TestClient(create_app())
     listed = client.post("/v1/build-files/list", json={"build_dir": str(tmp_path)}).json()
@@ -50,6 +64,11 @@ def test_build_files_api(tmp_path: Path) -> None:
     ).json()
     assert content["ok"] is True
     assert "(kicad_pcb" in content["content"]
+
+    quality = client.post("/v1/build-files/design-quality", json={"build_dir": str(tmp_path)}).json()
+    assert quality["ok"] is True
+    assert quality["kicad_drc_errors"] == 0
+    assert quality["copper_tier"] == "cosmetic_preview"
 
 
 def test_netlist_fixture_example() -> None:

@@ -126,6 +126,15 @@ export async function fetchBuildFileContent(buildDir, relative) {
   return parseJson(res);
 }
 
+export async function fetchDesignQuality(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/design-quality`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
 export async function composeCanvas(nodes, wires, { wireOnly = false, exportGerber = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/compose-canvas`, {
     method: "POST",

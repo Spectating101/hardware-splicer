@@ -1,6 +1,6 @@
 import { GateBadge, StatusPill } from "./ProjectPanels.jsx";
 
-export default function ProjectSummaryBar({ pkg, benchSession, onGoBench }) {
+export default function ProjectSummaryBar({ pkg, benchSession, onGoBench, onGoDesign }) {
   const gates = pkg?.gates || {};
   const openCount =
     benchSession?.open_gate_count ??
@@ -52,6 +52,11 @@ export default function ProjectSummaryBar({ pkg, benchSession, onGoBench }) {
       {openCount > 0 && onGoBench && (
         <button type="button" className="primary small summary-cta" onClick={onGoBench}>
           Close {openCount} gate{openCount === 1 ? "" : "s"} on bench →
+        </button>
+      )}
+      {onGoDesign && (
+        <button type="button" className="secondary small summary-cta" onClick={onGoDesign}>
+          View KiCad board →
         </button>
       )}
     </section>

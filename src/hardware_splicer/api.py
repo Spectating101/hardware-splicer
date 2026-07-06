@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .compose_dispatch import compose_dispatch
-from .build_files import list_kicad_files, read_build_file, resolve_build_dir
+from .build_files import list_kicad_files, read_build_file, read_design_quality_summary, resolve_build_dir
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .circuit_synthesis import (
     compile_synthesis_candidate,
@@ -527,6 +527,13 @@ def create_app() -> FastAPI:
         try:
             payload = read_build_file(request.build_dir, request.relative)
             return {"ok": True, **payload}
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/design-quality")
+    def build_files_design_quality(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            return read_design_quality_summary(request.build_dir)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 

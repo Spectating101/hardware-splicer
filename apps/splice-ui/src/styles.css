@@ -1305,3 +1305,98 @@ button.primary:disabled {
   background: var(--surface-2);
   color: var(--text);
 }
+
+.lab-hero h2 {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.lab-steps {
+  margin: 0 0 1rem 1.1rem;
+  color: var(--muted);
+}
+
+.lab-steps li {
+  margin-bottom: 0.35rem;
+}
+
+.lab-result {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.lab-result-ok {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+.lab-result-fail {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+}
+
+.lab-result-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.lab-result-summary {
+  margin: 0 0 10px;
+}
+
+.lab-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0 0 12px;
+}
+
+.lab-result-grid dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.lab-result-grid dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.design-truth-head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.design-gates-link {
+  margin-top: 12px;
+}
+
+.kicanvas-hint {
+  margin: 0 0 8px;
+}
+
+.preview-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preview-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+.summary-bar {
+  flex-wrap: wrap;
+}
+
+.summary-cta + .summary-cta {
+  margin-left: 0;
+}

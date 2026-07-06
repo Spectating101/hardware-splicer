@@ -5,6 +5,7 @@ import {
   fetchNetlistFixtures,
   netlistCompile,
 } from "../api.js";
+import LabResultCard from "./LabResultCard.jsx";
 
 const DEMO_NODES = [
   { id: "n1", moduleId: "usb-power-5v" },
@@ -20,32 +21,48 @@ const DEMO_WIRES = [
   { from: { nodeId: "n2", pinId: "GPIO4" }, to: { nodeId: "n3", pinId: "DATA" } },
 ];
 
-export default function InterfaceLabPanel() {
+const STEPS = [
+  "Wire a module graph (canvas → compose spine).",
+  "Compile to KiCad and open the board in the Design preview.",
+  "Or import circuit-json and compile through the same engine.",
+];
+
+export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }) {
   const [fixtures, setFixtures] = useState([]);
   const [fixtureId, setFixtureId] = useState("usb_esp_dht22");
-  const [canvasResult, setCanvasResult] = useState(null);
+  const [canvasWire, setCanvasWire] = useState(null);
+  const [canvasCompile, setCanvasCompile] = useState(null);
   const [netlistResult, setNetlistResult] = useState(null);
+  const [canvasError, setCanvasError] = useState("");
+  const [netlistError, setNetlistError] = useState("");
   const [busy, setBusy] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchNetlistFixtures()
       .then((payload) => {
         const rows = payload.fixtures || [];
         setFixtures(rows);
-        if (rows[0]?.id) setFixtureId(rows[0].id);
+        const preferred = rows.find((row) => row.id === "usb_esp_dht22") || rows[0];
+        if (preferred?.id) setFixtureId(preferred.id);
       })
       .catch(() => {});
   }, []);
 
   const runCanvas = async (wireOnly) => {
     setBusy(wireOnly ? "canvas-wire" : "canvas-compile");
-    setError("");
+    if (wireOnly) {
+      setCanvasError("");
+    } else {
+      setCanvasError("");
+      setCanvasCompile(null);
+    }
     try {
       const payload = await composeCanvas(DEMO_NODES, DEMO_WIRES, { wireOnly, exportGerber: false });
-      setCanvasResult(payload);
+      if (wireOnly) setCanvasWire(payload);
+      else setCanvasCompile(payload);
     } catch (err) {
-      setError(err.message);
+      if (wireOnly) setCanvasError(err.message);
+      else setCanvasError(err.message);
     } finally {
       setBusy("");
     }
@@ -53,7 +70,8 @@ export default function InterfaceLabPanel() {
 
   const runCircuitJson = async () => {
     setBusy("circuit-json");
-    setError("");
+    setNetlistError("");
+    setNetlistResult(null);
     try {
       const fixture = await fetchNetlistFixture(fixtureId);
       const payload = await netlistCompile({
@@ -61,61 +79,77 @@ export default function InterfaceLabPanel() {
         buildId: "generic_low_voltage_build",
         exportGerber: false,
       });
-      setNetlistResult(payload);
+      setNetlistResult({ ...payload, fixture_label: fixture.description });
     } catch (err) {
-      setError(err.message);
+      setNetlistError(err.message);
     } finally {
       setBusy("");
     }
   };
 
-  const canvasQuality = canvasResult?.design_quality || {};
-  const netlistQuality = netlistResult?.design_quality || {};
+  const openPreview = (ctx) => {
+    if (!onOpenDesignPreview) return;
+    onOpenDesignPreview({
+      buildDir: ctx.buildDir,
+      title: ctx.title || "Interface lab compile",
+      qualityHint: ctx.truth,
+    });
+  };
 
   return (
     <div className="panel-stack">
-      <section className="card">
-        <h3>Interface lab</h3>
+      <section className="card lab-hero">
+        <p className="eyebrow">Interface lab</p>
+        <h2>See the engine through borrowed OSS paths</h2>
         <p className="muted">
-          Spike: borrowed interfaces on the existing engine — <code>/v1/compose-canvas</code> and{" "}
-          <code>/v1/netlist-compile</code> (circuit-json).
+          This is not a Flux clone. It proves the same compile spine accepts canvas graphs and circuit-json interchange,
+          then shows the KiCad result in KiCanvas.
         </p>
-        {error && <p className="error">{error}</p>}
-      </section>
-
-      <section className="card">
-        <h3>Canvas → compile</h3>
-        <p className="muted">USB + ESP32 + DHT22 module graph through the same compose spine as Circuit.AI.</p>
-        <div className="lab-actions">
-          <button type="button" className="secondary" disabled={Boolean(busy)} onClick={() => runCanvas(true)}>
-            {busy === "canvas-wire" ? "Wiring…" : "Wire-only graph"}
+        <ol className="lab-steps">
+          {STEPS.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        {onRunFullDemo && (
+          <button type="button" className="secondary" onClick={onRunFullDemo}>
+            Run repair-café demo build →
           </button>
-          <button type="button" className="primary" disabled={Boolean(busy)} onClick={() => runCanvas(false)}>
-            {busy === "canvas-compile" ? "Compiling…" : "Compile to KiCad"}
-          </button>
-        </div>
-        {canvasResult && (
-          <pre className="lab-output">
-            {JSON.stringify(
-              {
-                wire_only: canvasResult.wire_only,
-                node_count: canvasResult.graph?.nodes?.length,
-                wire_count: canvasResult.graph?.wires?.length,
-                kicad_drc_errors: canvasQuality.kicad_drc_errors,
-                kicad_drc_warnings: canvasQuality.kicad_drc_warnings,
-                copper_tier: canvasQuality.copper_tier,
-                build_dir: canvasResult.build_dir || canvasResult.out_dir,
-              },
-              null,
-              2,
-            )}
-          </pre>
         )}
       </section>
 
       <section className="card">
-        <h3>circuit-json → netlist-compile</h3>
-        <p className="muted">Fixture roundtrip via tscircuit-style circuit-json interchange.</p>
+        <h3>1 · Canvas → compose</h3>
+        <p className="muted">
+          USB power, ESP32, and DHT22 modules — same graph path as Circuit.AI. Wire first, then compile to KiCad.
+        </p>
+        <div className="lab-actions">
+          <button type="button" className="secondary" disabled={Boolean(busy)} onClick={() => runCanvas(true)}>
+            {busy === "canvas-wire" ? "Wiring…" : "Step A — Wire graph"}
+          </button>
+          <button type="button" className="primary" disabled={Boolean(busy)} onClick={() => runCanvas(false)}>
+            {busy === "canvas-compile" ? "Compiling…" : "Step B — Compile to KiCad"}
+          </button>
+        </div>
+        <LabResultCard
+          title="Wire-only result"
+          payload={canvasWire}
+          error={canvasError && !canvasWire ? canvasError : ""}
+        />
+        <LabResultCard
+          title="KiCad compile result"
+          subtitle="USB + ESP32 + DHT22 carrier"
+          payload={canvasCompile}
+          error={canvasError && !canvasCompile ? canvasError : ""}
+          onViewBoard={(ctx) => openPreview({ ...ctx, title: "Canvas compile — USB/ESP32/DHT22" })}
+        />
+      </section>
+
+      <section className="card">
+        <h3>2 · circuit-json → netlist-compile</h3>
+        <p className="muted">
+          tscircuit-style interchange feeds the engine without a custom editor. Pick a fixture, compile, then preview the
+          board.
+        </p>
         <div className="lab-actions">
           <select value={fixtureId} onChange={(e) => setFixtureId(e.target.value)} className="lab-select">
             {fixtures.map((row) => (
@@ -128,22 +162,13 @@ export default function InterfaceLabPanel() {
             {busy === "circuit-json" ? "Compiling…" : "Compile fixture"}
           </button>
         </div>
-        {netlistResult && (
-          <pre className="lab-output">
-            {JSON.stringify(
-              {
-                fixture_id: fixtureId,
-                kicad_drc_errors: netlistQuality.kicad_drc_errors,
-                kicad_drc_warnings: netlistQuality.kicad_drc_warnings,
-                copper_tier: netlistQuality.copper_tier,
-                circuit_json_path: netlistResult.circuit_json,
-                build_dir: netlistResult.build_dir || netlistResult.out_dir,
-              },
-              null,
-              2,
-            )}
-          </pre>
-        )}
+        <LabResultCard
+          title="circuit-json compile"
+          subtitle={netlistResult?.fixture_label || fixtureId}
+          payload={netlistResult}
+          error={netlistError}
+          onViewBoard={(ctx) => openPreview({ ...ctx, title: `circuit-json — ${fixtureId}` })}
+        />
       </section>
     </div>
   );

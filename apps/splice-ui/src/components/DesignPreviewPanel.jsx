@@ -1,16 +1,24 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchBuildFileContent, listBuildFiles } from "../api.js";
+import { fetchBuildFileContent, fetchDesignQuality, listBuildFiles } from "../api.js";
+import {
+  compileTruthHeadline,
+  copperTierLabel,
+  normalizeCompileTruth,
+} from "../utils/compileTruth.js";
+import { StatusPill } from "./ProjectPanels.jsx";
 
 function useKiCanvasScript() {
   const [ready, setReady] = useState(
     () => typeof customElements !== "undefined" && Boolean(customElements.get("kicanvas-embed")),
   );
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (ready) return undefined;
     const existing = document.querySelector('script[data-kicanvas="1"]');
     if (existing) {
       existing.addEventListener("load", () => setReady(true), { once: true });
+      existing.addEventListener("error", () => setFailed(true), { once: true });
       return undefined;
     }
     const script = document.createElement("script");
@@ -18,17 +26,17 @@ function useKiCanvasScript() {
     script.src = "/kicanvas/kicanvas.js";
     script.dataset.kicanvas = "1";
     script.onload = () => setReady(true);
-    script.onerror = () => setReady(false);
+    script.onerror = () => setFailed(true);
     document.head.appendChild(script);
     return () => {};
   }, [ready]);
 
-  return ready;
+  return { ready, failed };
 }
 
 function KiCanvasInline({ content, label }) {
   const hostRef = useRef(null);
-  const kicanvasReady = useKiCanvasScript();
+  const { ready: kicanvasReady, failed: kicanvasFailed } = useKiCanvasScript();
 
   useEffect(() => {
     const host = hostRef.current;
@@ -36,7 +44,7 @@ function KiCanvasInline({ content, label }) {
     host.replaceChildren();
     const embed = document.createElement("kicanvas-embed");
     embed.setAttribute("controls", "basic");
-    embed.setAttribute("controlslist", "nodownload");
+    embed.setAttribute("controlslist", "nodownload nooverlay");
     const source = document.createElement("kicanvas-source");
     source.textContent = content;
     embed.appendChild(source);
@@ -51,19 +59,59 @@ function KiCanvasInline({ content, label }) {
     <div className="kicanvas-panel">
       <div className="kicanvas-toolbar">
         <span className="chip">{label}</span>
-        {!kicanvasReady && <span className="muted">Loading KiCanvas viewer…</span>}
+        {!kicanvasReady && !kicanvasFailed && <span className="muted">Loading KiCanvas viewer…</span>}
+        {kicanvasFailed && <span className="error">KiCanvas failed to load — refresh or check /kicanvas/kicanvas.js</span>}
       </div>
+      <p className="muted small kicanvas-hint">Click the board to pan and zoom. Read-only preview — edit in KiCad if needed.</p>
       <div ref={hostRef} className="kicanvas-host" />
     </div>
   );
 }
 
-export default function DesignPreviewPanel({ buildDir, pkg }) {
+function CompileTruthCard({ truth, loading }) {
+  if (loading) return <p className="muted">Loading compile truth from build artifacts…</p>;
+  if (!truth) return <p className="muted">No compile metadata found for this build.</p>;
+
+  const ok = truth.compile_ok !== false && (truth.kicad_drc_errors ?? 0) === 0;
+
+  return (
+    <>
+      <div className="design-truth-head">
+        <StatusPill ok={ok} label={ok ? "KiCad truth OK" : "Review required"} />
+        <p className="muted small">{compileTruthHeadline(truth)}</p>
+      </div>
+      <dl className="meta-grid">
+        <div>
+          <dt>DRC errors</dt>
+          <dd>{truth.kicad_drc_errors ?? "—"}</dd>
+        </div>
+        <div>
+          <dt>DRC warnings</dt>
+          <dd>{truth.kicad_drc_warnings ?? "—"}</dd>
+        </div>
+        <div>
+          <dt>Copper tier</dt>
+          <dd>{copperTierLabel(truth.copper_tier)}</dd>
+        </div>
+        <div>
+          <dt>Fab recommendation</dt>
+          <dd>{truth.fab_recommendation ? String(truth.fab_recommendation).replace(/_/g, " ") : "—"}</dd>
+        </div>
+      </dl>
+    </>
+  );
+}
+
+export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, onGoGates }) {
   const [files, setFiles] = useState([]);
   const [activeRelative, setActiveRelative] = useState("");
   const [content, setContent] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingFile, setLoadingFile] = useState(false);
+  const [quality, setQuality] = useState(null);
+  const [loadingQuality, setLoadingQuality] = useState(false);
+
+  const truth = normalizeCompileTruth({ pkg, quality: quality || qualityHint });
 
   useEffect(() => {
     if (!buildDir) return;
@@ -89,12 +137,37 @@ export default function DesignPreviewPanel({ buildDir, pkg }) {
   }, [buildDir]);
 
   useEffect(() => {
+    if (!buildDir) {
+      setQuality(qualityHint || null);
+      return;
+    }
+    if (qualityHint && !pkg) {
+      setQuality(qualityHint);
+    }
+    let cancelled = false;
+    setLoadingQuality(true);
+    fetchDesignQuality(buildDir)
+      .then((payload) => {
+        if (!cancelled) setQuality(payload);
+      })
+      .catch(() => {
+        if (!cancelled) setQuality(qualityHint || normalizeCompileTruth({ pkg }));
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingQuality(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [buildDir, pkg, qualityHint]);
+
+  useEffect(() => {
     if (!buildDir || !activeRelative) {
       setContent("");
       return undefined;
     }
     let cancelled = false;
-    setLoading(true);
+    setLoadingFile(true);
     setError("");
     fetchBuildFileContent(buildDir, activeRelative)
       .then((payload) => {
@@ -104,25 +177,37 @@ export default function DesignPreviewPanel({ buildDir, pkg }) {
         if (!cancelled) setError(err.message);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setLoadingFile(false);
       });
     return () => {
       cancelled = true;
     };
   }, [buildDir, activeRelative]);
 
-  const drc = pkg?.gates?.design_quality_gate || pkg?.gates || {};
+  if (!buildDir) {
+    return (
+      <section className="card empty-card">
+        <p className="muted">No build directory available. Run a project build or Interface lab compile first.</p>
+      </section>
+    );
+  }
 
   return (
     <div className="panel-stack">
+      {title && (
+        <section className="card design-preview-banner">
+          <p className="eyebrow">KiCad preview</p>
+          <h3>{title}</h3>
+        </section>
+      )}
       <section className="card">
-        <h3>Design preview</h3>
+        <h3>Board & schematic</h3>
         <p className="muted">
-          Read-only KiCad preview via embedded{" "}
+          Inspect the KiCad carrier the engine compiled — embedded{" "}
           <a href="https://kicanvas.org/" target="_blank" rel="noreferrer">
             KiCanvas
-          </a>
-          . Proves the engine emits inspectable ECAD artifacts.
+          </a>{" "}
+          viewer, no KiCad install required.
         </p>
         {error && <p className="error">{error}</p>}
         {files.length > 0 ? (
@@ -139,30 +224,22 @@ export default function DesignPreviewPanel({ buildDir, pkg }) {
             ))}
           </div>
         ) : (
-          !error && <p className="muted">No `.kicad_pcb` / `.kicad_sch` files found in this build.</p>
+          !error && <p className="muted">No `.kicad_pcb` / `.kicad_sch` files found in this build yet.</p>
         )}
-        {loading ? <p className="muted">Loading KiCad file…</p> : <KiCanvasInline content={content} label={activeRelative} />}
+        {loadingFile ? (
+          <p className="muted">Loading KiCad file…</p>
+        ) : (
+          <KiCanvasInline content={content} label={activeRelative} />
+        )}
       </section>
       <section className="card">
         <h3>Compile truth</h3>
-        <dl className="meta-grid">
-          <div>
-            <dt>DRC errors</dt>
-            <dd>{drc.kicad_drc_errors ?? drc.compile_errors ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>DRC warnings</dt>
-            <dd>{drc.kicad_drc_warnings ?? "—"}</dd>
-          </div>
-          <div>
-            <dt>Copper tier</dt>
-            <dd>{drc.copper_tier || "—"}</dd>
-          </div>
-          <div>
-            <dt>Fab recommendation</dt>
-            <dd>{drc.fab_recommendation || "—"}</dd>
-          </div>
-        </dl>
+        <CompileTruthCard truth={truth} loading={loadingQuality} />
+        {onGoGates && pkg?.gates && (
+          <button type="button" className="secondary small design-gates-link" onClick={onGoGates}>
+            Continue to bench gates →
+          </button>
+        )}
       </section>
     </div>
   );
