@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-install-smoke
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -100,6 +100,16 @@ verify-splice-real-bench:
 # Core v1 bar — run this before UI/packaging work. No npm, no splice-ui.
 verify-splice-v1: doctor test-project-package verify-splice verify-splice-loop verify-splice-real-bench
 	@echo "verify-splice-v1: engine + S2/S3 + project package — all passed"
+
+test-splice-product-v1:
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_splice_product_v1.py -q
+
+# Internal product maturity bar: engine + UI build + product API tests.
+verify-product-v1: verify-splice-v1 splice-ui-build test-splice-product-v1
+	@echo "verify-product-v1: engine + splice-ui + product API — all passed"
+
+verify-install-smoke:
+	bash scripts/verify_install_smoke.sh
 
 pin-golden-live-evidence:
 	QWEN_DISABLED=0 QWEN_OUT_OF_QUOTA=0 VISION_MONTHLY_USD_LIMIT=5 VISION_DAILY_USD_LIMIT=2 VISION_MAX_USD_PER_CALL=0.25 PYTHONPATH=src $(PYTHON) scripts/pin_golden_live_board_evidence.py

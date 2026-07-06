@@ -30,7 +30,9 @@ on:
       - "RELEASE_NOTES_v1.0.1.md"
       - "RELEASE_NOTES_v1.0.md"
       - "README.md"
-      - "apps/README.md"
+      - "docs/INTERNAL_MATURITY_PLAN.md"
+      - "tests/test_splice_product_v1.py"
+      - "scripts/verify_install_smoke.sh"
       - "Makefile"
       - "requirements.txt"
       - ".github/workflows/hardware-splicer.yml"
@@ -63,7 +65,9 @@ on:
       - "RELEASE_NOTES_v1.0.1.md"
       - "RELEASE_NOTES_v1.0.md"
       - "README.md"
-      - "apps/README.md"
+      - "docs/INTERNAL_MATURITY_PLAN.md"
+      - "tests/test_splice_product_v1.py"
+      - "scripts/verify_install_smoke.sh"
       - "Makefile"
       - "requirements.txt"
       - ".github/workflows/hardware-splicer.yml"
@@ -97,6 +101,10 @@ jobs:
           make verify-splice-v1
       - name: splice-ui production build
         run: make splice-ui-build
+      - name: product v1 API tests
+        run: |
+          source .venv/bin/activate
+          make test-splice-product-v1
 
   verify:
     runs-on: ubuntu-latest

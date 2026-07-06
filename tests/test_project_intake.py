@@ -392,10 +392,12 @@ def test_splice_intake_examples_api() -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
+    from hardware_splicer import _version
+
     client = TestClient(create_app())
     health = client.get("/health")
     assert health.status_code == 200
-    assert health.json().get("version") == "1.0.0"
+    assert health.json().get("version") == _version.__version__
 
     response = client.get("/v1/examples/splice-intakes")
     assert response.status_code == 200

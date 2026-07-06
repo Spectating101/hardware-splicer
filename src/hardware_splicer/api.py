@@ -368,9 +368,11 @@ def create_app() -> FastAPI:
         finally:
             job_backend.stop()
 
+    from ._version import __version__
+
     app = FastAPI(
         title="Hardware-Splicer Splice Agent",
-        version="1.0.0",
+        version=__version__,
         description="Splice agent API: donor intake → KiCad carrier → bench gates → project package.",
         lifespan=lifespan,
     )
@@ -1168,6 +1170,7 @@ def create_app() -> FastAPI:
     def list_jobs(status: str | None = None, limit: int = 100) -> Dict[str, Any]:
         jobs = job_backend.store.list_jobs(status=status, limit=limit)
         return {
+            "ok": True,
             "jobs": [job.to_dict(include_result=False) for job in jobs],
             "stats": job_backend.store.stats(),
         }

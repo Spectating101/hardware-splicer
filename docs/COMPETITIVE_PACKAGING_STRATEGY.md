@@ -280,16 +280,17 @@ Position as **spine in the bring-up layer**, not replacement EDA.
 
 ---
 
-## 13. Immediate action list (this week)
+## 13. Immediate action list (internal phase — before external)
 
-1. [ ] Create GitHub Release `v1.0.1` (body in `RELEASE_NOTES_v1.0.1.md`)
-2. [ ] Attach sample `PROJECT_PACKAGE` zip from golden job
-3. [ ] Record `docs/DEMO_5_MIN_UI.md` flow
-4. [ ] Export one-pager PDF from `OFFER_SPLICE_BENCH_KIT_v1.md`
-5. [ ] Name 5 outreach targets (1× maker, 1× lab, 1× EMS-adjacent, 1× robotics, 1× agent shop)
-6. [ ] Schedule alien-machine install using `INSTALL_REPORT_TEMPLATE.md`
+1. [ ] `make verify-product-v1` green locally and on CI
+2. [ ] `make verify-install-smoke` after clean venv wipe
+3. [ ] `make splice-ui-serve` — full demo path without code edits
+4. [ ] Fill `INSTALL_REPORT_TEMPLATE.md` on spare machine (still internal)
+5. [ ] Close P0 gaps in §4 of [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md)
 
-**Success metric:** One external "yes" — paid, LOI, or signed testimonial.
+**Defer until internal done:** outreach, pilot emails, grant apps, GitHub Release marketing.
+
+**Success metric (internal):** `verify-product-v1` + reinstall smoke + one alien-machine install report.
 
 ---
 

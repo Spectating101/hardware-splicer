@@ -40,7 +40,8 @@
 | [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook |
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
 | [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) | Competition loss lessons |
-| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter, completion roadmap |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter (after Tier I–III) |
+| [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal product maturity** — `verify-product-v1` |
 | [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Technical delta since May |
 
 ### Agent / MCP / CI
@@ -98,7 +99,8 @@
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install, deploy, systemd, release artifacts | **Core** |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
 | [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook | **Core** |
-| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs competitors, completion roadmap, do-not-build | **Core (internal)** |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs competitors (external phase) | Reference |
+| [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal gate** — Tier I–III before external | **Core** |
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy, funding | **Core** |
 | [`LAUNCH_PLAN.md`](LAUNCH_PLAN.md) | Phases A–C engine launch | Reference (mostly met) |
 | [`FLUX_TARGET.md`](FLUX_TARGET.md) | vs Flux positioning | Reference |
@@ -256,7 +258,8 @@ Everything else → index.
 |---------|-----|
 | `make setup` | SETUP.md |
 | `make verify-splice` | DEMO_SPLICE.md, SPLICE_PRODUCT.md |
-| `make verify-splice-loop` | AGENT_HANDOFF.md, HANDOFF_UPDATE.md |
+| `make verify-splice-v1` | DEMO_SPLICE.md, INTERNAL_MATURITY_PLAN.md §Tier I |
+| `make verify-product-v1` | INTERNAL_MATURITY_PLAN.md §Tier II |
 | `make splice-ui-serve` | QUICKSTART_SPLICE_v1.md, DEMO_5_MIN_UI.md |
 | `python -m hardware_splicer.mcp_server` | MCP.md, AGENT_HANDOFF.md |
 | `scripts/hardware_splicer.py serve` | AGENT_HANDOFF.md, INTEGRATION.md |

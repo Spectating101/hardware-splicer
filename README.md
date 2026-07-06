@@ -30,7 +30,8 @@ Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md)
 ## Verify (engineering bar)
 
 ```bash
-INSTALL_DEV=1 bash scripts/install_splice_v1.sh
+make verify-product-v1    # full internal product bar (engine + UI + API tests)
+# or engine only:
 make verify-splice-v1
 ```
 
@@ -41,7 +42,7 @@ make verify-splice-v1
 | `verify-splice-loop` | S3 bench closure (3/3) |
 | `verify-splice-real-bench` | Real capture → `power_on_authorized` |
 
-CI runs the same bar on Ubuntu: workflow **Splice Agent v1**.
+CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product API tests.
 
 ---
 
