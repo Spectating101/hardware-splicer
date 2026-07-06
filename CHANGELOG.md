@@ -6,6 +6,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.0.2] - 2026-07-07
+
+### Added
+
+- `make verify-product-internal` — full internal maturity command chain
+- `scripts/verify_product_live_smoke.py` — live HTTP async job smoke
+- `docs/GITHUB_START_HERE.md`, `docs/EXTERNAL_PROOF_CHECKLIST.md`
+- `docs/INSTALL_REPORT_dev-linux_2026-07-06.md`, `docs/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`
+- `releases/sample-splice-sprint-robot-repair-cafe.zip` — reviewer sample bundle
+
+### Fixed
+
+- `scripts/install_splice_v1.sh` — export `engine_pcb_data.json` and `catalog_recipes.json` on fresh install
+
+### Changed
+
+- Internal maturity Tier III: alien-machine pass on lab Windows/WSL2
+
+---
+
 ## [1.0.1] - 2026-07-06
 
 ### Added

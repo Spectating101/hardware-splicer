@@ -153,8 +153,9 @@ You may call the internal product **mature enough for external** when:
 | 4 | Version tag matches all surfaces (`health`, OpenAPI, README) |
 | 5 | One `INSTALL_REPORT` filled on non-dev machine (your spare box — still internal) |
 | 6 | No P0 items open in §4 |
+| 7 | GitHub Release + sample zip for reviewers (see [`EXTERNAL_PROOF_CHECKLIST.md`](EXTERNAL_PROOF_CHECKLIST.md)) |
 
-**Not required for internal done:** paid pilot, grant, sample zip on GitHub Release, demo video for strangers.
+**Internal done** when 1–6 are true. **External proof** starts with §7 + five conversations — not required for "internal mature enough."
 
 ---
 

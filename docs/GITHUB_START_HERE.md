@@ -2,7 +2,7 @@
 
 **Repo:** [Spectating101/hardware-splicer](https://github.com/Spectating101/hardware-splicer)  
 **Product:** Splice Agent v1 — auditable hardware bring-up (donor intake → KiCad carrier → bench gates → `PROJECT_PACKAGE`)  
-**Version:** `1.0.1` · **Status:** Internal maturity phase (Tier I–II green on dev-linux; Tier III alien-machine install pending)
+**Version:** `1.0.2` · **Status:** Internal maturity green (dev-linux + lab WSL); **external proof phase** — see [`EXTERNAL_PROOF_CHECKLIST.md`](EXTERNAL_PROOF_CHECKLIST.md)
 
 Use this page as the **single entry** when browsing on GitHub or pasting links into ChatGPT.
 
@@ -24,7 +24,7 @@ Use this page as the **single entry** when browsing on GitHub or pasting links i
 
 | Doc | Purpose |
 |-----|---------|
-| [RELEASE_NOTES_v1.0.1.md](https://github.com/Spectating101/hardware-splicer/blob/main/RELEASE_NOTES_v1.0.1.md) | What shipped in v1.0.1 |
+| [RELEASE_NOTES_v1.0.2.md](https://github.com/Spectating101/hardware-splicer/blob/main/RELEASE_NOTES_v1.0.2.md) | What shipped in v1.0.2 |
 | [RELEASE_V1.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/RELEASE_V1.md) | Release checklist and tag discipline |
 | [SUPPORT_AND_LIABILITY_v1.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/SUPPORT_AND_LIABILITY_v1.md) | Support boundary, power-on liability |
 | [OPERATIONS_RUNBOOK_v1.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/OPERATIONS_RUNBOOK_v1.md) | Lab ops, env vars, single-port serve |
@@ -72,7 +72,7 @@ CI: [`.github/workflows/hardware-splicer.yml`](https://github.com/Spectating101/
 | [COMPETITIVE_PACKAGING_STRATEGY.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/COMPETITIVE_PACKAGING_STRATEGY.md) | vs Flux / Blueprint / unstructured checklists |
 | [MONETIZATION_AND_PRODUCT_ASSESSMENT.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks |
 | [DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding sequence |
-| [OFFER_SPLICE_BENCH_KIT_v1.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/OFFER_SPLICE_BENCH_KIT_v1.md) | Pilot offer template (deferred until Tier III) |
+| [EXTERNAL_PROOF_CHECKLIST.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/EXTERNAL_PROOF_CHECKLIST.md) | **Next** — release, sample zip, 5 conversations |
 
 ---
 
@@ -110,8 +110,8 @@ External proof validates maturity.
 It does not create maturity.
 ```
 
-**Sequence:** Tier I–III internal green → alien-machine install report → then pilots, releases page, outreach.
+**Sequence:** Tier I–III internal green → **external proof checklist** → pilots / funding conversations.
 
 ---
 
-*Last updated: July 2026 · v1.0.1*
+*Last updated: July 2026 · v1.0.2*

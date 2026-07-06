@@ -6,7 +6,7 @@
 
 Self-hosted agent for teams who need compile honesty and a power-on checklist, not cosmetic copper or hand-wavy LLM excuses.
 
-**Version:** `1.0.1` · **Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
+**Version:** `1.0.2` · **Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
 
 ---
 
@@ -78,7 +78,7 @@ CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product A
 | Async jobs, MCP + HTTP parity | Flux / Blueprint-class editor |
 | Optional splice-ui workbench | Certified donor harness safety |
 
-Details: [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
+Details: [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
 
 ---
 
@@ -91,6 +91,7 @@ Details: [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) · [`docs/RELEASE_
 | **Everyone** | [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) |
 | **Full map** | [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) |
 | **Internal maturity** | [`docs/INTERNAL_MATURITY_PLAN.md`](docs/INTERNAL_MATURITY_PLAN.md) |
+| **External proof (next)** | [`docs/EXTERNAL_PROOF_CHECKLIST.md`](docs/EXTERNAL_PROOF_CHECKLIST.md) |
 | **Agents / CI** | [`docs/AGENT_HANDOFF.md`](docs/AGENT_HANDOFF.md) |
 | **Deploy / ops** | [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · [`docs/OPERATIONS_RUNBOOK_v1.md`](docs/OPERATIONS_RUNBOOK_v1.md) |
 | **Commercial** | [`docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) |
