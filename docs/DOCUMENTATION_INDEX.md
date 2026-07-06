@@ -259,6 +259,7 @@ Everything else → index.
 | `make setup` | SETUP.md |
 | `make verify-splice` | DEMO_SPLICE.md, SPLICE_PRODUCT.md |
 | `make verify-splice-v1` | DEMO_SPLICE.md, INTERNAL_MATURITY_PLAN.md §Tier I |
+| `make verify-product-internal` | INTERNAL_MATURITY_PLAN.md (full internal bar) |
 | `make verify-product-v1` | INTERNAL_MATURITY_PLAN.md §Tier II |
 | `make splice-ui-serve` | QUICKSTART_SPLICE_v1.md, DEMO_5_MIN_UI.md |
 | `python -m hardware_splicer.mcp_server` | MCP.md, AGENT_HANDOFF.md |

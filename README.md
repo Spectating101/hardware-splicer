@@ -30,9 +30,11 @@ Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md)
 ## Verify (engineering bar)
 
 ```bash
-make verify-product-v1    # full internal product bar (engine + UI + API tests)
-# or engine only:
-make verify-splice-v1
+make verify-product-internal   # full internal bar (engine + UI + API + live job)
+# or stepwise:
+make verify-product-v1
+make verify-install-smoke
+make verify-product-live-smoke
 ```
 
 | Step | Proves |

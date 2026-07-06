@@ -50,6 +50,8 @@ It does not create maturity.
 | Product pytest | `tests/test_splice_product_v1.py` |
 | Combined | `make verify-product-v1` |
 
+**Tier II status (dev-linux 2026-07-06):** ✅ PASS
+
 **Meaning:** The **shippable SKU** (not just engine library) is wired and tested.
 
 ---
@@ -62,9 +64,15 @@ It does not create maturity.
 | Dev install | `INSTALL_DEV=1` + `make verify-product-v1` |
 | Single-port run | `make splice-ui-serve` → health + UI + quick demo path (manual once per release) |
 | Ops docs match code | `OPERATIONS_RUNBOOK_v1.md` env vars = `INTEGRATION.md` |
-| Alien machine (optional internal) | `INSTALL_REPORT_TEMPLATE.md` filled — **your** Windows/Linux box, not a customer |
+| Combined | `make verify-product-internal` |
 
-**Meaning:** You can reinstall and operate without tribal knowledge.
+```bash
+make verify-product-internal
+```
+
+Runs: `verify-product-v1` + `verify-install-smoke` + `verify-product-live-smoke` (spawns server, runs real async job).
+
+**Tier III status (dev-linux 2026-07-06):** 🟡 install smoke PASS; alien machine report pending — see [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md)
 
 ---
 
@@ -115,10 +123,11 @@ Prioritized for **maturity**, not competitor parity.
 
 | Priority | Gap | Tier | Notes |
 |----------|-----|------|-------|
-| **P0** | Version drift (`api.py` hardcoded) | II | Fix — use `_version` |
-| **P0** | No product-layer API tests | II | `test_splice_product_v1.py` |
-| **P0** | CI runs engine bar only | II | Add product tests to `splice-v1` job |
-| **P1** | No automated install smoke | III | `scripts/verify_install_smoke.sh` |
+| **P0** | Version drift (`api.py` hardcoded) | II | ✅ Fixed |
+| **P0** | No product-layer API tests | II | ✅ `test_splice_product_v1.py` |
+| **P0** | CI runs engine bar only | II | ✅ product tests in `splice-v1` job |
+| **P1** | No automated install smoke | III | ✅ `verify_install_smoke.sh` |
+| **P1** | No live HTTP job smoke | II | ✅ `verify_product_live_smoke.py` |
 | **P1** | Job error messages → UI | II | User-visible failure copy |
 | **P1** | Bench instrument auto-fill | II | DMM path — after internal demo works |
 | **P2** | BOM LCSC enrich in UI | II | Engine hooks exist |
@@ -136,7 +145,7 @@ You may call the internal product **mature enough for external** when:
 
 | # | Criterion |
 |---|-----------|
-| 1 | `make verify-product-v1` green locally and on GitHub Actions |
+| 1 | `make verify-product-internal` green locally and on GitHub Actions |
 | 2 | Reinstall from `install_splice_v1.sh` on clean venv without manual fixes |
 | 3 | `make splice-ui-serve` → full demo path once without code edits |
 | 4 | Version tag matches all surfaces (`health`, OpenAPI, README) |

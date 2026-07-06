@@ -20,6 +20,16 @@ def test_version_single_source() -> None:
     assert len(parts) == 3
     assert all(p.isdigit() for p in parts)
 
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    text = pyproject.read_text(encoding="utf-8")
+    for line in text.splitlines():
+        if line.startswith('version = "'):
+            pkg_version = line.split('"')[1]
+            assert pkg_version == _version.__version__
+            break
+    else:
+        pytest.fail("version not found in pyproject.toml")
+
 
 def test_health_reports_package_version() -> None:
     pytest.importorskip("fastapi")
