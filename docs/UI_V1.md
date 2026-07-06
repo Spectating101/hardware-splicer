@@ -84,9 +84,13 @@ Open http://127.0.0.1:5178
 
 - Donor **photo** upload in UI (API exists; not wired)
 - Freeform NL without wizard steps
-- KiCad / 3D preview embed
+- Full Circuit-AI canvas in wizard (use **Interface lab** for canvas/circuit-json spike)
 - Auth, billing, cloud hosting
-- Full Circuit-AI canvas
+
+**P0 interface spike (v1.0.2+):**
+
+- **Design** tab — KiCanvas read-only KiCad preview
+- **Interface lab** — compose-canvas + circuit-json compile demos
 
 ---
 

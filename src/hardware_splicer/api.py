@@ -14,6 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .compose_dispatch import compose_dispatch
+from .build_files import list_kicad_files, read_build_file, resolve_build_dir
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .circuit_synthesis import (
     compile_synthesis_candidate,
@@ -116,6 +117,15 @@ class SpliceBenchTemplateRequest(BaseModel):
     build_dir: str
 
 
+class BuildFilesListRequest(BaseModel):
+    build_dir: str
+
+
+class BuildFilesContentRequest(BaseModel):
+    build_dir: str
+    relative: str
+
+
 class SpliceGoldenLoopRequest(BaseModel):
     intake: Dict[str, Any]
     out_dir: str | None = Field(default=None)
@@ -155,6 +165,7 @@ class ComposeCanvasRequest(BaseModel):
     out_dir: str | None = Field(default=None)
     request_id: str | None = None
     export_gerber: bool = True
+    wire_only: bool = False
 
 
 class NetlistCompileRequest(BaseModel):
@@ -454,6 +465,70 @@ def create_app() -> FastAPI:
                 }
             )
         return {"ok": True, "fixtures": fixtures}
+
+    @app.get("/v1/examples/netlist-fixtures")
+    def netlist_fixture_catalog() -> Dict[str, Any]:
+        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        if not manifest.is_file():
+            return {"ok": True, "fixtures": []}
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        fixtures = [
+            {
+                "id": row.get("id"),
+                "type": row.get("type"),
+                "description": row.get("description"),
+                "module_ids": list(row.get("module_ids") or []),
+            }
+            for row in data.get("fixtures") or []
+            if isinstance(row, dict) and row.get("id")
+        ]
+        return {"ok": True, "fixtures": fixtures}
+
+    @app.get("/v1/examples/netlist-fixtures/{fixture_id}")
+    def netlist_fixture_payload(fixture_id: str) -> Dict[str, Any]:
+        from .integrations.circuit_json_adapter import netlist_to_circuit_json
+        from .netlist.ir import CircuitNetlist
+
+        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        row = next((f for f in data.get("fixtures") or [] if f.get("id") == fixture_id), None)
+        if not row:
+            raise _error(404, "fixture_not_found", f"Unknown netlist fixture: {fixture_id}")
+        rel = str(row.get("path") or "")
+        path = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / rel
+        if not path.is_file():
+            raise _error(404, "fixture_file_missing", f"Fixture file missing: {rel}")
+        if row.get("type") == "kicad_netlist":
+            from .netlist.import_kicad import parse_kicad_netlist
+
+            netlist = parse_kicad_netlist(path.read_text(encoding="utf-8"))
+        else:
+            netlist = CircuitNetlist.from_dict(json.loads(path.read_text(encoding="utf-8")))
+        circuit_json = netlist_to_circuit_json(netlist, source_build_id=fixture_id)
+        return {
+            "ok": True,
+            "fixture_id": fixture_id,
+            "description": row.get("description"),
+            "module_ids": list(row.get("module_ids") or []),
+            "netlist": netlist.to_dict(),
+            "circuit_json": circuit_json,
+        }
+
+    @app.post("/v1/build-files/list")
+    def build_files_list(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            files = list_kicad_files(request.build_dir)
+            return {"ok": True, "build_dir": str(resolve_build_dir(request.build_dir)), "files": files}
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/content")
+    def build_files_content(request: BuildFilesContentRequest) -> Dict[str, Any]:
+        try:
+            payload = read_build_file(request.build_dir, request.relative)
+            return {"ok": True, **payload}
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
 
     @app.get("/v1/status")
     def status() -> Dict[str, Any]:
@@ -795,6 +870,7 @@ def create_app() -> FastAPI:
             out_dir=request.out_dir,
             request_id=request.request_id,
             export_gerber=request.export_gerber,
+            wire_only=request.wire_only,
         )
         return compose(wrapped)
 

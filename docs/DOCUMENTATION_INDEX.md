@@ -47,6 +47,12 @@
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
 | [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) | Competition loss lessons |
 | [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter (after Tier I–III) |
+| [`COMPETITOR_SCORECARD_v1.0.2.md`](COMPETITOR_SCORECARD_v1.0.2.md) | **Internal** — layer-5 scorecard + do-not-compete axes |
+| [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md) | **Internal** — artifact-to-artifact vs release sample zip |
+| [`ROADMAP_FROM_COMPETITOR_GAPS.md`](ROADMAP_FROM_COMPETITOR_GAPS.md) | **Internal** — do now / do if / do not after comparison |
+| [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md) | **Internal + outbound** — allowed vs forbidden claims |
+| [`ENGINE_VS_INTERFACE.md`](ENGINE_VS_INTERFACE.md) | **Internal** — under-interfaced vs under-powered |
+| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | **Internal** — OSS embed map + P0 spike |
 | [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal product maturity** — `verify-product-internal` |
 | [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Technical delta since May |
 

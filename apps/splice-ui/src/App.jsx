@@ -10,6 +10,8 @@ import {
   jobBundleUrl,
 } from "./api.js";
 import BuildOverlay from "./components/BuildOverlay.jsx";
+import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
+import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import ProjectSummaryBar from "./components/ProjectSummaryBar.jsx";
 import ProjectWizard from "./components/ProjectWizard.jsx";
@@ -31,6 +33,7 @@ const VIEWS = {
   wizard: "wizard",
   example: "example",
   results: "results",
+  lab: "lab",
 };
 
 function Toast({ message, onDismiss }) {
@@ -283,6 +286,8 @@ export default function App() {
         return <WiringPanel pkg={displayPackage} />;
       case "instructions":
         return <InstructionsPanel pkg={displayPackage} />;
+      case "design":
+        return <DesignPreviewPanel buildDir={displayBuildDir} pkg={displayPackage} />;
       case "gates":
         return <GatesPanel pkg={displayPackage} benchSession={benchSession} />;
       case "bench":
@@ -330,6 +335,7 @@ export default function App() {
             ["Home", VIEWS.home],
             ["New project", VIEWS.wizard],
             ["Examples", VIEWS.example],
+            ["Interface lab", VIEWS.lab],
             ["Project", VIEWS.results],
           ].map(([label, id]) => (
             <button
@@ -465,6 +471,8 @@ export default function App() {
           )}
 
           {view === VIEWS.results && renderResults()}
+
+          {view === VIEWS.lab && <InterfaceLabPanel />}
         </div>
       </main>
     </div>

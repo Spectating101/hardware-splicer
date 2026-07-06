@@ -1247,3 +1247,61 @@ button.primary:disabled {
     padding-bottom: 4px;
   }
 }
+
+.kicanvas-host {
+  min-height: 420px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #0f1419;
+  overflow: hidden;
+}
+
+.kicanvas-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.file-picker-row,
+.lab-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.chip-button {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.chip-button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.lab-output {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0b1014;
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  overflow: auto;
+  max-height: 280px;
+}
+
+.lab-select {
+  min-width: 260px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+}

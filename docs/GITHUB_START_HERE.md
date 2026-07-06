@@ -70,6 +70,9 @@ CI: [`.github/workflows/hardware-splicer.yml`](https://github.com/Spectating101/
 | Doc | Purpose |
 |-----|---------|
 | [COMPETITIVE_PACKAGING_STRATEGY.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/COMPETITIVE_PACKAGING_STRATEGY.md) | vs Flux / Blueprint / unstructured checklists |
+| [COMPETITOR_SCORECARD_v1.0.2.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/COMPETITOR_SCORECARD_v1.0.2.md) | Layer-5 scorecard (v1.0.2) |
+| [COMPARISON_DEMO_CASE_robot_repair_cafe.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/COMPARISON_DEMO_CASE_robot_repair_cafe.md) | Artifact comparison vs release sample zip |
+| [CLAIMS_BOUNDARY.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/CLAIMS_BOUNDARY.md) | Allowed vs forbidden outbound claims |
 | [MONETIZATION_AND_PRODUCT_ASSESSMENT.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks |
 | [DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding sequence |
 | [EXTERNAL_PROOF_CHECKLIST.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/EXTERNAL_PROOF_CHECKLIST.md) | **Next** — release, sample zip, 5 conversations |
