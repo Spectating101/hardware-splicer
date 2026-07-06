@@ -21,6 +21,11 @@ echo "==> Build compiler frontend deps (TypeScript for compile_build_graph.cjs)"
 if command -v npm >/dev/null 2>&1; then
   (cd apps/circuit-ai/circuit-ai-frontend && npm install --silent)
   (cd apps/hardware-splicer-demo && npm install --silent)
+  if command -v make >/dev/null 2>&1; then
+    make -C "$ROOT" export-engine-pcb-data export-catalog-recipes
+  else
+    (cd "$ROOT" && node scripts/export_engine_pcb_data.cjs && node scripts/export_catalog_recipes.cjs)
+  fi
 else
   echo "WARN: npm not found — build compiler and dashboard will not work"
 fi
