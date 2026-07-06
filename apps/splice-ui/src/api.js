@@ -186,6 +186,24 @@ export async function runBuildAutoroute(buildDir) {
   return parseJson(res);
 }
 
+export async function fetchBuildBom(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/bom`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
+export async function fetchFabManifest(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/fab-manifest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
 export async function composeCanvas(nodes, wires, { wireOnly = false, exportGerber = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/compose-canvas`, {
     method: "POST",

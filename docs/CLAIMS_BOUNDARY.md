@@ -33,7 +33,11 @@
 | Artifact export / download from a build | `POST /v1/build-files/artifacts`, `download`, Design tab panel |
 | circuit-json export from compile output | `POST /v1/build-files/circuit-json`, `build_compilation/circuit_json.json` |
 | KiCad netlist ingest (SKiDL-class tools) | `kicad_netlist_text` on `/v1/netlist-compile`, fixture `esp32_servo_kicad` |
+| atopile import via KiCad netlist paste | Interface lab paste + [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) |
 | OSS integration map in product | `GET /v1/integrations/catalog`, Interface lab panel |
+| Compile BOM surfaced in Design tab | `POST /v1/build-files/bom` |
+| Fab artifact coverage vs KiBot reference | `POST /v1/build-files/fab-manifest` |
+| Wiring topology diagram in package UI | Mermaid from `topology_operators` in Wiring tab |
 | Opt-in FreeRouting autoroute | `POST /v1/build-files/autoroute` with `confirm=true`; never default-on |
 
 **v1.1 one-liner (interface preview):**

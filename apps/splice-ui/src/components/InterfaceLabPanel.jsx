@@ -37,6 +37,8 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
   const [canvasError, setCanvasError] = useState("");
   const [netlistError, setNetlistError] = useState("");
   const [busy, setBusy] = useState("");
+  const [pasteNetlist, setPasteNetlist] = useState("");
+  const [showPaste, setShowPaste] = useState(false);
 
   useEffect(() => {
     fetchNetlistFixtures()
@@ -81,6 +83,24 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
         exportGerber: false,
       });
       setNetlistResult({ ...payload, fixture_label: fixture.description, via: "kicad_netlist" });
+    } catch (err) {
+      setNetlistError(err.message);
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const runPastedNetlist = async () => {
+    setBusy("paste-netlist");
+    setNetlistError("");
+    setNetlistResult(null);
+    try {
+      const payload = await netlistCompile({
+        kicadNetlistText: pasteNetlist,
+        buildId: "generic_low_voltage_build",
+        exportGerber: false,
+      });
+      setNetlistResult({ ...payload, fixture_label: "Pasted KiCad netlist", via: "kicad_netlist_paste" });
     } catch (err) {
       setNetlistError(err.message);
     } finally {
@@ -203,6 +223,47 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
             })
           }
         />
+      </section>
+
+      <section className="card">
+        <h3>3 · Paste KiCad netlist (SKiDL / atopile export)</h3>
+        <p className="muted">
+          Export a KiCad netlist from SKiDL, atopile, or KiCad Eeschema and compile through the same spine — no fixture
+          required.
+        </p>
+        <button type="button" className="ghost small" onClick={() => setShowPaste((value) => !value)}>
+          {showPaste ? "Hide paste box" : "Paste netlist…"}
+        </button>
+        {showPaste && (
+          <>
+            <textarea
+              className="lab-netlist-paste"
+              rows={8}
+              placeholder="(export (version &quot;E&quot;) (components …"
+              value={pasteNetlist}
+              onChange={(e) => setPasteNetlist(e.target.value)}
+            />
+            <div className="lab-actions">
+              <button
+                type="button"
+                className="primary"
+                disabled={Boolean(busy) || pasteNetlist.trim().length < 20}
+                onClick={runPastedNetlist}
+              >
+                {busy === "paste-netlist" ? "Compiling…" : "Compile pasted netlist"}
+              </button>
+            </div>
+          </>
+        )}
+        {netlistResult?.via === "kicad_netlist_paste" && (
+          <LabResultCard
+            title="Pasted netlist compile"
+            subtitle={netlistResult.fixture_label}
+            payload={netlistResult}
+            error={netlistError}
+            onViewBoard={(ctx) => openPreview({ ...ctx, title: "Pasted KiCad netlist" })}
+          />
+        )}
       </section>
 
       <IntegrationsCatalog />

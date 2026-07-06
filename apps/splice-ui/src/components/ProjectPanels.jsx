@@ -1,5 +1,7 @@
 import { useState } from "react";
 import MarkdownView from "./MarkdownView.jsx";
+import MermaidDiagram from "./MermaidDiagram.jsx";
+import { topologyToMermaid } from "../utils/topologyMermaid.js";
 
 export function StatusPill({ ok, label }) {
   return <span className={`status-pill ${ok ? "ok" : "warn"}`}>{label}</span>;
@@ -109,11 +111,17 @@ export function BomPanel({ pkg }) {
 export function WiringPanel({ pkg }) {
   const wiring = pkg?.wiring || {};
   const ops = wiring.topology_operators || [];
+  const mermaidSource = topologyToMermaid(ops);
   return (
     <div className="panel-stack">
       {ops.length > 0 && (
         <section className="card">
           <h3>Topology</h3>
+          {mermaidSource && (
+            <div className="topology-mermaid-wrap">
+              <MermaidDiagram source={mermaidSource} />
+            </div>
+          )}
           <div className="operator-grid">
             {ops.map((op) => (
               <article key={op.operator_id} className="operator-card">

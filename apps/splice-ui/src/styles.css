@@ -1501,3 +1501,76 @@ button.primary:disabled {
   cursor: pointer;
   color: var(--muted);
 }
+
+.design-bom-panel {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.design-bom-panel h4 {
+  margin: 0 0 8px;
+}
+
+.data-table.compact th,
+.data-table.compact td {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+.fab-manifest-panel {
+  margin-top: 12px;
+}
+
+.fab-manifest-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fab-manifest-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.fab-manifest-list li.present {
+  border-color: rgba(72, 187, 120, 0.25);
+}
+
+.fab-manifest-list li.missing {
+  opacity: 0.75;
+}
+
+.topology-mermaid-wrap {
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.mermaid-host svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.lab-netlist-paste {
+  width: 100%;
+  margin-top: 10px;
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2, rgba(0, 0, 0, 0.2));
+  color: inherit;
+  resize: vertical;
+}

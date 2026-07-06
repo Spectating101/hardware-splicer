@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import csv
 import json
 from pathlib import Path
 from typing import Any, Dict, List
@@ -9,17 +10,19 @@ from typing import Any, Dict, List
 KICAD_SUFFIXES = (".kicad_pcb", ".kicad_sch", ".kicad_pro")
 ARTIFACT_SUFFIXES = (".json", ".csv", ".md", ".txt", ".zip", ".net")
 
-# Key artifacts surfaced in UI export panel (relative to build_dir).
-ARTIFACT_CATALOG = [
-    {"relative": "build_compilation/main_ctrl_build.kicad_pcb", "kind": "kicad_pcb", "label": "KiCad PCB"},
-    {"relative": "build_compilation/main_ctrl_build.kicad_sch", "kind": "kicad_sch", "label": "KiCad schematic"},
+# Static artifacts (KiCad sch/pcb resolved dynamically per build).
+ARTIFACT_CATALOG_STATIC = [
     {"relative": "build_compilation/circuit_json.json", "kind": "circuit_json", "label": "circuit-json export"},
     {"relative": "build_compilation/KICAD_DRC.json", "kind": "drc_report", "label": "KiCad DRC report"},
     {"relative": "build_compilation/DESIGN_QUALITY.json", "kind": "design_quality", "label": "Design quality"},
     {"relative": "build_compilation/BOM.csv", "kind": "bom", "label": "Compile BOM (CSV)"},
+    {"relative": "build_compilation/BOM.json", "kind": "bom_json", "label": "Compile BOM (JSON)"},
     {"relative": "build_compilation/fab_package.zip", "kind": "fab_zip", "label": "Fab package zip"},
     {"relative": "PROJECT_PACKAGE.json", "kind": "project_package", "label": "PROJECT_PACKAGE"},
 ]
+
+# Back-compat alias
+ARTIFACT_CATALOG = ARTIFACT_CATALOG_STATIC
 
 
 def resolve_build_dir(build_dir: str | Path) -> Path:
@@ -146,10 +149,32 @@ def find_primary_pcb(build_dir: str | Path) -> Path | None:
     return matches[0] if matches else None
 
 
+def _dynamic_kicad_artifact_specs(root: Path) -> List[Dict[str, str]]:
+    specs: List[Dict[str, str]] = []
+    pcb = find_primary_pcb(root)
+    if pcb:
+        rel = _relative_under_root(root, pcb)
+        specs.append({"relative": rel, "kind": "kicad_pcb", "label": "KiCad PCB"})
+        sch = pcb.with_suffix(".kicad_sch")
+        if sch.is_file():
+            specs.append(
+                {
+                    "relative": _relative_under_root(root, sch),
+                    "kind": "kicad_sch",
+                    "label": "KiCad schematic",
+                }
+            )
+    return specs
+
+
+def _artifact_catalog_for_build(root: Path) -> List[Dict[str, str]]:
+    return _dynamic_kicad_artifact_specs(root) + list(ARTIFACT_CATALOG_STATIC)
+
+
 def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
     root = resolve_build_dir(build_dir)
     rows: List[Dict[str, Any]] = []
-    for spec in ARTIFACT_CATALOG:
+    for spec in _artifact_catalog_for_build(root):
         rel = spec["relative"]
         path = root / rel
         if not path.is_file():
@@ -161,6 +186,20 @@ def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
                 "label": spec["label"],
                 "size_bytes": path.stat().st_size,
                 "name": path.name,
+            }
+        )
+    # Gerber tree (summary row when present)
+    comp = root / "build_compilation"
+    gerber_files = sorted(p for p in comp.glob("gerber/**/*") if p.is_file()) if comp.is_dir() else []
+    if gerber_files:
+        rows.append(
+            {
+                "relative": str(gerber_files[0].relative_to(root)),
+                "kind": "gerber",
+                "label": f"Gerber files ({len(gerber_files)})",
+                "size_bytes": sum(p.stat().st_size for p in gerber_files),
+                "name": "gerber/",
+                "gerber_count": len(gerber_files),
             }
         )
     # Also surface any extra KiCad files not in catalog
@@ -177,6 +216,35 @@ def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
                 }
             )
     return rows
+
+
+def read_build_bom(build_dir: str | Path) -> Dict[str, Any]:
+    root = resolve_build_dir(build_dir)
+    comp = root / "build_compilation"
+    json_path = comp / "BOM.json"
+    if json_path.is_file():
+        bom = json.loads(json_path.read_text(encoding="utf-8"))
+        lines = list(bom.get("lines") or [])
+        return {
+            "ok": True,
+            "source": "BOM.json",
+            "lines": lines,
+            "jlc_enriched": bool(bom.get("jlc_enriched")),
+            "line_count": len(lines),
+        }
+    csv_path = comp / "BOM.csv"
+    if csv_path.is_file():
+        with csv_path.open(encoding="utf-8", newline="") as handle:
+            lines = list(csv.DictReader(handle))
+        jlc_enriched = any(row.get("jlc_lcsc") or row.get("jlc_mpn") for row in lines)
+        return {
+            "ok": True,
+            "source": "BOM.csv",
+            "lines": lines,
+            "jlc_enriched": jlc_enriched,
+            "line_count": len(lines),
+        }
+    raise ValueError("no BOM.csv or BOM.json under build_compilation/")
 
 
 def read_artifact_file(build_dir: str | Path, relative: str) -> Dict[str, Any]:

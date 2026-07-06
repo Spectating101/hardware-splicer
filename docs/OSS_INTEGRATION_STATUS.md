@@ -33,10 +33,10 @@
 | kicad-cli | KiCad 9 CLI | core | `kicad_cli_drc.py`, ERC, Gerber in `build_compilation/` | Authoritative DRC/ERC/fab export |
 | freerouting | [FreeRouting](https://github.com/freerouting/freerouting) | opt_in | `freerouting_bridge.py`, `POST /v1/build-files/autoroute` | Optional carrier autoroute — never default |
 | kicad-mcp | KiCad MCP servers | documented | [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) | Human KiCad session sidecar; re-compile on save |
-| kibot | [KiBot](https://github.com/INTI-CMNB/KiBot) | reference | Compare with `build_compilation/` outputs | Fab/doc automation pattern |
+| kibot | [KiBot](https://github.com/INTI-CMNB/KiBot) | reference | `kibot_reference.py` + `POST /v1/build-files/fab-manifest` | Fab artifact coverage comparison (not vendored) |
 | jlc-api | JLCPCB / LCSC | partial | `jlcsearch_client.py`, `HARDWARE_SPLICER_JLC_ENRICH` | Opt-in BOM stock/price enrich |
 | skidl | [SKiDL](https://github.com/devbisme/skidl) | wired | KiCad netlist ingest via `kicad_netlist_text` | Python netlist → compile spine (import path) |
-| atopile | [atopile](https://github.com/atopile/atopile) | planned | KiCad/netlist export → netlist-compile | Code-defined design import (planned) |
+| atopile | [atopile](https://github.com/atopile/atopile) | partial | KiCad netlist paste + [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) | Code-defined boards via netlist export |
 | schematic-ai | SINA / pcbGPT | planned | Intake → netlist-compile + gates | Research intake — not product UI |
 
 **Counts (catalog):** see `wired_count` / `total_count` in API response.

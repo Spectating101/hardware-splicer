@@ -20,10 +20,12 @@ from .build_files import (
     list_build_artifacts,
     list_kicad_files,
     read_artifact_file,
+    read_build_bom,
     read_build_file,
     read_design_quality_summary,
     resolve_build_dir,
 )
+from .integrations.kibot_reference import fab_output_manifest
 from .integrations.oss_catalog import integration_catalog
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .circuit_synthesis import (
@@ -577,6 +579,20 @@ def create_app() -> FastAPI:
     def build_files_circuit_json(request: BuildFilesListRequest) -> Dict[str, Any]:
         try:
             return export_circuit_json(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/bom")
+    def build_files_bom(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            return read_build_bom(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/fab-manifest")
+    def build_files_fab_manifest(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            return fab_output_manifest(request.build_dir)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 

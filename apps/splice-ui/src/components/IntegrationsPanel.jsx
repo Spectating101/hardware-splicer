@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { downloadBuildArtifact, fetchIntegrationsCatalog } from "../api.js";
+import { downloadBuildArtifact, fetchFabManifest, fetchIntegrationsCatalog } from "../api.js";
 
 const STATUS_LABEL = {
   wired: "Wired",
@@ -36,7 +36,7 @@ export default function IntegrationsCatalog() {
 
   return (
     <section className="card">
-      <h3>3 · OSS integration map</h3>
+      <h3>4 · OSS integration map</h3>
       <p className="muted">{catalog.thesis}</p>
       <p className="chip">
         {catalog.wired_count} wired / {catalog.total_count} catalogued
@@ -167,6 +167,92 @@ export function DesignArtifactsPanel({ buildDir }) {
         </button>
       </div>
       {autorouteMsg && <p className="muted small">{autorouteMsg}</p>}
+      <DesignBomPanel buildDir={buildDir} />
+      <FabManifestPanel buildDir={buildDir} />
     </section>
+  );
+}
+
+export function DesignBomPanel({ buildDir }) {
+  const [bom, setBom] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!buildDir) return;
+    import("../api.js")
+      .then(({ fetchBuildBom }) => fetchBuildBom(buildDir))
+      .then(setBom)
+      .catch((err) => setError(err.message));
+  }, [buildDir]);
+
+  if (!buildDir || error) return error ? <p className="muted small">{error}</p> : null;
+  if (!bom) return <p className="muted small">Loading compile BOM…</p>;
+  const lines = bom.lines || [];
+  const hasJlc = lines.some((row) => row.jlc_lcsc || row.jlc_mpn);
+
+  return (
+    <div className="design-bom-panel">
+      <h4>Compile BOM</h4>
+      <p className="muted small">
+        {bom.line_count} lines from {bom.source}
+        {bom.jlc_enriched || hasJlc ? " · JLC/LCSC hints present" : ""}
+      </p>
+      {lines.length === 0 ? (
+        <p className="muted">No BOM lines.</p>
+      ) : (
+        <div className="table-scroll">
+          <table className="data-table compact">
+            <thead>
+              <tr>
+                <th>Ref</th>
+                <th>Description</th>
+                <th>Qty</th>
+                {hasJlc && <th>LCSC</th>}
+              </tr>
+            </thead>
+            <tbody>
+              {lines.slice(0, 24).map((row, index) => (
+                <tr key={`${row.ref || row.module_id}-${index}`}>
+                  <td className="mono">{row.ref || row.module_id || "—"}</td>
+                  <td>{row.description || row.module_id || "—"}</td>
+                  <td>{row.qty ?? 1}</td>
+                  {hasJlc && <td className="mono small">{row.jlc_lcsc || "—"}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function FabManifestPanel({ buildDir }) {
+  const [manifest, setManifest] = useState(null);
+
+  useEffect(() => {
+    if (!buildDir) return;
+    fetchFabManifest(buildDir)
+      .then(setManifest)
+      .catch(() => setManifest(null));
+  }, [buildDir]);
+
+  if (!buildDir || !manifest) return null;
+
+  return (
+    <details className="fab-manifest-panel">
+      <summary>
+        Fab artifact coverage ({manifest.present_count}/{manifest.trackable_count} vs KiBot reference)
+      </summary>
+      <p className="muted small">{manifest.note}</p>
+      <ul className="fab-manifest-list">
+        {manifest.artifacts.map((row) => (
+          <li key={row.id} className={row.present ? "present" : row.planned ? "planned" : "missing"}>
+            <span>{row.label}</span>
+            <span className="chip small">{row.present ? "present" : row.planned ? "planned" : "missing"}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }

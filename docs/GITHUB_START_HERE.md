@@ -79,7 +79,21 @@ CI: [`.github/workflows/hardware-splicer.yml`](https://github.com/Spectating101/
 
 ---
 
-## 6. Monorepo boundary (read only if asked)
+## 6. OSS interface layer (v1.1 preview on `main`)
+
+| Doc | Purpose |
+|-----|---------|
+| [OSS_INTEGRATION_STATUS.md](OSS_INTEGRATION_STATUS.md) | Wired vs planned OSS integrations |
+| [OSS_INTERFACE_INTEGRATION_STRATEGY.md](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | Embed strategy — KiCanvas, circuit-json, MCP |
+| [ATOPILE_IMPORT.md](ATOPILE_IMPORT.md) | atopile → KiCad netlist import path |
+| [KICAD_MCP_SIDECAR.md](KICAD_MCP_SIDECAR.md) | Human KiCad edit sidecar pattern |
+| [ENGINE_VS_INTERFACE.md](ENGINE_VS_INTERFACE.md) | Under-interfaced, not under-powered thesis |
+
+**Try in UI:** `make splice-ui-dev` → **Interface lab** (canvas, circuit-json, netlist paste) → **Design** tab (KiCanvas + BOM + fab manifest).
+
+---
+
+## 7. Monorepo boundary (read only if asked)
 
 v1.0 **product SKU** = `src/hardware_splicer/` + `apps/splice-ui/` + splice examples/fixtures.
 
@@ -93,7 +107,7 @@ See [apps/README.md](https://github.com/Spectating101/hardware-splicer/blob/main
 
 ---
 
-## 7. Key code paths
+## 8. Key code paths
 
 | Path | Role |
 |------|------|
@@ -106,7 +120,7 @@ See [apps/README.md](https://github.com/Spectating101/hardware-splicer/blob/main
 
 ---
 
-## 8. Principle (current phase)
+## 9. Principle (current phase)
 
 ```text
 External proof validates maturity.

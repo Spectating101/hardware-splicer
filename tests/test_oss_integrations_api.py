@@ -63,6 +63,27 @@ def test_kicad_netlist_fixture_payload() -> None:
     assert len(fixture["kicad_netlist_text"]) > 20
 
 
+def test_build_bom_and_fab_manifest(tmp_path: Path) -> None:
+    comp = tmp_path / "build_compilation"
+    comp.mkdir()
+    bom = {"lines": [{"ref": "R1", "description": "10K", "qty": 1, "jlc_lcsc": "C123"}]}
+    (comp / "BOM.json").write_text(json.dumps(bom), encoding="utf-8")
+    (comp / "KICAD_DRC.json").write_text(json.dumps({"pass": True}), encoding="utf-8")
+
+    client = TestClient(create_app())
+    bom_payload = client.post("/v1/build-files/bom", json={"build_dir": str(tmp_path)}).json()
+    assert bom_payload["ok"] is True
+    assert bom_payload["line_count"] == 1
+    assert bom_payload["lines"][0]["jlc_lcsc"] == "C123"
+
+    manifest = client.post("/v1/build-files/fab-manifest", json={"build_dir": str(tmp_path)}).json()
+    assert manifest["ok"] is True
+    assert manifest["present_count"] >= 2
+    ids = {row["id"] for row in manifest["artifacts"]}
+    assert "bom_csv" in ids or "bom_json" in ids
+    assert "drc_report" in ids
+
+
 def test_autoroute_requires_confirm(tmp_path: Path) -> None:
     comp = tmp_path / "build_compilation"
     comp.mkdir()

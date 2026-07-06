@@ -97,7 +97,7 @@ make splice-ui-dev
 | KiCad MCP dev profile | documented — [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) |
 | Artifact export API + Design tab | ✅ wired |
 | FreeRouting opt-in (`POST /v1/build-files/autoroute`) | ✅ wired |
-| KiBot comparison for `build_compilation/` outputs | reference |
+| KiBot comparison for `build_compilation/` outputs | ✅ `POST /v1/build-files/fab-manifest` |
 | Donor photo wizard step (vision API exists) | partial |
 
 **Master matrix:** [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md)
