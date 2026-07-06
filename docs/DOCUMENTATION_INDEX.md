@@ -83,7 +83,7 @@
 |------|--------|
 | [`QUICKSTART_SPLICE_v1.md`](QUICKSTART_SPLICE_v1.md) | **Core** — install + run |
 | [`DEMO_5_MIN_UI.md`](DEMO_5_MIN_UI.md) | **Core** — demo script |
-| [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Pilot offer template |
+| [`EXTERNAL_PROOF_CHECKLIST.md`](EXTERNAL_PROOF_CHECKLIST.md) | **Post-maturity** — release, 5 conversations |
 | [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
 | [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
 | [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev machine validation log |
