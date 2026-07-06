@@ -6,6 +6,7 @@ import {
   normalizeCompileTruth,
 } from "../utils/compileTruth.js";
 import { StatusPill } from "./ProjectPanels.jsx";
+import { DesignArtifactsPanel } from "./IntegrationsPanel.jsx";
 
 function useKiCanvasScript() {
   const [ready, setReady] = useState(
@@ -241,6 +242,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
           </button>
         )}
       </section>
+      <DesignArtifactsPanel buildDir={buildDir} />
     </div>
   );
 }

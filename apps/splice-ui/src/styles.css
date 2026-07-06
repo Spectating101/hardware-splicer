@@ -1400,3 +1400,104 @@ button.primary:disabled {
 .summary-cta + .summary-cta {
   margin-left: 0;
 }
+
+.integration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.integration-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2, rgba(255, 255, 255, 0.02));
+}
+
+.integration-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.integration-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.integration-hook {
+  margin: 8px 0;
+  word-break: break-word;
+}
+
+.status-wired .integration-status,
+.integration-card.status-wired {
+  border-color: rgba(72, 187, 120, 0.35);
+}
+
+.status-wired .integration-status {
+  background: rgba(72, 187, 120, 0.15);
+  color: #68d391;
+}
+
+.status-core .integration-status {
+  background: rgba(99, 179, 237, 0.15);
+  color: #63b3ed;
+}
+
+.status-opt-in .integration-status {
+  background: rgba(237, 137, 54, 0.15);
+  color: #ed8936;
+}
+
+.status-partial .integration-status {
+  background: rgba(246, 224, 94, 0.12);
+  color: #ecc94b;
+}
+
+.status-documented .integration-status,
+.status-reference .integration-status {
+  background: rgba(160, 174, 192, 0.12);
+  color: #a0aec0;
+}
+
+.status-planned .integration-status {
+  background: rgba(113, 128, 150, 0.12);
+  color: #718096;
+}
+
+.artifact-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artifact-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.circuit-json-preview {
+  margin-top: 12px;
+}
+
+.circuit-json-preview summary {
+  cursor: pointer;
+  color: var(--muted);
+}

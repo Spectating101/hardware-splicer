@@ -77,6 +77,9 @@
 | 3 | Interface lab: `/v1/compose-canvas` | ✅ |
 | 4 | Interface lab: circuit-json → `/v1/netlist-compile` | ✅ |
 | 5 | `GET /v1/examples/netlist-fixtures/{id}` | ✅ |
+| 6 | `GET /v1/integrations/catalog` + OSS map UI | ✅ |
+| 7 | Artifact list / download / circuit-json export | ✅ |
+| 8 | KiCad netlist fixture path (`kicad_netlist_text`) | ✅ |
 
 **Try it:**
 
@@ -89,10 +92,15 @@ make splice-ui-dev
 
 ### P1 — sidecar + artifacts
 
-- KiCad MCP dev profile (human edits → re-DRC → package)
-- KiBot comparison for `build_compilation/` outputs
-- FreeRouting CI slice (`AUTOROUTE=1` on 2–3 fixtures)
-- Donor photo wizard step (vision API exists)
+| Item | Status |
+|------|--------|
+| KiCad MCP dev profile | documented — [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) |
+| Artifact export API + Design tab | ✅ wired |
+| FreeRouting opt-in (`POST /v1/build-files/autoroute`) | ✅ wired |
+| KiBot comparison for `build_compilation/` outputs | reference |
+| Donor photo wizard step (vision API exists) | partial |
+
+**Master matrix:** [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md)
 
 ### P2 — intake ecosystem
 

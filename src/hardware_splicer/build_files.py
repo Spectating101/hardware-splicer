@@ -7,6 +7,19 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 KICAD_SUFFIXES = (".kicad_pcb", ".kicad_sch", ".kicad_pro")
+ARTIFACT_SUFFIXES = (".json", ".csv", ".md", ".txt", ".zip", ".net")
+
+# Key artifacts surfaced in UI export panel (relative to build_dir).
+ARTIFACT_CATALOG = [
+    {"relative": "build_compilation/main_ctrl_build.kicad_pcb", "kind": "kicad_pcb", "label": "KiCad PCB"},
+    {"relative": "build_compilation/main_ctrl_build.kicad_sch", "kind": "kicad_sch", "label": "KiCad schematic"},
+    {"relative": "build_compilation/circuit_json.json", "kind": "circuit_json", "label": "circuit-json export"},
+    {"relative": "build_compilation/KICAD_DRC.json", "kind": "drc_report", "label": "KiCad DRC report"},
+    {"relative": "build_compilation/DESIGN_QUALITY.json", "kind": "design_quality", "label": "Design quality"},
+    {"relative": "build_compilation/BOM.csv", "kind": "bom", "label": "Compile BOM (CSV)"},
+    {"relative": "build_compilation/fab_package.zip", "kind": "fab_zip", "label": "Fab package zip"},
+    {"relative": "PROJECT_PACKAGE.json", "kind": "project_package", "label": "PROJECT_PACKAGE"},
+]
 
 
 def resolve_build_dir(build_dir: str | Path) -> Path:
@@ -119,3 +132,113 @@ def read_design_quality_summary(build_dir: str | Path) -> Dict[str, Any]:
         "circuit_readiness": quality.get("circuit_readiness"),
         "build_id": quality.get("build_id"),
     }
+
+
+def find_primary_pcb(build_dir: str | Path) -> Path | None:
+    root = resolve_build_dir(build_dir)
+    comp = root / "build_compilation"
+    if not comp.is_dir():
+        return None
+    preferred = comp / "main_ctrl_build.kicad_pcb"
+    if preferred.is_file():
+        return preferred
+    matches = sorted(comp.glob("*.kicad_pcb"))
+    return matches[0] if matches else None
+
+
+def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
+    root = resolve_build_dir(build_dir)
+    rows: List[Dict[str, Any]] = []
+    for spec in ARTIFACT_CATALOG:
+        rel = spec["relative"]
+        path = root / rel
+        if not path.is_file():
+            continue
+        rows.append(
+            {
+                "relative": rel,
+                "kind": spec["kind"],
+                "label": spec["label"],
+                "size_bytes": path.stat().st_size,
+                "name": path.name,
+            }
+        )
+    # Also surface any extra KiCad files not in catalog
+    seen = {row["relative"] for row in rows}
+    for row in list_kicad_files(root):
+        if row["relative"] not in seen:
+            rows.append(
+                {
+                    "relative": row["relative"],
+                    "kind": row["kind"],
+                    "label": row["name"],
+                    "size_bytes": row["size_bytes"],
+                    "name": row["name"],
+                }
+            )
+    return rows
+
+
+def read_artifact_file(build_dir: str | Path, relative: str) -> Dict[str, Any]:
+    root = resolve_build_dir(build_dir)
+    rel = relative.strip().lstrip("/")
+    if not rel or ".." in Path(rel).parts:
+        raise ValueError("invalid relative path")
+    target = (root / rel).resolve()
+    rel_check = _relative_under_root(root, target)
+    if not target.is_file():
+        raise ValueError(f"file not found: {rel_check}")
+    suffix = target.suffix.lower()
+    if suffix not in KICAD_SUFFIXES and suffix not in ARTIFACT_SUFFIXES:
+        raise ValueError(f"artifact type not allowed: {suffix}")
+    if suffix == ".json":
+        try:
+            parsed = json.loads(target.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            parsed = None
+        return {
+            "ok": True,
+            "relative": rel_check,
+            "name": target.name,
+            "content_type": "application/json",
+            "parsed": parsed,
+            "content": target.read_text(encoding="utf-8"),
+            "size_bytes": target.stat().st_size,
+        }
+    if suffix in {".zip"}:
+        return {
+            "ok": True,
+            "relative": rel_check,
+            "name": target.name,
+            "content_type": "application/zip",
+            "download_path": str(target),
+            "size_bytes": target.stat().st_size,
+        }
+    text = target.read_text(encoding="utf-8", errors="replace")
+    return {
+        "ok": True,
+        "relative": rel_check,
+        "name": target.name,
+        "content_type": "text/plain",
+        "content": text,
+        "size_bytes": target.stat().st_size,
+    }
+
+
+def export_circuit_json(build_dir: str | Path) -> Dict[str, Any]:
+    root = resolve_build_dir(build_dir)
+    path = root / "build_compilation" / "circuit_json.json"
+    if path.is_file():
+        docs = json.loads(path.read_text(encoding="utf-8"))
+        return {"ok": True, "source": "file", "circuit_json": docs, "path": str(path)}
+    # Fallback: netlist IR from build_graph if present
+    graph_path = root / "build_compilation" / "build_graph.json"
+    if not graph_path.is_file():
+        raise ValueError("circuit_json.json not found and no build_graph.json to convert")
+    from .integrations.circuit_json_adapter import netlist_to_circuit_json
+    from .netlist.lower import build_graph_to_netlist
+
+    graph = json.loads(graph_path.read_text(encoding="utf-8"))
+    netlist = build_graph_to_netlist(graph)
+    docs = netlist_to_circuit_json(netlist, source_build_id=str(root.name))
+    return {"ok": True, "source": "build_graph", "circuit_json": docs, "path": None}

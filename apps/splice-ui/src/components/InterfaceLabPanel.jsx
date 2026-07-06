@@ -6,6 +6,7 @@ import {
   netlistCompile,
 } from "../api.js";
 import LabResultCard from "./LabResultCard.jsx";
+import IntegrationsCatalog from "./IntegrationsPanel.jsx";
 
 const DEMO_NODES = [
   { id: "n1", moduleId: "usb-power-5v" },
@@ -68,6 +69,28 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
     }
   };
 
+  const runKicadNetlist = async () => {
+    setBusy("kicad-netlist");
+    setNetlistError("");
+    setNetlistResult(null);
+    try {
+      const fixture = await fetchNetlistFixture(fixtureId);
+      const payload = await netlistCompile({
+        kicadNetlistText: fixture.kicad_netlist_text,
+        buildId: "generic_low_voltage_build",
+        exportGerber: false,
+      });
+      setNetlistResult({ ...payload, fixture_label: fixture.description, via: "kicad_netlist" });
+    } catch (err) {
+      setNetlistError(err.message);
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const selectedFixture = fixtures.find((row) => row.id === fixtureId);
+  const isKicadFixture = selectedFixture?.type === "kicad_netlist";
+
   const runCircuitJson = async () => {
     setBusy("circuit-json");
     setNetlistError("");
@@ -79,7 +102,7 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
         buildId: "generic_low_voltage_build",
         exportGerber: false,
       });
-      setNetlistResult({ ...payload, fixture_label: fixture.description });
+      setNetlistResult({ ...payload, fixture_label: fixture.description, via: "circuit_json" });
     } catch (err) {
       setNetlistError(err.message);
     } finally {
@@ -145,10 +168,10 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
       </section>
 
       <section className="card">
-        <h3>2 · circuit-json → netlist-compile</h3>
+        <h3>2 · Interchange → netlist-compile</h3>
         <p className="muted">
-          tscircuit-style interchange feeds the engine without a custom editor. Pick a fixture, compile, then preview the
-          board.
+          circuit-json (tscircuit) or KiCad netlist (SKiDL-class tools) feed the same engine. Pick a fixture, compile,
+          preview the board.
         </p>
         <div className="lab-actions">
           <select value={fixtureId} onChange={(e) => setFixtureId(e.target.value)} className="lab-select">
@@ -158,18 +181,31 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
               </option>
             ))}
           </select>
-          <button type="button" className="primary" disabled={Boolean(busy)} onClick={runCircuitJson}>
-            {busy === "circuit-json" ? "Compiling…" : "Compile fixture"}
-          </button>
+          {isKicadFixture ? (
+            <button type="button" className="primary" disabled={Boolean(busy)} onClick={runKicadNetlist}>
+              {busy === "kicad-netlist" ? "Compiling…" : "Compile KiCad netlist"}
+            </button>
+          ) : (
+            <button type="button" className="primary" disabled={Boolean(busy)} onClick={runCircuitJson}>
+              {busy === "circuit-json" ? "Compiling…" : "Compile circuit-json"}
+            </button>
+          )}
         </div>
         <LabResultCard
-          title="circuit-json compile"
+          title={isKicadFixture ? "KiCad netlist compile" : "circuit-json compile"}
           subtitle={netlistResult?.fixture_label || fixtureId}
           payload={netlistResult}
           error={netlistError}
-          onViewBoard={(ctx) => openPreview({ ...ctx, title: `circuit-json — ${fixtureId}` })}
+          onViewBoard={(ctx) =>
+            openPreview({
+              ...ctx,
+              title: `${netlistResult?.via || "interchange"} — ${fixtureId}`,
+            })
+          }
         />
       </section>
+
+      <IntegrationsCatalog />
     </div>
   );
 }

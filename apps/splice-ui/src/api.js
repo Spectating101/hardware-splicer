@@ -135,6 +135,57 @@ export async function fetchDesignQuality(buildDir) {
   return parseJson(res);
 }
 
+export async function fetchIntegrationsCatalog() {
+  const res = await fetch(`${API_BASE}/v1/integrations/catalog`);
+  return parseJson(res);
+}
+
+export async function listBuildArtifacts(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/artifacts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
+export async function exportCircuitJson(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/circuit-json`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
+export async function downloadBuildArtifact(buildDir, relative) {
+  const res = await fetch(`${API_BASE}/v1/build-files/download`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir, relative }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body?.detail?.message || body?.detail || res.statusText);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = relative.split("/").pop() || "artifact";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function runBuildAutoroute(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/build-files/autoroute`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir, confirm: true }),
+  });
+  return parseJson(res);
+}
+
 export async function composeCanvas(nodes, wires, { wireOnly = false, exportGerber = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/compose-canvas`, {
     method: "POST",
@@ -149,13 +200,14 @@ export async function composeCanvas(nodes, wires, { wireOnly = false, exportGerb
   return parseJson(res);
 }
 
-export async function netlistCompile({ circuitJson, netlist, buildId = "generic_low_voltage_build", exportGerber = false } = {}) {
+export async function netlistCompile({ circuitJson, netlist, kicadNetlistText, buildId = "generic_low_voltage_build", exportGerber = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/netlist-compile`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       ...(circuitJson ? { circuit_json: circuitJson } : {}),
       ...(netlist ? { netlist } : {}),
+      ...(kicadNetlistText ? { kicad_netlist_text: kicadNetlistText } : {}),
       build_id: buildId,
       export_gerber: exportGerber,
     }),

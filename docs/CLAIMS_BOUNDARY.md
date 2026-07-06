@@ -22,7 +22,27 @@
 | Version `1.0.2` consistency | README, `/health`, OpenAPI, tag `v1.0.2` |
 | Splice Sprint pilot offer (template) | `OFFER_SPLICE_BENCH_KIT_v1.md` |
 
-**Preferred one-liner:**
+### v1.1 interface preview (main branch — evidence-backed)
+
+| Claim | Evidence |
+|-------|----------|
+| In-browser KiCad board preview (read-only) | splice-ui Design tab + vendored KiCanvas + `POST /v1/build-files/content` |
+| circuit-json interchange into compile spine | `circuit_json_import.py`, Interface lab, `POST /v1/netlist-compile` |
+| Canvas graph → same KiCad compile path | `POST /v1/compose-canvas`, Interface lab |
+| Compile truth surfaced in UI | `POST /v1/build-files/design-quality`, `CompileTruthCard` |
+| Artifact export / download from a build | `POST /v1/build-files/artifacts`, `download`, Design tab panel |
+| circuit-json export from compile output | `POST /v1/build-files/circuit-json`, `build_compilation/circuit_json.json` |
+| KiCad netlist ingest (SKiDL-class tools) | `kicad_netlist_text` on `/v1/netlist-compile`, fixture `esp32_servo_kicad` |
+| OSS integration map in product | `GET /v1/integrations/catalog`, Interface lab panel |
+| Opt-in FreeRouting autoroute | `POST /v1/build-files/autoroute` with `confirm=true`; never default-on |
+
+**v1.1 one-liner (interface preview):**
+
+> Splice Agent exposes the existing KiCad compile spine through borrowed OSS layers — KiCanvas preview, circuit-json and canvas inputs, artifact export — while bench gates and `PROJECT_PACKAGE` remain the authority layer.
+
+**Do not fold v1.1 interface claims into v1.0.2 release tag copy** until tagged and re-verified on a release branch.
+
+**Preferred one-liner (v1.0.2 release):**
 
 > Splice Agent v1.0.2 is a self-hosted hardware bring-up tool: donor intake → KiCad carrier with DRC truth → bench gates → `PROJECT_PACKAGE`. It passes the full internal bar on dev Linux and lab Windows/WSL2, with a sample package on the release.
 

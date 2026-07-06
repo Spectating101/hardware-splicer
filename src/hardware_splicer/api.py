@@ -14,7 +14,17 @@ from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from .compose_dispatch import compose_dispatch
-from .build_files import list_kicad_files, read_build_file, read_design_quality_summary, resolve_build_dir
+from .build_files import (
+    export_circuit_json,
+    find_primary_pcb,
+    list_build_artifacts,
+    list_kicad_files,
+    read_artifact_file,
+    read_build_file,
+    read_design_quality_summary,
+    resolve_build_dir,
+)
+from .integrations.oss_catalog import integration_catalog
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .circuit_synthesis import (
     compile_synthesis_candidate,
@@ -124,6 +134,11 @@ class BuildFilesListRequest(BaseModel):
 class BuildFilesContentRequest(BaseModel):
     build_dir: str
     relative: str
+
+
+class BuildFilesAutorouteRequest(BaseModel):
+    build_dir: str
+    confirm: bool = Field(default=False, description="Must be true to run opt-in FreeRouting")
 
 
 class SpliceGoldenLoopRequest(BaseModel):
@@ -501,17 +516,22 @@ def create_app() -> FastAPI:
         if row.get("type") == "kicad_netlist":
             from .netlist.import_kicad import parse_kicad_netlist
 
-            netlist = parse_kicad_netlist(path.read_text(encoding="utf-8"))
+            text = path.read_text(encoding="utf-8")
+            netlist = parse_kicad_netlist(text)
+            extra = {"kicad_netlist_text": text}
         else:
             netlist = CircuitNetlist.from_dict(json.loads(path.read_text(encoding="utf-8")))
+            extra = {}
         circuit_json = netlist_to_circuit_json(netlist, source_build_id=fixture_id)
         return {
             "ok": True,
             "fixture_id": fixture_id,
             "description": row.get("description"),
             "module_ids": list(row.get("module_ids") or []),
+            "type": row.get("type"),
             "netlist": netlist.to_dict(),
             "circuit_json": circuit_json,
+            **extra,
         }
 
     @app.post("/v1/build-files/list")
@@ -534,6 +554,71 @@ def create_app() -> FastAPI:
     def build_files_design_quality(request: BuildFilesListRequest) -> Dict[str, Any]:
         try:
             return read_design_quality_summary(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.get("/v1/integrations/catalog")
+    def integrations_catalog() -> Dict[str, Any]:
+        return integration_catalog()
+
+    @app.post("/v1/build-files/artifacts")
+    def build_files_artifacts(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            root = resolve_build_dir(request.build_dir)
+            return {
+                "ok": True,
+                "build_dir": str(root),
+                "artifacts": list_build_artifacts(root),
+            }
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/circuit-json")
+    def build_files_circuit_json(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            return export_circuit_json(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/artifact")
+    def build_files_artifact(request: BuildFilesContentRequest) -> Dict[str, Any]:
+        try:
+            return read_artifact_file(request.build_dir, request.relative)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/download")
+    def build_files_download(request: BuildFilesContentRequest) -> FileResponse:
+        try:
+            root = resolve_build_dir(request.build_dir)
+            rel = request.relative.strip().lstrip("/")
+            if not rel or ".." in Path(rel).parts:
+                raise ValueError("invalid relative path")
+            target = (root / rel).resolve()
+            target.relative_to(root)
+            if not target.is_file():
+                raise ValueError(f"file not found: {rel}")
+            return FileResponse(target, filename=target.name)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/autoroute")
+    def build_files_autoroute(request: BuildFilesAutorouteRequest) -> Dict[str, Any]:
+        if not request.confirm:
+            raise _error(
+                422,
+                "confirmation_required",
+                "Set confirm=true to run opt-in FreeRouting autoroute on this build.",
+            )
+        try:
+            from .integrations.freerouting_bridge import run_freerouting_pipeline
+
+            pcb = find_primary_pcb(request.build_dir)
+            if not pcb:
+                raise ValueError("no .kicad_pcb found under build_compilation/")
+            result = run_freerouting_pipeline(pcb)
+            quality = read_design_quality_summary(request.build_dir)
+            return {"ok": bool(result.get("ok")), "autoroute": result, "design_quality": quality}
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 
