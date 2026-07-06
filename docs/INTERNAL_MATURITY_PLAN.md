@@ -74,7 +74,7 @@ make verify-product-internal
 
 Runs: `verify-product-v1` + `verify-install-smoke` + `verify-product-live-smoke` (spawns server, runs real async job).
 
-**Tier III status (dev-linux 2026-07-06):** 🟡 `make verify-product-internal` PASS on dev-linux; **alien machine** install report still pending — see [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md)
+**Tier III status (2026-07-07):** ✅ `make verify-product-internal` PASS on **desktop-fgedhgv** (WSL2 Ubuntu 24.04) — see [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md). Dev-linux report: [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md).
 
 ---
 

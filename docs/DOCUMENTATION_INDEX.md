@@ -86,7 +86,8 @@
 | [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Pilot offer template |
 | [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
 | [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
-| [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev-linux validation log |
+| [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev machine validation log |
+| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md) | **Alien machine** — lab Windows + WSL2 |
 | [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |

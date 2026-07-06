@@ -26,6 +26,11 @@ fi
 echo "==> KiCad build compiler (Node) — required for compile"
 if command -v npm >/dev/null 2>&1; then
   (cd "$ROOT/apps/circuit-ai/circuit-ai-frontend" && npm install --silent)
+  if command -v make >/dev/null 2>&1; then
+    make -C "$ROOT" export-engine-pcb-data export-catalog-recipes
+  else
+    (cd "$ROOT" && node scripts/export_engine_pcb_data.cjs && node scripts/export_catalog_recipes.cjs)
+  fi
 else
   echo "WARN: npm not found — KiCad graph compile will fail until Node 18+ is installed"
 fi
