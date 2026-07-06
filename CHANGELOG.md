@@ -32,6 +32,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 ### Documentation
 
 - Professional packaging polish release — no engine behavior change required for upgrade from 1.0.0
+- Internal: [`docs/COMPETITIVE_PACKAGING_STRATEGY.md`](docs/COMPETITIVE_PACKAGING_STRATEGY.md) — competitor map and completion priorities
 
 ---
 

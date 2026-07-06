@@ -40,6 +40,7 @@
 | [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook |
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
 | [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) | Competition loss lessons |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter, completion roadmap |
 | [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Technical delta since May |
 
 ### Agent / MCP / CI
@@ -96,7 +97,8 @@
 | [`RELEASE_V1.md`](RELEASE_V1.md) | Finish line, checklist | **Core** |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install, deploy, systemd, release artifacts | **Core** |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
-| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Commercial assessment | **Core** |
+| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook | **Core** |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs competitors, completion roadmap, do-not-build | **Core (internal)** |
 | [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy, funding | **Core** |
 | [`LAUNCH_PLAN.md`](LAUNCH_PLAN.md) | Phases A–C engine launch | Reference (mostly met) |
 | [`FLUX_TARGET.md`](FLUX_TARGET.md) | vs Flux positioning | Reference |
@@ -165,6 +167,7 @@
 | [`apps/circuit-ai/docs/README.md`](../apps/circuit-ai/docs/README.md) | Circuit-AI index | Use for vision/salvage depth |
 | [`apps/circuit-ai/README.md`](../apps/circuit-ai/README.md) | Full Circuit-AI platform | **Broader** than splice v1.0 |
 | [`apps/mecha-splicer/docs/`](../apps/mecha-splicer/docs/) | Mechanical splice | S4 / future |
+| [`apps/README.md`](../apps/README.md) | Monorepo vs v1 product boundary | **Core** |
 | [`apps/splice-ui/README.md`](../apps/splice-ui/README.md) | **v1.0 product UI** — live splice workbench | **Ship with v1.0** |
 | [`docs/UI_V1.md`](UI_V1.md) | UI scope and architecture | **Core** |
 | [`apps/hardware-splicer-demo/README.md`](../apps/hardware-splicer-demo/README.md) | React demo shell (static sample data) | Legacy / reference |
@@ -266,4 +269,5 @@ Everything else → index.
 | Date | Change |
 |------|--------|
 | 2026-07 | v1.0.1 doc set: quickstart, support, ops, demo, install template |
+| 2026-07 | `COMPETITIVE_PACKAGING_STRATEGY.md` — internal monetisation/competitor completion map |
 | 2026-06 | Initial documentation index |
