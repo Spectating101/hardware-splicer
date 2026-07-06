@@ -34,6 +34,8 @@ It does not create maturity.
 | Project package | `make test-project-package` | Required |
 | Combined | `make verify-splice-v1` | **Tier I bar** |
 
+**Tier I status (dev-linux 2026-07-06):** ✅ PASS
+
 **Meaning:** KiCad compile, gates, and package emission are CI-backed facts.
 
 ---
@@ -72,7 +74,7 @@ make verify-product-internal
 
 Runs: `verify-product-v1` + `verify-install-smoke` + `verify-product-live-smoke` (spawns server, runs real async job).
 
-**Tier III status (dev-linux 2026-07-06):** 🟡 install smoke PASS; alien machine report pending — see [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md)
+**Tier III status (dev-linux 2026-07-06):** 🟡 `make verify-product-internal` PASS on dev-linux; **alien machine** install report still pending — see [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md)
 
 ---
 
@@ -104,16 +106,16 @@ Runs: `verify-product-v1` + `verify-install-smoke` + `verify-product-live-smoke`
 ## 3. Single internal completion command
 
 ```bash
-make verify-product-v1
+make verify-product-internal
 ```
 
 Runs:
 
-1. `verify-splice-v1` (Tier I)  
-2. `pytest tests/test_splice_product_v1.py` (Tier II)  
-3. `make splice-ui-build` (Tier II)
+1. `verify-product-v1` — Tier I + II (engine, UI build, product API tests)  
+2. `verify-install-smoke` — Tier III install path  
+3. `verify-product-live-smoke` — Tier II/III live HTTP + async job  
 
-**Release discipline:** No tag `v1.0.x` without local `make verify-product-v1` green.
+**Release discipline:** No tag `v1.0.x` without local `make verify-product-internal` green.
 
 ---
 
@@ -181,4 +183,5 @@ Internal maturity question is not "beat Flux?" It is:
 
 | Date | Change |
 |------|--------|
+| 2026-07 | `verify-product-internal`, live smoke, dev install report |
 | 2026-07 | Initial internal maturity plan; `verify-product-v1` |
