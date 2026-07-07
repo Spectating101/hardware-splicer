@@ -6,6 +6,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0] - 2026-07-08
+
+### Added
+
+- **Design verify** tab — KiCanvas preview, compile truth, BOM, fab manifest, exports
+- **Readiness verdict** hero — blockers before fab / power-on
+- `/v1/build-files/*` API — secured artifact, BOM, fab-manifest, recheck, export-views
+- **Interface lab** — canvas, circuit-json, KiCad netlist paste; OSS integration catalog
+- `make verify-ui-interface-smoke` — v1.1 interface HTTP smoke
+- `docs/RELEASE_v1.1.md`, `docs/RELEASE_CHECKLIST_v1.1.md`
+
+### Changed
+
+- Home hero and pipeline — design verification as first-class flow
+- CI **Splice Agent v1** job — v1.1 security/interface tests + live HTTP smoke
+- Product version **1.1.0** aligned across pyproject, `/health`, OpenAPI
+
+### Documentation
+
+- Stable release notes: `RELEASE_NOTES_v1.1.0.md`
+- Supersedes v1.1.0-alpha tags for production deploy references
+
+---
+
 ## [1.0.2] - 2026-07-07
 
 ### Added
@@ -68,5 +92,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 See [`RELEASE_NOTES_v1.0.md`](RELEASE_NOTES_v1.0.md) for full v1.0.0 scope.
 
+[1.1.0]: https://github.com/Spectating101/hardware-splicer/releases/tag/v1.1.0
+[1.0.2]: https://github.com/Spectating101/hardware-splicer/releases/tag/v1.0.2
 [1.0.1]: https://github.com/Spectating101/hardware-splicer/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Spectating101/hardware-splicer/releases/tag/v1.0.0

@@ -4,7 +4,7 @@
 
 **Prerequisites:** [`QUICKSTART_SPLICE_v1.md`](QUICKSTART_SPLICE_v1.md) complete; `hs-doctor` OK.
 
-**Launch checklist:** [`LAUNCH_v1.1.md`](LAUNCH_v1.1.md)
+**Launch checklist:** [`RELEASE_v1.1.md`](RELEASE_v1.1.md)
 
 ---
 
@@ -93,4 +93,4 @@ Screen recording should show: Online → build → **readiness hold** → Design
 
 ---
 
-*Updated for v1.1.0-alpha.1 · July 2026*
+*Updated for v1.1.0 · July 2026*

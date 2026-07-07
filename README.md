@@ -6,10 +6,9 @@
 
 Self-hosted agent for teams who need compile honesty and a power-on checklist, not cosmetic copper or hand-wavy LLM excuses.
 
-**Latest tag:** [`v1.1.0-alpha.1`](RELEASE_NOTES_v1.1.0-alpha.1.md) (interface preview) · stable: [`v1.0.2`](RELEASE_NOTES_v1.0.2.md)  
-**Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
+**Version:** [`v1.1.0`](RELEASE_NOTES_v1.1.0.md) · **Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
 
-**Launch:** [`docs/LAUNCH_v1.1.md`](docs/LAUNCH_v1.1.md) · **Deploy:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md)
+**Release:** [`docs/RELEASE_v1.1.md`](docs/RELEASE_v1.1.md) · **Deploy:** [`deploy/DEPLOY.md`](deploy/DEPLOY.md) · **Verify:** `make verify-product-internal`
 
 ---
 
@@ -26,7 +25,7 @@ make splice-ui-serve
 
 Open **http://127.0.0.1:8787** → **Quick demo** → **Design verify** (KiCanvas, BOM, fab) → **Gates** → **Bench** → **Download zip**.
 
-**v1.1 on `main`:** also try **Interface lab** (canvas / circuit-json / KiCad netlist adapters). See [`docs/V1.1_INTERFACE_PREVIEW.md`](docs/V1.1_INTERFACE_PREVIEW.md).
+**v1.1 on `main`:** Design verify tab (KiCanvas, BOM, fab readiness). See [`docs/V1.1_INTERFACE_PREVIEW.md`](docs/V1.1_INTERFACE_PREVIEW.md).
 
 Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) · 5-min demo: [`docs/DEMO_5_MIN_UI.md`](docs/DEMO_5_MIN_UI.md)
 
@@ -84,7 +83,7 @@ CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product A
 | Async jobs, MCP + HTTP parity | Flux / Blueprint-class editor |
 | Optional splice-ui workbench | Certified donor harness safety |
 
-Details: [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`RELEASE_NOTES_v1.1.0-alpha.1.md`](RELEASE_NOTES_v1.1.0-alpha.1.md) (draft) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
+Details: [`RELEASE_NOTES_v1.1.0.md`](RELEASE_NOTES_v1.1.0.md) · [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
 
 ---
 
@@ -95,7 +94,7 @@ Details: [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`RELEASE_NOTES
 | Audience | Start here |
 |----------|------------|
 | **Everyone** | [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) |
-| **Launch v1.1** | [`docs/LAUNCH_v1.1.md`](docs/LAUNCH_v1.1.md) |
+| **Launch v1.1** | [`docs/RELEASE_v1.1.md`](docs/RELEASE_v1.1.md) |
 | **Full map** | [`docs/DOCUMENTATION_INDEX.md`](docs/DOCUMENTATION_INDEX.md) |
 | **Internal maturity** | [`docs/INTERNAL_MATURITY_PLAN.md`](docs/INTERNAL_MATURITY_PLAN.md) |
 | **External proof (next)** | [`docs/EXTERNAL_PROOF_CHECKLIST.md`](docs/EXTERNAL_PROOF_CHECKLIST.md) |

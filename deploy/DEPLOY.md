@@ -15,7 +15,7 @@ sudo apt install -y python3.12-venv nodejs npm git
 # Install KiCad 9 from kicad.org — kicad-cli must be on PATH
 
 git clone https://github.com/Spectating101/hardware-splicer.git /opt/hardware-splicer
-cd /opt/hardware-splicer && git checkout v1.1.0-alpha.1
+cd /opt/hardware-splicer && git checkout v1.1.0
 bash scripts/install_splice_v1.sh
 source .venv/bin/activate
 hs-doctor
@@ -107,7 +107,7 @@ Configure Cursor/Claude with `.venv/bin/python -m hardware_splicer.mcp_server` a
 ```bash
 cd /opt/hardware-splicer
 sudo systemctl stop hardware-splicer
-git fetch && git checkout v1.1.0-alpha.1
+git fetch && git checkout v1.1.0
 bash scripts/install_splice_v1.sh
 make splice-ui-build
 sudo systemctl start hardware-splicer

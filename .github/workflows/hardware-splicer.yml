@@ -115,6 +115,18 @@ jobs:
         run: |
           source .venv/bin/activate
           make test-splice-product-v1
+      - name: v1.1 security and interface API tests
+        env:
+          HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR: "1"
+        run: |
+          source .venv/bin/activate
+          PYTHONPATH=src pytest tests/test_build_files_security.py tests/test_oss_integrations_api.py tests/test_build_files_api.py -q
+      - name: verify-product-live-smoke
+        env:
+          HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-product-live-smoke
 
   verify:
     runs-on: ubuntu-latest

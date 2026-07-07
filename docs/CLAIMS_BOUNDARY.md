@@ -19,10 +19,10 @@
 | Operator-owned power-on authorization | `power_on_authorized`, `SUPPORT_AND_LIABILITY_v1.md` |
 | Internal reproducibility | `make verify-product-internal` PASS dev-linux + lab WSL2; install reports |
 | HTTP + MCP agent surfaces | `/v1/jobs`, `hs-mcp`, product API tests |
-| Version `1.0.2` consistency | README, `/health`, OpenAPI, tag `v1.0.2` |
+| Version `1.1.0` consistency | README, `/health`, OpenAPI, tag `v1.1.0` |
 | Splice Sprint pilot offer (template) | `OFFER_SPLICE_BENCH_KIT_v1.md` |
 
-### v1.1 interface preview (main branch — evidence-backed)
+### v1.1.0 (stable — evidence-backed)
 
 | Claim | Evidence |
 |-------|----------|
@@ -41,13 +41,11 @@
 | Opt-in FreeRouting autoroute | `POST /v1/build-files/autoroute` with `confirm=true`; never default-on |
 | KiCad human edit → truth recheck | `scripts/kicad_mcp_dev_profile.sh`, `POST /v1/build-files/recheck` |
 
-**v1.1 one-liner (interface preview):**
+**v1.1 one-liner:**
 
-> Splice Agent exposes the existing KiCad compile spine through borrowed OSS layers — KiCanvas preview, circuit-json and canvas inputs, artifact export — while bench gates and `PROJECT_PACKAGE` remain the authority layer.
+> Self-hosted bring-up workbench with design verification and bench gates before fabrication or power-on.
 
-**Do not fold v1.1 interface claims into v1.0.2 release tag copy** until tagged and re-verified on a release branch.
-
-**Preferred one-liner (v1.0.2 release):**
+**Preferred one-liner (v1.0.2, still valid for gates-only story):**
 
 > Splice Agent v1.0.2 is a self-hosted hardware bring-up tool: donor intake → KiCad carrier with DRC truth → bench gates → `PROJECT_PACKAGE`. It passes the full internal bar on dev Linux and lab Windows/WSL2, with a sample package on the release.
 

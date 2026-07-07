@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hardware-splicer"
-version = "1.0.2"
-description = "Headless splice agent: donor intake → KiCad carrier → bench gates → project package"
+version = "1.1.0"
+description = "Self-hosted hardware bring-up workbench: donor intake, design verification, bench gates, PROJECT_PACKAGE"
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Proprietary" }
