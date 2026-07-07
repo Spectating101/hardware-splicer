@@ -65,6 +65,16 @@ def _run_smoke(base: str) -> None:
         raise RuntimeError(f"examples failed: {status} {examples}")
     print(f"    examples ok count={len(examples['examples'])}")
 
+    status, catalog = _fetch_json("GET", f"{base}/v1/integrations/catalog")
+    if status != 200 or not catalog.get("ok") or not catalog.get("integrations"):
+        raise RuntimeError(f"integrations catalog failed: {status} {catalog}")
+    print(f"    integrations catalog ok wired={catalog.get('wired_count')}")
+
+    status, fixtures = _fetch_json("GET", f"{base}/v1/examples/netlist-fixtures")
+    if status != 200 or not fixtures.get("ok") or not fixtures.get("fixtures"):
+        raise RuntimeError(f"netlist fixtures failed: {status} {fixtures}")
+    print(f"    netlist fixtures ok count={len(fixtures['fixtures'])}")
+
     status, html = _fetch("GET", f"{base}/")
     if status != 200 or "Splice Agent" not in html:
         raise RuntimeError(f"UI root failed: status={status}")

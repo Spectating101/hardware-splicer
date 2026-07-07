@@ -332,6 +332,18 @@ def _slug(value: str) -> str:
     return slug[:80] or "hardware-splicer-build"
 
 
+def _netlist_fixture_description(row: Dict[str, Any]) -> str:
+    description = str(row.get("description") or "").strip()
+    if description:
+        return description
+    modules = [str(m) for m in (row.get("module_ids") or []) if m]
+    if modules:
+        return " + ".join(modules)
+    if row.get("type") == "kicad_netlist":
+        return "KiCad netlist fixture"
+    return str(row.get("id") or "fixture")
+
+
 def _api_output_root() -> Path:
     return Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api")).resolve()
 
@@ -501,7 +513,7 @@ def create_app() -> FastAPI:
             {
                 "id": row.get("id"),
                 "type": row.get("type"),
-                "description": row.get("description"),
+                "description": _netlist_fixture_description(row),
                 "module_ids": list(row.get("module_ids") or []),
             }
             for row in data.get("fixtures") or []

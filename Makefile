@@ -108,6 +108,9 @@ test-splice-product-v1:
 verify-product-v1: verify-splice-v1 splice-ui-build test-splice-product-v1
 	@echo "verify-product-v1: engine + splice-ui + product API — all passed"
 
+verify-ui-interface-smoke:
+	PYTHONPATH=src $(PYTHON) scripts/verify_ui_interface_smoke.py
+
 verify-install-smoke:
 	bash scripts/verify_install_smoke.sh
 

@@ -75,6 +75,8 @@ def test_netlist_fixture_example() -> None:
     client = TestClient(create_app())
     catalog = client.get("/v1/examples/netlist-fixtures").json()
     assert catalog["ok"] is True
+    dht = next(row for row in catalog["fixtures"] if row["id"] == "usb_esp_dht22")
+    assert "dht22" in dht["description"]
     assert any(row["id"] == "usb_esp_dht22" for row in catalog["fixtures"])
 
     fixture = client.get("/v1/examples/netlist-fixtures/usb_esp_dht22").json()

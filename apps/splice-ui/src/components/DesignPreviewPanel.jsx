@@ -6,6 +6,7 @@ import {
   normalizeCompileTruth,
 } from "../utils/compileTruth.js";
 import { StatusPill } from "./ProjectPanels.jsx";
+import DesignFlowStepper from "./DesignFlowStepper.jsx";
 import { DesignArtifactsPanel, DesignReadinessPanel } from "./IntegrationsPanel.jsx";
 
 function useKiCanvasScript() {
@@ -204,6 +205,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
 
   return (
     <div className="panel-stack">
+      <DesignFlowStepper active="visual" />
       {title && (
         <section className="card design-preview-banner">
           <p className="eyebrow">KiCad preview</p>

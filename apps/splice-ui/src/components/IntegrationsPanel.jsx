@@ -45,7 +45,24 @@ export default function IntegrationsCatalog() {
       .catch((err) => setError(err.message));
   }, []);
 
-  if (error) return <p className="error">{error}</p>;
+  if (error) {
+    const staleApi = /not found/i.test(error);
+    return (
+      <section className="card integration-catalog-fallback">
+        <h3>4 · OSS integration map</h3>
+        {staleApi ? (
+          <>
+            <p className="muted">
+              Integration catalog unavailable — restart the API server on port 8787 with the current codebase.
+            </p>
+            <p className="mono small muted">GET /v1/integrations/catalog → {error}</p>
+          </>
+        ) : (
+          <p className="error">{error}</p>
+        )}
+      </section>
+    );
+  }
   if (!catalog) return <p className="muted">Loading OSS integration map…</p>;
 
   return (

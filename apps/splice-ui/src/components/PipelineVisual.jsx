@@ -1,8 +1,9 @@
 const STEPS = [
   { n: "01", title: "Describe", body: "Goal, parts, donor board" },
   { n: "02", title: "Compile", body: "KiCad carrier + DRC" },
-  { n: "03", title: "Package", body: "BOM, wiring, steps" },
-  { n: "04", title: "Gates", body: "Measure before power-on" },
+  { n: "03", title: "Verify", body: "Preview, BOM, fab readiness" },
+  { n: "04", title: "Package", body: "Wiring, steps, zip" },
+  { n: "05", title: "Gates", body: "Measure before power-on" },
 ];
 
 export default function PipelineVisual() {

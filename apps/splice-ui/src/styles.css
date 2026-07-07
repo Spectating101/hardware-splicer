@@ -855,6 +855,14 @@ button.primary:disabled {
   border-bottom-color: var(--accent);
 }
 
+.tab-nav button.tab-highlight:not(.active) {
+  color: #2d8f6a;
+}
+
+.project-button .job-status {
+  text-transform: capitalize;
+}
+
 .tab-badge {
   display: inline-grid;
   place-items: center;
@@ -978,6 +986,93 @@ button.primary:disabled {
   color: var(--muted);
   margin: 0 4px;
   font-size: 12px;
+}
+
+.design-flow-stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f0faf5 0%, var(--surface-2) 100%);
+  border: 1px solid #c8e6d8;
+}
+
+.design-flow-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.design-flow-step strong,
+.design-flow-step span {
+  display: block;
+}
+
+.design-flow-num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.design-flow-step-done .design-flow-num {
+  background: var(--accent);
+  color: #fff;
+}
+
+.design-flow-step-current .design-flow-num {
+  background: #fff;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 3px #e8f6ef;
+}
+
+.design-flow-step-upcoming .design-flow-num {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.design-flow-step-current strong {
+  color: var(--accent);
+}
+
+.design-flow-arrow {
+  color: var(--muted);
+  margin: 0 4px;
+  font-size: 12px;
+}
+
+.lab-path-help {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.lab-path-help li {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.integration-catalog-fallback {
+  border-style: dashed;
+}
+
+.design-preview-banner {
+  border-left: 4px solid var(--accent);
 }
 
 .build-overlay {

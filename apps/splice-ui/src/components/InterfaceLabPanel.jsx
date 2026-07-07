@@ -22,12 +22,6 @@ const DEMO_WIRES = [
   { from: { nodeId: "n2", pinId: "GPIO4" }, to: { nodeId: "n3", pinId: "DATA" } },
 ];
 
-const STEPS = [
-  "Canvas compose — module graph → same engine as production builds.",
-  "circuit-json — tscircuit interchange into the compile spine.",
-  "KiCad netlist — SKiDL, atopile, or Eeschema export via paste or fixture.",
-];
-
 const PATH_HELP = [
   {
     id: "canvas",
@@ -45,6 +39,12 @@ const PATH_HELP = [
     body: "S-expression netlist from SKiDL, atopile, or KiCad. Same compile spine — adapter proving ground, not the main product wizard.",
   },
 ];
+
+function fixtureLabel(row) {
+  if (row.description) return row.description;
+  if (row.module_ids?.length) return row.module_ids.join(" + ");
+  return row.id;
+}
 
 export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }) {
   const [fixtures, setFixtures] = useState([]);
@@ -173,11 +173,6 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
             </li>
           ))}
         </ul>
-        <ol className="lab-steps">
-          {STEPS.map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
         {onRunFullDemo && (
           <button type="button" className="secondary" onClick={onRunFullDemo}>
             Run repair-café demo build →
@@ -222,7 +217,7 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
           <select value={fixtureId} onChange={(e) => setFixtureId(e.target.value)} className="lab-select">
             {fixtures.map((row) => (
               <option key={row.id} value={row.id}>
-                {row.id} — {row.description}
+                {row.id} — {fixtureLabel(row)}
               </option>
             ))}
           </select>

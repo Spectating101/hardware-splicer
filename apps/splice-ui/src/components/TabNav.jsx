@@ -5,7 +5,7 @@ export default function TabNav({ tabs, activeId, onChange, badges = {} }) {
         <button
           key={tab.id}
           type="button"
-          className={activeId === tab.id ? "active" : ""}
+          className={`${activeId === tab.id ? "active" : ""} ${tab.highlight ? "tab-highlight" : ""}`}
           onClick={() => onChange(tab.id)}
         >
           {tab.label}

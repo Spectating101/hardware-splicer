@@ -61,6 +61,8 @@ def test_splice_product_routes_registered() -> None:
         "/health",
         "/v1/examples/splice-intakes",
         "/v1/examples/donor-fixtures",
+        "/v1/examples/netlist-fixtures",
+        "/v1/integrations/catalog",
         "/v1/intent/clarify",
         "/v1/jobs/splice-build",
         "/v1/jobs",
@@ -124,6 +126,22 @@ def test_serve_ui_mount_when_dist_exists(monkeypatch: pytest.MonkeyPatch) -> Non
     health = client.get("/health")
     assert health.status_code == 200
     assert health.json().get("version") == _version.__version__
+
+
+def test_v11_interface_routes() -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    client = TestClient(create_app())
+    catalog = client.get("/v1/integrations/catalog").json()
+    assert catalog.get("ok") is True
+    assert catalog.get("wired_count", 0) >= 1
+    assert len(catalog.get("integrations") or []) >= catalog["wired_count"]
+
+    fixtures = client.get("/v1/examples/netlist-fixtures").json()
+    assert fixtures.get("ok") is True
+    dht = next(row for row in fixtures["fixtures"] if row["id"] == "usb_esp_dht22")
+    assert dht.get("description")
 
 
 def test_serve_ui_off_by_default() -> None:

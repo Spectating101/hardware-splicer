@@ -58,15 +58,25 @@ function jobStatusClass(status) {
   return "";
 }
 
+function formatProjectName(name) {
+  if (!name) return "Untitled build";
+  return name.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function formatJobStatus(status) {
+  if (!status) return "Unknown";
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
 function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>Salvage hardware you can defend on the bench</h1>
+        <h1>Auditable hardware bring-up you can defend on the bench</h1>
         <p className="lead">
-          Turn donor parts into a KiCad carrier, parts list, wiring guide, and{" "}
-          <strong>measurement gates</strong> you must close before power-on.
+          Donor intake → KiCad carrier with honest DRC → <strong>design verification</strong> (preview, BOM, fab
+          readiness) → bench gates → <code>PROJECT_PACKAGE</code>.
         </p>
         <PipelineVisual />
         <div className="hero-actions">
@@ -108,6 +118,13 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
             </div>
           </li>
           <li>
+            <span className="feature-icon">◇</span>
+            <div>
+              <strong>Design verification</strong>
+              <span>KiCanvas preview, BOM, fab artifact coverage</span>
+            </div>
+          </li>
+          <li>
             <span className="feature-icon">🛡</span>
             <div>
               <strong>Safety gates</strong>
@@ -136,6 +153,16 @@ export default function App() {
   const [previewContext, setPreviewContext] = useState(null);
 
   const spliceJob = useSpliceJob();
+
+  const uniqueRecentJobs = useMemo(() => {
+    const seen = new Set();
+    return recentJobs.filter((job) => {
+      const key = job.project_name || job.job_id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [recentJobs]);
 
   const selectedExample = useMemo(
     () => examples.find((row) => row.id === selectedExampleId) || examples[0] || null,
@@ -394,11 +421,11 @@ export default function App() {
           )}
         </div>
 
-        {recentJobs.length > 0 && (
+        {uniqueRecentJobs.length > 0 && (
           <div className="sidebar-section sidebar-grow">
             <div className="sidebar-label">Recent builds</div>
             <div className="project-list">
-              {recentJobs.slice(0, 10).map((job) => (
+              {uniqueRecentJobs.slice(0, 8).map((job) => (
                 <button
                   key={job.job_id}
                   type="button"
@@ -407,8 +434,8 @@ export default function App() {
                   disabled={job.status !== "succeeded"}
                   title={job.status}
                 >
-                  <strong>{job.project_name || job.job_id}</strong>
-                  <span>{job.status}</span>
+                  <strong>{formatProjectName(job.project_name || job.job_id)}</strong>
+                  <span className="job-status">{formatJobStatus(job.status)}</span>
                 </button>
               ))}
             </div>
