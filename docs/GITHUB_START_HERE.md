@@ -1,8 +1,9 @@
 # Start here (GitHub / external review)
 
 **Repo:** [Spectating101/hardware-splicer](https://github.com/Spectating101/hardware-splicer)  
-**Product:** Splice Agent v1 — auditable hardware bring-up (donor intake → KiCad carrier → bench gates → `PROJECT_PACKAGE`)  
-**Version:** `1.0.2` · **Status:** Internal maturity green (dev-linux + lab WSL); **external proof phase** — see [`EXTERNAL_PROOF_CHECKLIST.md`](EXTERNAL_PROOF_CHECKLIST.md)
+**Product:** Splice Agent — auditable hardware bring-up + design verification (donor intake → KiCad carrier → preview/BOM/fab → bench gates → `PROJECT_PACKAGE`)  
+**Latest tag:** `v1.0.2` · **`main`:** v1.1 interface preview (alpha candidate — see §6)  
+**Status:** Internal maturity green; **v1.1.0-alpha.1** release prep — verify + manual UI pass before tag
 
 Use this page as the **single entry** when browsing on GitHub or pasting links into ChatGPT.
 
@@ -46,6 +47,7 @@ make verify-product-internal
 |-------|-----------------|----------------|
 | Engine | `verify-splice-v1` | S2 compile 4/4, S3 loop 3/3, real bench, project package |
 | Product | `verify-product-v1` | Above + UI build + `tests/test_splice_product_v1.py` |
+| v1.1 interface | `verify-ui-interface-smoke` | OSS catalog + netlist fixtures (API on :8787) |
 | Install | `verify-install-smoke` | `install_splice_v1.sh` + prerequisites |
 | Live HTTP | `verify-product-live-smoke` | uvicorn + async `splice-build` job over HTTP |
 
@@ -81,15 +83,20 @@ CI: [`.github/workflows/hardware-splicer.yml`](https://github.com/Spectating101/
 
 ## 6. OSS interface layer (v1.1 preview on `main`)
 
+**Release candidate:** [`RELEASE_NOTES_v1.1.0-alpha.1.md`](../RELEASE_NOTES_v1.1.0-alpha.1.md) (draft) · boundary: [`V1.1_INTERFACE_PREVIEW.md`](V1.1_INTERFACE_PREVIEW.md)
+
 | Doc | Purpose |
 |-----|---------|
+| [V1.1_INTERFACE_PREVIEW.md](V1.1_INTERFACE_PREVIEW.md) | Release boundary — what ships, what does not |
 | [OSS_INTEGRATION_STATUS.md](OSS_INTEGRATION_STATUS.md) | Wired vs planned OSS integrations |
 | [OSS_INTERFACE_INTEGRATION_STRATEGY.md](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | Embed strategy — KiCanvas, circuit-json, MCP |
 | [ATOPILE_IMPORT.md](ATOPILE_IMPORT.md) | atopile → KiCad netlist import path |
 | [KICAD_MCP_SIDECAR.md](KICAD_MCP_SIDECAR.md) | Human KiCad edit sidecar pattern |
 | [ENGINE_VS_INTERFACE.md](ENGINE_VS_INTERFACE.md) | Under-interfaced, not under-powered thesis |
 
-**Try in UI:** `make splice-ui-dev` → **Interface lab** (canvas, circuit-json, netlist paste) → **Design** tab (KiCanvas + BOM + fab manifest).
+**Manual UI pass (before tag):** Home → Quick demo → **Design verify** → Wiring → Interface lab → recent build.
+
+**Try in UI:** `make splice-ui-serve` → **Design verify** tab (KiCanvas + BOM + fab manifest) · **Interface lab** (canvas, circuit-json, netlist paste)
 
 ---
 
@@ -115,6 +122,7 @@ See [apps/README.md](https://github.com/Spectating101/hardware-splicer/blob/main
 | [`apps/splice-ui/`](https://github.com/Spectating101/hardware-splicer/tree/main/apps/splice-ui) | Consumer web UI (Vite + React) |
 | [`scripts/install_splice_v1.sh`](https://github.com/Spectating101/hardware-splicer/blob/main/scripts/install_splice_v1.sh) | Slim v1 install |
 | [`scripts/verify_product_live_smoke.py`](https://github.com/Spectating101/hardware-splicer/blob/main/scripts/verify_product_live_smoke.py) | Live HTTP job smoke |
+| [`scripts/verify_ui_interface_smoke.py`](https://github.com/Spectating101/hardware-splicer/blob/main/scripts/verify_ui_interface_smoke.py) | v1.1 interface API smoke |
 | [`tests/test_splice_product_v1.py`](https://github.com/Spectating101/hardware-splicer/blob/main/tests/test_splice_product_v1.py) | Product-layer API tests |
 | [`Makefile`](https://github.com/Spectating101/hardware-splicer/blob/main/Makefile) | `verify-product-internal` and related targets |
 
@@ -131,4 +139,4 @@ It does not create maturity.
 
 ---
 
-*Last updated: July 2026 · v1.0.2*
+*Last updated: July 2026 · v1.0.2 tag · v1.1.0-alpha.1 release prep on `main`*

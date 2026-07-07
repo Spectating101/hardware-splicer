@@ -6,7 +6,9 @@
 
 **Related:** [`ENGINE_VS_INTERFACE.md`](ENGINE_VS_INTERFACE.md) · [`INTEGRATIONS_RESEARCH.md`](INTEGRATIONS_RESEARCH.md) · [`FLUX_TARGET.md`](FLUX_TARGET.md)
 
-**Spike (shipped in repo):** splice-ui **Design** tab (KiCanvas) + **Interface lab** (`/v1/compose-canvas`, `/v1/netlist-compile`)
+**v1.1 preview (on `main`):** splice-ui **Design verify** tab (KiCanvas, BOM, fab) + **Interface lab** + OSS catalog. Verify: `make verify-ui-interface-smoke`.
+
+**Release boundary:** [`V1.1_INTERFACE_PREVIEW.md`](V1.1_INTERFACE_PREVIEW.md) · draft notes: [`RELEASE_NOTES_v1.1.0-alpha.1.md`](../RELEASE_NOTES_v1.1.0-alpha.1.md)
 
 ---
 

@@ -2,11 +2,12 @@
 
 [![Splice Agent v1](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml/badge.svg)](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml)
 
-**Auditable hardware bring-up** — donor intake → KiCad carrier with DRC truth → bench measurement gates → defensible **PROJECT_PACKAGE**.
+**Auditable hardware bring-up + design verification** — donor intake → KiCad carrier with DRC truth → preview/BOM/fab readiness → bench gates → defensible **PROJECT_PACKAGE**.
 
 Self-hosted agent for teams who need compile honesty and a power-on checklist, not cosmetic copper or hand-wavy LLM excuses.
 
-**Version:** `1.0.2` · **Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
+**Latest tag:** [`v1.0.2`](RELEASE_NOTES_v1.0.2.md) · **`main`:** [v1.1 interface preview](docs/V1.1_INTERFACE_PREVIEW.md) (alpha candidate — not tagged yet)  
+**Requires:** Python 3.12+, KiCad 9+ (`kicad-cli`), Node 18+
 
 ---
 
@@ -21,7 +22,9 @@ hs-doctor
 make splice-ui-serve
 ```
 
-Open **http://127.0.0.1:8787** → **Quick demo** → **Gates** → **Bench** → **Download zip**.
+Open **http://127.0.0.1:8787** → **Quick demo** → **Design verify** (KiCanvas, BOM, fab) → **Gates** → **Bench** → **Download zip**.
+
+**v1.1 on `main`:** also try **Interface lab** (canvas / circuit-json / KiCad netlist adapters). See [`docs/V1.1_INTERFACE_PREVIEW.md`](docs/V1.1_INTERFACE_PREVIEW.md).
 
 Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) · 5-min demo: [`docs/DEMO_5_MIN_UI.md`](docs/DEMO_5_MIN_UI.md)
 
@@ -33,6 +36,7 @@ Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md)
 make verify-product-internal   # full internal bar (engine + UI + API + live job)
 # or stepwise:
 make verify-product-v1
+make verify-ui-interface-smoke   # v1.1 interface APIs (API on :8787)
 make verify-install-smoke
 make verify-product-live-smoke
 ```
@@ -78,7 +82,7 @@ CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product A
 | Async jobs, MCP + HTTP parity | Flux / Blueprint-class editor |
 | Optional splice-ui workbench | Certified donor harness safety |
 
-Details: [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
+Details: [`RELEASE_NOTES_v1.0.2.md`](RELEASE_NOTES_v1.0.2.md) · [`RELEASE_NOTES_v1.1.0-alpha.1.md`](RELEASE_NOTES_v1.1.0-alpha.1.md) (draft) · [`docs/RELEASE_V1.md`](docs/RELEASE_V1.md)
 
 ---
 
