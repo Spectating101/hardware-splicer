@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
 import { downloadBuildArtifact, fetchFabManifest, fetchIntegrationsCatalog } from "../api.js";
 
+const FAB_STATUS_LABEL = {
+  present: "Present",
+  missing: "Missing",
+  optional: "Optional",
+  planned: "Planned",
+};
+
+const FAB_STATUS_CLASS = {
+  present: "present",
+  missing: "missing",
+  optional: "optional",
+  planned: "planned",
+};
+
 const STATUS_LABEL = {
   wired: "Wired",
   core: "Core",
@@ -124,7 +138,7 @@ export function DesignArtifactsPanel({ buildDir }) {
     <section className="card">
       <h3>Exports & interchange</h3>
       <p className="muted">
-        Download compile artifacts for KiCad, tscircuit/circuit-json tools, fab, or agent pipelines.
+        Step 4 — Handoff: download compile artifacts for KiCad, circuit-json tools, fab upload, or agent pipelines.
       </p>
       {error && <p className="error">{error}</p>}
       {artifacts.length === 0 ? (
@@ -167,8 +181,20 @@ export function DesignArtifactsPanel({ buildDir }) {
         </button>
       </div>
       {autorouteMsg && <p className="muted small">{autorouteMsg}</p>}
+    </section>
+  );
+}
+
+export function DesignReadinessPanel({ buildDir }) {
+  return (
+    <section className="card design-readiness-card">
+      <h3>Design readiness</h3>
+      <p className="muted">
+        Inspect the compile BOM and fab artifact coverage before handoff. This is verification, not a fab sign-off.
+      </p>
       <DesignBomPanel buildDir={buildDir} />
       <FabManifestPanel buildDir={buildDir} />
+      <HumanViewsPanel buildDir={buildDir} />
     </section>
   );
 }
@@ -185,7 +211,20 @@ export function DesignBomPanel({ buildDir }) {
       .catch((err) => setError(err.message));
   }, [buildDir]);
 
-  if (!buildDir || error) return error ? <p className="muted small">{error}</p> : null;
+  if (!buildDir || error) {
+    if (error && !error.includes("no BOM")) {
+      return <p className="muted small">{error}</p>;
+    }
+    if (error) {
+      return (
+        <div className="design-bom-panel">
+          <h4>Compile BOM</h4>
+          <p className="muted small">No compile BOM for this build yet — run a full compile with BOM emission.</p>
+        </div>
+      );
+    }
+    return null;
+  }
   if (!bom) return <p className="muted small">Loading compile BOM…</p>;
   const lines = bom.lines || [];
   const hasJlc = lines.some((row) => row.jlc_lcsc || row.jlc_mpn);
@@ -195,7 +234,9 @@ export function DesignBomPanel({ buildDir }) {
       <h4>Compile BOM</h4>
       <p className="muted small">
         {bom.line_count} lines from {bom.source}
-        {bom.jlc_enriched || hasJlc ? " · JLC/LCSC hints present" : ""}
+        {bom.jlc_enriched || hasJlc
+          ? " · JLC/LCSC hints present"
+          : " · sourcing hints optional (not required for preview)"}
       </p>
       {lines.length === 0 ? (
         <p className="muted">No BOM lines.</p>
@@ -239,20 +280,102 @@ export function FabManifestPanel({ buildDir }) {
 
   if (!buildDir || !manifest) return null;
 
+  const requiredMissing = manifest.artifacts.filter(
+    (row) => row.status === "missing" && !row.optional && !row.planned,
+  );
+
   return (
-    <details className="fab-manifest-panel">
+    <details className="fab-manifest-panel" open={requiredMissing.length > 0}>
       <summary>
-        Fab artifact coverage ({manifest.present_count}/{manifest.trackable_count} vs KiBot reference)
+        Fab artifact coverage — {manifest.present_count} required present
+        {manifest.optional_present_count ? `, ${manifest.optional_present_count} optional` : ""}
       </summary>
       <p className="muted small">{manifest.note}</p>
       <ul className="fab-manifest-list">
         {manifest.artifacts.map((row) => (
-          <li key={row.id} className={row.present ? "present" : row.planned ? "planned" : "missing"}>
-            <span>{row.label}</span>
-            <span className="chip small">{row.present ? "present" : row.planned ? "planned" : "missing"}</span>
+          <li key={row.id} className={`fab-status-${row.status || (row.present ? "present" : "missing")}`}>
+            <span>
+              {row.label}
+              {row.optional_note && !row.present && (
+                <span className="muted small"> — {row.optional_note}</span>
+              )}
+            </span>
+            <span className="chip small">
+              {row.status === "present"
+                ? "present"
+                : row.status === "optional"
+                  ? "optional"
+                  : row.status === "planned"
+                    ? "planned"
+                    : "missing"}
+            </span>
           </li>
         ))}
       </ul>
     </details>
+  );
+}
+
+const VIEW_STATUS_LABEL = { present: "ready", skipped: "skipped", missing: "missing" };
+
+export function HumanViewsPanel({ buildDir }) {
+  const [views, setViews] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadViews = async (generate = false) => {
+    setBusy(true);
+    setError("");
+    try {
+      const { exportBuildViews, listBuildArtifacts } = await import("../api.js");
+      if (generate) {
+        const result = await exportBuildViews(buildDir);
+        if (!result.ok && result.skipped) {
+          setError(result.reason || "kicad-cli export unavailable");
+        }
+      }
+      const artifacts = await listBuildArtifacts(buildDir);
+      const human = (artifacts.artifacts || []).filter((row) => row.kind === "human_view");
+      setViews(human);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (buildDir) loadViews(false);
+  }, [buildDir]);
+
+  if (!buildDir) return null;
+
+  return (
+    <div className="human-views-panel">
+      <h4>Human-readable exports</h4>
+      <p className="muted small">PDF/SVG/PNG via kicad-cli — for reviewers without KiCanvas or KiCad installed.</p>
+      <div className="lab-actions">
+        <button type="button" className="secondary small" disabled={busy} onClick={() => loadViews(true)}>
+          {busy ? "Exporting…" : "Generate PDF/SVG views"}
+        </button>
+      </div>
+      {error && <p className="muted small">{error}</p>}
+      {views && views.length > 0 && (
+        <ul className="artifact-list compact">
+          {views.map((row) => (
+            <li key={row.relative}>
+              <span className="mono small">{row.name}</span>
+              <button
+                type="button"
+                className="ghost small"
+                onClick={() => downloadBuildArtifact(buildDir, row.relative)}
+              >
+                Download
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

@@ -23,9 +23,27 @@ const DEMO_WIRES = [
 ];
 
 const STEPS = [
-  "Wire a module graph (canvas → compose spine).",
-  "Compile to KiCad and open the board in the Design preview.",
-  "Or import circuit-json and compile through the same engine.",
+  "Canvas compose — module graph → same engine as production builds.",
+  "circuit-json — tscircuit interchange into the compile spine.",
+  "KiCad netlist — SKiDL, atopile, or Eeschema export via paste or fixture.",
+];
+
+const PATH_HELP = [
+  {
+    id: "canvas",
+    title: "compose-canvas",
+    body: "Wire a module graph in memory, then compile to KiCad. This mirrors Circuit.AI-style editing without building a browser ECAD suite.",
+  },
+  {
+    id: "circuit-json",
+    title: "circuit-json",
+    body: "tscircuit-style JSON interchange. Good for agents and web-native editors that emit circuit-json.",
+  },
+  {
+    id: "kicad-netlist",
+    title: "KiCad netlist",
+    body: "S-expression netlist from SKiDL, atopile, or KiCad. Same compile spine — adapter proving ground, not the main product wizard.",
+  },
 ];
 
 export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }) {
@@ -142,12 +160,19 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
   return (
     <div className="panel-stack">
       <section className="card lab-hero">
-        <p className="eyebrow">Interface lab</p>
-        <h2>See the engine through borrowed OSS paths</h2>
+        <p className="eyebrow">Interface lab · v1.1 preview</p>
+        <h2>Adapter proving ground — not the main product path</h2>
         <p className="muted">
-          This is not a Flux clone. It proves the same compile spine accepts canvas graphs and circuit-json interchange,
-          then shows the KiCad result in KiCanvas.
+          Borrowed OSS interchange layers feed the same compile spine. Use this to test imports; use the project wizard
+          for donor bring-up, gates, and PROJECT_PACKAGE.
         </p>
+        <ul className="lab-path-help">
+          {PATH_HELP.map((row) => (
+            <li key={row.id}>
+              <strong className="mono">{row.title}</strong> — {row.body}
+            </li>
+          ))}
+        </ul>
         <ol className="lab-steps">
           {STEPS.map((step) => (
             <li key={step}>{step}</li>

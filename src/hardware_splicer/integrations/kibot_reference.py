@@ -15,6 +15,8 @@ KIBOT_REFERENCE_ROWS = [
         "ours_glob": "gerber/**",
         "ours_file": None,
         "label": "Gerber package",
+        "optional": True,
+        "optional_note": "Present when compile used export_gerber",
     },
     {
         "id": "bom_csv",
@@ -78,18 +80,31 @@ def fab_output_manifest(build_dir: str | Path) -> Dict[str, Any]:
         present = len(paths) > 0
         if present:
             present_count += 1
+        status = "present"
+        if spec.get("planned"):
+            status = "planned"
+        elif present:
+            status = "present"
+        elif spec.get("optional"):
+            status = "optional"
+        else:
+            status = "missing"
         rows.append(
             {
                 "id": spec["id"],
                 "label": spec["label"],
                 "kibot_output": spec["kibot_output"],
                 "present": present,
+                "status": status,
                 "planned": bool(spec.get("planned")),
+                "optional": bool(spec.get("optional")),
+                "optional_note": spec.get("optional_note"),
                 "paths": [str(p.relative_to(root)) for p in paths[:8]],
                 "file_count": len(paths),
             }
         )
-    total = len([r for r in rows if not r.get("planned")])
+    total = len([r for r in rows if not r.get("planned") and not r.get("optional")])
+    optional_present = len([r for r in rows if r.get("optional") and r.get("present")])
     return {
         "ok": True,
         "build_dir": str(root),
@@ -99,5 +114,6 @@ def fab_output_manifest(build_dir: str | Path) -> Dict[str, Any]:
         "artifacts": rows,
         "present_count": present_count,
         "trackable_count": total,
+        "optional_present_count": optional_present,
         "coverage_ratio": round(present_count / total, 3) if total else 0.0,
     }

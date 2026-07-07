@@ -15,6 +15,7 @@ def _fast_compile_defaults(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_BUILD_PICK", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_MODULE_PICK", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_COMPOSE", "0")

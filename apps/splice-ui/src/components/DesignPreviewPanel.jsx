@@ -6,7 +6,7 @@ import {
   normalizeCompileTruth,
 } from "../utils/compileTruth.js";
 import { StatusPill } from "./ProjectPanels.jsx";
-import { DesignArtifactsPanel } from "./IntegrationsPanel.jsx";
+import { DesignArtifactsPanel, DesignReadinessPanel } from "./IntegrationsPanel.jsx";
 
 function useKiCanvasScript() {
   const [ready, setReady] = useState(
@@ -204,11 +204,11 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
       <section className="card">
         <h3>Board & schematic</h3>
         <p className="muted">
-          Inspect the KiCad carrier the engine compiled — embedded{" "}
+          Step 1 — Visual: inspect the KiCad carrier in{" "}
           <a href="https://kicanvas.org/" target="_blank" rel="noreferrer">
             KiCanvas
           </a>{" "}
-          viewer, no KiCad install required.
+          (read-only; edit in KiCad if needed).
         </p>
         {error && <p className="error">{error}</p>}
         {files.length > 0 ? (
@@ -235,6 +235,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
       </section>
       <section className="card">
         <h3>Compile truth</h3>
+        <p className="muted small">Step 2 — Authority: KiCad DRC and design-quality artifacts from the engine.</p>
         <CompileTruthCard truth={truth} loading={loadingQuality} />
         {onGoGates && pkg?.gates && (
           <button type="button" className="secondary small design-gates-link" onClick={onGoGates}>
@@ -242,6 +243,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
           </button>
         )}
       </section>
+      <DesignReadinessPanel buildDir={buildDir} />
       <DesignArtifactsPanel buildDir={buildDir} />
     </div>
   );

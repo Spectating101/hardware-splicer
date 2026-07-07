@@ -7,8 +7,15 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from .build_files_security import (
+    assert_build_dir_allowed,
+    assert_file_size,
+    max_kicad_content_bytes,
+)
+
 KICAD_SUFFIXES = (".kicad_pcb", ".kicad_sch", ".kicad_pro")
-ARTIFACT_SUFFIXES = (".json", ".csv", ".md", ".txt", ".zip", ".net")
+ARTIFACT_SUFFIXES = (".json", ".csv", ".md", ".txt", ".zip", ".net", ".pdf", ".svg", ".png")
+DOWNLOAD_SUFFIXES = KICAD_SUFFIXES + ARTIFACT_SUFFIXES
 
 # Static artifacts (KiCad sch/pcb resolved dynamically per build).
 ARTIFACT_CATALOG_STATIC = [
@@ -29,6 +36,7 @@ def resolve_build_dir(build_dir: str | Path) -> Path:
     root = Path(build_dir).expanduser().resolve()
     if not root.is_dir():
         raise ValueError(f"build_dir not found: {root}")
+    assert_build_dir_allowed(root)
     return root
 
 
@@ -84,6 +92,7 @@ def read_build_file(build_dir: str | Path, relative: str) -> Dict[str, Any]:
     rel_check = _relative_under_root(root, target)
     if not target.is_file():
         raise ValueError(f"file not found: {rel_check}")
+    assert_file_size(target, max_bytes=max_kicad_content_bytes())
     if target.suffix.lower() not in KICAD_SUFFIXES:
         raise ValueError("only KiCad preview files are served via this endpoint")
     text = target.read_text(encoding="utf-8", errors="replace")
@@ -215,6 +224,25 @@ def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
                     "name": row["name"],
                 }
             )
+            seen.add(row["relative"])
+    export_dir = comp / "exports"
+    if export_dir.is_dir():
+        for path in sorted(export_dir.iterdir()):
+            if not path.is_file() or path.suffix.lower() not in {".pdf", ".svg", ".png"}:
+                continue
+            rel = str(path.relative_to(root))
+            if rel in seen:
+                continue
+            rows.append(
+                {
+                    "relative": rel,
+                    "kind": "human_view",
+                    "label": path.name,
+                    "size_bytes": path.stat().st_size,
+                    "name": path.name,
+                }
+            )
+            seen.add(rel)
     return rows
 
 
@@ -256,8 +284,9 @@ def read_artifact_file(build_dir: str | Path, relative: str) -> Dict[str, Any]:
     rel_check = _relative_under_root(root, target)
     if not target.is_file():
         raise ValueError(f"file not found: {rel_check}")
+    assert_file_size(target)
     suffix = target.suffix.lower()
-    if suffix not in KICAD_SUFFIXES and suffix not in ARTIFACT_SUFFIXES:
+    if suffix not in DOWNLOAD_SUFFIXES:
         raise ValueError(f"artifact type not allowed: {suffix}")
     if suffix == ".json":
         try:

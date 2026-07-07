@@ -25,7 +25,9 @@ from .build_files import (
     read_design_quality_summary,
     resolve_build_dir,
 )
+from .build_files_security import assert_file_size
 from .integrations.kibot_reference import fab_output_manifest
+from .pcb.kicad_cli_views import export_human_views
 from .integrations.oss_catalog import integration_catalog
 from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
 from .circuit_synthesis import (
@@ -596,6 +598,13 @@ def create_app() -> FastAPI:
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 
+    @app.post("/v1/build-files/export-views")
+    def build_files_export_views(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            return export_human_views(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
     @app.post("/v1/build-files/artifact")
     def build_files_artifact(request: BuildFilesContentRequest) -> Dict[str, Any]:
         try:
@@ -614,6 +623,11 @@ def create_app() -> FastAPI:
             target.relative_to(root)
             if not target.is_file():
                 raise ValueError(f"file not found: {rel}")
+            from .build_files import DOWNLOAD_SUFFIXES
+
+            if target.suffix.lower() not in DOWNLOAD_SUFFIXES:
+                raise ValueError(f"download type not allowed: {target.suffix}")
+            assert_file_size(target)
             return FileResponse(target, filename=target.name)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
