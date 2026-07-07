@@ -102,4 +102,4 @@ No breaking API changes to core splice/build endpoints. New UI panels require `m
 
 ---
 
-*Draft — tag `v1.1.0-alpha.1` only after release-candidate verify + manual UI pass on `main`.*
+*Ready for GitHub prerelease publish — see [`docs/LAUNCH_v1.1.md`](docs/LAUNCH_v1.1.md).*

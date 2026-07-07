@@ -899,6 +899,69 @@ button.primary:disabled {
   background: linear-gradient(90deg, #f4fbf7 0%, #fff 50%);
 }
 
+.readiness-pitch {
+  margin: 16px 0 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #c8e6d8;
+  background: #f4fbf7;
+}
+
+.readiness-pitch strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.readiness-hero {
+  margin: 16px 28px 0;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.readiness-hero h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.readiness-hero-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 6px 0 8px;
+}
+
+.readiness-hold {
+  border-color: #e8c96a;
+  background: linear-gradient(135deg, #fffdf5 0%, #fff 60%);
+}
+
+.readiness-ok {
+  border-color: #b9e2ce;
+  background: linear-gradient(135deg, #f0faf5 0%, #fff 60%);
+}
+
+.readiness-issues {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: #5c4a1e;
+}
+
+.readiness-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .summary-label,
 .summary-stat-label {
   display: block;

@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-install-smoke verify-product-live-smoke verify-product-internal
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-ui-interface-smoke launch-prep-v1.1 verify-install-smoke verify-product-live-smoke verify-product-internal
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -110,6 +110,9 @@ verify-product-v1: verify-splice-v1 splice-ui-build test-splice-product-v1
 
 verify-ui-interface-smoke:
 	PYTHONPATH=src $(PYTHON) scripts/verify_ui_interface_smoke.py
+
+launch-prep-v1.1:
+	bash scripts/launch_prep_v1_1.sh
 
 verify-install-smoke:
 	bash scripts/verify_install_smoke.sh

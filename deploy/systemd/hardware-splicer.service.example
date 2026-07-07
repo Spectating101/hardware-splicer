@@ -10,8 +10,8 @@ Environment=PYTHONPATH=/opt/hardware-splicer/src
 Environment=HARDWARE_SPLICER_AUTOROUTE=0
 Environment=HARDWARE_SPLICER_DRC_FIX_LOOP=1
 Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-# Optional: serve built splice-ui at / (run make splice-ui-build after upgrades)
-# Environment=HARDWARE_SPLICER_SERVE_UI=1
+# Serve built splice-ui at / (recommended for pilots — run make splice-ui-build after upgrades)
+Environment=HARDWARE_SPLICER_SERVE_UI=1
 ExecStart=/opt/hardware-splicer/.venv/bin/uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
 Restart=on-failure
 

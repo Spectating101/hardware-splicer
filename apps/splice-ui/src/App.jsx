@@ -14,6 +14,7 @@ import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import ProjectSummaryBar from "./components/ProjectSummaryBar.jsx";
+import ReadinessHero from "./components/ReadinessHero.jsx";
 import ProjectWizard from "./components/ProjectWizard.jsx";
 import TabNav from "./components/TabNav.jsx";
 import {
@@ -78,6 +79,12 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
           Donor intake → KiCad carrier with honest DRC → <strong>design verification</strong> (preview, BOM, fab
           readiness) → bench gates → <code>PROJECT_PACKAGE</code>.
         </p>
+        <div className="readiness-pitch">
+          <strong>Before you fabricate or power on</strong>
+          <p className="muted small">
+            See what is ready, what is missing, and what must be measured — not just another KiCad folder.
+          </p>
+        </div>
         <PipelineVisual />
         <div className="hero-actions">
           <button type="button" className="primary large" onClick={onStart} disabled={!apiOk}>
@@ -463,6 +470,13 @@ export default function App() {
 
         {inResults && displayPackage && (
           <>
+            <ReadinessHero
+              pkg={displayPackage}
+              benchSession={benchSession}
+              onGoDesign={() => setActiveTab("design")}
+              onGoBench={() => setActiveTab("bench")}
+              onGoGates={() => setActiveTab("gates")}
+            />
             <ProjectSummaryBar
               pkg={displayPackage}
               benchSession={benchSession}

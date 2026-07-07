@@ -1,8 +1,10 @@
-# 5-minute UI demo — Splice Agent v1
+# 5-minute UI demo — Splice Agent v1.1 (Interface Preview)
 
-**Purpose:** Repeatable demo for pilots, grant reviewers, and visual auditors (e.g. ChatGPT).
+**Purpose:** Repeatable demo for pilots, grant reviewers, and external proof.
 
 **Prerequisites:** [`QUICKSTART_SPLICE_v1.md`](QUICKSTART_SPLICE_v1.md) complete; `hs-doctor` OK.
+
+**Launch checklist:** [`LAUNCH_v1.1.md`](LAUNCH_v1.1.md)
 
 ---
 
@@ -15,7 +17,7 @@ make splice-ui-serve
 
 Open **http://127.0.0.1:8787**
 
-Confirm sidebar shows **Engine: Online** and version (e.g. v1.0.1).
+Confirm sidebar shows **Engine: Online**.
 
 ---
 
@@ -23,51 +25,44 @@ Confirm sidebar shows **Engine: Online** and version (e.g. v1.0.1).
 
 ### 1. Home (30 s)
 
-- Read headline: salvage → carrier → gates
-- Point at pipeline: Describe → Compile → Package → Gates
-- Note **What you get** sidebar (KiCad, package, safety gates)
-
-### 2. Quick demo (60–90 s)
-
+- Headline: auditable bring-up + **design verification**
+- **Before you fabricate or power on** pitch box
+- Pipeline: Describe → Compile → **Verify** → Package → Gates
 - Click **Quick demo (1-click)**
-- Build overlay appears with elapsed time
-- Auto-navigates to **Project** when complete
-- Toast: “Build complete — review safety gates”
 
-*Alternative:* **Examples** → pick `splice_salvaged_robot_drive` → **Build selected example**
+*Faster path:* **Recent builds** → succeeded job
 
-*Faster path:* **Recent builds** → click a succeeded job (skip compile wait)
+### 2. Readiness verdict (45 s)
 
-### 3. Project summary (60 s)
+- **Readiness verdict** hero — hold vs power-on authorized
+- Blocker list: open gates, DRC review, etc.
+- Summary bar: gate progress, compile, power-on hold
+- Say: *“This catches handoff gaps before fab or power-on.”*
 
-- **Gate verdict** pill (e.g. `COMPILE READY REVIEW BENCH`)
-- Progress bar: bench gates closed / total
-- **Power-on: hold** until gates close
-- Click **Close N gates on bench →** (jumps to Bench tab)
+### 3. Design verify (90 s)
 
-### 4. Gates tab (60 s)
+- **Design verify** tab (default after build)
+- Design flow stepper → KiCanvas preview
+- **Compile truth** — DRC errors/warnings
+- **Compile BOM** + **Fab artifact coverage**
+- **Exports & interchange** — download path
 
-- **Safety gate verdict** + blockers list
-- Gate cards: critical vs open, prompts (what to measure)
-- Emphasize: honest blocked state — not “looks good” schematics
+### 4. Gates + bench (90 s)
 
-### 5. Bench tab (60 s)
+- **Gates** tab — safety verdict, blockers
+- **Bench** — close one gate with a measurement
+- Readiness hero updates toward power-on OK (if all closed)
 
-- Pick one open gate
-- Enter measured value + unit (e.g. `5.02`, `V`)
-- **Close gate** → toast confirms
-- Refresh verdict / progress bar
+### 5. Wiring + download (30 s)
 
-### 6. Other tabs (30 s each, optional)
+- **Wiring** — guide (topology diagram when present)
+- **↓ Download zip** — full job bundle
 
-- **Parts** — BOM lines and estimate
-- **Wiring** — markdown wiring guide
-- **Build** — assembly steps
-- **Overview** — goal, assumptions, build ID
+### 6. Interface lab (optional 60 s)
 
-### 7. Download (15 s)
-
-- **↓ Download zip** — job bundle (KiCad, package JSON, guides)
+- **Interface lab** — adapter proving ground (not main wizard)
+- Canvas compile → View board in KiCanvas
+- OSS integration map
 
 ---
 
@@ -75,9 +70,11 @@ Confirm sidebar shows **Engine: Online** and version (e.g. v1.0.1).
 
 | Audience | Say |
 |----------|-----|
-| Maker / repair | “No power-on until the checklist is green.” |
-| EMS / NPI | “DRC truth + casefile on failure, not hand-wavy AI.” |
-| Grant / tech | “CI-backed verify bar; same spine via HTTP and MCP.” |
+| Maker / repair | “No power-on until the checklist is green — and you can see fab/BOM gaps first.” |
+| Lab / professor | “One package for student handoff: preview, BOM, fab readiness, gates.” |
+| Prototype engineer | “DRC truth + casefile on failure — not hand-wavy AI.” |
+
+**Value test question:** “Does this make a messy prototype easier to trust before fabrication or power-on?”
 
 ---
 
@@ -85,26 +82,15 @@ Confirm sidebar shows **Engine: Online** and version (e.g. v1.0.1).
 
 ```bash
 curl -s http://127.0.0.1:8787/health
-curl -s http://127.0.0.1:8787/v1/examples/splice-intakes | head
+curl -s http://127.0.0.1:8787/v1/integrations/catalog | head
 ```
 
-Open http://127.0.0.1:8787/docs for integrators.
+---
+
+## Record for launch
+
+Screen recording should show: Online → build → **readiness hold** → Design verify → one gate closed → download zip.
 
 ---
 
-## Troubleshooting live demo
-
-| Issue | Fix |
-|-------|-----|
-| Offline | Start `make splice-ui-serve` |
-| Build fails | Check terminal / job error; `hs-doctor` |
-| Empty recent builds | Run quick demo once |
-| Gates already closed | Load different job or reset bench session on disk |
-
----
-
-## Record for external proof
-
-Screen recording should show: Online → build → gates blocked → one measurement → download zip.
-
-For install proof on another machine, use [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md).
+*Updated for v1.1.0-alpha.1 · July 2026*

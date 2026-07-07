@@ -2,8 +2,8 @@
 
 **Repo:** [Spectating101/hardware-splicer](https://github.com/Spectating101/hardware-splicer)  
 **Product:** Splice Agent — auditable hardware bring-up + design verification (donor intake → KiCad carrier → preview/BOM/fab → bench gates → `PROJECT_PACKAGE`)  
-**Latest tag:** `v1.0.2` · **`main`:** v1.1 interface preview (alpha candidate — see §6)  
-**Status:** Internal maturity green; **v1.1.0-alpha.1** release prep — verify + manual UI pass before tag
+**Latest tag:** `v1.1.0-alpha.1` (interface preview) · stable `v1.0.2`  
+**Status:** Launch prep — deploy + prerelease + pilot conversations
 
 Use this page as the **single entry** when browsing on GitHub or pasting links into ChatGPT.
 
@@ -13,11 +13,12 @@ Use this page as the **single entry** when browsing on GitHub or pasting links i
 
 | # | Doc | Purpose |
 |---|-----|---------|
-| 1 | [README.md](https://github.com/Spectating101/hardware-splicer/blob/main/README.md) | Product pitch, quick start, verify commands |
-| 2 | [QUICKSTART_SPLICE_v1.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/QUICKSTART_SPLICE_v1.md) | Install → doctor → UI → first build |
-| 3 | [INTERNAL_MATURITY_PLAN.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/INTERNAL_MATURITY_PLAN.md) | **Current engineering bar** — what “done” means before external pilots |
-| 4 | [SPLICE_PRODUCT.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/SPLICE_PRODUCT.md) | Product tiers S0–S5, scope |
-| 5 | [DEMO_5_MIN_UI.md](https://github.com/Spectating101/hardware-splicer/blob/main/docs/DEMO_5_MIN_UI.md) | 5-minute demo script |
+| 1 | [LAUNCH_v1.1.md](LAUNCH_v1.1.md) | **Deploy, prerelease, demo, outreach** |
+| 2 | [RELEASE_NOTES_v1.1.0-alpha.1.md](../RELEASE_NOTES_v1.1.0-alpha.1.md) | What shipped in v1.1 alpha |
+| 3 | [QUICKSTART_SPLICE_v1.md](QUICKSTART_SPLICE_v1.md) | Install → doctor → UI → first build |
+| 4 | [INTERNAL_MATURITY_PLAN.md](INTERNAL_MATURITY_PLAN.md) | Engineering bar before pilots |
+| 5 | [SPLICE_PRODUCT.md](SPLICE_PRODUCT.md) | Product tiers S0–S5 |
+| 6 | [DEMO_5_MIN_UI.md](DEMO_5_MIN_UI.md) | 5-minute demo script |
 
 ---
 

@@ -10,7 +10,7 @@
 
 **Hardware-Splicer Splice Agent — Splice Sprint**
 
-Turn your donor parts into a KiCad carrier, parts list, wiring guide, and **bench measurement gates** you must close before power-on.
+Turn donor parts into a KiCad carrier, **design readiness review** (preview, BOM, fab artifacts), wiring guide, and **bench measurement gates** before power-on.
 
 ---
 
@@ -19,7 +19,7 @@ Turn your donor parts into a KiCad carrier, parts list, wiring guide, and **benc
 | Deliverable | Description |
 |-------------|-------------|
 | Intake session | 1–2 hours — goal, parts on table, donor context |
-| Splice build | Engine-run compile → **PROJECT_PACKAGE** |
+| Splice build | Engine-run compile → **PROJECT_PACKAGE** + Design verify artifacts |
 | Artifacts zip | KiCad project, BOM, guides, bench session JSON |
 | Walkthrough | ~30 minutes — gates, bench workflow, download |
 | Gate review | Verdict explanation before you energize |
