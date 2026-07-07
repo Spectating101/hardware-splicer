@@ -95,6 +95,7 @@ make splice-ui-dev
 | Item | Status |
 |------|--------|
 | KiCad MCP dev profile | documented — [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) |
+| KiCad MCP recheck script + API | ✅ [`KICAD_MCP_DEV_PROFILE.md`](KICAD_MCP_DEV_PROFILE.md) |
 | Artifact export API + Design tab | ✅ wired |
 | FreeRouting opt-in (`POST /v1/build-files/autoroute`) | ✅ wired |
 | KiBot comparison for `build_compilation/` outputs | ✅ `POST /v1/build-files/fab-manifest` |

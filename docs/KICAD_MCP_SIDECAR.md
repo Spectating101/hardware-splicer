@@ -20,8 +20,9 @@ Saves files                 Agent assists in KiCad          DRC / gates / zip
 1. Compile a build normally (CLI, UI, or agent).
 2. Open `build_compilation/*.kicad_pcb` in KiCad (or via MCP-assisted session).
 3. After human save, point HS at the same `build_dir` and refresh:
-   - `POST /v1/build-files/design-quality`
-   - Re-export `PROJECT_PACKAGE` when gates pass.
+   - `scripts/kicad_mcp_dev_profile.sh <build_dir> recheck`
+   - `POST /v1/build-files/recheck`
+   - splice-ui Design tab → **Recheck after KiCad edit**
 
 ---
 
@@ -65,4 +66,5 @@ After edits, in splice-ui **Design** tab: reload preview (KiCanvas reads `POST /
 
 - [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md)
 - [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](OSS_INTERFACE_INTEGRATION_STRATEGY.md)
+- [`KICAD_MCP_DEV_PROFILE.md`](KICAD_MCP_DEV_PROFILE.md)
 - [`ENGINE_VS_INTERFACE.md`](ENGINE_VS_INTERFACE.md)

@@ -213,6 +213,19 @@ export async function exportBuildViews(buildDir) {
   return parseJson(res);
 }
 
+export async function recheckBuildAfterKicad(buildDir, { refreshPackage = true, exportViews = true } = {}) {
+  const res = await fetch(`${API_BASE}/v1/build-files/recheck`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      build_dir: buildDir,
+      refresh_package: refreshPackage,
+      export_views: exportViews,
+    }),
+  });
+  return parseJson(res);
+}
+
 export async function composeCanvas(nodes, wires, { wireOnly = false, exportGerber = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/compose-canvas`, {
     method: "POST",

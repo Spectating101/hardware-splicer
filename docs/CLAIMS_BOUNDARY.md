@@ -39,6 +39,7 @@
 | Fab artifact coverage vs KiBot reference | `POST /v1/build-files/fab-manifest` |
 | Wiring topology diagram in package UI | Mermaid from `topology_operators` in Wiring tab |
 | Opt-in FreeRouting autoroute | `POST /v1/build-files/autoroute` with `confirm=true`; never default-on |
+| KiCad human edit → truth recheck | `scripts/kicad_mcp_dev_profile.sh`, `POST /v1/build-files/recheck` |
 
 **v1.1 one-liner (interface preview):**
 

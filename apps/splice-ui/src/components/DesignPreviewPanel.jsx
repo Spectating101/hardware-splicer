@@ -112,6 +112,15 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
   const [quality, setQuality] = useState(null);
   const [loadingQuality, setLoadingQuality] = useState(false);
 
+  const reloadQuality = () => {
+    if (!buildDir) return;
+    setLoadingQuality(true);
+    fetchDesignQuality(buildDir)
+      .then(setQuality)
+      .catch(() => setQuality(qualityHint || normalizeCompileTruth({ pkg })))
+      .finally(() => setLoadingQuality(false));
+  };
+
   const truth = normalizeCompileTruth({ pkg, quality: quality || qualityHint });
 
   useEffect(() => {
@@ -243,7 +252,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
           </button>
         )}
       </section>
-      <DesignReadinessPanel buildDir={buildDir} />
+      <DesignReadinessPanel buildDir={buildDir} onRecheckComplete={reloadQuality} />
       <DesignArtifactsPanel buildDir={buildDir} />
     </div>
   );

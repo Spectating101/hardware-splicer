@@ -66,10 +66,10 @@ OSS_CATALOG: List[Dict[str, Any]] = [
         "name": "KiCad MCP servers",
         "url": "https://github.com/mixelpixx/KiCAD-MCP-Server",
         "license": "varies",
-        "status": "documented",
+        "status": "partial",
         "priority": "P1",
-        "hook": "docs/KICAD_MCP_SIDECAR.md — human edits in KiCad, HS re-compiles",
-        "claim": "Live KiCad session sidecar; not a hard runtime dependency",
+        "hook": "scripts/kicad_mcp_dev_profile.sh + POST /v1/build-files/recheck",
+        "claim": "Human KiCad edit → DRC/ERC recheck + package refresh (MCP optional)",
     },
     {
         "id": "kibot",

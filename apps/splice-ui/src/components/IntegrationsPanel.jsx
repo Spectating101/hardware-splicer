@@ -185,13 +185,44 @@ export function DesignArtifactsPanel({ buildDir }) {
   );
 }
 
-export function DesignReadinessPanel({ buildDir }) {
+export function DesignReadinessPanel({ buildDir, onRecheckComplete }) {
+  const [recheckMsg, setRecheckMsg] = useState("");
+  const [recheckBusy, setRecheckBusy] = useState(false);
+
+  const handleRecheck = async () => {
+    setRecheckBusy(true);
+    setRecheckMsg("");
+    try {
+      const { recheckBuildAfterKicad } = await import("../api.js");
+      const result = await recheckBuildAfterKicad(buildDir);
+      const drc = result.drc || {};
+      setRecheckMsg(
+        drc.skipped
+          ? `Recheck skipped: ${drc.reason || "kicad-cli unavailable"}`
+          : drc.pass
+            ? `KiCad recheck OK — ${drc.errors ?? 0} DRC errors, ${drc.warnings ?? 0} warnings.`
+            : `KiCad recheck: ${drc.errors ?? "?"} DRC errors — review before bench.`,
+      );
+      onRecheckComplete?.(result);
+    } catch (err) {
+      setRecheckMsg(err.message);
+    } finally {
+      setRecheckBusy(false);
+    }
+  };
+
   return (
     <section className="card design-readiness-card">
       <h3>Design readiness</h3>
       <p className="muted">
-        Inspect the compile BOM and fab artifact coverage before handoff. This is verification, not a fab sign-off.
+        Inspect the compile BOM and fab artifact coverage before handoff. After editing in KiCad, recheck DRC/ERC here.
       </p>
+      <div className="lab-actions">
+        <button type="button" className="secondary small" disabled={recheckBusy} onClick={handleRecheck}>
+          {recheckBusy ? "Rechecking…" : "Recheck after KiCad edit"}
+        </button>
+      </div>
+      {recheckMsg && <p className="muted small">{recheckMsg}</p>}
       <DesignBomPanel buildDir={buildDir} />
       <FabManifestPanel buildDir={buildDir} />
       <HumanViewsPanel buildDir={buildDir} />

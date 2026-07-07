@@ -145,6 +145,12 @@ class BuildFilesAutorouteRequest(BaseModel):
     confirm: bool = Field(default=False, description="Must be true to run opt-in FreeRouting")
 
 
+class BuildFilesRecheckRequest(BaseModel):
+    build_dir: str
+    refresh_package: bool = True
+    export_views: bool = True
+
+
 class SpliceGoldenLoopRequest(BaseModel):
     intake: Dict[str, Any]
     out_dir: str | None = Field(default=None)
@@ -602,6 +608,20 @@ def create_app() -> FastAPI:
     def build_files_export_views(request: BuildFilesListRequest) -> Dict[str, Any]:
         try:
             return export_human_views(request.build_dir)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/recheck")
+    def build_files_recheck(request: BuildFilesRecheckRequest) -> Dict[str, Any]:
+        from .kicad_sidecar_recheck import recheck_build_after_kicad_edit
+
+        try:
+            return recheck_build_after_kicad_edit(
+                request.build_dir,
+                refresh_package=request.refresh_package,
+                export_views=request.export_views,
+                source="api_kicad_sidecar",
+            )
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 
