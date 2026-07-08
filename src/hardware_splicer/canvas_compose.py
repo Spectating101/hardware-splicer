@@ -40,6 +40,7 @@ def build_canvas_graph(
     constraints: Mapping[str, Any] | None = None,
     salvage_mode: bool = False,
     material_mode: str | None = None,
+    drc_fixup: Mapping[str, float] | None = None,
 ) -> Dict[str, Any]:
     """Merge editor nodes/wires or auto-wire unknown connections."""
     mode = str(material_mode or resolve_material_mode(constraints=constraints, salvage_mode=salvage_mode))
@@ -52,6 +53,8 @@ def build_canvas_graph(
         graph = compose_build_graph_from_canvas_nodes(list(nodes))
     graph.update(material_mode_summary(material_mode=mode, constraints=constraints))  # type: ignore[arg-type]
     graph["graph_mode"] = "canvas"
+    if drc_fixup:
+        graph["drc_fixup"] = {k: round(float(v), 4) for k, v in drc_fixup.items()}
     return graph
 
 
@@ -66,6 +69,7 @@ def compile_canvas_build(
     build_id: str = "generic_low_voltage_build",
     export_gerber: bool = True,
     resolved_modules: Sequence[Mapping[str, Any]] | None = None,
+    drc_fixup: Mapping[str, float] | None = None,
 ) -> CanvasCompileResult:
     """Editor/canvas partial graph → catalog compile with material_mode stamped on quality."""
     constraints_map = dict(constraints or {})
@@ -78,6 +82,7 @@ def compile_canvas_build(
         constraints=constraints_map,
         salvage_mode=salvage_mode,
         material_mode=mode,
+        drc_fixup=drc_fixup,
     )
     notes: List[str] = ["Compiled from canvas/editor graph via unified netlist path."]
     if not graph.get("nodes"):

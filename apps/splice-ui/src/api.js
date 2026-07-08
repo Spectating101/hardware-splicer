@@ -23,6 +23,11 @@ export async function fetchHealth() {
   return parseJson(res);
 }
 
+export async function fetchModuleCatalog() {
+  const res = await fetch(`${API_BASE}/v1/modules/catalog`);
+  return parseJson(res);
+}
+
 export async function fetchExamples() {
   const res = await fetch(`${API_BASE}/v1/examples/splice-intakes`);
   return parseJson(res);
@@ -122,6 +127,27 @@ export async function benchSubmitCapture(buildDir, capture) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ build_dir: buildDir, capture }),
+  });
+  return parseJson(res);
+}
+
+export async function composeBuild(payload) {
+  const res = await fetch(`${API_BASE}/v1/compose`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      export_gerber: false,
+      ...payload,
+    }),
+  });
+  return parseJson(res);
+}
+
+export async function renderProjectPackage(buildDir, { source = "compose" } = {}) {
+  const res = await fetch(`${API_BASE}/v1/project-package/render`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir, source }),
   });
   return parseJson(res);
 }

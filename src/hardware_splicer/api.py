@@ -186,6 +186,10 @@ class ComposeRequest(BaseModel):
         default=False,
         description="When phrase is set, try Qwen LLM-first compose before heuristic scratch.",
     )
+    drc_fixup: Dict[str, float] | None = Field(
+        default=None,
+        description="Geometry fixup hints from prior DRC loop — applied to canvas graph compile.",
+    )
 
 
 class ComposeCanvasRequest(BaseModel):
@@ -589,6 +593,17 @@ def create_app() -> FastAPI:
             return read_design_quality_summary(request.build_dir)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.get("/v1/modules/catalog")
+    def modules_catalog() -> Dict[str, Any]:
+        from .pcb.module_registry import list_canvas_modules
+
+        modules = list_canvas_modules()
+        return {
+            "ok": True,
+            "count": len(modules),
+            "modules": modules,
+        }
 
     @app.get("/v1/integrations/catalog")
     def integrations_catalog() -> Dict[str, Any]:
@@ -1011,6 +1026,7 @@ def create_app() -> FastAPI:
                 export_gerber=bool(request.export_gerber),
                 wire_only=bool(request.wire_only),
                 allow_llm_first=bool(request.allow_llm_first),
+                drc_fixup=request.drc_fixup,
                 request_id=request_id,
             )
             if payload.get("wire_only"):

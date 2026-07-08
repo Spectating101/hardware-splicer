@@ -72,6 +72,7 @@ def test_splice_product_routes_registered() -> None:
         "/v1/examples/donor-fixtures",
         "/v1/examples/netlist-fixtures",
         "/v1/integrations/catalog",
+        "/v1/modules/catalog",
         "/v1/intent/clarify",
         "/v1/jobs/splice-build",
         "/v1/jobs",
@@ -86,6 +87,19 @@ def test_splice_product_routes_registered() -> None:
     }
     missing = required - paths
     assert not missing, f"Missing routes: {sorted(missing)}"
+
+
+def test_modules_catalog_returns_footprinted_modules() -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    client = TestClient(create_app())
+    body = client.get("/v1/modules/catalog").json()
+    assert body.get("ok") is True
+    assert body.get("count", 0) >= 1
+    first = body["modules"][0]
+    assert first.get("id")
+    assert first.get("pins")
 
 
 def test_examples_return_intake_payloads() -> None:

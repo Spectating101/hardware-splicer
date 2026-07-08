@@ -10,10 +10,12 @@ import {
   fetchJobs,
   fetchVisionCapabilities,
   jobBundleUrl,
+  renderProjectPackage,
 } from "./api.js";
 import AiAssistPanel from "./components/AiAssistPanel.jsx";
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
+import DesignStudioPanel from "./components/DesignStudioPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
 import ProjectSummaryBar from "./components/ProjectSummaryBar.jsx";
@@ -34,6 +36,7 @@ import { useSpliceJob } from "./hooks/useSpliceJob.js";
 
 const VIEWS = {
   home: "home",
+  studio: "studio",
   wizard: "wizard",
   example: "example",
   results: "results",
@@ -72,7 +75,7 @@ function formatJobStatus(status) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
+function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
@@ -94,6 +97,9 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
         <div className="hero-actions">
           <button type="button" className="primary large" onClick={onStart} disabled={!apiOk}>
             Start a project
+          </button>
+          <button type="button" className="secondary large" onClick={onOpenStudio} disabled={!apiOk}>
+            Design studio
           </button>
           <button type="button" className="secondary large" onClick={onQuickDemo} disabled={!apiOk}>
             Quick demo (1-click)
@@ -316,6 +322,49 @@ export default function App() {
     if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
   };
 
+  const openStudioProject = async ({ composeResult, drc }) => {
+    const buildDir = drc?.outDir || composeResult?.out_dir;
+    if (!buildDir) return;
+    try {
+      const [pkgRes, session] = await Promise.all([
+        renderProjectPackage(buildDir, { source: "compose" }),
+        benchStatus(buildDir),
+      ]);
+      spliceJob.reset();
+      setHydratedResult({
+        build_dir: buildDir,
+        project_name: phraseFromCompose(composeResult),
+        goal: composeResult?.goal || phraseFromCompose(composeResult),
+        project_package: pkgRes.package,
+        design_quality: composeResult?.design_quality,
+        bench_session: {
+          readiness: session.readiness,
+          open_gate_count: session.open_gate_count,
+          critical_open_count: session.critical_open_count,
+          power_on_authorized: session.power_on_authorized,
+          level: session.level,
+          gates: session.gates,
+        },
+      });
+      setActiveJobId(null);
+      setPreviewContext(null);
+      setView(VIEWS.results);
+      setActiveTab("design");
+      setToast("Project package opened — review KiCad carrier and bench gates");
+    } catch (err) {
+      setToast(err.message);
+    }
+  };
+
+  function phraseFromCompose(composeResult) {
+    return (
+      composeResult?.project_name ||
+      composeResult?.phrase ||
+      composeResult?.build_id ||
+      "compose-project"
+    );
+  }
+
   const openDesignPreview = ({ buildDir, title, qualityHint }) => {
     if (!buildDir) return;
     setPreviewContext({ buildDir, title, qualityHint });
@@ -472,6 +521,7 @@ export default function App() {
         <nav className="sidebar-nav" aria-label="Main">
           {[
             ["Home", VIEWS.home],
+            ["Design studio", VIEWS.studio],
             ["New project", VIEWS.wizard],
             ["Examples", VIEWS.example],
             ["Interface lab", VIEWS.lab],
@@ -581,8 +631,17 @@ export default function App() {
               apiOk={health?.ok}
               version={health?.version}
               onStart={() => setView(VIEWS.wizard)}
+              onOpenStudio={() => setView(VIEWS.studio)}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
+            />
+          )}
+
+          {view === VIEWS.studio && (
+            <DesignStudioPanel
+              apiOk={health?.ok}
+              llmReady={Boolean(health?.llm_policy?.qwen_llm_first)}
+              onOpenProject={openStudioProject}
             />
           )}
 

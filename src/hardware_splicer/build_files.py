@@ -143,6 +143,19 @@ def read_design_quality_summary(build_dir: str | Path) -> Dict[str, Any]:
         "electrical_safety_pass": quality.get("electrical_safety_pass"),
         "circuit_readiness": quality.get("circuit_readiness"),
         "build_id": quality.get("build_id"),
+        "drc_fix_loop": quality.get("drc_fix_loop"),
+        "drc_fixup": (quality.get("drc_fix_loop") or {}).get("attempts", [{}])[-1].get("drc_fixup")
+        if quality.get("drc_fix_loop")
+        else None,
+        "violations": [
+            {
+                "severity": v.get("severity"),
+                "type": v.get("type"),
+                "description": v.get("description"),
+            }
+            for v in (kicad_drc.get("violations") or [])
+            if str(v.get("severity") or "").lower() == "error"
+        ][:24],
     }
 
 

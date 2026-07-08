@@ -77,6 +77,28 @@ def test_finalize_compose_job_result_writes_package(tmp_path: Path, monkeypatch:
     assert final.get("build_dir")
     assert Path(final["build_dir"], "PROJECT_PACKAGE.json").is_file()
 
+
+def test_build_canvas_graph_applies_drc_fixup() -> None:
+    from hardware_splicer.canvas_compose import build_canvas_graph
+
+    graph = build_canvas_graph(
+        nodes=[{"id": "m1", "moduleId": "esp32-devkit"}, {"id": "m2", "moduleId": "dht22"}],
+        drc_fixup={"edge_pad_extra_mm": 0.35, "module_gap_extra_mm": 4.0},
+    )
+    assert graph.get("drc_fixup") == {"edge_pad_extra_mm": 0.35, "module_gap_extra_mm": 4.0}
+
+
+def test_compose_request_accepts_drc_fixup() -> None:
+    from hardware_splicer.api import ComposeRequest
+
+    row = ComposeRequest(
+        canvas_nodes=[{"id": "m1", "moduleId": "esp32-devkit"}],
+        drc_fixup={"via_clearance_mm": 0.27},
+    )
+    assert row.drc_fixup == {"via_clearance_mm": 0.27}
+
+
+def test_scratch_failure_writes_casefile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
     result = compile_scratch_build(
         out_dir=str(tmp_path),

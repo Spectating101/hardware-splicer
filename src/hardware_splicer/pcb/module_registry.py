@@ -347,3 +347,14 @@ def bounds_from_pads(pads: list[dict], margin: float = 3) -> dict:
     w = max(max(xs) - min(xs) + margin * 2, 8)
     h = max(max(ys) - min(ys) + margin * 2, 8)
     return {"w": w, "h": h}
+
+
+def list_canvas_modules() -> list[dict]:
+    """Modules with KiCad footprints — curated set for browser canvas compose."""
+    lib = _load_library()
+    rows: list[dict] = []
+    for module_id in sorted(_MODULE_FOOTPRINTS.keys()):
+        spec = lib.get(module_id)
+        if spec:
+            rows.append(spec)
+    return rows

@@ -54,6 +54,7 @@ def compose_dispatch(
     export_gerber: bool = False,
     wire_only: bool = False,
     allow_llm_first: bool = False,
+    drc_fixup: Mapping[str, float] | None = None,
     request_id: str | None = None,
     build_id: str | None = None,
 ) -> Dict[str, Any]:
@@ -95,6 +96,7 @@ def compose_dispatch(
             salvage_mode=salvage_mode,
             material_mode=mode,
             export_gerber=export_gerber,
+            drc_fixup=drc_fixup,
         )
         quality = (canvas.compile_result.design_quality if canvas.compile_result else {}) or {}
         compile_payload = canvas.compile_result.to_dict() if canvas.compile_result else None
