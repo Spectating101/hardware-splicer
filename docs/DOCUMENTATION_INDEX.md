@@ -98,7 +98,8 @@
 | [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
 | [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
 | [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev machine validation log |
-| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md) | **Alien machine** — lab Windows + WSL2 |
+| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md) | **Alien machine** — lab Windows + WSL2 (v1.0.2 `verify-product-internal`) |
+| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md) | **Alien machine** — alpha.5 **AGENT_QUICKSTART** Track B (36s) |
 | [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |

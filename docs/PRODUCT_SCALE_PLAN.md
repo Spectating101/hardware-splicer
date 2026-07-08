@@ -178,7 +178,7 @@ flowchart LR
 
 ## 9. Next actions after alpha.5
 
-1. Run `make verify-product-internal` on second machine; file `INSTALL_REPORT`.
+1. ~~Run `make verify-product-internal` on second machine; file `INSTALL_REPORT`.~~ ✅ FGEDHGV Track B — [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md)
 2. Phase 1 kickoff: async `POST /v1/jobs` wrapper for `compose/agent-loop`.
 3. Expand module catalog toward 50 entries with pin validation tests.
 4. Unify salvage intake → `hs_compose_drc_agent` with `donor_context`.

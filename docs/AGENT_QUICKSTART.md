@@ -183,7 +183,7 @@ hs_modules_catalog
 
 ---
 
-## 7. Next
+Repeat on alien WSL: [`scripts/agent_quickstart_verify.sh`](../scripts/agent_quickstart_verify.sh) — see [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 
 - Browser legibility: Design Studio → **AI phrase compose** or canvas compile  
 - Demo script: [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md)  
