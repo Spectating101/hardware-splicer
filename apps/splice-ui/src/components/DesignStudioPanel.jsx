@@ -209,6 +209,10 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
     [compiling, moduleIndex, setNodes],
   );
 
+  const handleSelectionChange = useCallback(({ nodes: picked }) => {
+    setSelectedIds(picked.map((n) => n.id));
+  }, []);
+
   const handleLibraryDragStart = (event, spec) => {
     event.dataTransfer.setData("application/hs-module", JSON.stringify(spec));
     event.dataTransfer.effectAllowed = "move";
@@ -394,7 +398,7 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
           onEdgesChange={onEdgesChange}
           setNodes={setNodes}
           setEdges={setEdges}
-          onSelectionChange={({ nodes: picked }) => setSelectedIds(picked.map((n) => n.id))}
+          onSelectionChange={handleSelectionChange}
           disabled={disabled}
         />
 
