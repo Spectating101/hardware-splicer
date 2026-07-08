@@ -41,8 +41,10 @@ def test_compose_agent_bench_loop_salvage_simulated(tmp_path: Path, monkeypatch:
     assert loop.get("final_kicad_drc_errors") == 0
     assert result.get("project_package")
     assert bench_loop.get("submitted_capture") is True
-    assert bench_loop.get("bench_capture_template")
+    assert bench_loop.get("passed") is True
+    assert (result.get("bench_session") or {}).get("power_on_authorized") is True
     assert (tmp_path / "compose_bench" / "BENCH_LOOP_REPORT.json").is_file()
+    assert (tmp_path / "compose_bench" / "SPLICE_PLAN.json").is_file()
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")

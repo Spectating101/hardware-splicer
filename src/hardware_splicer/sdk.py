@@ -823,16 +823,31 @@ def finalize_compose_job_result(
     goal: str = "",
     project_name: str = "",
     clarifier: Mapping[str, Any] | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+    parts: Sequence[Mapping[str, Any]] | None = None,
 ) -> Dict[str, Any]:
     """Turn compose_dispatch output into the same PROJECT_PACKAGE shape as splice builds."""
     from .bench_capture_bridge import sync_bench_session_template
     from .project_package import write_project_package_artifacts
+    from .salvage_bridge import write_compose_salvage_bench_artifacts
     from .splice_bench import open_bench_session
 
     apply_engine_defaults()
     out_dir = Path(str(compose_result.get("out_dir") or "")).resolve()
     if not out_dir.is_dir():
         raise ValueError(f"compose out_dir missing: {out_dir}")
+
+    salvage_package = compose_result.get("salvage_package")
+    salvage_artifacts: Dict[str, str] = {}
+    if isinstance(salvage_package, Mapping):
+        salvage_artifacts = write_compose_salvage_bench_artifacts(
+            out_dir,
+            salvage_package=salvage_package,
+            goal=goal or str(compose_result.get("phrase") or ""),
+            project_name=project_name or out_dir.name,
+            donor_context=donor_context or compose_result.get("donor_context"),
+            parts=parts or compose_result.get("parts"),
+        )
 
     body: Dict[str, Any] = {
         **dict(compose_result),
@@ -843,7 +858,7 @@ def finalize_compose_job_result(
     if clarifier:
         body["metadata"] = {"clarifier": dict(clarifier)}
     package_write = write_project_package_artifacts(out_dir, result=body, source="compose")
-    bench_session = open_bench_session(out_dir)
+    bench_session = open_bench_session(out_dir, force=bool(salvage_package))
     template_sync = sync_bench_session_template(out_dir)
     bench_session = template_sync.get("session") or bench_session
     artifacts = dict(compose_result.get("artifacts") or {})
@@ -864,6 +879,7 @@ def finalize_compose_job_result(
             "bench_capture_template": bench_session.get("bench_capture_template"),
         },
         "bench_capture_template": (template_sync.get("template") or {}).get("template_path"),
+        "salvage_bench_artifacts": salvage_artifacts or None,
         "artifacts": artifacts,
     }
 

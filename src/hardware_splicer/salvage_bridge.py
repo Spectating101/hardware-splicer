@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
 from .build_compiler import ensure_circuit_import_path, resolve_build_id
@@ -311,3 +313,49 @@ def resolve_salvage_compose_inputs(
         compose["module_ids"] = compose_ids or None
         compose["resolved_modules"] = resolved or None
     return compose
+
+
+def write_compose_salvage_bench_artifacts(
+    out_dir: str | Path,
+    *,
+    salvage_package: Mapping[str, Any],
+    goal: str = "",
+    project_name: str = "",
+    donor_context: Mapping[str, Any] | None = None,
+    parts: Sequence[Mapping[str, Any]] | None = None,
+) -> Dict[str, str]:
+    """Emit splice-shaped bench artifacts so compose salvage builds get evidence gates."""
+    root = Path(out_dir).resolve()
+    root.mkdir(parents=True, exist_ok=True)
+    pkg = dict(salvage_package)
+    paths: Dict[str, str] = {}
+
+    splice_plan_path = root / "SPLICE_PLAN.json"
+    splice_plan_path.write_text(json.dumps(pkg, indent=2), encoding="utf-8")
+    paths["splice_plan"] = str(splice_plan_path)
+
+    intake_snapshot: Dict[str, Any] = {
+        "project_name": project_name or goal or root.name,
+        "goal": goal or project_name or root.name,
+        "salvage_mode": True,
+        "recommended_build_id": pkg.get("recommended_build_id"),
+        "available_parts": [dict(row) for row in (parts or []) if isinstance(row, Mapping)],
+    }
+    donor = dict(donor_context or {})
+    for key in ("circuit", "functional_salvage", "donor_boards", "analysis", "evidence_notes"):
+        if donor.get(key) is not None:
+            intake_snapshot[key] = donor[key]
+    intake_path = root / "PROJECT_INTAKE.json"
+    intake_path.write_text(json.dumps(intake_snapshot, indent=2), encoding="utf-8")
+    paths["project_intake"] = str(intake_path)
+
+    if isinstance(pkg.get("bringup_card"), Mapping):
+        bringup_path = root / "BRINGUP_CARD.json"
+        bringup_path.write_text(json.dumps(pkg["bringup_card"], indent=2), encoding="utf-8")
+        paths["bringup_card"] = str(bringup_path)
+    if isinstance(pkg.get("gap_analysis"), Mapping):
+        gap_path = root / "SALVAGE_GAP_ANALYSIS.json"
+        gap_path.write_text(json.dumps(pkg["gap_analysis"], indent=2), encoding="utf-8")
+        paths["gap_analysis"] = str(gap_path)
+
+    return paths

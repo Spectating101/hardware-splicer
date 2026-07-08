@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.10
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.11
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -162,6 +162,8 @@ al=r.get('agent_loop') or {}
 print('bench_loop_passed', bl.get('passed'), 'power_on', (r.get('bench_session') or {}).get('power_on_authorized'))
 assert al.get('final_kicad_drc_errors') == 0
 assert bl.get('submitted_capture') is True
+assert (r.get('bench_session') or {}).get('power_on_authorized') is True
+assert bl.get('passed') is True
 assert r.get('project_package')
 "
 

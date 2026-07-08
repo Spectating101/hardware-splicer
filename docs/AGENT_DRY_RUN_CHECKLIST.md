@@ -32,7 +32,7 @@
 
 **File blockers:** [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md)
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.10`
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.11`
 
 ---
 

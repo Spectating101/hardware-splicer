@@ -6,6 +6,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.11] - 2026-07-09
+
+### Fixed
+
+- Compose salvage `finalize_package` now writes `SPLICE_PLAN.json` + `PROJECT_INTAKE.json` so bench gates populate (same as splice intake path)
+- `hs_compose_bench_loop` simulated closure reaches `power_on_authorized` on robot drive salvage
+
+### Changed
+
+- Quickstart step 5 asserts `power_on_authorized` and `bench_loop.passed`
+
+---
+
 ## [1.1.0-alpha.10] - 2026-07-09
 
 ### Added

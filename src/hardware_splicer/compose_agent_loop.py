@@ -177,10 +177,15 @@ def compose_agent_loop(
     if finalize_package and last_result.get("out_dir"):
         from .sdk import finalize_compose_job_result
 
+        compose_for_finalize = {**last_result}
+        if salvage_package:
+            compose_for_finalize["salvage_package"] = salvage_package
         final = finalize_compose_job_result(
-            last_result,
+            compose_for_finalize,
             goal=goal or compose_phrase or project_name or "compose",
             project_name=project_name or compose_phrase or Path(str(last_result["out_dir"])).name,
+            donor_context=donor_context,
+            parts=parts,
         )
         payload = {**final, "agent_loop": agent_loop}
         if salvage_package:
