@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.7
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.8
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh

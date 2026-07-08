@@ -28,7 +28,7 @@
 | 7 | (Optional) Curl 3 — Qwen phrase | `qwen_configured=true`, 0 DRC errors |
 | 8 | Async job — `POST /v1/jobs/compose-agent-loop` + poll result | `ok=true`, package present |
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.7`
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.8`
 
 ---
 
