@@ -16,7 +16,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ### Changed
 
-- `AGENT_QUICKSTART.md` — async job poll example
+- `scripts/agent_quickstart_verify.sh` — sync + async job steps; `deploy_alien_quickstart.sh` for FGEDHGV
+- `verify_product_live_smoke.py` — compose-agent-loop in live bar
+- Canvas pin contract: fixed `dht22` / `mini-pump-5v` footprint pad ids
 
 ---
 

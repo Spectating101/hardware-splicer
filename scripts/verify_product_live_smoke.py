@@ -80,6 +80,57 @@ def _run_smoke(base: str) -> None:
         raise RuntimeError(f"UI root failed: status={status}")
     print("    UI root ok")
 
+    status, modules = _fetch_json("GET", f"{base}/v1/modules/catalog")
+    if status != 200 or not modules.get("ok") or not modules.get("count"):
+        raise RuntimeError(f"modules catalog failed: {status} {modules}")
+    print(f"    modules catalog ok count={modules.get('count')}")
+
+    agent_request_id = f"live-agent-{int(time.time())}"
+    status, agent_job = _fetch_json(
+        "POST",
+        f"{base}/v1/jobs/compose-agent-loop",
+        {
+            "phrase": "live smoke async agent loop",
+            "canvas_nodes": [
+                {"id": "m1", "moduleId": "esp32-devkit"},
+                {"id": "m2", "moduleId": "dht22"},
+            ],
+            "export_gerber": False,
+            "allow_llm_first": False,
+            "max_manual_retries": 1,
+            "finalize_package": True,
+            "project_name": "live_smoke_agent_loop",
+            "request_id": agent_request_id,
+        },
+    )
+    if status not in {200, 202}:
+        raise RuntimeError(f"agent-loop job submit failed: {status} {agent_job}")
+    agent_job_id = agent_job.get("job_id") or agent_request_id
+    agent_deadline = time.time() + JOB_TIMEOUT_SEC
+    agent_terminal = None
+    while time.time() < agent_deadline:
+        status, polled = _fetch_json("GET", f"{base}/v1/jobs/{agent_job_id}")
+        if status != 200:
+            raise RuntimeError(f"agent-loop job poll failed: {status} {polled}")
+        if polled.get("status") in {"succeeded", "failed", "cancelled"}:
+            agent_terminal = polled
+            break
+        time.sleep(POLL_SEC)
+    if agent_terminal is None or agent_terminal.get("status") != "succeeded":
+        raise RuntimeError(f"agent-loop job failed: {agent_terminal}")
+    status, agent_result = _fetch_json("GET", f"{base}/v1/jobs/{agent_job_id}/result")
+    if status != 200 or not agent_result.get("ok"):
+        raise RuntimeError(f"agent-loop result missing: {status} {agent_result}")
+    agent_body = agent_result.get("result") or {}
+    if not (agent_body.get("agent_loop") or {}).get("resolved"):
+        raise RuntimeError(f"agent-loop not resolved: {agent_body.get('agent_loop')}")
+    if not agent_body.get("project_package"):
+        raise RuntimeError("agent-loop project_package missing")
+    print(
+        f"    compose-agent-loop job ok drc_errors="
+        f"{(agent_body.get('agent_loop') or {}).get('final_kicad_drc_errors')}"
+    )
+
     intake = json.loads(INTAKE_PATH.read_text(encoding="utf-8"))
     request_id = f"live-smoke-{int(time.time())}"
     status, submitted = _fetch_json(
@@ -139,6 +190,7 @@ def main() -> int:
         env["HARDWARE_SPLICER_DRC_FIX_LOOP"] = "1"
         env["HARDWARE_SPLICER_SKIP_VISION_LIVE"] = "1"
         env["HARDWARE_SPLICER_OFFLINE_SALVAGE"] = "1"
+        env["HARDWARE_SPLICER_OFFLINE_COMPOSE"] = "1"
         venv_python = ROOT / ".venv" / "bin" / "python"
         python = str(venv_python if venv_python.is_file() else sys.executable)
         proc = subprocess.Popen(

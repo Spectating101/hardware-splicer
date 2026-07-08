@@ -110,7 +110,7 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     "dht22": {
         "kicadFootprint": "Sensor:DHT22-4PIN",
         "bodyMm": {"w": 15, "h": 12},
-        "pads": _row(["VCC", "DATA", "NC", "GND"], 0, 0, _P),
+        "pads": _row(["VCC", "DATA", "GND"], 0, 0, _P),
     },
     "hc-sr04": {
         "kicadFootprint": "Sensor:HC-SR04",
@@ -209,7 +209,7 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     "mini-pump-5v": {
         "kicadFootprint": "Actuator:PUMP-5V-MINI",
         "bodyMm": {"w": 24, "h": 18},
-        "pads": _row(["V+", "GND"], 0, 0, _P * 2),
+        "pads": _row(["VCC", "GND"], 0, 0, _P * 2),
     },
     "level-shifter-4ch": {
         "kicadFootprint": "Interface:LEVEL-SHIFTER-4CH",

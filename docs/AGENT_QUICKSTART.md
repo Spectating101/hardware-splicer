@@ -112,7 +112,13 @@ curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID/result | jq '{
 }'
 ```
 
-Repeat on alien WSL: [`scripts/agent_quickstart_verify.sh`](../scripts/agent_quickstart_verify.sh) — see [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
+Repeat on alien WSL:
+
+```bash
+bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.6
+```
+
+See [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 
 Start MCP (separate terminal):
 
@@ -204,10 +210,9 @@ hs_modules_catalog
 | `hs_design_quality` ValueError on build_dir | Set `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1` or use path under output root |
 | DRC 0 but `cosmetic_preview` | Expected — review before fab; not a bug |
 
----
+## 7. Next
 
-Repeat on alien WSL: [`scripts/agent_quickstart_verify.sh`](../scripts/agent_quickstart_verify.sh) — see [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
-
-- Browser legibility: Design Studio → **AI phrase compose** or canvas compile  
-- Demo script: [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md)  
+- Alien one-shot: `bash scripts/deploy_alien_quickstart.sh`
+- Browser legibility: Design Studio → **AI phrase compose** or canvas compile
+- Demo script: [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md)
 - Internal bar: `make verify-product-internal`
