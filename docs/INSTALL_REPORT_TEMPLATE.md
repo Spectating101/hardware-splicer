@@ -80,6 +80,14 @@ curl -s http://127.0.0.1:8787/health
 
 - [ ] HTTP 200, `"ok": true`
 
+**Agent quickstart bar (recommended):**
+
+```bash
+HS_QUICKSTART_FRESH=0 HS_TRACK_ROOT=$PWD bash scripts/agent_quickstart_verify.sh
+```
+
+- [ ] Catalog ≥ 50 · canvas agent-loop · salvage donor_context · async job — all PASS
+
 ---
 
 ## Manual fixes required

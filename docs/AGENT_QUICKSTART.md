@@ -64,6 +64,26 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/agent-loop \
   }'
 ```
 
+### Curl 2b — Salvage `donor_context` agent loop (robot drive intake)
+
+Offline salvage — no LLM. Payload from [`scripts/salvage_agent_loop_payload.py`](../scripts/salvage_agent_loop_payload.py):
+
+```bash
+curl -s -X POST http://127.0.0.1:8787/v1/compose/agent-loop \
+  -H 'Content-Type: application/json' \
+  -d "$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py)" \
+  | jq '{
+    mode,
+    build_id,
+    resolved: .agent_loop.resolved,
+    drc_errors: .agent_loop.final_kicad_drc_errors,
+    salvage: (.salvage_package != null),
+    package: (.project_package != null)
+  }'
+```
+
+Expect `mode: salvage_catalog`, `build_id: robot_drive_base`, 0 DRC errors, package present.
+
 ### Curl 3 — AI phrase agent loop (Qwen when configured)
 
 ```bash

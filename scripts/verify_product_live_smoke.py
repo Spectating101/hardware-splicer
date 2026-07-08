@@ -81,9 +81,43 @@ def _run_smoke(base: str) -> None:
     print("    UI root ok")
 
     status, modules = _fetch_json("GET", f"{base}/v1/modules/catalog")
-    if status != 200 or not modules.get("ok") or not modules.get("count"):
+    if status != 200 or not modules.get("ok") or int(modules.get("count") or 0) < 50:
         raise RuntimeError(f"modules catalog failed: {status} {modules}")
     print(f"    modules catalog ok count={modules.get('count')}")
+
+    sys.path.insert(0, str(ROOT / "src"))
+    from hardware_splicer.project_intake import _donor_context_from_intake, load_project_intake
+
+    salvage_intake = load_project_intake(INTAKE_PATH)
+    status, salvage_agent = _fetch_json(
+        "POST",
+        f"{base}/v1/compose/agent-loop",
+        {
+            "goal": salvage_intake["goal"],
+            "parts": salvage_intake["available_parts"],
+            "constraints": salvage_intake.get("constraints") or {},
+            "donor_context": _donor_context_from_intake(salvage_intake),
+            "salvage_mode": True,
+            "export_gerber": False,
+            "allow_llm_first": False,
+            "max_manual_retries": 1,
+            "finalize_package": True,
+            "project_name": "live_smoke_salvage_agent_loop",
+        },
+    )
+    if status != 200:
+        raise RuntimeError(f"salvage agent-loop failed: {status} {salvage_agent}")
+    salvage_loop = salvage_agent.get("agent_loop") or {}
+    if salvage_agent.get("mode") != "salvage_catalog":
+        raise RuntimeError(f"salvage agent-loop wrong mode: {salvage_agent.get('mode')}")
+    if not salvage_loop.get("resolved") or salvage_loop.get("final_kicad_drc_errors") != 0:
+        raise RuntimeError(f"salvage agent-loop not resolved: {salvage_loop}")
+    if not salvage_agent.get("project_package") or not salvage_agent.get("salvage_package"):
+        raise RuntimeError("salvage agent-loop package missing")
+    print(
+        f"    salvage agent-loop ok build_id={salvage_agent.get('build_id')} "
+        f"drc_errors={salvage_loop.get('final_kicad_drc_errors')}"
+    )
 
     agent_request_id = f"live-agent-{int(time.time())}"
     status, agent_job = _fetch_json(

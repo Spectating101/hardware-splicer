@@ -7,6 +7,17 @@
 
 ---
 
+## July 2026 — Alpha.9 quickstart salvage bar
+
+| Surface | What shipped |
+|---------|----------------|
+| **Ops** | `agent_quickstart_verify.sh` step 4 — salvage `donor_context` (robot drive) |
+| **Scripts** | `salvage_agent_loop_payload.py` for curls and MCP |
+| **CI** | `verify_product_live_smoke.py` — sync salvage agent-loop |
+| **Tag** | `v1.1.0-alpha.9` |
+
+---
+
 ## July 2026 — Alpha.8 salvage → agent-loop bridge
 
 | Surface | What shipped |

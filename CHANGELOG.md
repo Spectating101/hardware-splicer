@@ -6,6 +6,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.9] - 2026-07-09
+
+### Added
+
+- Salvage `donor_context` step in `agent_quickstart_verify.sh` (step 4 — robot drive catalog path)
+- `scripts/salvage_agent_loop_payload.py` — reusable POST body for salvage agent-loop curls
+- Live smoke: sync salvage agent-loop before async canvas job
+
+### Changed
+
+- `AGENT_QUICKSTART.md` — Curl 2b salvage example; dry-run checklist step 7
+
+---
+
 ## [1.1.0-alpha.8] - 2026-07-09
 
 ### Added

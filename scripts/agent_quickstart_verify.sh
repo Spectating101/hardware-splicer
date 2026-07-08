@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.8
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.9
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -34,6 +34,9 @@ fi
 cd "$ROOT"
 
 export HARDWARE_SPLICER_OFFLINE_COMPOSE="${HARDWARE_SPLICER_OFFLINE_COMPOSE:-1}"
+export HARDWARE_SPLICER_OFFLINE_SALVAGE="${HARDWARE_SPLICER_OFFLINE_SALVAGE:-1}"
+export HARDWARE_SPLICER_SALVAGE_RESOLVE="${HARDWARE_SPLICER_SALVAGE_RESOLVE:-heuristic}"
+export HARDWARE_SPLICER_DRC_FIX_LOOP="${HARDWARE_SPLICER_DRC_FIX_LOOP:-1}"
 export HARDWARE_SPLICER_AUTOROUTE=0
 export HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1
 
@@ -130,8 +133,25 @@ assert al.get('resolved') and al.get('final_kicad_drc_errors') == 0
 assert body.get('project_package')
 "
 
+echo "==> step 4: salvage donor_context agent-loop"
+SALVAGE_PAYLOAD=$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py)
+curl -s -X POST "$BASE/v1/compose/agent-loop" \
+  -H 'Content-Type: application/json' \
+  -d "$SALVAGE_PAYLOAD" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)
+al=r.get('agent_loop') or {}
+print('salvage_mode', r.get('mode'), 'build_id', r.get('build_id'))
+print('salvage_resolved', al.get('resolved'), 'drc', al.get('final_kicad_drc_errors'))
+assert r.get('mode') == 'salvage_catalog', r.get('mode')
+assert r.get('build_id') == 'robot_drive_base', r.get('build_id')
+assert r.get('salvage_package')
+assert al.get('resolved') and al.get('final_kicad_drc_errors') == 0
+assert r.get('project_package')
+"
+
 if [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
-  echo "==> step 4: Qwen phrase agent-loop"
+  echo "==> step 5: Qwen phrase agent-loop"
   curl -s -X POST "$BASE/v1/compose/agent-loop" \
     -H 'Content-Type: application/json' \
     -d '{
