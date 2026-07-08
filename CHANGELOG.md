@@ -6,6 +6,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.5] - 2026-07-08
+
+### Added
+
+- `docs/PRODUCT_SCALE_PLAN.md` — phased product scale plan (Phase 0–3)
+- `docs/AGENT_QUICKSTART.md` — 15-minute agent path (3 curls + 3 MCP tools)
+- `docs/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` build_dir rules
+- Phrase-only `POST /v1/compose/agent-loop` test coverage
+
+### Changed
+
+- Design Studio: agent-loop emits `PROJECT_PACKAGE` when project goal set; DRC panel shows picked modules
+- Design Studio: stable React Flow `onSelectionChange` (no infinite re-render)
+
+### Documentation
+
+- `DOCUMENTATION_INDEX.md`, `AGENT_HANDOFF.md` — links to scale plan and quickstart
+
+---
+
 ## [1.1.0] - 2026-07-08
 
 ### Added

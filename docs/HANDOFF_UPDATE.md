@@ -1,13 +1,26 @@
 # Handoff update — what changed since last time
 
-**Date:** July 2026 (updated after Design Studio + DRC agent loop on `main` @ `4775e1c`)
+**Date:** July 2026 (updated after alpha.5 scale plan + agent quickstart on `main`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
-**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · Design Studio spine: [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md)
+**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
 
 ---
 
-## July 2026 — Design Studio + agent DRC loop (`4775e1c`)
+## July 2026 — Alpha.5 product scale + agent quickstart
+
+| Surface | What shipped |
+|---------|----------------|
+| **Docs** | `PRODUCT_SCALE_PLAN.md` (Phase 0–3), `AGENT_QUICKSTART.md`, `AGENT_BUILD_DIR_POLICY.md` |
+| **UI** | Design Studio agent-loop emits package when goal set; modules picked shown in DRC panel; React Flow selection fix |
+| **Tests** | Phrase-only `compose/agent-loop` HTTP test |
+| **Tag** | `v1.1.0-alpha.5` |
+
+**Live verified:** Qwen phrase compose, canvas agent-loop, MCP `hs_compose_drc_agent` + `hs_design_quality` (with `ALLOW_ARBITRARY_OUT_DIR` for local MCP).
+
+---
+
+## July 2026 — Design Studio + agent DRC loop (`4775e1c` → `fb3584e`)
 
 | Surface | What shipped |
 |---------|----------------|

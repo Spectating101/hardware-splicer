@@ -21,6 +21,16 @@ import { extractStudioDrc } from "../studio/studioDrc.js";
 
 const nodeTypes = { module: ModuleNode };
 
+function slugProjectName(phrase) {
+  const slug = String(phrase || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "")
+    .slice(0, 48);
+  return slug || "studio_compose";
+}
+
 function StudioCanvas({
   nodes,
   edges,
@@ -255,7 +265,12 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
     }
 
     try {
-      const result = await composeAgentLoop(payload, { maxManualRetries: maxRounds });
+      const goal = phrase.trim();
+      const result = await composeAgentLoop(payload, {
+        maxManualRetries: maxRounds,
+        finalizePackage: Boolean(goal),
+        projectName: goal ? slugProjectName(goal) : null,
+      });
       setComposeResult(result);
 
       let drc = extractStudioDrc(result);

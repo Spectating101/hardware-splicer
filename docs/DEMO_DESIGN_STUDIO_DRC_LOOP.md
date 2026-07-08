@@ -4,6 +4,8 @@
 
 **Prereqs:** API on `:8787`, UI built or `npm run dev` on `:5173`/`5178`.
 
+**Agent-only path:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) (no browser).
+
 ```bash
 PYTHONPATH=src HARDWARE_SPLICER_OFFLINE_COMPOSE=1 \
   python3 scripts/hardware_splicer.py serve --host 127.0.0.1 --port 8787

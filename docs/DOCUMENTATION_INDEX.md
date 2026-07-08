@@ -61,7 +61,10 @@
 | Read | Why |
 |------|-----|
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | **Primary runbook** |
-| [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity (`hs_compose`, `hs_modules_catalog`) |
+| [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) | **15 min** — 3 curls + 3 MCP tools |
+| [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) | **What we're building** — phased scale plan |
+| [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md) | MCP `hs_design_quality` path rules |
+| [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity |
 | [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md) | 3–5 min demo (agent track + UI track) |
 | [`MCP.md`](MCP.md) | MCP install + tool list |
 | [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | Splice walkthrough + make targets |
@@ -211,7 +214,7 @@
 | **`INSTALL_REPORT_TEMPLATE.md`** | P1 | ✅ (fill on external test) |
 | **`CHANGELOG.md`** | P1 | ✅ |
 | **Fresh VM install report** | P1 | ❌ — use template when testing |
-| **`ROADMAP_v2.md`** | P2 | Not written |
+| **`ROADMAP_v2.md`** | P2 | Superseded by [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) |
 | **OpenAPI export in release** | P2 | Use `/docs` live |
 | **`docs/zh-TW/` one-pager** | P2 | Optional |
 | **Stale banner on `LAUNCH_PLAN`** | P3 | Add “Phases A–C met; see RELEASE_V1” |
@@ -278,7 +281,7 @@ Everything else → index.
 | `make verify-product-internal` | INTERNAL_MATURITY_PLAN.md (full internal bar) |
 | `make verify-product-v1` | INTERNAL_MATURITY_PLAN.md §Tier II |
 | `make splice-ui-serve` | QUICKSTART_SPLICE_v1.md, DEMO_5_MIN_UI.md |
-| `python -m hardware_splicer.mcp_server` | MCP.md, AGENT_HANDOFF.md |
+| `python -m hardware_splicer.mcp_server` | MCP.md, AGENT_HANDOFF.md, AGENT_QUICKSTART.md |
 | `scripts/hardware_splicer.py serve` | AGENT_HANDOFF.md, INTEGRATION.md |
 | `make test-project-package` | HANDOFF_UPDATE.md §9 |
 
@@ -288,6 +291,7 @@ Everything else → index.
 
 | Date | Change |
 |------|--------|
+| 2026-07-08 | `PRODUCT_SCALE_PLAN.md`, `AGENT_QUICKSTART.md`, `AGENT_BUILD_DIR_POLICY.md` — alpha.5 |
 | 2026-07 | v1.0.1 doc set: quickstart, support, ops, demo, install template |
 | 2026-07 | `COMPETITIVE_PACKAGING_STRATEGY.md` — internal monetisation/competitor completion map |
 | 2026-06 | Initial documentation index |

@@ -90,6 +90,33 @@ def test_compose_http_matches_agent_fields(tmp_path, monkeypatch: pytest.MonkeyP
     assert "drc_fix_loop" in dq or dq.get("kicad_drc_errors") is not None
 
 
+def test_compose_agent_loop_http_phrase_only(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
+    os.environ["HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR"] = "1"
+
+    client = TestClient(create_app())
+    payload = client.post(
+        "/v1/compose/agent-loop",
+        json={
+            "phrase": "ESP32 DevKit with DHT22 temperature sensor",
+            "export_gerber": False,
+            "allow_llm_first": False,
+            "max_manual_retries": 1,
+            "finalize_package": True,
+            "project_name": "phrase_only_loop",
+            "out_dir": str(tmp_path / "phrase_only_loop"),
+        },
+    ).json()
+    loop = payload.get("agent_loop") or {}
+    assert loop.get("rounds")
+    assert payload.get("project_package")
+    assert len(payload.get("module_ids") or []) >= 1
+
+
 def test_compose_agent_loop_http(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient

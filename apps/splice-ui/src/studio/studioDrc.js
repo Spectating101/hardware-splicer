@@ -29,6 +29,10 @@ export function extractStudioDrc(composeResult) {
     violations,
     outDir: composeResult?.out_dir || null,
     ok: Boolean(composeResult?.ok),
+    mode: composeResult?.mode || null,
+    composeMode: composeResult?.compose_mode || null,
+    moduleIds: composeResult?.module_ids || [],
+    hasPackage: Boolean(composeResult?.project_package),
     copperTier: composeResult?.agent_loop?.copper_tier || quality.copper_tier || null,
     fabRecommendation:
       composeResult?.agent_loop?.fab_recommendation || quality.fab_recommendation || null,

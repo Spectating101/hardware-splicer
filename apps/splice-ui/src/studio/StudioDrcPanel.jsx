@@ -48,6 +48,20 @@ export default function StudioDrcPanel({
         </ol>
       )}
 
+      {drc?.moduleIds?.length > 0 && (
+        <div className="studio-drc__meta">
+          <h3>Modules picked</h3>
+          <p className="mono small">{drc.moduleIds.join(", ")}</p>
+          {drc.composeMode && (
+            <p className="muted small">
+              compose mode: <span className="mono">{drc.composeMode}</span>
+              {drc.mode ? ` · ${drc.mode}` : ""}
+            </p>
+          )}
+          {drc.hasPackage && <p className="hint small">PROJECT_PACKAGE emitted — open project for bench gates.</p>}
+        </div>
+      )}
+
       {drc?.agentRounds?.length > 0 && (
         <div className="studio-drc__loop">
           <h3>Agent rounds</h3>
