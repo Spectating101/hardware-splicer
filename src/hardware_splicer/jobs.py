@@ -417,6 +417,29 @@ class JobBackend:
                 )
                 self.store.complete_job(job.job_id, final)
                 return
+            if job_type == "compose_agent_loop":
+                from .compose_agent_loop import compose_agent_loop
+
+                payload = dict(job.options.get("payload") or {})
+                max_manual_retries = int(payload.pop("max_manual_retries", 2))
+                finalize_package = bool(payload.pop("finalize_package", False))
+                project_name = payload.pop("project_name", None)
+                goal = payload.pop("goal", None) or payload.get("phrase")
+                allow_llm_first = bool(payload.pop("allow_llm_first", False))
+                drc_fixup = payload.pop("drc_fixup", None)
+                result = compose_agent_loop(
+                    out_dir=job.output_dir,
+                    allow_llm_first=allow_llm_first,
+                    request_id=job.request_id,
+                    max_manual_retries=max_manual_retries,
+                    finalize_package=finalize_package,
+                    goal=goal,
+                    project_name=project_name or job.project_name,
+                    drc_fixup=drc_fixup,
+                    **payload,
+                )
+                self.store.complete_job(job.job_id, result)
+                return
             if job_type == "splice_build":
                 from .project_intake import splice_and_build_from_intake
 

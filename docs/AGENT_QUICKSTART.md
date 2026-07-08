@@ -85,11 +85,34 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/agent-loop \
   }'
 ```
 
-**Read next:** `agent_loop.rounds[]` for per-round DRC; `design_quality.copper_tier` for fab honesty.
+### Async job — agent loop (for long compiles / agents that poll)
 
----
+```bash
+JOB=$(curl -s -X POST http://127.0.0.1:8787/v1/jobs/compose-agent-loop \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "phrase": "ESP32 DHT22 async job demo",
+    "canvas_nodes": [
+      {"id": "m1", "moduleId": "esp32-devkit"},
+      {"id": "m2", "moduleId": "dht22"}
+    ],
+    "allow_llm_first": false,
+    "max_manual_retries": 2,
+    "finalize_package": true,
+    "project_name": "agent_job_demo"
+  }')
+echo "$JOB" | jq '{job_id, status, links}'
+JOB_ID=$(echo "$JOB" | jq -r .job_id)
+until [[ $(curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID | jq -r .status) =~ ^(succeeded|failed)$ ]]; do sleep 1; done
+curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID/result | jq '{
+  status,
+  resolved: .result.agent_loop.resolved,
+  drc_errors: .result.agent_loop.final_kicad_drc_errors,
+  package: (.result.project_package != null)
+}'
+```
 
-## 3. Three MCP tools (same spine)
+Repeat on alien WSL: [`scripts/agent_quickstart_verify.sh`](../scripts/agent_quickstart_verify.sh) — see [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 
 Start MCP (separate terminal):
 

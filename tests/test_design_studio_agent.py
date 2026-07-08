@@ -170,6 +170,53 @@ def test_compose_design_agent_loop_sdk(tmp_path, monkeypatch: pytest.MonkeyPatch
     assert result.get("bench_session")
 
 
+def test_compose_agent_loop_job_http(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
+    os.environ["HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR"] = "1"
+
+    client = TestClient(create_app())
+    submit = client.post(
+        "/v1/jobs/compose-agent-loop",
+        json={
+            "phrase": "async agent loop job",
+            "canvas_nodes": [
+                {"id": "m1", "moduleId": "esp32-devkit"},
+                {"id": "m2", "moduleId": "dht22"},
+            ],
+            "export_gerber": False,
+            "allow_llm_first": False,
+            "max_manual_retries": 1,
+            "finalize_package": True,
+            "project_name": "async_agent_loop_job",
+            "out_dir": str(tmp_path / "async_agent_job"),
+        },
+    )
+    assert submit.status_code in {200, 202}
+    job_id = submit.json()["job_id"]
+
+    import time
+
+    deadline = time.time() + 120
+    result = None
+    while time.time() < deadline:
+        poll = client.get(f"/v1/jobs/{job_id}")
+        assert poll.status_code == 200
+        if poll.json()["status"] in {"succeeded", "failed"}:
+            result = client.get(f"/v1/jobs/{job_id}/result").json()
+            break
+        time.sleep(0.2)
+
+    assert result is not None
+    assert result.get("ok") is True
+    body = result.get("result") or {}
+    assert body.get("agent_loop", {}).get("rounds")
+    assert body.get("project_package")
+
+
 def test_finalize_compose_after_agent_compose(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")

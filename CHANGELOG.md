@@ -6,7 +6,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
-## [1.1.0-alpha.5] - 2026-07-08
+## [1.1.0-alpha.6] - 2026-07-09
+
+### Added
+
+- `POST /v1/jobs/compose-agent-loop` — async agent-loop compose with poll `/v1/jobs/{id}/result`
+- HTTP + job backend tests for async agent-loop path
+- FGEDHGV install report: Qwen curl 3 PASS on alien WSL
+
+### Changed
+
+- `AGENT_QUICKSTART.md` — async job poll example
+
+---
 
 ### Added
 

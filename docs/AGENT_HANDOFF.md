@@ -32,7 +32,7 @@ hs_sdk_info
   → hs_splice_bench_submit      # record measurements, close gates
 ```
 
-**Design Studio path (greenfield canvas):** same as `hs_compose` + `POST /v1/compose` — see [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md). Read `design_quality.drc_fix_loop`; pass `drc_fixup` on retry.
+**Design Studio path (greenfield canvas):** same as `hs_compose` + `POST /v1/compose/agent-loop` — see [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md). For long compiles, use **`POST /v1/jobs/compose-agent-loop`** and poll `GET /v1/jobs/{id}/result`.
 
 **Salvage / donor shortcut:**
 

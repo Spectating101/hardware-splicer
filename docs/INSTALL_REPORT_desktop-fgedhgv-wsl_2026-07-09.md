@@ -35,7 +35,7 @@ Public path equivalent — tarball deploy (GitHub clone not attempted; prior Jul
 
 **Install script modifications required?** **No**
 
-**Qwen / AI phrase curl (curl 3)?** **Skipped** — offline compose (`HARDWARE_SPLICER_OFFLINE_COMPOSE=1`). Canvas agent-loop is sufficient for Phase 0 spine proof.
+**Qwen / AI phrase curl (curl 3)?** **PASS** on 2026-07-09 — `qwen_configured=true`, 3072 tokens, 0 DRC errors, package emitted (see log `/root/hs-alpha5-qwen-quickstart.log` on node).
 
 ---
 
@@ -83,6 +83,19 @@ llm_policy.offline_compose=true, qwen_configured=false
 | `project_package` | **present** |
 | `project_name` | `fgedhgv_track_b_canvas` |
 | `out_dir` | `/tmp/hardware_splicer_api/compose/c3d994ae...` |
+
+### Curl 3 — `POST /v1/compose/agent-loop` (Qwen phrase)
+
+| Field | Result |
+|-------|--------|
+| `qwen_configured` | **true** |
+| `mode` | `llm_first` |
+| `module_ids` | esp32-devkit, soil_moisture, ssd1306, lcd_16x2_i2c, usb-power-5v |
+| `agent_loop.resolved` | **true** |
+| `final_kicad_drc_errors` | **0** |
+| `project_package` | **present** |
+| `qwen_usage.total_tokens` | **3072** |
+| Wall time | ~26s (API already warm from prior install) |
 
 ---
 
