@@ -409,6 +409,29 @@ def splice_bench_capture_template(build_dir: str | Path) -> Dict[str, Any]:
     return {"schema_version": SCHEMA_VERSION, **payload}
 
 
+def bench_capture_vision_assist(
+    build_dir: str | Path,
+    *,
+    attachments: Sequence[Mapping[str, Any]] | None = None,
+    live: bool = False,
+    operator_id: str = "",
+    device_hint: str = "",
+    goal: str = "",
+) -> Dict[str, Any]:
+    """Draft BENCH_CAPTURE_VISION_DRAFT.json from bench photos — does not close gates."""
+    from .bench_capture_vision import assist_bench_capture_vision
+
+    apply_engine_defaults()
+    return assist_bench_capture_vision(
+        build_dir,
+        attachments=attachments,
+        live=live,
+        operator_id=operator_id,
+        device_hint=device_hint,
+        goal=goal,
+    )
+
+
 def compose_agent_bench_loop(
     *,
     simulate_bench: bool = True,
@@ -578,9 +601,11 @@ def vision_capabilities() -> Dict[str, Any]:
             "evidence_notes_extractor": "evidence_extractor.enrich_intake_with_extracted_evidence",
             "splice_bench_gates": "splice_bench.submit_bench_measurements",
             "bench_capture_bridge": "bench_capture_bridge.submit_bench_capture",
+            "bench_capture_vision_assist": "bench_capture_vision.assist_bench_capture_vision",
             "sdk_entrypoints": [
                 "donor_board_vision_enrich",
                 "vision_enrich_intake",
+                "bench_capture_vision_assist",
                 "splice_bench_submit_capture",
                 "splice_golden_loop",
                 "splice_build (donor board_evidence / photos → functional_salvage automatically)",
@@ -966,6 +991,7 @@ def sdk_info() -> Dict[str, Any]:
                 "hs_donor_board_vision (photos/board_evidence → functional_salvage)",
                 "hs_splice_build",
                 "hs_splice_bench_capture_template",
+                "optional hs_bench_capture_vision_assist (photos → draft hints)",
                 "fill template → hs_splice_bench_submit_capture",
                 "hs_inspect_fab",
             ],
@@ -978,6 +1004,7 @@ def sdk_info() -> Dict[str, Any]:
                 "hs_donor_board_vision",
                 "hs_vision_enrich_intake",
                 "hs_splice_bench_capture_template",
+                "hs_bench_capture_vision_assist",
                 "hs_splice_bench_status",
                 "hs_splice_bench_submit_capture",
                 "hs_plan_motor_driver_circuit",

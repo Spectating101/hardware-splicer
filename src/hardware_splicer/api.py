@@ -131,6 +131,15 @@ class SpliceBenchTemplateRequest(BaseModel):
     build_dir: str
 
 
+class BenchCaptureVisionAssistRequest(BaseModel):
+    build_dir: str
+    attachments: list[Dict[str, Any]] = Field(default_factory=list)
+    live: bool = False
+    operator_id: str = ""
+    device_hint: str = ""
+    goal: str = ""
+
+
 class BuildFilesListRequest(BaseModel):
     build_dir: str
 
@@ -1409,6 +1418,27 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc)) from exc
         except Exception as exc:
             raise _error(500, "splice_bench_template_error", str(exc)) from exc
+
+    @app.post("/v1/splice-bench/vision-assist")
+    def splice_bench_vision_assist_route(request: BenchCaptureVisionAssistRequest) -> Dict[str, Any]:
+        from .sdk import bench_capture_vision_assist
+
+        try:
+            build_dir = Path(request.build_dir).resolve()
+            if not build_dir.is_dir():
+                raise ValueError(f"build_dir not found: {build_dir}")
+            return bench_capture_vision_assist(
+                build_dir,
+                attachments=request.attachments,
+                live=bool(request.live),
+                operator_id=request.operator_id,
+                device_hint=request.device_hint,
+                goal=request.goal,
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+        except Exception as exc:
+            raise _error(500, "bench_capture_vision_error", str(exc)) from exc
 
     @app.post("/v1/splice-golden-loop")
     def splice_golden_loop_route(request: SpliceGoldenLoopRequest) -> Dict[str, Any]:

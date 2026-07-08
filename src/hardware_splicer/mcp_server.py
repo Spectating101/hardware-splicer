@@ -328,6 +328,30 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_bench_capture_vision_assist",
+            description=(
+                "Camera-assisted draft for BENCH_CAPTURE_TEMPLATE — attaches photos and suggests "
+                "DMM/PSU test points per open gate. Writes BENCH_CAPTURE_VISION_DRAFT.json. "
+                "Does not close gates; operator must submit instrument capture afterward."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "build_dir": {"type": "string"},
+                    "attachments": {
+                        "type": "array",
+                        "items": {"type": "object"},
+                        "description": '[{"kind":"image","path":"photo.jpg"}] or image_base64',
+                    },
+                    "live": {"type": "boolean", "description": "Call Qwen board vision when keyed"},
+                    "operator_id": {"type": "string"},
+                    "device_hint": {"type": "string"},
+                    "goal": {"type": "string"},
+                },
+                "required": ["build_dir", "attachments"],
+            },
+        ),
+        Tool(
             name="hs_splice_golden_loop",
             description=(
                 "One-shot S3 golden loop: donor intake → splice compile → bench template → "
@@ -651,6 +675,17 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
             sdk.splice_bench_submit_capture(
                 str(args.get("build_dir") or ""),
                 args.get("capture") or {},
+            )
+        )
+    if name == "hs_bench_capture_vision_assist":
+        return _tool_result(
+            sdk.bench_capture_vision_assist(
+                str(args.get("build_dir") or ""),
+                attachments=args.get("attachments") or [],
+                live=bool(args.get("live")),
+                operator_id=str(args.get("operator_id") or ""),
+                device_hint=str(args.get("device_hint") or ""),
+                goal=str(args.get("goal") or ""),
             )
         )
     if name == "hs_splice_golden_loop":

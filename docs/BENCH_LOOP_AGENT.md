@@ -11,7 +11,8 @@
 ```text
 hs_compose_drc_agent (finalize_package: true)
   → SPLICE_BENCH_SESSION.json + BENCH_CAPTURE_TEMPLATE.json
-  → fill capture (instrument or camera-assisted packet)
+  → optional: hs_bench_capture_vision_assist (photos → draft hints)
+  → fill capture (instrument readings; vision draft is not evidence)
   → hs_splice_bench_submit_capture
   → bench_session.power_on_authorized
 ```
@@ -41,8 +42,9 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/bench-loop \
 
 1. `POST /v1/compose/agent-loop` with `finalize_package: true`
 2. `POST /v1/splice-bench/capture-template` with `build_dir`
-3. Fill `BENCH_CAPTURE_TEMPLATE.json` or POST capture packet
-4. `POST /v1/splice-bench/submit-capture`
+3. Optional: `POST /v1/splice-bench/vision-assist` with bench photos (`attachments`)
+4. Fill `BENCH_CAPTURE_TEMPLATE.json` or use `BENCH_CAPTURE_VISION_DRAFT.json` as a starting point
+5. `POST /v1/splice-bench/submit-capture` with instrument-backed readings
 
 ---
 
@@ -52,6 +54,7 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/bench-loop \
 |------|------|
 | `hs_compose_bench_loop` | Compose + package + optional simulated closure |
 | `hs_splice_bench_capture_template` | Refresh template from open gates |
+| `hs_bench_capture_vision_assist` | Photos → `BENCH_CAPTURE_VISION_DRAFT.json` (hints only) |
 | `hs_splice_bench_submit_capture` | Submit `bench_topology_capture.v1` |
 | `hs_splice_bench_status` | Read gate verdict |
 
@@ -63,6 +66,8 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/bench-loop \
 |------|---------|
 | `SPLICE_BENCH_SESSION.json` | Gate open/closed state |
 | `BENCH_CAPTURE_TEMPLATE.json` | Operator fill sheet from open gates |
+| `BENCH_CAPTURE_VISION_DRAFT.json` | Camera-assisted draft (open rows + hints) |
+| `BENCH_CAPTURE_VISION_REPORT.json` | Vision assist metadata |
 | `BENCH_LOOP_REPORT.json` | Compose+bench loop summary |
 
 ---
@@ -71,4 +76,5 @@ curl -s -X POST http://127.0.0.1:8787/v1/compose/bench-loop \
 
 - **DRC 0 errors** ≠ power-on safe
 - **`simulate_bench: true`** is for CI/demo only — do not cite as field evidence
+- **`vision-assist` drafts** attach photos and suggest test points — they do **not** close gates
 - Use `power_on_authorized` from **real** capture for bring-up claims
