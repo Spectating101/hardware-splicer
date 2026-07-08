@@ -177,6 +177,10 @@ class ComposeRequest(BaseModel):
         default=False,
         description="Return wired graph only (skip KiCad compile). For editor auto-wire.",
     )
+    allow_llm_first: bool = Field(
+        default=False,
+        description="When phrase is set, try Qwen LLM-first compose before heuristic scratch.",
+    )
 
 
 class ComposeCanvasRequest(BaseModel):
@@ -444,12 +448,14 @@ def create_app() -> FastAPI:
     @app.get("/health")
     def health() -> Dict[str, Any]:
         from ._version import __version__
+        from .integrations.llm_policy import llm_policy_summary
 
         status = runtime_status()
         return {
             "ok": bool(status.get("ok")),
             "version": __version__,
             "app_roots": status.get("app_roots"),
+            "llm_policy": llm_policy_summary(),
         }
 
     @app.get("/v1/examples/splice-intakes")
@@ -999,7 +1005,7 @@ def create_app() -> FastAPI:
                 salvage_mode=bool(request.salvage_mode),
                 export_gerber=bool(request.export_gerber),
                 wire_only=bool(request.wire_only),
-                allow_llm_first=False,
+                allow_llm_first=bool(request.allow_llm_first),
                 request_id=request_id,
             )
             if payload.get("wire_only"):

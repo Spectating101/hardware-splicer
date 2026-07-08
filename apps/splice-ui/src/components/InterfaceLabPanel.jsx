@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   composeCanvas,
+  composePhrase,
   fetchNetlistFixture,
   fetchNetlistFixtures,
   netlistCompile,
@@ -24,6 +25,11 @@ const DEMO_WIRES = [
 
 const PATH_HELP = [
   {
+    id: "llm-first",
+    title: "LLM-first compose",
+    body: "Natural-language goal → Qwen module pick + DRC feedback loop. Same spine as MCP hs_compose with allow_llm_first.",
+  },
+  {
     id: "canvas",
     title: "compose-canvas",
     body: "Wire a module graph in memory, then compile to KiCad. This mirrors Circuit.AI-style editing without building a browser ECAD suite.",
@@ -46,17 +52,31 @@ function fixtureLabel(row) {
   return row.id;
 }
 
-export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }) {
+const LLM_DEMO_PHRASE =
+  "USB-powered ESP32 soil moisture monitor with pump driver and status LED for a small plant watering carrier";
+
+export default function InterfaceLabPanel({ llmPolicy, onOpenDesignPreview, onRunFullDemo }) {
   const [fixtures, setFixtures] = useState([]);
   const [fixtureId, setFixtureId] = useState("usb_esp_dht22");
   const [canvasWire, setCanvasWire] = useState(null);
   const [canvasCompile, setCanvasCompile] = useState(null);
+  const [llmWire, setLlmWire] = useState(null);
+  const [llmCompile, setLlmCompile] = useState(null);
+  const [llmPhrase, setLlmPhrase] = useState(LLM_DEMO_PHRASE);
+  const [llmFirst, setLlmFirst] = useState(true);
+  const [llmError, setLlmError] = useState("");
   const [netlistResult, setNetlistResult] = useState(null);
   const [canvasError, setCanvasError] = useState("");
   const [netlistError, setNetlistError] = useState("");
   const [busy, setBusy] = useState("");
   const [pasteNetlist, setPasteNetlist] = useState("");
   const [showPaste, setShowPaste] = useState(false);
+
+  const llmReady = Boolean(llmPolicy?.qwen_llm_first);
+
+  useEffect(() => {
+    if (llmReady) setLlmFirst(true);
+  }, [llmReady]);
 
   useEffect(() => {
     fetchNetlistFixtures()
@@ -68,6 +88,26 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
       })
       .catch(() => {});
   }, []);
+
+  const runLlmCompose = async (wireOnly) => {
+    setBusy(wireOnly ? "llm-wire" : "llm-compile");
+    setLlmError("");
+    if (wireOnly) setLlmWire(null);
+    else setLlmCompile(null);
+    try {
+      const payload = await composePhrase(llmPhrase.trim(), {
+        allowLlmFirst: llmFirst,
+        wireOnly,
+        exportGerber: false,
+      });
+      if (wireOnly) setLlmWire(payload);
+      else setLlmCompile(payload);
+    } catch (err) {
+      setLlmError(err.message);
+    } finally {
+      setBusy("");
+    }
+  };
 
   const runCanvas = async (wireOnly) => {
     setBusy(wireOnly ? "canvas-wire" : "canvas-compile");
@@ -178,6 +218,53 @@ export default function InterfaceLabPanel({ onOpenDesignPreview, onRunFullDemo }
             Run repair-café demo build →
           </button>
         )}
+      </section>
+
+      <section className="card lab-llm-card">
+        <h3>0 · LLM-first compose</h3>
+        <p className="muted">
+          Describe a carrier in plain English. With Qwen configured, the engine runs LLM-first module selection and
+          compile — otherwise it falls back to heuristic scratch compose.
+        </p>
+        <textarea
+          className="field-textarea"
+          rows={4}
+          value={llmPhrase}
+          onChange={(e) => setLlmPhrase(e.target.value)}
+          placeholder="Example: ESP32 plant monitor with soil sensor, pump MOSFET, and USB power input"
+        />
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={llmFirst}
+            disabled={!llmReady}
+            onChange={(e) => setLlmFirst(e.target.checked)}
+          />
+          <span>
+            Allow LLM-first compose{" "}
+            {llmReady ? "(Qwen ready)" : "(offline — heuristic scratch only)"}
+          </span>
+        </label>
+        <div className="lab-actions">
+          <button type="button" className="secondary" disabled={Boolean(busy) || llmPhrase.trim().length < 12} onClick={() => runLlmCompose(true)}>
+            {busy === "llm-wire" ? "Wiring…" : "Wire modules (phrase)"}
+          </button>
+          <button type="button" className="primary" disabled={Boolean(busy) || llmPhrase.trim().length < 12} onClick={() => runLlmCompose(false)}>
+            {busy === "llm-compile" ? "Compiling…" : "LLM-first compile → KiCad"}
+          </button>
+        </div>
+        <LabResultCard
+          title="LLM wire result"
+          payload={llmWire}
+          error={llmError && !llmWire ? llmError : ""}
+        />
+        <LabResultCard
+          title="LLM-first compile"
+          subtitle={llmCompile?.mode === "llm_first" ? `compose_mode: ${llmCompile.compose_mode || "qwen"}` : "scratch fallback"}
+          payload={llmCompile}
+          error={llmError && !llmCompile ? llmError : ""}
+          onViewBoard={(ctx) => openPreview({ ...ctx, title: "LLM-first compose" })}
+        />
       </section>
 
       <section className="card">

@@ -41,6 +41,15 @@ def test_health_reports_package_version() -> None:
     body = response.json()
     assert body.get("ok") is True
     assert body.get("version") == _version.__version__
+    assert "llm_policy" in body
+    assert "qwen_llm_first" in body["llm_policy"]
+
+
+def test_compose_request_accepts_allow_llm_first() -> None:
+    from hardware_splicer.api import ComposeRequest
+
+    row = ComposeRequest(phrase="esp32 sensor board", allow_llm_first=True)
+    assert row.allow_llm_first is True
 
 
 def test_openapi_version_matches() -> None:
@@ -68,6 +77,9 @@ def test_splice_product_routes_registered() -> None:
         "/v1/jobs",
         "/v1/splice-bench/status",
         "/v1/splice-bench/submit",
+        "/v1/splice-bench/submit-capture",
+        "/v1/splice-bench/capture-template",
+        "/v1/compose",
         "/v1/vision/capabilities",
         "/v1/vision/enrich-intake",
         "/v1/donor-board-vision",

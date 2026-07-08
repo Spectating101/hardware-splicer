@@ -44,6 +44,11 @@ def main() -> int:
         raise SystemExit(f"vision capabilities failed: {vision}")
     print("    vision capabilities ok")
 
+    health = _get("/health")
+    if "llm_policy" not in health:
+        raise SystemExit(f"health missing llm_policy: {health}")
+    print("    health llm_policy ok")
+
     print("verify_ui_interface_smoke: passed")
     return 0
 

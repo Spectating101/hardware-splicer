@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   benchStatus,
   benchSubmit,
+  benchSubmitCapture,
   fetchDonorFixtures,
   fetchExamples,
   fetchHealth,
@@ -331,6 +332,35 @@ export default function App() {
         if (hydratedResult) setHydratedResult(updater);
       }
     }
+    return session;
+  };
+
+  const handleBenchCaptureSubmit = async (capture) => {
+    if (!projectBuildDir) return null;
+    const result = await benchSubmitCapture(projectBuildDir, capture);
+    if (result?.bench_session) {
+      setBenchSession(result.bench_session);
+    }
+    if (displayResult?.project_package?.gates && result?.bench_session) {
+      const session = result.bench_session;
+      const updater = (prev) =>
+        prev
+          ? {
+              ...prev,
+              project_package: {
+                ...prev.project_package,
+                gates: {
+                  ...prev.project_package.gates,
+                  open_gate_count: session.open_gate_count,
+                  critical_open_count: session.critical_open_count,
+                  power_on_authorized: session.power_on_authorized,
+                },
+              },
+            }
+          : prev;
+      if (hydratedResult) setHydratedResult(updater);
+    }
+    return result;
   };
 
   const renderResults = () => {
@@ -380,6 +410,7 @@ export default function App() {
             benchSession={benchSession}
             onRefresh={() => refreshBench()}
             onSubmit={handleBenchSubmit}
+            onSubmitCapture={handleBenchCaptureSubmit}
             onSuccess={setToast}
           />
         );
@@ -597,6 +628,7 @@ export default function App() {
 
           {view === VIEWS.lab && (
             <InterfaceLabPanel
+              llmPolicy={health?.llm_policy}
               onOpenDesignPreview={openDesignPreview}
               onRunFullDemo={handleRunRepairCafeDemo}
             />

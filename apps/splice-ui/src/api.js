@@ -108,6 +108,42 @@ export async function benchSubmit(buildDir, measurements) {
   return parseJson(res);
 }
 
+export async function benchCaptureTemplate(buildDir) {
+  const res = await fetch(`${API_BASE}/v1/splice-bench/capture-template`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir }),
+  });
+  return parseJson(res);
+}
+
+export async function benchSubmitCapture(buildDir, capture) {
+  const res = await fetch(`${API_BASE}/v1/splice-bench/submit-capture`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ build_dir: buildDir, capture }),
+  });
+  return parseJson(res);
+}
+
+export async function composePhrase(
+  phrase,
+  { allowLlmFirst = false, exportGerber = false, wireOnly = false, moduleIds = null } = {},
+) {
+  const res = await fetch(`${API_BASE}/v1/compose`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      phrase,
+      allow_llm_first: allowLlmFirst,
+      export_gerber: exportGerber,
+      wire_only: wireOnly,
+      ...(moduleIds ? { module_ids: moduleIds } : {}),
+    }),
+  });
+  return parseJson(res);
+}
+
 export async function listBuildFiles(buildDir) {
   const res = await fetch(`${API_BASE}/v1/build-files/list`, {
     method: "POST",

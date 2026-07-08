@@ -18,7 +18,11 @@ export default function LabResultCard({ title, subtitle, payload, error, onViewB
   if (!payload) return null;
 
   const truth = normalizeCompileTruth({ compose: payload });
-  const buildDir = payload.build_dir || payload.out_dir;
+  const kicadPcb = payload.artifacts?.kicad_pcb;
+  const buildDir =
+    payload.build_dir ||
+    payload.out_dir ||
+    (typeof kicadPcb === "string" ? kicadPcb.replace(/[/\\][^/\\]+$/, "") : null);
   const wireOnly = Boolean(payload.wire_only);
   const ok = wireOnly || truth.compile_ok !== false;
   const nodeCount = payload.graph?.nodes?.length;
@@ -33,7 +37,35 @@ export default function LabResultCard({ title, subtitle, payload, error, onViewB
         </div>
         <StatusPill ok={ok} label={wireOnly ? "Wired" : ok ? "Compiled" : "Review"} />
       </div>
-      <p className="lab-result-summary">{wireOnly ? "Module graph wired through compose spine." : compileTruthHeadline(truth)}</p>
+      <p className="lab-result-summary">
+        {wireOnly
+          ? "Module graph wired through compose spine."
+          : payload.mode === "llm_first"
+            ? `LLM-first compose (${payload.compose_mode || "qwen"}) — ${compileTruthHeadline(truth)}`
+            : compileTruthHeadline(truth)}
+      </p>
+      {(payload.mode === "llm_first" || payload.module_ids?.length) && (
+        <dl className="lab-result-grid">
+          {payload.mode && (
+            <div>
+              <dt>Mode</dt>
+              <dd className="mono">{payload.mode}</dd>
+            </div>
+          )}
+          {payload.module_ids?.length > 0 && (
+            <div>
+              <dt>Modules</dt>
+              <dd className="mono small">{(payload.module_ids || []).join(", ")}</dd>
+            </div>
+          )}
+          {payload.attempts?.length > 0 && (
+            <div>
+              <dt>Attempts</dt>
+              <dd>{payload.attempts.length}</dd>
+            </div>
+          )}
+        </dl>
+      )}
       <dl className="lab-result-grid">
         {wireOnly ? (
           <>

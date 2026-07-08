@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BenchCapturePanel from "./BenchCapturePanel.jsx";
 import MarkdownView from "./MarkdownView.jsx";
 import MermaidDiagram from "./MermaidDiagram.jsx";
 import { topologyToMermaid } from "../utils/topologyMermaid.js";
@@ -228,7 +229,7 @@ export function GatesPanel({ pkg, benchSession }) {
   );
 }
 
-export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit, onSuccess }) {
+export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit, onSubmitCapture, onSuccess }) {
   const [drafts, setDrafts] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [lastClosed, setLastClosed] = useState(null);
@@ -346,6 +347,16 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit, onSucc
           ))}
         </ul>
       </section>
+
+      {onSubmitCapture && (
+        <BenchCapturePanel
+          buildDir={buildDir}
+          benchSession={benchSession}
+          onSubmitCapture={onSubmitCapture}
+          onRefresh={onRefresh}
+          onSuccess={onSuccess}
+        />
+      )}
     </div>
   );
 }
