@@ -39,6 +39,11 @@ def main() -> int:
         raise SystemExit(f"fixtures missing description: {missing_desc[:5]}")
     print(f"    netlist fixtures ok count={len(rows)}")
 
+    vision = _get("/v1/vision/capabilities")
+    if not vision.get("hardware_splicer"):
+        raise SystemExit(f"vision capabilities failed: {vision}")
+    print("    vision capabilities ok")
+
     print("verify_ui_interface_smoke: passed")
     return 0
 

@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 import json
+import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableMapping, Sequence, Tuple
 
@@ -275,6 +279,39 @@ def _resolve_image_path(path_text: str, *, base_dir: Path | None) -> Path | None
     return None
 
 
+def _inline_image_payload(source: Mapping[str, Any]) -> tuple[bytes, str] | None:
+    data_b64 = str(source.get("image_base64") or source.get("data_base64") or "").strip()
+    url = str(source.get("url") or source.get("data_url") or "").strip()
+    if url.startswith("data:image/"):
+        _, _, data_b64 = url.partition(",")
+    if not data_b64:
+        return None
+    try:
+        raw = base64.b64decode(data_b64, validate=False)
+    except (ValueError, binascii.Error):
+        return None
+    if not raw:
+        return None
+    filename = str(source.get("filename") or source.get("name") or "donor_board.jpg")
+    return raw, filename
+
+
+def _materialize_inline_image(source: Mapping[str, Any]) -> Path | None:
+    payload = _inline_image_payload(source)
+    if payload is None:
+        return None
+    raw, filename = payload
+    suffix = Path(filename).suffix.lower()
+    if suffix not in _IMAGE_EXTENSIONS:
+        suffix = ".jpg"
+    fd, path_str = tempfile.mkstemp(suffix=suffix, prefix="hs_donor_")
+    try:
+        os.write(fd, raw)
+    finally:
+        os.close(fd)
+    return Path(path_str)
+
+
 def _donor_attachment_paths(intake: Mapping[str, Any], board_id: str) -> List[Path]:
     base_dir = Path(str(intake.get("source_file") or "")).parent if intake.get("source_file") else REPO_ROOT
     paths: List[Path] = []
@@ -286,6 +323,10 @@ def _donor_attachment_paths(intake: Mapping[str, Any], board_id: str) -> List[Pa
             continue
         board_ref = str(attachment.get("board_id") or attachment.get("donor_board_id") or "").strip()
         if board_ref and board_ref != board_id:
+            continue
+        inline = _materialize_inline_image(attachment)
+        if inline is not None:
+            paths.append(inline)
             continue
         resolved = _resolve_image_path(str(attachment.get("path") or attachment.get("file") or ""), base_dir=base_dir)
         if resolved is not None:
@@ -409,7 +450,11 @@ def _board_vision_row(
 
     image_path: Path | None = None
     vision_source = board.get("vision_source") if isinstance(board.get("vision_source"), dict) else {}
-    if vision_source.get("path"):
+    if vision_source:
+        image_path = _materialize_inline_image(vision_source)
+        if image_path is not None:
+            source_artifact = str(vision_source.get("filename") or vision_source.get("name") or "inline_upload")
+    if image_path is None and vision_source.get("path"):
         base_dir = Path(str(intake.get("source_file") or "")).parent if intake.get("source_file") else REPO_ROOT
         image_path = _resolve_image_path(str(vision_source["path"]), base_dir=base_dir)
         source_artifact = str(vision_source.get("path") or "")

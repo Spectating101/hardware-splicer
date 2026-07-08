@@ -450,6 +450,24 @@ def vision_enrich_intake(
 
 def vision_capabilities() -> Dict[str, Any]:
     """Inventory of camera/vision/bench capture already in this repo."""
+    circuit_ai_root = ROOT / "apps" / "circuit-ai"
+    qwen_status: Dict[str, Any] = {"ready_for_live_model": False, "api_key_configured": False}
+    try:
+        import sys
+
+        root_str = str(circuit_ai_root)
+        if circuit_ai_root.is_dir() and root_str not in sys.path:
+            sys.path.insert(0, root_str)
+        from src.vision.qwen_board_vision import qwen_vision_status
+
+        qwen_status = qwen_vision_status()
+    except Exception:
+        qwen_status = {
+            "schema_version": "qwen_board_vision_status.v1",
+            "ready_for_live_model": False,
+            "api_key_configured": False,
+            "import_error": True,
+        }
     return {
         "schema_version": SCHEMA_VERSION,
         "hardware_splicer": {
@@ -470,6 +488,7 @@ def vision_capabilities() -> Dict[str, Any]:
         },
         "circuit_ai": {
             "qwen_board_vision": "apps/circuit-ai/src/vision/qwen_board_vision.py",
+            "qwen_board_vision_status": qwen_status,
             "bench_topology_capture": "apps/circuit-ai/src/intelligence/bench_topology_capture.py",
             "measurement_session_progress": "apps/circuit-ai/src/intelligence/measurement_session_progress.py",
             "api_endpoints": [

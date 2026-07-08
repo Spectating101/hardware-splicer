@@ -68,6 +68,9 @@ def test_splice_product_routes_registered() -> None:
         "/v1/jobs",
         "/v1/splice-bench/status",
         "/v1/splice-bench/submit",
+        "/v1/vision/capabilities",
+        "/v1/vision/enrich-intake",
+        "/v1/donor-board-vision",
     }
     missing = required - paths
     assert not missing, f"Missing routes: {sorted(missing)}"

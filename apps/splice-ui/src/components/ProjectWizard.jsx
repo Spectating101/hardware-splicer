@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { clarifyIntent } from "../api.js";
+import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api.js";
 import {
   INITIAL_WIZARD,
   PART_TYPES,
@@ -8,6 +8,7 @@ import {
   getWizardSteps,
   slugify,
 } from "../intakeBuilder.js";
+import { summarizeDonorVisionReport } from "../utils/aiVisionSummary.js";
 
 function StepIndicator({ steps, currentId }) {
   const currentIndex = steps.findIndex((row) => row.id === currentId);
@@ -30,6 +31,7 @@ function StepIndicator({ steps, currentId }) {
 
 export default function ProjectWizard({
   donorFixtures,
+  visionCapabilities = null,
   onCancel,
   onBuild,
   building,
@@ -41,6 +43,12 @@ export default function ProjectWizard({
   const [clarifyLoading, setClarifyLoading] = useState(false);
   const [clarifyError, setClarifyError] = useState(null);
   const [enrichedIntent, setEnrichedIntent] = useState(null);
+  const [visionLoading, setVisionLoading] = useState(false);
+  const [visionError, setVisionError] = useState(null);
+
+  const qwenLiveReady = Boolean(
+    visionCapabilities?.circuit_ai?.qwen_board_vision_status?.ready_for_live_model,
+  );
 
   const steps = useMemo(() => getWizardSteps(wizard), [wizard]);
   const stepIndex = steps.findIndex((row) => row.id === stepId);
@@ -115,9 +123,66 @@ export default function ProjectWizard({
   };
 
   const handleBuild = () => {
-    const intake = buildIntakeFromWizard(wizard, { donorFixtures, enrichedIntent });
+    const intake = buildIntakeFromWizard(wizard, {
+      donorFixtures,
+      enrichedIntent,
+      visionEnrichedIntake: wizard.visionEnrichedIntake,
+    });
     onBuild(intake);
   };
+
+  const handleDonorPhoto = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      patchWizard({
+        donorPhoto: { name: file.name, dataUrl: String(reader.result || "") },
+        donorVisionReport: null,
+      });
+      setVisionError(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const runDonorVision = async () => {
+    setVisionError(null);
+    setVisionLoading(true);
+    try {
+      const intake = buildIntakeFromWizard(wizard, { donorFixtures, enrichedIntent });
+      const result = await donorBoardVision(intake);
+      patchWizard({ donorVisionReport: result });
+    } catch (err) {
+      setVisionError(err.message);
+    } finally {
+      setVisionLoading(false);
+    }
+  };
+
+  const runVisionEnrich = async () => {
+    setVisionError(null);
+    setVisionLoading(true);
+    try {
+      const intake = buildIntakeFromWizard(wizard, {
+        donorFixtures,
+        enrichedIntent,
+        visionEnrichedIntake: wizard.donorVisionReport?.intake,
+      });
+      const result = await visionEnrichIntake(intake, {
+        apply: true,
+        live: Boolean(wizard.visionLive),
+      });
+      patchWizard({
+        visionEnrichedIntake: result.intake,
+        visionEnrichReport: result.vision_evidence_report,
+      });
+    } catch (err) {
+      setVisionError(err.message);
+    } finally {
+      setVisionLoading(false);
+    }
+  };
+
+  const donorVisionSummary = summarizeDonorVisionReport(wizard.donorVisionReport?.donor_board_vision_report);
 
   const questions = wizard.clarifier?.questions || [];
 
@@ -266,15 +331,18 @@ export default function ProjectWizard({
 
         {stepId === "donor" && (
           <>
-            <h3>Which donor board are you reusing?</h3>
-            <p className="muted">Pick the closest profile — we’ll generate measurement gates for that harness.</p>
+            <h3>Donor board + AI vision</h3>
+            <p className="muted">
+              Pick a donor profile, then optionally upload a board photo. AI extracts candidate reusable blocks and
+              measurement gates — merged with fixture salvage when configured.
+            </p>
             <div className="fixture-grid">
               {donorFixtures.map((fixture) => (
                 <button
                   key={fixture.id}
                   type="button"
                   className={`fixture-card ${wizard.donorFixtureId === fixture.id ? "active" : ""}`}
-                  onClick={() => patchWizard({ donorFixtureId: fixture.id })}
+                  onClick={() => patchWizard({ donorFixtureId: fixture.id, donorVisionReport: null })}
                 >
                   <strong>{fixture.label}</strong>
                   <span>{fixture.headline || fixture.board_id}</span>
@@ -285,6 +353,57 @@ export default function ProjectWizard({
               ))}
               {donorFixtures.length === 0 && (
                 <p className="muted">No donor fixtures loaded from API.</p>
+              )}
+            </div>
+
+            <div className="ai-upload-block">
+              <label className="field-label" htmlFor="donor-photo">
+                Donor board photo (optional)
+              </label>
+              <input
+                id="donor-photo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleDonorPhoto(e.target.files?.[0])}
+              />
+              {wizard.donorPhoto?.dataUrl && (
+                <div className="ai-photo-preview">
+                  <img src={wizard.donorPhoto.dataUrl} alt="Donor board preview" />
+                  <span className="muted small">{wizard.donorPhoto.name}</span>
+                </div>
+              )}
+              <label className="checkbox-row">
+                <input
+                  type="checkbox"
+                  checked={wizard.visionLive}
+                  disabled={!qwenLiveReady}
+                  onChange={(e) => patchWizard({ visionLive: e.target.checked })}
+                />
+                <span>
+                  Run live Qwen vision {qwenLiveReady ? "" : "(configure API key to enable)"}
+                </span>
+              </label>
+              <div className="ai-action-row">
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={visionLoading || (!wizard.donorFixtureId && !wizard.donorPhoto)}
+                  onClick={runDonorVision}
+                >
+                  {visionLoading ? "Analyzing…" : "Analyze donor board with AI"}
+                </button>
+              </div>
+              {donorVisionSummary.headline && wizard.donorVisionReport && (
+                <div className="ai-inline-report">
+                  <strong>{donorVisionSummary.headline}</strong>
+                  {donorVisionSummary.blocks.length > 0 && (
+                    <ul className="clean-list">
+                      {donorVisionSummary.blocks.slice(0, 4).map((row) => (
+                        <li key={row.block_id || row.name}>{row.name || row.block_id}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               )}
             </div>
           </>
@@ -354,6 +473,7 @@ export default function ProjectWizard({
                   <dt>Donor fixture</dt>
                   <dd>
                     {donorFixtures.find((f) => f.id === wizard.donorFixtureId)?.label || "—"}
+                    {wizard.donorPhoto?.name ? ` · photo: ${wizard.donorPhoto.name}` : ""}
                   </dd>
                 </div>
               )}
@@ -363,7 +483,36 @@ export default function ProjectWizard({
                   {wizard.batteryVoltage} V · {wizard.runtimeMin} min runtime
                 </dd>
               </div>
+              {wizard.donorVisionReport && (
+                <div>
+                  <dt>AI donor vision</dt>
+                  <dd>{donorVisionSummary.headline}</dd>
+                </div>
+              )}
             </dl>
+
+            <div className="ai-review-actions card nested">
+              <h4>AI prep before compile</h4>
+              <p className="muted small">
+                Run intake vision enrichment to merge photo evidence, extracted notes, and clarifier output into the
+                splice plan.
+              </p>
+              <button
+                type="button"
+                className="secondary"
+                disabled={visionLoading || building}
+                onClick={runVisionEnrich}
+              >
+                {visionLoading ? "Running vision prep…" : "Run AI vision prep"}
+              </button>
+              {wizard.visionEnrichReport && (
+                <p className="hint small">
+                  Vision enrichment staged — {(wizard.visionEnrichReport.applied_notes || []).length || "indexed"}{" "}
+                  evidence notes ready for build.
+                </p>
+              )}
+            </div>
+
             {building && (
               <div className="build-progress">
                 <div className="spinner" aria-hidden />
@@ -375,7 +524,7 @@ export default function ProjectWizard({
           </>
         )}
 
-        {clarifyError && <p className="error">{clarifyError}</p>}
+        {(clarifyError || visionError) && <p className="error">{clarifyError || visionError}</p>}
       </div>
 
       <div className="wizard-footer">
@@ -390,9 +539,9 @@ export default function ProjectWizard({
             type="button"
             className="primary"
             onClick={goNext}
-            disabled={building || clarifyLoading}
+            disabled={building || clarifyLoading || visionLoading}
           >
-            {clarifyLoading ? "Checking…" : "Continue"}
+            {clarifyLoading ? "Checking…" : visionLoading ? "AI running…" : "Continue"}
           </button>
         ) : (
           <button

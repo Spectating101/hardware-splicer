@@ -352,6 +352,7 @@ export function BenchPanel({ buildDir, benchSession, onRefresh, onSubmit, onSucc
 
 export const PROJECT_TABS = [
   { id: "info", label: "Overview" },
+  { id: "ai", label: "AI assist", highlight: true },
   { id: "design", label: "Design verify", highlight: true },
   { id: "bom", label: "Parts" },
   { id: "wiring", label: "Wiring" },

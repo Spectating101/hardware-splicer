@@ -27,12 +27,23 @@ const INITIAL_WIZARD = {
   mode: "salvage",
   parts: [defaultPart()],
   donorFixtureId: "",
+  donorPhoto: null,
+  donorVisionReport: null,
+  visionEnrichedIntake: null,
+  visionEnrichReport: null,
+  visionLive: false,
   batteryVoltage: 7.4,
   runtimeMin: 20,
   massKg: "",
   answers: {},
   clarifier: null,
 };
+
+function stripDataUrl(dataUrl) {
+  if (!dataUrl || typeof dataUrl !== "string") return "";
+  const comma = dataUrl.indexOf(",");
+  return comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+}
 
 function buildPartRow(row) {
   const part = {
@@ -49,8 +60,11 @@ function buildPartRow(row) {
   return part;
 }
 
-export function buildIntakeFromWizard(wizard, { donorFixtures = [], enrichedIntent = null } = {}) {
-  const base = enrichedIntent || {};
+export function buildIntakeFromWizard(
+  wizard,
+  { donorFixtures = [], enrichedIntent = null, visionEnrichedIntake = null } = {},
+) {
+  const base = visionEnrichedIntake || enrichedIntent || {};
   const goal = String(wizard.goal || base.goal || "").trim();
   const projectName = slugify(wizard.projectName || goal);
 
@@ -80,15 +94,28 @@ export function buildIntakeFromWizard(wizard, { donorFixtures = [], enrichedInte
   if (wizard.mode === "salvage" && wizard.donorFixtureId) {
     const fixture = donorFixtures.find((row) => row.id === wizard.donorFixtureId);
     if (fixture) {
+      const boardRow = {
+        board_id: fixture.board_id,
+        board_name: fixture.label,
+        functional_salvage: fixture.intake_path,
+      };
+      if (wizard.donorPhoto?.dataUrl) {
+        boardRow.vision_source = {
+          image_base64: stripDataUrl(wizard.donorPhoto.dataUrl),
+          filename: wizard.donorPhoto.name || "donor_board.jpg",
+          live: Boolean(wizard.visionLive),
+          device_hint: fixture.label,
+        };
+      }
       intake.circuit = {
         mode: "circuit_board_system",
-        boards: [
-          {
-            board_id: fixture.board_id,
-            board_name: fixture.label,
-            functional_salvage: fixture.intake_path,
-          },
-        ],
+        boards: [boardRow],
+      };
+      intake.donor_board_vision = {
+        enabled: true,
+        live: Boolean(wizard.visionLive),
+        merge_with_fixture: true,
+        device_hint: fixture.label,
       };
       const hasDonor = intake.available_parts.some((row) => row.type === "donor_board");
       if (!hasDonor) {
@@ -100,6 +127,23 @@ export function buildIntakeFromWizard(wizard, { donorFixtures = [], enrichedInte
         });
       }
     }
+  } else if (wizard.donorPhoto?.dataUrl) {
+    intake.attachments = [
+      {
+        id: "donor_board_photo",
+        kind: "donor_board",
+        board_id: "donor_board",
+        image_base64: stripDataUrl(wizard.donorPhoto.dataUrl),
+        filename: wizard.donorPhoto.name || "donor_board.jpg",
+      },
+    ];
+    intake.donor_board_vision = { enabled: true, live: Boolean(wizard.visionLive) };
+  }
+
+  if (wizard.donorVisionReport?.intake) {
+    const merged = wizard.donorVisionReport.intake;
+    if (merged.circuit) intake.circuit = merged.circuit;
+    if (merged.evidence_notes) intake.evidence_notes = merged.evidence_notes;
   }
 
   return intake;
@@ -117,7 +161,7 @@ export function getWizardSteps(wizard) {
     { id: "parts", label: "Parts you have" },
   ];
   if (wizardNeedsDonorStep(wizard)) {
-    steps.push({ id: "donor", label: "Donor board" });
+    steps.push({ id: "donor", label: "Donor board + AI" });
   }
   steps.push({ id: "power", label: "Power & limits" }, { id: "review", label: "Review" });
   return steps;

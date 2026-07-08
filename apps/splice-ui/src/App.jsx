@@ -7,8 +7,10 @@ import {
   fetchHealth,
   fetchJobResult,
   fetchJobs,
+  fetchVisionCapabilities,
   jobBundleUrl,
 } from "./api.js";
+import AiAssistPanel from "./components/AiAssistPanel.jsx";
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
@@ -76,13 +78,15 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
         <h1>Auditable hardware bring-up you can defend on the bench</h1>
         <p className="lead">
-          Donor intake → KiCad carrier with honest DRC → <strong>design verification</strong> (preview, BOM, fab
-          readiness) → bench gates → <code>PROJECT_PACKAGE</code>.
+          Donor intake with <strong>AI board vision</strong> → KiCad carrier with honest DRC →{" "}
+          <strong>design verification</strong> (preview, BOM, fab readiness) → bench gates →{" "}
+          <code>PROJECT_PACKAGE</code>.
         </p>
         <div className="readiness-pitch">
-          <strong>Before you fabricate or power on</strong>
+          <strong>AI-assisted, auditable bring-up</strong>
           <p className="muted small">
-            See what is ready, what is missing, and what must be measured — not just another KiCad folder.
+            Upload donor photos, run Qwen vision + intent clarification, then defend every gate before fabrication or
+            power-on — not a black-box ECAD toy.
           </p>
         </div>
         <PipelineVisual />
@@ -149,6 +153,7 @@ export default function App() {
   const [examples, setExamples] = useState([]);
   const [donorFixtures, setDonorFixtures] = useState([]);
   const [recentJobs, setRecentJobs] = useState([]);
+  const [visionCapabilities, setVisionCapabilities] = useState(null);
   const [view, setView] = useState(VIEWS.home);
   const [selectedExampleId, setSelectedExampleId] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
@@ -208,14 +213,16 @@ export default function App() {
       return;
     }
     try {
-      const [examplesRes, fixturesRes, jobsRes] = await Promise.all([
+      const [examplesRes, fixturesRes, jobsRes, visionRes] = await Promise.all([
         fetchExamples(),
         fetchDonorFixtures(),
         fetchJobs({ limit: 12 }),
+        fetchVisionCapabilities().catch(() => null),
       ]);
       setExamples(examplesRes.examples || []);
       setDonorFixtures(fixturesRes.fixtures || []);
       setRecentJobs(jobsRes.jobs || []);
+      setVisionCapabilities(visionRes);
       if ((examplesRes.examples || []).length && !selectedExampleId) {
         setSelectedExampleId(examplesRes.examples[0].id);
       }
@@ -339,6 +346,15 @@ export default function App() {
     if (!displayPackage) return null;
 
     switch (activeTab) {
+      case "ai":
+        return (
+          <AiAssistPanel
+            capabilities={visionCapabilities}
+            donorVisionReport={displayResult?.donor_board_vision_report}
+            visionEnrichReport={displayResult?.vision_evidence_report}
+            clarifier={displayPackage.info?.clarifier}
+          />
+        );
       case "info":
         return <InfoPanel pkg={displayPackage} />;
       case "bom":
@@ -506,6 +522,7 @@ export default function App() {
           {view === VIEWS.wizard && (
             <ProjectWizard
               donorFixtures={donorFixtures}
+              visionCapabilities={visionCapabilities}
               onCancel={() => setView(VIEWS.home)}
               onBuild={(intake) => startBuild(intake)}
               building={spliceJob.active}

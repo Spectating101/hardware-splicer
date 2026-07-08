@@ -45,6 +45,53 @@ def test_enrich_intake_applies_board_evidence_without_fixture():
     assert "board_evidence" not in fixture_board
 
 
+def test_enrich_intake_accepts_inline_base64_image(monkeypatch) -> None:
+    import base64
+
+    fake_evidence = json.loads(BOARD_EVIDENCE.read_text(encoding="utf-8"))
+
+    def _fake_analyze(image_path, **kwargs):
+        return {
+            "ok": True,
+            "mode": "test_stub",
+            "board_evidence": fake_evidence,
+            "image_path": str(image_path),
+        }
+
+    monkeypatch.setattr(
+        "hardware_splicer.board_vision_salvage._analyze_board_image_path",
+        _fake_analyze,
+    )
+    tiny_png = base64.b64encode(
+        bytes.fromhex(
+            "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
+            "0000000a49444154789c63000100000500010d0a2db40000000049454e44ae426082"
+        )
+    ).decode("ascii")
+    intake = {
+        "goal": "robot drive base",
+        "donor_board_vision": {"enabled": True, "live": False},
+        "circuit": {
+            "mode": "circuit_board_system",
+            "boards": [
+                {
+                    "board_id": "donor_inline",
+                    "board_name": "Inline donor",
+                    "vision_source": {
+                        "image_base64": tiny_png,
+                        "filename": "donor.png",
+                        "device_hint": "RC toy donor",
+                    },
+                }
+            ],
+        },
+    }
+    body, report = enrich_intake_with_donor_board_vision(intake)
+    assert report["applied_board_count"] == 1
+    board = body["circuit"]["boards"][0]
+    assert board.get("functional_salvage", {}).get("reusable_blocks")
+
+
 def test_plan_from_vision_intake_has_circuit_backed_blocks():
     intake = load_project_intake(VISION_INTAKE)
     plan = plan_project_from_intake(intake, skip_vision=True)

@@ -264,3 +264,26 @@ export async function fetchNetlistFixture(fixtureId) {
   const res = await fetch(`${API_BASE}/v1/examples/netlist-fixtures/${encodeURIComponent(fixtureId)}`);
   return parseJson(res);
 }
+
+export async function fetchVisionCapabilities() {
+  const res = await fetch(`${API_BASE}/v1/vision/capabilities`);
+  return parseJson(res);
+}
+
+export async function visionEnrichIntake(intake, { apply = true, live = false } = {}) {
+  const res = await fetch(`${API_BASE}/v1/vision/enrich-intake`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ intake, apply, live }),
+  });
+  return parseJson(res);
+}
+
+export async function donorBoardVision(intake) {
+  const res = await fetch(`${API_BASE}/v1/donor-board-vision`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ intake }),
+  });
+  return parseJson(res);
+}

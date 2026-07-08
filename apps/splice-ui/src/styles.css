@@ -1758,3 +1758,93 @@ button.primary:disabled {
   color: inherit;
   resize: vertical;
 }
+
+.ai-assist-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-assist-panel.compact .card {
+  padding: 12px;
+}
+
+.ai-status-card .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-upload-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-photo-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ai-photo-preview img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.ai-action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-inline-report {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(99, 179, 237, 0.25);
+  background: rgba(99, 179, 237, 0.06);
+}
+
+.ai-review-actions {
+  margin-top: 16px;
+}
+
+.ai-review-actions.nested {
+  padding: 14px;
+}
+
+.ai-board-row {
+  margin: 10px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ai-board-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-block-list li {
+  margin-bottom: 6px;
+}
+
+.chip.small {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+}
