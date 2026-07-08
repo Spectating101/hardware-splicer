@@ -14,7 +14,7 @@
 | **HTTP** | `POST /v1/jobs/compose-agent-loop` — async agent spine |
 | **Alien** | FGEDHGV Track B: offline curls 1–2 (36s) + Qwen curl 3 (3072 tokens, 0 DRC) |
 | **Ops** | `scripts/deploy_alien_quickstart.sh`, upgraded `agent_quickstart_verify.sh` (sync + async) |
-| **CI** | Live smoke includes compose-agent-loop job; canvas pin contract tests (27 modules) |
+| **CI** | Live smoke includes compose-agent-loop job; canvas pin contract tests (**50 modules**) |
 | **Security** | Qwen `.env.local` scrubbed from lab node after test |
 | **Tag** | `v1.1.0-alpha.6` |
 

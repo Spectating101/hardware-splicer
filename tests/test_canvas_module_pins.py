@@ -13,7 +13,7 @@ from hardware_splicer.pcb.module_registry import (
 
 def test_canvas_catalog_matches_footprint_registry() -> None:
     modules = list_canvas_modules()
-    assert len(modules) >= 20
+    assert len(modules) >= 50
     assert len(modules) == len(_MODULE_FOOTPRINTS)
     ids = {m["id"] for m in modules}
     assert ids == set(_MODULE_FOOTPRINTS.keys())

@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.6
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.7
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -74,7 +74,7 @@ curl -s "$BASE/v1/modules/catalog" | python3 -c "
 import json,sys
 b=json.load(sys.stdin)
 print('catalog_count', b.get('count'))
-assert b.get('ok') and b.get('count',0) >= 20
+assert b.get('ok') and b.get('count',0) >= 50
 "
 
 echo "==> step 2: sync canvas agent-loop"

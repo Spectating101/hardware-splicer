@@ -3,7 +3,7 @@
 **Start here.** Any agent (MCP client, HTTP caller, Python script) can drive the splice product without a UI. The library/SDK is the primary handoff; MCP and HTTP are thin wrappers over the same functions.
 
 **15-minute path:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) — 3 curls + 3 MCP tools.  
-**Product scale (phases):** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md).  
+**Zero-help proof:** [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md).  
 **build_dir policy:** [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md).
 
 **What changed since May:** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — build/upgrade delta for continuity.  

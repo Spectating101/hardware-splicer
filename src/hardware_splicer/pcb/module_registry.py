@@ -242,6 +242,129 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
         "bodyMm": {"w": 27, "h": 40},
         "pads": _row(["5V", "GND", "U0T", "U0R", "GPIO4"], -6, 0, _P),
     },
+    # --- Canvas catalog expansion (27 → 50) — pin ids must match engine_pcb_data.json ---
+    "ds18b20": {
+        "kicadFootprint": "Sensor:DS18B20",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["VCC", "DATA", "GND"]),
+    },
+    "dht11": {
+        "kicadFootprint": "Sensor:DHT11-4PIN",
+        "bodyMm": {"w": 15, "h": 12},
+        "pads": _row(["VCC", "DATA", "NC", "GND"]),
+    },
+    "bh1750": {
+        "kicadFootprint": "Sensor:BH1750",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["VCC", "GND", "SCL", "SDA"]),
+    },
+    "bmp280": {
+        "kicadFootprint": "Sensor:BMP280",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["VCC", "GND", "SCL", "SDA"]),
+    },
+    "pir_motion_sensor": {
+        "kicadFootprint": "Sensor:PIR-MOTION",
+        "bodyMm": {"w": 24, "h": 20},
+        "pads": _row(["VCC", "OUT", "GND"]),
+    },
+    "mq-2_gas_sensor": {
+        "kicadFootprint": "Sensor:MQ-2",
+        "bodyMm": {"w": 20, "h": 16},
+        "pads": _row(["VCC", "GND", "A0", "D0"]),
+    },
+    "flame_sensor": {
+        "kicadFootprint": "Sensor:FLAME",
+        "bodyMm": {"w": 16, "h": 12},
+        "pads": _row(["VCC", "GND", "D0", "A0"]),
+    },
+    "lcd_16x2_i2c": {
+        "kicadFootprint": "Display:LCD1602-I2C",
+        "bodyMm": {"w": 80, "h": 24},
+        "pads": _row(["VCC", "GND", "SDA", "SCL"]),
+    },
+    "st7735_tft": {
+        "kicadFootprint": "Display:ST7735-TFT",
+        "bodyMm": {"w": 34, "h": 34},
+        "pads": _row(["VCC", "GND", "SCL", "SDA", "RES", "DC", "CS", "BL"], 0, 0, _P * 1.1),
+    },
+    "neopixel_ring": {
+        "kicadFootprint": "Display:NEOPIXEL-RING",
+        "bodyMm": {"w": 44, "h": 44},
+        "pads": _row(["5V", "GND", "IN", "OUT"]),
+    },
+    "cooling_fan_5v": {
+        "kicadFootprint": "Actuator:FAN-5V-40MM",
+        "bodyMm": {"w": 40, "h": 40},
+        "pads": _row(["VCC", "GND"], 0, 0, _P * 2),
+    },
+    "dc_motor_3v_6v": {
+        "kicadFootprint": "Actuator:DC-MOTOR-3V6V",
+        "bodyMm": {"w": 24, "h": 18},
+        "pads": _row(["VCC", "GND"], 0, 0, _P * 2),
+    },
+    "solenoid_valve_12v": {
+        "kicadFootprint": "Actuator:SOLENOID-12V",
+        "bodyMm": {"w": 28, "h": 20},
+        "pads": _row(["VCC", "GND"], 0, 0, _P * 3),
+    },
+    "active_buzzer": {
+        "kicadFootprint": "Actuator:BUZZER-ACTIVE-5V",
+        "bodyMm": {"w": 12, "h": 12},
+        "pads": _row(["VCC", "GND"], 0, 0, _P * 2),
+    },
+    "relay_module_1ch_5v": {
+        "kicadFootprint": "Driver:RELAY-1CH-5V-MOD",
+        "bodyMm": {"w": 50, "h": 26},
+        "pads": (
+            _row(["VCC", "GND", "IN"], -6, -8, _P)
+            + _row(["COM", "NO", "NC"], 6, 8, _P)
+        ),
+    },
+    "esp8266_nodemcu": {
+        "kicadFootprint": "Module:ESP8266-NODEMCU",
+        "bodyMm": {"w": 24, "h": 48},
+        "pads": _dual_col(
+            ["3V3", "GND", "D1", "D2", "D3"],
+            ["D4", "D5", "D6", "D7"],
+            _P * 5,
+        ),
+    },
+    "ds3231_rtc": {
+        "kicadFootprint": "Interface:DS3231-RTC",
+        "bodyMm": {"w": 20, "h": 14},
+        "pads": _row(["VCC", "GND", "SDA", "SCL", "SQW", "32K"], 0, 0, _P * 1.1),
+    },
+    "ds1307_rtc": {
+        "kicadFootprint": "Interface:DS1307-RTC",
+        "bodyMm": {"w": 18, "h": 12},
+        "pads": _row(["VCC", "GND", "SDA", "SCL", "SQW"]),
+    },
+    "ky040_encoder": {
+        "kicadFootprint": "Interface:KY040-ENCODER",
+        "bodyMm": {"w": 26, "h": 26},
+        "pads": _row(["VCC", "GND", "CLK", "DT", "SW"]),
+    },
+    "joystick_module": {
+        "kicadFootprint": "Interface:JOYSTICK-PS2",
+        "bodyMm": {"w": 34, "h": 34},
+        "pads": _row(["VCC", "GND", "VRx", "VRy", "SW"]),
+    },
+    "capacitive_touch": {
+        "kicadFootprint": "Interface:TTP223-TOUCH",
+        "bodyMm": {"w": 14, "h": 12},
+        "pads": _row(["VCC", "GND", "SIG"]),
+    },
+    "sd_card_module": {
+        "kicadFootprint": "Interface:SD-CARD-SPI",
+        "bodyMm": {"w": 24, "h": 28},
+        "pads": _row(["VCC", "GND", "MISO", "MOSI", "SCK", "CS"], 0, 0, _P * 1.1),
+    },
+    "mcp4725-dac": {
+        "kicadFootprint": "Interface:MCP4725-DAC",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["VCC", "GND", "SCL", "SDA", "A0", "VOUT"]),
+    },
 }
 
 # ---------------------------------------------------------------------------

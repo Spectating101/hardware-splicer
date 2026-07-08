@@ -6,6 +6,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.7] - 2026-07-09
+
+### Added
+
+- Canvas module catalog expanded **27 → 50** with pin/footprint contract coverage
+- `docs/AGENT_DRY_RUN_CHECKLIST.md` — zero-help external operator proof checklist
+
+### Changed
+
+- `scripts/agent_quickstart_verify.sh` — catalog assert `count` ≥ 50
+- `docs/PRODUCT_SCALE_PLAN.md` — Phase 1 catalog milestone marked complete
+
+---
+
 ## [1.1.0-alpha.6] - 2026-07-09
 
 ### Added

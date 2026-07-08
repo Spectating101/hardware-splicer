@@ -134,7 +134,7 @@ Or configure in Cursor/Claude per [`MCP.md`](MCP.md).
 {}
 ```
 
-Expect `count` ≈ 27 and each module has `id`, `pins`.
+Expect `count` ≥ **50** and each module has `id`, `pins`.
 
 ### MCP 2 — `hs_compose_drc_agent` (canvas)
 

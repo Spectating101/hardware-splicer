@@ -65,7 +65,7 @@ Describe (phrase / canvas / donor intake)
 | 0.4 | `docs/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` paths | ✅ |
 | 0.5 | Design Studio: AI phrase → agent-loop + package | ✅ |
 | 0.6 | `make verify-product-internal` green | Gate before tag |
-| 0.7 | React Flow selection loop fix | ✅ `fb3584e` |
+| 0.7 | Canvas catalog → 50 modules + pin contract tests | ✅ |
 
 **Exit criteria:** Clone → Qwen key → agent loop in &lt;15 min without author hand-holding. See [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md).
 
@@ -180,7 +180,7 @@ flowchart LR
 
 1. ~~Run `make verify-product-internal` on second machine; file `INSTALL_REPORT`.~~ ✅ FGEDHGV Track B + Qwen curl 3 — [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md)
 2. ~~Phase 1 kickoff: async `POST /v1/jobs/compose-agent-loop`.~~ ✅
-3. Expand module catalog toward 50 entries with pin validation tests.
+3. Expand module catalog toward 50 entries with pin validation tests. ✅ **50 modules** + `test_canvas_module_pins.py`
 4. Unify salvage intake → `hs_compose_drc_agent` with `donor_context`.
 
 ---
