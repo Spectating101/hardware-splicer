@@ -246,12 +246,16 @@ def list_build_artifacts(build_dir: str | Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def read_build_bom(build_dir: str | Path) -> Dict[str, Any]:
+def read_build_bom(build_dir: str | Path, *, enrich: bool = False) -> Dict[str, Any]:
     root = resolve_build_dir(build_dir)
     comp = root / "build_compilation"
     json_path = comp / "BOM.json"
     if json_path.is_file():
         bom = json.loads(json_path.read_text(encoding="utf-8"))
+        if enrich:
+            from .bom_generator import enrich_bom_with_jlcsearch
+
+            bom = enrich_bom_with_jlcsearch(bom)
         lines = list(bom.get("lines") or [])
         return {
             "ok": True,
@@ -264,12 +268,17 @@ def read_build_bom(build_dir: str | Path) -> Dict[str, Any]:
     if csv_path.is_file():
         with csv_path.open(encoding="utf-8", newline="") as handle:
             lines = list(csv.DictReader(handle))
+        if enrich:
+            from .bom_generator import enrich_bom_with_jlcsearch
+
+            enriched = enrich_bom_with_jlcsearch({"lines": lines})
+            lines = list(enriched.get("lines") or lines)
         jlc_enriched = any(row.get("jlc_lcsc") or row.get("jlc_mpn") for row in lines)
         return {
             "ok": True,
             "source": "BOM.csv",
             "lines": lines,
-            "jlc_enriched": jlc_enriched,
+            "jlc_enriched": jlc_enriched or enrich,
             "line_count": len(lines),
         }
     raise ValueError("no BOM.csv or BOM.json under build_compilation/")

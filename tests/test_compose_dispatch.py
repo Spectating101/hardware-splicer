@@ -57,7 +57,26 @@ def test_attach_build_compilation_uses_scratch_pipeline(tmp_path: Path, monkeypa
     assert int((payload.get("design_quality") or {}).get("kicad_drc_errors") or 0) == 0
 
 
-def test_scratch_failure_writes_casefile(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_finalize_compose_job_result_writes_package(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
+    dispatch = compose_dispatch(
+        out_dir=tmp_path / "compose_pkg",
+        phrase="usb esp32 temperature sensor board",
+        export_gerber=False,
+        allow_llm_first=False,
+    )
+    from hardware_splicer.sdk import finalize_compose_job_result
+
+    final = finalize_compose_job_result(
+        dispatch,
+        goal="usb esp32 temperature sensor board",
+        project_name="compose_pkg",
+    )
+    assert final.get("project_package")
+    assert final.get("build_dir")
+    assert Path(final["build_dir"], "PROJECT_PACKAGE.json").is_file()
+
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
     result = compile_scratch_build(
         out_dir=str(tmp_path),

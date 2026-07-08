@@ -398,15 +398,24 @@ class JobBackend:
         try:
             if job_type == "compose":
                 from .compose_dispatch import compose_dispatch
+                from .sdk import finalize_compose_job_result
 
                 payload = dict(job.options.get("payload") or {})
+                allow_llm_first = bool(payload.pop("allow_llm_first", False))
+                clarifier = payload.pop("clarifier", None)
                 result = compose_dispatch(
                     out_dir=job.output_dir,
-                    allow_llm_first=False,
+                    allow_llm_first=allow_llm_first,
                     request_id=job.request_id,
                     **payload,
                 )
-                self.store.complete_job(job.job_id, result)
+                final = finalize_compose_job_result(
+                    result,
+                    goal=str(payload.get("phrase") or ""),
+                    project_name=job.project_name,
+                    clarifier=clarifier if isinstance(clarifier, dict) else None,
+                )
+                self.store.complete_job(job.job_id, final)
                 return
             if job_type == "splice_build":
                 from .project_intake import splice_and_build_from_intake

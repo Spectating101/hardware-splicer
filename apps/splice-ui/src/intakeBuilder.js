@@ -32,6 +32,8 @@ const INITIAL_WIZARD = {
   visionEnrichedIntake: null,
   visionEnrichReport: null,
   visionLive: false,
+  designStrategy: "llm",
+  selectedModuleIds: ["usb-power-5v", "esp32-devkit", "dht22"],
   batteryVoltage: 7.4,
   runtimeMin: 20,
   massKg: "",
@@ -149,6 +151,41 @@ export function buildIntakeFromWizard(
   return intake;
 }
 
+export function buildComposePayloadFromWizard(wizard, { enrichedIntent = null } = {}) {
+  const goal = String(wizard.goal || enrichedIntent?.goal || "").trim();
+  const constraints = {
+    runtime_min: Number(wizard.runtimeMin) || 20,
+    battery_voltage_v: Number(wizard.batteryVoltage) || 7.4,
+  };
+  if (wizard.massKg) constraints.mass_kg = Number(wizard.massKg);
+
+  const clarifier = wizard.clarifier || null;
+  const base = {
+    constraints,
+    export_gerber: false,
+    material_mode: "scratch",
+    clarifier,
+  };
+
+  if (wizard.designStrategy === "canvas" && (wizard.selectedModuleIds || []).length >= 2) {
+    return {
+      ...base,
+      module_ids: [...wizard.selectedModuleIds],
+      allow_llm_first: false,
+    };
+  }
+
+  return {
+    ...base,
+    phrase: goal,
+    allow_llm_first: wizard.designStrategy !== "heuristic",
+  };
+}
+
+export function wizardIsGreenfield(wizard) {
+  return wizard.mode === "greenfield";
+}
+
 export function wizardNeedsDonorStep(wizard) {
   return wizard.mode === "salvage";
 }
@@ -157,13 +194,15 @@ export function getWizardSteps(wizard) {
   const steps = [
     { id: "goal", label: "Your project" },
     { id: "clarify", label: "Quick questions" },
-    { id: "mode", label: "Salvage or new" },
-    { id: "parts", label: "Parts you have" },
+    { id: "mode", label: "Design path" },
   ];
-  if (wizardNeedsDonorStep(wizard)) {
-    steps.push({ id: "donor", label: "Donor board + AI" });
+  if (wizard.mode === "salvage") {
+    steps.push({ id: "parts", label: "Parts you have" }, { id: "donor", label: "Donor board + AI" });
+  } else {
+    steps.push({ id: "design", label: "AI design studio" });
   }
-  steps.push({ id: "power", label: "Power & limits" }, { id: "review", label: "Review" });
+  steps.push({ id: "power", label: wizard.mode === "salvage" ? "Power & limits" : "Constraints" });
+  steps.push({ id: "review", label: "Review" });
   return steps;
 }
 

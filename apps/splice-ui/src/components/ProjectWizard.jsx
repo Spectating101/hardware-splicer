@@ -3,12 +3,14 @@ import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api.js";
 import {
   INITIAL_WIZARD,
   PART_TYPES,
+  buildComposePayloadFromWizard,
   buildIntakeFromWizard,
   defaultPart,
   getWizardSteps,
   slugify,
 } from "../intakeBuilder.js";
 import { summarizeDonorVisionReport } from "../utils/aiVisionSummary.js";
+import CanvasComposeStep from "./CanvasComposeStep.jsx";
 
 function StepIndicator({ steps, currentId }) {
   const currentIndex = steps.findIndex((row) => row.id === currentId);
@@ -32,6 +34,7 @@ function StepIndicator({ steps, currentId }) {
 export default function ProjectWizard({
   donorFixtures,
   visionCapabilities = null,
+  llmPolicy = null,
   onCancel,
   onBuild,
   building,
@@ -49,6 +52,7 @@ export default function ProjectWizard({
   const qwenLiveReady = Boolean(
     visionCapabilities?.circuit_ai?.qwen_board_vision_status?.ready_for_live_model,
   );
+  const llmComposeReady = Boolean(llmPolicy?.qwen_llm_first);
 
   const steps = useMemo(() => getWizardSteps(wizard), [wizard]);
   const stepIndex = steps.findIndex((row) => row.id === stepId);
@@ -99,12 +103,21 @@ export default function ProjectWizard({
       }
     }
 
-    if (stepId === "parts") {
+    if (stepId === "parts" && wizard.mode === "salvage") {
       const named = wizard.parts.filter((row) => row.name.trim());
       if (named.length === 0) {
         setClarifyError("Add at least one part you have on hand.");
         return;
       }
+    }
+
+    if (
+      stepId === "design" &&
+      wizard.designStrategy === "canvas" &&
+      (wizard.selectedModuleIds || []).length < 2
+    ) {
+      setClarifyError("Pick at least two modules for canvas compose.");
+      return;
     }
 
     if (stepId === "donor" && wizard.mode === "salvage" && !wizard.donorFixtureId) {
@@ -123,12 +136,17 @@ export default function ProjectWizard({
   };
 
   const handleBuild = () => {
+    if (wizard.mode === "greenfield") {
+      const payload = buildComposePayloadFromWizard(wizard, { enrichedIntent });
+      onBuild(payload, { route: "compose" });
+      return;
+    }
     const intake = buildIntakeFromWizard(wizard, {
       donorFixtures,
       enrichedIntent,
       visionEnrichedIntake: wizard.visionEnrichedIntake,
     });
-    onBuild(intake);
+    onBuild(intake, { route: "splice" });
   };
 
   const handleDonorPhoto = (file) => {
@@ -247,26 +265,34 @@ export default function ProjectWizard({
 
         {stepId === "mode" && (
           <>
-            <h3>Are you reusing junk hardware?</h3>
+            <h3>Choose your design path</h3>
             <div className="choice-grid">
+              <button
+                type="button"
+                className={`choice-card ${wizard.mode === "greenfield" ? "active" : ""}`}
+                onClick={() => patchWizard({ mode: "greenfield", donorFixtureId: "" })}
+              >
+                <strong>AI carrier design</strong>
+                <span>Flux-class — describe a board, AI composes modules → KiCad</span>
+              </button>
               <button
                 type="button"
                 className={`choice-card ${wizard.mode === "salvage" ? "active" : ""}`}
                 onClick={() => patchWizard({ mode: "salvage" })}
               >
                 <strong>Salvage / splice</strong>
-                <span>Reuse motors, drivers, or boards from dead gadgets</span>
-              </button>
-              <button
-                type="button"
-                className={`choice-card ${wizard.mode === "greenfield" ? "active" : ""}`}
-                onClick={() => patchWizard({ mode: "greenfield", donorFixtureId: "" })}
-              >
-                <strong>Mostly new parts</strong>
-                <span>Build from modules you already own — less donor PCB reuse</span>
+                <span>Donor boards, bench gates, auditable bring-up (HS moat)</span>
               </button>
             </div>
           </>
+        )}
+
+        {stepId === "design" && (
+          <CanvasComposeStep
+            wizard={wizard}
+            llmReady={llmComposeReady}
+            onChange={(patch) => patchWizard(patch)}
+          />
         )}
 
         {stepId === "parts" && (
@@ -462,7 +488,11 @@ export default function ProjectWizard({
               </div>
               <div>
                 <dt>Mode</dt>
-                <dd>{wizard.mode === "salvage" ? "Salvage / splice" : "Mostly new parts"}</dd>
+                <dd>
+                  {wizard.mode === "salvage"
+                    ? "Salvage / splice"
+                    : `AI design (${wizard.designStrategy === "canvas" ? "module canvas" : wizard.designStrategy === "heuristic" ? "heuristic" : "LLM-first"})`}
+                </dd>
               </div>
               <div>
                 <dt>Parts</dt>
@@ -491,7 +521,13 @@ export default function ProjectWizard({
               )}
             </dl>
 
-            <div className="ai-review-actions card nested">
+            {wizard.mode === "greenfield" ? (
+              <p className="hint">
+                Build runs AI compose → KiCad compile → full PROJECT_PACKAGE with design verify, BOM, and bench
+                session — same results shell as salvage builds.
+              </p>
+            ) : (
+              <div className="ai-review-actions card nested">
               <h4>AI prep before compile</h4>
               <p className="muted small">
                 Run intake vision enrichment to merge photo evidence, extracted notes, and clarifier output into the
@@ -512,6 +548,7 @@ export default function ProjectWizard({
                 </p>
               )}
             </div>
+            )}
 
             {building && (
               <div className="build-progress">

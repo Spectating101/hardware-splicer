@@ -126,6 +126,19 @@ export async function benchSubmitCapture(buildDir, capture) {
   return parseJson(res);
 }
 
+export async function submitComposeJob(payload, { exportGerber = false, requestId = null } = {}) {
+  const res = await fetch(`${API_BASE}/v1/jobs/compose`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...payload,
+      export_gerber: exportGerber,
+      ...(requestId ? { request_id: requestId } : {}),
+    }),
+  });
+  return parseJson(res);
+}
+
 export async function composePhrase(
   phrase,
   { allowLlmFirst = false, exportGerber = false, wireOnly = false, moduleIds = null } = {},
@@ -222,11 +235,11 @@ export async function runBuildAutoroute(buildDir) {
   return parseJson(res);
 }
 
-export async function fetchBuildBom(buildDir) {
+export async function fetchBuildBom(buildDir, { enrich = false } = {}) {
   const res = await fetch(`${API_BASE}/v1/build-files/bom`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ build_dir: buildDir }),
+    body: JSON.stringify({ build_dir: buildDir, enrich }),
   });
   return parseJson(res);
 }

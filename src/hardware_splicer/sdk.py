@@ -715,6 +715,55 @@ def clarify_hardware_intent(intent: Mapping[str, Any]) -> Dict[str, Any]:
     return analyze_intent_clarifications(dict(intent))
 
 
+def finalize_compose_job_result(
+    compose_result: Mapping[str, Any],
+    *,
+    goal: str = "",
+    project_name: str = "",
+    clarifier: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Turn compose_dispatch output into the same PROJECT_PACKAGE shape as splice builds."""
+    from .bench_capture_bridge import sync_bench_session_template
+    from .project_package import write_project_package_artifacts
+    from .splice_bench import open_bench_session
+
+    apply_engine_defaults()
+    out_dir = Path(str(compose_result.get("out_dir") or "")).resolve()
+    if not out_dir.is_dir():
+        raise ValueError(f"compose out_dir missing: {out_dir}")
+
+    body: Dict[str, Any] = {
+        **dict(compose_result),
+        "project_name": project_name or out_dir.name,
+        "goal": goal or project_name or out_dir.name,
+        "build_id": compose_result.get("build_id"),
+    }
+    if clarifier:
+        body["metadata"] = {"clarifier": dict(clarifier)}
+    package_write = write_project_package_artifacts(out_dir, result=body, source="compose")
+    bench_session = open_bench_session(out_dir)
+    template_sync = sync_bench_session_template(out_dir)
+    bench_session = template_sync.get("session") or bench_session
+    artifacts = dict(compose_result.get("artifacts") or {})
+    artifacts.update(package_write.get("artifacts") or {})
+    return {
+        **dict(compose_result),
+        "build_dir": str(out_dir),
+        "project_name": body["project_name"],
+        "goal": body["goal"],
+        "project_package": package_write.get("package"),
+        "bench_session": {
+            "readiness": bench_session.get("readiness"),
+            "open_gate_count": bench_session.get("open_gate_count"),
+            "critical_open_count": bench_session.get("critical_open_count"),
+            "power_on_authorized": bench_session.get("power_on_authorized"),
+            "level": bench_session.get("level"),
+            "gates": bench_session.get("gates"),
+        },
+        "artifacts": artifacts,
+    }
+
+
 def render_project_package(
     build_dir: str | Path,
     *,

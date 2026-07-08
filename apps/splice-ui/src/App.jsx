@@ -77,17 +77,17 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>Auditable hardware bring-up you can defend on the bench</h1>
+        <h1>Design PCBs with AI — plus auditable bring-up Flux doesn’t ship</h1>
         <p className="lead">
-          Donor intake with <strong>AI board vision</strong> → KiCad carrier with honest DRC →{" "}
-          <strong>design verification</strong> (preview, BOM, fab readiness) → bench gates →{" "}
-          <code>PROJECT_PACKAGE</code>.
+          <strong>AI carrier design</strong> (describe → compose → KiCad) or <strong>salvage splice</strong> (donor
+          vision → gates → bench capture) — browser workbench with honest DRC, LCSC-aware BOM, and{" "}
+          <code>PROJECT_PACKAGE</code> handoff.
         </p>
         <div className="readiness-pitch">
-          <strong>AI-assisted, auditable bring-up</strong>
+          <strong>Flux-class first mile. Hardware-Splicer last mile.</strong>
           <p className="muted small">
-            Upload donor photos, run Qwen vision + intent clarification, then defend every gate before fabrication or
-            power-on — not a black-box ECAD toy.
+            Compete on NL → board like Flux, then win on compile truth, measurement gates, and defensible packages —
+            self-hosted, not credit-metered black box.
           </p>
         </div>
         <PipelineVisual />
@@ -115,6 +115,20 @@ function HomeHero({ onStart, onExample, onQuickDemo, apiOk, version }) {
       <aside className="home-aside card">
         <h3>What you get</h3>
         <ul className="feature-list">
+          <li>
+            <span className="feature-icon">✦</span>
+            <div>
+              <strong>AI compose</strong>
+              <span>LLM-first module pick → KiCad (Flux-class path)</span>
+            </div>
+          </li>
+          <li>
+            <span className="feature-icon">◇</span>
+            <div>
+              <strong>Live sourcing</strong>
+              <span>JLC/LCSC enrich on compile BOM</span>
+            </div>
+          </li>
           <li>
             <span className="feature-icon">⚡</span>
             <div>
@@ -241,11 +255,18 @@ export default function App() {
       setPreviewContext(null);
       setView(VIEWS.results);
       setHydratedResult(null);
-      setActiveTab("design");
+      setActiveTab(spliceJob.jobKind === "compose" ? "design" : "design");
+      if (spliceJob.result.bench_session) {
+        setBenchSession(spliceJob.result.bench_session);
+      }
       loadBootstrap();
-      setToast("Build complete — review the KiCad carrier, then close bench gates");
+      setToast(
+        spliceJob.jobKind === "compose"
+          ? "AI compose complete — review KiCad carrier, BOM, and fab readiness"
+          : "Build complete — review the KiCad carrier, then close bench gates",
+      );
     }
-  }, [spliceJob.result, loadBootstrap]);
+  }, [spliceJob.result, spliceJob.jobKind, loadBootstrap]);
 
   useEffect(() => {
     if (!projectBuildDir) return;
@@ -259,13 +280,16 @@ export default function App() {
     return session;
   }, [projectBuildDir]);
 
-  const startBuild = async (intake, { exampleId } = {}) => {
+  const startBuild = async (payload, { exampleId, route = "splice" } = {}) => {
     spliceJob.clearError();
     setHydratedResult(null);
     setPreviewContext(null);
     setView(VIEWS.results);
-    setActiveTab("info");
-    const jobId = await spliceJob.startBuild(intake, { exportGerber: false });
+    setActiveTab(route === "compose" ? "design" : "info");
+    const jobId =
+      route === "compose"
+        ? await spliceJob.startCompose(payload, { exportGerber: false })
+        : await spliceJob.startBuild(payload, { exportGerber: false });
     setActiveJobId(jobId);
     if (exampleId) setSelectedExampleId(exampleId);
   };
@@ -507,9 +531,21 @@ export default function App() {
             </div>
             <div className="project-header-actions">
               {activeJobId && (
-                <a className="secondary button-link" href={jobBundleUrl(activeJobId)} download>
-                  ↓ Download zip
-                </a>
+                <>
+                  <button
+                    type="button"
+                    className="ghost button-link"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(jobBundleUrl(activeJobId));
+                      setToast("Share link copied — download bundle for reviewers");
+                    }}
+                  >
+                    Share bundle link
+                  </button>
+                  <a className="secondary button-link" href={jobBundleUrl(activeJobId)} download>
+                    ↓ Download zip
+                  </a>
+                </>
               )}
             </div>
           </header>
@@ -554,6 +590,7 @@ export default function App() {
             <ProjectWizard
               donorFixtures={donorFixtures}
               visionCapabilities={visionCapabilities}
+              llmPolicy={health?.llm_policy}
               onCancel={() => setView(VIEWS.home)}
               onBuild={(intake) => startBuild(intake)}
               building={spliceJob.active}

@@ -1876,6 +1876,18 @@ button.primary:disabled {
   margin-bottom: 6px;
 }
 
-.lab-llm-card textarea.field-textarea {
-  margin: 10px 0;
+.module-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.fixture-card.compact {
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.design-studio-step .choice-grid {
+  margin-bottom: 12px;
 }

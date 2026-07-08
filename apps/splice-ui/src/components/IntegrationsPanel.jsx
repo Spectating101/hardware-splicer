@@ -250,13 +250,20 @@ export function DesignReadinessPanel({ buildDir, onRecheckComplete }) {
 export function DesignBomPanel({ buildDir }) {
   const [bom, setBom] = useState(null);
   const [error, setError] = useState("");
+  const [enriching, setEnriching] = useState(false);
+
+  const loadBom = (enrich = false) => {
+    if (!buildDir) return;
+    setEnriching(enrich);
+    import("../api.js")
+      .then(({ fetchBuildBom }) => fetchBuildBom(buildDir, { enrich }))
+      .then(setBom)
+      .catch((err) => setError(err.message))
+      .finally(() => setEnriching(false));
+  };
 
   useEffect(() => {
-    if (!buildDir) return;
-    import("../api.js")
-      .then(({ fetchBuildBom }) => fetchBuildBom(buildDir))
-      .then(setBom)
-      .catch((err) => setError(err.message));
+    loadBom(false);
   }, [buildDir]);
 
   if (!buildDir || error) {
@@ -279,7 +286,12 @@ export function DesignBomPanel({ buildDir }) {
 
   return (
     <div className="design-bom-panel">
-      <h4>Compile BOM</h4>
+      <div className="card-header">
+        <h4>Compile BOM</h4>
+        <button type="button" className="ghost small" disabled={enriching} onClick={() => loadBom(true)}>
+          {enriching ? "Enriching…" : "Enrich JLC/LCSC"}
+        </button>
+      </div>
       <p className="muted small">
         {bom.line_count} lines from {bom.source}
         {bom.jlc_enriched || hasJlc

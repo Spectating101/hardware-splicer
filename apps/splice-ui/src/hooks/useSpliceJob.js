@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchJob, fetchJobResult, submitSpliceJob } from "../api.js";
+import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api.js";
 
 const POLL_MS = 2000;
 
@@ -8,6 +8,14 @@ const STAGE_LABELS = {
   running: "Compiling splice plan and KiCad carrier…",
   succeeded: "Build complete",
   failed: "Build failed",
+  cancelled: "Cancelled",
+};
+
+const COMPOSE_STAGE_LABELS = {
+  queued: "Waiting in queue…",
+  running: "AI compose → KiCad compile…",
+  succeeded: "Design complete",
+  failed: "Compose failed",
   cancelled: "Cancelled",
 };
 
@@ -20,6 +28,8 @@ export function useSpliceJob() {
   const timerRef = useRef(null);
   const elapsedRef = useRef(null);
   const startedAtRef = useRef(null);
+
+  const [jobKind, setJobKind] = useState("splice");
 
   const clearTimer = () => {
     if (timerRef.current) {
@@ -70,6 +80,7 @@ export function useSpliceJob() {
   const startBuild = useCallback(
     async (intake, options = {}) => {
       clearTimer();
+      setJobKind("splice");
       setActive(true);
       setError(null);
       setResult(null);
@@ -100,6 +111,40 @@ export function useSpliceJob() {
     [pollJob],
   );
 
+  const startCompose = useCallback(
+    async (payload, options = {}) => {
+      clearTimer();
+      setJobKind("compose");
+      setActive(true);
+      setError(null);
+      setResult(null);
+      setJob(null);
+      startElapsed();
+      try {
+        const submitted = await submitComposeJob(payload, options);
+        const jobId = submitted.job_id;
+        setJob(submitted);
+        const done = await pollJob(jobId);
+        if (!done) {
+          timerRef.current = setInterval(() => {
+            pollJob(jobId).catch((err) => {
+              setError(err.message);
+              setActive(false);
+              clearTimer();
+            });
+          }, POLL_MS);
+        }
+        return jobId;
+      } catch (err) {
+        setError(err.message);
+        setActive(false);
+        clearTimer();
+        throw err;
+      }
+    },
+    [pollJob],
+  );
+
   const reset = useCallback(() => {
     clearTimer();
     setJob(null);
@@ -107,12 +152,14 @@ export function useSpliceJob() {
     setError(null);
     setActive(false);
     setElapsedSec(0);
+    setJobKind("splice");
     startedAtRef.current = null;
   }, []);
 
   useEffect(() => () => clearTimer(), []);
 
-  const stageLabel = job?.status ? STAGE_LABELS[job.status] || job.status : "";
+  const labels = jobKind === "compose" ? COMPOSE_STAGE_LABELS : STAGE_LABELS;
+  const stageLabel = job?.status ? labels[job.status] || job.status : "";
 
   return {
     job,
@@ -121,7 +168,9 @@ export function useSpliceJob() {
     active,
     elapsedSec,
     stageLabel,
+    jobKind,
     startBuild,
+    startCompose,
     reset,
     clearError: () => setError(null),
   };

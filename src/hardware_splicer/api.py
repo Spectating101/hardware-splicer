@@ -135,6 +135,11 @@ class BuildFilesListRequest(BaseModel):
     build_dir: str
 
 
+class BuildBomRequest(BaseModel):
+    build_dir: str
+    enrich: bool = False
+
+
 class BuildFilesContentRequest(BaseModel):
     build_dir: str
     relative: str
@@ -609,9 +614,9 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc)) from exc
 
     @app.post("/v1/build-files/bom")
-    def build_files_bom(request: BuildFilesListRequest) -> Dict[str, Any]:
+    def build_files_bom(request: BuildBomRequest) -> Dict[str, Any]:
         try:
-            return read_build_bom(request.build_dir)
+            return read_build_bom(request.build_dir, enrich=bool(request.enrich))
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 
@@ -1350,6 +1355,7 @@ def create_app() -> FastAPI:
                 "salvage_mode": bool(request.salvage_mode),
                 "export_gerber": bool(request.export_gerber),
                 "wire_only": bool(request.wire_only),
+                "allow_llm_first": bool(request.allow_llm_first),
             }
             project_name = request.phrase or "-".join(request.module_ids or []) or "compose"
             job = job_backend.submit_task(
