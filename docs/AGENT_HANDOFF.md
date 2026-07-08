@@ -26,6 +26,7 @@
 hs_sdk_info
   → hs_modules_catalog          # canvas compose — pick moduleIds (Design Studio catalog)
   → hs_compose_drc_agent        # preferred: compose + manual DRC rounds + optional finalize_package
+  → hs_compose_bench_loop       # compose + package + bench capture closure (simulate_bench for CI)
   → hs_design_quality           # inspect build_dir DRC truth after compose
   → hs_render_project_package   # if not using finalize_package on compose
   → hs_splice_bench_status      # read open gates + next_actions

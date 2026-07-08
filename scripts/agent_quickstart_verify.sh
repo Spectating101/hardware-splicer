@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.9
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.10
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -150,8 +150,23 @@ assert al.get('resolved') and al.get('final_kicad_drc_errors') == 0
 assert r.get('project_package')
 "
 
+echo "==> step 5: compose+bench loop (salvage, simulated)"
+BENCH_PAYLOAD=$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py | python3 -c "import json,sys; p=json.load(sys.stdin); p['simulate_bench']=True; print(json.dumps(p))")
+curl -s -X POST "$BASE/v1/compose/bench-loop" \
+  -H 'Content-Type: application/json' \
+  -d "$BENCH_PAYLOAD" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)
+bl=r.get('bench_loop') or {}
+al=r.get('agent_loop') or {}
+print('bench_loop_passed', bl.get('passed'), 'power_on', (r.get('bench_session') or {}).get('power_on_authorized'))
+assert al.get('final_kicad_drc_errors') == 0
+assert bl.get('submitted_capture') is True
+assert r.get('project_package')
+"
+
 if [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
-  echo "==> step 5: Qwen phrase agent-loop"
+  echo "==> step 6: Qwen phrase agent-loop"
   curl -s -X POST "$BASE/v1/compose/agent-loop" \
     -H 'Content-Type: application/json' \
     -d '{

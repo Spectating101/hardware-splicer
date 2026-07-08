@@ -1,0 +1,88 @@
+name: External dry-run blocker
+description: Report a blocker from AGENT_DRY_RUN_CHECKLIST (zero verbal help)
+title: "[Dry-run] "
+labels:
+  - external-dry-run
+  - triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this **only after** following [`docs/AGENT_DRY_RUN_CHECKLIST.md`](https://github.com/Spectating101/hardware-splicer/blob/main/docs/AGENT_DRY_RUN_CHECKLIST.md) without author assistance.
+        See [`docs/EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](https://github.com/Spectating101/hardware-splicer/blob/main/docs/EXTERNAL_DRY_RUN_ISSUE_GUIDE.md) for what to paste.
+
+  - type: input
+    id: tag
+    attributes:
+      label: Git tag or commit tested
+      placeholder: v1.1.0-alpha.9
+    validations:
+      required: true
+
+  - type: input
+    id: hostname
+    attributes:
+      label: Machine hostname / environment
+      placeholder: Ubuntu 24.04 WSL2 / macOS / lab PC
+    validations:
+      required: true
+
+  - type: dropdown
+    id: step
+    attributes:
+      label: Checklist step that failed
+      options:
+        - "1 — git clone"
+        - "2 — install_splice_v1.sh"
+        - "3 — hs-doctor"
+        - "4 — API start / health"
+        - "5 — catalog count >= 50"
+        - "6 — canvas agent-loop"
+        - "7 — salvage donor_context agent-loop"
+        - "8 — Qwen phrase (optional)"
+        - "9 — async compose-agent-loop job"
+        - "10 — compose+bench-loop (optional)"
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected pass criterion (from checklist)
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead (command + output)
+      description: Paste the exact command, HTTP response, or log excerpt.
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: hs-doctor output (paste or attach)
+      description: Run `hs-doctor` or `hs-doctor --json` after the failure.
+    validations:
+      required: true
+
+  - type: textarea
+    id: versions
+    attributes:
+      label: Tool versions
+      description: "kicad-cli --version, python3 --version, node --version"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Confirm
+      options:
+        - label: I followed AGENT_QUICKSTART / DRY_RUN_CHECKLIST only (no verbal help from maintainers)
+          required: true
+        - label: cosmetic_preview copper with 0 DRC errors is NOT reported as failure
+          required: true

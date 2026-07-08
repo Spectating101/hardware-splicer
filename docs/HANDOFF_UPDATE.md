@@ -1,9 +1,21 @@
 # Handoff update — what changed since last time
 
-**Date:** July 2026 (updated after alpha.8 salvage bridge on `main`)
+**Date:** July 2026 (updated after alpha.10 bench-loop agent path on `main`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
 **Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
+
+---
+
+## July 2026 — Alpha.10 Phase 2 bench-loop kickoff
+
+| Surface | What shipped |
+|---------|----------------|
+| **Agent** | `POST /v1/compose/bench-loop`, MCP `hs_compose_bench_loop` |
+| **Engine** | `bench_loop.py` — shared capture → gate closure |
+| **Ops** | GitHub **External dry-run blocker** issue template + issue guide |
+| **Docs** | `BENCH_LOOP_AGENT.md` |
+| **Tag** | `v1.1.0-alpha.10` |
 
 ---
 

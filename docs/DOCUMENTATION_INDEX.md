@@ -64,6 +64,8 @@
 | [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) | **15 min** — 3 curls + 3 MCP tools |
 | [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) | **What we're building** — phased scale plan |
 | [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md) | **Zero-help** external operator proof |
+| [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md) | How to file dry-run blockers on GitHub |
+| [`BENCH_LOOP_AGENT.md`](BENCH_LOOP_AGENT.md) | Compose → bench capture → gate closure (agent) |
 | [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md) | MCP `hs_design_quality` path rules |
 | [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity |
 | [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md) | 3–5 min demo (agent track + UI track) |

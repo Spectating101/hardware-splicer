@@ -250,6 +250,18 @@ class ComposeAgentLoopJobRequest(ComposeAgentLoopRequest):
     pass
 
 
+class ComposeAgentBenchLoopRequest(ComposeAgentLoopRequest):
+    simulate_bench: bool = Field(
+        default=True,
+        description="When true (and capture omitted), submit simulated pass readings for open gates.",
+    )
+    capture: Dict[str, Any] | None = Field(
+        default=None,
+        description="bench_topology_capture.v1 packet — overrides simulate_bench when set.",
+    )
+    operator_id: str | None = Field(default=None, description="Operator id recorded on capture submit.")
+
+
 class SpliceBuildJobRequest(SpliceAndBuildRequest):
     pass
 
@@ -1144,6 +1156,64 @@ def create_app() -> FastAPI:
             raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
         except Exception as exc:
             raise _error(500, "compose_agent_loop_error", str(exc), request_id=request_id) from exc
+
+    @app.post("/v1/compose/bench-loop")
+    def compose_agent_bench_loop_route(request: ComposeAgentBenchLoopRequest) -> Dict[str, Any]:
+        """Compose agent-loop + PROJECT_PACKAGE + bench capture closure on same build_dir."""
+        request_id: str | None = None
+        try:
+            os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
+            from .sdk import compose_agent_bench_loop
+
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "compose" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+
+            constraints = _compose_constraints(request)
+            material_mode = request.material_mode or resolve_material_mode(
+                constraints=constraints,
+                salvage_mode=bool(request.salvage_mode),
+            )
+
+            payload = compose_agent_bench_loop(
+                out_dir=str(resolved),
+                phrase=request.phrase,
+                module_ids=request.module_ids,
+                canvas_nodes=request.canvas_nodes,
+                canvas_wires=request.canvas_wires,
+                constraints=constraints,
+                material_mode=material_mode,
+                salvage_mode=bool(request.salvage_mode),
+                export_gerber=bool(request.export_gerber),
+                allow_llm_first=bool(request.allow_llm_first),
+                drc_fixup=request.drc_fixup,
+                max_manual_retries=int(request.max_manual_retries),
+                goal=request.goal or request.phrase,
+                project_name=request.project_name,
+                donor_context=request.donor_context,
+                parts=request.parts,
+                request_id=request_id,
+                simulate_bench=bool(request.simulate_bench),
+                capture_packet=request.capture,
+                operator_id=request.operator_id or "bench_loop_http",
+            )
+            return _attach_inline_graph(payload)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "compose_bench_loop_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/netlist-compile")
     def netlist_compile(request: NetlistCompileRequest) -> Dict[str, Any]:

@@ -409,6 +409,57 @@ def splice_bench_capture_template(build_dir: str | Path) -> Dict[str, Any]:
     return {"schema_version": SCHEMA_VERSION, **payload}
 
 
+def compose_agent_bench_loop(
+    *,
+    simulate_bench: bool = True,
+    capture_packet: Mapping[str, Any] | None = None,
+    operator_id: str = "bench_loop_sim",
+    phrase: str | None = None,
+    module_ids: Sequence[str] | None = None,
+    canvas_nodes: Sequence[Mapping[str, Any]] | None = None,
+    canvas_wires: Sequence[Mapping[str, Any]] | None = None,
+    constraints: Mapping[str, Any] | None = None,
+    material_mode: str | None = None,
+    salvage_mode: bool = False,
+    out_dir: str | Path | None = None,
+    export_gerber: bool = False,
+    allow_llm_first: bool = True,
+    drc_fixup: Mapping[str, float] | None = None,
+    max_manual_retries: int = 2,
+    goal: str | None = None,
+    project_name: str | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+    parts: Sequence[Mapping[str, Any]] | None = None,
+    request_id: str | None = None,
+) -> Dict[str, Any]:
+    """Agent-loop compose + bench capture template + optional simulated gate closure."""
+    from .bench_loop import run_compose_agent_bench_loop
+
+    apply_engine_defaults()
+    return run_compose_agent_bench_loop(
+        simulate_bench=simulate_bench,
+        capture_packet=capture_packet,
+        operator_id=operator_id,
+        phrase=phrase,
+        module_ids=list(module_ids) if module_ids else None,
+        canvas_nodes=list(canvas_nodes) if canvas_nodes else None,
+        canvas_wires=list(canvas_wires or []),
+        constraints=dict(constraints or {}),
+        material_mode=material_mode,
+        salvage_mode=salvage_mode,
+        out_dir=out_dir,
+        export_gerber=export_gerber,
+        allow_llm_first=allow_llm_first,
+        drc_fixup=drc_fixup,
+        max_manual_retries=max_manual_retries,
+        goal=goal or phrase,
+        project_name=project_name,
+        donor_context=donor_context,
+        parts=list(parts) if parts else None,
+        request_id=request_id,
+    )
+
+
 def splice_golden_loop(
     intake: Mapping[str, Any] | str | Path,
     *,
@@ -810,7 +861,9 @@ def finalize_compose_job_result(
             "power_on_authorized": bench_session.get("power_on_authorized"),
             "level": bench_session.get("level"),
             "gates": bench_session.get("gates"),
+            "bench_capture_template": bench_session.get("bench_capture_template"),
         },
+        "bench_capture_template": (template_sync.get("template") or {}).get("template_path"),
         "artifacts": artifacts,
     }
 

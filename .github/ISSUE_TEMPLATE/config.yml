@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Agent quickstart
+    url: https://github.com/Spectating101/hardware-splicer/blob/main/docs/AGENT_QUICKSTART.md
+    about: 15-minute agent path before filing blockers
+  - name: Dry-run checklist
+    url: https://github.com/Spectating101/hardware-splicer/blob/main/docs/AGENT_DRY_RUN_CHECKLIST.md
+    about: Zero-help external operator proof steps

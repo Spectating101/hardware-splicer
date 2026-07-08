@@ -94,7 +94,7 @@ Describe (phrase / canvas / donor intake)
 | Track | Deliverables |
 |-------|----------------|
 | **Design Studio** | Pin wire editing; live DRC hints; open in KiCad one-click |
-| **Bench loop** | Camera capture → gate auto-fill; session replay |
+| **Bench loop** | Camera capture → gate auto-fill; session replay | 🟡 `hs_compose_bench_loop` + capture template on compose builds |
 | **Salvage** | Photo → functional blocks → splice plan → carrier in one session |
 | **Copper truth** | Path from `cosmetic_preview` to autoroute tier when `AUTOROUTE=1` |
 | **Integrations** | KiCad MCP sidecar; JLC enrich read-only on BOM |

@@ -6,6 +6,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.10] - 2026-07-09
+
+### Added
+
+- Phase 2 kickoff: `POST /v1/compose/bench-loop` and MCP `hs_compose_bench_loop` (compose + simulated/real bench closure)
+- `src/hardware_splicer/bench_loop.py` — shared bench closure for compose and splice golden loops
+- GitHub issue template: **External dry-run blocker** + `docs/EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`
+- `docs/BENCH_LOOP_AGENT.md` — agent bench loop path
+- Quickstart verify step 5: salvage compose+bench (simulated)
+
+### Changed
+
+- `golden_loop.py` delegates bench closure to `bench_loop.py`
+- `finalize_compose_job_result` exposes `bench_capture_template` path
+
+---
+
 ## [1.1.0-alpha.9] - 2026-07-09
 
 ### Added

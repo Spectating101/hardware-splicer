@@ -28,8 +28,11 @@
 | 7 | Curl 2b — salvage `donor_context` agent-loop | `mode=salvage_catalog`, `build_id=robot_drive_base`, 0 DRC, `salvage_package` + `project_package` |
 | 8 | (Optional) Curl 3 — Qwen phrase | `qwen_configured=true`, 0 DRC errors |
 | 9 | Async job — `POST /v1/jobs/compose-agent-loop` + poll result | `ok=true`, package present |
+| 10 | (Optional) `POST /v1/compose/bench-loop` salvage + `simulate_bench` | `bench_loop.submitted_capture=true`, 0 DRC |
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.9`
+**File blockers:** [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md)
+
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.10`
 
 ---
 

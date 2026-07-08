@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, Mapping
 
-from .bench_capture_bridge import load_bench_capture_template, submit_bench_capture
+from .bench_loop import build_simulated_capture, run_bench_loop_closure
 from .project_intake import splice_and_build_from_intake
 from .splice_bench import bench_status
 
@@ -16,56 +16,6 @@ SCHEMA = "hardware_splicer.splice_golden_loop.v1"
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
-
-
-def build_simulated_capture(template: Mapping[str, Any], *, operator_id: str = "golden_loop_sim") -> Dict[str, Any]:
-    """Fill an open template with simulated pass measurements (CI / demo loop closure)."""
-    capture = dict(template)
-    capture["operator_id"] = operator_id
-    capture["recorded_at"] = _now()
-    capture["instruments"] = capture.get("instruments") or [
-        {"instrument_id": "sim_dmm_01", "instrument_type": "calibrated_dmm", "calibration_status": "simulated"}
-    ]
-    filled: List[Dict[str, Any]] = []
-    for row in template.get("measurements") or []:
-        if not isinstance(row, dict):
-            continue
-        kind = str(row.get("kind") or "voltage")
-        item = {
-            "gate_id": row.get("gate_id"),
-            "kind": kind,
-            "target": row.get("target"),
-            "status": "pass",
-            "method": "golden_loop_simulator",
-            "instrument_id": "sim_dmm_01",
-            "operator_id": operator_id,
-        }
-        if kind == "voltage":
-            item["value"] = 6.0
-            item["unit"] = row.get("unit") or "V"
-        elif kind == "current":
-            item["value"] = 0.12
-            item["unit"] = row.get("unit") or "A"
-        elif kind == "psu_ramp":
-            item["value"] = float(row.get("current_limit_a") or 0.5)
-            item["unit"] = "A"
-            item["current_limit_a"] = item["value"]
-            item["ramp_observation"] = "idle_current_normal_no_hotspot"
-        elif kind == "thermal":
-            item["value"] = "pass"
-            item["artifact_kind"] = "thermal_image"
-            item["artifact_uri"] = row.get("artifact_uri") or "sim://thermal_baseline_ok"
-        else:
-            item["value"] = "pass"
-        filled.append(item)
-    capture["measurements"] = filled
-    capture["simulated"] = True
-    policy = capture.get("policy") if isinstance(capture.get("policy"), dict) else {}
-    capture["policy"] = {
-        **policy,
-        "note": "Simulated bench closure for golden-loop CI — replace with real instrument capture in production.",
-    }
-    return capture
 
 
 def run_splice_golden_loop(
@@ -87,18 +37,16 @@ def run_splice_golden_loop(
         request_id=request_id,
     )
     before = bench_status(out_path)
-    bench_result: Dict[str, Any] | None = None
+    bench_loop: Dict[str, Any] | None = None
     after = before
 
     if simulate_bench:
-        template = load_bench_capture_template(out_path)
-        capture = build_simulated_capture(template)
-        bench_result = submit_bench_capture(str(out_path), capture)
-        after = (
-            bench_result.get("bench_session")
-            if isinstance(bench_result.get("bench_session"), dict)
-            else bench_status(out_path)
+        bench_loop = run_bench_loop_closure(
+            out_path,
+            simulate_bench=True,
+            operator_id="golden_loop_sim",
         )
+        after = bench_loop.get("bench_after") or before
 
     drc_pass = bool(((build.get("build_compilation") or {}).get("design_quality") or {}).get("drc_pass"))
     report = {
@@ -108,20 +56,21 @@ def run_splice_golden_loop(
         "build_id": build.get("build_id"),
         "drc_pass": drc_pass,
         "donor_vision_applied": int((build.get("donor_board_vision_report") or {}).get("applied_board_count") or 0),
-        "bench_before": {
+        "bench_before": bench_loop.get("bench_before") if bench_loop else {
             "readiness": before.get("readiness"),
             "open_gate_count": before.get("open_gate_count"),
             "critical_open_count": before.get("critical_open_count"),
             "power_on_authorized": before.get("power_on_authorized"),
         },
-        "bench_after": {
+        "bench_after": bench_loop.get("bench_after") if bench_loop else {
             "readiness": after.get("readiness"),
             "open_gate_count": after.get("open_gate_count"),
             "critical_open_count": after.get("critical_open_count"),
             "power_on_authorized": after.get("power_on_authorized"),
         },
         "simulate_bench": simulate_bench,
-        "bench_submission_ok": bool((bench_result or {}).get("ok")) if simulate_bench else None,
+        "bench_submission_ok": bench_loop.get("bench_submission_ok") if bench_loop else None,
+        "bench_loop_report": bench_loop.get("report_path") if bench_loop else None,
         "artifacts": build.get("artifacts") or {},
         "passed": bool(drc_pass and (not simulate_bench or after.get("power_on_authorized"))),
     }
@@ -146,3 +95,7 @@ def run_splice_golden_loop(
     ]
     (out_path / "SPLICE_GOLDEN_LOOP_STORY.md").write_text("\n".join(story), encoding="utf-8")
     return report
+
+
+# Back-compat re-export for tests importing from golden_loop
+__all__ = ["build_simulated_capture", "run_splice_golden_loop"]

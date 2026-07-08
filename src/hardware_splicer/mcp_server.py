@@ -170,6 +170,35 @@ async def list_tools() -> list[Tool]:
             },
         ),
         Tool(
+            name="hs_compose_bench_loop",
+            description=(
+                "Compose agent-loop + PROJECT_PACKAGE + bench capture closure on the same build_dir. "
+                "Use simulate_bench=true for CI/demo gate closure; pass capture for real instrument readings."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "phrase": {"type": "string"},
+                    "goal": {"type": "string"},
+                    "module_ids": {"type": "array", "items": {"type": "string"}},
+                    "parts": {"type": "array", "items": {"type": "object"}},
+                    "donor_context": {"type": "object"},
+                    "canvas_nodes": {"type": "array", "items": {"type": "object"}},
+                    "canvas_wires": {"type": "array", "items": {"type": "object"}},
+                    "constraints": {"type": "object"},
+                    "salvage_mode": {"type": "boolean"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                    "allow_llm_first": {"type": "boolean", "default": False},
+                    "max_manual_retries": {"type": "integer", "default": 2},
+                    "project_name": {"type": "string"},
+                    "simulate_bench": {"type": "boolean", "default": True},
+                    "capture": {"type": "object"},
+                    "operator_id": {"type": "string"},
+                },
+            },
+        ),
+        Tool(
             name="hs_design_quality",
             description=(
                 "Read KiCad DRC summary, drc_fix_loop, and error violations for a compose/splice build_dir."
@@ -542,6 +571,30 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 project_name=args.get("project_name"),
                 donor_context=args.get("donor_context"),
                 parts=args.get("parts"),
+            )
+        )
+    if name == "hs_compose_bench_loop":
+        return _tool_result(
+            sdk.compose_agent_bench_loop(
+                phrase=args.get("phrase"),
+                module_ids=args.get("module_ids"),
+                canvas_nodes=args.get("canvas_nodes"),
+                canvas_wires=args.get("canvas_wires"),
+                constraints=args.get("constraints"),
+                material_mode=args.get("material_mode"),
+                salvage_mode=bool(args.get("salvage_mode")),
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+                allow_llm_first=bool(args.get("allow_llm_first", False)),
+                drc_fixup=args.get("drc_fixup"),
+                max_manual_retries=int(args.get("max_manual_retries", 2)),
+                goal=args.get("goal") or args.get("phrase"),
+                project_name=args.get("project_name"),
+                donor_context=args.get("donor_context"),
+                parts=args.get("parts"),
+                simulate_bench=bool(args.get("simulate_bench", True)),
+                capture_packet=args.get("capture"),
+                operator_id=str(args.get("operator_id") or "bench_loop_mcp"),
             )
         )
     if name == "hs_design_quality":
