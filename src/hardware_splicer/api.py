@@ -190,6 +190,18 @@ class ComposeRequest(BaseModel):
         default=None,
         description="Geometry fixup hints from prior DRC loop — applied to canvas graph compile.",
     )
+    donor_context: Dict[str, Any] | None = Field(
+        default=None,
+        description="Salvage donor circuit / functional_salvage / donor_boards for agent-loop compose.",
+    )
+    parts: list[Dict[str, Any]] | None = Field(
+        default=None,
+        description="Inventory parts list (salvage compose when donor_context or salvage_mode).",
+    )
+    goal: str | None = Field(
+        default=None,
+        description="Project goal for salvage compose (defaults to phrase when omitted).",
+    )
 
 
 class ComposeAgentLoopRequest(ComposeRequest):
@@ -338,9 +350,12 @@ def _compose_constraints(request: ComposeRequest | ComposeCanvasRequest) -> Dict
         body["strategy_mode"] = request.strategy_mode
     if getattr(request, "allowed_purchases", None):
         body["allowed_purchases"] = list(request.allowed_purchases or [])
+    salvage_intake = bool(getattr(request, "salvage_mode", False)) or bool(
+        getattr(request, "donor_context", None)
+    )
     if isinstance(request, ComposeCanvasRequest) or getattr(request, "canvas_nodes", None):
         body.setdefault("graph_mode", "canvas")
-    else:
+    elif not salvage_intake:
         body.setdefault("graph_mode", "scratch")
     return body
 
@@ -1119,8 +1134,10 @@ def create_app() -> FastAPI:
                 request_id=request_id,
                 max_manual_retries=int(request.max_manual_retries),
                 finalize_package=bool(request.finalize_package),
-                goal=request.phrase,
+                goal=request.goal or request.phrase,
                 project_name=request.project_name,
+                donor_context=request.donor_context,
+                parts=request.parts,
             )
             return _attach_inline_graph(payload)
         except ValueError as exc:
@@ -1501,7 +1518,9 @@ def create_app() -> FastAPI:
                 "max_manual_retries": int(request.max_manual_retries),
                 "finalize_package": bool(request.finalize_package),
                 "project_name": request.project_name,
-                "goal": request.phrase,
+                "goal": request.goal or request.phrase,
+                "donor_context": request.donor_context,
+                "parts": request.parts,
             }
             project_name = request.project_name or request.phrase or "-".join(request.module_ids or []) or "compose-agent"
             job = job_backend.submit_task(

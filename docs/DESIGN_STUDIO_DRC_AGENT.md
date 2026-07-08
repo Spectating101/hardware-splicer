@@ -160,7 +160,7 @@ Splice Agent → **Design studio** — same flow as agents, with:
 
 **One-shot HTTP equivalent:** `POST /v1/compose/agent-loop` with `max_manual_retries` and optional `finalize_package`.
 
-For salvage/donor workflows, branch to `hs_splice_build` / `hs_salvage_bringup` — Design Studio is the **greenfield / canvas** path.
+For salvage/donor workflows, agents use **`hs_compose_drc_agent` with `donor_context` + `parts`** (same spine as canvas). Full intake compile remains `hs_splice_build` / `hs_salvage_bringup`. Design Studio is the **greenfield / canvas** path.
 
 ---
 

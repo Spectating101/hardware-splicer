@@ -1,9 +1,20 @@
 # Handoff update — what changed since last time
 
-**Date:** July 2026 (updated after alpha.6 agent ops hardening on `main`)
+**Date:** July 2026 (updated after alpha.8 salvage bridge on `main`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
 **Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
+
+---
+
+## July 2026 — Alpha.8 salvage → agent-loop bridge
+
+| Surface | What shipped |
+|---------|----------------|
+| **Agent spine** | `donor_context` + `parts` on agent-loop / `hs_compose_drc_agent` → `salvage_catalog` or scratch |
+| **Catalog** | 50 canvas modules + pin contract tests |
+| **Ops** | `AGENT_DRY_RUN_CHECKLIST.md` for zero-help external proof |
+| **Tag** | `v1.1.0-alpha.8` |
 
 ---
 
@@ -14,7 +25,7 @@
 | **HTTP** | `POST /v1/jobs/compose-agent-loop` — async agent spine |
 | **Alien** | FGEDHGV Track B: offline curls 1–2 (36s) + Qwen curl 3 (3072 tokens, 0 DRC) |
 | **Ops** | `scripts/deploy_alien_quickstart.sh`, upgraded `agent_quickstart_verify.sh` (sync + async) |
-| **CI** | Live smoke includes compose-agent-loop job; canvas pin contract tests (**50 modules**) |
+| **Agent spine** | `donor_context` on agent-loop + MCP `hs_compose_drc_agent` (salvage catalog path) |
 | **Security** | Qwen `.env.local` scrubbed from lab node after test |
 | **Tag** | `v1.1.0-alpha.6` |
 

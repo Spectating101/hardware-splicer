@@ -152,6 +152,22 @@ Expect `count` ≥ **50** and each module has `id`, `pins`.
 }
 ```
 
+**Salvage (same tool):** pass `donor_context` + `parts` + `goal` from intake — no separate compile path:
+
+```json
+{
+  "goal": "Splice salvaged robot drive donor into carrier board",
+  "salvage_mode": true,
+  "parts": [{"name": "ESP32 dev board", "type": "microcontroller"}],
+  "donor_context": {"circuit": {"boards": []}},
+  "allow_llm_first": false,
+  "finalize_package": true,
+  "project_name": "salvage_quickstart"
+}
+```
+
+Use a full intake JSON (`examples/intakes/splice_robot_drive_brief.json`) for real donor blocks.
+
 ### MCP 3 — `hs_design_quality`
 
 Use `out_dir` from compose result:

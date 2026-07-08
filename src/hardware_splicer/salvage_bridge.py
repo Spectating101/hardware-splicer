@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, List, Mapping, Sequence
 
 from .build_compiler import ensure_circuit_import_path, resolve_build_id
 from .module_resolver import (
@@ -253,3 +253,61 @@ def build_intake_salvage_package(
         "bom_estimate": bom_estimate,
         "firmware_scaffold": firmware_scaffold,
     }
+
+
+def resolve_salvage_compose_inputs(
+    *,
+    goal: str | None = None,
+    phrase: str | None = None,
+    parts: Sequence[Mapping[str, Any]] | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+    constraints: Mapping[str, Any] | None = None,
+    project_name: str | None = None,
+    salvage_mode: bool = False,
+    module_ids: Sequence[str] | None = None,
+    canvas_nodes: Sequence[Mapping[str, Any]] | None = None,
+) -> Dict[str, Any] | None:
+    """Map donor_context / salvage parts into compose_dispatch kwargs + salvage_package."""
+    if canvas_nodes:
+        return None
+    donor = dict(donor_context or {})
+    parts_list = [dict(row) for row in (parts or []) if isinstance(row, Mapping)]
+    effective_goal = str(goal or phrase or project_name or "").strip()
+    should_plan = bool(donor) or (bool(salvage_mode) and (parts_list or effective_goal))
+    if not should_plan:
+        return None
+    if not effective_goal:
+        effective_goal = "salvage splice carrier"
+
+    pkg = build_intake_salvage_package(
+        goal=effective_goal,
+        parts=parts_list,
+        constraints=dict(constraints or {}),
+        project_name=project_name or effective_goal,
+        donor_context=donor or None,
+    )
+    constraints_out = dict(constraints or {})
+    graph_mode = str(pkg.get("graph_mode") or "scratch")
+    resolved = [dict(row) for row in (pkg.get("resolved_modules") or []) if isinstance(row, Mapping)]
+    compose_ids = list(module_ids or []) or list(pkg.get("compose_module_ids") or [])
+    if not compose_ids and graph_mode == "scratch":
+        compose_ids = module_ids_from_resolved(resolved)
+
+    compose: Dict[str, Any] = {
+        "phrase": effective_goal,
+        "salvage_mode": True,
+        "material_mode": "salvage",
+        "constraints": constraints_out,
+        "allow_llm_first": False,
+        "salvage_package": pkg,
+    }
+    if graph_mode == "catalog" and pkg.get("recommended_build_id"):
+        compose["build_id"] = str(pkg["recommended_build_id"])
+        graph_input = pkg.get("graph_input")
+        if isinstance(graph_input, Mapping):
+            compose["splice_plan"] = dict(graph_input)
+        compose["resolved_modules"] = resolved or None
+    else:
+        compose["module_ids"] = compose_ids or None
+        compose["resolved_modules"] = resolved or None
+    return compose

@@ -271,13 +271,13 @@ def compose_design_agent_loop(
     goal: str | None = None,
     project_name: str | None = None,
     request_id: str | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+    parts: Sequence[Mapping[str, Any]] | None = None,
 ) -> Dict[str, Any]:
     """Agent loop: compose with manual DRC fixup rounds + optional PROJECT_PACKAGE."""
     from .compose_agent_loop import compose_agent_loop
 
     apply_engine_defaults()
-    if resolved_modules:
-        raise ValueError("resolved_modules is not supported on compose_design_agent_loop")
     return compose_agent_loop(
         phrase=phrase,
         module_ids=list(module_ids) if module_ids else None,
@@ -295,6 +295,8 @@ def compose_design_agent_loop(
         goal=goal or phrase,
         project_name=project_name,
         request_id=request_id,
+        donor_context=donor_context,
+        parts=list(parts) if parts else None,
     )
 
 

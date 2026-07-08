@@ -9,6 +9,7 @@ from .build_files import read_design_quality_summary
 from .compose_dispatch import compose_dispatch
 from .material_modes import resolve_material_mode
 from .pcb.drc_fix_loop import propose_fixup_hints
+from .salvage_bridge import resolve_salvage_compose_inputs
 
 SCHEMA_VERSION = "hardware_splicer.compose_agent_loop.v1"
 
@@ -57,6 +58,8 @@ def compose_agent_loop(
     finalize_package: bool = False,
     goal: str | None = None,
     project_name: str | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+    parts: list[Dict[str, Any]] | None = None,
 ) -> Dict[str, Any]:
     """Compose with bounded manual DRC fixup rounds — for MCP/HTTP agents and Design Studio."""
     if wire_only:
@@ -67,6 +70,35 @@ def compose_agent_loop(
         constraints=constraints_map,
         salvage_mode=salvage_mode,
     )
+    salvage_compose = resolve_salvage_compose_inputs(
+        goal=goal,
+        phrase=phrase,
+        parts=parts,
+        donor_context=donor_context,
+        constraints=constraints_map,
+        project_name=project_name,
+        salvage_mode=salvage_mode,
+        module_ids=module_ids,
+        canvas_nodes=canvas_nodes,
+    )
+    salvage_package: Dict[str, Any] | None = None
+    compose_build_id: str | None = None
+    compose_splice_plan: Mapping[str, Any] | None = None
+    compose_resolved_modules: list[Dict[str, Any]] | None = None
+    compose_module_ids = list(module_ids) if module_ids else None
+    compose_phrase = phrase
+    compose_allow_llm_first = allow_llm_first
+    if salvage_compose:
+        salvage_package = dict(salvage_compose.get("salvage_package") or {})
+        mode = str(salvage_compose.get("material_mode") or mode)
+        salvage_mode = bool(salvage_compose.get("salvage_mode"))
+        constraints_map = dict(salvage_compose.get("constraints") or constraints_map)
+        compose_phrase = salvage_compose.get("phrase") or compose_phrase
+        compose_module_ids = salvage_compose.get("module_ids") or compose_module_ids
+        compose_resolved_modules = salvage_compose.get("resolved_modules") or compose_resolved_modules
+        compose_build_id = salvage_compose.get("build_id")
+        compose_splice_plan = salvage_compose.get("splice_plan")
+        compose_allow_llm_first = bool(salvage_compose.get("allow_llm_first", False))
     hints: Dict[str, float] = dict(drc_fixup or {})
     rounds: List[Dict[str, Any]] = []
     last_result: Dict[str, Any] = {}
@@ -87,8 +119,9 @@ def compose_agent_loop(
 
         last_result = compose_dispatch(
             out_dir=str(target),
-            phrase=phrase,
-            module_ids=module_ids,
+            phrase=compose_phrase,
+            module_ids=compose_module_ids,
+            resolved_modules=compose_resolved_modules,
             canvas_nodes=canvas_nodes,
             canvas_wires=canvas_wires,
             netlist=netlist,
@@ -96,9 +129,11 @@ def compose_agent_loop(
             material_mode=mode,
             salvage_mode=salvage_mode,
             export_gerber=export_gerber,
-            allow_llm_first=allow_llm_first,
+            allow_llm_first=compose_allow_llm_first,
             drc_fixup=hints or None,
             request_id=request_id,
+            build_id=compose_build_id,
+            splice_plan=compose_splice_plan,
         )
         errors = _drc_errors_from_result(last_result)
         violations = _error_violations(str(last_result.get("out_dir") or target))
@@ -136,14 +171,20 @@ def compose_agent_loop(
     }
 
     payload: Dict[str, Any] = {**last_result, "agent_loop": agent_loop}
+    if salvage_package:
+        payload["salvage_package"] = salvage_package
+        payload["recommended_build_id"] = salvage_package.get("recommended_build_id")
     if finalize_package and last_result.get("out_dir"):
         from .sdk import finalize_compose_job_result
 
         final = finalize_compose_job_result(
             last_result,
-            goal=goal or phrase or project_name or "compose",
-            project_name=project_name or phrase or Path(str(last_result["out_dir"])).name,
+            goal=goal or compose_phrase or project_name or "compose",
+            project_name=project_name or compose_phrase or Path(str(last_result["out_dir"])).name,
         )
         payload = {**final, "agent_loop": agent_loop}
+        if salvage_package:
+            payload["salvage_package"] = salvage_package
+            payload["recommended_build_id"] = salvage_package.get("recommended_build_id")
 
     return payload

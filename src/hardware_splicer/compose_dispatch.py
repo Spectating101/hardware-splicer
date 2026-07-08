@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from .auto_wire import compose_build_graph_from_module_ids
-from .build_compiler import compile_from_netlist, merge_fabrication_into_payload
+from .build_compiler import compile_catalog_build, compile_from_netlist, merge_fabrication_into_payload
 from .canvas_compose import build_canvas_graph, compile_canvas_build
 from .compose_failure import attach_compose_failure
 from .design_quality import build_design_quality_gate
@@ -57,6 +57,7 @@ def compose_dispatch(
     drc_fixup: Mapping[str, float] | None = None,
     request_id: str | None = None,
     build_id: str | None = None,
+    splice_plan: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     """Route compose requests through one implementation (bootstrap default; LLM-first opt-in)."""
     constraints_map = dict(constraints or {})
@@ -214,6 +215,36 @@ def compose_dispatch(
                 request_id=request_id,
                 compile_payload=compile_result.to_dict() if compile_result else None,
             )
+
+    catalog_build_id = build_id or str(constraints_map.get("target_build_id") or constraints_map.get("build_id") or "").strip()
+    if (
+        catalog_build_id
+        and splice_plan is not None
+        and canvas_nodes is None
+        and netlist is None
+        and not wire_only
+    ):
+        result = compile_catalog_build(
+            catalog_build_id,
+            target,
+            export_gerber=export_gerber,
+            splice_plan=splice_plan,
+            resolved_modules=list(resolved_modules) if resolved_modules else None,
+        )
+        quality = result.design_quality or {}
+        return _finalize_payload(
+            {
+                "ok": result.ok,
+                "mode": "salvage_catalog",
+                "out_dir": str(target),
+                "build_id": catalog_build_id,
+                **result.to_dict(),
+                **material_mode_summary(material_mode=mode, constraints=constraints_map),  # type: ignore[arg-type]
+            },
+            quality=quality,
+            request_id=request_id,
+            compile_payload=result.to_dict(),
+        )
 
     scratch = compile_scratch_build(
         out_dir=str(target),

@@ -47,7 +47,7 @@ Describe (phrase / canvas / donor intake)
 | **S3** | Bench gates (golden) | ✅ CI; field café deferred |
 | **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC errors; `cosmetic_preview` copper |
 | **Agent spine** | MCP = HTTP = SDK = UI | 🟡 `hs_compose_drc_agent`, Design Studio agent-loop |
-| **Salvage unified** | Donor → same agent loop | ❌ Phase 2 |
+| **Salvage unified** | Donor → same agent loop | 🟡 `donor_context` on agent-loop / `hs_compose_drc_agent` |
 
 ---
 
@@ -181,7 +181,7 @@ flowchart LR
 1. ~~Run `make verify-product-internal` on second machine; file `INSTALL_REPORT`.~~ ✅ FGEDHGV Track B + Qwen curl 3 — [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md)
 2. ~~Phase 1 kickoff: async `POST /v1/jobs/compose-agent-loop`.~~ ✅
 3. Expand module catalog toward 50 entries with pin validation tests. ✅ **50 modules** + `test_canvas_module_pins.py`
-4. Unify salvage intake → `hs_compose_drc_agent` with `donor_context`.
+4. Unify salvage intake → `hs_compose_drc_agent` with `donor_context`. ✅
 
 ---
 

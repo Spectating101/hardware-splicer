@@ -6,6 +6,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ---
 
+## [1.1.0-alpha.8] - 2026-07-09
+
+### Added
+
+- `donor_context` + `parts` on `POST /v1/compose/agent-loop`, async jobs, and MCP `hs_compose_drc_agent`
+- Catalog salvage path in `compose_dispatch` (`salvage_catalog` mode) via `resolve_salvage_compose_inputs`
+- Tests: `tests/test_compose_agent_loop_salvage.py` (robot drive donor → agent-loop → package)
+
+### Fixed
+
+- API `_compose_constraints` no longer forces `graph_mode: scratch` when salvage intake is present
+
+---
+
 ## [1.1.0-alpha.7] - 2026-07-09
 
 ### Added

@@ -102,7 +102,7 @@ verify-splice-v1: doctor test-project-package verify-splice verify-splice-loop v
 	@echo "verify-splice-v1: engine + S2/S3 + project package — all passed"
 
 test-splice-product-v1:
-	PYTHONPATH=src $(PYTHON) -m pytest tests/test_splice_product_v1.py tests/test_design_studio_agent.py tests/test_canvas_module_pins.py -q
+	PYTHONPATH=src $(PYTHON) -m pytest tests/test_splice_product_v1.py tests/test_design_studio_agent.py tests/test_canvas_module_pins.py tests/test_compose_agent_loop_salvage.py -q
 
 verify-design-studio-agent: test-splice-product-v1
 	@echo "verify-design-studio-agent: product API + agent compose spine passed"

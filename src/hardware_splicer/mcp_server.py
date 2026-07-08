@@ -143,13 +143,17 @@ async def list_tools() -> list[Tool]:
             description=(
                 "Agent orchestration: hs_compose plus bounded manual DRC fixup rounds. "
                 "Returns agent_loop.rounds with per-round KiCad DRC errors and drc_fixup. "
-                "Set finalize_package=true for PROJECT_PACKAGE + bench_session."
+                "Set finalize_package=true for PROJECT_PACKAGE + bench_session. "
+                "Pass donor_context (+ parts) to run salvage intake on the same spine."
             ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "phrase": {"type": "string"},
+                    "goal": {"type": "string"},
                     "module_ids": {"type": "array", "items": {"type": "string"}},
+                    "parts": {"type": "array", "items": {"type": "object"}},
+                    "donor_context": {"type": "object"},
                     "canvas_nodes": {"type": "array", "items": {"type": "object"}},
                     "canvas_wires": {"type": "array", "items": {"type": "object"}},
                     "constraints": {"type": "object"},
@@ -534,8 +538,10 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 drc_fixup=args.get("drc_fixup"),
                 max_manual_retries=int(args.get("max_manual_retries", 2)),
                 finalize_package=bool(args.get("finalize_package")),
-                goal=args.get("phrase"),
+                goal=args.get("goal") or args.get("phrase"),
                 project_name=args.get("project_name"),
+                donor_context=args.get("donor_context"),
+                parts=args.get("parts"),
             )
         )
     if name == "hs_design_quality":
