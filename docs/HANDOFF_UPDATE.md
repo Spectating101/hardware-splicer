@@ -1,9 +1,23 @@
 # Handoff update — what changed since last time
 
-**Date:** June 2026 (updated after `88f1db8` circuit synthesis push)
+**Date:** July 2026 (updated after Design Studio + DRC agent loop on `main` @ `4775e1c`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
-**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md)
+**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · Design Studio spine: [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
+
+---
+
+## July 2026 — Design Studio + agent DRC loop (`4775e1c`)
+
+| Surface | What shipped |
+|---------|----------------|
+| **UI** | Design Studio — React Flow canvas, module library, visible DRC agent panel, auto-fix & recompile |
+| **HTTP** | `GET /v1/modules/catalog`, `drc_fixup` on `POST /v1/compose` |
+| **MCP** | `hs_modules_catalog`, `hs_compose` accepts `drc_fixup` + `allow_llm_first` |
+| **SDK** | `compose_design(..., drc_fixup=, allow_llm_first=)` |
+| **Tests** | `tests/test_design_studio_agent.py` — agent spine without browser |
+
+**Product framing:** Agentic KiCad-truth workbench — agents and humans share compose → DRC fix loop → `PROJECT_PACKAGE` → bench gates. UI is legibility, not a separate product.
 
 ---
 

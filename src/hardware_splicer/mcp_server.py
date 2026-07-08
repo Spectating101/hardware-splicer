@@ -122,8 +122,21 @@ async def list_tools() -> list[Tool]:
                     "export_gerber": {"type": "boolean", "default": False},
                     "fab_profile": {"type": "boolean", "default": False},
                     "arbitrary": {"type": "boolean", "default": False},
+                    "allow_llm_first": {"type": "boolean", "default": True},
+                    "drc_fixup": {
+                        "type": "object",
+                        "description": "Geometry hints from prior DRC loop (edge_pad_extra_mm, module_gap_extra_mm, via_clearance_mm).",
+                    },
                 },
             },
+        ),
+        Tool(
+            name="hs_modules_catalog",
+            description=(
+                "List KiCad-footprinted modules for canvas compose (same catalog as Design Studio). "
+                "Use before hs_compose with canvas_nodes."
+            ),
+            inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
             name="hs_salvage_bringup",
@@ -458,8 +471,15 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 export_gerber=bool(args.get("export_gerber")),
                 fab_profile=bool(args.get("fab_profile")),
                 arbitrary=bool(args.get("arbitrary")),
+                allow_llm_first=bool(args.get("allow_llm_first", True)),
+                drc_fixup=args.get("drc_fixup"),
             )
         )
+    if name == "hs_modules_catalog":
+        from .pcb.module_registry import list_canvas_modules
+
+        modules = list_canvas_modules()
+        return _tool_result({"ok": True, "count": len(modules), "modules": modules})
     if name == "hs_compose_arbitrary":
         return _tool_result(
             sdk.compose_arbitrary(

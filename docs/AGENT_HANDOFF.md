@@ -20,12 +20,22 @@
 
 ```
 hs_sdk_info
-  → hs_clarify_hardware_intent   # optional — vague goals → questions
-  → hs_splice_build              # or hs_plan_salvage to explore feasibility first
-  → hs_render_project_package    # refresh PROJECT_PAGE.md from build dir
-  → hs_splice_bench_status       # read open gates + next_actions
-  → hs_splice_bench_submit       # record measurements, close gates
-  → hs_inspect_fab               # review carrier fab package on disk
+  → hs_modules_catalog          # canvas compose — pick moduleIds (Design Studio catalog)
+  → hs_compose                  # phrase | module_ids | canvas_nodes → KiCad + drc_fix_loop
+  → hs_render_project_package   # refresh PROJECT_PAGE.md from build dir
+  → hs_splice_bench_status      # read open gates + next_actions
+  → hs_splice_bench_submit      # record measurements, close gates
+```
+
+**Design Studio path (greenfield canvas):** same as `hs_compose` + `POST /v1/compose` — see [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md). Read `design_quality.drc_fix_loop`; pass `drc_fixup` on retry.
+
+**Salvage / donor shortcut:**
+
+```
+hs_clarify_hardware_intent   # optional
+  → hs_splice_build          # or hs_plan_salvage
+  → hs_render_project_package
+  → hs_splice_bench_status / hs_splice_bench_submit
 ```
 
 **Shortcut (CI / demo):** `hs_splice_golden_loop` — build + template + capture submit in one call. Set `simulate_bench: false` for real instrument readings.

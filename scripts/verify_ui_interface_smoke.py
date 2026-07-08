@@ -30,6 +30,11 @@ def main() -> int:
         raise SystemExit(f"integrations catalog failed: {catalog}")
     print(f"    integrations ok wired={catalog.get('wired_count')}/{catalog.get('total_count')}")
 
+    modules = _get("/v1/modules/catalog")
+    if not modules.get("ok") or not modules.get("modules"):
+        raise SystemExit(f"modules catalog failed: {modules}")
+    print(f"    modules catalog ok count={modules.get('count')}")
+
     fixtures = _get("/v1/examples/netlist-fixtures")
     rows = fixtures.get("fixtures") or []
     if not fixtures.get("ok") or not rows:

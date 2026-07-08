@@ -80,17 +80,16 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
     <div className="home-layout">
       <section className="home-hero card">
         <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>Design PCBs with AI — plus auditable bring-up Flux doesn’t ship</h1>
+        <h1>AI-assisted KiCad design — canvas to DRC truth to bench-ready package</h1>
         <p className="lead">
-          <strong>AI carrier design</strong> (describe → compose → KiCad) or <strong>salvage splice</strong> (donor
-          vision → gates → bench capture) — browser workbench with honest DRC, LCSC-aware BOM, and{" "}
-          <code>PROJECT_PACKAGE</code> handoff.
+          <strong>Agents and humans</strong> share one spine: MCP/HTTP compose → KiCad DRC fix loop →{" "}
+          <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
         </p>
         <div className="readiness-pitch">
-          <strong>Flux-class first mile. Hardware-Splicer last mile.</strong>
+          <strong>Flux-class first mile. Auditable last mile.</strong>
           <p className="muted small">
-            Compete on NL → board like Flux, then win on compile truth, measurement gates, and defensible packages —
-            self-hosted, not credit-metered black box.
+            Design Studio for people; <code>hs_compose</code> + <code>hs_modules_catalog</code> for agents — same
+            compile truth, measurement gates, self-hosted packages.
           </p>
         </div>
         <PipelineVisual />

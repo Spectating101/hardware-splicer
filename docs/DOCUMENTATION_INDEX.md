@@ -61,6 +61,8 @@
 | Read | Why |
 |------|-----|
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | **Primary runbook** |
+| [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity (`hs_compose`, `hs_modules_catalog`) |
+| [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md) | 3–5 min demo (agent track + UI track) |
 | [`MCP.md`](MCP.md) | MCP install + tool list |
 | [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | Splice walkthrough + make targets |
 | [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md) | Operator norms |

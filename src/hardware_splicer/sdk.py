@@ -217,6 +217,8 @@ def compose_design(
     export_gerber: bool = False,
     fab_profile: bool = False,
     arbitrary: bool = False,
+    allow_llm_first: bool = True,
+    drc_fixup: Mapping[str, float] | None = None,
 ) -> Dict[str, Any]:
     """Compose NL phrase, module list, or canvas graph → KiCad artifacts."""
     if arbitrary and phrase:
@@ -245,7 +247,8 @@ def compose_design(
         material_mode=mode,
         salvage_mode=salvage_mode,
         export_gerber=export_gerber,
-        allow_llm_first=True,
+        allow_llm_first=allow_llm_first,
+        drc_fixup=drc_fixup,
     )
 
 
