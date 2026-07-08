@@ -90,6 +90,59 @@ def test_compose_http_matches_agent_fields(tmp_path, monkeypatch: pytest.MonkeyP
     assert "drc_fix_loop" in dq or dq.get("kicad_drc_errors") is not None
 
 
+def test_compose_agent_loop_http(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
+    os.environ["HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR"] = "1"
+
+    client = TestClient(create_app())
+    payload = client.post(
+        "/v1/compose/agent-loop",
+        json={
+            "phrase": "agent loop smoke",
+            "canvas_nodes": [
+                {"id": "m1", "moduleId": "esp32-devkit"},
+                {"id": "m2", "moduleId": "dht22"},
+            ],
+            "export_gerber": False,
+            "allow_llm_first": False,
+            "max_manual_retries": 1,
+            "out_dir": str(tmp_path / "agent_loop_http"),
+        },
+    ).json()
+    loop = payload.get("agent_loop") or {}
+    assert loop.get("schema_version")
+    assert loop.get("rounds")
+    assert loop["rounds"][0].get("kicad_drc_errors") is not None
+
+
+def test_compose_design_agent_loop_sdk(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
+
+    from hardware_splicer.sdk import compose_design_agent_loop
+
+    result = compose_design_agent_loop(
+        phrase="sdk agent loop",
+        canvas_nodes=[
+            {"id": "m1", "moduleId": "esp32-devkit"},
+            {"id": "m2", "moduleId": "dht22"},
+        ],
+        out_dir=tmp_path / "sdk_agent_loop",
+        export_gerber=False,
+        allow_llm_first=False,
+        max_manual_retries=1,
+        finalize_package=True,
+        project_name="sdk_agent_loop",
+    )
+    assert result.get("agent_loop", {}).get("rounds")
+    assert result.get("project_package")
+    assert result.get("bench_session")
+
+
 def test_finalize_compose_after_agent_compose(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")

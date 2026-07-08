@@ -139,6 +139,44 @@ async def list_tools() -> list[Tool]:
             inputSchema={"type": "object", "properties": {}},
         ),
         Tool(
+            name="hs_compose_drc_agent",
+            description=(
+                "Agent orchestration: hs_compose plus bounded manual DRC fixup rounds. "
+                "Returns agent_loop.rounds with per-round KiCad DRC errors and drc_fixup. "
+                "Set finalize_package=true for PROJECT_PACKAGE + bench_session."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "phrase": {"type": "string"},
+                    "module_ids": {"type": "array", "items": {"type": "string"}},
+                    "canvas_nodes": {"type": "array", "items": {"type": "object"}},
+                    "canvas_wires": {"type": "array", "items": {"type": "object"}},
+                    "constraints": {"type": "object"},
+                    "material_mode": {"type": "string", "enum": ["scratch", "salvage"]},
+                    "salvage_mode": {"type": "boolean"},
+                    "out_dir": {"type": "string"},
+                    "export_gerber": {"type": "boolean", "default": False},
+                    "allow_llm_first": {"type": "boolean", "default": True},
+                    "drc_fixup": {"type": "object"},
+                    "max_manual_retries": {"type": "integer", "default": 2},
+                    "finalize_package": {"type": "boolean", "default": False},
+                    "project_name": {"type": "string"},
+                },
+            },
+        ),
+        Tool(
+            name="hs_design_quality",
+            description=(
+                "Read KiCad DRC summary, drc_fix_loop, and error violations for a compose/splice build_dir."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {"build_dir": {"type": "string"}},
+                "required": ["build_dir"],
+            },
+        ),
+        Tool(
             name="hs_salvage_bringup",
             description=(
                 "Full salvage bring-up from PROJECT_INTAKE-shaped JSON: "
@@ -480,6 +518,30 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
 
         modules = list_canvas_modules()
         return _tool_result({"ok": True, "count": len(modules), "modules": modules})
+    if name == "hs_compose_drc_agent":
+        return _tool_result(
+            sdk.compose_design_agent_loop(
+                phrase=args.get("phrase"),
+                module_ids=args.get("module_ids"),
+                canvas_nodes=args.get("canvas_nodes"),
+                canvas_wires=args.get("canvas_wires"),
+                constraints=args.get("constraints"),
+                material_mode=args.get("material_mode"),
+                salvage_mode=bool(args.get("salvage_mode")),
+                out_dir=args.get("out_dir"),
+                export_gerber=bool(args.get("export_gerber")),
+                allow_llm_first=bool(args.get("allow_llm_first", True)),
+                drc_fixup=args.get("drc_fixup"),
+                max_manual_retries=int(args.get("max_manual_retries", 2)),
+                finalize_package=bool(args.get("finalize_package")),
+                goal=args.get("phrase"),
+                project_name=args.get("project_name"),
+            )
+        )
+    if name == "hs_design_quality":
+        from .build_files import read_design_quality_summary
+
+        return _tool_result(read_design_quality_summary(str(args.get("build_dir") or "")))
     if name == "hs_compose_arbitrary":
         return _tool_result(
             sdk.compose_arbitrary(

@@ -48,6 +48,25 @@ export default function StudioDrcPanel({
         </ol>
       )}
 
+      {drc?.agentRounds?.length > 0 && (
+        <div className="studio-drc__loop">
+          <h3>Agent rounds</h3>
+          <ul className="studio-drc__attempts">
+            {drc.agentRounds.map((row) => (
+              <li key={`agent-round-${row.round}`}>
+                <span className="mono small">r{row.round}</span>
+                <span>
+                  {row.kicad_drc_errors} error(s), {row.kicad_drc_warnings} warning(s)
+                </span>
+                {row.violation_types?.length > 0 && (
+                  <span className="chip small">{row.violation_types.join(", ")}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {drc?.attempts?.length > 0 && (
         <div className="studio-drc__loop">
           <h3>KiCad fix loop</h3>
@@ -87,6 +106,14 @@ export default function StudioDrcPanel({
           <span>{warnings} warning(s)</span>
           {drc.truth?.copper_tier && <span> · {String(drc.truth.copper_tier).replace(/_/g, " ")}</span>}
         </div>
+      )}
+
+      {!compiling && drc?.resolved && drc.copperTier && String(drc.copperTier).includes("cosmetic") && (
+        <p className="hint small">
+          KiCad DRC errors are clear, but copper is <strong>cosmetic preview</strong>
+          {drc.fabRecommendation ? ` (${drc.fabRecommendation})` : ""}. Review before fab — same signal agents see in{" "}
+          <code>agent_loop.copper_tier</code>.
+        </p>
       )}
 
       <div className="studio-drc__actions">

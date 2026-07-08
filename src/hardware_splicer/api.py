@@ -192,6 +192,20 @@ class ComposeRequest(BaseModel):
     )
 
 
+class ComposeAgentLoopRequest(ComposeRequest):
+    max_manual_retries: int = Field(
+        default=2,
+        ge=0,
+        le=6,
+        description="Extra compose rounds with bumped drc_fixup when KiCad DRC errors remain.",
+    )
+    finalize_package: bool = Field(
+        default=False,
+        description="When true, emit PROJECT_PACKAGE + bench_session like a compose job.",
+    )
+    project_name: str | None = Field(default=None, description="Package name when finalize_package=true.")
+
+
 class ComposeCanvasRequest(BaseModel):
     nodes: list[Dict[str, Any]]
     wires: list[Dict[str, Any]] | None = None
@@ -1054,6 +1068,61 @@ def create_app() -> FastAPI:
             wire_only=request.wire_only,
         )
         return compose(wrapped)
+
+    @app.post("/v1/compose/agent-loop")
+    def compose_agent_loop_route(request: ComposeAgentLoopRequest) -> Dict[str, Any]:
+        """Agent orchestration: compose → KiCad DRC → bounded manual fixup rounds → optional PROJECT_PACKAGE."""
+        request_id: str | None = None
+        try:
+            os.environ["HARDWARE_SPLICER_AUTOROUTE"] = "0"
+            from .compose_agent_loop import compose_agent_loop
+
+            request_id = _request_id(request.request_id)
+            root = _api_output_root()
+            root.mkdir(parents=True, exist_ok=True)
+            if request.out_dir:
+                target = Path(request.out_dir)
+                if not target.is_absolute():
+                    target = root / target
+            else:
+                target = root / "compose" / request_id
+            resolved = target.resolve()
+            if not _allow_arbitrary_out_dir() and resolved != root and root not in resolved.parents:
+                raise ValueError(
+                    f"out_dir must be inside HARDWARE_SPLICER_OUTPUT_ROOT ({root}); "
+                    "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"
+                )
+
+            constraints = _compose_constraints(request)
+            material_mode = request.material_mode or resolve_material_mode(
+                constraints=constraints,
+                salvage_mode=bool(request.salvage_mode),
+            )
+
+            payload = compose_agent_loop(
+                out_dir=str(resolved),
+                phrase=request.phrase,
+                module_ids=request.module_ids,
+                canvas_nodes=request.canvas_nodes,
+                canvas_wires=request.canvas_wires,
+                netlist=request.netlist,
+                constraints=constraints,
+                material_mode=material_mode,
+                salvage_mode=bool(request.salvage_mode),
+                export_gerber=bool(request.export_gerber),
+                allow_llm_first=bool(request.allow_llm_first),
+                drc_fixup=request.drc_fixup,
+                request_id=request_id,
+                max_manual_retries=int(request.max_manual_retries),
+                finalize_package=bool(request.finalize_package),
+                goal=request.phrase,
+                project_name=request.project_name,
+            )
+            return _attach_inline_graph(payload)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc), request_id=request_id) from exc
+        except Exception as exc:
+            raise _error(500, "compose_agent_loop_error", str(exc), request_id=request_id) from exc
 
     @app.post("/v1/netlist-compile")
     def netlist_compile(request: NetlistCompileRequest) -> Dict[str, Any]:

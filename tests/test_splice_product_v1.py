@@ -73,6 +73,7 @@ def test_splice_product_routes_registered() -> None:
         "/v1/examples/netlist-fixtures",
         "/v1/integrations/catalog",
         "/v1/modules/catalog",
+        "/v1/compose/agent-loop",
         "/v1/intent/clarify",
         "/v1/jobs/splice-build",
         "/v1/jobs",

@@ -143,6 +143,24 @@ export async function composeBuild(payload) {
   return parseJson(res);
 }
 
+export async function composeAgentLoop(
+  payload,
+  { maxManualRetries = 2, finalizePackage = false, projectName = null } = {},
+) {
+  const res = await fetch(`${API_BASE}/v1/compose/agent-loop`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      export_gerber: false,
+      max_manual_retries: maxManualRetries,
+      finalize_package: finalizePackage,
+      ...(projectName ? { project_name: projectName } : {}),
+      ...payload,
+    }),
+  });
+  return parseJson(res);
+}
+
 export async function renderProjectPackage(buildDir, { source = "compose" } = {}) {
   const res = await fetch(`${API_BASE}/v1/project-package/render`, {
     method: "POST",

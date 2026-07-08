@@ -52,7 +52,8 @@ Agents and humans use the **same spine**. The browser Design Studio is not a sep
 | Tool | Purpose |
 |------|---------|
 | `hs_modules_catalog` | Module library for canvas compose (27+ KiCad-footprinted modules) |
-| `hs_compose` | NL phrase, `module_ids`, or `canvas_nodes`/`canvas_wires` → KiCad + DRC loop |
+| `hs_compose_drc_agent` | **Preferred** — compose + manual DRC rounds + optional `finalize_package` |
+| `hs_design_quality` | Read DRC summary + violations for a `build_dir` |
 | `hs_render_project_package` | Refresh `PROJECT_PACKAGE` after compose |
 | `hs_splice_bench_status` / `hs_splice_bench_submit` | Bench gates after compile |
 
@@ -149,13 +150,15 @@ Splice Agent → **Design studio** — same flow as agents, with:
 
 ```text
 1. hs_modules_catalog          → pick moduleIds
-2. hs_compose (canvas + phrase) → read design_quality
-3. If kicad_drc_errors > 0:
-     bump drc_fixup → hs_compose again (max 2–3 manual retries)
-4. hs_render_project_package
+2. hs_compose_drc_agent        → read agent_loop.rounds + design_quality
+3. If agent_loop.resolved is false:
+     inspect hs_design_quality(build_dir) → adjust phrase/modules or retry
+4. hs_compose_drc_agent(finalize_package=true)  OR hs_render_project_package
 5. hs_splice_bench_status      → report open gates
 6. hs_splice_bench_submit      → when measurements exist
 ```
+
+**One-shot HTTP equivalent:** `POST /v1/compose/agent-loop` with `max_manual_retries` and optional `finalize_package`.
 
 For salvage/donor workflows, branch to `hs_splice_build` / `hs_salvage_bringup` — Design Studio is the **greenfield / canvas** path.
 

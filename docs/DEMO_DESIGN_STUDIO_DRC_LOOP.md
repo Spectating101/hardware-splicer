@@ -23,7 +23,34 @@ curl -s http://127.0.0.1:8787/v1/modules/catalog | jq '{count, first: .modules[0
 
 Or MCP: `hs_modules_catalog`
 
-### 2. Compose canvas
+### 2. Compose canvas (agent loop — preferred)
+
+```bash
+curl -s -X POST http://127.0.0.1:8787/v1/compose/agent-loop \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "phrase": "ESP32 temperature humidity logger demo",
+    "canvas_nodes": [
+      {"id":"m1","moduleId":"esp32-devkit"},
+      {"id":"m2","moduleId":"dht22"}
+    ],
+    "export_gerber": false,
+    "allow_llm_first": false,
+    "max_manual_retries": 2
+  }' | jq '{
+    resolved: .agent_loop.resolved,
+    rounds: (.agent_loop.rounds | length),
+    drc_errors: .agent_loop.final_kicad_drc_errors,
+    copper: .agent_loop.copper_tier,
+    out_dir
+  }'
+```
+
+Or MCP: `hs_compose_drc_agent` with the same fields.
+
+**Point out:** `agent_loop.rounds[]` — each manual round includes engine `drc_fix_loop` attempts inside.
+
+### 2b. Single-shot compose (legacy)
 
 ```bash
 curl -s -X POST http://127.0.0.1:8787/v1/compose \

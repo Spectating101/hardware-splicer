@@ -22,11 +22,16 @@ export function extractStudioDrc(composeResult) {
     headline: compileTruthHeadline(truth),
     loop,
     attempts,
-    resolved: Boolean(loop?.resolved),
+    agentLoop: composeResult?.agent_loop || null,
+    agentRounds: composeResult?.agent_loop?.rounds || [],
+    resolved: Boolean(loop?.resolved || composeResult?.agent_loop?.resolved),
     fixup,
     violations,
     outDir: composeResult?.out_dir || null,
     ok: Boolean(composeResult?.ok),
+    copperTier: composeResult?.agent_loop?.copper_tier || quality.copper_tier || null,
+    fabRecommendation:
+      composeResult?.agent_loop?.fab_recommendation || quality.fab_recommendation || null,
   };
 }
 

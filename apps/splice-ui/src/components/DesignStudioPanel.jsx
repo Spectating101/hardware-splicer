@@ -12,7 +12,7 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { composeBuild, fetchDesignQuality, fetchModuleCatalog } from "../api.js";
+import { composeAgentLoop, fetchDesignQuality, fetchModuleCatalog } from "../api.js";
 import ModuleLibrary from "../studio/ModuleLibrary.jsx";
 import ModuleNode from "../studio/ModuleNode.jsx";
 import StudioDrcPanel from "../studio/StudioDrcPanel.jsx";
@@ -101,8 +101,33 @@ function StudioCanvas({
 }
 
 function buildAgentSteps(composeResult, drc) {
+  const agentRounds = drc?.agentRounds || [];
+  if (agentRounds.length) {
+    return agentRounds.flatMap((round, idx) => [
+      {
+        id: `compose-${idx}`,
+        status: "done",
+        detail: `round ${round.round} · ${round.mode || "compose"} · ${round.kicad_drc_errors} DRC errors`,
+      },
+      ...(round.engine_drc_fix_loop?.attempts?.length
+        ? [
+            {
+              id: `fix-${idx}`,
+              status: round.kicad_drc_errors === 0 ? "done" : "warn",
+              detail: `${round.engine_drc_fix_loop.attempts.length} engine fix attempt(s)`,
+            },
+          ]
+        : []),
+    ]).concat([
+      {
+        id: "done",
+        status: drc?.resolved ? "done" : "warn",
+        detail: drc?.resolved ? "DRC errors cleared" : "review remaining violations",
+      },
+    ]);
+  }
+
   const attempts = drc?.attempts || [];
-  const last = attempts[attempts.length - 1];
   const errors = drc?.truth?.kicad_drc_errors ?? 0;
   return [
     {
@@ -123,7 +148,7 @@ function buildAgentSteps(composeResult, drc) {
     {
       id: "fix",
       status: attempts.length ? (drc?.resolved ? "done" : "warn") : composeResult ? "done" : "pending",
-      detail: last ? `${attempts.length} attempt(s)` : "no fixups needed",
+      detail: attempts.length ? `${attempts.length} attempt(s)` : "no fixups needed",
     },
     {
       id: "done",
@@ -209,7 +234,7 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
     setComposeError("");
   };
 
-  const runCompose = async ({ fixup = drcFixup, isRetry = false } = {}) => {
+  const runCompose = async ({ fixup = drcFixup, isRetry = false, maxRounds = 2 } = {}) => {
     const allowLlm = composeMode === "ai" && llmReady;
     const payload = buildComposePayload(nodes, edges, {
       phrase,
@@ -226,7 +251,7 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
     }
 
     try {
-      const result = await composeBuild(payload);
+      const result = await composeAgentLoop(payload, { maxManualRetries: maxRounds });
       setComposeResult(result);
 
       let drc = extractStudioDrc(result);
@@ -238,6 +263,8 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
             design_quality: {
               ...(result.design_quality || {}),
               drc_fix_loop: quality.drc_fix_loop || result.design_quality?.drc_fix_loop,
+              copper_tier: quality.copper_tier || result.design_quality?.copper_tier,
+              fab_recommendation: quality.fab_recommendation || result.design_quality?.fab_recommendation,
             },
             violations: quality.violations,
           });
@@ -249,6 +276,7 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
       setDrcState(drc);
       if (fixup) setDrcFixup(fixup);
       if (isRetry) setManualRetries((n) => n + 1);
+      else setManualRetries(result.agent_loop?.manual_retries_used || 0);
     } catch (err) {
       setComposeError(err.message);
     } finally {
@@ -256,9 +284,9 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
     }
   };
 
-  const handleCompile = () => runCompose({ fixup: null, isRetry: false });
+  const handleCompile = () => runCompose({ fixup: null, isRetry: false, maxRounds: 2 });
 
-  const handleAutoFix = (nextFixup) => runCompose({ fixup: nextFixup, isRetry: true });
+  const handleAutoFix = (nextFixup) => runCompose({ fixup: nextFixup, isRetry: true, maxRounds: 2 });
 
   const canCompile =
     composeMode === "ai"
