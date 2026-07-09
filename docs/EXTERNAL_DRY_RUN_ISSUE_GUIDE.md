@@ -1,6 +1,8 @@
-# External dry-run issue guide
+# Dry-run issue guide (cold-internal + external)
 
-**Purpose:** How external operators file blockers from [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md) without maintainer hand-holding.
+**Purpose:** How operators file blockers from [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md) without maintainer hand-holding.
+
+**Cold-internal counts:** A maintainer on FGEDHGV / a fresh archive who follows only public docs is the default proof path until strangers are available. Same issue template; title prefix `[Cold-run]` or `[Dry-run]`.
 
 ---
 
@@ -46,4 +48,6 @@ Do **not** file for:
 
 Copy [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) → `INSTALL_REPORT_<hostname>_<date>.md` in your fork or attach to the issue.
 
-**Alien shortcut (maintainers):** `bash scripts/deploy_alien_quickstart.sh <tag>`
+**Alien shortcut (maintainers):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12`
+
+**After a green cold-run:** copy [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) → `docs/install_reports/INSTALL_REPORT_<hostname>_<date>.md` (or attach to the issue) so the bar is auditable without strangers.

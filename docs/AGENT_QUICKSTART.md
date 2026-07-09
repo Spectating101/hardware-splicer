@@ -135,8 +135,10 @@ curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID/result | jq '{
 Repeat on alien WSL:
 
 ```bash
-bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.6
+bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12
 ```
+
+**Cold-internal dry-run (no strangers required):** fresh archive on a second machine, follow only this doc + [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md), then fill an install report.
 
 See [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 
@@ -229,11 +231,14 @@ print(result["agent_loop"]["resolved"], result.get("project_package") is not Non
 hs_modules_catalog
   → hs_compose_drc_agent (finalize_package: true)
   → hs_design_quality (if build_dir path allowed)
-  → hs_splice_bench_status
-  → hs_splice_bench_submit
+  → hs_splice_bench_capture_template
+  → optional hs_bench_capture_vision_assist (photos → draft; gates stay open)
+  → hs_splice_bench_submit_capture (instrument readings)
+  → hs_splice_bench_status (power_on_authorized)
 ```
 
 **Do not claim fab-ready** from DRC alone. Check `copper_tier`, `design_quality_gate`, and `bench_session.power_on_authorized`.
+Vision drafts are **not** evidence.
 
 ---
 

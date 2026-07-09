@@ -2,11 +2,14 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.11
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
 #   HS_QUICKSTART_FRESH=0 bash scripts/agent_quickstart_verify.sh  # reuse ROOT
+#
+# Cold-internal dry-run (external proxy): fresh archive extract, no verbal help,
+# then fill INSTALL_REPORT_<host>_<date>.md from docs/INSTALL_REPORT_TEMPLATE.md
 set -euo pipefail
 
 ARCHIVE="${1:-}"
@@ -166,6 +169,71 @@ assert (r.get('bench_session') or {}).get('power_on_authorized') is True
 assert bl.get('passed') is True
 assert r.get('project_package')
 "
+
+echo "==> step 5b: vision-assist draft (gates stay open)"
+VISION_PHOTO="$ROOT/tests/data/golden/rc_toy_motor_board.jpg"
+if [[ ! -f "$VISION_PHOTO" ]]; then
+  echo "ERROR: missing golden bench photo: $VISION_PHOTO"
+  exit 1
+fi
+VISION_COMPOSE_PAYLOAD=$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py | python3 -c "
+import json, sys
+p = json.load(sys.stdin)
+p['project_name'] = 'quickstart_vision_assist'
+p['finalize_package'] = True
+print(json.dumps(p))
+")
+VISION_BUILD=$(curl -s -X POST "$BASE/v1/compose/agent-loop" \
+  -H 'Content-Type: application/json' \
+  -d "$VISION_COMPOSE_PAYLOAD" | python3 -c "
+import json, sys
+r = json.load(sys.stdin)
+al = r.get('agent_loop') or {}
+assert al.get('final_kicad_drc_errors') == 0, al
+out = r.get('out_dir')
+assert out, r
+print(out)
+")
+export HS_QUICKSTART_VISION_BUILD="$VISION_BUILD"
+export HS_QUICKSTART_VISION_PHOTO="$VISION_PHOTO"
+export HS_QUICKSTART_BASE="$BASE"
+python3 - <<'PY'
+import json, os, urllib.request
+
+build = os.environ["HS_QUICKSTART_VISION_BUILD"]
+photo = os.environ["HS_QUICKSTART_VISION_PHOTO"]
+base = os.environ["HS_QUICKSTART_BASE"]
+body = json.dumps(
+    {
+        "build_dir": build,
+        "attachments": [{"kind": "image", "path": photo}],
+        "operator_id": "quickstart_vision",
+        "live": False,
+    }
+).encode()
+req = urllib.request.Request(
+    base + "/v1/splice-bench/vision-assist",
+    data=body,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=120) as resp:
+    r = json.load(resp)
+print(
+    "vision_ok",
+    r.get("ok"),
+    "gates_unchanged",
+    (r.get("policy") or {}).get("gates_unchanged"),
+)
+assert r.get("ok") is True
+assert (r.get("policy") or {}).get("vision_alone_is_not_evidence") is True
+assert (r.get("policy") or {}).get("gates_unchanged") is True
+assert (r.get("bench_session") or {}).get("power_on_authorized") is not True
+draft = r.get("draft") or {}
+assert draft.get("vision_assisted") is True
+assert any(row.get("status") == "open" for row in (draft.get("measurements") or []))
+assert r.get("draft_path")
+PY
 
 if [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
   echo "==> step 6: Qwen phrase agent-loop"

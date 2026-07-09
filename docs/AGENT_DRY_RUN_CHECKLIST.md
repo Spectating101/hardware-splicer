@@ -1,7 +1,21 @@
 # Agent dry-run checklist — zero verbal help
 
-**Purpose:** External operator or agent proves Phase 0 without author assistance.  
+**Purpose:** Prove the public install + agent spine without author hand-holding.  
+**Primary path today:** **cold-internal** (maintainer on a second machine / fresh archive — treat yourself as a stranger).  
+**External strangers:** welcome when available; not required to raise the bar.
+
 **Time budget:** 15 minutes (offline) · 20 minutes (with Qwen curl 3)
+
+---
+
+## Cold-internal rules (external proxy)
+
+1. Use a **fresh** tree: `git archive` / alien deploy / clean clone — not your dirty optiplex checkout.
+2. Follow **only** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) + this checklist. No Slack, no “just set X”.
+3. If blocked, write the failure into an install report (or GitHub issue) **before** fixing from memory.
+4. Pass = automated `scripts/agent_quickstart_verify.sh` **and** a filled `INSTALL_REPORT_<host>_<date>.md`.
+
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12`
 
 ---
 
@@ -28,11 +42,12 @@
 | 7 | Curl 2b — salvage `donor_context` agent-loop | `mode=salvage_catalog`, `build_id=robot_drive_base`, 0 DRC, `salvage_package` + `project_package` |
 | 8 | (Optional) Curl 3 — Qwen phrase | `qwen_configured=true`, 0 DRC errors |
 | 9 | Async job — `POST /v1/jobs/compose-agent-loop` + poll result | `ok=true`, package present |
-| 10 | (Optional) `POST /v1/compose/bench-loop` salvage + `simulate_bench` | `bench_loop.passed=true`, `power_on_authorized=true`, 0 DRC |
+| 10 | `POST /v1/compose/bench-loop` salvage + `simulate_bench` | `bench_loop.passed=true`, `power_on_authorized=true`, 0 DRC |
+| 11 | `POST /v1/splice-bench/vision-assist` on open gates + golden photo | `ok=true`, `gates_unchanged=true`, draft present, **not** power-on |
+
+**Automated equivalent:** `bash scripts/agent_quickstart_verify.sh` (steps 1–5b; Qwen via `HS_QUICKSTART_QWEN=1`).
 
 **File blockers:** [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md)
-
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.11`
 
 ---
 
