@@ -3,7 +3,7 @@
 **Purpose:** Define what we are building, at what depth, in what order — for founder, agents, and future contributors.
 
 **Status:** Active · July 2026  
-**Anchor tag:** `v1.1.0-alpha.15` (live photo→salvage + live vision-assist when keyed)  
+**Anchor tag:** `v1.1.0-alpha.16` (public-web DMM provenance + live VL when keyed)  
 **Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
@@ -181,14 +181,15 @@ flowchart LR
 
 ---
 
-## 9. Next actions (after alpha.15)
+## 9. Next actions (after alpha.16)
 
 1. ~~Cold-internal dry-run bar (archive + alien + vision-assist).~~ ✅
 2. ~~Golden-real (non-simulated capture) in quickstart.~~ ✅
 3. ~~Donor-board-vision offline + copper honesty + optional Qwen in cold bar.~~ ✅
 4. ~~Live photo → Qwen board vision → salvage (keyed).~~ ✅ alpha.15
-5. Operator live DMM session using [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md) when hardware is on the bench.
-6. Copper honesty ladder toward `fab_ready` when FreeRouting actually routes (jar present; compose path still preview by default).
+5. ~~Public-web DMM photos → bench capture (Wikimedia provenance).~~ ✅ alpha.16
+6. On-board café DMM session still the only claim that requires *this* hardware in hand.
+7. Copper honesty ladder toward `fab_ready` when FreeRouting actually routes.
 
 ---
 
@@ -200,3 +201,4 @@ flowchart LR
 | 2026-07-10 | Refresh maturity to alpha.12; cold-internal readiness; bench/vision status |
 | 2026-07-10 | alpha.14 leftovers: donor vision, copper honesty, Qwen auto, operator real-bench doc |
 | 2026-07-10 | alpha.15: live photo→salvage + live vision-assist; Wikimedia Arduino PCB sample |
+| 2026-07-10 | alpha.16: public-web DMM photos → bench capture with explicit not-this-board policy |

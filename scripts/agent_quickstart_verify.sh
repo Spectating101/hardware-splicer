@@ -2,8 +2,8 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.14
-#   HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.14
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
+#   HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -274,6 +274,47 @@ assert r.get('passed') is True
 assert r.get('simulated') is False
 assert (r.get('bench_after') or {}).get('power_on_authorized') is True
 assert (r.get('matched_measurement_count') or 0) >= 1
+"
+
+echo "==> step 5f: public-web DMM photos → bench capture (provenance, not this-board café)"
+PUBLIC_OUT="$ROOT/out/quickstart_public_web_bench"
+rm -rf "$PUBLIC_OUT"
+# Build a salvage package first so gates exist, then apply public-web capture
+PUBLIC_COMPOSE=$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py | python3 -c "
+import json,sys
+p=json.load(sys.stdin)
+p['project_name']='quickstart_public_web_bench'
+p['finalize_package']=True
+print(json.dumps(p))
+")
+PUBLIC_BUILD=$(curl -s -X POST "$BASE/v1/compose/agent-loop" \
+  -H 'Content-Type: application/json' \
+  -d "$PUBLIC_COMPOSE" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)
+assert (r.get('agent_loop') or {}).get('final_kicad_drc_errors')==0, r
+print(r['out_dir'])
+")
+HARDWARE_SPLICER_AUTOROUTE=0 \
+HARDWARE_SPLICER_DRC_FIX_LOOP=1 \
+HARDWARE_SPLICER_SKIP_VISION_LIVE=1 \
+HARDWARE_SPLICER_OFFLINE_SALVAGE=1 \
+PYTHONPATH=src python3 scripts/public_web_bench_capture.py \
+  --build-dir "$PUBLIC_BUILD" \
+  --max-photos 2 \
+  --json | python3 -c "
+import json,sys
+r=json.load(sys.stdin)
+print(
+  'public_web_passed', r.get('passed'),
+  'matched', r.get('matched_gate_count'),
+  'power_on', (r.get('bench_after') or {}).get('power_on_authorized'),
+  'not_this_board', (r.get('policy') or {}).get('public_web_is_not_this_board'),
+)
+assert r.get('passed') is True
+assert (r.get('policy') or {}).get('public_web_is_not_this_board') is True
+assert (r.get('bench_after') or {}).get('power_on_authorized') is True
+assert (r.get('matched_gate_count') or 0) >= 1
 "
 
 echo "==> step 5d: donor-board-vision offline (photo/evidence → functional_salvage)"

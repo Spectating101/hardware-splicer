@@ -15,8 +15,8 @@
 3. If blocked, write the failure into an install report (or GitHub issue) **before** fixing from memory.
 4. Pass = automated `scripts/agent_quickstart_verify.sh` **and** a filled `INSTALL_REPORT_<host>_<date>.md`.
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.15`  
-**With Qwen on alien:** `HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.15`
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`  
+**With Qwen on alien:** `HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`
 
 ---
 
@@ -46,6 +46,7 @@
 | 10 | `POST /v1/compose/bench-loop` salvage + `simulate_bench` | `bench_loop.passed=true`, `power_on_authorized=true`, 0 DRC |
 | 11 | `POST /v1/splice-bench/vision-assist` on open gates + golden photo | `ok=true`, `gates_unchanged=true`, draft present, **not** power-on |
 | 12 | `scripts/splice_golden_real.py` (manual capture JSON) | `passed=true`, `simulated=false`, `power_on_authorized=true` |
+| 12b | `scripts/public_web_bench_capture.py` (Wikimedia DMM photos) | `passed=true`, `public_web_is_not_this_board=true` |
 | 13 | `POST /v1/donor-board-vision` offline | `applied_board_count≥1`, `functional_salvage` blocks |
 | 14 | Copper honesty (autoroute off) | `copper_tier` preview/placement; `fabrication_ready` not true |
 | 15 | (Keyed) Live photo → donor-board-vision | `mode=live`, blocks ≥1 |
@@ -55,8 +56,8 @@
 
 **Operator real-bench (live DMM):** [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.15`  
-**With Qwen + live vision on alien:** `HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.15`
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`  
+**With Qwen + live vision on alien:** `HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`
 
 ---
 

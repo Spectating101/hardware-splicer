@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # One-shot alien quickstart from optiplex → DESKTOP-FGEDHGV WSL.
 # Usage: bash scripts/deploy_alien_quickstart.sh [git-ref]
-# Default proof tag: v1.1.0-alpha.15
+# Default proof tag: v1.1.0-alpha.16
 # Optional Qwen + live vision on alien: HS_ALIEN_QWEN=1 (scp local .env.local — never commit)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-REF="${1:-v1.1.0-alpha.15}"
+REF="${1:-v1.1.0-alpha.16}"
 HOST="${HS_ALIEN_HOST:-desktop-fgedhgv}"
 ARCHIVE="/tmp/hs-alien-quickstart.tar.gz"
 

@@ -1,0 +1,60 @@
+{
+  "schema_version": "hardware_splicer.public_bench_meter_readings.v1",
+  "policy": {
+    "public_web_is_not_this_board": true,
+    "note": "Readings transcribed from Wikimedia Commons DMM photos for cold-run provenance. Not measurements of the current donor under test."
+  },
+  "photos": [
+    {
+      "file": "dmm_testing_5v.jpg",
+      "commons_title": "Testing 5 volts.jpg",
+      "value": 5.52,
+      "unit": "V",
+      "kind": "voltage",
+      "dial": "20V DC",
+      "probes": "G (black) and 5 (red) banana jacks on ATX-derived bench supply",
+      "status_for_pass": "pass",
+      "transcription": "LCD shows 5.52"
+    },
+    {
+      "file": "dmm_voltage_3v3.jpg",
+      "commons_title": "Voltage on 3.3.jpg",
+      "value": 0.0,
+      "unit": "V",
+      "kind": "voltage",
+      "dial": "20V DC",
+      "probes": "3.3V and G terminals",
+      "status_for_pass": "recorded",
+      "transcription": "LCD shows 0.00 (rail off / open)"
+    },
+    {
+      "file": "dmm_flyback_test.jpg",
+      "commons_title": "Flyback converter testing with two resistors in parallel and multimeter for measuring voltage.jpg",
+      "value": null,
+      "unit": "V",
+      "kind": "voltage",
+      "dial": "Fluke 87V",
+      "probes": "flyback converter test points",
+      "status_for_pass": "recorded",
+      "transcription": "Fluke on flyback bench; use as artifact only unless VL refreshes digits"
+    },
+    {
+      "file": "dmm_measuring_circuit.png",
+      "commons_title": "Medición del voltaje de un circuito usando un multímetro.png",
+      "value": null,
+      "unit": "V",
+      "kind": "voltage",
+      "status_for_pass": "recorded",
+      "transcription": "Spanish-language DMM-on-circuit photo; artifact provenance"
+    },
+    {
+      "file": "dmm_battery_voltage.jpg",
+      "commons_title": "Testing voltage of a battery using a digital multimeter.jpg",
+      "value": null,
+      "unit": "V",
+      "kind": "voltage",
+      "status_for_pass": "recorded",
+      "transcription": "Battery voltage measurement photo; artifact provenance"
+    }
+  ]
+}

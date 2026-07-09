@@ -13,7 +13,17 @@
 | `simulate_bench: true` | Yes — **CI/demo only** |
 | `vision-assist` / photo draft | **No** |
 | Golden-real committed JSON | Yes — provenance fixture, not live café |
-| This operator path | Yes — when you fill real DMM/PSU readings |
+| **Public-web DMM photos** (`public_web_bench_capture.py`) | Yes for cold-run — **real meter LCDs from Wikimedia**, labeled `public_web_is_not_this_board` |
+| This operator path | Yes — when you fill real DMM/PSU readings on **this** board |
+
+### Public-web path (no café required)
+
+```bash
+PYTHONPATH=src python3 scripts/public_web_bench_capture.py --build-dir "$OUT"
+# optional: --live  (Qwen VL on the public photos)
+```
+
+Photos live under `tests/data/golden/public_bench/` (CC from Wikimedia).
 
 ---
 
