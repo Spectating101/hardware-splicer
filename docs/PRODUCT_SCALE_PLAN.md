@@ -3,7 +3,7 @@
 **Purpose:** Define what we are building, at what depth, in what order — for founder, agents, and future contributors.
 
 **Status:** Active · July 2026  
-**Anchor tag:** `v1.1.0-alpha.12` (cold-internal dry-run bar)  
+**Anchor tag:** `v1.1.0-alpha.14` (leftover cold-internal bar: Qwen + donor vision + copper honesty)  
 **Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
@@ -48,8 +48,10 @@ Describe (phrase / canvas / donor intake)
 | **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC; copper still `cosmetic_preview` by default |
 | **Agent spine** | MCP = HTTP = SDK = UI | ✅ Catalog 50, async jobs, agent-loop parity; Design Studio on same spine |
 | **Salvage unified** | Donor → same agent loop | ✅ `donor_context` on agent-loop / MCP / HTTP |
-| **Bench + vision** | Capture assist | 🟡 Draft from photos (`vision-assist`); does **not** close gates |
-| **External readiness** | Zero-help dry-run | 🟡 **Cold-internal** (optiplex archive + FGEDHGV) substitutes for strangers |
+| **Bench + vision** | Capture assist | 🟡 Draft from photos (`vision-assist`); operator real-bench doc; golden-real non-sim |
+| **Donor vision** | Photo/evidence → salvage | ✅ Offline `POST /v1/donor-board-vision` in cold bar; live Qwen optional |
+| **Copper honesty** | Fab claims | ✅ Cold bar asserts preview copper ≠ `fabrication_ready` |
+| **External readiness** | Zero-help dry-run | 🟡 **Cold-internal** (optiplex + FGEDHGV + optional Qwen) substitutes for strangers |
 
 ---
 
@@ -179,13 +181,14 @@ flowchart LR
 
 ---
 
-## 9. Next actions (after alpha.12)
+## 9. Next actions (after alpha.14)
 
-1. ~~Cold-internal dry-run bar (archive + alien + vision-assist).~~ ✅ [`install_reports/`](install_reports/)
-2. Keep **golden-real** (non-simulated capture) in the automated quickstart bar.
-3. Optional: Qwen cold path (`HS_QUICKSTART_QWEN=1`) on FGEDHGV when keyed.
-4. Phase 2 depth: live photo → salvage blocks; real instrument capture (not only golden JSON).
-5. Copper honesty ladder toward `fab_ready` when autoroute is on.
+1. ~~Cold-internal dry-run bar (archive + alien + vision-assist).~~ ✅
+2. ~~Golden-real (non-simulated capture) in quickstart.~~ ✅
+3. ~~Donor-board-vision offline + copper honesty + optional Qwen in cold bar.~~ ✅
+4. Operator live DMM session using [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md) when hardware is on the bench.
+5. Copper honesty ladder toward `fab_ready` when `AUTOROUTE=1` is intentionally on.
+6. Live photo → Qwen board vision → salvage (beyond offline board_evidence).
 
 ---
 
@@ -195,3 +198,4 @@ flowchart LR
 |------|--------|
 | 2026-07-08 | Initial product scale plan; Phase 0 doc + studio wiring for alpha.5 |
 | 2026-07-10 | Refresh maturity to alpha.12; cold-internal readiness; bench/vision status |
+| 2026-07-10 | alpha.14 leftovers: donor vision, copper honesty, Qwen auto, operator real-bench doc |

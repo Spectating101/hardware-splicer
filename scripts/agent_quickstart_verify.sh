@@ -2,7 +2,8 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.14
+#   HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.14
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -51,13 +52,22 @@ fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
-if [[ -f "$ROOT/.env.local" ]] && [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
+# Prefer tree-local .env.local; alien may scp hs-quickstart.env.local beside the archive
+if [[ ! -f "$ROOT/.env.local" ]] && [[ -f /mnt/c/Users/user/hs-quickstart.env.local ]]; then
+  cp /mnt/c/Users/user/hs-quickstart.env.local "$ROOT/.env.local"
+  echo "==> installed alien hs-quickstart.env.local → $ROOT/.env.local"
+fi
+
+if [[ -f "$ROOT/.env.local" ]] && [[ "${HS_QUICKSTART_QWEN:-auto}" != "0" ]]; then
   set -a
   # shellcheck disable=SC1090
   source "$ROOT/.env.local"
   set +a
-  export HARDWARE_SPLICER_OFFLINE_COMPOSE=0
-  export HARDWARE_SPLICER_QWEN_COMPOSE=1
+  if [[ -n "${QWEN_API_KEY:-}" ]]; then
+    export HARDWARE_SPLICER_OFFLINE_COMPOSE=0
+    export HARDWARE_SPLICER_QWEN_COMPOSE=1
+    echo "==> Qwen key present — optional step 6 enabled"
+  fi
 fi
 
 echo "==> doctor"
@@ -259,7 +269,78 @@ assert (r.get('bench_after') or {}).get('power_on_authorized') is True
 assert (r.get('matched_measurement_count') or 0) >= 1
 "
 
-if [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
+echo "==> step 5d: donor-board-vision offline (photo/evidence → functional_salvage)"
+export HS_QUICKSTART_BASE="$BASE"
+export HS_QUICKSTART_ROOT="$ROOT"
+python3 - <<'PY'
+import json, os, urllib.request, subprocess
+
+root = os.environ["HS_QUICKSTART_ROOT"]
+base = os.environ["HS_QUICKSTART_BASE"]
+payload = json.loads(
+    subprocess.check_output(
+        ["python3", "scripts/donor_vision_payload.py"],
+        cwd=root,
+        env={**os.environ, "PYTHONPATH": os.path.join(root, "src")},
+    )
+)
+body = json.dumps({"intake": payload}).encode()
+req = urllib.request.Request(
+    base + "/v1/donor-board-vision",
+    data=body,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=120) as resp:
+    r = json.load(resp)
+report = r.get("donor_board_vision_report") or {}
+intake = r.get("intake") or {}
+boards = ((intake.get("circuit") or {}).get("boards") or [])
+fs = (boards[0].get("functional_salvage") if boards else {}) or {}
+print(
+    "donor_vision_applied",
+    report.get("applied_board_count"),
+    "blocks",
+    len(fs.get("reusable_blocks") or []),
+    "source",
+    fs.get("source"),
+)
+assert int(report.get("applied_board_count") or 0) >= 1
+assert len(fs.get("reusable_blocks") or []) >= 1
+assert fs.get("source") == "board_vision"
+PY
+
+echo "==> step 5e: copper honesty (autoroute off → not fab-ready)"
+curl -s -X POST "$BASE/v1/compose/agent-loop" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "phrase": "Copper honesty quickstart",
+    "canvas_nodes": [
+      {"id": "m1", "moduleId": "esp32-devkit"},
+      {"id": "m2", "moduleId": "dht22"}
+    ],
+    "allow_llm_first": false,
+    "max_manual_retries": 1,
+    "finalize_package": true,
+    "project_name": "quickstart_copper_honesty"
+  }' | python3 -c "
+import json, sys
+r = json.load(sys.stdin)
+al = r.get('agent_loop') or {}
+pkg = r.get('project_package') or {}
+gates = (pkg.get('gates') if isinstance(pkg, dict) else None) or {}
+copper = al.get('copper_tier') or gates.get('copper_tier')
+fab = al.get('fab_recommendation') or gates.get('fab_recommendation')
+fabrication_ready = gates.get('fabrication_ready')
+print('copper_tier', copper, 'fab_recommendation', fab, 'fabrication_ready', fabrication_ready)
+assert al.get('final_kicad_drc_errors') == 0
+assert copper in {'cosmetic_preview', 'placement_only'}
+assert fabrication_ready is not True
+assert fab == 'review_required_preview_copper' or (isinstance(fab, str) and 'review' in fab)
+"
+
+# Auto-enable Qwen when key was sourced from .env.local (HS_QUICKSTART_QWEN=0 disables)
+if [[ -n "${QWEN_API_KEY:-}" && "${HS_QUICKSTART_QWEN:-auto}" != "0" ]]; then
   echo "==> step 6: Qwen phrase agent-loop"
   curl -s -X POST "$BASE/v1/compose/agent-loop" \
     -H 'Content-Type: application/json' \
@@ -277,6 +358,9 @@ print('qwen_resolved', al.get('resolved'), 'tokens', (r.get('qwen_usage') or {})
 assert al.get('resolved') and al.get('final_kicad_drc_errors') == 0
 assert r.get('project_package')
 "
+elif [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
+  echo "==> step 6: FAIL — HS_QUICKSTART_QWEN=1 but QWEN_API_KEY missing"
+  exit 1
 fi
 
 END_TS=$(date +%s)
