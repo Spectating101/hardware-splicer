@@ -2,7 +2,7 @@
 # Agent quickstart verify — catalog, sync agent-loop, async job; optional Qwen.
 #
 # Alien (FGEDHGV):
-#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
@@ -234,6 +234,30 @@ assert draft.get("vision_assisted") is True
 assert any(row.get("status") == "open" for row in (draft.get("measurements") or []))
 assert r.get("draft_path")
 PY
+
+echo "==> step 5c: golden-real bench (manual capture, not simulator)"
+GOLDEN_OUT="$ROOT/out/quickstart_golden_real"
+rm -rf "$GOLDEN_OUT"
+HARDWARE_SPLICER_AUTOROUTE=0 \
+HARDWARE_SPLICER_DRC_FIX_LOOP=1 \
+HARDWARE_SPLICER_SKIP_VISION_LIVE=1 \
+HARDWARE_SPLICER_OFFLINE_SALVAGE=1 \
+PYTHONPATH=src python3 scripts/splice_golden_real.py \
+  --out "$GOLDEN_OUT" \
+  --json | python3 -c "
+import json, sys
+r = json.load(sys.stdin)
+print(
+    'golden_real_passed', r.get('passed'),
+    'simulated', r.get('simulated'),
+    'power_on', (r.get('bench_after') or {}).get('power_on_authorized'),
+    'matched', r.get('matched_measurement_count'),
+)
+assert r.get('passed') is True
+assert r.get('simulated') is False
+assert (r.get('bench_after') or {}).get('power_on_authorized') is True
+assert (r.get('matched_measurement_count') or 0) >= 1
+"
 
 if [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
   echo "==> step 6: Qwen phrase agent-loop"

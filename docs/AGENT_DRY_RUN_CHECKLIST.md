@@ -15,7 +15,7 @@
 3. If blocked, write the failure into an install report (or GitHub issue) **before** fixing from memory.
 4. Pass = automated `scripts/agent_quickstart_verify.sh` **and** a filled `INSTALL_REPORT_<host>_<date>.md`.
 
-**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12`
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13`
 
 ---
 
@@ -44,10 +44,11 @@
 | 9 | Async job — `POST /v1/jobs/compose-agent-loop` + poll result | `ok=true`, package present |
 | 10 | `POST /v1/compose/bench-loop` salvage + `simulate_bench` | `bench_loop.passed=true`, `power_on_authorized=true`, 0 DRC |
 | 11 | `POST /v1/splice-bench/vision-assist` on open gates + golden photo | `ok=true`, `gates_unchanged=true`, draft present, **not** power-on |
+| 12 | `scripts/splice_golden_real.py` (manual capture JSON) | `passed=true`, `simulated=false`, `power_on_authorized=true` |
 
-**Automated equivalent:** `bash scripts/agent_quickstart_verify.sh` (steps 1–5b; Qwen via `HS_QUICKSTART_QWEN=1`).
+**Automated equivalent:** `bash scripts/agent_quickstart_verify.sh` (steps 1–5c; Qwen via `HS_QUICKSTART_QWEN=1`).
 
-**File blockers:** [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md)
+**Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13`
 
 ---
 

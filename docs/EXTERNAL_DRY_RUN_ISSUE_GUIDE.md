@@ -48,6 +48,6 @@ Do **not** file for:
 
 Copy [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) → `INSTALL_REPORT_<hostname>_<date>.md` in your fork or attach to the issue.
 
-**Alien shortcut (maintainers):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12`
+**Alien shortcut (maintainers):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13`
 
 **After a green cold-run:** copy [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) → `docs/install_reports/INSTALL_REPORT_<hostname>_<date>.md` (or attach to the issue) so the bar is auditable without strangers.

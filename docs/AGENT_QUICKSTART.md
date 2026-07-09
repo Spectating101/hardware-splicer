@@ -135,7 +135,7 @@ curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID/result | jq '{
 Repeat on alien WSL:
 
 ```bash
-bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.12
+bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.13
 ```
 
 **Cold-internal dry-run (no strangers required):** fresh archive on a second machine, follow only this doc + [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md), then fill an install report.

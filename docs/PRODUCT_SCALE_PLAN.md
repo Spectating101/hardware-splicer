@@ -3,8 +3,8 @@
 **Purpose:** Define what we are building, at what depth, in what order — for founder, agents, and future contributors.
 
 **Status:** Active · July 2026  
-**Anchor tag:** `v1.1.0-alpha.5`  
-**Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md)
+**Anchor tag:** `v1.1.0-alpha.12` (cold-internal dry-run bar)  
+**Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
 
@@ -41,13 +41,15 @@ Describe (phrase / canvas / donor intake)
 
 ## 3. Maturity map (honest)
 
-| Tier | Name | Today (alpha.5) |
-|------|------|-----------------|
+| Tier | Name | Today (alpha.12) |
+|------|------|------------------|
 | **S2** | Carrier compile (CI) | ✅ `make verify-splice` |
-| **S3** | Bench gates (golden) | ✅ CI; field café deferred |
-| **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC errors; `cosmetic_preview` copper |
-| **Agent spine** | MCP = HTTP = SDK = UI | 🟡 `hs_compose_drc_agent`, Design Studio agent-loop |
-| **Salvage unified** | Donor → same agent loop | 🟡 `donor_context` on agent-loop / `hs_compose_drc_agent` |
+| **S3** | Bench gates | ✅ Simulated compose bench-loop + **golden-real** manual capture path |
+| **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC; copper still `cosmetic_preview` by default |
+| **Agent spine** | MCP = HTTP = SDK = UI | ✅ Catalog 50, async jobs, agent-loop parity; Design Studio on same spine |
+| **Salvage unified** | Donor → same agent loop | ✅ `donor_context` on agent-loop / MCP / HTTP |
+| **Bench + vision** | Capture assist | 🟡 Draft from photos (`vision-assist`); does **not** close gates |
+| **External readiness** | Zero-help dry-run | 🟡 **Cold-internal** (optiplex archive + FGEDHGV) substitutes for strangers |
 
 ---
 
@@ -59,15 +61,16 @@ Describe (phrase / canvas / donor intake)
 
 | # | Deliverable | Status |
 |---|-------------|--------|
-| 0.1 | Tag `v1.1.0-alpha.5`, push `main` | This release |
+| 0.1 | Tag `v1.1.0-alpha.5`, push `main` | ✅ (superseded by later alphas) |
 | 0.2 | `docs/PRODUCT_SCALE_PLAN.md` (this file) | ✅ |
 | 0.3 | `docs/AGENT_QUICKSTART.md` — 3 curls + 3 MCP calls | ✅ |
 | 0.4 | `docs/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` paths | ✅ |
 | 0.5 | Design Studio: AI phrase → agent-loop + package | ✅ |
-| 0.6 | `make verify-product-internal` green | Gate before tag |
+| 0.6 | `make verify-product-internal` green | ✅ |
 | 0.7 | Canvas catalog → 50 modules + pin contract tests | ✅ |
+| 0.8 | Cold-internal dry-run bar (archive + alien) | ✅ alpha.12 |
 
-**Exit criteria:** Clone → Qwen key → agent loop in &lt;15 min without author hand-holding. See [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md).
+**Exit criteria:** Fresh archive → agent loop + salvage + bench + vision draft in &lt;15 min without author hand-holding. See [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md).
 
 ---
 
@@ -75,15 +78,15 @@ Describe (phrase / canvas / donor intake)
 
 **Goal:** Agents are the primary customer; UI is inspection + override.
 
-| Track | Deliverables |
-|-------|----------------|
-| **Agent API** | Versioned `agent_loop` schema; async job for long compiles; webhook optional |
-| **Module graph** | 50+ modules; pin contract validation; LLM picker telemetry |
-| **DRC agent** | Smarter fixup policy; `cosmetic_preview` → `review_required` → `fab_ready` ladder |
-| **Package** | `PROJECT_PACKAGE` schema version; wiring steps ↔ gate checklist |
-| **Salvage bridge** | `donor_context` on `hs_compose_drc_agent` from circuit-ai intake |
+| Track | Deliverables | Status |
+|-------|----------------|--------|
+| **Agent API** | Versioned `agent_loop` schema; async job for long compiles; webhook optional | ✅ async jobs; webhook deferred |
+| **Module graph** | 50+ modules; pin contract validation; LLM picker telemetry | ✅ 50 + pin tests |
+| **DRC agent** | Smarter fixup policy; `cosmetic_preview` → `review_required` → `fab_ready` ladder | 🟡 0 DRC path works; copper ladder still soft |
+| **Package** | `PROJECT_PACKAGE` schema version; wiring steps ↔ gate checklist | 🟡 package present; deeper gate card wiring ongoing |
+| **Salvage bridge** | `donor_context` on `hs_compose_drc_agent` from circuit-ai intake | ✅ |
 
-**Exit criteria:** Cursor/Claude agent designs → fixes DRC → delivers zip + gate card without browser.
+**Exit criteria:** Cursor/Claude agent designs → fixes DRC → delivers zip + gate card without browser. **Cold-internal proxy:** green on optiplex archive + FGEDHGV.
 
 ---
 
@@ -91,13 +94,13 @@ Describe (phrase / canvas / donor intake)
 
 **Goal:** Flux-class intake + bench moat — not Flux feature parity.
 
-| Track | Deliverables |
-|-------|----------------|
-| **Design Studio** | Pin wire editing; live DRC hints; open in KiCad one-click |
-| **Bench loop** | Camera capture → gate auto-fill; session replay | 🟡 `hs_compose_bench_loop` + capture template on compose builds |
-| **Salvage** | Photo → functional blocks → splice plan → carrier in one session |
-| **Copper truth** | Path from `cosmetic_preview` to autoroute tier when `AUTOROUTE=1` |
-| **Integrations** | KiCad MCP sidecar; JLC enrich read-only on BOM |
+| Track | Deliverables | Status |
+|-------|----------------|--------|
+| **Design Studio** | Pin wire editing; live DRC hints; open in KiCad one-click | 🟡 agent-loop wired; deeper ECAD UX deferred |
+| **Bench loop** | Capture template → submit → power-on; camera assist | 🟡 `hs_compose_bench_loop` + `vision-assist` draft; golden-real non-sim path |
+| **Salvage** | Photo → functional blocks → splice plan → carrier in one session | 🟡 offline salvage on agent-loop; live photo→blocks still optional |
+| **Copper truth** | Path from `cosmetic_preview` to autoroute tier when `AUTOROUTE=1` | 🟡 opt-in only |
+| **Integrations** | KiCad MCP sidecar; JLC enrich read-only on BOM | ⬜ |
 
 **Exit criteria:** Repair café case: donor photo → carrier PCB → measured gates → fab zip.
 
@@ -176,12 +179,13 @@ flowchart LR
 
 ---
 
-## 9. Next actions after alpha.5
+## 9. Next actions (after alpha.12)
 
-1. ~~Run `make verify-product-internal` on second machine; file `INSTALL_REPORT`.~~ ✅ FGEDHGV Track B + Qwen curl 3 — [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md)
-2. ~~Phase 1 kickoff: async `POST /v1/jobs/compose-agent-loop`.~~ ✅
-3. Expand module catalog toward 50 entries with pin validation tests. ✅ **50 modules** + `test_canvas_module_pins.py`
-4. Unify salvage intake → `hs_compose_drc_agent` with `donor_context`. ✅
+1. ~~Cold-internal dry-run bar (archive + alien + vision-assist).~~ ✅ [`install_reports/`](install_reports/)
+2. Keep **golden-real** (non-simulated capture) in the automated quickstart bar.
+3. Optional: Qwen cold path (`HS_QUICKSTART_QWEN=1`) on FGEDHGV when keyed.
+4. Phase 2 depth: live photo → salvage blocks; real instrument capture (not only golden JSON).
+5. Copper honesty ladder toward `fab_ready` when autoroute is on.
 
 ---
 
@@ -190,3 +194,4 @@ flowchart LR
 | Date | Change |
 |------|--------|
 | 2026-07-08 | Initial product scale plan; Phase 0 doc + studio wiring for alpha.5 |
+| 2026-07-10 | Refresh maturity to alpha.12; cold-internal readiness; bench/vision status |
