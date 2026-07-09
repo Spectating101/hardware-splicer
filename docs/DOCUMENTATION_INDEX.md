@@ -63,6 +63,7 @@
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | **Primary runbook** |
 | [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) | **15 min** — 3 curls + 3 MCP tools |
 | [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) | **What we're building** — phased scale plan |
+| [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) | **Phase 0/1 cold exit** at alpha.16 (autoroute out of scope) |
 | [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md) | **Zero-help** external operator proof |
 | [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md) | How to file dry-run blockers on GitHub |
 | [`BENCH_LOOP_AGENT.md`](BENCH_LOOP_AGENT.md) | Compose → bench capture → gate closure (agent) |
@@ -295,6 +296,7 @@ Everything else → index.
 
 | Date | Change |
 |------|--------|
+| 2026-07-10 | `COLD_INTERNAL_EXIT.md` + Phase 0/1 cold exit links (alpha.16) |
 | 2026-07-08 | `PRODUCT_SCALE_PLAN.md`, `AGENT_QUICKSTART.md`, `AGENT_BUILD_DIR_POLICY.md` — alpha.5 |
 | 2026-07 | v1.0.1 doc set: quickstart, support, ops, demo, install template |
 | 2026-07 | `COMPETITIVE_PACKAGING_STRATEGY.md` — internal monetisation/competitor completion map |

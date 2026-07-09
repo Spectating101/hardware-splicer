@@ -3,7 +3,8 @@
 **Purpose:** Define what we are building, at what depth, in what order — for founder, agents, and future contributors.
 
 **Status:** Active · July 2026  
-**Anchor tag:** `v1.1.0-alpha.16` (public-web DMM provenance + live VL when keyed)  
+**Anchor tag:** `v1.1.0-alpha.16`  
+**Cold-internal exit:** ✅ declared — see [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)  
 **Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
@@ -32,93 +33,69 @@ Describe (phrase / canvas / donor intake)
 |---------|------|
 | **MCP / HTTP / SDK** | Primary — agents drive the product |
 | **Design Studio** | Human legibility on the same endpoints |
-| **Salvage / circuit-ai** | Donor intake → same compile path (Phase 2) |
+| **Salvage / circuit-ai** | Donor intake → same compile path |
 | **KiCad** | Source of schematic/PCB truth — we do not replace it |
 
 **Rule:** No second compile path. UI features call `POST /v1/compose/agent-loop` or `hs_compose_drc_agent`.
 
 ---
 
-## 3. Maturity map (honest)
+## 3. Maturity map (honest) — alpha.16
 
-| Tier | Name | Today (alpha.12) |
-|------|------|------------------|
+| Tier | Name | Today |
+|------|------|-------|
 | **S2** | Carrier compile (CI) | ✅ `make verify-splice` |
-| **S3** | Bench gates | ✅ Simulated compose bench-loop + **golden-real** manual capture path |
-| **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC; copper still `cosmetic_preview` by default |
-| **Agent spine** | MCP = HTTP = SDK = UI | ✅ Catalog 50, async jobs, agent-loop parity; Design Studio on same spine |
+| **S3** | Bench gates | ✅ Sim bench-loop + golden-real + **public-web DMM** provenance |
+| **S5 partial** | Greenfield compose | 🟡 Phrase/canvas → 0 DRC; copper default `cosmetic_preview` |
+| **Agent spine** | MCP = HTTP = SDK = UI | ✅ Catalog 50, async jobs, agent-loop parity |
 | **Salvage unified** | Donor → same agent loop | ✅ `donor_context` on agent-loop / MCP / HTTP |
-| **Bench + vision** | Capture assist | 🟡 Draft from photos (`vision-assist`); operator real-bench doc; golden-real non-sim |
-| **Donor vision** | Photo/evidence → salvage | ✅ Offline + **live Qwen VL** photo→`functional_salvage` in cold bar when keyed |
-| **Copper honesty** | Fab claims | ✅ Cold bar asserts preview copper ≠ `fabrication_ready` (autoroute still opt-in/heavy) |
-| **External readiness** | Zero-help dry-run | 🟡 **Cold-internal** (optiplex + FGEDHGV + keyed live vision) substitutes for strangers |
+| **Bench + vision** | Capture assist | ✅ Template + vision-assist draft + operator doc |
+| **Donor vision** | Photo → salvage | ✅ Offline evidence + **live Qwen VL** when keyed |
+| **Copper honesty** | Fab claims | ✅ Cold bar asserts preview ≠ `fabrication_ready` |
+| **Public-web bench** | Internet DMM photos | ✅ Wikimedia LCDs; `public_web_is_not_this_board` |
+| **External readiness** | Zero-help dry-run | ✅ **Cold-internal exit** (optiplex + FGEDHGV); strangers optional |
 
 ---
 
 ## 4. Phased execution
 
-### Phase 0 — Alpha stabilize (now → ~4 weeks)
-
-**Goal:** Spine boringly reliable for you + one external agent operator.
+### Phase 0 — Alpha stabilize — **EXITED** (alpha.16)
 
 | # | Deliverable | Status |
 |---|-------------|--------|
-| 0.1 | Tag `v1.1.0-alpha.5`, push `main` | ✅ (superseded by later alphas) |
-| 0.2 | `docs/PRODUCT_SCALE_PLAN.md` (this file) | ✅ |
-| 0.3 | `docs/AGENT_QUICKSTART.md` — 3 curls + 3 MCP calls | ✅ |
-| 0.4 | `docs/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` paths | ✅ |
-| 0.5 | Design Studio: AI phrase → agent-loop + package | ✅ |
-| 0.6 | `make verify-product-internal` green | ✅ |
-| 0.7 | Canvas catalog → 50 modules + pin contract tests | ✅ |
-| 0.8 | Cold-internal dry-run bar (archive + alien) | ✅ alpha.12 |
+| 0.1–0.7 | Plan, quickstart, studio, verify, catalog 50 | ✅ |
+| 0.8 | Cold-internal dry-run (archive + alien) | ✅ through alpha.16 bar |
 
-**Exit criteria:** Fresh archive → agent loop + salvage + bench + vision draft in &lt;15 min without author hand-holding. See [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md).
+**Exit met:** Fresh archive → full quickstart (incl. salvage, bench, vision, public-web DMM, keyed live VL) without author hand-holding.
 
----
+### Phase 1 — Beta workbench — **COLD EXIT** (alpha.16)
 
-### Phase 1 — Beta workbench (1–3 months)
+| Track | Status |
+|-------|--------|
+| Agent API (async jobs) | ✅ |
+| Module graph 50 + pins | ✅ |
+| Salvage on agent-loop | ✅ |
+| DRC → package without browser | ✅ (cold-internal proxy) |
+| Copper → `fab_ready` ladder | 🟡 honesty asserted; **autoroute left to maintainer** (not default) |
+| Webhook | ⬜ deferred |
 
-**Goal:** Agents are the primary customer; UI is inspection + override.
+**Exit met (cold proxy):** Agent designs → 0 DRC → package + gate card on two machines. Stranger dry-run still welcome, not required.
 
-| Track | Deliverables | Status |
-|-------|----------------|--------|
-| **Agent API** | Versioned `agent_loop` schema; async job for long compiles; webhook optional | ✅ async jobs; webhook deferred |
-| **Module graph** | 50+ modules; pin contract validation; LLM picker telemetry | ✅ 50 + pin tests |
-| **DRC agent** | Smarter fixup policy; `cosmetic_preview` → `review_required` → `fab_ready` ladder | 🟡 0 DRC path works; copper ladder still soft |
-| **Package** | `PROJECT_PACKAGE` schema version; wiring steps ↔ gate checklist | 🟡 package present; deeper gate card wiring ongoing |
-| **Salvage bridge** | `donor_context` on `hs_compose_drc_agent` from circuit-ai intake | ✅ |
+### Phase 2 — Product depth — **IN PROGRESS**
 
-**Exit criteria:** Cursor/Claude agent designs → fixes DRC → delivers zip + gate card without browser. **Cold-internal proxy:** green on optiplex archive + FGEDHGV.
+| Track | Status |
+|-------|--------|
+| Design Studio deeper ECAD UX | 🟡 agent-loop wired; pin-edit / live DRC deferred |
+| Bench loop + camera assist | ✅ compose bench-loop, vision-assist, golden-real, public-web |
+| Salvage photo → carrier | ✅ offline + live VL path when keyed |
+| Copper truth (autoroute) | 🟡 **maintainer-owned**; opt-in only — do not block product on it |
+| Integrations (KiCad MCP / JLC) | ⬜ |
 
----
-
-### Phase 2 — Product depth (3–9 months)
-
-**Goal:** Flux-class intake + bench moat — not Flux feature parity.
-
-| Track | Deliverables | Status |
-|-------|----------------|--------|
-| **Design Studio** | Pin wire editing; live DRC hints; open in KiCad one-click | 🟡 agent-loop wired; deeper ECAD UX deferred |
-| **Bench loop** | Capture template → submit → power-on; camera assist | 🟡 `hs_compose_bench_loop` + `vision-assist` draft; golden-real non-sim path |
-| **Salvage** | Photo → functional blocks → splice plan → carrier in one session | 🟡 offline salvage on agent-loop; live photo→blocks still optional |
-| **Copper truth** | Path from `cosmetic_preview` to autoroute tier when `AUTOROUTE=1` | 🟡 opt-in only |
-| **Integrations** | KiCad MCP sidecar; JLC enrich read-only on BOM | ⬜ |
-
-**Exit criteria:** Repair café case: donor photo → carrier PCB → measured gates → fab zip.
-
----
+**Exit criteria (unchanged):** Repair café case — donor photo → carrier → **on-board** measured gates → fab zip.
 
 ### Phase 3 — Scale & distribution (9–18 months)
 
-**Goal:** Self-hosted SKU + one vertical wedge — not mass SaaS.
-
-| Option | Shape |
-|--------|-------|
-| Self-hosted kit | Docker / `hs-serve` for labs and shops |
-| Agent hosting | MCP server as product; UI optional |
-| Vertical wedge | Pick one: repair refurb, edu makerspace, IoT module carriers |
-
-**Exit criteria:** 3–5 paying labs; case studies with real DRC + bench evidence.
+Unchanged: self-hosted kit, agent hosting, one vertical wedge.
 
 ---
 
@@ -126,10 +103,11 @@ Describe (phrase / canvas / donor intake)
 
 - Full schematic editor (KiCad stays truth)
 - Hosted multi-tenant SaaS
-- Production autorouting as default
+- Production autorouting as **default** (opt-in only; maintainer experiments headless)
 - JLC one-click order
 - Mech splice as day-one blocker
 - “Beat Flux” marketing
+- Claiming café evidence from public-web DMM photos
 
 ---
 
@@ -137,9 +115,9 @@ Describe (phrase / canvas / donor intake)
 
 | Phase | Metric |
 |-------|--------|
-| Alpha | Agent loop success rate; time-to-package; DRC rounds to 0 errors |
-| Beta | External agent sessions/week without support |
-| Product | % packages with gates closed before power-on |
+| Alpha | Agent loop success; time-to-package; DRC rounds to 0 |
+| Beta | Cold-internal green on 2 machines; optional stranger sessions |
+| Product | % packages with gates closed before power-on (**on-board** preferred) |
 | Commercial | Paid self-hosted installs; salvage cases completed |
 
 ---
@@ -147,13 +125,10 @@ Describe (phrase / canvas / donor intake)
 ## 7. Work allocation (internal)
 
 ```text
-Phase 0–1:  70% agent spine + DRC honesty + tests
-            20% Design Studio legibility (not ECAD parity)
-            10% docs when code changes
-Phase 2+:   shift toward salvage + bench when Phase 1 exit green
+Now:        Phase 2 depth that is not autoroute (studio UX, on-board café when hardware available)
+Autoroute:  maintainer-owned; headless only if automated
+Phase 3:    when café case + copper story are honest
 ```
-
-Competitive essays and outreach templates are **not** internal gates. See [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md).
 
 ---
 
@@ -181,15 +156,13 @@ flowchart LR
 
 ---
 
-## 9. Next actions (after alpha.16)
+## 9. Next actions (after cold exit)
 
-1. ~~Cold-internal dry-run bar (archive + alien + vision-assist).~~ ✅
-2. ~~Golden-real (non-simulated capture) in quickstart.~~ ✅
-3. ~~Donor-board-vision offline + copper honesty + optional Qwen in cold bar.~~ ✅
-4. ~~Live photo → Qwen board vision → salvage (keyed).~~ ✅ alpha.15
-5. ~~Public-web DMM photos → bench capture (Wikimedia provenance).~~ ✅ alpha.16
-6. On-board café DMM session still the only claim that requires *this* hardware in hand.
-7. Copper honesty ladder toward `fab_ready` when FreeRouting actually routes.
+1. ~~Phase 0 + Phase 1 cold-internal exit.~~ ✅ alpha.16 — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
+2. On-board café DMM when hardware is available ([`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)).
+3. Autoroute / `fab_ready` — **maintainer track**; keep default `AUTOROUTE=0`.
+4. Design Studio pin-edit / live DRC hints (Phase 2 UX).
+5. Optional: stranger dry-run when someone appears.
 
 ---
 
@@ -198,7 +171,5 @@ flowchart LR
 | Date | Change |
 |------|--------|
 | 2026-07-08 | Initial product scale plan; Phase 0 doc + studio wiring for alpha.5 |
-| 2026-07-10 | Refresh maturity to alpha.12; cold-internal readiness; bench/vision status |
-| 2026-07-10 | alpha.14 leftovers: donor vision, copper honesty, Qwen auto, operator real-bench doc |
-| 2026-07-10 | alpha.15: live photo→salvage + live vision-assist; Wikimedia Arduino PCB sample |
-| 2026-07-10 | alpha.16: public-web DMM photos → bench capture with explicit not-this-board policy |
+| 2026-07-10 | Maturity through alpha.12–16; cold-internal bar; live VL; public-web DMM |
+| 2026-07-10 | Declare Phase 0 / Phase 1 **cold exit** at alpha.16; autoroute left to maintainer |

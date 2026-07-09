@@ -1,9 +1,21 @@
 # Handoff update — what changed since last time
 
-**Date:** July 2026 (updated after alpha.10 bench-loop agent path on `main`)
+**Date:** July 2026 (updated after alpha.16 cold-internal exit on `main`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
-**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md)
+**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
 **Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
+
+---
+
+## July 2026 — Alpha.16 cold-internal exit (Phase 0 / Phase 1)
+
+| Surface | What shipped |
+|---------|----------------|
+| **Exit** | Phase 0 + Phase 1 **cold exit** declared — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) |
+| **Bar** | Public-web DMM provenance + keyed live VL; copper honesty; alien + optiplex green |
+| **Autoroute** | **Maintainer-owned** — leave alone / headless only; default `AUTOROUTE=0` |
+| **Next** | On-board café DMM when hardware available; Design Studio depth; not FreeRouting product work |
+| **Tag** | `v1.1.0-alpha.16` |
 
 ---
 

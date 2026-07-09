@@ -3,7 +3,7 @@
 **Audience:** MCP clients, HTTP callers, Cursor/Claude agents.  
 **Prereq:** Python 3.11+, KiCad CLI on PATH, repo cloned.
 
-**Full runbook:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md)
+**Full runbook:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
 
 ---
 

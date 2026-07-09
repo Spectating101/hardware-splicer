@@ -4,7 +4,7 @@
 
 **Audience:** Founder, agents, future contributors.  
 **Status:** July 2026 · Active  
-**Related:** [`ENGINE_DONE.md`](ENGINE_DONE.md) · [`RELEASE_V1.md`](RELEASE_V1.md) · [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md)
+**Related:** [`ENGINE_DONE.md`](ENGINE_DONE.md) · [`RELEASE_V1.md`](RELEASE_V1.md) · [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) · [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md)
 
 ---
 
@@ -157,6 +157,8 @@ You may call the internal product **mature enough for external** when:
 
 **Internal done** when 1–6 are true. **External proof** starts with §7 + five conversations — not required for "internal mature enough."
 
+**Cold-internal product exit (alpha.16):** Phase 0 / Phase 1 agent spine is declared done under the cold proxy — see [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md). Autoroute / default `fab_ready` is **not** an internal maturity gate.
+
 ---
 
 ## 6. Work allocation (internal phase)
@@ -184,5 +186,6 @@ Internal maturity question is not "beat Flux?" It is:
 
 | Date | Change |
 |------|--------|
+| 2026-07-10 | Link cold-internal exit (alpha.16); autoroute not a maturity gate |
 | 2026-07 | `verify-product-internal`, live smoke, dev install report |
 | 2026-07 | Initial internal maturity plan; `verify-product-v1` |

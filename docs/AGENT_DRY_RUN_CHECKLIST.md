@@ -2,7 +2,9 @@
 
 **Purpose:** Prove the public install + agent spine without author hand-holding.  
 **Primary path today:** **cold-internal** (maintainer on a second machine / fresh archive — treat yourself as a stranger).  
-**External strangers:** welcome when available; not required to raise the bar.
+**Exit status:** Phase 0 / Phase 1 cold exit declared at `v1.1.0-alpha.16` — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md).  
+**External strangers:** welcome when available; not required to raise the bar.  
+**Autoroute:** out of scope for this checklist (default off; maintainer-owned).
 
 **Time budget:** 15 minutes (offline) · 20 minutes (with Qwen curl 3)
 
