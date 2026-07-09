@@ -66,7 +66,14 @@ if [[ -f "$ROOT/.env.local" ]] && [[ "${HS_QUICKSTART_QWEN:-auto}" != "0" ]]; th
   if [[ -n "${QWEN_API_KEY:-}" ]]; then
     export HARDWARE_SPLICER_OFFLINE_COMPOSE=0
     export HARDWARE_SPLICER_QWEN_COMPOSE=1
-    echo "==> Qwen key present — optional step 6 enabled"
+    # Unlock circuit-ai vision budget gates (defaults block live VL at $0/mo)
+    export QWEN_DISABLED="${QWEN_DISABLED:-0}"
+    export QWEN_OUT_OF_QUOTA="${QWEN_OUT_OF_QUOTA:-0}"
+    export VISION_MONTHLY_USD_LIMIT="${VISION_MONTHLY_USD_LIMIT:-5}"
+    export VISION_DAILY_USD_LIMIT="${VISION_DAILY_USD_LIMIT:-2}"
+    export VISION_MAX_USD_PER_CALL="${VISION_MAX_USD_PER_CALL:-0.25}"
+    export HARDWARE_SPLICER_RUN_VISION_LIVE="${HARDWARE_SPLICER_RUN_VISION_LIVE:-1}"
+    echo "==> Qwen key present — phrase + live vision steps enabled"
   fi
 fi
 
@@ -358,6 +365,103 @@ print('qwen_resolved', al.get('resolved'), 'tokens', (r.get('qwen_usage') or {})
 assert al.get('resolved') and al.get('final_kicad_drc_errors') == 0
 assert r.get('project_package')
 "
+
+  echo "==> step 6b: live photo → donor-board-vision (Qwen VL)"
+  export HS_QUICKSTART_BASE="$BASE"
+  export HS_QUICKSTART_ROOT="$ROOT"
+  python3 - <<'PY'
+import json, os, subprocess, urllib.request
+
+root = os.environ["HS_QUICKSTART_ROOT"]
+base = os.environ["HS_QUICKSTART_BASE"]
+payload = json.loads(
+    subprocess.check_output(
+        ["python3", "scripts/live_photo_salvage_payload.py"],
+        cwd=root,
+        env={**os.environ, "PYTHONPATH": os.path.join(root, "src")},
+    )
+)
+body = json.dumps({"intake": payload}).encode()
+req = urllib.request.Request(
+    base + "/v1/donor-board-vision",
+    data=body,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=180) as resp:
+    r = json.load(resp)
+report = r.get("donor_board_vision_report") or {}
+boards = report.get("boards") or []
+row = boards[0] if boards else {}
+fs = row.get("functional_salvage") or {}
+print(
+    "live_photo_mode",
+    row.get("mode"),
+    "applied",
+    report.get("applied_board_count"),
+    "blocks",
+    len(fs.get("reusable_blocks") or []),
+)
+assert int(report.get("applied_board_count") or 0) >= 1
+assert row.get("mode") == "live"
+assert row.get("ok") is True
+assert len(fs.get("reusable_blocks") or []) >= 1
+PY
+
+  echo "==> step 6c: live vision-assist on open gates (gates stay open)"
+  LIVE_PHOTO="$ROOT/tests/data/golden/rc_toy_motor_board.jpg"
+  LIVE_COMPOSE=$(PYTHONPATH=src python3 scripts/salvage_agent_loop_payload.py | python3 -c "
+import json,sys
+p=json.load(sys.stdin)
+p['project_name']='quickstart_live_vision_assist'
+p['finalize_package']=True
+print(json.dumps(p))
+")
+  LIVE_BUILD=$(curl -s -X POST "$BASE/v1/compose/agent-loop" \
+    -H 'Content-Type: application/json' \
+    -d "$LIVE_COMPOSE" | python3 -c "
+import json,sys
+r=json.load(sys.stdin)
+assert (r.get('agent_loop') or {}).get('final_kicad_drc_errors')==0
+print(r['out_dir'])
+")
+  export HS_QUICKSTART_VISION_BUILD="$LIVE_BUILD"
+  export HS_QUICKSTART_VISION_PHOTO="$LIVE_PHOTO"
+  export HS_QUICKSTART_BASE="$BASE"
+  python3 - <<'PY'
+import json, os, urllib.request
+
+body = json.dumps(
+    {
+        "build_dir": os.environ["HS_QUICKSTART_VISION_BUILD"],
+        "attachments": [{"kind": "image", "path": os.environ["HS_QUICKSTART_VISION_PHOTO"]}],
+        "operator_id": "quickstart_live_vision",
+        "live": True,
+    }
+).encode()
+req = urllib.request.Request(
+    os.environ["HS_QUICKSTART_BASE"] + "/v1/splice-bench/vision-assist",
+    data=body,
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+with urllib.request.urlopen(req, timeout=180) as resp:
+    r = json.load(resp)
+print(
+    "live_vision_assist_ok",
+    r.get("ok"),
+    "live",
+    (r.get("vision_report") or {}).get("live"),
+    "gates_unchanged",
+    (r.get("policy") or {}).get("gates_unchanged"),
+)
+assert r.get("ok") is True
+assert (r.get("vision_report") or {}).get("live") is True
+assert (r.get("policy") or {}).get("gates_unchanged") is True
+assert (r.get("bench_session") or {}).get("power_on_authorized") is not True
+analyses = (r.get("vision_report") or {}).get("image_analyses") or []
+assert analyses and analyses[0].get("ok") is True
+PY
 elif [[ "${HS_QUICKSTART_QWEN:-0}" == "1" ]]; then
   echo "==> step 6: FAIL — HS_QUICKSTART_QWEN=1 but QWEN_API_KEY missing"
   exit 1

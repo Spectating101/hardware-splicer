@@ -10,3 +10,14 @@
 - **Use in repo:** Golden S3 regression — real board photo for vision dry-run / provenance URI in manual bench capture
 
 Modifications: none (original JPEG retained).
+
+## `arduino_leonardo_pcb.jpg`
+
+- **Title:** Arduino Leonardo PCB
+- **Author:** Becky Stern (via Flickr)
+- **Source:** https://commons.wikimedia.org/wiki/File:Arduino_Leonardo_PCB.jpg
+- **License:** [Creative Commons Attribution-ShareAlike 2.0 Generic](https://creativecommons.org/licenses/by-sa/2.0/)
+- **Downloaded:** 2026-07-10 via Wikimedia `Special:FilePath` (1280px) for live board-vision cold-run
+- **Use in repo:** Second public PCB sample for live Qwen VL smoke (not a splice golden)
+
+Modifications: resized thumbnail from Commons (1280px wide).

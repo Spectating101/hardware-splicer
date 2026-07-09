@@ -135,11 +135,12 @@ curl -s http://127.0.0.1:8787/v1/jobs/$JOB_ID/result | jq '{
 Repeat on alien WSL:
 
 ```bash
-bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.14
+bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.15
 ```
 
 **Cold-internal dry-run (no strangers required):** fresh archive on a second machine, follow only this doc + [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md), then fill an install report.  
-**Operator real-bench:** [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)
+**Operator real-bench:** [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)  
+**Live vision (keyed):** steps 6b/6c in `scripts/agent_quickstart_verify.sh` when `.env.local` present.
 
 See [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 

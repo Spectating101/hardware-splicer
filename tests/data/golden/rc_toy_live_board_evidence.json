@@ -5,66 +5,59 @@
     {
       "id": "playmobil_logo",
       "label": "Playmobil brand logo",
-      "kind": "text",
+      "kind": "branding",
       "confidence": 0.95,
       "bbox": [
-        293,
+        294,
         470,
         736,
-        552
+        554
       ],
-      "missing_evidence": "",
-      "warnings": ""
+      "missing_evidence": [],
+      "warnings": []
     }
   ],
   "regions": [
     {
-      "id": "control_housing",
-      "label": "Controller housing with joysticks and steering wheel",
-      "kind": "plastic_shell",
-      "confidence": 0.98,
+      "id": "controller_housing",
+      "label": "Plastic controller housing",
+      "kind": "enclosure",
+      "confidence": 0.99,
       "bbox": [
-        68,
-        48,
+        65,
+        50,
         948,
         970
       ],
-      "missing_evidence": "",
-      "warnings": ""
+      "missing_evidence": [],
+      "warnings": []
     }
   ],
   "damage": [],
-  "connectors": [
-    {
-      "id": "power_cable_connector",
-      "label": "Blue power cable connector",
-      "kind": "cable",
-      "confidence": 0.9,
-      "bbox": [
-        448,
-        0,
-        560,
-        52
-      ],
-      "missing_evidence": "Internal PCB connection point not visible",
-      "warnings": ""
-    }
-  ],
+  "connectors": [],
   "test_points": [],
   "salvage_candidates": [
     {
       "id": "motor_driver_section",
-      "label": "Motor driver IC and associated circuitry",
-      "kind": "integrated_circuit",
-      "confidence": 0.7,
+      "label": "Motor driver section (internal PCB)",
+      "kind": "salvage_candidate",
+      "confidence": 0.85,
       "bbox": [
         0,
         0,
         1,
         1
       ],
-      "missing_evidence": "Under plastic casing; no visible markings or pins. Requires disassembly to confirm location and part number.",
-      "warnings": "No visible voltage or current ratings; assume low-power DC motor control. Required tests: continuity between motor terminals and driver outputs, supply voltage at driver VCC, logic input response to joystick signals."
+      "missing_evidence": [
+        "Internal PCB visible",
+        "Component labels",
+        "Pinout markings"
+      ],
+      "warnings": [
+        "Requires disassembly to access",
+        "No visible voltage/current ratings",
+        "Motor driver IC not identifiable without opening"
+      ]
     }
   ]
 }
