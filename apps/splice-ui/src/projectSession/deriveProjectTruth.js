@@ -12,6 +12,7 @@
  *   2. package.gates snapshot
  *   3. not started
  * Evidence: simulated and physical stay separate.
+ * Physical requires affirmative provenance — simulated===false alone is NOT physical.
  * Copper: copper_tier honesty boundary.
  */
 
@@ -30,6 +31,25 @@ function numOrNull(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+/** Affirmative physical provenance only — never infer from simulated===false. */
+export function hasAffirmativePhysicalEvidence(bench, gates = {}) {
+  if (!bench && !gates) return false;
+  const kind = pick(bench?.evidence_kind, gates?.evidence_kind);
+  if (kind === "physical") return true;
+  if (bench?.physical_capture === true || gates?.physical_capture === true) return true;
+  if (bench?.capture_provenance === "physical" || gates?.capture_provenance === "physical") {
+    return true;
+  }
+  if (bench?.instrument_capture === true || gates?.instrument_capture === true) return true;
+  if (
+    (bench?.validated_physical_capture === true || gates?.validated_physical_capture === true) &&
+    kind !== "simulated"
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function deriveProjectTruth(session = {}) {
   const pkg = session.projectPackage || {};
   const gates = pkg.gates || {};
@@ -46,7 +66,6 @@ export function deriveProjectTruth(session = {}) {
   if (!sessionHasBuild(session)) {
     designState = "not_compiled";
   } else if (errors == null && gates.compile_ok !== true && gates.compile_ok !== false) {
-    // Explicit: missing compile_ok must not become success
     designState = "unknown";
   } else if (errors != null && errors > 0) {
     designState = "drc_errors";
@@ -92,16 +111,13 @@ export function deriveProjectTruth(session = {}) {
     bench?.simulated === true ||
       bench?.evidence_kind === "simulated" ||
       gates.simulated === true ||
+      gates.evidence_kind === "simulated" ||
       String(bench?.source || "").includes("simulat"),
   );
-  const physical = Boolean(
-    bench?.evidence_kind === "physical" ||
-      bench?.simulated === false ||
-      gates.simulated === false,
-  );
+  const physical = hasAffirmativePhysicalEvidence(bench, gates);
 
   let benchState = "not_started";
-  if (!bench && !sessionHasBuild(session)) {
+  if (!bench && openGateCount == null && !sessionHasBuild(session)) {
     benchState = "not_started";
   } else if (powerOnAuthorized && physical && !simulated) {
     benchState = "physical_authorized";
@@ -110,7 +126,14 @@ export function deriveProjectTruth(session = {}) {
   } else if ((openGateCount ?? 0) > 0 || criticalOpenCount > 0) {
     benchState = "gates_open";
   } else if (bench || gates.open_gate_count != null) {
-    benchState = simulated ? "simulated_pass" : "gates_open";
+    // Zero open gates without simulated/physical authorization evidence
+    if (simulated && !powerOnAuthorized) {
+      benchState = "authorization_pending";
+    } else if (simulated) {
+      benchState = "simulated_pass";
+    } else {
+      benchState = "authorization_pending";
+    }
   }
 
   const packageState = sessionHasPackage(session) ? "generated" : "missing";
@@ -134,6 +157,10 @@ export function deriveProjectTruth(session = {}) {
   } else if (benchState === "gates_open" || benchState === "not_started") {
     overallState = "power_on_blocked";
     headline = "Close bench gates before power-on";
+    nextAction = { label: "Review Bench", stage: STAGES.bench };
+  } else if (benchState === "authorization_pending") {
+    overallState = "power_on_blocked";
+    headline = "Bench evidence needs review before power-on";
     nextAction = { label: "Review Bench", stage: STAGES.bench };
   } else if (benchState === "simulated_pass") {
     overallState = "review_required";
@@ -185,11 +212,13 @@ export function deriveProjectTruth(session = {}) {
           ? "No bench yet"
           : benchState === "gates_open"
             ? `${openGateCount ?? 0} gate(s) open`
-            : benchState === "simulated_pass"
-              ? "Simulated evidence"
-              : benchState === "physical_authorized"
-                ? "Power-on authorized"
-                : "Bench pending",
+            : benchState === "authorization_pending"
+              ? "Measurements recorded · authorization pending"
+              : benchState === "simulated_pass"
+                ? "Simulated evidence"
+                : benchState === "physical_authorized"
+                  ? "Power-on authorized"
+                  : "Bench pending",
     },
     package: {
       state: packageState,

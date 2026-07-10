@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import zipfile
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -38,6 +39,18 @@ def resolve_build_dir(build_dir: str | Path) -> Path:
         raise ValueError(f"build_dir not found: {root}")
     assert_build_dir_allowed(root)
     return root
+
+
+def build_package_archive(build_dir: str | Path) -> Path:
+    """Zip an existing build directory for Package-stage handoff (no recompile)."""
+    root = resolve_build_dir(build_dir)
+    archive = root / "hardware_splicer_project_package.zip"
+    with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for path in sorted(p for p in root.rglob("*") if p.is_file()):
+            if path.resolve() == archive.resolve():
+                continue
+            zf.write(path, path.relative_to(root))
+    return archive
 
 
 def _read_json_optional(path: Path) -> Dict[str, Any]:

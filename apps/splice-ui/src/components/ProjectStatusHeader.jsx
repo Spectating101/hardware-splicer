@@ -1,18 +1,18 @@
 import { deriveProjectTruth } from "../projectSession/deriveProjectTruth.js";
+import { derivePackageHandoff } from "../projectSession/packageHandoff.js";
 import { STAGE_LABELS } from "../projectSession/projectSession.js";
-import { jobBundleUrl } from "../api.js";
 
 /**
  * Compact stable project identity strip — chips from deriveProjectTruth only.
  */
-export default function ProjectStatusHeader({ session, activeJobId, onShare }) {
+export default function ProjectStatusHeader({ session, onShare }) {
   const truth = deriveProjectTruth(session);
+  const handoff = derivePackageHandoff(session);
   const pkg = session.projectPackage;
   const name = session.projectName || pkg?.info?.project_name || "Untitled project";
   const goal = session.goal || pkg?.info?.goal || "";
   const mode = session.mode === "salvage" ? "Salvage" : "Greenfield";
   const stageLabel = STAGE_LABELS[session.currentStage] || session.currentStage;
-  const bundleUrl = activeJobId ? jobBundleUrl(activeJobId) : null;
 
   return (
     <header className="project-status-header" data-testid="project-status-header">
@@ -63,13 +63,23 @@ export default function ProjectStatusHeader({ session, activeJobId, onShare }) {
       </div>
 
       <div className="project-status-header__actions">
-        {activeJobId && bundleUrl ? (
+        {handoff.available && handoff.url ? (
           <>
-            <button type="button" className="ghost button-link" data-testid="share-bundle" onClick={onShare}>
-              Share bundle
+            <button
+              type="button"
+              className="ghost button-link"
+              data-testid="share-bundle"
+              onClick={() => onShare?.(handoff)}
+            >
+              Share package
             </button>
-            <a className="secondary button-link" href={bundleUrl} download data-testid="download-bundle">
-              Download zip
+            <a
+              className="secondary button-link"
+              href={handoff.url}
+              download
+              data-testid="download-bundle"
+            >
+              Download package
             </a>
           </>
         ) : null}
@@ -86,6 +96,8 @@ function chipTone(designState) {
 
 function benchTone(state) {
   if (state === "physical_authorized") return "ok";
-  if (state === "simulated_pass" || state === "gates_open") return "warn";
+  if (state === "simulated_pass" || state === "gates_open" || state === "authorization_pending") {
+    return "warn";
+  }
   return "neutral";
 }

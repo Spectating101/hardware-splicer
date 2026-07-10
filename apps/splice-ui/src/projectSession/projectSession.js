@@ -1,5 +1,7 @@
 /** Shared project-session model for the unified workbench UI (in-memory only). */
 
+import { packageHandoffSnapshot } from "./packageHandoff.js";
+
 export const STAGES = Object.freeze({
   intake: "intake",
   design: "design",
@@ -56,6 +58,7 @@ export function createEmptySession(overrides = {}) {
     intakeComplete: Boolean(o.intakeComplete),
     designEditable: o.designEditable !== undefined ? Boolean(o.designEditable) : true,
     sessionOrigin: o.sessionOrigin || "new", // new | current_job | recent_build
+    packageHandoff: o.packageHandoff || null,
   };
 }
 
@@ -242,6 +245,11 @@ export function projectSessionReducer(state, action) {
         dirty: false,
         intakeComplete: true,
         designEditable: true,
+        packageHandoff: packageHandoffSnapshot({
+          activeJobId: jobId ?? null,
+          buildDir: dir,
+          projectPackage: projectPackage || null,
+        }),
       };
     }
 
@@ -249,6 +257,7 @@ export function projectSessionReducer(state, action) {
       const result = action.result || {};
       const pkg = result.project_package || null;
       const id = resultIdentity(result, pkg);
+      const jobId = action.jobId ?? state.activeJobId;
       return {
         ...state,
         projectId: state.projectId || action.jobId || newProjectId(),
@@ -257,7 +266,7 @@ export function projectSessionReducer(state, action) {
         mode: id.mode,
         intake: state.intake,
         buildDir: id.dir,
-        activeJobId: action.jobId ?? state.activeJobId,
+        activeJobId: jobId,
         composeResult: result.compose_result || result.compose || null,
         designQuality: result.design_quality || null,
         agentLoop: result.agent_loop || null,
@@ -270,6 +279,11 @@ export function projectSessionReducer(state, action) {
         designEditable: state.designEditable !== false && hasReconstructableGraph(state.graph),
         sessionOrigin: "current_job",
         graph: state.graph,
+        packageHandoff: packageHandoffSnapshot({
+          activeJobId: jobId,
+          buildDir: id.dir,
+          projectPackage: pkg,
+        }),
       };
     }
 
@@ -279,13 +293,14 @@ export function projectSessionReducer(state, action) {
       const id = resultIdentity(result, pkg);
       const reconstructable = action.graph || result.studio_graph || null;
       const editable = hasReconstructableGraph(reconstructable);
+      const jobId = action.jobId || null;
       return createEmptySession({
         projectId: action.jobId || newProjectId(),
         projectName: id.name,
         goal: id.goal,
         mode: id.mode,
         buildDir: id.dir,
-        activeJobId: action.jobId || null,
+        activeJobId: jobId,
         composeResult: result.compose_result || result.compose || null,
         designQuality: result.design_quality || null,
         agentLoop: result.agent_loop || null,
@@ -297,6 +312,11 @@ export function projectSessionReducer(state, action) {
         intakeComplete: true,
         designEditable: editable,
         sessionOrigin: "recent_build",
+        packageHandoff: packageHandoffSnapshot({
+          activeJobId: jobId,
+          buildDir: id.dir,
+          projectPackage: pkg,
+        }),
         graph: editable
           ? {
               nodes: reconstructable.nodes || [],
@@ -321,7 +341,15 @@ export function projectSessionReducer(state, action) {
       };
 
     case ACTIONS.SET_ACTIVE_JOB:
-      return { ...state, activeJobId: action.jobId };
+      return {
+        ...state,
+        activeJobId: action.jobId,
+        packageHandoff: packageHandoffSnapshot({
+          activeJobId: action.jobId,
+          buildDir: state.buildDir,
+          projectPackage: state.projectPackage,
+        }),
+      };
 
     case ACTIONS.PATCH_PACKAGE_GATES: {
       const session = action.benchSession;

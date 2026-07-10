@@ -74,6 +74,7 @@ vi.mock("../components/ProjectWizard.jsx", () => ({
 
 vi.mock("../api.js", () => ({
   jobBundleUrl: (id) => `/bundle/${id}`,
+  buildPackageArchiveUrl: (dir) => `/archive?build_dir=${encodeURIComponent(dir)}`,
 }));
 
 function Harness({ initial }) {
@@ -167,18 +168,47 @@ describe("ProjectWorkspace continuity + polish", () => {
     await user.click(screen.getByTestId("studio-open-project"));
 
     expect(await screen.findByTestId("stage-verify")).toBeInTheDocument();
-    expect(screen.queryByTestId("download-bundle")).not.toBeInTheDocument();
+    expect(screen.getByTestId("download-bundle")).toBeInTheDocument();
+    expect(screen.getByTestId("download-bundle").getAttribute("href")).toContain("/archive?");
     expect(screen.getByTestId("copper-honesty")).toHaveTextContent(/not.*fabrication-ready/i);
     expect(screen.getByTestId("chip-stage")).toHaveTextContent(/Verify/i);
     expect(screen.getByTestId("project-readiness-panel")).toBeInTheDocument();
     expect(screen.getByTestId("chip-drc")).toHaveTextContent(/DRC clean/i);
     expect(screen.getByTestId("ready-design")).toHaveTextContent(/DRC clean/i);
 
+    await user.click(screen.getByTestId("stage-tab-package"));
+    expect(screen.getByTestId("package-download")).toBeInTheDocument();
+    expect(screen.getByTestId("package-download").getAttribute("href")).toContain("/archive?");
+
     await user.click(screen.getByTestId("stage-tab-design"));
     expect(screen.getByTestId("stage-design")).toBeInTheDocument();
     expect(screen.getByTestId("studio-phrase")).toHaveTextContent("carrier board");
     expect(screen.getByTestId("studio-node-count")).toHaveTextContent("2");
     expect(screen.getByTestId("project-status-name")).toHaveTextContent("carrier board");
+  });
+
+  it("async job packages keep job_bundle download", async () => {
+    const user = userEvent.setup();
+    const state = projectSessionReducer(createEmptySession(), {
+      type: ACTIONS.LOAD_RECENT_BUILD,
+      jobId: "job_async",
+      result: {
+        build_dir: "/tmp/async",
+        project_name: "Async build",
+        goal: "async goal",
+        project_package: {
+          build_dir: "/tmp/async",
+          info: { project_name: "Async build" },
+          gates: { compile_ok: true },
+        },
+        design_quality: { kicad_drc_errors: 0 },
+      },
+    });
+
+    render(<Harness initial={state} />);
+    expect(screen.getByTestId("download-bundle").getAttribute("href")).toBe("/bundle/job_async");
+    await user.click(screen.getByTestId("stage-tab-package"));
+    expect(screen.getByTestId("package-download").getAttribute("href")).toBe("/bundle/job_async");
   });
 
   it("loaded build without Studio graph shows non-editable Design explanation", async () => {

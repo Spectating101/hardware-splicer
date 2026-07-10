@@ -11,7 +11,6 @@ import {
   InstructionsPanel,
   WiringPanel,
 } from "../components/ProjectPanels.jsx";
-import { jobBundleUrl } from "../api.js";
 import {
   STAGES,
   sessionHasPackage,
@@ -23,6 +22,7 @@ import {
   stageIsAvailable,
 } from "./stageAvailability.js";
 import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { derivePackageHandoff } from "./packageHandoff.js";
 
 /**
  * Project workspace shell — stages wrap existing panels.
@@ -57,7 +57,7 @@ export default function ProjectWorkspace({
   const stageTabs = buildStageTabs(session);
   const next = nextStageAction(session);
   const truth = deriveProjectTruth(session);
-  const bundleUrl = activeJobId ? jobBundleUrl(activeJobId) : null;
+  const handoff = derivePackageHandoff(session);
 
   const openGateCount = truth.bench.openGateCount;
 
@@ -78,10 +78,11 @@ export default function ProjectWorkspace({
       <ProjectStatusHeader
         session={session}
         activeJobId={activeJobId}
-        onShare={() => {
-          if (!bundleUrl) return;
-          navigator.clipboard?.writeText(bundleUrl);
-          onToast?.("Share link copied — download bundle for reviewers");
+        onShare={(link) => {
+          const url = link?.url || handoff.url;
+          if (!url) return;
+          navigator.clipboard?.writeText(url);
+          onToast?.("Share link copied — download package for reviewers");
         }}
       />
 
@@ -91,13 +92,19 @@ export default function ProjectWorkspace({
         <div className="stage-next-bar" data-testid="stage-next-bar">
           <p className="muted small">Next</p>
           {next.isDownload ? (
-            activeJobId && bundleUrl ? (
-              <a className="primary button-link" href={bundleUrl} download data-testid="stage-next-action">
+            next.handoff?.available && next.handoff.url ? (
+              <a
+                className="primary button-link"
+                href={next.handoff.url}
+                download
+                data-testid="stage-next-action"
+              >
                 {next.label}
               </a>
             ) : (
               <span className="muted small" data-testid="stage-next-action-disabled">
-                Bundle download appears after an async job finishes
+                {next.handoff?.explanation ||
+                  "Package download is unavailable for this session"}
               </span>
             )
           ) : (
@@ -193,16 +200,33 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.bench && (
           <div className="panel-stack" data-testid="stage-bench">
-            {(truth.bench.simulated || truth.bench.state !== "not_started") && (
+            {(truth.bench.simulated ||
+              truth.bench.state === "authorization_pending" ||
+              truth.bench.state === "gates_open" ||
+              truth.bench.state === "physical_authorized") && (
               <section
-                className={`card honesty-card honesty-card--${truth.bench.simulated ? "warn" : "neutral"}`}
+                className={`card honesty-card honesty-card--${
+                  truth.bench.simulated
+                    ? "warn"
+                    : truth.bench.state === "authorization_pending"
+                      ? "warn"
+                      : "neutral"
+                }`}
                 data-testid="bench-evidence-banner"
               >
-                <h3>{truth.bench.simulated ? "Simulated evidence" : "Bench evidence"}</h3>
+                <h3>
+                  {truth.bench.simulated
+                    ? "Simulated evidence"
+                    : truth.bench.state === "authorization_pending"
+                      ? "Authorization pending"
+                      : "Bench evidence"}
+                </h3>
                 <p className="small muted">
                   {truth.bench.simulated
                     ? "Simulated evidence is not physical café measurement."
-                    : "Confirm whether measurements are simulated or from a physical instrument before treating power-on as field proof."}
+                    : truth.bench.state === "authorization_pending"
+                      ? "Measurements may be recorded, but power-on is not authorized without explicit simulated or physical provenance."
+                      : "Confirm whether measurements are simulated or from a physical instrument before treating power-on as field proof."}
                 </p>
               </section>
             )}
@@ -236,6 +260,26 @@ export default function ProjectWorkspace({
             )}
             {pkg && (
               <>
+                <section className="card" data-testid="package-handoff">
+                  <h3>Project package handoff</h3>
+                  {handoff.available && handoff.url ? (
+                    <>
+                      <p className="muted small">{handoff.explanation}</p>
+                      <a
+                        className="primary button-link"
+                        href={handoff.url}
+                        download
+                        data-testid="package-download"
+                      >
+                        Download project package
+                      </a>
+                    </>
+                  ) : (
+                    <p className="muted small" data-testid="package-handoff-unavailable">
+                      {handoff.explanation}
+                    </p>
+                  )}
+                </section>
                 <BomPanel pkg={pkg} />
                 <WiringPanel pkg={pkg} />
                 <InstructionsPanel pkg={pkg} />

@@ -52,6 +52,7 @@ def test_build_files_api(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (comp / "KICAD_DRC.json").write_text(json.dumps({"pass": True, "errors": 0, "warnings": 3}), encoding="utf-8")
+    (tmp_path / "PROJECT_PACKAGE.json").write_text(json.dumps({"schema": "PROJECT_PACKAGE.v1"}), encoding="utf-8")
 
     client = TestClient(create_app())
     listed = client.post("/v1/build-files/list", json={"build_dir": str(tmp_path)}).json()
@@ -69,6 +70,15 @@ def test_build_files_api(tmp_path: Path) -> None:
     assert quality["ok"] is True
     assert quality["kicad_drc_errors"] == 0
     assert quality["copper_tier"] == "cosmetic_preview"
+
+    archive = client.get("/v1/build-files/package-archive", params={"build_dir": str(tmp_path)})
+    assert archive.status_code == 200
+    assert archive.headers["content-type"].startswith("application/zip")
+    assert archive.content.startswith(b"PK")
+
+    archive_post = client.post("/v1/build-files/package-archive", json={"build_dir": str(tmp_path)})
+    assert archive_post.status_code == 200
+    assert archive_post.content.startswith(b"PK")
 
 
 def test_netlist_fixture_example() -> None:

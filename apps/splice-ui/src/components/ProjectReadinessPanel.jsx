@@ -65,6 +65,12 @@ function toneForCopper(state) {
 
 function toneForBench(state) {
   if (state === "physical_authorized") return "ok";
-  if (state === "simulated_pass" || state === "gates_open") return "warn";
+  if (
+    state === "simulated_pass" ||
+    state === "gates_open" ||
+    state === "authorization_pending"
+  ) {
+    return "warn";
+  }
   return "neutral";
 }

@@ -95,6 +95,13 @@ export function jobBundleUrl(jobId) {
   return `${base}/v1/jobs/${encodeURIComponent(jobId)}/bundle`;
 }
 
+/** GET URL for zipping an already-generated build/package directory (no recompile). */
+export function buildPackageArchiveUrl(buildDir) {
+  const base = API_BASE || "";
+  const params = new URLSearchParams({ build_dir: String(buildDir || "") });
+  return `${base}/v1/build-files/package-archive?${params.toString()}`;
+}
+
 export async function benchStatus(buildDir) {
   const res = await fetch(`${API_BASE}/v1/splice-bench/status`, {
     method: "POST",

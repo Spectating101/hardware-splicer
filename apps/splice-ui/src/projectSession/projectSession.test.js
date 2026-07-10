@@ -90,7 +90,7 @@ describe("projectSessionReducer", () => {
     expect(state.graph.phrase).toBe("carrier board");
   });
 
-  it("APPLY_STUDIO_COMPILE clears a stale previous-job bundle link", () => {
+  it("APPLY_STUDIO_COMPILE clears a stale previous-job bundle link and sets build_package handoff", () => {
     let state = createEmptySession({
       projectId: "proj_a",
       activeJobId: "job_stale",
@@ -111,6 +111,8 @@ describe("projectSessionReducer", () => {
     });
     expect(state.activeJobId).toBeNull();
     expect(sessionHasPackage(state)).toBe(true);
+    expect(state.packageHandoff.kind).toBe("build_package");
+    expect(state.packageHandoff.available).toBe(true);
   });
 
   it("LOAD_RECENT_BUILD without Studio graph is not editable Design", () => {

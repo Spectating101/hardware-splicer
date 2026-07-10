@@ -24,6 +24,7 @@ vi.mock("./api.js", () => ({
   donorBoardVision: vi.fn(),
   visionEnrichIntake: vi.fn(),
   jobBundleUrl: (id) => `/v1/jobs/${id}/bundle.zip`,
+  buildPackageArchiveUrl: (dir) => `/v1/build-files/package-archive?build_dir=${encodeURIComponent(dir)}`,
   submitComposeJob: vi.fn(),
   submitSpliceJob: vi.fn(),
   fetchJob: vi.fn(),

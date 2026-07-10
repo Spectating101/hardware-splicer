@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from .compose_dispatch import compose_dispatch
 from .build_files import (
+    build_package_archive,
     export_circuit_json,
     find_primary_pcb,
     list_build_artifacts,
@@ -741,6 +742,31 @@ def create_app() -> FastAPI:
                 raise ValueError(f"download type not allowed: {target.suffix}")
             assert_file_size(target)
             return FileResponse(target, filename=target.name)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.get("/v1/build-files/package-archive")
+    def build_files_package_archive_get(build_dir: str) -> FileResponse:
+        """Download a zip of an already-generated build/package directory (no recompile)."""
+        try:
+            archive = build_package_archive(build_dir)
+            return FileResponse(
+                archive,
+                media_type="application/zip",
+                filename=f"{Path(build_dir).name}-project-package.zip",
+            )
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/package-archive")
+    def build_files_package_archive_post(request: BuildFilesListRequest) -> FileResponse:
+        try:
+            archive = build_package_archive(request.build_dir)
+            return FileResponse(
+                archive,
+                media_type="application/zip",
+                filename=f"{Path(request.build_dir).name}-project-package.zip",
+            )
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 

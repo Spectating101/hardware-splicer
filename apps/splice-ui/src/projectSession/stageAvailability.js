@@ -2,6 +2,7 @@
 
 import { STAGES, STAGE_ORDER, sessionHasBuild, sessionHasPackage } from "./projectSession.js";
 import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { derivePackageHandoff } from "./packageHandoff.js";
 
 export function intakeReady(session) {
   return Boolean(session?.projectId);
@@ -11,7 +12,6 @@ export function designReady(session) {
   if (!session?.projectId) return false;
   if (!session.intakeComplete) return false;
   // Non-editable recent builds still open Design to show a bounded explanation
-  // (not a fake blank canvas). Editable Studio requires designEditable !== false.
   return true;
 }
 
@@ -126,12 +126,14 @@ export function nextStageAction(session) {
     };
   }
   if (stage === STAGES.package) {
+    const handoff = derivePackageHandoff(session);
     return {
-      label: "Download or share bundle",
+      label: handoff.available ? "Download project package" : "Package handoff unavailable",
       stage: null,
-      enabled: Boolean(session?.activeJobId),
+      enabled: handoff.available,
       primary: true,
       isDownload: true,
+      handoff,
     };
   }
   return {
@@ -142,51 +144,4 @@ export function nextStageAction(session) {
   };
 }
 
-/** @deprecated Prefer deriveProjectTruth(session).copper — kept for thin honesty helpers/tests */
-export function copperHonestyLabel(tier) {
-  if (!tier) return null;
-  const raw = String(tier);
-  if (raw.includes("cosmetic") || raw.includes("preview")) {
-    return {
-      tone: "warn",
-      title: "Copper preview only",
-      detail: "KiCad DRC may be clean, but routing is not fabrication-ready.",
-    };
-  }
-  if (raw.includes("autorout") || raw.includes("fab")) {
-    return {
-      tone: "ok",
-      title: "Copper review",
-      detail: String(tier).replace(/_/g, " "),
-    };
-  }
-  return {
-    tone: "neutral",
-    title: "Copper status",
-    detail: String(tier).replace(/_/g, " "),
-  };
-}
-
-/** @deprecated Prefer deriveProjectTruth(session).bench */
-export function evidenceLabel(benchSession, pkg) {
-  const simulated =
-    benchSession?.simulated === true ||
-    benchSession?.evidence_kind === "simulated" ||
-    pkg?.gates?.simulated === true ||
-    String(benchSession?.source || "").includes("simulat");
-  if (simulated) {
-    return { tone: "warn", label: "Simulated evidence", detail: "Not physical café measurement" };
-  }
-  if (benchSession?.power_on_authorized || (benchSession?.open_gate_count === 0 && benchSession)) {
-    const physical =
-      benchSession?.evidence_kind === "physical" ||
-      benchSession?.simulated === false ||
-      pkg?.gates?.simulated === false;
-    if (physical) {
-      return { tone: "ok", label: "Physical evidence", detail: "Operator/capture path" };
-    }
-  }
-  return null;
-}
-
-export { deriveProjectTruth };
+export { deriveProjectTruth, derivePackageHandoff };
