@@ -15,9 +15,9 @@ import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
-import ProjectWizard from "./components/ProjectWizard.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
+import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
 import {
   ACTIONS,
@@ -25,19 +25,8 @@ import {
   createEmptySession,
   projectSessionReducer,
   sessionHasBuild,
+  sessionIsResumable,
 } from "./projectSession/projectSession.js";
-
-const VIEWS = {
-  home: "home",
-  wizard: "wizard",
-  workspace: "workspace",
-  advanced: "advanced",
-  example: "example",
-  lab: "lab",
-  preview: "preview",
-};
-
-const ADVANCED_VIEWS = new Set([VIEWS.advanced, VIEWS.example, VIEWS.lab, VIEWS.preview]);
 
 function Toast({ message, onDismiss }) {
   useEffect(() => {
@@ -70,7 +59,7 @@ function formatJobStatus(status) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, version }) {
+function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
@@ -84,17 +73,31 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
           <strong>Flux-class first mile. Auditable last mile.</strong>
           <p className="muted small">
             One project workspace: Intake → Design → Verify → Bench → Package. Same compile truth as{" "}
-            <code>hs_compose_drc_agent</code>.
+            <code>hs_compose_drc_agent</code>. Session continuity is in-memory while this page is open.
           </p>
         </div>
         <PipelineVisual />
         <div className="hero-actions">
-          <button type="button" className="primary large" onClick={onStart} disabled={!apiOk}>
-            Start a project
-          </button>
-          <button type="button" className="secondary large" onClick={onOpenStudio} disabled={!apiOk}>
-            Open Design stage
-          </button>
+          {canResume ? (
+            <>
+              <button type="button" className="primary large" onClick={onResume} disabled={!apiOk}>
+                Resume project
+              </button>
+              <button type="button" className="secondary large" onClick={onStart} disabled={!apiOk}>
+                Start new project
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="primary large"
+              onClick={onStart}
+              disabled={!apiOk}
+              data-testid="home-start-project"
+            >
+              Start a project
+            </button>
+          )}
           <button type="button" className="secondary large" onClick={onQuickDemo} disabled={!apiOk}>
             Quick demo (1-click)
           </button>
@@ -165,19 +168,19 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
 
 function AdvancedHub({ onExamples, onLab }) {
   return (
-    <section className="card advanced-hub">
+    <section className="card advanced-hub" data-testid="advanced-hub">
       <p className="eyebrow">Advanced</p>
       <h1>Developer tools</h1>
       <p className="muted">
         Adapters and demos that are not part of the normal project journey. Prefer{" "}
-        <strong>New project</strong> or the Design stage for day-to-day work.
+        <strong>Start a project</strong> for day-to-day work.
       </p>
       <div className="advanced-grid">
-        <button type="button" className="fixture-card" onClick={onExamples}>
+        <button type="button" className="fixture-card" onClick={onExamples} data-testid="advanced-examples">
           <strong>Examples</strong>
           <span>Proven manifest intakes — same engine path as production.</span>
         </button>
-        <button type="button" className="fixture-card" onClick={onLab}>
+        <button type="button" className="fixture-card" onClick={onLab} data-testid="advanced-lab">
           <strong>Interface Lab</strong>
           <span>Integration adapters, netlist fixtures, and design-preview probes.</span>
         </button>
@@ -197,7 +200,7 @@ export default function App() {
   const [loadError, setLoadError] = useState(null);
   const [toast, setToast] = useState("");
   const [previewContext, setPreviewContext] = useState(null);
-  const [session, dispatch] = useReducer(projectSessionReducer, null, createEmptySession);
+  const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
 
   const spliceJob = useSpliceJob();
 
@@ -222,6 +225,8 @@ export default function App() {
     spliceJob.job?.project_name ||
     selectedExample?.label ||
     "project";
+
+  const canResume = sessionIsResumable(session);
 
   const loadBootstrap = useCallback(async () => {
     setLoadError(null);
@@ -259,7 +264,7 @@ export default function App() {
   useEffect(() => {
     if (!spliceJob.result) return;
     dispatch({
-      type: ACTIONS.HYDRATE_BUILD,
+      type: ACTIONS.HYDRATE_CURRENT_RESULT,
       jobId: spliceJob.job?.job_id || null,
       result: spliceJob.result,
       benchSession: spliceJob.result.bench_session || null,
@@ -289,12 +294,25 @@ export default function App() {
     return bench;
   }, [session.buildDir]);
 
+  const startProject = () => {
+    dispatch({ type: ACTIONS.START_PROJECT });
+    setView(VIEWS.workspace);
+  };
+
+  const resumeProject = () => {
+    setView(VIEWS.workspace);
+  };
+
+  const cancelIntake = () => {
+    dispatch({ type: ACTIONS.RESET });
+    setView(VIEWS.home);
+  };
+
   const startBuild = async (payload, { exampleId, route = "splice" } = {}) => {
     spliceJob.clearError();
     setPreviewContext(null);
     dispatch({ type: ACTIONS.START_FROM_INTAKE, intake: payload });
     setView(VIEWS.workspace);
-    dispatch({ type: ACTIONS.SET_STAGE, stage: STAGES.verify });
     const jobId =
       route === "compose"
         ? await spliceJob.startCompose(payload, { exportGerber: false })
@@ -318,7 +336,7 @@ export default function App() {
         }
       }
       dispatch({
-        type: ACTIONS.HYDRATE_BUILD,
+        type: ACTIONS.LOAD_RECENT_BUILD,
         jobId,
         result: payload.result,
         benchSession: bench,
@@ -330,12 +348,7 @@ export default function App() {
 
   const handleQuickDemo = () => {
     const ex = examples.find((r) => r.id.includes("robot_drive_brief")) || examples[0];
-    if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
-  };
-
-  const openGreenfieldDesign = () => {
-    dispatch({ type: ACTIONS.START_GREENFIELD, phrase: "" });
-    setView(VIEWS.workspace);
+    if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id, route: "splice" });
   };
 
   const openStudioProject = async ({ composeResult, drc }) => {
@@ -354,6 +367,7 @@ export default function App() {
         projectPackage: pkgRes.package,
         benchSession: bench,
         buildDir,
+        // no jobId — clear any stale recent-job bundle link
       });
       setView(VIEWS.workspace);
       setToast("Moved to Verify — Design graph kept; return via Design stage");
@@ -378,7 +392,7 @@ export default function App() {
       examples.find((r) => r.id.includes("repair_cafe")) ||
       examples.find((r) => r.id.includes("robot_drive_brief")) ||
       examples[0];
-    if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
+    if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id, route: "splice" });
   };
 
   const handleBenchSubmit = async (measurements) => {
@@ -398,10 +412,10 @@ export default function App() {
   };
 
   const inWorkspace = view === VIEWS.workspace;
-  const advancedActive = ADVANCED_VIEWS.has(view);
+  const advancedActive = isAdvancedView(view);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-testid="app-shell">
       <BuildOverlay
         active={spliceJob.active}
         status={spliceJob.job?.status}
@@ -433,28 +447,23 @@ export default function App() {
           </button>
           <button
             type="button"
-            className={`nav-button ${view === VIEWS.wizard ? "active" : ""}`}
-            onClick={() => setView(VIEWS.wizard)}
-          >
-            New project
-          </button>
-          <button
-            type="button"
             className={`nav-button ${inWorkspace ? "active" : ""}`}
+            data-testid="nav-project"
             onClick={() => {
               if (!session.projectId) {
-                openGreenfieldDesign();
+                startProject();
                 return;
               }
               setView(VIEWS.workspace);
             }}
             disabled={!health?.ok}
           >
-            Projects
+            Project
           </button>
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
+            data-testid="nav-advanced"
             onClick={() => setView(VIEWS.advanced)}
           >
             Advanced
@@ -474,6 +483,7 @@ export default function App() {
             <button
               type="button"
               className={`nav-button nested ${view === VIEWS.lab || view === VIEWS.preview ? "active" : ""}`}
+              data-testid="nav-interface-lab"
               onClick={() => setView(VIEWS.lab)}
             >
               Interface Lab
@@ -519,23 +529,11 @@ export default function App() {
             <HomeHero
               apiOk={health?.ok}
               version={health?.version}
-              onStart={() => setView(VIEWS.wizard)}
-              onOpenStudio={openGreenfieldDesign}
+              canResume={canResume}
+              onStart={startProject}
+              onResume={resumeProject}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
-            />
-          )}
-
-          {view === VIEWS.wizard && (
-            <ProjectWizard
-              donorFixtures={donorFixtures}
-              visionCapabilities={visionCapabilities}
-              llmPolicy={health?.llm_policy}
-              onCancel={() => setView(VIEWS.home)}
-              onBuild={(intake) => startBuild(intake)}
-              building={spliceJob.active}
-              buildError={spliceJob.error}
-              stageLabel={spliceJob.stageLabel}
             />
           )}
 
@@ -545,6 +543,14 @@ export default function App() {
               onSetStage={(stage) => dispatch({ type: ACTIONS.SET_STAGE, stage })}
               apiOk={health?.ok}
               llmReady={Boolean(health?.llm_policy?.qwen_llm_first)}
+              donorFixtures={donorFixtures}
+              visionCapabilities={visionCapabilities}
+              llmPolicy={health?.llm_policy}
+              onIntakeBuild={(payload, options) => startBuild(payload, options)}
+              onIntakeCancel={cancelIntake}
+              intakeBuilding={spliceJob.active}
+              intakeBuildError={spliceJob.error}
+              intakeStageLabel={spliceJob.stageLabel}
               onStudioOpenProject={openStudioProject}
               onGraphSync={handleGraphSync}
               onRefreshBench={() => refreshBench()}
@@ -592,7 +598,10 @@ export default function App() {
                     disabled={!selectedExample || spliceJob.active || !health?.ok}
                     onClick={() =>
                       selectedExample?.intake &&
-                      startBuild(selectedExample.intake, { exampleId: selectedExample.id })
+                      startBuild(selectedExample.intake, {
+                        exampleId: selectedExample.id,
+                        route: "splice",
+                      })
                     }
                   >
                     Build selected example
@@ -637,7 +646,7 @@ export default function App() {
           )}
 
           {view === VIEWS.lab && (
-            <div className="lab-shell">
+            <div className="lab-shell" data-testid="interface-lab">
               <div className="preview-toolbar" style={{ marginBottom: "0.75rem" }}>
                 <button type="button" className="ghost" onClick={() => setView(VIEWS.advanced)}>
                   ← Advanced
@@ -655,3 +664,6 @@ export default function App() {
     </div>
   );
 }
+
+// Re-export for tests
+export { ADVANCED_VIEWS, VIEWS };

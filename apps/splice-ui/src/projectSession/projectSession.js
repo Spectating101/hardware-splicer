@@ -1,4 +1,4 @@
-/** Shared project-session model for the unified workbench UI. */
+/** Shared project-session model for the unified workbench UI (in-memory only). */
 
 export const STAGES = Object.freeze({
   intake: "intake",
@@ -24,51 +24,71 @@ export const STAGE_LABELS = Object.freeze({
   [STAGES.package]: "Package",
 });
 
-export function createEmptySession(overrides = {}) {
+export function emptyGraph(phrase = "", composeMode = "canvas") {
   return {
-    projectId: overrides.projectId || null,
-    projectName: overrides.projectName || "",
-    goal: overrides.goal || "",
-    mode: overrides.mode || "greenfield", // greenfield | salvage
-    intake: overrides.intake || null,
-    constraints: overrides.constraints || null,
-    graph: {
-      nodes: overrides.graph?.nodes || [],
-      edges: overrides.graph?.edges || [],
-      phrase: overrides.graph?.phrase || "",
-      composeMode: overrides.graph?.composeMode || "canvas",
-    },
-    buildDir: overrides.buildDir || null,
-    activeJobId: overrides.activeJobId || null,
-    composeResult: overrides.composeResult || null,
-    designQuality: overrides.designQuality || null,
-    agentLoop: overrides.agentLoop || null,
-    projectPackage: overrides.projectPackage || null,
-    benchSession: overrides.benchSession || null,
-    displayResult: overrides.displayResult || null,
-    currentStage: overrides.currentStage || STAGES.intake,
-    dirty: Boolean(overrides.dirty),
+    nodes: [],
+    edges: [],
+    phrase: phrase || "",
+    composeMode: composeMode || "canvas",
+  };
+}
+
+export function createEmptySession(overrides = {}) {
+  const o = overrides && typeof overrides === "object" ? overrides : {};
+  return {
+    projectId: o.projectId || null,
+    projectName: o.projectName || "",
+    goal: o.goal || "",
+    mode: o.mode || "greenfield",
+    intake: o.intake || null,
+    constraints: o.constraints || null,
+    graph: o.graph || emptyGraph(),
+    buildDir: o.buildDir || null,
+    activeJobId: o.activeJobId || null,
+    composeResult: o.composeResult || null,
+    designQuality: o.designQuality || null,
+    agentLoop: o.agentLoop || null,
+    projectPackage: o.projectPackage || null,
+    benchSession: o.benchSession || null,
+    displayResult: o.displayResult || null,
+    currentStage: o.currentStage || STAGES.intake,
+    dirty: Boolean(o.dirty),
   };
 }
 
 export const ACTIONS = Object.freeze({
   RESET: "RESET",
-  START_GREENFIELD: "START_GREENFIELD",
+  START_PROJECT: "START_PROJECT",
   START_FROM_INTAKE: "START_FROM_INTAKE",
   SET_STAGE: "SET_STAGE",
   SYNC_GRAPH: "SYNC_GRAPH",
   APPLY_STUDIO_COMPILE: "APPLY_STUDIO_COMPILE",
-  HYDRATE_BUILD: "HYDRATE_BUILD",
+  /** Same active project received its own job result (wizard/demo submit). */
+  HYDRATE_CURRENT_RESULT: "HYDRATE_CURRENT_RESULT",
+  /** Sidebar recent-build load — replaces project identity; clears foreign graph. */
+  LOAD_RECENT_BUILD: "LOAD_RECENT_BUILD",
   SET_BENCH_SESSION: "SET_BENCH_SESSION",
   SET_ACTIVE_JOB: "SET_ACTIVE_JOB",
   PATCH_PACKAGE_GATES: "PATCH_PACKAGE_GATES",
 });
 
-function newProjectId() {
+export function newProjectId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   return `proj_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function resultIdentity(result = {}, pkg = null) {
+  return {
+    name: result.project_name || pkg?.info?.project_name || "Loaded build",
+    goal: result.goal || pkg?.info?.goal || "",
+    mode:
+      result.salvage_package || result.donor_context || result.mode === "salvage"
+        ? "salvage"
+        : "greenfield",
+    dir: result.build_dir || pkg?.build_dir || null,
+  };
 }
 
 export function projectSessionReducer(state, action) {
@@ -76,34 +96,28 @@ export function projectSessionReducer(state, action) {
     case ACTIONS.RESET:
       return createEmptySession();
 
-    case ACTIONS.START_GREENFIELD: {
-      const phrase = action.phrase || "";
+    case ACTIONS.START_PROJECT:
       return createEmptySession({
         projectId: newProjectId(),
-        projectName: action.projectName || phrase || "Untitled project",
-        goal: phrase || action.goal || "",
+        projectName: action.projectName || "New project",
+        goal: "",
         mode: "greenfield",
-        currentStage: STAGES.design,
-        graph: {
-          nodes: [],
-          edges: [],
-          phrase,
-          composeMode: action.composeMode || "canvas",
-        },
+        currentStage: STAGES.intake,
         dirty: false,
       });
-    }
 
     case ACTIONS.START_FROM_INTAKE: {
       const intake = action.intake || {};
       return createEmptySession({
-        projectId: newProjectId(),
-        projectName: intake.project_name || intake.projectName || "Untitled project",
-        goal: intake.goal || "",
+        projectId: state.projectId || newProjectId(),
+        projectName: intake.project_name || intake.projectName || state.projectName || "Untitled project",
+        goal: intake.goal || state.goal || "",
         mode: intake.mode === "salvage" || intake.donor_context ? "salvage" : "greenfield",
         intake,
-        currentStage: STAGES.intake,
+        currentStage: STAGES.verify,
         dirty: true,
+        // Keep studio graph only if this is still the same in-progress project with no foreign load
+        graph: state.graph,
       });
     }
 
@@ -130,13 +144,7 @@ export function projectSessionReducer(state, action) {
     }
 
     case ACTIONS.APPLY_STUDIO_COMPILE: {
-      const {
-        composeResult,
-        drc,
-        projectPackage,
-        benchSession,
-        buildDir,
-      } = action;
+      const { composeResult, drc, projectPackage, benchSession, buildDir, jobId } = action;
       const phrase =
         composeResult?.phrase ||
         composeResult?.goal ||
@@ -154,8 +162,8 @@ export function projectSessionReducer(state, action) {
         project_name: phrase,
         goal: composeResult?.goal || phrase,
         project_package: projectPackage,
-        design_quality: composeResult?.design_quality || drc?.truth || state.designQuality,
-        agent_loop: composeResult?.agent_loop || state.agentLoop,
+        design_quality: composeResult?.design_quality || drc?.truth || null,
+        agent_loop: composeResult?.agent_loop || null,
         bench_session: benchSession
           ? {
               readiness: benchSession.readiness,
@@ -165,7 +173,7 @@ export function projectSessionReducer(state, action) {
               level: benchSession.level,
               gates: benchSession.gates,
             }
-          : state.displayResult?.bench_session,
+          : null,
       };
       return {
         ...state,
@@ -173,53 +181,75 @@ export function projectSessionReducer(state, action) {
         projectName: phrase || state.projectName,
         goal: phrase || state.goal,
         buildDir: dir,
-        composeResult: composeResult || state.composeResult,
+        // Synchronous studio compile is not an async job — never keep a foreign bundle link
+        activeJobId: jobId ?? null,
+        composeResult: composeResult || null,
         designQuality: displayResult.design_quality,
         agentLoop: displayResult.agent_loop,
-        projectPackage: projectPackage || state.projectPackage,
-        benchSession: benchSession || state.benchSession,
+        projectPackage: projectPackage || null,
+        benchSession: benchSession || null,
         displayResult,
         currentStage: STAGES.verify,
         dirty: false,
-        // graph intentionally preserved from prior SYNC_GRAPH
+        // same project — preserve graph
       };
     }
 
-    case ACTIONS.HYDRATE_BUILD: {
+    case ACTIONS.HYDRATE_CURRENT_RESULT: {
       const result = action.result || {};
       const pkg = result.project_package || null;
-      const dir = result.build_dir || pkg?.build_dir || null;
-      const name =
-        result.project_name ||
-        pkg?.info?.project_name ||
-        state.projectName ||
-        "Loaded build";
+      const id = resultIdentity(result, pkg);
       return {
         ...state,
         projectId: state.projectId || action.jobId || newProjectId(),
-        projectName: name,
-        goal: result.goal || pkg?.info?.goal || state.goal,
-        mode: result.salvage_package || result.donor_context ? "salvage" : state.mode || "greenfield",
-        buildDir: dir,
+        projectName: id.name || state.projectName,
+        goal: id.goal || state.goal,
+        mode: id.mode,
+        intake: state.intake,
+        buildDir: id.dir,
         activeJobId: action.jobId ?? state.activeJobId,
-        composeResult: result.compose_result || result.compose || state.composeResult,
-        designQuality: result.design_quality || state.designQuality,
-        agentLoop: result.agent_loop || state.agentLoop,
+        composeResult: result.compose_result || result.compose || null,
+        designQuality: result.design_quality || null,
+        agentLoop: result.agent_loop || null,
         projectPackage: pkg,
-        benchSession: action.benchSession || result.bench_session || state.benchSession,
+        benchSession: action.benchSession || result.bench_session || null,
         displayResult: result,
         currentStage: action.stage || STAGES.verify,
         dirty: false,
-        // Keep existing graph if any (studio continuity); do not wipe on recent-build load
-        graph: state.graph?.nodes?.length
-          ? state.graph
-          : {
-              nodes: [],
-              edges: [],
-              phrase: result.goal || pkg?.info?.goal || "",
-              composeMode: "canvas",
-            },
+        // Same project job — keep studio graph if present (compose path may have none)
+        graph: state.graph,
       };
+    }
+
+    case ACTIONS.LOAD_RECENT_BUILD: {
+      const result = action.result || {};
+      const pkg = result.project_package || null;
+      const id = resultIdentity(result, pkg);
+      const reconstructable = action.graph || result.studio_graph || null;
+      return createEmptySession({
+        projectId: action.jobId || newProjectId(),
+        projectName: id.name,
+        goal: id.goal,
+        mode: id.mode,
+        buildDir: id.dir,
+        activeJobId: action.jobId || null,
+        composeResult: result.compose_result || result.compose || null,
+        designQuality: result.design_quality || null,
+        agentLoop: result.agent_loop || null,
+        projectPackage: pkg,
+        benchSession: action.benchSession || result.bench_session || null,
+        displayResult: result,
+        currentStage: action.stage || STAGES.verify,
+        dirty: false,
+        graph: reconstructable
+          ? {
+              nodes: reconstructable.nodes || [],
+              edges: reconstructable.edges || [],
+              phrase: reconstructable.phrase || id.goal || "",
+              composeMode: reconstructable.composeMode || "canvas",
+            }
+          : emptyGraph(id.goal),
+      });
     }
 
     case ACTIONS.SET_BENCH_SESSION:
@@ -270,7 +300,6 @@ export function projectSessionReducer(state, action) {
   }
 }
 
-/** Pure helpers used by UI + tests */
 export function canReturnToDesign(session) {
   return Boolean(session?.graph?.nodes?.length || session?.graph?.phrase);
 }
@@ -281,4 +310,9 @@ export function sessionHasPackage(session) {
 
 export function sessionHasBuild(session) {
   return Boolean(session?.buildDir || session?.projectPackage);
+}
+
+/** True when an in-memory session exists (cancel clears via RESET). */
+export function sessionIsResumable(session) {
+  return Boolean(session?.projectId);
 }

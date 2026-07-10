@@ -40,6 +40,7 @@ export default function ProjectWizard({
   building,
   buildError,
   stageLabel,
+  embedded = false,
 }) {
   const [wizard, setWizard] = useState({ ...INITIAL_WIZARD });
   const [stepId, setStepId] = useState("goal");
@@ -205,11 +206,15 @@ export default function ProjectWizard({
   const questions = wizard.clarifier?.questions || [];
 
   return (
-    <div className="wizard-shell">
+    <div className={`wizard-shell ${embedded ? "wizard-shell--embedded" : ""}`}>
       <div className="wizard-header">
         <div>
-          <h2>Start a hardware project</h2>
-          <p className="muted">Describe what you want — we’ll turn it into a splice plan and carrier board.</p>
+          <h2>{embedded ? "Project intake" : "Start a hardware project"}</h2>
+          <p className="muted">
+            {embedded
+              ? "Greenfield or salvage — same agent spine as MCP/HTTP. Session is in-memory until you leave or cancel."
+              : "Describe what you want — we’ll turn it into a splice plan and carrier board."}
+          </p>
         </div>
         <button type="button" className="ghost" onClick={onCancel}>
           Cancel

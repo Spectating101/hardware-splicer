@@ -1,5 +1,6 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
+import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectSummaryBar from "../components/ProjectSummaryBar.jsx";
 import ReadinessHero from "../components/ReadinessHero.jsx";
 import TabNav from "../components/TabNav.jsx";
@@ -7,7 +8,6 @@ import {
   BomPanel,
   BenchPanel,
   GatesPanel,
-  InfoPanel,
   InstructionsPanel,
   WiringPanel,
 } from "../components/ProjectPanels.jsx";
@@ -28,13 +28,21 @@ const STAGE_TABS = STAGE_ORDER.map((id) => ({
 
 /**
  * Project workspace shell — stages wrap existing panels.
- * Does not introduce a second compile path.
+ * Session continuity is in-memory only (no localStorage).
  */
 export default function ProjectWorkspace({
   session,
   onSetStage,
   apiOk,
   llmReady,
+  donorFixtures,
+  visionCapabilities,
+  llmPolicy,
+  onIntakeBuild,
+  onIntakeCancel,
+  intakeBuilding,
+  intakeBuildError,
+  intakeStageLabel,
   onStudioOpenProject,
   onGraphSync,
   onRefreshBench,
@@ -46,7 +54,7 @@ export default function ProjectWorkspace({
   const pkg = session.projectPackage;
   const buildDir = session.buildDir || pkg?.build_dir || null;
   const displayResult = session.displayResult;
-  const stage = session.currentStage || STAGES.design;
+  const stage = session.currentStage || STAGES.intake;
   const hasPkg = sessionHasPackage(session);
 
   const openGateCount =
@@ -57,19 +65,22 @@ export default function ProjectWorkspace({
   };
 
   return (
-    <div className="project-workspace">
+    <div className="project-workspace" data-testid="project-workspace">
       <header className="project-header">
         <div className="project-header-text">
           <p className="eyebrow">Project workspace</p>
           <h1>{session.projectName || pkg?.info?.project_name || "Untitled project"}</h1>
-          <p className="muted">{session.goal || pkg?.info?.goal || "Greenfield design in progress"}</p>
+          <p className="muted">
+            {session.goal || pkg?.info?.goal || "In-memory session — Intake → Design → Verify → Bench → Package"}
+          </p>
         </div>
         <div className="project-header-actions">
-          {activeJobId && (
+          {activeJobId ? (
             <>
               <button
                 type="button"
                 className="ghost button-link"
+                data-testid="share-bundle"
                 onClick={() => {
                   navigator.clipboard?.writeText(jobBundleUrl(activeJobId));
                   onToast?.("Share link copied — download bundle for reviewers");
@@ -77,11 +88,16 @@ export default function ProjectWorkspace({
               >
                 Share bundle link
               </button>
-              <a className="secondary button-link" href={jobBundleUrl(activeJobId)} download>
+              <a
+                className="secondary button-link"
+                href={jobBundleUrl(activeJobId)}
+                download
+                data-testid="download-bundle"
+              >
                 ↓ Download zip
               </a>
             </>
-          )}
+          ) : null}
         </div>
       </header>
 
@@ -107,55 +123,44 @@ export default function ProjectWorkspace({
 
       <div className="workspace-stage">
         {stage === STAGES.intake && (
-          <section className="card">
-            <h2>Intake</h2>
-            <p className="muted">
-              Project intent and constraints. Use <strong>New project</strong> for the full wizard
-              (greenfield or salvage). Design Studio can also start from a phrase on the Design stage.
-            </p>
-            <dl className="meta-grid">
-              <div>
-                <dt>Mode</dt>
-                <dd>{session.mode || "greenfield"}</dd>
-              </div>
-              <div>
-                <dt>Goal</dt>
-                <dd>{session.goal || "—"}</dd>
-              </div>
-              <div>
-                <dt>Build dir</dt>
-                <dd className="mono">{buildDir || "—"}</dd>
-              </div>
-            </dl>
-            {pkg && <InfoPanel pkg={pkg} />}
-            <div className="hero-actions" style={{ marginTop: "1rem" }}>
-              <button type="button" className="primary" onClick={() => onSetStage(STAGES.design)}>
-                Continue to Design
-              </button>
-            </div>
-          </section>
+          <div data-testid="stage-intake">
+            <ProjectWizard
+              key={session.projectId || "intake"}
+              embedded
+              donorFixtures={donorFixtures}
+              visionCapabilities={visionCapabilities}
+              llmPolicy={llmPolicy}
+              onCancel={onIntakeCancel}
+              onBuild={onIntakeBuild}
+              building={intakeBuilding}
+              buildError={intakeBuildError}
+              stageLabel={intakeStageLabel}
+            />
+          </div>
         )}
 
         {stage === STAGES.design && (
-          <DesignStudioPanel
-            key={session.projectId || "studio"}
-            apiOk={apiOk}
-            llmReady={llmReady}
-            initialPhrase={session.graph.phrase || session.goal || ""}
-            initialNodes={session.graph.nodes || []}
-            initialEdges={session.graph.edges || []}
-            initialComposeMode={session.graph.composeMode || "canvas"}
-            onSessionSync={onGraphSync}
-            onOpenProject={onStudioOpenProject}
-          />
+          <div data-testid="stage-design">
+            <DesignStudioPanel
+              key={session.projectId || "studio"}
+              apiOk={apiOk}
+              llmReady={llmReady}
+              initialPhrase={session.graph.phrase || session.goal || ""}
+              initialNodes={session.graph.nodes || []}
+              initialEdges={session.graph.edges || []}
+              initialComposeMode={session.graph.composeMode || "canvas"}
+              onSessionSync={onGraphSync}
+              onOpenProject={onStudioOpenProject}
+            />
+          </div>
         )}
 
         {stage === STAGES.verify && (
-          <div className="panel-stack">
+          <div className="panel-stack" data-testid="stage-verify">
             {!buildDir && (
               <section className="card empty-card">
                 <p className="muted">
-                  Compile from Design to populate KiCad verification.{" "}
+                  Compile from Design or finish Intake to populate KiCad verification.{" "}
                   {canReturnToDesign(session) && (
                     <button type="button" className="link-button" onClick={() => onSetStage(STAGES.design)}>
                       Return to Design
@@ -187,7 +192,7 @@ export default function ProjectWorkspace({
         )}
 
         {stage === STAGES.bench && (
-          <div className="panel-stack">
+          <div className="panel-stack" data-testid="stage-bench">
             {!buildDir && (
               <section className="card empty-card">
                 <p className="muted">Bench gates need a compiled build directory.</p>
@@ -208,7 +213,7 @@ export default function ProjectWorkspace({
         )}
 
         {stage === STAGES.package && (
-          <div className="panel-stack">
+          <div className="panel-stack" data-testid="stage-package">
             {!pkg && (
               <section className="card empty-card">
                 <p className="muted">
