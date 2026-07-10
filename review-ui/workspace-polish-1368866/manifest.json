@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "1368866f96218a5d772578c366a289c33235af64",
+  "viewport": { "width": 1440, "height": 900 },
+  "before": [
+    "01-home.png",
+    "02-intake-goal.png",
+    "04-design.png",
+    "06-verify.png",
+    "07-bench.png",
+    "08-package.png",
+    "09-advanced.png",
+    "10-interface-lab.png"
+  ],
+  "after": [
+    "01-home.png",
+    "02-intake-goal.png",
+    "03-intake-mode.png",
+    "04-design.png",
+    "06-verify.png",
+    "07-bench.png",
+    "08-package.png",
+    "09-advanced.png",
+    "10-interface-lab.png"
+  ],
+  "notes": "Verify tab confirmed disabled before compile in after capture. Full live DRC canvas (05) not captured without a fresh studio compile in this pass."
+}

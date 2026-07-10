@@ -24,8 +24,8 @@ export default function StudioDrcPanel({
     <aside className="studio-drc card">
       <header className="studio-drc__header">
         <div>
-          <p className="eyebrow">Agent loop</p>
-          <h2>{compiling ? "Compiling…" : drc?.headline || "DRC feedback"}</h2>
+          <p className="eyebrow">Design check</p>
+          <h2>{compiling ? "Compiling…" : drc?.headline || "KiCad DRC feedback"}</h2>
         </div>
         {drc && (
           <span className={`studio-drc__badge ${clean ? "ok" : "fail"}`}>
@@ -54,11 +54,13 @@ export default function StudioDrcPanel({
           <p className="mono small">{drc.moduleIds.join(", ")}</p>
           {drc.composeMode && (
             <p className="muted small">
-              compose mode: <span className="mono">{drc.composeMode}</span>
+              Design path: <span className="mono">{drc.composeMode}</span>
               {drc.mode ? ` · ${drc.mode}` : ""}
             </p>
           )}
-          {drc.hasPackage && <p className="hint small">PROJECT_PACKAGE emitted — open project for bench gates.</p>}
+          {drc.hasPackage && (
+            <p className="hint small">Project package ready — continue to Verify for preview and gates.</p>
+          )}
         </div>
       )}
 
@@ -123,10 +125,9 @@ export default function StudioDrcPanel({
       )}
 
       {!compiling && drc?.resolved && drc.copperTier && String(drc.copperTier).includes("cosmetic") && (
-        <p className="hint small">
-          KiCad DRC errors are clear, but copper is <strong>cosmetic preview</strong>
-          {drc.fabRecommendation ? ` (${drc.fabRecommendation})` : ""}. Review before fab — same signal agents see in{" "}
-          <code>agent_loop.copper_tier</code>.
+        <p className="hint small" data-testid="studio-copper-honesty">
+          KiCad DRC errors are clear, but copper is still a <strong>preview layout</strong>
+          {drc.fabRecommendation ? ` (${drc.fabRecommendation})` : ""}. That is not fabrication-ready.
         </p>
       )}
 
@@ -137,8 +138,8 @@ export default function StudioDrcPanel({
           </button>
         )}
         {drc?.outDir && (
-          <button type="button" className="primary" onClick={() => onOpenProject(drc)}>
-            Open full project
+          <button type="button" className="primary" data-testid="continue-to-verify" onClick={() => onOpenProject(drc)}>
+            Continue to Verify
           </button>
         )}
         {drc && (

@@ -250,7 +250,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
         <CompileTruthCard truth={truth} loading={loadingQuality} />
         {onGoGates && pkg?.gates && (
           <button type="button" className="secondary small design-gates-link" onClick={onGoGates}>
-            Continue to bench gates →
+            Continue to Bench →
           </button>
         )}
       </section>

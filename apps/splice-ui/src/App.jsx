@@ -370,7 +370,7 @@ export default function App() {
         // no jobId — clear any stale recent-job bundle link
       });
       setView(VIEWS.workspace);
-      setToast("Moved to Verify — Design graph kept; return via Design stage");
+      setToast("Moved to Verify — same project; Design graph kept");
     } catch (err) {
       setToast(err.message);
     }

@@ -212,7 +212,7 @@ export default function ProjectWizard({
           <h2>{embedded ? "Project intake" : "Start a hardware project"}</h2>
           <p className="muted">
             {embedded
-              ? "Greenfield or salvage — same agent spine as MCP/HTTP. Session is in-memory until you leave or cancel."
+              ? "Choose greenfield or salvage. This session stays in memory until you cancel or leave."
               : "Describe what you want — we’ll turn it into a splice plan and carrier board."}
           </p>
         </div>

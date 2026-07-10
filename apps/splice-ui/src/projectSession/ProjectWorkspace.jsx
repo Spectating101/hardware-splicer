@@ -1,6 +1,7 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
+import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
 import ProjectSummaryBar from "../components/ProjectSummaryBar.jsx";
 import ReadinessHero from "../components/ReadinessHero.jsx";
 import TabNav from "../components/TabNav.jsx";
@@ -13,18 +14,18 @@ import {
 } from "../components/ProjectPanels.jsx";
 import { jobBundleUrl } from "../api.js";
 import {
-  STAGE_LABELS,
-  STAGE_ORDER,
   STAGES,
   canReturnToDesign,
   sessionHasPackage,
 } from "./projectSession.js";
-
-const STAGE_TABS = STAGE_ORDER.map((id) => ({
-  id,
-  label: STAGE_LABELS[id],
-  highlight: id === STAGES.design || id === STAGES.verify,
-}));
+import {
+  buildStageTabs,
+  copperHonestyLabel,
+  evidenceLabel,
+  nextStageAction,
+  stageBlockReason,
+  stageIsAvailable,
+} from "./stageAvailability.js";
 
 /**
  * Project workspace shell — stages wrap existing panels.
@@ -56,6 +57,14 @@ export default function ProjectWorkspace({
   const displayResult = session.displayResult;
   const stage = session.currentStage || STAGES.intake;
   const hasPkg = sessionHasPackage(session);
+  const stageTabs = buildStageTabs(session);
+  const next = nextStageAction(session);
+  const copper = copperHonestyLabel(
+    displayResult?.design_quality?.copper_tier ||
+      session.designQuality?.copper_tier ||
+      pkg?.gates?.copper_tier,
+  );
+  const evidence = evidenceLabel(session.benchSession, pkg);
 
   const openGateCount =
     session.benchSession?.open_gate_count ?? (session.benchSession?.open_gates || []).length;
@@ -64,59 +73,72 @@ export default function ProjectWorkspace({
     [STAGES.bench]: openGateCount,
   };
 
+  const handleStageChange = (nextStage) => {
+    if (!stageIsAvailable(session, nextStage)) {
+      onToast?.(stageBlockReason(session, nextStage) || "Stage not available yet");
+      return;
+    }
+    onSetStage(nextStage);
+  };
+
+  const bundleUrl = activeJobId ? jobBundleUrl(activeJobId) : null;
+
   return (
     <div className="project-workspace" data-testid="project-workspace">
-      <header className="project-header">
-        <div className="project-header-text">
-          <p className="eyebrow">Project workspace</p>
-          <h1>{session.projectName || pkg?.info?.project_name || "Untitled project"}</h1>
-          <p className="muted">
-            {session.goal || pkg?.info?.goal || "In-memory session — Intake → Design → Verify → Bench → Package"}
-          </p>
-        </div>
-        <div className="project-header-actions">
-          {activeJobId ? (
-            <>
-              <button
-                type="button"
-                className="ghost button-link"
-                data-testid="share-bundle"
-                onClick={() => {
-                  navigator.clipboard?.writeText(jobBundleUrl(activeJobId));
-                  onToast?.("Share link copied — download bundle for reviewers");
-                }}
-              >
-                Share bundle link
-              </button>
-              <a
-                className="secondary button-link"
-                href={jobBundleUrl(activeJobId)}
-                download
-                data-testid="download-bundle"
-              >
-                ↓ Download zip
-              </a>
-            </>
-          ) : null}
-        </div>
-      </header>
+      <ProjectStatusHeader
+        session={session}
+        activeJobId={activeJobId}
+        bundleUrl={bundleUrl}
+        onShare={() => {
+          if (!bundleUrl) return;
+          navigator.clipboard?.writeText(bundleUrl);
+          onToast?.("Share link copied — download bundle for reviewers");
+        }}
+      />
 
-      <TabNav tabs={STAGE_TABS} activeId={stage} onChange={onSetStage} badges={badges} />
+      <TabNav tabs={stageTabs} activeId={stage} onChange={handleStageChange} badges={badges} />
+
+      {next && stage !== STAGES.intake && (
+        <div className="stage-next-bar" data-testid="stage-next-bar">
+          <p className="muted small">Next</p>
+          {next.isDownload ? (
+            activeJobId && bundleUrl ? (
+              <a className="primary button-link" href={bundleUrl} download data-testid="stage-next-action">
+                {next.label}
+              </a>
+            ) : (
+              <span className="muted small" data-testid="stage-next-action-disabled">
+                Bundle download appears after an async job finishes
+              </span>
+            )
+          ) : (
+            <button
+              type="button"
+              className="primary"
+              data-testid="stage-next-action"
+              disabled={!next.enabled}
+              onClick={() => next.enabled && next.stage && handleStageChange(next.stage)}
+            >
+              {next.label}
+            </button>
+          )}
+        </div>
+      )}
 
       {hasPkg && stage !== STAGES.design && stage !== STAGES.intake && (
         <>
           <ReadinessHero
             pkg={pkg}
             benchSession={session.benchSession}
-            onGoDesign={() => onSetStage(STAGES.verify)}
-            onGoBench={() => onSetStage(STAGES.bench)}
-            onGoGates={() => onSetStage(STAGES.bench)}
+            onGoDesign={() => handleStageChange(STAGES.verify)}
+            onGoBench={() => handleStageChange(STAGES.bench)}
+            onGoGates={() => handleStageChange(STAGES.bench)}
           />
           <ProjectSummaryBar
             pkg={pkg}
             benchSession={session.benchSession}
-            onGoBench={() => onSetStage(STAGES.bench)}
-            onGoDesign={() => onSetStage(STAGES.verify)}
+            onGoBench={() => handleStageChange(STAGES.bench)}
+            onGoDesign={() => handleStageChange(STAGES.verify)}
           />
         </>
       )}
@@ -162,7 +184,7 @@ export default function ProjectWorkspace({
                 <p className="muted">
                   Compile from Design or finish Intake to populate KiCad verification.{" "}
                   {canReturnToDesign(session) && (
-                    <button type="button" className="link-button" onClick={() => onSetStage(STAGES.design)}>
+                    <button type="button" className="link-button" onClick={() => handleStageChange(STAGES.design)}>
                       Return to Design
                     </button>
                   )}
@@ -173,17 +195,17 @@ export default function ProjectWorkspace({
               <DesignPreviewPanel
                 buildDir={buildDir}
                 pkg={pkg}
-                onGoGates={() => onSetStage(STAGES.bench)}
+                onGoGates={() => handleStageChange(STAGES.bench)}
               />
             )}
-            {displayResult?.design_quality?.copper_tier && (
-              <section className="card">
-                <h3>Copper honesty</h3>
+            {copper && (
+              <section className={`card honesty-card honesty-card--${copper.tone}`} data-testid="copper-honesty">
+                <h3>{copper.title}</h3>
+                <p className="small muted">{copper.detail}</p>
                 <p className="small muted">
-                  DRC-clean is not fabrication-ready. Current copper tier:{" "}
-                  <code>{displayResult.design_quality.copper_tier}</code>
-                  {displayResult.design_quality.fab_recommendation
-                    ? ` · ${displayResult.design_quality.fab_recommendation}`
+                  DRC clean does <strong>not</strong> mean fabrication-ready.
+                  {displayResult?.design_quality?.fab_recommendation
+                    ? ` Recommendation: ${displayResult.design_quality.fab_recommendation}`
                     : ""}
                 </p>
               </section>
@@ -193,9 +215,24 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.bench && (
           <div className="panel-stack" data-testid="stage-bench">
+            {evidence && (
+              <section className={`card honesty-card honesty-card--${evidence.tone}`} data-testid="bench-evidence-banner">
+                <h3>{evidence.label}</h3>
+                <p className="small muted">{evidence.detail}</p>
+              </section>
+            )}
+            {!evidence && session.benchSession && (
+              <section className="card honesty-card honesty-card--neutral" data-testid="bench-evidence-banner">
+                <h3>Bench evidence</h3>
+                <p className="small muted">
+                  Confirm whether measurements are simulated or from a physical instrument before treating power-on as
+                  field proof.
+                </p>
+              </section>
+            )}
             {!buildDir && (
               <section className="card empty-card">
-                <p className="muted">Bench gates need a compiled build directory.</p>
+                <p className="muted">Bench gates need a compiled board first.</p>
               </section>
             )}
             {pkg && <GatesPanel pkg={pkg} benchSession={session.benchSession} />}
@@ -217,8 +254,7 @@ export default function ProjectWorkspace({
             {!pkg && (
               <section className="card empty-card">
                 <p className="muted">
-                  Package appears after agent-loop finalize (set a project goal in Design) or a splice
-                  build.
+                  Package appears after you finish Intake build or compile from Design with a project goal set.
                 </p>
               </section>
             )}

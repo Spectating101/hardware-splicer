@@ -42,11 +42,13 @@ export function compileTruthHeadline(truth) {
   if (truth.kicad_drc_errors > 0) return `${truth.kicad_drc_errors} KiCad DRC error(s) — not fab-ready`;
   if (truth.fabrication_ready) return "KiCad DRC clean — fabrication checks passed";
   if (truth.build_ready) return "KiCad compile ready — review warnings before fab";
-  if (truth.compile_ok) return "KiCad compile passed — cosmetic/preview copper";
-  return "Compile truth loaded from build artifacts";
+  if (truth.compile_ok) return "KiCad compile passed — preview copper only (not fab-ready)";
+  return "Compile status loaded from build artifacts";
 }
 
 export function copperTierLabel(tier) {
   if (!tier) return "—";
-  return String(tier).replace(/_/g, " ");
+  const raw = String(tier);
+  if (raw.includes("cosmetic") || raw.includes("preview")) return "Preview copper (not fab-ready)";
+  return raw.replace(/_/g, " ");
 }
