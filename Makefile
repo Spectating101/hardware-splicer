@@ -169,7 +169,7 @@ splice-ui-dev: splice-ui-install
 	cd apps/splice-ui && npm run dev
 
 splice-ui-build: splice-ui-install
-	cd apps/splice-ui && npm run build
+	cd apps/splice-ui && npm test && npm run build
 
 # Build UI + serve API and static frontend on one port (auditor / demo mode).
 splice-ui-serve: splice-ui-build

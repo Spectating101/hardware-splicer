@@ -428,6 +428,23 @@ button.full {
   border-color: #2f3f52;
 }
 
+.nav-button.nested {
+  padding-left: 22px;
+  font-size: 0.92rem;
+  color: #b7c4d2;
+}
+
+.advanced-hub .advanced-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.project-workspace .workspace-stage {
+  margin-top: 0.75rem;
+}
+
 .home-hero {
   max-width: 760px;
   padding: 32px;

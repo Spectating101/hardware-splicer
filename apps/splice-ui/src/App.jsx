@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
   benchStatus,
   benchSubmit,
@@ -9,40 +9,35 @@ import {
   fetchJobResult,
   fetchJobs,
   fetchVisionCapabilities,
-  jobBundleUrl,
   renderProjectPackage,
 } from "./api.js";
-import AiAssistPanel from "./components/AiAssistPanel.jsx";
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
-import DesignStudioPanel from "./components/DesignStudioPanel.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import PipelineVisual from "./components/PipelineVisual.jsx";
-import ProjectSummaryBar from "./components/ProjectSummaryBar.jsx";
-import ReadinessHero from "./components/ReadinessHero.jsx";
 import ProjectWizard from "./components/ProjectWizard.jsx";
-import TabNav from "./components/TabNav.jsx";
-import {
-  BomPanel,
-  BenchPanel,
-  GatesPanel,
-  InfoPanel,
-  InstructionsPanel,
-  PROJECT_TABS,
-  StatusPill,
-  WiringPanel,
-} from "./components/ProjectPanels.jsx";
+import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
+import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
+import {
+  ACTIONS,
+  STAGES,
+  createEmptySession,
+  projectSessionReducer,
+  sessionHasBuild,
+} from "./projectSession/projectSession.js";
 
 const VIEWS = {
   home: "home",
-  studio: "studio",
   wizard: "wizard",
+  workspace: "workspace",
+  advanced: "advanced",
   example: "example",
-  results: "results",
   lab: "lab",
   preview: "preview",
 };
+
+const ADVANCED_VIEWS = new Set([VIEWS.advanced, VIEWS.example, VIEWS.lab, VIEWS.preview]);
 
 function Toast({ message, onDismiss }) {
   useEffect(() => {
@@ -88,8 +83,8 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
         <div className="readiness-pitch">
           <strong>Flux-class first mile. Auditable last mile.</strong>
           <p className="muted small">
-            Design Studio for people; <code>hs_compose</code> + <code>hs_modules_catalog</code> for agents — same
-            compile truth, measurement gates, self-hosted packages.
+            One project workspace: Intake → Design → Verify → Bench → Package. Same compile truth as{" "}
+            <code>hs_compose_drc_agent</code>.
           </p>
         </div>
         <PipelineVisual />
@@ -98,7 +93,7 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
             Start a project
           </button>
           <button type="button" className="secondary large" onClick={onOpenStudio} disabled={!apiOk}>
-            Design studio
+            Open Design stage
           </button>
           <button type="button" className="secondary large" onClick={onQuickDemo} disabled={!apiOk}>
             Quick demo (1-click)
@@ -168,6 +163,29 @@ function HomeHero({ onStart, onOpenStudio, onExample, onQuickDemo, apiOk, versio
   );
 }
 
+function AdvancedHub({ onExamples, onLab }) {
+  return (
+    <section className="card advanced-hub">
+      <p className="eyebrow">Advanced</p>
+      <h1>Developer tools</h1>
+      <p className="muted">
+        Adapters and demos that are not part of the normal project journey. Prefer{" "}
+        <strong>New project</strong> or the Design stage for day-to-day work.
+      </p>
+      <div className="advanced-grid">
+        <button type="button" className="fixture-card" onClick={onExamples}>
+          <strong>Examples</strong>
+          <span>Proven manifest intakes — same engine path as production.</span>
+        </button>
+        <button type="button" className="fixture-card" onClick={onLab}>
+          <strong>Interface Lab</strong>
+          <span>Integration adapters, netlist fixtures, and design-preview probes.</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   const [health, setHealth] = useState(null);
   const [examples, setExamples] = useState([]);
@@ -176,13 +194,10 @@ export default function App() {
   const [visionCapabilities, setVisionCapabilities] = useState(null);
   const [view, setView] = useState(VIEWS.home);
   const [selectedExampleId, setSelectedExampleId] = useState(null);
-  const [activeTab, setActiveTab] = useState("info");
-  const [benchSession, setBenchSession] = useState(null);
   const [loadError, setLoadError] = useState(null);
-  const [activeJobId, setActiveJobId] = useState(null);
-  const [hydratedResult, setHydratedResult] = useState(null);
   const [toast, setToast] = useState("");
   const [previewContext, setPreviewContext] = useState(null);
+  const [session, dispatch] = useReducer(projectSessionReducer, null, createEmptySession);
 
   const spliceJob = useSpliceJob();
 
@@ -201,26 +216,12 @@ export default function App() {
     [examples, selectedExampleId],
   );
 
-  const displayResult = spliceJob.result || hydratedResult;
-  const displayPackage = displayResult?.project_package || null;
-  const projectBuildDir = displayResult?.build_dir || displayPackage?.build_dir || null;
-  const displayBuildDir =
-    view === VIEWS.preview ? previewContext?.buildDir || projectBuildDir : projectBuildDir;
   const buildingName =
-    displayPackage?.info?.project_name ||
+    session.projectPackage?.info?.project_name ||
+    session.projectName ||
     spliceJob.job?.project_name ||
     selectedExample?.label ||
     "project";
-
-  const openGateCount = benchSession?.open_gate_count ?? (benchSession?.open_gates || []).length;
-
-  const tabBadges = useMemo(
-    () => ({
-      gates: openGateCount,
-      bench: openGateCount,
-    }),
-    [openGateCount],
-  );
 
   const loadBootstrap = useCallback(async () => {
     setLoadError(null);
@@ -256,46 +257,49 @@ export default function App() {
   }, [loadBootstrap]);
 
   useEffect(() => {
-    if (spliceJob.result) {
-      setPreviewContext(null);
-      setView(VIEWS.results);
-      setHydratedResult(null);
-      setActiveTab(spliceJob.jobKind === "compose" ? "design" : "design");
-      if (spliceJob.result.bench_session) {
-        setBenchSession(spliceJob.result.bench_session);
-      }
-      loadBootstrap();
-      setToast(
-        spliceJob.jobKind === "compose"
-          ? "AI compose complete — review KiCad carrier, BOM, and fab readiness"
-          : "Build complete — review the KiCad carrier, then close bench gates",
-      );
-    }
-  }, [spliceJob.result, spliceJob.jobKind, loadBootstrap]);
+    if (!spliceJob.result) return;
+    dispatch({
+      type: ACTIONS.HYDRATE_BUILD,
+      jobId: spliceJob.job?.job_id || null,
+      result: spliceJob.result,
+      benchSession: spliceJob.result.bench_session || null,
+      stage: STAGES.verify,
+    });
+    setPreviewContext(null);
+    setView(VIEWS.workspace);
+    loadBootstrap();
+    setToast(
+      spliceJob.jobKind === "compose"
+        ? "AI compose complete — review Verify, then Bench and Package"
+        : "Build complete — review Verify, then close bench gates",
+    );
+  }, [spliceJob.result, spliceJob.jobKind, spliceJob.job?.job_id, loadBootstrap]);
 
   useEffect(() => {
-    if (!projectBuildDir) return;
-    benchStatus(projectBuildDir).then(setBenchSession).catch(() => {});
-  }, [projectBuildDir]);
+    if (!session.buildDir) return;
+    benchStatus(session.buildDir)
+      .then((bench) => dispatch({ type: ACTIONS.SET_BENCH_SESSION, benchSession: bench }))
+      .catch(() => {});
+  }, [session.buildDir]);
 
   const refreshBench = useCallback(async () => {
-    if (!projectBuildDir) return;
-    const session = await benchStatus(projectBuildDir);
-    setBenchSession(session);
-    return session;
-  }, [projectBuildDir]);
+    if (!session.buildDir) return;
+    const bench = await benchStatus(session.buildDir);
+    dispatch({ type: ACTIONS.SET_BENCH_SESSION, benchSession: bench });
+    return bench;
+  }, [session.buildDir]);
 
   const startBuild = async (payload, { exampleId, route = "splice" } = {}) => {
     spliceJob.clearError();
-    setHydratedResult(null);
     setPreviewContext(null);
-    setView(VIEWS.results);
-    setActiveTab(route === "compose" ? "design" : "info");
+    dispatch({ type: ACTIONS.START_FROM_INTAKE, intake: payload });
+    setView(VIEWS.workspace);
+    dispatch({ type: ACTIONS.SET_STAGE, stage: STAGES.verify });
     const jobId =
       route === "compose"
         ? await spliceJob.startCompose(payload, { exportGerber: false })
         : await spliceJob.startBuild(payload, { exportGerber: false });
-    setActiveJobId(jobId);
+    dispatch({ type: ACTIONS.SET_ACTIVE_JOB, jobId });
     if (exampleId) setSelectedExampleId(exampleId);
   };
 
@@ -304,15 +308,23 @@ export default function App() {
     setPreviewContext(null);
     const payload = await fetchJobResult(jobId);
     if (payload.ok && payload.result) {
-      setHydratedResult(payload.result);
-      setActiveJobId(jobId);
-      setView(VIEWS.results);
-      setActiveTab("design");
       const dir = payload.result.build_dir || payload.result.project_package?.build_dir;
+      let bench = null;
       if (dir) {
-        const session = await benchStatus(dir);
-        setBenchSession(session);
+        try {
+          bench = await benchStatus(dir);
+        } catch {
+          bench = null;
+        }
       }
+      dispatch({
+        type: ACTIONS.HYDRATE_BUILD,
+        jobId,
+        result: payload.result,
+        benchSession: bench,
+        stage: STAGES.verify,
+      });
+      setView(VIEWS.workspace);
     }
   };
 
@@ -321,48 +333,38 @@ export default function App() {
     if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id });
   };
 
+  const openGreenfieldDesign = () => {
+    dispatch({ type: ACTIONS.START_GREENFIELD, phrase: "" });
+    setView(VIEWS.workspace);
+  };
+
   const openStudioProject = async ({ composeResult, drc }) => {
     const buildDir = drc?.outDir || composeResult?.out_dir;
     if (!buildDir) return;
     try {
-      const [pkgRes, session] = await Promise.all([
+      const [pkgRes, bench] = await Promise.all([
         renderProjectPackage(buildDir, { source: "compose" }),
         benchStatus(buildDir),
       ]);
       spliceJob.reset();
-      setHydratedResult({
-        build_dir: buildDir,
-        project_name: phraseFromCompose(composeResult),
-        goal: composeResult?.goal || phraseFromCompose(composeResult),
-        project_package: pkgRes.package,
-        design_quality: composeResult?.design_quality,
-        bench_session: {
-          readiness: session.readiness,
-          open_gate_count: session.open_gate_count,
-          critical_open_count: session.critical_open_count,
-          power_on_authorized: session.power_on_authorized,
-          level: session.level,
-          gates: session.gates,
-        },
+      dispatch({
+        type: ACTIONS.APPLY_STUDIO_COMPILE,
+        composeResult,
+        drc,
+        projectPackage: pkgRes.package,
+        benchSession: bench,
+        buildDir,
       });
-      setActiveJobId(null);
-      setPreviewContext(null);
-      setView(VIEWS.results);
-      setActiveTab("design");
-      setToast("Project package opened — review KiCad carrier and bench gates");
+      setView(VIEWS.workspace);
+      setToast("Moved to Verify — Design graph kept; return via Design stage");
     } catch (err) {
       setToast(err.message);
     }
   };
 
-  function phraseFromCompose(composeResult) {
-    return (
-      composeResult?.project_name ||
-      composeResult?.phrase ||
-      composeResult?.build_id ||
-      "compose-project"
-    );
-  }
+  const handleGraphSync = useCallback((patch) => {
+    dispatch({ type: ACTIONS.SYNC_GRAPH, ...patch });
+  }, []);
 
   const openDesignPreview = ({ buildDir, title, qualityHint }) => {
     if (!buildDir) return;
@@ -380,119 +382,23 @@ export default function App() {
   };
 
   const handleBenchSubmit = async (measurements) => {
-    if (!projectBuildDir) return;
-    const session = await benchSubmit(projectBuildDir, measurements);
-    setBenchSession(session);
-    if (displayResult?.project_package?.gates) {
-      const pkg = hydratedResult?.project_package || spliceJob.result?.project_package;
-      if (pkg) {
-        const updater = (prev) =>
-          prev
-            ? {
-                ...prev,
-                project_package: {
-                  ...prev.project_package,
-                  gates: {
-                    ...prev.project_package.gates,
-                    open_gate_count: session.open_gate_count,
-                    critical_open_count: session.critical_open_count,
-                    power_on_authorized: session.power_on_authorized,
-                  },
-                },
-              }
-            : prev;
-        if (hydratedResult) setHydratedResult(updater);
-      }
-    }
-    return session;
+    if (!session.buildDir) return;
+    const bench = await benchSubmit(session.buildDir, measurements);
+    dispatch({ type: ACTIONS.PATCH_PACKAGE_GATES, benchSession: bench });
+    return bench;
   };
 
   const handleBenchCaptureSubmit = async (capture) => {
-    if (!projectBuildDir) return null;
-    const result = await benchSubmitCapture(projectBuildDir, capture);
+    if (!session.buildDir) return null;
+    const result = await benchSubmitCapture(session.buildDir, capture);
     if (result?.bench_session) {
-      setBenchSession(result.bench_session);
-    }
-    if (displayResult?.project_package?.gates && result?.bench_session) {
-      const session = result.bench_session;
-      const updater = (prev) =>
-        prev
-          ? {
-              ...prev,
-              project_package: {
-                ...prev.project_package,
-                gates: {
-                  ...prev.project_package.gates,
-                  open_gate_count: session.open_gate_count,
-                  critical_open_count: session.critical_open_count,
-                  power_on_authorized: session.power_on_authorized,
-                },
-              },
-            }
-          : prev;
-      if (hydratedResult) setHydratedResult(updater);
+      dispatch({ type: ACTIONS.PATCH_PACKAGE_GATES, benchSession: result.bench_session });
     }
     return result;
   };
 
-  const renderResults = () => {
-    if (!displayPackage && !spliceJob.active) {
-      return (
-        <section className="card empty-card">
-          <p className="muted">Select a build from the sidebar or start a new project.</p>
-          {spliceJob.error && <p className="error">{spliceJob.error}</p>}
-        </section>
-      );
-    }
-
-    if (!displayPackage) return null;
-
-    switch (activeTab) {
-      case "ai":
-        return (
-          <AiAssistPanel
-            capabilities={visionCapabilities}
-            donorVisionReport={displayResult?.donor_board_vision_report}
-            visionEnrichReport={displayResult?.vision_evidence_report}
-            clarifier={displayPackage.info?.clarifier}
-          />
-        );
-      case "info":
-        return <InfoPanel pkg={displayPackage} />;
-      case "bom":
-        return <BomPanel pkg={displayPackage} />;
-      case "wiring":
-        return <WiringPanel pkg={displayPackage} />;
-      case "instructions":
-        return <InstructionsPanel pkg={displayPackage} />;
-      case "design":
-        return (
-          <DesignPreviewPanel
-            buildDir={projectBuildDir}
-            pkg={displayPackage}
-            onGoGates={() => setActiveTab("gates")}
-          />
-        );
-      case "gates":
-        return <GatesPanel pkg={displayPackage} benchSession={benchSession} />;
-      case "bench":
-        return (
-          <BenchPanel
-            buildDir={projectBuildDir}
-            benchSession={benchSession}
-            onRefresh={() => refreshBench()}
-            onSubmit={handleBenchSubmit}
-            onSubmitCapture={handleBenchCaptureSubmit}
-            onSuccess={setToast}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  const inResults = view === VIEWS.results;
-  const inPreview = view === VIEWS.preview;
+  const inWorkspace = view === VIEWS.workspace;
+  const advancedActive = ADVANCED_VIEWS.has(view);
 
   return (
     <div className="app-shell">
@@ -518,25 +424,62 @@ export default function App() {
         </div>
 
         <nav className="sidebar-nav" aria-label="Main">
-          {[
-            ["Home", VIEWS.home],
-            ["Design studio", VIEWS.studio],
-            ["New project", VIEWS.wizard],
-            ["Examples", VIEWS.example],
-            ["Interface lab", VIEWS.lab],
-            ["Project", VIEWS.results],
-          ].map(([label, id]) => (
-            <button
-              key={id}
-              type="button"
-              className={`nav-button ${view === id ? "active" : ""}`}
-              onClick={() => setView(id)}
-              disabled={id === VIEWS.results && !displayPackage && !spliceJob.active}
-            >
-              {label}
-            </button>
-          ))}
+          <button
+            type="button"
+            className={`nav-button ${view === VIEWS.home ? "active" : ""}`}
+            onClick={() => setView(VIEWS.home)}
+          >
+            Home
+          </button>
+          <button
+            type="button"
+            className={`nav-button ${view === VIEWS.wizard ? "active" : ""}`}
+            onClick={() => setView(VIEWS.wizard)}
+          >
+            New project
+          </button>
+          <button
+            type="button"
+            className={`nav-button ${inWorkspace ? "active" : ""}`}
+            onClick={() => {
+              if (!session.projectId) {
+                openGreenfieldDesign();
+                return;
+              }
+              setView(VIEWS.workspace);
+            }}
+            disabled={!health?.ok}
+          >
+            Projects
+          </button>
+          <button
+            type="button"
+            className={`nav-button ${advancedActive ? "active" : ""}`}
+            onClick={() => setView(VIEWS.advanced)}
+          >
+            Advanced
+          </button>
         </nav>
+
+        {advancedActive && (
+          <div className="sidebar-section">
+            <div className="sidebar-label">Advanced</div>
+            <button
+              type="button"
+              className={`nav-button nested ${view === VIEWS.example ? "active" : ""}`}
+              onClick={() => setView(VIEWS.example)}
+            >
+              Examples
+            </button>
+            <button
+              type="button"
+              className={`nav-button nested ${view === VIEWS.lab || view === VIEWS.preview ? "active" : ""}`}
+              onClick={() => setView(VIEWS.lab)}
+            >
+              Interface Lab
+            </button>
+          </div>
+        )}
 
         <div className="sidebar-section">
           <div className="sidebar-label">Engine</div>
@@ -556,7 +499,7 @@ export default function App() {
                 <button
                   key={job.job_id}
                   type="button"
-                  className={`project-button ${activeJobId === job.job_id ? "active" : ""} ${jobStatusClass(job.status)}`}
+                  className={`project-button ${session.activeJobId === job.job_id ? "active" : ""} ${jobStatusClass(job.status)}`}
                   onClick={() => job.status === "succeeded" && loadJobResult(job.job_id)}
                   disabled={job.status !== "succeeded"}
                   title={job.status}
@@ -571,76 +514,15 @@ export default function App() {
       </aside>
 
       <main className="main">
-        {inResults && displayPackage && (
-          <header className="project-header">
-            <div className="project-header-text">
-              <p className="eyebrow">Project package</p>
-              <h1>{displayPackage.info?.project_name || "Your project"}</h1>
-              <p className="muted">{displayPackage.info?.goal}</p>
-            </div>
-            <div className="project-header-actions">
-              {activeJobId && (
-                <>
-                  <button
-                    type="button"
-                    className="ghost button-link"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(jobBundleUrl(activeJobId));
-                      setToast("Share link copied — download bundle for reviewers");
-                    }}
-                  >
-                    Share bundle link
-                  </button>
-                  <a className="secondary button-link" href={jobBundleUrl(activeJobId)} download>
-                    ↓ Download zip
-                  </a>
-                </>
-              )}
-            </div>
-          </header>
-        )}
-
-        {inResults && displayPackage && (
-          <>
-            <ReadinessHero
-              pkg={displayPackage}
-              benchSession={benchSession}
-              onGoDesign={() => setActiveTab("design")}
-              onGoBench={() => setActiveTab("bench")}
-              onGoGates={() => setActiveTab("gates")}
-            />
-            <ProjectSummaryBar
-              pkg={displayPackage}
-              benchSession={benchSession}
-              onGoBench={() => setActiveTab("bench")}
-              onGoDesign={() => setActiveTab("design")}
-            />
-            <TabNav
-              tabs={PROJECT_TABS}
-              activeId={activeTab}
-              onChange={setActiveTab}
-              badges={tabBadges}
-            />
-          </>
-        )}
-
-        <div className={`content ${inResults || inPreview ? "content-results" : ""}`}>
+        <div className={`content ${inWorkspace || view === VIEWS.preview ? "content-results" : ""}`}>
           {view === VIEWS.home && (
             <HomeHero
               apiOk={health?.ok}
               version={health?.version}
               onStart={() => setView(VIEWS.wizard)}
-              onOpenStudio={() => setView(VIEWS.studio)}
+              onOpenStudio={openGreenfieldDesign}
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
-            />
-          )}
-
-          {view === VIEWS.studio && (
-            <DesignStudioPanel
-              apiOk={health?.ok}
-              llmReady={Boolean(health?.llm_policy?.qwen_llm_first)}
-              onOpenProject={openStudioProject}
             />
           )}
 
@@ -657,9 +539,37 @@ export default function App() {
             />
           )}
 
+          {view === VIEWS.workspace && (
+            <ProjectWorkspace
+              session={session}
+              onSetStage={(stage) => dispatch({ type: ACTIONS.SET_STAGE, stage })}
+              apiOk={health?.ok}
+              llmReady={Boolean(health?.llm_policy?.qwen_llm_first)}
+              onStudioOpenProject={openStudioProject}
+              onGraphSync={handleGraphSync}
+              onRefreshBench={() => refreshBench()}
+              onBenchSubmit={handleBenchSubmit}
+              onBenchCaptureSubmit={handleBenchCaptureSubmit}
+              onToast={setToast}
+              activeJobId={session.activeJobId}
+            />
+          )}
+
+          {view === VIEWS.advanced && (
+            <AdvancedHub
+              onExamples={() => setView(VIEWS.example)}
+              onLab={() => setView(VIEWS.lab)}
+            />
+          )}
+
           {view === VIEWS.example && (
             <div className="example-shell">
               <section className="card">
+                <div className="preview-toolbar" style={{ marginBottom: "0.75rem" }}>
+                  <button type="button" className="ghost" onClick={() => setView(VIEWS.advanced)}>
+                    ← Advanced
+                  </button>
+                </div>
                 <h2>Example projects</h2>
                 <p className="muted">Proven manifest intakes — same engine path as production.</p>
                 <div className="example-grid">
@@ -680,7 +590,10 @@ export default function App() {
                     type="button"
                     className="primary"
                     disabled={!selectedExample || spliceJob.active || !health?.ok}
-                    onClick={() => selectedExample?.intake && startBuild(selectedExample.intake, { exampleId: selectedExample.id })}
+                    onClick={() =>
+                      selectedExample?.intake &&
+                      startBuild(selectedExample.intake, { exampleId: selectedExample.id })
+                    }
                   >
                     Build selected example
                   </button>
@@ -689,44 +602,53 @@ export default function App() {
             </div>
           )}
 
-          {view === VIEWS.results && renderResults()}
-
           {view === VIEWS.preview && (
             <div className="preview-shell">
               <div className="preview-toolbar card">
                 <button type="button" className="ghost" onClick={() => setView(VIEWS.lab)}>
-                  ← Back to Interface lab
+                  ← Back to Interface Lab
                 </button>
                 <button
                   type="button"
                   className="ghost"
                   onClick={() => {
                     setPreviewContext(null);
-                    setView(displayPackage ? VIEWS.results : VIEWS.home);
+                    setView(sessionHasBuild(session) ? VIEWS.workspace : VIEWS.home);
                   }}
                 >
-                  {displayPackage ? "Open full project" : "Home"}
+                  {sessionHasBuild(session) ? "Open project workspace" : "Home"}
                 </button>
               </div>
               <DesignPreviewPanel
-                buildDir={previewContext?.buildDir || displayBuildDir}
+                buildDir={previewContext?.buildDir || session.buildDir}
                 qualityHint={previewContext?.qualityHint}
                 title={previewContext?.title}
-                onGoGates={displayPackage ? () => {
-                  setPreviewContext(null);
-                  setView(VIEWS.results);
-                  setActiveTab("gates");
-                } : null}
+                onGoGates={
+                  sessionHasBuild(session)
+                    ? () => {
+                        setPreviewContext(null);
+                        dispatch({ type: ACTIONS.SET_STAGE, stage: STAGES.bench });
+                        setView(VIEWS.workspace);
+                      }
+                    : null
+                }
               />
             </div>
           )}
 
           {view === VIEWS.lab && (
-            <InterfaceLabPanel
-              llmPolicy={health?.llm_policy}
-              onOpenDesignPreview={openDesignPreview}
-              onRunFullDemo={handleRunRepairCafeDemo}
-            />
+            <div className="lab-shell">
+              <div className="preview-toolbar" style={{ marginBottom: "0.75rem" }}>
+                <button type="button" className="ghost" onClick={() => setView(VIEWS.advanced)}>
+                  ← Advanced
+                </button>
+              </div>
+              <InterfaceLabPanel
+                llmPolicy={health?.llm_policy}
+                onOpenDesignPreview={openDesignPreview}
+                onRunFullDemo={handleRunRepairCafeDemo}
+              />
+            </div>
           )}
         </div>
       </main>

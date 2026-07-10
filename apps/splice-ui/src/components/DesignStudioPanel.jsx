@@ -168,14 +168,23 @@ function buildAgentSteps(composeResult, drc) {
   ];
 }
 
-function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
+function DesignStudioInner({
+  onOpenProject,
+  llmReady,
+  apiOk,
+  initialPhrase = "",
+  initialNodes = [],
+  initialEdges = [],
+  initialComposeMode = "canvas",
+  onSessionSync,
+}) {
   const [modules, setModules] = useState([]);
   const [catalogError, setCatalogError] = useState(null);
-  const [phrase, setPhrase] = useState("");
-  const [composeMode, setComposeMode] = useState("canvas");
+  const [phrase, setPhrase] = useState(initialPhrase);
+  const [composeMode, setComposeMode] = useState(initialComposeMode);
   const [selectedIds, setSelectedIds] = useState([]);
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [compiling, setCompiling] = useState(false);
   const [composeError, setComposeError] = useState("");
   const [composeResult, setComposeResult] = useState(null);
@@ -192,6 +201,10 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
       })
       .catch((err) => setCatalogError(err.message));
   }, [apiOk]);
+
+  useEffect(() => {
+    onSessionSync?.({ phrase, nodes, edges, composeMode });
+  }, [phrase, nodes, edges, composeMode, onSessionSync]);
 
   const moduleIndex = useMemo(() => {
     const map = new Map();
@@ -320,7 +333,7 @@ function DesignStudioInner({ onOpenProject, llmReady, apiOk }) {
       <header className="design-studio__toolbar card">
         <div className="design-studio__toolbar-main">
           <div>
-            <p className="eyebrow">Design studio</p>
+            <p className="eyebrow">Design stage</p>
             <h1>Pin-level canvas → KiCad compile + DRC agent</h1>
           </div>
           <div className="design-studio__mode">
