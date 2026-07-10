@@ -1,0 +1,24 @@
+{
+  "ok": false,
+  "out_dir": "/tmp/hardware_splicer_api/compose/0d51c0af1d0642bc99ba028e4fcd049e",
+  "build_id": "generic_low_voltage_build",
+  "project_name": "alien_fr_esp32_dht22",
+  "agent_loop": {
+    "resolved": true,
+    "final_kicad_drc_errors": 0,
+    "copper_tier": "cosmetic_preview"
+  },
+  "design_quality": {
+    "kicad_drc_errors": 0,
+    "kicad_drc_warnings": 11,
+    "copper_tier": "cosmetic_preview",
+    "fab_recommendation": "review_required_preview_copper",
+    "fabrication_ready": false,
+    "build_ready": true
+  },
+  "has_project_package": true,
+  "bench_session": {
+    "open_gate_count": 0,
+    "power_on_authorized": false
+  }
+}

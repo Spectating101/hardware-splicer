@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "autoroute_ok": true,
+  "skipped": false,
+  "reason": "",
+  "routed_pcb": null,
+  "keys": [
+    "dsn_path",
+    "freerouting_version",
+    "ok",
+    "reason",
+    "routed_pcb_path",
+    "ses_path",
+    "skipped",
+    "track_count"
+  ],
+  "stderr_tail": "",
+  "copper_after": "cosmetic_preview",
+  "fab_rec_after": "review_required_preview_copper"
+}

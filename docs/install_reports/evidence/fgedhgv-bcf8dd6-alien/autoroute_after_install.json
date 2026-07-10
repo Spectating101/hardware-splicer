@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "autoroute": {
+    "ok": true,
+    "skipped": false,
+    "reason": "",
+    "routed_pcb_path": "/tmp/hs-fr-ie6odgt8/routed.kicad_pcb",
+    "dsn_path": "/tmp/hs-fr-ie6odgt8/autoroute.dsn",
+    "ses_path": "/tmp/hs-fr-ie6odgt8/autoroute.ses",
+    "track_count": 62,
+    "freerouting_version": "2.1.0"
+  },
+  "design_quality": {
+    "ok": true,
+    "build_dir": "/tmp/hardware_splicer_api/compose/0d51c0af1d0642bc99ba028e4fcd049e",
+    "has_kicad_pcb": true,
+    "kicad_drc_errors": 0,
+    "kicad_drc_warnings": 11,
+    "drc_pass": true,
+    "compile_ok": true,
+    "build_ready": true,
+    "fabrication_ready": false,
+    "copper_tier": "cosmetic_preview",
+    "fab_recommendation": "review_required_preview_copper",
+    "electrical_safety_pass": true,
+    "circuit_readiness": "build_ready",
+    "build_id": "generic_low_voltage_build",
+    "drc_fix_loop": {
+      "schema_version": "hardware_splicer.drc_fix_loop.v1",
+      "enabled": true,
+      "attempts": [
+        {
+          "attempt": 0,
+          "kicad_drc_errors": 0,
+          "kicad_drc_warnings": 11,
+          "drc_fixup": {},
+          "fix_buckets": [],
+          "violation_types": []
+        }
+      ],
+      "final_kicad_drc_errors": 0,
+      "resolved": true
+    },
+    "drc_fixup": {},
+    "violations": []
+  }
+}

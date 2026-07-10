@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "out_dir": "/tmp/hardware_splicer_api/compose/6faa49d8d88e4f6daf7cd177994715e4",
+  "resolved": true,
+  "drc_errors": 0,
+  "copper_tier": "cosmetic_preview",
+  "has_package": true,
+  "power_on_authorized": false,
+  "open_gate_count": 0
+}

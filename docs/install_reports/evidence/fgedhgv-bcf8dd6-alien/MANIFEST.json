@@ -1,0 +1,30 @@
+{
+  "source_commit": "bcf8dd6a6a8a9dc1b6020690ffccc847d0da361c",
+  "machine": "DESKTOP-FGEDHGV",
+  "operator": "agent (not independent human)",
+  "date": "2026-07-11",
+  "hashes": {
+    "project-package.zip": "f9be5288b7ef16b996bfaf1211206ed429b9a9bab67afaa8f693cfbd03000544",
+    "project-package-after-fr.zip": "583fbb5b8e32bd75a762cdca43d19090d57a2f13ca42b08816f37372b4d2aa1c",
+    "freerouting-2.1.0.jar": "2c07d58f75dac03782664081e7a58b41c25400d871a9fcf166a2ea6fe60d5def",
+    "agent_loop_fr.json": "97339a8fd55bb7eed622f40c3895fb7ef2afa147a20a6dacaa3cbdc9b1a5c627",
+    "autoroute_after_install.json": "b4cd951e122462e2523f31985cadab777fb88ec94cecee3da47702ecfc10124f"
+  },
+  "sizes_bytes": {
+    "project-package.zip": 25843,
+    "project-package-after-fr.zip": 25800,
+    "freerouting-2.1.0.jar": 67108864
+  },
+  "not_committed": [
+    "project-package.zip",
+    "project-package-after-fr.zip",
+    "freerouting-2.1.0.jar",
+    "full agent_loop_fr.json (summary only committed)"
+  ],
+  "screenshots": [
+    "01-home.png",
+    "02-intake.png",
+    "03-intake-review.png",
+    "04-design.png"
+  ]
+}
