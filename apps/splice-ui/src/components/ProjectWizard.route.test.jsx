@@ -31,16 +31,19 @@ describe("ProjectWizard route handoff", () => {
     cleanup();
   });
 
-  it("greenfield wizard forwards route: compose", async () => {
+  it("greenfield Intake completion does not call compose and uses onCompleteIntake", async () => {
     const user = userEvent.setup();
     const onBuild = vi.fn();
+    const onCompleteIntake = vi.fn();
     render(
       <ProjectWizard
         donorFixtures={[]}
         llmPolicy={{ qwen_llm_first: false }}
         onCancel={() => {}}
         onBuild={onBuild}
+        onCompleteIntake={onCompleteIntake}
         building={false}
+        embedded
       />,
     );
 
@@ -56,16 +59,22 @@ describe("ProjectWizard route handoff", () => {
     await user.click(screen.getByRole("button", { name: /AI carrier design/i }));
     await continueWizard(user);
 
-    await continueWizard(user); // design
+    await screen.findByTestId("greenfield-design-preference");
+    await user.click(screen.getByRole("button", { name: /Describe with AI/i }));
+    await continueWizard(user); // design preference
     await continueWizard(user); // power
 
-    await user.click(screen.getByRole("button", { name: /Build my project/i }));
+    await user.click(screen.getByRole("button", { name: /Continue to Design/i }));
 
-    expect(onBuild).toHaveBeenCalledTimes(1);
-    expect(onBuild.mock.calls[0][1]).toEqual({ route: "compose" });
+    expect(onBuild).not.toHaveBeenCalled();
+    expect(onCompleteIntake).toHaveBeenCalledTimes(1);
+    const payload = onCompleteIntake.mock.calls[0][0];
+    expect(payload.goal).toMatch(/ESP32 soil moisture/i);
+    expect(payload.composeMode).toBe("ai");
+    expect(payload.intake.mode).toBe("greenfield");
   });
 
-  it("salvage wizard forwards route: splice", async () => {
+  it("salvage Intake still submits via route: splice", async () => {
     const user = userEvent.setup();
     const onBuild = vi.fn();
     const fixtures = [
@@ -82,6 +91,7 @@ describe("ProjectWizard route handoff", () => {
         onCancel={() => {}}
         onBuild={onBuild}
         building={false}
+        embedded
       />,
     );
 
@@ -105,7 +115,7 @@ describe("ProjectWizard route handoff", () => {
 
     await continueWizard(user); // power
 
-    await user.click(screen.getByRole("button", { name: /Build my project/i }));
+    await user.click(screen.getByRole("button", { name: /Build salvage project/i }));
 
     expect(onBuild).toHaveBeenCalled();
     expect(onBuild.mock.calls.at(-1)[1]).toEqual({ route: "splice" });

@@ -37,6 +37,7 @@ export default function ProjectWizard({
   llmPolicy = null,
   onCancel,
   onBuild,
+  onCompleteIntake = null,
   building,
   buildError,
   stageLabel,
@@ -114,10 +115,17 @@ export default function ProjectWizard({
 
     if (
       stepId === "design" &&
+      wizard.mode === "salvage" &&
       wizard.designStrategy === "canvas" &&
       (wizard.selectedModuleIds || []).length < 2
     ) {
       setClarifyError("Pick at least two modules for canvas compose.");
+      return;
+    }
+
+    // Greenfield design preference: strategy only — no module canvas in Intake
+    if (stepId === "design" && wizard.mode === "greenfield" && !wizard.designStrategy) {
+      setClarifyError("Choose how you want to design in Design Studio.");
       return;
     }
 
@@ -138,6 +146,33 @@ export default function ProjectWizard({
 
   const handleBuild = () => {
     if (wizard.mode === "greenfield") {
+      const goal = wizard.goal.trim();
+      const projectName = slugify(wizard.projectName || goal);
+      const intake = {
+        goal,
+        project_name: projectName,
+        mode: "greenfield",
+        designStrategy: wizard.designStrategy || "llm",
+        clarifier: wizard.clarifier,
+        answers: wizard.answers,
+        batteryVoltage: wizard.batteryVoltage,
+        runtimeMin: wizard.runtimeMin,
+        enriched_intent: enrichedIntent,
+      };
+      if (onCompleteIntake) {
+        onCompleteIntake({
+          intake,
+          goal,
+          projectName,
+          composeMode: wizard.designStrategy === "llm" ? "ai" : "canvas",
+          constraints: {
+            batteryVoltage: wizard.batteryVoltage,
+            runtimeMin: wizard.runtimeMin,
+          },
+        });
+        return;
+      }
+      // Non-embedded fallback (should not happen in workspace)
       const payload = buildComposePayloadFromWizard(wizard, { enrichedIntent });
       onBuild(payload, { route: "compose" });
       return;
@@ -292,7 +327,41 @@ export default function ProjectWizard({
           </>
         )}
 
-        {stepId === "design" && (
+        {stepId === "design" && wizard.mode === "greenfield" && (
+          <div className="design-studio-step" data-testid="greenfield-design-preference">
+            <h3>How will you design?</h3>
+            <p className="muted">
+              Intake only records your preference. Module placement and compile happen in the Design stage next.
+            </p>
+            <div className="choice-grid">
+              <button
+                type="button"
+                className={`choice-card ${wizard.designStrategy === "llm" ? "active" : ""}`}
+                onClick={() => patchWizard({ designStrategy: "llm" })}
+              >
+                <strong>Describe with AI</strong>
+                <span>Use your goal phrase in Design Studio — agent picks modules</span>
+              </button>
+              <button
+                type="button"
+                className={`choice-card ${wizard.designStrategy === "canvas" ? "active" : ""}`}
+                onClick={() => patchWizard({ designStrategy: "canvas" })}
+              >
+                <strong>Choose modules manually</strong>
+                <span>Place modules on the Design Studio canvas</span>
+              </button>
+            </div>
+            {wizard.designStrategy === "llm" && (
+              <p className="hint">
+                {llmComposeReady
+                  ? "Qwen is available for AI phrase compose in Design."
+                  : "LLM keys not configured — Design can still use heuristic phrase compose."}
+              </p>
+            )}
+          </div>
+        )}
+
+        {stepId === "design" && wizard.mode === "salvage" && (
           <CanvasComposeStep
             wizard={wizard}
             llmReady={llmComposeReady}
@@ -528,8 +597,7 @@ export default function ProjectWizard({
 
             {wizard.mode === "greenfield" ? (
               <p className="hint">
-                Build runs AI compose → KiCad compile → full PROJECT_PACKAGE with design verify, BOM, and bench
-                session — same results shell as salvage builds.
+                Next you will open Design Studio with this goal. Compile and KiCad DRC happen there — not from Intake.
               </p>
             ) : (
               <div className="ai-review-actions card nested">
@@ -592,7 +660,11 @@ export default function ProjectWizard({
             onClick={handleBuild}
             disabled={building}
           >
-            {building ? "Building…" : "Build my project"}
+            {building
+              ? "Building…"
+              : wizard.mode === "greenfield"
+                ? "Continue to Design"
+                : "Build salvage project"}
           </button>
         )}
       </div>

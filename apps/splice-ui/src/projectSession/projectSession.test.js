@@ -7,22 +7,55 @@ import {
   projectSessionReducer,
   sessionHasPackage,
 } from "./projectSession.js";
+import { designReady } from "./stageAvailability.js";
 
 describe("projectSessionReducer", () => {
-  it("START_PROJECT opens Intake with a new identity", () => {
+  it("START_PROJECT opens Intake with a new identity and Design locked", () => {
     const next = projectSessionReducer(createEmptySession(), {
       type: ACTIONS.START_PROJECT,
     });
     expect(next.currentStage).toBe(STAGES.intake);
     expect(next.projectId).toBeTruthy();
+    expect(next.intakeComplete).toBe(false);
     expect(next.graph.nodes).toEqual([]);
+    expect(designReady(next)).toBe(false);
+  });
+
+  it("COMMIT_INTAKE unlocks Design with goal preserved and no engine fields", () => {
+    let state = projectSessionReducer(createEmptySession(), { type: ACTIONS.START_PROJECT });
+    state = projectSessionReducer(state, {
+      type: ACTIONS.COMMIT_INTAKE,
+      intake: {
+        goal: "ESP32 soil moisture logger",
+        project_name: "soil_logger",
+        mode: "greenfield",
+        designStrategy: "llm",
+      },
+      goal: "ESP32 soil moisture logger",
+      projectName: "soil_logger",
+      composeMode: "ai",
+    });
+    expect(state.intakeComplete).toBe(true);
+    expect(state.designEditable).toBe(true);
+    expect(state.currentStage).toBe(STAGES.design);
+    expect(state.goal).toBe("ESP32 soil moisture logger");
+    expect(state.graph.phrase).toBe("ESP32 soil moisture logger");
+    expect(state.graph.composeMode).toBe("ai");
+    expect(state.buildDir).toBeNull();
+    expect(state.composeResult).toBeNull();
+    expect(designReady(state)).toBe(true);
   });
 
   it("persists graph across Studio → Verify and Verify → Design", () => {
     let state = projectSessionReducer(createEmptySession(), {
       type: ACTIONS.START_PROJECT,
     });
-    state = projectSessionReducer(state, { type: ACTIONS.SET_STAGE, stage: STAGES.design });
+    state = projectSessionReducer(state, {
+      type: ACTIONS.COMMIT_INTAKE,
+      intake: { goal: "carrier board", project_name: "carrier" },
+      goal: "carrier board",
+      composeMode: "canvas",
+    });
     const nodes = [{ id: "n1", data: { moduleId: "esp32" } }];
     const edges = [{ id: "e1", source: "n1", target: "n2" }];
     state = projectSessionReducer(state, {
@@ -61,6 +94,7 @@ describe("projectSessionReducer", () => {
     let state = createEmptySession({
       projectId: "proj_a",
       activeJobId: "job_stale",
+      intakeComplete: true,
       graph: {
         nodes: [{ id: "n1" }],
         edges: [],
@@ -79,7 +113,7 @@ describe("projectSessionReducer", () => {
     expect(sessionHasPackage(state)).toBe(true);
   });
 
-  it("LOAD_RECENT_BUILD replaces project identity and clears foreign Studio graph", () => {
+  it("LOAD_RECENT_BUILD without Studio graph is not editable Design", () => {
     let state = projectSessionReducer(createEmptySession(), {
       type: ACTIONS.START_PROJECT,
     });
@@ -115,8 +149,33 @@ describe("projectSessionReducer", () => {
     expect(state.mode).toBe("salvage");
     expect(state.graph.nodes).toEqual([]);
     expect(state.graph.phrase).toBe("salvage drive");
+    expect(state.designEditable).toBe(false);
+    expect(state.sessionOrigin).toBe("recent_build");
     expect(state.composeResult).toEqual({ from: "b" });
     expect(state.buildDir).toBe("/tmp/project_b");
+  });
+
+  it("LOAD_RECENT_BUILD with stored Studio graph restores Design", () => {
+    const state = projectSessionReducer(createEmptySession(), {
+      type: ACTIONS.LOAD_RECENT_BUILD,
+      jobId: "job_studio",
+      result: {
+        build_dir: "/tmp/studio_b",
+        project_name: "logger",
+        goal: "logger goal",
+        project_package: { build_dir: "/tmp/studio_b" },
+        studio_graph: {
+          nodes: [{ id: "n1", data: { moduleId: "esp32" } }],
+          edges: [],
+          phrase: "logger goal",
+          composeMode: "canvas",
+        },
+      },
+    });
+    expect(state.designEditable).toBe(true);
+    expect(state.graph.nodes).toHaveLength(1);
+    expect(state.graph.phrase).toBe("logger goal");
+    expect(designReady(state)).toBe(true);
   });
 
   it("HYDRATE_CURRENT_RESULT keeps the same project identity for the active job", () => {
@@ -126,7 +185,7 @@ describe("projectSessionReducer", () => {
     const id = state.projectId;
     state = projectSessionReducer(state, {
       type: ACTIONS.START_FROM_INTAKE,
-      intake: { goal: "logger", project_name: "logger", mode: "greenfield" },
+      intake: { goal: "logger", project_name: "logger", mode: "salvage", donor_context: {} },
     });
     state = projectSessionReducer(state, {
       type: ACTIONS.HYDRATE_CURRENT_RESULT,
@@ -139,6 +198,7 @@ describe("projectSessionReducer", () => {
     expect(state.projectId).toBe(id);
     expect(state.activeJobId).toBe("job_current");
     expect(state.currentStage).toBe(STAGES.verify);
+    expect(state.intakeComplete).toBe(true);
   });
 
   it("patches package gates from bench submit", () => {
@@ -157,4 +217,22 @@ describe("projectSessionReducer", () => {
     expect(state.projectPackage.gates.open_gate_count).toBe(0);
     expect(state.projectPackage.gates.power_on_authorized).toBe(true);
   });
+
+  it("SYNC_GRAPH is a no-op when Design is not editable", () => {
+    let state = createEmptySession({
+      designEditable: false,
+      graph: emptyPhraseGraph("locked"),
+    });
+    state = projectSessionReducer(state, {
+      type: ACTIONS.SYNC_GRAPH,
+      nodes: [{ id: "fake" }],
+      phrase: "should not apply",
+    });
+    expect(state.graph.nodes).toEqual([]);
+    expect(state.graph.phrase).toBe("locked");
+  });
 });
+
+function emptyPhraseGraph(phrase) {
+  return { nodes: [], edges: [], phrase, composeMode: "canvas" };
+}

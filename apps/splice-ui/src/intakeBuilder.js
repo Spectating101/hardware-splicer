@@ -199,7 +199,7 @@ export function getWizardSteps(wizard) {
   if (wizard.mode === "salvage") {
     steps.push({ id: "parts", label: "Parts you have" }, { id: "donor", label: "Donor board + AI" });
   } else {
-    steps.push({ id: "design", label: "AI design studio" });
+    steps.push({ id: "design", label: "Design preference" });
   }
   steps.push({ id: "power", label: wizard.mode === "salvage" ? "Power & limits" : "Constraints" });
   steps.push({ id: "review", label: "Review" });

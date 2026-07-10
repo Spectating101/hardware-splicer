@@ -2,8 +2,7 @@ import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
-import ProjectSummaryBar from "../components/ProjectSummaryBar.jsx";
-import ReadinessHero from "../components/ReadinessHero.jsx";
+import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
 import TabNav from "../components/TabNav.jsx";
 import {
   BomPanel,
@@ -15,17 +14,15 @@ import {
 import { jobBundleUrl } from "../api.js";
 import {
   STAGES,
-  canReturnToDesign,
   sessionHasPackage,
 } from "./projectSession.js";
 import {
   buildStageTabs,
-  copperHonestyLabel,
-  evidenceLabel,
   nextStageAction,
   stageBlockReason,
   stageIsAvailable,
 } from "./stageAvailability.js";
+import { deriveProjectTruth } from "./deriveProjectTruth.js";
 
 /**
  * Project workspace shell — stages wrap existing panels.
@@ -40,6 +37,7 @@ export default function ProjectWorkspace({
   visionCapabilities,
   llmPolicy,
   onIntakeBuild,
+  onIntakeComplete,
   onIntakeCancel,
   intakeBuilding,
   intakeBuildError,
@@ -54,20 +52,14 @@ export default function ProjectWorkspace({
 }) {
   const pkg = session.projectPackage;
   const buildDir = session.buildDir || pkg?.build_dir || null;
-  const displayResult = session.displayResult;
   const stage = session.currentStage || STAGES.intake;
   const hasPkg = sessionHasPackage(session);
   const stageTabs = buildStageTabs(session);
   const next = nextStageAction(session);
-  const copper = copperHonestyLabel(
-    displayResult?.design_quality?.copper_tier ||
-      session.designQuality?.copper_tier ||
-      pkg?.gates?.copper_tier,
-  );
-  const evidence = evidenceLabel(session.benchSession, pkg);
+  const truth = deriveProjectTruth(session);
+  const bundleUrl = activeJobId ? jobBundleUrl(activeJobId) : null;
 
-  const openGateCount =
-    session.benchSession?.open_gate_count ?? (session.benchSession?.open_gates || []).length;
+  const openGateCount = truth.bench.openGateCount;
 
   const badges = {
     [STAGES.bench]: openGateCount,
@@ -81,14 +73,11 @@ export default function ProjectWorkspace({
     onSetStage(nextStage);
   };
 
-  const bundleUrl = activeJobId ? jobBundleUrl(activeJobId) : null;
-
   return (
     <div className="project-workspace" data-testid="project-workspace">
       <ProjectStatusHeader
         session={session}
         activeJobId={activeJobId}
-        bundleUrl={bundleUrl}
         onShare={() => {
           if (!bundleUrl) return;
           navigator.clipboard?.writeText(bundleUrl);
@@ -126,21 +115,7 @@ export default function ProjectWorkspace({
       )}
 
       {hasPkg && stage !== STAGES.design && stage !== STAGES.intake && (
-        <>
-          <ReadinessHero
-            pkg={pkg}
-            benchSession={session.benchSession}
-            onGoDesign={() => handleStageChange(STAGES.verify)}
-            onGoBench={() => handleStageChange(STAGES.bench)}
-            onGoGates={() => handleStageChange(STAGES.bench)}
-          />
-          <ProjectSummaryBar
-            pkg={pkg}
-            benchSession={session.benchSession}
-            onGoBench={() => handleStageChange(STAGES.bench)}
-            onGoDesign={() => handleStageChange(STAGES.verify)}
-          />
-        </>
+        <ProjectReadinessPanel session={session} onGoStage={handleStageChange} />
       )}
 
       <div className="workspace-stage">
@@ -154,6 +129,7 @@ export default function ProjectWorkspace({
               llmPolicy={llmPolicy}
               onCancel={onIntakeCancel}
               onBuild={onIntakeBuild}
+              onCompleteIntake={onIntakeComplete}
               building={intakeBuilding}
               buildError={intakeBuildError}
               stageLabel={intakeStageLabel}
@@ -163,17 +139,29 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.design && (
           <div data-testid="stage-design">
-            <DesignStudioPanel
-              key={session.projectId || "studio"}
-              apiOk={apiOk}
-              llmReady={llmReady}
-              initialPhrase={session.graph.phrase || session.goal || ""}
-              initialNodes={session.graph.nodes || []}
-              initialEdges={session.graph.edges || []}
-              initialComposeMode={session.graph.composeMode || "canvas"}
-              onSessionSync={onGraphSync}
-              onOpenProject={onStudioOpenProject}
-            />
+            {session.designEditable === false ? (
+              <section className="card empty-card" data-testid="design-not-editable">
+                <h2>No editable Studio graph</h2>
+                <p className="muted">
+                  No editable Studio graph was stored for this build. Verify, Bench, and Package still show the compiled
+                  artifacts. Start a new greenfield project to design in Studio.
+                </p>
+                <p className="small muted">Goal on record: {session.goal || "—"}</p>
+              </section>
+            ) : (
+              <DesignStudioPanel
+                key={session.projectId || "studio"}
+                apiOk={apiOk}
+                llmReady={llmReady}
+                initialPhrase={session.graph.phrase || session.goal || ""}
+                initialNodes={session.graph.nodes || []}
+                initialEdges={session.graph.edges || []}
+                initialComposeMode={session.graph.composeMode || "canvas"}
+                onSessionSync={onGraphSync}
+                onOpenProject={onStudioOpenProject}
+                showIntakeEmptyState={Boolean(session.intakeComplete && !(session.graph.nodes || []).length)}
+              />
+            )}
           </div>
         )}
 
@@ -181,14 +169,7 @@ export default function ProjectWorkspace({
           <div className="panel-stack" data-testid="stage-verify">
             {!buildDir && (
               <section className="card empty-card">
-                <p className="muted">
-                  Compile from Design or finish Intake to populate KiCad verification.{" "}
-                  {canReturnToDesign(session) && (
-                    <button type="button" className="link-button" onClick={() => handleStageChange(STAGES.design)}>
-                      Return to Design
-                    </button>
-                  )}
-                </p>
+                <p className="muted">Compile from Design or finish a salvage build to populate verification.</p>
               </section>
             )}
             {buildDir && (
@@ -198,15 +179,12 @@ export default function ProjectWorkspace({
                 onGoGates={() => handleStageChange(STAGES.bench)}
               />
             )}
-            {copper && (
-              <section className={`card honesty-card honesty-card--${copper.tone}`} data-testid="copper-honesty">
-                <h3>{copper.title}</h3>
-                <p className="small muted">{copper.detail}</p>
+            {truth.copper.state === "preview_only" && (
+              <section className="card honesty-card honesty-card--warn" data-testid="copper-honesty">
+                <h3>{truth.copper.label}</h3>
+                <p className="small muted">{truth.copper.detail}</p>
                 <p className="small muted">
-                  DRC clean does <strong>not</strong> mean fabrication-ready.
-                  {displayResult?.design_quality?.fab_recommendation
-                    ? ` Recommendation: ${displayResult.design_quality.fab_recommendation}`
-                    : ""}
+                  Design clean · Copper preview only · <strong>Not fabrication-ready</strong>
                 </p>
               </section>
             )}
@@ -215,18 +193,16 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.bench && (
           <div className="panel-stack" data-testid="stage-bench">
-            {evidence && (
-              <section className={`card honesty-card honesty-card--${evidence.tone}`} data-testid="bench-evidence-banner">
-                <h3>{evidence.label}</h3>
-                <p className="small muted">{evidence.detail}</p>
-              </section>
-            )}
-            {!evidence && session.benchSession && (
-              <section className="card honesty-card honesty-card--neutral" data-testid="bench-evidence-banner">
-                <h3>Bench evidence</h3>
+            {(truth.bench.simulated || truth.bench.state !== "not_started") && (
+              <section
+                className={`card honesty-card honesty-card--${truth.bench.simulated ? "warn" : "neutral"}`}
+                data-testid="bench-evidence-banner"
+              >
+                <h3>{truth.bench.simulated ? "Simulated evidence" : "Bench evidence"}</h3>
                 <p className="small muted">
-                  Confirm whether measurements are simulated or from a physical instrument before treating power-on as
-                  field proof.
+                  {truth.bench.simulated
+                    ? "Simulated evidence is not physical café measurement."
+                    : "Confirm whether measurements are simulated or from a physical instrument before treating power-on as field proof."}
                 </p>
               </section>
             )}
@@ -254,7 +230,7 @@ export default function ProjectWorkspace({
             {!pkg && (
               <section className="card empty-card">
                 <p className="muted">
-                  Package appears after you finish Intake build or compile from Design with a project goal set.
+                  Package appears after Design compile with a project goal, or after a salvage build.
                 </p>
               </section>
             )}

@@ -1,15 +1,18 @@
 /** Stage availability for the project workspace (UI gating only). */
 
 import { STAGES, STAGE_ORDER, sessionHasBuild, sessionHasPackage } from "./projectSession.js";
+import { deriveProjectTruth } from "./deriveProjectTruth.js";
 
 export function intakeReady(session) {
   return Boolean(session?.projectId);
 }
 
 export function designReady(session) {
-  // Project exists → Design is available. Home no longer bypasses Intake;
-  // Verify/Bench/Package remain hard-gated on compile/package evidence.
-  return Boolean(session?.projectId);
+  if (!session?.projectId) return false;
+  if (!session.intakeComplete) return false;
+  // Non-editable recent builds still open Design to show a bounded explanation
+  // (not a fake blank canvas). Editable Studio requires designEditable !== false.
+  return true;
 }
 
 export function verifyReady(session) {
@@ -40,15 +43,14 @@ export function stageIsAvailable(session, stageId) {
 export function stageIsComplete(session, stageId) {
   switch (stageId) {
     case STAGES.intake:
-      return Boolean(session?.intake || sessionHasBuild(session) || session?.graph?.nodes?.length);
+      return Boolean(session?.intakeComplete);
     case STAGES.design:
       return sessionHasBuild(session);
     case STAGES.verify:
       return sessionHasBuild(session);
     case STAGES.bench: {
-      const open =
-        session?.benchSession?.open_gate_count ?? (session?.benchSession?.open_gates || []).length;
-      return Boolean(session?.benchSession?.power_on_authorized) || (session?.benchSession && open === 0);
+      const truth = deriveProjectTruth(session);
+      return truth.bench.state === "physical_authorized" || truth.bench.state === "simulated_pass";
     }
     case STAGES.package:
       return sessionHasPackage(session);
@@ -63,9 +65,10 @@ export function stageBlockReason(session, stageId) {
     case STAGES.intake:
       return "Start a project first";
     case STAGES.design:
-      return "Start a project first";
+      if (!session?.intakeComplete) return "Finish Intake before Design";
+      return "Design not available";
     case STAGES.verify:
-      return "Compile a board in Design (or finish Intake build) first";
+      return "Compile a board in Design (or finish salvage build) first";
     case STAGES.bench:
       return "Needs a compiled board before gates";
     case STAGES.package:
@@ -93,49 +96,53 @@ export function buildStageTabs(session) {
 }
 
 export function nextStageAction(session) {
+  const truth = deriveProjectTruth(session);
   const stage = session?.currentStage || STAGES.intake;
-  switch (stage) {
-    case STAGES.intake:
-      return {
-        label: designReady(session) ? "Continue to Design" : "Describe your project above",
-        stage: STAGES.design,
-        enabled: designReady(session),
-        primary: true,
-      };
-    case STAGES.design:
-      return {
-        label: verifyReady(session) ? "Continue to Verify" : "Compile to KiCad above",
-        stage: STAGES.verify,
-        enabled: verifyReady(session),
-        primary: true,
-      };
-    case STAGES.verify:
-      return {
-        label: "Review bench gates",
-        stage: STAGES.bench,
-        enabled: benchReady(session),
-        primary: true,
-      };
-    case STAGES.bench:
-      return {
-        label: "Continue to Package",
-        stage: STAGES.package,
-        enabled: packageReady(session),
-        primary: true,
-      };
-    case STAGES.package:
-      return {
-        label: "Download or share bundle",
-        stage: null,
-        enabled: Boolean(session?.activeJobId),
-        primary: true,
-        isDownload: true,
-      };
-    default:
-      return null;
+  if (stage === STAGES.intake) {
+    return null; // wizard owns CTA
   }
+  if (stage === STAGES.design) {
+    return {
+      label: verifyReady(session) ? "Continue to Verify" : "Compile to KiCad above",
+      stage: STAGES.verify,
+      enabled: verifyReady(session),
+      primary: true,
+    };
+  }
+  if (stage === STAGES.verify) {
+    return {
+      label: "Review bench gates",
+      stage: STAGES.bench,
+      enabled: benchReady(session),
+      primary: true,
+    };
+  }
+  if (stage === STAGES.bench) {
+    return {
+      label: "Continue to Package",
+      stage: STAGES.package,
+      enabled: packageReady(session),
+      primary: true,
+    };
+  }
+  if (stage === STAGES.package) {
+    return {
+      label: "Download or share bundle",
+      stage: null,
+      enabled: Boolean(session?.activeJobId),
+      primary: true,
+      isDownload: true,
+    };
+  }
+  return {
+    label: truth.overall.nextAction.label,
+    stage: truth.overall.nextAction.stage,
+    enabled: stageIsAvailable(session, truth.overall.nextAction.stage),
+    primary: true,
+  };
 }
 
+/** @deprecated Prefer deriveProjectTruth(session).copper — kept for thin honesty helpers/tests */
 export function copperHonestyLabel(tier) {
   if (!tier) return null;
   const raw = String(tier);
@@ -160,24 +167,7 @@ export function copperHonestyLabel(tier) {
   };
 }
 
-export function drcStatusFromSession(session) {
-  const dq = session?.designQuality || session?.displayResult?.design_quality || {};
-  const errors = dq.kicad_drc_errors;
-  if (errors == null && !sessionHasBuild(session)) return { tone: "neutral", label: "Not compiled" };
-  if (errors > 0) return { tone: "fail", label: `${errors} DRC error${errors === 1 ? "" : "s"}` };
-  if (errors === 0) return { tone: "ok", label: "DRC clean" };
-  return { tone: "neutral", label: "DRC unknown" };
-}
-
-export function benchStatusFromSession(session) {
-  const bench = session?.benchSession;
-  if (!bench && !sessionHasBuild(session)) return { tone: "neutral", label: "No bench yet" };
-  if (bench?.power_on_authorized) return { tone: "ok", label: "Power-on authorized" };
-  const open = bench?.open_gate_count ?? (bench?.open_gates || []).length;
-  if (open > 0) return { tone: "warn", label: `${open} gate${open === 1 ? "" : "s"} open` };
-  return { tone: "neutral", label: "Bench pending" };
-}
-
+/** @deprecated Prefer deriveProjectTruth(session).bench */
 export function evidenceLabel(benchSession, pkg) {
   const simulated =
     benchSession?.simulated === true ||
@@ -198,3 +188,5 @@ export function evidenceLabel(benchSession, pkg) {
   }
   return null;
 }
+
+export { deriveProjectTruth };

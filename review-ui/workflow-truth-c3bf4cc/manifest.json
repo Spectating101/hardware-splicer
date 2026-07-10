@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "c3bf4cc7bcd5a9514cfd6646bae6e4f111ef11af",
+  "viewport": { "width": 1440, "height": 900 },
+  "server": "http://127.0.0.1:8787",
+  "journey": [
+    "01-home.png",
+    "02-intake.png",
+    "03-intake-review.png",
+    "04-design-empty.png"
+  ],
+  "live_drc": [
+    "live-drc/05-design-canvas-populated.png",
+    "live-drc/06-design-drc-agent.png",
+    "live-drc/07-verify-after-transition.png"
+  ],
+  "notes": "Live Studio canvas compile captured with KiCad DRC agent loop (0 errors, preview copper). Greenfield Intake used COMMIT_INTAKE / Continue to Design."
+}

@@ -177,6 +177,7 @@ function DesignStudioInner({
   initialEdges = [],
   initialComposeMode = "canvas",
   onSessionSync,
+  showIntakeEmptyState = false,
 }) {
   const [modules, setModules] = useState([]);
   const [catalogError, setCatalogError] = useState(null);
@@ -327,9 +328,51 @@ function DesignStudioInner({
 
   const disabled = compiling || !apiOk;
   const agentSteps = buildAgentSteps(composeResult, drcState);
+  const showEmpty =
+    showIntakeEmptyState && !nodes.length && !composeResult && !compiling;
 
   return (
     <div className="design-studio">
+      {showEmpty && (
+        <section className="card design-empty-state" data-testid="design-empty-state">
+          <p className="eyebrow">Design Studio</p>
+          <h2>Start from your Intake goal</h2>
+          <p className="muted">
+            Goal carried from Intake: <strong>{phrase || initialPhrase || "—"}</strong>
+          </p>
+          <ol className="design-empty-state__steps">
+            <li>Let the agent select modules from your phrase, or place modules manually on the canvas.</li>
+            <li>Compile runs KiCad DRC with an auto-fix loop — that judges the board.</li>
+            <li>DRC-clean does not guarantee fabrication-ready copper (preview copper stays preview-only).</li>
+          </ol>
+          <div className="design-empty-state__actions">
+            <button
+              type="button"
+              className={composeMode === "ai" ? "primary" : "secondary"}
+              data-testid="design-empty-ai"
+              disabled={disabled}
+              onClick={() => setComposeMode("ai")}
+            >
+              Describe with AI
+            </button>
+            <button
+              type="button"
+              className={composeMode === "canvas" ? "primary" : "secondary"}
+              data-testid="design-empty-manual"
+              disabled={disabled}
+              onClick={() => setComposeMode("canvas")}
+            >
+              Choose modules manually
+            </button>
+          </div>
+          <p className="hint small">
+            {composeMode === "ai"
+              ? "Dominant path: refine the goal above, then run AI compose → KiCad."
+              : "Dominant path: add modules from the library, then Compile to KiCad."}
+          </p>
+        </section>
+      )}
+
       <header className="design-studio__toolbar card">
         <div className="design-studio__toolbar-main">
           <div>

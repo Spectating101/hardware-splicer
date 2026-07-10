@@ -53,19 +53,23 @@ export function createEmptySession(overrides = {}) {
     displayResult: o.displayResult || null,
     currentStage: o.currentStage || STAGES.intake,
     dirty: Boolean(o.dirty),
+    intakeComplete: Boolean(o.intakeComplete),
+    designEditable: o.designEditable !== undefined ? Boolean(o.designEditable) : true,
+    sessionOrigin: o.sessionOrigin || "new", // new | current_job | recent_build
   };
 }
 
 export const ACTIONS = Object.freeze({
   RESET: "RESET",
   START_PROJECT: "START_PROJECT",
+  /** Greenfield Intake finished — hand off to Design Studio (no engine call). */
+  COMMIT_INTAKE: "COMMIT_INTAKE",
+  /** Salvage/demo engine submission transition. */
   START_FROM_INTAKE: "START_FROM_INTAKE",
   SET_STAGE: "SET_STAGE",
   SYNC_GRAPH: "SYNC_GRAPH",
   APPLY_STUDIO_COMPILE: "APPLY_STUDIO_COMPILE",
-  /** Same active project received its own job result (wizard/demo submit). */
   HYDRATE_CURRENT_RESULT: "HYDRATE_CURRENT_RESULT",
-  /** Sidebar recent-build load — replaces project identity; clears foreign graph. */
   LOAD_RECENT_BUILD: "LOAD_RECENT_BUILD",
   SET_BENCH_SESSION: "SET_BENCH_SESSION",
   SET_ACTIVE_JOB: "SET_ACTIVE_JOB",
@@ -91,6 +95,10 @@ function resultIdentity(result = {}, pkg = null) {
   };
 }
 
+function hasReconstructableGraph(graph) {
+  return Boolean(graph?.nodes?.length);
+}
+
 export function projectSessionReducer(state, action) {
   switch (action.type) {
     case ACTIONS.RESET:
@@ -104,21 +112,60 @@ export function projectSessionReducer(state, action) {
         mode: "greenfield",
         currentStage: STAGES.intake,
         dirty: false,
+        intakeComplete: false,
+        designEditable: true,
+        sessionOrigin: "new",
       });
+
+    case ACTIONS.COMMIT_INTAKE: {
+      const intake = action.intake || {};
+      const goal = intake.goal || action.goal || state.goal || "";
+      const projectName =
+        intake.project_name || intake.projectName || action.projectName || state.projectName || "Untitled project";
+      const composeMode =
+        action.composeMode ||
+        (intake.designStrategy === "llm" || intake.design_strategy === "llm" ? "ai" : "canvas");
+      return {
+        ...state,
+        projectId: state.projectId || newProjectId(),
+        projectName,
+        goal,
+        mode: "greenfield",
+        intake,
+        constraints: action.constraints || intake.constraints || state.constraints,
+        graph: {
+          nodes: state.graph?.nodes || [],
+          edges: state.graph?.edges || [],
+          phrase: goal,
+          composeMode,
+        },
+        intakeComplete: true,
+        designEditable: true,
+        sessionOrigin: "new",
+        currentStage: STAGES.design,
+        dirty: true,
+      };
+    }
 
     case ACTIONS.START_FROM_INTAKE: {
       const intake = action.intake || {};
-      return createEmptySession({
-        projectId: state.projectId || newProjectId(),
-        projectName: intake.project_name || intake.projectName || state.projectName || "Untitled project",
-        goal: intake.goal || state.goal || "",
-        mode: intake.mode === "salvage" || intake.donor_context ? "salvage" : "greenfield",
-        intake,
-        currentStage: STAGES.verify,
-        dirty: true,
-        // Keep studio graph only if this is still the same in-progress project with no foreign load
-        graph: state.graph,
-      });
+      const salvage = intake.mode === "salvage" || Boolean(intake.donor_context);
+      return {
+        ...createEmptySession({
+          projectId: state.projectId || newProjectId(),
+          projectName:
+            intake.project_name || intake.projectName || state.projectName || "Untitled project",
+          goal: intake.goal || state.goal || "",
+          mode: salvage ? "salvage" : "greenfield",
+          intake,
+          currentStage: STAGES.verify,
+          dirty: true,
+          graph: state.graph,
+          intakeComplete: true,
+          designEditable: salvage ? false : hasReconstructableGraph(state.graph),
+          sessionOrigin: "current_job",
+        }),
+      };
     }
 
     case ACTIONS.SET_STAGE: {
@@ -128,6 +175,7 @@ export function projectSessionReducer(state, action) {
     }
 
     case ACTIONS.SYNC_GRAPH: {
+      if (state.designEditable === false) return state;
       const graph = {
         nodes: action.nodes ?? state.graph.nodes,
         edges: action.edges ?? state.graph.edges,
@@ -172,6 +220,8 @@ export function projectSessionReducer(state, action) {
               power_on_authorized: benchSession.power_on_authorized,
               level: benchSession.level,
               gates: benchSession.gates,
+              simulated: benchSession.simulated,
+              evidence_kind: benchSession.evidence_kind,
             }
           : null,
       };
@@ -181,7 +231,6 @@ export function projectSessionReducer(state, action) {
         projectName: phrase || state.projectName,
         goal: phrase || state.goal,
         buildDir: dir,
-        // Synchronous studio compile is not an async job — never keep a foreign bundle link
         activeJobId: jobId ?? null,
         composeResult: composeResult || null,
         designQuality: displayResult.design_quality,
@@ -191,7 +240,8 @@ export function projectSessionReducer(state, action) {
         displayResult,
         currentStage: STAGES.verify,
         dirty: false,
-        // same project — preserve graph
+        intakeComplete: true,
+        designEditable: true,
       };
     }
 
@@ -216,7 +266,9 @@ export function projectSessionReducer(state, action) {
         displayResult: result,
         currentStage: action.stage || STAGES.verify,
         dirty: false,
-        // Same project job — keep studio graph if present (compose path may have none)
+        intakeComplete: true,
+        designEditable: state.designEditable !== false && hasReconstructableGraph(state.graph),
+        sessionOrigin: "current_job",
         graph: state.graph,
       };
     }
@@ -226,6 +278,7 @@ export function projectSessionReducer(state, action) {
       const pkg = result.project_package || null;
       const id = resultIdentity(result, pkg);
       const reconstructable = action.graph || result.studio_graph || null;
+      const editable = hasReconstructableGraph(reconstructable);
       return createEmptySession({
         projectId: action.jobId || newProjectId(),
         projectName: id.name,
@@ -241,7 +294,10 @@ export function projectSessionReducer(state, action) {
         displayResult: result,
         currentStage: action.stage || STAGES.verify,
         dirty: false,
-        graph: reconstructable
+        intakeComplete: true,
+        designEditable: editable,
+        sessionOrigin: "recent_build",
+        graph: editable
           ? {
               nodes: reconstructable.nodes || [],
               edges: reconstructable.edges || [],
@@ -301,7 +357,7 @@ export function projectSessionReducer(state, action) {
 }
 
 export function canReturnToDesign(session) {
-  return Boolean(session?.graph?.nodes?.length || session?.graph?.phrase);
+  return Boolean(session?.designEditable && (session?.graph?.nodes?.length || session?.graph?.phrase));
 }
 
 export function sessionHasPackage(session) {
@@ -312,7 +368,6 @@ export function sessionHasBuild(session) {
   return Boolean(session?.buildDir || session?.projectPackage);
 }
 
-/** True when an in-memory session exists (cancel clears via RESET). */
 export function sessionIsResumable(session) {
   return Boolean(session?.projectId);
 }

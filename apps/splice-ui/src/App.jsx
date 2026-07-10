@@ -547,6 +547,18 @@ export default function App() {
               visionCapabilities={visionCapabilities}
               llmPolicy={health?.llm_policy}
               onIntakeBuild={(payload, options) => startBuild(payload, options)}
+              onIntakeComplete={(payload) => {
+                dispatch({
+                  type: ACTIONS.COMMIT_INTAKE,
+                  intake: payload.intake,
+                  goal: payload.goal,
+                  projectName: payload.projectName,
+                  composeMode: payload.composeMode,
+                  constraints: payload.constraints,
+                });
+                setView(VIEWS.workspace);
+                setToast("Intake saved — Design Studio is ready with your project goal");
+              }}
               onIntakeCancel={cancelIntake}
               intakeBuilding={spliceJob.active}
               intakeBuildError={spliceJob.error}
