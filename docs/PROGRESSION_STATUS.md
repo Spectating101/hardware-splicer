@@ -1,31 +1,32 @@
 # Hardware-Splicer — Progression status
 
 **Owner:** Cursor agent · Founder reviews checkpoints  
-**Doctrine:** [`CONVERSION_DOCTRINE.md`](CONVERSION_DOCTRINE.md) (strong path — active)
+**Doctrine:** [`CONVERSION_DOCTRINE.md`](CONVERSION_DOCTRINE.md)
 
-**Git tip:** tag `v1.1.0-alpha.16`
+**Public repo:** https://github.com/Spectating101/hardware-splicer  
+**Prerelease:** https://github.com/Spectating101/hardware-splicer/releases/tag/v1.1.0-alpha.16
 
-## Mode — accelerated A in progress
+## Mode — Engine I DONE · Engines II–III next
 
 | Stance | Status |
 |--------|--------|
-| **B** proof pack | **DONE** — `releases/proof-packs/hs-proof-pack-alpha16-20260718.tgz` |
-| **A** public open-core | **IN PROGRESS** — MIT LICENSE + README CTA + partner docs; visibility flip next |
+| **A** public open-core | **DONE** — MIT, public, prerelease + proof pack assets |
 | Design partners | **3 slots OPEN** — [`DESIGN_PARTNER.md`](DESIGN_PARTNER.md) |
+| Outreach list of 15 | **TODO** — [`outreach/PILOT_OUTREACH_NOTES.md`](outreach/PILOT_OUTREACH_NOTES.md) |
+| Ecosystem (Inception/credits) | **TODO** after founder has bandwidth |
 
 **Proof pack SHA256:** `327fa99f7cd73263aa16ca034313606d96b59f0fcdba49fe1175f2046eb9feb0`
 
-## Next actions
+## Next actions (founder + agent)
 
-1. Push commits to `origin/main`  
-2. Set repo **public**  
-3. GitHub **prerelease** `v1.1.0-alpha.16` with proof-pack asset  
-4. Fill outreach list of 15 + send partner invites  
-5. Apply NVIDIA Inception / cloud credits once public  
+1. Fill named list of 15 prospects in outreach notes  
+2. Send design-partner invites (max ~5/week) pointing at prerelease  
+3. Apply NVIDIA Inception / cloud credits  
+4. Demo walk before first call (`DEMO_5_MIN_UI.md`)
 
 ## Log
 
 | Date | Note |
 |------|------|
-| 2026-07-18 | Strong doctrine chosen; MIT LICENSE; SECURITY; DESIGN_PARTNER; proof pack built |
-| 2026-07-18 | verify-product-v1 + smokes PASS earlier same day |
+| 2026-07-18 | Strong doctrine; MIT; partner CTA; proof pack |
+| 2026-07-18 | Pushed `4b6e27b`; **repo made public**; prerelease published with pack + sample zip |
