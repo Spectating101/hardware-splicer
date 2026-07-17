@@ -1,0 +1,232 @@
+bash scripts/verify_install_smoke.sh
+==> verify_install_smoke: prerequisites
+Python 3.13.5
+v18.20.8
+9.0.2
+==> verify_install_smoke: slim install
+==> Splice v1 slim install at /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer
+==> Python venv: /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv
+Requirement already satisfied: pip in ./.venv/lib/python3.13/site-packages (26.1.2)
+Requirement already satisfied: wheel in ./.venv/lib/python3.13/site-packages (0.47.0)
+Requirement already satisfied: packaging>=24.0 in ./.venv/lib/python3.13/site-packages (from wheel) (26.2)
+Requirement already satisfied: fastapi==0.136.3 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 2)) (0.136.3)
+Requirement already satisfied: uvicorn==0.49.0 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 3)) (0.49.0)
+Requirement already satisfied: httpx==0.28.1 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 4)) (0.28.1)
+Requirement already satisfied: pillow==12.2.0 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 5)) (12.2.0)
+Requirement already satisfied: pydantic==2.13.4 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 6)) (2.13.4)
+Requirement already satisfied: pydantic-settings==2.14.1 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 7)) (2.14.1)
+Requirement already satisfied: python-multipart==0.0.32 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 8)) (0.0.32)
+Requirement already satisfied: python-dotenv==1.2.2 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 9)) (1.2.2)
+Requirement already satisfied: loguru==0.7.3 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 10)) (0.7.3)
+Requirement already satisfied: starlette==1.3.0 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 11)) (1.3.0)
+Requirement already satisfied: anyio==4.13.0 in ./.venv/lib/python3.13/site-packages (from -r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 12)) (4.13.0)
+Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.13/site-packages (from fastapi==0.136.3->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 2)) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.13/site-packages (from fastapi==0.136.3->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 2)) (0.4.2)
+Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.13/site-packages (from fastapi==0.136.3->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 2)) (0.0.4)
+Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.13/site-packages (from uvicorn==0.49.0->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 3)) (8.4.1)
+Requirement already satisfied: h11>=0.8 in ./.venv/lib/python3.13/site-packages (from uvicorn==0.49.0->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 3)) (0.16.0)
+Requirement already satisfied: certifi in ./.venv/lib/python3.13/site-packages (from httpx==0.28.1->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 4)) (2026.5.20)
+Requirement already satisfied: httpcore==1.* in ./.venv/lib/python3.13/site-packages (from httpx==0.28.1->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 4)) (1.0.9)
+Requirement already satisfied: idna in ./.venv/lib/python3.13/site-packages (from httpx==0.28.1->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 4)) (3.18)
+Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.13/site-packages (from pydantic==2.13.4->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 6)) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.4 in ./.venv/lib/python3.13/site-packages (from pydantic==2.13.4->-r /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/requirements-splice-v1.txt (line 6)) (2.46.4)
+Obtaining file:///home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: fastapi>=0.110 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.136.3)
+Requirement already satisfied: uvicorn>=0.27 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.49.0)
+Requirement already satisfied: httpx>=0.27 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.28.1)
+Requirement already satisfied: pillow>=10.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (12.2.0)
+Requirement already satisfied: pydantic>=2.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (2.13.4)
+Requirement already satisfied: python-multipart>=0.0.9 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.0.32)
+Requirement already satisfied: python-dotenv>=1.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (1.2.2)
+Requirement already satisfied: loguru>=0.7 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.7.3)
+Requirement already satisfied: starlette>=0.46.0 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (1.3.0)
+Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (0.4.2)
+Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (0.0.4)
+Requirement already satisfied: anyio in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (4.13.0)
+Requirement already satisfied: certifi in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (2026.5.20)
+Requirement already satisfied: httpcore==1.* in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (1.0.9)
+Requirement already satisfied: idna in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (3.18)
+Requirement already satisfied: h11>=0.16 in ./.venv/lib/python3.13/site-packages (from httpcore==1.*->httpx>=0.27->hardware-splicer==1.1.0) (0.16.0)
+Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.13/site-packages (from pydantic>=2.0->hardware-splicer==1.1.0) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.4 in ./.venv/lib/python3.13/site-packages (from pydantic>=2.0->hardware-splicer==1.1.0) (2.46.4)
+Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.13/site-packages (from uvicorn>=0.27->hardware-splicer==1.1.0) (8.4.1)
+Building wheels for collected packages: hardware-splicer
+  Building editable for hardware-splicer (pyproject.toml): started
+  Building editable for hardware-splicer (pyproject.toml): finished with status 'done'
+  Created wheel for hardware-splicer: filename=hardware_splicer-1.1.0-0.editable-py3-none-any.whl size=4001 sha256=d473ccf17b7bec13ef2583d18442c6ec1857cd9c37f98432224e67fe76c3c796
+  Stored in directory: /tmp/pip-ephem-wheel-cache-pblanlbj/wheels/37/e8/45/3465eb1e3934080da24cf460ed8714debf00d4ff98924d7d9c
+Successfully built hardware-splicer
+Installing collected packages: hardware-splicer
+  Attempting uninstall: hardware-splicer
+    Found existing installation: hardware-splicer 1.1.0
+    Uninstalling hardware-splicer-1.1.0:
+      Successfully uninstalled hardware-splicer-1.1.0
+Successfully installed hardware-splicer-1.1.0
+Obtaining file:///home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: fastapi>=0.110 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.136.3)
+Requirement already satisfied: uvicorn>=0.27 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.49.0)
+Requirement already satisfied: httpx>=0.27 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.28.1)
+Requirement already satisfied: pillow>=10.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (12.2.0)
+Requirement already satisfied: pydantic>=2.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (2.13.4)
+Requirement already satisfied: python-multipart>=0.0.9 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.0.32)
+Requirement already satisfied: python-dotenv>=1.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (1.2.2)
+Requirement already satisfied: loguru>=0.7 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (0.7.3)
+Requirement already satisfied: mcp>=1.2.0 in ./.venv/lib/python3.13/site-packages (from hardware-splicer==1.1.0) (1.27.2)
+Requirement already satisfied: starlette>=0.46.0 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (1.3.0)
+Requirement already satisfied: typing-extensions>=4.8.0 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (4.15.0)
+Requirement already satisfied: typing-inspection>=0.4.2 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (0.4.2)
+Requirement already satisfied: annotated-doc>=0.0.2 in ./.venv/lib/python3.13/site-packages (from fastapi>=0.110->hardware-splicer==1.1.0) (0.0.4)
+Requirement already satisfied: anyio in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (4.13.0)
+Requirement already satisfied: certifi in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (2026.5.20)
+Requirement already satisfied: httpcore==1.* in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (1.0.9)
+Requirement already satisfied: idna in ./.venv/lib/python3.13/site-packages (from httpx>=0.27->hardware-splicer==1.1.0) (3.18)
+Requirement already satisfied: h11>=0.16 in ./.venv/lib/python3.13/site-packages (from httpcore==1.*->httpx>=0.27->hardware-splicer==1.1.0) (0.16.0)
+Requirement already satisfied: httpx-sse>=0.4 in ./.venv/lib/python3.13/site-packages (from mcp>=1.2.0->hardware-splicer==1.1.0) (0.4.3)
+Requirement already satisfied: jsonschema>=4.20.0 in ./.venv/lib/python3.13/site-packages (from mcp>=1.2.0->hardware-splicer==1.1.0) (4.26.0)
+Requirement already satisfied: pydantic-settings>=2.5.2 in ./.venv/lib/python3.13/site-packages (from mcp>=1.2.0->hardware-splicer==1.1.0) (2.14.1)
+Requirement already satisfied: pyjwt>=2.10.1 in ./.venv/lib/python3.13/site-packages (from pyjwt[crypto]>=2.10.1->mcp>=1.2.0->hardware-splicer==1.1.0) (2.13.0)
+Requirement already satisfied: sse-starlette>=1.6.1 in ./.venv/lib/python3.13/site-packages (from mcp>=1.2.0->hardware-splicer==1.1.0) (3.4.4)
+Requirement already satisfied: annotated-types>=0.6.0 in ./.venv/lib/python3.13/site-packages (from pydantic>=2.0->hardware-splicer==1.1.0) (0.7.0)
+Requirement already satisfied: pydantic-core==2.46.4 in ./.venv/lib/python3.13/site-packages (from pydantic>=2.0->hardware-splicer==1.1.0) (2.46.4)
+Requirement already satisfied: attrs>=22.2.0 in ./.venv/lib/python3.13/site-packages (from jsonschema>=4.20.0->mcp>=1.2.0->hardware-splicer==1.1.0) (26.1.0)
+Requirement already satisfied: jsonschema-specifications>=2023.03.6 in ./.venv/lib/python3.13/site-packages (from jsonschema>=4.20.0->mcp>=1.2.0->hardware-splicer==1.1.0) (2025.9.1)
+Requirement already satisfied: referencing>=0.28.4 in ./.venv/lib/python3.13/site-packages (from jsonschema>=4.20.0->mcp>=1.2.0->hardware-splicer==1.1.0) (0.37.0)
+Requirement already satisfied: rpds-py>=0.25.0 in ./.venv/lib/python3.13/site-packages (from jsonschema>=4.20.0->mcp>=1.2.0->hardware-splicer==1.1.0) (2026.5.1)
+Requirement already satisfied: cryptography>=3.4.0 in ./.venv/lib/python3.13/site-packages (from pyjwt[crypto]>=2.10.1->mcp>=1.2.0->hardware-splicer==1.1.0) (49.0.0)
+Requirement already satisfied: cffi>=2.0.0 in ./.venv/lib/python3.13/site-packages (from cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp>=1.2.0->hardware-splicer==1.1.0) (2.0.0)
+Requirement already satisfied: pycparser in ./.venv/lib/python3.13/site-packages (from cffi>=2.0.0->cryptography>=3.4.0->pyjwt[crypto]>=2.10.1->mcp>=1.2.0->hardware-splicer==1.1.0) (3.0)
+Requirement already satisfied: click>=7.0 in ./.venv/lib/python3.13/site-packages (from uvicorn>=0.27->hardware-splicer==1.1.0) (8.4.1)
+Building wheels for collected packages: hardware-splicer
+  Building editable for hardware-splicer (pyproject.toml): started
+  Building editable for hardware-splicer (pyproject.toml): finished with status 'done'
+  Created wheel for hardware-splicer: filename=hardware_splicer-1.1.0-0.editable-py3-none-any.whl size=4001 sha256=e53403806b14cb173b243ffa4c4189d8240435296f7061a80cda6ac4041a5df9
+  Stored in directory: /tmp/pip-ephem-wheel-cache-w74d38zy/wheels/37/e8/45/3465eb1e3934080da24cf460ed8714debf00d4ff98924d7d9c
+Successfully built hardware-splicer
+Installing collected packages: hardware-splicer
+  Attempting uninstall: hardware-splicer
+    Found existing installation: hardware-splicer 1.1.0
+    Uninstalling hardware-splicer-1.1.0:
+      Successfully uninstalled hardware-splicer-1.1.0
+Successfully installed hardware-splicer-1.1.0
+==> KiCad build compiler (Node) — required for compile
+make[1]: Entering directory '/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer'
+node scripts/export_engine_pcb_data.cjs
+Wrote /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/data/engine_pcb_data.json (159 modules, 27 footprints)
+node scripts/export_catalog_recipes.cjs
+Wrote /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/data/catalog_recipes.json (18 recipes)
+make[1]: Leaving directory '/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer'
+==> Doctor
+ok=True
+demo_ready=True
+fab_export_ready=True
+python=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python
+dependencies=cadquery:missing, fastapi:ok, kicad_cli:ok, ngspice:ok, node:ok, npm:ok, pillow:ok, pytest:ok, uvicorn:ok
+circuit_ai=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/circuit-ai exists=True
+mecha_splicer=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/mecha-splicer exists=True
+root=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer exists=True
+splicer3d=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/3d-splicer exists=True
+qwen_vision_key=configured default_model=qwen3-vl-flash-2026-01-22
+vision_usage_calls=19 vision_usage_tokens=18650
+
+Done. Activate: source /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/activate
+  hs-doctor | hs-serve --port 8787 | hs-mcp
+  make verify-splice-v1   # developers: INSTALL_DEV=1 before running tests
+Prerequisites: kicad-cli 9+, Node 18+ — see docs/SETUP.md
+version 1.1.0
+{
+  "schema_version": "hardware_splicer.sdk.v1",
+  "ok": true,
+  "demo_ready": true,
+  "fab_export_ready": true,
+  "testing_mode": false,
+  "testing_mode_blocker": null,
+  "dependencies": {
+    "fastapi": true,
+    "uvicorn": true,
+    "pillow": true,
+    "pytest": true,
+    "cadquery": false,
+    "ngspice": true,
+    "node": true,
+    "npm": true,
+    "kicad_cli": true
+  },
+  "app_roots": {
+    "root": {
+      "path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer",
+      "exists": true,
+      "is_dir": true
+    },
+    "circuit_ai": {
+      "path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/circuit-ai",
+      "exists": true,
+      "is_dir": true
+    },
+    "mecha_splicer": {
+      "path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/mecha-splicer",
+      "exists": true,
+      "is_dir": true
+    },
+    "splicer3d": {
+      "path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/3d-splicer",
+      "exists": true,
+      "is_dir": true
+    }
+  },
+  "engine_defaults": {
+    "autoroute": "0",
+    "jlc_enrich": "0",
+    "drc_fix_loop": "1"
+  },
+  "llm_policy": {
+    "offline_compose": false,
+    "offline_salvage": false,
+    "offline_phrase_expand": false,
+    "qwen_llm_first": true,
+    "compose_retry": true,
+    "llm_configured": true,
+    "qwen_configured": true,
+    "env": {
+      "HARDWARE_SPLICER_OFFLINE_COMPOSE": "",
+      "HARDWARE_SPLICER_OFFLINE_SALVAGE": "",
+      "HARDWARE_SPLICER_LLM_FIRST": "",
+      "HARDWARE_SPLICER_QWEN_COMPOSE": "",
+      "HARDWARE_SPLICER_QWEN_COMPOSE_RETRY": "",
+      "HARDWARE_SPLICER_QWEN_SALVAGE": ""
+    }
+  },
+  "capability_boundary": "KiCad ERC/DRC is external truth. Default copper is cosmetic preview, not autorouted. Salvage and scratch share one engine; material_mode only changes the parts budget."
+}
+==> verify_install_smoke: product import
+api ok
+verify_install_smoke: passed
+PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python scripts/verify_product_live_smoke.py
+==> live smoke: http://127.0.0.1:8798
+    health ok version=1.1.0
+    examples ok count=5
+    integrations catalog ok wired=9
+    netlist fixtures ok count=18
+    UI root ok
+    modules catalog ok count=50
+    salvage agent-loop ok build_id=robot_drive_base drc_errors=0
+    compose-agent-loop job ok drc_errors=0
+    job submitted id=live-smoke-1784308549 status=queued
+    job succeeded package=splice_salvaged_robot_drive gates_open=5
+verify_product_live_smoke: passed

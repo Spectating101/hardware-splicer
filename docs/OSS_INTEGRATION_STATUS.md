@@ -38,6 +38,7 @@
 | skidl | [SKiDL](https://github.com/devbisme/skidl) | wired | KiCad netlist ingest via `kicad_netlist_text` | Python netlist → compile spine (import path) |
 | atopile | [atopile](https://github.com/atopile/atopile) | partial | KiCad netlist paste + [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) | Code-defined boards via netlist export |
 | schematic-ai | SINA / pcbGPT | planned | Intake → netlist-compile + gates | Research intake — not product UI |
+| architon | [Architon](https://architon.io/) `rv` | documented | [`integrations/ARCHITON_GATE.md`](integrations/ARCHITON_GATE.md) | Optional pre-fab architecture contracts after HS compose — not bundled |
 
 **Counts (catalog):** see `wired_count` / `total_count` in API response.
 

@@ -1,0 +1,91 @@
+/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python scripts/hardware_splicer.py doctor
+ok=True
+demo_ready=True
+fab_export_ready=True
+python=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python
+dependencies=cadquery:missing, fastapi:ok, kicad_cli:ok, ngspice:ok, node:ok, npm:ok, pillow:ok, pytest:ok, uvicorn:ok
+circuit_ai=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/circuit-ai exists=True
+mecha_splicer=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/mecha-splicer exists=True
+root=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer exists=True
+splicer3d=/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/3d-splicer exists=True
+qwen_vision_key=configured default_model=qwen3-vl-flash-2026-01-22
+vision_usage_calls=19 vision_usage_tokens=18650
+PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python -m pytest tests/test_project_package.py tests/test_circuit_synthesis_bridge.py -q
+...........                                                              [100%]
+11 passed in 2.73s
+HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python scripts/verify_splice_demos.py --out /tmp/hs_splice_verify
+Splice verify: 4/4 passed
+report: /tmp/hs_splice_verify/SPLICE_DEMO_REPORT.json
+  [PASS] robot_drive_from_rc_toy
+  [PASS] robot_drive_vision_junk
+  [PASS] robot_repair_cafe_s3
+  [PASS] printer_motion_stage
+HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python scripts/verify_splice_golden_loop.py
+Splice golden loop verify: 3/3 passed
+report: /tmp/hs_splice_golden_verify/SPLICE_GOLDEN_LOOP_VERIFY.json
+  [PASS] robot_fixture_s2
+  [PASS] robot_vision_junk_s3
+  [PASS] robot_repair_cafe_s3
+HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python scripts/verify_splice_real_bench.py
+Golden real S3 verify: PASS
+  photo: rc_toy_motor_board.jpg (6578 KB)
+  capture: rc_motor_manual_bench_capture.v1.json operator=repair_cafe_operator_01
+  power_on_authorized=True
+  report: /tmp/hs_splice_golden_real_verify/SPLICE_GOLDEN_REAL_VERIFY.json
+verify-splice-v1: engine + S2/S3 + project package — all passed
+cd apps/splice-ui && npm install
+
+up to date, audited 179 packages in 1s
+
+27 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+cd apps/splice-ui && npm test && npm run build
+
+> hardware-splicer-splice-ui@1.0.0 test
+> vitest run
+
+
+ RUN  v3.2.7 /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui
+
+ ✓ src/projectSession/projectSession.test.js (9 tests) 25ms
+ ✓ src/projectSession/stageAvailability.test.js (12 tests) 22ms
+ ✓ src/projectSession/ProjectWorkspace.test.jsx (4 tests) 623ms
+   ✓ ProjectWorkspace continuity + polish > keeps Design disabled until Intake commit, then Verify after compile  417ms
+ ✓ src/App.integration.test.jsx (3 tests) 379ms
+ ✓ src/components/ProjectWizard.route.test.jsx (2 tests) 1478ms
+   ✓ ProjectWizard route handoff > greenfield Intake completion does not call compose and uses onCompleteIntake  799ms
+   ✓ ProjectWizard route handoff > salvage Intake still submits via route: splice  676ms
+
+ Test Files  5 passed (5)
+      Tests  30 passed (30)
+   Start at  01:14:27
+   Duration  4.34s (transform 1.62s, setup 882ms, collect 3.94s, tests 2.53s, environment 5.96s, prepare 1.24s)
+
+
+> hardware-splicer-splice-ui@1.0.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 225 modules transformed.
+[plugin vite:reporter] 
+(!) /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/api.js is dynamically imported by /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx but also statically imported by /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/App.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/BenchCapturePanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/DesignPreviewPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/DesignStudioPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/IntegrationsPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/InterfaceLabPanel.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/components/ProjectWizard.jsx, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/hooks/useSpliceJob.js, /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/apps/splice-ui/src/projectSession/packageHandoff.js, dynamic import will not move module into another chunk.
+
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.98 kB │ gzip:   0.52 kB
+dist/assets/index-CJrRePQU.css   48.66 kB │ gzip:   9.56 kB
+dist/assets/index-BcJ1oAWe.js   470.14 kB │ gzip: 145.47 kB
+✓ built in 2.73s
+PYTHONPATH=src /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/bin/python -m pytest tests/test_splice_product_v1.py tests/test_design_studio_agent.py tests/test_canvas_module_pins.py tests/test_compose_agent_loop_salvage.py tests/test_compose_bench_loop.py tests/test_bench_capture_vision.py tests/test_public_web_bench.py -q
+....................................                                     [100%]
+=============================== warnings summary ===============================
+tests/test_splice_product_v1.py::test_health_reports_package_version
+  /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+36 passed, 1 warning in 25.85s
+verify-product-v1: engine + splice-ui + product API — all passed

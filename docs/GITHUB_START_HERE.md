@@ -1,8 +1,9 @@
 # Start here (GitHub / external review)
 
 **Repo:** [Spectating101/hardware-splicer](https://github.com/Spectating101/hardware-splicer)  
-**Product:** Splice Agent **v1.1.0** — auditable hardware bring-up + design verification  
-**Status:** Stable release — see [`RELEASE_v1.1.md`](RELEASE_v1.1.md)
+**Product:** Splice Agent **v1.1.0-alpha.16** — auditable hardware bring-up + design verification  
+**Status:** Cold-internal exit complete · **design partners open** · MIT  
+**Pilots:** [`DESIGN_PARTNER.md`](DESIGN_PARTNER.md) · [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) · [`PROOF_PACK_CONTENTS.md`](PROOF_PACK_CONTENTS.md)
 
 Use this page as the **single entry** when browsing on GitHub.
 
@@ -13,10 +14,10 @@ Use this page as the **single entry** when browsing on GitHub.
 | # | Doc | Purpose |
 |---|-----|---------|
 | 1 | [RELEASE_v1.1.md](RELEASE_v1.1.md) | **Install, verify, deploy** |
-| 2 | [RELEASE_NOTES_v1.1.0.md](../RELEASE_NOTES_v1.1.0.md) | What shipped in v1.1.0 |
-| 3 | [QUICKSTART_SPLICE_v1.md](QUICKSTART_SPLICE_v1.md) | Install → doctor → first build |
-| 4 | [DEMO_5_MIN_UI.md](DEMO_5_MIN_UI.md) | Demo script |
-| 5 | [RELEASE_CHECKLIST_v1.1.md](RELEASE_CHECKLIST_v1.1.md) | Sign before publish |
+| 2 | [COLD_INTERNAL_EXIT.md](COLD_INTERNAL_EXIT.md) | What is / isn’t claimed |
+| 3 | [DESIGN_PARTNER.md](DESIGN_PARTNER.md) | How to join the 3-slot cohort |
+| 4 | [QUICKSTART_SPLICE_v1.md](QUICKSTART_SPLICE_v1.md) | Install → doctor → first build |
+| 5 | [DEMO_5_MIN_UI.md](DEMO_5_MIN_UI.md) | Demo script |
 
 ---
 
@@ -30,24 +31,28 @@ CI: **Splice Agent v1** job on GitHub Actions.
 
 ---
 
-## 3. OSS interface layer (v1.1.0)
+## 3. Conversion / doctrine
+
+| Doc | Purpose |
+|-----|---------|
+| [CONVERSION_DOCTRINE.md](CONVERSION_DOCTRINE.md) | Strong conversion strategy |
+| [CONVERSION_PUSH.md](CONVERSION_PUSH.md) | Funnel tactics |
+| [PROGRESSION_STATUS.md](PROGRESSION_STATUS.md) | Living status |
+
+---
+
+## 4. OSS interface layer (v1.1)
 
 | Doc | Purpose |
 |-----|---------|
 | [V1.1_INTERFACE_PREVIEW.md](V1.1_INTERFACE_PREVIEW.md) | Scope boundary |
 | [OSS_INTEGRATION_STATUS.md](OSS_INTEGRATION_STATUS.md) | Wired vs planned |
-| [BUILD_FILES_API_SECURITY.md](BUILD_FILES_API_SECURITY.md) | API security model |
-
-**Try:** `make splice-ui-serve` → Quick demo → **Design verify**
+| [integrations/ARCHITON_GATE.md](integrations/ARCHITON_GATE.md) | Optional Architon compose |
 
 ---
 
-## 4. Claims
+## 5. Security & liability
 
-Outbound copy: [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md)
-
-> Self-hosted bring-up workbench with design verification and bench gates before fabrication or power-on.
-
----
-
-*Last updated: July 2026 · v1.1.0*
+- [SECURITY.md](../SECURITY.md)
+- [SUPPORT_AND_LIABILITY_v1.md](SUPPORT_AND_LIABILITY_v1.md)
+- [LICENSE](../LICENSE) — MIT

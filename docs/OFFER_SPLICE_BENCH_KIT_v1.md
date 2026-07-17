@@ -65,7 +65,7 @@ Anchor: one bad fab respin or one week senior EE time.
 2. Signed SOW + deposit (if required)
 3. Scheduled intake session
 
-**Contact:** _[your email]_
+**Contact:** Open a GitHub Issue `[Design partner] …` (see [`DESIGN_PARTNER.md`](DESIGN_PARTNER.md)) or use the maintainer contact on the GitHub profile.
 
 ---
 

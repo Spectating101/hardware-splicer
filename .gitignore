@@ -68,3 +68,10 @@ temp/
 
 # Council Copilot local job output
 .council/
+
+# local alien dry-run captures
+review-ui/alien-*/
+releases/proof-packs/hs-proof-pack-*/
+!releases/proof-packs/*.tgz
+!releases/proof-packs/*.sha256
+!releases/proof-packs/README.md
