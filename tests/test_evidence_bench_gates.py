@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from hardware_splicer.bench_capture_bridge import build_bench_capture_template_from_gates
+from hardware_splicer.bench_loop import build_simulated_capture
 from hardware_splicer.splice_bench import (
     SESSION_FILE,
     _gates_from_evidence_integrations,
@@ -59,6 +61,26 @@ def test_evidence_interfaces_generate_contract_and_measurement_gates() -> None:
     assert measurement_gate["lower"] == 0.0
     assert measurement_gate["upper"] == 5.5
     assert measurement_gate["required"] is True
+
+
+def test_capture_template_separates_contract_actions_from_measurements() -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    template = build_bench_capture_template_from_gates(gates, project_name="robot")
+
+    assert len(template["contract_actions"]) == 1
+    assert template["contract_actions"][0]["action"] == "update_interface_contract"
+    assert template["contract_actions"][0]["evidence_field"] == "signals.control.direction"
+    assert len(template["measurements"]) == 1
+    measurement = template["measurements"][0]
+    assert measurement["measurement_id"] == "idle_voltage_v"
+    assert measurement["unit"] == "V"
+    assert measurement["lower"] == 0.0
+    assert measurement["upper"] == 5.5
+
+    simulated = build_simulated_capture(template)
+    assert len(simulated["measurements"]) == 1
+    assert simulated["measurements"][0]["value"] == 3.3
+    assert simulated["measurements"][0]["unit"] == "V"
 
 
 def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path: Path) -> None:
