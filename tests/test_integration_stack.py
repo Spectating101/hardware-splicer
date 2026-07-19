@@ -1,4 +1,4 @@
-from hardware_splicer.backends import build_circuit_json_projection
+from hardware_splicer.backends import BackendStatus, build_circuit_json_projection
 from hardware_splicer.bench import donor_interface_discovery_recipe
 from hardware_splicer.donor import (
     Contact,
@@ -60,6 +60,12 @@ def test_verified_interface_can_authorize_firmware() -> None:
                 direction=SignalDirection.INPUT,
                 voltage_max_v=voltage,
                 active_level=active,
+                controller_pin=accepted_measurement(
+                    "GPIO16",
+                    unit=None,
+                    evidence_id="design-binding",
+                    method="approved pin assignment",
+                ),
             )
         ],
         status=InterfaceStatus.VERIFIED,
@@ -106,3 +112,60 @@ def test_stack_emits_blocked_interface_package() -> None:
     package = stack.build_interface_package(contract.interface_id)
     assert package["compile_status"] == "blocked"
     assert package["resolved_module"]["firmware_authorized"] is False
+
+
+def test_interface_recompute_promotes_authoritative_signals() -> None:
+    contract = InterfaceContract(
+        interface_id="if:board:driver",
+        board_id="board",
+        block_id="driver",
+        functional_role="actuator_driver",
+        contacts=[Contact(contact_id="J1.1", connector_ref="J1", pin_number="1")],
+        signals=[
+            SignalContract(
+                signal_id="enable",
+                contact_id="J1.1",
+                direction=SignalDirection.INPUT,
+                voltage_max_v=accepted_measurement(
+                    3.3, unit="V", evidence_id="m-voltage", method="DMM"
+                ),
+                active_level=accepted_measurement(
+                    "high", unit=None, evidence_id="m-polarity", method="protected stimulus"
+                ),
+                controller_pin=accepted_measurement(
+                    "GPIO16", unit=None, evidence_id="design-binding", method="approved pin assignment"
+                ),
+            )
+        ],
+    )
+
+    assert contract.recompute_status() == InterfaceStatus.VERIFIED
+    assert contract.can_generate_firmware() is True
+    assert contract.unresolved_fields() == []
+
+
+def test_interface_requires_controller_pin_for_firmware() -> None:
+    contract = InterfaceContract(
+        interface_id="if:board:driver",
+        board_id="board",
+        block_id="driver",
+        functional_role="actuator_driver",
+        contacts=[Contact(contact_id="J1.1")],
+        signals=[
+            SignalContract(
+                signal_id="enable",
+                contact_id="J1.1",
+                direction=SignalDirection.INPUT,
+                voltage_max_v=accepted_measurement(
+                    3.3, unit="V", evidence_id="m-voltage", method="DMM"
+                ),
+                active_level=accepted_measurement(
+                    "high", unit=None, evidence_id="m-polarity", method="protected stimulus"
+                ),
+            )
+        ],
+    )
+
+    contract.recompute_status()
+    assert contract.can_generate_firmware() is False
+    assert "signals.enable.controller_pin" in contract.unresolved_fields()
