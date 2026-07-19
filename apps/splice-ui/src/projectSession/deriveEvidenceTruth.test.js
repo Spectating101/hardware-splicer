@@ -64,6 +64,38 @@ describe("deriveEvidenceTruth", () => {
     expect(truth.powerAuthorized).toBe(true);
   });
 
+  it("prefers refreshed Bench authority over the original build snapshot", () => {
+    const session = evidenceSession({
+      benchSession: {
+        power_on_authorized: false,
+        evidence_integrations: {
+          authority: {
+            firmware_authorized: true,
+            power_authorized: false,
+            claim_boundary: "Updated from typed contract evidence.",
+          },
+          interfaces: [
+            {
+              compile_status: "ready",
+              blockers: [],
+              interface_contract: {
+                interface_id: "if:donor:driver",
+                firmware_authorized: true,
+                unresolved_fields: [],
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const truth = deriveEvidenceTruth(session);
+    expect(truth.state).toBe("bench_required");
+    expect(truth.firmwareAuthorized).toBe(true);
+    expect(truth.powerAuthorized).toBe(false);
+    expect(truth.claimBoundary).toBe("Updated from typed contract evidence.");
+  });
+
   it("creates a conservative fallback for legacy donor rows", () => {
     const truth = deriveEvidenceTruth({
       mode: "salvage",
