@@ -31,6 +31,7 @@ def test_functional_analogy_does_not_inherit_l298n_contract() -> None:
         }
     ]
     assert contract.can_generate_firmware() is False
+    assert "interface_complete" in contract.unresolved_fields()
     assert contract.to_resolved_module()["module_id"].startswith("donor:")
 
 
@@ -68,6 +69,12 @@ def test_verified_interface_can_authorize_firmware() -> None:
                 ),
             )
         ],
+        interface_complete=accepted_measurement(
+            True,
+            unit=None,
+            evidence_id="interface-review",
+            method="complete interface review",
+        ),
         status=InterfaceStatus.VERIFIED,
     )
     assert contract.can_generate_firmware() is True
@@ -137,11 +144,47 @@ def test_interface_recompute_promotes_authoritative_signals() -> None:
                 ),
             )
         ],
+        interface_complete=accepted_measurement(
+            True,
+            unit=None,
+            evidence_id="interface-review",
+            method="complete interface review",
+        ),
     )
 
     assert contract.recompute_status() == InterfaceStatus.VERIFIED
     assert contract.can_generate_firmware() is True
     assert contract.unresolved_fields() == []
+
+
+def test_interface_requires_complete_attestation_for_firmware() -> None:
+    contract = InterfaceContract(
+        interface_id="if:board:driver",
+        board_id="board",
+        block_id="driver",
+        functional_role="actuator_driver",
+        contacts=[Contact(contact_id="J1.1")],
+        signals=[
+            SignalContract(
+                signal_id="enable",
+                contact_id="J1.1",
+                direction=SignalDirection.INPUT,
+                voltage_max_v=accepted_measurement(
+                    3.3, unit="V", evidence_id="m-voltage", method="DMM"
+                ),
+                active_level=accepted_measurement(
+                    "high", unit=None, evidence_id="m-polarity", method="protected stimulus"
+                ),
+                controller_pin=accepted_measurement(
+                    "GPIO16", unit=None, evidence_id="design-binding", method="approved pin assignment"
+                ),
+            )
+        ],
+    )
+
+    assert contract.recompute_status() == InterfaceStatus.PARTIAL
+    assert contract.can_generate_firmware() is False
+    assert "interface_complete" in contract.unresolved_fields()
 
 
 def test_interface_requires_controller_pin_for_firmware() -> None:
@@ -164,6 +207,12 @@ def test_interface_requires_controller_pin_for_firmware() -> None:
                 ),
             )
         ],
+        interface_complete=accepted_measurement(
+            True,
+            unit=None,
+            evidence_id="interface-review",
+            method="complete interface review",
+        ),
     )
 
     contract.recompute_status()
