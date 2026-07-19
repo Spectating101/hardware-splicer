@@ -1,11 +1,11 @@
+import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth.js";
 import { deriveProjectTruth } from "../projectSession/deriveProjectTruth.js";
 
-/**
- * Compact readiness panel driven by deriveProjectTruth — one story, one next action.
- */
+/** Compact readiness panel driven by shared truth models — one story, one next action. */
 export default function ProjectReadinessPanel({ session, onGoStage }) {
   const truth = deriveProjectTruth(session);
-  const hold = truth.overall.state !== "authorized";
+  const evidence = deriveEvidenceTruth(session);
+  const hold = truth.overall.state !== "authorized" || (evidence.applicable && !evidence.powerAuthorized);
 
   return (
     <section
@@ -14,8 +14,19 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
     >
       <div className="project-readiness-panel__main">
         <p className="eyebrow">Project readiness</p>
-        <h2 data-testid="readiness-headline">{truth.overall.headline}</h2>
+        <h2 data-testid="readiness-headline">
+          {evidence.applicable && evidence.state === "blocked" ? evidence.label : truth.overall.headline}
+        </h2>
         <div className="project-readiness-panel__dims">
+          {evidence.applicable && (
+            <span
+              className={`status-chip status-chip--${evidenceTone(evidence.state)}`}
+              data-testid="ready-evidence"
+              title={evidence.detail}
+            >
+              Evidence: {evidence.label}
+            </span>
+          )}
           <span className={`status-chip status-chip--${toneForDesign(truth.design.state)}`} data-testid="ready-design">
             Design: {truth.design.label}
           </span>
@@ -26,24 +37,16 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
             Bench: {truth.bench.label}
           </span>
         </div>
-        {truth.copper.state === "preview_only" && (
-          <p className="small muted" data-testid="readiness-copper-note">
-            {truth.copper.detail}
+        {evidence.applicable && evidence.state === "blocked" && (
+          <p className="small muted" data-testid="readiness-evidence-note">
+            {evidence.detail} Open Verify to inspect the exact donor-interface blockers before using generated firmware.
           </p>
         )}
-        {truth.bench.simulated && (
-          <p className="small muted" data-testid="readiness-sim-note">
-            Simulated evidence is not physical café proof.
-          </p>
-        )}
+        {truth.copper.state === "preview_only" && <p className="small muted" data-testid="readiness-copper-note">{truth.copper.detail}</p>}
+        {truth.bench.simulated && <p className="small muted" data-testid="readiness-sim-note">Simulated evidence is not physical café proof.</p>}
       </div>
       {truth.overall.nextAction?.stage && onGoStage && (
-        <button
-          type="button"
-          className="primary"
-          data-testid="readiness-next"
-          onClick={() => onGoStage(truth.overall.nextAction.stage)}
-        >
+        <button type="button" className="primary" data-testid="readiness-next" onClick={() => onGoStage(truth.overall.nextAction.stage)}>
           {truth.overall.nextAction.label}
         </button>
       )}
@@ -65,12 +68,6 @@ function toneForCopper(state) {
 
 function toneForBench(state) {
   if (state === "physical_authorized") return "ok";
-  if (
-    state === "simulated_pass" ||
-    state === "gates_open" ||
-    state === "authorization_pending"
-  ) {
-    return "warn";
-  }
+  if (state === "simulated_pass" || state === "gates_open" || state === "authorization_pending") return "warn";
   return "neutral";
 }
