@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 import re
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 
 from hardware_splicer.evidence import EvidenceValue, EpistemicStatus, ReviewStatus
 
@@ -64,6 +64,7 @@ class SignalContract:
     active_level: EvidenceValue = field(default_factory=EvidenceValue)
     idle_level: EvidenceValue = field(default_factory=EvidenceValue)
     protocol: EvidenceValue = field(default_factory=EvidenceValue)
+    controller_pin: EvidenceValue = field(default_factory=EvidenceValue)
     notes: str = ""
 
     def authoritative_for_firmware(self) -> bool:
@@ -73,7 +74,7 @@ class SignalContract:
             SignalDirection.BIDIRECTIONAL,
         }:
             return False
-        required = [self.voltage_max_v, self.active_level]
+        required = [self.voltage_max_v, self.active_level, self.controller_pin]
         return all(v.authoritative for v in required)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -86,6 +87,7 @@ class SignalContract:
             "active_level": self.active_level.to_dict(),
             "idle_level": self.idle_level.to_dict(),
             "protocol": self.protocol.to_dict(),
+            "controller_pin": self.controller_pin.to_dict(),
             "notes": self.notes,
         }
 
@@ -126,11 +128,15 @@ class InterfaceContract:
                 SignalDirection.BIDIRECTIONAL,
             } and not signal.active_level.authoritative:
                 unresolved.append(f"{prefix}.active_level")
+            if signal.direction in {
+                SignalDirection.INPUT,
+                SignalDirection.OUTPUT,
+                SignalDirection.BIDIRECTIONAL,
+            } and not signal.controller_pin.authoritative:
+                unresolved.append(f"{prefix}.controller_pin")
         return unresolved
 
-    def can_generate_firmware(self) -> bool:
-        if self.status != InterfaceStatus.VERIFIED or self.blockers:
-            return False
+    def _active_signals_authoritative(self) -> bool:
         active_signals = [
             s
             for s in self.signals
@@ -142,10 +148,17 @@ class InterfaceContract:
         ]
         return bool(active_signals) and all(s.authoritative_for_firmware() for s in active_signals)
 
+    def can_generate_firmware(self) -> bool:
+        return (
+            self.status == InterfaceStatus.VERIFIED
+            and not self.blockers
+            and self._active_signals_authoritative()
+        )
+
     def recompute_status(self) -> InterfaceStatus:
         if self.blockers:
             self.status = InterfaceStatus.REJECTED
-        elif self.can_generate_firmware():
+        elif self._active_signals_authoritative():
             self.status = InterfaceStatus.VERIFIED
         elif self.contacts or self.signals:
             self.status = InterfaceStatus.PARTIAL
