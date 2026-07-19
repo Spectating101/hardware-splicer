@@ -113,6 +113,7 @@ def _contract_from_dict(raw: Mapping[str, Any]) -> InterfaceContract:
         signals=signals,
         power_domains=[dict(v) for v in (raw.get("power_domains") or []) if isinstance(v, Mapping)],
         reference_equivalents=[dict(v) for v in (raw.get("reference_equivalents") or []) if isinstance(v, Mapping)],
+        interface_complete=_evidence_value(raw.get("interface_complete")),
         status=status,
         blockers=[str(v) for v in (raw.get("blockers") or []) if str(v)],
     )
@@ -195,6 +196,25 @@ def _upsert_signal(contract: InterfaceContract, update: Mapping[str, Any], evide
     contract.signals = [signal if row.signal_id == signal_id else row for row in contract.signals]
     if not current:
         contract.signals.append(signal)
+    if update.get("interface_complete") is True:
+        contract.interface_complete = _accepted(
+            True,
+            unit=None,
+            evidence_id=evidence_id,
+            method=method,
+            producer=producer,
+        )
+    elif update.get("interface_complete") is False:
+        contract.interface_complete = EvidenceValue(
+            value=False,
+            unit=None,
+            status=EpistemicStatus.OBSERVED,
+            confidence=1.0,
+            evidence_ids=(evidence_id,),
+            producer=producer,
+            method=method,
+            review_status=ReviewStatus.ACCEPTED,
+        )
     return signal
 
 
@@ -269,6 +289,7 @@ def apply_interface_contract_update(
                 "interface_id": interface_id,
                 "signal_id": signal.signal_id,
                 "contact_id": signal.contact_id,
+                "interface_complete": update.get("interface_complete"),
                 "update": dict(update),
             },
             "created_at": _now(),
@@ -304,6 +325,14 @@ def apply_interface_contract_update(
 
     package["evidence_integrations"] = integrations
     _write_json_atomic(plan_path, package)
+    candidate_fields = (
+        "signals",
+        "interface_complete",
+        f"signals.{signal.signal_id}.direction",
+        f"signals.{signal.signal_id}.voltage_max_v",
+        f"signals.{signal.signal_id}.active_level",
+        f"signals.{signal.signal_id}.controller_pin",
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "ok": True,
@@ -312,10 +341,7 @@ def apply_interface_contract_update(
         "interface_package": target,
         "authority": authority,
         "evidence_integrations": integrations,
-        "resolved_fields": [
-            field for field in ("signals", f"signals.{signal.signal_id}.direction", f"signals.{signal.signal_id}.voltage_max_v", f"signals.{signal.signal_id}.active_level", f"signals.{signal.signal_id}.controller_pin")
-            if field not in contract.unresolved_fields()
-        ],
+        "resolved_fields": [field for field in candidate_fields if field not in contract.unresolved_fields()],
         "unresolved_fields": contract.unresolved_fields(),
         "plan_path": str(plan_path),
     }
