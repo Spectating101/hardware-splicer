@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping
+from typing import Any, Dict, Iterable, List, Mapping, Optional
 
 from hardware_splicer.integration_stack import IntegrationStack
 
@@ -93,11 +93,41 @@ def attach_evidence_first_integrations(
             "blocked until required donor interface measurements pass."
         ),
     }
+    legacy_modules = [
+        dict(row)
+        for row in (package.get("resolved_modules") or [])
+        if isinstance(row, Mapping)
+    ]
+    donor_sources = {
+        "donor_functional_salvage",
+        "circuit_functional_salvage",
+        "donor_interface_contract",
+    }
+    non_donor_modules = [
+        row for row in legacy_modules if str(row.get("source") or "") not in donor_sources
+    ]
+    canonical_donor_modules = [c.to_resolved_module() for c in contracts]
+    authority_modules = non_donor_modules + canonical_donor_modules
+
+    package["authority_resolved_modules"] = authority_modules
     package["evidence_integrations"] = {
         "schema_version": SCHEMA_VERSION,
         "authority": authority,
         "evidence_graph": stack.evidence_graph.to_dict(),
         "interfaces": interface_packages,
+        "authority_resolved_modules": authority_modules,
+        "compatibility": {
+            "mode": "legacy_graph_projection" if canonical_donor_modules else "native",
+            "legacy_catalog_projection": [
+                row
+                for row in legacy_modules
+                if str(row.get("source") or "") in donor_sources
+            ],
+            "claim_boundary": (
+                "Legacy catalog rows may support existing graph rendering only; "
+                "their pin semantics are not authority-bearing."
+            ),
+        },
     }
 
     if out_dir is not None:
