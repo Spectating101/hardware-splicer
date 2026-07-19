@@ -126,6 +126,13 @@ jobs:
         run: |
           source .venv/bin/activate
           make verify-splice-loop
+      - name: Upload golden-loop report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: splice-golden-loop-report
+          path: /tmp/hs_splice_golden_verify/SPLICE_GOLDEN_LOOP_VERIFY.json
+          if-no-files-found: warn
       - name: Splice real-bench verification
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
@@ -180,7 +187,14 @@ jobs:
           HARDWARE_SPLICER_JLC_ENRICH: "0"
         run: |
           source .venv/bin/activate
-          make verify-engine
+          PYTHONPATH=src python scripts/verify_engine.py --json /tmp/verify-engine.json
+      - name: Upload engine verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-engine-report
+          path: /tmp/verify-engine.json
+          if-no-files-found: warn
       - name: Fab verify (Gerber + inspect-fab)
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
