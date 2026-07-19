@@ -42,7 +42,10 @@ voltage limits and control semantics are not inherited.
 
 ```bash
 PYTHONPATH=src python scripts/verify_integration_stack.py
-pytest -q tests/test_integration_stack.py
+pytest -q \
+  tests/test_integration_stack.py \
+  tests/test_evidence_salvage_bridge.py \
+  tests/test_evidence_bench_gates.py
 ```
 
 ## Frontend authority workbench
@@ -63,6 +66,15 @@ Older salvage packages receive a conservative client-side fallback. A legacy don
 
 The UI links directly into the existing Bench stage. It does not duplicate bench measurement storage or create a second authority system.
 
+## Bench integration
+
+Canonical interface contracts are translated into the existing splice Bench session:
+
+- recipe measurements become measurable Bench gates;
+- structural contract fields become explicit authority gates;
+- structural gates cannot be closed by submitting an arbitrary scalar value;
+- power-on remains blocked until both contract structure and required measurements are resolved.
+
 ## Authority invariants
 
 1. A functional analogy never inherits an electrical contract.
@@ -72,3 +84,4 @@ The UI links directly into the existing Bench stage. It does not duplicate bench
 5. PlatformIO is blocked until every active donor signal is firmware-authorized.
 6. KiBot readiness means a manufacturing backend is available, not that fabrication has been authorized.
 7. Physical power-on remains a separate Bench authority transition.
+8. Legacy catalog modules remain available only as a compatibility graph projection; `authority_resolved_modules` contains canonical `donor:*` identities.
