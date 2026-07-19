@@ -61,7 +61,170 @@ function InterfaceListItem({ item, active, onSelect }) {
   );
 }
 
-function InterfaceDetail({ item }) {
+function ContractEditor({ item, benchSession, onContractUpdate, onToast }) {
+  const contract = item?.interface_contract || {};
+  const firstContact = contract.contacts?.[0] || {};
+  const firstSignal = contract.signals?.[0] || {};
+  const gate = (benchSession?.open_gates || []).find(
+    (row) => row?.requires_contract_edit && row?.interface_id === contract.interface_id,
+  );
+  const [draft, setDraft] = useState({
+    signalId: firstSignal.signal_id || "enable",
+    contactId: firstSignal.contact_id || firstContact.contact_id || "",
+    connectorRef: firstContact.connector_ref || "",
+    pinNumber: firstContact.pin_number || "",
+    direction: firstSignal.direction || "input",
+    voltageMax: firstSignal.voltage_max_v?.value ?? "3.3",
+    activeLevel: firstSignal.active_level?.value || "high",
+    controllerPin: firstSignal.controller_pin?.value || "",
+    method: "DMM plus protected stimulus",
+    notes: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState(null);
+
+  if (item?.legacy_fallback) {
+    return (
+      <div className="evidence-callout evidence-callout--warn">
+        <strong>Regenerate before editing</strong>
+        <p>Legacy builds do not contain a canonical contract that can be safely updated.</p>
+      </div>
+    );
+  }
+  if (contract.firmware_authorized && !gate) {
+    return (
+      <div className="evidence-callout evidence-callout--ok">
+        <strong>Interface structure verified</strong>
+        <p>Control semantics and MCU binding are authoritative. Continue with physical measurement gates.</p>
+      </div>
+    );
+  }
+  if (!gate || !onContractUpdate) {
+    return (
+      <div className="evidence-callout evidence-callout--neutral">
+        <strong>Open Bench to initialize contract gates</strong>
+        <p>The editor activates after the build's Bench session has loaded its canonical interface gates.</p>
+      </div>
+    );
+  }
+
+  const update = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
+  const required = draft.signalId.trim() && draft.contactId.trim() && draft.controllerPin.trim() && draft.voltageMax !== "";
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (!required || submitting) return;
+    setSubmitting(true);
+    setResult(null);
+    try {
+      const response = await onContractUpdate([
+        {
+          gate_id: gate.gate_id,
+          status: "verified",
+          contract_update: {
+            operation: "upsert_signal",
+            interface_id: contract.interface_id,
+            signal_id: draft.signalId.trim(),
+            contact_id: draft.contactId.trim(),
+            connector_ref: draft.connectorRef.trim(),
+            pin_number: draft.pinNumber.trim(),
+            direction: draft.direction,
+            voltage_max_v: Number(draft.voltageMax),
+            active_level: draft.activeLevel.trim(),
+            controller_pin: draft.controllerPin.trim(),
+            evidence_id: `ui-contract:${contract.interface_id}:${Date.now()}`,
+            method: draft.method.trim(),
+            producer: "operator+instrument",
+            notes: draft.notes.trim(),
+          },
+        },
+      ]);
+      const applied = response?.last_submission?.applied?.[0];
+      if (!applied?.ok) throw new Error(applied?.reason || applied?.error || "Contract update rejected");
+      setResult({ ok: true, message: "Interface contract persisted and authority recomputed." });
+      onToast?.("Donor interface contract updated");
+    } catch (error) {
+      setResult({ ok: false, message: error.message });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <section className="evidence-section evidence-contract-editor" data-testid="evidence-contract-editor">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Resolve interface structure</p>
+          <h4>Bind one evidenced control signal</h4>
+        </div>
+        <span>Typed update</span>
+      </div>
+      <p className="muted small">
+        This writes to the canonical contract. It is not a free-form override: every value receives provenance and is revalidated before firmware authority changes.
+      </p>
+      <form onSubmit={submit} className="contract-form">
+        <label>
+          Signal ID
+          <input value={draft.signalId} onChange={(event) => update("signalId", event.target.value)} placeholder="enable" />
+        </label>
+        <label>
+          Contact ID
+          <input value={draft.contactId} onChange={(event) => update("contactId", event.target.value)} placeholder="J_LOGIC.1" />
+        </label>
+        <label>
+          Connector
+          <input value={draft.connectorRef} onChange={(event) => update("connectorRef", event.target.value)} placeholder="J_LOGIC" />
+        </label>
+        <label>
+          Physical pin
+          <input value={draft.pinNumber} onChange={(event) => update("pinNumber", event.target.value)} placeholder="1" />
+        </label>
+        <label>
+          Direction
+          <select value={draft.direction} onChange={(event) => update("direction", event.target.value)}>
+            <option value="input">Input to donor</option>
+            <option value="output">Output from donor</option>
+            <option value="bidirectional">Bidirectional</option>
+          </select>
+        </label>
+        <label>
+          Maximum logic voltage (V)
+          <input type="number" min="0" step="0.01" value={draft.voltageMax} onChange={(event) => update("voltageMax", event.target.value)} />
+        </label>
+        <label>
+          Active level
+          <select value={draft.activeLevel} onChange={(event) => update("activeLevel", event.target.value)}>
+            <option value="high">Active high</option>
+            <option value="low">Active low</option>
+          </select>
+        </label>
+        <label>
+          Controller pin
+          <input value={draft.controllerPin} onChange={(event) => update("controllerPin", event.target.value)} placeholder="GPIO16" />
+        </label>
+        <label className="contract-form__wide">
+          Evidence method
+          <input value={draft.method} onChange={(event) => update("method", event.target.value)} placeholder="DMM plus protected stimulus" />
+        </label>
+        <label className="contract-form__wide">
+          Notes
+          <textarea value={draft.notes} onChange={(event) => update("notes", event.target.value)} placeholder="Probe points, resistor value, observed response, instrument ID…" />
+        </label>
+        <div className="contract-form__actions contract-form__wide">
+          <span className="mono small">Gate: {gate.gate_id}</span>
+          <button type="submit" className="primary" disabled={!required || submitting}>
+            {submitting ? "Persisting…" : "Save evidenced signal"}
+          </button>
+        </div>
+      </form>
+      {result ? (
+        <p className={result.ok ? "success small" : "error small"} role="status">{result.message}</p>
+      ) : null}
+    </section>
+  );
+}
+
+function InterfaceDetail({ item, benchSession, onContractUpdate, onToast }) {
   if (!item) {
     return (
       <div className="evidence-empty">
@@ -171,6 +334,8 @@ function InterfaceDetail({ item }) {
         )}
       </section>
 
+      <ContractEditor item={item} benchSession={benchSession} onContractUpdate={onContractUpdate} onToast={onToast} />
+
       {recipe?.phases?.length ? (
         <section className="evidence-section">
           <div className="section-heading">
@@ -206,7 +371,7 @@ function InterfaceDetail({ item }) {
   );
 }
 
-export default function EvidenceWorkbenchPanel({ session, onGoBench, onGoVerify }) {
+export default function EvidenceWorkbenchPanel({ session, onGoBench, onGoVerify, onContractUpdate, onToast }) {
   const truth = useMemo(() => deriveEvidenceTruth(session), [session]);
   const [selectedId, setSelectedId] = useState(null);
   if (!truth.applicable) return null;
@@ -228,11 +393,7 @@ export default function EvidenceWorkbenchPanel({ session, onGoBench, onGoVerify 
           </p>
         </div>
         <div className="evidence-hero__actions">
-          <button
-            type="button"
-            className="ghost"
-            onClick={() => downloadJson("hardware-splicer-evidence.json", truth.integrations || truth)}
-          >
+          <button type="button" className="ghost" onClick={() => downloadJson("hardware-splicer-evidence.json", truth.integrations || truth)}>
             Export evidence JSON
           </button>
           <button type="button" className="secondary" onClick={onGoVerify}>Review compiled design</button>
@@ -253,24 +414,9 @@ export default function EvidenceWorkbenchPanel({ session, onGoBench, onGoVerify 
 
       <div className="evidence-metrics">
         <Metric label="Interfaces" value={truth.interfaceCount} detail="Donor functional boundaries" />
-        <Metric
-          label="Unresolved fields"
-          value={truth.unresolvedFieldCount}
-          detail="Must be observed or measured"
-          tone={truth.unresolvedFieldCount ? "warn" : "ok"}
-        />
-        <Metric
-          label="Firmware"
-          value={truth.firmwareAuthorized ? "Authorized" : "Blocked"}
-          detail="PlatformIO generation gate"
-          tone={truth.firmwareAuthorized ? "ok" : "fail"}
-        />
-        <Metric
-          label="Power-on"
-          value={truth.powerAuthorized ? "Authorized" : "Blocked"}
-          detail="Physical bench authority"
-          tone={truth.powerAuthorized ? "ok" : "fail"}
-        />
+        <Metric label="Unresolved fields" value={truth.unresolvedFieldCount} detail="Must be observed or measured" tone={truth.unresolvedFieldCount ? "warn" : "ok"} />
+        <Metric label="Firmware" value={truth.firmwareAuthorized ? "Authorized" : "Blocked"} detail="PlatformIO generation gate" tone={truth.firmwareAuthorized ? "ok" : "fail"} />
+        <Metric label="Power-on" value={truth.powerAuthorized ? "Authorized" : "Blocked"} detail="Physical bench authority" tone={truth.powerAuthorized ? "ok" : "fail"} />
       </div>
 
       <div className="backend-readiness-grid">
@@ -285,26 +431,17 @@ export default function EvidenceWorkbenchPanel({ session, onGoBench, onGoVerify 
             <h3>Donor interfaces</h3>
             <span>{truth.interfaces.length}</span>
           </div>
-          {truth.interfaces.length ? (
-            truth.interfaces.map((item) => {
-              const id = item?.interface_contract?.interface_id;
-              return (
-                <InterfaceListItem
-                  key={id || item?.interface_contract?.virtual_module_id}
-                  item={item}
-                  active={selected === item}
-                  onSelect={() => setSelectedId(id)}
-                />
-              );
-            })
-          ) : (
+          {truth.interfaces.length ? truth.interfaces.map((item) => {
+            const id = item?.interface_contract?.interface_id;
+            return <InterfaceListItem key={id || item?.interface_contract?.virtual_module_id} item={item} active={selected === item} onSelect={() => setSelectedId(id)} />;
+          }) : (
             <div className="evidence-empty compact">
               <strong>No canonical interface contract</strong>
               <p>Regenerate the salvage package with the evidence-first stack.</p>
             </div>
           )}
         </aside>
-        <InterfaceDetail item={selected} />
+        <InterfaceDetail item={selected} benchSession={session.benchSession} onContractUpdate={onContractUpdate} onToast={onToast} />
       </div>
     </section>
   );
