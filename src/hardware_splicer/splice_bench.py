@@ -1,7 +1,6 @@
 """S3 splice bench — evidence gate sessions for donor splices (agent-first, no UI required)."""
 
 from __future__ import annotations
-
 import json
 import re
 from datetime import datetime, timezone
@@ -12,18 +11,8 @@ SCHEMA_VERSION = "hardware_splicer.splice_bench.v1"
 SESSION_FILE = "SPLICE_BENCH_SESSION.json"
 
 _CRITICAL_PATTERNS = (
-    "polarity",
-    "ground",
-    "voltage",
-    "current",
-    "short",
-    "continuity",
-    "do not connect",
-    "input polarity",
-    "rail voltage",
-    "battery",
-    "mains",
-    "hazard",
+    "polarity", "ground", "voltage", "current", "short", "continuity",
+    "do not connect", "input polarity", "rail voltage", "battery", "mains", "hazard",
 )
 
 
@@ -79,27 +68,11 @@ def _gates_from_splice_plan(splice_package: Mapping[str, Any]) -> List[Dict[str,
     for index, prompt in enumerate(splice_plan.get("required_measurements") or []):
         if not str(prompt).strip():
             continue
-        gates.append(
-            _gate(
-                gate_id=f"sp_measure_{index + 1}",
-                source="splice_plan",
-                prompt=str(prompt),
-                stage="before_power_on",
-                gate_type="measurement",
-            )
-        )
+        gates.append(_gate(gate_id=f"sp_measure_{index + 1}", source="splice_plan", prompt=str(prompt), stage="before_power_on", gate_type="measurement"))
     for index, prompt in enumerate(splice_plan.get("do_not_connect_until") or []):
         if not str(prompt).strip():
             continue
-        gates.append(
-            _gate(
-                gate_id=f"sp_dnc_{index + 1}",
-                source="splice_plan",
-                prompt=str(prompt),
-                stage="before_power_on",
-                gate_type="interconnect_hold",
-            )
-        )
+        gates.append(_gate(gate_id=f"sp_dnc_{index + 1}", source="splice_plan", prompt=str(prompt), stage="before_power_on", gate_type="interconnect_hold"))
     functional = splice_plan.get("functional_reuse_plan") if isinstance(splice_plan.get("functional_reuse_plan"), dict) else {}
     for index, block in enumerate(functional.get("ready_blocks") or []):
         if not isinstance(block, dict):
@@ -108,16 +81,7 @@ def _gates_from_splice_plan(splice_package: Mapping[str, Any]) -> List[Dict[str,
             text = str(missing).strip()
             if not text:
                 continue
-            gates.append(
-                _gate(
-                    gate_id=f"fr_{_slug(block.get('block_id', 'block'))}_{index + 1}",
-                    source="functional_reuse_plan",
-                    prompt=text,
-                    stage="before_first_splice",
-                    block_id=str(block.get("block_id") or ""),
-                    gate_type="functional_check",
-                )
-            )
+            gates.append(_gate(gate_id=f"fr_{_slug(block.get('block_id', 'block'))}_{index + 1}", source="functional_reuse_plan", prompt=text, stage="before_first_splice", block_id=str(block.get("block_id") or ""), gate_type="functional_check"))
     return gates
 
 
@@ -141,16 +105,7 @@ def _gates_from_functional_salvage(root: Mapping[str, Any]) -> List[Dict[str, An
             gate_id = str(gate.get("gate_id") or gate.get("measurement_id") or "").strip()
             if not gate_id:
                 gate_id = f"fs_{_slug(board_id)}_{_slug(str(gate.get('prompt') or 'gate'))}"
-            gates.append(
-                _gate(
-                    gate_id=gate_id,
-                    source="functional_salvage",
-                    prompt=str(gate.get("prompt") or gate.get("target") or gate_id),
-                    stage="before_power_on",
-                    board_id=board_id,
-                    gate_type=str(gate.get("gate_type") or gate.get("type") or ""),
-                )
-            )
+            gates.append(_gate(gate_id=gate_id, source="functional_salvage", prompt=str(gate.get("prompt") or gate.get("target") or gate_id), stage="before_power_on", board_id=board_id, gate_type=str(gate.get("gate_type") or gate.get("type") or "")))
         for block in fs.get("reusable_blocks") or []:
             if not isinstance(block, dict):
                 continue
@@ -161,32 +116,80 @@ def _gates_from_functional_salvage(root: Mapping[str, Any]) -> List[Dict[str, An
                 gate_id = str(gate.get("gate_id") or gate.get("measurement_id") or "").strip()
                 if not gate_id:
                     gate_id = f"fs_{_slug(block_id)}_{_slug(str(gate.get('prompt') or 'gate'))}"
-                gates.append(
-                    _gate(
-                        gate_id=gate_id,
-                        source="functional_salvage",
-                        prompt=str(gate.get("prompt") or gate.get("target") or gate_id),
-                        stage="before_power_on",
-                        block_id=block_id,
-                        board_id=board_id,
-                        gate_type=str(gate.get("gate_type") or gate.get("type") or ""),
-                    )
-                )
+                gates.append(_gate(gate_id=gate_id, source="functional_salvage", prompt=str(gate.get("prompt") or gate.get("target") or gate_id), stage="before_power_on", block_id=block_id, board_id=board_id, gate_type=str(gate.get("gate_type") or gate.get("type") or "")))
             for missing in block.get("missing_evidence") or []:
                 text = str(missing).strip()
                 if not text:
                     continue
-                gates.append(
-                    _gate(
-                        gate_id=f"fs_{_slug(block_id)}_missing_{_slug(text)}",
-                        source="functional_salvage",
-                        prompt=text,
-                        stage="before_power_on",
-                        block_id=block_id,
-                        board_id=board_id,
-                        gate_type="missing_evidence",
-                    )
+                gates.append(_gate(gate_id=f"fs_{_slug(block_id)}_missing_{_slug(text)}", source="functional_salvage", prompt=text, stage="before_power_on", block_id=block_id, board_id=board_id, gate_type="missing_evidence"))
+    return gates
+
+
+def _gates_from_evidence_integrations(splice_package: Mapping[str, Any]) -> List[Dict[str, Any]]:
+    """Translate canonical interface packages into the existing Bench gate model."""
+    integrations = splice_package.get("evidence_integrations")
+    if not isinstance(integrations, Mapping):
+        return []
+    gates: List[Dict[str, Any]] = []
+    for package in integrations.get("interfaces") or []:
+        if not isinstance(package, Mapping):
+            continue
+        contract = package.get("interface_contract") if isinstance(package.get("interface_contract"), Mapping) else {}
+        interface_id = str(contract.get("interface_id") or "donor-interface")
+        board_id = str(contract.get("board_id") or "")
+        block_id = str(contract.get("block_id") or "")
+        for blocker in package.get("blockers") or contract.get("unresolved_fields") or []:
+            field = str(blocker).strip()
+            if not field:
+                continue
+            gate = _gate(
+                gate_id=f"evidence_{_slug(interface_id)}_field_{_slug(field)}",
+                source="evidence_interface",
+                prompt=f"Resolve donor interface field `{field}` for {interface_id}.",
+                stage="before_power_on",
+                block_id=block_id,
+                board_id=board_id,
+                gate_type="interface_contract_field",
+                critical=True,
+            )
+            gate.update({
+                "interface_id": interface_id,
+                "evidence_field": field,
+                "requires_contract_edit": True,
+            })
+            gates.append(gate)
+
+        recipe = package.get("bench_recipe") if isinstance(package.get("bench_recipe"), Mapping) else {}
+        for phase in recipe.get("phases") or []:
+            if not isinstance(phase, Mapping):
+                continue
+            phase_title = str(phase.get("title") or phase.get("phase_id") or "Evidence phase")
+            for measurement in phase.get("measurements") or []:
+                if not isinstance(measurement, Mapping):
+                    continue
+                measurement_id = str(measurement.get("measurement_id") or "measurement")
+                description = str(measurement.get("description") or measurement_id)
+                gate = _gate(
+                    gate_id=f"evidence_{_slug(interface_id)}_measurement_{_slug(measurement_id)}",
+                    source="evidence_recipe",
+                    prompt=f"{phase_title}: {description}",
+                    stage="before_power_on",
+                    block_id=block_id,
+                    board_id=board_id,
+                    gate_type="interface_measurement",
+                    critical=True,
                 )
+                gate.update({
+                    "interface_id": interface_id,
+                    "phase_id": phase.get("phase_id"),
+                    "measurement_id": measurement_id,
+                    "expected_unit": measurement.get("unit"),
+                    "lower": measurement.get("lower"),
+                    "upper": measurement.get("upper"),
+                    "required": bool(measurement.get("required", True)),
+                    "validators": list(measurement.get("validators") or []),
+                })
+                gates.append(gate)
     return gates
 
 
@@ -196,15 +199,7 @@ def _gates_from_bringup(bringup: Mapping[str, Any]) -> List[Dict[str, Any]]:
         text = str(check).strip()
         if not text:
             continue
-        gates.append(
-            _gate(
-                gate_id=f"bringup_{index + 1}",
-                source="bringup_card",
-                prompt=text,
-                stage="before_power_on",
-                gate_type="bench_check",
-            )
-        )
+        gates.append(_gate(gate_id=f"bringup_{index + 1}", source="bringup_card", prompt=text, stage="before_power_on", gate_type="bench_check"))
     return gates
 
 
@@ -238,6 +233,7 @@ def collect_bench_gates(build_dir: Path) -> List[Dict[str, Any]]:
     gates: List[Dict[str, Any]] = []
     gates.extend(_gates_from_splice_plan(splice_package))
     gates.extend(_gates_from_functional_salvage(intake_body))
+    gates.extend(_gates_from_evidence_integrations(splice_package))
     gates.extend(_gates_from_bringup(bringup))
     gates = _dedupe_gates(gates)
     from .standard_bench_gates import inject_standard_safety_gates
@@ -306,6 +302,7 @@ def open_bench_session(build_dir: str | Path, *, force: bool = False) -> Dict[st
         "agent_notes": [
             "Submit measurements with splice_bench_submit before claiming power-on is safe.",
             "Close critical gates (voltage, polarity, ground, continuity) first.",
+            "Interface-contract field gates require an explicit contract edit; a scalar measurement cannot close them.",
             "Carrier KiCad DRC pass does not replace bench measurements on donor harnesses.",
         ],
     }
@@ -368,6 +365,13 @@ def submit_bench_measurements(
             applied.append({"gate_id": gate_id, "ok": False, "error": "unknown_gate_id"})
             continue
         gate = by_id[gate_id]
+        if gate.get("requires_contract_edit"):
+            gate["status"] = "open"
+            gate.setdefault("notes", []).append(
+                "This gate represents interface structure and must be closed by updating the canonical interface contract."
+            )
+            applied.append({"gate_id": gate_id, "ok": False, "error": "contract_edit_required"})
+            continue
         status = str(item.get("status") or "closed").strip().lower()
         if status in {"pass", "closed", "ok", "verified"}:
             gate["status"] = "closed"
