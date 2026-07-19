@@ -44,3 +44,31 @@ voltage limits and control semantics are not inherited.
 PYTHONPATH=src python scripts/verify_integration_stack.py
 pytest -q tests/test_integration_stack.py
 ```
+
+## Frontend authority workbench
+
+The Studio Verify stage now contains an evidence workbench for salvage projects. It is intentionally absent from greenfield projects.
+
+The workbench presents:
+
+- donor virtual module identity;
+- known contacts and evidenced signals;
+- reference-only catalog analogies;
+- unresolved authority fields;
+- firmware and power-on authorization;
+- the required measurement sequence;
+- tscircuit, PlatformIO, and KiBot backend readiness.
+
+Older salvage packages receive a conservative client-side fallback. A legacy donor-bound `l298n` row is shown as blocked and never interpreted as an inherited electrical contract.
+
+The UI links directly into the existing Bench stage. It does not duplicate bench measurement storage or create a second authority system.
+
+## Authority invariants
+
+1. A functional analogy never inherits an electrical contract.
+2. Firmware generation requires accepted signal voltage, polarity, and controller-pin evidence.
+3. `InterfaceContract.recompute_status()` promotes a contract only from authoritative signal facts; it does not depend circularly on an already-verified status.
+4. tscircuit is a projection, not the canonical truth store.
+5. PlatformIO is blocked until every active donor signal is firmware-authorized.
+6. KiBot readiness means a manufacturing backend is available, not that fabrication has been authorized.
+7. Physical power-on remains a separate Bench authority transition.
