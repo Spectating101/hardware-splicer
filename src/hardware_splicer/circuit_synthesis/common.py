@@ -17,7 +17,7 @@ POWER_SOURCE_VOLTAGE_V = {
     "usb-power-5v": 5.0,
     "dc-barrel-12v": 12.0,
 }
-MCU_MODULE_IDS = {"esp32-devkit", "arduino-nano", "rpi-pico"}
+MCU_MODULE_IDS = {"esp32-devkit", "esp32-cam-module", "arduino-nano", "rpi-pico"}
 
 
 def available_module_ids(intent: CircuitIntent) -> set[str]:
@@ -38,7 +38,7 @@ def first_available(available: set[str], candidates: Iterable[str]) -> str:
 
 
 def first_controller(available: set[str]) -> str:
-    for module_id in ("esp32-devkit", "arduino-nano", "rpi-pico"):
+    for module_id in ("esp32-cam-module", "esp32-devkit", "arduino-nano", "rpi-pico"):
         if module_id in available:
             return module_id
     for module_id in available:

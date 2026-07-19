@@ -78,8 +78,11 @@ _SKIP_GENERIC_POWER_IDS = frozenset(
 
 
 def _alloc_gpio(mcu: ModuleSpec, used: Set[str]) -> Optional[str]:
+    # Prefer ESP32-CAM free GPIOs (12–15) before flash-LED GPIO4 / boot-sensitive pins.
     order = [
-        "GPIO4", "GPIO2", "GPIO16", "GPIO17", "GP4", "GP5", "GP0", "GP1", "GP26",
+        "GPIO12", "GPIO13", "GPIO14", "GPIO15",
+        "GPIO16", "GPIO17", "GPIO4", "GPIO2",
+        "GP4", "GP5", "GP0", "GP1", "GP26",
         "D2", "D3", "A0", "A1", "A2", "A3", "A4", "A5",
     ]
     pins = mcu.get("pins") or []
@@ -308,30 +311,44 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             if mcu_g and _first_pin(dev, lambda p: p.get("id") == "GND"):
                 wire(mcu["id"], mcu_g, dev["id"], "GND")
         if mcu and dev_id == "l298n":
-            in1 = _alloc_gpio(mcu, used_gpio)
-            in2 = _alloc_gpio(mcu, used_gpio)
-            if in1:
-                wire(mcu["id"], in1, dev["id"], "IN1")
-            if in2:
-                wire(mcu["id"], in2, dev["id"], "IN2")
+            # Dual H-bridge: always request both channels when pinout includes IN3/IN4.
+            control_pins = ["IN1", "IN2"]
+            if _first_pin(dev, lambda p: p.get("id") == "IN3"):
+                control_pins = ["IN1", "IN2", "IN3", "IN4"]
+            for pin_name in control_pins:
+                if not _first_pin(dev, lambda p, n=pin_name: p.get("id") == n):
+                    continue
+                sig = _alloc_gpio(mcu, used_gpio)
+                if sig:
+                    wire(mcu["id"], sig, dev["id"], pin_name)
             if rail_pos:
                 wire(rail_pos[0], rail_pos[1], dev["id"], "VCC")
             if mcu_g:
                 wire(mcu["id"], mcu_g, dev["id"], "GND")
-            motor_load = next(
-                (
-                    m
-                    for m in modules
-                    if str(m.get("id")) in {"dc_motor_3v_6v", "dc_geared_motor_12v", "water_pump_5v", "mini-pump-5v", "cooling_fan_5v"}
-                ),
-                None,
-            )
-            if motor_load:
-                load_pos = _first_pin(motor_load, lambda p: p.get("id") in {"VCC", "V+", "VIN"} or p.get("role") == "power_in")
+            motor_loads = [
+                m
+                for m in modules
+                if str(m.get("id"))
+                in {
+                    "dc_motor_3v_6v",
+                    "dc_geared_motor_12v",
+                    "water_pump_5v",
+                    "mini-pump-5v",
+                    "cooling_fan_5v",
+                }
+            ]
+            out_pairs = [("OUT1", "OUT2"), ("OUT3", "OUT4")]
+            for motor_load, (out_a, out_b) in zip(motor_loads, out_pairs):
+                if not _first_pin(dev, lambda p, n=out_a: p.get("id") == n):
+                    break
+                load_pos = _first_pin(
+                    motor_load,
+                    lambda p: p.get("id") in {"VCC", "V+", "VIN"} or p.get("role") == "power_in",
+                )
                 load_gnd = gnd_pin(motor_load)
                 if load_pos and load_gnd:
-                    wire(dev["id"], "OUT1", motor_load["id"], load_pos)
-                    wire(dev["id"], "OUT2", motor_load["id"], load_gnd)
+                    wire(dev["id"], out_a, motor_load["id"], load_pos)
+                    wire(dev["id"], out_b, motor_load["id"], load_gnd)
         if mcu and dev_id in {"drv8833-motor", "l9110-motor", "bts7960-motor", "tb6612fng-motor"}:
             control_pins = [
                 str(p.get("id"))

@@ -1,0 +1,37 @@
+{
+  "project_name": "money_smart_relay_lamp",
+  "goal": "Build a smart relay box to switch a desk lamp over Wi-Fi from salvaged ESP32 and relay module parts",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 DevKit",
+      "type": "microcontroller",
+      "module_id": "esp32-devkit",
+      "condition": "salvaged"
+    },
+    {
+      "name": "5V single-channel relay module",
+      "type": "relay",
+      "module_id": "relay-1ch-5v",
+      "condition": "salvaged"
+    },
+    {
+      "name": "USB wall adapter 5V",
+      "type": "power_source",
+      "module_id": "usb-power-5v",
+      "voltage_v": 5.0,
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained",
+    "prefer_salvage": true,
+    "battery_voltage_v": 5.0,
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.05
+  },
+  "evidence_notes": [
+    "intent:smart_relay_money_path",
+    "splice:mains side stays on relay NO/COM — logic stays 5V USB"
+  ]
+}

@@ -61,6 +61,33 @@ KIBOT_REFERENCE_ROWS = [
         "label": "Schematic PDF",
         "planned": True,
     },
+    {
+        "id": "ibom",
+        "kibot_output": "Interactive HTML BOM",
+        "ours_glob": "exports/*ibom*.html",
+        "ours_file": "exports/ibom.html",
+        "label": "Interactive HTML BOM (iBOM)",
+        "optional": True,
+        "optional_note": "Present when InteractiveHtmlBom CLI is installed",
+    },
+    {
+        "id": "pcbdraw",
+        "kibot_output": "Board drawing SVG",
+        "ours_glob": "exports/pcbdraw_board.svg",
+        "ours_file": "exports/pcbdraw_board.svg",
+        "label": "PcbDraw board SVG",
+        "optional": True,
+        "optional_note": "Present when pcbdraw is on PATH",
+    },
+    {
+        "id": "kikit_fab",
+        "kibot_output": "Manufacturer fab package",
+        "ours_glob": "exports/kikit/**",
+        "ours_file": None,
+        "label": "KiKit fab export",
+        "optional": True,
+        "optional_note": "Opt-in via POST /v1/build-files/kikit-fab",
+    },
 ]
 
 

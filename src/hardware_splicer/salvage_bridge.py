@@ -9,6 +9,7 @@ from .module_resolver import (
     coalesce_resolved_modules,
     fill_salvage_gaps,
     infer_power_topology,
+    merge_functional_salvage_modules,
     merge_module_overrides,
     module_overrides_for_build,
     overrides_from_resource_plan,
@@ -20,6 +21,7 @@ from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick
 from .salvage_intelligence import analyze_salvage_gaps, build_bringup_card
 from .salvage_bom_estimate import build_salvage_bom_estimate
 from .firmware_scaffold import generate_firmware_from_salvage
+from .mechanism_bridge import build_mecha_project_spec
 from .scratch_pipeline import (
     merge_goal_modules_with_inventory,
     module_ids_from_resolved,
@@ -120,8 +122,29 @@ def build_intake_salvage_package(
     constraints_map = dict(constraints or {})
     splice_plan = SalvageSplicePlanner().plan(payload)
     diy_plan = build_diy_project_engineering_plan(payload)
+    # Bind planner-expanded donor reusable_blocks BEFORE gap_fill so junk drivers
+    # are kept (not catalog-substituted L298N/A4988).
+    fs_context: Dict[str, Any] = {
+        **dict(donor_context or {}),
+        "splice_plan": splice_plan,
+        "reusable_blocks": list(splice_plan.get("reusable_blocks") or []),
+    }
+    fs_rows = merge_functional_salvage_modules(fs_context, parts)
     resolved_modules, salvage_resolution = resolve_parts_to_modules_with_llm(parts, goal=goal)
-    resolved_modules = fill_salvage_gaps(resolved_modules, parts=parts)
+    resolved_modules = coalesce_resolved_modules(parts, list(fs_rows) + list(resolved_modules))
+    resolved_modules = fill_salvage_gaps(
+        resolved_modules,
+        parts=parts,
+        donor_context=fs_context,
+    )
+    salvage_resolution["functional_salvage_bound"] = {
+        "rows": len(fs_rows),
+        "donor_block_ids": [str(r.get("donor_block_id") or "") for r in fs_rows if r.get("donor_block_id")],
+        "skipped_catalog_driver_gap_fill": any(
+            str(r.get("source") or "") == "donor_functional_salvage" and str(r.get("role") or "") == "drv"
+            for r in resolved_modules
+        ),
+    }
     build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
 
     from .catalog import CATALOG_BUILD_IDS
@@ -151,6 +174,7 @@ def build_intake_salvage_package(
             resolved_modules = fill_salvage_gaps(
                 apply_workshop_review(resolved_modules, workshop_review),
                 parts=parts,
+                donor_context=fs_context,
             )
             suggested = str(workshop_review.get("suggested_build_id") or "").strip()
             if suggested:
@@ -183,7 +207,10 @@ def build_intake_salvage_package(
         constraints=constraints_map,
         strategy_mode=strategy_mode,
     )
-    if use_scratch:
+    # Scratch compose must not erase a concrete catalog money-path build_id.
+    from .scratch_pipeline import NAMED_CATALOG_BUILD_IDS
+
+    if use_scratch and str(build_id or "") not in NAMED_CATALOG_BUILD_IDS:
         build_id = "generic_low_voltage_build"
     if build_id:
         target = dict(splice_plan.get("target") or {})
@@ -194,7 +221,8 @@ def build_intake_salvage_package(
         build_id=build_id or None,
         resolved_modules=merged_modules if use_scratch else resolved_modules,
     )
-    module_overrides = merge_module_overrides(inventory_overrides, resource_overrides)
+    # Inventory wins over DIY resource guesses (e.g. usb-uart must not replace usb-power-5v).
+    module_overrides = merge_module_overrides(resource_overrides, inventory_overrides)
     if power_topology == "usb_5v":
         module_overrides["pwr"] = "usb-power-5v"
         for drop_role in ("buck", "psu", "mot_psu", "svo_psu"):
@@ -235,6 +263,24 @@ def build_intake_salvage_package(
         module_ids=module_id_list,
         goal=goal,
     )
+    resolved_for_mech = merged_modules if use_scratch else resolved_modules
+    mech_plan = build_mecha_project_spec(
+        project_name=str(project_name or build_id or "salvage_mech"),
+        build_id=str(build_id or ""),
+        goal=goal,
+        resolved_modules=resolved_for_mech,
+    )
+    mechanism_pack = {
+        "schema_version": "hardware_splicer.mechanism_pack.v1",
+        "status": "planned",
+        "kind": mech_plan["kind"],
+        "project_spec": mech_plan["project_spec"],
+        "outputs": [],
+        "parts": [],
+        "bundle_dir": None,
+        "claim_boundary": "Starter printable pack from electronics roles — verify fit on bench.",
+        "degraded_reason": None,
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         "splice_plan": splice_plan,
@@ -254,6 +300,7 @@ def build_intake_salvage_package(
         "bringup_card": bringup_card,
         "bom_estimate": bom_estimate,
         "firmware_scaffold": firmware_scaffold,
+        "mechanism_pack": mechanism_pack,
     }
 
 

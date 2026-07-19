@@ -664,6 +664,8 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
       { id: "GPIO4", label: "GPIO4", role: "digital_io", voltage: "3.3V", notes: "Flash LED / aux" },
       { id: "GPIO12", label: "GPIO12", role: "digital_io", voltage: "3.3V" },
       { id: "GPIO13", label: "GPIO13", role: "digital_io", voltage: "3.3V" },
+      { id: "GPIO14", label: "GPIO14", role: "digital_io", voltage: "3.3V" },
+      { id: "GPIO15", label: "GPIO15", role: "digital_io", voltage: "3.3V" },
     ],
     warnings: ["GPIO0 must be held correctly for flashing. Use separate 5V supply ≥500mA for stable capture."],
   },

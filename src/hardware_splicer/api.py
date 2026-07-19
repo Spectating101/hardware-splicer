@@ -157,13 +157,29 @@ class BuildFilesContentRequest(BaseModel):
 
 class BuildFilesAutorouteRequest(BaseModel):
     build_dir: str
-    confirm: bool = Field(default=False, description="Must be true to run opt-in FreeRouting")
+    confirm: bool = Field(default=False, description="Must be true to run opt-in autoroute")
+    engine: str = Field(
+        default="freerouting",
+        description="Autoroute engine: freerouting (default) or tscircuit",
+    )
 
 
 class BuildFilesRecheckRequest(BaseModel):
     build_dir: str
     refresh_package: bool = True
     export_views: bool = True
+
+
+class BuildFilesKikitRequest(BaseModel):
+    build_dir: str
+    confirm: bool = False
+    preset: str = "jlcpcb"
+
+
+class BuildFilesLcscLibRequest(BaseModel):
+    build_dir: str
+    lcsc_id: str
+    confirm: bool = False
 
 
 class SpliceGoldenLoopRequest(BaseModel):
@@ -776,17 +792,76 @@ def create_app() -> FastAPI:
             raise _error(
                 422,
                 "confirmation_required",
-                "Set confirm=true to run opt-in FreeRouting autoroute on this build.",
+                "Set confirm=true to run opt-in autoroute on this build.",
+            )
+        engine = str(request.engine or "freerouting").strip().lower()
+        try:
+            if engine == "tscircuit":
+                from .integrations.tscircuit_autorouter_bridge import run_tscircuit_autorouter
+
+                result = run_tscircuit_autorouter(request.build_dir)
+            else:
+                from .integrations.freerouting_bridge import run_freerouting_pipeline
+
+                pcb = find_primary_pcb(request.build_dir)
+                if not pcb:
+                    raise ValueError("no .kicad_pcb found under build_compilation/")
+                result = run_freerouting_pipeline(pcb)
+                result = {**result, "engine": "freerouting"}
+            quality = read_design_quality_summary(request.build_dir)
+            return {
+                "ok": bool(result.get("ok")),
+                "engine": engine,
+                "autoroute": result,
+                "design_quality": quality,
+            }
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/oss-exports")
+    def build_files_oss_exports(request: BuildFilesListRequest) -> Dict[str, Any]:
+        try:
+            from .integrations.oss_export_bundle import run_oss_export_bundle
+
+            root = resolve_build_dir(request.build_dir)
+            return run_oss_export_bundle(root, enforce_roots=False)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/kikit-fab")
+    def build_files_kikit_fab(request: BuildFilesKikitRequest) -> Dict[str, Any]:
+        if not request.confirm:
+            raise _error(
+                422,
+                "confirmation_required",
+                "Set confirm=true to run opt-in KiKit fab export on this build.",
             )
         try:
-            from .integrations.freerouting_bridge import run_freerouting_pipeline
+            from .integrations.kikit_bridge import run_kikit_fab
 
             pcb = find_primary_pcb(request.build_dir)
             if not pcb:
                 raise ValueError("no .kicad_pcb found under build_compilation/")
-            result = run_freerouting_pipeline(pcb)
-            quality = read_design_quality_summary(request.build_dir)
-            return {"ok": bool(result.get("ok")), "autoroute": result, "design_quality": quality}
+            root = resolve_build_dir(request.build_dir)
+            out = root / "build_compilation" / "exports" / "kikit"
+            return run_kikit_fab(pcb, out_dir=out, preset=request.preset)
+        except ValueError as exc:
+            raise _error(422, "validation_error", str(exc)) from exc
+
+    @app.post("/v1/build-files/lcsc-lib")
+    def build_files_lcsc_lib(request: BuildFilesLcscLibRequest) -> Dict[str, Any]:
+        if not request.confirm:
+            raise _error(
+                422,
+                "confirmation_required",
+                "Set confirm=true to fetch an LCSC part via easyeda2kicad.",
+            )
+        try:
+            from .integrations.easyeda2kicad_bridge import fetch_lcsc_to_kicad
+
+            root = resolve_build_dir(request.build_dir)
+            out = root / "build_compilation" / "exports" / "lcsc_lib"
+            return fetch_lcsc_to_kicad(request.lcsc_id, out_dir=out)
         except ValueError as exc:
             raise _error(422, "validation_error", str(exc)) from exc
 

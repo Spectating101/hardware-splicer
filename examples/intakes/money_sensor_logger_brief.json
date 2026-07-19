@@ -1,0 +1,36 @@
+{
+  "project_name": "money_wifi_sensor_logger",
+  "goal": "temperature sensor logger with wifi using salvaged ESP32, DHT22, and USB charger",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 DevKit from parts bin",
+      "type": "microcontroller",
+      "module_id": "esp32-devkit",
+      "condition": "salvaged"
+    },
+    {
+      "name": "DHT22 module",
+      "type": "temperature_sensor",
+      "module_id": "dht22",
+      "condition": "salvaged"
+    },
+    {
+      "name": "USB 5V wall wart",
+      "type": "power_source",
+      "module_id": "usb-power-5v",
+      "voltage_v": 5.0,
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained",
+    "prefer_salvage": true,
+    "target_build_id": "sensor_logger"
+  },
+  "evidence_notes": [
+    "intent:sensor_logger_money_path",
+    "salvage:parts_bin_esp32_devkit",
+    "salvage:dht22_breakout"
+  ]
+}

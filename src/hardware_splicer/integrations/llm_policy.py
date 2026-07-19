@@ -27,6 +27,8 @@ def _falsy(name: str) -> bool:
 
 def qwen_llm_first() -> bool:
     """True when a text LLM backend is configured and user has not disabled LLM paths."""
+    if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
+        return False
     if _falsy("HARDWARE_SPLICER_LLM_FIRST"):
         return False
     if _falsy("HARDWARE_SPLICER_QWEN_SALVAGE") and _falsy("HARDWARE_SPLICER_QWEN_COMPOSE"):
@@ -36,6 +38,8 @@ def qwen_llm_first() -> bool:
 
 def offline_compose_enabled() -> bool:
     """Regex module_picker / phrase_expander allowed."""
+    if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
+        return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_COMPOSE"):
         return True
     if _falsy("HARDWARE_SPLICER_QWEN_COMPOSE"):
@@ -45,6 +49,8 @@ def offline_compose_enabled() -> bool:
 
 def offline_salvage_enabled() -> bool:
     """Regex part resolve / keyword build pick allowed."""
+    if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
+        return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_SALVAGE"):
         return True
     if _falsy("HARDWARE_SPLICER_QWEN_SALVAGE"):
@@ -82,5 +88,8 @@ def llm_policy_summary() -> dict[str, object]:
             "HARDWARE_SPLICER_QWEN_COMPOSE": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", ""),
             "HARDWARE_SPLICER_QWEN_COMPOSE_RETRY": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE_RETRY", ""),
             "HARDWARE_SPLICER_QWEN_SALVAGE": os.environ.get("HARDWARE_SPLICER_QWEN_SALVAGE", ""),
+            "QWEN_DISABLED": os.environ.get("QWEN_DISABLED", ""),
+            "HARDWARE_SPLICER_QWEN_DISABLED": os.environ.get("HARDWARE_SPLICER_QWEN_DISABLED", ""),
+            "HARDWARE_SPLICER_JOB_TIMEOUT_S": os.environ.get("HARDWARE_SPLICER_JOB_TIMEOUT_S", ""),
         },
     }

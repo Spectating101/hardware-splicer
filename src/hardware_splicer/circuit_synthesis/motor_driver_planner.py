@@ -31,7 +31,7 @@ POWER_SOURCE_CURRENT_A = {
     "buck-mp1584": 3.0,
     "buck-lm2596": 3.0,
 }
-MCU_MODULE_IDS = {"esp32-devkit", "arduino-nano", "rpi-pico"}
+MCU_MODULE_IDS = {"esp32-devkit", "esp32-cam-module", "arduino-nano", "rpi-pico"}
 LOAD_MODULE_IDS = {"water_pump_5v", "mini-pump-5v", "cooling_fan_5v"}
 PROTECTION_EVIDENCE = {
     "flyback_or_driver_protection",

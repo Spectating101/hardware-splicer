@@ -210,7 +210,52 @@ def splice_and_build_from_intake(
             goal=goal,
             out_dir=out_path,
         )
-    intake_snapshot = dict(plan)
+    # Materialize mechanical pack + authority once out_dir is known
+    from .mechanism_bridge import (
+        attach_mechatronics_authority,
+        run_mechanism_pack,
+        write_mechanism_pack_artifacts,
+    )
+
+    mechanism_pack = run_mechanism_pack(
+        project_name=str(plan.get("project_name") or build_id or "salvage_mech"),
+        build_id=build_id,
+        goal=goal,
+        resolved_modules=list(salvage_package.get("resolved_modules") or []),
+        out_dir=out_path,
+    )
+    salvage_package["mechanism_pack"] = mechanism_pack
+    salvage_package["mechatronics_authority"] = attach_mechatronics_authority(
+        salvage_package=salvage_package,
+        mechanism_pack=mechanism_pack,
+        out_dir=out_path,
+    )
+    write_mechanism_pack_artifacts(mechanism_pack, out_path)
+    # Refresh SPLICE_PLAN with mech + authority attached
+    splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
+    # Keep PROJECT_INTAKE lean: full salvage_package/scenario blow up clarifier + job results.
+    salvage_summary = {
+        "verdict": salvage_package.get("verdict"),
+        "recommended_build_id": salvage_package.get("recommended_build_id"),
+        "planning_confidence": salvage_package.get("planning_confidence"),
+        "graph_mode": salvage_package.get("graph_mode"),
+        "resolved_modules": salvage_package.get("resolved_modules") or [],
+    }
+    intake_snapshot = {
+        "schema_version": plan.get("schema_version"),
+        "project_name": plan.get("project_name"),
+        "goal": plan.get("goal"),
+        "archetype": plan.get("archetype"),
+        "planning_confidence": plan.get("planning_confidence"),
+        "budget": plan.get("budget"),
+        "normalized_parts": plan.get("normalized_parts"),
+        "assumptions": plan.get("assumptions"),
+        "missing_info": plan.get("missing_info"),
+        "evidence_summary": plan.get("evidence_summary"),
+        "recommended_build_id": plan.get("recommended_build_id"),
+        "salvage_verdict": plan.get("salvage_verdict"),
+        "salvage_package_summary": salvage_summary,
+    }
     for key in ("circuit", "functional_salvage", "evidence_notes", "available_parts", "salvage_mode", "constraints"):
         if key in intake and intake.get(key) is not None:
             intake_snapshot[key] = intake[key]
@@ -301,12 +346,21 @@ def splice_and_build_from_intake(
     compiler_patch_file = out_path / "COMPILER_EVIDENCE_PATCH.json"
     if compiler_patch:
         compiler_patch_file.write_text(json.dumps(compiler_patch, indent=2), encoding="utf-8")
-    post_intake = _to_dict(intake, "intake")
-    if compiler_patch:
-        evidence = _to_dict(post_intake.get("evidence"), "intake.evidence")
-        _merge_evidence(evidence, compiler_patch)
-        post_intake["evidence"] = evidence
-    post_plan = plan_project_from_intake(post_intake, skip_vision=True) if compiler_patch else plan
+    # Do NOT re-run plan_project_from_intake here: that re-invokes salvage/Qwen and has
+    # hung Quick demo jobs after compile artifacts were already on disk. Score from the
+    # existing plan + compiler patch only.
+    post_plan = {
+        "planning_confidence": plan.get("planning_confidence"),
+        "missing_info": list(plan.get("missing_info") or []),
+        "evidence_summary": plan.get("evidence_summary"),
+    }
+    if compiler_patch and compile_result.ok and gate.get("build_ready"):
+        try:
+            post_plan["planning_confidence"] = min(
+                1.0, float(post_plan.get("planning_confidence") or 0.0) + 0.05
+            )
+        except (TypeError, ValueError):
+            pass
     post_metrics_file = out_path / "POST_SPLICE_SCORING.json"
     post_metrics_file.write_text(
         json.dumps(
@@ -316,6 +370,8 @@ def splice_and_build_from_intake(
                 "planning_confidence": post_plan.get("planning_confidence"),
                 "missing_info": post_plan.get("missing_info"),
                 "evidence_summary": post_plan.get("evidence_summary"),
+                "replan_skipped": True,
+                "replan_skip_reason": "avoid_second_llm_salvage_pass",
             },
             indent=2,
         ),
@@ -353,6 +409,9 @@ def splice_and_build_from_intake(
         "salvage_verdict": salvage_package.get("verdict"),
         "salvage_package": salvage_package,
         "power_topology": salvage_package.get("power_topology"),
+        "firmware_scaffold": salvage_package.get("firmware_scaffold"),
+        "mechanism_pack": salvage_package.get("mechanism_pack"),
+        "mechatronics_authority": salvage_package.get("mechatronics_authority"),
         "planning_confidence": plan.get("planning_confidence"),
         "build_compilation": compile_result.to_dict(),
         "design_quality_gate": gate,
@@ -380,6 +439,18 @@ def splice_and_build_from_intake(
             "vision_evidence_report": str(vision_report_file),
             "evidence_extraction_report": str(extraction_report_file),
             "donor_board_vision_report": str(donor_vision_file),
+            "mechanism_pack": str(out_path / "MECHANISM_PACK.json")
+            if (out_path / "MECHANISM_PACK.json").is_file()
+            else "",
+            "mechatronics_pack": str(out_path / "MECHATRONICS_PACK.json")
+            if (out_path / "MECHATRONICS_PACK.json").is_file()
+            else "",
+            "mechatronics_authority": str(out_path / "MECHATRONICS_AUTHORITY.json")
+            if (out_path / "MECHATRONICS_AUTHORITY.json").is_file()
+            else "",
+            "firmware_scaffold": str(out_path / "firmware" / "FIRMWARE_SCAFFOLD.json")
+            if (out_path / "firmware" / "FIRMWARE_SCAFFOLD.json").is_file()
+            else "",
         },
         "bench_session": {
             "readiness": bench_session.get("readiness"),
@@ -400,6 +471,38 @@ def splice_and_build_from_intake(
             "evidence_summary": post_plan.get("evidence_summary"),
         },
     }
+    # Authoritative firmware + bring-up: regenerate from compiled build_graph
+    graph_path = Path(str(compile_result.build_graph_file or ""))
+    if graph_path.is_file():
+        try:
+            build_graph = json.loads(graph_path.read_text(encoding="utf-8"))
+            from .firmware_scaffold import generate_firmware_scaffold, write_firmware_scaffold
+            from .salvage_intelligence import build_bringup_card
+
+            fw_graph = generate_firmware_scaffold(build_id=build_id, build_graph=build_graph)
+            write_firmware_scaffold(build_id=build_id, build_graph=build_graph, out_dir=out_path)
+            salvage_package["firmware_scaffold"] = fw_graph
+            result_body["firmware_scaffold"] = fw_graph
+
+            graph_bringup = build_bringup_card(
+                goal=goal,
+                resolved_modules=list(salvage_package.get("resolved_modules") or []),
+                module_overrides=dict(salvage_package.get("module_overrides") or {}),
+                power_topology=salvage_package.get("power_topology"),
+                graph_input=salvage_package.get("graph_input")
+                if isinstance(salvage_package.get("graph_input"), dict)
+                else salvage_package,
+                build_graph=build_graph,
+            )
+            salvage_package["bringup_card"] = graph_bringup
+            result_body["bringup_card"] = graph_bringup
+            bringup_json.write_text(json.dumps(graph_bringup, indent=2), encoding="utf-8")
+            bringup_md.write_text(str(graph_bringup.get("markdown") or ""), encoding="utf-8")
+
+            splice_plan_file.write_text(json.dumps(salvage_package, indent=2), encoding="utf-8")
+        except Exception:
+            pass
+
     from .project_package import write_project_package_artifacts
 
     package_write = write_project_package_artifacts(out_path, result=result_body, source="splice_build")

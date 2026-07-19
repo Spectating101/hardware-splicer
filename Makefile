@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-ui-interface-smoke launch-prep-v1.1 release-verify-v1.1 verify-install-smoke verify-product-live-smoke verify-product-internal
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice verify-vibe-enabot-endgame verify-money-paths verify-mechatronics-paths verify-mechatronics-golden audit-mechatronics-confidence prepare-physical-closed-loop verify-physical-closed-loop salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-ui-interface-smoke launch-prep-v1.1 release-verify-v1.1 verify-install-smoke verify-product-live-smoke verify-product-internal
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -87,6 +87,36 @@ splice-demo:
 
 verify-splice:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/verify_splice_demos.py --out /tmp/hs_splice_verify
+
+verify-vibe-enabot-endgame:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/verify_vibe_enabot_endgame.py --out /tmp/hs_vibe_enabot_endgame
+
+verify-money-paths:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/verify_money_paths.py --out /tmp/hs_money_paths
+
+verify-mechatronics-paths:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/verify_mechatronics_paths.py --out /tmp/hs_mechatronics_paths
+
+verify-mechatronics-golden:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/verify_mechatronics_golden.py --out /tmp/hs_mechatronics_golden
+
+audit-mechatronics-confidence: verify-mechatronics-paths
+	PYTHONPATH=src $(PYTHON) scripts/audit_mechatronics_confidence.py --root /tmp/hs_mechatronics_paths
+
+prepare-physical-closed-loop:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/prepare_physical_closed_loop.py --out /tmp/hs_physical_closed_loop
+
+verify-physical-closed-loop:
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 PYTHONPATH=src $(PYTHON) scripts/verify_physical_closed_loop.py --out /tmp/hs_physical_closed_loop
+
+product-corpus:
+	PYTHONPATH=src $(PYTHON) scripts/generate_product_corpus.py
+
+sweep-product-corpus: product-corpus
+	HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 PYTHONPATH=src $(PYTHON) scripts/sweep_product_corpus.py --out /tmp/hs_product_corpus_sweep
+
+sweep-product-corpus-compile: product-corpus
+	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_OFFLINE_LLM=1 HARDWARE_SPLICER_OFFLINE_VISION=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 QWEN_DISABLED=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 PYTHONPATH=src $(PYTHON) scripts/sweep_product_corpus.py --compile-candidates --out /tmp/hs_product_corpus_sweep_compile
 
 splice-golden-loop:
 	HARDWARE_SPLICER_AUTOROUTE=0 HARDWARE_SPLICER_DRC_FIX_LOOP=1 HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 PYTHONPATH=src $(PYTHON) scripts/splice_golden_loop.py --out /tmp/hs_splice_golden_loop

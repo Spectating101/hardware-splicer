@@ -1,0 +1,71 @@
+{
+  "project_name": "vibe_enabot_lite_junk_bin",
+  "goal": "Build a DIY Enabot-like rolling home camera robot: dual-wheel drive, Wi-Fi camera, battery pack, keep using junk donor motor driver if possible",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "dead RC toy car donor board",
+      "type": "donor_board",
+      "condition": "salvaged",
+      "notes": "Dual H-bridge section and motor harnesses still intact \u2014 reuse, do not buy L298N"
+    },
+    {
+      "name": "left 6V DC gear motor",
+      "type": "dc_motor",
+      "condition": "salvaged",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "notes": "On donor harness J_MOTOR_L"
+    },
+    {
+      "name": "right 6V DC gear motor",
+      "type": "dc_motor",
+      "condition": "salvaged",
+      "voltage_v": 6.0,
+      "current_a": 0.45,
+      "notes": "On donor harness J_MOTOR_R"
+    },
+    {
+      "name": "ESP32-CAM AI-Thinker with OV2640",
+      "type": "microcontroller",
+      "condition": "new",
+      "module_id": "esp32-cam-module",
+      "notes": "Camera + Wi-Fi brain for telepresence (catalog esp32-cam-module)"
+    },
+    {
+      "name": "front ToF range sensor",
+      "type": "tof_range",
+      "condition": "salvaged"
+    },
+    {
+      "name": "2S LiPo 7.4V pack from drone junk",
+      "type": "battery",
+      "condition": "salvaged",
+      "voltage_v": 7.4
+    }
+  ],
+  "constraints": {
+    "battery_voltage_v": 7.4,
+    "battery_capacity_mah": 1500,
+    "max_speed_mps": 0.4,
+    "strategy_mode": "constrained",
+    "prefer_salvage": true
+  },
+  "circuit": {
+    "mode": "circuit_board_system",
+    "boards": [
+      {
+        "board_id": "donor_rc_car_ctrl",
+        "board_name": "RC toy motor controller donor",
+        "functional_salvage": "@examples/fixtures/splice_donor_rc_motor_board.json"
+      }
+    ]
+  },
+  "evidence_notes": [
+    "intent:enabot_lite_rolling_camera",
+    "splice:keep motor harness intact on J_MOTOR_L and J_MOTOR_R",
+    "splice:measure VMOTOR before connecting ESP32-CAM logic",
+    "splice:do not gap-fill L298N \u2014 donor H-bridge is the driver",
+    "buy:only if camera/Wi-Fi missing from bin"
+  ]
+}

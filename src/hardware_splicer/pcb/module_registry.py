@@ -180,15 +180,19 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     },
     "l298n": {
         "kicadFootprint": "Driver:L298N-HBRIDGE",
-        "bodyMm": {"w": 43, "h": 37},
+        "bodyMm": {"w": 43, "h": 43},
         "pads": [
             {"pinId": "VCC",  "x": -14, "y": -10},
             {"pinId": "GND",  "x": -14, "y":  10},
             {"pinId": "5V",   "x":  -5, "y": -10},
-            {"pinId": "IN1",  "x":  -5, "y":   0},
-            {"pinId": "IN2",  "x":  -5, "y":  10},
-            {"pinId": "OUT1", "x":  14, "y":  -6},
-            {"pinId": "OUT2", "x":  14, "y":   6},
+            {"pinId": "IN1",  "x":  -5, "y":  -2},
+            {"pinId": "IN2",  "x":  -5, "y":   4},
+            {"pinId": "IN3",  "x":  -5, "y":  10},
+            {"pinId": "IN4",  "x":  -5, "y":  16},
+            {"pinId": "OUT1", "x":  14, "y": -12},
+            {"pinId": "OUT2", "x":  14, "y":  -4},
+            {"pinId": "OUT3", "x":  14, "y":   4},
+            {"pinId": "OUT4", "x":  14, "y":  12},
         ],
     },
     "sg90": {
@@ -238,9 +242,16 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
         "pads": _row(["VCC", "GND", "SIG"], 0, 0, _P),
     },
     "esp32-cam-module": {
+        # Dual-column pads match catalog pin ids used by robot_drive overrides.
+        # Keep only power + motor GPIOs on copper — UART/flash pads stay off-board to
+        # avoid orphan 3V3/5V pad nets shorting autorouted motor tracks.
         "kicadFootprint": "Module:ESP32-CAM",
-        "bodyMm": {"w": 27, "h": 40},
-        "pads": _row(["5V", "GND", "U0T", "U0R", "GPIO4"], -6, 0, _P),
+        "bodyMm": {"w": 32, "h": 48},
+        "pads": _dual_col(
+            ["5V", "GND", "GPIO12", "GPIO13"],
+            ["GPIO14", "GPIO15", "U0T", "U0R"],
+            _P * 6,
+        ),
     },
     # --- Canvas catalog expansion (27 → 50) — pin ids must match engine_pcb_data.json ---
     "ds18b20": {

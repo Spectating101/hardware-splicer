@@ -55,9 +55,30 @@ def _needs_clarification(intent: Mapping[str, Any]) -> bool:
     return not (has_supply or has_load or has_splice or has_modules)
 
 
+def _slim_intent_for_package(intent: Mapping[str, Any]) -> Dict[str, Any]:
+    """Keep clarifier payloads small — never echo nested salvage/scenario graphs."""
+    body = dict(intent)
+    keep_keys = (
+        "goal",
+        "project_name",
+        "salvage_mode",
+        "available_parts",
+        "constraints",
+        "supply_rails",
+        "allowed_modules",
+        "load_requirements",
+        "module_ids",
+        "clarification_answers",
+    )
+    slim = {key: body[key] for key in keep_keys if key in body and body[key] is not None}
+    if "goal" not in slim and body.get("goal"):
+        slim["goal"] = body.get("goal")
+    return slim
+
+
 def analyze_intent_clarifications(intent: Mapping[str, Any]) -> Dict[str, Any]:
     """Return clarifying questions and optional enriched intent when answers are present."""
-    body = dict(intent)
+    body = _slim_intent_for_package(intent)
     answers = dict(body.get("clarification_answers") or {})
     needs = _needs_clarification(body)
     questions = [dict(row) for row in _DEFAULT_QUESTIONS] if needs else []
@@ -67,7 +88,7 @@ def analyze_intent_clarifications(intent: Mapping[str, Any]) -> Dict[str, Any]:
         "needs_clarification": needs and not answers,
         "questions": questions,
         "clarification_answers": answers,
-        "enriched_intent": enriched,
+        "enriched_intent": _slim_intent_for_package(enriched),
         "notes": (
             "Answer clarification_answers on the intent before planning when needs_clarification is true."
             if needs and not answers
@@ -93,7 +114,10 @@ def apply_clarification_answers(intent: Mapping[str, Any]) -> Dict[str, Any]:
     controller = str(answers.get("controller") or "").lower()
     allowed = _string_list(body.get("allowed_modules"))
     if controller:
-        if "esp32" in controller and "esp32-devkit" not in allowed:
+        if "esp32-cam" in controller or "ov2640" in controller:
+            if "esp32-cam-module" not in allowed:
+                allowed.append("esp32-cam-module")
+        elif "esp32" in controller and "esp32-devkit" not in allowed:
             allowed.append("esp32-devkit")
         if "arduino" in controller and "arduino-nano" not in allowed:
             allowed.append("arduino-nano")

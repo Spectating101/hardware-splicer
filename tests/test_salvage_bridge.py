@@ -147,8 +147,8 @@ def test_wifi_salvage_intake_resolves_usb_wall_wart_without_barrel() -> None:
     module_ids = [row.get("module_id") for row in package.get("resolved_modules") or []]
     assert package.get("power_topology") == "usb_5v"
     assert "dc-barrel-12v" not in module_ids
-    assert module_ids == ["esp32-devkit", "dht22", "usb-power-5v"]
-    assert package.get("compose_module_ids") == module_ids
+    assert set(module_ids) == {"esp32-devkit", "dht22", "usb-power-5v"}
+    assert set(package.get("compose_module_ids") or []) == set(module_ids)
 
 
 def test_plant_watering_brief_uses_usb_topology_not_barrel() -> None:

@@ -12,7 +12,7 @@ GENERIC_BUILD_ID = "generic_low_voltage_build"
 BUILD_ID_GUIDE: dict[str, str] = {
     "automatic_plant_watering": "Soil moisture / plant watering / drip pump / irrigation",
     "automatic_plant_watering_usb": "USB-powered plant watering variant",
-    "robot_drive_base": "Rover, wheels, mobile robot, differential drive",
+    "robot_drive_base": "Rover, wheels, mobile robot, differential drive, Enabot-like rolling camera",
     "plotter_motion_stage": "Plotter, inkjet printer salvage, stepper motion, CNC axis, scanner rail",
     "usb_fume_extractor": "Desk fan, solder fumes, airflow, cooling fan, ventilation, temp-controlled fan",
     "room_display_station": "Room monitor, TFT/OLED display station, environmental panel",
@@ -60,26 +60,139 @@ def keyword_build_id(
         ]
     ):
         return "plotter_motion_stage"
+    if any(
+        word in text
+        for word in [
+            "enabot",
+            "telepresence",
+            "rolling camera",
+            "home camera robot",
+            "wifi camera robot",
+            "wi-fi camera robot",
+            "pet camera robot",
+        ]
+    ):
+        return "robot_drive_base"
     if any(word in text for word in ["rover", "wheel", "wheeled", "robot car", "drive motor", "rc toy"]):
         return "robot_drive_base"
-    if any(word in text for word in ["fan", "airflow", "vent", "blower", "fume"]):
+    if any(word in text for word in ["fan", "airflow", "vent", "blower", "fume", "aerator", "chiller fan"]):
         return "usb_fume_extractor"
     if any(
         word in text
-        for word in ["tft", "oled", "display station", "room display", "room temp", "ili9341"]
+        for word in [
+            "tft",
+            "oled",
+            "display station",
+            "room display",
+            "room temp",
+            "ili9341",
+            "status board",
+            "ticker",
+            "calendar desk",
+            "weather station",
+        ]
     ):
         return "room_display_station"
-    if any(word in text for word in ["relay box", "smart relay", "relay module", "desk lamp"]):
+    if any(
+        word in text
+        for word in [
+            "relay box",
+            "smart relay",
+            "relay module",
+            "desk lamp",
+            "solenoid",
+            "valve",
+            "heater relay",
+            "heater guard",
+            "frost",
+            "dehumidifier",
+            "humidifier",
+            "mister",
+            "mist",
+            "sprinkler",
+            "garage door",
+            "dry-contact",
+            "auto-start",
+            "preheat",
+            "slow cooker",
+            "incubator",
+            "fermentation",
+            "sous-vide",
+            "sous vide",
+            "uv cure",
+        ]
+    ):
         return "smart_relay_box"
     if any(
         word in text
-        for word in ["sensor logger", "bme280", "log temperature", "environment sensor", "data logger"]
+        for word in [
+            "sensor logger",
+            "bme280",
+            "log temperature",
+            "environment sensor",
+            "data logger",
+            "leak",
+            "alarm",
+            "notifier",
+            "door alarm",
+            "fridge door",
+            "fridge case",
+            "freezer",
+            "mailbox",
+            "beam-break",
+            "break-beam",
+            "tof alert",
+            "grain bin",
+            "hive weight",
+            "lightning",
+            "power outage",
+            "pulse-ox",
+            "pulse ox",
+            "seismometer",
+            "physiology logger",
+            "aqi",
+            "air quality",
+            "co2",
+            "compost",
+            "posture",
+            "handwash",
+            "temp cable",
+            "temperature alarm",
+            "temperature logger",
+            "temp logger",
+        ]
     ):
         return "sensor_logger"
-    if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal"]):
+    if any(
+        word in text
+        for word in [
+            "amp box",
+            "amplifier",
+            "i2s amp",
+            "pam8403",
+            "dfplayer",
+            "practice amp",
+            "intercom",
+            "doorbell",
+            "audio monitor",
+            "soundboard",
+        ]
+    ):
+        return "small_audio_amp_box"
+    if any(word in text for word in ["macro pad", "keypad", "call button", "panic button", "stream-deck", "stream deck"]):
+        return "salvaged_input_panel"
+    if any(word in text for word in ["task light", "led strip", "grow light", "night light", "softbox", "illuminator", "led bar", "led panel"]):
+        return "indicator_or_task_light"
+    if any(word in text for word in ["pan", "tilt", "camera mount", "gimbal", "turntable", "trash lid", "blind tilt"]):
         return "inspection_motion_fixture"
-    if any(word in text for word in ["gripper", "claw", "grab"]):
+    if any(word in text for word in ["gripper", "claw", "grab", "curtain", "coop door", "motor test", "jog"]):
         return "low_voltage_motor_test_jig"
+    if any(word in text for word in ["bench power", "adjustable buck", "pd trigger"]):
+        return "bench_power_adapter"
+    if any(word in text for word in ["uart debug", "usb serial", "ch340"]):
+        return "usb_uart_debug_adapter"
+    if any(word in text for word in ["pager", "status led", "led ack", "network status"]):
+        return "network_status_indicator"
     if salvage_id == "sensor_logger" and any("pump" in str(part.get("type") or "").lower() for part in (parts or [])):
         return "automatic_plant_watering"
     return None

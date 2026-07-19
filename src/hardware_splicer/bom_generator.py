@@ -178,11 +178,20 @@ def enrich_bom_with_jlcsearch(
                     line["jlc_mpn"] = str(hit.get("mpn") or hit.get("manufacturer_part_number") or "")
             except Exception:
                 pass
+        # Bouni-style CPL fields when footprint/position metadata already on the line
+        if line.get("footprint") and not line.get("jlc_cpl_footprint"):
+            line["jlc_cpl_footprint"] = str(line.get("footprint") or "")
+        if line.get("ref") and not line.get("jlc_designator"):
+            line["jlc_designator"] = str(line.get("ref") or "")
+        for pos_key in ("mid_x", "mid_y", "rotation", "layer"):
+            if line.get(pos_key) is not None and f"jlc_{pos_key}" not in line:
+                line[f"jlc_{pos_key}"] = line.get(pos_key)
         enriched_lines.append(line)
 
     out = dict(bom)
     out["lines"] = enriched_lines
     out["jlc_enriched"] = True
+    out["jlc_cpl_shape"] = True
     return out
 
 
@@ -204,6 +213,12 @@ def write_bom_artifacts(bom: Mapping[str, Any], out_dir: str | Path) -> Dict[str
                 "supplier_sku",
                 "jlc_lcsc",
                 "jlc_mpn",
+                "jlc_designator",
+                "jlc_cpl_footprint",
+                "jlc_mid_x",
+                "jlc_mid_y",
+                "jlc_rotation",
+                "jlc_layer",
                 "qty",
                 "source",
                 "salvaged_part",

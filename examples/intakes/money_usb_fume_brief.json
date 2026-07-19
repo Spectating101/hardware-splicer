@@ -1,0 +1,51 @@
+{
+  "project_name": "money_usb_fume_extractor",
+  "goal": "Turn a salvaged 5V fan and temperature sensor into a quiet automatic USB desk fume / airflow extractor with MOSFET speed control",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 DevKit",
+      "type": "microcontroller",
+      "module_id": "esp32-devkit",
+      "condition": "salvaged"
+    },
+    {
+      "name": "5V brushless cooling fan",
+      "type": "fan",
+      "module_id": "cooling_fan_5v",
+      "voltage_v": 5.0,
+      "current_a": 0.28,
+      "condition": "salvaged"
+    },
+    {
+      "name": "DHT22 temperature sensor",
+      "type": "temperature",
+      "module_id": "dht22",
+      "condition": "salvaged"
+    },
+    {
+      "name": "IRLZ44N MOSFET module",
+      "type": "driver_module",
+      "module_id": "mosfet-irlz44n",
+      "condition": "salvaged"
+    },
+    {
+      "name": "USB 5V power bank",
+      "type": "power_source",
+      "module_id": "usb-power-5v",
+      "voltage_v": 5.0,
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained",
+    "prefer_salvage": true,
+    "battery_voltage_v": 5.0,
+    "runtime_min": 30,
+    "mission_duty_cycle": 0.7
+  },
+  "evidence_notes": [
+    "intent:usb_fume_extractor_money_path",
+    "splice:MOSFET switches fan low-side — no relay buy"
+  ]
+}

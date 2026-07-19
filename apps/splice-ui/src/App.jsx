@@ -347,7 +347,13 @@ export default function App() {
   };
 
   const handleQuickDemo = () => {
-    const ex = examples.find((r) => r.id.includes("robot_drive_brief")) || examples[0];
+    // Physical closed-loop flagship first (print→wire→flash→bench), then legacy demos.
+    const ex =
+      examples.find((r) => r.id.includes("physical_pan_tilt")) ||
+      examples.find((r) => r.id.includes("money_pan_tilt")) ||
+      examples.find((r) => r.id.includes("vibe_enabot_lite")) ||
+      examples.find((r) => r.id.includes("robot_drive_brief")) ||
+      examples[0];
     if (ex?.intake) startBuild(ex.intake, { exampleId: ex.id, route: "splice" });
   };
 

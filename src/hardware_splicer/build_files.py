@@ -27,6 +27,10 @@ ARTIFACT_CATALOG_STATIC = [
     {"relative": "build_compilation/BOM.json", "kind": "bom_json", "label": "Compile BOM (JSON)"},
     {"relative": "build_compilation/fab_package.zip", "kind": "fab_zip", "label": "Fab package zip"},
     {"relative": "PROJECT_PACKAGE.json", "kind": "project_package", "label": "PROJECT_PACKAGE"},
+    {"relative": "build_compilation/exports/OSS_EXPORTS.json", "kind": "oss_exports", "label": "OSS export bundle status"},
+    {"relative": "build_compilation/exports/ibom.html", "kind": "ibom", "label": "Interactive HTML BOM"},
+    {"relative": "build_compilation/exports/pcbdraw_board.svg", "kind": "pcbdraw", "label": "PcbDraw board SVG"},
+    {"relative": "firmware/esphome_stub.yaml", "kind": "esphome", "label": "ESPHome pin stub"},
 ]
 
 # Back-compat alias
@@ -172,8 +176,13 @@ def read_design_quality_summary(build_dir: str | Path) -> Dict[str, Any]:
     }
 
 
-def find_primary_pcb(build_dir: str | Path) -> Path | None:
-    root = resolve_build_dir(build_dir)
+def find_primary_pcb(build_dir: str | Path, *, enforce_roots: bool = True) -> Path | None:
+    if enforce_roots:
+        root = resolve_build_dir(build_dir)
+    else:
+        root = Path(build_dir).expanduser().resolve()
+        if not root.is_dir():
+            return None
     comp = root / "build_compilation"
     if not comp.is_dir():
         return None

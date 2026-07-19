@@ -29,7 +29,7 @@ export default function BuildOverlay({ active, status, stageLabel, elapsedSec, e
             <div className="build-overlay-spinner" aria-hidden />
             <h2>{projectName ? `Building ${projectName}` : "Building your project"}</h2>
             <p className="build-overlay-stage">{stageLabel || "Working…"}</p>
-            <p className="muted small">Typical compile time: 30–90 seconds · {formatElapsed(elapsedSec)}</p>
+            <p className="muted small">Typical compile time: 30–90 seconds · {formatElapsed(elapsedSec)} · fails after ~3 min if stuck</p>
             <ol className="build-stage-list">
               {STAGES.map((stage, index) => (
                 <li key={stage.id} className={index <= stageIndex ? "done" : index === stageIndex ? "active" : ""}>

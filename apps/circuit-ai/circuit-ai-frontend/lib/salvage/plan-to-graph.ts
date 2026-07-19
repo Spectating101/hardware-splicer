@@ -30,7 +30,7 @@ import { adaptRecipeToInventory } from "./inventory-topology";
 // concrete library modules for buildable products without a wired recipe.
 const BUILD_CATALOG_CAPS: Record<string, string[][]> = {
   automatic_plant_watering: [["controller"], ["sensor_or_adc"], ["actuator_driver"], ["motor_or_load", "fan_or_pump"], ["power"]],
-  usb_fume_extractor: [["motor_or_load", "fan_or_pump"], ["actuator_driver"], ["power"]],
+  usb_fume_extractor: [["controller"], ["motor_or_load", "fan_or_pump"], ["actuator_driver"], ["power"]],
   inspection_motion_fixture: [["mechanical_motion"], ["led_or_light", "camera_or_vision"], ["power"]],
   low_voltage_motor_test_jig: [["motor_or_load", "fan_or_pump", "mechanical_motion"], ["power"], ["connector", "switch_or_button"]],
   robot_drive_base: [["motor_or_load", "wheel_or_drive"], ["actuator_driver", "controller"], ["power"]],
@@ -86,7 +86,8 @@ function firstPin(mod: ModuleSpec, pred: (p: ModulePin) => boolean): string | un
 
 function allocGpio(mcu: ModuleSpec, used: Set<string>): string | undefined {
   const order = [
-    "GPIO4", "GPIO2", "GPIO16", "GPIO17", "GP4", "GP5", "GP0", "GP1", "GP26",
+    "GPIO12", "GPIO13", "GPIO14", "GPIO15",
+    "GPIO16", "GPIO17", "GPIO4", "GPIO2", "GP4", "GP5", "GP0", "GP1", "GP26",
     "D2", "D3", "A0", "A1", "A2", "A3", "A4", "A5",
   ];
   for (const id of order) {
@@ -232,10 +233,14 @@ function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
       if (sig) wire(mcu.id, sig, dev.id, "IN");
     }
     if (mcu && dev.id === "l298n") {
-      const in1 = allocGpio(mcu, usedGpio);
-      const in2 = allocGpio(mcu, usedGpio);
-      if (in1) wire(mcu.id, in1, dev.id, "IN1");
-      if (in2) wire(mcu.id, in2, dev.id, "IN2");
+      const controlPins = firstPin(dev, (p) => p.id === "IN3")
+        ? (["IN1", "IN2", "IN3", "IN4"] as const)
+        : (["IN1", "IN2"] as const);
+      for (const pinName of controlPins) {
+        if (!firstPin(dev, (p) => p.id === pinName)) continue;
+        const sig = allocGpio(mcu, usedGpio);
+        if (sig) wire(mcu.id, sig, dev.id, pinName);
+      }
       if (railPos) wire(railPos.id, railPos.pin, dev.id, "VCC");
       if (mcu && gndPin(mcu)) wire(mcu.id, gndPin(mcu)!, dev.id, "GND");
     }
@@ -554,19 +559,33 @@ const RECIPES: Record<string, Recipe> = {
     ],
   },
 
+  // USB desk fume / airflow: MCU + MOSFET low-side switch + optional DHT + fan load.
+  // (Legacy barrel+buck-only recipe omitted MCU — that failed junk→intent honesty.)
   usb_fume_extractor: {
     modules: [
-      { role: "pwr", moduleId: "dc-barrel-12v" },
-      { role: "psu", moduleId: "buck-mp1584" },
+      { role: "usb", moduleId: "usb-power-5v" },
+      { role: "mcu", moduleId: "esp32-devkit" },
+      { role: "sns", moduleId: "dht22" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
+      { role: "load", moduleId: "cooling_fan_5v" },
     ],
     wires: [
-      ...barrelToBuck("pwr", "psu"),
-      { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
-      { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
-      { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
+      ...usbToMcu("usb", "mcu", "VIN"),
+      { from: { role: "usb", pin: "V+" }, to: { role: "drv", pin: "VIN" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "drv", pin: "VIN-" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "drv", pin: "GND" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
+      { from: { role: "sns", pin: "DATA" }, to: { role: "mcu", pin: "GPIO15" } },
+      { from: { role: "mcu", pin: "GPIO25" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
+      { from: { role: "drv", pin: "VOUT+" }, to: { role: "load", pin: "VCC" } },
+      { from: { role: "drv", pin: "VOUT-" }, to: { role: "load", pin: "GND" } },
     ],
-    notes: ["Set buck to fan voltage (often 5V or 12V). Fan wires to driver VOUT+/VOUT-."],
+    notes: [
+      "USB 5V feeds MCU + MOSFET high side; fan on driver VOUT+/VOUT-.",
+      "GPIO25 = fan enable; DHT22 DATA on GPIO15 for optional temp-triggered airflow.",
+    ],
   },
 
   indicator_or_task_light: {

@@ -315,7 +315,7 @@ def _check_regulator(
 
 def _recommended_modules(available: set[str], selected_modules: List[str]) -> List[str]:
     out = list(selected_modules)
-    for module_id in ("esp32-devkit", "arduino-nano", "rpi-pico"):
+    for module_id in ("esp32-cam-module", "esp32-devkit", "arduino-nano", "rpi-pico"):
         if module_id in available:
             out.append(module_id)
             break

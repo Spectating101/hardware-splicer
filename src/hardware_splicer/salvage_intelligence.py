@@ -41,6 +41,22 @@ def _goal_needs_power(goal: str, parts: List[Mapping[str, Any]]) -> bool:
     return bool(re.search(r"pump|motor|fan|relay|solenoid|led strip|12v|5v|power|usb", text))
 
 
+def _inventory_covers_battery_power(
+    parts: List[Mapping[str, Any]],
+    constraints: Mapping[str, Any] | None,
+    power_topology: str | None,
+) -> bool:
+    """Junk-bin packs (LiPo / declared battery_voltage_v) already cover the power role."""
+    constraints_map = dict(constraints or {})
+    if constraints_map.get("battery_voltage_v") is not None and str(power_topology or "") in {
+        "hybrid",
+        "barrel_12v",
+    }:
+        return True
+    text = " ".join(str(p.get("name") or p.get("type") or "") for p in parts).lower()
+    return bool(re.search(r"\bbattery\b|lipo|li-?ion|2s\b|7\.4\s*v", text))
+
+
 def _goal_needs_sensor(goal: str) -> bool:
     return bool(
         re.search(
@@ -51,7 +67,17 @@ def _goal_needs_sensor(goal: str) -> bool:
     )
 
 
-def _goal_needs_driver(goal: str, parts: List[Mapping[str, Any]], module_ids: Set[str]) -> bool:
+def _goal_needs_driver(
+    goal: str,
+    parts: List[Mapping[str, Any]],
+    module_ids: Set[str],
+    resolved_modules: List[Mapping[str, Any]] | None = None,
+) -> bool:
+    # Donor-bound actuator_driver already covers the motor path — do not shop L298N.
+    for row in resolved_modules or []:
+        if str(row.get("source") or "") in {"donor_functional_salvage", "circuit_functional_salvage"}:
+            if str(row.get("role") or "") == "drv" and row.get("module_id"):
+                return False
     text = f"{goal} {' '.join(str(p.get('name') or p.get('type') or '') for p in parts)}".lower()
     if re.search(r"pump|motor|fan|solenoid|relay|load", text):
         driver_ids = {
@@ -60,6 +86,7 @@ def _goal_needs_driver(goal: str, parts: List[Mapping[str, Any]], module_ids: Se
             "mosfet-irf520",
             "relay-1ch",
             "relay-1ch-5v",
+            "a4988-stepper",
         }
         if module_ids & driver_ids:
             return False
@@ -190,7 +217,12 @@ def analyze_salvage_gaps(
                 )
             )
 
-    if _goal_needs_power(goal, parts) and not (roles & {"pwr", "usb", "buck"}):
+    topo_preview = power_topology or infer_power_topology(parts, resolved_modules, constraints=constraints_map)
+    if (
+        _goal_needs_power(goal, parts)
+        and not (roles & {"pwr", "usb", "buck"})
+        and not _inventory_covers_battery_power(parts, constraints_map, topo_preview)
+    ):
         if "usb-power-5v" not in inventory_ids:
             shopping.append(
                 _shopping_entry(
@@ -202,7 +234,7 @@ def analyze_salvage_gaps(
                 )
             )
 
-    if _goal_needs_driver(goal, parts, inventory_ids):
+    if _goal_needs_driver(goal, parts, inventory_ids, resolved_modules):
         driver = "mosfet-irlz44n" if "mosfet-irlz44n" in allowed_purchases(constraints_map) else "l298n"
         if driver not in inventory_ids:
             row = _shopping_entry(
@@ -292,15 +324,13 @@ def _gap_summary(
     return f"Inventory covers {len(covered)} mapped module(s) for this goal."
 
 
-def build_bringup_card(
-    *,
-    goal: str,
+_GPIO_PIN_RE = re.compile(r"gpio|gp\d+|d\d+|a\d+", re.I)
+
+
+def _module_ids_for_bringup(
     resolved_modules: List[Mapping[str, Any]],
-    module_overrides: Mapping[str, str] | None = None,
-    power_topology: str | None = None,
-    graph_input: Mapping[str, Any] | None = None,
-) -> Dict[str, Any]:
-    """Human bench hookup sheet from resolved modules and auto-wired graph."""
+    module_overrides: Mapping[str, str] | None,
+) -> List[str]:
     overrides = dict(module_overrides or {})
     module_ids: List[str] = []
     seen: Set[str] = set()
@@ -313,51 +343,134 @@ def build_bringup_card(
         if mid and mid not in seen:
             seen.add(mid)
             module_ids.append(str(mid))
+    return module_ids
 
-    specs = [find_module(mid) for mid in module_ids]
-    specs = [spec for spec in specs if spec]
-    warnings: List[str] = []
-    recipe_modules: List[Dict[str, Any]] = []
-    wires: List[Dict[str, Any]] = []
-    if len(specs) >= 2:
-        recipe = auto_wire_picked_modules(specs)
-        recipe_modules = list(recipe.get("modules") or [])
-        wires = list(recipe.get("wires") or [])
-    else:
-        warnings.append("Need at least two known modules for hookup lines.")
 
-    role_labels: Dict[str, str] = {}
-    role_module_ids: Dict[str, str] = {}
-    for index, mod in enumerate(recipe_modules):
-        role = str(mod.get("role") or f"m{index + 1}")
-        module_id = str(mod.get("moduleId") or mod.get("module_id") or "")
-        role_labels[role] = _module_label(module_id) if module_id else role
-        role_module_ids[role] = module_id
-
+def _connections_from_compiled_graph(build_graph: Mapping[str, Any]) -> List[Dict[str, Any]]:
+    """Human hookup lines from compiled build_graph wires (authoritative after compile)."""
+    nodes_by_id: Dict[str, Mapping[str, Any]] = {
+        str(n.get("id")): n
+        for n in (build_graph.get("nodes") or [])
+        if isinstance(n, Mapping) and n.get("id") is not None
+    }
     connections: List[Dict[str, Any]] = []
-    for wire in wires:
-        src = dict(wire.get("from") or {})
-        dst = dict(wire.get("to") or {})
-        fr = str(src.get("role") or "")
-        tr = str(dst.get("role") or "")
-        fp = str(src.get("pin") or "")
-        tp = str(dst.get("pin") or "")
+    for wire in build_graph.get("wires") or []:
+        if not isinstance(wire, Mapping):
+            continue
+        src = wire.get("from") if isinstance(wire.get("from"), Mapping) else {}
+        dst = wire.get("to") if isinstance(wire.get("to"), Mapping) else {}
+        if not src or not dst:
+            continue
+        fn = nodes_by_id.get(str(src.get("nodeId"))) or {}
+        tn = nodes_by_id.get(str(dst.get("nodeId"))) or {}
+        fmid = str(fn.get("moduleId") or src.get("nodeId") or "")
+        tmid = str(tn.get("moduleId") or dst.get("nodeId") or "")
+        fp = str(src.get("pinId") or src.get("pin") or "")
+        tp = str(dst.get("pinId") or dst.get("pin") or "")
+        if not fp or not tp:
+            continue
         connections.append(
             {
-                "from": f"{role_labels.get(fr, fr)} ({fp})",
-                "to": f"{role_labels.get(tr, tr)} ({tp})",
-                "from_role": fr,
-                "to_role": tr,
+                "from": f"{_module_label(fmid)} ({fp})",
+                "to": f"{_module_label(tmid)} ({tp})",
+                "from_role": str(fn.get("role") or src.get("nodeId") or ""),
+                "to_role": str(tn.get("role") or dst.get("nodeId") or ""),
                 "from_pin": fp,
                 "to_pin": tp,
-                "purpose": _wire_purpose(role_module_ids.get(fr, ""), fp, role_module_ids.get(tr, ""), tp),
+                "purpose": _wire_purpose(fmid, fp, tmid, tp),
+                "sourced_from_graph": True,
             }
         )
+    return connections
+
+
+def build_bringup_card(
+    *,
+    goal: str,
+    resolved_modules: List[Mapping[str, Any]],
+    module_overrides: Mapping[str, str] | None = None,
+    power_topology: str | None = None,
+    graph_input: Mapping[str, Any] | None = None,
+    build_graph: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Human bench hookup sheet from resolved modules (or compiled build_graph when provided)."""
+    module_ids = _module_ids_for_bringup(resolved_modules, module_overrides)
+    warnings: List[str] = []
+    connections: List[Dict[str, Any]] = []
+    sourced_from_graph = bool(
+        build_graph
+        and (build_graph.get("wires") or build_graph.get("nodes"))
+    )
+
+    if sourced_from_graph:
+        connections = _connections_from_compiled_graph(build_graph or {})
+        if not connections:
+            warnings.append("Compiled graph had no usable wires — fell back to auto-wire heuristics.")
+            sourced_from_graph = False
+
+    if not sourced_from_graph:
+        specs = [find_module(mid) for mid in module_ids]
+        specs = [spec for spec in specs if spec]
+        recipe_modules: List[Dict[str, Any]] = []
+        wires: List[Dict[str, Any]] = []
+        if len(specs) >= 2:
+            recipe = auto_wire_picked_modules(specs)
+            recipe_modules = list(recipe.get("modules") or [])
+            wires = list(recipe.get("wires") or [])
+        else:
+            warnings.append("Need at least two known modules for hookup lines.")
+
+        role_labels: Dict[str, str] = {}
+        role_module_ids: Dict[str, str] = {}
+        for index, mod in enumerate(recipe_modules):
+            role = str(mod.get("role") or f"m{index + 1}")
+            module_id = str(mod.get("moduleId") or mod.get("module_id") or "")
+            role_labels[role] = _module_label(module_id) if module_id else role
+            role_module_ids[role] = module_id
+
+        for wire in wires:
+            src = dict(wire.get("from") or {})
+            dst = dict(wire.get("to") or {})
+            fr = str(src.get("role") or "")
+            tr = str(dst.get("role") or "")
+            fp = str(src.get("pin") or "")
+            tp = str(dst.get("pin") or "")
+            connections.append(
+                {
+                    "from": f"{role_labels.get(fr, fr)} ({fp})",
+                    "to": f"{role_labels.get(tr, tr)} ({tp})",
+                    "from_role": fr,
+                    "to_role": tr,
+                    "from_pin": fp,
+                    "to_pin": tp,
+                    "purpose": _wire_purpose(
+                        role_module_ids.get(fr, ""), fp, role_module_ids.get(tr, ""), tp
+                    ),
+                }
+            )
+
+    # Donor harness reuse — keep junk connector labels in the human sheet.
+    donor_harness = _donor_harness_connections(resolved_modules, graph_input)
+    for row in donor_harness:
+        connections.append(row)
 
     gpio_rows = [
-        row for row in connections if re.search(r"gpio|gp\d|d\d|a\d", row.get("from_pin", ""), re.I)
+        row
+        for row in connections
+        if _GPIO_PIN_RE.search(str(row.get("from_pin") or ""))
+        or _GPIO_PIN_RE.search(str(row.get("to_pin") or ""))
     ]
     bench_checks = _bench_checks(goal, power_topology, module_ids, connections)
+    if sourced_from_graph:
+        bench_checks.insert(0, "Hookup lines match compiled build_graph (same pins as firmware scaffold).")
+    for row in donor_harness:
+        refs = row.get("connector_refs") or []
+        if refs:
+            bench_checks.insert(
+                0 if not sourced_from_graph else 1,
+                f"Keep donor harness connectors intact: {', '.join(str(r) for r in refs)} — measure before cutting.",
+            )
+            break
 
     markdown = _bringup_markdown(goal, power_topology, connections, bench_checks)
 
@@ -371,7 +484,65 @@ def build_bringup_card(
         "bench_checks": bench_checks,
         "warnings": warnings,
         "markdown": markdown,
+        "donor_harness": donor_harness,
+        "sourced_from_graph": sourced_from_graph,
     }
+
+
+def _donor_harness_connections(
+    resolved_modules: List[Mapping[str, Any]],
+    graph_input: Mapping[str, Any] | None,
+) -> List[Dict[str, Any]]:
+    """Emit bringup lines that keep donor connector_refs (J_MOTOR_*, J_LOGIC, …)."""
+    rows: List[Dict[str, Any]] = []
+    seen: Set[str] = set()
+
+    def _add(block_name: str, refs: List[str], purpose: str) -> None:
+        key = f"{block_name}|{','.join(refs)}"
+        if not refs or key in seen:
+            return
+        seen.add(key)
+        rows.append(
+            {
+                "from": f"Donor {block_name}",
+                "to": f"Harness {', '.join(refs)}",
+                "from_role": "donor",
+                "to_role": "harness",
+                "from_pin": refs[0],
+                "to_pin": refs[-1] if len(refs) > 1 else refs[0],
+                "purpose": purpose,
+                "connector_refs": refs,
+            }
+        )
+
+    for row in resolved_modules:
+        if str(row.get("source") or "") not in {"donor_functional_salvage", "circuit_functional_salvage"}:
+            continue
+        refs = [str(c) for c in (row.get("connector_refs") or []) if str(c).strip()]
+        name = str(row.get("donor_block_name") or row.get("part_name") or "donor block")
+        _add(name, refs, "reuse donor connector — do not cut until pinout/voltage gates close")
+
+    for block in (graph_input or {}).get("reusable_blocks") or []:
+        if not isinstance(block, Mapping):
+            continue
+        if str(block.get("source") or "") not in {
+            "circuit_functional_salvage",
+            "donor_functional_salvage",
+            "",
+        } and str(block.get("function_type") or "") not in {
+            "actuator_driver",
+            "power_regulation",
+            "sensor_io",
+            "mechanical_motion",
+        }:
+            # Still take FS-shaped blocks with connector_refs.
+            if not block.get("connector_refs"):
+                continue
+        refs = [str(c) for c in (block.get("connector_refs") or []) if str(c).strip()]
+        name = str(block.get("name") or block.get("block_id") or "donor block")
+        _add(name, refs, "reuse donor connector — do not cut until pinout/voltage gates close")
+
+    return rows
 
 
 def _wire_purpose(from_mod: str, from_pin: str, to_mod: str, to_pin: str) -> str:

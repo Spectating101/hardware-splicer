@@ -15,7 +15,7 @@ PART_CASES = [
     ("BME280 breakout", "sensor", "bme280"),
     ("IRLZ44N MOSFET module", "driver", "mosfet-irlz44n"),
     ("IRF520 driver", "driver", "mosfet-irlz44n"),
-    ("relay module 5v", "driver", "relay-1ch"),
+    ("relay module 5v", "driver", "relay-1ch-5v"),
     ("L298N motor driver", "driver", "l298n"),
     ("SG90 servo", "actuator", "sg90"),
     ("USB power bank", "power_source", "usb-power-5v"),

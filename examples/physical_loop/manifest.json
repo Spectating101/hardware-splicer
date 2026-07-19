@@ -1,0 +1,21 @@
+{
+  "schema_version": "hardware_splicer.physical_closed_loop.v1",
+  "description": "Single flagship path for a real print→wire→flash→bench win. Invites stay paused until this closes physically.",
+  "primary_path_id": "pan_tilt",
+  "paths": [
+    {
+      "path_id": "pan_tilt",
+      "title": "Pan-tilt inspection mount — physical closed loop",
+      "intake": "examples/intakes/splice_physical_pan_tilt_loop.json",
+      "expected_build_id": "inspection_motion_fixture",
+      "require_compile": true,
+      "require_firmware": true,
+      "require_mechanism": true,
+      "mechanism_kinds_any": ["pan_tilt"],
+      "require_firmware_tokens": ["PAN_PIN", "TILT_PIN"],
+      "min_servos": 2,
+      "require_scad": ["pt_base.scad", "pt_bracket.scad", "pt_platform.scad", "enclosure.scad"],
+      "bench_steps_min": 6
+    }
+  ]
+}

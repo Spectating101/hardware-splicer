@@ -16,6 +16,7 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"lm2596", re.I), "buck-lm2596", "buck", 0.92),
     (re.compile(r"mp1584|mini buck", re.I), "buck-mp1584", "buck", 0.9),
     (re.compile(r"tp4056|lipo charger", re.I), "tp4056", "usb", 0.9),
+    (re.compile(r"esp32[\s\-]?cam|ai[\s\-]?thinker.*cam|ov2640", re.I), "esp32-cam-module", "mcu", 0.96),
     (re.compile(r"esp32", re.I), "esp32-devkit", "mcu", 0.95),
     (re.compile(r"arduino nano|nano", re.I), "arduino-nano", "mcu", 0.9),
     (re.compile(r"pico|raspberry pi pico", re.I), "rpi-pico", "mcu", 0.9),
@@ -28,17 +29,13 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"limit.?switch|endstop|end.?stop", re.I), "limit-switch-3pin", "sns", 0.9),
     (re.compile(r"sg90", re.I), "sg90", "act", 0.92),
     (re.compile(r"mg996r", re.I), "mg996r", "act", 0.9),
-    (
-        re.compile(r"a4988|stepper.*driver|driver.*stepper|stepper.*section|inkjet.*motion.*board|printer.*motion.*board", re.I),
-        "a4988-stepper",
-        "drv",
-        0.86,
-    ),
+    # Do NOT match donor board names here — functional_salvage binds inkjet/RC donors.
+    (re.compile(r"a4988|stepper.*driver|driver.*stepper|stepper.*section", re.I), "a4988-stepper", "drv", 0.86),
     (re.compile(r"stepper.*motor|28byj|nema", re.I), "28byj48_stepper", "mot", 0.84),
     (re.compile(r"l298n", re.I), "l298n", "drv", 0.9),
     (re.compile(r"dc.*gear.*motor|gear.*motor|brushed.*motor|dc[_ ]motor|6v.*motor", re.I), "dc_motor_3v_6v", "mot", 0.86),
     (re.compile(r"12v.*gear.*motor|geared.*motor.*12", re.I), "dc_geared_motor_12v", "mot", 0.84),
-    (re.compile(r"relay", re.I), "relay-1ch", "drv", 0.85),
+    (re.compile(r"relay", re.I), "relay-1ch-5v", "rly", 0.85),
     (re.compile(r"pump|peristaltic", re.I), "mini-pump-5v", "load", 0.8),
     (re.compile(r"fan|blower", re.I), "fan-5v", "load", 0.8),
     (re.compile(r"usb.*serial|cp210|ch340|ftdi", re.I), "usb-uart", "usb", 0.85),
@@ -86,7 +83,10 @@ _ROLE_ALIASES = {
     "sensor": "sns",
     "actuator": "act",
     "driver": "drv",
+    "relay": "rly",
+    "servo": "svo",
     "power": "buck",
+    "power_source": "pwr",
     "pump": "load",
     "fan": "load",
     "motor": "load",
@@ -136,11 +136,33 @@ def _part_implies_barrel_12v(part: Mapping[str, Any]) -> bool:
 
 
 def _role_for_module_id(module_id: str, part: Mapping[str, Any]) -> str:
-    for _pattern, mid, role, _confidence in _MODULE_PATTERNS:
-        if mid == module_id:
+    mid = str(module_id or "").strip()
+    if mid in _USB_WALL_MODULE_IDS:
+        return "usb"
+    if mid.startswith("relay"):
+        return "rly"
+    if mid in {"sg90", "mg996r"}:
+        return "svo"
+    for _pattern, pattern_mid, role, _confidence in _MODULE_PATTERNS:
+        if pattern_mid == mid:
             return role
     cap = str(part.get("part_class") or part.get("type") or "").lower()
     return _ROLE_ALIASES.get(cap, cap or "misc")
+
+
+_MULTI_INSTANCE_ROLES = frozenset({"mot", "sns", "load", "act", "svo"})
+_DONOR_SOURCES = frozenset({"donor_functional_salvage", "circuit_functional_salvage"})
+
+
+def _row_coalesce_key(row: Mapping[str, Any]) -> str:
+    """Allow multiple motors/sensors with the same catalog module_id."""
+    module_id = str(row.get("module_id") or "").strip()
+    role = str(row.get("role") or "").strip()
+    part_name = str(row.get("part_name") or "").strip().lower()
+    instance = str(row.get("instance_id") or "").strip()
+    if role in _MULTI_INSTANCE_ROLES and (part_name or instance):
+        return f"{module_id}::{instance or part_name}"
+    return module_id
 
 
 def coalesce_resolved_modules(
@@ -159,42 +181,51 @@ def coalesce_resolved_modules(
     elif topology == "barrel_12v":
         rows = [row for row in rows if str(row.get("module_id") or "") not in _USB_WALL_MODULE_IDS]
 
-    by_id: Dict[str, Dict[str, Any]] = {}
+    by_key: Dict[str, Dict[str, Any]] = {}
+    source_rank = {
+        "donor_functional_salvage": 3,
+        "circuit_functional_salvage": 3,
+        "user_inventory": 2,
+        "gap_fill": 0,
+        "unresolved": 0,
+    }
     for row in rows:
         module_id = str(row.get("module_id") or "").strip()
         if not module_id:
             continue
-        existing = by_id.get(module_id)
+        key = _row_coalesce_key(row)
+        existing = by_key.get(key)
         if not existing:
-            by_id[module_id] = row
+            by_key[key] = row
             continue
-        if existing.get("source") != "user_inventory" and row.get("source") == "user_inventory":
-            by_id[module_id] = row
-    return list(by_id.values()) + unresolved
+        # Prefer donor-bound / inventory over gap_fill when the same key collides.
+        if source_rank.get(str(row.get("source") or ""), 1) > source_rank.get(str(existing.get("source") or ""), 1):
+            by_key[key] = row
+    return list(by_key.values()) + unresolved
 
 
 def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
     """Map intake-normalized parts to module-library IDs with role hints."""
     resolved: List[Dict[str, Any]] = []
-    seen_ids: set[str] = set()
+    seen_keys: set[str] = set()
     for part in parts:
         text = _part_text(part)
         explicit_id = str(part.get("module_id") or "").strip()
         if explicit_id:
-            if explicit_id in seen_ids:
+            row = {
+                "schema_version": SCHEMA_VERSION,
+                "part_name": str(part.get("name") or text or explicit_id),
+                "module_id": explicit_id,
+                "role": _role_for_module_id(explicit_id, part),
+                "source": "user_inventory",
+                "confidence": 1.0,
+                "matched_on": "explicit_module_id",
+            }
+            key = _row_coalesce_key(row)
+            if key in seen_keys:
                 continue
-            seen_ids.add(explicit_id)
-            resolved.append(
-                {
-                    "schema_version": SCHEMA_VERSION,
-                    "part_name": str(part.get("name") or text or explicit_id),
-                    "module_id": explicit_id,
-                    "role": _role_for_module_id(explicit_id, part),
-                    "source": "user_inventory",
-                    "confidence": 1.0,
-                    "matched_on": "explicit_module_id",
-                }
-            )
+            seen_keys.add(key)
+            resolved.append(row)
             continue
         if not text:
             continue
@@ -227,12 +258,166 @@ def resolve_parts_to_modules(parts: List[Mapping[str, Any]]) -> List[Dict[str, A
                 "confidence": 0.2,
                 "matched_on": cap,
             }
-        if match.get("module_id") and match["module_id"] in seen_ids:
-            continue
         if match.get("module_id"):
-            seen_ids.add(str(match["module_id"]))
+            key = _row_coalesce_key(match)
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
         resolved.append(match)
     return coalesce_resolved_modules(parts, resolved)
+
+
+def _iter_functional_salvage_blocks(donor_context: Mapping[str, Any] | None) -> List[Dict[str, Any]]:
+    """Collect reusable_blocks from circuit boards / top-level functional_salvage."""
+    if not donor_context:
+        return []
+    blocks: List[Dict[str, Any]] = []
+    seen: set[str] = set()
+
+    def _take(report: Mapping[str, Any] | None) -> None:
+        if not isinstance(report, Mapping):
+            return
+        for block in report.get("reusable_blocks") or []:
+            if not isinstance(block, Mapping):
+                continue
+            block_id = str(block.get("block_id") or block.get("name") or "")
+            key = block_id or json_dumps_safe(block)
+            if key in seen:
+                continue
+            seen.add(key)
+            blocks.append(dict(block))
+
+    if isinstance(donor_context.get("reusable_blocks"), list):
+        _take({"reusable_blocks": donor_context.get("reusable_blocks")})
+    circuit = donor_context.get("circuit")
+    if isinstance(circuit, Mapping):
+        for board in circuit.get("boards") or []:
+            if isinstance(board, Mapping):
+                fs = board.get("functional_salvage")
+                if isinstance(fs, Mapping):
+                    _take(fs)
+                if isinstance(board.get("reusable_blocks"), list):
+                    _take({"reusable_blocks": board.get("reusable_blocks")})
+    fs_top = donor_context.get("functional_salvage")
+    if isinstance(fs_top, Mapping):
+        _take(fs_top)
+    # Planner output carries expanded FS blocks on reusable_blocks.
+    splice = donor_context.get("splice_plan")
+    if isinstance(splice, Mapping):
+        nested = splice.get("reusable_blocks")
+        if isinstance(nested, list):
+            _take({"reusable_blocks": nested})
+    return blocks
+
+
+def json_dumps_safe(value: Any) -> str:
+    try:
+        import json
+
+        return json.dumps(value, sort_keys=True, default=str)[:240]
+    except Exception:
+        return str(value)[:240]
+
+
+def _module_id_for_donor_block(block: Mapping[str, Any]) -> Tuple[str, str] | None:
+    """Map a functional_salvage block to a catalog stand-in + role (carrier interface)."""
+    ftype = str(block.get("function_type") or "").lower()
+    caps = " ".join(str(c).lower() for c in (block.get("capabilities") or []))
+    name = str(block.get("name") or "").lower()
+    text = f"{ftype} {caps} {name}"
+    status = str(block.get("status") or "").lower()
+    if status and status not in {"reuse_ready", "ready_after_measurements", "layout_review_required", ""}:
+        # Still bind layout_review / reuse_ready; skip only hard rejects.
+        if status in {"do_not_reuse", "blocked", "unsafe"}:
+            return None
+    if "stepper" in text or ftype in {"stepper_driver", "motion_driver"}:
+        return "a4988-stepper", "drv"
+    if ftype == "actuator_driver" or "h-bridge" in text or "hbridge" in text or "motor driver" in text:
+        return "l298n", "drv"
+    if ftype == "power_regulation" or "battery" in text or "power" in caps:
+        # Battery input sections are reuse notes — do not invent a USB wall-wart stand-in.
+        if "battery" in text or "j_batt" in text or "batt" in name:
+            return None
+        if "24" in text or "12" in text:
+            return "dc-barrel-12v", "pwr"
+        if "usb" in text or "5v" in text:
+            return "usb-power-5v", "pwr"
+        return None
+    if ftype in {"sensor_io", "sensor"} or "limit" in text or "switch" in text:
+        return "limit-switch-3pin", "sns"
+    return None
+
+
+def merge_functional_salvage_modules(
+    donor_context: Mapping[str, Any] | None,
+    parts: List[Mapping[str, Any]] | None = None,
+) -> List[Dict[str, Any]]:
+    """Bind donor reusable_blocks into resolved_modules so gap_fill cannot substitute them away."""
+    parts = parts or []
+    donor_part_names = [
+        str(p.get("name") or "")
+        for p in parts
+        if "donor" in str(p.get("type") or "").lower() or "donor" in str(p.get("name") or "").lower()
+    ]
+    default_donor_name = donor_part_names[0] if donor_part_names else "donor board"
+    rows: List[Dict[str, Any]] = []
+    bound_donor_names: set[str] = set()
+
+    for block in _iter_functional_salvage_blocks(donor_context):
+        mapped = _module_id_for_donor_block(block)
+        if not mapped:
+            continue
+        module_id, role = mapped
+        board_id = str(block.get("board_id") or "")
+        part_name = default_donor_name
+        for name in donor_part_names:
+            if board_id and board_id.replace("_", " ") in name.lower().replace("-", " "):
+                part_name = name
+                break
+            if "inkjet" in name.lower() and "stepper" in str(block.get("name") or "").lower():
+                part_name = name
+                break
+            if "rc" in name.lower() and ("h-bridge" in str(block.get("name") or "").lower() or "motor driver" in str(block.get("name") or "").lower()):
+                part_name = name
+                break
+        connector_refs = [str(c) for c in (block.get("connector_refs") or []) if str(c).strip()]
+        rows.append(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "part_name": part_name,
+                "module_id": module_id,
+                "role": role,
+                "source": "donor_functional_salvage",
+                "confidence": float(block.get("confidence") or block.get("reuse_value_score") or 0.8),
+                "matched_on": "functional_salvage.reusable_blocks",
+                "donor_block_id": str(block.get("block_id") or ""),
+                "donor_block_name": str(block.get("name") or ""),
+                "board_id": board_id,
+                "connector_refs": connector_refs,
+                "extractability": dict(block.get("extractability") or {}) if isinstance(block.get("extractability"), Mapping) else {},
+                "instance_id": str(block.get("block_id") or module_id),
+            }
+        )
+        bound_donor_names.add(part_name)
+
+    # Drop unresolved placeholder rows for donor boards we just bound.
+    # (Caller coalesces FS rows + heuristic rows together.)
+    _ = bound_donor_names
+    return rows
+
+
+def donor_has_bound_driver(
+    resolved_modules: List[Mapping[str, Any]] | None = None,
+    donor_context: Mapping[str, Any] | None = None,
+) -> bool:
+    for row in resolved_modules or []:
+        if str(row.get("source") or "") in _DONOR_SOURCES and str(row.get("role") or "") == "drv" and row.get("module_id"):
+            return True
+    for block in _iter_functional_salvage_blocks(donor_context):
+        mapped = _module_id_for_donor_block(block)
+        if mapped and mapped[1] == "drv":
+            return True
+    return False
 
 
 def resolve_parts_to_modules_with_llm(
@@ -394,14 +579,53 @@ def fill_salvage_gaps(
     resolved_modules: List[Dict[str, Any]],
     *,
     parts: List[Mapping[str, Any]] | None = None,
+    donor_context: Mapping[str, Any] | None = None,
 ) -> List[Dict[str, Any]]:
-    """Deterministic gap-fill for salvage (driver for motors, etc.) — no LLM."""
+    """Deterministic gap-fill for salvage (driver for motors, etc.) — no LLM.
+
+    When functional_salvage already binds a donor actuator_driver, do not catalog-substitute
+    L298N/A4988 — that was the junk→intent failure mode.
+    """
     rows = [dict(row) for row in resolved_modules]
+    # Drop unresolved donor_board placeholders once FS bound the same part.
+    bound_names = {
+        str(row.get("part_name") or "").strip().lower()
+        for row in rows
+        if str(row.get("source") or "") in _DONOR_SOURCES and row.get("module_id")
+    }
+    if bound_names:
+        rows = [
+            row
+            for row in rows
+            if not (
+                str(row.get("source") or "") == "unresolved"
+                and str(row.get("part_name") or "").strip().lower() in bound_names
+            )
+        ]
+
+    donor_drv = donor_has_bound_driver(rows, donor_context)
+    if donor_drv:
+        # Strip dishonest catalog substitutes that slipped in before FS bind / workshop.
+        rows = [
+            row
+            for row in rows
+            if not (
+                str(row.get("source") or "") in {"gap_fill", "goal_picker", "qwen_workshop"}
+                and str(row.get("module_id") or "").strip() in _DRIVER_MODULE_IDS
+            )
+        ]
+
     module_ids = {str(row.get("module_id") or "").strip() for row in rows if row.get("module_id")}
     has_driver = bool(module_ids & _DRIVER_MODULE_IDS) or any(
         str(row.get("role") or "") == "drv" and row.get("module_id") for row in rows
     )
-    if _inventory_has_stepper_motors(parts, rows) and not (module_ids & _STEPPER_DRIVER_MODULE_IDS):
+    if donor_drv:
+        has_driver = True
+    if (
+        _inventory_has_stepper_motors(parts, rows)
+        and not (module_ids & _STEPPER_DRIVER_MODULE_IDS)
+        and not donor_drv
+    ):
         rows.append(
             {
                 "schema_version": SCHEMA_VERSION,
@@ -440,23 +664,27 @@ def infer_power_topology(
     resolved_modules = resolved_modules or []
     constraints_map = dict(constraints or {})
     battery_v = constraints_map.get("battery_voltage_v")
+    has_barrel = any(_part_implies_barrel_12v(part) for part in parts)
+    has_barrel_module = any(str(row.get("module_id") or "") == "dc-barrel-12v" for row in resolved_modules)
     if battery_v is not None:
         try:
-            if float(battery_v) >= 6.0:
+            bv = float(battery_v)
+            if bv >= 6.0:
                 has_usb = any(_part_implies_usb_5v(part) for part in parts)
                 has_usb_module = any(
                     str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules
                 )
+                # Declared pack (e.g. 7.4V) without a barrel PSU → hybrid battery path, not 12V brick.
+                if has_barrel or has_barrel_module:
+                    return "barrel_12v" if not (has_usb or has_usb_module) else "hybrid"
                 if has_usb or has_usb_module:
                     return "hybrid"
-                return "barrel_12v"
+                return "hybrid"
         except (TypeError, ValueError):
             pass
 
     has_usb = any(_part_implies_usb_5v(part) for part in parts)
-    has_barrel = any(_part_implies_barrel_12v(part) for part in parts)
     has_usb_module = any(str(row.get("module_id") or "") == "usb-power-5v" for row in resolved_modules)
-    has_barrel_module = any(str(row.get("module_id") or "") == "dc-barrel-12v" for row in resolved_modules)
     usb_only = (has_usb or has_usb_module) and not (has_barrel or has_barrel_module)
     if usb_only:
         return "usb_5v"
@@ -498,13 +726,23 @@ def module_overrides_for_build(
 ) -> Dict[str, str]:
     """Role → module_id overrides from user inventory and substitution rules."""
     overrides: Dict[str, str] = {}
+    # Pass 1: inventory / heuristic. Pass 2: donor FS wins for same role.
     for row in resolved_modules:
         module_id = row.get("module_id")
         role = row.get("role")
-        if module_id and role:
+        if module_id and role and str(row.get("source") or "") not in _DONOR_SOURCES:
+            overrides[str(role)] = str(module_id)
+    for row in resolved_modules:
+        module_id = row.get("module_id")
+        role = row.get("role")
+        if module_id and role and str(row.get("source") or "") in _DONOR_SOURCES:
             overrides[str(role)] = str(module_id)
 
-    has_esp32 = any(str(row.get("module_id") or "") == "esp32-devkit" for row in resolved_modules)
+    mcu_ids = {str(row.get("module_id") or "") for row in resolved_modules}
+    has_esp32 = bool(mcu_ids & {"esp32-devkit", "esp32-cam-module"})
+    # Camera brain wins over bare DevKit when inventory/goal already resolved a CAM module.
+    if "esp32-cam-module" in mcu_ids:
+        overrides["mcu"] = "esp32-cam-module"
     if (mcu_logic_voltage <= 3.4 or has_esp32) and overrides.get("drv") == "mosfet-irf520":
         overrides["drv"] = _SUBSTITUTIONS["mosfet-irf520"]
     if has_esp32 and overrides.get("drv") in {None, "mosfet-irf520"} and build_id == "automatic_plant_watering":
@@ -513,6 +751,22 @@ def module_overrides_for_build(
     # LM2596 needs ≥7V in; prefer MP1584 when user only has 5V USB path.
     if build_id == "automatic_plant_watering" and overrides.get("buck") == "buck-lm2596":
         overrides["buck"] = "buck-mp1584"
+
+    # Recipe role aliases — catalog recipes use usb/rly/svo, inventory may say pwr/relay/act.
+    if overrides.get("pwr") in _USB_WALL_MODULE_IDS and "usb" not in overrides:
+        overrides["usb"] = overrides["pwr"]
+    if overrides.get("usb") == "usb-uart" and any(
+        str(row.get("module_id") or "") in _USB_WALL_MODULE_IDS for row in resolved_modules
+    ):
+        overrides["usb"] = "usb-power-5v"
+    if overrides.get("rly") is None:
+        for key in ("relay", "drv"):
+            mid = overrides.get(key)
+            if mid and str(mid).startswith("relay"):
+                overrides["rly"] = str(mid)
+                break
+    if overrides.get("svo") is None and overrides.get("act") in {"sg90", "mg996r"}:
+        overrides["svo"] = overrides["act"]
 
     return overrides
 

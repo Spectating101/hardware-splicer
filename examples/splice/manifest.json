@@ -59,6 +59,19 @@
       "min_circuit_backed_blocks": 2,
       "required_extractability_classes": ["connector_reuse", "board_section_cut_candidate"],
       "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
+    },
+    {
+      "case_id": "vibe_enabot_lite_junk_bin",
+      "tier": "S2_compile",
+      "title": "Junk bin → Enabot-lite rolling camera cousin",
+      "product_story": "Intent-first DIY: keep donor dual H-bridge + motor harnesses, bind ESP32-CAM brain, compile differential-drive carrier without buying an L298N.",
+      "intake": "examples/intakes/splice_vibe_enabot_lite_brief.json",
+      "donor_fixture": "examples/fixtures/splice_donor_rc_motor_board.json",
+      "expected_build_id": "robot_drive_base",
+      "requires_compile": true,
+      "min_circuit_backed_blocks": 2,
+      "required_extractability_classes": ["connector_reuse", "board_section_cut_candidate"],
+      "expected_verdicts": ["ready_after_measurements", "ready_for_first_splice"]
     }
   ]
 }

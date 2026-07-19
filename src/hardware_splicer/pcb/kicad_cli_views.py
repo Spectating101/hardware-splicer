@@ -84,6 +84,34 @@ def export_human_views(
                 }
             )
 
+    # Best-effort InteractiveHtmlBom + PcbDraw (skip when tools absent)
+    try:
+        from ..integrations.ibom_bridge import run_ibom
+        from ..integrations.pcbdraw_bridge import run_pcbdraw
+
+        if pcb and pcb.is_file():
+            for report in (run_ibom(pcb, out_dir=export_dir), run_pcbdraw(pcb, out_dir=export_dir)):
+                rel = None
+                path = report.get("path")
+                if path:
+                    try:
+                        rel = str(Path(path).resolve().relative_to(root.resolve()))
+                    except Exception:
+                        rel = None
+                rows.append(
+                    {
+                        "id": report.get("id"),
+                        "label": report.get("label") or report.get("id"),
+                        "relative": rel,
+                        "present": bool(report.get("ok")),
+                        "ok": bool(report.get("ok")),
+                        "skipped": bool(report.get("skipped")),
+                        "reason": report.get("reason"),
+                    }
+                )
+    except Exception:
+        pass
+
     if not rows:
         return {"ok": False, "skipped": True, "reason": "no schematic or PCB found", "exports": []}
 

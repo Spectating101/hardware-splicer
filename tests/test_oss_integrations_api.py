@@ -18,12 +18,19 @@ def test_integrations_catalog() -> None:
     client = TestClient(create_app())
     payload = client.get("/v1/integrations/catalog").json()
     assert payload["ok"] is True
-    assert payload["total_count"] >= 10
+    assert payload["total_count"] >= 15
     assert payload["wired_count"] >= 5
     ids = {row["id"] for row in payload["integrations"]}
     assert "kicanvas" in ids
     assert "circuit-json" in ids
     assert "freerouting" in ids
+    assert "ibom" in ids
+    assert "pcbdraw" in ids
+    assert "kikit" in ids
+    assert "tscircuit-autorouter" in ids
+    assert "easyeda2kicad" in ids
+    assert "esphome" in ids
+    assert "nopscadlib" in ids
 
 
 def test_build_artifacts_and_circuit_json(tmp_path: Path) -> None:
@@ -61,6 +68,48 @@ def test_kicad_netlist_fixture_payload() -> None:
     assert fixture["type"] == "kicad_netlist"
     assert isinstance(fixture.get("kicad_netlist_text"), str)
     assert len(fixture["kicad_netlist_text"]) > 20
+
+
+def test_oss_exports_and_opt_in_endpoints(tmp_path: Path) -> None:
+    comp = tmp_path / "build_compilation"
+    comp.mkdir()
+    (comp / "demo.kicad_pcb").write_text("(kicad_pcb (version 20241229))\n", encoding="utf-8")
+    client = TestClient(create_app())
+
+    with patch("hardware_splicer.integrations.ibom_bridge._resolve_ibom_cli", return_value=None):
+        with patch("hardware_splicer.integrations.pcbdraw_bridge._resolve_pcbdraw", return_value=None):
+            with patch(
+                "hardware_splicer.integrations.ibom_bridge.subprocess.run",
+                side_effect=FileNotFoundError("no"),
+            ):
+                exports = client.post("/v1/build-files/oss-exports", json={"build_dir": str(tmp_path)}).json()
+    assert exports["ok"] is True
+
+    denied = client.post(
+        "/v1/build-files/kikit-fab",
+        json={"build_dir": str(tmp_path), "confirm": False},
+    )
+    assert denied.status_code == 422
+
+    with patch("hardware_splicer.integrations.kikit_bridge._resolve_kikit", return_value=None):
+        kikit = client.post(
+            "/v1/build-files/kikit-fab",
+            json={"build_dir": str(tmp_path), "confirm": True, "preset": "jlcpcb"},
+        ).json()
+    assert kikit.get("skipped") is True
+
+    lcsc_denied = client.post(
+        "/v1/build-files/lcsc-lib",
+        json={"build_dir": str(tmp_path), "lcsc_id": "C123", "confirm": False},
+    )
+    assert lcsc_denied.status_code == 422
+
+    ar = client.post(
+        "/v1/build-files/autoroute",
+        json={"build_dir": str(tmp_path), "confirm": True, "engine": "tscircuit"},
+    ).json()
+    assert ar.get("engine") == "tscircuit"
+    assert ar.get("autoroute", {}).get("skipped") is True
 
 
 def test_build_bom_and_fab_manifest(tmp_path: Path) -> None:

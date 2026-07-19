@@ -82,6 +82,36 @@ def _estimate_cost_usd(lines: List[Mapping[str, Any]]) -> Optional[float]:
     return round(total, 2) if found else None
 
 
+def _graph_node_label(graph: Mapping[str, Any], node_id: str) -> str:
+    for node in graph.get("nodes") or []:
+        if not isinstance(node, dict):
+            continue
+        if str(node.get("id")) != str(node_id):
+            continue
+        module_id = str(node.get("moduleId") or node_id)
+        try:
+            from .pcb.module_registry import find_module
+
+            spec = find_module(module_id)
+            if spec:
+                return str(spec.get("label") or module_id)
+        except Exception:
+            pass
+        return module_id
+    return str(node_id)
+
+
+def _format_wire_endpoint(graph: Mapping[str, Any], endpoint: Any) -> str:
+    if isinstance(endpoint, Mapping):
+        node_id = str(endpoint.get("nodeId") or "")
+        pin = str(endpoint.get("pinId") or endpoint.get("pin") or "")
+        if node_id and pin:
+            return f"**{_graph_node_label(graph, node_id)}** `{pin}`"
+        if pin:
+            return f"`{pin}`"
+    return f"`{endpoint}`"
+
+
 def _wiring_narrative(
     *,
     splice_plan: Mapping[str, Any],
@@ -114,19 +144,39 @@ def _wiring_narrative(
                 lines.append(f"{index}. {step}")
         lines.append("")
 
-    wires = list(graph.get("wires") or [])
-    if wires:
-        lines.append("## Net connections (compile graph)")
-        for wire in wires[:40]:
-            if not isinstance(wire, dict):
+    # Prefer bring-up card lines when present (already humanized + donor harness).
+    bringup = splice_plan.get("bringup_card") if isinstance(splice_plan.get("bringup_card"), dict) else {}
+    bringup_connections = list(bringup.get("connections") or [])
+    if bringup_connections:
+        lines.append("## Bench hookup (bring-up card)")
+        if bringup.get("sourced_from_graph"):
+            lines.append("_Pins match compiled build_graph / firmware scaffold._")
+            lines.append("")
+        for row in bringup_connections[:50]:
+            if not isinstance(row, dict):
                 continue
             lines.append(
-                f"- `{wire.get('from')}` → `{wire.get('to')}`"
-                + (f" ({wire.get('net')})" if wire.get("net") else "")
+                f"- {row.get('from')} → {row.get('to')}"
+                + (f" — {row.get('purpose')}" if row.get("purpose") else "")
             )
-        if len(wires) > 40:
-            lines.append(f"- … {len(wires) - 40} more connections")
+        if len(bringup_connections) > 50:
+            lines.append(f"- … {len(bringup_connections) - 50} more connections")
         lines.append("")
+    else:
+        wires = list(graph.get("wires") or [])
+        if wires:
+            lines.append("## Net connections (compile graph)")
+            for wire in wires[:40]:
+                if not isinstance(wire, dict):
+                    continue
+                lines.append(
+                    f"- {_format_wire_endpoint(graph, wire.get('from'))} → "
+                    f"{_format_wire_endpoint(graph, wire.get('to'))}"
+                    + (f" ({wire.get('net')})" if wire.get("net") else "")
+                )
+            if len(wires) > 40:
+                lines.append(f"- … {len(wires) - 40} more connections")
+            lines.append("")
 
     if len(lines) <= 2:
         lines.append("_No wiring narrative generated yet — add load/supply details or run synthesis/splice planning._")
@@ -333,6 +383,15 @@ def build_project_package(
             if (root / "physical_assembly" / "assembly_preview.scad").is_file()
             else "",
         },
+        "firmware_scaffold": payload.get("firmware_scaffold")
+        or _read_json(root / "firmware" / "FIRMWARE_SCAFFOLD.json")
+        or (splice_plan.get("firmware_scaffold") if isinstance(splice_plan, dict) else None),
+        "mechanism_pack": payload.get("mechanism_pack")
+        or _read_json(root / "MECHANISM_PACK.json")
+        or (splice_plan.get("mechanism_pack") if isinstance(splice_plan, dict) else None),
+        "mechatronics_authority": payload.get("mechatronics_authority")
+        or _read_json(root / "MECHATRONICS_AUTHORITY.json")
+        or (splice_plan.get("mechatronics_authority") if isinstance(splice_plan, dict) else None),
         "instructions": {
             "assembly_steps": assembly_steps,
             "bringup_markdown": str(bringup.get("markdown") or ""),
@@ -436,6 +495,27 @@ def write_project_package_artifacts(
     elif compile_csv.is_file():
         csv_hint = str(compile_csv)
 
+    oss_exports: Dict[str, Any] = {}
+    try:
+        from .integrations.oss_export_bundle import run_oss_export_bundle
+
+        oss_exports = run_oss_export_bundle(
+            root,
+            build_id=str((result or {}).get("build_id") or package.get("info", {}).get("build_id") or ""),
+            project_name=str(
+                (result or {}).get("project_name") or package.get("info", {}).get("project_name") or root.name
+            ),
+            enforce_roots=False,
+        )
+        package["oss_exports"] = {
+            "present_count": oss_exports.get("present_count"),
+            "exports": oss_exports.get("exports") or [],
+            "oss_mech_refs": oss_exports.get("oss_mech_refs") or [],
+        }
+        package_path.write_text(json.dumps(package, indent=2), encoding="utf-8")
+    except Exception:
+        oss_exports = {"ok": False, "skipped": True, "reason": "oss_export_bundle_error"}
+
     return {
         "schema_version": SCHEMA_VERSION,
         "package": package,
@@ -445,6 +525,10 @@ def write_project_package_artifacts(
             "wiring_guide": str(wiring_path),
             "assembly_guide": str(assembly_path),
             "bom_csv": csv_hint,
+            "oss_exports": str((root / "build_compilation" / "exports" / "OSS_EXPORTS.json"))
+            if (root / "build_compilation" / "exports" / "OSS_EXPORTS.json").is_file()
+            else "",
         },
         "gates": package.get("gates"),
+        "oss_exports": oss_exports,
     }

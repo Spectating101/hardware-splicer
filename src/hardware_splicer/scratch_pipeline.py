@@ -58,6 +58,20 @@ class ScratchCompileResult:
         }
 
 
+_GOAL_PICKER_DRIVER_IDS = frozenset(
+    {
+        "l298n",
+        "drv8833-motor",
+        "l9110-motor",
+        "tb6612fng-motor",
+        "bts7960-motor",
+        "a4988-stepper",
+        "tmc2209-stepper",
+        "drv8825_stepper",
+    }
+)
+
+
 def merge_goal_modules_with_inventory(
     goal: str,
     resolved_modules: Sequence[Mapping[str, Any]] | None,
@@ -65,6 +79,8 @@ def merge_goal_modules_with_inventory(
     constrained: bool = False,
 ) -> List[Dict[str, Any]]:
     """Merge NL module picker output with inventory-resolved rows (inventory wins on id clash)."""
+    from .module_resolver import donor_has_bound_driver
+
     by_id: Dict[str, Dict[str, Any]] = {}
     for row in resolved_modules or []:
         module_id = str(row.get("module_id") or "").strip()
@@ -72,14 +88,19 @@ def merge_goal_modules_with_inventory(
             by_id[module_id] = dict(row)
     if constrained and by_id:
         return list(by_id.values())
+    donor_drv = donor_has_bound_driver(list(resolved_modules or []))
     pick = pick_modules_for_goal(goal)
     for index, module_id in enumerate(pick.module_ids):
-        if module_id not in by_id:
-            by_id[module_id] = {
-                "module_id": module_id,
-                "role": f"g{index + 1}",
-                "source": "goal_picker",
-            }
+        if module_id in by_id:
+            continue
+        # Do not catalog-inject a second driver when donor FS already bound one.
+        if donor_drv and module_id in _GOAL_PICKER_DRIVER_IDS:
+            continue
+        by_id[module_id] = {
+            "module_id": module_id,
+            "role": f"g{index + 1}",
+            "source": "goal_picker",
+        }
     return list(by_id.values())
 
 

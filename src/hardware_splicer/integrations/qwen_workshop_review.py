@@ -180,6 +180,21 @@ Rules:
     }
 
 
+_WORKSHOP_DRIVER_IDS = frozenset(
+    {
+        "l298n",
+        "drv8833-motor",
+        "l9110-motor",
+        "tb6612fng-motor",
+        "bts7960-motor",
+        "mosfet-irlz44n",
+        "a4988-stepper",
+        "tmc2209-stepper",
+        "drv8825_stepper",
+    }
+)
+
+
 def apply_workshop_review(
     resolved_modules: List[Dict[str, Any]],
     review: Mapping[str, Any],
@@ -188,14 +203,22 @@ def apply_workshop_review(
     if not review.get("ok"):
         return resolved_modules
 
+    from ..module_resolver import donor_has_bound_driver
+
     rows = [dict(row) for row in resolved_modules]
     seen_ids = {str(row.get("module_id") or "").strip() for row in rows if row.get("module_id")}
+    donor_drv = donor_has_bound_driver(rows)
 
     for hit in review.get("add_modules") or []:
         if not isinstance(hit, dict):
             continue
         module_id = str(hit.get("module_id") or "").strip()
         if not module_id or module_id in seen_ids:
+            continue
+        # Refuse catalog driver gap-fill when donor actuator_driver is already bound.
+        if donor_drv and (
+            module_id in _WORKSHOP_DRIVER_IDS or str(hit.get("role") or "") == "drv"
+        ):
             continue
         rows.append(
             {

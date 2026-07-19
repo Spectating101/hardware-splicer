@@ -11,6 +11,7 @@ import {
   InstructionsPanel,
   WiringPanel,
 } from "../components/ProjectPanels.jsx";
+import MechatronicsPanel from "../components/MechatronicsPanel.jsx";
 import {
   STAGES,
   sessionHasPackage,
@@ -186,6 +187,7 @@ export default function ProjectWorkspace({
                 onGoGates={() => handleStageChange(STAGES.bench)}
               />
             )}
+            {pkg && <MechatronicsPanel pkg={pkg} />}
             {truth.copper.state === "preview_only" && (
               <section className="card honesty-card honesty-card--warn" data-testid="copper-honesty">
                 <h3>{truth.copper.label}</h3>
@@ -283,6 +285,7 @@ export default function ProjectWorkspace({
                 <BomPanel pkg={pkg} />
                 <WiringPanel pkg={pkg} />
                 <InstructionsPanel pkg={pkg} />
+                <MechatronicsPanel pkg={pkg} />
               </>
             )}
           </div>

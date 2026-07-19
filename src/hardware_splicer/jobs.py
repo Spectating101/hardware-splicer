@@ -18,6 +18,20 @@ from .schemas import HardwareCompileSpec
 
 TERMINAL_STATUSES = {"succeeded", "failed", "cancelled"}
 
+# Wall-clock cap for a single job worker run. Prevents Quick-demo "Building…" forever
+# when an LLM call or KiCad subprocess stalls.
+DEFAULT_JOB_TIMEOUT_S = 180.0
+
+
+def _job_timeout_s() -> float:
+    raw = os.getenv("HARDWARE_SPLICER_JOB_TIMEOUT_S", "").strip()
+    if not raw:
+        return DEFAULT_JOB_TIMEOUT_S
+    try:
+        return max(30.0, float(raw))
+    except ValueError:
+        return DEFAULT_JOB_TIMEOUT_S
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -233,11 +247,12 @@ class JobStore:
     def complete_job(self, job_id: str, result: Dict[str, Any]) -> None:
         now = _utc_now()
         with self._lock, self._connect() as conn:
+            # Only transition running → succeeded (ignore late completes after timeout/fail).
             conn.execute(
                 """
                 UPDATE jobs
                 SET status = 'succeeded', finished_at = ?, updated_at = ?, result_json = ?, error_json = NULL
-                WHERE job_id = ?
+                WHERE job_id = ? AND status = 'running'
                 """,
                 (now, now, _json(result), job_id),
             )
@@ -249,7 +264,7 @@ class JobStore:
                 """
                 UPDATE jobs
                 SET status = 'failed', finished_at = ?, updated_at = ?, error_json = ?
-                WHERE job_id = ?
+                WHERE job_id = ? AND status = 'running'
                 """,
                 (now, now, _json(error), job_id),
             )
@@ -394,6 +409,54 @@ class JobBackend:
             self._run_job(job)
 
     def _run_job(self, job: JobRecord) -> None:
+        timeout_s = _job_timeout_s()
+        # Helper thread so a hung LLM/subprocess cannot leave the job "running" forever.
+        error_box: list[BaseException] = []
+        done = threading.Event()
+
+        def _target() -> None:
+            try:
+                self._execute_job(job)
+            except BaseException as exc:  # noqa: BLE001 — surface to outer fail_job
+                error_box.append(exc)
+            finally:
+                done.set()
+
+        worker = threading.Thread(
+            target=_target,
+            name=f"hs-job-{job.job_id[:8]}",
+            daemon=True,
+        )
+        worker.start()
+        if not done.wait(timeout_s):
+            self.store.fail_job(
+                job.job_id,
+                {
+                    "type": "JobTimeout",
+                    "message": (
+                        f"Job exceeded wall-clock timeout ({int(timeout_s)}s). "
+                        "Likely a stalled LLM or compile step; retry with offline flags "
+                        "(HARDWARE_SPLICER_OFFLINE_SALVAGE=1 / QWEN_DISABLED=1) or raise "
+                        "HARDWARE_SPLICER_JOB_TIMEOUT_S."
+                    ),
+                    "timeout_s": timeout_s,
+                },
+            )
+            return
+        if error_box:
+            exc = error_box[0]
+            self.store.fail_job(
+                job.job_id,
+                {
+                    "type": exc.__class__.__name__,
+                    "message": str(exc),
+                    "traceback": "".join(
+                        traceback.format_exception(type(exc), exc, exc.__traceback__, limit=20)
+                    ),
+                },
+            )
+
+    def _execute_job(self, job: JobRecord) -> None:
         job_type = str(job.options.get("job_type") or "compile_bundle")
         try:
             if job_type == "compose":

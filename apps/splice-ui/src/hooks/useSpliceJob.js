@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api.js";
 
 const POLL_MS = 2000;
+/** Client-side honesty cap — backend also has HARDWARE_SPLICER_JOB_TIMEOUT_S (default 180). */
+const CLIENT_JOB_TIMEOUT_S = 210;
 
 const STAGE_LABELS = {
   queued: "Waiting in queue…",
@@ -28,6 +30,7 @@ export function useSpliceJob() {
   const timerRef = useRef(null);
   const elapsedRef = useRef(null);
   const startedAtRef = useRef(null);
+  const timedOutRef = useRef(false);
 
   const [jobKind, setJobKind] = useState("splice");
 
@@ -44,15 +47,26 @@ export function useSpliceJob() {
 
   const startElapsed = () => {
     startedAtRef.current = Date.now();
+    timedOutRef.current = false;
     setElapsedSec(0);
     elapsedRef.current = setInterval(() => {
       if (startedAtRef.current) {
-        setElapsedSec(Math.floor((Date.now() - startedAtRef.current) / 1000));
+        const sec = Math.floor((Date.now() - startedAtRef.current) / 1000);
+        setElapsedSec(sec);
+        if (sec >= CLIENT_JOB_TIMEOUT_S && !timedOutRef.current) {
+          timedOutRef.current = true;
+          setError(
+            `Build timed out after ${CLIENT_JOB_TIMEOUT_S}s. The job may still be running on the server — check Recent jobs or retry with offline mode.`,
+          );
+          setActive(false);
+          clearTimer();
+        }
       }
     }, 1000);
   };
 
   const pollJob = useCallback(async (jobId) => {
+    if (timedOutRef.current) return true;
     const snapshot = await fetchJob(jobId);
     setJob(snapshot);
     if (snapshot.status === "succeeded") {
@@ -147,6 +161,7 @@ export function useSpliceJob() {
 
   const reset = useCallback(() => {
     clearTimer();
+    timedOutRef.current = false;
     setJob(null);
     setResult(null);
     setError(null);

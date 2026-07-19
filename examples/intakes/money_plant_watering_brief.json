@@ -1,0 +1,54 @@
+{
+  "project_name": "money_plant_watering_junk_bin",
+  "goal": "Build a small automatic plant watering device: read soil moisture and run a mini pump briefly when dry",
+  "salvage_mode": true,
+  "available_parts": [
+    {
+      "name": "ESP32 DevKit from junk drawer",
+      "type": "microcontroller",
+      "module_id": "esp32-devkit",
+      "condition": "salvaged"
+    },
+    {
+      "name": "capacitive soil moisture probe",
+      "type": "soil_moisture",
+      "module_id": "soil_moisture",
+      "condition": "salvaged"
+    },
+    {
+      "name": "5V mini water pump",
+      "type": "pump",
+      "module_id": "mini-pump-5v",
+      "voltage_v": 5.0,
+      "current_a": 0.55,
+      "condition": "new"
+    },
+    {
+      "name": "IRLZ44N logic-level MOSFET module",
+      "type": "driver_module",
+      "module_id": "mosfet-irlz44n",
+      "condition": "salvaged"
+    },
+    {
+      "name": "USB 5V power bank",
+      "type": "power_source",
+      "module_id": "usb-power-5v",
+      "voltage_v": 5.0,
+      "capacity_mah": 2000,
+      "condition": "salvaged"
+    }
+  ],
+  "constraints": {
+    "strategy_mode": "constrained",
+    "prefer_salvage": true,
+    "battery_voltage_v": 5.0,
+    "battery_capacity_mah": 2000,
+    "runtime_min": 60,
+    "mission_duty_cycle": 0.12
+  },
+  "evidence_notes": [
+    "intent:plant_watering_money_path",
+    "splice:keep MOSFET as pump switch — do not buy another driver",
+    "splice:measure pump current before continuous duty"
+  ]
+}

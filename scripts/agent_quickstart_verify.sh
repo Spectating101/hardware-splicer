@@ -7,18 +7,27 @@
 #
 # Local:
 #   bash scripts/agent_quickstart_verify.sh
-#   HS_QUICKSTART_FRESH=0 bash scripts/agent_quickstart_verify.sh  # reuse ROOT
+#   (defaults to this repo; log → /tmp/hs-agent-quickstart-verify.log)
+#   HS_TRACK_ROOT=/other/tree bash scripts/agent_quickstart_verify.sh
+#   HS_QUICKSTART_PORT=8791 bash scripts/agent_quickstart_verify.sh
 #
 # Cold-internal dry-run (external proxy): fresh archive extract, no verbal help,
 # then fill INSTALL_REPORT_<host>_<date>.md from docs/INSTALL_REPORT_TEMPLATE.md
+# Alien:
+#   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
+#   HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
 set -euo pipefail
 
 ARCHIVE="${1:-}"
-ROOT="${HS_TRACK_ROOT:-/root/hardware-splicer-alpha5}"
-LOG="${HS_TRACK_LOG:-/root/hs-alpha5-quickstart.log}"
+# Default to this repo when run from a normal checkout; alien/cold paths still override.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT="${HS_TRACK_ROOT:-$DEFAULT_ROOT}"
+LOG="${HS_TRACK_LOG:-/tmp/hs-agent-quickstart-verify.log}"
 PORT="${HS_QUICKSTART_PORT:-8787}"
 START_TS=$(date +%s)
 
+mkdir -p "$(dirname "$LOG")" 2>/dev/null || true
 exec > >(tee -a "$LOG") 2>&1
 
 echo "==> agent quickstart verify @ $(date -Is)"
@@ -30,8 +39,13 @@ if [[ -n "$ARCHIVE" ]]; then
   rm -rf "$ROOT"
   mkdir -p "$ROOT"
   tar -xzf "$ARCHIVE" -C "$ROOT"
-elif [[ "${HS_QUICKSTART_FRESH:-1}" == "1" ]] || [[ ! -d "$ROOT/.venv" ]]; then
-  echo "ERROR: set ARCHIVE path or HS_QUICKSTART_FRESH=0 with existing ROOT"
+elif [[ "${HS_QUICKSTART_FRESH:-0}" == "1" ]] && [[ ! -d "$ROOT/.venv" ]]; then
+  echo "ERROR: HS_QUICKSTART_FRESH=1 requires an existing ROOT with .venv, or pass an ARCHIVE tarball"
+  echo "  example: HS_TRACK_ROOT=/path/to/tree bash scripts/agent_quickstart_verify.sh"
+  echo "  alien:   bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16"
+  exit 1
+elif [[ ! -d "$ROOT" ]]; then
+  echo "ERROR: ROOT does not exist: $ROOT"
   exit 1
 fi
 

@@ -22,6 +22,12 @@ def test_keyword_printer_motion_maps_to_plotter_stage() -> None:
     assert got == "plotter_motion_stage"
 
 
+def test_keyword_enabot_maps_to_robot_drive_base() -> None:
+    intake = load_project_intake("examples/intakes/splice_vibe_enabot_lite_brief.json")
+    got = keyword_build_id(str(intake.get("goal") or ""), list(intake.get("available_parts") or []))
+    assert got == "robot_drive_base"
+
+
 def test_printer_splice_intake_resolves_plotter_build_id() -> None:
     intake = load_project_intake("examples/intakes/splice_printer_motion_brief.json")
     pkg = build_intake_salvage_package(

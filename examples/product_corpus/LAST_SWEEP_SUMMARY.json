@@ -1,0 +1,356 @@
+{
+  "schema_version": "hardware_splicer.product_corpus_sweep.v1",
+  "corpus_path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/examples/product_corpus/enabot_depth_corpus.json",
+  "product_count": 620,
+  "compile_mode": false,
+  "grades": {
+    "A": 556,
+    "B": 54,
+    "C": 10
+  },
+  "strong_count": 610,
+  "weak_count": 10,
+  "strong_pct": 98.4,
+  "check_pass_rates_pct": {
+    "actuator_or_driver_path": 62.6,
+    "family_match": 78.2,
+    "mcu_resolved": 100.0,
+    "no_driver_gap_fill_when_donor": 90.3,
+    "ready_to_compile": 100.0,
+    "routed_non_generic": 97.9,
+    "shopping_honest": 100.0
+  },
+  "top_build_ids": [
+    [
+      "room_display_station",
+      106
+    ],
+    [
+      "robot_drive_base",
+      104
+    ],
+    [
+      "smart_relay_box",
+      83
+    ],
+    [
+      "automatic_plant_watering",
+      68
+    ],
+    [
+      "sensor_logger",
+      57
+    ],
+    [
+      "plotter_motion_stage",
+      49
+    ],
+    [
+      "usb_fume_extractor",
+      28
+    ],
+    [
+      "low_voltage_motor_test_jig",
+      22
+    ],
+    [
+      "indicator_or_task_light",
+      21
+    ],
+    [
+      "inspection_motion_fixture",
+      18
+    ],
+    [
+      "small_audio_amp_box",
+      17
+    ],
+    [
+      "generic_low_voltage_build",
+      13
+    ],
+    [
+      "salvaged_input_panel",
+      13
+    ],
+    [
+      "network_status_indicator",
+      10
+    ],
+    [
+      "safety_hold",
+      7
+    ],
+    [
+      "usb_uart_debug_adapter",
+      4
+    ]
+  ],
+  "grades_by_family": {
+    "agriculture": {
+      "A": 24
+    },
+    "air_climate": {
+      "A": 30
+    },
+    "aquatics_vivarium": {
+      "A": 24
+    },
+    "audio_comms": {
+      "A": 18,
+      "B": 3
+    },
+    "cleaning_mobility": {
+      "A": 18
+    },
+    "desktop_fab": {
+      "A": 21,
+      "B": 3
+    },
+    "display_info": {
+      "A": 28
+    },
+    "edu_robotics": {
+      "A": 21
+    },
+    "health_access": {
+      "A": 6,
+      "B": 5,
+      "C": 4
+    },
+    "home_assistive": {
+      "A": 18
+    },
+    "industrial_lite": {
+      "A": 14,
+      "B": 1
+    },
+    "inspection_camera": {
+      "A": 24
+    },
+    "kitchen_appliance": {
+      "A": 24
+    },
+    "lab_bench": {
+      "B": 12,
+      "A": 20
+    },
+    "lighting": {
+      "A": 21
+    },
+    "mobile_telepresence": {
+      "A": 60
+    },
+    "mobility_vehicle": {
+      "A": 9,
+      "B": 3
+    },
+    "outdoor_water": {
+      "A": 18
+    },
+    "pet_care": {
+      "A": 19,
+      "B": 5
+    },
+    "plant_garden": {
+      "A": 27,
+      "C": 3
+    },
+    "power_energy": {
+      "B": 9,
+      "A": 3
+    },
+    "retail_hospitality": {
+      "A": 15,
+      "C": 3
+    },
+    "science_edu": {
+      "A": 20,
+      "B": 4
+    },
+    "security_access": {
+      "A": 30
+    },
+    "sensor_networks": {
+      "A": 28,
+      "B": 4
+    },
+    "studio_media": {
+      "B": 5,
+      "A": 16
+    }
+  },
+  "weak_products": [
+    {
+      "id": "handwash_timer_nano",
+      "family": "health_access",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "indicator_or_task_light",
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "plant_compost_temp_logger",
+      "family": "plant_garden",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "automatic_plant_watering",
+        "automatic_plant_watering_usb",
+        "sensor_logger",
+        "smart_relay_box"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "plant_compost_temp_logger_batt",
+      "family": "plant_garden",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "automatic_plant_watering",
+        "automatic_plant_watering_usb",
+        "sensor_logger",
+        "smart_relay_box"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "plant_compost_temp_logger_nano",
+      "family": "plant_garden",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "automatic_plant_watering",
+        "automatic_plant_watering_usb",
+        "sensor_logger",
+        "smart_relay_box"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "posture_seat_buzz",
+      "family": "health_access",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "posture_seat_buzz_batt",
+      "family": "health_access",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "posture_seat_buzz_nano",
+      "family": "health_access",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "retail_fridge_case_logger",
+      "family": "retail_hospitality",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "retail_fridge_case_logger_batt",
+      "family": "retail_hospitality",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    },
+    {
+      "id": "retail_fridge_case_logger_nano",
+      "family": "retail_hospitality",
+      "grade": "C",
+      "build_id": "generic_low_voltage_build",
+      "preferred": [
+        "sensor_logger"
+      ],
+      "failed_checks": [
+        "routed_non_generic",
+        "family_match",
+        "actuator_or_driver_path"
+      ],
+      "dishonest_shopping": [],
+      "error": null
+    }
+  ],
+  "note": "Full per-product rows in /tmp/hs_product_corpus_sweep/PRODUCT_CORPUS_SWEEP.json after make sweep-product-corpus"
+}
