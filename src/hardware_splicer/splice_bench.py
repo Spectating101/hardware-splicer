@@ -377,7 +377,7 @@ def submit_bench_measurements(
     build_dir: str | Path,
     measurements: Sequence[Mapping[str, Any]],
 ) -> Dict[str, Any]:
-    """Record bench measurements and close matching gates."""
+    """Record bench measurements or typed interface updates and close matching gates."""
     root = Path(build_dir).resolve()
     session = bench_status(root)
     gates: List[MutableMapping[str, Any]] = [dict(row) for row in session.get("gates") or []]
@@ -393,12 +393,62 @@ def submit_bench_measurements(
             continue
         gate = by_id[gate_id]
         if gate.get("requires_contract_edit"):
-            gate["status"] = "open"
-            gate.setdefault("notes", []).append(
-                "This gate represents interface structure and must be closed by updating the canonical interface contract."
-            )
-            applied.append({"gate_id": gate_id, "ok": False, "error": "contract_edit_required"})
+            update = item.get("contract_update")
+            if not isinstance(update, Mapping):
+                gate["status"] = "open"
+                gate.setdefault("notes", []).append(
+                    "This gate represents interface structure and requires a typed contract_update payload."
+                )
+                applied.append({"gate_id": gate_id, "ok": False, "error": "contract_edit_required"})
+                continue
+            from .evidence_contract_store import apply_interface_contract_update
+
+            try:
+                result = apply_interface_contract_update(
+                    root,
+                    interface_id=str(gate.get("interface_id") or update.get("interface_id") or ""),
+                    update=update,
+                )
+            except (FileNotFoundError, ValueError, TypeError) as exc:
+                gate["status"] = "open"
+                gate.setdefault("notes", []).append(f"Contract update rejected: {exc}")
+                applied.append({
+                    "gate_id": gate_id,
+                    "ok": False,
+                    "error": "contract_update_rejected",
+                    "reason": str(exc),
+                })
+                continue
+
+            unresolved = set(str(v) for v in (result.get("unresolved_fields") or []))
+            interface_id = str(result.get("interface_id") or gate.get("interface_id") or "")
+            closed_ids: List[str] = []
+            for candidate in gates:
+                if not candidate.get("requires_contract_edit"):
+                    continue
+                if str(candidate.get("interface_id") or "") != interface_id:
+                    continue
+                field = str(candidate.get("evidence_field") or "")
+                if field and field not in unresolved:
+                    candidate["status"] = "closed"
+                    candidate["closed_at"] = _now()
+                    candidate["measurement"] = {
+                        "contract_update": dict(update),
+                        "evidence_id": update.get("evidence_id"),
+                        "recorded_at": _now(),
+                    }
+                    closed_ids.append(str(candidate.get("gate_id") or ""))
+            session["evidence_integrations"] = result.get("evidence_integrations")
+            applied.append({
+                "gate_id": gate_id,
+                "ok": True,
+                "status": "closed" if gate_id in closed_ids else "open",
+                "contract_update": True,
+                "closed_gate_ids": closed_ids,
+                "unresolved_fields": sorted(unresolved),
+            })
             continue
+
         status = str(item.get("status") or "closed").strip().lower()
         validation_ok, validation_reason = _validate_evidence_measurement(gate, item)
         closing_status = status in {"pass", "closed", "ok", "verified"}
