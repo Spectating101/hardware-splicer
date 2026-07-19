@@ -346,6 +346,33 @@ def bench_status(build_dir: str | Path) -> Dict[str, Any]:
     return session
 
 
+def _validate_evidence_measurement(gate: Mapping[str, Any], item: Mapping[str, Any]) -> tuple[bool, str]:
+    """Validate evidence-recipe values before a gate may close."""
+    if str(gate.get("gate_type") or "") != "interface_measurement":
+        return True, "not an evidence measurement"
+    value = item.get("value", item.get("measured_value"))
+    required = bool(gate.get("required", True))
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return (not required), "required measurement missing"
+    expected_unit = str(gate.get("expected_unit") or "").strip().lower()
+    supplied_unit = str(item.get("unit") or "").strip().lower()
+    if expected_unit and supplied_unit and supplied_unit != expected_unit:
+        return False, f"unit {supplied_unit!r} does not match expected {expected_unit!r}"
+    lower = gate.get("lower")
+    upper = gate.get("upper")
+    if lower is None and upper is None:
+        return True, "recorded"
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return False, "measurement is not numeric"
+    if lower is not None and numeric < float(lower):
+        return False, f"{numeric} < lower bound {lower}"
+    if upper is not None and numeric > float(upper):
+        return False, f"{numeric} > upper bound {upper}"
+    return True, "within bounds"
+
+
 def submit_bench_measurements(
     build_dir: str | Path,
     measurements: Sequence[Mapping[str, Any]],
@@ -373,12 +400,16 @@ def submit_bench_measurements(
             applied.append({"gate_id": gate_id, "ok": False, "error": "contract_edit_required"})
             continue
         status = str(item.get("status") or "closed").strip().lower()
-        if status in {"pass", "closed", "ok", "verified"}:
+        validation_ok, validation_reason = _validate_evidence_measurement(gate, item)
+        closing_status = status in {"pass", "closed", "ok", "verified"}
+        if closing_status and not validation_ok:
+            gate["status"] = "blocked"
+        elif closing_status:
             gate["status"] = "closed"
         elif status in {"fail", "blocked", "open", "hold"}:
             gate["status"] = "open" if status == "open" else "blocked"
         else:
-            gate["status"] = "closed"
+            gate["status"] = "closed" if validation_ok else "blocked"
         measurement = {
             "value": item.get("value", item.get("measured_value")),
             "unit": item.get("unit"),
@@ -390,9 +421,19 @@ def submit_bench_measurements(
         if item.get("notes"):
             gate.setdefault("notes", [])
             gate["notes"].append(str(item["notes"]))
-        if status in {"closed", "pass", "ok", "verified"}:
+        if gate["status"] == "closed":
             gate["closed_at"] = _now()
-        applied.append({"gate_id": gate_id, "ok": True, "status": gate["status"]})
+        if closing_status and not validation_ok:
+            gate.setdefault("notes", []).append(f"Measurement validation failed: {validation_reason}")
+            applied.append({
+                "gate_id": gate_id,
+                "ok": False,
+                "status": gate["status"],
+                "error": "measurement_validation_failed",
+                "reason": validation_reason,
+            })
+        else:
+            applied.append({"gate_id": gate_id, "ok": True, "status": gate["status"]})
 
     session["gates"] = gates
     summary = _readiness_summary(gates)
