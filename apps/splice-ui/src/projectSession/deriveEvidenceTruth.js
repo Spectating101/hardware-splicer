@@ -2,16 +2,18 @@
  * Evidence authority view model for salvage projects.
  *
  * Source precedence:
- * 1. result.salvage_package.evidence_integrations
- * 2. result.evidence_integrations
- * 3. package.evidence_integrations
- * 4. conservative legacy fallback from donor-bound resolved modules
+ * 1. refreshed Bench session evidence integrations
+ * 2. result.salvage_package.evidence_integrations
+ * 3. result.evidence_integrations
+ * 4. package.evidence_integrations
+ * 5. conservative legacy fallback from donor-bound resolved modules
  */
 
 function pickEvidenceIntegrations(session = {}) {
   const result = session.displayResult || {};
   const salvage = result.salvage_package || session.composeResult?.salvage_package || {};
   return (
+    session.benchSession?.evidence_integrations ||
     salvage.evidence_integrations ||
     result.evidence_integrations ||
     session.projectPackage?.evidence_integrations ||
@@ -78,7 +80,9 @@ export function deriveEvidenceTruth(session = {}) {
   const firmwareAuthorized = Boolean(
     authority.firmware_authorized === true && unresolvedInterfaces.length === 0,
   );
-  const powerAuthorized = Boolean(authority.power_authorized === true);
+  const powerAuthorized = Boolean(
+    authority.power_authorized === true || session.benchSession?.power_on_authorized === true,
+  );
 
   let state = "not_applicable";
   let label = "Evidence not required";
