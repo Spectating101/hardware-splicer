@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 import re
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Mapping, Optional
 
 from hardware_splicer.evidence import EvidenceValue, EpistemicStatus, ReviewStatus
 
@@ -102,6 +102,7 @@ class InterfaceContract:
     signals: List[SignalContract] = field(default_factory=list)
     power_domains: List[Dict[str, Any]] = field(default_factory=list)
     reference_equivalents: List[Dict[str, Any]] = field(default_factory=list)
+    interface_complete: EvidenceValue = field(default_factory=EvidenceValue)
     status: InterfaceStatus = InterfaceStatus.UNKNOWN
     blockers: List[str] = field(default_factory=list)
     schema_version: str = SCHEMA_VERSION
@@ -109,6 +110,9 @@ class InterfaceContract:
     @property
     def virtual_module_id(self) -> str:
         return virtual_donor_module_id(self.board_id, self.block_id)
+
+    def _interface_complete_authoritative(self) -> bool:
+        return self.interface_complete.authoritative and self.interface_complete.value is True
 
     def unresolved_fields(self) -> List[str]:
         unresolved: List[str] = []
@@ -134,6 +138,8 @@ class InterfaceContract:
                 SignalDirection.BIDIRECTIONAL,
             } and not signal.controller_pin.authoritative:
                 unresolved.append(f"{prefix}.controller_pin")
+        if not self._interface_complete_authoritative():
+            unresolved.append("interface_complete")
         return unresolved
 
     def _active_signals_authoritative(self) -> bool:
@@ -153,12 +159,13 @@ class InterfaceContract:
             self.status == InterfaceStatus.VERIFIED
             and not self.blockers
             and self._active_signals_authoritative()
+            and self._interface_complete_authoritative()
         )
 
     def recompute_status(self) -> InterfaceStatus:
         if self.blockers:
             self.status = InterfaceStatus.REJECTED
-        elif self._active_signals_authoritative():
+        elif self._active_signals_authoritative() and self._interface_complete_authoritative():
             self.status = InterfaceStatus.VERIFIED
         elif self.contacts or self.signals:
             self.status = InterfaceStatus.PARTIAL
@@ -178,6 +185,7 @@ class InterfaceContract:
             "donor_block_id": self.block_id,
             "board_id": self.board_id,
             "interface_status": self.status.value,
+            "interface_complete": self._interface_complete_authoritative(),
             "firmware_authorized": self.can_generate_firmware(),
             "reference_equivalents": list(self.reference_equivalents),
         }
@@ -194,6 +202,7 @@ class InterfaceContract:
             "signals": [s.to_dict() for s in self.signals],
             "power_domains": list(self.power_domains),
             "reference_equivalents": list(self.reference_equivalents),
+            "interface_complete": self.interface_complete.to_dict(),
             "status": self.status.value,
             "blockers": list(self.blockers),
             "unresolved_fields": self.unresolved_fields(),
