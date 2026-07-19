@@ -18,6 +18,22 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _bounded_simulated_value(row: Mapping[str, Any]) -> float | None:
+    """Return an in-range deterministic value when numeric bounds are declared."""
+    lower = row.get("lower")
+    upper = row.get("upper")
+    if lower is None and upper is None:
+        return None
+    try:
+        if lower is not None and upper is not None:
+            return (float(lower) + float(upper)) / 2.0
+        if lower is not None:
+            return float(lower)
+        return float(upper) / 2.0
+    except (TypeError, ValueError):
+        return None
+
+
 def build_simulated_capture(
     template: Mapping[str, Any],
     *,
@@ -38,7 +54,7 @@ def build_simulated_capture(
     for row in template.get("measurements") or []:
         if not isinstance(row, dict):
             continue
-        kind = str(row.get("kind") or "voltage")
+        kind = str(row.get("kind") or "measurement")
         item: Dict[str, Any] = {
             "gate_id": row.get("gate_id"),
             "kind": kind,
@@ -48,8 +64,13 @@ def build_simulated_capture(
             "instrument_id": "sim_dmm_01",
             "operator_id": operator_id,
         }
-        if kind == "voltage":
-            item["value"] = 3.3 if row.get("upper") is not None and float(row.get("upper")) <= 5.5 else 6.0
+        bounded = _bounded_simulated_value(row)
+        if bounded is not None:
+            item["value"] = bounded
+            if row.get("unit"):
+                item["unit"] = row.get("unit")
+        elif kind == "voltage":
+            item["value"] = 3.3
             item["unit"] = row.get("unit") or "V"
         elif kind == "current":
             item["value"] = 0.12
@@ -65,6 +86,8 @@ def build_simulated_capture(
             item["artifact_uri"] = row.get("artifact_uri") or "sim://thermal_baseline_ok"
         else:
             item["value"] = "pass"
+            if row.get("unit"):
+                item["unit"] = row.get("unit")
         filled.append(item)
     capture["measurements"] = filled
     capture["simulated"] = True
@@ -180,6 +203,7 @@ def run_bench_loop_closure(
         "bench_submission_ok": submission_ok,
         "bench_capture_template": template.get("template_path"),
         "open_measurement_count": template.get("open_measurement_count"),
+        "open_contract_action_count": template.get("open_contract_action_count"),
         "evidence_measurements_remaining": len(evidence_measurements_remaining),
         "authority_gates_remaining": len(authority_remaining),
         "measurements_complete": measurements_complete,
