@@ -101,3 +101,58 @@ def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path
     assert stored[measurement_gate["gate_id"]]["status"] == "closed"
     assert result["power_on_authorized"] is False
     assert result["critical_open_count"] == 1
+
+
+def test_out_of_range_evidence_measurement_stays_blocked(tmp_path: Path) -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": [measurement_gate],
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [{
+            "gate_id": measurement_gate["gate_id"],
+            "status": "verified",
+            "value": 8.0,
+            "unit": "V",
+            "method": "DMM",
+        }],
+    )
+
+    applied = result["last_submission"]["applied"][0]
+    assert applied["error"] == "measurement_validation_failed"
+    assert "upper bound" in applied["reason"]
+    assert result["gates"][0]["status"] == "blocked"
+    assert result["power_on_authorized"] is False
+
+
+def test_wrong_unit_evidence_measurement_stays_blocked(tmp_path: Path) -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": [measurement_gate],
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [{
+            "gate_id": measurement_gate["gate_id"],
+            "status": "verified",
+            "value": 3.3,
+            "unit": "A",
+            "method": "DMM",
+        }],
+    )
+
+    applied = result["last_submission"]["applied"][0]
+    assert applied["error"] == "measurement_validation_failed"
+    assert "expected" in applied["reason"]
+    assert result["gates"][0]["status"] == "blocked"
