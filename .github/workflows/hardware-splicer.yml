@@ -100,7 +100,15 @@ jobs:
           sudo apt-get install -y kicad
       - name: Splice v1 slim install (with dev for pytest)
         run: INSTALL_DEV=1 bash scripts/install_splice_v1.sh
-      - name: verify-splice-v1
+      - name: Doctor
+        run: |
+          source .venv/bin/activate
+          make doctor
+      - name: Project package bridge tests
+        run: |
+          source .venv/bin/activate
+          make test-project-package
+      - name: Splice demo verification
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
           HARDWARE_SPLICER_DRC_FIX_LOOP: "1"
@@ -108,7 +116,29 @@ jobs:
           HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
         run: |
           source .venv/bin/activate
-          make verify-splice-v1
+          make verify-splice
+      - name: Splice golden loop verification
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_DRC_FIX_LOOP: "1"
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-splice-loop
+      - name: Splice real-bench verification
+        env:
+          HARDWARE_SPLICER_AUTOROUTE: "0"
+          HARDWARE_SPLICER_DRC_FIX_LOOP: "1"
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+        run: |
+          source .venv/bin/activate
+          make verify-splice-real-bench
+      - name: Evidence integration focused tests
+        run: |
+          source .venv/bin/activate
+          PYTHONPATH=src pytest -q tests/test_integration_stack.py tests/test_evidence_salvage_bridge.py tests/test_evidence_bench_gates.py
       - name: splice-ui production build
         run: make splice-ui-build
       - name: product v1 API tests
