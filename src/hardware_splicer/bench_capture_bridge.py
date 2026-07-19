@@ -26,6 +26,8 @@ _KIND_BY_GATE_TYPE = {
     "interconnect_hold": "continuity",
     "psu_ramp": "psu_ramp",
     "thermal": "thermal",
+    "interface_measurement": "voltage",
+    "interface_contract_field": "contract",
 }
 
 
@@ -53,10 +55,27 @@ def build_bench_capture_template_from_gates(
     project_name: str = "",
     build_id: str = "",
 ) -> Dict[str, Any]:
-    """Build bench_topology_capture.v1 skeleton from open splice bench gates."""
+    """Build bench_topology_capture.v1 skeleton from open measurable gates.
+
+    Interface-structure gates are intentionally excluded from measurement rows. They
+    are returned as contract actions because a DMM reading cannot define signal
+    direction, protocol, or controller-pin binding.
+    """
     measurements: List[Dict[str, Any]] = []
+    contract_actions: List[Dict[str, Any]] = []
     for gate in gates:
         if str(gate.get("status") or "open") == "closed":
+            continue
+        if gate.get("requires_contract_edit") or str(gate.get("gate_type") or "") == "interface_contract_field":
+            contract_actions.append(
+                {
+                    "gate_id": str(gate.get("gate_id") or ""),
+                    "interface_id": gate.get("interface_id"),
+                    "evidence_field": gate.get("evidence_field"),
+                    "target": str(gate.get("prompt") or gate.get("gate_id") or ""),
+                    "action": "update_interface_contract",
+                }
+            )
             continue
         kind = _gate_kind(gate)
         row: Dict[str, Any] = {
@@ -68,16 +87,20 @@ def build_bench_capture_template_from_gates(
             "block_id": gate.get("block_id") or "",
             "board_id": gate.get("board_id") or "",
         }
+        expected_unit = gate.get("expected_unit")
         if kind == "voltage":
-            row["unit"] = "V"
+            row["unit"] = expected_unit or "V"
         elif kind == "current":
-            row["unit"] = "A"
+            row["unit"] = expected_unit or "A"
         elif kind == "psu_ramp":
-            row["unit"] = "A"
+            row["unit"] = expected_unit or "A"
             row["current_limit_a"] = 0.5
         elif kind == "thermal":
             row["artifact_kind"] = "thermal_image"
             row["artifact_uri"] = ""
+        for key in ("lower", "upper", "required", "validators", "measurement_id", "phase_id", "interface_id"):
+            if gate.get(key) is not None:
+                row[key] = gate.get(key)
         measurements.append(row)
 
     return {
@@ -93,6 +116,7 @@ def build_bench_capture_template_from_gates(
             {"instrument_id": "bench_supply_01", "instrument_type": "current_limited_supply", "calibration_status": "valid"},
         ],
         "measurements": measurements,
+        "contract_actions": contract_actions,
         "artifacts": [
             {"kind": "photo", "uri": "", "notes": "Connector or test point photo for this capture."},
             {"kind": "thermal_image", "uri": "", "notes": "Optional FLIR / thermal baseline image."},
@@ -101,6 +125,7 @@ def build_bench_capture_template_from_gates(
         "policy": {
             "vision_alone_is_not_evidence": True,
             "fill_status_pass_fail_after_physical_measurement": True,
+            "contract_actions_are_not_measurements": True,
             "submit_via": "hs_splice_bench_submit_capture or POST /v1/splice-bench/submit-capture",
         },
     }
@@ -121,6 +146,7 @@ def write_bench_capture_template(build_dir: str | Path, session: Mapping[str, An
     path.write_text(json.dumps(template, indent=2), encoding="utf-8")
     template["template_path"] = str(path)
     template["open_measurement_count"] = len(template.get("measurements") or [])
+    template["open_contract_action_count"] = len(template.get("contract_actions") or [])
     return template
 
 
@@ -145,11 +171,12 @@ def sync_bench_session_template(build_dir: str | Path) -> Dict[str, Any]:
         body = json.loads(session_path.read_text(encoding="utf-8"))
         body["bench_capture_template"] = template.get("template_path")
         body["open_measurement_count"] = template.get("open_measurement_count")
+        body["open_contract_action_count"] = template.get("open_contract_action_count")
         session_path.write_text(json.dumps(body, indent=2), encoding="utf-8")
         session["bench_capture_template"] = template.get("template_path")
         session["open_measurement_count"] = template.get("open_measurement_count")
+        session["open_contract_action_count"] = template.get("open_contract_action_count")
     return {"session": session, "template": template}
-
 
 
 def _rows(value: Any) -> List[Dict[str, Any]]:
@@ -280,10 +307,13 @@ def submit_bench_capture(
         }
     updated = submit_bench_measurements(build_dir, mapped)
     sync_bench_session_template(build_dir)
+    applied = list(((updated.get("last_submission") or {}).get("applied") or []))
+    failed = [row for row in applied if isinstance(row, Mapping) and not row.get("ok")]
     return {
         "schema_version": SCHEMA_VERSION,
-        "ok": True,
+        "ok": not failed,
         "mapped_count": len(mapped),
         "mapped": mapped,
+        "failed": failed,
         "bench_session": updated,
     }
