@@ -48,7 +48,19 @@ def test_h_bridge_compile_uses_operator_lowering_with_actual_motor_load(tmp_path
     ]
     assert electrical_errors == []
     assert result["topology_lowering"]["operator_count"] == 1
-    assert len(result["topology_lowering"]["actions"]) == 4
+    lowered_terminals = {
+        (row.get("node_id"), row.get("pin_id"), row.get("role"))
+        for row in result["topology_lowering"]["actions"]
+        if row.get("action") == "mark_terminal"
+    }
+    assert lowered_terminals == {
+        ("n3", "OUT1", "floating_motor_terminal"),
+        ("n3", "OUT2", "floating_motor_terminal"),
+        ("n3", "OUT3", "floating_motor_terminal"),
+        ("n3", "OUT4", "floating_motor_terminal"),
+        ("n4", "VCC", "floating_motor_terminal"),
+        ("n4", "GND", "floating_motor_terminal"),
+    }
 
 
 def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tmp_path) -> None:
