@@ -1,0 +1,71 @@
+name: Core Diagnostics
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/**"
+      - "tests/**"
+      - "scripts/**"
+      - "examples/**"
+      - "Makefile"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - ".github/workflows/core-diagnostics.yml"
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install KiCad 9 CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+      - name: Bootstrap
+        run: make setup
+      - name: Full Python test suite
+        if: ${{ !cancelled() }}
+        env:
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          source .venv/bin/activate
+          make test
+      - name: Golden intake tests
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make test-golden-intakes
+      - name: Backend benchmark
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make benchmark-backend
+      - name: Functional delivery audit
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make audit-functional-delivery
+      - name: Intake tier scoring
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make score-intake-tiers
+      - name: Splice verification
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make verify-splice
+      - name: End-to-end smoke
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          make smoke
