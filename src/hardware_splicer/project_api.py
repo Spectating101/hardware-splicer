@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -11,6 +12,7 @@ from .project_store import (
     ProjectNotFound,
     ProjectStore,
     RevisionConflict,
+    validate_project_id,
 )
 
 
@@ -55,6 +57,47 @@ def _project_error(exc: Exception) -> HTTPException:
     )
 
 
+def _load_latest_with_recovery(project_store: ProjectStore, project_id: str) -> Dict[str, Any]:
+    """Load the newest valid snapshot and report whether fallback was required."""
+
+    safe_id = validate_project_id(project_id)
+    manifest_path = project_store.root / safe_id / "project.json"
+    requested_revision: int | None = None
+    manifest_problem = False
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if isinstance(manifest, dict):
+            requested_revision = int(manifest.get("latest_revision") or 0) or None
+        else:
+            manifest_problem = True
+    except (OSError, ValueError, json.JSONDecodeError):
+        manifest_problem = manifest_path.exists()
+
+    if requested_revision is not None:
+        try:
+            envelope = project_store.load(safe_id, revision=requested_revision)
+            recovered = False
+        except CorruptProject:
+            envelope = project_store.load(safe_id)
+            recovered = True
+    else:
+        envelope = project_store.load(safe_id)
+        recovered = manifest_problem
+
+    loaded_revision = int(envelope.get("revision") or 0)
+    recovered = recovered or (
+        requested_revision is not None and loaded_revision != requested_revision
+    )
+    body = dict(envelope)
+    body["recovery"] = {
+        "used": recovered,
+        "requested_revision": requested_revision,
+        "loaded_revision": loaded_revision,
+    }
+    return body
+
+
 def create_project_router(store: ProjectStore | None = None) -> APIRouter:
     project_store = store or ProjectStore()
     router = APIRouter(prefix="/v1/projects", tags=["projects"])
@@ -85,7 +128,11 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
         revision: int | None = Query(default=None, ge=1),
     ) -> Dict[str, Any]:
         try:
-            envelope = project_store.load(project_id, revision=revision)
+            envelope = (
+                project_store.load(project_id, revision=revision)
+                if revision is not None
+                else _load_latest_with_recovery(project_store, project_id)
+            )
         except Exception as exc:
             raise _project_error(exc) from exc
         return {"ok": True, "project": envelope}
