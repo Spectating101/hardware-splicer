@@ -64,6 +64,16 @@ export async function savePersistentProject(
   );
 }
 
+export async function seedMachineProjectFromIntake(intake) {
+  return parseJson(
+    await fetch(`${API_BASE}/v1/machine-projects/from-intake`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ intake }),
+    }),
+  );
+}
+
 export async function duplicatePersistentProject(projectId, targetProjectId) {
   return parseJson(
     await fetch(`${API_BASE}/v1/projects/${encodeURIComponent(projectId)}/duplicate`, {
@@ -95,9 +105,11 @@ export async function deletePersistentProject(projectId) {
 export function useProjectPersistence({ session, dispatch, enabled = true, debounceMs = 700 }) {
   const [projects, setProjects] = useState([]);
   const [listError, setListError] = useState(null);
+  const [machineSeedError, setMachineSeedError] = useState(null);
   const timerRef = useRef(null);
   const pendingSerializedRef = useRef(null);
   const savedSerializedRef = useRef(null);
+  const machineSeedRef = useRef(null);
   const activeProjectRef = useRef(session?.projectId || null);
 
   useEffect(() => {
@@ -121,6 +133,39 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   useEffect(() => {
     refreshProjects();
   }, [refreshProjects]);
+
+  useEffect(() => {
+    if (!enabled || !session?.projectId || !session?.intake || session?.machineProject) {
+      return undefined;
+    }
+    let seedKey;
+    try {
+      seedKey = `${session.projectId}:${JSON.stringify(session.intake)}`;
+    } catch (error) {
+      setMachineSeedError(`Machine intake is not serializable: ${error.message}`);
+      return undefined;
+    }
+    if (machineSeedRef.current === seedKey) return undefined;
+    machineSeedRef.current = seedKey;
+    let cancelled = false;
+    seedMachineProjectFromIntake(session.intake)
+      .then((body) => {
+        if (cancelled || activeProjectRef.current !== session.projectId) return;
+        dispatch({
+          type: ACTIONS.SET_MACHINE_PROJECT,
+          machineProject: body.project || null,
+        });
+        setMachineSeedError(null);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        machineSeedRef.current = null;
+        setMachineSeedError(error.message);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, enabled, session?.intake, session?.machineProject, session?.projectId]);
 
   useEffect(() => {
     if (!enabled || !sessionIsPersistable(session)) return undefined;
@@ -201,6 +246,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         const recovery = envelope.recovery || {};
         savedSerializedRef.current = JSON.stringify(snapshot);
         pendingSerializedRef.current = null;
+        machineSeedRef.current = snapshot.machineProject ? "restored" : null;
         dispatch({
           type: ACTIONS.RESTORE_PROJECT_SNAPSHOT,
           projectId: envelope.project_id || projectId,
@@ -255,6 +301,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   return {
     projects,
     listError,
+    machineSeedError,
     refreshProjects,
     openProject,
     duplicateProject,

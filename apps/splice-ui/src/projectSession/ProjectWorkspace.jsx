@@ -1,6 +1,7 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
+import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
 import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
@@ -27,8 +28,8 @@ import { deriveProjectTruth } from "./deriveProjectTruth.js";
 import { derivePackageHandoff } from "./packageHandoff.js";
 
 /**
- * Project workspace shell — stages wrap existing panels.
- * Session continuity is in-memory only (no localStorage).
+ * Project workspace shell — stages wrap existing panels while the durable
+ * project session carries the canonical machine object across disciplines.
  */
 export default function ProjectWorkspace({
   session,
@@ -147,7 +148,17 @@ export default function ProjectWorkspace({
         )}
 
         {stage === STAGES.design && (
-          <div data-testid="stage-design">
+          <div className="panel-stack" data-testid="stage-design">
+            <MachineArchitecturePanel
+              project={session.machineProject}
+              onOpenDiscipline={(domain) => {
+                if (domain === "electrical") {
+                  onToast?.("Electrical subsystem is open below in Design Studio");
+                  return;
+                }
+                onToast?.(`${domain} discipline workspace is the next adapter on this machine spine`);
+              }}
+            />
             {session.designEditable === false ? (
               <section className="card empty-card" data-testid="design-not-editable">
                 <h2>No editable Studio graph</h2>
