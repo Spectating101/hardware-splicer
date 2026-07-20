@@ -9,7 +9,9 @@ from hardware_splicer.project_store import ProjectStore
 
 
 def test_product_api_mounts_engine_and_persistent_projects(tmp_path: Path) -> None:
-    app = create_product_app(project_store=ProjectStore(tmp_path))
+    store = ProjectStore(tmp_path)
+    app = create_product_app(project_store=store)
+    assert app.state.project_store is store
 
     with TestClient(app) as client:
         paths = client.get("/openapi.json").json()["paths"]
