@@ -59,10 +59,15 @@ def _project_error(exc: Exception) -> HTTPException:
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"type": "not_found", "message": str(exc)},
         )
-    if isinstance(exc, (RevisionConflict, ReviewConflict)):
+    if isinstance(exc, RevisionConflict):
         return HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"type": "revision_or_review_conflict", "message": str(exc)},
+            detail={"type": "revision_conflict", "message": str(exc)},
+        )
+    if isinstance(exc, ReviewConflict):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"type": "review_conflict", "message": str(exc)},
         )
     if isinstance(exc, CorruptProject):
         return HTTPException(
