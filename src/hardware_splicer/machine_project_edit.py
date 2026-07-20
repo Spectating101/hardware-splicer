@@ -54,6 +54,14 @@ def _upsert(rows: list[Dict[str, Any]], id_field: str, payload: Mapping[str, Any
 
 def _referencers(project: Mapping[str, Any], requirement_id: str) -> list[str]:
     references: list[str] = []
+    for row in project.get("requirements", []):
+        if row.get("requirement_id") != requirement_id and row.get("parent_requirement_id") == requirement_id:
+            references.append(f"requirements/{row.get('requirement_id')}.parent_requirement_id")
+        if row.get("requirement_id") == requirement_id and row.get("verification_method_ids"):
+            references.extend(
+                f"verifications/{verification_id}"
+                for verification_id in row.get("verification_method_ids") or []
+            )
     for collection, id_field, fields in (
         ("functions", "function_id", ("requirement_ids",)),
         ("subsystems", "subsystem_id", ("requirement_ids",)),
@@ -65,7 +73,7 @@ def _referencers(project: Mapping[str, Any], requirement_id: str) -> list[str]:
         for row in project.get(collection, []):
             if any(requirement_id in (row.get(field) or []) for field in fields):
                 references.append(f"{collection}/{row.get(id_field)}")
-    return references
+    return sorted(set(references))
 
 
 def apply_machine_edits(
