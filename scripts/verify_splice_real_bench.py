@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify golden real S3: real photo + manual bench capture (not simulator)."""
+"""Verify golden real S3: typed donor contract evidence + physical bench capture."""
 
 from __future__ import annotations
 
@@ -34,6 +34,11 @@ def main() -> int:
             failures.append("golden capture must have simulated:false")
         if not str(capture.get("operator_id") or "").strip():
             failures.append("golden capture missing operator_id")
+        updates = [row for row in (capture.get("contract_updates") or []) if isinstance(row, dict)]
+        if len(updates) < 2:
+            failures.append(f"too few typed contract updates: {len(updates)}")
+        if not updates or updates[-1].get("interface_complete") is not True:
+            failures.append("final typed contract update must attest interface_complete:true")
 
     if failures:
         for item in failures:
@@ -53,11 +58,23 @@ def main() -> int:
         failures.append("golden real report.passed is false")
     if report.get("simulated"):
         failures.append("report marked simulated")
-    if int(report.get("matched_measurement_count") or 0) < 5:
+    if not report.get("contract_updates_ok"):
+        failures.append("typed interface contract updates did not persist")
+    if int(report.get("contract_update_count") or 0) < 2:
+        failures.append(f"too few applied contract updates: {report.get('contract_update_count')}")
+    if not report.get("firmware_authorized"):
+        failures.append("firmware authority remained blocked after completeness attestation")
+    if int(report.get("matched_measurement_count") or 0) < 10:
         failures.append(f"too few matched measurements: {report.get('matched_measurement_count')}")
+    if report.get("bench_after_contract", {}).get("power_on_authorized"):
+        failures.append("contract evidence alone incorrectly authorized physical power-on")
+    if not report.get("bench_after", {}).get("power_on_authorized"):
+        failures.append("physical measurement capture did not authorize power-on")
+    if report.get("open_gates"):
+        failures.append(f"open gates remain: {[row.get('gate_id') for row in report.get('open_gates') or []]}")
 
     summary = {
-        "schema_version": "hardware_splicer.splice_golden_real_verify.v1",
+        "schema_version": "hardware_splicer.splice_golden_real_verify.v2",
         "passed": not failures,
         "failures": failures,
         "report": report,
@@ -69,10 +86,15 @@ def main() -> int:
     path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     mark = "PASS" if not failures else "FAIL"
+    capture = load_golden_bench_capture(GOLDEN_CAPTURE)
     print(f"Golden real S3 verify: {mark}")
     print(f"  photo: {GOLDEN_PHOTO.name} ({GOLDEN_PHOTO.stat().st_size // 1024} KB)")
-    print(f"  capture: {GOLDEN_CAPTURE.name} operator={load_golden_bench_capture(GOLDEN_CAPTURE).get('operator_id')}")
-    print(f"  power_on_authorized={report.get('bench_after', {}).get('power_on_authorized')}")
+    print(f"  capture: {GOLDEN_CAPTURE.name} operator={capture.get('operator_id')}")
+    print(f"  contract_updates={report.get('contract_update_count')} ok={report.get('contract_updates_ok')}")
+    print(f"  firmware_authorized={report.get('firmware_authorized')}")
+    print(f"  matched_measurements={report.get('matched_measurement_count')}")
+    print(f"  power_after_contract={report.get('bench_after_contract', {}).get('power_on_authorized')}")
+    print(f"  power_after_measurements={report.get('bench_after', {}).get('power_on_authorized')}")
     print(f"  report: {path}")
     for item in failures:
         print(f"  - {item}")
