@@ -19,6 +19,7 @@ import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
+import { useProjectPersistence } from "./projectSession/projectPersistence.js";
 import {
   ACTIONS,
   STAGES,
@@ -49,6 +50,13 @@ function jobStatusClass(status) {
   return "";
 }
 
+function persistenceStatusClass(status) {
+  if (status === "saved" || status === "restored") return "job-ok";
+  if (status === "saving") return "job-run";
+  if (status === "failed" || status === "conflict") return "job-fail";
+  return "";
+}
+
 function formatProjectName(name) {
   if (!name) return "Untitled build";
   return name.replace(/_/g, " ").replace(/\s+/g, " ").trim();
@@ -57,6 +65,13 @@ function formatProjectName(name) {
 function formatJobStatus(status) {
   if (!status) return "Unknown";
   return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+function formatSavedAt(value) {
+  if (!value) return "Not saved";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Saved";
+  return `Saved ${date.toLocaleString()}`;
 }
 
 function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk, version }) {
@@ -70,10 +85,10 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
           <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
         </p>
         <div className="readiness-pitch">
-          <strong>Flux-class first mile. Auditable last mile.</strong>
+          <strong>Durable project first. Auditable machine lifecycle next.</strong>
           <p className="muted small">
-            One project workspace: Intake → Design → Verify → Bench → Package. Same compile truth as{" "}
-            <code>hs_compose_drc_agent</code>. Session continuity is in-memory while this page is open.
+            One project workspace: Intake → Design → Verify → Bench → Package. Projects autosave as
+            versioned server snapshots and reopen into the same editable source state.
           </p>
         </div>
         <PipelineVisual />
@@ -122,14 +137,14 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, apiOk,
             <span className="feature-icon">✦</span>
             <div>
               <strong>AI compose</strong>
-              <span>LLM-first module pick → KiCad (Flux-class path)</span>
+              <span>LLM-first module pick → KiCad design path</span>
             </div>
           </li>
           <li>
             <span className="feature-icon">◇</span>
             <div>
-              <strong>Live sourcing</strong>
-              <span>JLC/LCSC enrich on compile BOM</span>
+              <strong>Persistent source</strong>
+              <span>Versioned project snapshots, reopen, duplicate, and archive</span>
             </div>
           </li>
           <li>
@@ -203,6 +218,11 @@ export default function App() {
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
 
   const spliceJob = useSpliceJob();
+  const projectPersistence = useProjectPersistence({
+    session,
+    dispatch,
+    enabled: Boolean(health?.ok),
+  });
 
   const uniqueRecentJobs = useMemo(() => {
     const seen = new Set();
@@ -226,7 +246,7 @@ export default function App() {
     selectedExample?.label ||
     "project";
 
-  const canResume = sessionIsResumable(session);
+  const canResume = sessionIsResumable(session) || projectPersistence.projects.length > 0;
 
   const loadBootstrap = useCallback(async () => {
     setLoadError(null);
@@ -299,8 +319,31 @@ export default function App() {
     setView(VIEWS.workspace);
   };
 
+  const openSavedProject = useCallback(
+    async (projectId) => {
+      try {
+        const envelope = await projectPersistence.openProject(projectId);
+        setPreviewContext(null);
+        setView(VIEWS.workspace);
+        setToast(
+          envelope?.recovery?.used
+            ? `Recovered project revision ${envelope.revision}`
+            : `Opened ${envelope?.snapshot?.projectName || projectId}`,
+        );
+      } catch (error) {
+        setToast(error.message);
+      }
+    },
+    [projectPersistence],
+  );
+
   const resumeProject = () => {
-    setView(VIEWS.workspace);
+    if (sessionIsResumable(session)) {
+      setView(VIEWS.workspace);
+      return;
+    }
+    const latest = projectPersistence.projects[0];
+    if (latest) openSavedProject(latest.project_id);
   };
 
   const cancelIntake = () => {
@@ -347,7 +390,6 @@ export default function App() {
   };
 
   const handleQuickDemo = () => {
-    // Physical closed-loop flagship first (print→wire→flash→bench), then legacy demos.
     const ex =
       examples.find((r) => r.id.includes("physical_pan_tilt")) ||
       examples.find((r) => r.id.includes("money_pan_tilt")) ||
@@ -373,7 +415,6 @@ export default function App() {
         projectPackage: pkgRes.package,
         benchSession: bench,
         buildDir,
-        // no jobId — clear any stale recent-job bundle link
       });
       setView(VIEWS.workspace);
       setToast("Moved to Verify — same project; Design graph kept");
@@ -457,6 +498,11 @@ export default function App() {
             data-testid="nav-project"
             onClick={() => {
               if (!session.projectId) {
+                const latest = projectPersistence.projects[0];
+                if (latest) {
+                  openSavedProject(latest.project_id);
+                  return;
+                }
                 startProject();
                 return;
               }
@@ -506,6 +552,56 @@ export default function App() {
             </button>
           )}
         </div>
+
+        {session.projectId && (
+          <div className="sidebar-section">
+            <div className="sidebar-label">Project state</div>
+            <div className={`project-button ${persistenceStatusClass(session.persistenceStatus)}`}>
+              <strong>{session.projectName || "Untitled project"}</strong>
+              <span className="job-status">
+                {session.persistenceStatus === "saving"
+                  ? "Saving…"
+                  : session.persistenceStatus === "conflict"
+                    ? "Save conflict"
+                    : session.persistenceStatus === "failed"
+                      ? "Save failed"
+                      : session.persistenceStatus === "restored"
+                        ? `Restored r${session.snapshotRevision}`
+                        : session.snapshotRevision
+                          ? `Saved r${session.snapshotRevision}`
+                          : "Not saved"}
+              </span>
+            </div>
+            {session.persistenceError && <span className="muted small">{session.persistenceError}</span>}
+          </div>
+        )}
+
+        {projectPersistence.projects.length > 0 && (
+          <div className="sidebar-section">
+            <div className="sidebar-label">Saved projects</div>
+            <div className="project-list">
+              {projectPersistence.projects.slice(0, 8).map((project) => (
+                <button
+                  key={project.project_id}
+                  type="button"
+                  className={`project-button ${session.projectId === project.project_id ? "active" : ""}`}
+                  onClick={() => openSavedProject(project.project_id)}
+                  title={formatSavedAt(project.saved_at)}
+                >
+                  <strong>{formatProjectName(project.name)}</strong>
+                  <span className="job-status">
+                    {project.current_stage} · r{project.latest_revision}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {projectPersistence.listError && (
+              <button type="button" className="link-button small" onClick={projectPersistence.refreshProjects}>
+                Retry projects
+              </button>
+            )}
+          </div>
+        )}
 
         {uniqueRecentJobs.length > 0 && (
           <div className="sidebar-section sidebar-grow">

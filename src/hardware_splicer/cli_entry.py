@@ -23,7 +23,10 @@ def main_serve() -> None:
         host = args[args.index("--host") + 1]
     if "--port" in args:
         port = int(args[args.index("--port") + 1])
-    uvicorn.run("hardware_splicer.api:app", host=host, port=port, reload=False)
+    # Serve the canonical product composition: engine endpoints plus durable
+    # project snapshots. The lower-level hardware_splicer.api app remains
+    # available for engine-only embedding and focused tests.
+    uvicorn.run("hardware_splicer.product_api:app", host=host, port=port, reload=False)
 
 
 def main_mcp() -> None:
