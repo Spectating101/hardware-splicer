@@ -28,6 +28,7 @@ _MODULE_LABELS: Dict[str, str] = {
     "arduino-nano": "Arduino Nano",
     "tp4056": "TP4056 Li-ion charger",
     "fan-5v": "5V DC fan",
+    "cooling_fan_5v": "5V DC cooling fan, 40 mm",
     "mini-pump-5v": "5V mini water pump",
     "usb-power-5v": "USB 5V power input",
     "ch340-usb-ttl": "CH340 USB-TTL serial adapter",
@@ -63,6 +64,7 @@ _PART_HINTS: Dict[str, Dict[str, str]] = {
     "arduino-nano": {"mpn": "ATmega328P-AU", "footprint": "Arduino_Nano", "supplier_sku": "A000005"},
     "tp4056": {"mpn": "TP4056", "footprint": "TP4056-CHARGER", "supplier_sku": "TP4056-MOD"},
     "fan-5v": {"mpn": "Fan-5V-40mm", "footprint": "FAN-5V-2PIN", "supplier_sku": "FAN-5V-40"},
+    "cooling_fan_5v": {"mpn": "FAN-40MM", "footprint": "FAN-5V-40MM", "supplier_sku": "FAN-5V-40"},
     "mini-pump-5v": {"mpn": "Mini-Submersible-Pump-5V", "footprint": "PUMP-5V-MINI", "supplier_sku": "PUMP-5V"},
     "dc-barrel-12v": {"mpn": "DC-005", "footprint": "BarrelJack_CUI_PJ-002A", "supplier_sku": "DC-BARREL-12V"},
     "usb-power-5v": {"mpn": "USB-Micro-B-5V", "footprint": "USB-MICRO-POWER", "supplier_sku": "USB-5V-IN"},
@@ -178,7 +180,6 @@ def enrich_bom_with_jlcsearch(
                     line["jlc_mpn"] = str(hit.get("mpn") or hit.get("manufacturer_part_number") or "")
             except Exception:
                 pass
-        # Bouni-style CPL fields when footprint/position metadata already on the line
         if line.get("footprint") and not line.get("jlc_cpl_footprint"):
             line["jlc_cpl_footprint"] = str(line.get("footprint") or "")
         if line.get("ref") and not line.get("jlc_designator"):

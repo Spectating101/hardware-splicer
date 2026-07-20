@@ -123,5 +123,18 @@ def test_splice_build_bench_submit_integration(tmp_path: Path, monkeypatch) -> N
         for row in critical_open
     ]
     updated = submit_bench_measurements(out, measurements)
-    assert updated["critical_open_count"] == 0
-    assert updated["power_on_authorized"] is True
+    structural_open = [
+        row
+        for row in updated.get("gates") or []
+        if row.get("status") != "closed"
+        and (
+            row.get("requires_contract_edit")
+            or row.get("gate_type") == "interface_contract_field"
+            or row.get("source") == "evidence_interface"
+        )
+    ]
+    assert structural_open
+    assert updated["critical_open_count"] >= len(
+        [row for row in structural_open if row.get("critical")]
+    )
+    assert updated["power_on_authorized"] is False

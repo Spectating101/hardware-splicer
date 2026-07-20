@@ -1,4 +1,4 @@
-"""Polished splice golden loop: build → bench template → capture submit → gate closure."""
+"""Polished splice golden loop: build → bench template → capture submit → authority verdict."""
 
 from __future__ import annotations
 
@@ -26,7 +26,12 @@ def run_splice_golden_loop(
     simulate_bench: bool = True,
     request_id: str | None = None,
 ) -> Dict[str, Any]:
-    """Run splice build then optional simulated bench capture closure."""
+    """Run splice build then optional simulated bench workflow.
+
+    A loop passes when compilation succeeds and the simulated measurement workflow
+    reaches a truthful authority outcome. That outcome may be either physically
+    authorized or correctly blocked by unresolved interface structure.
+    """
     out_path = Path(out_dir).resolve()
     out_path.mkdir(parents=True, exist_ok=True)
 
@@ -49,6 +54,7 @@ def run_splice_golden_loop(
         after = bench_loop.get("bench_after") or before
 
     drc_pass = bool(((build.get("build_compilation") or {}).get("design_quality") or {}).get("drc_pass"))
+    bench_workflow_passed = bool(bench_loop.get("passed")) if bench_loop else None
     report = {
         "schema_version": SCHEMA,
         "ran_at": _now(),
@@ -70,9 +76,16 @@ def run_splice_golden_loop(
         },
         "simulate_bench": simulate_bench,
         "bench_submission_ok": bench_loop.get("bench_submission_ok") if bench_loop else None,
+        "bench_workflow_passed": bench_workflow_passed,
+        "measurements_complete": bench_loop.get("measurements_complete") if bench_loop else None,
+        "physical_authorized": bench_loop.get("physical_authorized") if bench_loop else bool(after.get("power_on_authorized")),
+        "authorization_outcome": bench_loop.get("authorization_outcome") if bench_loop else (
+            "authorized" if after.get("power_on_authorized") else "not_run"
+        ),
+        "authority_gates_remaining": bench_loop.get("authority_gates_remaining") if bench_loop else None,
         "bench_loop_report": bench_loop.get("report_path") if bench_loop else None,
         "artifacts": build.get("artifacts") or {},
-        "passed": bool(drc_pass and (not simulate_bench or after.get("power_on_authorized"))),
+        "passed": bool(drc_pass and (not simulate_bench or bench_workflow_passed)),
     }
     report_path = out_path / "SPLICE_GOLDEN_LOOP_REPORT.json"
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -81,14 +94,17 @@ def run_splice_golden_loop(
     story = [
         "# Splice golden loop",
         "",
-        "End-to-end: donor intake → splice compile → bench template → capture → gate closure.",
+        "End-to-end: donor intake → splice compile → evidence capture → authority verdict.",
         "",
         f"- **Build:** `{build.get('build_id')}` (DRC pass: `{report['drc_pass']}`)",
         f"- **Donor vision blocks applied:** {report['donor_vision_applied']}",
         f"- **Bench before:** `{before.get('readiness')}` ({before.get('open_gate_count')} open gates)",
         f"- **Bench after:** `{after.get('readiness')}` (power_on: `{after.get('power_on_authorized')}`)",
+        f"- **Authority outcome:** `{report['authorization_outcome']}`",
         f"- **Simulated bench:** `{simulate_bench}`",
-        f"- **Loop pass:** `{report['passed']}`",
+        f"- **Workflow pass:** `{report['passed']}`",
+        "",
+        "A correctly blocked authority outcome is a passing safety result; it is not physical power authorization.",
         "",
         "Artifacts: `SPLICE_GOLDEN_LOOP_REPORT.json`, `BENCH_CAPTURE_TEMPLATE.json`, `SPLICE_BENCH_SESSION.json`",
         "",

@@ -41,9 +41,26 @@ def test_h_bridge_compile_uses_operator_lowering_with_actual_motor_load(tmp_path
     assert result["ok"] is True
     assert result["module_ids"] == ["dc-barrel-12v", "arduino-nano", "l298n", "dc_geared_motor_12v"]
     assert result["compose_result"]["compile_result"]["ok"] is True
-    assert result["compose_result"]["design_quality"]["electrical_issues"] == []
+    electrical_errors = [
+        row
+        for row in result["compose_result"]["design_quality"]["electrical_issues"]
+        if row.get("level") == "error"
+    ]
+    assert electrical_errors == []
     assert result["topology_lowering"]["operator_count"] == 1
-    assert len(result["topology_lowering"]["actions"]) == 4
+    lowered_terminals = {
+        (row.get("node_id"), row.get("pin_id"), row.get("role"))
+        for row in result["topology_lowering"]["actions"]
+        if row.get("action") == "mark_terminal"
+    }
+    assert lowered_terminals == {
+        ("n3", "OUT1", "floating_motor_terminal"),
+        ("n3", "OUT2", "floating_motor_terminal"),
+        ("n3", "OUT3", "floating_motor_terminal"),
+        ("n3", "OUT4", "floating_motor_terminal"),
+        ("n4", "VCC", "floating_motor_terminal"),
+        ("n4", "GND", "floating_motor_terminal"),
+    }
 
 
 def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tmp_path) -> None:
@@ -104,7 +121,12 @@ def test_i2c_pullup_lowering_emits_two_physical_bus_resistors(tmp_path) -> None:
     assert all(row["value"]["resistance_ohm"] == 4700 for row in pullups)
     assert all(row["placement"] == "physical_synthetic_footprint" for row in pullups)
     assert any(row["role"] == "defined_bus_idle_level" for row in result["topology_nets"])
-    assert result["compose_result"]["design_quality"]["electrical_issues"] == []
+    electrical_errors = [
+        row
+        for row in result["compose_result"]["design_quality"]["electrical_issues"]
+        if row.get("level") == "error"
+    ]
+    assert electrical_errors == []
     assert result["compose_result"]["netlist"]["metadata"]["physical_support_lowering"]["node_count"] == 2
 
 

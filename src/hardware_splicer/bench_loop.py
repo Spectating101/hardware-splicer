@@ -18,6 +18,22 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _bounded_simulated_value(row: Mapping[str, Any]) -> float | None:
+    """Return an in-range deterministic value when numeric bounds are declared."""
+    lower = row.get("lower")
+    upper = row.get("upper")
+    if lower is None and upper is None:
+        return None
+    try:
+        if lower is not None and upper is not None:
+            return (float(lower) + float(upper)) / 2.0
+        if lower is not None:
+            return float(lower)
+        return float(upper) / 2.0
+    except (TypeError, ValueError):
+        return None
+
+
 def build_simulated_capture(
     template: Mapping[str, Any],
     *,
@@ -38,7 +54,7 @@ def build_simulated_capture(
     for row in template.get("measurements") or []:
         if not isinstance(row, dict):
             continue
-        kind = str(row.get("kind") or "voltage")
+        kind = str(row.get("kind") or "measurement")
         item: Dict[str, Any] = {
             "gate_id": row.get("gate_id"),
             "kind": kind,
@@ -48,8 +64,13 @@ def build_simulated_capture(
             "instrument_id": "sim_dmm_01",
             "operator_id": operator_id,
         }
-        if kind == "voltage":
-            item["value"] = 6.0
+        bounded = _bounded_simulated_value(row)
+        if bounded is not None:
+            item["value"] = bounded
+            if row.get("unit"):
+                item["unit"] = row.get("unit")
+        elif kind == "voltage":
+            item["value"] = 3.3
             item["unit"] = row.get("unit") or "V"
         elif kind == "current":
             item["value"] = 0.12
@@ -65,6 +86,8 @@ def build_simulated_capture(
             item["artifact_uri"] = row.get("artifact_uri") or "sim://thermal_baseline_ok"
         else:
             item["value"] = "pass"
+            if row.get("unit"):
+                item["unit"] = row.get("unit")
         filled.append(item)
     capture["measurements"] = filled
     capture["simulated"] = True
@@ -76,6 +99,29 @@ def build_simulated_capture(
     return capture
 
 
+def _open_gates(session: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+    return [
+        row
+        for row in (session.get("gates") or [])
+        if isinstance(row, Mapping) and str(row.get("status") or "open") != "closed"
+    ]
+
+
+def _authority_gate(row: Mapping[str, Any]) -> bool:
+    return bool(
+        row.get("requires_contract_edit")
+        or str(row.get("gate_type") or "") == "interface_contract_field"
+        or str(row.get("source") or "") == "evidence_interface"
+    )
+
+
+def _evidence_measurement_gate(row: Mapping[str, Any]) -> bool:
+    return bool(
+        str(row.get("gate_type") or "") == "interface_measurement"
+        or str(row.get("source") or "") == "evidence_recipe"
+    )
+
+
 def run_bench_loop_closure(
     build_dir: str | Path,
     *,
@@ -83,7 +129,12 @@ def run_bench_loop_closure(
     capture_packet: Mapping[str, Any] | None = None,
     operator_id: str = "bench_loop_sim",
 ) -> Dict[str, Any]:
-    """Refresh capture template and optionally submit capture to close bench gates."""
+    """Refresh capture template and optionally submit capture to close bench gates.
+
+    Pipeline success and physical authorization are intentionally separate. A simulated
+    capture may prove that measurable gates close while canonical interface-structure
+    gates correctly remain open.
+    """
     out_path = Path(build_dir).resolve()
     if not out_path.is_dir():
         raise ValueError(f"build_dir not found: {out_path}")
@@ -111,6 +162,26 @@ def run_bench_loop_closure(
         else:
             after = bench_status(out_path)
 
+    remaining = _open_gates(after)
+    authority_remaining = [row for row in remaining if _authority_gate(row)]
+    evidence_measurements_remaining = [row for row in remaining if _evidence_measurement_gate(row)]
+    submission_ok = bool((bench_result or {}).get("ok")) if submitted_capture else None
+    measurements_complete = bool(submitted_capture and submission_ok and not evidence_measurements_remaining)
+    physical_authorized = after.get("power_on_authorized") is True
+    correctly_blocked = bool(measurements_complete and authority_remaining and not physical_authorized)
+    if physical_authorized:
+        authorization_outcome = "authorized"
+    elif correctly_blocked:
+        authorization_outcome = "correctly_blocked"
+    else:
+        authorization_outcome = "incomplete"
+    workflow_passed = bool(
+        submitted_capture
+        and submission_ok
+        and measurements_complete
+        and authorization_outcome in {"authorized", "correctly_blocked"}
+    )
+
     report: Dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "ran_at": _now(),
@@ -129,14 +200,16 @@ def run_bench_loop_closure(
         },
         "simulate_bench": bool(simulate_bench and capture_packet is None),
         "submitted_capture": submitted_capture,
-        "bench_submission_ok": bool((bench_result or {}).get("ok")) if submitted_capture else None,
+        "bench_submission_ok": submission_ok,
         "bench_capture_template": template.get("template_path"),
         "open_measurement_count": template.get("open_measurement_count"),
-        "passed": bool(
-            submitted_capture
-            and after.get("power_on_authorized") is True
-            and (bench_result or {}).get("ok") is not False
-        ),
+        "open_contract_action_count": template.get("open_contract_action_count"),
+        "evidence_measurements_remaining": len(evidence_measurements_remaining),
+        "authority_gates_remaining": len(authority_remaining),
+        "measurements_complete": measurements_complete,
+        "physical_authorized": physical_authorized,
+        "authorization_outcome": authorization_outcome,
+        "passed": workflow_passed,
     }
     report_path = out_path / REPORT_FILE
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")

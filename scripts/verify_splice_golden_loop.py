@@ -58,8 +58,19 @@ def evaluate_case(case: Mapping[str, Any], intake: Mapping[str, Any], report: Di
         elif case.get("simulate_bench") and _gate_status(out_dir, gate_id) != "closed":
             failures.append(f"gate {gate_id} not closed after simulated bench")
 
-    if case.get("simulate_bench") and not report.get("bench_after", {}).get("power_on_authorized"):
-        failures.append("power_on_authorized false after simulated bench")
+    if case.get("simulate_bench"):
+        outcome = str(report.get("authorization_outcome") or "")
+        if outcome not in {"authorized", "correctly_blocked"}:
+            failures.append(f"unexpected authorization_outcome {outcome!r}")
+        if not report.get("bench_workflow_passed"):
+            failures.append("bench_workflow_passed false after simulated bench")
+        if outcome == "correctly_blocked":
+            if report.get("physical_authorized"):
+                failures.append("correctly_blocked outcome cannot be physically authorized")
+            if int(report.get("authority_gates_remaining") or 0) < 1:
+                failures.append("correctly_blocked outcome missing authority gates")
+        elif not report.get("bench_after", {}).get("power_on_authorized"):
+            failures.append("authorized outcome missing power_on_authorized")
 
     intake_path = out_dir / "PROJECT_INTAKE.json"
     if intake_path.is_file() and case.get("expect_repair_context"):

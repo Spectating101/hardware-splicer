@@ -42,7 +42,12 @@ def test_compose_agent_bench_loop_salvage_simulated(tmp_path: Path, monkeypatch:
     assert result.get("project_package")
     assert bench_loop.get("submitted_capture") is True
     assert bench_loop.get("passed") is True
-    assert (result.get("bench_session") or {}).get("power_on_authorized") is True
+    assert bench_loop.get("authorization_outcome") in {"authorized", "correctly_blocked"}
+    if bench_loop.get("authorization_outcome") == "correctly_blocked":
+        assert (result.get("bench_session") or {}).get("power_on_authorized") is False
+        assert int(bench_loop.get("authority_gates_remaining") or 0) >= 1
+    else:
+        assert (result.get("bench_session") or {}).get("power_on_authorized") is True
     assert (tmp_path / "compose_bench" / "BENCH_LOOP_REPORT.json").is_file()
     assert (tmp_path / "compose_bench" / "SPLICE_PLAN.json").is_file()
 
@@ -77,6 +82,7 @@ def test_compose_bench_loop_http_salvage(tmp_path: Path, monkeypatch: pytest.Mon
     assert response.status_code == 200, response.text
     payload = response.json()
     assert payload.get("bench_loop", {}).get("submitted_capture") is True
+    assert payload.get("bench_loop", {}).get("authorization_outcome") in {"authorized", "correctly_blocked"}
     assert payload.get("agent_loop", {}).get("final_kicad_drc_errors") == 0
 
 
@@ -100,3 +106,4 @@ def test_bench_loop_closure_on_existing_compose(tmp_path: Path, monkeypatch: pyt
     )
     report = run_bench_loop_closure(built["out_dir"], simulate_bench=True)
     assert report.get("submitted_capture") is True
+    assert report.get("authorization_outcome") in {"authorized", "correctly_blocked"}

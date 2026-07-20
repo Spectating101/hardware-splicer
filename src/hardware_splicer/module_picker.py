@@ -185,6 +185,7 @@ MODULE_HINTS: list[ModuleHint] = [
         patterns=[re.compile(r"button|keypad|\bpress(?:able)?\b|macro pad", re.I)],
         label="buttons",
         requires_any=[["switch_or_button"]],
+        prefer_id="capacitive_touch",
         priority=5,
     ),
     ModuleHint(

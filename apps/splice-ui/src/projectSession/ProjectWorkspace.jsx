@@ -1,5 +1,6 @@
 import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
+import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
 import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
@@ -175,6 +176,15 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.verify && (
           <div className="panel-stack" data-testid="stage-verify">
+            {session.mode === "salvage" && (
+              <EvidenceWorkbenchPanel
+                session={session}
+                onGoVerify={() => handleStageChange(STAGES.verify)}
+                onGoBench={() => handleStageChange(STAGES.bench)}
+                onContractUpdate={(measurements) => onBenchSubmit?.(measurements)}
+                onToast={onToast}
+              />
+            )}
             {!buildDir && (
               <section className="card empty-card">
                 <p className="muted">Compile from Design or finish a salvage build to populate verification.</p>

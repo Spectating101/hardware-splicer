@@ -1,0 +1,287 @@
+import json
+from pathlib import Path
+
+from hardware_splicer.bench_capture_bridge import build_bench_capture_template_from_gates
+from hardware_splicer.bench_loop import build_simulated_capture
+from hardware_splicer.evidence_salvage_bridge import attach_evidence_first_integrations
+from hardware_splicer.splice_bench import (
+    SESSION_FILE,
+    _gates_from_evidence_integrations,
+    submit_bench_measurements,
+)
+
+
+def _package():
+    return {
+        "evidence_integrations": {
+            "interfaces": [
+                {
+                    "blockers": ["signals.control.direction"],
+                    "interface_contract": {
+                        "interface_id": "if:enabot:driver",
+                        "board_id": "enabot",
+                        "block_id": "driver",
+                        "unresolved_fields": ["signals.control.direction"],
+                    },
+                    "bench_recipe": {
+                        "phases": [
+                            {
+                                "phase_id": "idle_voltage",
+                                "title": "Measure idle logic voltage",
+                                "measurements": [
+                                    {
+                                        "measurement_id": "idle_voltage_v",
+                                        "description": "Idle contact voltage",
+                                        "unit": "V",
+                                        "lower": 0.0,
+                                        "upper": 5.5,
+                                        "required": True,
+                                    }
+                                ],
+                            }
+                        ]
+                    },
+                }
+            ]
+        }
+    }
+
+
+def test_evidence_interfaces_generate_contract_and_measurement_gates() -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    assert len(gates) == 2
+
+    field_gate = next(row for row in gates if row["gate_type"] == "interface_contract_field")
+    assert field_gate["requires_contract_edit"] is True
+    assert field_gate["evidence_field"] == "signals.control.direction"
+    assert field_gate["critical"] is True
+
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+    assert measurement_gate["measurement_id"] == "idle_voltage_v"
+    assert measurement_gate["expected_unit"] == "V"
+    assert measurement_gate["lower"] == 0.0
+    assert measurement_gate["upper"] == 5.5
+    assert measurement_gate["required"] is True
+
+
+def test_capture_template_separates_contract_actions_from_measurements() -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    template = build_bench_capture_template_from_gates(gates, project_name="robot")
+
+    assert len(template["contract_actions"]) == 1
+    assert template["contract_actions"][0]["action"] == "update_interface_contract"
+    assert template["contract_actions"][0]["evidence_field"] == "signals.control.direction"
+    assert len(template["measurements"]) == 1
+    measurement = template["measurements"][0]
+    assert measurement["measurement_id"] == "idle_voltage_v"
+    assert measurement["unit"] == "V"
+    assert measurement["lower"] == 0.0
+    assert measurement["upper"] == 5.5
+
+    simulated = build_simulated_capture(template)
+    assert len(simulated["measurements"]) == 1
+    assert simulated["measurements"][0]["value"] == 2.75
+    assert simulated["measurements"][0]["unit"] == "V"
+
+
+def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path: Path) -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": gates,
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+
+    field_gate = next(row for row in gates if row["gate_type"] == "interface_contract_field")
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [
+            {
+                "gate_id": field_gate["gate_id"],
+                "status": "verified",
+                "value": "input",
+                "method": "operator assertion",
+            },
+            {
+                "gate_id": measurement_gate["gate_id"],
+                "status": "verified",
+                "value": 3.3,
+                "unit": "V",
+                "method": "DMM",
+            },
+        ],
+    )
+
+    applied = {row["gate_id"]: row for row in result["last_submission"]["applied"]}
+    assert applied[field_gate["gate_id"]]["error"] == "contract_edit_required"
+    assert applied[measurement_gate["gate_id"]]["ok"] is True
+
+    stored = {row["gate_id"]: row for row in result["gates"]}
+    assert stored[field_gate["gate_id"]]["status"] == "open"
+    assert stored[measurement_gate["gate_id"]]["status"] == "closed"
+    assert result["power_on_authorized"] is False
+    assert result["critical_open_count"] == 1
+
+
+def test_typed_contract_update_persists_and_recomputes_authority(tmp_path: Path) -> None:
+    package = attach_evidence_first_integrations(
+        {
+            "recommended_build_id": "robot_drive",
+            "splice_plan": {
+                "reusable_blocks": [
+                    {
+                        "board_id": "enabot-mainboard",
+                        "block_id": "dual-hbridge-01",
+                        "name": "Dual H-bridge motor driver",
+                        "function_type": "actuator_driver",
+                        "connector_refs": ["J_LOGIC"],
+                    }
+                ]
+            },
+            "firmware_scaffold": {"source": "generated/main.cpp"},
+        }
+    )
+    (tmp_path / "SPLICE_PLAN.json").write_text(json.dumps(package), encoding="utf-8")
+    gates = _gates_from_evidence_integrations(package)
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": gates,
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+    field_gate = next(row for row in gates if row["gate_type"] == "interface_contract_field")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [
+            {
+                "gate_id": field_gate["gate_id"],
+                "status": "verified",
+                "contract_update": {
+                    "operation": "upsert_signal",
+                    "interface_id": "if:enabot-mainboard:dual-hbridge-01",
+                    "signal_id": "enable",
+                    "contact_id": "J_LOGIC.1",
+                    "connector_ref": "J_LOGIC",
+                    "pin_number": "1",
+                    "direction": "input",
+                    "voltage_max_v": 3.3,
+                    "active_level": "high",
+                    "controller_pin": "GPIO16",
+                    "evidence_id": "bench-contract-001",
+                    "method": "DMM plus protected stimulus",
+                    "producer": "operator+instrument",
+                },
+            }
+        ],
+    )
+
+    applied = result["last_submission"]["applied"][0]
+    assert applied["ok"] is True
+    assert applied["contract_update"] is True
+    # One evidenced signal must not clear structural completeness or authorize firmware.
+    assert "interface_complete" in applied["unresolved_fields"]
+    assert result["evidence_integrations"]["authority"]["firmware_authorized"] is False
+    assert result["power_on_authorized"] is False
+
+    stored = json.loads((tmp_path / "SPLICE_PLAN.json").read_text(encoding="utf-8"))
+    interface = stored["evidence_integrations"]["interfaces"][0]
+    assert interface["compile_status"] == "blocked"
+    assert interface["interface_contract"]["firmware_authorized"] is False
+    assert interface["interface_contract"]["signals"][0]["controller_pin"]["value"] == "GPIO16"
+    assert stored["firmware_scaffold"]["evidence_authorized"] is False
+
+    complete = submit_bench_measurements(
+        tmp_path,
+        [
+            {
+                "gate_id": field_gate["gate_id"],
+                "status": "verified",
+                "contract_update": {
+                    "operation": "upsert_signal",
+                    "interface_id": "if:enabot-mainboard:dual-hbridge-01",
+                    "signal_id": "enable",
+                    "contact_id": "J_LOGIC.1",
+                    "connector_ref": "J_LOGIC",
+                    "pin_number": "1",
+                    "direction": "input",
+                    "voltage_max_v": 3.3,
+                    "active_level": "high",
+                    "controller_pin": "GPIO16",
+                    "interface_complete": True,
+                    "evidence_id": "bench-contract-complete-001",
+                    "method": "complete interface review",
+                    "producer": "operator+instrument",
+                },
+            }
+        ],
+    )
+    complete_applied = complete["last_submission"]["applied"][0]
+    assert complete_applied["ok"] is True
+    assert complete_applied["unresolved_fields"] == []
+    assert complete["evidence_integrations"]["authority"]["firmware_authorized"] is True
+    assert complete["power_on_authorized"] is False
+
+    stored_complete = json.loads((tmp_path / "SPLICE_PLAN.json").read_text(encoding="utf-8"))
+    interface_complete = stored_complete["evidence_integrations"]["interfaces"][0]
+    assert interface_complete["compile_status"] == "ready"
+    assert interface_complete["interface_contract"]["firmware_authorized"] is True
+    assert stored_complete["firmware_scaffold"]["evidence_authorized"] is True
+
+
+def test_out_of_range_evidence_measurement_stays_blocked(tmp_path: Path) -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": [measurement_gate],
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [{
+            "gate_id": measurement_gate["gate_id"],
+            "status": "verified",
+            "value": 8.0,
+            "unit": "V",
+            "method": "DMM",
+        }],
+    )
+
+    applied = result["last_submission"]["applied"][0]
+    assert applied["error"] == "measurement_validation_failed"
+    assert "upper bound" in applied["reason"]
+    assert result["gates"][0]["status"] == "blocked"
+    assert result["power_on_authorized"] is False
+
+
+def test_wrong_unit_evidence_measurement_stays_blocked(tmp_path: Path) -> None:
+    gates = _gates_from_evidence_integrations(_package())
+    measurement_gate = next(row for row in gates if row["gate_type"] == "interface_measurement")
+    session = {
+        "schema_version": "hardware_splicer.splice_bench.v1",
+        "build_dir": str(tmp_path),
+        "gates": [measurement_gate],
+    }
+    (tmp_path / SESSION_FILE).write_text(json.dumps(session), encoding="utf-8")
+
+    result = submit_bench_measurements(
+        tmp_path,
+        [{
+            "gate_id": measurement_gate["gate_id"],
+            "status": "verified",
+            "value": 3.3,
+            "unit": "A",
+            "method": "DMM",
+        }],
+    )
+
+    applied = result["last_submission"]["applied"][0]
+    assert applied["error"] == "measurement_validation_failed"
+    assert "expected" in applied["reason"]
+    assert result["gates"][0]["status"] == "blocked"

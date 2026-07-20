@@ -50,7 +50,7 @@
     {
       "id": "scratch_compose",
       "intake": "scratch_compose_brief.json",
-      "expected_build_id": "generic_low_voltage_build",
+      "expected_build_id": "sensor_logger",
       "min_modules": 3,
       "min_wires": 3
     }

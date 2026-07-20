@@ -48,6 +48,24 @@ Full walkthrough: [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md)
 
 ---
 
+## Evidence-governed donor reuse
+
+Salvage projects now keep uncertain donor hardware as stable `donor:*` virtual modules rather than silently inheriting the pinout of a similar catalog part.
+
+The Verify-stage **Evidence Authority** workbench lets an operator:
+
+1. inspect donor contacts, signals, reference-only analogies, and unresolved fields;
+2. persist typed, provenance-bearing interface updates;
+3. explicitly attest when all firmware-relevant control signals have been identified;
+4. record bounded physical measurements through Bench;
+5. authorize firmware and power only after the corresponding evidence gates close.
+
+Known equivalents such as L298N or A4988 are functional references only. Their electrical contracts are never inherited without accepted evidence. Optional tscircuit, PlatformIO, and KiBot integrations remain replaceable execution backends; they do not decide what is electrically true.
+
+Architecture and authority boundaries: [`docs/INTEGRATION_STACK.md`](docs/INTEGRATION_STACK.md).
+
+---
+
 ## What this is / is not (honesty)
 
 | Is | Is not |
@@ -75,9 +93,9 @@ make verify-product-live-smoke
 | `hs-doctor` | KiCad, Node, Python, API deps |
 | `verify-splice` | S2 manifest compile (4/4) |
 | `verify-splice-loop` | S3 bench closure (3/3) |
-| `verify-splice-real-bench` | Real capture → `power_on_authorized` |
+| `verify-splice-real-bench` | Typed donor contract → physical capture → `power_on_authorized` |
 
-CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product API tests.
+CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + evidence tests + UI build + product API tests.
 
 ---
 
@@ -96,6 +114,7 @@ CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product A
 
 - `PROJECT_PACKAGE.json` — BOM, wiring, build steps, **gates**
 - KiCad carrier + DRC report
+- `SPLICE_PLAN.json` — donor interface contracts, evidence lineage, and authority state
 - `SPLICE_BENCH_SESSION.json` — measurements before power-on
 - `COMPILE_CASEFILE.json` on failure — debuggable, not vague errors
 - Job bundle zip via `GET /v1/jobs/{id}/bundle`
@@ -107,7 +126,7 @@ CI runs **Splice Agent v1** on Ubuntu: `verify-splice-v1` + UI build + product A
 | In | Out |
 |----|-----|
 | Splice intake → carrier compile | Public multi-tenant SaaS |
-| Bench gates + gate verdict | Production autorouted copper (default) |
+| Evidence contracts + Bench gates + gate verdict | Production autorouted copper (default) |
 | Async jobs, MCP + HTTP parity | Flux / Blueprint-class editor |
 | Optional splice-ui workbench | Certified donor harness safety |
 
@@ -124,6 +143,7 @@ Details: [`RELEASE_NOTES_v1.1.0.md`](RELEASE_NOTES_v1.1.0.md) · [`docs/RELEASE_
 | **Everyone** | [`docs/QUICKSTART_SPLICE_v1.md`](docs/QUICKSTART_SPLICE_v1.md) |
 | **Design partners / pilots** | [`docs/DESIGN_PARTNER.md`](docs/DESIGN_PARTNER.md) |
 | **Launch v1.1** | [`docs/RELEASE_v1.1.md`](docs/RELEASE_v1.1.md) |
+| **Evidence integration** | [`docs/INTEGRATION_STACK.md`](docs/INTEGRATION_STACK.md) |
 | **Conversion doctrine** | [`docs/CONVERSION_DOCTRINE.md`](docs/CONVERSION_DOCTRINE.md) |
 | **Support & liability** | [`docs/SUPPORT_AND_LIABILITY_v1.md`](docs/SUPPORT_AND_LIABILITY_v1.md) |
 | **Security** | [`SECURITY.md`](SECURITY.md) |

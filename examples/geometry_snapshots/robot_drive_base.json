@@ -47,7 +47,7 @@
       "height": 83.05000000000001
     },
     "footprint_count": 5,
-    "trace_segments": 84,
+    "trace_segments": 82,
     "via_count": 80
   },
   "drc_pass": true,

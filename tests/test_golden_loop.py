@@ -34,7 +34,9 @@ def test_golden_loop_vision_junk(tmp_path: Path):
     report = run_splice_golden_loop(intake, out_dir=tmp_path / "loop", simulate_bench=True)
     assert report.get("drc_pass") is True
     assert int(report.get("donor_vision_applied") or 0) >= 1
-    assert report["bench_after"].get("power_on_authorized") is True
+    assert report["bench_after"].get("power_on_authorized") is False
+    assert report.get("authorization_outcome") == "correctly_blocked"
+    assert int(report.get("authority_gates_remaining") or 0) >= 1
     assert report.get("passed") is True
     report_path = tmp_path / "loop" / "SPLICE_GOLDEN_LOOP_REPORT.json"
     assert report_path.is_file()

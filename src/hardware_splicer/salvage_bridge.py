@@ -281,7 +281,7 @@ def build_intake_salvage_package(
         "claim_boundary": "Starter printable pack from electronics roles — verify fit on bench.",
         "degraded_reason": None,
     }
-    return {
+    package = {
         "schema_version": SCHEMA_VERSION,
         "splice_plan": splice_plan,
         "diy_plan": diy_plan,
@@ -302,6 +302,11 @@ def build_intake_salvage_package(
         "firmware_scaffold": firmware_scaffold,
         "mechanism_pack": mechanism_pack,
     }
+    # Canonical evidence is attached on every salvage planning path. This is the
+    # authority boundary consumed by the UI and specialist backends.
+    from .evidence_salvage_bridge import attach_evidence_first_integrations
+
+    return attach_evidence_first_integrations(package)
 
 
 def resolve_salvage_compose_inputs(

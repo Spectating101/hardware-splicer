@@ -37,7 +37,7 @@ _MODULE_PATTERNS: List[Tuple[re.Pattern[str], str, str, float]] = [
     (re.compile(r"12v.*gear.*motor|geared.*motor.*12", re.I), "dc_geared_motor_12v", "mot", 0.84),
     (re.compile(r"relay", re.I), "relay-1ch-5v", "rly", 0.85),
     (re.compile(r"pump|peristaltic", re.I), "mini-pump-5v", "load", 0.8),
-    (re.compile(r"fan|blower", re.I), "fan-5v", "load", 0.8),
+    (re.compile(r"fan|blower", re.I), "cooling_fan_5v", "load", 0.8),
     (re.compile(r"usb.*serial|cp210|ch340|ftdi", re.I), "usb-uart", "usb", 0.85),
     (re.compile(r"ssd1306|oled", re.I), "ssd1306", "ui", 0.85),
     (
