@@ -25,6 +25,7 @@ PART_CASES = [
     ("MP1584 mini buck", "regulator", "buck-mp1584"),
     ("SSD1306 OLED", "display", "ssd1306"),
     ("mini pump 5v", "pump", "mini-pump-5v"),
+    # Resolve to the current catalog identity, never the retired fan-5v alias.
     ("cooling fan 5v", "fan", "cooling_fan_5v"),
     ("CH340 USB serial", "interface", "usb-uart"),
     ("HC-SR04 ultrasonic", "sensor", None),
