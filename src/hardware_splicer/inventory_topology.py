@@ -25,6 +25,15 @@ SUPPORT_MODULE_IDS = frozenset(
         "ldo-ams1117-3v3",
         "ldo-ams1117-5v",
         "tp4056",
+        "mosfet-irlz44n",
+        "mosfet-irf520",
+        "level-shifter-4ch",
+        "l298n",
+        "drv8833-motor",
+        "l9110-motor",
+        "tb6612fng-motor",
+        "bts7960-motor",
+        "a4988-stepper",
     }
 )
 
@@ -100,6 +109,18 @@ def _mcu_pin_aliases(module_id: str) -> Dict[str, str]:
         gpio_pool = [p for p in ("GPIO12", "GPIO13", "GPIO14", "GPIO15", "GPIO4", "GPIO2") if p in pins]
         for src, dst in zip(("D2", "D3", "D4", "D5", "D6", "D7"), gpio_pool):
             aliases[src] = dst
+    if module_id == "arduino-nano":
+        aliases.update(
+            {
+                "GPIO4": "D2",
+                "GPIO15": "D2",
+                "GPIO16": "D2",
+                "GPIO25": "D3",
+                "GPIO34": "A0",
+                "GPIO21": "A4",
+                "GPIO22": "A5",
+            }
+        )
     return aliases
 
 
@@ -166,9 +187,6 @@ def _support_roles_needed_by_owned_modules(
     topology: str,
 ) -> Set[str]:
     """Keep power/support modules that make a pruned salvage recipe electrically valid."""
-    if topology == "usb_5v":
-        return set()
-
     modules = list(recipe.get("modules") or [])
     module_by_role = {str(m.get("role") or ""): str(m.get("moduleId") or "") for m in modules}
     support_roles = {
@@ -510,7 +528,7 @@ def adapt_recipe_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Tuple[
 
 def _rewrite_i2c_sensor_to_dht(recipe: Recipe, overrides: Mapping[str, str]) -> Recipe:
     """sensor_logger recipe is BME280/I2C — retarget wires when inventory is DHT22."""
-    sns_id = str(overrides.get("sns") or _module_id_for(list(recipe.get("modules") or []), "sns") or "")
+    sns_id = str(overrides.get("sns") or "").strip()
     if sns_id not in {"dht22", "dht11"}:
         return recipe
     mcu_id = _module_id_for(list(recipe.get("modules") or []), "mcu") or ""

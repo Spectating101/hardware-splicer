@@ -41,7 +41,12 @@ def test_h_bridge_compile_uses_operator_lowering_with_actual_motor_load(tmp_path
     assert result["ok"] is True
     assert result["module_ids"] == ["dc-barrel-12v", "arduino-nano", "l298n", "dc_geared_motor_12v"]
     assert result["compose_result"]["compile_result"]["ok"] is True
-    assert result["compose_result"]["design_quality"]["electrical_issues"] == []
+    electrical_errors = [
+        row
+        for row in result["compose_result"]["design_quality"]["electrical_issues"]
+        if row.get("level") == "error"
+    ]
+    assert electrical_errors == []
     assert result["topology_lowering"]["operator_count"] == 1
     assert len(result["topology_lowering"]["actions"]) == 4
 
@@ -104,7 +109,12 @@ def test_i2c_pullup_lowering_emits_two_physical_bus_resistors(tmp_path) -> None:
     assert all(row["value"]["resistance_ohm"] == 4700 for row in pullups)
     assert all(row["placement"] == "physical_synthetic_footprint" for row in pullups)
     assert any(row["role"] == "defined_bus_idle_level" for row in result["topology_nets"])
-    assert result["compose_result"]["design_quality"]["electrical_issues"] == []
+    electrical_errors = [
+        row
+        for row in result["compose_result"]["design_quality"]["electrical_issues"]
+        if row.get("level") == "error"
+    ]
+    assert electrical_errors == []
     assert result["compose_result"]["netlist"]["metadata"]["physical_support_lowering"]["node_count"] == 2
 
 

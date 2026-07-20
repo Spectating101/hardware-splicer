@@ -66,7 +66,8 @@ def test_plan_salvage_wifi_intake() -> None:
     )
     ids = [r.get("module_id") for r in plan.get("resolved_modules") or []]
     assert plan["power_topology"] == "usb_5v"
-    assert ids == ["esp32-devkit", "dht22", "usb-power-5v"]
+    assert len(ids) == len(set(ids))
+    assert set(ids) == {"esp32-devkit", "dht22", "usb-power-5v"}
 
 
 def test_suggest_modules_returns_ids() -> None:

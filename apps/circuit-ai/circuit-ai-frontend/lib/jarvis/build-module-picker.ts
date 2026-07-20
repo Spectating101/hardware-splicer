@@ -158,6 +158,7 @@ const MODULE_HINTS: ModuleHint[] = [
     patterns: [/button|keypad|\bpress(?:able)?\b|macro pad/],
     label: "buttons",
     requiresAny: [["switch_or_button"]],
+    preferId: "capacitive_touch",
     priority: 5,
   },
   {
