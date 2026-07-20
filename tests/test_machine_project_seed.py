@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from hardware_splicer.machine_project import AuthorityState, Domain, LifecycleState
+from hardware_splicer.machine_project import AuthorityState, Domain, LifecycleState, ReleaseState
 from hardware_splicer.machine_project_seed import machine_project_from_intake
+from hardware_splicer.machine_release import assessment_allows
 
 
 def pan_tilt_intake() -> dict:
@@ -91,11 +92,12 @@ def test_runtime_requirement_allocates_to_power_even_without_declared_power_part
     assert not [issue for issue in project.traceability_issues() if issue.code == "invalid_ref"]
 
 
-def test_seed_reports_verification_gaps_instead_of_claiming_release() -> None:
+def test_seed_reports_verification_gaps_instead_of_claiming_operational_release() -> None:
     project = machine_project_from_intake(pan_tilt_intake())
 
     issues = project.traceability_issues()
     assert {issue.code for issue in issues} == {"unverified_requirement"}
-    assessment = project.assess_release()
-    assert assessment.allowed is False
-    assert assessment.achieved_state.value in {"design_ready", "concept"}
+    assessment = project.assess_release(requested=ReleaseState.OPERATIONALLY_AUTHORIZED)
+    assert assessment_allows(assessment) is False
+    assert assessment.achieved_state.value in {"build_ready", "design_ready", "concept"}
+    assert {row.code for row in assessment.blockers} >= {"release_state_not_reached"}
