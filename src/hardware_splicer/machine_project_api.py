@@ -13,6 +13,7 @@ from .machine_project import (
     machine_project_from_session,
 )
 from .machine_project_compile_adapter import machine_project_from_compile_spec
+from .machine_project_diff import diff_machine_projects
 from .machine_project_seed import machine_project_from_intake
 from .machine_release import assessment_allows
 
@@ -32,6 +33,12 @@ class CompileSpecProjectionRequest(BaseModel):
 class ReleaseAssessmentRequest(BaseModel):
     project: MachineProject
     requested_state: ReleaseState | None = None
+
+
+class MachineProjectDiffRequest(BaseModel):
+    base: MachineProject
+    candidate: MachineProject
+    include_metadata: bool = False
 
 
 class MachineProjectEnvelope(BaseModel):
@@ -76,6 +83,20 @@ def create_machine_project_router() -> APIRouter:
     @router.post("/from-session")
     def migrate_legacy_session(request: LegacySessionMigrationRequest) -> Dict[str, Any]:
         return _project_response(machine_project_from_session(request.session))
+
+    @router.post("/diff")
+    def compare_machine_projects(request: MachineProjectDiffRequest) -> Dict[str, Any]:
+        diff = diff_machine_projects(
+            request.base,
+            request.candidate,
+            include_metadata=request.include_metadata,
+        )
+        return {
+            "ok": True,
+            "diff": diff.model_dump(mode="json"),
+            "summary": diff.summary(),
+            "review_required": diff.review_required,
+        }
 
     @router.post("/assess-release")
     def assess_machine_release(request: ReleaseAssessmentRequest) -> Dict[str, Any]:
