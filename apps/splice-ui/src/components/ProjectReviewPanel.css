@@ -90,6 +90,10 @@
   background: rgba(224, 157, 35, 0.16);
 }
 
+.project-review__status--accepting {
+  background: rgba(77, 111, 255, 0.16);
+}
+
 .project-review__status--accepted {
   background: rgba(42, 166, 93, 0.16);
 }
