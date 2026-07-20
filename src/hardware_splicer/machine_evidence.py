@@ -42,6 +42,8 @@ _TARGET_COLLECTIONS: dict[str, tuple[str, str]] = {
     "artifacts": ("artifacts", "artifact_id"),
 }
 
+_PHYSICAL_COLLECTIONS = {"subsystems", "components", "interfaces", "artifacts"}
+
 
 def _upsert(rows: list[Dict[str, Any]], id_field: str, payload: Mapping[str, Any]) -> None:
     object_id = str(payload.get(id_field) or "")
@@ -109,8 +111,14 @@ def _validate_promotion(
         raise EvidencePromotionError(
             f"evidence {evidence.evidence_id!r} does not declare support for {collection}/{object_id}"
         )
+    if evidence.simulated and collection in _PHYSICAL_COLLECTIONS:
+        raise EvidencePromotionError(
+            f"simulated evidence cannot promote physical target {collection}/{object_id}"
+        )
 
     if requested == AuthorityState.OBSERVED:
+        if evidence.simulated:
+            raise EvidencePromotionError("observed promotion requires non-simulated observation")
         if _AUTHORITY_ORDER[evidence.authority] < _AUTHORITY_ORDER[AuthorityState.OBSERVED]:
             raise EvidencePromotionError("observed promotion requires observed-or-stronger evidence")
         return
