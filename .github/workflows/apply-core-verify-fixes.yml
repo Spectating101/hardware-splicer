@@ -1,9 +1,9 @@
 name: Apply core verify fixes
 
 on:
-  push:
+  pull_request:
     branches:
-      - agent/evidence-first-integration-stack
+      - main
     paths:
       - .github/workflows/apply-core-verify-fixes.yml
 
