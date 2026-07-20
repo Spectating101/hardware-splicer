@@ -73,6 +73,7 @@ def test_accepted_review_becomes_exactly_one_linked_revision(tmp_path) -> None:
 
     assert decided["status"] == "accepted"
     assert decided["decision"]["accepted_revision"] == 2
+    assert [event["decision"] for event in decided["events"]] == ["accepting", "accepted"]
     revision = store.load("robot", revision=2)
     assert revision["snapshot"]["machineProject"]["purpose"].startswith("Build a safe autonomous")
     assert revision["metadata"] == {
@@ -83,6 +84,72 @@ def test_accepted_review_becomes_exactly_one_linked_revision(tmp_path) -> None:
     rows = reviews.list_revisions("robot")
     assert rows[0]["revision"] == 2
     assert rows[0]["review_id"] == review["review_id"]
+
+
+def test_acceptance_can_resume_after_crash_before_revision_write(tmp_path, monkeypatch) -> None:
+    store = ProjectStore(tmp_path)
+    store.save("robot", snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(store)
+    review = reviews.create("robot", snapshot("Candidate purpose"), created_by="agent")
+    original_save = store.save
+
+    def fail_before_save(*args, **kwargs):
+        raise RuntimeError("simulated crash before revision write")
+
+    monkeypatch.setattr(store, "save", fail_before_save)
+    with pytest.raises(RuntimeError, match="before revision write"):
+        reviews.decide(
+            "robot",
+            review["review_id"],
+            decision="accepted",
+            actor="owner",
+        )
+
+    interrupted = reviews.get("robot", review["review_id"])
+    assert interrupted["status"] == "accepting"
+    assert interrupted["decision"]["accepted_revision"] == 2
+    assert store.load("robot")["revision"] == 1
+
+    monkeypatch.setattr(store, "save", original_save)
+    completed = reviews.decide(
+        "robot",
+        review["review_id"],
+        decision="accepted",
+        actor="owner",
+    )
+    assert completed["status"] == "accepted"
+    assert completed["decision"]["accepted_revision"] == 2
+    assert store.load("robot")["revision"] == 2
+
+
+def test_acceptance_reconciles_after_crash_between_revision_and_completion(tmp_path, monkeypatch) -> None:
+    store = ProjectStore(tmp_path)
+    store.save("robot", snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(store)
+    review = reviews.create("robot", snapshot("Candidate purpose"), created_by="agent")
+    original_write_event = reviews._write_event
+
+    def fail_completion(project_id, review_id, sequence, event):
+        if sequence == 2:
+            raise RuntimeError("simulated crash before completion event")
+        return original_write_event(project_id, review_id, sequence, event)
+
+    monkeypatch.setattr(reviews, "_write_event", fail_completion)
+    with pytest.raises(RuntimeError, match="before completion event"):
+        reviews.decide(
+            "robot",
+            review["review_id"],
+            decision="accepted",
+            actor="owner",
+        )
+    assert store.load("robot")["revision"] == 2
+
+    monkeypatch.setattr(reviews, "_write_event", original_write_event)
+    recovered = reviews.get("robot", review["review_id"])
+    assert recovered["status"] == "accepted"
+    assert recovered["decision"]["accepted_revision"] == 2
+    assert recovered["decision"]["recovered"] is True
+    assert [event["decision"] for event in recovered["events"]] == ["accepting", "accepted"]
 
 
 def test_stale_review_cannot_overwrite_newer_revision(tmp_path) -> None:
@@ -122,6 +189,26 @@ def test_decision_is_append_only_and_cannot_be_repeated(tmp_path) -> None:
     event_path = tmp_path / "robot" / "reviews" / review["review_id"] / "events" / "00000001.json"
     assert json.loads(event_path.read_text())["decision"] == "rejected"
     assert len(list(event_path.parent.glob("*.json"))) == 1
+
+
+def test_acceptance_retry_requires_same_actor(tmp_path, monkeypatch) -> None:
+    store = ProjectStore(tmp_path)
+    store.save("robot", snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(store)
+    review = reviews.create("robot", snapshot("Candidate purpose"), created_by="agent")
+    original_save = store.save
+
+    monkeypatch.setattr(
+        store,
+        "save",
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("crash")),
+    )
+    with pytest.raises(RuntimeError):
+        reviews.decide("robot", review["review_id"], decision="accepted", actor="owner-a")
+    monkeypatch.setattr(store, "save", original_save)
+
+    with pytest.raises(ReviewConflict, match="started by 'owner-a'"):
+        reviews.decide("robot", review["review_id"], decision="accepted", actor="owner-b")
 
 
 def test_non_machine_snapshot_changes_are_visible_and_review_gated(tmp_path) -> None:
