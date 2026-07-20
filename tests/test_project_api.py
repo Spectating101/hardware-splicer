@@ -67,9 +67,10 @@ def test_project_crud_and_history(tmp_path: Path) -> None:
     listed = api.get("/v1/projects")
     assert listed.status_code == 200
     assert listed.json()["projects"][0]["project_id"] == "robot"
+    assert listed.json()["projects"][0]["recovered"] is False
 
 
-def test_latest_load_repairs_corrupt_revision_for_continued_editing(tmp_path: Path) -> None:
+def test_project_list_recovers_corrupt_revision_and_editing_can_continue(tmp_path: Path) -> None:
     api = client(tmp_path)
     api.put(
         "/v1/projects/robot/snapshot",
@@ -82,8 +83,15 @@ def test_latest_load_repairs_corrupt_revision_for_continued_editing(tmp_path: Pa
     corrupt_path = tmp_path / "robot" / "revisions" / "00000002.json"
     corrupt_path.write_text("{not-json", encoding="utf-8")
 
-    recovered = api.get("/v1/projects/robot")
+    listed = api.get("/v1/projects")
+    assert listed.status_code == 200
+    summary = listed.json()["projects"][0]
+    assert summary["project_id"] == "robot"
+    assert summary["latest_revision"] == 1
+    assert summary["current_stage"] == "design"
+    assert summary["recovered"] is True
 
+    recovered = api.get("/v1/projects/robot")
     assert recovered.status_code == 200
     project = recovered.json()["project"]
     assert project["revision"] == 1
@@ -104,6 +112,10 @@ def test_latest_load_repairs_corrupt_revision_for_continued_editing(tmp_path: Pa
     assert continued.status_code == 200
     assert continued.json()["project"]["revision"] == 2
     assert continued.json()["project"]["snapshot"]["currentStage"] == "bench"
+
+    refreshed = api.get("/v1/projects")
+    assert refreshed.json()["projects"][0]["recovered"] is False
+    assert refreshed.json()["projects"][0]["latest_revision"] == 2
 
 
 def test_project_conflict_and_invalid_identifier_errors(tmp_path: Path) -> None:
