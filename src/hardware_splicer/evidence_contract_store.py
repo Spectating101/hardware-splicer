@@ -259,21 +259,26 @@ def apply_interface_contract_update(
     target["blockers"] = contract.unresolved_fields()
     target["compile_status"] = "ready" if contract.can_generate_firmware() else "blocked"
 
+    unresolved_firmware_interfaces = []
     unresolved_driver_interfaces = []
     for row in interfaces:
         if not isinstance(row, Mapping):
             continue
         raw_contract = row.get("interface_contract") if isinstance(row.get("interface_contract"), Mapping) else {}
-        role = str(raw_contract.get("functional_role") or "").lower()
-        references = raw_contract.get("reference_equivalents") or []
-        driver = "driver" in role or any(
-            isinstance(ref, Mapping) and str(ref.get("module_id") or "") in {"l298n", "a4988-stepper"}
-            for ref in references
-        )
-        if driver and raw_contract.get("firmware_authorized") is not True:
-            unresolved_driver_interfaces.append(str(raw_contract.get("interface_id") or ""))
+        current_interface_id = str(raw_contract.get("interface_id") or "")
+        if raw_contract.get("firmware_authorized") is not True:
+            unresolved_firmware_interfaces.append(current_interface_id)
+            role = str(raw_contract.get("functional_role") or "").lower()
+            references = raw_contract.get("reference_equivalents") or []
+            driver = "driver" in role or any(
+                isinstance(ref, Mapping) and str(ref.get("module_id") or "") in {"l298n", "a4988-stepper"}
+                for ref in references
+            )
+            if driver:
+                unresolved_driver_interfaces.append(current_interface_id)
     authority = integrations.setdefault("authority", {})
-    authority["firmware_authorized"] = not unresolved_driver_interfaces
+    authority["firmware_authorized"] = not unresolved_firmware_interfaces
+    authority["unresolved_firmware_interfaces"] = unresolved_firmware_interfaces
     authority["unresolved_driver_interfaces"] = unresolved_driver_interfaces
     authority["updated_at"] = _now()
 
@@ -321,7 +326,7 @@ def apply_interface_contract_update(
             firmware.pop("authority_blockers", None)
         else:
             firmware["status"] = "blocked_needs_donor_control_interface"
-            firmware["authority_blockers"] = unresolved_driver_interfaces
+            firmware["authority_blockers"] = unresolved_firmware_interfaces
 
     package["evidence_integrations"] = integrations
     _write_json_atomic(plan_path, package)
