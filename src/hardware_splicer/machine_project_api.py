@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .machine_project import (
@@ -14,6 +14,7 @@ from .machine_project import (
 )
 from .machine_project_compile_adapter import machine_project_from_compile_spec
 from .machine_project_diff import diff_machine_projects
+from .machine_project_edit import MachineEditError, apply_machine_edits
 from .machine_project_seed import machine_project_from_intake
 from .machine_release import assessment_allows
 
@@ -38,6 +39,12 @@ class ReleaseAssessmentRequest(BaseModel):
 class MachineProjectDiffRequest(BaseModel):
     base: MachineProject
     candidate: MachineProject
+    include_metadata: bool = False
+
+
+class MachineProjectEditRequest(BaseModel):
+    project: MachineProject
+    operations: list[Dict[str, Any]] = Field(min_length=1)
     include_metadata: bool = False
 
 
@@ -97,6 +104,30 @@ def create_machine_project_router() -> APIRouter:
             "summary": diff.summary(),
             "review_required": diff.review_required,
         }
+
+    @router.post("/edit")
+    def edit_machine_project(request: MachineProjectEditRequest) -> Dict[str, Any]:
+        try:
+            candidate = apply_machine_edits(request.project, request.operations)
+        except MachineEditError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_machine_edit", "message": str(exc)},
+            ) from exc
+        diff = diff_machine_projects(
+            request.project,
+            candidate,
+            include_metadata=request.include_metadata,
+        )
+        response = _project_response(candidate)
+        response.update(
+            {
+                "diff": diff.model_dump(mode="json"),
+                "summary": diff.summary(),
+                "review_required": diff.review_required,
+            }
+        )
+        return response
 
     @router.post("/assess-release")
     def assess_machine_release(request: ReleaseAssessmentRequest) -> Dict[str, Any]:
