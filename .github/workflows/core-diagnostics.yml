@@ -32,6 +32,16 @@ jobs:
           sudo apt-get install --install-recommends -y kicad
       - name: Bootstrap
         run: make setup
+      - name: Focused project review tests
+        if: ${{ !cancelled() }}
+        run: |
+          source .venv/bin/activate
+          PYTHONPATH=src pytest -q \
+            tests/test_project_review_store.py \
+            tests/test_project_review_api.py \
+            tests/test_project_store.py \
+            tests/test_project_api.py \
+            tests/test_product_api_projects.py
       - name: Full Python test suite
         if: ${{ !cancelled() }}
         env:
