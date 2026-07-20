@@ -1,0 +1,120 @@
+name: Hardware-Splicer Legacy Diagnostics
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/**"
+      - "scripts/**"
+      - "tests/**"
+      - "examples/geometry_snapshots/**"
+      - "examples/intakes/**"
+      - "Makefile"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - ".github/workflows/legacy-diagnostics.yml"
+  workflow_dispatch:
+
+jobs:
+  tier-c:
+    name: Tier C delivery diagnosis
+    runs-on: ubuntu-latest
+    env:
+      HARDWARE_SPLICER_TMP_ROOT: /tmp/hs-tier-c
+      HARDWARE_SPLICER_AUTOROUTE: "0"
+      HARDWARE_SPLICER_JLC_ENRICH: "0"
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      HARDWARE_SPLICER_OFFLINE_COMPOSE: "1"
+      HARDWARE_SPLICER_QWEN_SALVAGE: "0"
+      HARDWARE_SPLICER_SALVAGE_RESOLVE: heuristic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install KiCad 9 CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          kicad-cli --version
+      - name: Bootstrap
+        run: make setup
+      - name: Strict functional delivery audit
+        id: audit
+        continue-on-error: true
+        run: |
+          source .venv/bin/activate
+          set -o pipefail
+          PYTHONPATH=src python scripts/audit_functional_delivery.py --strict 2>&1 | tee /tmp/tier-c-audit.log
+      - name: Tier C BOM and fabrication tests
+        id: tests
+        continue-on-error: true
+        run: |
+          source .venv/bin/activate
+          set -o pipefail
+          PYTHONPATH=src pytest tests/test_tier_c_delivery.py -q 2>&1 | tee /tmp/tier-c-tests.log
+      - name: Upload Tier C reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tier-c-diagnostics
+          path: |
+            /tmp/tier-c-audit.log
+            /tmp/tier-c-tests.log
+            /tmp/hs-tier-c/functional_audit/FUNCTIONAL_DELIVERY_AUDIT.json
+          if-no-files-found: error
+      - name: Enforce Tier C result
+        if: always()
+        run: |
+          test "${{ steps.audit.outcome }}" = "success"
+          test "${{ steps.tests.outcome }}" = "success"
+
+  geometry:
+    name: Geometry snapshot diagnosis
+    runs-on: ubuntu-latest
+    env:
+      HARDWARE_SPLICER_AUTOROUTE: "0"
+      HARDWARE_SPLICER_JLC_ENRICH: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install KiCad 9 CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          kicad-cli --version
+      - name: Bootstrap
+        run: make setup
+      - name: Compare geometry snapshots
+        id: geometry
+        continue-on-error: true
+        run: |
+          source .venv/bin/activate
+          set -o pipefail
+          PYTHONPATH=src python scripts/verify_geometry.py \
+            --out /tmp/hs-geometry \
+            --json /tmp/geometry-report.json \
+            2>&1 | tee /tmp/geometry.log
+      - name: Upload geometry reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: geometry-diagnostics
+          path: |
+            /tmp/geometry.log
+            /tmp/geometry-report.json
+          if-no-files-found: error
+      - name: Enforce geometry result
+        if: always()
+        run: test "${{ steps.geometry.outcome }}" = "success"
