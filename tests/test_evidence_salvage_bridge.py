@@ -79,3 +79,55 @@ def test_bridge_separates_authority_modules_from_legacy_projection() -> None:
     compatibility = package["evidence_integrations"]["compatibility"]
     assert compatibility["mode"] == "legacy_graph_projection"
     assert compatibility["legacy_catalog_projection"][0]["module_id"] == "l298n"
+
+
+def test_bridge_creates_contracts_only_for_opaque_firmware_interfaces() -> None:
+    package = attach_evidence_first_integrations(
+        {
+            "recommended_build_id": "robot_drive",
+            "splice_plan": {
+                "reusable_blocks": [
+                    {
+                        "board_id": "donor_rc_car_ctrl",
+                        "block_id": "donor_rc_car_ctrl_motor_driver_section",
+                        "name": "Motor driver section (internal PCB)",
+                        "function_type": "actuator_driver",
+                        "capabilities": ["actuator_driver", "motor_or_load", "connector"],
+                        "source": "board_vision",
+                        "missing_evidence": ["Pinout markings"],
+                    },
+                    {
+                        "board_id": "donor-board",
+                        "block_id": "dead-rc-toy-car-donor-board",
+                        "name": "dead RC toy car donor board",
+                        "function_type": "donor_board",
+                    },
+                    {
+                        "board_id": "donor-board",
+                        "block_id": "left-6v-dc-gear-motor",
+                        "name": "left 6V DC gear motor",
+                        "function_type": "mechanical_motion",
+                    },
+                    {
+                        "board_id": "donor-board",
+                        "block_id": "esp32-dev-board",
+                        "name": "ESP32 dev board",
+                        "function_type": "controller_core",
+                    },
+                ]
+            },
+        }
+    )
+
+    integrations = package["evidence_integrations"]
+    assert integrations["authority"]["interface_contract_count"] == 1
+    assert integrations["authority"]["ignored_reusable_block_count"] == 3
+    assert len(integrations["interfaces"]) == 1
+    contract = integrations["interfaces"][0]["interface_contract"]
+    assert contract["functional_role"] == "actuator_driver"
+    ignored_ids = {row["block_id"] for row in integrations["ignored_reusable_blocks"]}
+    assert ignored_ids == {
+        "dead-rc-toy-car-donor-board",
+        "left-6v-dc-gear-motor",
+        "esp32-dev-board",
+    }
