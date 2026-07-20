@@ -5,6 +5,7 @@ import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
 import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
+import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
 import TabNav from "../components/TabNav.jsx";
 import {
   BomPanel,
@@ -87,6 +88,12 @@ export default function ProjectWorkspace({
           navigator.clipboard?.writeText(url);
           onToast?.("Share link copied — download package for reviewers");
         }}
+      />
+
+      <ProjectReviewPanel
+        projectId={session.projectId}
+        currentRevision={session.snapshotRevision}
+        onToast={onToast}
       />
 
       <TabNav tabs={stageTabs} activeId={stage} onChange={handleStageChange} badges={badges} />
