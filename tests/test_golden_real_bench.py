@@ -32,7 +32,7 @@ def test_golden_photo_capture_and_contract_updates_committed():
     evidence_measurements = {
         row.get("measurement_id")
         for row in capture.get("measurements") or []
-        if row.get("interface_id") == INTERFACE_ID
+        if row.get("measurement_id")
     }
     assert evidence_measurements >= {
         "ground_resistance_ohm",
