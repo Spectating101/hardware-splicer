@@ -30,12 +30,12 @@ jobs:
           import json
           from pathlib import Path
 
-          def replace_exact(path: str, old: str, new: str) -> None:
+          def replace_exact(path: str, old: str, new: str, *, expected: int = 1) -> None:
               target = Path(path)
               text = target.read_text(encoding='utf-8')
               count = text.count(old)
-              if count != 1:
-                  raise SystemExit(f'{path}: expected exactly one match, found {count}: {old!r}')
+              if count != expected:
+                  raise SystemExit(f'{path}: expected {expected} match(es), found {count}: {old!r}')
               target.write_text(text.replace(old, new), encoding='utf-8')
 
           replace_exact(
@@ -58,7 +58,6 @@ jobs:
               '    requiresAny: [["switch_or_button"]],\n    priority: 5,',
               '    requiresAny: [["switch_or_button"]],\n    preferId: "capacitive_touch",\n    priority: 5,',
           )
-
           replace_exact(
               'src/hardware_splicer/inventory_topology.py',
               '        "tp4056",\n    }',
@@ -109,7 +108,6 @@ jobs:
               '    sns_id = str(overrides.get("sns") or _module_id_for(list(recipe.get("modules") or []), "sns") or "")',
               '    sns_id = str(overrides.get("sns") or "").strip()',
           )
-
           replace_exact(
               'tests/test_agent_sdk.py',
               '    assert ids == ["esp32-devkit", "dht22", "usb-power-5v"]',
@@ -164,11 +162,13 @@ jobs:
               '        if row.get("level") == "error"\n'
               '    ]\n'
               '    assert electrical_errors == []',
+              expected=2,
           )
           PY
       - name: Commit patch for normal CI validation
         run: |
           rm .github/workflows/apply-core-verify-fixes.yml
+          rm .github/workflows/diagnose-core-patch.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
