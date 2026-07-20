@@ -23,7 +23,11 @@ function session(overrides = {}) {
       project_id: "robot",
       name: "Inspection robot",
       purpose: "Inspect a building",
-      subsystems: [{ subsystem_id: "control", name: "Control", domain: "firmware" }],
+      subsystems: [
+        { subsystem_id: "control", name: "Control", domain: "firmware" },
+        { subsystem_id: "drive", name: "Drive", domain: "mechanical" },
+      ],
+      components: [],
       interfaces: [],
     },
     currentStage: "design",
@@ -55,7 +59,7 @@ describe("MachineAuthoringPanel", () => {
     });
   });
 
-  it("validates an edit and stages the candidate instead of mutating the session", async () => {
+  it("validates a requirement and stages the candidate instead of mutating the session", async () => {
     const onToast = vi.fn();
     render(<MachineAuthoringPanel session={session()} onToast={onToast} />);
 
@@ -93,6 +97,50 @@ describe("MachineAuthoringPanel", () => {
     expect(onToast).toHaveBeenCalledWith(
       "Candidate staged as review-123. Review it before acceptance.",
     );
+  });
+
+  it("creates the first declared interface with unresolved contract fields", async () => {
+    render(<MachineAuthoringPanel session={session()} onToast={() => {}} />);
+    fireEvent.click(screen.getByRole("button", { name: "New interface" }));
+    fireEvent.change(screen.getByLabelText("Interface ID"), { target: { value: "control-link" } });
+    fireEvent.change(screen.getByLabelText("Interface name"), { target: { value: "Control link" } });
+    fireEvent.change(screen.getByLabelText("Interface kind"), { target: { value: "control" } });
+    fireEvent.change(screen.getByLabelText("Source object"), { target: { value: "control" } });
+    fireEvent.change(screen.getByLabelText("Source port"), { target: { value: "command" } });
+    fireEvent.change(screen.getByLabelText("Target object"), { target: { value: "drive" } });
+    fireEvent.change(screen.getByLabelText("Target port"), { target: { value: "enable" } });
+    fireEvent.change(screen.getByLabelText("Contract values (JSON)"), {
+      target: { value: '{"logic_voltage_v":3.3}' },
+    });
+    fireEvent.change(screen.getByLabelText("Unresolved fields"), {
+      target: { value: "pin_mapping, timing" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Stage candidate for review" }));
+
+    await waitFor(() => expect(editMachineProject).toHaveBeenCalledTimes(1));
+    expect(editMachineProject.mock.calls[0][1]).toEqual([
+      {
+        type: "upsert_interface",
+        payload: {
+          interface_id: "control-link",
+          name: "Control link",
+          kind: "control",
+          endpoints: [
+            { object_id: "control", port: "command", role: "source" },
+            { object_id: "drive", port: "enable", role: "target" },
+          ],
+          contracts: [
+            {
+              contract_type: "electrical",
+              values: { logic_voltage_v: 3.3 },
+              unresolved_fields: ["pin_mapping", "timing"],
+              authority: "declared",
+            },
+          ],
+          authority: "declared",
+        },
+      },
+    ]);
   });
 
   it("refuses to stage against an unsaved workspace", () => {
