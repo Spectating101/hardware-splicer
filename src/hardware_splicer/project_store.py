@@ -338,7 +338,7 @@ class ProjectStore:
                 archived = bool(manifest.get("archived", False))
                 if archived and not include_archived:
                     continue
-                latest = self.load(project_id)
+                latest = self.load_latest_with_recovery(project_id)
                 snapshot = latest["snapshot"]
                 projects.append(
                     ProjectSummary(
