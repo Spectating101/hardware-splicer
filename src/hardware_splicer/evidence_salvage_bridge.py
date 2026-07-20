@@ -2,15 +2,79 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional
+from typing import Any, Dict, Iterable, List, Mapping
 
 from hardware_splicer.integration_stack import IntegrationStack
 
 
 SCHEMA_VERSION = "hardware_splicer.evidence_salvage_bridge.v1"
 
+_DONOR_EVIDENCE_SOURCES = {
+    "board_vision",
+    "functional_salvage",
+    "donor_functional_salvage",
+    "circuit_functional_salvage",
+    "donor_interface_contract",
+    "manual_donor_interface",
+}
+_FIRMWARE_INTERFACE_TOKENS = (
+    "actuator_driver",
+    "motor driver",
+    "motor_driver",
+    "h-bridge",
+    "hbridge",
+    "stepper driver",
+    "relay driver",
+    "load switch",
+    "sensor interface",
+    "sensor_interface",
+    "serial bridge",
+    "usb_serial_bridge",
+    "uart bridge",
+    "control interface",
+)
 
-def _iter_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
+
+def _block_key(row: Mapping[str, Any]) -> str:
+    return str(row.get("block_id") or row.get("name") or json.dumps(dict(row), sort_keys=True, default=str))
+
+
+def _has_donor_evidence_shape(row: Mapping[str, Any]) -> bool:
+    source = str(row.get("source") or "").strip().lower()
+    if source in _DONOR_EVIDENCE_SOURCES:
+        return True
+    return bool(
+        row.get("connector_refs")
+        or row.get("evidence_gates")
+        or row.get("missing_evidence")
+        or row.get("required_tests")
+        or row.get("source_refs")
+    )
+
+
+def _is_firmware_interface_block(row: Mapping[str, Any]) -> bool:
+    """Return true only for opaque donor blocks with firmware-facing controls.
+
+    Inventory primitives such as a bare motor, a known ESP32 board, or a donor-board
+    container are not interfaces. Generating signal/polarity/controller-pin gates for
+    those rows creates fictitious work and can prevent a valid physical scenario from
+    ever closing. This bridge currently owns firmware-facing interface contracts; other
+    evidence types should use role-specific contracts/recipes rather than this motor-
+    control discovery recipe.
+    """
+    if not _has_donor_evidence_shape(row):
+        return False
+    text = " ".join(
+        [
+            str(row.get("function_type") or ""),
+            str(row.get("name") or ""),
+            " ".join(str(value) for value in (row.get("capabilities") or [])),
+        ]
+    ).lower()
+    return any(token in text for token in _FIRMWARE_INTERFACE_TOKENS)
+
+
+def _collect_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
     blocks: List[Dict[str, Any]] = []
     seen: set[str] = set()
 
@@ -19,7 +83,7 @@ def _iter_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
             if not isinstance(raw, Mapping):
                 continue
             row = dict(raw)
-            key = str(row.get("block_id") or row.get("name") or json.dumps(row, sort_keys=True, default=str))
+            key = _block_key(row)
             if key in seen:
                 continue
             seen.add(key)
@@ -38,6 +102,32 @@ def _iter_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
     return blocks
 
 
+def _partition_interface_blocks(package: Mapping[str, Any]) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    selected: List[Dict[str, Any]] = []
+    ignored: List[Dict[str, Any]] = []
+    for row in _collect_reusable_blocks(package):
+        if _is_firmware_interface_block(row):
+            selected.append(row)
+        else:
+            ignored.append(
+                {
+                    "block_id": row.get("block_id"),
+                    "board_id": row.get("board_id"),
+                    "name": row.get("name"),
+                    "function_type": row.get("function_type"),
+                    "source": row.get("source"),
+                    "reason": "not_an_opaque_firmware_control_interface",
+                }
+            )
+    return selected, ignored
+
+
+def _iter_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
+    """Compatibility helper returning only firmware-interface donor blocks."""
+    selected, _ = _partition_interface_blocks(package)
+    return selected
+
+
 def attach_evidence_first_integrations(
     salvage_package: Mapping[str, Any],
     *,
@@ -53,7 +143,8 @@ def attach_evidence_first_integrations(
     package = dict(salvage_package)
     build_id = str(package.get("recommended_build_id") or "salvage-build")
     stack = IntegrationStack(graph_id=f"salvage:{build_id}")
-    contracts = stack.ingest_functional_salvage(_iter_reusable_blocks(package))
+    interface_blocks, ignored_blocks = _partition_interface_blocks(package)
+    contracts = stack.ingest_functional_salvage(interface_blocks)
     interface_packages = [stack.build_interface_package(c.interface_id) for c in contracts]
 
     driver_contracts = [
@@ -87,6 +178,7 @@ def attach_evidence_first_integrations(
         "firmware_authorized": firmware_authorized,
         "power_authorized": False,
         "interface_contract_count": len(contracts),
+        "ignored_reusable_block_count": len(ignored_blocks),
         "unresolved_driver_interfaces": [c.interface_id for c in unresolved_drivers],
         "claim_boundary": (
             "Generated design artifacts are candidates only. Power and function claims remain "
@@ -115,6 +207,7 @@ def attach_evidence_first_integrations(
         "authority": authority,
         "evidence_graph": stack.evidence_graph.to_dict(),
         "interfaces": interface_packages,
+        "ignored_reusable_blocks": ignored_blocks,
         "authority_resolved_modules": authority_modules,
         "compatibility": {
             "mode": "legacy_graph_projection" if canonical_donor_modules else "native",
