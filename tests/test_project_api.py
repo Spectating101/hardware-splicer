@@ -53,13 +53,47 @@ def test_project_crud_and_history(tmp_path: Path) -> None:
     latest = api.get("/v1/projects/robot")
     assert latest.status_code == 200
     assert latest.json()["project"]["snapshot"]["currentStage"] == "verify"
+    assert latest.json()["project"]["recovery"] == {
+        "used": False,
+        "requested_revision": 2,
+        "loaded_revision": 2,
+    }
 
     historical = api.get("/v1/projects/robot?revision=1")
     assert historical.json()["project"]["snapshot"]["currentStage"] == "design"
+    assert "recovery" not in historical.json()["project"]
 
     listed = api.get("/v1/projects")
     assert listed.status_code == 200
     assert listed.json()["projects"][0]["project_id"] == "robot"
+
+
+def test_latest_load_reports_recovery_from_corrupt_revision(tmp_path: Path) -> None:
+    api = client(tmp_path)
+    api.put(
+        "/v1/projects/robot/snapshot",
+        json={"snapshot": project_snapshot(), "expected_revision": 0},
+    )
+    api.put(
+        "/v1/projects/robot/snapshot",
+        json={"snapshot": project_snapshot("verify"), "expected_revision": 1},
+    )
+    (tmp_path / "robot" / "revisions" / "00000002.json").write_text(
+        "{not-json",
+        encoding="utf-8",
+    )
+
+    recovered = api.get("/v1/projects/robot")
+
+    assert recovered.status_code == 200
+    project = recovered.json()["project"]
+    assert project["revision"] == 1
+    assert project["snapshot"]["currentStage"] == "design"
+    assert project["recovery"] == {
+        "used": True,
+        "requested_revision": 2,
+        "loaded_revision": 1,
+    }
 
 
 def test_project_conflict_and_invalid_identifier_errors(tmp_path: Path) -> None:
