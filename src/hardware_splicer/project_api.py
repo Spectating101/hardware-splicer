@@ -5,6 +5,12 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
+from .project_review_store import (
+    InvalidReviewId,
+    ProjectReviewStore,
+    ReviewConflict,
+    ReviewNotFound,
+)
 from .project_store import (
     CorruptProject,
     InvalidProjectId,
@@ -28,26 +34,50 @@ class ProjectArchiveRequest(BaseModel):
     archived: bool = True
 
 
+class ProjectReviewCreateRequest(BaseModel):
+    candidate_snapshot: Dict[str, Any]
+    base_revision: int | None = Field(default=None, ge=1)
+    created_by: str = Field(min_length=1)
+    note: str = ""
+    include_metadata: bool = False
+
+
+class ProjectReviewDecisionRequest(BaseModel):
+    decision: str
+    actor: str = Field(min_length=1)
+    note: str = ""
+
+
 def _project_error(exc: Exception) -> HTTPException:
-    if isinstance(exc, InvalidProjectId):
+    if isinstance(exc, (InvalidProjectId, InvalidReviewId)):
         return HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"type": "invalid_project_id", "message": str(exc)},
+            detail={"type": "invalid_identifier", "message": str(exc)},
         )
-    if isinstance(exc, ProjectNotFound):
+    if isinstance(exc, (ProjectNotFound, ReviewNotFound)):
         return HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail={"type": "project_not_found", "message": str(exc)},
+            detail={"type": "not_found", "message": str(exc)},
         )
     if isinstance(exc, RevisionConflict):
         return HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={"type": "revision_conflict", "message": str(exc)},
         )
+    if isinstance(exc, ReviewConflict):
+        return HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"type": "review_conflict", "message": str(exc)},
+        )
     if isinstance(exc, CorruptProject):
         return HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"type": "corrupt_project", "message": str(exc)},
+        )
+    if isinstance(exc, (ValueError, TypeError)):
+        return HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"type": "invalid_request", "message": str(exc)},
         )
     return HTTPException(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -57,6 +87,7 @@ def _project_error(exc: Exception) -> HTTPException:
 
 def create_project_router(store: ProjectStore | None = None) -> APIRouter:
     project_store = store or ProjectStore()
+    review_store = ProjectReviewStore(project_store)
     router = APIRouter(prefix="/v1/projects", tags=["projects"])
 
     @router.get("")
@@ -78,6 +109,63 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
         except Exception as exc:
             raise _project_error(exc) from exc
         return {"ok": True, "project": envelope}
+
+    @router.get("/{project_id}/revisions")
+    def list_project_revisions(project_id: str) -> Dict[str, Any]:
+        try:
+            revisions = review_store.list_revisions(project_id)
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        return {"ok": True, "project_id": project_id, "revisions": revisions}
+
+    @router.get("/{project_id}/reviews")
+    def list_project_reviews(project_id: str) -> Dict[str, Any]:
+        try:
+            reviews = review_store.list(project_id)
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        return {"ok": True, "project_id": project_id, "reviews": reviews}
+
+    @router.post("/{project_id}/reviews", status_code=status.HTTP_201_CREATED)
+    def create_project_review(project_id: str, request: ProjectReviewCreateRequest) -> Dict[str, Any]:
+        try:
+            review = review_store.create(
+                project_id,
+                request.candidate_snapshot,
+                base_revision=request.base_revision,
+                created_by=request.created_by,
+                note=request.note,
+                include_metadata=request.include_metadata,
+            )
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        return {"ok": True, "review": review}
+
+    @router.get("/{project_id}/reviews/{review_id}")
+    def load_project_review(project_id: str, review_id: str) -> Dict[str, Any]:
+        try:
+            review = review_store.get(project_id, review_id)
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        return {"ok": True, "review": review}
+
+    @router.post("/{project_id}/reviews/{review_id}/decision")
+    def decide_project_review(
+        project_id: str,
+        review_id: str,
+        request: ProjectReviewDecisionRequest,
+    ) -> Dict[str, Any]:
+        try:
+            review = review_store.decide(
+                project_id,
+                review_id,
+                decision=request.decision,
+                actor=request.actor,
+                note=request.note,
+            )
+        except Exception as exc:
+            raise _project_error(exc) from exc
+        return {"ok": True, "review": review}
 
     @router.get("/{project_id}")
     def load_project(
