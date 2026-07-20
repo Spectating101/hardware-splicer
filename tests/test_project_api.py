@@ -57,6 +57,7 @@ def test_project_crud_and_history(tmp_path: Path) -> None:
         "used": False,
         "requested_revision": 2,
         "loaded_revision": 2,
+        "quarantined_revisions": [],
     }
 
     historical = api.get("/v1/projects/robot?revision=1")
@@ -68,7 +69,7 @@ def test_project_crud_and_history(tmp_path: Path) -> None:
     assert listed.json()["projects"][0]["project_id"] == "robot"
 
 
-def test_latest_load_reports_recovery_from_corrupt_revision(tmp_path: Path) -> None:
+def test_latest_load_repairs_corrupt_revision_for_continued_editing(tmp_path: Path) -> None:
     api = client(tmp_path)
     api.put(
         "/v1/projects/robot/snapshot",
@@ -78,10 +79,8 @@ def test_latest_load_reports_recovery_from_corrupt_revision(tmp_path: Path) -> N
         "/v1/projects/robot/snapshot",
         json={"snapshot": project_snapshot("verify"), "expected_revision": 1},
     )
-    (tmp_path / "robot" / "revisions" / "00000002.json").write_text(
-        "{not-json",
-        encoding="utf-8",
-    )
+    corrupt_path = tmp_path / "robot" / "revisions" / "00000002.json"
+    corrupt_path.write_text("{not-json", encoding="utf-8")
 
     recovered = api.get("/v1/projects/robot")
 
@@ -93,7 +92,18 @@ def test_latest_load_reports_recovery_from_corrupt_revision(tmp_path: Path) -> N
         "used": True,
         "requested_revision": 2,
         "loaded_revision": 1,
+        "quarantined_revisions": [2],
     }
+    assert not corrupt_path.exists()
+    assert (tmp_path / "robot" / "revisions" / "00000002.json.corrupt").is_file()
+
+    continued = api.put(
+        "/v1/projects/robot/snapshot",
+        json={"snapshot": project_snapshot("bench"), "expected_revision": 1},
+    )
+    assert continued.status_code == 200
+    assert continued.json()["project"]["revision"] == 2
+    assert continued.json()["project"]["snapshot"]["currentStage"] == "bench"
 
 
 def test_project_conflict_and_invalid_identifier_errors(tmp_path: Path) -> None:
