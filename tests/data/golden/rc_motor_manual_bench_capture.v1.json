@@ -1,13 +1,13 @@
 {
   "schema_version": "bench_topology_capture.v1",
-  "capture_id": "golden_rc_motor_manual_bench_v1",
+  "capture_id": "golden_rc_motor_manual_bench_v2",
   "project_name": "splice_golden_real_rc_motor",
   "build_id": "robot_drive_base",
   "source": "golden_manual_bench_session",
   "operator_id": "repair_cafe_operator_01",
   "recorded_at": "2026-06-11T15:42:00+00:00",
   "simulated": false,
-  "session_notes": "Hand-filled after physical checks on Playmobil RC donor board (Wikimedia photo). UNI-T UT139C DMM + Korad KA3005P supply at 0.5A limit.",
+  "session_notes": "Hand-filled after physical checks on Playmobil RC donor board (Wikimedia photo). UNI-T UT139C DMM + Korad KA3005P supply at 0.5A limit. Contract rows record the observed two-line control interface before measurement gates are submitted.",
   "instruments": [
     {
       "instrument_id": "uni_t_ut139c_01",
@@ -20,6 +20,58 @@
       "instrument_type": "current_limited_supply",
       "calibration_status": "valid",
       "notes": "0.5A limit for Rossmann-style ramp"
+    }
+  ],
+  "contract_updates": [
+    {
+      "operation": "upsert_signal",
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "block_id": "motor_driver_section",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      },
+      "signal_id": "motor_a_enable",
+      "contact_id": "J_LOGIC.1",
+      "contact_label": "Motor A control",
+      "connector_ref": "J_LOGIC",
+      "pin_number": "1",
+      "direction": "input",
+      "voltage_max_v": 3.3,
+      "active_level": "high",
+      "controller_pin": "GPIO16",
+      "interface_complete": false,
+      "evidence_id": "golden-contract-motor-a-001",
+      "method": "DMM idle-level measurement plus protected 1 kOhm series-resistor stimulus",
+      "producer": "repair_cafe_operator_01+uni_t_ut139c_01",
+      "source_uri": "tests/data/golden/rc_motor_manual_bench_capture.v1.json",
+      "notes": "J_LOGIC.1 toggled the first motor output without energizing the MCU rail. Interface remains incomplete until the second control contact is recorded."
+    },
+    {
+      "operation": "upsert_signal",
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "block_id": "motor_driver_section",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      },
+      "signal_id": "motor_b_enable",
+      "contact_id": "J_LOGIC.2",
+      "contact_label": "Motor B control",
+      "connector_ref": "J_LOGIC",
+      "pin_number": "2",
+      "direction": "input",
+      "voltage_max_v": 3.3,
+      "active_level": "high",
+      "controller_pin": "GPIO17",
+      "interface_complete": true,
+      "evidence_id": "golden-contract-motor-b-002",
+      "method": "DMM idle-level measurement plus protected 1 kOhm series-resistor stimulus",
+      "producer": "repair_cafe_operator_01+uni_t_ut139c_01",
+      "source_uri": "tests/data/golden/rc_motor_manual_bench_capture.v1.json",
+      "notes": "J_LOGIC.2 toggled the second motor output. Operator attests that all firmware-relevant control contacts exposed by this donor harness are now identified."
     }
   ],
   "measurements": [
@@ -92,6 +144,65 @@
       "method": "visual_thermal_proxy",
       "operator_id": "repair_cafe_operator_01",
       "notes": "No FLIR on hand — finger probe + photo reference; no abnormal warmth at driver."
+    },
+    {
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "measurement_id": "ground_resistance_ohm",
+      "kind": "continuity",
+      "status": "pass",
+      "value": 0.7,
+      "unit": "ohm",
+      "method": "dmm_resistance",
+      "instrument_id": "uni_t_ut139c_01",
+      "operator_id": "repair_cafe_operator_01",
+      "notes": "J_LOGIC ground contact to donor ground plane."
+    },
+    {
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "measurement_id": "idle_voltage_v",
+      "kind": "voltage",
+      "status": "pass",
+      "value": 0.02,
+      "unit": "V",
+      "method": "dmm_dc_voltage",
+      "instrument_id": "uni_t_ut139c_01",
+      "operator_id": "repair_cafe_operator_01",
+      "notes": "Both control contacts idle low relative to verified donor ground."
+    },
+    {
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "measurement_id": "stimulus_voltage_v",
+      "kind": "voltage",
+      "status": "pass",
+      "value": 3.3,
+      "unit": "V",
+      "method": "protected_logic_stimulus",
+      "instrument_id": "uni_t_ut139c_01",
+      "operator_id": "repair_cafe_operator_01",
+      "notes": "Applied through 1 kOhm series resistance."
+    },
+    {
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "measurement_id": "supply_current_a",
+      "kind": "current",
+      "status": "pass",
+      "value": 0.18,
+      "unit": "A",
+      "method": "current_limited_psu_observation",
+      "instrument_id": "korad_ka3005p_01",
+      "operator_id": "repair_cafe_operator_01",
+      "notes": "No-load output response under protected control stimulus."
+    },
+    {
+      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
+      "measurement_id": "response_observed",
+      "kind": "functional_response",
+      "status": "pass",
+      "value": "pass",
+      "method": "protected_stimulus_response",
+      "instrument_id": "uni_t_ut139c_01",
+      "operator_id": "repair_cafe_operator_01",
+      "notes": "Expected motor-output rail transition observed for both recorded control contacts."
     }
   ],
   "artifacts": [
@@ -103,11 +214,13 @@
     {
       "kind": "measurement_log",
       "uri": "tests/data/golden/rc_motor_manual_bench_capture.v1.json",
-      "notes": "This committed capture packet"
+      "notes": "This committed contract-and-measurement capture packet"
     }
   ],
   "policy": {
     "vision_alone_is_not_evidence": true,
+    "contract_updates_precede_measurements": true,
+    "interface_completeness_requires_operator_attestation": true,
     "golden_artifact": true,
     "simulated": false
   }
