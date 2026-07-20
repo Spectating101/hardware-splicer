@@ -94,10 +94,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Install KiCad CLI
+      - name: Install KiCad 9 CLI
         run: |
           sudo apt-get update
-          sudo apt-get install -y kicad
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          KICAD_VERSION="$(kicad-cli --version)"
+          echo "KiCad CLI: ${KICAD_VERSION}"
+          case "${KICAD_VERSION}" in
+            9.*) ;;
+            *) echo "Expected KiCad 9.x, got ${KICAD_VERSION}" >&2; exit 1 ;;
+          esac
+          kicad-cli pcb drc --help | grep -q -- "--format"
+          kicad-cli sch erc --help | grep -q -- "--format"
       - name: Splice v1 slim install (with dev for pytest)
         run: INSTALL_DEV=1 bash scripts/install_splice_v1.sh
       - name: Doctor
@@ -142,23 +153,37 @@ jobs:
         run: |
           source .venv/bin/activate
           make verify-splice-real-bench
+      - name: Upload golden real-bench report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: splice-golden-real-report
+          path: |
+            /tmp/hs_splice_golden_real_verify/SPLICE_GOLDEN_REAL_REPORT.json
+            /tmp/hs_splice_golden_real_verify/SPLICE_GOLDEN_REAL_VERIFY.json
+          if-no-files-found: warn
       - name: Evidence integration focused tests
+        if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
-          PYTHONPATH=src pytest -q tests/test_integration_stack.py tests/test_evidence_salvage_bridge.py tests/test_evidence_bench_gates.py
+          PYTHONPATH=src pytest -q tests/test_integration_stack.py tests/test_evidence_salvage_bridge.py tests/test_evidence_bench_gates.py tests/test_golden_real_bench.py tests/test_kicad_cli_drc_unit.py
       - name: splice-ui production build
+        if: ${{ !cancelled() }}
         run: make splice-ui-build
       - name: product v1 API tests
+        if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
           make test-splice-product-v1
       - name: v1.1 security and interface API tests
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR: "1"
         run: |
           source .venv/bin/activate
           PYTHONPATH=src pytest tests/test_build_files_security.py tests/test_oss_integrations_api.py tests/test_build_files_api.py -q
       - name: verify-product-live-smoke
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR: "1"
         run: |
@@ -175,10 +200,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Install KiCad CLI
+      - name: Install KiCad 9 CLI
         run: |
           sudo apt-get update
-          sudo apt-get install -y kicad
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          KICAD_VERSION="$(kicad-cli --version)"
+          echo "KiCad CLI: ${KICAD_VERSION}"
+          case "${KICAD_VERSION}" in
+            9.*) ;;
+            *) echo "Expected KiCad 9.x, got ${KICAD_VERSION}" >&2; exit 1 ;;
+          esac
+          kicad-cli pcb drc --help | grep -q -- "--format"
+          kicad-cli sch erc --help | grep -q -- "--format"
       - name: Bootstrap (venv, npm, 3D-Splicer)
         run: make setup
       - name: Engine verify (KiCad DRC bar, no FreeRouting)
@@ -196,6 +232,7 @@ jobs:
           path: /tmp/verify-engine.json
           if-no-files-found: warn
       - name: Fab verify (Gerber + inspect-fab)
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
           HARDWARE_SPLICER_JLC_ENRICH: "0"
@@ -204,6 +241,7 @@ jobs:
           source .venv/bin/activate
           make verify-fab
       - name: Netlist engine verify
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
           HARDWARE_SPLICER_JLC_ENRICH: "0"
@@ -211,6 +249,7 @@ jobs:
           source .venv/bin/activate
           make verify-netlist-engine
       - name: Tier C verify
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
           HARDWARE_SPLICER_JLC_ENRICH: "0"
@@ -219,6 +258,7 @@ jobs:
           source .venv/bin/activate
           make verify-tier-c
       - name: Geometry snapshot verify
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_AUTOROUTE: "0"
           HARDWARE_SPLICER_JLC_ENRICH: "0"
@@ -226,20 +266,24 @@ jobs:
           source .venv/bin/activate
           make verify-geometry
       - name: Sprint C integration tests
+        if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
           PYTHONPATH=src python -m pytest tests/test_sprint_c.py tests/test_compose_jobs.py tests/test_compose_dispatch.py tests/test_compose_failure.py -q
       - name: Compile casefile gate
+        if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
           make verify-casefiles
       - name: Core verify (tests, benchmark, audit, tiers, smoke)
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
           source .venv/bin/activate
           make verify
       - name: Exploration harness
+        if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
