@@ -23,6 +23,7 @@ from .project_store import ProjectNotFound, ProjectStore, RevisionConflict, vali
 PROJECT_REVIEW_SCHEMA = "hardware_splicer.project_review.v1"
 PROJECT_REVIEW_EVENT_SCHEMA = "hardware_splicer.project_review_event.v1"
 _REVIEW_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,95}\Z")
+_MACHINE_SNAPSHOT_KEYS = {"machineProject", "machine_project"}
 
 
 class ProjectReviewError(RuntimeError):
@@ -78,6 +79,19 @@ def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
         temp_path.unlink(missing_ok=True)
 
 
+def _snapshot_changes(base: Mapping[str, Any], candidate: Mapping[str, Any]) -> list[Dict[str, Any]]:
+    """Report non-machine top-level changes so project state cannot hide behind ontology diffs."""
+
+    changes: list[Dict[str, Any]] = []
+    keys = (set(base) | set(candidate)) - _MACHINE_SNAPSHOT_KEYS
+    for key in sorted(keys):
+        before = base.get(key)
+        after = candidate.get(key)
+        if before != after:
+            changes.append({"path": key, "before": before, "after": after})
+    return changes
+
+
 class ProjectReviewStore:
     """Store immutable proposals and append-only decisions beside project revisions."""
 
@@ -124,6 +138,9 @@ class ProjectReviewStore:
         if not isinstance(candidate_snapshot, Mapping):
             raise TypeError("candidate_snapshot must be a mapping")
         json.dumps(candidate_snapshot, ensure_ascii=False)
+        candidate_session_id = candidate_snapshot.get("projectId") or candidate_snapshot.get("project_id")
+        if candidate_session_id is not None and str(candidate_session_id) != safe_id:
+            raise ValueError("candidate snapshot project identity must match the persistent project")
 
         base = (
             self.project_store.load(safe_id, revision=base_revision)
@@ -141,8 +158,26 @@ class ProjectReviewStore:
             candidate_machine,
             include_metadata=include_metadata,
         )
-        if not semantic_diff.project_changes and not semantic_diff.object_changes:
-            raise ValueError("candidate snapshot contains no semantic machine changes")
+        snapshot_changes = _snapshot_changes(base_snapshot, candidate_snapshot)
+        if (
+            not semantic_diff.project_changes
+            and not semantic_diff.object_changes
+            and not snapshot_changes
+        ):
+            raise ValueError("candidate snapshot contains no reviewable changes")
+
+        snapshot_flags = [
+            {
+                "code": "snapshot_field_changed",
+                "severity": "required",
+                "path": change["path"],
+                "message": f"project snapshot field {change['path']!r} changed outside the canonical machine object",
+            }
+            for change in snapshot_changes
+        ]
+        summary = semantic_diff.summary()
+        summary["snapshot_fields_changed"] = len(snapshot_changes)
+        summary["review_required"] = bool(summary.get("review_required") or snapshot_flags)
 
         review_id = f"review-{uuid.uuid4().hex[:16]}"
         review_dir = self._review_dir(safe_id, review_id)
@@ -159,7 +194,9 @@ class ProjectReviewStore:
             "include_metadata": bool(include_metadata),
             "candidate_snapshot": dict(candidate_snapshot),
             "diff": semantic_diff.model_dump(mode="json"),
-            "summary": semantic_diff.summary(),
+            "snapshot_changes": snapshot_changes,
+            "review_flags": snapshot_flags,
+            "summary": summary,
         }
         _atomic_write_json(review_dir / "proposal.json", proposal)
         return self.get(safe_id, review_id)
@@ -208,6 +245,7 @@ class ProjectReviewStore:
                         "created_by",
                         "note",
                         "summary",
+                        "review_flags",
                         "status",
                         "decision",
                     )
