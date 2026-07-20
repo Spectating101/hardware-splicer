@@ -47,7 +47,11 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
       setError("");
       setSelectedId((prior) => {
         if (prior && nextReviews.some((row) => row.review_id === prior)) return prior;
-        return nextReviews.find((row) => row.status === "pending")?.review_id || nextReviews[0]?.review_id || null;
+        return (
+          nextReviews.find((row) => ["pending", "accepting"].includes(row.status))?.review_id ||
+          nextReviews[0]?.review_id ||
+          null
+        );
       });
     } catch (err) {
       setError(err.message);
@@ -82,7 +86,13 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
     };
   }, [projectId, selectedId]);
 
-  const pendingCount = reviews.filter((row) => row.status === "pending").length;
+  useEffect(() => {
+    if (selected?.status === "accepting" && selected.decision?.actor) {
+      setActor(selected.decision.actor);
+    }
+  }, [selected]);
+
+  const openCount = reviews.filter((row) => ["pending", "accepting"].includes(row.status)).length;
   const flags = useMemo(() => collectFlags(selected), [selected]);
   const requiredFlags = flags.filter((flag) => flag.severity === "required");
 
@@ -115,6 +125,9 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
 
   if (!projectId || !currentRevision) return null;
 
+  const decisionOpen = ["pending", "accepting"].includes(selected?.status);
+  const acceptanceInProgress = selected?.status === "accepting";
+
   return (
     <section className="card project-review" data-testid="project-review-panel">
       <div className="project-review__header">
@@ -127,7 +140,7 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
           </p>
         </div>
         <div className="project-review__metrics" aria-label="Review metrics">
-          <span><strong>{pendingCount}</strong> pending</span>
+          <span><strong>{openCount}</strong> open</span>
           <span><strong>{currentRevision}</strong> current revision</span>
         </div>
       </div>
@@ -221,22 +234,36 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
                 </details>
               )}
 
-              {selected.status === "pending" ? (
+              {decisionOpen ? (
                 <div className="project-review__decision">
+                  {acceptanceInProgress && (
+                    <p className="small muted" data-testid="review-acceptance-recovery">
+                      Acceptance was journaled but not finalized. Resume it with the original reviewer identity;
+                      the server will reuse or reconcile the linked revision without creating a duplicate.
+                    </p>
+                  )}
                   <label>
                     Reviewer
-                    <input value={actor} onChange={(event) => setActor(event.target.value)} />
+                    <input
+                      value={actor}
+                      disabled={acceptanceInProgress}
+                      onChange={(event) => setActor(event.target.value)}
+                    />
                   </label>
-                  <label>
-                    Decision note
-                    <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} />
-                  </label>
+                  {!acceptanceInProgress && (
+                    <label>
+                      Decision note
+                      <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={2} />
+                    </label>
+                  )}
                   <div className="project-review__actions">
-                    <button type="button" className="secondary" disabled={busy || !actor.trim()} onClick={() => decide("rejected")}>
-                      Reject candidate
-                    </button>
+                    {!acceptanceInProgress && (
+                      <button type="button" className="secondary" disabled={busy || !actor.trim()} onClick={() => decide("rejected")}>
+                        Reject candidate
+                      </button>
+                    )}
                     <button type="button" className="primary" disabled={busy || !actor.trim()} onClick={() => decide("accepted")}>
-                      Accept as next revision
+                      {acceptanceInProgress ? "Resume acceptance" : "Accept as next revision"}
                     </button>
                   </div>
                 </div>
