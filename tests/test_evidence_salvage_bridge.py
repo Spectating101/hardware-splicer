@@ -21,6 +21,9 @@ def test_bridge_blocks_unknown_donor_driver_firmware() -> None:
     )
     authority = package["evidence_integrations"]["authority"]
     assert authority["firmware_authorized"] is False
+    assert authority["unresolved_firmware_interfaces"] == [
+        "if:enabot-mainboard:dual-hbridge-01"
+    ]
     assert authority["unresolved_driver_interfaces"] == [
         "if:enabot-mainboard:dual-hbridge-01"
     ]
@@ -28,7 +31,37 @@ def test_bridge_blocks_unknown_donor_driver_firmware() -> None:
     assert package["firmware_scaffold"]["source"] == "generated/main.cpp"
 
 
-def test_bridge_does_not_block_package_without_donor_driver() -> None:
+def test_bridge_blocks_unknown_non_driver_control_interface() -> None:
+    package = attach_evidence_first_integrations(
+        {
+            "recommended_build_id": "sensor_logger",
+            "splice_plan": {
+                "reusable_blocks": [
+                    {
+                        "board_id": "donor-sensor-board",
+                        "block_id": "unknown-sensor-interface",
+                        "name": "Unknown digital sensor interface",
+                        "function_type": "sensor_interface",
+                        "source": "board_vision",
+                        "connector_refs": ["J_SENSOR"],
+                        "missing_evidence": ["Logic voltage", "Protocol", "Pinout"],
+                    }
+                ]
+            },
+            "firmware_scaffold": {"source": "generated/main.cpp"},
+        }
+    )
+
+    authority = package["evidence_integrations"]["authority"]
+    assert authority["firmware_authorized"] is False
+    assert authority["unresolved_firmware_interfaces"] == [
+        "if:donor-sensor-board:unknown-sensor-interface"
+    ]
+    assert authority["unresolved_driver_interfaces"] == []
+    assert package["firmware_scaffold"]["evidence_authorized"] is False
+
+
+def test_bridge_does_not_block_package_without_donor_control_interface() -> None:
     package = attach_evidence_first_integrations(
         {
             "recommended_build_id": "sensor_logger",
@@ -36,7 +69,9 @@ def test_bridge_does_not_block_package_without_donor_driver() -> None:
             "firmware_scaffold": {},
         }
     )
-    assert package["evidence_integrations"]["authority"]["firmware_authorized"] is True
+    authority = package["evidence_integrations"]["authority"]
+    assert authority["firmware_authorized"] is True
+    assert authority["unresolved_firmware_interfaces"] == []
 
 
 def test_bridge_separates_authority_modules_from_legacy_projection() -> None:
