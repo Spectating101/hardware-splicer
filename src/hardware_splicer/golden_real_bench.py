@@ -147,6 +147,25 @@ def _resolve_interface_id(build_dir: Path, update: Mapping[str, Any]) -> str:
     )
 
 
+def _bind_capture_interface_ids(build_dir: Path, capture: Mapping[str, Any]) -> Dict[str, Any]:
+    """Resolve selector-based capture rows against the interfaces emitted by this build."""
+    body = dict(capture)
+    measurements: List[Dict[str, Any]] = []
+    for raw in capture.get("measurements") or []:
+        if not isinstance(raw, dict):
+            continue
+        row = dict(raw)
+        if row.get("interface_selector") or row.get("interface_id"):
+            try:
+                row["interface_id"] = _resolve_interface_id(build_dir, row)
+            except ValueError:
+                # Preserve the row as unmatched evidence; the final report exposes it.
+                pass
+        measurements.append(row)
+    body["measurements"] = measurements
+    return body
+
+
 def _open_contract_gate(session: Mapping[str, Any], interface_id: str) -> Dict[str, Any] | None:
     for gate in session.get("gates") or []:
         if not isinstance(gate, dict):
@@ -258,7 +277,8 @@ def run_splice_golden_real(
     after_contract = open_bench_session(out_path, force=True)
     template_sync = sync_bench_session_template(out_path)
     template = dict(template_sync.get("template") or {})
-    capture = filter_capture_for_template(golden, template)
+    bound_capture = _bind_capture_interface_ids(out_path, golden)
+    capture = filter_capture_for_template(bound_capture, template)
 
     bench_result: Dict[str, Any]
     if not capture.get("measurements"):
