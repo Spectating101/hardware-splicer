@@ -147,29 +147,30 @@ def attach_evidence_first_integrations(
     contracts = stack.ingest_functional_salvage(interface_blocks)
     interface_packages = [stack.build_interface_package(c.interface_id) for c in contracts]
 
-    driver_contracts = [
+    unresolved_firmware_interfaces = [c for c in contracts if not c.can_generate_firmware()]
+    unresolved_driver_interfaces = [
         c
-        for c in contracts
+        for c in unresolved_firmware_interfaces
         if "driver" in c.functional_role.lower()
         or any(
             str(ref.get("module_id") or "") in {"l298n", "a4988-stepper"}
             for ref in c.reference_equivalents
         )
     ]
-    unresolved_drivers = [c for c in driver_contracts if not c.can_generate_firmware()]
-    firmware_authorized = not unresolved_drivers
+    firmware_authorized = not unresolved_firmware_interfaces
 
     firmware = dict(package.get("firmware_scaffold") or {})
     firmware["evidence_authorized"] = firmware_authorized
-    if unresolved_drivers:
+    if unresolved_firmware_interfaces:
         firmware["status"] = "blocked_needs_donor_control_interface"
         firmware["authority_blockers"] = [
             {
                 "interface_id": c.interface_id,
                 "virtual_module_id": c.virtual_module_id,
+                "functional_role": c.functional_role,
                 "unresolved_fields": c.unresolved_fields(),
             }
-            for c in unresolved_drivers
+            for c in unresolved_firmware_interfaces
         ]
     package["firmware_scaffold"] = firmware
 
@@ -179,7 +180,8 @@ def attach_evidence_first_integrations(
         "power_authorized": False,
         "interface_contract_count": len(contracts),
         "ignored_reusable_block_count": len(ignored_blocks),
-        "unresolved_driver_interfaces": [c.interface_id for c in unresolved_drivers],
+        "unresolved_firmware_interfaces": [c.interface_id for c in unresolved_firmware_interfaces],
+        "unresolved_driver_interfaces": [c.interface_id for c in unresolved_driver_interfaces],
         "claim_boundary": (
             "Generated design artifacts are candidates only. Power and function claims remain "
             "blocked until required donor interface measurements pass."
