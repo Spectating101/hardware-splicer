@@ -14,6 +14,7 @@ def snapshot(purpose: str = "Build a safe inspection robot") -> dict:
         "projectName": "Inspection robot",
         "currentStage": "design",
         "mode": "greenfield",
+        "graph": {"nodes": [], "edges": []},
         "machineProject": {
             "project_id": "robot",
             "name": "Inspection robot",
@@ -123,12 +124,38 @@ def test_decision_is_append_only_and_cannot_be_repeated(tmp_path) -> None:
     assert len(list(event_path.parent.glob("*.json"))) == 1
 
 
-def test_review_requires_machine_project_and_semantic_change(tmp_path) -> None:
+def test_non_machine_snapshot_changes_are_visible_and_review_gated(tmp_path) -> None:
+    store = ProjectStore(tmp_path)
+    store.save("robot", snapshot(), expected_revision=0)
+    reviews = ProjectReviewStore(store)
+    candidate = snapshot()
+    candidate["graph"] = {"nodes": [{"id": "motor-driver"}], "edges": []}
+    candidate["currentStage"] = "verify"
+
+    review = reviews.create("robot", candidate, created_by="agent")
+
+    assert {change["path"] for change in review["snapshot_changes"]} == {
+        "currentStage",
+        "graph",
+    }
+    assert review["summary"]["snapshot_fields_changed"] == 2
+    assert review["summary"]["review_required"] is True
+    assert {flag["path"] for flag in review["review_flags"]} == {
+        "currentStage",
+        "graph",
+    }
+
+
+def test_review_requires_matching_identity_machine_project_and_change(tmp_path) -> None:
     store = ProjectStore(tmp_path)
     store.save("robot", snapshot(), expected_revision=0)
     reviews = ProjectReviewStore(store)
 
     with pytest.raises(ValueError, match="canonical machineProject"):
         reviews.create("robot", {"projectId": "robot"}, created_by="agent")
-    with pytest.raises(ValueError, match="no semantic machine changes"):
+    with pytest.raises(ValueError, match="no reviewable changes"):
         reviews.create("robot", snapshot(), created_by="agent")
+    mismatched = snapshot("Candidate")
+    mismatched["projectId"] = "other"
+    with pytest.raises(ValueError, match="persistent project"):
+        reviews.create("robot", mismatched, created_by="agent")
