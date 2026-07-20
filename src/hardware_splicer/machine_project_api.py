@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
+from .bench_capture_evidence import (
+    BenchCaptureEvidenceError,
+    project_bench_capture_to_evidence,
+)
+from .machine_evidence import EvidencePromotionError, record_evidence_and_promote
 from .machine_project import (
     MachineProject,
     ReleaseState,
@@ -14,6 +19,7 @@ from .machine_project import (
 )
 from .machine_project_compile_adapter import machine_project_from_compile_spec
 from .machine_project_diff import diff_machine_projects
+from .machine_project_edit import MachineEditError, apply_machine_edits
 from .machine_project_seed import machine_project_from_intake
 from .machine_release import assessment_allows
 
@@ -41,6 +47,27 @@ class MachineProjectDiffRequest(BaseModel):
     include_metadata: bool = False
 
 
+class MachineProjectEditRequest(BaseModel):
+    project: MachineProject
+    operations: list[Dict[str, Any]] = Field(min_length=1)
+    include_metadata: bool = False
+
+
+class MachineEvidenceRequest(BaseModel):
+    project: MachineProject
+    evidence: Dict[str, Any]
+    verification: Dict[str, Any] | None = None
+    promotions: list[Dict[str, Any]] = Field(default_factory=list)
+    include_metadata: bool = False
+
+
+class BenchCaptureEvidenceRequest(BaseModel):
+    project: MachineProject
+    capture: Dict[str, Any]
+    target_map: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    include_metadata: bool = False
+
+
 class MachineProjectEnvelope(BaseModel):
     project: MachineProject
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -54,6 +81,24 @@ def _project_response(project: MachineProject) -> Dict[str, Any]:
             issue.model_dump(mode="json") for issue in project.traceability_issues()
         ],
     }
+
+
+def _candidate_response(
+    base: MachineProject,
+    candidate: MachineProject,
+    *,
+    include_metadata: bool,
+) -> Dict[str, Any]:
+    diff = diff_machine_projects(base, candidate, include_metadata=include_metadata)
+    response = _project_response(candidate)
+    response.update(
+        {
+            "diff": diff.model_dump(mode="json"),
+            "summary": diff.summary(),
+            "review_required": diff.review_required,
+        }
+    )
+    return response
 
 
 def create_machine_project_router() -> APIRouter:
@@ -97,6 +142,63 @@ def create_machine_project_router() -> APIRouter:
             "summary": diff.summary(),
             "review_required": diff.review_required,
         }
+
+    @router.post("/edit")
+    def edit_machine_project(request: MachineProjectEditRequest) -> Dict[str, Any]:
+        try:
+            candidate = apply_machine_edits(request.project, request.operations)
+        except MachineEditError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_machine_edit", "message": str(exc)},
+            ) from exc
+        return _candidate_response(
+            request.project,
+            candidate,
+            include_metadata=request.include_metadata,
+        )
+
+    @router.post("/record-evidence")
+    def record_machine_evidence(request: MachineEvidenceRequest) -> Dict[str, Any]:
+        try:
+            candidate = record_evidence_and_promote(
+                request.project,
+                evidence=request.evidence,
+                verification=request.verification,
+                promotions=request.promotions,
+            )
+        except (EvidencePromotionError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_evidence_promotion", "message": str(exc)},
+            ) from exc
+        return _candidate_response(
+            request.project,
+            candidate,
+            include_metadata=request.include_metadata,
+        )
+
+    @router.post("/from-bench-capture")
+    def import_bench_capture(request: BenchCaptureEvidenceRequest) -> Dict[str, Any]:
+        try:
+            projection = project_bench_capture_to_evidence(
+                request.project,
+                request.capture,
+                target_map=request.target_map,
+            )
+        except (BenchCaptureEvidenceError, EvidencePromotionError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_bench_capture_evidence", "message": str(exc)},
+            ) from exc
+        candidate = projection.pop("project")
+        response = _candidate_response(
+            request.project,
+            candidate,
+            include_metadata=request.include_metadata,
+        )
+        response["bench_capture"] = projection
+        return response
 
     @router.post("/assess-release")
     def assess_machine_release(request: ReleaseAssessmentRequest) -> Dict[str, Any]:
