@@ -14,6 +14,7 @@ from .machine_project import (
 )
 from .machine_project_compile_adapter import machine_project_from_compile_spec
 from .machine_project_seed import machine_project_from_intake
+from .machine_release import assessment_allows
 
 
 class LegacySessionMigrationRequest(BaseModel):
@@ -82,7 +83,7 @@ def create_machine_project_router() -> APIRouter:
         return {
             "ok": True,
             "assessment": assessment.model_dump(mode="json"),
-            "allowed": assessment.allowed,
+            "allowed": assessment_allows(assessment),
         }
 
     return router
