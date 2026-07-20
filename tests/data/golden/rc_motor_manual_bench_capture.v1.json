@@ -25,10 +25,8 @@
   "contract_updates": [
     {
       "operation": "upsert_signal",
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "interface_selector": {
         "board_id": "donor_rc_car_ctrl",
-        "block_id": "motor_driver_section",
         "functional_role_contains": "driver",
         "reference_module_id": "l298n"
       },
@@ -50,10 +48,8 @@
     },
     {
       "operation": "upsert_signal",
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "interface_selector": {
         "board_id": "donor_rc_car_ctrl",
-        "block_id": "motor_driver_section",
         "functional_role_contains": "driver",
         "reference_module_id": "l298n"
       },
@@ -146,7 +142,6 @@
       "notes": "No FLIR on hand — finger probe + photo reference; no abnormal warmth at driver."
     },
     {
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "measurement_id": "ground_resistance_ohm",
       "kind": "continuity",
       "status": "pass",
@@ -155,10 +150,14 @@
       "method": "dmm_resistance",
       "instrument_id": "uni_t_ut139c_01",
       "operator_id": "repair_cafe_operator_01",
-      "notes": "J_LOGIC ground contact to donor ground plane."
+      "notes": "J_LOGIC ground contact to donor ground plane.",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      }
     },
     {
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "measurement_id": "idle_voltage_v",
       "kind": "voltage",
       "status": "pass",
@@ -167,10 +166,14 @@
       "method": "dmm_dc_voltage",
       "instrument_id": "uni_t_ut139c_01",
       "operator_id": "repair_cafe_operator_01",
-      "notes": "Both control contacts idle low relative to verified donor ground."
+      "notes": "Both control contacts idle low relative to verified donor ground.",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      }
     },
     {
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "measurement_id": "stimulus_voltage_v",
       "kind": "voltage",
       "status": "pass",
@@ -179,10 +182,14 @@
       "method": "protected_logic_stimulus",
       "instrument_id": "uni_t_ut139c_01",
       "operator_id": "repair_cafe_operator_01",
-      "notes": "Applied through 1 kOhm series resistance."
+      "notes": "Applied through 1 kOhm series resistance.",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      }
     },
     {
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "measurement_id": "supply_current_a",
       "kind": "current",
       "status": "pass",
@@ -191,10 +198,14 @@
       "method": "current_limited_psu_observation",
       "instrument_id": "korad_ka3005p_01",
       "operator_id": "repair_cafe_operator_01",
-      "notes": "No-load output response under protected control stimulus."
+      "notes": "No-load output response under protected control stimulus.",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      }
     },
     {
-      "interface_id": "if:donor-rc-car-ctrl:motor-driver-section",
       "measurement_id": "response_observed",
       "kind": "functional_response",
       "status": "pass",
@@ -202,7 +213,12 @@
       "method": "protected_stimulus_response",
       "instrument_id": "uni_t_ut139c_01",
       "operator_id": "repair_cafe_operator_01",
-      "notes": "Expected motor-output rail transition observed for both recorded control contacts."
+      "notes": "Expected motor-output rail transition observed for both recorded control contacts.",
+      "interface_selector": {
+        "board_id": "donor_rc_car_ctrl",
+        "functional_role_contains": "driver",
+        "reference_module_id": "l298n"
+      }
     }
   ],
   "artifacts": [
