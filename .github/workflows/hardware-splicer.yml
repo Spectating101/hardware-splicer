@@ -256,7 +256,8 @@ jobs:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
           source .venv/bin/activate
-          make verify-tier-c
+          set -o pipefail
+          make verify-tier-c 2>&1 | tee /tmp/verify-tier-c.log
       - name: Geometry snapshot verify
         if: ${{ !cancelled() }}
         env:
@@ -264,7 +265,8 @@ jobs:
           HARDWARE_SPLICER_JLC_ENRICH: "0"
         run: |
           source .venv/bin/activate
-          make verify-geometry
+          set -o pipefail
+          PYTHONPATH=src python scripts/verify_geometry.py --out /tmp/hs_verify_geometry --json /tmp/verify-geometry.json 2>&1 | tee /tmp/verify-geometry.log
       - name: Sprint C integration tests
         if: ${{ !cancelled() }}
         run: |
@@ -281,14 +283,29 @@ jobs:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
           source .venv/bin/activate
-          make verify
+          set -o pipefail
+          make verify 2>&1 | tee /tmp/verify-core.log
       - name: Exploration harness
         if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
           source .venv/bin/activate
-          make explore
+          set -o pipefail
+          make explore 2>&1 | tee /tmp/exploration.log
+      - name: Upload legacy verification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-verification-diagnostics
+          path: |
+            /tmp/verify-tier-c.log
+            /tmp/verify-geometry.log
+            /tmp/verify-geometry.json
+            /tmp/verify-core.log
+            /tmp/exploration.log
+            /tmp/hardware_splicer/functional_audit/FUNCTIONAL_DELIVERY_AUDIT.json
+          if-no-files-found: warn
 
   apps:
     runs-on: ubuntu-latest
