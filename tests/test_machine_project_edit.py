@@ -66,7 +66,7 @@ def project() -> MachineProject:
     )
 
 
-def test_upsert_and_allocate_requirement() -> None:
+def test_upsert_and_allocate_requirement_updates_both_sides() -> None:
     candidate = apply_machine_edits(
         project(),
         [
@@ -89,8 +89,79 @@ def test_upsert_and_allocate_requirement() -> None:
     )
 
     runtime = next(row for row in candidate.requirements if row.requirement_id == "req-runtime")
+    drive = next(row for row in candidate.subsystems if row.subsystem_id == "drive")
+    control = next(row for row in candidate.subsystems if row.subsystem_id == "control")
     assert runtime.allocated_to == ["drive"]
     assert runtime.authority == AuthorityState.DECLARED
+    assert drive.requirement_ids == ["req-runtime"]
+    assert control.requirement_ids == ["req-safe"]
+
+
+def test_component_membership_moves_with_component() -> None:
+    candidate = apply_machine_edits(
+        project(),
+        [
+            {
+                "type": "upsert_component",
+                "payload": {
+                    "component_id": "controller",
+                    "name": "Controller",
+                    "domain": "firmware",
+                    "subsystem_id": "control",
+                },
+            },
+            {
+                "type": "upsert_component",
+                "payload": {
+                    "component_id": "controller",
+                    "subsystem_id": "drive",
+                    "domain": "firmware",
+                },
+            },
+        ],
+    )
+
+    control = next(row for row in candidate.subsystems if row.subsystem_id == "control")
+    drive = next(row for row in candidate.subsystems if row.subsystem_id == "drive")
+    controller = next(row for row in candidate.components if row.component_id == "controller")
+    assert controller.subsystem_id == "drive"
+    assert "controller" not in control.component_ids
+    assert drive.component_ids == ["controller"]
+
+
+def test_new_interface_attaches_to_endpoint_subsystems() -> None:
+    candidate = apply_machine_edits(
+        project(),
+        [
+            {
+                "type": "upsert_interface",
+                "payload": {
+                    "interface_id": "power-link",
+                    "name": "Power link",
+                    "kind": "power",
+                    "endpoints": [
+                        {"object_id": "control", "port": "vin"},
+                        {"object_id": "drive", "port": "power"},
+                    ],
+                    "contracts": [
+                        {
+                            "contract_type": "electrical",
+                            "values": {"nominal_voltage_v": 12},
+                            "unresolved_fields": ["peak_current_a"],
+                            "authority": "declared",
+                        }
+                    ],
+                },
+            }
+        ],
+    )
+
+    assert {row.interface_id for row in candidate.interfaces} == {"control-link", "power-link"}
+    assert all(
+        "power-link" in row.interface_ids
+        for row in candidate.subsystems
+        if row.subsystem_id in {"control", "drive"}
+    )
 
 
 def test_interface_contract_edit_closes_declared_fields_without_claiming_verification() -> None:
@@ -157,7 +228,7 @@ def test_safety_requirement_removal_needs_confirmation_and_no_references() -> No
 
 
 def test_cross_domain_invariants_reject_dangling_component() -> None:
-    with pytest.raises(MachineEditError, match="violates machine-project invariants"):
+    with pytest.raises(MachineEditError, match="unknown component subsystem"):
         apply_machine_edits(
             project(),
             [
