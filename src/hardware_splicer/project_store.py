@@ -43,6 +43,7 @@ class ProjectSummary:
     latest_revision: int
     saved_at: str
     archived: bool
+    recovered: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -53,6 +54,7 @@ class ProjectSummary:
             "latest_revision": self.latest_revision,
             "saved_at": self.saved_at,
             "archived": self.archived,
+            "recovered": self.recovered,
         }
 
 
@@ -254,6 +256,7 @@ class ProjectStore:
         Corrupt revisions newer than the recovered truth are quarantined with a
         ``.corrupt`` suffix. The manifest is atomically repointed so the next
         optimistic save can continue from the recovered revision immediately.
+        Recovery remains visible until a successful new save replaces the manifest.
         """
 
         safe_id = validate_project_id(project_id)
@@ -265,30 +268,33 @@ class ProjectStore:
         requested_revision: int | None = None
         manifest_problem = False
         manifest: Dict[str, Any] = {}
+        prior_recovery: Dict[str, Any] = {}
         try:
             manifest = _read_json(manifest_path)
             requested_revision = int(manifest.get("latest_revision") or 0) or None
+            if isinstance(manifest.get("recovery"), dict):
+                prior_recovery = dict(manifest["recovery"])
         except CorruptProject:
             manifest_problem = manifest_path.exists()
 
         if requested_revision is not None:
             try:
                 envelope = self.load(safe_id, revision=requested_revision)
-                recovered = False
+                recovered_now = False
             except CorruptProject:
                 envelope = self.load(safe_id)
-                recovered = True
+                recovered_now = True
         else:
             envelope = self.load(safe_id)
-            recovered = manifest_problem
+            recovered_now = manifest_problem
 
         loaded_revision = int(envelope.get("revision") or 0)
-        recovered = recovered or (
+        recovered_now = recovered_now or (
             requested_revision is not None and loaded_revision != requested_revision
         )
         quarantined: list[int] = []
 
-        if recovered:
+        if recovered_now:
             for candidate in self._revision_numbers(safe_id):
                 if candidate <= loaded_revision:
                     continue
@@ -303,6 +309,11 @@ class ProjectStore:
                     quarantined.append(candidate)
 
             saved_at = str(envelope.get("saved_at") or "")
+            prior_recovery = {
+                "requested_revision": requested_revision,
+                "loaded_revision": loaded_revision,
+                "quarantined_revisions": quarantined,
+            }
             repaired_manifest = {
                 "schema_version": PROJECT_STORE_SCHEMA,
                 "project_id": safe_id,
@@ -310,21 +321,19 @@ class ProjectStore:
                 "archived": bool(manifest.get("archived", False)),
                 "created_at": manifest.get("created_at") or saved_at,
                 "saved_at": saved_at,
-                "recovery": {
-                    "requested_revision": requested_revision,
-                    "loaded_revision": loaded_revision,
-                    "quarantined_revisions": quarantined,
-                },
+                "recovery": prior_recovery,
             }
             _atomic_write_json(manifest_path, repaired_manifest)
 
-        body = dict(envelope)
-        body["recovery"] = {
-            "used": recovered,
-            "requested_revision": requested_revision,
-            "loaded_revision": loaded_revision,
-            "quarantined_revisions": quarantined,
+        recovery_used = recovered_now or bool(prior_recovery)
+        recovery = {
+            "used": recovery_used,
+            "requested_revision": prior_recovery.get("requested_revision", requested_revision),
+            "loaded_revision": int(prior_recovery.get("loaded_revision") or loaded_revision),
+            "quarantined_revisions": list(prior_recovery.get("quarantined_revisions") or quarantined),
         }
+        body = dict(envelope)
+        body["recovery"] = recovery
         return body
 
     def list_projects(self, *, include_archived: bool = False) -> list[Dict[str, Any]]:
@@ -349,6 +358,7 @@ class ProjectStore:
                         latest_revision=int(latest["revision"]),
                         saved_at=str(latest.get("saved_at") or manifest.get("saved_at") or ""),
                         archived=archived,
+                        recovered=bool(latest.get("recovery", {}).get("used")),
                     )
                 )
             except (ProjectStoreError, ValueError, OSError):
