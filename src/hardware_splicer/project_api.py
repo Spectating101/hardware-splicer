@@ -7,11 +7,13 @@ from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from .project_store import (
+    PROJECT_STORE_SCHEMA,
     CorruptProject,
     InvalidProjectId,
     ProjectNotFound,
     ProjectStore,
     RevisionConflict,
+    _atomic_write_json,
     validate_project_id,
 )
 
@@ -57,8 +59,56 @@ def _project_error(exc: Exception) -> HTTPException:
     )
 
 
+def _repair_recovered_project(
+    project_store: ProjectStore,
+    project_id: str,
+    envelope: Dict[str, Any],
+    *,
+    requested_revision: int | None,
+) -> list[int]:
+    """Quarantine corrupt later revisions and repoint the manifest at recovered truth."""
+
+    loaded_revision = int(envelope.get("revision") or 0)
+    quarantined: list[int] = []
+    for candidate in project_store._revision_numbers(project_id):
+        if candidate <= loaded_revision:
+            continue
+        try:
+            project_store.load(project_id, revision=candidate)
+        except CorruptProject:
+            source = project_store._revision_path(project_id, candidate)
+            quarantine = source.with_name(f"{source.name}.corrupt")
+            source.replace(quarantine)
+            quarantined.append(candidate)
+
+    manifest_path = project_store._manifest_path(project_id)
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        if not isinstance(manifest, dict):
+            manifest = {}
+    except (OSError, ValueError, json.JSONDecodeError):
+        manifest = {}
+
+    saved_at = str(envelope.get("saved_at") or "")
+    repaired_manifest = {
+        "schema_version": PROJECT_STORE_SCHEMA,
+        "project_id": project_id,
+        "latest_revision": loaded_revision,
+        "archived": bool(manifest.get("archived", False)),
+        "created_at": manifest.get("created_at") or saved_at,
+        "saved_at": saved_at,
+        "recovery": {
+            "requested_revision": requested_revision,
+            "loaded_revision": loaded_revision,
+            "quarantined_revisions": quarantined,
+        },
+    }
+    _atomic_write_json(manifest_path, repaired_manifest)
+    return quarantined
+
+
 def _load_latest_with_recovery(project_store: ProjectStore, project_id: str) -> Dict[str, Any]:
-    """Load the newest valid snapshot and report whether fallback was required."""
+    """Load the newest valid snapshot and repair storage when fallback is required."""
 
     safe_id = validate_project_id(project_id)
     manifest_path = project_store.root / safe_id / "project.json"
@@ -89,11 +139,22 @@ def _load_latest_with_recovery(project_store: ProjectStore, project_id: str) -> 
     recovered = recovered or (
         requested_revision is not None and loaded_revision != requested_revision
     )
+    quarantined = (
+        _repair_recovered_project(
+            project_store,
+            safe_id,
+            envelope,
+            requested_revision=requested_revision,
+        )
+        if recovered
+        else []
+    )
     body = dict(envelope)
     body["recovery"] = {
         "used": recovered,
         "requested_revision": requested_revision,
         "loaded_revision": loaded_revision,
+        "quarantined_revisions": quarantined,
     }
     return body
 
