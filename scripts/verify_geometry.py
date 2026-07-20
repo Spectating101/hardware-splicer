@@ -22,6 +22,7 @@ GOLDEN_ROOT = ROOT / "examples" / "geometry_snapshots"
 def main() -> int:
     parser = argparse.ArgumentParser(description="Compare catalog geometry against golden snapshots.")
     parser.add_argument("--out", type=Path, default=Path("/tmp/hs_verify_geometry"))
+    parser.add_argument("--json", type=Path, default=None, help="Write the complete comparison report")
     parser.add_argument("--build-id", action="append", dest="build_ids")
     args = parser.parse_args()
 
@@ -42,14 +43,18 @@ def main() -> int:
         compile_catalog_build(build_id, target, export_gerber=False)
         actual = build_geometry_snapshot(target)
         diff = compare_geometry_snapshots(expected, actual)
-        rows.append({"build_id": build_id, **diff})
+        rows.append({"build_id": build_id, "golden_file": str(golden_path), **diff})
 
     report = {
         "schema_version": "hardware_splicer.geometry_verify.v1",
         "golden_root": str(GOLDEN_ROOT),
+        "output_root": str(args.out),
         "ok": all(row.get("ok") for row in rows),
         "rows": rows,
     }
+    if args.json:
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps(report, indent=2))
     return 0 if report["ok"] else 1
 
