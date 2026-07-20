@@ -79,6 +79,7 @@ function ContractEditor({ item, benchSession, onContractUpdate, onToast }) {
     controllerPin: firstSignal.controller_pin?.value || "",
     method: "DMM plus protected stimulus",
     notes: "",
+    interfaceComplete: contract.interface_complete?.value === true,
   });
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
@@ -132,8 +133,11 @@ function ContractEditor({ item, benchSession, onContractUpdate, onToast }) {
             voltage_max_v: Number(draft.voltageMax),
             active_level: draft.activeLevel.trim(),
             controller_pin: draft.controllerPin.trim(),
+            ...(draft.interfaceComplete ? { interface_complete: true } : {}),
             evidence_id: `ui-contract:${contract.interface_id}:${Date.now()}`,
-            method: draft.method.trim(),
+            method: draft.interfaceComplete
+              ? "complete interface review"
+              : draft.method.trim(),
             producer: "operator+instrument",
             notes: draft.notes.trim(),
           },
@@ -141,8 +145,14 @@ function ContractEditor({ item, benchSession, onContractUpdate, onToast }) {
       ]);
       const applied = response?.last_submission?.applied?.[0];
       if (!applied?.ok) throw new Error(applied?.reason || applied?.error || "Contract update rejected");
-      setResult({ ok: true, message: "Interface contract persisted and authority recomputed." });
-      onToast?.("Donor interface contract updated");
+      const stillIncomplete = (applied.unresolved_fields || []).includes("interface_complete");
+      setResult({
+        ok: true,
+        message: stillIncomplete
+          ? "Signal persisted. Interface completeness attestation still required before firmware authority."
+          : "Interface contract persisted and authority recomputed.",
+      });
+      onToast?.(stillIncomplete ? "Signal saved — completeness still open" : "Donor interface contract updated");
     } catch (error) {
       setResult({ ok: false, message: error.message });
     } finally {
@@ -209,6 +219,18 @@ function ContractEditor({ item, benchSession, onContractUpdate, onToast }) {
         <label className="contract-form__wide">
           Notes
           <textarea value={draft.notes} onChange={(event) => update("notes", event.target.value)} placeholder="Probe points, resistor value, observed response, instrument ID…" />
+        </label>
+        <label className="contract-form__wide contract-form__check">
+          <input
+            type="checkbox"
+            checked={Boolean(draft.interfaceComplete)}
+            onChange={(event) => update("interfaceComplete", event.target.checked)}
+            data-testid="evidence-interface-complete"
+          />
+          <span>
+            Attest that this interface is complete — every control signal that exists on the donor is listed above.
+            Required before firmware generation; one signal alone is not enough.
+          </span>
         </label>
         <div className="contract-form__actions contract-form__wide">
           <span className="mono small">Gate: {gate.gate_id}</span>

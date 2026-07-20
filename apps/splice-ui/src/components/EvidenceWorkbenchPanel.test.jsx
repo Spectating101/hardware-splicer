@@ -76,12 +76,18 @@ function session() {
 
 describe("EvidenceWorkbenchPanel", () => {
   it("renders authority boundaries and reference-only analogies", () => {
-    render(<EvidenceWorkbenchPanel session={session()} />);
+    render(
+      <EvidenceWorkbenchPanel
+        session={session()}
+        onContractUpdate={vi.fn().mockResolvedValue({ last_submission: { applied: [] } })}
+      />,
+    );
     expect(screen.getByTestId("evidence-workbench")).toBeInTheDocument();
     expect(screen.getByText(/donor interface.*blocked/i)).toBeInTheDocument();
     expect(screen.getByText("l298n")).toBeInTheDocument();
     expect(screen.getByText(/electrical pins and limits are not inherited/i)).toBeInTheDocument();
     expect(screen.getByText("Identify ground contacts")).toBeInTheDocument();
+    // Editor mounts only when a contract-edit gate and onContractUpdate are present.
     expect(screen.getByTestId("evidence-contract-editor")).toBeInTheDocument();
   });
 
@@ -89,14 +95,16 @@ describe("EvidenceWorkbenchPanel", () => {
     const user = userEvent.setup();
     const onGoBench = vi.fn();
     render(<EvidenceWorkbenchPanel session={session()} onGoBench={onGoBench} />);
-    await user.click(screen.getByRole("button", { name: /record bench evidence/i }));
+    await user.click(screen.getByRole("button", { name: "Record bench evidence" }));
     expect(onGoBench).toHaveBeenCalledTimes(1);
   });
 
   it("submits a typed, provenance-bearing interface contract update", async () => {
     const user = userEvent.setup();
     const onContractUpdate = vi.fn().mockResolvedValue({
-      last_submission: { applied: [{ ok: true, contract_update: true }] },
+      last_submission: {
+        applied: [{ ok: true, contract_update: true, unresolved_fields: ["interface_complete"] }],
+      },
     });
     render(
       <EvidenceWorkbenchPanel
@@ -125,6 +133,7 @@ describe("EvidenceWorkbenchPanel", () => {
       controller_pin: "GPIO16",
       producer: "operator+instrument",
     });
-    expect(await screen.findByText(/interface contract persisted/i)).toBeInTheDocument();
+    expect(measurements[0].contract_update.interface_complete).toBeUndefined();
+    expect(await screen.findByText(/completeness attestation still required/i)).toBeInTheDocument();
   });
 });

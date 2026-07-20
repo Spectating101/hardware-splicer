@@ -182,16 +182,54 @@ def test_typed_contract_update_persists_and_recomputes_authority(tmp_path: Path)
     applied = result["last_submission"]["applied"][0]
     assert applied["ok"] is True
     assert applied["contract_update"] is True
-    assert applied["unresolved_fields"] == []
-    assert result["evidence_integrations"]["authority"]["firmware_authorized"] is True
+    # One evidenced signal must not clear structural completeness or authorize firmware.
+    assert "interface_complete" in applied["unresolved_fields"]
+    assert result["evidence_integrations"]["authority"]["firmware_authorized"] is False
     assert result["power_on_authorized"] is False
 
     stored = json.loads((tmp_path / "SPLICE_PLAN.json").read_text(encoding="utf-8"))
     interface = stored["evidence_integrations"]["interfaces"][0]
-    assert interface["compile_status"] == "ready"
-    assert interface["interface_contract"]["firmware_authorized"] is True
+    assert interface["compile_status"] == "blocked"
+    assert interface["interface_contract"]["firmware_authorized"] is False
     assert interface["interface_contract"]["signals"][0]["controller_pin"]["value"] == "GPIO16"
-    assert stored["firmware_scaffold"]["evidence_authorized"] is True
+    assert stored["firmware_scaffold"]["evidence_authorized"] is False
+
+    complete = submit_bench_measurements(
+        tmp_path,
+        [
+            {
+                "gate_id": field_gate["gate_id"],
+                "status": "verified",
+                "contract_update": {
+                    "operation": "upsert_signal",
+                    "interface_id": "if:enabot-mainboard:dual-hbridge-01",
+                    "signal_id": "enable",
+                    "contact_id": "J_LOGIC.1",
+                    "connector_ref": "J_LOGIC",
+                    "pin_number": "1",
+                    "direction": "input",
+                    "voltage_max_v": 3.3,
+                    "active_level": "high",
+                    "controller_pin": "GPIO16",
+                    "interface_complete": True,
+                    "evidence_id": "bench-contract-complete-001",
+                    "method": "complete interface review",
+                    "producer": "operator+instrument",
+                },
+            }
+        ],
+    )
+    complete_applied = complete["last_submission"]["applied"][0]
+    assert complete_applied["ok"] is True
+    assert complete_applied["unresolved_fields"] == []
+    assert complete["evidence_integrations"]["authority"]["firmware_authorized"] is True
+    assert complete["power_on_authorized"] is False
+
+    stored_complete = json.loads((tmp_path / "SPLICE_PLAN.json").read_text(encoding="utf-8"))
+    interface_complete = stored_complete["evidence_integrations"]["interfaces"][0]
+    assert interface_complete["compile_status"] == "ready"
+    assert interface_complete["interface_contract"]["firmware_authorized"] is True
+    assert stored_complete["firmware_scaffold"]["evidence_authorized"] is True
 
 
 def test_out_of_range_evidence_measurement_stays_blocked(tmp_path: Path) -> None:

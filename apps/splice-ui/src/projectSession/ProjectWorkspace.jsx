@@ -181,7 +181,7 @@ export default function ProjectWorkspace({
                 session={session}
                 onGoVerify={() => handleStageChange(STAGES.verify)}
                 onGoBench={() => handleStageChange(STAGES.bench)}
-                onContractUpdate={(measurements) => onBenchSubmit?.(buildDir, measurements)}
+                onContractUpdate={(measurements) => onBenchSubmit?.(measurements)}
                 onToast={onToast}
               />
             )}
