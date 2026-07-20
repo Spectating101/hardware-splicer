@@ -14,12 +14,29 @@ function splitList(value) {
     .filter(Boolean);
 }
 
+function parseValues(value) {
+  try {
+    return JSON.parse(value || "{}");
+  } catch {
+    throw new Error("Contract values must be valid JSON.");
+  }
+}
+
 export default function MachineAuthoringPanel({ session, onToast }) {
   const [mode, setMode] = useState("requirement");
   const [requirementId, setRequirementId] = useState("");
   const [statement, setStatement] = useState("");
   const [kind, setKind] = useState("functional");
   const [allocatedTo, setAllocatedTo] = useState("");
+
+  const [newInterfaceId, setNewInterfaceId] = useState("");
+  const [newInterfaceName, setNewInterfaceName] = useState("");
+  const [newInterfaceKind, setNewInterfaceKind] = useState("electrical");
+  const [sourceObject, setSourceObject] = useState("");
+  const [sourcePort, setSourcePort] = useState("");
+  const [targetObject, setTargetObject] = useState("");
+  const [targetPort, setTargetPort] = useState("");
+
   const [interfaceId, setInterfaceId] = useState(session.machineProject?.interfaces?.[0]?.interface_id || "");
   const [contractType, setContractType] = useState("electrical");
   const [contractValues, setContractValues] = useState("{}");
@@ -33,13 +50,20 @@ export default function MachineAuthoringPanel({ session, onToast }) {
     session.snapshotRevision > 0 &&
     [PERSISTENCE_STATUS.saved, PERSISTENCE_STATUS.restored].includes(session.persistenceStatus);
   const interfaces = session.machineProject?.interfaces || [];
-  const objectIds = useMemo(
+  const objects = useMemo(
     () => [
-      ...(session.machineProject?.subsystems || []).map((row) => row.subsystem_id),
-      ...(session.machineProject?.components || []).map((row) => row.component_id),
+      ...(session.machineProject?.subsystems || []).map((row) => ({
+        id: row.subsystem_id,
+        label: `${row.name} · subsystem`,
+      })),
+      ...(session.machineProject?.components || []).map((row) => ({
+        id: row.component_id,
+        label: `${row.name} · component`,
+      })),
     ],
     [session.machineProject],
   );
+  const objectIds = objects.map((row) => row.id);
 
   if (!session.machineProject) return null;
 
@@ -49,6 +73,7 @@ export default function MachineAuthoringPanel({ session, onToast }) {
       return;
     }
     let operation;
+    let defaultNote;
     try {
       if (mode === "requirement") {
         if (!requirementId.trim() || !statement.trim()) {
@@ -64,24 +89,52 @@ export default function MachineAuthoringPanel({ session, onToast }) {
             authority: "declared",
           },
         };
+        defaultNote = `Edit requirement ${requirementId.trim()}`;
+      } else if (mode === "interface") {
+        if (!newInterfaceId.trim() || !newInterfaceName.trim()) {
+          throw new Error("Interface ID and name are required.");
+        }
+        if (!sourceObject || !targetObject || !sourcePort.trim() || !targetPort.trim()) {
+          throw new Error("Both interface endpoints and ports are required.");
+        }
+        if (sourceObject === targetObject && sourcePort.trim() === targetPort.trim()) {
+          throw new Error("Interface endpoints must be distinct.");
+        }
+        operation = {
+          type: "upsert_interface",
+          payload: {
+            interface_id: newInterfaceId.trim(),
+            name: newInterfaceName.trim(),
+            kind: newInterfaceKind.trim() || "interface",
+            endpoints: [
+              { object_id: sourceObject, port: sourcePort.trim(), role: "source" },
+              { object_id: targetObject, port: targetPort.trim(), role: "target" },
+            ],
+            contracts: [
+              {
+                contract_type: contractType.trim() || newInterfaceKind.trim() || "interface",
+                values: parseValues(contractValues),
+                unresolved_fields: splitList(unresolvedFields),
+                authority: "declared",
+              },
+            ],
+            authority: "declared",
+          },
+        };
+        defaultNote = `Create interface ${newInterfaceId.trim()}`;
       } else {
         if (!interfaceId) throw new Error("Select an interface first.");
-        let values;
-        try {
-          values = JSON.parse(contractValues || "{}");
-        } catch {
-          throw new Error("Contract values must be valid JSON.");
-        }
         operation = {
           type: "update_interface_contract",
           payload: {
             interface_id: interfaceId,
             contract_type: contractType.trim() || "electrical",
-            values,
+            values: parseValues(contractValues),
             unresolved_fields: splitList(unresolvedFields),
             authority: "declared",
           },
         };
+        defaultNote = `Edit ${interfaceId}/${contractType.trim() || "electrical"} contract`;
       }
 
       setBusy(true);
@@ -93,11 +146,7 @@ export default function MachineAuthoringPanel({ session, onToast }) {
       };
       const staged = await stageMachineProjectReview(session.projectId, candidateSnapshot, {
         baseRevision: session.snapshotRevision,
-        note:
-          note.trim() ||
-          (mode === "requirement"
-            ? `Edit requirement ${requirementId.trim()}`
-            : `Edit ${interfaceId}/${contractType.trim() || "electrical"} contract`),
+        note: note.trim() || defaultNote,
       });
       setLastReview(staged.review || null);
       window.dispatchEvent(new Event("hardware-splicer:review-created"));
@@ -130,12 +179,15 @@ export default function MachineAuthoringPanel({ session, onToast }) {
         <button type="button" className={mode === "requirement" ? "active" : ""} onClick={() => setMode("requirement")}>
           Requirement
         </button>
+        <button type="button" className={mode === "interface" ? "active" : ""} onClick={() => setMode("interface")}>
+          New interface
+        </button>
         <button type="button" className={mode === "contract" ? "active" : ""} onClick={() => setMode("contract")}>
           Interface contract
         </button>
       </div>
 
-      {mode === "requirement" ? (
+      {mode === "requirement" && (
         <div className="machine-authoring__form">
           <label>
             Requirement ID
@@ -160,7 +212,60 @@ export default function MachineAuthoringPanel({ session, onToast }) {
             <input value={allocatedTo} onChange={(event) => setAllocatedTo(event.target.value)} placeholder={objectIds.slice(0, 3).join(", ")} />
           </label>
         </div>
-      ) : (
+      )}
+
+      {mode === "interface" && (
+        <div className="machine-authoring__form">
+          <label>
+            Interface ID
+            <input value={newInterfaceId} onChange={(event) => setNewInterfaceId(event.target.value)} placeholder="motor-power" />
+          </label>
+          <label>
+            Interface name
+            <input value={newInterfaceName} onChange={(event) => setNewInterfaceName(event.target.value)} placeholder="Battery to motor power" />
+          </label>
+          <label>
+            Interface kind
+            <input value={newInterfaceKind} onChange={(event) => setNewInterfaceKind(event.target.value)} placeholder="power" />
+          </label>
+          <label>
+            Contract type
+            <input value={contractType} onChange={(event) => setContractType(event.target.value)} />
+          </label>
+          <label>
+            Source object
+            <select value={sourceObject} onChange={(event) => setSourceObject(event.target.value)}>
+              <option value="">Select object</option>
+              {objects.map((row) => <option key={`source-${row.id}`} value={row.id}>{row.label}</option>)}
+            </select>
+          </label>
+          <label>
+            Source port
+            <input value={sourcePort} onChange={(event) => setSourcePort(event.target.value)} placeholder="output" />
+          </label>
+          <label>
+            Target object
+            <select value={targetObject} onChange={(event) => setTargetObject(event.target.value)}>
+              <option value="">Select object</option>
+              {objects.map((row) => <option key={`target-${row.id}`} value={row.id}>{row.label}</option>)}
+            </select>
+          </label>
+          <label>
+            Target port
+            <input value={targetPort} onChange={(event) => setTargetPort(event.target.value)} placeholder="vmotor" />
+          </label>
+          <label className="wide">
+            Contract values (JSON)
+            <textarea value={contractValues} onChange={(event) => setContractValues(event.target.value)} rows={3} />
+          </label>
+          <label className="wide">
+            Unresolved fields
+            <input value={unresolvedFields} onChange={(event) => setUnresolvedFields(event.target.value)} placeholder="peak_current_a, connector_pinout" />
+          </label>
+        </div>
+      )}
+
+      {mode === "contract" && (
         <div className="machine-authoring__form">
           <label>
             Interface
