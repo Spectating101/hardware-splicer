@@ -64,9 +64,13 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return value
 
 
+def _json_payload(value: Mapping[str, Any]) -> str:
+    return json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+
+
 def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    payload = _json_payload(value)
     fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     temp_path = Path(temp_name)
     try:
@@ -75,6 +79,26 @@ def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temp_path, path)
+    finally:
+        temp_path.unlink(missing_ok=True)
+
+
+def _atomic_create_json(path: Path, value: Mapping[str, Any]) -> None:
+    """Create an immutable JSON record without replacing a concurrent writer."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = _json_payload(value)
+    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temp_path = Path(temp_name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temp_path, path)
+        except FileExistsError as exc:
+            raise ReviewConflict(f"immutable review record already exists: {path.name}") from exc
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -114,6 +138,24 @@ class ProjectReviewStore:
         if path.parent != root:
             raise InvalidReviewId("review_id resolves outside review root")
         return path
+
+    def _event_path(self, project_id: str, review_id: str, sequence: int) -> Path:
+        return self._review_dir(project_id, review_id) / "events" / f"{int(sequence):08d}.json"
+
+    def _write_event(
+        self,
+        project_id: str,
+        review_id: str,
+        sequence: int,
+        event: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        record = {
+            "schema_version": PROJECT_REVIEW_EVENT_SCHEMA,
+            "sequence": int(sequence),
+            **dict(event),
+        }
+        _atomic_create_json(self._event_path(project_id, review_id, sequence), record)
+        return record
 
     @staticmethod
     def _machine(snapshot: Mapping[str, Any]) -> MachineProject:
@@ -207,6 +249,71 @@ class ProjectReviewStore:
             return []
         return [_read_json(path) for path in sorted(events_dir.glob("*.json"))]
 
+    @staticmethod
+    def _revision_matches_review(
+        envelope: Mapping[str, Any],
+        review_id: str,
+        candidate_snapshot: Mapping[str, Any],
+    ) -> bool:
+        metadata = envelope.get("metadata") if isinstance(envelope.get("metadata"), Mapping) else {}
+        return bool(
+            metadata.get("review_id") == review_id
+            and metadata.get("review_decision") == "accepted"
+            and envelope.get("snapshot") == candidate_snapshot
+        )
+
+    def _complete_acceptance(
+        self,
+        project_id: str,
+        review_id: str,
+        proposal: Mapping[str, Any],
+        intent: Mapping[str, Any],
+        *,
+        recovered: bool = False,
+    ) -> Dict[str, Any]:
+        expected_revision = int(intent["accepted_revision"])
+        completion = {
+            "event_type": "decision_completed",
+            "decision": "accepted",
+            "decided_at": _utc_now(),
+            "actor": intent.get("actor"),
+            "note": intent.get("note") or "",
+            "accepted_revision": expected_revision,
+            "recovered": bool(recovered),
+        }
+        return self._write_event(project_id, review_id, int(intent["sequence"]) + 1, completion)
+
+    def _reconcile_accepting(
+        self,
+        project_id: str,
+        review_id: str,
+        proposal: Mapping[str, Any],
+        events: list[Dict[str, Any]],
+    ) -> list[Dict[str, Any]]:
+        if not events or events[-1].get("decision") != "accepting":
+            return events
+        intent = events[-1]
+        expected_revision = int(intent.get("accepted_revision") or 0)
+        if expected_revision <= 0:
+            return events
+        try:
+            envelope = self.project_store.load(project_id, revision=expected_revision)
+        except ProjectNotFound:
+            return events
+        if not self._revision_matches_review(envelope, review_id, proposal["candidate_snapshot"]):
+            return events
+        try:
+            completion = self._complete_acceptance(
+                project_id,
+                review_id,
+                proposal,
+                intent,
+                recovered=True,
+            )
+        except ReviewConflict:
+            return self._events(project_id, review_id)
+        return [*events, completion]
+
     def get(self, project_id: str, review_id: str) -> Dict[str, Any]:
         review_dir = self._review_dir(project_id, review_id)
         proposal_path = review_dir / "proposal.json"
@@ -214,6 +321,7 @@ class ProjectReviewStore:
             raise ReviewNotFound(review_id)
         proposal = _read_json(proposal_path)
         events = self._events(project_id, review_id)
+        events = self._reconcile_accepting(project_id, review_id, proposal, events)
         decision = events[-1] if events else None
         return {
             **proposal,
@@ -280,6 +388,45 @@ class ProjectReviewStore:
             )
         return rows
 
+    def _finish_acceptance(
+        self,
+        project_id: str,
+        review_id: str,
+        review: Mapping[str, Any],
+        intent: Mapping[str, Any],
+    ) -> Dict[str, Any]:
+        base_revision = int(review["base_revision"])
+        expected_revision = int(intent["accepted_revision"])
+        try:
+            existing = self.project_store.load(project_id, revision=expected_revision)
+        except ProjectNotFound:
+            latest = self.project_store.load_latest_with_recovery(project_id)
+            if int(latest["revision"]) != base_revision:
+                raise RevisionConflict(
+                    f"review {review_id!r} is based on revision {base_revision}, "
+                    f"but project is at revision {latest['revision']}"
+                )
+            existing = self.project_store.save(
+                project_id,
+                review["candidate_snapshot"],
+                expected_revision=base_revision,
+                metadata={
+                    "review_id": review_id,
+                    "review_decision": "accepted",
+                    "review_actor": str(intent.get("actor") or "").strip(),
+                },
+            )
+        if int(existing["revision"]) != expected_revision or not self._revision_matches_review(
+            existing,
+            review_id,
+            review["candidate_snapshot"],
+        ):
+            raise RevisionConflict(
+                f"revision {expected_revision} exists but does not belong to review {review_id!r}"
+            )
+        self._complete_acceptance(project_id, review_id, review, intent)
+        return self.get(project_id, review_id)
+
     def decide(
         self,
         project_id: str,
@@ -292,45 +439,58 @@ class ProjectReviewStore:
         normalized = str(decision or "").strip().lower()
         if normalized not in {"accepted", "rejected"}:
             raise ValueError("decision must be accepted or rejected")
-        if not str(actor or "").strip():
+        actor_value = str(actor or "").strip()
+        if not actor_value:
             raise ValueError("actor is required")
 
         review = self.get(project_id, review_id)
-        if review["status"] != "pending":
-            raise ReviewConflict(f"review {review_id!r} is already {review['status']}")
-
-        accepted_revision: int | None = None
-        if normalized == "accepted":
-            latest = self.project_store.load_latest_with_recovery(project_id)
-            base_revision = int(review["base_revision"])
-            if int(latest["revision"]) != base_revision:
-                raise RevisionConflict(
-                    f"review {review_id!r} is based on revision {base_revision}, "
-                    f"but project is at revision {latest['revision']}"
+        status = review["status"]
+        if status == "accepting":
+            if normalized != "accepted":
+                raise ReviewConflict(f"review {review_id!r} has an acceptance in progress")
+            intent = review["decision"]
+            if str(intent.get("actor") or "") != actor_value:
+                raise ReviewConflict(
+                    f"review {review_id!r} acceptance was started by {intent.get('actor')!r}"
                 )
-            envelope = self.project_store.save(
+            return self._finish_acceptance(project_id, review_id, review, intent)
+        if status != "pending":
+            raise ReviewConflict(f"review {review_id!r} is already {status}")
+
+        if normalized == "rejected":
+            self._write_event(
                 project_id,
-                review["candidate_snapshot"],
-                expected_revision=base_revision,
-                metadata={
-                    "review_id": review_id,
-                    "review_decision": normalized,
-                    "review_actor": str(actor).strip(),
+                review_id,
+                1,
+                {
+                    "event_type": "decision_completed",
+                    "decision": "rejected",
+                    "decided_at": _utc_now(),
+                    "actor": actor_value,
+                    "note": str(note or ""),
+                    "accepted_revision": None,
                 },
             )
-            accepted_revision = int(envelope["revision"])
+            return self.get(project_id, review_id)
 
-        event = {
-            "schema_version": PROJECT_REVIEW_EVENT_SCHEMA,
-            "sequence": 1,
-            "decision": normalized,
-            "decided_at": _utc_now(),
-            "actor": str(actor).strip(),
-            "note": str(note or ""),
-            "accepted_revision": accepted_revision,
-        }
-        event_path = self._review_dir(project_id, review_id) / "events" / "00000001.json"
-        if event_path.exists():
-            raise ReviewConflict(f"review {review_id!r} already has a decision")
-        _atomic_write_json(event_path, event)
-        return self.get(project_id, review_id)
+        latest = self.project_store.load_latest_with_recovery(project_id)
+        base_revision = int(review["base_revision"])
+        if int(latest["revision"]) != base_revision:
+            raise RevisionConflict(
+                f"review {review_id!r} is based on revision {base_revision}, "
+                f"but project is at revision {latest['revision']}"
+            )
+        intent = self._write_event(
+            project_id,
+            review_id,
+            1,
+            {
+                "event_type": "decision_intent",
+                "decision": "accepting",
+                "decided_at": _utc_now(),
+                "actor": actor_value,
+                "note": str(note or ""),
+                "accepted_revision": base_revision + 1,
+            },
+        )
+        return self._finish_acceptance(project_id, review_id, review, intent)
