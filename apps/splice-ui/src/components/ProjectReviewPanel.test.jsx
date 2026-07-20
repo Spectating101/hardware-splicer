@@ -102,6 +102,38 @@ describe("ProjectReviewPanel", () => {
     );
   });
 
+  it("resumes a journaled acceptance with the original reviewer", async () => {
+    const accepting = {
+      ...detail,
+      status: "accepting",
+      decision: {
+        decision: "accepting",
+        actor: "reviewer-a",
+        accepted_revision: 2,
+        decided_at: "2026-07-20T10:30:00Z",
+      },
+    };
+    listProjectReviews.mockResolvedValue({ reviews: [{ ...summary, status: "accepting" }] });
+    loadProjectReview.mockResolvedValue({ review: accepting });
+    render(<ProjectReviewPanel projectId="robot" currentRevision={1} onToast={() => {}} />);
+
+    expect(await screen.findByTestId("review-acceptance-recovery")).toHaveTextContent(
+      "Acceptance was journaled but not finalized",
+    );
+    expect(screen.getByLabelText("Reviewer")).toHaveValue("reviewer-a");
+    expect(screen.getByLabelText("Reviewer")).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Reject candidate" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Resume acceptance" }));
+
+    await waitFor(() =>
+      expect(decideProjectReview).toHaveBeenCalledWith("robot", "review-1", {
+        decision: "accepted",
+        actor: "reviewer-a",
+        note: "",
+      }),
+    );
+  });
+
   it("stays hidden until a durable revision exists", () => {
     const { container } = render(
       <ProjectReviewPanel projectId="robot" currentRevision={0} onToast={() => {}} />,
