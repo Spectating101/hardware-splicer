@@ -1,4 +1,4 @@
-/** Shared project-session model for the unified workbench UI (in-memory only). */
+/** Shared project-session model for the unified workbench UI. */
 
 import { packageHandoffSnapshot } from "./packageHandoff.js";
 
@@ -26,6 +26,15 @@ export const STAGE_LABELS = Object.freeze({
   [STAGES.package]: "Package",
 });
 
+export const PERSISTENCE_STATUS = Object.freeze({
+  idle: "idle",
+  saving: "saving",
+  saved: "saved",
+  restored: "restored",
+  conflict: "conflict",
+  failed: "failed",
+});
+
 export function emptyGraph(phrase = "", composeMode = "canvas") {
   return {
     nodes: [],
@@ -45,6 +54,7 @@ export function createEmptySession(overrides = {}) {
     intake: o.intake || null,
     constraints: o.constraints || null,
     graph: o.graph || emptyGraph(),
+    machineProject: o.machineProject || null,
     buildDir: o.buildDir || null,
     activeJobId: o.activeJobId || null,
     composeResult: o.composeResult || null,
@@ -57,14 +67,22 @@ export function createEmptySession(overrides = {}) {
     dirty: Boolean(o.dirty),
     intakeComplete: Boolean(o.intakeComplete),
     designEditable: o.designEditable !== undefined ? Boolean(o.designEditable) : true,
-    sessionOrigin: o.sessionOrigin || "new", // new | current_job | recent_build
+    sessionOrigin: o.sessionOrigin || "new", // new | current_job | recent_build | persistent_project
     packageHandoff: o.packageHandoff || null,
+    snapshotRevision: Number.isInteger(o.snapshotRevision) ? o.snapshotRevision : 0,
+    persistenceStatus: o.persistenceStatus || PERSISTENCE_STATUS.idle,
+    persistenceError: o.persistenceError || null,
+    savedAt: o.savedAt || null,
+    restoredFromRevision: o.restoredFromRevision || null,
   };
 }
 
 export const ACTIONS = Object.freeze({
   RESET: "RESET",
   START_PROJECT: "START_PROJECT",
+  RESTORE_PROJECT_SNAPSHOT: "RESTORE_PROJECT_SNAPSHOT",
+  SET_PERSISTENCE: "SET_PERSISTENCE",
+  SET_MACHINE_PROJECT: "SET_MACHINE_PROJECT",
   /** Greenfield Intake finished — hand off to Design Studio (no engine call). */
   COMMIT_INTAKE: "COMMIT_INTAKE",
   /** Salvage/demo engine submission transition. */
@@ -106,6 +124,45 @@ export function projectSessionReducer(state, action) {
   switch (action.type) {
     case ACTIONS.RESET:
       return createEmptySession();
+
+    case ACTIONS.RESTORE_PROJECT_SNAPSHOT: {
+      const snapshot = action.snapshot && typeof action.snapshot === "object" ? action.snapshot : {};
+      const revision = Number.isInteger(action.revision) ? action.revision : 0;
+      return createEmptySession({
+        ...snapshot,
+        projectId: snapshot.projectId || action.projectId || null,
+        dirty: false,
+        sessionOrigin: "persistent_project",
+        snapshotRevision: revision,
+        persistenceStatus: action.recovered
+          ? PERSISTENCE_STATUS.restored
+          : PERSISTENCE_STATUS.saved,
+        persistenceError: null,
+        savedAt: action.savedAt || null,
+        restoredFromRevision: action.recovered ? revision : null,
+      });
+    }
+
+    case ACTIONS.SET_PERSISTENCE:
+      return {
+        ...state,
+        snapshotRevision:
+          action.revision !== undefined ? Number(action.revision || 0) : state.snapshotRevision,
+        persistenceStatus: action.status || state.persistenceStatus,
+        persistenceError: action.error || null,
+        savedAt: action.savedAt !== undefined ? action.savedAt : state.savedAt,
+        restoredFromRevision:
+          action.restoredFromRevision !== undefined
+            ? action.restoredFromRevision
+            : state.restoredFromRevision,
+      };
+
+    case ACTIONS.SET_MACHINE_PROJECT:
+      return {
+        ...state,
+        machineProject: action.machineProject || null,
+        dirty: true,
+      };
 
     case ACTIONS.START_PROJECT:
       return createEmptySession({
@@ -164,9 +221,13 @@ export function projectSessionReducer(state, action) {
           currentStage: STAGES.verify,
           dirty: true,
           graph: state.graph,
+          machineProject: state.machineProject,
           intakeComplete: true,
           designEditable: salvage ? false : hasReconstructableGraph(state.graph),
           sessionOrigin: "current_job",
+          snapshotRevision: state.snapshotRevision,
+          persistenceStatus: state.persistenceStatus,
+          savedAt: state.savedAt,
         }),
       };
     }
@@ -384,6 +445,19 @@ export function projectSessionReducer(state, action) {
   }
 }
 
+export function projectSnapshot(session) {
+  if (!session || typeof session !== "object") return {};
+  const {
+    snapshotRevision: _snapshotRevision,
+    persistenceStatus: _persistenceStatus,
+    persistenceError: _persistenceError,
+    savedAt: _savedAt,
+    restoredFromRevision: _restoredFromRevision,
+    ...snapshot
+  } = session;
+  return snapshot;
+}
+
 export function canReturnToDesign(session) {
   return Boolean(session?.designEditable && (session?.graph?.nodes?.length || session?.graph?.phrase));
 }
@@ -398,4 +472,8 @@ export function sessionHasBuild(session) {
 
 export function sessionIsResumable(session) {
   return Boolean(session?.projectId);
+}
+
+export function sessionIsPersistable(session) {
+  return Boolean(session?.projectId && session?.projectName);
 }
