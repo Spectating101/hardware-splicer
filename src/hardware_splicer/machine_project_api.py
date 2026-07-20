@@ -7,6 +7,10 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
+from .bench_capture_evidence import (
+    BenchCaptureEvidenceError,
+    project_bench_capture_to_evidence,
+)
 from .machine_evidence import EvidencePromotionError, record_evidence_and_promote
 from .machine_project import (
     MachineProject,
@@ -54,6 +58,13 @@ class MachineEvidenceRequest(BaseModel):
     evidence: Dict[str, Any]
     verification: Dict[str, Any] | None = None
     promotions: list[Dict[str, Any]] = Field(default_factory=list)
+    include_metadata: bool = False
+
+
+class BenchCaptureEvidenceRequest(BaseModel):
+    project: MachineProject
+    capture: Dict[str, Any]
+    target_map: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     include_metadata: bool = False
 
 
@@ -166,6 +177,28 @@ def create_machine_project_router() -> APIRouter:
             candidate,
             include_metadata=request.include_metadata,
         )
+
+    @router.post("/from-bench-capture")
+    def import_bench_capture(request: BenchCaptureEvidenceRequest) -> Dict[str, Any]:
+        try:
+            projection = project_bench_capture_to_evidence(
+                request.project,
+                request.capture,
+                target_map=request.target_map,
+            )
+        except (BenchCaptureEvidenceError, EvidencePromotionError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_bench_capture_evidence", "message": str(exc)},
+            ) from exc
+        candidate = projection.pop("project")
+        response = _candidate_response(
+            request.project,
+            candidate,
+            include_metadata=request.include_metadata,
+        )
+        response["bench_capture"] = projection
+        return response
 
     @router.post("/assess-release")
     def assess_machine_release(request: ReleaseAssessmentRequest) -> Dict[str, Any]:
