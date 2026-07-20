@@ -90,7 +90,7 @@ def test_review_api_rejects_stale_acceptance_and_invalid_decision(tmp_path) -> N
         json={"decision": "accepted", "actor": "owner"},
     )
     assert stale.status_code == 409
-    assert stale.json()["detail"]["type"] == "revision_or_review_conflict"
+    assert stale.json()["detail"]["type"] == "revision_conflict"
 
     invalid = api.post(
         f"/v1/projects/robot/reviews/{created['review_id']}/decision",
