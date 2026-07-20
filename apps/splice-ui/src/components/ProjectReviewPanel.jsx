@@ -15,12 +15,13 @@ function formatTime(value) {
 }
 
 function collectFlags(review) {
-  if (!review?.diff) return [];
-  const direct = review.diff.review_flags || [];
-  const objectFlags = (review.diff.object_changes || []).flatMap((change) =>
+  if (!review) return [];
+  const proposalFlags = review.review_flags || [];
+  const direct = review.diff?.review_flags || [];
+  const objectFlags = (review.diff?.object_changes || []).flatMap((change) =>
     (change.review_flags || []).map((flag) => ({ ...flag, collection: change.collection })),
   );
-  return [...direct, ...objectFlags];
+  return [...proposalFlags, ...direct, ...objectFlags];
 }
 
 export default function ProjectReviewPanel({ projectId, currentRevision, onToast }) {
@@ -173,20 +174,33 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
                 <span><strong>{selected.summary?.added || 0}</strong> added</span>
                 <span><strong>{selected.summary?.removed || 0}</strong> removed</span>
                 <span><strong>{selected.summary?.modified || 0}</strong> modified</span>
+                <span><strong>{selected.summary?.snapshot_fields_changed || 0}</strong> workspace fields</span>
                 <span><strong>{requiredFlags.length}</strong> required reviews</span>
               </div>
 
               {flags.length > 0 ? (
                 <div className="project-review__flags" data-testid="project-review-flags">
                   {flags.map((flag, index) => (
-                    <div key={`${flag.code}-${flag.object_id || index}`} className={`project-review__flag project-review__flag--${flag.severity}`}>
+                    <div key={`${flag.code}-${flag.object_id || flag.path || index}`} className={`project-review__flag project-review__flag--${flag.severity}`}>
                       <strong>{flag.code.replaceAll("_", " ")}</strong>
                       <span>{flag.message}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="small muted">No authority or safety review flags were raised.</p>
+                <p className="small muted">No authority, safety, or workspace review flags were raised.</p>
+              )}
+
+              {(selected.snapshot_changes || []).length > 0 && (
+                <details className="project-review__changes">
+                  <summary>Changed workspace fields</summary>
+                  {selected.snapshot_changes.map((change) => (
+                    <div key={change.path}>
+                      <strong>{change.path}</strong>
+                      <span>project snapshot changed</span>
+                    </div>
+                  ))}
+                </details>
               )}
 
               {(selected.diff?.object_changes || []).length > 0 && (
