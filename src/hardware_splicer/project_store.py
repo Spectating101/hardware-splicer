@@ -248,6 +248,85 @@ class ProjectStore:
             raise CorruptProject("; ".join(errors))
         raise ProjectNotFound(safe_id)
 
+    def load_latest_with_recovery(self, project_id: str) -> Dict[str, Any]:
+        """Load latest valid state and repair corrupt manifest/revision pointers.
+
+        Corrupt revisions newer than the recovered truth are quarantined with a
+        ``.corrupt`` suffix. The manifest is atomically repointed so the next
+        optimistic save can continue from the recovered revision immediately.
+        """
+
+        safe_id = validate_project_id(project_id)
+        project_dir = self._project_dir(safe_id)
+        if not project_dir.is_dir():
+            raise ProjectNotFound(safe_id)
+
+        manifest_path = self._manifest_path(safe_id)
+        requested_revision: int | None = None
+        manifest_problem = False
+        manifest: Dict[str, Any] = {}
+        try:
+            manifest = _read_json(manifest_path)
+            requested_revision = int(manifest.get("latest_revision") or 0) or None
+        except CorruptProject:
+            manifest_problem = manifest_path.exists()
+
+        if requested_revision is not None:
+            try:
+                envelope = self.load(safe_id, revision=requested_revision)
+                recovered = False
+            except CorruptProject:
+                envelope = self.load(safe_id)
+                recovered = True
+        else:
+            envelope = self.load(safe_id)
+            recovered = manifest_problem
+
+        loaded_revision = int(envelope.get("revision") or 0)
+        recovered = recovered or (
+            requested_revision is not None and loaded_revision != requested_revision
+        )
+        quarantined: list[int] = []
+
+        if recovered:
+            for candidate in self._revision_numbers(safe_id):
+                if candidate <= loaded_revision:
+                    continue
+                try:
+                    self.load(safe_id, revision=candidate)
+                except CorruptProject:
+                    source = self._revision_path(safe_id, candidate)
+                    quarantine = source.with_name(f"{source.name}.corrupt")
+                    if quarantine.exists():
+                        quarantine.unlink()
+                    source.replace(quarantine)
+                    quarantined.append(candidate)
+
+            saved_at = str(envelope.get("saved_at") or "")
+            repaired_manifest = {
+                "schema_version": PROJECT_STORE_SCHEMA,
+                "project_id": safe_id,
+                "latest_revision": loaded_revision,
+                "archived": bool(manifest.get("archived", False)),
+                "created_at": manifest.get("created_at") or saved_at,
+                "saved_at": saved_at,
+                "recovery": {
+                    "requested_revision": requested_revision,
+                    "loaded_revision": loaded_revision,
+                    "quarantined_revisions": quarantined,
+                },
+            }
+            _atomic_write_json(manifest_path, repaired_manifest)
+
+        body = dict(envelope)
+        body["recovery"] = {
+            "used": recovered,
+            "requested_revision": requested_revision,
+            "loaded_revision": loaded_revision,
+            "quarantined_revisions": quarantined,
+        }
+        return body
+
     def list_projects(self, *, include_archived: bool = False) -> list[Dict[str, Any]]:
         projects: list[ProjectSummary] = []
         for directory in sorted(self.root.iterdir()):
