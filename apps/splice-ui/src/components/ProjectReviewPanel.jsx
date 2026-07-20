@@ -35,7 +35,7 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
   const [error, setError] = useState("");
 
   const refresh = useCallback(async () => {
-    if (!projectId) return;
+    if (!projectId || !currentRevision) return;
     try {
       const [reviewBody, revisionBody] = await Promise.all([
         listProjectReviews(projectId),
@@ -52,11 +52,17 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
     } catch (err) {
       setError(err.message);
     }
-  }, [projectId]);
+  }, [projectId, currentRevision]);
 
   useEffect(() => {
     refresh();
-  }, [refresh, currentRevision]);
+  }, [refresh]);
+
+  useEffect(() => {
+    const handleReviewCreated = () => refresh();
+    window.addEventListener("hardware-splicer:review-created", handleReviewCreated);
+    return () => window.removeEventListener("hardware-splicer:review-created", handleReviewCreated);
+  }, [refresh]);
 
   useEffect(() => {
     if (!projectId || !selectedId) {
