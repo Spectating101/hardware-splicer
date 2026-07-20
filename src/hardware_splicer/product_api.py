@@ -17,9 +17,10 @@ from .project_store import ProjectStore
 def create_product_app(*, project_store: ProjectStore | None = None) -> FastAPI:
     """Build the canonical user-facing API with persistent project routes."""
 
+    resolved_store = project_store or ProjectStore()
     app = create_engine_app()
-    app.include_router(create_project_router(project_store))
-    app.state.project_store = project_store
+    app.include_router(create_project_router(resolved_store))
+    app.state.project_store = resolved_store
     return app
 
 
