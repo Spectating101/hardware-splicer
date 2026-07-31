@@ -117,9 +117,17 @@ def test_failed_worker_does_not_publish_partial_output(tmp_path: Path) -> None:
     output = tmp_path / "failed.stl"
     code = """
 from pathlib import Path
-Path(r'%s').write_text('partial', encoding='utf-8')
-raise RuntimeError('intentional failure')
-""" % output
+
+class FakeShape:
+    def val(self):
+        return self
+
+    def exportStl(self, path):
+        Path(path).write_text('partial', encoding='utf-8')
+        raise RuntimeError('intentional export failure')
+
+result = FakeShape()
+"""
 
     with pytest.raises(RuntimeError, match="CadQuery worker failed"):
         script_to_stl(code, output, timeout_s=5)
