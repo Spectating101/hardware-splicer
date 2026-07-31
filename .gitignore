@@ -48,6 +48,7 @@ data/
 !tests/data/**
 logs/
 runs/
+out/
 output/
 outputs/
 demo_output/

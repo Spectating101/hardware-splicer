@@ -1,0 +1,6 @@
+Golden real S3 verify: FAIL
+  photo: rc_toy_motor_board.jpg (6578 KB)
+  capture: rc_motor_manual_bench_capture.v1.json operator=repair_cafe_operator_01
+  power_on_authorized=False
+  report: /tmp/hs_splice_golden_real_verify/SPLICE_GOLDEN_REAL_VERIFY.json
+  - golden real report.passed is false

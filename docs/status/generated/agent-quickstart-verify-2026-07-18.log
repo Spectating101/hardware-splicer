@@ -1,0 +1,62 @@
+==> agent quickstart verify @ 2026-07-18T01:34:34+08:00
+==> hostname: optiplex
+==> root: /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer
+==> Qwen key present — phrase + live vision steps enabled
+==> doctor
+doctor_ok True
+==> start API :8791
+INFO:     Started server process [841551]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8791 (Press CTRL+C to quit)
+INFO:     127.0.0.1:50514 - "GET /health HTTP/1.1" 200 OK
+==> step 1: modules catalog
+INFO:     127.0.0.1:48944 - "GET /v1/modules/catalog HTTP/1.1" 200 OK
+catalog_count 50
+==> step 2: sync canvas agent-loop
+INFO:     127.0.0.1:48946 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+sync_resolved True drc 0
+==> step 3: async compose-agent-loop job
+INFO:     127.0.0.1:48962 - "POST /v1/jobs/compose-agent-loop HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:48976 - "GET /v1/jobs/cfb9a4e0ad4e4863940f83f0d0c3180f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48982 - "GET /v1/jobs/cfb9a4e0ad4e4863940f83f0d0c3180f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48990 - "GET /v1/jobs/cfb9a4e0ad4e4863940f83f0d0c3180f HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48994 - "GET /v1/jobs/cfb9a4e0ad4e4863940f83f0d0c3180f/result HTTP/1.1" 200 OK
+async_resolved True drc 0
+==> step 4: salvage donor_context agent-loop
+INFO:     127.0.0.1:49010 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+salvage_mode salvage_catalog build_id robot_drive_base
+salvage_resolved True drc 0
+==> step 5: compose+bench loop (salvage, simulated)
+INFO:     127.0.0.1:49020 - "POST /v1/compose/bench-loop HTTP/1.1" 200 OK
+bench_loop_passed True power_on True
+==> step 5b: vision-assist draft (gates stay open)
+INFO:     127.0.0.1:49034 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49048 - "POST /v1/splice-bench/vision-assist HTTP/1.1" 200 OK
+vision_ok True gates_unchanged True
+==> step 5c: golden-real bench (manual capture, not simulator)
+golden_real_passed True simulated False power_on True matched 5
+==> step 5f: public-web DMM photos → bench capture (provenance, not this-board café)
+INFO:     127.0.0.1:56298 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+public_web_passed True matched 10 power_on True not_this_board True
+==> step 5d: donor-board-vision offline (photo/evidence → functional_salvage)
+INFO:     127.0.0.1:56312 - "POST /v1/donor-board-vision HTTP/1.1" 200 OK
+donor_vision_applied 1 blocks 6 source board_vision
+==> step 5e: copper honesty (autoroute off → not fab-ready)
+INFO:     127.0.0.1:56320 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+copper_tier cosmetic_preview fab_recommendation review_required_preview_copper fabrication_ready False
+==> step 6: Qwen phrase agent-loop
+INFO:     127.0.0.1:56332 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+qwen_resolved True tokens 3065
+==> step 6b: live photo → donor-board-vision (Qwen VL)
+INFO:     127.0.0.1:35640 - "POST /v1/donor-board-vision HTTP/1.1" 200 OK
+live_photo_mode live applied 1 blocks 2
+==> step 6c: live vision-assist on open gates (gates stay open)
+INFO:     127.0.0.1:55672 - "POST /v1/compose/agent-loop HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55684 - "POST /v1/splice-bench/vision-assist HTTP/1.1" 200 OK
+live_vision_assist_ok True live True gates_unchanged True
+==> PASS wall_seconds=73
+  127.0.0.1:55684 - "POST /v1/splice-bench/vision-assist HTTP/1.1" 200 OK
+live_vision_assist_ok True live True gates_unchanged True
+==> PASS wall_seconds=73
+EXIT:0

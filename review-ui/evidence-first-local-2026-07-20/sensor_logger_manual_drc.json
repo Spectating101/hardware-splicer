@@ -1,0 +1,420 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-07-20T14:48:23+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "main_ctrl_build.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-4] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.0,
+                        "y": 77.0
+                    },
+                    "uuid": "6d2f27d8-0673-4d5a-8928-bbe68e0775a6"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-6] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 78.0
+                    },
+                    "uuid": "b5788c2b-8436-4804-ba00-ecba713e5b0a"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-7] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 79.0
+                    },
+                    "uuid": "1c158242-3b79-4ce8-9cb3-84308923613a"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+5V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.0,
+                        "y": 75.0
+                    },
+                    "uuid": "a357eb16-c543-4769-839a-2acf7b4f186b"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "5f70293d-940d-4524-8f46-5e6370dd14b0"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "363c354d-1929-4840-9c18-7d89ae727840"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+5V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.0,
+                        "y": 75.0
+                    },
+                    "uuid": "21c510a3-ac0a-4bef-a764-1c5d064cdaa3"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-4] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.0,
+                        "y": 77.0
+                    },
+                    "uuid": "fe85ebf3-9ab1-4d10-a711-899e6be58980"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "97a3bbac-d8f1-482e-8c64-a7946970c520"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-7] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 79.0
+                    },
+                    "uuid": "81813165-a3a6-4793-8427-3e3f7c17bb37"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Via is not connected or connected on only one layer",
+            "items": [
+                {
+                    "description": "Via [+3V3-6] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 78.0
+                    },
+                    "uuid": "63481fea-5daa-45f4-9a7a-710e8f117b81"
+                }
+            ],
+            "severity": "warning",
+            "type": "via_dangling"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [+3V3-4] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.0,
+                        "y": 77.0
+                    },
+                    "uuid": "6d2f27d8-0673-4d5a-8928-bbe68e0775a6"
+                },
+                {
+                    "description": "Via [+3V3-4] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.0,
+                        "y": 77.0
+                    },
+                    "uuid": "fe85ebf3-9ab1-4d10-a711-899e6be58980"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [+3V3-6] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 78.0
+                    },
+                    "uuid": "63481fea-5daa-45f4-9a7a-710e8f117b81"
+                },
+                {
+                    "description": "Via [+3V3-6] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 111.0,
+                        "y": 78.0
+                    },
+                    "uuid": "b5788c2b-8436-4804-ba00-ecba713e5b0a"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [+3V3-7] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 79.0
+                    },
+                    "uuid": "1c158242-3b79-4ce8-9cb3-84308923613a"
+                },
+                {
+                    "description": "Via [+3V3-7] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 79.0
+                    },
+                    "uuid": "81813165-a3a6-4793-8427-3e3f7c17bb37"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [+5V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.0,
+                        "y": 75.0
+                    },
+                    "uuid": "21c510a3-ac0a-4bef-a764-1c5d064cdaa3"
+                },
+                {
+                    "description": "Via [+5V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.0,
+                        "y": 75.0
+                    },
+                    "uuid": "a357eb16-c543-4769-839a-2acf7b4f186b"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "363c354d-1929-4840-9c18-7d89ae727840"
+                },
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "5f70293d-940d-4524-8f46-5e6370dd14b0"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "5f70293d-940d-4524-8f46-5e6370dd14b0"
+                },
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "97a3bbac-d8f1-482e-8c64-a7946970c520"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Drilled holes co-located",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "363c354d-1929-4840-9c18-7d89ae727840"
+                },
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.0,
+                        "y": 76.0
+                    },
+                    "uuid": "97a3bbac-d8f1-482e-8c64-a7946970c520"
+                }
+            ],
+            "severity": "warning",
+            "type": "holes_co_located"
+        },
+        {
+            "description": "Footprint 'ESP32-WROOM-32' not found in library 'Module'.",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 16.0,
+                        "y": 28.0
+                    },
+                    "uuid": "e3709730-ee5c-4e89-9f90-6ed89e451347"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Footprint 'USB-MICRO-POWER' not found in library 'Connector'.",
+            "items": [
+                {
+                    "description": "Footprint U2",
+                    "pos": {
+                        "x": 47.0,
+                        "y": 6.5
+                    },
+                    "uuid": "9823b1ce-b3db-4efb-8640-8205ddaa187f"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Footprint 'BME280-BREAKOUT' not found in library 'Sensor'.",
+            "items": [
+                {
+                    "description": "Footprint U3",
+                    "pos": {
+                        "x": 71.0,
+                        "y": 8.0
+                    },
+                    "uuid": "cf6ece3d-f9a1-47bc-b76d-0335571529e1"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Reference field of U2",
+                    "pos": {
+                        "x": 47.0,
+                        "y": 3.5
+                    },
+                    "uuid": "f659f65a-a840-4a84-b8d5-86e23fd84227"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen overlap",
+            "items": [
+                {
+                    "description": "Segment on F.Silkscreen",
+                    "pos": {
+                        "x": 43.0,
+                        "y": 3.0
+                    },
+                    "uuid": "137f7c3a-7aff-44df-b74d-a30f2bb9b7c0"
+                },
+                {
+                    "description": "Reference field of U2",
+                    "pos": {
+                        "x": 47.0,
+                        "y": 3.5
+                    },
+                    "uuid": "f659f65a-a840-4a84-b8d5-86e23fd84227"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_overlap"
+        }
+    ]
+}
