@@ -22,6 +22,10 @@ Public A + prerelease stay as infrastructure only.
 | Pan-tilt mechatronics golden | **PASS** (`make verify-mechatronics-golden`) |
 | Physical closed loop (software pack) | **READY** (`make verify-physical-closed-loop`) — human bench still open |
 | Donor-keep + graph-true handoff | **SHIPPED** — gap_fill/goal_picker/workshop cannot replace donor drv; bring-up/wiring regen from build_graph |
+| Evidence-first integration stack | **SHIPPED** — [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md); donor virtual modules, bench-derived gates |
+| Canonical machine project spine | **SHIPPED** — [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md); one traceable project, durable revisions |
+| Staged revision review workflow | **SHIPPED** — semantic diff + append-only review; acceptance journaled and crash-recoverable |
+| Real-bench golden fixture | **PASS** — fixture migrated to two-stage contract; `make verify-splice-real-bench` |
 | Design-partner invites | **PAUSED** until `PHYSICAL_BENCH_EVIDENCE.json` is operator-closed |
 
 **Assessment:** [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](FUNCTIONAL_ASSESSMENT_2026-07-18.md) (includes value audit)  
@@ -84,6 +88,7 @@ Pan-tilt is the one path meant for a real print→wire→flash→bench win.
 2. Optional: plant-watering as easier second physical path  
 3. Soft-I2C ToF on CAM; corpus compile on flagged A/B  
 4. Invites stay paused until physical evidence is closed  
+5. Prune merged `agent/*` remote branches; keep only live work  
 
 ## Log
 
@@ -103,3 +108,8 @@ Pan-tilt is the one path meant for a real print→wire→flash→bench win.
 | 2026-07-18 | **Mechatronics engine:** `mechanism_bridge` → mecha-splicer; FW for relay/fume/pan-tilt; `verify-mechatronics-paths` 8/8; pan-tilt golden PASS; splice-ui Mechatronics panel |
 | 2026-07-18 | **Confidence harden:** graph-true FW regen; usb_fume recipe includes MCU; pan-tilt GPIO18/16; GPIO0 falsy bug fixed; `audit-mechatronics-confidence` 8/8 |
 | 2026-07-18 | **Physical closed loop:** pan-tilt pack + runbook + evidence template; Quick demo prefers it; `make verify-physical-closed-loop` software-ready — human bench open |
+| 2026-07-20 | **Evidence-first integration stack:** donor virtual modules, partial interface contracts, bench-derived gates, tscircuit/PlatformIO/KiBot backends; [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) |
+| 2026-07-20 | **Local diagnosis:** catalog-engine KiCad failure was CI-environment-only (local 9.0.2 → 18/18 DRC clean); CI now pins the `kicad-9.0-releases` PPA and asserts `--format` support. Evidence: `review-ui/evidence-first-local-2026-07-20/` |
+| 2026-07-20 | **Real-bench fixture migrated** to the two-stage contract sequence (signal → completeness); `verify-splice-real-bench` PASS, `power_after_measurements=True` |
+| 2026-07-31 | **Persistent project spine:** canonical cross-discipline machine project, durable revisions, deterministic intake seed, compile-spec projection, monotonic release ordering; [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) |
+| 2026-07-31 | **Staged revision review:** identity-aware semantic diff with `info`/`warning`/`required` severity, append-only review store + API + console, full-snapshot review visibility, journaled crash-recoverable acceptance, stable revision-conflict error contract |
