@@ -86,33 +86,55 @@ def build_salvage_bom_estimate(
     """BOM lines for inventory + optional shopping list with USD estimates."""
     gap = dict(gap_analysis or {})
     lines: List[Dict[str, Any]] = []
-    seen: set[str] = set()
+    seen: Dict[str, Dict[str, Any]] = {}
+    parts_seen: Dict[str, List[str]] = {}
+
+    def _add_instance(line: Dict[str, Any]) -> None:
+        """A design using N of a module needs N of it on the bench."""
+        line["qty"] = int(line.get("qty") or 1) + 1
+        unit = line.get("unit_price_usd")
+        if unit is not None:
+            line["line_total_usd"] = round(float(unit) * line["qty"], 2)
 
     for row in resolved_modules:
         module_id = str(row.get("module_id") or "").strip()
-        if not module_id or module_id in seen:
+        if not module_id:
             continue
-        seen.add(module_id)
-        lines.append(
-            _line_for_module(
+        part_name = str(row.get("part_name") or "").strip()
+        line = seen.get(module_id)
+        if line is None:
+            line = _line_for_module(
                 module_id,
                 source="salvage" if str(row.get("source") or "") != "goal_picker" else "goal",
-                salvaged_part=str(row.get("part_name") or ""),
+                salvaged_part=part_name,
             )
-        )
+            seen[module_id] = line
+            parts_seen[module_id] = [part_name] if part_name else []
+            lines.append(line)
+            continue
+        _add_instance(line)
+        names = parts_seen.setdefault(module_id, [])
+        if part_name and part_name not in names:
+            names.append(part_name)
+            line["salvaged_part"] = "; ".join(names)
 
     for shop in gap.get("shopping_list") or []:
         module_id = str(shop.get("module_id") or "").strip()
-        if not module_id or module_id in seen:
+        if not module_id:
             continue
-        seen.add(module_id)
-        lines.append(
-            _line_for_module(
-                module_id,
-                source="to_buy",
-                priority=str(shop.get("priority") or "recommended"),
-            )
+        line = seen.get(module_id)
+        if line is not None:
+            # Already covered by inventory; only stack repeats of a buy line.
+            if line.get("source") == "to_buy":
+                _add_instance(line)
+            continue
+        line = _line_for_module(
+            module_id,
+            source="to_buy",
+            priority=str(shop.get("priority") or "recommended"),
         )
+        seen[module_id] = line
+        lines.append(line)
 
     salvage_total = sum(float(row["line_total_usd"]) for row in lines if row.get("line_total_usd") is not None and row.get("source") != "to_buy")
     buy_total = sum(float(row["line_total_usd"]) for row in lines if row.get("line_total_usd") is not None and row.get("source") == "to_buy")
