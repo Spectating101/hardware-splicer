@@ -31,7 +31,7 @@ Public path equivalent — tarball deploy (GitHub clone not attempted; prior Jul
 - [x] WSL extract to `/root/hardware-splicer-alpha5` (clean dir)
 - [x] `bash scripts/install_splice_v1.sh`
 - [x] `hs-doctor` — `ok=True`
-- [x] Agent quickstart curls 1–2 per [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md)
+- [x] Agent quickstart curls 1–2 per [`AGENT_QUICKSTART.md`](../AGENT_QUICKSTART.md)
 
 **Install script modifications required?** **No**
 
@@ -120,7 +120,7 @@ scp /tmp/hs-alpha5.tar.gz scripts/agent_quickstart_verify.sh desktop-fgedhgv:
 ssh desktop-fgedhgv "wsl --distribution Ubuntu-24.04 -- bash /mnt/c/Users/user/hs_fgedhgv_track_b.sh"
 ```
 
-Or use [`scripts/agent_quickstart_verify.sh`](../scripts/agent_quickstart_verify.sh) after copying tarball.
+Or use [`scripts/agent_quickstart_verify.sh`](../../scripts/agent_quickstart_verify.sh) after copying tarball.
 
 ---
 

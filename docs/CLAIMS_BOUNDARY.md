@@ -87,7 +87,7 @@
 1. GitHub Release `v1.0.2` + sample zip  
 2. `docs/GITHUB_START_HERE.md`  
 3. `docs/COMPARISON_DEMO_CASE_robot_repair_cafe.md` (optional, internal reviewer)  
-4. `docs/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md` (reproducibility)
+4. `docs/install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md` (reproducibility)
 
 **Do not attach:** `FLUX_TARGET.md`, raw `COMPETITIVE_PACKAGING_STRATEGY.md` to customers without editing.
 

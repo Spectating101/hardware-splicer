@@ -143,7 +143,7 @@ bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
 **Live vision (keyed):** steps 6b/6c in `scripts/agent_quickstart_verify.sh` when `.env.local` present.  
 **Public-web DMM:** `scripts/public_web_bench_capture.py` (Wikimedia meter photos).
 
-See [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
+See [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md).
 
 Start MCP (separate terminal):
 
