@@ -31,6 +31,39 @@ def test_salvage_bom_estimate_has_prices(monkeypatch):
     assert esp.get("price_note") == "prototype_fallback"
 
 
+def test_salvage_bom_counts_repeated_modules(monkeypatch):
+    """A pan-tilt needs two servos; the BOM must not collapse them to one."""
+    monkeypatch.setenv("HARDWARE_SPLICER_JLC_ENRICH", "0")
+    bom = build_salvage_bom_estimate(
+        resolved_modules=[
+            {"module_id": "esp32-devkit", "part_name": "ESP32 DevKit"},
+            {"module_id": "sg90", "part_name": "SG90 pan servo"},
+            {"module_id": "sg90", "part_name": "SG90 tilt servo"},
+        ],
+        gap_analysis={},
+    )
+    servo = next(row for row in bom["lines"] if row["module_id"] == "sg90")
+    mcu = next(row for row in bom["lines"] if row["module_id"] == "esp32-devkit")
+
+    assert servo["qty"] == 2
+    assert mcu["qty"] == 1
+    assert servo["salvaged_part"] == "SG90 pan servo; SG90 tilt servo"
+    assert servo["line_total_usd"] == round(servo["unit_price_usd"] * 2, 2)
+    # One aggregated line per module, not one per instance.
+    assert sum(1 for row in bom["lines"] if row["module_id"] == "sg90") == 1
+
+
+def test_salvage_bom_does_not_double_count_inventory_in_shopping_list(monkeypatch):
+    monkeypatch.setenv("HARDWARE_SPLICER_JLC_ENRICH", "0")
+    bom = build_salvage_bom_estimate(
+        resolved_modules=[{"module_id": "esp32-devkit", "part_name": "ESP32 DevKit"}],
+        gap_analysis={"shopping_list": [{"module_id": "esp32-devkit", "priority": "required"}]},
+    )
+    mcu = [row for row in bom["lines"] if row["module_id"] == "esp32-devkit"]
+    assert len(mcu) == 1
+    assert mcu[0]["qty"] == 1
+
+
 def test_salvage_bom_jlc_enrich_mock(monkeypatch, tmp_path):
     monkeypatch.setenv("HARDWARE_SPLICER_JLC_ENRICH", "1")
     from unittest.mock import MagicMock
