@@ -60,4 +60,4 @@ CI: `.github/workflows/hardware-splicer.yml` → **Splice Agent v1 bar**
 - Public SaaS, billing, in-app auth
 - Mass self-serve deployment
 
-See [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) for packaging polish; [`RELEASE_NOTES_v1.0.0.md`](RELEASE_NOTES_v1.0.0.md) for original v1.0.0 scope.
+See [`RELEASE_NOTES_v1.0.1.md`](RELEASE_NOTES_v1.0.1.md) for packaging polish; [`RELEASE_NOTES_v1.0.md`](RELEASE_NOTES_v1.0.md) for original v1.0.0 scope.

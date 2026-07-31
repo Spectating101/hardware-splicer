@@ -2,8 +2,8 @@
 
 **Purpose:** What we do *after* the proof pack exists and (when triggered) the repo is public — how we actually get pilots and cash.  
 **Depends on:** [`superpowers/plans/2026-07-18-hs-b-to-a-conversion.md`](superpowers/plans/2026-07-18-hs-b-to-a-conversion.md)  
-**Offer:** [`OFFER_SPLICE_BENCH_KIT_v1.md`](../OFFER_SPLICE_BENCH_KIT_v1.md)  
-**Pack:** [`PROOF_PACK_CONTENTS.md`](../PROOF_PACK_CONTENTS.md)
+**Offer:** [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md)  
+**Pack:** [`PROOF_PACK_CONTENTS.md`](PROOF_PACK_CONTENTS.md)
 
 **Product one-liner (always use):**
 
