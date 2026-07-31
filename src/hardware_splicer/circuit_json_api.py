@@ -65,6 +65,9 @@ def create_circuit_json_router() -> APIRouter:
         elif unresolved_count or single_pin_count:
             status = "review_required"
             headline = "Circuit imported with unresolved or incomplete connectivity."
+        elif upstream_diagnostic_count:
+            status = "review_required"
+            headline = "Circuit source graph is compilable, but upstream diagnostics require review."
         else:
             status = "ready"
             headline = "Circuit source graph is ready for Hardware Splicer compile."
