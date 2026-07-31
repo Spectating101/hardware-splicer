@@ -1,0 +1,196 @@
+.engineering-review {
+  display: grid;
+  gap: 1rem;
+}
+
+.engineering-review__header,
+.engineering-review__toolchain,
+.engineering-review__summary,
+.engineering-review__actions,
+.engineering-review__finding-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.engineering-review__header {
+  align-items: flex-start;
+}
+
+.engineering-review__header h3,
+.engineering-review__toolchain p,
+.engineering-review__finding p {
+  margin: 0;
+}
+
+.engineering-review__adapter {
+  flex: 0 0 auto;
+  border: 1px solid var(--border, #d8dde6);
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.engineering-review__adapter.available {
+  border-color: #75b798;
+  background: rgba(25, 135, 84, 0.09);
+}
+
+.engineering-review__adapter.missing {
+  border-color: #d7a54a;
+  background: rgba(255, 193, 7, 0.1);
+}
+
+.engineering-review__chips,
+.engineering-review__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.engineering-review__setup {
+  border: 1px dashed #d7a54a;
+  border-radius: 0.7rem;
+  padding: 0.85rem;
+  background: rgba(255, 193, 7, 0.06);
+}
+
+.engineering-review__setup code {
+  display: block;
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.45rem;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.engineering-review__summary {
+  align-items: flex-start;
+  border-left: 4px solid #6c757d;
+  border-radius: 0.55rem;
+  padding: 0.8rem 0.9rem;
+  background: rgba(108, 117, 125, 0.07);
+}
+
+.engineering-review__summary > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.engineering-review__summary--blocked,
+.engineering-review__summary--failed {
+  border-left-color: #c43d4b;
+  background: rgba(196, 61, 75, 0.08);
+}
+
+.engineering-review__summary--review_required,
+.engineering-review__summary--partial {
+  border-left-color: #d7a54a;
+  background: rgba(215, 165, 74, 0.09);
+}
+
+.engineering-review__summary--clear {
+  border-left-color: #32855b;
+  background: rgba(50, 133, 91, 0.08);
+}
+
+.engineering-review__metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.engineering-review__metrics span {
+  display: grid;
+  gap: 0.1rem;
+  border: 1px solid var(--border, #d8dde6);
+  border-radius: 0.6rem;
+  padding: 0.65rem;
+  text-align: center;
+}
+
+.engineering-review__metrics strong {
+  font-size: 1.15rem;
+}
+
+.engineering-review__findings {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.engineering-review__finding {
+  display: grid;
+  gap: 0.35rem;
+  border: 1px solid var(--border, #d8dde6);
+  border-left-width: 4px;
+  border-radius: 0.55rem;
+  padding: 0.75rem 0.8rem;
+}
+
+.engineering-review__finding--blocker {
+  border-left-color: #c43d4b;
+}
+
+.engineering-review__finding--warning {
+  border-left-color: #d7a54a;
+}
+
+.engineering-review__finding--advisory {
+  border-left-color: #4c83bd;
+}
+
+.engineering-review__finding--info {
+  border-left-color: #7a8796;
+}
+
+.engineering-review__severity {
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.engineering-review__severity--blocker {
+  color: #9d2330;
+  background: rgba(196, 61, 75, 0.12);
+}
+
+.engineering-review__severity--warning {
+  color: #805b16;
+  background: rgba(215, 165, 74, 0.18);
+}
+
+.engineering-review__severity--advisory,
+.engineering-review__severity--info {
+  color: #365d84;
+  background: rgba(76, 131, 189, 0.12);
+}
+
+.engineering-review__failures {
+  border: 1px solid var(--border, #d8dde6);
+  border-radius: 0.55rem;
+  padding: 0.65rem 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .engineering-review__header,
+  .engineering-review__toolchain,
+  .engineering-review__summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .engineering-review__chips,
+  .engineering-review__actions {
+    justify-content: flex-start;
+  }
+
+  .engineering-review__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
