@@ -30,6 +30,7 @@ tests enforce.
 |-----|---------|
 | [MACHINE_PROJECT_SPINE.md](MACHINE_PROJECT_SPINE.md) | Canonical project model, durable revisions, staged review workflow |
 | [INTEGRATION_STACK.md](INTEGRATION_STACK.md) | Evidence-first boundary to external tools; donor virtual modules |
+| [CONSOLIDATION_AUDIT_2026-07-31.md](CONSOLIDATION_AUDIT_2026-07-31.md) | **Current repo state** — what is verified, resolved, and still open |
 
 **Core doctrine, one line:** authority is never implicitly upgraded — importing,
 seeding, diffing, and reviewing report state; they never promote a claim.

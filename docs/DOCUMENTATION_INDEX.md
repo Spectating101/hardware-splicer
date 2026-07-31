@@ -134,6 +134,7 @@ kept as record, not as current truth — when they disagree with
 | [`CONVERSION_DOCTRINE.md`](CONVERSION_DOCTRINE.md) | Conversion strategy | Reference |
 | [`CONVERSION_PUSH.md`](CONVERSION_PUSH.md) | Funnel tactics | Reference |
 | [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](FUNCTIONAL_ASSESSMENT_2026-07-18.md) | Value audit (2026-07-18) | Reference |
+| [`CONSOLIDATION_AUDIT_2026-07-31.md`](CONSOLIDATION_AUDIT_2026-07-31.md) | Repo-state audit — verified state, resolved items, open items | **Core** |
 | [`RELEASE_V1.md`](RELEASE_V1.md) | v1.0 finish line, checklist | Superseded by `RELEASE_v1.1.md` |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install, deploy, systemd, release artifacts | **Core** |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
