@@ -201,9 +201,9 @@ splice-ui-dev: splice-ui-install
 splice-ui-build: splice-ui-install
 	cd apps/splice-ui && npm test && npm run build
 
-# Build UI + serve API and static frontend on one port (auditor / demo mode).
+# Build UI + serve the canonical product API and static frontend on one port.
 splice-ui-serve: splice-ui-build
-	HARDWARE_SPLICER_SERVE_UI=1 PYTHONPATH=src $(PYTHON) -m uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
+	HARDWARE_SPLICER_SERVE_UI=1 PYTHONPATH=src $(PYTHON) -m uvicorn hardware_splicer.product_api:app --host 127.0.0.1 --port 8787
 
 verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers verify-splice smoke
 	@echo "Hardware-Splicer verify: all checks passed"

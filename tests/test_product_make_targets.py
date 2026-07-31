@@ -27,7 +27,7 @@ def test_standard_ui_serve_target_uses_canonical_product_api() -> None:
     assert "npm run build" in output
 
 
-def test_other_make_targets_still_delegate_to_legacy_makefile() -> None:
+def test_unrelated_make_targets_remain_available() -> None:
     output = make_dry_run("doctor")
 
     assert "scripts/hardware_splicer.py doctor" in output
