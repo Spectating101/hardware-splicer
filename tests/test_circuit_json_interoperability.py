@@ -98,7 +98,7 @@ def test_product_api_inspects_upstream_circuit_json() -> None:
 
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "ready"
+    assert body["status"] == "review_required"
     assert body["compilable"] is True
     assert body["authority"] == "proposed"
     assert body["summary"] == {
