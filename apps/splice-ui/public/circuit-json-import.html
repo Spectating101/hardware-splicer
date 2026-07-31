@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hardware Splicer · Circuit JSON Import</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f3f5f8;
+        color: #18202a;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { width: min(1160px, calc(100% - 2rem)); margin: 2rem auto 4rem; display: grid; gap: 1rem; }
+      header, section { background: #fff; border: 1px solid #d9dee7; border-radius: 14px; padding: 1.1rem; box-shadow: 0 6px 22px rgba(28, 39, 54, 0.055); }
+      h1, h2, p { margin-top: 0; }
+      .eyebrow { margin-bottom: .35rem; color: #55708d; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+      .muted { color: #667085; }
+      textarea { width: 100%; min-height: 25rem; resize: vertical; border: 1px solid #cfd6e1; border-radius: 10px; padding: .8rem; font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f9fafb; color: #16202b; }
+      .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }
+      button, a.button { border: 1px solid #acb6c3; border-radius: 9px; padding: .6rem .85rem; font-weight: 750; cursor: pointer; text-decoration: none; color: inherit; background: #fff; }
+      button.primary { border-color: #315f8a; background: #315f8a; color: #fff; }
+      button:disabled { cursor: not-allowed; opacity: .55; }
+      .status { display: none; border-left: 5px solid #64748b; }
+      .status.ready { display: block; border-left-color: #32855b; }
+      .status.review_required { display: block; border-left-color: #d7a54a; }
+      .status.blocked { display: block; border-left-color: #c43d4b; }
+      .metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .55rem; }
+      .metric { padding: .65rem; border-radius: 9px; background: #f3f5f8; }
+      .metric span { display: block; color: #667085; font-size: .75rem; }
+      .metric strong { font-size: 1.15rem; }
+      .pill { display: inline-block; border-radius: 999px; padding: .25rem .55rem; font-size: .72rem; font-weight: 800; background: #eaf0f6; }
+      .grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 1rem; }
+      pre { max-height: 28rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 10px; padding: .75rem; background: #111827; color: #d9e4ef; font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .error { color: #a32733; font-weight: 700; }
+      .success { color: #246944; font-weight: 700; }
+      #resultSection { display: none; }
+      @media (max-width: 800px) {
+        .grid { grid-template-columns: 1fr; }
+        .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (prefers-color-scheme: dark) {
+        :root { background: #10141a; color: #e8edf4; }
+        header, section { background: #171d25; border-color: #303946; }
+        textarea, button, a.button { background: #11171f; color: #e8edf4; border-color: #465364; }
+        textarea { color: #e8edf4; }
+        .metric { background: #11171f; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Hardware Splicer · Interchange workbench</p>
+        <h1>Import upstream Circuit JSON</h1>
+        <p class="muted">Inspect real tscircuit source components, ports, named nets, traces, and diagnostics before accepting the graph into the Hardware Splicer compile spine.</p>
+        <span class="pill">Imported authority: proposed</span>
+        <span class="pill">No silent fabrication authorization</span>
+      </header>
+
+      <section>
+        <div class="grid">
+          <div>
+            <h2>1 · Source documents</h2>
+            <textarea id="documents" spellcheck="false" aria-label="Circuit JSON documents"></textarea>
+            <div class="actions">
+              <button id="inspect">Inspect source graph</button>
+              <button id="compile" class="primary">Compile accepted graph → KiCad</button>
+              <button id="sample">Restore sample</button>
+              <button id="clear">Clear</button>
+            </div>
+            <p id="message" class="muted"></p>
+          </div>
+          <div>
+            <h2>What this checks</h2>
+            <p class="muted">The import layer resolves stable source-port IDs into component pins, aggregates traces connected to shared source nets, preserves direct port-to-port traces, and reports anything it cannot resolve rather than inventing connectivity.</p>
+            <ul>
+              <li>Source component and port identity</li>
+              <li>Named source nets and direct traces</li>
+              <li>Incomplete single-pin nets</li>
+              <li>Unresolved or ambiguous references</li>
+              <li>Upstream warning/error documents</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="statusSection" class="status">
+        <p class="eyebrow" id="statusLabel">Inspection</p>
+        <h2 id="headline"></h2>
+        <div class="metrics">
+          <div class="metric"><span>Documents</span><strong id="documentsCount">0</strong></div>
+          <div class="metric"><span>Components</span><strong id="componentsCount">0</strong></div>
+          <div class="metric"><span>Nets</span><strong id="netsCount">0</strong></div>
+          <div class="metric"><span>Unresolved</span><strong id="unresolvedCount">0</strong></div>
+          <div class="metric"><span>Incomplete nets</span><strong id="singlePinCount">0</strong></div>
+        </div>
+      </section>
+
+      <section id="resultSection">
+        <div class="grid">
+          <div>
+            <h2>2 · Import diagnostics</h2>
+            <pre id="diagnostics">No diagnostics.</pre>
+          </div>
+          <div>
+            <h2>3 · Normalized netlist / compile</h2>
+            <pre id="result">No result.</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const sample = [
+        { type: "source_component", source_component_id: "source_component_0", ftype: "simple_chip", name: "J1" },
+        { type: "source_component", source_component_id: "source_component_1", ftype: "simple_resistor", name: "R1", resistance: 1000, display_resistance: "1kΩ" },
+        { type: "source_port", source_port_id: "source_port_0", source_component_id: "source_component_0", name: "VBUS", pin_number: 1 },
+        { type: "source_port", source_port_id: "source_port_1", source_component_id: "source_component_1", name: "pin1", pin_number: 1 },
+        { type: "source_net", source_net_id: "source_net_0", name: "VBUS", member_source_group_ids: [], is_power: true },
+        { type: "source_trace", source_trace_id: "source_trace_0", connected_source_port_ids: ["source_port_0"], connected_source_net_ids: ["source_net_0"] },
+        { type: "source_trace", source_trace_id: "source_trace_1", connected_source_port_ids: ["source_port_1"], connected_source_net_ids: ["source_net_0"] }
+      ];
+
+      const editor = document.getElementById("documents");
+      const inspectButton = document.getElementById("inspect");
+      const compileButton = document.getElementById("compile");
+      const message = document.getElementById("message");
+      let inspection = null;
+
+      function restoreSample() {
+        editor.value = JSON.stringify(sample, null, 2);
+        inspection = null;
+        message.textContent = "";
+      }
+
+      function documents() {
+        const parsed = JSON.parse(editor.value);
+        if (!Array.isArray(parsed)) throw new Error("Circuit JSON must be a JSON array.");
+        return parsed;
+      }
+
+      async function jsonRequest(path, body) {
+        const response = await fetch(path, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const detail = payload.detail;
+          throw new Error(typeof detail === "string" ? detail : detail?.error?.message || detail?.message || response.statusText);
+        }
+        return payload;
+      }
+
+      function showInspection(payload) {
+        inspection = payload;
+        const status = document.getElementById("statusSection");
+        status.className = `status ${payload.status}`;
+        document.getElementById("statusLabel").textContent = payload.status.replaceAll("_", " ");
+        document.getElementById("headline").textContent = payload.headline;
+        document.getElementById("documentsCount").textContent = payload.summary.document_count;
+        document.getElementById("componentsCount").textContent = payload.summary.component_count;
+        document.getElementById("netsCount").textContent = payload.summary.net_count;
+        document.getElementById("unresolvedCount").textContent = payload.summary.unresolved_count;
+        document.getElementById("singlePinCount").textContent = payload.summary.single_pin_net_count;
+        document.getElementById("diagnostics").textContent = JSON.stringify(payload.diagnostics, null, 2);
+        document.getElementById("result").textContent = JSON.stringify(payload.netlist, null, 2);
+        document.getElementById("resultSection").style.display = "block";
+      }
+
+      async function inspectGraph() {
+        inspectButton.disabled = true;
+        compileButton.disabled = true;
+        message.className = "muted";
+        message.textContent = "Inspecting source graph…";
+        try {
+          const payload = await jsonRequest("/v1/interchange/circuit-json/inspect", {
+            documents: documents(),
+            source_label: "circuit_json_workbench"
+          });
+          showInspection(payload);
+          message.className = payload.compilable ? "success" : "error";
+          message.textContent = payload.compilable ? "Source graph can proceed to compile." : "Resolve the blocked import before compilation.";
+          return payload;
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+          throw error;
+        } finally {
+          inspectButton.disabled = false;
+          compileButton.disabled = false;
+        }
+      }
+
+      async function compileGraph() {
+        compileButton.disabled = true;
+        inspectButton.disabled = true;
+        message.className = "muted";
+        message.textContent = "Inspecting and compiling…";
+        try {
+          const current = inspection || await inspectGraph();
+          if (!current.compilable) throw new Error(current.headline);
+          const payload = await jsonRequest("/v1/netlist-compile", {
+            circuit_json: documents(),
+            build_id: "generic_low_voltage_build",
+            export_gerber: false
+          });
+          document.getElementById("result").textContent = JSON.stringify({ inspection: current, compile: payload }, null, 2);
+          document.getElementById("resultSection").style.display = "block";
+          message.className = payload.ok ? "success" : "error";
+          message.textContent = payload.ok ? "Compile completed. Open the generated build in the Design stage." : "Compile completed with blockers; inspect the returned quality data.";
+        } catch (error) {
+          message.className = "error";
+          message.textContent = error.message;
+        } finally {
+          compileButton.disabled = false;
+          inspectButton.disabled = false;
+        }
+      }
+
+      inspectButton.addEventListener("click", inspectGraph);
+      compileButton.addEventListener("click", compileGraph);
+      document.getElementById("sample").addEventListener("click", restoreSample);
+      document.getElementById("clear").addEventListener("click", () => { editor.value = "[]"; inspection = null; });
+      editor.addEventListener("input", () => { inspection = null; });
+      restoreSample();
+    </script>
+  </body>
+</html>
