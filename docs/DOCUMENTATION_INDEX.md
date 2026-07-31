@@ -4,11 +4,18 @@
 
 **Rule:** If two docs disagree, precedence is:
 
-1. [`ENGINE_DONE.md`](ENGINE_DONE.md) — engine completion / terms  
-2. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — splice product tiers  
-3. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to run (agents)  
-4. [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — what changed recently  
-5. Everything else  
+1. [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) · [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) — architecture and authority invariants  
+2. [`PROGRESSION_STATUS.md`](PROGRESSION_STATUS.md) — what is shipped right now  
+3. [`ENGINE_DONE.md`](ENGINE_DONE.md) — engine completion / terms  
+4. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — splice product tiers  
+5. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to run (agents)  
+6. Everything else  
+
+**Point-in-time docs.** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md),
+[`AGENT_HANDOFF.md`](AGENT_HANDOFF.md), `FUNCTIONAL_ASSESSMENT_*`, and
+`install_reports/` describe the repo on the date they were written. They are
+kept as record, not as current truth — when they disagree with
+`PROGRESSION_STATUS.md` or the architecture docs, they are stale.
 
 ---
 
@@ -101,9 +108,9 @@
 | [`EXTERNAL_PROOF_CHECKLIST.md`](EXTERNAL_PROOF_CHECKLIST.md) | **Post-maturity** — release, 5 conversations |
 | [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md) | Support & power-on boundary |
 | [`INSTALL_REPORT_TEMPLATE.md`](INSTALL_REPORT_TEMPLATE.md) | External machine proof |
-| [`INSTALL_REPORT_dev-linux_2026-07-06.md`](INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev machine validation log |
-| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md) | **Alien machine** — lab Windows + WSL2 (v1.0.2 `verify-product-internal`) |
-| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md) | **Alien machine** — alpha.5 **AGENT_QUICKSTART** Track B (36s) |
+| [`INSTALL_REPORT_dev-linux_2026-07-06.md`](install_reports/INSTALL_REPORT_dev-linux_2026-07-06.md) | Dev machine validation log |
+| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md`](install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md) | **Alien machine** — lab Windows + WSL2 (v1.0.2 `verify-product-internal`) |
+| [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md) | **Alien machine** — alpha.5 **AGENT_QUICKSTART** Track B (36s) |
 | [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |
@@ -119,7 +126,15 @@
 | Doc | Role | v1.0 |
 |-----|------|------|
 | [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) | Product thesis, S0–S5 tiers | **Core** |
-| [`RELEASE_V1.md`](RELEASE_V1.md) | Finish line, checklist | **Core** |
+| [`RELEASE_v1.1.md`](RELEASE_v1.1.md) | **Current release** — install, verify, deploy | **Core** |
+| [`RELEASE_CHECKLIST_v1.1.md`](RELEASE_CHECKLIST_v1.1.md) | v1.1 release checklist | **Core** |
+| [`PROGRESSION_STATUS.md`](PROGRESSION_STATUS.md) | **Living status** — tracks, scoreboards, log | **Core** |
+| [`V1.1_INTERFACE_PREVIEW.md`](V1.1_INTERFACE_PREVIEW.md) | v1.1 scope boundary | Reference |
+| [`LAUNCH_v1.1.md`](LAUNCH_v1.1.md) | v1.1 launch pointer | Reference |
+| [`CONVERSION_DOCTRINE.md`](CONVERSION_DOCTRINE.md) | Conversion strategy | Reference |
+| [`CONVERSION_PUSH.md`](CONVERSION_PUSH.md) | Funnel tactics | Reference |
+| [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](FUNCTIONAL_ASSESSMENT_2026-07-18.md) | Value audit (2026-07-18) | Reference |
+| [`RELEASE_V1.md`](RELEASE_V1.md) | v1.0 finish line, checklist | Superseded by `RELEASE_v1.1.md` |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install, deploy, systemd, release artifacts | **Core** |
 | [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
 | [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook | **Core** |
@@ -156,6 +171,14 @@
 |-----|------|
 | [`ENGINE_DONE.md`](ENGINE_DONE.md) | **Canonical engine gates** |
 | [`ENGINE.md`](ENGINE.md) | Pipeline diagram |
+| [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) | **Canonical project model**, durable revisions, staged review |
+| [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) | **Evidence-first external boundary**, donor virtual modules |
+| [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md) | Wired vs planned OSS surfaces |
+| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | Interface-layer strategy |
+| [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) | atopile import path |
+| [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) | KiCad MCP sidecar |
+| [`KICAD_MCP_DEV_PROFILE.md`](KICAD_MCP_DEV_PROFILE.md) | KiCad MCP dev profile |
+| [`BUILD_FILES_API_SECURITY.md`](BUILD_FILES_API_SECURITY.md) | build_dir / out_dir security |
 | [`INTEGRATION.md`](INTEGRATION.md) | Env + runtime |
 | [`INTEGRATIONS_RESEARCH.md`](INTEGRATIONS_RESEARCH.md) | OSS integration research |
 | [`INCORPORATION_RESEARCH.md`](INCORPORATION_RESEARCH.md) | OSS stack — don’t rebuild |
@@ -170,7 +193,16 @@
 | Doc | Role |
 |-----|------|
 | [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md) | Bench / splice norms |
+| [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md) | Real-bench operator procedure |
 | [`REAL_WORLD_PARALLELS.md`](REAL_WORLD_PARALLELS.md) | Repair café, lab parallels |
+
+### Pilots & design partners
+
+| Doc | Role |
+|-----|------|
+| [`DESIGN_PARTNER.md`](DESIGN_PARTNER.md) | How to join the 3-slot cohort |
+| [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Bench kit offer |
+| [`PROOF_PACK_CONTENTS.md`](PROOF_PACK_CONTENTS.md) | What ships in a proof pack |
 
 ### Competition archive (`docs/competition/`)
 
@@ -296,6 +328,7 @@ Everything else → index.
 
 | Date | Change |
 |------|--------|
+| 2026-07-31 | Index refreshed: 18 unlisted docs added, `MACHINE_PROJECT_SPINE.md` recorded, precedence reordered to architecture → status, point-in-time docs marked as record. Dated install reports moved into `install_reports/` |
 | 2026-07-10 | `COLD_INTERNAL_EXIT.md` + Phase 0/1 cold exit links (alpha.16) |
 | 2026-07-08 | `PRODUCT_SCALE_PLAN.md`, `AGENT_QUICKSTART.md`, `AGENT_BUILD_DIR_POLICY.md` — alpha.5 |
 | 2026-07 | v1.0.1 doc set: quickstart, support, ops, demo, install template |
