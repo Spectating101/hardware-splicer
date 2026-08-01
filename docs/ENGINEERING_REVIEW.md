@@ -16,6 +16,22 @@ From the **Design** stage:
 
 The review may inform or block a release policy. It never grants fabrication, flashing, or power-on authorization.
 
+## Interchange-to-review workflow
+
+The packaged UI also exposes `/capability-studio.html` for external-source intake. It joins the previously separate Circuit JSON and engineering-review paths into one visible sequence:
+
+1. inspect upstream Circuit JSON identity and connectivity;
+2. compile the accepted graph through the Hardware Splicer/KiCad spine;
+3. detect the optional kicad-happy adapter for the resulting build;
+4. run review and inspect normalized blockers, warnings, provenance, and recommendations;
+5. carry the build and `ENGINEERING_REVIEW.json` into the main project workspace.
+
+Authority remains deliberately layered:
+
+- imported source identity is `proposed`;
+- external analyzer evidence is capped at `observed`;
+- KiCad checks, project gates, bench evidence, and a human release decision remain independent.
+
 ## Configure kicad-happy
 
 Clone the upstream project outside Hardware Splicer and point the product API at it:
