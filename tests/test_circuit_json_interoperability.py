@@ -113,8 +113,8 @@ def test_product_api_exposes_interchange_and_review_routes_together() -> None:
 
     route_paths = {route.path for route in client.app.routes}
     assert "/v1/interchange/circuit-json/inspect" in route_paths
-    assert "/v1/engineering-review/status" in route_paths
-    assert "/v1/engineering-review/run" in route_paths
+    assert "/v1/build-files/engineering-review/status" in route_paths
+    assert "/v1/build-files/engineering-review/run" in route_paths
 
 
 def test_product_api_surfaces_incomplete_source_graph() -> None:
