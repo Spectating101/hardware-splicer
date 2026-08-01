@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hardware Splicer · Capability Studio</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f4f6f8;
+        color: #17212b;
+        --surface: #ffffff;
+        --surface-soft: #f8fafc;
+        --line: #d8dee7;
+        --muted: #657180;
+        --primary: #245d7a;
+        --primary-strong: #18465f;
+        --good: #287557;
+        --warn: #a56a15;
+        --bad: #a93442;
+        --shadow: 0 14px 40px rgba(24, 38, 55, 0.08);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; }
+      button, textarea, input { font: inherit; }
+      button { cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: .52; }
+      a { color: inherit; }
+      .shell { display: grid; grid-template-columns: 270px minmax(0, 1fr); min-height: 100vh; }
+      aside { position: sticky; top: 0; height: 100vh; padding: 1.1rem; border-right: 1px solid var(--line); background: #111a23; color: #edf4fa; }
+      .brand { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.4rem; }
+      .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: #d9ebf5; color: #173d51; font-weight: 900; }
+      .brand span { display: block; color: #9db0bf; font-size: .78rem; }
+      .side-label { margin: 1.15rem 0 .45rem; color: #8ea3b3; font-size: .72rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+      .side-step { display: grid; grid-template-columns: 28px 1fr; gap: .55rem; padding: .65rem; border-radius: 10px; color: #aec0cd; }
+      .side-step.active { background: #203444; color: #fff; }
+      .side-step.complete { color: #c9f0df; }
+      .step-number { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid currentColor; border-radius: 50%; font-size: .72rem; font-weight: 900; }
+      .side-step strong { display: block; font-size: .88rem; }
+      .side-step span:last-child { display: block; margin-top: .12rem; font-size: .72rem; line-height: 1.35; }
+      .side-link { display: block; margin-top: .55rem; padding: .55rem .65rem; border: 1px solid #354957; border-radius: 9px; color: #c8d6df; text-decoration: none; font-size: .82rem; }
+      main { padding: 2rem; }
+      .content { width: min(1280px, 100%); margin: 0 auto; display: grid; gap: 1rem; }
+      .card { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); padding: 1.15rem; }
+      .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: start; }
+      .eyebrow { margin: 0 0 .35rem; color: #557189; font-size: .72rem; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+      h1, h2, h3, p { margin-top: 0; }
+      h1 { max-width: 800px; margin-bottom: .55rem; font-size: clamp(1.8rem, 4vw, 3rem); line-height: 1.07; }
+      h2 { margin-bottom: .4rem; }
+      h3 { margin-bottom: .35rem; }
+      .lead { max-width: 820px; color: var(--muted); font-size: 1.02rem; line-height: 1.6; }
+      .authority { display: grid; gap: .45rem; min-width: 220px; }
+      .pill { display: inline-flex; align-items: center; width: fit-content; border-radius: 999px; padding: .28rem .58rem; background: #eaf1f5; color: #31576d; font-size: .72rem; font-weight: 850; }
+      .pill.good { background: #e5f4ed; color: #22664a; }
+      .pill.warn { background: #fff1d8; color: #81520d; }
+      .pill.bad { background: #fbe4e7; color: #8b2633; }
+      .grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr); gap: 1rem; }
+      .stack { display: grid; gap: .8rem; }
+      .section-head { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+      textarea { width: 100%; min-height: 410px; resize: vertical; border: 1px solid #cbd4df; border-radius: 11px; padding: .85rem; background: var(--surface-soft); color: inherit; font: 12.5px/1.52 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .75rem; }
+      button, .button { border: 1px solid #aeb9c5; border-radius: 9px; padding: .58rem .78rem; background: var(--surface); color: inherit; font-weight: 780; text-decoration: none; }
+      button.primary { border-color: var(--primary); background: var(--primary); color: #fff; }
+      button.primary:hover:not(:disabled) { background: var(--primary-strong); }
+      button.ghost { background: transparent; }
+      .status-card { border-left: 5px solid #748293; }
+      .status-card.ready, .status-card.clear { border-left-color: var(--good); }
+      .status-card.review_required, .status-card.partial { border-left-color: var(--warn); }
+      .status-card.blocked, .status-card.failed { border-left-color: var(--bad); }
+      .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .55rem; }
+      .metric { padding: .65rem; border-radius: 10px; background: var(--surface-soft); }
+      .metric span { display: block; color: var(--muted); font-size: .72rem; }
+      .metric strong { display: block; margin-top: .15rem; font-size: 1.18rem; }
+      .muted { color: var(--muted); }
+      .small { font-size: .82rem; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .message { min-height: 1.25rem; margin: .65rem 0 0; color: var(--muted); }
+      .message.error { color: var(--bad); font-weight: 760; }
+      .message.success { color: var(--good); font-weight: 760; }
+      pre { margin: .55rem 0 0; max-height: 300px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 10px; padding: .75rem; background: #111923; color: #dce8f0; font: 11.5px/1.48 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      details { border-top: 1px solid var(--line); padding-top: .65rem; }
+      summary { cursor: pointer; font-weight: 780; }
+      .adapter-row { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: .75rem; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-soft); }
+      .findings { display: grid; gap: .55rem; margin-top: .75rem; }
+      .finding { padding: .72rem; border: 1px solid var(--line); border-left-width: 4px; border-radius: 9px; }
+      .finding.blocker { border-left-color: var(--bad); }
+      .finding.warning { border-left-color: var(--warn); }
+      .finding.advisory, .finding.info { border-left-color: #557b94; }
+      .finding-head { display: flex; justify-content: space-between; gap: .6rem; margin-bottom: .25rem; }
+      .finding p { margin: .28rem 0 0; }
+      .handoff { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; }
+      .handoff-item { padding: .8rem; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-soft); }
+      .hidden { display: none !important; }
+      @media (max-width: 960px) {
+        .shell { grid-template-columns: 1fr; }
+        aside { position: static; height: auto; }
+        .grid, .hero { grid-template-columns: 1fr; }
+        .authority { min-width: 0; }
+      }
+      @media (max-width: 640px) {
+        main { padding: 1rem; }
+        .metrics, .handoff { grid-template-columns: 1fr; }
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          background: #0e141a;
+          color: #e8eef3;
+          --surface: #171e26;
+          --surface-soft: #111820;
+          --line: #303b47;
+          --muted: #a2afba;
+          --shadow: none;
+        }
+        textarea, button, .button { border-color: #42505e; }
+        .pill { background: #20313d; color: #b9d7e8; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside>
+        <div class="brand">
+          <div class="brand-mark">HS</div>
+          <div><strong>Capability Studio</strong><span>External engines · governed workflow</span></div>
+        </div>
+        <div class="side-label">Delivery flow</div>
+        <div class="side-step active" data-step="1"><span class="step-number">1</span><div><strong>Inspect intake</strong><span>Resolve source identity and connectivity.</span></div></div>
+        <div class="side-step" data-step="2"><span class="step-number">2</span><div><strong>Compile</strong><span>Create a KiCad-backed Hardware Splicer build.</span></div></div>
+        <div class="side-step" data-step="3"><span class="step-number">3</span><div><strong>Review evidence</strong><span>Run read-only external analysis.</span></div></div>
+        <div class="side-step" data-step="4"><span class="step-number">4</span><div><strong>Handoff</strong><span>Carry artifacts and findings into the project.</span></div></div>
+        <div class="side-label">Navigation</div>
+        <a class="side-link" href="/">Open main product</a>
+        <a class="side-link" href="/docs">API documentation</a>
+      </aside>
+
+      <main>
+        <div class="content">
+          <section class="card hero">
+            <div>
+              <p class="eyebrow">Interchange → engineering evidence</p>
+              <h1>Turn an external circuit graph into a reviewable build.</h1>
+              <p class="lead">Circuit JSON supplies proposed electrical identity. Hardware Splicer compiles it through the KiCad spine. Optional kicad-happy analysis contributes observed evidence. Human review and release gates remain authoritative.</p>
+            </div>
+            <div class="authority">
+              <span class="pill">Import ceiling · proposed</span>
+              <span class="pill">External review ceiling · observed</span>
+              <span class="pill warn">No automatic fabrication authorization</span>
+            </div>
+          </section>
+
+          <div class="grid">
+            <section class="card">
+              <div class="section-head">
+                <div><p class="eyebrow">Step 1</p><h2>Inspect Circuit JSON</h2><p class="muted small">Paste a tscircuit source graph. Unresolved references remain explicit; connectivity is never invented.</p></div>
+                <span id="intakeAuthority" class="pill">proposed</span>
+              </div>
+              <textarea id="documents" spellcheck="false" aria-label="Circuit JSON documents"></textarea>
+              <div class="actions">
+                <button id="inspect" class="primary">Inspect source graph</button>
+                <button id="sample">Restore sample</button>
+                <button id="clear" class="ghost">Clear</button>
+              </div>
+              <p id="intakeMessage" class="message" role="status"></p>
+            </section>
+
+            <div class="stack">
+              <section id="inspectionCard" class="card status-card">
+                <p class="eyebrow">Import acceptance</p>
+                <h2 id="inspectionHeadline">No source inspected</h2>
+                <p id="inspectionDetail" class="muted small">Inspect a source graph to see components, nets, unresolved references, and upstream diagnostics.</p>
+                <div class="metrics">
+                  <div class="metric"><span>Components</span><strong id="componentCount">—</strong></div>
+                  <div class="metric"><span>Nets</span><strong id="netCount">—</strong></div>
+                  <div class="metric"><span>Diagnostics</span><strong id="diagnosticCount">—</strong></div>
+                </div>
+                <details id="diagnosticDetails" class="hidden"><summary>Import diagnostics</summary><pre id="diagnostics"></pre></details>
+              </section>
+
+              <section class="card">
+                <p class="eyebrow">Step 2</p>
+                <h2>Compile accepted graph</h2>
+                <p class="muted small">Compilation creates a build and KiCad artifacts. It does not resolve source warnings or authorize downstream release.</p>
+                <div class="actions"><button id="compile" class="primary" disabled>Compile → KiCad build</button></div>
+                <p id="compileMessage" class="message" role="status"></p>
+                <div id="buildSummary" class="hidden">
+                  <div class="adapter-row"><div><strong>Build directory</strong><div id="buildDir" class="mono small muted"></div></div><span id="compileStatus" class="pill"></span></div>
+                  <details><summary>Compile response</summary><pre id="compileResult"></pre></details>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <section id="reviewCard" class="card status-card">
+            <div class="section-head">
+              <div><p class="eyebrow">Step 3</p><h2>Engineering review</h2><p class="muted small">Read-only schematic, PCB, and Gerber analysis becomes provenance-bearing observed evidence.</p></div>
+              <span id="adapterBadge" class="pill">Build required</span>
+            </div>
+            <div class="adapter-row">
+              <div><strong id="adapterName">kicad-happy</strong><p id="adapterDetail" class="small muted">Compile a build before checking the review adapter.</p></div>
+              <div class="actions"><button id="checkReview" disabled>Check adapter</button><button id="runReview" class="primary" disabled>Run engineering review</button></div>
+            </div>
+            <p id="reviewMessage" class="message" role="status"></p>
+            <div id="reviewSummary" class="hidden">
+              <div class="metrics">
+                <div class="metric"><span>Blockers</span><strong id="blockerCount">0</strong></div>
+                <div class="metric"><span>Warnings</span><strong id="warningCount">0</strong></div>
+                <div class="metric"><span>Analyzers</span><strong id="analysisCount">0</strong></div>
+              </div>
+              <div id="findings" class="findings"></div>
+              <details><summary>Normalized review artifact</summary><pre id="reviewResult"></pre></details>
+            </div>
+          </section>
+
+          <section id="handoffCard" class="card">
+            <p class="eyebrow">Step 4</p>
+            <h2>Project handoff</h2>
+            <p class="muted small">The build, import diagnostics, and external review remain separate evidence layers. Continue in the main product for design preview, gates, bench evidence, and package release.</p>
+            <div class="handoff">
+              <div class="handoff-item"><strong>Source intake</strong><p id="handoffIntake" class="small muted">Not inspected.</p></div>
+              <div class="handoff-item"><strong>Compiled build</strong><p id="handoffBuild" class="small muted">Not compiled.</p></div>
+              <div class="handoff-item"><strong>Review evidence</strong><p id="handoffReview" class="small muted">Not run.</p></div>
+            </div>
+            <div class="actions">
+              <a class="button" href="/">Open main project UI</a>
+              <button id="downloadReview" disabled>Download ENGINEERING_REVIEW.json</button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const API_BASE = window.location.port === "5178" ? "/api" : "";
+      const sample = [
+        { type: "source_component", source_component_id: "source_component_0", ftype: "simple_chip", name: "J1" },
+        { type: "source_component", source_component_id: "source_component_1", ftype: "simple_resistor", name: "R1", resistance: 1000, display_resistance: "1kΩ" },
+        { type: "source_component", source_component_id: "source_component_2", ftype: "simple_diode", name: "LED1" },
+        { type: "source_port", source_port_id: "source_port_0", source_component_id: "source_component_0", name: "VBUS", pin_number: 1 },
+        { type: "source_port", source_port_id: "source_port_1", source_component_id: "source_component_0", name: "GND", pin_number: 2 },
+        { type: "source_port", source_port_id: "source_port_2", source_component_id: "source_component_1", name: "pin1", pin_number: 1 },
+        { type: "source_port", source_port_id: "source_port_3", source_component_id: "source_component_1", name: "pin2", pin_number: 2 },
+        { type: "source_port", source_port_id: "source_port_4", source_component_id: "source_component_2", name: "anode", pin_number: 1 },
+        { type: "source_port", source_port_id: "source_port_5", source_component_id: "source_component_2", name: "cathode", pin_number: 2 },
+        { type: "source_net", source_net_id: "source_net_0", name: "VBUS", member_source_group_ids: [], is_power: true },
+        { type: "source_net", source_net_id: "source_net_1", name: "GND", member_source_group_ids: [], is_ground: true },
+        { type: "source_trace", source_trace_id: "source_trace_0", connected_source_port_ids: ["source_port_0"], connected_source_net_ids: ["source_net_0"] },
+        { type: "source_trace", source_trace_id: "source_trace_1", connected_source_port_ids: ["source_port_2"], connected_source_net_ids: ["source_net_0"] },
+        { type: "source_trace", source_trace_id: "source_trace_2", connected_source_port_ids: ["source_port_3", "source_port_4"], connected_source_net_ids: [], display_name: "R1.2 to LED1.anode" },
+        { type: "source_trace", source_trace_id: "source_trace_3", connected_source_port_ids: ["source_port_1"], connected_source_net_ids: ["source_net_1"] },
+        { type: "source_trace", source_trace_id: "source_trace_4", connected_source_port_ids: ["source_port_5"], connected_source_net_ids: ["source_net_1"] }
+      ];
+
+      const state = { inspection: null, compile: null, buildDir: "", reviewStatus: null, review: null };
+      const $ = (id) => document.getElementById(id);
+
+      function endpoint(path) { return `${API_BASE}${path}`; }
+      async function request(path, body) {
+        const response = await fetch(endpoint(path), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const detail = payload?.detail;
+          throw new Error(typeof detail === "string" ? detail : detail?.error?.message || detail?.message || response.statusText);
+        }
+        return payload;
+      }
+      function documents() {
+        const parsed = JSON.parse($("documents").value);
+        if (!Array.isArray(parsed)) throw new Error("Circuit JSON must be a JSON array.");
+        return parsed;
+      }
+      function setMessage(id, text, type = "") {
+        const node = $(id); node.textContent = text; node.className = `message ${type}`.trim();
+      }
+      function setStep(number) {
+        document.querySelectorAll(".side-step").forEach((node) => {
+          const value = Number(node.dataset.step);
+          node.classList.toggle("active", value === number);
+          node.classList.toggle("complete", value < number);
+        });
+      }
+      function restoreSample() {
+        $("documents").value = JSON.stringify(sample, null, 2);
+        state.inspection = null;
+        $("compile").disabled = true;
+        setMessage("intakeMessage", "");
+      }
+      function renderInspection(payload) {
+        state.inspection = payload;
+        const card = $("inspectionCard");
+        card.className = `card status-card ${payload.status}`;
+        $("inspectionHeadline").textContent = payload.headline;
+        $("inspectionDetail").textContent = payload.compilable
+          ? "The normalized graph can enter compile. Review-required diagnostics remain visible and unresolved."
+          : "Compilation is blocked until the source graph resolves at least one multi-pin electrical net.";
+        $("componentCount").textContent = payload.summary.component_count;
+        $("netCount").textContent = payload.summary.net_count;
+        const diagnosticCount = payload.summary.unresolved_count + payload.summary.single_pin_net_count + payload.summary.upstream_diagnostic_count;
+        $("diagnosticCount").textContent = diagnosticCount;
+        $("diagnostics").textContent = JSON.stringify(payload.diagnostics, null, 2);
+        $("diagnosticDetails").classList.toggle("hidden", diagnosticCount === 0);
+        $("compile").disabled = !payload.compilable;
+        $("handoffIntake").textContent = `${payload.summary.component_count} components · ${payload.summary.net_count} nets · ${payload.status.replaceAll("_", " ")}.`;
+        setStep(2);
+      }
+      function resolveBuildDir(payload) {
+        return payload?.build_dir || payload?.out_dir || payload?.outDir || payload?.compile?.build_dir || payload?.result?.build_dir || "";
+      }
+      function renderCompile(payload) {
+        state.compile = payload;
+        state.buildDir = resolveBuildDir(payload);
+        $("buildSummary").classList.remove("hidden");
+        $("buildDir").textContent = state.buildDir || "Compile returned no build directory";
+        $("compileStatus").textContent = payload.ok === false ? "review required" : "compiled";
+        $("compileStatus").className = `pill ${payload.ok === false ? "warn" : "good"}`;
+        $("compileResult").textContent = JSON.stringify(payload, null, 2);
+        $("checkReview").disabled = !state.buildDir;
+        $("handoffBuild").textContent = state.buildDir ? `Build created at ${state.buildDir}.` : "Compile response needs build-directory inspection.";
+        if (state.buildDir) setStep(3);
+      }
+      function renderReviewStatus(payload) {
+        state.reviewStatus = payload;
+        const adapter = payload.adapter || {};
+        $("adapterName").textContent = adapter.name || "kicad-happy";
+        $("adapterBadge").textContent = adapter.available ? "Analyzer ready" : "Analyzer not configured";
+        $("adapterBadge").className = `pill ${adapter.available ? "good" : "warn"}`;
+        $("adapterDetail").textContent = adapter.available
+          ? `Read-only · authority ceiling ${adapter.authority_ceiling || "observed"} · ${(payload.supported_inputs || []).join(", ") || "available analyzers detected"}`
+          : adapter.setup?.instruction || "Set HARDWARE_SPLICER_KICAD_HAPPY_ROOT to an upstream checkout.";
+        $("runReview").disabled = !payload.can_run;
+        if (payload.latest_review) renderReview(payload.latest_review);
+      }
+      function renderReview(payload) {
+        state.review = payload;
+        const summary = payload.summary || {};
+        const status = summary.status || (payload.skipped ? "partial" : "clear");
+        $("reviewCard").className = `card status-card ${status}`;
+        $("reviewSummary").classList.remove("hidden");
+        $("blockerCount").textContent = summary.blocker_count || 0;
+        $("warningCount").textContent = summary.warning_count || 0;
+        $("analysisCount").textContent = summary.analysis_count || 0;
+        $("reviewResult").textContent = JSON.stringify(payload, null, 2);
+        const findings = [...(payload.findings || [])].sort((a, b) => ({ blocker: 0, warning: 1, advisory: 2, info: 3 }[a.severity] ?? 9) - ({ blocker: 0, warning: 1, advisory: 2, info: 3 }[b.severity] ?? 9));
+        $("findings").innerHTML = findings.slice(0, 20).map((finding) => `
+          <article class="finding ${finding.severity || "info"}">
+            <div class="finding-head"><strong>${escapeHtml(finding.title || finding.rule_id || "Finding")}</strong><span class="pill">${escapeHtml(finding.severity || "info")}</span></div>
+            <p>${escapeHtml(finding.recommendation || finding.message || "No recommendation supplied.")}</p>
+            <p class="small muted mono">${escapeHtml(finding.rule_id || "unclassified")} · ${escapeHtml(finding.analyzer_type || "analyzer")}</p>
+          </article>`).join("") || '<p class="small muted">No normalized findings were reported.</p>';
+        $("downloadReview").disabled = !state.buildDir;
+        $("handoffReview").textContent = `${summary.blocker_count || 0} blockers · ${summary.warning_count || 0} warnings · ${status.replaceAll("_", " ")}.`;
+        setStep(4);
+      }
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+      }
+
+      $("inspect").addEventListener("click", async () => {
+        $("inspect").disabled = true;
+        setMessage("intakeMessage", "Inspecting source identity and connectivity…");
+        try {
+          const payload = await request("/v1/interchange/circuit-json/inspect", { documents: documents(), source_label: "capability_studio" });
+          renderInspection(payload);
+          setMessage("intakeMessage", payload.compilable ? "Inspection complete. The graph may proceed to compile." : payload.headline, payload.compilable ? "success" : "error");
+        } catch (error) {
+          setMessage("intakeMessage", error.message, "error");
+        } finally { $("inspect").disabled = false; }
+      });
+      $("compile").addEventListener("click", async () => {
+        $("compile").disabled = true;
+        setMessage("compileMessage", "Compiling accepted source graph through the KiCad spine…");
+        try {
+          const payload = await request("/v1/netlist-compile", { circuit_json: documents(), build_id: "generic_low_voltage_build", export_gerber: false });
+          renderCompile(payload);
+          setMessage("compileMessage", state.buildDir ? "Compile completed. Engineering review can now inspect the build." : "Compile completed, but no build directory was returned.", state.buildDir ? "success" : "error");
+        } catch (error) {
+          setMessage("compileMessage", error.message, "error");
+        } finally { $("compile").disabled = !state.inspection?.compilable; }
+      });
+      $("checkReview").addEventListener("click", async () => {
+        $("checkReview").disabled = true;
+        setMessage("reviewMessage", "Checking review adapter and existing evidence…");
+        try {
+          const payload = await request("/v1/build-files/engineering-review/status", { build_dir: state.buildDir });
+          renderReviewStatus(payload);
+          setMessage("reviewMessage", payload.adapter?.available ? "Review engine is ready." : "Review engine is optional and not configured.", payload.adapter?.available ? "success" : "");
+        } catch (error) { setMessage("reviewMessage", error.message, "error"); }
+        finally { $("checkReview").disabled = !state.buildDir; }
+      });
+      $("runReview").addEventListener("click", async () => {
+        $("runReview").disabled = true;
+        setMessage("reviewMessage", "Running bounded external analysis…");
+        try {
+          const payload = await request("/v1/build-files/engineering-review/run", { build_dir: state.buildDir, force: Boolean(state.review), timeout_s: 180 });
+          if (payload.skipped) {
+            setMessage("reviewMessage", payload.reason || "Engineering review was skipped.", "error");
+          } else {
+            renderReview(payload);
+            setMessage("reviewMessage", payload.cached ? "Existing engineering review is current." : "Engineering review saved to the build package.", "success");
+          }
+        } catch (error) { setMessage("reviewMessage", error.message, "error"); }
+        finally { $("runReview").disabled = !state.reviewStatus?.can_run; }
+      });
+      $("downloadReview").addEventListener("click", async () => {
+        try {
+          const response = await fetch(endpoint("/v1/build-files/download"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ build_dir: state.buildDir, relative: "build_compilation/ENGINEERING_REVIEW.json" }) });
+          if (!response.ok) throw new Error("Review artifact is not available for download.");
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a"); anchor.href = url; anchor.download = "ENGINEERING_REVIEW.json"; anchor.click(); URL.revokeObjectURL(url);
+        } catch (error) { setMessage("reviewMessage", error.message, "error"); }
+      });
+      $("sample").addEventListener("click", restoreSample);
+      $("clear").addEventListener("click", () => { $("documents").value = "[]"; state.inspection = null; $("compile").disabled = true; setStep(1); });
+      $("documents").addEventListener("input", () => { state.inspection = null; $("compile").disabled = true; setStep(1); });
+      restoreSample();
+    </script>
+  </body>
+</html>
