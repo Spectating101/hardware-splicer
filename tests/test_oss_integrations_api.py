@@ -18,19 +18,42 @@ def test_integrations_catalog() -> None:
     client = TestClient(create_app())
     payload = client.get("/v1/integrations/catalog").json()
     assert payload["ok"] is True
-    assert payload["total_count"] >= 15
-    assert payload["wired_count"] >= 5
-    ids = {row["id"] for row in payload["integrations"]}
-    assert "kicanvas" in ids
-    assert "circuit-json" in ids
-    assert "freerouting" in ids
-    assert "ibom" in ids
-    assert "pcbdraw" in ids
-    assert "kikit" in ids
-    assert "tscircuit-autorouter" in ids
-    assert "easyeda2kicad" in ids
-    assert "esphome" in ids
-    assert "nopscadlib" in ids
+    assert payload["schema_version"] == "hardware_splicer.oss_catalog.v2"
+    assert payload["total_count"] >= 14
+    assert payload["wired_count"] >= 7
+    assert 0 <= payload["outcome_readiness_score"] <= 100
+    assert payload["workflows"]
+
+    rows = {row["id"]: row for row in payload["integrations"]}
+    for required in {
+        "kicanvas",
+        "kicad-cli",
+        "circuit-json",
+        "kicad-happy",
+        "build123d-agentcad",
+        "atopile",
+        "konnect",
+        "freerouting",
+        "kikit",
+        "partcad",
+    }:
+        assert required in rows
+
+    for row in rows.values():
+        assert row["user_value"]
+        assert row["delivery"]
+        assert row["authority_ceiling"] in {"proposed", "observed", "verified"}
+        assert row["runtime"]
+
+    assert rows["circuit-json"]["status"] == "partial"
+    assert rows["circuit-json"]["limitations"]
+    assert rows["kicad-happy"]["authority_ceiling"] == "observed"
+    assert rows["konnect"]["delivery"] == "licensed_sidecar"
+
+    workflows = {row["id"]: row for row in payload["workflows"]}
+    assert workflows["reviewable-board"]["release_state"] == "available"
+    assert "kicad-happy" in workflows["engineering-review"]["integrations"]
+    assert "STEP" in workflows["mechanical-handoff"]["deliverables"]
 
 
 def test_build_artifacts_and_circuit_json(tmp_path: Path) -> None:
