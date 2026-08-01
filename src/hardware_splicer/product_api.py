@@ -11,6 +11,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from .api import create_app as create_engine_app
+from .circuit_json_api import create_circuit_json_router
 from .engineering_review_api import create_engineering_review_router
 from .machine_project_api import create_machine_project_router
 from .project_api import create_project_router
@@ -24,6 +25,7 @@ def create_product_app(*, project_store: ProjectStore | None = None) -> FastAPI:
     app = create_engine_app()
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_machine_project_router())
+    app.include_router(create_circuit_json_router())
     app.include_router(create_engineering_review_router())
     app.state.project_store = resolved_store
     return app
