@@ -10,6 +10,7 @@ from .engineering_analysis import EngineeringAnalysisReport
 from .engineering_artifact_projection import project_engineering_artifacts
 from .engineering_execution_plan import EngineeringExecutionPlan, build_engineering_execution_plan
 from .engineering_source_graph import EngineeringSourceGraph
+from .engineering_status import build_engineering_status
 from .engineering_verification_bridge import bridge_engineering_verification
 from .machine_project import MachineProject
 from .manufacturing_closure import ManufacturingClosureReport, build_manufacturing_closure
@@ -41,7 +42,7 @@ def plan_guided_engineering_project(
     baseline_project: Mapping[str, Any] | MachineProject | None = None,
     skip_vision: bool = False,
 ) -> Dict[str, Any]:
-    """Create the complete plan, source projection, closure, verification, and guide."""
+    """Create the complete plan, projections, closure, verification, guide, and status."""
 
     plan = plan_complete_engineering_project(
         intake,
@@ -206,4 +207,46 @@ def plan_guided_engineering_project(
         }
     )
     plan["engineering_readiness"] = readiness
+
+    status_report = build_engineering_status(plan)
+    status_payload = status_report.model_dump(mode="json")
+    plan["engineering_status"] = status_payload
+    readiness.update(
+        {
+            "status": status_report.overall_status,
+            "current_phase": status_report.current_phase,
+            "unified_blocker_count": len(status_report.blockers),
+            "unified_advisory_count": len(status_report.advisories),
+            "next_action_id": status_report.next_action_id,
+        }
+    )
+    plan["engineering_readiness"] = readiness
+
+    payloads = dict(project.discipline_payloads)
+    payloads["engineering_status"] = status_payload
+    metadata = dict(project.metadata)
+    metadata.update(
+        {
+            "engineering_status_schema": status_report.schema_version,
+            "engineering_status": status_report.overall_status,
+            "engineering_current_phase": status_report.current_phase,
+            "engineering_blocker_count": len(status_report.blockers),
+            "engineering_next_action_id": status_report.next_action_id,
+            "physical_authority_unchanged": True,
+        }
+    )
+    project = project.model_copy(update={"discipline_payloads": payloads, "metadata": metadata}, deep=True)
+    plan["machine_project"] = project.model_dump(mode="json")
+
+    scenario = dict(plan.get("scenario") or {})
+    compile_spec = dict(scenario.get("compile_spec") or {})
+    compile_spec["machine_project"] = project.model_dump(mode="json")
+    compile_spec["engineering_status"] = status_payload
+    scenario["compile_spec"] = compile_spec
+    scenario["next_action"] = (
+        status_report.next_actions[0].model_dump(mode="json")
+        if status_report.next_actions
+        else None
+    )
+    plan["scenario"] = scenario
     return plan
