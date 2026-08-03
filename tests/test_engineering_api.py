@@ -12,6 +12,7 @@ def test_product_api_mounts_engineering_routes() -> None:
     assert "/v1/engineering/schemas" in paths
     assert "/v1/engineering/sources/reconcile" in paths
     assert "/v1/engineering/topology" in paths
+    assert "/v1/engineering/analysis" in paths
     assert "/v1/engineering/change-impact" in paths
     assert "/v1/engineering/plan" in paths
 
@@ -45,6 +46,7 @@ def test_engineering_plan_endpoint_synthesizes_bounded_rover_candidate() -> None
     plan = body["plan"]
     assert plan["archetype"] == "rover"
     assert plan["robot_topology"]["robot_genre"] == "rover"
+    assert "engineering_analysis" in plan
     assert plan["machine_project"]["project_id"] == "compact-inspection-rover"
     assert body["engineering_readiness"]["candidate_machine_synthesized"] is True
     assert body["engineering_readiness"]["power_on_authorized"] is False
@@ -94,6 +96,34 @@ def test_source_reconciliation_endpoint_keeps_conflict_blocking() -> None:
     assert body["graph"]["conflicts"][0]["blocking"] is True
 
 
+def test_analysis_endpoint_reports_failures_without_authorizing_operation() -> None:
+    client = TestClient(create_product_app())
+
+    response = client.post(
+        "/v1/engineering/analysis",
+        json={
+            "intake": {
+                "goal": "Revise a rover after tipping and brownout.",
+                "available_parts": [{"name": "drive motor", "type": "dc_motor", "quantity": 2}],
+                "constraints": {
+                    "support_width_mm": 200,
+                    "combined_cg_height_mm": 400,
+                    "static_tilt_margin_deg": 20,
+                    "supply_current_limit_a": 5,
+                    "peak_current_a": 12,
+                },
+            }
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["blocking_finding_count"] >= 2
+    assert body["power_on_authorized"] is False
+    assert body["motion_authorized"] is False
+    assert body["release_authorized"] is False
+
+
 def test_change_impact_endpoint_never_restores_release_after_field_failure() -> None:
     client = TestClient(create_product_app())
 
@@ -103,7 +133,6 @@ def test_change_impact_endpoint_never_restores_release_after_field_failure() -> 
             "intake": {
                 "project_name": "field-rover",
                 "goal": "Revise the field rover after tipping and a logic rail brownout.",
-                "mode": "evolve",
                 "baseline_revision": 7,
                 "available_parts": [
                     {"name": "drive motor", "type": "dc_motor", "quantity": 2},
@@ -116,6 +145,7 @@ def test_change_impact_endpoint_never_restores_release_after_field_failure() -> 
 
     assert response.status_code == 200, response.text
     body = response.json()
+    assert body["change_impact"]["mode"] == "field_evolution"
     assert body["blocking_impact_count"] > 0
     assert body["release_authority_preserved"] is False
     assert {"mechanical", "electrical", "control", "safety"}.issubset(
