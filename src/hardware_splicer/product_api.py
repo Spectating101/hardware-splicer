@@ -18,13 +18,14 @@ from .electrical_design_api import create_electrical_design_router
 from .engineering_review_api import create_engineering_review_router
 from .machine_project_api import create_machine_project_router
 from .project_api import create_project_router
+from .project_compatibility import CompatibleProjectStore
 from .project_store import ProjectStore
 
 
 def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
-    resolved_store = project_store or ProjectStore()
+    resolved_store = project_store or CompatibleProjectStore()
     app = create_engine_app()
     app.state.project_store = resolved_store
     app.include_router(create_project_router(resolved_store))
