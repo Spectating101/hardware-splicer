@@ -1,0 +1,16 @@
+.machine-authoring { display: grid; gap: 1rem; }
+.machine-authoring__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.machine-authoring__header h2 { margin: 0; }
+.machine-authoring__state { border-radius: 999px; padding: .35rem .6rem; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.machine-authoring__state.ready { background: rgba(42,166,93,.16); }
+.machine-authoring__state.waiting { background: rgba(224,157,35,.16); }
+.machine-authoring__tabs { display: flex; gap: .5rem; border-bottom: 1px solid var(--border,#d7dbe2); padding-bottom: .5rem; }
+.machine-authoring__tabs button { border: 0; background: transparent; padding: .45rem .65rem; border-radius: .5rem; }
+.machine-authoring__tabs button.active { background: color-mix(in srgb,var(--accent,#4d6fff) 12%,transparent); font-weight: 700; }
+.machine-authoring__form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .75rem; }
+.machine-authoring__form label,.machine-authoring__note { display: grid; gap: .3rem; font-size: .8rem; font-weight: 600; }
+.machine-authoring__form .wide { grid-column: 1 / -1; }
+.machine-authoring__form input,.machine-authoring__form textarea,.machine-authoring__form select,.machine-authoring__note input { width: 100%; }
+.machine-authoring__error { color: var(--danger,#b33131); margin: 0; }
+.machine-authoring__actions { display: flex; justify-content: flex-end; }
+@media (max-width:720px){.machine-authoring__header{flex-direction:column}.machine-authoring__form{grid-template-columns:1fr}.machine-authoring__form .wide{grid-column:auto}}
