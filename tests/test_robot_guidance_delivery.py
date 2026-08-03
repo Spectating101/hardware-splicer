@@ -11,7 +11,7 @@ CASE_DIR = ROOT / "examples" / "robotics_guidance"
 
 
 def test_delivery_assessment_separates_artifacts_from_authority_lineage(tmp_path: Path) -> None:
-    scenario = load_robot_guidance_scenario(CASE_DIR / "openmanipulator_wrist_camera_sorter.json")
+    scenario = load_robot_guidance_scenario(CASE_DIR / "crazyflie_custom_sensor_deck.json")
     generated = tmp_path / "generated"
     generated.mkdir()
     artifact_paths = {}
@@ -29,17 +29,17 @@ def test_delivery_assessment_separates_artifacts_from_authority_lineage(tmp_path
         artifact_paths[name] = str(path)
 
     plan = {
-        "goal": "modify the arm",
-        "archetype": "robotic_arm",
-        "recommended_build_id": "arm_candidate",
+        "goal": "modify the aerial robot",
+        "archetype": "aerial_robot",
+        "recommended_build_id": "aerial_sensor_candidate",
         "normalized_parts": [{"name": "tool", "type": "tool", "quantity": 1}] * 12,
         "missing_info": [],
         "scenario": {
             "acceptance": {"allowed_blockers": 0},
             "compile_spec": {
-                "robotics_project": {"platform": {"type": "robotic_arm"}},
-                "mechanism": {"custom_mount": {"id": "camera"}},
-                "electrical": {"voltage_v": 12},
+                "robotics_project": {"platform": {"type": "aerial_robot"}},
+                "mechanism": {"custom_mount": {"id": "sensor_deck"}},
+                "electrical": {"voltage_v": 3.3},
             },
         },
     }
@@ -51,7 +51,7 @@ def test_delivery_assessment_separates_artifacts_from_authority_lineage(tmp_path
         "bench_session": {
             "readiness": "blocked",
             "power_on_authorized": False,
-            "next_actions": ["measure payload current"],
+            "next_actions": ["measure deck current and mass"],
         },
         "production_release_metrics": {"production_ready": False},
     }
