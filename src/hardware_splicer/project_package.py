@@ -9,6 +9,8 @@ caller to change imports.
 from __future__ import annotations
 
 import json
+import os
+import uuid
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -33,6 +35,19 @@ def _build_graph(
         if isinstance(candidate, Mapping):
             return dict(candidate)
     return {}
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def build_project_package(
@@ -74,8 +89,14 @@ def write_project_package_artifacts(
 
     package_path = root / "PROJECT_PACKAGE.json"
     page_path = root / "PROJECT_PAGE.md"
-    package_path.write_text(json.dumps(package, indent=2), encoding="utf-8")
-    page_path.write_text(_core.render_project_page_md(package), encoding="utf-8")
+    _atomic_write_text(
+        package_path,
+        json.dumps(package, indent=2) + "\n",
+    )
+    _atomic_write_text(
+        page_path,
+        _core.render_project_page_md(package),
+    )
 
     output["package"] = package
     output["gates"] = package.get("gates")
