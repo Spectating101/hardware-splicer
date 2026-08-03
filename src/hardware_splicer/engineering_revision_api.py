@@ -36,6 +36,7 @@ def create_engineering_revision_router(project_store: ProjectStore | None = None
 
     @router.post("/diff")
     def revision_diff(request: EngineeringRevisionDiffRequest) -> Dict[str, Any]:
+        recovery: Dict[str, Any] | None = None
         try:
             if request.base_plan is not None and request.candidate_plan is not None:
                 base_plan = request.base_plan
@@ -51,8 +52,13 @@ def create_engineering_revision_router(project_store: ProjectStore | None = None
                 if not request.project_id:
                     raise ValueError("project_id is required when plans are not supplied")
                 if request.candidate_revision is None:
-                    candidate_envelope = project_store.load(request.project_id)
+                    candidate_envelope = project_store.load_latest_with_recovery(request.project_id)
                     candidate_revision = int(candidate_envelope["revision"])
+                    recovery = (
+                        dict(candidate_envelope["recovery"])
+                        if isinstance(candidate_envelope.get("recovery"), dict)
+                        else None
+                    )
                 else:
                     candidate_revision = request.candidate_revision
                     candidate_envelope = project_store.load(request.project_id, candidate_revision)
@@ -92,6 +98,7 @@ def create_engineering_revision_router(project_store: ProjectStore | None = None
             "project_id": report.project_id,
             "base_revision": report.base_revision,
             "candidate_revision": report.candidate_revision,
+            "recovery": recovery,
             "engineering_revision_diff": report.model_dump(mode="json"),
             "next_action": (
                 report.candidate_status.next_actions[0].model_dump(mode="json")
