@@ -1,8 +1,11 @@
 """Canonical product API composition.
 
-The engine router remains the product's existing capability surface.  Persistent
-project and complete-machine routers are mounted beside it so all UI and CLI entry
-points share one durable, cross-discipline product boundary.
+The core engine factory remains in :mod:`hardware_splicer.api`; this module mounts
+product-level routers that own durable workspace state, canonical machine and
+electrical models, external interchange, and engineering-review evidence. Keeping
+composition here gives every UI and CLI entry point one durable cross-discipline
+product boundary without coupling the engine endpoint module to product storage or
+ontology details.
 """
 
 from __future__ import annotations
@@ -10,19 +13,25 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from .api import create_app as create_engine_app
+from .circuit_json_api import create_circuit_json_router
 from .electrical_design_api import create_electrical_design_router
+from .engineering_review_api import create_engineering_review_router
 from .machine_project_api import create_machine_project_router
 from .project_api import create_project_router
 from .project_store import ProjectStore
 
 
 def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
-    store = project_store or ProjectStore()
+    """Build the canonical user-facing API with all product route families."""
+
+    resolved_store = project_store or ProjectStore()
     app = create_engine_app()
-    app.state.project_store = store
-    app.include_router(create_project_router(store))
+    app.state.project_store = resolved_store
+    app.include_router(create_project_router(resolved_store))
     app.include_router(create_machine_project_router())
     app.include_router(create_electrical_design_router())
+    app.include_router(create_circuit_json_router())
+    app.include_router(create_engineering_review_router())
     return app
 
 
