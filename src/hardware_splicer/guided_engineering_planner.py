@@ -8,6 +8,7 @@ from .change_impact import ChangeImpactGraph
 from .complete_engineering_planner import plan_complete_engineering_project
 from .engineering_analysis import EngineeringAnalysisReport
 from .engineering_artifact_projection import project_engineering_artifacts
+from .engineering_execution_plan import EngineeringExecutionPlan, build_engineering_execution_plan
 from .engineering_source_graph import EngineeringSourceGraph
 from .engineering_verification_bridge import bridge_engineering_verification
 from .machine_project import MachineProject
@@ -22,6 +23,14 @@ GUIDED_ENGINEERING_PLAN_SCHEMA = "hardware_splicer.guided_engineering_plan.v1"
 
 def _closure_blockers(report: ManufacturingClosureReport) -> list[str]:
     return [f"Manufacturing closure {row.check_id}: {row.message}" for row in report.blocking_checks]
+
+
+def _execution_missing(report: EngineeringExecutionPlan) -> list[str]:
+    rows: list[str] = []
+    for item in report.unresolved:
+        subject = item.get("source_id") or item.get("artifact_id") or report.project_id
+        rows.append(f"Prepare bounded execution input for {subject}: {item.get('reason', 'unresolved execution input')}")
+    return rows
 
 
 def plan_guided_engineering_project(
@@ -64,20 +73,28 @@ def plan_guided_engineering_project(
 
     closure = build_manufacturing_closure(plan, intake=intake, project=project)
     closure_payload = closure.model_dump(mode="json")
+    execution_plan = build_engineering_execution_plan(plan, source_graph=source_graph)
+    execution_payload = execution_plan.model_dump(mode="json")
     payloads = dict(project.discipline_payloads)
     payloads["manufacturing_closure"] = closure_payload
+    payloads["engineering_execution_plan"] = execution_payload
     metadata = dict(project.metadata)
     metadata.update(
         {
             "manufacturing_closure_schema": closure.schema_version,
             "manufacturing_closure_status": closure.status,
             "manufacturing_closure_blocker_count": len(closure.blocking_checks),
+            "engineering_execution_plan_schema": execution_plan.schema_version,
+            "engineering_execution_check_count": len(execution_plan.checks),
+            "engineering_execution_unresolved_count": len(execution_plan.unresolved),
+            "automatic_execution": False,
             "manufacturing_authority_unchanged": True,
         }
     )
     project = project.model_copy(update={"discipline_payloads": payloads, "metadata": metadata}, deep=True)
     plan["manufacturing_projection"] = manufacturing_projection
     plan["manufacturing_closure"] = closure_payload
+    plan["engineering_execution_plan"] = execution_payload
 
     guide: RobotOperatorGuide = build_robot_operator_guide(
         plan,
@@ -113,6 +130,7 @@ def plan_guided_engineering_project(
 
     missing = list(plan.get("missing_info") or [])
     missing.extend(_closure_blockers(closure))
+    missing.extend(_execution_missing(execution_plan))
     plan["missing_info"] = list(dict.fromkeys(missing))
 
     scenario = dict(plan.get("scenario") or {})
@@ -124,6 +142,7 @@ def plan_guided_engineering_project(
     compile_spec["engineering_artifact_projection"] = plan["engineering_artifact_projection"]
     compile_spec["manufacturing_projection"] = manufacturing_projection
     compile_spec["manufacturing_closure"] = closure_payload
+    compile_spec["engineering_execution_plan"] = execution_payload
     scenario["compile_spec"] = compile_spec
     scenario["manufacturing_acceptance"] = {
         "status": closure.status,
@@ -134,6 +153,15 @@ def plan_guided_engineering_project(
         "projected_artifact_count": len((manufacturing_projection or {}).get("projected_artifact_ids", [])),
         "fabrication_authorized": False,
         "release_authorized": False,
+    }
+    scenario["execution_acceptance"] = {
+        "preview_check_count": len(execution_plan.checks),
+        "unresolved_input_count": len(execution_plan.unresolved),
+        "automatic_execution": False,
+        "device_access_authorized": False,
+        "flash_authorized": False,
+        "power_on_authorized": False,
+        "motion_authorized": False,
     }
     plan["scenario"] = scenario
 
@@ -165,8 +193,13 @@ def plan_guided_engineering_project(
             "manufacturing_closure_blocker_count": len(closure.blocking_checks),
             "manufacturing_closure_warning_count": len(closure.warning_checks),
             "manufacturing_inputs_reconciled": not bool(closure.blocking_checks),
+            "bounded_execution_plan_generated": True,
+            "bounded_execution_check_count": len(execution_plan.checks),
+            "bounded_execution_unresolved_count": len(execution_plan.unresolved),
+            "automatic_execution": False,
             "physical_validation_required": True,
             "fabrication_authorized": False,
+            "flash_authorized": False,
             "power_on_authorized": False,
             "motion_authorized": False,
             "release_authorized": False,
