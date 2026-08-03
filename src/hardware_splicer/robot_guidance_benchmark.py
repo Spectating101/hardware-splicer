@@ -1,6 +1,6 @@
 """Measure whether Hardware Splicer can guide a real robot build or modification.
 
-This benchmark evaluates the current project-intake output against concrete guidance
+The benchmark evaluates the current project-intake output against concrete guidance
 obligations. Public repositories, documentation, and videos are reference evidence;
 they never become verified build truth without identity mapping and physical checks.
 """
@@ -75,6 +75,20 @@ def _contains_key(payload: Any, wanted: set[str]) -> bool:
     return False
 
 
+def _has_tool_inventory(parts: list[Any]) -> bool:
+    tokens = {"tool", "equipment", "instrument", "jig", "fixture"}
+    for item in parts:
+        if not isinstance(item, Mapping):
+            continue
+        values = " ".join(
+            str(item.get(key) or "").strip().lower()
+            for key in ("name", "type", "class", "category", "role")
+        )
+        if any(token in values for token in tokens):
+            return True
+    return False
+
+
 def _has_ordered_steps(payload: Any) -> bool:
     step_keys = {
         "assembly_steps",
@@ -98,10 +112,7 @@ def _has_ordered_steps(payload: Any) -> bool:
 
 
 def _source_governance(plan: Mapping[str, Any]) -> bool:
-    """Require timestamped observations plus canonical target identity.
-
-    Retaining a repository or video URL alone is not governed evidence.
-    """
+    """Require timestamped observations, canonical target identity, and authority."""
 
     return (
         _contains_key(plan, {"timestamp_start", "timestamp_end", "time_range"})
@@ -119,7 +130,9 @@ def _bom_quality(plan: Mapping[str, Any], expectations: Mapping[str, Any]) -> tu
     quantities = [row.get("quantity") for row in normalized if isinstance(row, Mapping)]
     if normalized and not any(value not in (None, "") for value in quantities):
         gaps.append("part_quantities_missing")
-    if expectations.get("tools_required") and not _contains_key(plan, {"tool", "tools", "equipment"}):
+    if expectations.get("tools_required") and not (
+        _has_tool_inventory(normalized) or _contains_key(plan, {"tool", "tools", "equipment"})
+    ):
         gaps.append("tooling_plan_missing")
     return not gaps, gaps
 
@@ -148,31 +161,35 @@ def evaluate_robot_guidance_scenario(
     dimensions: dict[str, dict[str, Any]] = {}
     gaps: list[str] = []
 
-    requirements_ok = bool(plan.get("goal")) and bool(intake.get("constraints"))
-    if not requirements_ok:
-        gaps.append("requirements_not_structured")
-    dimensions["requirements"] = {
-        "satisfied": requirements_ok,
-        "evidence": ["goal", "constraints"] if requirements_ok else [],
-    }
+    def record(name: str, satisfied: bool, gap: str, evidence: str) -> None:
+        if not satisfied:
+            gaps.append(gap)
+        dimensions[name] = {
+            "satisfied": satisfied,
+            "evidence": [evidence] if satisfied and evidence else [],
+        }
 
-    provenance_ok = _source_governance(plan)
-    if not provenance_ok:
-        gaps.append("reference_sources_not_governed")
-    dimensions["reference_provenance"] = {
-        "satisfied": provenance_ok,
-        "evidence": ["timestamped identity-resolved observation"] if provenance_ok else [],
-    }
-
-    variant_ok = detected_archetype == expected_archetype and bool(
-        plan.get("recommended_build_id") or spec.get("robotics_project")
+    record(
+        "requirements",
+        bool(plan.get("goal")) and bool(intake.get("constraints")),
+        "requirements_not_structured",
+        "goal and constraints",
     )
-    if not variant_ok:
-        gaps.append("robot_variant_not_resolved")
-    dimensions["variant_selection"] = {
-        "satisfied": variant_ok,
-        "evidence": [detected_archetype] if variant_ok else [],
-    }
+
+    record(
+        "reference_provenance",
+        _source_governance(plan),
+        "reference_sources_not_governed",
+        "timestamped identity-resolved observation",
+    )
+
+    record(
+        "variant_selection",
+        detected_archetype == expected_archetype
+        and bool(plan.get("recommended_build_id") or spec.get("robotics_project")),
+        "robot_variant_not_resolved",
+        detected_archetype,
+    )
 
     bom_ok, bom_gaps = _bom_quality(plan, expectations)
     gaps.extend(bom_gaps)
@@ -186,27 +203,27 @@ def evaluate_robot_guidance_scenario(
         {"mechanism", "dimensions", "clearance", "mount", "link", "joint_axis", "coordinate_frame"},
     )
     if expectations.get("custom_mechanics") and not _contains_key(
-        spec, {"custom_mount", "mount_delta", "center_of_mass", "collision_geometry", "payload_inertia"}
+        spec,
+        {"custom_mount", "mount_delta", "center_of_mass", "collision_geometry", "payload_inertia"},
     ):
         mechanical_ok = False
         gaps.append("custom_mechanical_impact_missing")
-    if not mechanical_ok:
-        gaps.append("mechanical_build_guidance_missing")
-    dimensions["mechanical_guidance"] = {
-        "satisfied": mechanical_ok,
-        "evidence": ["mechanical compile specification"] if mechanical_ok else [],
-    }
-
-    electrical_ok = _contains_key(
-        spec,
-        {"electrical", "electronics", "circuit", "power_budget", "current_limit", "voltage"},
+    record(
+        "mechanical_guidance",
+        mechanical_ok,
+        "mechanical_build_guidance_missing",
+        "mechanical compile specification",
     )
-    if not electrical_ok:
-        gaps.append("electrical_power_guidance_missing")
-    dimensions["electrical_power_guidance"] = {
-        "satisfied": electrical_ok,
-        "evidence": ["electrical or power specification"] if electrical_ok else [],
-    }
+
+    record(
+        "electrical_power_guidance",
+        _contains_key(
+            spec,
+            {"electrical", "electronics", "circuit", "power_budget", "current_limit", "voltage"},
+        ),
+        "electrical_power_guidance_missing",
+        "electrical or power specification",
+    )
 
     firmware_ok = _contains_key(
         spec,
@@ -222,12 +239,12 @@ def evaluate_robot_guidance_scenario(
             "pin_map_hash",
         },
     )
-    if expectations.get("firmware_required") and not firmware_ok:
-        gaps.append("firmware_build_flash_lineage_missing")
-    dimensions["firmware_lineage"] = {
-        "satisfied": firmware_ok or not bool(expectations.get("firmware_required")),
-        "evidence": ["versioned build/flash lineage"] if firmware_ok else [],
-    }
+    record(
+        "firmware_lineage",
+        firmware_ok or not bool(expectations.get("firmware_required")),
+        "firmware_build_flash_lineage_missing",
+        "versioned build/flash lineage" if firmware_ok else "not required",
+    )
 
     middleware_ok = _contains_key(
         spec,
@@ -243,63 +260,56 @@ def evaluate_robot_guidance_scenario(
             "control_loop",
         },
     )
-    if expectations.get("middleware_required") and not middleware_ok:
-        gaps.append("control_middleware_lineage_missing")
-    dimensions["control_middleware"] = {
-        "satisfied": middleware_ok or not bool(expectations.get("middleware_required")),
-        "evidence": ["control or middleware contract"] if middleware_ok else [],
-    }
-
-    modification_ok = True
-    if mode in {"modify", "repair"}:
-        modification_ok = _contains_key(
-            plan,
-            {
-                "baseline_revision",
-                "change_request",
-                "affected_subsystems",
-                "compatibility_impact",
-                "modification_delta",
-                "repair_delta",
-                "replacement_mapping",
-            },
-        )
-        if not modification_ok:
-            gaps.append("modification_impact_analysis_missing")
-    dimensions["modification_impact"] = {
-        "satisfied": modification_ok,
-        "evidence": ["explicit baseline-to-candidate delta"] if modification_ok and mode != "build" else [],
-    }
-
-    procedure_ok = _has_ordered_steps(plan)
-    if not procedure_ok:
-        gaps.append("ordered_build_procedure_missing")
-    dimensions["ordered_procedure"] = {
-        "satisfied": procedure_ok,
-        "evidence": ["ordered assembly/bring-up steps"] if procedure_ok else [],
-    }
-
-    verification_ok = bool(plan.get("missing_info") is not None) and _contains_key(
-        scenario_plan,
-        {"acceptance", "safety", "verification", "evidence", "blocker"},
+    record(
+        "control_middleware",
+        middleware_ok or not bool(expectations.get("middleware_required")),
+        "control_middleware_lineage_missing",
+        "control or middleware contract" if middleware_ok else "not required",
     )
-    if not verification_ok:
-        gaps.append("verification_gate_plan_missing")
-    dimensions["verification_gates"] = {
-        "satisfied": verification_ok,
-        "evidence": ["acceptance and evidence gates"] if verification_ok else [],
-    }
 
-    rollback_ok = _contains_key(
+    modification_ok = mode == "build" or _contains_key(
         plan,
-        {"rollback", "recovery", "safe_state", "replacement", "repair", "revert", "power_off"},
+        {
+            "baseline_revision",
+            "change_request",
+            "affected_subsystems",
+            "compatibility_impact",
+            "modification_delta",
+            "repair_delta",
+            "replacement_mapping",
+        },
     )
-    if not rollback_ok:
-        gaps.append("rollback_repair_guidance_missing")
-    dimensions["rollback_repair"] = {
-        "satisfied": rollback_ok,
-        "evidence": ["rollback or repair path"] if rollback_ok else [],
-    }
+    record(
+        "modification_impact",
+        modification_ok,
+        "modification_impact_analysis_missing",
+        "explicit baseline-to-candidate delta" if mode != "build" else "greenfield build",
+    )
+
+    record(
+        "ordered_procedure",
+        _has_ordered_steps(plan),
+        "ordered_build_procedure_missing",
+        "ordered assembly/bring-up steps",
+    )
+
+    record(
+        "verification_gates",
+        bool(plan.get("missing_info") is not None)
+        and _contains_key(scenario_plan, {"acceptance", "safety", "verification", "evidence", "blocker"}),
+        "verification_gate_plan_missing",
+        "acceptance and evidence gates",
+    )
+
+    record(
+        "rollback_repair",
+        _contains_key(
+            plan,
+            {"rollback", "recovery", "safe_state", "replacement", "repair", "revert", "power_off"},
+        ),
+        "rollback_repair_guidance_missing",
+        "rollback or repair path",
+    )
 
     score = round(
         sum(
