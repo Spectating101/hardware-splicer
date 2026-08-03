@@ -43,7 +43,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_capability_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_manufacturing_router())
-    app.include_router(create_engineering_execution_router())
+    app.include_router(create_engineering_execution_router(resolved_store))
     app.include_router(create_engineering_status_router())
     app.include_router(create_source_conflict_router())
     app.include_router(create_engineering_review_router())
