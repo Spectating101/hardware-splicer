@@ -194,9 +194,15 @@ def electrical_design_from_machine_project(project: MachineProject) -> Electrica
 
         lower, upper = _voltage_range(values)
         authority = str(interface.get("authority") or AuthorityState.UNKNOWN.value)
+        interface_metadata = (
+            interface.get("metadata") if isinstance(interface.get("metadata"), Mapping) else {}
+        )
+        source_authority = str(interface_metadata.get("source_authority") or authority)
         unresolved = sorted(set(unresolved))
-        source_authority = authority
-        if unresolved and authority in {AuthorityState.VERIFIED.value, AuthorityState.AUTHORIZED.value}:
+        if unresolved and source_authority in {
+            AuthorityState.VERIFIED.value,
+            AuthorityState.AUTHORIZED.value,
+        }:
             authority = AuthorityState.DECLARED.value
         net = ElectricalNet(
             net_id=interface["interface_id"],
