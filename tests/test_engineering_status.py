@@ -155,4 +155,7 @@ def test_clean_plan_advances_to_release_review_candidate() -> None:
     assert status.current_phase == "release"
     assert status.blockers == []
     assert status.advisories == []
-    assert status.next_actions == []
+    assert status.next_action_id == "next-release"
+    assert len(status.next_actions) == 1
+    assert status.next_actions[0].route == "/v1/engineering/guide"
+    assert status.next_actions[0].physical_action is False
