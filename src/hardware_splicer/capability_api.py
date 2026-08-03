@@ -7,7 +7,7 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, Query
 
 from .build_files import resolve_build_dir
-from .capability_runtime import capability_report
+from .capability_policy import product_capability_report
 
 
 def create_capability_router() -> APIRouter:
@@ -25,7 +25,7 @@ def create_capability_router() -> APIRouter:
     ) -> Dict[str, Any]:
         try:
             resolved = resolve_build_dir(build_dir) if build_dir else None
-            return capability_report(build_dir=resolved)
+            return product_capability_report(build_dir=resolved)
         except ValueError as exc:
             raise HTTPException(
                 status_code=422,
