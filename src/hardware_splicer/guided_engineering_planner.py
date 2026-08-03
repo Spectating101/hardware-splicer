@@ -7,6 +7,7 @@ from typing import Any, Dict, Iterable, Mapping
 from .change_impact import ChangeImpactGraph
 from .complete_engineering_planner import plan_complete_engineering_project
 from .engineering_analysis import EngineeringAnalysisReport
+from .engineering_artifact_projection import project_engineering_artifacts
 from .engineering_source_graph import EngineeringSourceGraph
 from .engineering_verification_bridge import bridge_engineering_verification
 from .machine_project import MachineProject
@@ -25,7 +26,7 @@ def plan_guided_engineering_project(
     baseline_project: Mapping[str, Any] | MachineProject | None = None,
     skip_vision: bool = False,
 ) -> Dict[str, Any]:
-    """Create the complete plan, verification bridge, and ordered operator guide."""
+    """Create the complete plan, source projection, verification bridge, and guide."""
 
     plan = plan_complete_engineering_project(
         intake,
@@ -41,6 +42,11 @@ def plan_guided_engineering_project(
     change_impact = ChangeImpactGraph.model_validate(plan["change_impact"])
     identity_map = dict(plan.get("engineering_identity_map") or {})
 
+    project = project_engineering_artifacts(
+        project,
+        source_graph=source_graph,
+        identity_map=identity_map,
+    )
     project = bridge_engineering_verification(
         project,
         analysis=analysis,
@@ -73,12 +79,14 @@ def plan_guided_engineering_project(
     plan["machine_project"] = project.model_dump(mode="json")
     plan["operator_guide"] = guide.model_dump(mode="json")
     plan["verification_bridge"] = project.discipline_payloads.get("engineering_verification_bridge")
+    plan["engineering_artifact_projection"] = project.discipline_payloads.get("engineering_artifact_projection")
 
     scenario = dict(plan.get("scenario") or {})
     compile_spec = dict(scenario.get("compile_spec") or {})
     compile_spec["machine_project"] = project.model_dump(mode="json")
     compile_spec["operator_guide"] = guide.model_dump(mode="json")
     compile_spec["engineering_verification_bridge"] = plan["verification_bridge"]
+    compile_spec["engineering_artifact_projection"] = plan["engineering_artifact_projection"]
     scenario["compile_spec"] = compile_spec
     plan["scenario"] = scenario
 
@@ -91,6 +99,15 @@ def plan_guided_engineering_project(
             "verification_method_count": len(project.verifications),
             "analysis_evidence_count": len(
                 [row for row in project.evidence if row.kind == "bounded_engineering_calculation"]
+            ),
+            "projected_source_evidence_count": len(
+                (plan["engineering_artifact_projection"] or {}).get("projected_evidence_ids", [])
+            ),
+            "firmware_lineage_component_count": len(
+                (plan["engineering_artifact_projection"] or {}).get("firmware_component_ids", [])
+            ),
+            "middleware_contract_component_count": len(
+                (plan["engineering_artifact_projection"] or {}).get("middleware_component_ids", [])
             ),
             "physical_validation_required": True,
             "power_on_authorized": False,
