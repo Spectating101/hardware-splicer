@@ -1,4 +1,4 @@
-"""HTTP surface for source-agnostic engineering planning."""
+"""HTTP surface for source-agnostic guided engineering planning."""
 
 from __future__ import annotations
 
@@ -8,14 +8,15 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .change_impact import ChangeImpactGraph, build_change_impact_graph
-from .complete_engineering_planner import plan_complete_engineering_project
 from .engineering_analysis import EngineeringAnalysisReport, analyze_engineering_candidate
 from .engineering_plan_store import save_engineering_plan
 from .engineering_planner import normalize_engineering_intake
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
+from .guided_engineering_planner import plan_guided_engineering_project
 from .machine_project import MachineProject
 from .machine_project_seed import machine_project_from_intake
 from .project_store import ProjectStore, ProjectStoreError
+from .robot_operator_guide import RobotOperatorGuide
 from .robot_topology import RobotTopology, build_robot_topology
 
 
@@ -65,7 +66,7 @@ def _unprocessable(error_type: str, exc: Exception) -> HTTPException:
 
 
 def _plan(request: EngineeringPlanRequest) -> Dict[str, Any]:
-    return plan_complete_engineering_project(
+    return plan_guided_engineering_project(
         request.intake,
         engineering_sources=request.engineering_sources,
         declared_conflicts=request.declared_conflicts,
@@ -86,6 +87,7 @@ def create_engineering_router(project_store: ProjectStore | None = None) -> APIR
                 "robot_topology": RobotTopology.model_json_schema(),
                 "engineering_analysis": EngineeringAnalysisReport.model_json_schema(),
                 "change_impact": ChangeImpactGraph.model_json_schema(),
+                "operator_guide": RobotOperatorGuide.model_json_schema(),
             },
         }
 
@@ -181,6 +183,20 @@ def create_engineering_router(project_store: ProjectStore | None = None) -> APIR
             "plan": plan,
             "engineering_readiness": plan.get("engineering_readiness"),
             "machine_project": plan.get("machine_project"),
+            "operator_guide": plan.get("operator_guide"),
+        }
+
+    @router.post("/guide")
+    def create_operator_guide(request: EngineeringPlanRequest) -> Dict[str, Any]:
+        try:
+            plan = _plan(request)
+        except (TypeError, ValueError) as exc:
+            raise _unprocessable("invalid_engineering_plan", exc) from exc
+        return {
+            "ok": True,
+            "project_id": (plan.get("machine_project") or {}).get("project_id"),
+            "operator_guide": plan.get("operator_guide"),
+            "engineering_readiness": plan.get("engineering_readiness"),
         }
 
     @router.post("/plans/save")
@@ -211,6 +227,7 @@ def create_engineering_router(project_store: ProjectStore | None = None) -> APIR
             "revision": envelope["revision"],
             "saved_at": envelope["saved_at"],
             "engineering_readiness": plan.get("engineering_readiness"),
+            "operator_guide": plan.get("operator_guide"),
             "plan": plan,
         }
 
