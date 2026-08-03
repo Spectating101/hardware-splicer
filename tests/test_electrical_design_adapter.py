@@ -110,7 +110,13 @@ def machine() -> MachineProject:
                         authority=AuthorityState.UNKNOWN,
                     )
                 ],
-                authority=AuthorityState.VERIFIED,
+                authority=AuthorityState.DECLARED,
+                metadata={
+                    "source_authority": "verified",
+                    "source_authority_note": (
+                        "Legacy source claimed verified before unresolved fields were normalized."
+                    ),
+                },
             ),
         ],
     )
