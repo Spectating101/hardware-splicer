@@ -8,9 +8,10 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .change_impact import ChangeImpactGraph, build_change_impact_graph
+from .complete_engineering_planner import plan_complete_engineering_project
 from .engineering_analysis import EngineeringAnalysisReport, analyze_engineering_candidate
 from .engineering_plan_store import save_engineering_plan
-from .engineering_planner import normalize_engineering_intake, plan_engineering_project
+from .engineering_planner import normalize_engineering_intake
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
 from .machine_project import MachineProject
 from .machine_project_seed import machine_project_from_intake
@@ -64,7 +65,7 @@ def _unprocessable(error_type: str, exc: Exception) -> HTTPException:
 
 
 def _plan(request: EngineeringPlanRequest) -> Dict[str, Any]:
-    return plan_engineering_project(
+    return plan_complete_engineering_project(
         request.intake,
         engineering_sources=request.engineering_sources,
         declared_conflicts=request.declared_conflicts,
