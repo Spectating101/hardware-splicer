@@ -7,12 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "validate:library": "node scripts/validate-module-library.cjs",
     "validate:topology": "node scripts/test-inventory-topology.cjs",
     "test:build-intent": "node scripts/test-build-intent.cjs",
     "test:compose-scenarios": "node scripts/test-compose-scenarios.cjs",
+    "test:engineering-ui": "node scripts/test-engineering-status-ui.cjs",
     "test:jarvis-build": "node scripts/test-build-intent.cjs && node scripts/test-compose-scenarios.cjs",
-    "test:backend": "node scripts/test-build-intent.cjs && node scripts/test-compose-scenarios.cjs && node scripts/test-phrase-expander.cjs && node scripts/test-phrase-eval.cjs && node scripts/test-firmware-scaffold.cjs && node scripts/test-firmware-bundle.cjs && node scripts/test-local-manufacture.cjs && node scripts/test-golden-path.cjs && node scripts/validate-module-library.cjs && node scripts/test-inventory-topology.cjs"
+    "test:backend": "node scripts/test-build-intent.cjs && node scripts/test-compose-scenarios.cjs && node scripts/test-phrase-expander.cjs && node scripts/test-phrase-eval.cjs && node scripts/test-firmware-scaffold.cjs && node scripts/test-firmware-bundle.cjs && node scripts/test-local-manufacture.cjs && node scripts/test-golden-path.cjs && node scripts/validate-module-library.cjs && node scripts/test-inventory-topology.cjs && node scripts/test-engineering-status-ui.cjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -36,7 +38,7 @@
     "react-dropzone": "^14.3.8",
     "recharts": "^3.1.2",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-animate": "^1.0.0",
     "three": "^0.182.0",
     "zustand": "^5.0.12"
   },
