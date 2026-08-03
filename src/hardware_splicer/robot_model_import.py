@@ -1,8 +1,8 @@
-"""Bounded import of structured robot models into canonical RobotTopology.
+"""Bounded URDF, SDF, and MJCF import into canonical robot topology.
 
-URDF, SDF, and MJCF are treated as declared design sources. Parsing preserves model
-identity and relationships but does not verify mass properties, collision geometry,
-actuator ratings, calibration, or physical agreement with a built robot.
+Imported XML is declared design evidence. It can establish model relationships and
+identifiers, but never proves physical fit, calibration, actuator ratings, or safe
+motion on a built machine.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ import hashlib
 import re
 import xml.etree.ElementTree as ET
 from enum import Enum
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Dict
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -84,20 +84,22 @@ class ParsedRobotModel(RobotModelBase):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
-    def validate_model_references(self) -> "ParsedRobotModel":
-        link_ids = [row.link_id for row in self.links]
-        joint_ids = [row.joint_id for row in self.joints]
-        actuator_ids = [row.actuator_id for row in self.actuators]
-        for label, values in (("link", link_ids), ("joint", joint_ids), ("actuator", actuator_ids)):
+    def validate_references(self) -> "ParsedRobotModel":
+        collections = {
+            "link": [row.link_id for row in self.links],
+            "joint": [row.joint_id for row in self.joints],
+            "actuator": [row.actuator_id for row in self.actuators],
+        }
+        for label, values in collections.items():
             if len(values) != len(set(values)):
                 raise ValueError(f"duplicate {label} identifier")
-        link_set = set(link_ids)
-        joint_set = set(joint_ids)
+        link_ids = set(collections["link"])
+        joint_ids = set(collections["joint"])
         for joint in self.joints:
-            if joint.parent_link_id not in link_set or joint.child_link_id not in link_set:
+            if joint.parent_link_id not in link_ids or joint.child_link_id not in link_ids:
                 raise ValueError(f"joint {joint.joint_id!r} references an unknown link")
         for actuator in self.actuators:
-            if actuator.joint_id not in joint_set:
+            if actuator.joint_id not in joint_ids:
                 raise ValueError(f"actuator {actuator.actuator_id!r} references an unknown joint")
         return self
 
@@ -106,16 +108,22 @@ class RobotModelImportError(ValueError):
     pass
 
 
-def _local_name(tag: str) -> str:
+def _local(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
 
 
-def _children(element: ET.Element, name: str) -> list[ET.Element]:
-    return [child for child in list(element) if _local_name(child.tag) == name]
+def _children(element: ET.Element | None, name: str) -> list[ET.Element]:
+    if element is None:
+        return []
+    return [child for child in list(element) if _local(child.tag) == name]
 
 
-def _first(element: ET.Element, name: str) -> ET.Element | None:
-    return next((child for child in list(element) if _local_name(child.tag) == name), None)
+def _first(element: ET.Element | None, name: str) -> ET.Element | None:
+    return next(iter(_children(element, name)), None)
+
+
+def _descendant(element: ET.Element, name: str) -> ET.Element | None:
+    return next((row for row in element.iter() if _local(row.tag) == name), None)
 
 
 def _slug(value: str, fallback: str) -> str:
@@ -123,20 +131,8 @@ def _slug(value: str, fallback: str) -> str:
     return token[:120] or fallback
 
 
-def _vector(value: str | None, default: list[float]) -> list[float]:
-    if not value:
-        return list(default)
-    try:
-        values = [float(item) for item in value.replace(",", " ").split()]
-    except ValueError:
-        return list(default)
-    if len(values) < len(default):
-        values.extend(default[len(values) :])
-    return values[: len(default)]
-
-
 def _number(value: Any) -> float | None:
-    if value is None:
+    if value in (None, ""):
         return None
     try:
         return float(value)
@@ -144,12 +140,33 @@ def _number(value: Any) -> float | None:
         return None
 
 
+def _floats(value: str | None) -> list[float]:
+    if not value:
+        return []
+    try:
+        return [float(item) for item in value.replace(",", " ").split()]
+    except ValueError:
+        return []
+
+
+def _vector(value: str | None, default: tuple[float, float, float]) -> list[float]:
+    values = _floats(value)
+    if len(values) != 3:
+        return list(default)
+    return values
+
+
+def _range(value: str | None) -> Dict[str, float]:
+    values = _floats(value)
+    return {"lower": values[0], "upper": values[1]} if len(values) >= 2 else {}
+
+
 def _origin(element: ET.Element | None) -> Dict[str, Any]:
     if element is None:
         return {}
     return {
-        "xyz": _vector(element.attrib.get("xyz") or element.attrib.get("pos"), [0.0, 0.0, 0.0]),
-        "rpy": _vector(element.attrib.get("rpy") or element.attrib.get("euler"), [0.0, 0.0, 0.0]),
+        "xyz": _vector(element.attrib.get("xyz") or element.attrib.get("pos"), (0.0, 0.0, 0.0)),
+        "rpy": _vector(element.attrib.get("rpy") or element.attrib.get("euler"), (0.0, 0.0, 0.0)),
     }
 
 
@@ -169,94 +186,99 @@ def _joint_type(value: str | None) -> JointType:
         return JointType.REVOLUTE
 
 
-def _mesh_refs(element: ET.Element, child_name: str) -> list[str]:
+def _geometry_refs(element: ET.Element, wrapper_name: str) -> list[str]:
     refs: list[str] = []
-    for child in _children(element, child_name):
-        geometry = _first(child, "geometry")
-        if geometry is None:
-            continue
-        for primitive in list(geometry):
-            tag = _local_name(primitive.tag)
-            uri = (
-                primitive.attrib.get("filename")
-                or primitive.attrib.get("uri")
-                or (primitive.text or "").strip()
-            )
-            refs.append(f"{tag}:{uri}" if uri else tag)
+    for wrapper in _children(element, wrapper_name):
+        geometry = _first(wrapper, "geometry")
+        for primitive in list(geometry) if geometry is not None else []:
+            kind = _local(primitive.tag)
+            uri = primitive.attrib.get("filename") or primitive.attrib.get("uri")
+            if not uri:
+                uri_child = _first(primitive, "uri")
+                uri = (uri_child.text or "").strip() if uri_child is not None else ""
+            refs.append(f"{kind}:{uri}" if uri else kind)
     return refs
 
 
+def _limits_from_attributes(element: ET.Element | None) -> Dict[str, float]:
+    if element is None:
+        return {}
+    result: Dict[str, float] = {}
+    for key in ("lower", "upper", "effort", "velocity"):
+        value = _number(element.attrib.get(key))
+        if value is not None:
+            result[key] = value
+    return result
+
+
+def _limits_from_children(element: ET.Element | None) -> Dict[str, float]:
+    result: Dict[str, float] = {}
+    for key in ("lower", "upper", "effort", "velocity"):
+        child = _first(element, key)
+        value = _number(child.text) if child is not None else None
+        if value is not None:
+            result[key] = value
+    return result
+
+
 def _parse_urdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
-    if _local_name(root.tag) != "robot":
+    if _local(root.tag) != "robot":
         raise RobotModelImportError("URDF root must be <robot>")
     model_name = root.attrib.get("name") or "urdf-robot"
     links: list[ParsedRobotLink] = []
-    joints: list[ParsedRobotJoint] = []
-    actuators: list[ParsedRobotActuator] = []
     for index, element in enumerate(_children(root, "link")):
         name = element.attrib.get("name") or f"link-{index + 1}"
         inertial = _first(element, "inertial")
-        mass_element = _first(inertial, "mass") if inertial is not None else None
-        mass = _number(mass_element.attrib.get("value")) if mass_element is not None else None
+        mass_element = _first(inertial, "mass")
         links.append(
             ParsedRobotLink(
                 link_id=_slug(name, f"link-{index + 1}"),
                 name=name,
-                mass_kg=mass,
-                inertial_origin=_origin(_first(inertial, "origin") if inertial is not None else None),
-                visual_refs=_mesh_refs(element, "visual"),
-                collision_refs=_mesh_refs(element, "collision"),
+                mass_kg=_number(mass_element.attrib.get("value")) if mass_element is not None else None,
+                inertial_origin=_origin(_first(inertial, "origin")),
+                visual_refs=_geometry_refs(element, "visual"),
+                collision_refs=_geometry_refs(element, "collision"),
             )
         )
-    link_name_to_id = {row.name: row.link_id for row in links}
-    link_name_to_id.update({row.link_id: row.link_id for row in links})
+    link_map = {row.name: row.link_id for row in links} | {row.link_id: row.link_id for row in links}
+    joints: list[ParsedRobotJoint] = []
     for index, element in enumerate(_children(root, "joint")):
         name = element.attrib.get("name") or f"joint-{index + 1}"
         parent = _first(element, "parent")
         child = _first(element, "child")
-        if parent is None or child is None:
+        parent_name = parent.attrib.get("link") if parent is not None else None
+        child_name = child.attrib.get("link") if child is not None else None
+        if not parent_name or not child_name:
             raise RobotModelImportError(f"URDF joint {name!r} is missing parent or child")
-        parent_name = parent.attrib.get("link") or ""
-        child_name = child.attrib.get("link") or ""
-        axis_element = _first(element, "axis")
-        limit_element = _first(element, "limit")
-        limits = {
-            key: value
-            for key, value in {
-                "lower": _number(limit_element.attrib.get("lower")) if limit_element is not None else None,
-                "upper": _number(limit_element.attrib.get("upper")) if limit_element is not None else None,
-                "effort": _number(limit_element.attrib.get("effort")) if limit_element is not None else None,
-                "velocity": _number(limit_element.attrib.get("velocity")) if limit_element is not None else None,
-            }.items()
-            if value is not None
-        }
         joints.append(
             ParsedRobotJoint(
                 joint_id=_slug(name, f"joint-{index + 1}"),
                 name=name,
                 joint_type=_joint_type(element.attrib.get("type")),
-                parent_link_id=link_name_to_id.get(parent_name, _slug(parent_name, "parent-link")),
-                child_link_id=link_name_to_id.get(child_name, _slug(child_name, "child-link")),
-                axis=_vector(axis_element.attrib.get("xyz") if axis_element is not None else None, [0.0, 0.0, 1.0]),
-                limits=limits,
+                parent_link_id=link_map.get(parent_name, _slug(parent_name, "parent-link")),
+                child_link_id=link_map.get(child_name, _slug(child_name, "child-link")),
+                axis=_vector((_first(element, "axis") or ET.Element("axis")).attrib.get("xyz"), (0.0, 0.0, 1.0)),
+                limits=_limits_from_attributes(_first(element, "limit")),
                 origin=_origin(_first(element, "origin")),
             )
         )
+    joint_ids = {row.name: row.joint_id for row in joints} | {row.joint_id: row.joint_id for row in joints}
+    actuators: list[ParsedRobotActuator] = []
     for index, transmission in enumerate(_children(root, "transmission")):
         joint_element = _first(transmission, "joint")
         actuator_element = _first(transmission, "actuator")
         joint_name = joint_element.attrib.get("name") if joint_element is not None else None
-        actuator_name = actuator_element.attrib.get("name") if actuator_element is not None else None
         if not joint_name:
             continue
-        reduction_element = _first(actuator_element, "mechanicalReduction") if actuator_element is not None else None
+        actuator_name = actuator_element.attrib.get("name") if actuator_element is not None else None
+        reduction = _first(actuator_element, "mechanicalReduction")
         actuators.append(
             ParsedRobotActuator(
                 actuator_id=_slug(actuator_name or f"actuator-{index + 1}", f"actuator-{index + 1}"),
                 name=actuator_name or f"actuator-{index + 1}",
-                joint_id=_slug(joint_name, f"joint-{index + 1}"),
+                joint_id=joint_ids.get(joint_name, _slug(joint_name, f"joint-{index + 1}")),
                 actuator_type="urdf_transmission",
-                reduction=_number(reduction_element.text) if reduction_element is not None else None,
+                reduction=_number(reduction.text) if reduction is not None else None,
                 metadata={"transmission_name": transmission.attrib.get("name")},
             )
         )
@@ -272,25 +294,25 @@ def _parse_urdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
 
 
 def _parse_sdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
-    model = root if _local_name(root.tag) == "model" else next(
-        (element for element in root.iter() if _local_name(element.tag) == "model"),
-        None,
-    )
+    model = root if _local(root.tag) == "model" else _descendant(root, "model")
     if model is None:
         raise RobotModelImportError("SDF must contain a <model>")
     model_name = model.attrib.get("name") or "sdf-robot"
-    links = [
-        ParsedRobotLink(
-            link_id=_slug(element.attrib.get("name") or f"link-{index + 1}", f"link-{index + 1}"),
-            name=element.attrib.get("name") or f"link-{index + 1}",
-            mass_kg=_number((_first(_first(element, "inertial"), "mass").text if _first(element, "inertial") is not None and _first(_first(element, "inertial"), "mass") is not None else None)),
-            visual_refs=_mesh_refs(element, "visual"),
-            collision_refs=_mesh_refs(element, "collision"),
+    links: list[ParsedRobotLink] = []
+    for index, element in enumerate(_children(model, "link")):
+        name = element.attrib.get("name") or f"link-{index + 1}"
+        inertial = _first(element, "inertial")
+        mass_element = _first(inertial, "mass")
+        links.append(
+            ParsedRobotLink(
+                link_id=_slug(name, f"link-{index + 1}"),
+                name=name,
+                mass_kg=_number(mass_element.text) if mass_element is not None else None,
+                visual_refs=_geometry_refs(element, "visual"),
+                collision_refs=_geometry_refs(element, "collision"),
+            )
         )
-        for index, element in enumerate(_children(model, "link"))
-    ]
-    link_map = {row.name: row.link_id for row in links}
-    link_map.update({row.link_id: row.link_id for row in links})
+    link_map = {row.name: row.link_id for row in links} | {row.link_id: row.link_id for row in links}
     joints: list[ParsedRobotJoint] = []
     for index, element in enumerate(_children(model, "joint")):
         name = element.attrib.get("name") or f"joint-{index + 1}"
@@ -298,16 +320,10 @@ def _parse_sdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
         child_element = _first(element, "child")
         parent_name = (parent_element.text or "").strip() if parent_element is not None else ""
         child_name = (child_element.text or "").strip() if child_element is not None else ""
-        axis_element = _first(element, "axis")
-        xyz_element = _first(axis_element, "xyz") if axis_element is not None else None
-        limit_element = _first(axis_element, "limit") if axis_element is not None else None
-        limits = {}
-        if limit_element is not None:
-            for key in ("lower", "upper", "effort", "velocity"):
-                item = _first(limit_element, key)
-                value = _number(item.text) if item is not None else None
-                if value is not None:
-                    limits[key] = value
+        if not parent_name or not child_name:
+            raise RobotModelImportError(f"SDF joint {name!r} is missing parent or child")
+        axis = _first(element, "axis")
+        xyz = _first(axis, "xyz")
         joints.append(
             ParsedRobotJoint(
                 joint_id=_slug(name, f"joint-{index + 1}"),
@@ -315,8 +331,9 @@ def _parse_sdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
                 joint_type=_joint_type(element.attrib.get("type")),
                 parent_link_id=link_map.get(parent_name, _slug(parent_name, "parent-link")),
                 child_link_id=link_map.get(child_name, _slug(child_name, "child-link")),
-                axis=_vector(xyz_element.text if xyz_element is not None else None, [0.0, 0.0, 1.0]),
-                limits=limits,
+                axis=_vector(xyz.text if xyz is not None else None, (0.0, 0.0, 1.0)),
+                limits=_limits_from_children(_first(axis, "limit")),
+                origin={"pose": _floats((_first(element, "pose") or ET.Element("pose")).text)},
             )
         )
     return ParsedRobotModel(
@@ -330,34 +347,30 @@ def _parse_sdf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
 
 
 def _parse_mjcf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
-    if _local_name(root.tag) != "mujoco":
+    if _local(root.tag) != "mujoco":
         raise RobotModelImportError("MJCF root must be <mujoco>")
     model_name = root.attrib.get("model") or "mjcf-robot"
-    worldbody = next((element for element in root.iter() if _local_name(element.tag) == "worldbody"), None)
+    worldbody = _descendant(root, "worldbody")
     if worldbody is None:
         raise RobotModelImportError("MJCF must contain <worldbody>")
     links: list[ParsedRobotLink] = [ParsedRobotLink(link_id="world", name="world")]
     joints: list[ParsedRobotJoint] = []
 
     def walk(parent_link_id: str, parent: ET.Element) -> None:
-        for body_index, body in enumerate(_children(parent, "body")):
+        for body in _children(parent, "body"):
             name = body.attrib.get("name") or f"body-{len(links)}"
             link_id = _slug(name, f"body-{len(links)}")
             links.append(
                 ParsedRobotLink(
                     link_id=link_id,
                     name=name,
-                    metadata={"pos": _vector(body.attrib.get("pos"), [0.0, 0.0, 0.0])},
+                    metadata={"pos": _vector(body.attrib.get("pos"), (0.0, 0.0, 0.0))},
                 )
             )
             body_joints = _children(body, "joint")
             if body_joints:
-                for joint_index, element in enumerate(body_joints):
-                    joint_name = element.attrib.get("name") or f"{name}-joint-{joint_index + 1}"
-                    limits = {}
-                    range_values = _vector(element.attrib.get("range"), [])
-                    if len(range_values) >= 2:
-                        limits = {"lower": range_values[0], "upper": range_values[1]}
+                for element in body_joints:
+                    joint_name = element.attrib.get("name") or f"{name}-joint-{len(joints) + 1}"
                     joints.append(
                         ParsedRobotJoint(
                             joint_id=_slug(joint_name, f"joint-{len(joints) + 1}"),
@@ -365,9 +378,9 @@ def _parse_mjcf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
                             joint_type=_joint_type(element.attrib.get("type") or "hinge"),
                             parent_link_id=parent_link_id,
                             child_link_id=link_id,
-                            axis=_vector(element.attrib.get("axis"), [0.0, 0.0, 1.0]),
-                            limits=limits,
-                            origin={"xyz": _vector(element.attrib.get("pos"), [0.0, 0.0, 0.0])},
+                            axis=_vector(element.attrib.get("axis"), (0.0, 0.0, 1.0)),
+                            limits=_range(element.attrib.get("range")),
+                            origin={"xyz": _vector(element.attrib.get("pos"), (0.0, 0.0, 0.0))},
                         )
                     )
             else:
@@ -383,23 +396,23 @@ def _parse_mjcf(root: ET.Element, content_hash: str) -> ParsedRobotModel:
             walk(link_id, body)
 
     walk("world", worldbody)
+    joint_map = {row.name: row.joint_id for row in joints} | {row.joint_id: row.joint_id for row in joints}
     actuators: list[ParsedRobotActuator] = []
-    actuator_root = next((element for element in root.iter() if _local_name(element.tag) == "actuator"), None)
-    if actuator_root is not None:
-        for index, element in enumerate(list(actuator_root)):
-            joint_name = element.attrib.get("joint")
-            if not joint_name:
-                continue
-            name = element.attrib.get("name") or f"actuator-{index + 1}"
-            actuators.append(
-                ParsedRobotActuator(
-                    actuator_id=_slug(name, f"actuator-{index + 1}"),
-                    name=name,
-                    joint_id=_slug(joint_name, f"joint-{index + 1}"),
-                    actuator_type=_local_name(element.tag),
-                    metadata=dict(element.attrib),
-                )
+    actuator_root = _descendant(root, "actuator")
+    for index, element in enumerate(list(actuator_root) if actuator_root is not None else []):
+        joint_name = element.attrib.get("joint")
+        if not joint_name:
+            continue
+        name = element.attrib.get("name") or f"actuator-{index + 1}"
+        actuators.append(
+            ParsedRobotActuator(
+                actuator_id=_slug(name, f"actuator-{index + 1}"),
+                name=name,
+                joint_id=joint_map.get(joint_name, _slug(joint_name, f"joint-{index + 1}")),
+                actuator_type=_local(element.tag),
+                metadata=dict(element.attrib),
             )
+        )
     return ParsedRobotModel(
         model_id=_slug(model_name, "mjcf-robot"),
         name=model_name,
@@ -415,20 +428,21 @@ def parse_robot_model(content: str | bytes, model_format: str | RobotModelFormat
     raw = content.encode("utf-8") if isinstance(content, str) else bytes(content)
     if len(raw) > MAX_ROBOT_MODEL_BYTES:
         raise RobotModelImportError("robot model exceeds maximum accepted size")
-    if b"<!DOCTYPE" in raw.upper() or b"<!ENTITY" in raw.upper():
+    upper = raw.upper()
+    if b"<!DOCTYPE" in upper or b"<!ENTITY" in upper:
         raise RobotModelImportError("DTD and entity declarations are not accepted")
     try:
         root = ET.fromstring(raw)
     except ET.ParseError as exc:
         raise RobotModelImportError(f"invalid robot model XML: {exc}") from exc
     try:
-        resolved_format = model_format if isinstance(model_format, RobotModelFormat) else RobotModelFormat(str(model_format).strip().lower())
+        resolved = model_format if isinstance(model_format, RobotModelFormat) else RobotModelFormat(str(model_format).strip().lower())
     except ValueError as exc:
         raise RobotModelImportError(f"unsupported robot model format: {model_format}") from exc
     content_hash = f"sha256:{hashlib.sha256(raw).hexdigest()}"
-    if resolved_format == RobotModelFormat.URDF:
+    if resolved == RobotModelFormat.URDF:
         return _parse_urdf(root, content_hash)
-    if resolved_format == RobotModelFormat.SDF:
+    if resolved == RobotModelFormat.SDF:
         return _parse_sdf(root, content_hash)
     return _parse_mjcf(root, content_hash)
 
@@ -444,14 +458,26 @@ def infer_model_genre(model: ParsedRobotModel) -> RobotGenre:
         return RobotGenre.ROVER
     if any(token in text for token in ("rotor", "propeller", "quadrotor")):
         return RobotGenre.AERIAL
-    leg_markers = sum(token in text for token in ("front_left", "front-left", "rear_left", "rear-left", "front_right", "front-right", "rear_right", "rear-right"))
+    leg_markers = sum(
+        token in text
+        for token in (
+            "front_left",
+            "front-left",
+            "rear_left",
+            "rear-left",
+            "front_right",
+            "front-right",
+            "rear_right",
+            "rear-right",
+        )
+    )
     if leg_markers >= 3 or ("hip" in text and "knee" in text and len(model.joints) >= 8):
         return RobotGenre.QUADRUPED
     movable = [row for row in model.joints if row.joint_type != JointType.FIXED]
     child_counts: dict[str, int] = {}
     for joint in movable:
         child_counts[joint.parent_link_id] = child_counts.get(joint.parent_link_id, 0) + 1
-    if 3 <= len(movable) <= 12 and max(child_counts.values(), default=0) <= 2:
+    if 1 <= len(movable) <= 12 and max(child_counts.values(), default=0) <= 2:
         return RobotGenre.SERIAL_MANIPULATOR
     return RobotGenre.GENERIC
 
@@ -463,12 +489,12 @@ def topology_from_robot_model(
 ) -> RobotTopology:
     genre = robot_genre or infer_model_genre(model)
     parent_by_child = {row.child_link_id: row.parent_link_id for row in model.joints}
-    root_candidates = [row.link_id for row in model.links if row.link_id not in parent_by_child]
-    root_link_id = root_candidates[0] if root_candidates else model.links[0].link_id
+    roots = [row.link_id for row in model.links if row.link_id not in parent_by_child]
+    root_link_id = roots[0] if roots else model.links[0].link_id
     frames = [
         CoordinateFrame(
             frame_id=f"{row.link_id}-frame",
-            parent_frame_id=(f"{parent_by_child[row.link_id]}-frame" if row.link_id in parent_by_child else None),
+            parent_frame_id=f"{parent_by_child[row.link_id]}-frame" if row.link_id in parent_by_child else None,
             attached_object_id=row.link_id,
             authority=AuthorityState.DECLARED,
         )
@@ -492,11 +518,11 @@ def topology_from_robot_model(
         )
         for row in model.links
     ]
-    parsed_actuators = {row.joint_id: row for row in model.actuators}
-    actuators: list[RobotActuator] = []
+    actuator_by_joint = {row.joint_id: row for row in model.actuators}
     joints: list[RobotJoint] = []
+    actuators: list[RobotActuator] = []
     for row in model.joints:
-        parsed_actuator = parsed_actuators.get(row.joint_id)
+        parsed_actuator = actuator_by_joint.get(row.joint_id)
         actuator_id = parsed_actuator.actuator_id if parsed_actuator else (
             f"actuator-{row.joint_id}" if row.joint_type != JointType.FIXED else None
         )
@@ -538,9 +564,21 @@ def topology_from_robot_model(
     unresolved: list[Dict[str, Any]] = []
     for row in joints:
         if row.joint_type != JointType.FIXED and not row.limits:
-            unresolved.append({"object_id": row.joint_id, "field": "limits", "reason": "Robot model does not declare complete joint limits."})
+            unresolved.append(
+                {
+                    "object_id": row.joint_id,
+                    "field": "limits",
+                    "reason": "Robot model does not declare complete joint limits.",
+                }
+            )
         if row.joint_type != JointType.FIXED:
-            unresolved.append({"object_id": row.joint_id, "field": "calibration_ref", "reason": "Imported design model does not prove physical joint calibration."})
+            unresolved.append(
+                {
+                    "object_id": row.joint_id,
+                    "field": "calibration_ref",
+                    "reason": "Imported design model does not prove physical joint calibration.",
+                }
+            )
     return RobotTopology(
         topology_id=f"model-{model.model_id}-{model.content_hash.split(':')[-1][:12]}",
         robot_genre=genre,
