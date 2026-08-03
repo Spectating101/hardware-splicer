@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from hardware_splicer.capability_runtime import capability_report
+from hardware_splicer.capability_policy import product_capability_report
 
 
 def main() -> int:
@@ -30,7 +30,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    payload = capability_report(build_dir=args.build_dir)
+    payload = product_capability_report(build_dir=args.build_dir)
     print(
         json.dumps(
             payload,
