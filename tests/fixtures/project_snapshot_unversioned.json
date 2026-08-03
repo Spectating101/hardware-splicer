@@ -1,0 +1,28 @@
+{
+  "project_id": "legacy-demo",
+  "revision": 1,
+  "saved_at": "2026-07-20T00:00:00+00:00",
+  "snapshot": {
+    "projectId": "legacy-demo",
+    "projectName": "Legacy compatibility fixture",
+    "mode": "greenfield",
+    "currentStage": "design",
+    "discipline_payloads": {
+      "unknown_future_payload": {
+        "must_survive": true,
+        "nested": {
+          "value": 7
+        }
+      }
+    }
+  },
+  "metadata": {
+    "origin": "compatibility_fixture",
+    "unknown_metadata": {
+      "must_survive": true
+    }
+  },
+  "unknown_envelope_field": {
+    "must_survive": true
+  }
+}

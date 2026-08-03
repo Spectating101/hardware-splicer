@@ -111,11 +111,9 @@ def test_product_api_exposes_interchange_and_review_routes_together() -> None:
     }
     assert body["netlist"]["metadata"]["interchange"] == "circuit-json"
 
-    route_paths = {
-        path
-        for route in client.app.routes
-        if (path := getattr(route, "path", None)) is not None
-    }
+    openapi = client.get("/openapi.json")
+    assert openapi.status_code == 200
+    route_paths = set(openapi.json()["paths"])
     assert "/v1/interchange/circuit-json/inspect" in route_paths
     assert "/v1/build-files/engineering-review/status" in route_paths
     assert "/v1/build-files/engineering-review/run" in route_paths
