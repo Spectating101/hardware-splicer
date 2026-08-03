@@ -111,7 +111,11 @@ def test_product_api_exposes_interchange_and_review_routes_together() -> None:
     }
     assert body["netlist"]["metadata"]["interchange"] == "circuit-json"
 
-    route_paths = {route.path for route in client.app.routes}
+    route_paths = {
+        path
+        for route in client.app.routes
+        if (path := getattr(route, "path", None)) is not None
+    }
     assert "/v1/interchange/circuit-json/inspect" in route_paths
     assert "/v1/build-files/engineering-review/status" in route_paths
     assert "/v1/build-files/engineering-review/run" in route_paths
