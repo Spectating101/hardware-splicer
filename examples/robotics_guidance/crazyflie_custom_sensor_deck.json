@@ -1,0 +1,70 @@
+{
+  "scenario_id": "crazyflie_custom_sensor_deck",
+  "mode": "modify",
+  "reference_project": "Crazyflie 2.1+",
+  "expected_archetype": "aerial_robot",
+  "user_need": "Add a lightweight custom environmental sensor deck to a Crazyflie 2.1+ for supervised indoor mapping while preserving stable flight and a safe recovery path.",
+  "reference_sources": {
+    "repository": "https://github.com/bitcraze/crazyflie-firmware",
+    "documentation": [
+      "https://www.bitcraze.io/documentation/tutorials/getting-started-with-expansion-decks/",
+      "https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/development/howto/",
+      "https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/userguides/deck/"
+    ],
+    "videos": [
+      "https://www.youtube.com/@Bitcraze"
+    ]
+  },
+  "guidance_expectations": {
+    "minimum_part_lines": 9,
+    "tools_required": true,
+    "custom_mechanics": true,
+    "firmware_required": true,
+    "middleware_required": false
+  },
+  "intake": {
+    "project_name": "crazyflie_custom_environment_deck",
+    "goal": "Modify a Crazyflie 2.1+ with a custom expansion deck carrying a lightweight environmental sensor, one-wire identity memory and deck driver, then perform tethered and guarded first-flight validation.",
+    "salvage_mode": false,
+    "baseline": {
+      "platform": "Crazyflie 2.1+",
+      "flight_controller": "STM32F4",
+      "radio_power_controller": "nRF51",
+      "expansion_interface": "Crazyflie deck port",
+      "base_mass_g": 29
+    },
+    "change_request": {
+      "add": ["custom sensor PCB", "environmental sensor", "one-wire identity memory", "deck driver"],
+      "modify": ["mass distribution", "power budget", "firmware configuration", "flight validation"],
+      "preserve": ["propeller clearance", "radio link", "watchdog", "arming safety"]
+    },
+    "available_parts": [
+      {"name": "Crazyflie 2.1+", "type": "quadcopter", "quantity": 1},
+      {"name": "Crazyradio 2.0", "type": "radio_interface", "quantity": 1},
+      {"name": "Crazyflie prototyping deck", "type": "prototype_board", "quantity": 1},
+      {"name": "BME688 environmental sensor", "type": "environment_sensor", "quantity": 1},
+      {"name": "DS28E05 one-wire memory", "type": "identity_memory", "quantity": 1},
+      {"name": "decoupling capacitor", "type": "capacitor", "quantity": 2},
+      {"name": "deck connector pins", "type": "connector", "quantity": 20},
+      {"name": "JTAG or SWD debugger", "type": "tool", "quantity": 1},
+      {"name": "soldering station", "type": "tool", "quantity": 1},
+      {"name": "digital scale with 0.1 g resolution", "type": "tool", "quantity": 1},
+      {"name": "propeller guard", "type": "safety_guard", "quantity": 1}
+    ],
+    "constraints": {
+      "deck_mass_limit_g": 3.0,
+      "deck_current_limit_ma": 80,
+      "propeller_clearance_required": true,
+      "deck_orientation_required": true,
+      "flight_time_loss_limit_percent": 20,
+      "tethered_first_flight_required": true,
+      "propeller_guard_required": true,
+      "watchdog_must_remain_enabled": true,
+      "supervised_indoor_only": true
+    },
+    "reference_sources": {
+      "baseline_repository": "https://github.com/bitcraze/crazyflie-firmware",
+      "video_channel": "https://www.youtube.com/@Bitcraze"
+    }
+  }
+}
