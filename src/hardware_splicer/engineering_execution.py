@@ -1,9 +1,10 @@
 """Bounded execution for software-only engineering checks.
 
 This module intentionally supports no flashing, device access, power control, or
-physical motion.  Commands are generated from named operations; callers cannot submit
+physical motion. Commands are generated from named operations; callers cannot submit
 an arbitrary shell string. Execution is disabled unless explicitly enabled by the
-host and every workspace/target remains inside the configured execution root.
+host and every workspace, target, test path, and output remains inside the configured
+execution root.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ import sys
 import time
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -119,14 +120,23 @@ def _within(root: Path, value: str | Path) -> Path:
     return path
 
 
-def _safe_pytest_targets(value: Any) -> list[str]:
+def _safe_pytest_targets(workspace: Path, value: Any) -> list[str]:
     targets = value if isinstance(value, list) else []
     result: list[str] = []
     for item in targets:
-        token = str(item)
-        if token.startswith("-") or "::" in token and token.startswith("-"):
+        token = str(item).strip()
+        if not token:
+            continue
+        if token.startswith("-"):
             raise ExecutionPolicyError("pytest target cannot be an option")
-        result.append(token)
+        path_token, separator, node_id = token.partition("::")
+        resolved = _within(workspace, path_token)
+        rendered = str(resolved)
+        if separator:
+            if not node_id or node_id.startswith("-"):
+                raise ExecutionPolicyError("pytest node id is invalid")
+            rendered = f"{rendered}::{node_id}"
+        result.append(rendered)
     return result
 
 
@@ -137,7 +147,7 @@ def _argv(request: ExecutionRequest, workspace: Path, target: Path | None) -> tu
     if operation == ExecutionOperation.PYTHON_COMPILE:
         return [sys.executable, "-m", "compileall", "-q", str(target)], sys.executable
     if operation == ExecutionOperation.PYTEST:
-        targets = _safe_pytest_targets(request.options.get("targets")) or ["tests"]
+        targets = _safe_pytest_targets(workspace, request.options.get("targets")) or [str(_within(workspace, "tests"))]
         return [sys.executable, "-m", "pytest", "-q", *targets], sys.executable
     if operation == ExecutionOperation.KICAD_ERC:
         return ["kicad-cli", "sch", "erc", str(target)], shutil.which("kicad-cli")
@@ -210,6 +220,7 @@ def preview_engineering_execution(
             "execution_enabled": execution_enabled(),
             "shell": False,
             "network_authorized": False,
+            "network_isolation_enforced": False,
             "device_access_authorized": False,
             "flash_authorized": False,
             "power_on_authorized": False,
@@ -242,12 +253,18 @@ def run_engineering_execution(
             deep=True,
         )
 
+    execution_home = workspace / ".hardware-splicer-execution-home"
+    execution_home.mkdir(parents=True, exist_ok=True)
     env = {
         "PATH": os.environ.get("PATH", ""),
-        "HOME": os.environ.get("HOME", str(workspace)),
+        "HOME": str(execution_home),
+        "XDG_CACHE_HOME": str(execution_home / ".cache"),
+        "XDG_CONFIG_HOME": str(execution_home / ".config"),
         "LANG": os.environ.get("LANG", "C.UTF-8"),
         "LC_ALL": os.environ.get("LC_ALL", "C.UTF-8"),
         "PYTHONUNBUFFERED": "1",
+        "PIP_NO_INDEX": "1",
+        "PIP_DISABLE_PIP_VERSION_CHECK": "1",
         "HARDWARE_SPLICER_EXECUTION_SANDBOX": "1",
     }
     try:
