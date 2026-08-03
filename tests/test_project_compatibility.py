@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_compatibility import (
@@ -166,6 +167,33 @@ def test_unknown_named_schema_fails_closed() -> None:
                 "snapshot": {},
             }
         )
+
+
+def test_future_schema_is_structured_http_refusal_not_server_failure(
+    tmp_path: Path,
+) -> None:
+    store = CompatibleProjectStore(tmp_path)
+    store.save("future-demo", {"projectName": "Future schema fixture"})
+
+    revision_path = tmp_path / "future-demo" / "revisions" / "00000001.json"
+    envelope = json.loads(revision_path.read_text(encoding="utf-8"))
+    envelope["schema_version"] = "hardware_splicer.project_snapshot.v2"
+    revision_path.write_text(json.dumps(envelope), encoding="utf-8")
+
+    response = TestClient(create_product_app(store)).get("/v1/projects/future-demo")
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == {
+        "type": "invalid_request",
+        "message": (
+            "unsupported project snapshot schema "
+            "'hardware_splicer.project_snapshot.v2'; this build supports "
+            "'hardware_splicer.project_snapshot.v1' and deterministic migration "
+            "from unversioned legacy envelopes"
+        ),
+    }
+    assert revision_path.is_file()
+    assert not revision_path.with_name("00000001.json.corrupt").exists()
 
 
 def test_product_app_defaults_to_compatible_store_and_preserves_injected_store(
