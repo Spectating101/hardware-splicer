@@ -8,9 +8,9 @@ existing build, evidence, bench, and package workflows.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Mapping, Sequence
+from typing import Any, Dict, Iterable, Mapping
 
-from .change_impact import ChangeImpactGraph, ChangeMode, build_change_impact_graph
+from .change_impact import ChangeImpactGraph, build_change_impact_graph
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
 from .machine_project import AuthorityState, MachineProject
 from .machine_project_seed import machine_project_from_intake
@@ -27,6 +27,71 @@ def _mapping(value: Any) -> dict[str, Any]:
 
 def _sequence(value: Any) -> list[Any]:
     return list(value) if isinstance(value, (list, tuple)) else []
+
+
+def normalize_engineering_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
+    """Lift common nested change/failure fields into a consistent planning context."""
+
+    body = dict(intake or {})
+    constraints = _mapping(body.get("constraints"))
+    change_request = _mapping(body.get("change_request"))
+    repair_request = _mapping(body.get("repair"))
+    goal = str(body.get("goal") or body.get("intent") or body.get("brief") or "")
+    lowered = goal.lower()
+
+    if body.get("baseline_revision") is None:
+        nested_baseline = change_request.get("baseline_revision")
+        if nested_baseline is None:
+            nested_baseline = constraints.get("baseline_revision")
+        if nested_baseline is not None:
+            body["baseline_revision"] = nested_baseline
+
+    if body.get("candidate_revision") is None and change_request.get("candidate_revision") is not None:
+        body["candidate_revision"] = change_request["candidate_revision"]
+
+    if body.get("field_failure") is None and change_request.get("failure_event"):
+        body["field_failure"] = {
+            "event": change_request.get("failure_event"),
+            "requested_outcome": change_request.get("requested_outcome"),
+            "must_preserve": change_request.get("must_preserve") or [],
+        }
+
+    if body.get("mode") is None:
+        failure_tokens = (
+            "field failure",
+            "tipping",
+            "tipped",
+            "brownout",
+            "reboot",
+            "failed in field",
+            "return to field",
+            "returning to field",
+            "regression before field",
+        )
+        repair_tokens = ("repair", "recover", "salvage", "donor", "splice", "burned")
+        modification_tokens = ("modify", "upgrade", "revise", "replace", "add a", "add an")
+        if body.get("field_failure") or change_request.get("failure_event") or any(token in lowered for token in failure_tokens):
+            body["mode"] = "evolve"
+        elif body.get("salvage_mode") or repair_request or any(token in lowered for token in repair_tokens):
+            body["mode"] = "repair"
+        elif change_request or body.get("baseline_revision") is not None or any(token in lowered for token in modification_tokens):
+            body["mode"] = "modify"
+        else:
+            body["mode"] = "greenfield"
+
+    context = _mapping(body.get("engineering_context"))
+    context.update(
+        {
+            "normalized_mode": body.get("mode"),
+            "baseline_revision": body.get("baseline_revision"),
+            "candidate_revision": body.get("candidate_revision"),
+            "change_request_present": bool(change_request),
+            "field_failure_present": bool(body.get("field_failure")),
+            "repair_request_present": bool(repair_request or body.get("salvage_mode")),
+        }
+    )
+    body["engineering_context"] = context
+    return body
 
 
 def _source_id(value: Mapping[str, Any]) -> str:
@@ -222,7 +287,7 @@ def plan_engineering_project(
     are canonical planning artifacts with proposed/declared/observed authority only.
     """
 
-    body = dict(intake or {})
+    body = normalize_engineering_intake(intake)
     plan = dict(plan_project_from_intake(body, skip_vision=skip_vision))
     machine_project = machine_project_from_intake(body)
     resolved_sources, unresolved_source_ids = _resolve_sources(body, engineering_sources)
@@ -256,6 +321,8 @@ def plan_engineering_project(
     native_archetype = _native_archetype(topology, str(plan.get("archetype") or "generic_mechatronics"))
     plan["schema_version"] = ENGINEERING_PLAN_SCHEMA
     plan["legacy_intake_schema_version"] = "hardware_splicer.project_intake.v1"
+    plan["normalized_intake"] = body
+    plan["engineering_context"] = body.get("engineering_context")
     plan["archetype"] = native_archetype
     plan["native_robot_genre"] = topology.robot_genre.value
     plan["engineering_source_graph"] = source_graph.model_dump(mode="json")
