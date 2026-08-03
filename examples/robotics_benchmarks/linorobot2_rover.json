@@ -1,0 +1,50 @@
+{
+  "benchmark_id": "linorobot2_rover",
+  "robot_genre": "autonomous_mobile_robot",
+  "reference_project": "linorobot2 differential-drive base",
+  "expected_archetype": "rover",
+  "reference_sources": {
+    "repository": "https://github.com/linorobot/linorobot2",
+    "documentation": ["https://linorobot.github.io/linorobot2/"],
+    "videos": ["https://www.youtube.com/results?search_query=linorobot2+robot+build"]
+  },
+  "stress_profile": {
+    "actuator_count": 2,
+    "kinematic_chains": 1,
+    "sensor_count": 4,
+    "control_loops": 4,
+    "power_domains": 2,
+    "external_interfaces": 8,
+    "firmware_components": 1,
+    "ros_interfaces": 8,
+    "dynamic_coupling": "medium",
+    "safety_criticality": "medium",
+    "required_domains": ["mechanical", "actuation", "control", "platform", "safety", "electrical", "perception", "firmware", "ros", "evidence"]
+  },
+  "intake": {
+    "project_name": "linorobot2_reference_rover",
+    "goal": "Build a differential-drive autonomous rover with wheel encoders, IMU, lidar, micro-ROS motor control, ROS 2 localization, SLAM and Nav2.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "left geared DC motor with encoder", "type": "dc_motor"},
+      {"name": "right geared DC motor with encoder", "type": "dc_motor"},
+      {"name": "dual H-bridge motor driver", "type": "motor_driver"},
+      {"name": "ESP32 micro-ROS controller", "type": "microcontroller"},
+      {"name": "Raspberry Pi robot computer", "type": "computer"},
+      {"name": "2D lidar", "type": "lidar"},
+      {"name": "IMU", "type": "imu"},
+      {"name": "12V battery pack", "type": "power_source"}
+    ],
+    "constraints": {
+      "wheel_d_mm": 65,
+      "track_width_mm": 220,
+      "battery_voltage_v": 12,
+      "current_limit_a": 8,
+      "runtime_min": 45
+    },
+    "reference_sources": {
+      "repository": "https://github.com/linorobot/linorobot2",
+      "video_query": "linorobot2 robot build"
+    }
+  }
+}
