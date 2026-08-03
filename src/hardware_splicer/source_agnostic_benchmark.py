@@ -3,8 +3,8 @@
 The benchmark goes beyond reproducing known open-source robots. It measures whether
 Hardware Splicer can reconcile conflicting evidence, synthesize a requirement-driven
 candidate without a canonical reference, repair/splice donor hardware, and revise a
-machine after field failure. No public source receives more authority than its evidence
-class permits.
+machine after field failure. Public sources never receive more authority than their
+evidence class permits.
 """
 
 from __future__ import annotations
@@ -28,7 +28,6 @@ _DIMENSION_WEIGHTS: dict[str, float] = {
     "uncertainty_visibility": 8.0,
     "verification_authority": 10.0,
 }
-
 _VALID_MODES = {"reconstruct", "synthesize", "repair", "evolve"}
 
 
@@ -92,10 +91,11 @@ def _source_retention(plan: Mapping[str, Any], sources: list[Any]) -> tuple[bool
     for source in sources:
         if not isinstance(source, Mapping):
             continue
-        source_id = str(source.get("source_id") or source.get("id") or "").strip().lower()
-        uri = str(source.get("uri") or source.get("url") or "").strip().lower()
-        version = str(source.get("version") or source.get("revision") or "").strip().lower()
-        tokens = [token for token in (source_id, uri, version) if token]
+        tokens = [
+            str(source.get(key) or "").strip().lower()
+            for key in ("source_id", "uri", "version")
+        ]
+        tokens = [token for token in tokens if token]
         if tokens and any(token in haystack for token in tokens):
             retained += 1
     ratio = retained / len(sources)
@@ -105,27 +105,21 @@ def _source_retention(plan: Mapping[str, Any], sources: list[Any]) -> tuple[bool
 def _source_provenance(plan: Mapping[str, Any], sources: list[Any]) -> bool:
     if not sources:
         return True
-    return _contains_key(
+    has_identity = _contains_key(plan, {"source_id", "source_type", "source_uri"})
+    has_version = _contains_key(
         plan,
-        {
-            "source_id",
-            "source_type",
-            "uri",
-            "revision",
-            "commit_sha",
-            "checksum",
-            "content_hash",
-            "retrieved_at",
-            "authority_ceiling",
-        },
+        {"revision", "commit_sha", "checksum", "content_hash", "retrieved_at"},
     )
+    has_authority = _contains_key(
+        plan,
+        {"authority_ceiling", "source_authority", "evidence_authority"},
+    )
+    return has_identity and has_version and has_authority
 
 
 def _candidate_synthesis(plan: Mapping[str, Any], expected_archetype: str) -> bool:
-    scenario = _mapping(plan.get("scenario"))
-    spec = _mapping(scenario.get("compile_spec"))
-    detected = str(plan.get("archetype") or "")
-    return detected == expected_archetype and bool(
+    spec = _mapping(_mapping(plan.get("scenario")).get("compile_spec"))
+    return str(plan.get("archetype") or "") == expected_archetype and bool(
         plan.get("recommended_build_id")
         or _mapping(spec.get("robotics_project"))
         or _mapping(spec.get("machine"))
@@ -142,6 +136,25 @@ def _donor_reuse(plan: Mapping[str, Any]) -> bool:
             or _mapping(salvage.get("graph_input"))
         )
     )
+
+
+def _revision_impact(plan: Mapping[str, Any]) -> bool:
+    has_baseline = _contains_key(
+        plan,
+        {"baseline_revision", "baseline_project", "baseline_snapshot", "source_revision"},
+    )
+    has_delta = _contains_key(
+        plan,
+        {
+            "candidate_revision",
+            "affected_subsystems",
+            "compatibility_impact",
+            "modification_delta",
+            "failure_hypothesis",
+            "regression_scope",
+        },
+    )
+    return has_baseline and has_delta
 
 
 def evaluate_source_agnostic_scenario(
@@ -162,7 +175,6 @@ def evaluate_source_agnostic_scenario(
     mode = str(scenario.get("mode") or "").strip().lower()
     expected_archetype = str(scenario.get("expected_archetype") or "")
     plan = dict(planner(intake, skip_vision=True))
-
     dimensions: dict[str, dict[str, Any]] = {}
     gaps: list[str] = []
 
@@ -180,7 +192,6 @@ def evaluate_source_agnostic_scenario(
         "requirements_not_structured",
         "goal and constraints",
     )
-
     retained, retention_ratio = _source_retention(plan, sources)
     record(
         "source_retention",
@@ -192,21 +203,26 @@ def evaluate_source_agnostic_scenario(
         "source_provenance",
         _source_provenance(plan, sources),
         "source_provenance_not_pinned",
-        "source identities, revisions, hashes, and authority ceilings",
+        "source identity, revision/hash, and authority ceiling",
     )
 
     expected_conflicts = int(challenge.get("expected_conflict_count") or 0)
-    conflicts_visible = expected_conflicts == 0 or _contains_key(
-        plan,
-        {"conflict", "contradiction", "incompatible_claim", "disputed", "source_disagreement"},
+    conflicts_visible = expected_conflicts == 0 or (
+        _contains_key(
+            plan,
+            {"conflict_id", "contradiction_id", "source_disagreement", "incompatible_claim"},
+        )
+        and _contains_key(
+            plan,
+            {"disposition", "selected_claim", "blocked_by_conflict", "resolution_status"},
+        )
     )
     record(
         "conflict_resolution",
         conflicts_visible,
         "source_conflicts_not_resolved",
-        "explicit contradiction records",
+        "conflict identity and explicit disposition",
     )
-
     record(
         "candidate_synthesis",
         _candidate_synthesis(plan, expected_archetype),
@@ -215,33 +231,19 @@ def evaluate_source_agnostic_scenario(
     )
 
     donor_required = mode == "repair" or bool(challenge.get("donor_reuse_required"))
-    donor_ok = not donor_required or _donor_reuse(plan)
     record(
         "donor_reuse",
-        donor_ok,
+        not donor_required or _donor_reuse(plan),
         "donor_mapping_not_resolved",
         "resolved donor modules and splice graph" if donor_required else "not required",
     )
 
     revision_required = mode == "evolve" or bool(challenge.get("baseline_revision_required"))
-    revision_ok = not revision_required or _contains_key(
-        plan,
-        {
-            "baseline_revision",
-            "candidate_revision",
-            "change_request",
-            "affected_subsystems",
-            "compatibility_impact",
-            "modification_delta",
-            "field_failure",
-            "failure_hypothesis",
-        },
-    )
     record(
         "revision_impact",
-        revision_ok,
+        not revision_required or _revision_impact(plan),
         "baseline_to_candidate_impact_missing",
-        "baseline-to-candidate change impact" if revision_required else "not required",
+        "pinned baseline plus affected-subsystem delta" if revision_required else "not required",
     )
 
     identity_required = bool(challenge.get("identity_continuity_required", True))
