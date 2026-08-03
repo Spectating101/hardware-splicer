@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .electrical_design import ElectricalDesign
 from .electrical_design_adapter import electrical_design_from_machine_project
+from .electrical_design_edit import ElectricalEditError, apply_electrical_edits
 from .machine_project import MachineProject
 
 
@@ -19,6 +20,11 @@ class ElectricalDesignEnvelope(BaseModel):
 
 class MachineElectricalProjectionRequest(BaseModel):
     project: MachineProject
+
+
+class ElectricalDesignEditRequest(BaseModel):
+    design: ElectricalDesign
+    operations: list[Dict[str, Any]] = Field(min_length=1)
 
 
 def _design_response(design: ElectricalDesign) -> Dict[str, Any]:
@@ -51,6 +57,17 @@ def create_electrical_design_router() -> APIRouter:
     @router.post("/from-machine-project")
     def project_machine_electrical(request: MachineElectricalProjectionRequest) -> Dict[str, Any]:
         return _design_response(electrical_design_from_machine_project(request.project))
+
+    @router.post("/edit")
+    def edit_electrical_design(request: ElectricalDesignEditRequest) -> Dict[str, Any]:
+        try:
+            candidate = apply_electrical_edits(request.design, request.operations)
+        except ElectricalEditError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_electrical_edit", "message": str(exc)},
+            ) from exc
+        return _design_response(candidate)
 
     @router.post("/erc")
     def run_electrical_rule_check(request: ElectricalDesignEnvelope) -> Dict[str, Any]:
