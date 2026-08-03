@@ -71,6 +71,12 @@ from .scenario_runner import (
 from .schemas import HardwareCompileResult, HardwareCompileSpec
 from .vision_evidence_assistant import build_vision_evidence_report, enrich_intake_with_vision_assistance
 
+# Install the narrowly scoped ElementTree leaf correction before callers import
+# ``hardware_splicer.robot_model_import.parse_robot_model``. The compatibility
+# module preserves the bounded parser's validation and authority semantics.
+from . import robot_model_import_compat as _robot_model_import_compat  # noqa: F401,E402
+
+
 __all__ = [
     "HardwareCompileResult",
     "HardwareCompileSpec",
