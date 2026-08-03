@@ -1,9 +1,8 @@
 """Source-agnostic engineering planning built on the existing Hardware Splicer intake.
 
-This module does not replace the mature intake/compiler path.  It enriches that path
-with canonical source provenance, robot topology, change propagation, and a
-MachineProject projection so richer engineering reasoning remains compatible with
-existing build, evidence, bench, and package workflows.
+This module does not replace the mature intake/compiler path. It enriches that path
+with canonical source provenance, robot topology, bounded quantitative analysis,
+change propagation, and a MachineProject projection.
 """
 
 from __future__ import annotations
@@ -11,6 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, Iterable, Mapping
 
 from .change_impact import ChangeImpactGraph, build_change_impact_graph
+from .engineering_analysis import EngineeringAnalysisReport, analyze_engineering_candidate
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
 from .machine_project import AuthorityState, MachineProject
 from .machine_project_seed import machine_project_from_intake
@@ -45,10 +45,8 @@ def normalize_engineering_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
             nested_baseline = constraints.get("baseline_revision")
         if nested_baseline is not None:
             body["baseline_revision"] = nested_baseline
-
     if body.get("candidate_revision") is None and change_request.get("candidate_revision") is not None:
         body["candidate_revision"] = change_request["candidate_revision"]
-
     if body.get("field_failure") is None and change_request.get("failure_event"):
         body["field_failure"] = {
             "event": change_request.get("failure_event"),
@@ -140,9 +138,7 @@ def _resolve_sources(
 
 
 def _native_archetype(topology: RobotTopology, fallback: str) -> str:
-    if topology.robot_genre == RobotGenre.GENERIC:
-        return fallback
-    return topology.robot_genre.value
+    return fallback if topology.robot_genre == RobotGenre.GENERIC else topology.robot_genre.value
 
 
 def _identity_map(
@@ -196,14 +192,11 @@ def _identity_map(
             "middleware_interfaces": sensor.middleware_interfaces,
         }
 
-    claim_targets: dict[str, str] = {}
     known_ids = set(topology_objects) | set(component_aliases) | {machine_project.project_id}
-    for claim in source_graph.claims:
-        if claim.subject_id in known_ids:
-            claim_targets[claim.claim_id] = claim.subject_id
-        else:
-            claim_targets[claim.claim_id] = machine_project.project_id
-
+    claim_targets = {
+        claim.claim_id: claim.subject_id if claim.subject_id in known_ids else machine_project.project_id
+        for claim in source_graph.claims
+    }
     return {
         "schema_version": "hardware_splicer.engineering_identity_map.v1",
         "project_id": machine_project.project_id,
@@ -219,6 +212,7 @@ def _machine_project_with_engineering_payloads(
     machine_project: MachineProject,
     source_graph: EngineeringSourceGraph,
     topology: RobotTopology,
+    analysis: EngineeringAnalysisReport,
     change_impact: ChangeImpactGraph,
     identity_map: Mapping[str, Any],
 ) -> MachineProject:
@@ -227,6 +221,7 @@ def _machine_project_with_engineering_payloads(
         {
             "engineering_source_graph": source_graph.model_dump(mode="json"),
             "robot_topology": topology.model_dump(mode="json"),
+            "engineering_analysis": analysis.model_dump(mode="json"),
             "change_impact": change_impact.model_dump(mode="json"),
             "engineering_identity_map": dict(identity_map),
         }
@@ -237,27 +232,23 @@ def _machine_project_with_engineering_payloads(
             "engineering_planner": ENGINEERING_PLAN_SCHEMA,
             "source_provenance_complete": source_graph.source_provenance_complete,
             "blocking_source_conflict_count": len(source_graph.blocking_conflicts),
+            "blocking_analysis_finding_count": len(analysis.blocking_findings),
             "robot_genre": topology.robot_genre.value,
             "change_mode": change_impact.mode.value,
             "physical_authority_unchanged": True,
         }
     )
-    return machine_project.model_copy(
-        update={"discipline_payloads": payloads, "metadata": metadata},
-        deep=True,
-    )
+    return machine_project.model_copy(update={"discipline_payloads": payloads, "metadata": metadata}, deep=True)
 
 
 def _engineering_missing_info(
     source_graph: EngineeringSourceGraph,
     topology: RobotTopology,
+    analysis: EngineeringAnalysisReport,
     change_impact: ChangeImpactGraph,
 ) -> list[str]:
     rows: list[str] = []
-    rows.extend(
-        f"Resolve engineering source reference {source_id!r}."
-        for source_id in source_graph.unresolved_source_ids
-    )
+    rows.extend(f"Resolve engineering source reference {source_id!r}." for source_id in source_graph.unresolved_source_ids)
     rows.extend(
         f"Disposition source conflict {conflict.conflict_id!r}: {conflict.reason}"
         for conflict in source_graph.blocking_conflicts
@@ -265,6 +256,11 @@ def _engineering_missing_info(
     rows.extend(
         f"Resolve robot topology field {item.get('object_id', topology.topology_id)}.{item.get('field', 'unknown')}: {item.get('reason', '')}"
         for item in topology.unresolved
+    )
+    rows.extend(
+        f"Provide analysis input for {finding.finding_id}: {', '.join(finding.missing_inputs)}"
+        for finding in analysis.findings
+        if finding.missing_inputs
     )
     rows.extend(
         f"Resolve change-impact field {item.get('field', 'unknown')}: {item.get('reason', '')}"
@@ -281,11 +277,7 @@ def plan_engineering_project(
     baseline_project: Mapping[str, Any] | MachineProject | None = None,
     skip_vision: bool = False,
 ) -> Dict[str, Any]:
-    """Produce an enriched source-agnostic engineering plan.
-
-    Existing intake planning remains the build and artifact baseline.  The added graphs
-    are canonical planning artifacts with proposed/declared/observed authority only.
-    """
+    """Produce an enriched source-agnostic engineering plan."""
 
     body = normalize_engineering_intake(intake)
     plan = dict(plan_project_from_intake(body, skip_vision=skip_vision))
@@ -302,6 +294,7 @@ def plan_engineering_project(
         hinted_genre=str(body.get("robot_genre") or plan.get("archetype") or ""),
         machine_project=machine_project,
     )
+    analysis = analyze_engineering_candidate(body, topology=topology)
     change_impact = build_change_impact_graph(
         body,
         machine_project=machine_project,
@@ -314,30 +307,36 @@ def plan_engineering_project(
         machine_project,
         source_graph,
         topology,
+        analysis,
         change_impact,
         identity_map,
     )
 
     native_archetype = _native_archetype(topology, str(plan.get("archetype") or "generic_mechatronics"))
-    plan["schema_version"] = ENGINEERING_PLAN_SCHEMA
-    plan["legacy_intake_schema_version"] = "hardware_splicer.project_intake.v1"
-    plan["normalized_intake"] = body
-    plan["engineering_context"] = body.get("engineering_context")
-    plan["archetype"] = native_archetype
-    plan["native_robot_genre"] = topology.robot_genre.value
-    plan["engineering_source_graph"] = source_graph.model_dump(mode="json")
-    plan["reference_sources"] = source_graph.model_dump(mode="json")
-    plan["source_conflicts"] = [row.model_dump(mode="json") for row in source_graph.conflicts]
-    plan["robot_topology"] = topology.model_dump(mode="json")
-    plan["change_impact"] = change_impact.model_dump(mode="json")
-    plan["engineering_identity_map"] = identity_map
-    plan["identity_map"] = identity_map
-    plan["machine_project"] = machine_project.model_dump(mode="json")
-    plan["baseline_revision"] = change_impact.baseline_revision
-    plan["candidate_revision"] = change_impact.candidate_revision
-    plan["affected_subsystems"] = change_impact.affected_target_ids
-    plan["compatibility_impact"] = [row.model_dump(mode="json") for row in change_impact.impacts]
-    plan["regression_scope"] = [row.model_dump(mode="json") for row in change_impact.regression_checks]
+    plan.update(
+        {
+            "schema_version": ENGINEERING_PLAN_SCHEMA,
+            "legacy_intake_schema_version": "hardware_splicer.project_intake.v1",
+            "normalized_intake": body,
+            "engineering_context": body.get("engineering_context"),
+            "archetype": native_archetype,
+            "native_robot_genre": topology.robot_genre.value,
+            "engineering_source_graph": source_graph.model_dump(mode="json"),
+            "reference_sources": source_graph.model_dump(mode="json"),
+            "source_conflicts": [row.model_dump(mode="json") for row in source_graph.conflicts],
+            "robot_topology": topology.model_dump(mode="json"),
+            "engineering_analysis": analysis.model_dump(mode="json"),
+            "change_impact": change_impact.model_dump(mode="json"),
+            "engineering_identity_map": identity_map,
+            "identity_map": identity_map,
+            "machine_project": machine_project.model_dump(mode="json"),
+            "baseline_revision": change_impact.baseline_revision,
+            "candidate_revision": change_impact.candidate_revision,
+            "affected_subsystems": change_impact.affected_target_ids,
+            "compatibility_impact": [row.model_dump(mode="json") for row in change_impact.impacts],
+            "regression_scope": [row.model_dump(mode="json") for row in change_impact.regression_checks],
+        }
+    )
     plan["modification_delta"] = {
         "mode": change_impact.mode.value,
         "baseline_project_id": change_impact.baseline_project_id,
@@ -360,6 +359,7 @@ def plan_engineering_project(
         {
             "engineering_source_graph": source_graph.model_dump(mode="json"),
             "robot_topology": topology.model_dump(mode="json"),
+            "engineering_analysis": analysis.model_dump(mode="json"),
             "change_impact": change_impact.model_dump(mode="json"),
             "engineering_identity_map": identity_map,
             "machine_project": machine_project.model_dump(mode="json"),
@@ -384,6 +384,7 @@ def plan_engineering_project(
     scenario["engineering_acceptance"] = {
         "blocking_source_conflicts": len(source_graph.blocking_conflicts),
         "unresolved_topology_fields": len(topology.unresolved),
+        "blocking_analysis_findings": len(analysis.blocking_findings),
         "blocking_change_impacts": len(change_impact.blocking_impacts),
         "power_on_authorized": False,
         "release_authorized": False,
@@ -391,18 +392,21 @@ def plan_engineering_project(
     plan["scenario"] = scenario
 
     missing = list(plan.get("missing_info") or [])
-    missing.extend(_engineering_missing_info(source_graph, topology, change_impact))
+    missing.extend(_engineering_missing_info(source_graph, topology, analysis, change_impact))
     plan["missing_info"] = list(dict.fromkeys(missing))
     confidence = float(plan.get("planning_confidence") or 0.0)
     confidence -= min(len(source_graph.blocking_conflicts) * 0.05, 0.25)
     confidence -= min(len(source_graph.unresolved_source_ids) * 0.03, 0.15)
+    confidence -= min(len(analysis.blocking_findings) * 0.02, 0.2)
     plan["planning_confidence"] = round(max(0.0, min(confidence, 1.0)), 3)
+    blocked = bool(source_graph.blocking_conflicts or analysis.blocking_findings or change_impact.blocking_impacts)
     plan["engineering_readiness"] = {
-        "status": "blocked" if source_graph.blocking_conflicts or change_impact.blocking_impacts else "candidate",
+        "status": "blocked" if blocked else "candidate",
         "candidate_machine_synthesized": True,
         "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC,
         "source_provenance_complete": source_graph.source_provenance_complete,
         "blocking_source_conflict_count": len(source_graph.blocking_conflicts),
+        "blocking_analysis_finding_count": len(analysis.blocking_findings),
         "blocking_change_impact_count": len(change_impact.blocking_impacts),
         "physical_validation_required": True,
         "power_on_authorized": False,
