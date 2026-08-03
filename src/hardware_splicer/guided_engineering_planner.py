@@ -12,6 +12,7 @@ from .engineering_source_graph import EngineeringSourceGraph
 from .engineering_verification_bridge import bridge_engineering_verification
 from .machine_project import MachineProject
 from .manufacturing_closure import ManufacturingClosureReport, build_manufacturing_closure
+from .manufacturing_projection import project_manufacturing_identities
 from .robot_operator_guide import RobotOperatorGuide, build_robot_operator_guide
 from .robot_topology import RobotTopology
 
@@ -58,6 +59,8 @@ def plan_guided_engineering_project(
         change_impact=change_impact,
         identity_map=identity_map,
     )
+    project = project_manufacturing_identities(project, plan=plan, intake=intake)
+    manufacturing_projection = project.discipline_payloads.get("manufacturing_projection")
 
     closure = build_manufacturing_closure(plan, intake=intake, project=project)
     closure_payload = closure.model_dump(mode="json")
@@ -73,6 +76,7 @@ def plan_guided_engineering_project(
         }
     )
     project = project.model_copy(update={"discipline_payloads": payloads, "metadata": metadata}, deep=True)
+    plan["manufacturing_projection"] = manufacturing_projection
     plan["manufacturing_closure"] = closure_payload
 
     guide: RobotOperatorGuide = build_robot_operator_guide(
@@ -118,12 +122,16 @@ def plan_guided_engineering_project(
     compile_spec["ordered_steps"] = plan["ordered_steps"]
     compile_spec["engineering_verification_bridge"] = plan["verification_bridge"]
     compile_spec["engineering_artifact_projection"] = plan["engineering_artifact_projection"]
+    compile_spec["manufacturing_projection"] = manufacturing_projection
     compile_spec["manufacturing_closure"] = closure_payload
     scenario["compile_spec"] = compile_spec
     scenario["manufacturing_acceptance"] = {
         "status": closure.status,
         "blocking_check_count": len(closure.blocking_checks),
         "warning_check_count": len(closure.warning_checks),
+        "projected_component_count": len((manufacturing_projection or {}).get("projected_component_ids", [])),
+        "projected_interface_count": len((manufacturing_projection or {}).get("projected_interface_ids", [])),
+        "projected_artifact_count": len((manufacturing_projection or {}).get("projected_artifact_ids", [])),
         "fabrication_authorized": False,
         "release_authorized": False,
     }
@@ -150,6 +158,9 @@ def plan_guided_engineering_project(
             "middleware_contract_component_count": len(
                 (plan["engineering_artifact_projection"] or {}).get("middleware_component_ids", [])
             ),
+            "manufacturing_projected_component_count": len((manufacturing_projection or {}).get("projected_component_ids", [])),
+            "manufacturing_projected_interface_count": len((manufacturing_projection or {}).get("projected_interface_ids", [])),
+            "manufacturing_projected_artifact_count": len((manufacturing_projection or {}).get("projected_artifact_ids", [])),
             "manufacturing_closure_status": closure.status,
             "manufacturing_closure_blocker_count": len(closure.blocking_checks),
             "manufacturing_closure_warning_count": len(closure.warning_checks),
