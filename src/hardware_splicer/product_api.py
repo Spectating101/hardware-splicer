@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from .api import create_app as create_engine_app
 from .circuit_json_api import create_circuit_json_router
 from .electrical_design_api import create_electrical_design_router
+from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_review_api import create_engineering_review_router
 from .machine_project_api import create_machine_project_router
 from .project_api import create_project_router
@@ -32,6 +33,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_machine_project_router())
     app.include_router(create_electrical_design_router())
     app.include_router(create_circuit_json_router())
+    app.include_router(create_electrical_interchange_router())
     app.include_router(create_engineering_review_router())
     return app
 
