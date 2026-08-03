@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from .project_store import PROJECT_STORE_SCHEMA, ProjectStore
+from .project_store import CorruptProject, PROJECT_STORE_SCHEMA, ProjectStore
 
 LEGACY_UNVERSIONED_SCHEMA = "legacy_unversioned_project_snapshot"
 
@@ -33,7 +33,9 @@ def migrate_project_envelope(envelope: Mapping[str, Any]) -> Dict[str, Any]:
     only supported legacy form is an otherwise complete envelope that predates the
     top-level ``schema_version`` field. Unknown top-level, snapshot, and metadata
     fields are preserved. Unknown named schemas fail closed rather than being
-    treated as corrupt JSON or silently rewritten.
+    treated as corrupt JSON or silently rewritten. Malformed unversioned envelopes
+    remain ordinary corruption so the mature revision-recovery path can recover an
+    older valid snapshot.
     """
 
     value = dict(envelope)
@@ -46,7 +48,11 @@ def migrate_project_envelope(envelope: Mapping[str, Any]) -> Dict[str, Any]:
     required = {"project_id", "revision", "snapshot"}
     missing = sorted(field for field in required if field not in value)
     if missing:
-        raise UnsupportedProjectSchema(schema_version)
+        raise CorruptProject(
+            "legacy project envelope is missing required fields: " + ", ".join(missing)
+        )
+    if not isinstance(value.get("snapshot"), Mapping):
+        raise CorruptProject("legacy project snapshot must be an object")
 
     metadata = value.get("metadata")
     if metadata is None:
@@ -54,13 +60,14 @@ def migrate_project_envelope(envelope: Mapping[str, Any]) -> Dict[str, Any]:
     elif isinstance(metadata, Mapping):
         migrated_metadata = dict(metadata)
     else:
-        raise ValueError("legacy project metadata must be an object")
+        raise CorruptProject("legacy project metadata must be an object")
 
     migrated_metadata["project_store_migration"] = {
         "source_schema": LEGACY_UNVERSIONED_SCHEMA,
         "target_schema": PROJECT_STORE_SCHEMA,
     }
     value["schema_version"] = PROJECT_STORE_SCHEMA
+    value["snapshot"] = dict(value["snapshot"])
     value["metadata"] = migrated_metadata
     return value
 
