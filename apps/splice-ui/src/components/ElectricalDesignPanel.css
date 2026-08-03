@@ -1,0 +1,23 @@
+.electrical-design { display: grid; gap: 1rem; }
+.electrical-design__header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.electrical-design__header h2,.electrical-design h3 { margin: 0; }
+.electrical-design__state { border-radius: 999px; padding: .35rem .6rem; font-size: .75rem; font-weight: 700; white-space: nowrap; }
+.electrical-design__state.ready { background: rgba(42,166,93,.16); }
+.electrical-design__state.waiting { background: rgba(224,157,35,.16); }
+.electrical-design__error,.electrical-design__issue--error { color: var(--danger,#b33131); }
+.electrical-design__metrics { display: flex; flex-wrap: wrap; gap: .5rem; }
+.electrical-design__metrics span { border: 1px solid var(--border,#d7dbe2); border-radius: .55rem; padding: .35rem .55rem; font-size: .8rem; }
+.electrical-design__layout { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.electrical-design__layout > div { display: grid; align-content: start; gap: .65rem; }
+.electrical-design__list,.electrical-design__issues { display: grid; gap: .45rem; }
+.electrical-design__list > div,.electrical-design__issue { display: grid; gap: .2rem; border: 1px solid var(--border,#d7dbe2); border-radius: .55rem; padding: .55rem; font-size: .8rem; }
+.electrical-design__issue { border-left: 3px solid currentColor; }
+.electrical-design__issue--warning { color: var(--warning,#9a6500); }
+.electrical-design__tabs { display: flex; gap: .5rem; border-bottom: 1px solid var(--border,#d7dbe2); padding-bottom: .5rem; }
+.electrical-design__tabs button { border: 0; background: transparent; padding: .45rem .65rem; border-radius: .5rem; }
+.electrical-design__tabs button.active { background: color-mix(in srgb,var(--accent,#4d6fff) 12%,transparent); font-weight: 700; }
+.electrical-design__form { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: .75rem; }
+.electrical-design__form label,.electrical-design__note { display: grid; gap: .3rem; font-size: .8rem; font-weight: 600; }
+.electrical-design__form input,.electrical-design__form select,.electrical-design__note input { width: 100%; }
+.electrical-design__actions { display: flex; justify-content: flex-end; }
+@media (max-width:900px){.electrical-design__layout,.electrical-design__form{grid-template-columns:1fr}.electrical-design__header{flex-direction:column}}
