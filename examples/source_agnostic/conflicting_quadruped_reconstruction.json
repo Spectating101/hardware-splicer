@@ -1,0 +1,76 @@
+{
+  "scenario_id": "conflicting_quadruped_reconstruction",
+  "mode": "reconstruct",
+  "expected_archetype": "quadruped",
+  "challenge": {
+    "expected_conflict_count": 4,
+    "identity_continuity_required": true,
+    "description": "Reconstruct one internally coherent quadruped revision from mutually incompatible public sources rather than mixing revisions."
+  },
+  "engineering_sources": [
+    {
+      "source_id": "pupper_v1_repo",
+      "source_type": "repository",
+      "uri": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+      "version": "master-eol",
+      "authority_ceiling": "declared",
+      "claims": ["twelve servo-class actuators", "Raspberry Pi control", "PWM hardware interface"]
+    },
+    {
+      "source_id": "pupper_v1_build_guide",
+      "source_type": "manual",
+      "uri": "https://pupper.readthedocs.io/",
+      "version": "v1-guide",
+      "authority_ceiling": "declared",
+      "claims": ["legacy mechanical assembly", "legacy bill of materials"]
+    },
+    {
+      "source_id": "pupper_v3_announcement",
+      "source_type": "repository_readme",
+      "uri": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+      "version": "v3-preview",
+      "authority_ceiling": "declared",
+      "claims": ["brushless actuators", "Raspberry Pi 5", "new mechanical and control architecture"]
+    },
+    {
+      "source_id": "assembly_video_observation",
+      "source_type": "video",
+      "uri": "https://www.youtube.com/results?search_query=Stanford+Pupper+assembly",
+      "version": "unresolved-video-revision",
+      "authority_ceiling": "observed",
+      "claims": ["visible leg assembly orientation", "visible cable routing"]
+    }
+  ],
+  "declared_conflicts": [
+    {"conflict_id": "actuator_family", "claim_a": "servo PWM", "claim_b": "brushless motor controller"},
+    {"conflict_id": "compute_platform", "claim_a": "legacy Raspberry Pi", "claim_b": "Raspberry Pi 5"},
+    {"conflict_id": "mechanical_revision", "claim_a": "v1 printed frame", "claim_b": "v3 frame"},
+    {"conflict_id": "control_stack", "claim_a": "legacy gait controller", "claim_b": "reinforcement-learning locomotion"}
+  ],
+  "intake": {
+    "project_name": "conflicting_quadruped_reconstruction",
+    "goal": "Reconstruct one coherent twelve-degree-of-freedom quadruped build from mixed Pupper references without combining incompatible revisions. Produce explicit conflicts, unresolved identities, a selected revision boundary, and a safe first-motion plan.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "twelve candidate joint actuators", "type": "actuator", "quantity": 12},
+      {"name": "robot computer", "type": "computer", "quantity": 1},
+      {"name": "IMU", "type": "imu", "quantity": 1},
+      {"name": "battery pack", "type": "power_source", "quantity": 1},
+      {"name": "four leg assemblies", "type": "mechanical_structure", "quantity": 4}
+    ],
+    "constraints": {
+      "degrees_of_freedom": 12,
+      "leg_count": 4,
+      "joints_per_leg": 3,
+      "mixed_revision_parts_forbidden": true,
+      "first_motion_current_limited": true,
+      "emergency_stop_required": true
+    },
+    "engineering_sources": [
+      "pupper_v1_repo",
+      "pupper_v1_build_guide",
+      "pupper_v3_announcement",
+      "assembly_video_observation"
+    ]
+  }
+}
