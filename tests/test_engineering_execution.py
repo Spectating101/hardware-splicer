@@ -31,6 +31,8 @@ def test_preview_is_non_executing_and_discloses_physical_prohibitions(tmp_path: 
     assert result.status == ExecutionStatus.PLANNED
     assert result.argv == []
     assert result.metadata["shell"] is False
+    assert result.metadata["network_authorized"] is False
+    assert result.metadata["network_isolation_enforced"] is False
     assert result.metadata["flash_authorized"] is False
     assert result.metadata["power_on_authorized"] is False
     assert result.metadata["motion_authorized"] is False
@@ -45,6 +47,32 @@ def test_workspace_escape_is_rejected(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ExecutionPolicyError, match="outside execution root"):
+        preview_engineering_execution(request, root=tmp_path)
+
+
+def test_pytest_target_escape_is_rejected(tmp_path: Path) -> None:
+    (tmp_path / "tests").mkdir()
+    request = ExecutionRequest(
+        execution_id="pytest-escape",
+        operation=ExecutionOperation.PYTEST,
+        workspace=".",
+        options={"targets": ["../outside-tests"]},
+    )
+
+    with pytest.raises(ExecutionPolicyError, match="outside execution root"):
+        preview_engineering_execution(request, root=tmp_path)
+
+
+def test_pytest_options_are_rejected(tmp_path: Path) -> None:
+    (tmp_path / "tests").mkdir()
+    request = ExecutionRequest(
+        execution_id="pytest-option",
+        operation=ExecutionOperation.PYTEST,
+        workspace=".",
+        options={"targets": ["--collect-only"]},
+    )
+
+    with pytest.raises(ExecutionPolicyError, match="cannot be an option"):
         preview_engineering_execution(request, root=tmp_path)
 
 
@@ -88,8 +116,9 @@ def test_internal_artifact_hash_can_run_when_explicitly_enabled(tmp_path: Path, 
     assert result.metadata["device_access_authorized"] is False
 
 
-def test_pytest_operation_generates_argv_internally(tmp_path: Path) -> None:
-    (tmp_path / "tests").mkdir()
+def test_pytest_operation_generates_contained_argv_internally(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir()
     request = ExecutionRequest(
         execution_id="pytest-preview",
         operation=ExecutionOperation.PYTEST,
@@ -102,5 +131,5 @@ def test_pytest_operation_generates_argv_internally(tmp_path: Path) -> None:
 
     assert result.status == ExecutionStatus.PLANNED
     assert result.argv[1:4] == ["-m", "pytest", "-q"]
-    assert result.argv[-1] == "tests"
+    assert result.argv[-1] == str(tests.resolve())
     assert all(";" not in token for token in result.argv)
