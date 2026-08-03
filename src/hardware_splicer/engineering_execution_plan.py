@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any, Dict, Mapping
 
@@ -68,6 +69,10 @@ def _local_path(value: Any) -> str | None:
     return text
 
 
+def _options_key(options: Mapping[str, Any] | None) -> str:
+    return json.dumps(dict(options or {}), sort_keys=True, default=str, separators=(",", ":"))
+
+
 def _request(
     checks: list[ExecutionRequest],
     *,
@@ -79,9 +84,9 @@ def _request(
     expected_outputs: list[str] | None = None,
     timeout_s: int = 60,
 ) -> None:
-    key = (operation.value, workspace, target, tuple(sorted((options or {}).items())))
+    key = (operation.value, workspace, target, _options_key(options))
     existing = {
-        (row.operation.value, row.workspace, row.target, tuple(sorted(row.options.items())))
+        (row.operation.value, row.workspace, row.target, _options_key(row.options))
         for row in checks
     }
     if key in existing:
