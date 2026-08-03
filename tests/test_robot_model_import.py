@@ -87,9 +87,11 @@ def test_urdf_import_preserves_links_joint_limits_and_transmission() -> None:
     assert model.actuators[0].reduction == 2.0
 
     topology = topology_from_robot_model(model)
-    assert topology.robot_genre == RobotGenre.GENERIC or topology.robot_genre == RobotGenre.SERIAL_MANIPULATOR
+    assert topology.robot_genre in {RobotGenre.GENERIC, RobotGenre.SERIAL_MANIPULATOR}
     assert topology.root_link_id == "base_link"
     assert topology.joints[0].limits["effort"] == 4.0
+    assert topology.actuators[0].actuator_id == "shoulder_motor"
+    assert topology.actuators[0].joint_ids == ["shoulder_joint"]
     assert topology.metadata["motion_authorized"] is False
 
 
@@ -111,7 +113,9 @@ def test_mjcf_import_preserves_body_chain_and_actuators() -> None:
     assert {row.link_id for row in model.links} >= {"world", "base", "upper_leg", "lower_leg"}
     assert {row.joint_id for row in model.joints} >= {"hip", "knee"}
     assert {row.actuator_id for row in model.actuators} == {"hip_motor", "knee_motor"}
-    assert {row.joint_id for row in topology.actuators} if False else True
+    actuator_joint_map = {row.actuator_id: row.joint_ids for row in topology.actuators}
+    assert actuator_joint_map["hip_motor"] == ["hip"]
+    assert actuator_joint_map["knee_motor"] == ["knee"]
     assert topology.metadata["source_model_format"] == "mjcf"
     assert topology.metadata["calibration_verified"] is False
 
