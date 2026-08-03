@@ -8,7 +8,8 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .change_impact import ChangeImpactGraph, build_change_impact_graph
-from .engineering_planner import plan_engineering_project
+from .engineering_analysis import EngineeringAnalysisReport, analyze_engineering_candidate
+from .engineering_planner import normalize_engineering_intake, plan_engineering_project
 from .engineering_source_graph import EngineeringSourceGraph, build_engineering_source_graph
 from .machine_project import MachineProject
 from .machine_project_seed import machine_project_from_intake
@@ -33,6 +34,11 @@ class RobotTopologyRequest(BaseModel):
     intake: Dict[str, Any]
     hinted_genre: str | None = None
     machine_project: MachineProject | None = None
+
+
+class EngineeringAnalysisRequest(BaseModel):
+    intake: Dict[str, Any]
+    robot_topology: RobotTopology | None = None
 
 
 class ChangeImpactRequest(BaseModel):
@@ -60,6 +66,7 @@ def create_engineering_router() -> APIRouter:
             "schemas": {
                 "engineering_source_graph": EngineeringSourceGraph.model_json_schema(),
                 "robot_topology": RobotTopology.model_json_schema(),
+                "engineering_analysis": EngineeringAnalysisReport.model_json_schema(),
                 "change_impact": ChangeImpactGraph.model_json_schema(),
             },
         }
@@ -84,9 +91,10 @@ def create_engineering_router() -> APIRouter:
     @router.post("/topology")
     def create_topology(request: RobotTopologyRequest) -> Dict[str, Any]:
         try:
-            project = request.machine_project or machine_project_from_intake(request.intake)
+            intake = normalize_engineering_intake(request.intake)
+            project = request.machine_project or machine_project_from_intake(intake)
             topology = build_robot_topology(
-                request.intake,
+                intake,
                 hinted_genre=request.hinted_genre,
                 machine_project=project,
             )
@@ -100,16 +108,34 @@ def create_engineering_router() -> APIRouter:
             "motion_authorized": False,
         }
 
+    @router.post("/analysis")
+    def analyze_candidate(request: EngineeringAnalysisRequest) -> Dict[str, Any]:
+        try:
+            intake = normalize_engineering_intake(request.intake)
+            topology = request.robot_topology or build_robot_topology(intake)
+            report = analyze_engineering_candidate(intake, topology=topology)
+        except ValueError as exc:
+            raise _unprocessable("invalid_engineering_analysis", exc) from exc
+        return {
+            "ok": True,
+            "engineering_analysis": report.model_dump(mode="json"),
+            "blocking_finding_count": len(report.blocking_findings),
+            "power_on_authorized": False,
+            "motion_authorized": False,
+            "release_authorized": False,
+        }
+
     @router.post("/change-impact")
     def assess_change_impact(request: ChangeImpactRequest) -> Dict[str, Any]:
         try:
-            project = request.machine_project or machine_project_from_intake(request.intake)
+            intake = normalize_engineering_intake(request.intake)
+            project = request.machine_project or machine_project_from_intake(intake)
             topology = request.robot_topology or build_robot_topology(
-                request.intake,
+                intake,
                 machine_project=project,
             )
             impact = build_change_impact_graph(
-                request.intake,
+                intake,
                 machine_project=project,
                 topology=topology,
                 source_graph=request.engineering_source_graph,
