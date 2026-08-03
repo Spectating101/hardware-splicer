@@ -9,18 +9,14 @@ import {
   Binary,
   Boxes,
   CheckCircle2,
-  ChevronRight,
   CircleOff,
-  ClipboardCheck,
   Code2,
-  Diff,
   FileJson2,
   GitCompareArrows,
   LoaderCircle,
   PlayCircle,
   RefreshCw,
   Route,
-  Save,
   ShieldCheck,
   TriangleAlert,
   Wrench,
@@ -39,7 +35,6 @@ import {
   statusTone,
   summarizeRevisionDiff,
   type EngineeringPlan,
-  type EngineeringStatus,
   type EngineeringStatusResponse,
   type NextAction,
   type ProjectEnvelope,
@@ -83,7 +78,7 @@ const localStarterPlan: EngineeringPlan = {
   manufacturing_closure: { checks: [] },
   engineering_execution_plan: { checks: [], unresolved: [] },
   change_impact: { impacts: [], unresolved: [] },
-  missing_info: ['Load a persisted project or replace this local starter with a guided engineering plan.'],
+  missing_info: ['Load a persisted project or replace this starter with a guided engineering plan.'],
   engineering_readiness: {
     status: 'blocked',
     fabrication_authorized: false,
@@ -106,11 +101,6 @@ function asRows<T>(value: unknown): T[] {
   return Array.isArray(value) ? value as T[] : [];
 }
 
-function metric(value: unknown, fallback = '0') {
-  if (typeof value === 'number' || typeof value === 'string') return String(value);
-  return fallback;
-}
-
 function categoryLabel(value: string) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
@@ -121,12 +111,11 @@ function phaseIcon(category: string) {
   if (category === 'analysis') return Activity;
   if (category === 'manufacturing') return Boxes;
   if (category === 'execution') return Code2;
-  if (category === 'verification') return ClipboardCheck;
   if (category === 'release') return ShieldCheck;
   return Wrench;
 }
 
-function panelHeading(eyebrow: string, title: string) {
+function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="mb-4">
       <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{eyebrow}</div>
@@ -179,7 +168,7 @@ function BlockerCard({ blocker }: { blocker: StatusBlocker }) {
   );
 }
 
-function ActionCard({ action, active = false }: { action: NextAction; active?: boolean }) {
+function ActionCard({ action, active }: { action: NextAction; active: boolean }) {
   const Icon = phaseIcon(action.category);
   return (
     <div className={`rounded-[1.15rem] border p-4 ${active ? 'border-cyan-300/25 bg-cyan-300/10' : 'border-white/8 bg-[#081423]'}`}>
@@ -188,13 +177,10 @@ function ActionCard({ action, active = false }: { action: NextAction; active?: b
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Priority {action.priority} • {categoryLabel(action.category)}</div>
-            <span className="rounded-full border border-white/8 px-2 py-0.5 text-[10px] text-slate-400">{action.method || 'POST'}</span>
-          </div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Priority {action.priority} • {categoryLabel(action.category)}</div>
           <div className="mt-2 text-sm font-semibold text-white">{action.title}</div>
           <div className="mt-2 text-xs leading-5 text-slate-400">{action.instruction}</div>
-          <div className="mt-3 truncate rounded-lg border border-white/8 bg-black/15 px-2.5 py-2 font-mono text-[10px] text-cyan-200">{action.route}</div>
+          <div className="mt-3 truncate rounded-lg border border-white/8 bg-black/15 px-2.5 py-2 font-mono text-[10px] text-cyan-200">{action.method || 'POST'} {action.route}</div>
         </div>
       </div>
     </div>
@@ -206,7 +192,7 @@ export default function EngineeringPage() {
 
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState('');
   const [projectSource, setProjectSource] = useState<'persisted' | 'local'>('local');
   const [plan, setPlan] = useState<EngineeringPlan>(localStarterPlan);
   const [planText, setPlanText] = useState(JSON.stringify(localStarterPlan, null, 2));
@@ -281,7 +267,7 @@ export default function EngineeringPage() {
         if (active) setProjectsLoading(false);
       }
     }
-    loadProjects();
+    void loadProjects();
     return () => { active = false; };
   }, []);
 
@@ -318,13 +304,12 @@ export default function EngineeringPage() {
         setBaseRevision(revisionRows[1]?.revision || null);
         await runStatus(loadedPlan);
       } catch (error: unknown) {
-        if (!active) return;
-        setStatusError(error instanceof Error ? error.message : 'Project load failed.');
+        if (active) setStatusError(error instanceof Error ? error.message : 'Project load failed.');
       } finally {
         if (active) setPlanLoading(false);
       }
     }
-    loadProject();
+    void loadProject();
     return () => { active = false; };
   }, [runStatus, selectedProjectId]);
 
@@ -348,11 +333,7 @@ export default function EngineeringPage() {
       const response = await fetch('/api/proxy/engineering/revisions/diff', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          project_id: selectedProjectId,
-          base_revision: baseRevision,
-          candidate_revision: candidateRevision,
-        }),
+        body: JSON.stringify({ project_id: selectedProjectId, base_revision: baseRevision, candidate_revision: candidateRevision }),
         cache: 'no-store',
       });
       const payload = await readJsonPayload<RevisionDiffResponse | ProxyErrorPayload>(response);
@@ -395,20 +376,12 @@ export default function EngineeringPage() {
       navItems={navItems}
       actions={(
         <>
-          <Button
-            type="button"
-            onClick={() => void runStatus(plan)}
-            disabled={statusLoading}
-            className="rounded-full bg-white text-slate-950 hover:bg-slate-100"
-          >
+          <Button type="button" onClick={() => void runStatus(plan)} disabled={statusLoading} className="rounded-full bg-white text-slate-950 hover:bg-slate-100">
             {statusLoading ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Recompile status
           </Button>
           <Button asChild variant="outline" className="rounded-full border-white/15 bg-white/5 text-white hover:bg-white/10">
-            <Link href="/cad">
-              <Boxes className="mr-2 h-4 w-4" />
-              CAD workspace
-            </Link>
+            <Link href="/cad"><Boxes className="mr-2 h-4 w-4" />CAD workspace</Link>
           </Button>
         </>
       )}
@@ -416,9 +389,9 @@ export default function EngineeringPage() {
       left={(
         <div className="space-y-5">
           <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
-            {panelHeading('Projects', 'Persistent engineering revisions')}
+            <SectionTitle eyebrow="Projects" title="Persistent engineering revisions" />
             {projectsLoading ? (
-              <div className="flex items-center gap-2 text-sm text-slate-400"><LoaderCircle className="h-4 w-4 animate-spin" /> Loading Hardware Splicer projects</div>
+              <div className="flex items-center gap-2 text-sm text-slate-400"><LoaderCircle className="h-4 w-4 animate-spin" />Loading projects</div>
             ) : projects.length ? (
               <div className="space-y-2">
                 {projects.slice(0, 10).map((project) => (
@@ -429,9 +402,8 @@ export default function EngineeringPage() {
                     className={`w-full rounded-[1rem] border px-3 py-3 text-left transition-colors ${selectedProjectId === project.project_id ? 'border-cyan-300/25 bg-cyan-300/10' : 'border-white/8 bg-[#081423] hover:border-white/15'}`}
                   >
                     <div className="truncate text-sm font-semibold text-white">{project.name || project.project_id}</div>
-                    <div className="mt-1 flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.16em] text-slate-500">
-                      <span>rev {project.latest_revision}</span>
-                      <span>{project.current_stage || project.mode || 'engineering'}</span>
+                    <div className="mt-1 flex items-center justify-between text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                      <span>rev {project.latest_revision}</span><span>{project.current_stage || project.mode || 'engineering'}</span>
                     </div>
                     <div className="mt-2 truncate text-xs text-slate-400">{formatSavedAt(project.saved_at)}</div>
                   </button>
@@ -439,32 +411,26 @@ export default function EngineeringPage() {
               </div>
             ) : (
               <div className="rounded-[1rem] border border-amber-300/15 bg-amber-300/8 p-3 text-xs leading-5 text-amber-100">
-                Hardware Splicer project storage is unavailable or empty. The local starter remains clearly labeled and no live status is fabricated.
+                Project storage is unavailable or empty. The local starter is clearly labeled; no live state is fabricated.
               </div>
             )}
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Plan JSON</div>
-                <div className="mt-2 text-sm font-semibold text-white">{projectSource === 'persisted' ? 'Persisted revision' : 'Local editor'}</div>
-              </div>
-              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${projectSource === 'persisted' ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : 'border-amber-300/20 bg-amber-300/8 text-amber-200'}`}>
-                {projectSource}
-              </span>
+              <SectionTitle eyebrow="Plan JSON" title={projectSource === 'persisted' ? 'Persisted revision' : 'Local editor'} />
+              <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${projectSource === 'persisted' ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : 'border-amber-300/20 bg-amber-300/8 text-amber-200'}`}>{projectSource}</span>
             </div>
             <textarea
               value={planText}
               onChange={(event) => setPlanText(event.target.value)}
               spellCheck={false}
-              className="h-52 w-full resize-y rounded-[1rem] border border-white/10 bg-[#050c16] p-3 font-mono text-[11px] leading-5 text-slate-300 outline-none transition-colors focus:border-cyan-300/30"
+              className="h-52 w-full resize-y rounded-[1rem] border border-white/10 bg-[#050c16] p-3 font-mono text-[11px] leading-5 text-slate-300 outline-none focus:border-cyan-300/30"
               aria-label="Guided engineering plan JSON"
             />
             {editorError ? <div className="mt-2 text-xs leading-5 text-rose-300">{editorError}</div> : null}
             <Button type="button" onClick={applyEditor} className="mt-3 w-full rounded-xl bg-cyan-300 text-slate-950 hover:bg-cyan-200">
-              <Binary className="mr-2 h-4 w-4" />
-              Compile local plan
+              <Binary className="mr-2 h-4 w-4" />Compile local plan
             </Button>
           </div>
         </div>
@@ -479,7 +445,7 @@ export default function EngineeringPage() {
                   <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">{engineeringStatus?.project_id || 'No compiled engineering status'}</h1>
                   <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
                     {engineeringStatus
-                      ? `Hardware Splicer is currently in the ${categoryLabel(engineeringStatus.current_phase)} phase. The queue is ranked by engineering dependency, not by visual severity alone.`
+                      ? `Hardware Splicer is in the ${categoryLabel(engineeringStatus.current_phase)} phase. Work is ranked by engineering dependency, not cosmetic severity.`
                       : 'Load or compile a guided plan to derive blockers, closure state, bounded checks, revision impact, and a deterministic next action.'}
                   </p>
                 </div>
@@ -488,7 +454,6 @@ export default function EngineeringPage() {
                   {statusLoading ? 'Compiling' : engineeringStatus?.overall_status || 'Local draft'}
                 </div>
               </div>
-
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 {[
                   ['Phase', engineeringStatus ? categoryLabel(engineeringStatus.current_phase) : 'Uncompiled'],
@@ -506,37 +471,28 @@ export default function EngineeringPage() {
             </div>
 
             {statusError ? (
-              <div className="rounded-[1.3rem] border border-rose-400/20 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100">
-                <TriangleAlert className="mr-2 inline h-4 w-4" />{statusError}
-              </div>
+              <div className="rounded-[1.3rem] border border-rose-400/20 bg-rose-500/10 p-4 text-sm leading-6 text-rose-100"><TriangleAlert className="mr-2 inline h-4 w-4" />{statusError}</div>
             ) : null}
 
             <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_17rem]">
               <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0a1526,#07111f)] p-5">
-                <div className="flex items-center justify-between gap-3">
-                  {panelHeading('Blockers', 'Ranked engineering closure queue')}
-                  <div className="text-xs text-slate-500">{blockers.length + advisories.length} visible</div>
-                </div>
+                <SectionTitle eyebrow="Blockers" title="Ranked engineering closure queue" />
                 {statusLoading || planLoading ? (
-                  <div className="flex min-h-52 items-center justify-center gap-3 text-sm text-slate-400">
-                    <LoaderCircle className="h-5 w-5 animate-spin" /> Compiling canonical status
-                  </div>
+                  <div className="flex min-h-52 items-center justify-center gap-3 text-sm text-slate-400"><LoaderCircle className="h-5 w-5 animate-spin" />Compiling canonical status</div>
                 ) : blockers.length || advisories.length ? (
-                  <div className="space-y-3">
-                    {[...blockers, ...advisories].slice(0, 12).map((blocker) => <BlockerCard key={blocker.blocker_id} blocker={blocker} />)}
-                  </div>
+                  <div className="space-y-3">{[...blockers, ...advisories].slice(0, 12).map((blocker) => <BlockerCard key={blocker.blocker_id} blocker={blocker} />)}</div>
                 ) : engineeringStatus ? (
                   <div className="rounded-[1.2rem] border border-emerald-300/20 bg-emerald-300/8 p-5 text-sm leading-6 text-emerald-100">
-                    <CheckCircle2 className="mr-2 inline h-5 w-5" /> No modeled engineering blockers remain. The project advances to scoped human release review; this does not self-authorize fabrication, flashing, power, or motion.
+                    <CheckCircle2 className="mr-2 inline h-5 w-5" />No modeled blockers remain. The candidate advances to scoped human release review; it does not self-authorize fabrication, flashing, power, or motion.
                   </div>
                 ) : (
-                  <div className="rounded-[1.2rem] border border-white/8 bg-[#081423] p-5 text-sm leading-6 text-slate-400">No live blocker model is available yet.</div>
+                  <div className="rounded-[1.2rem] border border-white/8 bg-[#081423] p-5 text-sm text-slate-400">No live blocker model is available yet.</div>
                 )}
               </div>
 
               <div className="space-y-5">
                 <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0a1526,#07111f)] p-4">
-                  {panelHeading('Groups', 'Blockers by domain')}
+                  <SectionTitle eyebrow="Groups" title="Blockers by domain" />
                   <div className="space-y-2">
                     {Object.entries(engineeringStatus?.blocker_groups || {}).length ? Object.entries(engineeringStatus?.blocker_groups || {}).map(([category, ids]) => (
                       <div key={category} className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5">
@@ -546,14 +502,19 @@ export default function EngineeringPage() {
                     )) : <div className="text-xs leading-5 text-slate-500">No grouped status yet.</div>}
                   </div>
                 </div>
-
                 <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0a1526,#07111f)] p-4">
-                  {panelHeading('Closure', 'Manufacturing and execution')}
+                  <SectionTitle eyebrow="Closure" title="Manufacturing and execution" />
                   <div className="space-y-2 text-xs">
-                    <div className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5"><span className="text-slate-400">Closure checks</span><span className="font-semibold text-white">{manufacturingChecks.length}</span></div>
-                    <div className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5"><span className="text-slate-400">Blocking checks</span><span className="font-semibold text-rose-200">{manufacturingBlocking}</span></div>
-                    <div className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5"><span className="text-slate-400">Preview checks</span><span className="font-semibold text-cyan-200">{executionChecks.length}</span></div>
-                    <div className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5"><span className="text-slate-400">Missing local inputs</span><span className="font-semibold text-amber-200">{executionUnresolved.length}</span></div>
+                    {[
+                      ['Closure checks', manufacturingChecks.length, 'text-white'],
+                      ['Blocking checks', manufacturingBlocking, 'text-rose-200'],
+                      ['Preview checks', executionChecks.length, 'text-cyan-200'],
+                      ['Missing local inputs', executionUnresolved.length, 'text-amber-200'],
+                    ].map(([label, value, color]) => (
+                      <div key={String(label)} className="flex items-center justify-between rounded-[0.9rem] border border-white/8 bg-[#081423] px-3 py-2.5">
+                        <span className="text-slate-400">{label}</span><span className={`font-semibold ${color}`}>{value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -564,27 +525,20 @@ export default function EngineeringPage() {
       right={(
         <div className="space-y-5">
           <div className="rounded-[1.5rem] border border-cyan-300/18 bg-[linear-gradient(180deg,rgba(34,211,238,0.10),rgba(8,20,35,0.96))] p-4">
-            {panelHeading('Next action', nextAction?.title || 'Compile project status')}
+            <SectionTitle eyebrow="Next action" title={nextAction?.title || 'Compile project status'} />
             {nextAction ? (
               <>
                 <div className="text-sm leading-6 text-slate-200">{nextAction.instruction}</div>
                 <div className="mt-4 rounded-xl border border-cyan-300/15 bg-black/15 p-3 font-mono text-[10px] leading-5 text-cyan-200">{nextAction.method || 'POST'} {nextAction.route}</div>
                 {nextAction.required_inputs?.length ? (
-                  <div className="mt-4">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Required inputs</div>
-                    <div className="mt-2 space-y-1.5">
-                      {nextAction.required_inputs.slice(0, 5).map((item) => <div key={item} className="flex gap-2 text-xs leading-5 text-slate-300"><ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" />{item}</div>)}
-                    </div>
-                  </div>
+                  <div className="mt-4 text-xs leading-5 text-slate-300"><span className="font-semibold text-white">Needs:</span> {nextAction.required_inputs.slice(0, 5).join(' • ')}</div>
                 ) : null}
               </>
-            ) : (
-              <div className="text-sm leading-6 text-slate-400">Load a persisted plan or compile the local editor to receive a deterministic, API-backed next action.</div>
-            )}
+            ) : <div className="text-sm leading-6 text-slate-400">Load or compile a guided plan to receive an API-backed next action.</div>}
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
-            {panelHeading('Authority', 'Physical gates remain closed')}
+            <SectionTitle eyebrow="Authority" title="Physical gates remain closed" />
             <div className="space-y-2">
               <AuthorityGate label="Fabrication" allowed={readiness.fabrication_authorized === true} />
               <AuthorityGate label="Firmware flash" allowed={readiness.flash_authorized === true} />
@@ -595,30 +549,21 @@ export default function EngineeringPage() {
           </div>
 
           <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0c1730,#091323)] p-4">
-            {panelHeading('Revision diff', selectedProjectId ? `${selectedProjectId} history` : 'Select a persisted project')}
+            <SectionTitle eyebrow="Revision diff" title={selectedProjectId ? `${selectedProjectId} history` : 'Select a persisted project'} />
             <div className="grid grid-cols-2 gap-2">
-              <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Base
-                <select
-                  value={baseRevision || ''}
-                  onChange={(event) => setBaseRevision(event.target.value ? Number(event.target.value) : null)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-[#081423] px-2 py-2 text-xs text-white outline-none"
-                >
-                  <option value="">Select</option>
-                  {revisions.map((revision) => <option key={`base-${revision.revision}`} value={revision.revision}>rev {revision.revision}</option>)}
-                </select>
-              </label>
-              <label className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Candidate
-                <select
-                  value={candidateRevision || ''}
-                  onChange={(event) => setCandidateRevision(event.target.value ? Number(event.target.value) : null)}
-                  className="mt-2 w-full rounded-xl border border-white/10 bg-[#081423] px-2 py-2 text-xs text-white outline-none"
-                >
-                  <option value="">Select</option>
-                  {revisions.map((revision) => <option key={`candidate-${revision.revision}`} value={revision.revision}>rev {revision.revision}</option>)}
-                </select>
-              </label>
+              {[['Base', baseRevision, setBaseRevision], ['Candidate', candidateRevision, setCandidateRevision]].map(([label, value, setter]) => (
+                <label key={String(label)} className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  {String(label)}
+                  <select
+                    value={typeof value === 'number' ? value : ''}
+                    onChange={(event) => (setter as typeof setBaseRevision)(event.target.value ? Number(event.target.value) : null)}
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-[#081423] px-2 py-2 text-xs text-white outline-none"
+                  >
+                    <option value="">Select</option>
+                    {revisions.map((revision) => <option key={`${String(label)}-${revision.revision}`} value={revision.revision}>rev {revision.revision}</option>)}
+                  </select>
+                </label>
+              ))}
             </div>
             <Button
               type="button"
@@ -627,8 +572,7 @@ export default function EngineeringPage() {
               variant="outline"
               className="mt-3 w-full rounded-xl border-white/15 bg-white/5 text-white hover:bg-white/10"
             >
-              {diffLoading ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <GitCompareArrows className="mr-2 h-4 w-4" />}
-              Compare revisions
+              {diffLoading ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <GitCompareArrows className="mr-2 h-4 w-4" />}Compare revisions
             </Button>
             {diffError ? <div className="mt-3 text-xs leading-5 text-rose-300">{diffError}</div> : null}
             {diffResponse ? (
@@ -654,7 +598,7 @@ export default function EngineeringPage() {
       bottom={(
         <div className="grid h-full grid-rows-[40px_minmax(0,1fr)]">
           <div className="flex items-center gap-2 border-b border-white/8 bg-[#08111d] px-4">
-            <div className="inline-flex items-center gap-2 rounded-lg bg-cyan-300/12 px-3 py-1.5 text-xs font-medium text-cyan-100"><PlayCircle className="h-3.5 w-3.5" /> Action queue</div>
+            <div className="inline-flex items-center gap-2 rounded-lg bg-cyan-300/12 px-3 py-1.5 text-xs font-medium text-cyan-100"><PlayCircle className="h-3.5 w-3.5" />Action queue</div>
             <div className="text-xs text-slate-500">{actions.length} ranked actions • no automatic physical execution</div>
           </div>
           <div className="overflow-x-auto p-3 pr-24">
@@ -663,10 +607,7 @@ export default function EngineeringPage() {
                 <div key={action.action_id} className="w-80"><ActionCard action={action} active={index === 0} /></div>
               )) : (
                 <div className="flex w-full min-w-[42rem] items-center justify-between rounded-[1rem] border border-white/8 bg-[#081423] p-4">
-                  <div>
-                    <div className="text-sm font-semibold text-white">No compiled action queue</div>
-                    <div className="mt-1 text-xs text-slate-400">Compile the current plan to rank source, topology, analysis, manufacturing, execution, regression, and release work.</div>
-                  </div>
+                  <div><div className="text-sm font-semibold text-white">No compiled action queue</div><div className="mt-1 text-xs text-slate-400">Compile the current plan to rank source, topology, analysis, manufacturing, execution, regression, and release work.</div></div>
                   <ArrowRight className="h-5 w-5 text-slate-500" />
                 </div>
               )}
