@@ -91,12 +91,22 @@ def _sync_pin_net(body: Dict[str, Any], pin_id: str, net_id: str | None) -> None
     pin["net_id"] = net_id
 
 
-def _sync_net_membership(body: Dict[str, Any], net_id: str, pin_ids: list[str]) -> None:
+def _sync_net_membership(
+    body: Dict[str, Any],
+    net_id: str,
+    pin_ids: list[str],
+    *,
+    previous_pin_ids: list[str] | None = None,
+) -> None:
     unknown = [pin_id for pin_id in pin_ids if _find(body["pins"], "pin_id", pin_id) is None]
     if unknown:
         raise ElectricalEditError(f"net {net_id!r} references unknown pins: {', '.join(unknown)}")
     existing = _find(body["nets"], "net_id", net_id)
-    old_pin_ids = list(existing.get("pin_ids") or []) if existing else []
+    old_pin_ids = (
+        list(previous_pin_ids)
+        if previous_pin_ids is not None
+        else list(existing.get("pin_ids") or []) if existing else []
+    )
     for pin_id in old_pin_ids:
         if pin_id not in pin_ids:
             pin = _find(body["pins"], "pin_id", pin_id)
@@ -159,14 +169,28 @@ def apply_electrical_edits(
             _authority(data.get("authority"), label="net")
             net_id = str(data.get("net_id") or "")
             existing = _find(body["nets"], "net_id", net_id)
-            requested_pins = list(data.get("pin_ids") if "pin_ids" in data else (existing or {}).get("pin_ids") or [])
+            previous_pin_ids = list((existing or {}).get("pin_ids") or [])
+            requested_pins = list(
+                data.get("pin_ids")
+                if "pin_ids" in data
+                else previous_pin_ids
+            )
             validated = ElectricalNet.model_validate(
                 {**(existing or {}), **data, "pin_ids": requested_pins}
             ).model_dump(mode="json")
-            _sync_net_membership(body, net_id, requested_pins)
-            _upsert(body["nets"], "net_id", validated)
-            for pin_id in requested_pins:
-                _sync_pin_net(body, pin_id, net_id)
+            staging = dict(validated)
+            staging["pin_ids"] = []
+            _upsert(body["nets"], "net_id", staging)
+            _sync_net_membership(
+                body,
+                net_id,
+                requested_pins,
+                previous_pin_ids=previous_pin_ids,
+            )
+            target = _find(body["nets"], "net_id", net_id)
+            if target is None:
+                raise ElectricalEditError(f"failed to stage target net {net_id!r}")
+            target.update(validated)
 
         elif operation == "remove_net":
             net_id = str(data.get("net_id") or "")
