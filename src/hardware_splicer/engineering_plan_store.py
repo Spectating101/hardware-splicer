@@ -24,7 +24,10 @@ def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
         "changeImpact": dict(plan.get("change_impact") or {}),
         "engineeringIdentityMap": dict(plan.get("engineering_identity_map") or {}),
         "verificationBridge": dict(plan.get("verification_bridge") or {}),
+        "engineeringArtifactProjection": dict(plan.get("engineering_artifact_projection") or {}),
+        "manufacturingClosure": dict(plan.get("manufacturing_closure") or {}),
         "operatorGuide": dict(plan.get("operator_guide") or {}),
+        "orderedSteps": list(plan.get("ordered_steps") or []),
         "sourceAdapter": dict(plan.get("source_adapter") or {}),
         "engineeringReadiness": dict(plan.get("engineering_readiness") or {}),
         "missingInfo": list(plan.get("missing_info") or []),
@@ -44,6 +47,7 @@ def save_engineering_plan(
     machine_project = snapshot.get("machineProject")
     if isinstance(machine_project, dict):
         machine_project["project_id"] = resolved_project_id
+    readiness = plan.get("engineering_readiness") if isinstance(plan.get("engineering_readiness"), Mapping) else {}
     return store.save(
         resolved_project_id,
         snapshot,
@@ -52,11 +56,14 @@ def save_engineering_plan(
             "source": "guided_engineering_planner",
             "engineering_plan_schema": plan.get("schema_version"),
             "native_robot_genre": plan.get("native_robot_genre"),
-            "blocking_source_conflict_count": (plan.get("engineering_readiness") or {}).get("blocking_source_conflict_count"),
-            "blocking_analysis_finding_count": (plan.get("engineering_readiness") or {}).get("blocking_analysis_finding_count"),
-            "blocking_change_impact_count": (plan.get("engineering_readiness") or {}).get("blocking_change_impact_count"),
-            "operator_guide_step_count": (plan.get("engineering_readiness") or {}).get("operator_guide_step_count"),
-            "verification_method_count": (plan.get("engineering_readiness") or {}).get("verification_method_count"),
+            "blocking_source_conflict_count": readiness.get("blocking_source_conflict_count"),
+            "blocking_analysis_finding_count": readiness.get("blocking_analysis_finding_count"),
+            "blocking_change_impact_count": readiness.get("blocking_change_impact_count"),
+            "manufacturing_closure_status": readiness.get("manufacturing_closure_status"),
+            "manufacturing_closure_blocker_count": readiness.get("manufacturing_closure_blocker_count"),
+            "operator_guide_step_count": readiness.get("operator_guide_step_count"),
+            "verification_method_count": readiness.get("verification_method_count"),
             "physical_authority_unchanged": True,
+            "manufacturing_authority_unchanged": True,
         },
     )
