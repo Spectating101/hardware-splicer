@@ -1,0 +1,62 @@
+{
+  "scenario_id": "linorobot2_apartment_mapper",
+  "mode": "build",
+  "reference_project": "linorobot2",
+  "expected_archetype": "rover",
+  "user_need": "Build a low-speed indoor robot that can map and autonomously navigate a small apartment, fit through 70 cm doors, run for at least 60 minutes, and remain repairable with accessible parts.",
+  "reference_sources": {
+    "repositories": [
+      "https://github.com/linorobot/linorobot2",
+      "https://github.com/linorobot/linorobot2_hardware"
+    ],
+    "documentation": [
+      "https://linorobot.github.io/linorobot2/"
+    ],
+    "videos": [
+      "https://www.youtube.com/results?search_query=linorobot2+build+ROS2"
+    ]
+  },
+  "guidance_expectations": {
+    "minimum_part_lines": 10,
+    "tools_required": true,
+    "custom_mechanics": false,
+    "firmware_required": true,
+    "middleware_required": true
+  },
+  "intake": {
+    "project_name": "apartment_mapping_rover",
+    "goal": "Build a two-wheel differential-drive indoor mapping rover using linorobot2 conventions, with wheel encoders, IMU, 2D lidar, micro-ROS motor control, SLAM Toolbox and Nav2.",
+    "salvage_mode": false,
+    "budget": {"currency": "USD", "amount": 450},
+    "available_parts": [
+      {"name": "Raspberry Pi 5", "type": "computer", "quantity": 1},
+      {"name": "ESP32-S3 development board", "type": "microcontroller", "quantity": 1},
+      {"name": "12V geared DC motor with quadrature encoder", "type": "dc_motor", "quantity": 2},
+      {"name": "dual-channel motor driver", "type": "motor_driver", "quantity": 1},
+      {"name": "MPU9250 IMU", "type": "imu", "quantity": 1},
+      {"name": "RPLIDAR A1", "type": "lidar", "quantity": 1},
+      {"name": "12V lithium battery pack with BMS", "type": "power_source", "quantity": 1},
+      {"name": "5V buck converter for robot computer", "type": "power_converter", "quantity": 1},
+      {"name": "65 mm wheel", "type": "wheel", "quantity": 2},
+      {"name": "caster wheel", "type": "caster", "quantity": 1},
+      {"name": "chassis plate", "type": "mechanical_structure", "quantity": 1},
+      {"name": "emergency motor-power switch", "type": "safety_switch", "quantity": 1}
+    ],
+    "constraints": {
+      "drive_type": "differential_drive",
+      "maximum_width_mm": 500,
+      "target_runtime_min": 60,
+      "maximum_speed_mps": 0.4,
+      "indoor_only": true,
+      "door_clearance_mm": 700,
+      "emergency_stop_required": true,
+      "robot_computer_voltage_v": 5,
+      "motor_bus_voltage_v": 12
+    },
+    "reference_sources": {
+      "baseline_repository": "https://github.com/linorobot/linorobot2",
+      "hardware_repository": "https://github.com/linorobot/linorobot2_hardware",
+      "video_query": "linorobot2 build ROS2"
+    }
+  }
+}

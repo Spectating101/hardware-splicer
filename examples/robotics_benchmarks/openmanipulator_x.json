@@ -1,0 +1,51 @@
+{
+  "benchmark_id": "openmanipulator_x",
+  "robot_genre": "serial_robotic_manipulator",
+  "reference_project": "ROBOTIS OpenMANIPULATOR-X",
+  "expected_archetype": "robotic_arm",
+  "reference_sources": {
+    "repository": "https://github.com/ROBOTIS-GIT/open_manipulator",
+    "documentation": ["https://docs.robotis.com/docs/systems/openmanipulator_x/overview/", "https://docs.robotis.com/docs/systems/openmanipulator_x/quick_start_guide/"],
+    "videos": ["https://www.youtube.com/results?search_query=ROBOTIS+OpenMANIPULATOR-X+assembly"]
+  },
+  "stress_profile": {
+    "actuator_count": 5,
+    "kinematic_chains": 1,
+    "sensor_count": 5,
+    "control_loops": 5,
+    "power_domains": 2,
+    "external_interfaces": 7,
+    "firmware_components": 1,
+    "ros_interfaces": 10,
+    "dynamic_coupling": "medium",
+    "safety_criticality": "medium",
+    "required_domains": ["mechanical", "actuation", "control", "platform", "safety", "electrical", "firmware", "ros", "evidence"]
+  },
+  "intake": {
+    "project_name": "openmanipulator_x_reference",
+    "goal": "Build a five-actuator serial robotic arm with four articulated joints and a gripper, DYNAMIXEL feedback, OpenCR control, ROS 2, URDF, MoveIt and collision-aware motion planning.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "DYNAMIXEL XM430 shoulder actuator", "type": "smart_servo"},
+      {"name": "DYNAMIXEL XM430 upper arm actuator", "type": "smart_servo"},
+      {"name": "DYNAMIXEL XM430 elbow actuator", "type": "smart_servo"},
+      {"name": "DYNAMIXEL XM430 wrist actuator", "type": "smart_servo"},
+      {"name": "DYNAMIXEL gripper actuator", "type": "smart_servo"},
+      {"name": "OpenCR controller", "type": "microcontroller"},
+      {"name": "12V 5A supply", "type": "power_source"},
+      {"name": "3D printed links and brackets", "type": "mechanical_structure"}
+    ],
+    "constraints": {
+      "degrees_of_freedom": 5,
+      "payload_g": 500,
+      "reach_mm": 380,
+      "repeatability_mm": 0.2,
+      "battery_voltage_v": 12,
+      "current_limit_a": 5
+    },
+    "reference_sources": {
+      "repository": "https://github.com/ROBOTIS-GIT/open_manipulator",
+      "video_query": "ROBOTIS OpenMANIPULATOR-X assembly"
+    }
+  }
+}

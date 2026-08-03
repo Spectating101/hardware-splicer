@@ -1,0 +1,79 @@
+{
+  "scenario_id": "field_failure_payload_revision",
+  "mode": "evolve",
+  "expected_archetype": "rover",
+  "challenge": {
+    "expected_conflict_count": 1,
+    "baseline_revision_required": true,
+    "identity_continuity_required": true,
+    "description": "Revise a previously working rover after a payload modification caused tipping and power brownouts in field use."
+  },
+  "engineering_sources": [
+    {
+      "source_id": "baseline_project_snapshot",
+      "source_type": "project_snapshot",
+      "uri": "evidence://field-revision/project-r7",
+      "version": "revision-7",
+      "authority_ceiling": "declared",
+      "claims": ["stable without camera mast", "verified low-speed indoor mission"]
+    },
+    {
+      "source_id": "field_telemetry_run_18",
+      "source_type": "telemetry",
+      "uri": "evidence://field-revision/run-18-telemetry",
+      "version": "run-18",
+      "authority_ceiling": "measured",
+      "claims": ["logic rail drops during acceleration", "pitch excursion precedes tip event"]
+    },
+    {
+      "source_id": "payload_measurements",
+      "source_type": "measurement",
+      "uri": "evidence://field-revision/payload-calipers-scale",
+      "version": "capture-2",
+      "authority_ceiling": "measured",
+      "claims": ["camera mast mass 620 g", "payload center is 310 mm above deck"]
+    },
+    {
+      "source_id": "operator_field_log",
+      "source_type": "field_log",
+      "uri": "evidence://field-revision/operator-log",
+      "version": "log-18",
+      "authority_ceiling": "observed",
+      "claims": ["tips during fast turn", "reboots after simultaneous steering and camera startup"]
+    }
+  ],
+  "declared_conflicts": [
+    {"conflict_id": "baseline_release_scope", "claim_a": "revision 7 was field verified", "claim_b": "the new mast configuration was never inside revision 7 release scope"}
+  ],
+  "intake": {
+    "project_name": "field_failure_payload_revision",
+    "goal": "Revise an indoor inspection rover after a tall camera mast caused tipping and logic-rail brownouts. Preserve baseline identities, lower or redistribute the payload, separate noisy power loads, update the operating envelope, and define regression tests before returning to field use.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "revision-7 differential rover", "type": "robot_platform", "quantity": 1},
+      {"name": "depth camera payload", "type": "camera", "quantity": 1},
+      {"name": "adjustable camera mast", "type": "mechanical_structure", "quantity": 1},
+      {"name": "12 V battery pack", "type": "power_source", "quantity": 1},
+      {"name": "5 V regulator", "type": "power_regulator", "quantity": 1},
+      {"name": "IMU", "type": "imu", "quantity": 1},
+      {"name": "current logger", "type": "instrument", "quantity": 1}
+    ],
+    "constraints": {
+      "baseline_revision": 7,
+      "payload_mass_g": 620,
+      "current_payload_height_mm": 310,
+      "maximum_speed_mps": 0.3,
+      "maximum_turn_rate_rps": 0.5,
+      "no_logic_rail_brownout": true,
+      "static_tilt_margin_deg": 15,
+      "field_release_requires_regression_suite": true,
+      "operator_emergency_stop": true
+    },
+    "change_request": {
+      "baseline_revision": 7,
+      "failure_event": "run-18 tipping and reboot",
+      "requested_outcome": "stable low-mounted payload and separated power path",
+      "must_preserve": ["motor identities", "encoder identities", "controller identity", "existing navigation interfaces"]
+    }
+  }
+}

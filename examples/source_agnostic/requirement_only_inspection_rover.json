@@ -1,0 +1,41 @@
+{
+  "scenario_id": "requirement_only_inspection_rover",
+  "mode": "synthesize",
+  "expected_archetype": "rover",
+  "challenge": {
+    "expected_conflict_count": 0,
+    "identity_continuity_required": true,
+    "description": "Design from user constraints and available parts without a canonical robot, tutorial, repository, or video reference."
+  },
+  "engineering_sources": [],
+  "intake": {
+    "project_name": "requirement_only_inspection_rover",
+    "goal": "Design a quiet compact indoor inspection rover that fits through a 250 mm gap, crosses a 15 mm threshold, carries a 500 g camera payload, operates for 90 minutes, and can be safely stopped by the operator. There is no canonical reference design to copy.",
+    "salvage_mode": false,
+    "budget": {"currency": "USD", "amount": 500},
+    "available_parts": [
+      {"name": "ESP32-S3 controller", "type": "microcontroller", "quantity": 1},
+      {"name": "Raspberry Pi 5", "type": "computer", "quantity": 1},
+      {"name": "12 V geared encoder motors", "type": "dc_motor", "quantity": 2},
+      {"name": "dual motor driver", "type": "motor_driver", "quantity": 1},
+      {"name": "depth camera", "type": "camera", "quantity": 1},
+      {"name": "2D lidar", "type": "lidar", "quantity": 1},
+      {"name": "IMU", "type": "imu", "quantity": 1},
+      {"name": "12 V battery pack", "type": "power_source", "quantity": 1},
+      {"name": "multimeter", "type": "tool", "quantity": 1},
+      {"name": "current-limited bench supply", "type": "instrument", "quantity": 1}
+    ],
+    "constraints": {
+      "maximum_width_mm": 250,
+      "threshold_height_mm": 15,
+      "payload_g": 500,
+      "runtime_min": 90,
+      "maximum_noise_dba": 55,
+      "maximum_speed_mps": 0.4,
+      "indoor_only": true,
+      "operator_emergency_stop": true,
+      "first_motion_current_limit_a": 1.5,
+      "battery_voltage_v": 12
+    }
+  }
+}

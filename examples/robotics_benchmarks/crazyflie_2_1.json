@@ -1,0 +1,54 @@
+{
+  "benchmark_id": "crazyflie_2_1",
+  "robot_genre": "aerial_robot",
+  "reference_project": "Bitcraze Crazyflie 2.1",
+  "expected_archetype": "aerial_robot",
+  "reference_sources": {
+    "repository": "https://github.com/bitcraze/crazyflie-firmware",
+    "documentation": ["https://www.bitcraze.io/documentation/start/", "https://www.bitcraze.io/documentation/system/platform/"],
+    "videos": ["https://www.youtube.com/results?search_query=Bitcraze+Crazyflie+2.1+assembly"]
+  },
+  "stress_profile": {
+    "actuator_count": 4,
+    "kinematic_chains": 0,
+    "sensor_count": 7,
+    "control_loops": 8,
+    "power_domains": 3,
+    "external_interfaces": 10,
+    "firmware_components": 2,
+    "ros_interfaces": 0,
+    "dynamic_coupling": "high",
+    "safety_criticality": "high",
+    "required_domains": ["mechanical", "actuation", "control", "platform", "safety", "electrical", "perception", "firmware", "evidence"]
+  },
+  "intake": {
+    "project_name": "crazyflie_2_1_reference",
+    "goal": "Build and validate a four-motor nano quadcopter with dual-MCU firmware, radio link, IMU and pressure sensing, battery monitoring, attitude control, position-control extensions and a bounded first-flight procedure.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "front-left motor and propeller", "type": "brushless_motor"},
+      {"name": "front-right motor and propeller", "type": "brushless_motor"},
+      {"name": "rear-left motor and propeller", "type": "brushless_motor"},
+      {"name": "rear-right motor and propeller", "type": "brushless_motor"},
+      {"name": "STM32 flight controller", "type": "microcontroller"},
+      {"name": "nRF radio and power controller", "type": "microcontroller"},
+      {"name": "IMU", "type": "imu"},
+      {"name": "barometer", "type": "pressure_sensor"},
+      {"name": "single-cell lithium battery", "type": "power_source"},
+      {"name": "Crazyradio", "type": "radio_interface"},
+      {"name": "airframe and propeller guards", "type": "mechanical_structure"}
+    ],
+    "constraints": {
+      "motor_count": 4,
+      "battery_voltage_v": 3.7,
+      "mass_g": 27,
+      "propeller_guard_required": true,
+      "first_flight_tethered": true,
+      "emergency_disarm_required": true
+    },
+    "reference_sources": {
+      "repository": "https://github.com/bitcraze/crazyflie-firmware",
+      "video_query": "Bitcraze Crazyflie assembly and first flight"
+    }
+  }
+}
