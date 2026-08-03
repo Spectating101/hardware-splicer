@@ -1,4 +1,4 @@
-"""Persistence helpers for enriched engineering plans."""
+"""Persistence helpers for enriched guided engineering plans."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
         "projectId": project_id,
         "projectName": str(machine_project.get("name") or plan.get("project_name") or project_id),
         "mode": str((plan.get("engineering_context") or {}).get("normalized_mode") or "greenfield"),
-        "currentStage": "engineering_plan",
+        "currentStage": "guided_engineering_plan",
         "engineeringPlan": dict(plan),
         "machineProject": dict(machine_project),
         "engineeringSourceGraph": dict(plan.get("engineering_source_graph") or {}),
@@ -23,6 +23,9 @@ def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
         "engineeringAnalysis": dict(plan.get("engineering_analysis") or {}),
         "changeImpact": dict(plan.get("change_impact") or {}),
         "engineeringIdentityMap": dict(plan.get("engineering_identity_map") or {}),
+        "verificationBridge": dict(plan.get("verification_bridge") or {}),
+        "operatorGuide": dict(plan.get("operator_guide") or {}),
+        "sourceAdapter": dict(plan.get("source_adapter") or {}),
         "engineeringReadiness": dict(plan.get("engineering_readiness") or {}),
         "missingInfo": list(plan.get("missing_info") or []),
     }
@@ -46,12 +49,14 @@ def save_engineering_plan(
         snapshot,
         expected_revision=expected_revision,
         metadata={
-            "source": "engineering_planner",
+            "source": "guided_engineering_planner",
             "engineering_plan_schema": plan.get("schema_version"),
             "native_robot_genre": plan.get("native_robot_genre"),
             "blocking_source_conflict_count": (plan.get("engineering_readiness") or {}).get("blocking_source_conflict_count"),
             "blocking_analysis_finding_count": (plan.get("engineering_readiness") or {}).get("blocking_analysis_finding_count"),
             "blocking_change_impact_count": (plan.get("engineering_readiness") or {}).get("blocking_change_impact_count"),
+            "operator_guide_step_count": (plan.get("engineering_readiness") or {}).get("operator_guide_step_count"),
+            "verification_method_count": (plan.get("engineering_readiness") or {}).get("verification_method_count"),
             "physical_authority_unchanged": True,
         },
     )
