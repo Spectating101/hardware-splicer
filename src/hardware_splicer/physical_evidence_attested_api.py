@@ -21,20 +21,29 @@ from .physical_evidence_attestation import (
     EvidenceAttestationUnavailable,
     attest_raw_evidence_bytes,
     attestation_capability,
+    verify_evidence_file_attestation,
 )
 from .physical_evidence_bytes import RawEvidenceHashRequest
 from .physical_evidence_ledger import (
     AuthorizationLedgerEntry,
     PhysicalEvidenceEnvelope,
     build_physical_evidence_envelope,
+    validate_physical_evidence_envelope,
 )
 from .scoped_release import assess_scoped_release
+
+
+MAX_ATTESTED_ENVELOPE_RAW_BYTES = 16 * 1024 * 1024
+MAX_ATTESTED_ENVELOPE_FILE_COUNT = 8
 
 
 class AttestedEnvelopeBuildRequest(BaseModel):
     envelope_id: str = Field(min_length=1)
     record: PhysicalEvidenceRecord
-    raw_files: list[RawEvidenceHashRequest] = Field(min_length=1, max_length=16)
+    raw_files: list[RawEvidenceHashRequest] = Field(
+        min_length=1,
+        max_length=MAX_ATTESTED_ENVELOPE_FILE_COUNT,
+    )
     created_at: str = Field(min_length=1)
     created_by: str = Field(min_length=1)
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -54,6 +63,11 @@ class AttestedReleaseRequest(AttestedAuditRequest):
     requested_operations: list[PhysicalOperation] = Field(min_length=1)
 
 
+def _estimated_decoded_size(value: str) -> int:
+    text = value.rstrip("=")
+    return (len(text) * 3) // 4
+
+
 def create_physical_evidence_attested_router() -> APIRouter:
     router = APIRouter(
         prefix="/v1/engineering/physical-evidence",
@@ -68,6 +82,8 @@ def create_physical_evidence_attested_router() -> APIRouter:
             "audit_request_schema": AttestedAuditRequest.model_json_schema(),
             "release_request_schema": AttestedReleaseRequest.model_json_schema(),
             "attestation_capability": attestation_capability(),
+            "maximum_envelope_raw_bytes": MAX_ATTESTED_ENVELOPE_RAW_BYTES,
+            "maximum_envelope_file_count": MAX_ATTESTED_ENVELOPE_FILE_COUNT,
             "server_attestation_required": True,
             "plain_hash_sufficient": False,
             "raw_bytes_persisted": False,
@@ -79,10 +95,25 @@ def create_physical_evidence_attested_router() -> APIRouter:
         request: AttestedEnvelopeBuildRequest,
     ) -> Dict[str, Any]:
         try:
+            estimated_total = sum(
+                _estimated_decoded_size(value.content_base64)
+                for value in request.raw_files
+            )
+            if estimated_total > MAX_ATTESTED_ENVELOPE_RAW_BYTES:
+                raise ValueError(
+                    "combined decoded raw evidence exceeds "
+                    f"{MAX_ATTESTED_ENVELOPE_RAW_BYTES} bytes"
+                )
             attested_files = [
                 attest_raw_evidence_bytes(value).file_ref
                 for value in request.raw_files
             ]
+            decoded_total = sum(value.size_bytes or 0 for value in attested_files)
+            if decoded_total > MAX_ATTESTED_ENVELOPE_RAW_BYTES:
+                raise ValueError(
+                    "combined decoded raw evidence exceeds "
+                    f"{MAX_ATTESTED_ENVELOPE_RAW_BYTES} bytes"
+                )
             envelope = build_physical_evidence_envelope(
                 envelope_id=request.envelope_id,
                 record=request.record,
@@ -97,6 +128,12 @@ def create_physical_evidence_attested_router() -> APIRouter:
                     "automatic_authorization": False,
                 },
             )
+            blockers = validate_physical_evidence_envelope(envelope)
+            for file_ref in envelope.raw_files:
+                blockers.extend(verify_evidence_file_attestation(file_ref))
+            blockers = list(dict.fromkeys(blockers))
+            if blockers:
+                raise ValueError(" ".join(blockers))
         except EvidenceAttestationUnavailable as exc:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -111,6 +148,7 @@ def create_physical_evidence_attested_router() -> APIRouter:
             "ok": True,
             "evidence_envelope": envelope.model_dump(mode="json"),
             "attested_raw_file_count": len(attested_files),
+            "decoded_size_bytes": decoded_total,
             "server_attested": True,
             "raw_bytes_persisted": False,
             "automatic_authorization": False,
