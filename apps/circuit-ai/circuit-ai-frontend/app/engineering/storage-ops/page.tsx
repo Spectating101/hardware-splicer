@@ -29,6 +29,7 @@ type AuditResponse = {
   audit?: JsonRecord;
 };
 type CleanupResponse = AuditResponse & { cleanup?: JsonRecord };
+type Metric = { label: string; value: unknown; note: string };
 
 function record(value: unknown): JsonRecord {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -44,6 +45,10 @@ function rows(value: unknown): JsonRecord[] {
 
 function text(value: unknown, fallback = '—') {
   return value === undefined || value === null || value === '' ? fallback : String(value);
+}
+
+function count(value: unknown) {
+  return Array.isArray(value) ? value.length : 0;
 }
 
 function formatBytes(value: unknown) {
@@ -70,6 +75,12 @@ export default function SourceStorageOperationsPage() {
   const sessions = rows(audit?.sessions);
   const orphanBlobs = useMemo(() => blobs.filter((row) => row.orphan === true), [blobs]);
   const expiredSessions = useMemo(() => sessions.filter((row) => row.expired === true), [sessions]);
+  const metrics: Metric[] = [
+    { label: 'Stored blobs', value: summary.stored_blob_count, note: formatBytes(summary.stored_blob_bytes) },
+    { label: 'Orphan blobs', value: summary.orphan_blob_count, note: formatBytes(summary.orphan_blob_bytes) },
+    { label: 'Corrupt blobs', value: summary.corrupt_blob_count, note: 'report boundary' },
+    { label: 'Temporary chunks', value: summary.session_count, note: formatBytes(summary.temporary_chunk_bytes) },
+  ];
 
   async function loadAudit() {
     const id = projectId.trim();
@@ -151,7 +162,7 @@ export default function SourceStorageOperationsPage() {
               <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-3 text-amber-200"><Database className="h-6 w-6" /></div>
               <div>
                 <h1 className="text-2xl font-semibold text-white">Source Storage Ops</h1>
-                <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">Audit project blob reachability and temporary upload sessions. Preview cleanup first; destructive apply requires the exact project ID.</p>
+                <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-400">Audit blob reachability and temporary upload sessions. Preview cleanup first; destructive apply requires the exact project ID.</p>
               </div>
             </div>
           </div>
@@ -177,16 +188,11 @@ export default function SourceStorageOperationsPage() {
         {error ? <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-300/20 bg-rose-300/10 p-4 text-sm text-rose-100"><XCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}</div> : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            ['Stored blobs', summary.stored_blob_count, formatBytes(summary.stored_blob_bytes)],
-            ['Orphan blobs', summary.orphan_blob_count, formatBytes(summary.orphan_blob_bytes)],
-            ['Corrupt blobs', summary.corrupt_blob_count, 'report boundary'],
-            ['Temporary chunks', summary.session_count, formatBytes(summary.temporary_chunk_bytes)],
-          ].map(([label, value, note]) => (
-            <div key={String(label)} className="rounded-2xl border border-white/10 bg-[#07111f] p-4">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{label}</div>
-              <div className="mt-2 text-2xl font-semibold text-white">{text(value, '0')}</div>
-              <div className="mt-1 text-xs text-slate-400">{note}</div>
+          {metrics.map((metric) => (
+            <div key={metric.label} className="rounded-2xl border border-white/10 bg-[#07111f] p-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">{metric.label}</div>
+              <div className="mt-2 text-2xl font-semibold text-white">{text(metric.value, '0')}</div>
+              <div className="mt-1 text-xs text-slate-400">{metric.note}</div>
             </div>
           ))}
         </div>
@@ -237,7 +243,7 @@ export default function SourceStorageOperationsPage() {
 
             <section className="rounded-3xl border border-white/10 bg-[#07111f] p-5">
               <div className="text-sm font-semibold text-white">Latest cleanup result</div>
-              {!cleanup ? <div className="mt-4 text-sm leading-6 text-slate-500">Run a dry-run preview before applying cleanup.</div> : <div className="mt-4 space-y-3 text-xs text-slate-400"><div>Mode: <span className="text-slate-200">{cleanup.dry_run ? 'dry run' : 'applied'}</span></div><div>Blob candidates: <span className="text-slate-200">{rows(cleanup.candidate_blob_refs).length || (Array.isArray(cleanup.candidate_blob_refs) ? cleanup.candidate_blob_refs.length : 0)}</span></div><div>Session candidates: <span className="text-slate-200">{Array.isArray(cleanup.candidate_session_ids) ? cleanup.candidate_session_ids.length : 0}</span></div><div>Reclaimable: <span className="text-slate-200">{formatBytes(cleanup.bytes_reclaimable)}</span></div><div>Reclaimed: <span className="text-slate-200">{formatBytes(cleanup.bytes_reclaimed)}</span></div></div>}
+              {!cleanup ? <div className="mt-4 text-sm leading-6 text-slate-500">Run a dry-run preview before applying cleanup.</div> : <div className="mt-4 space-y-3 text-xs text-slate-400"><div>Mode: <span className="text-slate-200">{cleanup.dry_run ? 'dry run' : 'applied'}</span></div><div>Blob candidates: <span className="text-slate-200">{count(cleanup.candidate_blob_refs)}</span></div><div>Session candidates: <span className="text-slate-200">{count(cleanup.candidate_session_ids)}</span></div><div>Reclaimable: <span className="text-slate-200">{formatBytes(cleanup.bytes_reclaimable)}</span></div><div>Reclaimed: <span className="text-slate-200">{formatBytes(cleanup.bytes_reclaimed)}</span></div></div>}
             </section>
 
             {(orphanBlobs.length > 0 || expiredSessions.length > 0) ? <div className="flex items-start gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-xs leading-5 text-amber-100"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />Review {orphanBlobs.length} orphan blobs and {expiredSessions.length} expired sessions before applying cleanup.</div> : null}
