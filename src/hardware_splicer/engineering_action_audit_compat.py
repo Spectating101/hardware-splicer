@@ -35,6 +35,7 @@ def install_audited_release_action_compatibility() -> None:
         audited = _mapping(plan.get("audited_physical_evidence"))
         if audited:
             ledger = _mapping(audited.get("ledger_assessment"))
+            audit_metadata = _mapping(audited.get("metadata"))
             payload.update(
                 {
                     "audited_physical_evidence": audited,
@@ -42,6 +43,12 @@ def install_audited_release_action_compatibility() -> None:
                     "authorization_ledger_entry_count": len(audited.get("ledger_entries") or []),
                     "authorization_ledger_valid": bool(ledger.get("valid")),
                     "audited_authorization_applicable": bool(audited.get("applicable")),
+                    "server_attestation_required": bool(
+                        audit_metadata.get("server_attestation_required")
+                    ),
+                    "server_attestation_valid": audit_metadata.get(
+                        "server_attestation_valid"
+                    ),
                 }
             )
             blockers.extend(_messages(audited.get("blockers")))
@@ -54,13 +61,20 @@ def install_audited_release_action_compatibility() -> None:
             {
                 "raw_evidence_hash_schema_route": "/v1/engineering/physical-evidence/raw-files/schema",
                 "raw_evidence_hash_route": "/v1/engineering/physical-evidence/raw-files/hash",
+                "attested_raw_evidence_hash_route": "/v1/engineering/physical-evidence/raw-files/hash-attested",
                 "physical_envelope_build_route": "/v1/engineering/physical-evidence/envelopes/build",
+                "attested_envelope_build_route": "/v1/engineering/physical-evidence/envelopes/build-attested",
                 "authorization_ledger_build_route": "/v1/engineering/physical-evidence/ledger/build-entry",
                 "audited_physical_assess_route": "/v1/engineering/physical-evidence/audited-assess",
                 "audited_release_assess_route": "/v1/engineering/physical-evidence/audited-release-assess",
                 "audited_apply_save_route": "/v1/engineering/physical-evidence/audited-apply-save",
+                "attested_physical_schema_route": "/v1/engineering/physical-evidence/attested/schema",
+                "attested_audited_assess_route": "/v1/engineering/physical-evidence/attested-audited-assess",
+                "attested_audited_release_assess_route": "/v1/engineering/physical-evidence/attested-audited-release-assess",
+                "attested_audited_apply_save_route": "/v1/engineering/physical-evidence/attested-audited-apply-save",
                 "server_computed_raw_hash_recommended": True,
-                "raw_hash_alone_proves_origin": False,
+                "strict_server_attestation_available": True,
+                "plain_hash_alone_proves_origin": False,
                 "tamper_evident_envelopes_required": True,
                 "valid_authorization_chain_required": True,
                 "automatic_authorization": False,
