@@ -75,6 +75,50 @@ def _save_error(exc: Exception, *, audited: bool = False) -> HTTPException:
     )
 
 
+def _audited_response(
+    *,
+    plan: Dict[str, Any],
+    envelope: Dict[str, Any],
+    server_attestation_required: bool,
+) -> Dict[str, Any]:
+    audited = plan.get("audited_physical_evidence") or {}
+    ledger = audited.get("ledger_assessment") or {}
+    release = plan.get("scoped_release_assessment") or {}
+    blockers = audited.get("blockers") or []
+    envelope_valid = not any(
+        "envelope" in str(value).lower() for value in blockers
+    )
+    server_attestation_valid = (
+        bool(audited.get("metadata", {}).get("server_attestation_valid"))
+        if server_attestation_required
+        else None
+    )
+    return {
+        "ok": True,
+        "project_id": envelope["project_id"],
+        "revision": envelope["revision"],
+        "saved_at": envelope["saved_at"],
+        "plan": plan,
+        "audited_physical_evidence": audited,
+        "physical_evidence_package": plan.get("physical_evidence_package"),
+        "scoped_release_assessment": release,
+        "engineering_status": plan.get("engineering_status"),
+        "engineering_readiness": plan.get("engineering_readiness"),
+        "authorization_applicable": bool(audited.get("applicable")),
+        "tamper_evident_envelopes_validated": envelope_valid,
+        "authorization_ledger_validated": bool(ledger.get("valid")),
+        "server_attestation_required": server_attestation_required,
+        "server_attestation_valid": server_attestation_valid,
+        "automatic_authorization": False,
+        "global_authority_flags_unchanged": True,
+        "fabrication_authorized": False,
+        "flash_authorized": False,
+        "power_on_authorized": False,
+        "motion_authorized": False,
+        "release_authorized": False,
+    }
+
+
 def create_physical_evidence_persistence_router(
     project_store: ProjectStore | None,
 ) -> APIRouter:
@@ -118,6 +162,8 @@ def create_physical_evidence_persistence_router(
             "engineering_readiness": plan.get("engineering_readiness"),
             "tamper_evident_envelopes_validated": False,
             "authorization_ledger_validated": False,
+            "server_attestation_required": False,
+            "server_attestation_valid": None,
             "automatic_authorization": False,
             "global_authority_flags_unchanged": True,
             "fabrication_authorized": False,
@@ -127,9 +173,10 @@ def create_physical_evidence_persistence_router(
             "release_authorized": False,
         }
 
-    @router.post("/audited-apply-save")
-    def audited_apply_and_save(
+    def _apply_audited(
         request: AuditedPhysicalEvidenceSaveRequest,
+        *,
+        require_server_attestation: bool,
     ) -> Dict[str, Any]:
         if project_store is None:
             raise _store_unavailable()
@@ -142,6 +189,7 @@ def create_physical_evidence_persistence_router(
                 requested_operations=request.requested_operations,
                 scope_id=request.scope_id,
                 as_of=request.as_of,
+                require_server_attestation=require_server_attestation,
             )
             envelope = save_engineering_plan(
                 project_store,
@@ -151,35 +199,22 @@ def create_physical_evidence_persistence_router(
             )
         except (ProjectStoreError, TypeError, ValueError) as exc:
             raise _save_error(exc, audited=True) from exc
-
-        audited = plan.get("audited_physical_evidence") or {}
-        ledger = audited.get("ledger_assessment") or {}
-        release = plan.get("scoped_release_assessment") or {}
-        blockers = audited.get("blockers") or []
-        envelope_valid = not any(
-            "envelope" in str(value).lower() for value in blockers
+        return _audited_response(
+            plan=plan,
+            envelope=envelope,
+            server_attestation_required=require_server_attestation,
         )
-        return {
-            "ok": True,
-            "project_id": envelope["project_id"],
-            "revision": envelope["revision"],
-            "saved_at": envelope["saved_at"],
-            "plan": plan,
-            "audited_physical_evidence": audited,
-            "physical_evidence_package": plan.get("physical_evidence_package"),
-            "scoped_release_assessment": release,
-            "engineering_status": plan.get("engineering_status"),
-            "engineering_readiness": plan.get("engineering_readiness"),
-            "authorization_applicable": bool(audited.get("applicable")),
-            "tamper_evident_envelopes_validated": envelope_valid,
-            "authorization_ledger_validated": bool(ledger.get("valid")),
-            "automatic_authorization": False,
-            "global_authority_flags_unchanged": True,
-            "fabrication_authorized": False,
-            "flash_authorized": False,
-            "power_on_authorized": False,
-            "motion_authorized": False,
-            "release_authorized": False,
-        }
+
+    @router.post("/audited-apply-save")
+    def audited_apply_and_save(
+        request: AuditedPhysicalEvidenceSaveRequest,
+    ) -> Dict[str, Any]:
+        return _apply_audited(request, require_server_attestation=False)
+
+    @router.post("/attested-audited-apply-save")
+    def attested_audited_apply_and_save(
+        request: AuditedPhysicalEvidenceSaveRequest,
+    ) -> Dict[str, Any]:
+        return _apply_audited(request, require_server_attestation=True)
 
     return router
