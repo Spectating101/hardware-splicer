@@ -5,6 +5,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict, Iterable, Mapping
 
+from .attested_audited_physical_evidence import (
+    assess_attested_audited_physical_authorization,
+)
 from .audited_physical_evidence import (
     AuditedPhysicalEvidencePackage,
     assess_audited_physical_authorization,
@@ -31,12 +34,18 @@ def apply_audited_physical_evidence_to_plan(
     requested_operations: Iterable[PhysicalOperation | str] = (),
     scope_id: str | None = None,
     as_of: datetime | None = None,
+    require_server_attestation: bool = False,
 ) -> Dict[str, Any]:
     """Persist audited evidence while keeping all broad authority flags false."""
 
     updated = dict(plan)
     project = MachineProject.model_validate(updated.get("machine_project") or {})
-    audited: AuditedPhysicalEvidencePackage = assess_audited_physical_authorization(
+    assessor = (
+        assess_attested_audited_physical_authorization
+        if require_server_attestation
+        else assess_audited_physical_authorization
+    )
+    audited: AuditedPhysicalEvidencePackage = assessor(
         updated,
         calibrations=calibrations,
         envelopes=envelopes,
@@ -87,6 +96,10 @@ def apply_audited_physical_evidence_to_plan(
             "physical_evidence_envelope_count": len(audited.envelopes),
             "authorization_ledger_entry_count": len(audited.ledger_entries),
             "authorization_ledger_valid": audited.ledger_assessment.valid,
+            "server_attestation_required": require_server_attestation,
+            "server_attestation_valid": bool(
+                audited.metadata.get("server_attestation_valid")
+            ) if require_server_attestation else None,
             "tamper_evident_envelopes_required": True,
             "valid_authorization_chain_required": True,
             "scoped_release_allowed": (
@@ -121,6 +134,10 @@ def apply_audited_physical_evidence_to_plan(
             "authorization_ledger_entry_count": len(audited.ledger_entries),
             "authorization_ledger_valid": audited.ledger_assessment.valid,
             "audited_physical_authorization_applicable": audited.applicable,
+            "server_attestation_required": require_server_attestation,
+            "server_attestation_valid": bool(
+                audited.metadata.get("server_attestation_valid")
+            ) if require_server_attestation else None,
             "scoped_release_allowed": (
                 audited.applicable and release.allowed
                 if release is not None
@@ -156,6 +173,10 @@ def apply_audited_physical_evidence_to_plan(
     scenario["audited_physical_authorization"] = {
         "applicable": audited.applicable,
         "ledger_valid": audited.ledger_assessment.valid,
+        "server_attestation_required": require_server_attestation,
+        "server_attestation_valid": bool(
+            audited.metadata.get("server_attestation_valid")
+        ) if require_server_attestation else None,
         "envelope_count": len(audited.envelopes),
         "ledger_entry_count": len(audited.ledger_entries),
         "scoped_release_allowed": (
