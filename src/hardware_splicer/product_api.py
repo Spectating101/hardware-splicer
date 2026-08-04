@@ -36,6 +36,7 @@ from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
 from .project_store import ProjectStore
 from .source_conflict_api import create_source_conflict_router
+from .stored_source_parser_api import create_stored_source_parser_router
 
 
 def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
@@ -52,6 +53,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_capability_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_engineering_source_ingestion_router(resolved_store))
+    app.include_router(create_stored_source_parser_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
