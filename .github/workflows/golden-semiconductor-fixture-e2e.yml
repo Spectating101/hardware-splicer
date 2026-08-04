@@ -1,0 +1,125 @@
+name: Golden Semiconductor Fixture E2E
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "examples/semiconductor_fixture_e2e/**"
+      - "scripts/run_golden_semiconductor_fixture_e2e.py"
+      - "tests/test_golden_semiconductor_fixture_e2e.py"
+      - "scripts/run_golden_rover_jarvis_e2e.py"
+      - "tests/test_golden_rover_jarvis_e2e.py"
+      - "src/hardware_splicer/ai_project_*.py"
+      - "src/hardware_splicer/engineering_package*.py"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/packages/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-package-workspace.cjs"
+      - "docs/GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.md"
+      - ".github/workflows/golden-semiconductor-fixture-e2e.yml"
+  pull_request:
+    paths:
+      - "examples/semiconductor_fixture_e2e/**"
+      - "scripts/run_golden_semiconductor_fixture_e2e.py"
+      - "tests/test_golden_semiconductor_fixture_e2e.py"
+      - "scripts/run_golden_rover_jarvis_e2e.py"
+      - "tests/test_golden_rover_jarvis_e2e.py"
+      - "src/hardware_splicer/ai_project_*.py"
+      - "src/hardware_splicer/engineering_package*.py"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/packages/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-package-workspace.cjs"
+      - "docs/GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.md"
+      - ".github/workflows/golden-semiconductor-fixture-e2e.yml"
+
+jobs:
+  semiconductor-fixture:
+    name: DUT fixture proposal-to-package trace
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_LLM: "1"
+      HARDWARE_SPLICER_OFFLINE_VISION: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      QWEN_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install Hardware Splicer and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Compile golden validation harnesses and owning modules
+        run: |
+          python -m py_compile \
+            scripts/run_golden_semiconductor_fixture_e2e.py \
+            scripts/run_golden_rover_jarvis_e2e.py \
+            src/hardware_splicer/ai_project_orchestrator.py \
+            src/hardware_splicer/ai_project_orchestrator_api.py \
+            src/hardware_splicer/ai_project_tool_executor.py \
+            src/hardware_splicer/ai_project_tool_executor_api.py \
+            src/hardware_splicer/ai_project_repair.py \
+            src/hardware_splicer/ai_project_repair_api.py \
+            src/hardware_splicer/ai_project_conversation.py \
+            src/hardware_splicer/ai_project_conversation_api.py \
+            src/hardware_splicer/engineering_package.py \
+            src/hardware_splicer/engineering_package_api.py \
+            src/hardware_splicer/engineering_package_download_api.py
+      - name: Run strict semiconductor fixture trace
+        run: |
+          PYTHONPATH=src python scripts/run_golden_semiconductor_fixture_e2e.py \
+            --strict \
+            --out /tmp/golden-semiconductor-fixture-e2e
+      - name: Re-run strict rover trace for domain portability
+        run: |
+          PYTHONPATH=src python scripts/run_golden_rover_jarvis_e2e.py \
+            --strict \
+            --out /tmp/golden-rover-jarvis-e2e
+      - name: Run focused backend contracts
+        run: |
+          PYTHONPATH=src python -m pytest -q \
+            tests/test_golden_semiconductor_fixture_e2e.py \
+            tests/test_golden_rover_jarvis_e2e.py \
+            tests/test_ai_project_orchestrator_api.py \
+            tests/test_ai_project_tool_executor_api.py \
+            tests/test_ai_project_repair_api.py \
+            tests/test_ai_project_conversation_api.py \
+            tests/test_engineering_package_api.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Validate JARVIS review and package surfaces
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: |
+          node scripts/test-ai-studio-repair-lineage.cjs
+          node scripts/test-jarvis-console.cjs
+          node scripts/test-engineering-package-workspace.cjs
+          npm run typecheck
+          npm run build
+      - name: Upload both golden validation packages
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-semiconductor-and-rover-e2e
+          path: |
+            /tmp/golden-semiconductor-fixture-e2e/GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.json
+            /tmp/golden-semiconductor-fixture-e2e/GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.md
+            /tmp/golden-semiconductor-fixture-e2e/GOLDEN_SEMICONDUCTOR_FIXTURE_PACKAGE.zip
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_JARVIS_E2E.json
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_JARVIS_E2E.md
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_ENGINEERING_PACKAGE.zip
+          if-no-files-found: warn
