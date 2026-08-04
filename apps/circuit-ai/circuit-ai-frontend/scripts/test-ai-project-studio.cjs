@@ -26,7 +26,7 @@ requireText(page, 'Recorded without execution.', 'AI Studio page');
 requireText(page, 'Automatic execution is disabled.', 'AI Studio page');
 requireText(page, 'expected_revision: revision', 'AI Studio page');
 requireText(page, "model_profile: modelProfile", 'AI Studio page');
-requireText(page, "decision: 'accepted'", 'AI Studio page');
+requireText(page, "decideAction(actionId, 'accepted')", 'AI Studio page');
 requireText(page, 'No tool execution authorized.', 'AI Studio page');
 requireText(layout, 'href="/engineering/ai-studio"', 'Engineering navigation');
 requireText(createProxy, '/v1/projects/${encodeURIComponent(projectId)}/ai-sessions', 'Session creation proxy');
