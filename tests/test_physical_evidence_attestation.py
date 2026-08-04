@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import base64
 import json
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+
+import pytest
 
 from hardware_splicer.physical_evidence_attestation import (
+    EvidenceAttestationUnavailable,
     attest_raw_evidence_bytes,
     verify_evidence_file_attestation,
 )
@@ -79,3 +82,26 @@ def test_missing_verification_key_blocks_attestation(monkeypatch) -> None:
 
     blockers = verify_evidence_file_attestation(result.file_ref)
     assert any("No verification key" in row for row in blockers)
+
+
+def test_signing_fails_closed_when_verification_keyring_is_invalid(monkeypatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY", KEY)
+    monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY_ID", "lab-key")
+    monkeypatch.setenv(
+        "HARDWARE_SPLICER_EVIDENCE_VERIFICATION_KEYS",
+        "not-json",
+    )
+
+    with pytest.raises(EvidenceAttestationUnavailable, match="self-verification failed"):
+        attest_raw_evidence_bytes(_request())
+
+
+def test_materially_future_dated_attestation_is_rejected(monkeypatch) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY", KEY)
+    monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY_ID", "lab-key")
+
+    with pytest.raises(EvidenceAttestationUnavailable, match="future-dated"):
+        attest_raw_evidence_bytes(
+            _request(),
+            issued_at=datetime.now(timezone.utc) + timedelta(hours=1),
+        )
