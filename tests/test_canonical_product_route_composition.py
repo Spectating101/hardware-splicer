@@ -8,11 +8,20 @@ from hardware_splicer.project_store import ProjectStore
 REQUIRED_PATHS = {
     "/v1/engineering/actions/prepare",
     "/v1/engineering/execution/capabilities",
+    "/v1/engineering/mechanical/schema",
+    "/v1/engineering/mechanical/geometry/apply",
+    "/v1/engineering/mechanical/fit/check",
+    "/v1/engineering/mechanical/fit/apply",
     "/v1/engineering/physical-evidence/schema",
     "/v1/engineering/physical-evidence/assess",
     "/v1/engineering/physical-evidence/attach",
     "/v1/engineering/physical-evidence/release-assess",
+    "/v1/engineering/physical-evidence/envelopes/build",
+    "/v1/engineering/physical-evidence/ledger/build-entry",
+    "/v1/engineering/physical-evidence/audited-assess",
+    "/v1/engineering/physical-evidence/audited-release-assess",
     "/v1/engineering/physical-evidence/apply-save",
+    "/v1/engineering/physical-evidence/audited-apply-save",
 }
 
 
