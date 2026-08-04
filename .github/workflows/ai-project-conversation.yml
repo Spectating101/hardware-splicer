@@ -10,6 +10,7 @@ on:
       - "tests/test_ai_project_conversation.py"
       - "tests/test_ai_project_conversation_api.py"
       - "tests/test_ai_project_conversation_product_api.py"
+      - "tests/test_ai_project_conversation_retry.py"
       - "docs/AI_PROJECT_CONVERSATION.md"
       - ".github/workflows/ai-project-conversation.yml"
   pull_request:
@@ -20,6 +21,7 @@ on:
       - "tests/test_ai_project_conversation.py"
       - "tests/test_ai_project_conversation_api.py"
       - "tests/test_ai_project_conversation_product_api.py"
+      - "tests/test_ai_project_conversation_retry.py"
       - "docs/AI_PROJECT_CONVERSATION.md"
       - ".github/workflows/ai-project-conversation.yml"
 
@@ -56,6 +58,7 @@ jobs:
             tests/test_ai_project_conversation.py \
             tests/test_ai_project_conversation_api.py \
             tests/test_ai_project_conversation_product_api.py \
+            tests/test_ai_project_conversation_retry.py \
             tests/test_ai_project_orchestrator.py \
             tests/test_ai_project_repair.py \
             tests/test_ai_project_tool_executor.py
