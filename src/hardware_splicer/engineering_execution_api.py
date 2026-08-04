@@ -15,6 +15,7 @@ from .engineering_execution import (
     preview_engineering_execution,
     run_engineering_execution,
 )
+from .engineering_execution_capability import build_engineering_execution_capability
 from .engineering_execution_evidence import attach_execution_evidence
 from .engineering_execution_plan_update import apply_execution_evidence_to_plan
 from .engineering_plan_store import save_engineering_plan
@@ -50,6 +51,21 @@ def create_engineering_execution_router(project_store: ProjectStore | None = Non
             "evidence_request_schema": ExecutionEvidenceRequest.model_json_schema(),
             "evidence_save_request_schema": ExecutionEvidenceSaveRequest.model_json_schema(),
             "physical_operations_supported": False,
+        }
+
+    @router.get("/capabilities")
+    def execution_capabilities() -> Dict[str, Any]:
+        report = build_engineering_execution_capability()
+        return {
+            "ok": True,
+            "execution_capability": report.model_dump(mode="json"),
+            "physical_operations_supported": False,
+            "automatic_execution": False,
+            "device_access_authorized": False,
+            "flash_authorized": False,
+            "power_on_authorized": False,
+            "motion_authorized": False,
+            "release_authorized": False,
         }
 
     @router.post("/preview")
@@ -96,9 +112,7 @@ def create_engineering_execution_router(project_store: ProjectStore | None = Non
             ) from exc
         release = project.assess_release()
         software_evidence = [
-            row
-            for row in project.evidence
-            if row.kind == "software_execution_result"
+            row for row in project.evidence if row.kind == "software_execution_result"
         ]
         physical_evidence = [
             row
