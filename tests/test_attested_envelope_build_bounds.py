@@ -55,7 +55,7 @@ def test_attested_builder_rejects_record_raw_ref_mismatch(monkeypatch) -> None:
 
     assert response.status_code == 422
     assert response.json()["detail"]["type"] == "invalid_attested_evidence_envelope"
-    assert "raw_refs" in response.json()["detail"]["message"]
+    assert "raw refs" in response.json()["detail"]["message"]
 
 
 def test_attested_builder_rejects_more_than_eight_files(monkeypatch) -> None:
