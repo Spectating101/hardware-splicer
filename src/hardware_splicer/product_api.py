@@ -22,6 +22,7 @@ from .engineering_execution_api import create_engineering_execution_router
 from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
 from .engineering_review_identity_api import create_engineering_review_identity_router
+from .engineering_source_ingestion_api import create_engineering_source_ingestion_router
 from .engineering_status_api import create_engineering_status_router
 from .machine_project_api import create_machine_project_router
 from .manufacturing_api import create_manufacturing_router
@@ -32,6 +33,7 @@ from .physical_evidence_hash_api import create_physical_evidence_hash_router
 from .physical_evidence_persistence_api import create_physical_evidence_persistence_router
 from .project_api import create_project_router
 from .project_compatibility import CompatibleProjectStore
+from .project_engineering_plan_api import create_project_engineering_plan_router
 from .project_store import ProjectStore
 from .source_conflict_api import create_source_conflict_router
 
@@ -49,6 +51,8 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_electrical_interchange_router())
     app.include_router(create_capability_router())
     app.include_router(create_engineering_router(resolved_store))
+    app.include_router(create_engineering_source_ingestion_router(resolved_store))
+    app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
