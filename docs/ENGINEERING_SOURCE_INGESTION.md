@@ -1,19 +1,22 @@
-# Engineering Source Ingestion
+# Engineering Source Ingestion and Project Preflight
 
-Hardware Splicer now has a bounded first-pass path for attaching real project files to a revisioned engineering project.
+Hardware Splicer now has a bounded path for attaching real files to a revisioned engineering project and then generating a guided plan from that exact persisted source boundary.
 
 ## Canonical routes
 
 - `GET /v1/engineering/sources/ingestion/schema`
 - `POST /v1/projects/{project_id}/sources/ingest`
+- `POST /v1/projects/{project_id}/engineering/plan`
 
-The frontend proxy for the write route is:
+Frontend proxies:
 
+- `PUT /api/proxy/engineering/projects/{projectId}/snapshot`
 - `POST /api/proxy/engineering/projects/{projectId}/sources/ingest`
+- `POST /api/proxy/engineering/projects/{projectId}/plan`
 
-A project must already have at least one persisted revision. The request carries `expected_revision`; stale writes return a revision conflict instead of silently overwriting newer project state.
+All writes carry `expected_revision`. Stale writes return a revision conflict instead of silently overwriting newer project state.
 
-## Request
+## Source-ingestion request
 
 ```json
 {
@@ -27,7 +30,7 @@ A project must already have at least one persisted revision. The request carries
 }
 ```
 
-The current transport is canonical base64 and is limited to 16 MiB decoded per file. This is an initial bounded API contract, not the final streaming or multipart upload surface.
+The current transport is canonical base64 and is limited to 16 MiB decoded per file. This is a bounded first transport, not the final streaming or multipart upload surface.
 
 ## Storage and identity
 
@@ -38,9 +41,9 @@ The server:
 3. computes SHA-256 over the received bytes;
 4. classifies the file conservatively;
 5. stores it under the project in a content-addressed path;
-6. registers an upload record and source descriptor in a new project revision.
+6. registers an upload audit record and source descriptor in a new project revision.
 
-Project JSON retains only metadata and an immutable blob reference. Raw bytes are not returned in the API response and are not embedded in the snapshot.
+Project JSON retains metadata and an immutable blob reference. Raw bytes are not returned in the API response and are not embedded in the snapshot.
 
 The project-scoped layout is:
 
@@ -58,13 +61,13 @@ Repeated identical bytes reuse the same blob. Repeating the exact same filename/
 
 ## Bounded classification
 
-Structured parser routing currently exists for:
+Structured parser routing is prepared for:
 
 - URDF, SDF and MJCF → `robot_model_import`;
 - STEP/STP → `step_geometry`;
 - valid JSON → `engineering_source_descriptor`.
 
-The following are retained as inventory-only in this tranche:
+The following are retained as inventory-only:
 
 - KiCad files;
 - firmware binaries and source bundles;
@@ -77,13 +80,55 @@ The following are retained as inventory-only in this tranche:
 
 Inventory-only means the bytes are stored, hashed and registered. It does not mean they were parsed, validated, executed or interpreted.
 
-Archives are deliberately not extracted. Archive extraction remains blocked until path traversal, symlink, decompressed-size, expansion-ratio and aggregate-session controls exist.
+Archives are deliberately not extracted. Extraction remains blocked until path traversal, symlink, decompressed-size, expansion-ratio and aggregate-session controls exist.
+
+## Project-bound guided planning
+
+`POST /v1/projects/{project_id}/engineering/plan` loads the current project revision, collects its registered `engineeringSources`, combines any explicitly supplied additional source descriptors, runs the canonical guided planner, and saves the result as the next optimistic revision.
+
+The route preserves:
+
+- upload audit records;
+- registered source descriptors and blob references;
+- unknown future project fields;
+- the project ID boundary;
+- fail-closed physical authority.
+
+The generated snapshot receives the normal guided-plan, MachineProject, source graph, topology, analysis, manufacturing, execution, operator-guide, readiness and unified-status fields.
+
+## User-facing workspaces
+
+### Engineering Sources
+
+`/engineering/sources` lets an ordinary user:
+
+- create or load a revisioned project;
+- drag and drop or select real files;
+- queue multiple files;
+- see browser-read and network-upload progress;
+- cancel an active upload;
+- remove or retry failed items;
+- upload sequentially against the newest revision;
+- inspect SHA-256, blob identity, classification, parser disposition and limitations;
+- download the registered source manifest.
+
+### Project Preflight
+
+`/engineering/project-preflight` lets the user:
+
+- load a revisioned project;
+- see its registered-source count;
+- enter mission, mode, parts and constraints;
+- generate the canonical guided plan from persisted sources;
+- save the plan as the next project revision;
+- inspect phase, blockers, advisories, next action and authority gates;
+- download the plan or open Project inspector.
 
 ## Authority boundary
 
 An uploaded file may enter only as `unknown`, `proposed` or `declared` authority. The ingestion route rejects attempts to introduce a file directly as `observed`, `measured`, `verified` or `authorized`.
 
-Ingestion never grants:
+Neither ingestion nor project planning grants:
 
 - fabrication authority;
 - firmware flashing authority;
@@ -96,23 +141,21 @@ A hash proves byte identity inside the HS project store. It does not prove that 
 ## Current limitations
 
 - Base64 transport, not streaming multipart upload.
-- One file per request.
-- No upload progress, cancellation or resumable sessions yet.
+- One file per backend request; the UI sequences multiple requests.
+- No resumable upload sessions.
+- Browser cancellation cannot reverse a request already completed server-side.
 - No archive extraction.
 - No automatic PDF, image or video interpretation.
 - No automatic KiCad project assembly.
 - Structured classification does not yet invoke and persist parser output in the same transaction.
-- A failed project-revision write after blob publication can leave an unreferenced content-addressed blob; garbage collection is a later maintenance tranche.
+- Source-role correction is not yet available in the UI.
+- A failed project-revision write after blob publication can leave an unreferenced content-addressed blob; garbage collection is later maintenance work.
 
-## Next interface tranche
+## Next tranche
 
-The next UI work should:
-
-1. create or select a revisioned project;
-2. send files through the project-scoped proxy;
-3. show per-file progress, cancellation and retry;
-4. display the server hash, classification, parser disposition and limitations;
-5. allow bounded correction of source role without raising authority;
-6. pass registered source descriptors into guided planning;
-7. save the generated plan as the next optimistic project revision;
-8. open that exact revision in Project inspector.
+1. Invoke supported structured parsers against stored blobs and persist bounded parser output.
+2. Add source-role correction without permitting authority elevation.
+3. Move from base64 JSON to bounded streaming or multipart sessions.
+4. Add resumable uploads and aggregate-session ceilings.
+5. Add content-addressed orphan reporting and garbage collection.
+6. Add browser-level interaction tests against a running backend.
