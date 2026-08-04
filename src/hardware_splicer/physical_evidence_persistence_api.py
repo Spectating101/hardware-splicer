@@ -274,6 +274,17 @@ def create_physical_evidence_persistence_router(
                 as_of=request.as_of,
                 require_server_attestation=require_server_attestation,
             )
+            audit_metadata = (
+                plan.get("audited_physical_evidence", {}).get("metadata", {})
+            )
+            if (
+                base_source == "stored_revision"
+                and audit_metadata.get("history_continuity_valid") is False
+            ):
+                raise RevisionConflict(
+                    "submitted audit package does not preserve the persisted "
+                    "append-only evidence and authorization history"
+                )
             envelope = save_engineering_plan(
                 project_store,
                 plan,
