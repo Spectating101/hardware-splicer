@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .engineering_action import PreparedEngineeringAction, prepare_engineering_action
 from .guided_engineering_planner import plan_guided_engineering_project
@@ -14,8 +14,8 @@ from .guided_engineering_planner import plan_guided_engineering_project
 class EngineeringActionRequest(BaseModel):
     plan: Dict[str, Any] | None = None
     intake: Dict[str, Any] | None = None
-    engineering_sources: list[Any] = []
-    declared_conflicts: list[Dict[str, Any]] = []
+    engineering_sources: list[Any] = Field(default_factory=list)
+    declared_conflicts: list[Dict[str, Any]] = Field(default_factory=list)
     baseline_project: Dict[str, Any] | None = None
     action_id: str | None = None
     skip_vision: bool = True
