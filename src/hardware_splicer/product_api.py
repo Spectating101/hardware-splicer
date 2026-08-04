@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from .ai_project_conversation_api import create_ai_project_conversation_router
 from .ai_project_orchestrator_api import create_ai_project_orchestrator_router
 from .ai_project_repair_api import create_ai_project_repair_router
 from .ai_project_tool_executor_api import create_ai_project_tool_executor_router
@@ -71,6 +72,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))
     app.include_router(create_ai_project_repair_router(resolved_store))
+    app.include_router(create_ai_project_conversation_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
