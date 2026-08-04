@@ -1,0 +1,56 @@
+name: AI Project Orchestrator
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/hardware_splicer/ai_project_orchestrator.py"
+      - "src/hardware_splicer/ai_project_orchestrator_api.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_ai_project_orchestrator.py"
+      - "tests/test_ai_project_orchestrator_api.py"
+      - "docs/AI_PROJECT_ORCHESTRATOR.md"
+      - ".github/workflows/ai-project-orchestrator.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/ai_project_orchestrator.py"
+      - "src/hardware_splicer/ai_project_orchestrator_api.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_ai_project_orchestrator.py"
+      - "tests/test_ai_project_orchestrator_api.py"
+      - "docs/AI_PROJECT_ORCHESTRATOR.md"
+      - ".github/workflows/ai-project-orchestrator.yml"
+
+jobs:
+  orchestrator-contract:
+    name: Proposal-only AI project contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_LLM: "1"
+      HARDWARE_SPLICER_OFFLINE_VISION: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      QWEN_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install Hardware Splicer and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Compile orchestrator modules
+        run: |
+          python -m py_compile \
+            src/hardware_splicer/ai_project_orchestrator.py \
+            src/hardware_splicer/ai_project_orchestrator_api.py \
+            src/hardware_splicer/product_api.py
+      - name: Run bounded orchestrator tests
+        run: |
+          PYTHONPATH=src python -m pytest -q \
+            tests/test_ai_project_orchestrator.py \
+            tests/test_ai_project_orchestrator_api.py \
+            tests/test_product_api_projects.py
