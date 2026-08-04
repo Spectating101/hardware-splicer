@@ -50,6 +50,32 @@ export type EngineeringStatusResponse = {
   detail?: string;
 };
 
+export type PreparedEngineeringAction = {
+  schema_version: string;
+  project_id: string;
+  action: NextAction;
+  status: string;
+  payload: Record<string, unknown>;
+  blockers: string[];
+  warnings: string[];
+  metadata: Record<string, unknown>;
+};
+
+export type PreparedActionResponse = {
+  ok?: boolean;
+  project_id?: string;
+  prepared_action?: PreparedEngineeringAction;
+  automatic_execution?: boolean;
+  physical_action?: boolean;
+  fabrication_authorized?: boolean;
+  flash_authorized?: boolean;
+  power_on_authorized?: boolean;
+  motion_authorized?: boolean;
+  release_authorized?: boolean;
+  error?: string;
+  detail?: string;
+};
+
 export type ProjectSummary = {
   project_id: string;
   name: string;
@@ -98,6 +124,8 @@ export type RevisionDiffResponse = {
     }>;
     artifact_changes?: Array<Record<string, unknown>>;
     execution_changes?: Array<Record<string, unknown>>;
+    mechanical_changes?: Array<Record<string, unknown>>;
+    physical_authorization_changes?: Array<Record<string, unknown>>;
     authority_regressions?: string[];
     summary?: Record<string, number | string | boolean | null>;
     metadata?: Record<string, unknown>;
@@ -197,6 +225,12 @@ export function summarizeRevisionDiff(response: RevisionDiffResponse | null) {
     persistent: Number(summary.persistent_blocker_count || diff?.persistent_blockers?.length || 0),
     artifacts: Number(summary.artifact_change_count || diff?.artifact_changes?.length || 0),
     execution: Number(summary.execution_change_count || diff?.execution_changes?.length || 0),
+    mechanical: Number(summary.mechanical_change_count || diff?.mechanical_changes?.length || 0),
+    physicalAuthorization: Number(
+      summary.physical_authorization_change_count
+      || diff?.physical_authorization_changes?.length
+      || 0,
+    ),
     identities: Number(summary.identity_change_category_count || diff?.identity_changes?.length || 0),
     authorityRegressions: Number(summary.authority_regression_count || diff?.authority_regressions?.length || 0),
   };
