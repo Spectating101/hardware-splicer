@@ -1,26 +1,21 @@
-"""Extended product composition including strict physical-evidence release gates.
+"""Compatibility alias for the canonical product API.
 
-The canonical product app is reused unchanged, then the physical-evidence routers are
-mounted. This gives deployments an immediately runnable integration target while the
-main launcher remains draft/validation-gated.
+Strict physical-evidence and scoped-release routes are now mounted directly by
+:mod:`hardware_splicer.product_api`. This module remains for deployments that already
+reference ``hardware_splicer.extended_product_api`` without registering duplicate
+routes.
 """
 
 from __future__ import annotations
 
 from fastapi import FastAPI
 
-from .physical_evidence_api import create_physical_evidence_router
-from .physical_evidence_persistence_api import create_physical_evidence_persistence_router
-from .product_api import create_product_app as create_base_product_app
+from .product_api import create_product_app
 from .project_store import ProjectStore
 
 
 def create_extended_product_app(project_store: ProjectStore | None = None) -> FastAPI:
-    app = create_base_product_app(project_store)
-    resolved_store = app.state.project_store
-    app.include_router(create_physical_evidence_router())
-    app.include_router(create_physical_evidence_persistence_router(resolved_store))
-    return app
+    return create_product_app(project_store)
 
 
 app = create_extended_product_app()
