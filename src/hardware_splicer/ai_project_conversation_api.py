@@ -164,11 +164,6 @@ def create_ai_project_conversation_router(
         try:
             envelope = store.load_latest_with_recovery(project_id)
             current_revision = int(envelope["revision"])
-            if current_revision != request.expected_revision:
-                raise RevisionConflict(
-                    f"project {project_id!r} is at revision {current_revision}, "
-                    f"expected {request.expected_revision}"
-                )
             snapshot = deepcopy(envelope["snapshot"])
             sessions, session_index, session = _find_session(snapshot, session_id)
             existing = _existing_turn(session, request.client_request_id)
@@ -184,6 +179,11 @@ def create_ai_project_conversation_router(
                     "automatic_execution": False,
                     "authority_unchanged": True,
                 }
+            if current_revision != request.expected_revision:
+                raise RevisionConflict(
+                    f"project {project_id!r} is at revision {current_revision}, "
+                    f"expected {request.expected_revision}"
+                )
 
             turn = run_ai_project_conversation_turn(
                 project_id,
