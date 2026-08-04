@@ -11,7 +11,7 @@ async function loadJarvisWorkspace(page) {
   await page.locator('input[placeholder="project-id"]').fill(PROJECT_ID);
   await page.locator('input[placeholder="ai-session-id"]').fill(SESSION_ID);
   await page.getByRole('button', { name: 'Load project session' }).click();
-  await expect(page.getByText('Revision 6', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revision 6', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('2 sources', { exact: true })).toBeVisible();
   await expect(page.getByText('JARVIS is guidance, not project truth.')).toBeVisible();
 }
@@ -24,7 +24,7 @@ test('outsider completes grounded question, repair review, and verified package 
   );
   await page.getByRole('button', { name: 'Ask from revision 6' }).click();
 
-  await expect(page.getByText('Revision 7', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revision 7', { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/The fixture is not pre-fabrication ready/)).toBeVisible();
   await expect(page.getByText(/tool_result · action-failed-compose/)).toBeVisible();
   await expect(page.getByText(/No powered-off high-impedance translator is proven/)).toBeVisible();
@@ -37,7 +37,7 @@ test('outsider completes grounded question, repair review, and verified package 
 
   await page.locator('input[placeholder="project-id"]').fill(PROJECT_ID);
   await page.getByRole('button', { name: 'Load project' }).click();
-  await expect(page.getByText('Revision 7', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revision 7', { exact: true }).first()).toBeVisible();
   await page.locator('input[placeholder="ai-session-id"]').fill(SESSION_ID);
   await page.getByRole('button', { name: 'Load session' }).click();
 
@@ -46,7 +46,7 @@ test('outsider completes grounded question, repair review, and verified package 
   await expect(page.getByRole('button', { name: 'Propose bounded repair' })).toBeVisible();
   await page.getByRole('button', { name: 'Propose bounded repair' }).click();
 
-  await expect(page.getByText('Revision 8', { exact: true })).toBeVisible();
+  await expect(page.getByText('Revision 8', { exact: true }).first()).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Repair successor summary' })).toBeVisible();
   await expect(page.getByText('Default-off translated DUT adapter')).toBeVisible();
   await expect(page.getByText('Failed action: action-failed-compose')).toBeVisible();
