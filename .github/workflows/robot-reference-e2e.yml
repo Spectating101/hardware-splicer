@@ -10,6 +10,10 @@ on:
       - "examples/robot_reference_corpus/**"
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/package.json"
       - ".github/workflows/robot-reference-e2e.yml"
   pull_request:
     paths:
@@ -19,13 +23,17 @@ on:
       - "examples/robot_reference_corpus/**"
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/package.json"
       - ".github/workflows/robot-reference-e2e.yml"
 
 jobs:
   reference-rich-rover:
     name: Reference-rich rover E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -58,6 +66,22 @@ jobs:
           HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
           QWEN_DISABLED: "1"
         run: PYTHONPATH=src python -m pytest -q tests/test_robot_reference_e2e.py
+      - uses: actions/setup-node@v4
+        if: ${{ !cancelled() }}
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend dependencies
+        if: ${{ !cancelled() }}
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Validate HS Preflight interface
+        if: ${{ !cancelled() }}
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: |
+          npm run test:engineering-preflight
+          npm run typecheck
       - name: Upload end-to-end report
         if: always()
         uses: actions/upload-artifact@v4
