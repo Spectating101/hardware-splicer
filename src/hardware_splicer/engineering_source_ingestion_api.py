@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .engineering_source_ingestion import (
     ENGINEERING_SOURCE_INGESTION_SCHEMA,
+    MAX_ENGINEERING_SOURCE_BASE64_CHARACTERS,
     EngineeringSourceIngestionRequest,
     ingest_engineering_source,
 )
@@ -30,7 +31,10 @@ class EngineeringSourceApiModel(BaseModel):
 
 class EngineeringSourceUploadRequest(EngineeringSourceApiModel):
     filename: str = Field(min_length=1, max_length=255)
-    content_base64: str = Field(min_length=1)
+    content_base64: str = Field(
+        min_length=1,
+        max_length=MAX_ENGINEERING_SOURCE_BASE64_CHARACTERS,
+    )
     declared_media_type: str | None = Field(default=None, max_length=255)
     authority_ceiling: AuthorityState = AuthorityState.DECLARED
     captured_at: str | None = Field(default=None, max_length=128)
