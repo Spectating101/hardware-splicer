@@ -23,6 +23,10 @@ from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_api import create_engineering_execution_router
+from .engineering_package_api import create_engineering_package_router
+from .engineering_package_download_api import (
+    create_engineering_package_download_router,
+)
 from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
 from .engineering_review_identity_api import create_engineering_review_identity_router
@@ -73,6 +77,8 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_ai_project_tool_executor_router(resolved_store))
     app.include_router(create_ai_project_repair_router(resolved_store))
     app.include_router(create_ai_project_conversation_router(resolved_store))
+    app.include_router(create_engineering_package_router(resolved_store))
+    app.include_router(create_engineering_package_download_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
