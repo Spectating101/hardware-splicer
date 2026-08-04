@@ -48,6 +48,25 @@ No action is executed in this tranche. Accepting an action records a human decis
 
 Creating a session and recording a decision each use optimistic project revisions.
 
+## AI Project Studio
+
+`/engineering/ai-studio` is the first ordinary-user surface for the orchestrator.
+
+A user can:
+
+- load one revisioned project;
+- inspect registered-source and parser-run counts;
+- enter a plain-language engineering mission;
+- provide structured constraints;
+- choose a bounded model profile;
+- create or reload an AI proposal session;
+- inspect proposed requirements, open questions, and architecture candidates;
+- inspect provider and model identity;
+- accept or reject individual proposed actions;
+- verify that every decision is recorded without tool execution.
+
+Authenticated Next.js proxies preserve the project/session/action route boundary. Engineering navigation exposes AI Studio as the first product-facing workspace while the existing source, storage, planning, and inspector pages remain available as specialist surfaces.
+
 ## Context boundary
 
 Registered raw file bytes are never sent through this project-context assembler. The model receives:
@@ -77,4 +96,4 @@ The session and every action state that automatic execution is false and physica
 
 ## Current limitation
 
-This tranche does not yet execute the guided planner, compose engine, ERC, DRC, simulation, fabrication, firmware, or bench tools. The next separate tranche should add an allowlisted executor for read-only planning and candidate validation, with each tool result appended to the same session trace and no automatic project or physical authority elevation.
+This tranche does not yet execute the guided planner, compose engine, ERC, DRC, simulation, fabrication, firmware, or bench tools. The interface is contract- and production-build tested but has no browser-level test against a running backend. The next separate tranche should add an allowlisted executor for read-only planning and candidate validation, with each tool result appended to the same session trace and no automatic project or physical authority elevation.
