@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, Cpu, FileSearch, Network, PauseCircle, Route, UploadCloud } from 'lucide-react';
+import { ClipboardCheck, Cpu, Database, FileSearch, Network, PauseCircle, Route, UploadCloud } from 'lucide-react';
 import { EngineeringExecutionCapabilityPanel } from '@/components/engineering-execution-capability-panel';
 
 export default function EngineeringLayout({ children }: { children: ReactNode }) {
@@ -18,6 +18,9 @@ export default function EngineeringLayout({ children }: { children: ReactNode })
         </Link>
         <Link href="/engineering/source-lab" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <FileSearch className="h-3.5 w-3.5" /> Source lab
+        </Link>
+        <Link href="/engineering/storage-ops" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+          <Database className="h-3.5 w-3.5" /> Storage
         </Link>
         <Link href="/engineering/project-preflight" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <Route className="h-3.5 w-3.5" /> Project plan
