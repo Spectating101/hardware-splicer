@@ -90,8 +90,14 @@ def _history_continuity_blockers(
                 f"Previously persisted evidence envelope {envelope_id} is missing from the submitted audit history."
             )
             continue
-        prior_hash = prior_row.get("envelope_hash")
-        if submitted.envelope_hash != prior_hash:
+        try:
+            persisted = PhysicalEvidenceEnvelope.model_validate(prior_row)
+        except ValueError:
+            blockers.append(
+                f"Previously persisted evidence envelope {envelope_id} is not a valid canonical record."
+            )
+            continue
+        if submitted.model_dump(mode="json") != persisted.model_dump(mode="json"):
             blockers.append(
                 f"Previously persisted evidence envelope {envelope_id} was rewritten."
             )
@@ -105,9 +111,15 @@ def _history_continuity_blockers(
         if index >= len(ledger_entries):
             break
         submitted = ledger_entries[index]
-        prior_id = str(prior_row.get("entry_id") or "")
-        prior_hash = str(prior_row.get("entry_hash") or "")
-        if submitted.entry_id != prior_id or submitted.entry_hash != prior_hash:
+        try:
+            persisted = AuthorizationLedgerEntry.model_validate(prior_row)
+        except ValueError:
+            blockers.append(
+                "Persisted authorization ledger contains an invalid canonical entry "
+                f"at sequence {index + 1}."
+            )
+            continue
+        if submitted.model_dump(mode="json") != persisted.model_dump(mode="json"):
             blockers.append(
                 "Submitted authorization ledger does not preserve the persisted prefix "
                 f"at sequence {index + 1}."
