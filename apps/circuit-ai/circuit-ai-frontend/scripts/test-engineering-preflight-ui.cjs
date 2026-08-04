@@ -41,6 +41,16 @@ if (!proxy.includes('/v1/engineering/plan')) {
 if (!proxy.includes('getProxyAuthHeaders')) {
   throw new Error('Preflight proxy does not preserve product proxy authentication headers.');
 }
+for (const contract of [
+  'normalizeDiscoverySources',
+  'discovery_only: true',
+  'requires_concrete_source_selection: true',
+  'requires_timestamp_range_for_media_observation: true',
+  'authority_ceiling: "declared"',
+  'claims: []',
+]) {
+  if (!proxy.includes(contract)) throw new Error(`Preflight proxy lost discovery-authority contract: ${contract}`);
+}
 if (page.includes('/execution/run') || page.includes('flash_authorized: true') || page.includes('motion_authorized: true')) {
   throw new Error('Preflight UI must not directly invoke execution or hard-code physical authority.');
 }
