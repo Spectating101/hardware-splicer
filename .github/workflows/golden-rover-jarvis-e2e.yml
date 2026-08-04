@@ -1,0 +1,118 @@
+name: Golden Rover JARVIS E2E
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/run_golden_rover_jarvis_e2e.py"
+      - "tests/test_golden_rover_jarvis_e2e.py"
+      - "src/hardware_splicer/ai_project_*.py"
+      - "src/hardware_splicer/engineering_package*.py"
+      - "src/hardware_splicer/robot_reference_e2e.py"
+      - "examples/robot_reference_corpus/**"
+      - "examples/robot_reference_e2e/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/packages/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-package-workspace.cjs"
+      - "docs/GOLDEN_ROVER_JARVIS_E2E.md"
+      - ".github/workflows/golden-rover-jarvis-e2e.yml"
+  pull_request:
+    paths:
+      - "scripts/run_golden_rover_jarvis_e2e.py"
+      - "tests/test_golden_rover_jarvis_e2e.py"
+      - "src/hardware_splicer/ai_project_*.py"
+      - "src/hardware_splicer/engineering_package*.py"
+      - "src/hardware_splicer/robot_reference_e2e.py"
+      - "examples/robot_reference_corpus/**"
+      - "examples/robot_reference_e2e/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/packages/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-package-workspace.cjs"
+      - "docs/GOLDEN_ROVER_JARVIS_E2E.md"
+      - ".github/workflows/golden-rover-jarvis-e2e.yml"
+
+jobs:
+  golden-rover:
+    name: Complete rover proposal-to-package trace
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_LLM: "1"
+      HARDWARE_SPLICER_OFFLINE_VISION: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      QWEN_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install Hardware Splicer and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Compile golden workflow and owning modules
+        run: |
+          python -m py_compile \
+            scripts/run_golden_rover_jarvis_e2e.py \
+            src/hardware_splicer/ai_project_orchestrator.py \
+            src/hardware_splicer/ai_project_orchestrator_api.py \
+            src/hardware_splicer/ai_project_tool_executor.py \
+            src/hardware_splicer/ai_project_tool_executor_api.py \
+            src/hardware_splicer/ai_project_repair.py \
+            src/hardware_splicer/ai_project_repair_api.py \
+            src/hardware_splicer/ai_project_conversation.py \
+            src/hardware_splicer/ai_project_conversation_api.py \
+            src/hardware_splicer/engineering_package.py \
+            src/hardware_splicer/engineering_package_api.py \
+            src/hardware_splicer/engineering_package_download_api.py
+      - name: Run strict golden rover trace
+        run: |
+          PYTHONPATH=src python scripts/run_golden_rover_jarvis_e2e.py \
+            --strict \
+            --out /tmp/golden-rover-jarvis-e2e
+      - name: Run focused backend contracts
+        run: |
+          PYTHONPATH=src python -m pytest -q \
+            tests/test_golden_rover_jarvis_e2e.py \
+            tests/test_robot_reference_e2e.py \
+            tests/test_ai_project_orchestrator_api.py \
+            tests/test_ai_project_tool_executor_api.py \
+            tests/test_ai_project_repair_api.py \
+            tests/test_ai_project_conversation_api.py \
+            tests/test_engineering_package_api.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Validate primary JARVIS product surfaces
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: |
+          node scripts/test-ai-studio-repair-lineage.cjs
+          node scripts/test-jarvis-console.cjs
+          node scripts/test-engineering-package-workspace.cjs
+          npm run typecheck
+          npm run build
+      - name: Upload golden rover report and package
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-rover-jarvis-e2e
+          path: |
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_JARVIS_E2E.json
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_JARVIS_E2E.md
+            /tmp/golden-rover-jarvis-e2e/GOLDEN_ROVER_ENGINEERING_PACKAGE.zip
+          if-no-files-found: warn
