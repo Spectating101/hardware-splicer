@@ -221,7 +221,8 @@ def test_tampered_envelope_is_persisted_only_as_blocked_state(tmp_path) -> None:
     body = response.json()
     assert body["authorization_applicable"] is False
     assert body["tamper_evident_envelopes_validated"] is False
-    assert body["scoped_release_assessment"] is None
+    assert body["scoped_release_assessment"]["allowed"] is False
+    assert body["scoped_release_assessment"]["allowed_operations"] == []
     assert body["engineering_readiness"]["status"] == "blocked"
     assert body["engineering_readiness"]["scoped_authorized_operations"] == []
     assert body["power_on_authorized"] is False
