@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, Cpu, Network } from 'lucide-react';
+import { ClipboardCheck, Cpu, Network, UploadCloud } from 'lucide-react';
 import { EngineeringExecutionCapabilityPanel } from '@/components/engineering-execution-capability-panel';
 
 export default function EngineeringLayout({ children }: { children: ReactNode }) {
@@ -9,6 +9,9 @@ export default function EngineeringLayout({ children }: { children: ReactNode })
       <div className="fixed left-1/2 top-3 z-[95] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-[#07111f]/95 p-1 shadow-xl shadow-black/30 backdrop-blur-xl">
         <Link href="/engineering/preflight" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-cyan-100 hover:bg-cyan-300/10">
           <ClipboardCheck className="h-3.5 w-3.5" /> Preflight
+        </Link>
+        <Link href="/engineering/sources" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+          <UploadCloud className="h-3.5 w-3.5" /> Sources
         </Link>
         <Link href="/engineering" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <Network className="h-3.5 w-3.5" /> Project inspector
