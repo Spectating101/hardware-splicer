@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from .ai_project_orchestrator_api import create_ai_project_orchestrator_router
 from .api import create_app as create_engine_app
 from .capability_api import create_capability_router
 from .circuit_json_api import create_circuit_json_router
@@ -65,6 +66,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_stored_source_parser_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
+    app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
