@@ -76,12 +76,13 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: npm ci
-      - name: Validate HS Preflight interface
+      - name: Validate HS Preflight interface and production build
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
           npm run test:engineering-preflight
           npm run typecheck
+          npm run build
       - name: Upload end-to-end report
         if: always()
         uses: actions/upload-artifact@v4
