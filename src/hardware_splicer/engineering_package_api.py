@@ -144,6 +144,9 @@ def create_engineering_package_router(
             packages = package_rows(snapshot.get("engineeringPackages"))
             existing = package_for_revision(packages, request.expected_revision)
             if existing is not None:
+                from .engineering_package_download_api import verified_package_zip
+
+                verified_package_zip(store, project_id, existing)
                 return {
                     "ok": True,
                     "project_id": project_id,
