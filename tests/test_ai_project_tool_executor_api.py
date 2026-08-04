@@ -16,6 +16,18 @@ ACTION_ID = "action-1234567890abcdef"
 
 
 def _snapshot(*, action_type: str = "run_compose", action_status: str = "accepted") -> dict:
+    decision = (
+        {
+            "decision": "accepted",
+            "reviewer": "test-engineer",
+            "note": "Accepted as a proposal only.",
+            "decided_at": "2026-08-04T14:00:00+00:00",
+            "project_revision": 1,
+            "executed": False,
+        }
+        if action_status == "accepted"
+        else None
+    )
     return {
         "projectId": "rover",
         "name": "Indoor rover",
@@ -43,6 +55,7 @@ def _snapshot(*, action_type: str = "run_compose", action_status: str = "accepte
                         "rationale": "Validate the candidate.",
                         "inputs": {},
                         "status": action_status,
+                        "decision": decision,
                         "tool_result": None,
                         "automatic_execution": False,
                         "authority_effect": "none",
