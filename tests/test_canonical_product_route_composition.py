@@ -16,6 +16,8 @@ REQUIRED_PATHS = {
     "/v1/engineering/physical-evidence/assess",
     "/v1/engineering/physical-evidence/attach",
     "/v1/engineering/physical-evidence/release-assess",
+    "/v1/engineering/physical-evidence/raw-files/schema",
+    "/v1/engineering/physical-evidence/raw-files/hash",
     "/v1/engineering/physical-evidence/envelopes/build",
     "/v1/engineering/physical-evidence/ledger/build-entry",
     "/v1/engineering/physical-evidence/audited-assess",
