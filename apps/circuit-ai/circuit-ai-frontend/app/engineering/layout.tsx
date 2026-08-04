@@ -10,8 +10,8 @@ export default function EngineeringLayout({ children }: { children: ReactNode })
         <Link href="/engineering/preflight" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-cyan-100 hover:bg-cyan-300/10">
           <ClipboardCheck className="h-3.5 w-3.5" /> Preflight
         </Link>
-        <Link href="/engineering/sources" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
-          <UploadCloud className="h-3.5 w-3.5" /> Sources
+        <Link href="/engineering/uploads" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+          <UploadCloud className="h-3.5 w-3.5" /> Uploads
         </Link>
         <Link href="/engineering/source-lab" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <FileSearch className="h-3.5 w-3.5" /> Source lab
