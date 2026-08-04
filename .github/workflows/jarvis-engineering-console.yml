@@ -1,0 +1,45 @@
+name: JARVIS Engineering Console
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/ai-sessions/**/turns/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "docs/JARVIS_ENGINEERING_CONSOLE.md"
+      - ".github/workflows/jarvis-engineering-console.yml"
+  pull_request:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/jarvis/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/ai-sessions/**/turns/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-jarvis-console.cjs"
+      - "docs/JARVIS_ENGINEERING_CONSOLE.md"
+      - ".github/workflows/jarvis-engineering-console.yml"
+
+jobs:
+  jarvis-ui-contract:
+    name: Revision-grounded JARVIS product contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Validate JARVIS console contract
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: node scripts/test-jarvis-console.cjs
+      - name: Run strict TypeScript
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm run typecheck
+      - name: Build production frontend
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm run build
