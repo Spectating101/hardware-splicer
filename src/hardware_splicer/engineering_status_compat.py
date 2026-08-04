@@ -2,8 +2,8 @@
 
 Besides message deduplication and the clean-candidate release action, this layer makes
 persisted physical-evidence state part of every fresh status rebuild. Cached status is
-not trusted: audited envelopes, ledger validity, scoped decisions, and release scope
-are re-read from the plan and converted into a canonical release blocker when needed.
+not trusted: audited envelopes, HMAC attestations, ledger validity, scoped decisions,
+and release scope are re-read from the plan and converted into canonical blockers.
 """
 
 from __future__ import annotations
@@ -11,6 +11,8 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from . import engineering_status as _target
+from .physical_evidence_attestation import verify_evidence_file_attestation
+from .physical_evidence_ledger import PhysicalEvidenceEnvelope
 
 
 def _mapping(value: Any) -> dict[str, Any]:
@@ -30,6 +32,51 @@ def _messages(values: Any) -> list[str]:
     return rows
 
 
+def _attestation_state(audited: Mapping[str, Any]) -> dict[str, Any]:
+    metadata = _mapping(audited.get("metadata"))
+    required = bool(metadata.get("server_attestation_required"))
+    if not required:
+        return {
+            "required": False,
+            "valid": None,
+            "raw_file_count": 0,
+            "attested_raw_file_count": 0,
+            "blockers": [],
+        }
+
+    blockers: list[str] = []
+    raw_file_count = 0
+    attested_raw_file_count = 0
+    for raw_envelope in audited.get("envelopes") or []:
+        try:
+            envelope = PhysicalEvidenceEnvelope.model_validate(raw_envelope)
+        except ValueError as exc:
+            blockers.append(f"Persisted physical evidence envelope is invalid: {exc}")
+            continue
+        for file_ref in envelope.raw_files:
+            raw_file_count += 1
+            file_blockers = verify_evidence_file_attestation(file_ref)
+            if file_blockers:
+                blockers.extend(
+                    f"Envelope {envelope.envelope_id}: {value}"
+                    for value in file_blockers
+                )
+            else:
+                attested_raw_file_count += 1
+    if raw_file_count == 0:
+        blockers.append(
+            "Server-attested physical authorization requires at least one retained raw file."
+        )
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "required": True,
+        "valid": not blockers,
+        "raw_file_count": raw_file_count,
+        "attested_raw_file_count": attested_raw_file_count,
+        "blockers": blockers,
+    }
+
+
 def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
     audited = _mapping(plan.get("audited_physical_evidence"))
     package = _mapping(plan.get("physical_evidence_package"))
@@ -43,6 +90,7 @@ def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
         else package.get("assessment")
     )
     ledger = _mapping(audited.get("ledger_assessment"))
+    attestation = _attestation_state(audited)
     audited_present = bool(audited)
     applicable = bool(audited.get("applicable")) if audited_present else bool(assessment.get("applicable"))
     ledger_valid = bool(ledger.get("valid")) if audited_present else False
@@ -59,11 +107,14 @@ def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
         *_messages(ledger.get("blockers")),
         *_messages(assessment.get("blockers")),
         *_messages(scoped.get("blockers")),
+        *attestation["blockers"],
     ]
     if audited_present and not ledger_valid:
         blockers.append("The authorization ledger is invalid or incomplete.")
     if audited_present and not audited.get("envelopes"):
         blockers.append("Tamper-evident physical evidence envelopes are missing.")
+    if attestation["required"] and not attestation["valid"]:
+        blockers.append("Required server attestations for raw evidence are invalid or unavailable.")
     if not applicable:
         blockers.append("No physical authorization applies to the current candidate revision and artifact hashes.")
     if not scoped:
@@ -74,7 +125,13 @@ def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
         blockers.append("The scoped release assessment names no authorized operations.")
 
     blockers = list(dict.fromkeys(value for value in blockers if value))
-    valid = applicable and allowed and bool(authorized_operations) and not blockers
+    valid = (
+        applicable
+        and allowed
+        and bool(authorized_operations)
+        and (not attestation["required"] or attestation["valid"])
+        and not blockers
+    )
     return {
         "valid": valid,
         "applicable": applicable,
@@ -85,6 +142,10 @@ def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
         "ledger_valid": ledger_valid,
         "envelope_count": len(audited.get("envelopes") or []),
         "ledger_entry_count": len(audited.get("ledger_entries") or []),
+        "server_attestation_required": attestation["required"],
+        "server_attestation_valid": attestation["valid"],
+        "raw_file_count": attestation["raw_file_count"],
+        "attested_raw_file_count": attestation["attested_raw_file_count"],
     }
 
 
@@ -144,6 +205,10 @@ def install_status_message_compatibility() -> None:
                     "authorization_ledger_valid": physical["ledger_valid"],
                     "physical_evidence_envelope_count": physical["envelope_count"],
                     "authorization_ledger_entry_count": physical["ledger_entry_count"],
+                    "server_attestation_required": physical["server_attestation_required"],
+                    "server_attestation_valid": physical["server_attestation_valid"],
+                    "raw_evidence_file_count": physical["raw_file_count"],
+                    "attested_raw_file_count": physical["attested_raw_file_count"],
                 }
             )
             metadata.update(
@@ -152,6 +217,8 @@ def install_status_message_compatibility() -> None:
                     "authorized_operations": physical["authorized_operations"],
                     "physical_evidence_audited": physical["audited"],
                     "authorization_ledger_valid": physical["ledger_valid"],
+                    "server_attestation_required": physical["server_attestation_required"],
+                    "server_attestation_valid": physical["server_attestation_valid"],
                     "global_authority_flags_unchanged": True,
                     "automatic_authorization": False,
                 }
@@ -173,23 +240,24 @@ def install_status_message_compatibility() -> None:
                         "calibrated physical evidence",
                         "tamper-evident evidence envelopes",
                         "valid authorization ledger",
+                        "server attestation verification keys when required",
                         "scoped human decision",
                     ],
                     required_evidence=[
                         "calibration certificates",
-                        "raw physical evidence hashes",
+                        "server-attested raw physical evidence hashes",
                         "fixture and interlock state",
                         "authorization ledger chain",
                     ],
                     metadata={
                         "audited": physical["audited"],
                         "ledger_valid": physical["ledger_valid"],
+                        "server_attestation_required": physical["server_attestation_required"],
+                        "server_attestation_valid": physical["server_attestation_valid"],
                         "automatic_authorization": False,
                     },
                 )
-                blockers = {
-                    row.blocker_id: row for row in report.blockers
-                }
+                blockers = {row.blocker_id: row for row in report.blockers}
                 blockers[blocker.blocker_id] = blocker
                 blocker_rows = sorted(
                     blockers.values(),
