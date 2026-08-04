@@ -14,7 +14,7 @@ import json
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Literal, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -44,14 +44,16 @@ class AttestationBase(BaseModel):
 
 
 class EvidenceFileAttestation(AttestationBase):
-    schema_version: str = EVIDENCE_ATTESTATION_SCHEMA
+    schema_version: Literal[
+        "hardware_splicer.evidence_file_attestation.v1"
+    ] = EVIDENCE_ATTESTATION_SCHEMA
     attestation_id: str = Field(min_length=1)
     key_id: str = Field(min_length=1)
-    algorithm: str = "hmac-sha256"
+    algorithm: Literal["hmac-sha256"] = "hmac-sha256"
     issued_at: str = Field(min_length=1)
     signature: str = Field(pattern=r"^hmac-sha256:[0-9a-f]{64}$")
-    bytes_observed: bool = True
-    bytes_retained: bool = False
+    bytes_observed: Literal[True] = True
+    bytes_retained: Literal[False] = False
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -325,13 +327,5 @@ def verify_evidence_file_attestation(
     if not hmac.compare_digest(expected, attestation.signature):
         blockers.append(
             f"Raw evidence file {resolved.ref!r} server attestation signature is invalid."
-        )
-    if attestation.bytes_observed is not True:
-        blockers.append(
-            f"Raw evidence file {resolved.ref!r} attestation does not confirm byte observation."
-        )
-    if attestation.bytes_retained is not False:
-        blockers.append(
-            f"Raw evidence file {resolved.ref!r} attestation has an invalid retention declaration."
         )
     return list(dict.fromkeys(blockers))
