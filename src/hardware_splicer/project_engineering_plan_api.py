@@ -18,7 +18,10 @@ from .project_store import (
     ProjectStoreError,
     RevisionConflict,
 )
-from .stored_source_parser import read_registered_source_bytes
+from .stored_source_parser import (
+    STORED_SOURCE_PARSER_IMPLEMENTATION,
+    read_registered_source_bytes,
+)
 
 
 class ProjectEngineeringPlanModel(BaseModel):
@@ -48,7 +51,10 @@ def _project_plan_error(exc: Exception) -> HTTPException:
     if isinstance(exc, RevisionConflict):
         return HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"type": "project_engineering_plan_revision_conflict", "message": str(exc)},
+            detail={
+                "type": "project_engineering_plan_revision_conflict",
+                "message": str(exc),
+            },
         )
     if isinstance(exc, CorruptProject):
         return HTTPException(
@@ -58,7 +64,10 @@ def _project_plan_error(exc: Exception) -> HTTPException:
     if isinstance(exc, (TypeError, ValueError)):
         return HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"type": "invalid_project_engineering_plan", "message": str(exc)},
+            detail={
+                "type": "invalid_project_engineering_plan",
+                "message": str(exc),
+            },
         )
     if isinstance(exc, ProjectStoreError):
         return HTTPException(
@@ -96,7 +105,9 @@ def _combined_sources(*collections: list[Dict[str, Any]]) -> list[Dict[str, Any]
     return result
 
 
-def _successful_robot_parser_runs(snapshot: Mapping[str, Any]) -> set[tuple[str, str]]:
+def _successful_robot_parser_runs(
+    snapshot: Mapping[str, Any],
+) -> set[tuple[str, str]]:
     return {
         (
             str(row.get("source_id") or ""),
@@ -105,6 +116,7 @@ def _successful_robot_parser_runs(snapshot: Mapping[str, Any]) -> set[tuple[str,
         for row in _rows(snapshot.get("engineeringSourceParserRuns"))
         if row.get("status") == "parsed"
         and row.get("parser_route") == "robot_model_import"
+        and row.get("parser_identity") == STORED_SOURCE_PARSER_IMPLEMENTATION
     }
 
 
@@ -123,7 +135,8 @@ def _planning_source(
     model_format = str(metadata.get("structured_format") or "")
     if model_format not in {"urdf", "sdf", "mjcf"}:
         raise ValueError(
-            f"parsed robot source {row.get('source_id')!r} has no supported structured_format"
+            f"parsed robot source {row.get('source_id')!r} has no supported "
+            "structured_format"
         )
     content = read_registered_source_bytes(
         project_id,
@@ -143,6 +156,7 @@ def _planning_source(
         "metadata": {
             **metadata,
             "planning_materialization": "ephemeral_verified_blob_read",
+            "planning_parser_identity": STORED_SOURCE_PARSER_IMPLEMENTATION,
             "raw_content_persisted_in_snapshot": False,
         },
     }
@@ -169,12 +183,18 @@ def create_project_engineering_plan_router(
                 )
             existing_snapshot = deepcopy(envelope["snapshot"])
             persisted_sources = _rows(existing_snapshot.get("engineeringSources"))
-            parsed_sources = _rows(existing_snapshot.get("engineeringParsedSources"))
+            parsed_sources = _rows(
+                existing_snapshot.get("engineeringParsedSources")
+            )
             persistent_combined_sources = _combined_sources(
                 persisted_sources,
                 request.additional_engineering_sources,
             )
             successful_robot_runs = _successful_robot_parser_runs(existing_snapshot)
+            materialized_robot_source_count = sum(
+                _source_key(row) in successful_robot_runs
+                for row in persistent_combined_sources
+            )
             materialized_sources = [
                 _planning_source(
                     project_id,
@@ -184,7 +204,10 @@ def create_project_engineering_plan_router(
                 )
                 for row in persistent_combined_sources
             ]
-            planning_sources = _combined_sources(materialized_sources, parsed_sources)
+            planning_sources = _combined_sources(
+                materialized_sources,
+                parsed_sources,
+            )
             plan = plan_guided_engineering_project(
                 request.intake,
                 engineering_sources=planning_sources,
@@ -213,7 +236,12 @@ def create_project_engineering_plan_router(
                     "persisted_source_count": len(persisted_sources),
                     "parsed_derived_source_count": len(parsed_sources),
                     "combined_source_count": len(planning_sources),
-                    "materialized_robot_source_count": len(successful_robot_runs),
+                    "materialized_robot_source_count": (
+                        materialized_robot_source_count
+                    ),
+                    "materialized_parser_identity": (
+                        STORED_SOURCE_PARSER_IMPLEMENTATION
+                    ),
                     "raw_source_bytes_persisted_in_snapshot": False,
                     "automatic_execution": False,
                     "physical_authority_unchanged": True,
@@ -230,7 +258,7 @@ def create_project_engineering_plan_router(
             "persisted_source_count": len(persisted_sources),
             "parsed_derived_source_count": len(parsed_sources),
             "combined_source_count": len(planning_sources),
-            "materialized_robot_source_count": len(successful_robot_runs),
+            "materialized_robot_source_count": materialized_robot_source_count,
             "plan": plan,
             "engineering_readiness": plan.get("engineering_readiness"),
             "engineering_status": plan.get("engineering_status"),
