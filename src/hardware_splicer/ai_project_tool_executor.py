@@ -239,8 +239,18 @@ def execute_ai_project_action_preview(
         raise AIActionNotExecutable(
             f"AI action type {action_type!r} is not executable in the preview boundary"
         )
-    if str(action.get("status") or "") != "accepted":
-        raise AIActionNotAccepted("AI action must be explicitly accepted before preview")
+    decision = _mapping(action.get("decision"))
+    accepted = (
+        str(action.get("status") or "") == "accepted"
+        and str(decision.get("decision") or "") == "accepted"
+        and bool(str(decision.get("reviewer") or "").strip())
+        and bool(str(decision.get("decided_at") or "").strip())
+        and decision.get("executed") is False
+    )
+    if not accepted:
+        raise AIActionNotAccepted(
+            "AI action requires a persisted, unexecuted human acceptance decision"
+        )
     if action.get("tool_result"):
         return dict(action.get("tool_result") or {})
 
