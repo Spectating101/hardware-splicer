@@ -77,6 +77,8 @@ from . import robot_model_import_compat as _robot_model_import_compat  # noqa: F
 from . import engineering_status_compat as _engineering_status_compat  # noqa: F401,E402
 from . import manufacturing_closure_compat as _manufacturing_closure_compat  # noqa: F401,E402
 from . import engineering_revision_diff_compat as _engineering_revision_diff_compat  # noqa: F401,E402
+from . import engineering_revision_authority_compat as _engineering_revision_authority_compat  # noqa: F401,E402
+from . import engineering_action_audit_compat as _engineering_action_audit_compat  # noqa: F401,E402
 
 
 __all__ = [
