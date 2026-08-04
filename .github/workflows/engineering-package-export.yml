@@ -1,0 +1,64 @@
+name: Engineering Package Export
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/hardware_splicer/engineering_package.py"
+      - "src/hardware_splicer/engineering_package_api.py"
+      - "src/hardware_splicer/engineering_package_download_api.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_engineering_package.py"
+      - "tests/test_engineering_package_api.py"
+      - "tests/test_engineering_package_product_api.py"
+      - "docs/ENGINEERING_PACKAGE_EXPORT.md"
+      - ".github/workflows/engineering-package-export.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/engineering_package.py"
+      - "src/hardware_splicer/engineering_package_api.py"
+      - "src/hardware_splicer/engineering_package_download_api.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_engineering_package.py"
+      - "tests/test_engineering_package_api.py"
+      - "tests/test_engineering_package_product_api.py"
+      - "docs/ENGINEERING_PACKAGE_EXPORT.md"
+      - ".github/workflows/engineering-package-export.yml"
+
+jobs:
+  package-contract:
+    name: Deterministic Engineering Package contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_LLM: "1"
+      HARDWARE_SPLICER_OFFLINE_VISION: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      QWEN_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install Hardware Splicer and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Compile Engineering Package modules
+        run: |
+          python -m py_compile \
+            src/hardware_splicer/engineering_package.py \
+            src/hardware_splicer/engineering_package_api.py \
+            src/hardware_splicer/engineering_package_download_api.py \
+            src/hardware_splicer/product_api.py
+      - name: Run Engineering Package contracts
+        run: |
+          PYTHONPATH=src python -m pytest -q \
+            tests/test_engineering_package.py \
+            tests/test_engineering_package_api.py \
+            tests/test_engineering_package_product_api.py \
+            tests/test_ai_project_conversation.py \
+            tests/test_ai_project_repair.py \
+            tests/test_ai_project_tool_executor.py
