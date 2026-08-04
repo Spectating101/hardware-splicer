@@ -15,6 +15,11 @@ ENGINEERING_REVISION_DIFF_SCHEMA = "hardware_splicer.engineering_revision_diff.v
 class DiffBase(BaseModel):
     model_config = ConfigDict(extra="forbid", validate_assignment=True)
 
+    def __getitem__(self, key: str) -> Any:
+        """Retain mapping-style access used by older diff consumers."""
+
+        return getattr(self, key)
+
 
 class IdentityChange(DiffBase):
     category: str
@@ -29,6 +34,12 @@ class ArtifactChange(DiffBase):
     base: Dict[str, Any] = Field(default_factory=dict)
     candidate: Dict[str, Any] = Field(default_factory=dict)
 
+    @property
+    def change(self) -> str:
+        """Compatibility alias for the original public diff key."""
+
+        return self.change_type
+
 
 class EngineeringRevisionDiff(DiffBase):
     schema_version: str = ENGINEERING_REVISION_DIFF_SCHEMA
@@ -42,6 +53,8 @@ class EngineeringRevisionDiff(DiffBase):
     identity_changes: list[IdentityChange] = Field(default_factory=list)
     artifact_changes: list[ArtifactChange] = Field(default_factory=list)
     execution_changes: list[Dict[str, Any]] = Field(default_factory=list)
+    mechanical_changes: list[Dict[str, Any]] = Field(default_factory=list)
+    physical_authorization_changes: list[Dict[str, Any]] = Field(default_factory=list)
     authority_regressions: list[str] = Field(default_factory=list)
     candidate_status: EngineeringStatus
     summary: Dict[str, Any] = Field(default_factory=dict)
@@ -66,12 +79,6 @@ def _rows(value: Any) -> list[dict[str, Any]]:
 
 
 def _status(plan: Mapping[str, Any]) -> EngineeringStatus:
-    existing = plan.get("engineering_status")
-    if isinstance(existing, Mapping):
-        try:
-            return EngineeringStatus.model_validate(existing)
-        except ValueError:
-            pass
     return build_engineering_status(plan)
 
 
@@ -133,6 +140,101 @@ def _execution_map(plan: Mapping[str, Any]) -> dict[str, Dict[str, Any]]:
     return result
 
 
+def _mechanical_map(plan: Mapping[str, Any]) -> dict[str, Dict[str, Any]]:
+    result: dict[str, Dict[str, Any]] = {}
+    geometry = _mapping(plan.get("mechanical_geometry"))
+    for row in _rows(geometry.get("models")):
+        model_id = row.get("model_id")
+        if model_id:
+            result[f"step_model:{model_id}"] = {
+                "content_hash": row.get("content_hash"),
+                "file_schema": row.get("file_schema"),
+                "products": row.get("products") or [],
+                "units": row.get("units") or [],
+                "bounding_box": row.get("bounding_box"),
+                "unresolved": row.get("unresolved") or [],
+            }
+    for row in _rows(geometry.get("mounts")):
+        interface_id = row.get("interface_id")
+        if interface_id:
+            result[f"mount:{interface_id}"] = row
+
+    fit = _mapping(plan.get("mechanical_fit"))
+    for row in _rows(fit.get("checks")):
+        check_id = row.get("check_id")
+        if check_id:
+            result[f"fit_check:{check_id}"] = {
+                "category": row.get("category"),
+                "status": row.get("status"),
+                "message": row.get("message"),
+                "target_ids": row.get("target_ids") or [],
+                "unresolved_fields": row.get("unresolved_fields") or [],
+                "metadata": row.get("metadata") or {},
+            }
+    for row in _rows(fit.get("clearance_boxes")):
+        object_id = row.get("object_id")
+        if object_id:
+            result[f"clearance_box:{object_id}"] = row
+    for row in _rows(fit.get("clearance_requirements")):
+        requirement_id = row.get("requirement_id")
+        if requirement_id:
+            result[f"clearance_requirement:{requirement_id}"] = row
+    for row in _rows(fit.get("fastener_stacks")):
+        stack_id = row.get("stack_id")
+        if stack_id:
+            result[f"fastener_stack:{stack_id}"] = row
+    return result
+
+
+def _physical_authorization_map(plan: Mapping[str, Any]) -> dict[str, Dict[str, Any]]:
+    result: dict[str, Dict[str, Any]] = {}
+    package = _mapping(plan.get("physical_evidence_package"))
+    for row in _rows(package.get("calibrations")):
+        calibration_id = row.get("calibration_id")
+        if calibration_id:
+            result[f"calibration:{calibration_id}"] = row
+    for row in _rows(package.get("evidence")):
+        evidence_id = row.get("evidence_id")
+        if evidence_id:
+            result[f"physical_evidence:{evidence_id}"] = row
+    decision = _mapping(package.get("decision"))
+    if decision:
+        authorization_id = decision.get("authorization_id") or "decision"
+        result[f"authorization:{authorization_id}"] = decision
+    assessment = _mapping(package.get("assessment"))
+    if assessment:
+        result["physical_assessment"] = assessment
+    scoped = _mapping(plan.get("scoped_release_assessment"))
+    if scoped:
+        result["scoped_release_assessment"] = scoped
+    return result
+
+
+def _map_changes(
+    base: Mapping[str, Dict[str, Any]],
+    candidate: Mapping[str, Dict[str, Any]],
+    *,
+    id_field: str,
+) -> list[Dict[str, Any]]:
+    changes: list[Dict[str, Any]] = []
+    for record_id in sorted(set(base) | set(candidate)):
+        before = base.get(record_id)
+        after = candidate.get(record_id)
+        if before == after:
+            continue
+        changes.append(
+            {
+                id_field: record_id,
+                "change_type": (
+                    "added" if before is None else "removed" if after is None else "changed"
+                ),
+                "base": before,
+                "candidate": after,
+            }
+        )
+    return changes
+
+
 def _authority_regressions(plan: Mapping[str, Any]) -> list[str]:
     regressions: list[str] = []
     readiness = _mapping(plan.get("engineering_readiness"))
@@ -161,7 +263,7 @@ def diff_engineering_revisions(
     base_revision: int | str | None = None,
     candidate_revision: int | str | None = None,
 ) -> EngineeringRevisionDiff:
-    """Compare blockers, identities, artifacts, execution evidence, and authority."""
+    """Compare blockers, identities, artifacts, execution, mechanics, and authority."""
 
     base_status = _status(base_plan)
     candidate_status = _status(candidate_plan)
@@ -218,24 +320,21 @@ def diff_engineering_revisions(
             )
         )
 
-    base_execution = _execution_map(base_plan)
-    candidate_execution = _execution_map(candidate_plan)
-    execution_changes = [
-        {
-            "execution_id": execution_id,
-            "change_type": (
-                "added"
-                if execution_id not in base_execution
-                else "removed"
-                if execution_id not in candidate_execution
-                else "changed"
-            ),
-            "base": base_execution.get(execution_id),
-            "candidate": candidate_execution.get(execution_id),
-        }
-        for execution_id in sorted(set(base_execution) | set(candidate_execution))
-        if base_execution.get(execution_id) != candidate_execution.get(execution_id)
-    ]
+    execution_changes = _map_changes(
+        _execution_map(base_plan),
+        _execution_map(candidate_plan),
+        id_field="execution_id",
+    )
+    mechanical_changes = _map_changes(
+        _mechanical_map(base_plan),
+        _mechanical_map(candidate_plan),
+        id_field="mechanical_id",
+    )
+    physical_authorization_changes = _map_changes(
+        _physical_authorization_map(base_plan),
+        _physical_authorization_map(candidate_plan),
+        id_field="physical_record_id",
+    )
     authority_regressions = _authority_regressions(candidate_plan)
     return EngineeringRevisionDiff(
         project_id=project_id,
@@ -248,6 +347,8 @@ def diff_engineering_revisions(
         identity_changes=identity_changes,
         artifact_changes=artifact_changes,
         execution_changes=execution_changes,
+        mechanical_changes=mechanical_changes,
+        physical_authorization_changes=physical_authorization_changes,
         authority_regressions=authority_regressions,
         candidate_status=candidate_status,
         summary={
@@ -258,6 +359,8 @@ def diff_engineering_revisions(
             "identity_change_category_count": len(identity_changes),
             "artifact_change_count": len(artifact_changes),
             "execution_change_count": len(execution_changes),
+            "mechanical_change_count": len(mechanical_changes),
+            "physical_authorization_change_count": len(physical_authorization_changes),
             "authority_regression_count": len(authority_regressions),
             "candidate_overall_status": candidate_status.overall_status,
             "candidate_next_action_id": candidate_status.next_action_id,
