@@ -11,8 +11,10 @@ import {
   FileCheck2,
   FileSearch,
   GitBranch,
+  History,
   LoaderCircle,
   RefreshCw,
+  RotateCcw,
   ShieldCheck,
   Sparkles,
   X,
@@ -32,6 +34,13 @@ type ProjectResponse = { ok?: boolean; project?: JsonRecord };
 type SessionResponse = { ok?: boolean; revision?: number; session?: JsonRecord };
 type ActionResponse = { ok?: boolean; revision?: number; action?: JsonRecord };
 type PreviewResponse = ActionResponse & { tool_result?: JsonRecord; idempotent?: boolean };
+type RepairResponse = {
+  ok?: boolean;
+  revision?: number;
+  parent_action?: JsonRecord;
+  repair_session?: JsonRecord;
+  idempotent?: boolean;
+};
 type Decision = 'accepted' | 'rejected';
 type ModelProfile = 'fast_draft' | 'deep_synthesis' | 'design_repair';
 
@@ -88,6 +97,8 @@ export default function AIStudioPage() {
   const candidates = rows(session?.architecture_candidates);
   const actions = rows(session?.actions);
   const openQuestions = strings(session?.open_questions);
+  const repairOf = record(session?.repair_of);
+  const isRepairSession = text(session?.session_kind, '') === 'failure_repair';
   const proposedCount = useMemo(
     () => actions.filter((action) => text(action.status, '') === 'proposed').length,
     [actions],
@@ -108,14 +119,18 @@ export default function AIStudioPage() {
     setBusyKey('project');
     setError(null);
     try {
-      const response = await fetch(`/api/proxy/engineering/projects/${encodeURIComponent(id)}`, { cache: 'no-store' });
+      const response = await fetch(`/api/proxy/engineering/projects/${encodeURIComponent(id)}`, {
+        cache: 'no-store',
+      });
       const payload = await readJsonPayload<ProjectResponse | ProxyErrorPayload>(response);
       if (!response.ok || isProxyFailure(payload)) {
         throw new Error(getProxyErrorMessage(payload, 'Hardware Splicer could not load the project.'));
       }
       const envelope = record((payload as ProjectResponse).project);
       const nextRevision = Number(envelope.revision);
-      if (!Number.isInteger(nextRevision) || nextRevision < 1) throw new Error('The project returned no valid revision.');
+      if (!Number.isInteger(nextRevision) || nextRevision < 1) {
+        throw new Error('The project returned no valid revision.');
+      }
       const nextSnapshot = record(envelope.snapshot);
       setRevision(nextRevision);
       setSnapshot(nextSnapshot);
@@ -181,11 +196,10 @@ export default function AIStudioPage() {
     }
   }
 
-  async function loadSession() {
+  async function fetchSession(selectedSession: string, busy = 'session') {
     const id = projectId.trim();
-    const selectedSession = sessionId.trim();
     if (!id || !selectedSession) return setError('Enter both a project ID and session ID.');
-    setBusyKey('session');
+    setBusyKey(busy);
     setError(null);
     try {
       const response = await fetch(
@@ -197,7 +211,9 @@ export default function AIStudioPage() {
         throw new Error(getProxyErrorMessage(payload, 'The AI project session could not be loaded.'));
       }
       const body = payload as SessionResponse;
-      setSession(record(body.session));
+      const nextSession = record(body.session);
+      setSession(nextSession);
+      setSessionId(text(nextSession.session_id, selectedSession));
       const nextRevision = Number(body.revision);
       if (Number.isInteger(nextRevision)) setRevision(nextRevision);
     } catch (caught) {
@@ -205,6 +221,10 @@ export default function AIStudioPage() {
     } finally {
       setBusyKey(null);
     }
+  }
+
+  async function loadSession() {
+    await fetchSession(sessionId.trim());
   }
 
   async function decideAction(actionId: string, decision: Decision) {
@@ -272,6 +292,40 @@ export default function AIStudioPage() {
     }
   }
 
+  async function proposeRepair(actionId: string) {
+    if (!revision || !sessionId.trim()) return;
+    setBusyKey(`repair:${actionId}`);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/proxy/engineering/projects/${encodeURIComponent(projectId.trim())}/ai-sessions/${encodeURIComponent(sessionId.trim())}/actions/${encodeURIComponent(actionId)}/repair`,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ expected_revision: revision, max_actions: 6 }),
+          cache: 'no-store',
+        },
+      );
+      const payload = await readJsonPayload<RepairResponse | ProxyErrorPayload>(response);
+      if (!response.ok || isProxyFailure(payload)) {
+        throw new Error(getProxyErrorMessage(payload, 'Hardware Splicer could not propose a bounded repair.'));
+      }
+      const body = payload as RepairResponse;
+      const repairSession = record(body.repair_session);
+      const nextRevision = Number(body.revision);
+      if (!repairSession.session_id || !Number.isInteger(nextRevision)) {
+        throw new Error('The repair route returned no valid successor session or revision.');
+      }
+      setSession(repairSession);
+      setSessionId(text(repairSession.session_id, ''));
+      setRevision(nextRevision);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Repair proposal failed.');
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
   return (
     <main className="min-h-screen bg-[#040b14] px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px]">
@@ -287,7 +341,7 @@ export default function AIStudioPage() {
               <div>
                 <h1 className="text-2xl font-semibold text-white">AI Project Studio</h1>
                 <p className="mt-1 max-w-4xl text-sm leading-6 text-slate-400">
-                  Build revision-pinned engineering proposals, review them, and run only explicitly accepted software previews. Physical authority remains separate and closed.
+                  Propose, review, preview, observe failure, and create a separate repair successor. Every transition is revisioned and physical authority remains closed.
                 </p>
               </div>
             </div>
@@ -344,7 +398,7 @@ export default function AIStudioPage() {
 
         <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm text-amber-100">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>Proposal acceptance and preview execution are separate revisions. Previews are software evidence only; fabrication, flashing, power-on, motion, operation, and release remain unauthorized.</div>
+          <div>Proposal, decision, preview, and repair are separate revisions. Repairs create successors; they never rewrite failed evidence or retry automatically.</div>
         </div>
 
         {error ? <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-300/20 bg-rose-300/10 p-4 text-sm text-rose-100"><XCircle className="mt-0.5 h-4 w-4 shrink-0" />{error}</div> : null}
@@ -372,13 +426,25 @@ export default function AIStudioPage() {
                 ].map(([label, value]) => <div key={String(label)} className="flex justify-between rounded-xl border border-white/8 bg-[#040b14] px-3 py-2"><span className="text-slate-400">{String(label)}</span><span className="text-emerald-200">{closedGate(value)}</span></div>)}
               </div>
             </section>
+            {isRepairSession ? <section className="rounded-3xl border border-violet-300/20 bg-violet-300/5 p-5">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-violet-100"><History className="h-4 w-4" />Repair lineage</h2>
+              <div className="mt-4 space-y-2 break-all text-xs text-slate-400">
+                <div>Parent session: {text(repairOf.parent_session_id)}</div>
+                <div>Failed action: {text(repairOf.parent_action_id)}</div>
+                <div>Failure SHA-256: {text(repairOf.failure_sha256)}</div>
+                <div>Iteration: {text(repairOf.repair_iteration)}</div>
+              </div>
+              <Button className="mt-4 w-full" size="sm" variant="outline" onClick={() => fetchSession(text(repairOf.parent_session_id, ''), 'parent-session')} disabled={busyKey === 'parent-session'}>
+                {busyKey === 'parent-session' ? <LoaderCircle className="mr-2 h-3.5 w-3.5 animate-spin" /> : <ArrowLeft className="mr-2 h-3.5 w-3.5" />}Open failed parent
+              </Button>
+            </section> : null}
           </aside>
 
           <section className="space-y-5">
             {!session ? <div className="rounded-3xl border border-dashed border-white/10 bg-[#07111f] p-12 text-center"><BrainCircuit className="mx-auto h-10 w-10 text-slate-600" /><p className="mt-4 text-sm text-slate-500">Load a project and generate one revision-pinned AI session.</p></div> : <>
-              <article className="rounded-3xl border border-fuchsia-300/20 bg-fuchsia-300/5 p-5">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-200">{text(session.model_profile, 'profile')} · {text(session.provider, 'provider')} · {text(session.model, 'model')}</div>
-                <h2 className="mt-3 text-lg font-semibold text-white">Session summary</h2>
+              <article className={`rounded-3xl border p-5 ${isRepairSession ? 'border-violet-300/20 bg-violet-300/5' : 'border-fuchsia-300/20 bg-fuchsia-300/5'}`}>
+                <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fuchsia-200">{text(session.session_kind, 'project proposal')} · {text(session.model_profile, 'profile')} · {text(session.provider, 'provider')} · {text(session.model, 'model')}</div>
+                <h2 className="mt-3 text-lg font-semibold text-white">{isRepairSession ? 'Repair successor summary' : 'Session summary'}</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-300">{text(session.summary)}</p>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-400"><span className="rounded-full border border-white/10 px-3 py-1">{requirements.length} requirements</span><span className="rounded-full border border-white/10 px-3 py-1">{candidates.length} candidates</span><span className="rounded-full border border-white/10 px-3 py-1">{proposedCount} proposed actions</span></div>
               </article>
@@ -389,8 +455,11 @@ export default function AIStudioPage() {
               </article>
 
               <article className="rounded-3xl border border-white/10 bg-[#07111f] p-5">
-                <h2 className="text-sm font-semibold text-white">Architecture candidates</h2>
-                <div className="mt-4 space-y-4">{candidates.length ? candidates.map((candidate) => <div key={text(candidate.id)} className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-4"><div className="flex items-start justify-between gap-4"><div><div className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">{text(candidate.id)}</div><h3 className="mt-1 font-semibold text-white">{text(candidate.title)}</h3></div><span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-[10px] text-amber-100">proposed</span></div><p className="mt-3 text-sm leading-6 text-slate-300">{text(candidate.summary)}</p><div className="mt-3 space-y-1 text-xs text-slate-400">{strings(candidate.tradeoffs).map((tradeoff) => <div key={tradeoff}>• {tradeoff}</div>)}</div></div>) : <p className="text-sm text-slate-500">No architecture candidates returned.</p>}</div>
+                <h2 className="text-sm font-semibold text-white">{isRepairSession ? 'Successor candidate' : 'Architecture candidates'}</h2>
+                <div className="mt-4 space-y-4">{candidates.length ? candidates.map((candidate) => {
+                  const lineage = record(candidate.lineage);
+                  return <div key={text(candidate.id)} className="rounded-2xl border border-cyan-300/15 bg-cyan-300/5 p-4"><div className="flex items-start justify-between gap-4"><div><div className="text-xs font-semibold uppercase tracking-[0.14em] text-cyan-200">{text(candidate.id)}</div><h3 className="mt-1 font-semibold text-white">{text(candidate.title)}</h3></div><span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-2.5 py-1 text-[10px] text-amber-100">proposed</span></div><p className="mt-3 text-sm leading-6 text-slate-300">{text(candidate.summary)}</p><div className="mt-3 space-y-1 text-xs text-slate-400">{strings(candidate.tradeoffs).map((tradeoff) => <div key={tradeoff}>• {tradeoff}</div>)}</div>{lineage.kind ? <div className="mt-3 rounded-xl border border-violet-300/15 bg-violet-300/5 p-3 text-[10px] text-violet-100">Successor of {text(lineage.parent_action_id)} · failure {text(lineage.failure_sha256)}</div> : null}</div>;
+                }) : <p className="text-sm text-slate-500">No architecture candidates returned.</p>}</div>
               </article>
 
               {openQuestions.length ? <article className="rounded-3xl border border-amber-300/20 bg-amber-300/5 p-5"><h2 className="flex items-center gap-2 text-sm font-semibold text-amber-100"><AlertTriangle className="h-4 w-4" />Open questions</h2><div className="mt-3 space-y-2 text-sm text-amber-50/80">{openQuestions.map((question) => <div key={question}>• {question}</div>)}</div></article> : null}
@@ -407,20 +476,20 @@ export default function AIStudioPage() {
                 const toolResult = record(action.tool_result);
                 const resultSummary = record(toolResult.summary);
                 const artifact = record(toolResult.artifact);
-                const decisionBusy = busyKey?.endsWith(`:${actionId}`) ?? false;
+                const repairSessions = rows(action.repair_sessions);
+                const decisionBusy = busyKey === `accepted:${actionId}` || busyKey === `rejected:${actionId}`;
                 const previewBusy = busyKey === `preview:${actionId}`;
+                const repairBusy = busyKey === `repair:${actionId}`;
                 const canPreview = actionStatus === 'accepted' && previewActions.has(actionType) && !action.tool_result;
+                const canRepair = actionStatus === 'failed' && text(toolResult.status, '') === 'failed' && previewActions.has(actionType);
                 return <article key={actionId} className="rounded-2xl border border-white/8 bg-[#040b14] p-4">
                   <div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-fuchsia-200">{actionType}</div><h3 className="mt-1 text-sm font-semibold text-white">{text(action.title)}</h3></div><span className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-slate-300">{actionStatus}</span></div>
                   <p className="mt-3 text-xs leading-5 text-slate-400">{text(action.rationale)}</p>
                   <div className="mt-3 rounded-xl border border-white/8 bg-[#02070d] p-3 text-[11px] text-slate-500">Authority effect: {text(action.authority_effect, 'none')} · Automatic execution: false</div>
 
                   {actionStatus === 'proposed' ? <div className="mt-4 grid grid-cols-2 gap-2"><Button size="sm" onClick={() => decideAction(actionId, 'accepted')} disabled={decisionBusy}>{decisionBusy ? <LoaderCircle className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-2 h-3.5 w-3.5" />}Accept</Button><Button size="sm" variant="outline" onClick={() => decideAction(actionId, 'rejected')} disabled={decisionBusy}><X className="mr-2 h-3.5 w-3.5" />Reject</Button></div> : null}
-
                   {canPreview ? <Button className="mt-4 w-full" size="sm" onClick={() => executePreview(actionId)} disabled={previewBusy}>{previewBusy ? <LoaderCircle className="mr-2 h-3.5 w-3.5 animate-spin" /> : <CirclePlay className="mr-2 h-3.5 w-3.5" />}Run software preview</Button> : null}
-
                   {actionStatus === 'accepted' && !previewActions.has(actionType) ? <div className="mt-4 text-xs text-amber-200">Accepted proposal; this action type is not executable in the current preview boundary.</div> : null}
-
                   {actionStatus === 'rejected' ? <div className="mt-4 flex items-center gap-2 text-xs text-rose-200"><X className="h-3.5 w-3.5" />Rejected without execution.</div> : null}
 
                   {action.tool_result ? <div className={`mt-4 rounded-2xl border p-4 ${text(toolResult.status, '') === 'succeeded' ? 'border-emerald-300/20 bg-emerald-300/5' : 'border-rose-300/20 bg-rose-300/5'}`}>
@@ -428,6 +497,7 @@ export default function AIStudioPage() {
                     <pre className="mt-3 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl border border-white/8 bg-[#02070d] p-3 text-[10px] leading-5 text-slate-300">{compactJson(resultSummary)}</pre>
                     <div className="mt-3 space-y-1 break-all text-[10px] text-slate-500"><div>Artifact: {text(artifact.project_relative_path)}</div><div>SHA-256: {text(artifact.sha256)}</div><div>Bytes: {text(artifact.size_bytes)}</div></div>
                     <div className="mt-3 text-[10px] text-emerald-200">Software evidence only · physical authority unchanged</div>
+                    {canRepair ? <Button className="mt-4 w-full" size="sm" variant="outline" onClick={() => proposeRepair(actionId)} disabled={repairBusy}>{repairBusy ? <LoaderCircle className="mr-2 h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="mr-2 h-3.5 w-3.5" />}{repairSessions.length ? 'Open repair successor' : 'Propose bounded repair'}</Button> : null}
                   </div> : null}
                 </article>;
               }) : <p className="text-sm text-slate-500">No actions available.</p>}</div>
