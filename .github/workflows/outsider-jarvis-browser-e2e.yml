@@ -70,35 +70,39 @@ jobs:
         run: |
           npm run typecheck
           npm run build
-      - name: Start mock backend and production frontend
+      - name: Run outsider browser path
         run: |
+          set -euo pipefail
           python scripts/mock_outsider_jarvis_backend.py > /tmp/outsider-backend.log 2>&1 &
-          echo $! > /tmp/outsider-backend.pid
-          (
-            cd apps/circuit-ai/circuit-ai-frontend
-            npm run start -- -H 127.0.0.1 -p 3000 > /tmp/outsider-frontend.log 2>&1 &
-            echo $! > /tmp/outsider-frontend.pid
-          )
+          BACKEND_PID=$!
+          pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
+          npm run start -- -H 127.0.0.1 -p 3000 > /tmp/outsider-frontend.log 2>&1 &
+          FRONTEND_PID=$!
+          popd >/dev/null
+          cleanup() {
+            kill "$FRONTEND_PID" "$BACKEND_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8090/healthz >/dev/null \
               && curl --fail --silent http://127.0.0.1:3000/engineering/jarvis >/dev/null; then
-              exit 0
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              echo "mock backend log"
+              cat /tmp/outsider-backend.log || true
+              echo "frontend log"
+              cat /tmp/outsider-frontend.log || true
+              exit 1
             fi
             sleep 2
           done
-          echo "mock backend log"
-          cat /tmp/outsider-backend.log || true
-          echo "frontend log"
-          cat /tmp/outsider-frontend.log || true
-          exit 1
-      - name: Run outsider browser path
-        working-directory: apps/circuit-ai/circuit-ai-frontend
-        run: |
+          pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
           npx playwright test e2e/outsider-jarvis-workflow.spec.js \
             --browser=chromium \
             --reporter=line \
-            --trace=retain-on-failure \
-            --screenshot=only-on-failure
+            --trace=retain-on-failure
+          popd >/dev/null
       - name: Show service logs on failure
         if: failure()
         run: |
@@ -113,7 +117,6 @@ jobs:
           name: outsider-jarvis-browser-e2e
           path: |
             apps/circuit-ai/circuit-ai-frontend/test-results
-            apps/circuit-ai/circuit-ai-frontend/playwright-report
             /tmp/outsider-backend.log
             /tmp/outsider-frontend.log
           if-no-files-found: warn
