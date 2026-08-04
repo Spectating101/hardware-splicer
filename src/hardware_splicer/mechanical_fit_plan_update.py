@@ -12,6 +12,7 @@ from typing import Any, Dict, Mapping
 
 from .engineering_status import build_engineering_status
 from .machine_project import MachineProject
+from .manufacturing_closure import MANUFACTURING_CLOSURE_SCHEMA
 from .mechanical_fit import FitStatus, MechanicalFitReport
 
 
@@ -22,12 +23,14 @@ _SYNTHETIC_SOURCE = "mechanical_fit"
 def _closure_check(report: MechanicalFitReport, check) -> Dict[str, Any]:
     return {
         "check_id": f"mechanical-fit-{check.check_id}",
+        "category": f"mechanical_{check.category}",
         "status": "pass" if check.status == FitStatus.PASS else check.status.value,
         "severity": "error" if check.blocking else "warning",
         "message": check.message,
         "target_ids": list(check.target_ids),
         "source_ids": [],
         "unresolved_fields": list(check.unresolved_fields),
+        "evidence_ids": [],
         "metadata": {
             **dict(check.metadata),
             "source_schema": report.schema_version,
@@ -71,6 +74,54 @@ def _project_fit(project: MachineProject, report: MechanicalFitReport) -> Machin
     )
 
 
+def _closure_payload(
+    plan: Mapping[str, Any],
+    project: MachineProject,
+    report: MechanicalFitReport,
+) -> Dict[str, Any]:
+    raw = dict(plan.get("manufacturing_closure") or {})
+    existing_checks = [
+        dict(row)
+        for row in raw.get("checks") or []
+        if isinstance(row, Mapping)
+        and (row.get("metadata") or {}).get("source_kind") != _SYNTHETIC_SOURCE
+    ]
+    metadata = dict(raw.get("metadata") or {})
+    metadata.update(
+        {
+            "mechanical_fit_schema": report.schema_version,
+            "mechanical_fit_status": report.status,
+            "mechanical_fit_blocker_count": len(report.blocking_checks),
+            "mechanical_fit_aabb_only": True,
+            "full_brep_collision": False,
+            "fabrication_authorized": False,
+        }
+    )
+    required_evidence = [
+        dict(row)
+        for row in raw.get("required_evidence") or []
+        if isinstance(row, Mapping)
+        and row.get("source_kind") != _SYNTHETIC_SOURCE
+    ]
+    required_evidence.extend(
+        {
+            **dict(row),
+            "source_kind": _SYNTHETIC_SOURCE,
+            "source_schema": report.schema_version,
+        }
+        for row in report.required_evidence
+    )
+    return {
+        "schema_version": raw.get("schema_version") or MANUFACTURING_CLOSURE_SCHEMA,
+        "project_id": raw.get("project_id") or project.project_id,
+        "candidate_revision": raw.get("candidate_revision") or plan.get("candidate_revision"),
+        "checks": [*existing_checks, *[_closure_check(report, row) for row in report.checks]],
+        "identity_matrix": dict(raw.get("identity_matrix") or {}),
+        "required_evidence": required_evidence,
+        "metadata": metadata,
+    }
+
+
 def apply_mechanical_fit_to_plan(
     plan: Mapping[str, Any],
     report: MechanicalFitReport | Mapping[str, Any],
@@ -90,20 +141,7 @@ def apply_mechanical_fit_to_plan(
     project = _project_fit(project, resolved)
     updated["machine_project"] = project.model_dump(mode="json")
     updated["mechanical_fit"] = resolved.model_dump(mode="json")
-
-    closure = dict(updated.get("manufacturing_closure") or {})
-    existing_checks = [
-        dict(row)
-        for row in closure.get("checks") or []
-        if isinstance(row, Mapping)
-        and (row.get("metadata") or {}).get("source_kind") != _SYNTHETIC_SOURCE
-    ]
-    fit_checks = [_closure_check(resolved, row) for row in resolved.checks]
-    closure["checks"] = [*existing_checks, *fit_checks]
-    closure["mechanical_fit_schema"] = resolved.schema_version
-    closure["mechanical_fit_status"] = resolved.status
-    closure["mechanical_fit_blocker_count"] = len(resolved.blocking_checks)
-    closure["fabrication_authorized"] = False
+    closure = _closure_payload(updated, project, resolved)
     updated["manufacturing_closure"] = closure
 
     missing = [
