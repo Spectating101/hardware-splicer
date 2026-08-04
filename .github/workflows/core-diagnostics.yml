@@ -13,6 +13,40 @@ on:
       - ".github/workflows/core-diagnostics.yml"
 
 jobs:
+  engineering-core:
+    name: Engineering core fast bar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install package and test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev]'
+      - name: Compile engineering package
+        run: python -m compileall -q src/hardware_splicer
+      - name: Run every Python test changed by this pull request
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          git fetch --no-tags origin "$BASE_REF:refs/remotes/origin/$BASE_REF"
+          mapfile -t changed_tests < <(
+            git diff --name-only "origin/$BASE_REF...HEAD" \
+              | grep -E '^tests/test_.*\.py$' \
+              | sort
+          )
+          if (( ${#changed_tests[@]} == 0 )); then
+            echo "No changed Python tests to run."
+            exit 0
+          fi
+          printf 'Running %s changed test files:\n' "${#changed_tests[@]}"
+          printf ' - %s\n' "${changed_tests[@]}"
+          PYTHONPATH=src python -m pytest -q "${changed_tests[@]}"
+
   diagnose:
     runs-on: ubuntu-latest
     steps:
