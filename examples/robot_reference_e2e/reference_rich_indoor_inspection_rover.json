@@ -1,0 +1,229 @@
+{
+  "schema_version": "hardware_splicer.robot_reference_e2e_case.v1",
+  "scenario_id": "reference_rich_indoor_inspection_rover",
+  "description": "End-to-end source-rich validation of a custom indoor differential-drive inspection rover. Public references accelerate the plan but do not define the candidate or authorize physical operation.",
+  "catalog_path": "examples/robot_reference_corpus/robot_reference_catalog.json",
+  "selected_catalog_source_ids": [
+    "linorobot2-repo",
+    "linorobot2-docs",
+    "linorobot2-hardware",
+    "linorobot2-video-query",
+    "tb3-hardware-assembly",
+    "tb3-open-hardware",
+    "tb3-locomotion",
+    "tb3-assembly-video-index",
+    "ardurover-docs",
+    "ardurover-build",
+    "ardurover-hardware"
+  ],
+  "source_roles": {
+    "baseline": [
+      "linorobot2-repo",
+      "linorobot2-docs",
+      "linorobot2-hardware"
+    ],
+    "comparative": [
+      "tb3-hardware-assembly",
+      "tb3-open-hardware",
+      "tb3-locomotion"
+    ],
+    "safety_and_bringup": [
+      "ardurover-docs",
+      "ardurover-build",
+      "ardurover-hardware"
+    ],
+    "observed_media": [
+      "linorobot2-video-query",
+      "tb3-assembly-video-index"
+    ]
+  },
+  "intake": {
+    "project_name": "reference_rich_indoor_inspection_rover",
+    "candidate_revision": "e2e-r1",
+    "goal": "Design and prepare a repairable two-wheel differential-drive indoor inspection rover that fits through 70 cm doors, crosses a 15 mm threshold, carries a 500 g sensor payload, runs for at least 90 minutes, maps with 2D lidar, and supports ROS 2 autonomous navigation.",
+    "mode": "build",
+    "selected_robot_model_source_id": "e2e-rover-urdf",
+    "available_parts": [
+      {"name": "Raspberry Pi 5", "type": "computer", "part_id": "pi5", "quantity": 1},
+      {"name": "ESP32-S3 controller", "type": "microcontroller", "part_id": "mcu", "quantity": 1},
+      {"name": "12 V geared DC motor with quadrature encoder", "type": "dc_motor", "part_id": "wheel-motor", "quantity": 2},
+      {"name": "dual-channel motor driver", "type": "motor_driver", "part_id": "motor-driver", "quantity": 1},
+      {"name": "RPLIDAR A1", "type": "lidar", "part_id": "lidar", "quantity": 1},
+      {"name": "BNO085 IMU", "type": "imu", "part_id": "imu", "quantity": 1},
+      {"name": "12 V 8 Ah protected battery", "type": "power_source", "part_id": "battery", "quantity": 1},
+      {"name": "5 V 8 A buck converter", "type": "power_converter", "part_id": "logic-buck", "quantity": 1},
+      {"name": "80 mm wheel", "type": "wheel", "part_id": "wheel", "quantity": 2},
+      {"name": "caster wheel", "type": "caster", "part_id": "caster", "quantity": 1},
+      {"name": "laser-cut aluminum chassis plate", "type": "mechanical_structure", "part_id": "chassis", "quantity": 1},
+      {"name": "latching motor power switch", "type": "safety_switch", "part_id": "motor-estop", "quantity": 1}
+    ],
+    "constraints": {
+      "drive_type": "differential_drive",
+      "wheel_count": 2,
+      "maximum_width_mm": 500,
+      "maximum_length_mm": 450,
+      "maximum_height_mm": 420,
+      "door_clearance_mm": 700,
+      "threshold_height_mm": 15,
+      "payload_mass_kg": 0.5,
+      "target_runtime_min": 90,
+      "runtime_min": 90,
+      "maximum_speed_mps": 0.35,
+      "indoor_only": true,
+      "emergency_stop_required": true,
+      "first_motion_current_limited": true,
+      "battery_energy_wh": 96,
+      "continuous_power_w": 45,
+      "battery_usable_fraction": 0.8,
+      "supply_current_limit_a": 15,
+      "peak_current_a": 11,
+      "support_width_mm": 320,
+      "combined_cg_height_mm": 140,
+      "static_tilt_margin_deg": 25,
+      "candidate_width_mm": 360,
+      "candidate_length_mm": 400,
+      "candidate_height_mm": 360,
+      "maximum_envelope_width_mm": 500,
+      "maximum_envelope_length_mm": 450,
+      "maximum_envelope_height_mm": 420
+    },
+    "electrical_pins": [
+      {"component_id": "mcu", "pin": "gpio12", "net": "left_motor_pwm"},
+      {"component_id": "mcu", "pin": "gpio13", "net": "right_motor_pwm"},
+      {"component_id": "mcu", "pin": "gpio14", "net": "left_encoder_a"},
+      {"component_id": "mcu", "pin": "gpio15", "net": "right_encoder_a"}
+    ],
+    "firmware_pin_map": [
+      {"component_id": "mcu", "physical_pin": "gpio12", "net": "left_motor_pwm"},
+      {"component_id": "mcu", "physical_pin": "gpio13", "net": "right_motor_pwm"},
+      {"component_id": "mcu", "physical_pin": "gpio14", "net": "left_encoder_a"},
+      {"component_id": "mcu", "physical_pin": "gpio15", "net": "right_encoder_a"}
+    ],
+    "connectors": [
+      {"connector_id": "j-mcu-motor", "mates_with": "p-motor-control"},
+      {"connector_id": "p-motor-control", "mates_with": "j-mcu-motor"},
+      {"connector_id": "j-battery", "mates_with": "p-power-distribution"},
+      {"connector_id": "p-power-distribution", "mates_with": "j-battery"}
+    ],
+    "harnesses": [
+      {
+        "harness_id": "motor-control-harness",
+        "endpoints": ["j-mcu-motor", "p-motor-control"],
+        "conductors": [
+          {"from_pin": "1", "to_pin": "1", "net": "left_motor_pwm"},
+          {"from_pin": "2", "to_pin": "2", "net": "right_motor_pwm"},
+          {"from_pin": "3", "to_pin": "3", "net": "logic_return"}
+        ]
+      },
+      {
+        "harness_id": "battery-harness",
+        "endpoints": ["j-battery", "p-power-distribution"],
+        "conductors": [
+          {"from_pin": "1", "to_pin": "1", "net": "battery_12v"},
+          {"from_pin": "2", "to_pin": "2", "net": "battery_return"}
+        ]
+      }
+    ],
+    "bom": [
+      {"part_id": "wheel-motor", "quantity": 2},
+      {"part_id": "motor-driver", "quantity": 1},
+      {"part_id": "mcu", "quantity": 1},
+      {"part_id": "pi5", "quantity": 1},
+      {"part_id": "battery", "quantity": 1},
+      {"part_id": "logic-buck", "quantity": 1},
+      {"part_id": "lidar", "quantity": 1},
+      {"part_id": "imu", "quantity": 1},
+      {"part_id": "wheel", "quantity": 2},
+      {"part_id": "caster", "quantity": 1},
+      {"part_id": "chassis", "quantity": 1},
+      {"part_id": "m3x10", "quantity": 16}
+    ],
+    "physical_instances": [
+      {"part_id": "wheel-motor", "quantity": 2},
+      {"part_id": "motor-driver", "quantity": 1},
+      {"part_id": "mcu", "quantity": 1},
+      {"part_id": "pi5", "quantity": 1},
+      {"part_id": "battery", "quantity": 1},
+      {"part_id": "logic-buck", "quantity": 1},
+      {"part_id": "lidar", "quantity": 1},
+      {"part_id": "imu", "quantity": 1},
+      {"part_id": "wheel", "quantity": 2},
+      {"part_id": "caster", "quantity": 1},
+      {"part_id": "chassis", "quantity": 1},
+      {"part_id": "m3x10", "quantity": 16}
+    ],
+    "fasteners": [{"fastener_id": "m3x10", "size": "M3x10"}],
+    "assembly_steps": [
+      {"step_id": "mount-drive", "instruction": "Mount both drive motors and wheels with sixteen M3x10 fasteners."},
+      {"step_id": "mount-electronics", "instruction": "Mount controller, computer, motor driver, lidar, IMU, power converter and battery before routing harnesses."},
+      {"step_id": "wire-power-off", "instruction": "Install power and control harnesses with the battery disconnected and verify polarity and continuity."}
+    ],
+    "mounts": [
+      {"mount_id": "motor-bracket-left", "cad_id": "rover-chassis-step"},
+      {"mount_id": "motor-bracket-right", "cad_id": "rover-chassis-step"},
+      {"mount_id": "lidar-deck", "cad_id": "rover-chassis-step"}
+    ],
+    "cad_models": [{"cad_id": "rover-chassis-step", "format": "step"}],
+    "fabrication_artifacts": [
+      {"artifact_id": "rover-chassis-step", "revision": "e2e-r1", "content_hash": "sha256:fixture-rover-chassis-e2e-r1"},
+      {"artifact_id": "firmware-bin", "revision": "e2e-r1", "content_hash": "sha256:fixture-firmware-e2e-r1"},
+      {"artifact_id": "wiring-package", "revision": "e2e-r1", "content_hash": "sha256:fixture-wiring-e2e-r1"}
+    ]
+  },
+  "inline_engineering_sources": [
+    {
+      "source_id": "e2e-rover-urdf",
+      "artifact_kind": "urdf",
+      "uri": "fixture://reference_rich_indoor_inspection_rover.urdf",
+      "revision": "e2e-r1",
+      "content": "<robot name=\"reference_rich_rover\"><link name=\"base_link\"/><link name=\"left_wheel_link\"/><link name=\"right_wheel_link\"/><link name=\"lidar_link\"/><joint name=\"left_wheel_joint\" type=\"continuous\"><parent link=\"base_link\"/><child link=\"left_wheel_link\"/><axis xyz=\"0 1 0\"/></joint><joint name=\"right_wheel_joint\" type=\"continuous\"><parent link=\"base_link\"/><child link=\"right_wheel_link\"/><axis xyz=\"0 1 0\"/></joint><joint name=\"lidar_mount_joint\" type=\"fixed\"><parent link=\"base_link\"/><child link=\"lidar_link\"/><origin xyz=\"0.10 0 0.22\" rpy=\"0 0 0\"/></joint></robot>"
+    },
+    {
+      "source_id": "e2e-firmware-manifest",
+      "artifact_kind": "firmware_manifest",
+      "manifest": {
+        "firmware_component_id": "base-controller",
+        "source_revision": "e2e-r1",
+        "toolchain": "platformio",
+        "toolchain_version": "6.1",
+        "build_command": "pio run",
+        "binary_hash": "sha256:fixture-firmware-e2e-r1",
+        "flash_command": "pio run -t upload",
+        "pin_map_hash": "sha256:fixture-pin-map-e2e-r1",
+        "board_profile": "esp32-s3",
+        "hardware_revision": "e2e-r1"
+      }
+    },
+    {
+      "source_id": "e2e-ros-contract",
+      "artifact_kind": "ros_interface_manifest",
+      "revision": "jazzy-e2e-r1",
+      "manifest": {
+        "node_id": "reference-rich-rover-base",
+        "distribution": "jazzy",
+        "topics": [
+          {"name": "/cmd_vel", "type": "geometry_msgs/msg/Twist"},
+          {"name": "/joint_states", "type": "sensor_msgs/msg/JointState"},
+          {"name": "/odom", "type": "nav_msgs/msg/Odometry"},
+          {"name": "/scan", "type": "sensor_msgs/msg/LaserScan"},
+          {"name": "/imu/data", "type": "sensor_msgs/msg/Imu"}
+        ],
+        "services": [],
+        "actions": [{"name": "/navigate_to_pose", "type": "nav2_msgs/action/NavigateToPose"}],
+        "frames": ["map", "odom", "base_link", "left_wheel_link", "right_wheel_link", "lidar_link"]
+      }
+    }
+  ],
+  "expected": {
+    "minimum_catalog_sources": 40,
+    "minimum_catalog_families": 8,
+    "minimum_selected_sources": 12,
+    "robot_genre": "rover",
+    "minimum_joints": 2,
+    "minimum_operator_steps": 12,
+    "candidate_synthesized": true,
+    "manufacturing_closure_present": true,
+    "execution_plan_present": true,
+    "physical_authority": false
+  }
+}
