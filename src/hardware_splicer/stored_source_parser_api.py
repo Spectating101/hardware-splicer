@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from typing import Any, Dict, Mapping
 
@@ -17,8 +18,9 @@ from .project_store import (
     RevisionConflict,
 )
 from .stored_source_parser import (
+    MAX_PERSISTED_PARSER_OUTPUT_BYTES,
+    STORED_SOURCE_PARSER_IMPLEMENTATION,
     STORED_SOURCE_PARSER_SCHEMA,
-    StoredParserStatus,
     execute_stored_source_parser,
 )
 
@@ -45,7 +47,10 @@ def _parser_error(exc: Exception) -> HTTPException:
     if isinstance(exc, RevisionConflict):
         return HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail={"type": "stored_source_parser_revision_conflict", "message": str(exc)},
+            detail={
+                "type": "stored_source_parser_revision_conflict",
+                "message": str(exc),
+            },
         )
     if isinstance(exc, CorruptProject):
         return HTTPException(
@@ -55,7 +60,10 @@ def _parser_error(exc: Exception) -> HTTPException:
     if isinstance(exc, (TypeError, ValueError)):
         return HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"type": "invalid_stored_source_parser_request", "message": str(exc)},
+            detail={
+                "type": "invalid_stored_source_parser_request",
+                "message": str(exc),
+            },
         )
     if isinstance(exc, ProjectStoreError):
         return HTTPException(
@@ -72,11 +80,12 @@ def _rows(value: Any) -> list[Dict[str, Any]]:
     return [dict(row) for row in value or [] if isinstance(row, Mapping)]
 
 
-def _run_key(row: Mapping[str, Any]) -> tuple[str, str, str]:
+def _run_key(row: Mapping[str, Any]) -> tuple[str, str, str, str]:
     return (
         str(row.get("source_id") or ""),
         str(row.get("content_hash") or ""),
         str(row.get("schema_version") or ""),
+        str(row.get("parser_identity") or ""),
     )
 
 
@@ -84,6 +93,17 @@ def _source_key(row: Mapping[str, Any]) -> tuple[str, str]:
     return (
         str(row.get("source_id") or ""),
         str(row.get("content_hash") or row.get("revision") or ""),
+    )
+
+
+def _serialized_size(payload: Mapping[str, Any]) -> int:
+    return len(
+        json.dumps(
+            payload,
+            sort_keys=True,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
     )
 
 
@@ -98,6 +118,8 @@ def create_stored_source_parser_router(
         return {
             "ok": True,
             "schema_version": STORED_SOURCE_PARSER_SCHEMA,
+            "parser_identity": STORED_SOURCE_PARSER_IMPLEMENTATION,
+            "maximum_persisted_output_bytes": MAX_PERSISTED_PARSER_OUTPUT_BYTES,
             "supported_routes": [
                 "robot_model_import",
                 "engineering_source_descriptor",
@@ -127,7 +149,11 @@ def create_stored_source_parser_router(
             snapshot = deepcopy(envelope["snapshot"])
             sources = _rows(snapshot.get("engineeringSources"))
             source = next(
-                (row for row in sources if str(row.get("source_id")) == source_id),
+                (
+                    row
+                    for row in sources
+                    if str(row.get("source_id")) == source_id
+                ),
                 None,
             )
             if source is None:
@@ -139,9 +165,18 @@ def create_stored_source_parser_router(
                 project_root=store.root,
             )
             payload = result.model_dump(mode="json")
+            output_size = _serialized_size(payload)
+            if output_size > MAX_PERSISTED_PARSER_OUTPUT_BYTES:
+                raise ValueError(
+                    "stored parser output exceeds the maximum persisted output size"
+                )
+
             runs = _rows(snapshot.get("engineeringSourceParserRuns"))
             key = _run_key(payload)
-            existing = next((row for row in runs if _run_key(row) == key), None)
+            existing = next(
+                (row for row in runs if _run_key(row) == key),
+                None,
+            )
             if existing is not None:
                 return {
                     "ok": True,
@@ -171,9 +206,11 @@ def create_stored_source_parser_router(
                 metadata = dict(row.get("metadata") or {})
                 metadata["latest_parser_run"] = {
                     "schema_version": STORED_SOURCE_PARSER_SCHEMA,
+                    "parser_identity": STORED_SOURCE_PARSER_IMPLEMENTATION,
                     "status": result.status.value,
                     "parser_route": result.parser_route,
                     "content_hash": result.content_hash,
+                    "persisted_output_size_bytes": output_size,
                     "parsed_output_available": bool(result.parsed_output),
                     "automatic_authorization": False,
                 }
@@ -187,9 +224,13 @@ def create_stored_source_parser_router(
                 metadata={
                     "source": "stored_source_parser",
                     "stored_source_parser_schema": STORED_SOURCE_PARSER_SCHEMA,
+                    "stored_source_parser_identity": (
+                        STORED_SOURCE_PARSER_IMPLEMENTATION
+                    ),
                     "parsed_source_id": source_id,
                     "parsed_content_hash": result.content_hash,
                     "parser_status": result.status.value,
+                    "persisted_output_size_bytes": output_size,
                     "derived_source_count": len(result.derived_sources),
                     "raw_bytes_persisted_in_snapshot": False,
                     "automatic_authorization": False,
@@ -206,6 +247,7 @@ def create_stored_source_parser_router(
             "revision": saved["revision"],
             "saved_at": saved["saved_at"],
             "parser_run": payload,
+            "persisted_output_size_bytes": output_size,
             "derived_source_count": len(result.derived_sources),
             "authority_unchanged": True,
         }
