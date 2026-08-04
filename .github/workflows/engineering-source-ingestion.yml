@@ -8,7 +8,11 @@ on:
       - "src/hardware_splicer/engineering_source_ingestion_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_engineering_source_ingestion.py"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/sources/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/ingest/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/snapshot/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-source-workspace.cjs"
       - "docs/ENGINEERING_SOURCE_INGESTION.md"
       - ".github/workflows/engineering-source-ingestion.yml"
   pull_request:
@@ -17,7 +21,11 @@ on:
       - "src/hardware_splicer/engineering_source_ingestion_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_engineering_source_ingestion.py"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/sources/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/ingest/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/snapshot/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-source-workspace.cjs"
       - "docs/ENGINEERING_SOURCE_INGESTION.md"
       - ".github/workflows/engineering-source-ingestion.yml"
 
@@ -60,9 +68,10 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: npm ci
-      - name: Validate frontend proxy and production build
+      - name: Validate Engineering Sources workspace
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
+          node scripts/test-engineering-source-workspace.cjs
           npm run typecheck
           npm run build
