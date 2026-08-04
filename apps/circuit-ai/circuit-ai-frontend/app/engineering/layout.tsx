@@ -1,37 +1,40 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { Bot, BrainCircuit, ClipboardCheck, Cpu, Database, FileSearch, Network, PauseCircle, Route, UploadCloud } from 'lucide-react';
+import { Bot, BrainCircuit, ClipboardCheck, Cpu, Database, FileArchive, FileSearch, Network, PauseCircle, Route, UploadCloud } from 'lucide-react';
 import { EngineeringExecutionCapabilityPanel } from '@/components/engineering-execution-capability-panel';
 
 export default function EngineeringLayout({ children }: { children: ReactNode }) {
   return (
     <div className="relative">
-      <div className="fixed left-1/2 top-3 z-[95] flex -translate-x-1/2 items-center gap-1 rounded-full border border-white/10 bg-[#07111f]/95 p-1 shadow-xl shadow-black/30 backdrop-blur-xl">
-        <Link href="/engineering/jarvis" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-cyan-100 hover:bg-cyan-300/10">
+      <div className="fixed left-1/2 top-3 z-[95] flex max-w-[calc(100vw-1rem)] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-[#07111f]/95 p-1 shadow-xl shadow-black/30 backdrop-blur-xl">
+        <Link href="/engineering/jarvis" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-cyan-100 hover:bg-cyan-300/10">
           <Bot className="h-3.5 w-3.5" /> JARVIS
         </Link>
-        <Link href="/engineering/ai-studio" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-fuchsia-100 hover:bg-fuchsia-300/10">
+        <Link href="/engineering/ai-studio" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-fuchsia-100 hover:bg-fuchsia-300/10">
           <BrainCircuit className="h-3.5 w-3.5" /> AI Studio
         </Link>
-        <Link href="/engineering/preflight" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/packages" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-emerald-100 hover:bg-emerald-300/10">
+          <FileArchive className="h-3.5 w-3.5" /> Packages
+        </Link>
+        <Link href="/engineering/preflight" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <ClipboardCheck className="h-3.5 w-3.5" /> Preflight
         </Link>
-        <Link href="/engineering/uploads" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/uploads" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <UploadCloud className="h-3.5 w-3.5" /> Uploads
         </Link>
-        <Link href="/engineering/resumable-uploads" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/resumable-uploads" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <PauseCircle className="h-3.5 w-3.5" /> Resume
         </Link>
-        <Link href="/engineering/source-lab" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/source-lab" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <FileSearch className="h-3.5 w-3.5" /> Source lab
         </Link>
-        <Link href="/engineering/storage-ops" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/storage-ops" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <Database className="h-3.5 w-3.5" /> Storage
         </Link>
-        <Link href="/engineering/project-preflight" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering/project-preflight" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <Route className="h-3.5 w-3.5" /> Project plan
         </Link>
-        <Link href="/engineering" className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+        <Link href="/engineering" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <Network className="h-3.5 w-3.5" /> Project inspector
         </Link>
       </div>
