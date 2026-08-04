@@ -81,8 +81,8 @@ def selected_engineering_sources(
         for index, claim in enumerate(source.get("claims") or []):
             claims.append(
                 {
-                    "subject_id": f"reference:{source.get('family_id')}",
-                    "predicate": "reference_claim",
+                    "subject_id": f"reference:{source.get('source_id')}",
+                    "predicate": f"reference_claim_{index}",
                     "value": str(claim),
                     "authority": authority,
                     "evidence_locator": {
