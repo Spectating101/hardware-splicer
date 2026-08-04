@@ -167,6 +167,7 @@ def run_robot_reference_e2e(
     execution = dict(plan.get("engineering_execution_plan") or {})
     guide = dict(plan.get("operator_guide") or {})
     readiness = dict(plan.get("engineering_readiness") or {})
+    source_adapter = dict(plan.get("source_adapter") or {})
 
     operator_steps = _rows(guide.get("steps"))
     if not operator_steps:
@@ -189,6 +190,11 @@ def run_robot_reference_e2e(
             "release_authorized",
         )
     }
+    candidate_delivered = bool(
+        readiness.get("candidate_machine_synthesized")
+        or readiness.get("structured_robot_model_selected")
+        or source_adapter.get("selected_robot_model_source_id")
+    )
 
     expected = dict(case.get("expected") or {})
     checks = [
@@ -227,8 +233,12 @@ def run_robot_reference_e2e(
         ),
         _check(
             "native-robot-genre",
-            topology.get("robot_genre") == expected.get("robot_genre"),
-            topology.get("robot_genre"),
+            topology.get("robot_genre") == expected.get("robot_genre")
+            and plan.get("native_robot_genre") == expected.get("robot_genre"),
+            {
+                "topology": topology.get("robot_genre"),
+                "plan": plan.get("native_robot_genre"),
+            },
             expected.get("robot_genre"),
         ),
         _check(
@@ -238,10 +248,13 @@ def run_robot_reference_e2e(
             f">={expected.get('minimum_joints')}",
         ),
         _check(
-            "candidate-synthesized",
-            bool(readiness.get("candidate_machine_synthesized"))
-            is bool(expected.get("candidate_synthesized")),
-            bool(readiness.get("candidate_machine_synthesized")),
+            "candidate-delivered",
+            candidate_delivered is bool(expected.get("candidate_synthesized")),
+            {
+                "candidate_machine_synthesized": bool(readiness.get("candidate_machine_synthesized")),
+                "structured_robot_model_selected": bool(readiness.get("structured_robot_model_selected")),
+                "selected_robot_model_source_id": source_adapter.get("selected_robot_model_source_id"),
+            },
             bool(expected.get("candidate_synthesized")),
         ),
         _check(
