@@ -1,9 +1,14 @@
-"""Optimistic persistence API for calibrated and audited physical evidence."""
+"""Optimistic persistence API for calibrated and audited physical evidence.
+
+Every write is anchored to an explicit project revision. For an existing project, the
+server loads the stored engineering plan at that revision and applies evidence to that
+state; a caller cannot replace or omit prior audit history by submitting an older plan.
+"""
 
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
@@ -11,7 +16,10 @@ from pydantic import BaseModel, Field
 from .audited_physical_evidence_plan_update import (
     apply_audited_physical_evidence_to_plan,
 )
-from .engineering_plan_store import save_engineering_plan
+from .engineering_plan_store import (
+    resolve_engineering_project_id,
+    save_engineering_plan,
+)
 from .physical_evidence import (
     AuthorizationDecision,
     CalibrationRecord,
@@ -23,7 +31,12 @@ from .physical_evidence_ledger import (
     PhysicalEvidenceEnvelope,
 )
 from .physical_evidence_plan_update import apply_physical_evidence_to_plan
-from .project_store import ProjectStore, ProjectStoreError
+from .project_store import (
+    ProjectNotFound,
+    ProjectStore,
+    ProjectStoreError,
+    RevisionConflict,
+)
 
 
 class PhysicalEvidenceSaveRequest(BaseModel):
@@ -75,11 +88,67 @@ def _save_error(exc: Exception, *, audited: bool = False) -> HTTPException:
     )
 
 
+def _engineering_plan_from_envelope(envelope: Mapping[str, Any]) -> Dict[str, Any]:
+    snapshot = envelope.get("snapshot")
+    if not isinstance(snapshot, Mapping):
+        raise ValueError("stored project revision does not contain a snapshot")
+    plan = snapshot.get("engineeringPlan")
+    if not isinstance(plan, Mapping):
+        raise ValueError("stored project revision does not contain an engineeringPlan")
+    return dict(plan)
+
+
+def _anchored_base_plan(
+    project_store: ProjectStore,
+    supplied_plan: Mapping[str, Any],
+    *,
+    project_id: str | None,
+    expected_revision: int | None,
+) -> tuple[Dict[str, Any], str, str]:
+    """Resolve a caller request to either a new plan or the exact stored base revision."""
+
+    if expected_revision is None:
+        raise RevisionConflict(
+            "expected_revision is required for physical evidence persistence"
+        )
+    resolved_project_id = resolve_engineering_project_id(
+        supplied_plan,
+        project_id=project_id,
+    )
+    supplied_identity = resolve_engineering_project_id(supplied_plan)
+    if supplied_identity != resolved_project_id:
+        raise ValueError(
+            "supplied plan project identity does not match requested project_id"
+        )
+
+    try:
+        latest = project_store.load_latest_with_recovery(resolved_project_id)
+    except ProjectNotFound:
+        if int(expected_revision) != 0:
+            raise RevisionConflict(
+                f"project {resolved_project_id!r} does not exist; expected_revision must be 0"
+            )
+        return dict(supplied_plan), resolved_project_id, "new_plan"
+
+    latest_revision = int(latest["revision"])
+    if int(expected_revision) != latest_revision:
+        raise RevisionConflict(
+            f"project {resolved_project_id!r} is at revision {latest_revision}, "
+            f"expected {expected_revision}"
+        )
+    stored_plan = _engineering_plan_from_envelope(latest)
+    stored_identity = resolve_engineering_project_id(stored_plan)
+    if stored_identity != resolved_project_id:
+        raise ValueError("stored engineering plan identity is inconsistent")
+    return stored_plan, resolved_project_id, "stored_revision"
+
+
 def _audited_response(
     *,
     plan: Dict[str, Any],
     envelope: Dict[str, Any],
     server_attestation_required: bool,
+    base_plan_source: str,
 ) -> Dict[str, Any]:
     audited = plan.get("audited_physical_evidence") or {}
     ledger = audited.get("ledger_assessment") or {}
@@ -98,6 +167,7 @@ def _audited_response(
         "project_id": envelope["project_id"],
         "revision": envelope["revision"],
         "saved_at": envelope["saved_at"],
+        "base_plan_source": base_plan_source,
         "plan": plan,
         "audited_physical_evidence": audited,
         "physical_evidence_package": plan.get("physical_evidence_package"),
@@ -132,8 +202,14 @@ def create_physical_evidence_persistence_router(
         if project_store is None:
             raise _store_unavailable()
         try:
-            plan = apply_physical_evidence_to_plan(
+            base_plan, resolved_project_id, base_source = _anchored_base_plan(
+                project_store,
                 request.plan,
+                project_id=request.project_id,
+                expected_revision=request.expected_revision,
+            )
+            plan = apply_physical_evidence_to_plan(
+                base_plan,
                 calibrations=request.calibrations,
                 evidence=request.evidence,
                 decision=request.decision,
@@ -143,7 +219,7 @@ def create_physical_evidence_persistence_router(
             envelope = save_engineering_plan(
                 project_store,
                 plan,
-                project_id=request.project_id,
+                project_id=resolved_project_id,
                 expected_revision=request.expected_revision,
             )
         except (ProjectStoreError, TypeError, ValueError) as exc:
@@ -155,6 +231,7 @@ def create_physical_evidence_persistence_router(
             "project_id": envelope["project_id"],
             "revision": envelope["revision"],
             "saved_at": envelope["saved_at"],
+            "base_plan_source": base_source,
             "plan": plan,
             "physical_evidence_package": package,
             "scoped_release_assessment": release,
@@ -181,8 +258,14 @@ def create_physical_evidence_persistence_router(
         if project_store is None:
             raise _store_unavailable()
         try:
-            plan = apply_audited_physical_evidence_to_plan(
+            base_plan, resolved_project_id, base_source = _anchored_base_plan(
+                project_store,
                 request.plan,
+                project_id=request.project_id,
+                expected_revision=request.expected_revision,
+            )
+            plan = apply_audited_physical_evidence_to_plan(
+                base_plan,
                 calibrations=request.calibrations,
                 envelopes=request.envelopes,
                 ledger_entries=request.ledger_entries,
@@ -194,7 +277,7 @@ def create_physical_evidence_persistence_router(
             envelope = save_engineering_plan(
                 project_store,
                 plan,
-                project_id=request.project_id,
+                project_id=resolved_project_id,
                 expected_revision=request.expected_revision,
             )
         except (ProjectStoreError, TypeError, ValueError) as exc:
@@ -203,6 +286,7 @@ def create_physical_evidence_persistence_router(
             plan=plan,
             envelope=envelope,
             server_attestation_required=require_server_attestation,
+            base_plan_source=base_source,
         )
 
     @router.post("/audited-apply-save")
