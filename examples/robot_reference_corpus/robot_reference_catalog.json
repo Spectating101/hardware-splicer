@@ -1,0 +1,871 @@
+{
+  "schema_version": "hardware_splicer.robot_reference_catalog.v1",
+  "generated_at": "2026-08-04T15:04:00+08:00",
+  "purpose": "A source-agnostic robotics evidence corpus. Video is one observed source type among repositories, manuals, CAD, firmware, middleware, papers and measurements.",
+  "authority_policy": {
+    "declared": "A source states a design, specification or procedure; it is not physical verification.",
+    "observed": "A visual or operator observation tied to a selected media item and timestamp.",
+    "simulated": "Evidence generated in a model or simulator; it cannot prove physical behavior.",
+    "measured": "Instrument-backed evidence for the exact candidate, configuration and operating envelope."
+  },
+  "families": [
+    {
+      "family_id": "linorobot2",
+      "name": "Linorobot2",
+      "genre": "rover",
+      "sources": [
+        {
+          "source_id": "linorobot2-repo",
+          "source_type": "repository",
+          "title": "linorobot2 ROS 2 stack",
+          "uri": "https://github.com/linorobot/linorobot2",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "baseline autonomy and middleware architecture",
+          "claims": [
+            "2WD, 4WD, and mecanum variants",
+            "Nav2, SLAM Toolbox, robot_localization, URDF and Gazebo integration"
+          ],
+          "limitations": [
+            "repository state must be commit-pinned"
+          ]
+        },
+        {
+          "source_id": "linorobot2-docs",
+          "source_type": "documentation",
+          "title": "linorobot2 documentation",
+          "uri": "https://linorobot.github.io/linorobot2/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "ordered build, odometry, transforms, mapping and navigation guidance",
+          "claims": [
+            "bare robot to autonomous navigation sequence",
+            "base controller, odometry, sensor and transform obligations"
+          ],
+          "limitations": [
+            "published docs may track a moving branch"
+          ]
+        },
+        {
+          "source_id": "linorobot2-hardware",
+          "source_type": "repository",
+          "title": "linorobot2 hardware firmware and build guide",
+          "uri": "https://github.com/linorobot/linorobot2_hardware",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "microcontroller, motor, encoder, IMU and firmware lineage",
+          "claims": [
+            "micro-ROS base controller",
+            "motor driver and board configuration"
+          ],
+          "limitations": [
+            "must pin board profile and firmware revision"
+          ]
+        },
+        {
+          "source_id": "linorobot2-video-query",
+          "source_type": "video_index",
+          "title": "Linorobot2 build demonstrations",
+          "uri": "https://www.youtube.com/results?search_query=linorobot2+build+ROS2",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "discover assembly and bring-up observations for timestamped capture",
+          "claims": [
+            "visible chassis, wiring, calibration and navigation demonstrations"
+          ],
+          "limitations": [
+            "search results are not evidence until a video and timestamp are selected"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "turtlebot3",
+      "name": "TurtleBot3",
+      "genre": "rover",
+      "sources": [
+        {
+          "source_id": "tb3-hardware-assembly",
+          "source_type": "assembly_manual",
+          "title": "TurtleBot3 hardware setup",
+          "uri": "https://emanual.robotis.com/docs/en/platform/turtlebot3/hardware_setup/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "assembly sequence and variant-specific parts",
+          "claims": [
+            "Burger, Waffle and Waffle Pi assembly manuals",
+            "official embedded assembly videos"
+          ],
+          "limitations": [
+            "variant must be selected"
+          ],
+          "locator": "Hardware Assembly / Assembly Manual / Assembly Video"
+        },
+        {
+          "source_id": "tb3-open-hardware",
+          "source_type": "documentation",
+          "title": "TurtleBot3 open hardware and CAD",
+          "uri": "https://www.turtlebot.com/about/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "CAD, chassis, OpenCR schematics, PCB, Gerber and BOM provenance",
+          "claims": [
+            "CAD data and multiple structural variants are available",
+            "OpenCR hardware files are open"
+          ],
+          "limitations": [
+            "linked CAD may be hosted in external tools"
+          ]
+        },
+        {
+          "source_id": "tb3-locomotion",
+          "source_type": "documentation",
+          "title": "TurtleBot3 locomotion and friends",
+          "uri": "https://emanual.robotis.com/docs/en/platform/turtlebot3/locomotion/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "comparative modification patterns",
+          "claims": [
+            "car, tank, omni, mecanum, conveyor and manipulator variants"
+          ],
+          "limitations": [
+            "demonstrations do not prove a custom build"
+          ]
+        },
+        {
+          "source_id": "tb3-overview",
+          "source_type": "documentation",
+          "title": "TurtleBot3 overview and videos",
+          "uri": "https://emanual.robotis.com/docs/en/platform/turtlebot3/overview/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "platform component and compute options",
+          "claims": [
+            "standard mobile robot platform",
+            "Raspberry Pi and Jetson-class compute references"
+          ],
+          "limitations": [
+            "current configuration must be revision-pinned"
+          ]
+        },
+        {
+          "source_id": "tb3-assembly-video-index",
+          "source_type": "video_index",
+          "title": "TurtleBot3 official assembly videos",
+          "uri": "https://emanual.robotis.com/docs/en/platform/turtlebot3/hardware_setup/",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "timestamped visual assembly observations",
+          "claims": [
+            "fastener order, cable placement and plate orientation"
+          ],
+          "limitations": [
+            "embedded media must be resolved to a specific video and timestamp"
+          ],
+          "locator": "Assembly Video"
+        }
+      ]
+    },
+    {
+      "family_id": "openmanipulator_x",
+      "name": "OpenMANIPULATOR-X",
+      "genre": "serial_manipulator",
+      "sources": [
+        {
+          "source_id": "omx-repo",
+          "source_type": "repository",
+          "title": "ROBOTIS OpenManipulator software",
+          "uri": "https://github.com/ROBOTIS-GIT/open_manipulator",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "ROS, MoveIt, Gazebo and controller lineage",
+          "claims": [
+            "OpenManipulator software packages and tutorial resources"
+          ],
+          "limitations": [
+            "release and ROS distribution must be pinned"
+          ]
+        },
+        {
+          "source_id": "omx-assembly",
+          "source_type": "assembly_manual",
+          "title": "OpenMANIPULATOR-X assembly",
+          "uri": "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/assembly/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "BOM, quantities, fasteners, tools, CAD and assembly sequence",
+          "claims": [
+            "five XM430 actuators",
+            "3D CAD files and official assembly manual/video"
+          ],
+          "limitations": [
+            "does not validate a user-modified payload"
+          ]
+        },
+        {
+          "source_id": "omx-cad",
+          "source_type": "cad_index",
+          "title": "OpenMANIPULATOR-X CAD models",
+          "uri": "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/assembly/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "mechanical identity and modification baseline",
+          "claims": [
+            "Onshape and printable part models"
+          ],
+          "limitations": [
+            "external CAD revisions require content hashes"
+          ],
+          "locator": "3D Printed Parts"
+        },
+        {
+          "source_id": "omx-tutorial-videos",
+          "source_type": "video_index",
+          "title": "OpenManipulator tutorial videos",
+          "uri": "https://github.com/ROBOTIS-GIT/open_manipulator",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "demonstrations of control, MoveIt and modifications",
+          "claims": [
+            "usage and demonstration media are linked by the official repository"
+          ],
+          "limitations": [
+            "video observations are not calibration or load evidence"
+          ]
+        },
+        {
+          "source_id": "omx-platform-paper",
+          "source_type": "research_paper",
+          "title": "Open source manipulator platform context",
+          "uri": "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/overview/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "platform specifications and intended extensibility",
+          "claims": [
+            "open platform intended for education and research"
+          ],
+          "limitations": [
+            "specifications must be checked against the selected revision"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "stanford_pupper",
+      "name": "Stanford Pupper",
+      "genre": "quadruped",
+      "sources": [
+        {
+          "source_id": "pupper-repo",
+          "source_type": "repository",
+          "title": "StanfordQuadruped repository",
+          "uri": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "controller, hardware interface and revision lineage",
+          "claims": [
+            "12-actuator quadruped architecture",
+            "joystick, gait controller and hardware interface"
+          ],
+          "limitations": [
+            "legacy and newer Pupper revisions must not be mixed"
+          ]
+        },
+        {
+          "source_id": "pupper-docs",
+          "source_type": "documentation",
+          "title": "Stanford Pupper build guide",
+          "uri": "https://pupper.readthedocs.io/en/latest/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "parts, assembly, calibration and operation sequence",
+          "claims": [
+            "documented build and calibration process"
+          ],
+          "limitations": [
+            "guide revision must match hardware"
+          ]
+        },
+        {
+          "source_id": "pupper-action-video",
+          "source_type": "video",
+          "title": "Stanford Pupper demonstration",
+          "uri": "https://youtu.be/NIjodHA78UE",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "observed locomotion and platform configuration",
+          "claims": [
+            "visible Pupper locomotion"
+          ],
+          "limitations": [
+            "does not prove the viewer's build or hidden wiring"
+          ]
+        },
+        {
+          "source_id": "pupper-paper",
+          "source_type": "research_paper",
+          "title": "Stanford Pupper benchmark paper",
+          "uri": "https://arxiv.org/abs/2110.00736",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "design goals, reproducibility and benchmark context",
+          "claims": [
+            "open-source quadruped benchmark platform",
+            "reference controller and reproducibility claims"
+          ],
+          "limitations": [
+            "paper-era design may differ from current hardware"
+          ]
+        },
+        {
+          "source_id": "doggo-paper",
+          "source_type": "research_paper",
+          "title": "Stanford Doggo quasi-direct-drive quadruped",
+          "uri": "https://arxiv.org/abs/1905.04254",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "comparative actuator and mechanical architecture",
+          "claims": [
+            "open-source quasi-direct-drive design"
+          ],
+          "limitations": [
+            "different platform; comparative only"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "mini_pupper",
+      "name": "Mini Pupper",
+      "genre": "quadruped",
+      "sources": [
+        {
+          "source_id": "minipupper-repo",
+          "source_type": "repository",
+          "title": "Mini Pupper open-source robot dog",
+          "uri": "https://github.com/Tiryoh/MiniPupper-QuadrupedRobot",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "BOM, CAD, installation and calibration links",
+          "claims": [
+            "Fusion 360 CAD, BOM, assembly and software resources"
+          ],
+          "limitations": [
+            "community mirror and external linked files require revision capture"
+          ]
+        },
+        {
+          "source_id": "minipupper-assembly",
+          "source_type": "assembly_manual",
+          "title": "Mini Pupper assembly guide",
+          "uri": "https://minipupperdocs.readthedocs.io/en/latest/guide/Assembly/MiniPupper.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "stepwise leg, hip, body and add-on assembly",
+          "claims": [
+            "fastener sizes and assembly sequence",
+            "embedded video instructions"
+          ],
+          "limitations": [
+            "kit revisions changed after 2022"
+          ]
+        },
+        {
+          "source_id": "minipupper2-assembly",
+          "source_type": "assembly_manual",
+          "title": "Mini Pupper 2 assembly guide",
+          "uri": "https://minipupperdocs.readthedocs.io/en/latest/guide/Assembly/MiniPupper2.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "newer hardware and compute assembly",
+          "claims": [
+            "standard and complete kit videos",
+            "battery and image setup"
+          ],
+          "limitations": [
+            "not interchangeable with Mini Pupper v1"
+          ]
+        },
+        {
+          "source_id": "minipupper-calibration-video",
+          "source_type": "video",
+          "title": "Mini Pupper calibration guide",
+          "uri": "https://youtu.be/oMQS_zwIw40",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "timestamped calibration observations",
+          "claims": [
+            "servo calibration procedure is demonstrated"
+          ],
+          "limitations": [
+            "must map timestamps to the selected kit revision"
+          ]
+        },
+        {
+          "source_id": "minipupper-leg-video",
+          "source_type": "video",
+          "title": "Mini Pupper leg assembly",
+          "uri": "https://youtu.be/Ut7UnS3CTZs",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "visual leg orientation and fastener order",
+          "claims": [
+            "single-leg assembly orientation"
+          ],
+          "limitations": [
+            "visible steps do not prove dimensions or torque"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "spotmicroai",
+      "name": "SpotMicroAI",
+      "genre": "quadruped",
+      "sources": [
+        {
+          "source_id": "spotmicro-docs",
+          "source_type": "documentation",
+          "title": "SpotMicroAI documentation",
+          "uri": "https://spotmicroai.readthedocs.io/en/latest/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "community build, simulation and model references",
+          "claims": [
+            "physical and simulated build paths",
+            "3D print sources and community variants"
+          ],
+          "limitations": [
+            "community references may describe incompatible variants"
+          ]
+        },
+        {
+          "source_id": "spotmicro-bom",
+          "source_type": "assembly_manual",
+          "title": "SpotMicroAI parts collection",
+          "uri": "https://spotmicroai.readthedocs.io/en/latest/gettingStarted/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "electronics, actuator and sensor inventory",
+          "claims": [
+            "12 servo motors, computer, IMU, sonar and servo driver references"
+          ],
+          "limitations": [
+            "component substitutions require electrical validation"
+          ]
+        },
+        {
+          "source_id": "spotmicro-simulation",
+          "source_type": "documentation",
+          "title": "SpotMicroAI simulation and kinematics",
+          "uri": "https://spotmicroai.readthedocs.io/en/latest/simulation/",
+          "authority_ceiling": "simulated",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "URDF/RViz, inverse kinematics and PyBullet/ROS context",
+          "claims": [
+            "simulation and IK resources"
+          ],
+          "limitations": [
+            "simulation is not physical verification"
+          ]
+        },
+        {
+          "source_id": "spotmicro-assembly-1",
+          "source_type": "video",
+          "title": "SpotMicro assembly video part 1",
+          "uri": "https://youtu.be/03RR-mz2hwA",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "visual mechanical assembly observations",
+          "claims": [
+            "first assembly sequence"
+          ],
+          "limitations": [
+            "original Arduino-era design; revision matching required"
+          ]
+        },
+        {
+          "source_id": "spotmicro-assembly-2",
+          "source_type": "video",
+          "title": "SpotMicro assembly video part 2",
+          "uri": "https://youtu.be/LV5vvmhwtxM",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "visual continuation, wiring and body closure observations",
+          "claims": [
+            "second assembly sequence"
+          ],
+          "limitations": [
+            "original Arduino-era design; revision matching required"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "solo12",
+      "name": "ODRI Solo12",
+      "genre": "quadruped",
+      "sources": [
+        {
+          "source_id": "solo12-properties",
+          "source_type": "repository",
+          "title": "Solo robot properties and simulation models",
+          "uri": "https://github.com/open-dynamic-robot-initiative/robot_properties_solo",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "URDF/configuration/simulation identity",
+          "claims": [
+            "Solo12 model and PyBullet loading"
+          ],
+          "limitations": [
+            "repository and dependency revisions must be pinned"
+          ]
+        },
+        {
+          "source_id": "solo12-driver",
+          "source_type": "repository",
+          "title": "Solo12 robot_interfaces driver",
+          "uri": "https://github.com/open-dynamic-robot-initiative/robot_interfaces_solo",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "real robot driver, configuration and demos",
+          "claims": [
+            "Solo8/Solo12 master-board driver"
+          ],
+          "limitations": [
+            "physical operation requires real-time and calibration setup"
+          ]
+        },
+        {
+          "source_id": "solo12-docs",
+          "source_type": "documentation",
+          "title": "Solo12 driver documentation",
+          "uri": "https://open-dynamic-robot-initiative.github.io/robot_interfaces_solo/index.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "homing, offset calibration, configuration and usage",
+          "claims": [
+            "calibration and configuration obligations"
+          ],
+          "limitations": [
+            "documentation may track a moving release"
+          ]
+        },
+        {
+          "source_id": "solo12-examples",
+          "source_type": "documentation",
+          "title": "Solo12 applications and examples",
+          "uri": "https://open-dynamic-robot-initiative.github.io/robot_interfaces_solo/doc/apps_and_examples.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "hold, sine and simulation test progression",
+          "claims": [
+            "data display, hold-position, sine and simulation examples"
+          ],
+          "limitations": [
+            "example motion is not authorization for an unverified build"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "crazyflie",
+      "name": "Crazyflie",
+      "genre": "aerial",
+      "sources": [
+        {
+          "source_id": "crazyflie-firmware",
+          "source_type": "repository",
+          "title": "Crazyflie firmware",
+          "uri": "https://github.com/bitcraze/crazyflie-firmware",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "flight firmware, build and deck integration lineage",
+          "claims": [
+            "open firmware and hardware platform"
+          ],
+          "limitations": [
+            "platform and release must be pinned"
+          ]
+        },
+        {
+          "source_id": "crazyflie-docs",
+          "source_type": "documentation",
+          "title": "Bitcraze Crazyflie documentation",
+          "uri": "https://www.bitcraze.io/documentation/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "getting started, hardware, firmware and deck guidance",
+          "claims": [
+            "official platform and expansion documentation"
+          ],
+          "limitations": [
+            "documentation alone cannot authorize flight"
+          ]
+        },
+        {
+          "source_id": "crazyflie-deck-api",
+          "source_type": "documentation",
+          "title": "Crazyflie deck API",
+          "uri": "https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/development/howto/deck-api/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "custom deck identity and driver integration",
+          "claims": [
+            "deck driver registration and firmware integration"
+          ],
+          "limitations": [
+            "electrical compatibility and mass remain project-specific"
+          ]
+        },
+        {
+          "source_id": "crazyflie-release",
+          "source_type": "repository",
+          "title": "Crazyflie release binaries",
+          "uri": "https://github.com/bitcraze/crazyflie-release",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "binary packaging and release lineage",
+          "claims": [
+            "firmware release artifacts and manifests"
+          ],
+          "limitations": [
+            "binary lineage must match the hardware platform"
+          ]
+        },
+        {
+          "source_id": "crazyflie-video-gallery",
+          "source_type": "video_index",
+          "title": "Crazyflie research and project videos",
+          "uri": "https://robots.ros.org/crazyflie/",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "discover demonstrations for timestamped evidence",
+          "claims": [
+            "research compilation and ROS ecosystem examples"
+          ],
+          "limitations": [
+            "demonstrations are not safe-flight evidence"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "ardupilot_rover",
+      "name": "ArduPilot Rover",
+      "genre": "rover",
+      "sources": [
+        {
+          "source_id": "ardurover-docs",
+          "source_type": "documentation",
+          "title": "ArduPilot Rover documentation",
+          "uri": "https://ardupilot.org/rover/index.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "vehicle configuration, first setup, tuning and safety sequence",
+          "claims": [
+            "ground and water vehicle support",
+            "first-time setup and first-drive guidance"
+          ],
+          "limitations": [
+            "firmware and board combination must be pinned"
+          ]
+        },
+        {
+          "source_id": "ardurover-build",
+          "source_type": "assembly_manual",
+          "title": "Building your own ArduPilot rover",
+          "uri": "https://ardupilot.org/rover/docs/introduction.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "frame, autopilot, ground station and first-drive obligations",
+          "claims": [
+            "DIY rover build sequence and safety warning"
+          ],
+          "limitations": [
+            "generic guidance; custom mechanics remain unresolved"
+          ]
+        },
+        {
+          "source_id": "ardurover-hardware",
+          "source_type": "documentation",
+          "title": "ArduPilot rover peripheral hardware",
+          "uri": "https://ardupilot.org/rover/docs/common-optional-hardware.html",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "sensors, wiring, encoders, safety and peripherals",
+          "claims": [
+            "wheel encoders, power modules, rangefinders and safety hardware"
+          ],
+          "limitations": [
+            "large compatibility surface requires selected components"
+          ]
+        },
+        {
+          "source_id": "ardupilot-repo",
+          "source_type": "repository",
+          "title": "ArduPilot source",
+          "uri": "https://github.com/ArduPilot/ardupilot",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "firmware source and vehicle-code lineage",
+          "claims": [
+            "Rover, Copter, Plane and Sub source"
+          ],
+          "limitations": [
+            "build target and commit must be pinned"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "px4_multicopter",
+      "name": "PX4 Multicopter",
+      "genre": "aerial",
+      "sources": [
+        {
+          "source_id": "px4-repo",
+          "source_type": "repository",
+          "title": "PX4 Autopilot",
+          "uri": "https://github.com/PX4/PX4-Autopilot",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "flight-stack source, airframes and simulation lineage",
+          "claims": [
+            "multicopter, fixed-wing, VTOL and rover support"
+          ],
+          "limitations": [
+            "flight controller, airframe and release must be pinned"
+          ]
+        },
+        {
+          "source_id": "px4-build",
+          "source_type": "documentation",
+          "title": "Building PX4 software",
+          "uri": "https://docs.px4.io/main/en/dev_setup/building_px4",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "reproducible source build and target selection",
+          "claims": [
+            "source and simulation builds"
+          ],
+          "limitations": [
+            "does not validate a physical vehicle"
+          ]
+        },
+        {
+          "source_id": "px4-airframe",
+          "source_type": "documentation",
+          "title": "PX4 airframe configuration",
+          "uri": "https://px4.gitbook.io/px4-user-guide/config/airframe",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "motor geometry and output mapping baseline",
+          "claims": [
+            "frame selection and actuator mapping"
+          ],
+          "limitations": [
+            "generic frame is not a tuned custom design"
+          ]
+        },
+        {
+          "source_id": "px4-multicopter-builds",
+          "source_type": "assembly_manual",
+          "title": "PX4 multicopter builds and videos",
+          "uri": "https://docs.px4.io/main/en/frames_multicopter/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "frame build examples and video index",
+          "claims": [
+            "assembly, configuration, tuning and flight resources"
+          ],
+          "limitations": [
+            "examples span different hardware revisions"
+          ]
+        },
+        {
+          "source_id": "px4-getting-started-video",
+          "source_type": "video_index",
+          "title": "PX4 Drone Development 101",
+          "uri": "https://px4.io/software/getting-started/",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "official beginner video series and simulation demonstrations",
+          "claims": [
+            "development-kit and simulation demonstrations"
+          ],
+          "limitations": [
+            "video must be resolved to episode and timestamp"
+          ]
+        }
+      ]
+    },
+    {
+      "family_id": "reachy",
+      "name": "Reachy",
+      "genre": "humanoid_manipulator",
+      "sources": [
+        {
+          "source_id": "reachy2-docs",
+          "source_type": "documentation",
+          "title": "Reachy 2 documentation",
+          "uri": "https://docs.pollen-robotics.com/",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "platform, SDK, simulation and operation guidance",
+          "claims": [
+            "Reachy 2 programming and platform documentation"
+          ],
+          "limitations": [
+            "hardware CAD/version must be pinned"
+          ]
+        },
+        {
+          "source_id": "reachy2-lerobot",
+          "source_type": "documentation",
+          "title": "Reachy 2 LeRobot integration",
+          "uri": "https://huggingface.co/docs/lerobot/en/reachy2",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "simulation, teleoperation and dataset workflow",
+          "claims": [
+            "Gazebo/MuJoCo simulation and teleoperation data capture"
+          ],
+          "limitations": [
+            "teleoperation is not autonomous safety evidence"
+          ]
+        },
+        {
+          "source_id": "reachy2-teleop",
+          "source_type": "repository",
+          "title": "Reachy2Teleoperation",
+          "uri": "https://github.com/pollen-robotics/Reachy2Teleoperation",
+          "authority_ceiling": "declared",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "VR teleoperation application lineage",
+          "claims": [
+            "Unity VR teleoperation and virtual robot mode"
+          ],
+          "limitations": [
+            "requires matching robot/software versions"
+          ]
+        },
+        {
+          "source_id": "reachy-2019-video",
+          "source_type": "video_index",
+          "title": "Reachy platform introduction and manual",
+          "uri": "https://pollen-robotics.github.io/reachy-2019-docs/",
+          "authority_ceiling": "observed",
+          "revision_policy": "pin commit, release, document revision, or retrieval timestamp before candidate release",
+          "evidence_use": "historical platform and use-case video observations",
+          "claims": [
+            "open-source interactive robot introduction"
+          ],
+          "limitations": [
+            "historical revision; comparative only"
+          ]
+        }
+      ]
+    }
+  ]
+}
