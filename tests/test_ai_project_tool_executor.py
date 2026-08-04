@@ -15,6 +15,18 @@ from hardware_splicer.project_store import ProjectStore
 
 
 def _session(action_type: str, *, status: str = "accepted") -> tuple[dict, dict]:
+    decision = (
+        {
+            "decision": "accepted",
+            "reviewer": "test-engineer",
+            "note": "Accepted as a proposal only.",
+            "decided_at": "2026-08-04T14:00:00+00:00",
+            "project_revision": 1,
+            "executed": False,
+        }
+        if status == "accepted"
+        else None
+    )
     action = {
         "action_id": "action-1234567890abcdef",
         "session_id": "ai-session-1234567890abcdef",
@@ -25,6 +37,7 @@ def _session(action_type: str, *, status: str = "accepted") -> tuple[dict, dict]
         "rationale": "Validate the candidate without physical execution.",
         "inputs": {},
         "status": status,
+        "decision": decision,
         "tool_result": None,
         "automatic_execution": False,
         "authority_effect": "none",
@@ -200,6 +213,17 @@ def test_unaccepted_and_nonallowlisted_actions_are_refused(tmp_path: Path) -> No
             "rover",
             proposed_session,
             proposed_action,
+            compose_callable=lambda **_: {"ok": True},
+        )
+
+    forged_session, forged_action = _session("run_compose", status="accepted")
+    forged_action["decision"] = None
+    with pytest.raises(AIActionNotAccepted):
+        execute_ai_project_action_preview(
+            store,
+            "rover",
+            forged_session,
+            forged_action,
             compose_callable=lambda **_: {"ok": True},
         )
 
