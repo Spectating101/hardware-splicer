@@ -13,7 +13,7 @@ import hmac
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -28,6 +28,7 @@ _SIGNING_KEY_ENV = "HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY"
 _SIGNING_KEY_ID_ENV = "HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY_ID"
 _VERIFICATION_KEYS_ENV = "HARDWARE_SPLICER_EVIDENCE_VERIFICATION_KEYS"
 _MINIMUM_KEY_BYTES = 32
+_MAXIMUM_FUTURE_SKEW = timedelta(minutes=5)
 
 
 class EvidenceAttestationError(RuntimeError):
@@ -71,6 +72,19 @@ def _canonical(value: Any) -> bytes:
         ensure_ascii=False,
         default=str,
     ).encode("utf-8")
+
+
+def _parse_time(value: str) -> datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
 
 
 def _key_bytes(value: str, *, label: str) -> bytes:
@@ -134,17 +148,24 @@ def attestation_capability() -> Dict[str, Any]:
     except EvidenceAttestationUnavailable:
         key_id = None
         signing_available = False
+    verification_error = None
     try:
         verification_ids = sorted(_verification_keys())
-    except EvidenceAttestationUnavailable:
+    except EvidenceAttestationUnavailable as exc:
         verification_ids = []
+        verification_error = str(exc)
     return {
         "schema_version": EVIDENCE_ATTESTATION_SCHEMA,
         "signing_available": signing_available,
         "active_key_id": key_id,
         "verification_key_ids": verification_ids,
+        "verification_configuration_valid": verification_error is None,
+        "verification_configuration_error": verification_error,
         "algorithm": "hmac-sha256",
         "minimum_key_bytes": _MINIMUM_KEY_BYTES,
+        "maximum_future_clock_skew_seconds": int(
+            _MAXIMUM_FUTURE_SKEW.total_seconds()
+        ),
         "bytes_retained": False,
         "automatic_authorization": False,
     }
@@ -181,7 +202,7 @@ def attest_evidence_file_ref(
     issued_at: datetime | None = None,
     attestation_id: str | None = None,
 ) -> AttestedEvidenceFileResult:
-    """Attach a server HMAC to one already server-computed EvidenceFileRef."""
+    """Attach and immediately self-verify a server HMAC over one file reference."""
 
     resolved = (
         file_ref
@@ -223,12 +244,17 @@ def attest_evidence_file_ref(
     metadata[_ATTESTATION_METADATA_KEY] = attestation.model_dump(mode="json")
     attested_ref = unsigned.model_copy(update={"metadata": metadata}, deep=True)
     blockers = verify_evidence_file_attestation(attested_ref)
+    if blockers:
+        raise EvidenceAttestationUnavailable(
+            "server attestation self-verification failed: "
+            + " ".join(blockers)
+        )
     return AttestedEvidenceFileResult(
         file_ref=attested_ref,
         attestation=attestation,
-        verification_blockers=blockers,
+        verification_blockers=[],
         metadata={
-            "server_attested": not blockers,
+            "server_attested": True,
             "raw_bytes_persisted": False,
             "automatic_authorization": False,
         },
@@ -264,15 +290,27 @@ def verify_evidence_file_attestation(
         attestation = EvidenceFileAttestation.model_validate(raw_attestation)
     except ValueError as exc:
         return [f"Raw evidence file {resolved.ref!r} has an invalid server attestation: {exc}"]
+    blockers: list[str] = []
+    issued_at = _parse_time(attestation.issued_at)
+    if issued_at is None:
+        blockers.append(
+            f"Raw evidence file {resolved.ref!r} attestation has an invalid issued_at timestamp."
+        )
+    elif issued_at > datetime.now(timezone.utc) + _MAXIMUM_FUTURE_SKEW:
+        blockers.append(
+            f"Raw evidence file {resolved.ref!r} attestation is materially future-dated."
+        )
     try:
         keys = _verification_keys()
     except EvidenceAttestationUnavailable as exc:
-        return [str(exc)]
+        blockers.append(str(exc))
+        return list(dict.fromkeys(blockers))
     key = keys.get(attestation.key_id)
     if key is None:
-        return [
+        blockers.append(
             f"No verification key is configured for evidence attestation key_id {attestation.key_id!r}."
-        ]
+        )
+        return list(dict.fromkeys(blockers))
     payload = _attestation_payload(
         resolved,
         attestation_id=attestation.attestation_id,
@@ -284,7 +322,6 @@ def verify_evidence_file_attestation(
         _canonical(payload),
         hashlib.sha256,
     ).hexdigest()
-    blockers: list[str] = []
     if not hmac.compare_digest(expected, attestation.signature):
         blockers.append(
             f"Raw evidence file {resolved.ref!r} server attestation signature is invalid."
@@ -297,4 +334,4 @@ def verify_evidence_file_attestation(
         blockers.append(
             f"Raw evidence file {resolved.ref!r} attestation has an invalid retention declaration."
         )
-    return blockers
+    return list(dict.fromkeys(blockers))
