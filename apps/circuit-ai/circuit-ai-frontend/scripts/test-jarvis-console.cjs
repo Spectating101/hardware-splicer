@@ -20,6 +20,7 @@ const proxy = read('app/api/proxy/engineering/projects/[projectId]/ai-sessions/[
 requireText(page, 'JARVIS Console', 'JARVIS page');
 requireText(page, 'Ask JARVIS', 'JARVIS page');
 requireText(page, 'JARVIS is guidance, not project truth.', 'JARVIS page');
+requireText(page, 'human review, deterministic preview, physical evidence, and authority remain separate', 'JARVIS page');
 requireText(page, 'expected_revision: revision', 'JARVIS page');
 requireText(page, 'client_request_id: clientRequestId', 'JARVIS page');
 requireText(page, 'max_proposals: 2', 'JARVIS page');
@@ -29,7 +30,6 @@ requireText(page, 'recommended_action_id', 'JARVIS page');
 requireText(page, 'origin_turn_id', 'JARVIS page');
 requireText(page, 'Awaiting human review', 'JARVIS page');
 requireText(page, 'Review in AI Studio', 'JARVIS page');
-requireText(page, 'Software evidence', 'JARVIS page');
 requireText(layout, 'href="/engineering/jarvis"', 'Engineering navigation');
 requireText(layout, 'JARVIS', 'Engineering navigation');
 requireText(proxy, '/ai-sessions/${encodeURIComponent(sessionId)}/turns', 'JARVIS proxy');
