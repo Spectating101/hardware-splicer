@@ -18,12 +18,18 @@ REQUIRED_PATHS = {
     "/v1/engineering/physical-evidence/release-assess",
     "/v1/engineering/physical-evidence/raw-files/schema",
     "/v1/engineering/physical-evidence/raw-files/hash",
+    "/v1/engineering/physical-evidence/raw-files/hash-attested",
     "/v1/engineering/physical-evidence/envelopes/build",
+    "/v1/engineering/physical-evidence/envelopes/build-attested",
     "/v1/engineering/physical-evidence/ledger/build-entry",
     "/v1/engineering/physical-evidence/audited-assess",
     "/v1/engineering/physical-evidence/audited-release-assess",
+    "/v1/engineering/physical-evidence/attested/schema",
+    "/v1/engineering/physical-evidence/attested-audited-assess",
+    "/v1/engineering/physical-evidence/attested-audited-release-assess",
     "/v1/engineering/physical-evidence/apply-save",
     "/v1/engineering/physical-evidence/audited-apply-save",
+    "/v1/engineering/physical-evidence/attested-audited-apply-save",
 }
 
 
