@@ -56,6 +56,75 @@ def _project_id(plan: Mapping[str, Any]) -> str:
     return str(plan.get("project_name") or "engineering-project")
 
 
+def _rows(value: Any) -> list[dict[str, Any]]:
+    return [dict(row) for row in value if isinstance(row, Mapping)] if isinstance(value, list) else []
+
+
+def _prior_audit(plan: Mapping[str, Any]) -> dict[str, Any]:
+    value = plan.get("audited_physical_evidence")
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
+def _history_continuity_blockers(
+    plan: Mapping[str, Any],
+    envelopes: list[PhysicalEvidenceEnvelope],
+    ledger_entries: list[AuthorizationLedgerEntry],
+) -> tuple[list[str], int, int]:
+    """Require the submitted audit package to preserve all previously saved history."""
+
+    prior = _prior_audit(plan)
+    if not prior:
+        return [], 0, 0
+
+    blockers: list[str] = []
+    prior_envelopes = {
+        str(row.get("envelope_id")): row
+        for row in _rows(prior.get("envelopes"))
+        if row.get("envelope_id")
+    }
+    submitted_envelopes = {row.envelope_id: row for row in envelopes}
+    for envelope_id, prior_row in prior_envelopes.items():
+        submitted = submitted_envelopes.get(envelope_id)
+        if submitted is None:
+            blockers.append(
+                f"Previously persisted evidence envelope {envelope_id} is missing from the submitted audit history."
+            )
+            continue
+        prior_hash = prior_row.get("envelope_hash")
+        if submitted.envelope_hash != prior_hash:
+            blockers.append(
+                f"Previously persisted evidence envelope {envelope_id} was rewritten."
+            )
+
+    prior_ledger = _rows(prior.get("ledger_entries"))
+    if len(ledger_entries) < len(prior_ledger):
+        blockers.append(
+            "Submitted authorization ledger is shorter than the previously persisted ledger."
+        )
+    for index, prior_row in enumerate(prior_ledger):
+        if index >= len(ledger_entries):
+            break
+        submitted = ledger_entries[index]
+        prior_id = str(prior_row.get("entry_id") or "")
+        prior_hash = str(prior_row.get("entry_hash") or "")
+        if submitted.entry_id != prior_id or submitted.entry_hash != prior_hash:
+            blockers.append(
+                "Submitted authorization ledger does not preserve the persisted prefix "
+                f"at sequence {index + 1}."
+            )
+
+    prior_assessment = prior.get("ledger_assessment")
+    if isinstance(prior_assessment, Mapping) and prior_ledger:
+        anchored_hash = prior_assessment.get("latest_entry_hash")
+        persisted_hash = prior_ledger[-1].get("entry_hash")
+        if anchored_hash and anchored_hash != persisted_hash:
+            blockers.append(
+                "Persisted authorization ledger assessment does not match its retained latest entry."
+            )
+
+    return list(dict.fromkeys(blockers)), len(prior_envelopes), len(prior_ledger)
+
+
 def assess_audited_physical_authorization(
     plan: Mapping[str, Any],
     *,
@@ -65,7 +134,7 @@ def assess_audited_physical_authorization(
     scope_id: str | None = None,
     as_of: datetime | None = None,
 ) -> AuditedPhysicalEvidencePackage:
-    """Assess only a decision retained in a valid hash chain with valid envelopes."""
+    """Assess a decision retained in valid envelopes and append-only ledger history."""
 
     now = (as_of or datetime.now(timezone.utc)).astimezone(timezone.utc)
     project_id = _project_id(plan)
@@ -82,14 +151,27 @@ def assess_audited_physical_authorization(
     ]
     envelope_blockers: list[str] = []
     evidence_ids: set[str] = set()
+    envelope_ids: set[str] = set()
     for envelope in resolved_envelopes:
         envelope_blockers.extend(validate_physical_evidence_envelope(envelope))
+        if envelope.envelope_id in envelope_ids:
+            envelope_blockers.append(
+                f"Physical evidence envelope_id {envelope.envelope_id!r} is duplicated."
+            )
+        envelope_ids.add(envelope.envelope_id)
         if envelope.record.evidence_id in evidence_ids:
             envelope_blockers.append(
                 f"Physical evidence_id {envelope.record.evidence_id!r} appears in multiple envelopes."
             )
         evidence_ids.add(envelope.record.evidence_id)
 
+    continuity_blockers, prior_envelope_count, prior_ledger_count = (
+        _history_continuity_blockers(
+            plan,
+            resolved_envelopes,
+            resolved_ledger,
+        )
+    )
     ledger_assessment = validate_authorization_ledger(
         resolved_ledger,
         project_id=project_id,
@@ -117,6 +199,7 @@ def assess_audited_physical_authorization(
     )
     blockers = [
         *envelope_blockers,
+        *continuity_blockers,
         *ledger_assessment.blockers,
         *package.assessment.blockers,
     ]
@@ -135,7 +218,13 @@ def assess_audited_physical_authorization(
             )
     blockers = list(dict.fromkeys(blockers))
     warnings = list(dict.fromkeys(warnings))
-    applicable = package.assessment.applicable and ledger_assessment.valid and not envelope_blockers and not blockers
+    applicable = (
+        package.assessment.applicable
+        and ledger_assessment.valid
+        and not envelope_blockers
+        and not continuity_blockers
+        and not blockers
+    )
 
     if blockers or not applicable:
         assessment = package.assessment.model_copy(
@@ -162,6 +251,10 @@ def assess_audited_physical_authorization(
             "assessment_time": now.isoformat(),
             "tamper_evident_envelopes_required": True,
             "valid_authorization_chain_required": True,
+            "append_only_history_required": True,
+            "prior_envelope_count": prior_envelope_count,
+            "prior_ledger_entry_count": prior_ledger_count,
+            "history_continuity_valid": not continuity_blockers,
             "automatic_authorization": False,
             "authorization_carries_across_revisions": False,
         },
