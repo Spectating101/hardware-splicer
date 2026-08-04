@@ -23,6 +23,10 @@ from .robot_model_import import parse_robot_model, topology_from_robot_model
 
 
 STORED_SOURCE_PARSER_SCHEMA = "hardware_splicer.stored_source_parser.v1"
+STORED_SOURCE_PARSER_IMPLEMENTATION = (
+    "hardware_splicer.stored_source_parser.python.v1"
+)
+MAX_PERSISTED_PARSER_OUTPUT_BYTES = 8 * 1024 * 1024
 
 
 class StoredParserStatus(str, Enum):
@@ -36,6 +40,7 @@ class StoredSourceParserModel(BaseModel):
 
 class StoredSourceParserResult(StoredSourceParserModel):
     schema_version: str = STORED_SOURCE_PARSER_SCHEMA
+    parser_identity: str = STORED_SOURCE_PARSER_IMPLEMENTATION
     project_id: str
     source_id: str
     content_hash: str
@@ -57,7 +62,9 @@ def _descriptor_metadata(source: Mapping[str, Any]) -> Dict[str, Any]:
 
 def _authority(value: Any) -> AuthorityState:
     try:
-        authority = AuthorityState(str(value or AuthorityState.DECLARED.value).lower())
+        authority = AuthorityState(
+            str(value or AuthorityState.DECLARED.value).lower()
+        )
     except ValueError as exc:
         raise ValueError(f"unsupported source authority: {value!r}") from exc
     if authority not in {
@@ -65,14 +72,18 @@ def _authority(value: Any) -> AuthorityState:
         AuthorityState.PROPOSED,
         AuthorityState.DECLARED,
     }:
-        raise ValueError("stored uploaded sources cannot execute above declared authority")
+        raise ValueError(
+            "stored uploaded sources cannot execute above declared authority"
+        )
     return authority
 
 
 def _expected_digest(source: Mapping[str, Any]) -> str:
     content_hash = str(source.get("content_hash") or source.get("revision") or "")
     if not content_hash.startswith("sha256:") or len(content_hash) != 71:
-        raise ValueError("registered source requires a canonical sha256 content_hash")
+        raise ValueError(
+            "registered source requires a canonical sha256 content_hash"
+        )
     digest = content_hash.split(":", 1)[1]
     if any(character not in "0123456789abcdef" for character in digest):
         raise ValueError("registered source sha256 digest is invalid")
@@ -86,7 +97,13 @@ def _blob_path(
 ) -> Path:
     root = Path(project_root) if project_root is not None else default_project_root()
     root = root.expanduser().resolve()
-    project_dir = (root / validate_project_id(project_id)).resolve()
+    unresolved_project_dir = root / validate_project_id(project_id)
+    if unresolved_project_dir.is_symlink():
+        raise ValueError("project source directory must not be a symlink")
+    project_dir = unresolved_project_dir.resolve()
+    if project_dir.parent != root:
+        raise ValueError("project source directory resolves outside project root")
+
     metadata = _descriptor_metadata(source)
     blob_ref = str(metadata.get("blob_ref") or "")
     if not blob_ref:
@@ -94,16 +111,16 @@ def _blob_path(
     relative = Path(blob_ref)
     if relative.is_absolute() or ".." in relative.parts:
         raise ValueError("registered source blob_ref is not project-relative")
-    target = (project_dir / relative).resolve()
-    if target == project_dir or project_dir not in target.parents:
-        raise ValueError("registered source blob resolves outside its project")
+
+    unresolved_target = project_dir / relative
     current = project_dir
-    if current.is_symlink():
-        raise ValueError("project source root must not be a symlink")
     for part in relative.parts:
         current = current / part
         if current.exists() and current.is_symlink():
             raise ValueError("registered source path contains a symlink")
+    target = unresolved_target.resolve()
+    if target == project_dir or project_dir not in target.parents:
+        raise ValueError("registered source blob resolves outside its project")
     if not target.is_file():
         raise ValueError("registered source blob does not exist")
     return target
@@ -125,7 +142,9 @@ def read_registered_source_bytes(
     expected = _expected_digest(source)
     actual = hashlib.sha256(content).hexdigest()
     if actual != expected:
-        raise ValueError("registered source blob no longer matches its content_hash")
+        raise ValueError(
+            "registered source blob no longer matches its content_hash"
+        )
     return content
 
 
@@ -146,7 +165,11 @@ def _bounded_authority(value: Any, ceiling: AuthorityState) -> str:
         requested = AuthorityState(str(value or ceiling.value).lower())
     except ValueError:
         requested = ceiling
-    return requested.value if _authority_rank(requested) <= _authority_rank(ceiling) else ceiling.value
+    return (
+        requested.value
+        if _authority_rank(requested) <= _authority_rank(ceiling)
+        else ceiling.value
+    )
 
 
 def _bounded_source_descriptor(
@@ -157,8 +180,12 @@ def _bounded_source_descriptor(
     index: int,
 ) -> Dict[str, Any]:
     row = dict(source)
-    row["source_id"] = str(row.get("source_id") or f"{parent_source_id}-derived-{index + 1}")
-    row["authority_ceiling"] = _bounded_authority(row.get("authority_ceiling"), ceiling)
+    row["source_id"] = str(
+        row.get("source_id") or f"{parent_source_id}-derived-{index + 1}"
+    )
+    row["authority_ceiling"] = _bounded_authority(
+        row.get("authority_ceiling"), ceiling
+    )
     claims: list[Dict[str, Any]] = []
     for claim in row.get("claims") or []:
         if not isinstance(claim, Mapping):
@@ -169,7 +196,11 @@ def _bounded_source_descriptor(
         )
         claims.append(bounded_claim)
     row["claims"] = claims
-    metadata = dict(row.get("metadata") or {}) if isinstance(row.get("metadata"), Mapping) else {}
+    metadata = (
+        dict(row.get("metadata") or {})
+        if isinstance(row.get("metadata"), Mapping)
+        else {}
+    )
     metadata.update(
         {
             "derived_from_uploaded_source_id": parent_source_id,
@@ -196,12 +227,15 @@ def _json_descriptors(value: Any) -> list[Mapping[str, Any]]:
             rows = [value]
         else:
             raise ValueError(
-                "JSON is valid but does not contain an engineering source descriptor envelope"
+                "JSON is valid but does not contain an engineering source "
+                "descriptor envelope"
             )
     else:
         raise ValueError("engineering source JSON must be an object or array")
     if not rows or not all(isinstance(row, Mapping) for row in rows):
-        raise ValueError("engineering source JSON must contain one or more object descriptors")
+        raise ValueError(
+            "engineering source JSON must contain one or more object descriptors"
+        )
     return list(rows)
 
 
@@ -220,8 +254,15 @@ def execute_stored_source_parser(
     authority = _authority(source.get("authority_ceiling"))
     metadata = _descriptor_metadata(source)
     parser_route = str(metadata.get("parser_route") or "").strip() or None
-    parser_disposition = str(metadata.get("parser_disposition") or "inventory_only")
+    parser_disposition = str(
+        metadata.get("parser_disposition") or "inventory_only"
+    )
     content_hash = f"sha256:{_expected_digest(source)}"
+    content = read_registered_source_bytes(
+        project_id,
+        source,
+        project_root=project_root,
+    )
 
     if parser_disposition != "structured" or not parser_route:
         return StoredSourceParserResult(
@@ -232,25 +273,24 @@ def execute_stored_source_parser(
             status=StoredParserStatus.SKIPPED,
             authority_ceiling=authority,
             limitations=[
-                "The registered source is inventory-only and has no executable bounded parser."
+                "The registered source is inventory-only and has no executable "
+                "bounded parser."
             ],
             metadata={
                 "parser_disposition": parser_disposition,
+                "blob_hash_reverified": True,
+                "verified_size_bytes": len(content),
                 "physical_authority_unchanged": True,
             },
         )
-
-    content = read_registered_source_bytes(
-        project_id,
-        source,
-        project_root=project_root,
-    )
 
     if parser_route == "robot_model_import":
         model_format = str(metadata.get("structured_format") or "")
         model = parse_robot_model(content, model_format)
         if model.content_hash != content_hash:
-            raise ValueError("robot-model parser hash disagrees with registered source")
+            raise ValueError(
+                "robot-model parser hash disagrees with registered source"
+            )
         topology = topology_from_robot_model(model)
         return StoredSourceParserResult(
             project_id=project_id,
@@ -271,10 +311,12 @@ def execute_stored_source_parser(
                 },
             },
             limitations=[
-                "Parsed design relationships do not prove physical fit, calibration, ratings, or safe motion."
+                "Parsed design relationships do not prove physical fit, "
+                "calibration, ratings, or safe motion."
             ],
             metadata={
                 "parser_reverified_hash": True,
+                "verified_size_bytes": len(content),
                 "candidate_only": True,
                 "physical_authority_unchanged": True,
             },
@@ -284,7 +326,9 @@ def execute_stored_source_parser(
         try:
             value = json.loads(content.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise ValueError(f"registered JSON source cannot be decoded: {exc}") from exc
+            raise ValueError(
+                f"registered JSON source cannot be decoded: {exc}"
+            ) from exc
         bounded = [
             _bounded_source_descriptor(
                 row,
@@ -312,10 +356,12 @@ def execute_stored_source_parser(
             },
             derived_sources=bounded,
             limitations=[
-                "Parsing validates structure and authority bounds; it does not establish correctness or trustworthiness."
+                "Parsing validates structure and authority bounds; it does not "
+                "establish correctness or trustworthiness."
             ],
             metadata={
                 "parser_reverified_hash": True,
+                "verified_size_bytes": len(content),
                 "derived_authority_capped": True,
                 "physical_authority_unchanged": True,
             },
@@ -330,10 +376,12 @@ def execute_stored_source_parser(
             status=StoredParserStatus.SKIPPED,
             authority_ceiling=authority,
             limitations=[
-                "No callable bounded STEP parser is registered in this build; the file remains hash-verified inventory."
+                "No callable bounded STEP parser is registered in this build; "
+                "the file remains hash-verified inventory."
             ],
             metadata={
                 "blob_hash_reverified": True,
+                "verified_size_bytes": len(content),
                 "parser_available": False,
                 "physical_authority_unchanged": True,
             },
@@ -346,8 +394,12 @@ def execute_stored_source_parser(
         parser_route=parser_route,
         status=StoredParserStatus.SKIPPED,
         authority_ceiling=authority,
-        limitations=[f"No bounded parser implementation is registered for {parser_route!r}."],
+        limitations=[
+            f"No bounded parser implementation is registered for {parser_route!r}."
+        ],
         metadata={
+            "blob_hash_reverified": True,
+            "verified_size_bytes": len(content),
             "parser_available": False,
             "physical_authority_unchanged": True,
         },
