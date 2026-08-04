@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from hardware_splicer.physical_evidence import (
     AuthorizationDecision,
     AuthorizationScope,
@@ -9,6 +11,9 @@ from hardware_splicer.physical_evidence_ledger import (
     build_authorization_ledger_entry,
     validate_authorization_ledger,
 )
+
+
+AS_OF = datetime.fromisoformat("2026-08-04T03:00:00+00:00")
 
 
 def _decision(*, authorization_id: str, status: str, reviewed_at: str):
@@ -64,7 +69,7 @@ def test_chronologically_ordered_chain_remains_valid() -> None:
         project_id="chronology",
         candidate_revision="r1",
         scope_id="scope-r1",
-        as_of="2026-08-04T03:00:00+00:00",
+        as_of=AS_OF,
     )
 
     assert report.valid is True
@@ -90,7 +95,7 @@ def test_backdated_append_is_rejected_even_with_valid_hash_chain() -> None:
         [first, second],
         project_id="chronology",
         candidate_revision="r1",
-        as_of="2026-08-04T03:00:00+00:00",
+        as_of=AS_OF,
     )
 
     assert report.valid is False
@@ -113,7 +118,7 @@ def test_entry_recorded_before_review_is_rejected() -> None:
         [entry],
         project_id="chronology",
         candidate_revision="r1",
-        as_of="2026-08-04T03:00:00+00:00",
+        as_of=AS_OF,
     )
 
     assert report.valid is False
