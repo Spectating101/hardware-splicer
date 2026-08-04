@@ -52,11 +52,15 @@ def install_audited_release_action_compatibility() -> None:
                 )
         payload.update(
             {
+                "raw_evidence_hash_schema_route": "/v1/engineering/physical-evidence/raw-files/schema",
+                "raw_evidence_hash_route": "/v1/engineering/physical-evidence/raw-files/hash",
                 "physical_envelope_build_route": "/v1/engineering/physical-evidence/envelopes/build",
                 "authorization_ledger_build_route": "/v1/engineering/physical-evidence/ledger/build-entry",
                 "audited_physical_assess_route": "/v1/engineering/physical-evidence/audited-assess",
                 "audited_release_assess_route": "/v1/engineering/physical-evidence/audited-release-assess",
                 "audited_apply_save_route": "/v1/engineering/physical-evidence/audited-apply-save",
+                "server_computed_raw_hash_recommended": True,
+                "raw_hash_alone_proves_origin": False,
                 "tamper_evident_envelopes_required": True,
                 "valid_authorization_chain_required": True,
                 "automatic_authorization": False,
