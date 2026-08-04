@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from hardware_splicer.audited_physical_evidence import (
     assess_audited_physical_authorization,
 )
@@ -16,7 +18,7 @@ from hardware_splicer.physical_evidence_ledger import (
 )
 
 
-AS_OF = "2026-08-04T04:00:00+00:00"
+AS_OF = datetime.fromisoformat("2026-08-04T04:00:00+00:00")
 
 
 def _plan() -> dict:
