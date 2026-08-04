@@ -76,6 +76,7 @@ from .vision_evidence_assistant import build_vision_evidence_report, enrich_inta
 from . import robot_model_import_compat as _robot_model_import_compat  # noqa: F401,E402
 from . import physical_evidence_ledger_compat as _physical_evidence_ledger_compat  # noqa: F401,E402
 from . import engineering_status_compat as _engineering_status_compat  # noqa: F401,E402
+from . import engineering_status_revalidation_compat as _engineering_status_revalidation_compat  # noqa: F401,E402
 from . import manufacturing_closure_compat as _manufacturing_closure_compat  # noqa: F401,E402
 from . import engineering_revision_diff_compat as _engineering_revision_diff_compat  # noqa: F401,E402
 from . import engineering_revision_authority_compat as _engineering_revision_authority_compat  # noqa: F401,E402
