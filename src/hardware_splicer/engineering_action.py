@@ -86,14 +86,26 @@ def _analysis_payload(plan: Mapping[str, Any]) -> Dict[str, Any]:
 def _manufacturing_payload(plan: Mapping[str, Any]) -> tuple[Dict[str, Any], list[str]]:
     existing = plan.get("manufacturing_closure")
     if isinstance(existing, Mapping):
-        report = ManufacturingClosureReport.model_validate(existing)
+        try:
+            report = ManufacturingClosureReport.model_validate(existing)
+        except ValueError:
+            report = build_manufacturing_closure(plan)
     else:
         report = build_manufacturing_closure(plan)
     blockers = [row.message for row in report.blocking_checks]
     return {
         "manufacturing_closure": report.model_dump(mode="json"),
+        "mechanical_geometry": _mapping(plan.get("mechanical_geometry")),
+        "mechanical_fit": _mapping(plan.get("mechanical_fit")),
         "closure_route": "/v1/engineering/manufacturing-closure",
+        "mechanical_schema_route": "/v1/engineering/mechanical/schema",
+        "geometry_apply_route": "/v1/engineering/mechanical/geometry/apply",
+        "fit_check_route": "/v1/engineering/mechanical/fit/check",
+        "fit_apply_route": "/v1/engineering/mechanical/fit/apply",
         "required_evidence": report.required_evidence,
+        "full_brep_collision": False,
+        "structural_analysis": False,
+        "fabrication_authorized": False,
     }, blockers
 
 
@@ -116,6 +128,7 @@ def _execution_payload(plan: Mapping[str, Any]) -> tuple[Dict[str, Any], list[st
         "checks": _rows(execution_plan.get("checks")),
         "previews": previews,
         "unresolved": _rows(execution_plan.get("unresolved")),
+        "capability_route": "/v1/engineering/execution/capabilities",
         "preview_route": "/v1/engineering/execution/preview",
         "run_route": "/v1/engineering/execution/run",
         "evidence_route": "/v1/engineering/execution/evidence/save",
@@ -155,13 +168,28 @@ def _release_payload(plan: Mapping[str, Any]) -> tuple[Dict[str, Any], list[str]
         blockers.extend(row.message for row in release.blockers)
     except (TypeError, ValueError) as exc:
         blockers.append(f"MachineProject release assessment is unavailable: {exc}")
+
+    scoped = _mapping(plan.get("scoped_release_assessment"))
+    if scoped and not scoped.get("authorized"):
+        for row in scoped.get("blockers") or []:
+            if isinstance(row, Mapping):
+                blockers.append(str(row.get("message") or row.get("reason") or "Scoped release blocker"))
+            else:
+                blockers.append(str(row))
     return {
         "operator_guide": _mapping(plan.get("operator_guide")),
         "release_assessment": assessment,
+        "physical_evidence_package": _mapping(plan.get("physical_evidence_package")),
+        "scoped_release_assessment": scoped,
         "review_route": "/v1/engineering/guide",
+        "physical_schema_route": "/v1/engineering/physical-evidence/schema",
+        "physical_assess_route": "/v1/engineering/physical-evidence/assess",
+        "physical_release_assess_route": "/v1/engineering/physical-evidence/release-assess",
+        "physical_apply_save_route": "/v1/engineering/physical-evidence/apply-save",
         "physical_evidence_required": True,
         "human_authorization_required": True,
-    }, blockers
+        "automatic_authorization": False,
+    }, list(dict.fromkeys(blockers))
 
 
 def prepare_engineering_action(
