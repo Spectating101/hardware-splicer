@@ -1,16 +1,15 @@
 'use client';
 
-import { ChangeEvent, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import Link from 'next/link';
 import {
   AlertTriangle,
   ArrowLeft,
-  Boxes,
   CheckCircle2,
   ChevronRight,
   ClipboardList,
   Download,
-  FileJson2,
   LoaderCircle,
   Play,
   Plus,
@@ -326,7 +325,7 @@ export default function EngineeringPreflightPage() {
               </div>
               <div className="mt-3 space-y-2">
                 {parts.map((part, index) => (
-                  <div key={`${index}-${part.name}`} className="grid grid-cols-[1fr_0.8fr_64px_32px] gap-2">
+                  <div key={index} className="grid grid-cols-[1fr_0.8fr_64px_32px] gap-2">
                     <input aria-label={`Part ${index + 1} name`} value={part.name} onChange={(event) => updatePart(index, 'name', event.target.value)} placeholder="Motor" className="min-w-0 rounded-lg border border-white/10 bg-[#040b14] px-2.5 py-2 text-xs text-white" />
                     <input aria-label={`Part ${index + 1} type`} value={part.type} onChange={(event) => updatePart(index, 'type', event.target.value)} placeholder="dc_motor" className="min-w-0 rounded-lg border border-white/10 bg-[#040b14] px-2.5 py-2 text-xs text-white" />
                     <input aria-label={`Part ${index + 1} quantity`} type="number" min="1" value={part.quantity} onChange={(event) => updatePart(index, 'quantity', event.target.value)} className="min-w-0 rounded-lg border border-white/10 bg-[#040b14] px-2 py-2 text-xs text-white" />
