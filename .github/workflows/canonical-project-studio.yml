@@ -1,0 +1,118 @@
+name: Canonical Project Studio
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/canonical-project-studio.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-canonical-project-studio.cjs"
+      - "scripts/mock_canonical_project_studio_backend.py"
+      - "scripts/mock_outsider_jarvis_backend.py"
+      - "docs/CANONICAL_PROJECT_STUDIO.md"
+      - ".github/workflows/canonical-project-studio.yml"
+  pull_request:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/canonical-project-studio.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-canonical-project-studio.cjs"
+      - "scripts/mock_canonical_project_studio_backend.py"
+      - "scripts/mock_outsider_jarvis_backend.py"
+      - "docs/CANONICAL_PROJECT_STUDIO.md"
+      - ".github/workflows/canonical-project-studio.yml"
+
+jobs:
+  project-studio:
+    name: First-use project to verified package
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      HARDWARE_SPLICER_API_URL: http://127.0.0.1:8090
+      OUTSIDER_APP_URL: http://127.0.0.1:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+      HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+      HARDWARE_SPLICER_OFFLINE_LLM: "1"
+      HARDWARE_SPLICER_OFFLINE_VISION: "1"
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+      QWEN_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install and compile backend fixtures
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          python -m py_compile \
+            scripts/mock_outsider_jarvis_backend.py \
+            scripts/mock_canonical_project_studio_backend.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend and browser test dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: |
+          npm ci
+          npm install --no-save --package-lock=false @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Validate interface contracts and production build
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: |
+          node scripts/test-canonical-project-studio.cjs
+          npm run typecheck
+          npm run build
+      - name: Run canonical Studio browser path
+        run: |
+          set -euo pipefail
+          python scripts/mock_canonical_project_studio_backend.py > /tmp/project-studio-backend.log 2>&1 &
+          BACKEND_PID=$!
+          pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
+          npm run start -- -H 127.0.0.1 -p 3000 > /tmp/project-studio-frontend.log 2>&1 &
+          FRONTEND_PID=$!
+          popd >/dev/null
+          cleanup() {
+            kill "$FRONTEND_PID" "$BACKEND_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8090/healthz >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/studio >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              cat /tmp/project-studio-backend.log || true
+              cat /tmp/project-studio-frontend.log || true
+              exit 1
+            fi
+            sleep 2
+          done
+          pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
+          npx playwright test e2e/canonical-project-studio.spec.js \
+            --browser=chromium \
+            --reporter=line \
+            --trace=retain-on-failure \
+            --workers=1
+          popd >/dev/null
+      - name: Show service logs on failure
+        if: failure()
+        run: |
+          cat /tmp/project-studio-backend.log || true
+          cat /tmp/project-studio-frontend.log || true
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-project-studio
+          path: |
+            apps/circuit-ai/circuit-ai-frontend/test-results
+            /tmp/project-studio-backend.log
+            /tmp/project-studio-frontend.log
+          if-no-files-found: warn
