@@ -22,8 +22,8 @@ test('new user can resume a project and finish the visible JARVIS workflow in on
   await expect(page.getByText('2 registered sources', { exact: true })).toBeVisible();
   await expect(page.getByText('Direct controller DUT adapter')).toBeVisible();
   await expect(page.getByText('Compile the DUT validation adapter')).toBeVisible();
-  await expect(page.getByText(/1.8 V DUT interface is not protected from 3.3 V controller/)).toBeVisible();
-  await expect(page.getByText('Fabrication')).toBeVisible();
+  await expect(page.getByText(/1.8 V DUT interface is not protected from 3.3 V controller/).first()).toBeVisible();
+  await expect(page.getByText('Fabrication', { exact: true })).toBeVisible();
   await expect(page.getByText('closed', { exact: true }).first()).toBeVisible();
 
   await page.getByPlaceholder('What is still unsupported? Which action should we review next? Is this ready for fabrication?').fill(
@@ -34,8 +34,8 @@ test('new user can resume a project and finish the visible JARVIS workflow in on
   await expect(page.getByText('Revision 7', { exact: true }).first()).toBeVisible();
   await expect(page.getByText(/The fixture is not pre-fabrication ready/)).toBeVisible();
   await expect(page.getByText('Prepare fixture pre-fabrication verification')).toBeVisible();
-  await expect(page.getByText(/No powered-off high-impedance translator is proven/)).toBeVisible();
-  await expect(page.getByText('2 persisted turns').or(page.getByText('1 persisted turn'))).toBeVisible();
+  await expect(page.getByText(/No powered-off high-impedance translator is proven/).first()).toBeVisible();
+  await expect(page.getByText('1 persisted turn', { exact: true })).toBeVisible();
 
   const repairButton = page.getByRole('button', { name: 'Propose repair' });
   await expect(repairButton).toBeVisible();
