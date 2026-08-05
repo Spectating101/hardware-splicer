@@ -26,7 +26,9 @@ const pageContracts = [
   "activeView === 'system'",
   'selectedObjectId={selectedInCurrentGraph?.id}',
   'onSelectObject={setSelectedObject}',
-  'Project truth',
+  'Evidence and provenance',
+  'Proposal lineage',
+  'Physical gates',
   'Authority effect',
   'Never owned',
 ];
