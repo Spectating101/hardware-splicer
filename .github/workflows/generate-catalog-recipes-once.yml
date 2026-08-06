@@ -54,3 +54,5 @@ jobs:
           git add .github/workflows/generate-catalog-recipes-once.yml
           git commit -m "Package generated catalog recipe data"
           git push origin HEAD:"$BRANCH"
+
+# Second branch push intentionally triggers this one-shot generator after registration.
