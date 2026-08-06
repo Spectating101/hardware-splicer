@@ -16,7 +16,7 @@ def _record(raw_refs: list[str]) -> dict:
         "evidence_id": "bounded-test",
         "project_id": "bounded-project",
         "candidate_revision": "r1",
-        "kind": "functional_test",
+        "kind": "electrical_measurement",
         "target_ids": ["bounded-project"],
         "procedure_id": "bounded-test",
         "passed": True,
