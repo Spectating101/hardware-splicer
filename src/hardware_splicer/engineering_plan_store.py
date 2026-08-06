@@ -7,9 +7,43 @@ from typing import Any, Dict, Mapping
 from .project_store import ProjectStore
 
 
+def resolve_engineering_project_id(
+    plan: Mapping[str, Any],
+    *,
+    project_id: str | None = None,
+) -> str:
+    """Resolve the stable project identity used by engineering-plan persistence.
+
+    An explicit route/request identity wins so callers can target a known project,
+    while callers that omit it inherit the identity embedded in the plan.  The
+    physical-evidence persistence layer compares both forms before writing, which
+    prevents an explicit project ID from silently rebinding a plan from another
+    project.
+    """
+
+    explicit = str(project_id or "").strip()
+    if explicit:
+        return explicit
+
+    machine_project = (
+        plan.get("machine_project")
+        if isinstance(plan.get("machine_project"), Mapping)
+        else {}
+    )
+    for candidate in (
+        machine_project.get("project_id"),
+        plan.get("project_id"),
+        plan.get("project_name"),
+    ):
+        resolved = str(candidate or "").strip()
+        if resolved:
+            return resolved
+    return "engineering-project"
+
+
 def engineering_snapshot(plan: Mapping[str, Any]) -> Dict[str, Any]:
     machine_project = plan.get("machine_project") if isinstance(plan.get("machine_project"), Mapping) else {}
-    project_id = str(machine_project.get("project_id") or plan.get("project_name") or "engineering-project")
+    project_id = resolve_engineering_project_id(plan)
     return {
         "snapshot_schema_version": "hardware_splicer.engineering_project_snapshot.v1",
         "projectId": project_id,
@@ -45,7 +79,7 @@ def save_engineering_plan(
     expected_revision: int | None = None,
 ) -> Dict[str, Any]:
     snapshot = engineering_snapshot(plan)
-    resolved_project_id = str(project_id or snapshot["projectId"])
+    resolved_project_id = resolve_engineering_project_id(plan, project_id=project_id)
     snapshot["projectId"] = resolved_project_id
     machine_project = snapshot.get("machineProject")
     if isinstance(machine_project, dict):
