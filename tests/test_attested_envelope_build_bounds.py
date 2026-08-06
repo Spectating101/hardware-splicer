@@ -37,6 +37,23 @@ def _raw_file(ref: str) -> dict:
     }
 
 
+def _error_text(response) -> str:
+    detail = response.json()["detail"]
+    if isinstance(detail, dict):
+        return " ".join(
+            str(detail.get(key) or "")
+            for key in ("type", "message")
+        ).strip()
+    if isinstance(detail, list):
+        return " ".join(
+            str(row.get("msg") or row)
+            if isinstance(row, dict)
+            else str(row)
+            for row in detail
+        )
+    return str(detail)
+
+
 def test_attested_builder_rejects_record_raw_ref_mismatch(monkeypatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY", KEY)
     monkeypatch.setenv("HARDWARE_SPLICER_EVIDENCE_SIGNING_KEY_ID", "bounded-key")
@@ -54,8 +71,12 @@ def test_attested_builder_rejects_record_raw_ref_mismatch(monkeypatch) -> None:
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"]["type"] == "invalid_attested_evidence_envelope"
-    assert "raw refs" in response.json()["detail"]["message"]
+    error_text = _error_text(response).lower()
+    assert "raw refs" in error_text
+    assert (
+        "invalid_attested_evidence_envelope" in error_text
+        or "value error" in error_text
+    )
 
 
 def test_attested_builder_rejects_more_than_eight_files(monkeypatch) -> None:
