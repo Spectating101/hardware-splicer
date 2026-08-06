@@ -45,7 +45,7 @@ jobs:
           fi
           printf 'Running %s changed test files:\n' "${#changed_tests[@]}"
           printf ' - %s\n' "${changed_tests[@]}"
-          PYTHONPATH=src python -m pytest -q "${changed_tests[@]}"
+          PYTHONPATH=src python -m pytest -q --tb=short --maxfail=5 "${changed_tests[@]}"
 
   diagnose:
     runs-on: ubuntu-latest
@@ -70,7 +70,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
-          PYTHONPATH=src pytest -q \
+          PYTHONPATH=src pytest -q --tb=short --maxfail=5 \
             tests/test_project_review_store.py \
             tests/test_project_review_api.py \
             tests/test_project_store.py \
@@ -80,6 +80,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          PYTEST_ADDOPTS: "--tb=short --maxfail=5"
         run: |
           source .venv/bin/activate
           make test
