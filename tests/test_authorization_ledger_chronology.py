@@ -32,8 +32,13 @@ def _decision(*, authorization_id: str, status: str, reviewed_at: str):
         ),
         reviewer="reviewer",
         reviewed_at=reviewed_at,
-        evidence_ids=[],
+        evidence_ids=["chronology-evidence"],
         reason="Chronology test decision.",
+        revocation_reason=(
+            "Chronology test authorization withdrawn."
+            if status == "revoked"
+            else None
+        ),
     )
 
 
