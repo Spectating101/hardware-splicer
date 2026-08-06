@@ -106,7 +106,9 @@ describe("ElectricalDesignPanel", () => {
     expect(await screen.findByText("required pin unconnected")).toBeInTheDocument();
     expect(screen.getByText(/required pin 'controller-vin' is unconnected/)).toBeInTheDocument();
     expect(projectElectricalDesign).toHaveBeenCalledWith(session().machineProject);
-    expect(screen.getByText("1 ERC errors")).toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent?.trim() === "1 ERC errors"),
+    ).toBeInTheDocument();
   });
 
   it("stages a net candidate as a discipline-payload review", async () => {
