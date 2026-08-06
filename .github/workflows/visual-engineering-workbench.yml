@@ -6,6 +6,7 @@ on:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
@@ -18,6 +19,7 @@ on:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
