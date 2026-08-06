@@ -1,0 +1,54 @@
+name: Generate PCB Engine Data Once
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/public-visual-adapter-spike-20260805
+    paths:
+      - .github/workflows/generate-pcb-engine-data-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/public-visual-adapter-spike-20260805
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install canonical frontend dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Generate and validate Python engine data
+        run: |
+          node scripts/export_engine_pcb_data.cjs
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("src/hardware_splicer/data/engine_pcb_data.json")
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          assert payload["schema_version"] == "hardware_splicer.engine_pcb_data.v1"
+          assert len(payload["module_library"]) >= 10
+          assert any(row.get("id") == "usb-power-5v" for row in payload["module_library"])
+          PY
+      - name: Commit canonical generated resource
+        env:
+          BRANCH: agent/public-visual-adapter-spike-20260805
+        run: |
+          rm .github/workflows/generate-pcb-engine-data-once.yml
+          git config user.name "hardware-splicer-ci"
+          git config user.email "hardware-splicer-ci@users.noreply.github.com"
+          git add -f src/hardware_splicer/data/engine_pcb_data.json
+          git add .github/workflows/generate-pcb-engine-data-once.yml
+          git commit -m "Package generated PCB engine module data"
+          git push origin HEAD:"$BRANCH"
