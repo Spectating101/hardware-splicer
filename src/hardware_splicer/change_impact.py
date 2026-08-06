@@ -422,6 +422,12 @@ def build_change_impact_graph(
     triggers = _trigger_rows(body, source_graph)
     combined_text = " ".join(row.statement for row in triggers)
     domains = _inferred_domains(combined_text, mode)
+    if mode != ChangeMode.GREENFIELD and baseline_revision is None:
+        # Without a pinned baseline the existing wiring, pin contracts, and power
+        # distribution are unknown. Conservatively require electrical review rather
+        # than inferring that a visually mechanical or software-facing change is
+        # electrically isolated.
+        domains.add(ImpactDomain.ELECTRICAL)
 
     impacts: list[ImpactNode] = []
     checks: list[RegressionCheck] = []
