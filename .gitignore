@@ -46,6 +46,8 @@ artifacts/
 data/
 !tests/data/
 !tests/data/**
+!src/hardware_splicer/data/
+!src/hardware_splicer/data/**
 logs/
 runs/
 out/
