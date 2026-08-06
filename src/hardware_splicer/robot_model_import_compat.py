@@ -9,6 +9,7 @@ authority behavior owned by :mod:`hardware_splicer.robot_model_import`.
 
 from __future__ import annotations
 
+import sys
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -131,6 +132,14 @@ def install_robot_model_leaf_compatibility() -> None:
         return model
 
     _target.parse_robot_model = parse_robot_model
+
+    # Some planner modules can import the original function while the package
+    # initializer is still loading. Update that already-bound reference as well;
+    # modules imported later naturally receive the patched target attribute.
+    adapter_module = sys.modules.get(f"{__package__}.engineering_source_adapters")
+    if adapter_module is not None:
+        adapter_module.parse_robot_model = parse_robot_model
+
     _target._leaf_element_compatibility_installed = True
 
 
