@@ -5,11 +5,20 @@ on:
   push:
     paths:
       - "src/hardware_splicer/robot_reference_e2e.py"
+      - "src/hardware_splicer/robot_model_import.py"
+      - "src/hardware_splicer/robot_model_import_compat.py"
+      - "src/hardware_splicer/pcb/module_registry.py"
+      - "src/hardware_splicer/data/engine_pcb_data.json"
       - "scripts/run_robot_reference_e2e.py"
+      - "scripts/export_engine_pcb_data.cjs"
       - "tests/test_robot_reference_e2e.py"
+      - "tests/test_robot_model_import.py"
+      - "tests/test_pcb_module_registry_data.py"
+      - "pyproject.toml"
       - "examples/robot_reference_corpus/**"
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
+      - "docs/PCB_ENGINE_DATA_CONTRACT.md"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
@@ -18,11 +27,20 @@ on:
   pull_request:
     paths:
       - "src/hardware_splicer/robot_reference_e2e.py"
+      - "src/hardware_splicer/robot_model_import.py"
+      - "src/hardware_splicer/robot_model_import_compat.py"
+      - "src/hardware_splicer/pcb/module_registry.py"
+      - "src/hardware_splicer/data/engine_pcb_data.json"
       - "scripts/run_robot_reference_e2e.py"
+      - "scripts/export_engine_pcb_data.cjs"
       - "tests/test_robot_reference_e2e.py"
+      - "tests/test_robot_model_import.py"
+      - "tests/test_pcb_module_registry_data.py"
+      - "pyproject.toml"
       - "examples/robot_reference_corpus/**"
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
+      - "docs/PCB_ENGINE_DATA_CONTRACT.md"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
@@ -33,7 +51,7 @@ jobs:
   reference-rich-rover:
     name: Reference-rich rover E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -46,6 +64,21 @@ jobs:
           python -m pip install -e '.[dev]'
       - name: Compile Hardware Splicer
         run: python -m compileall -q src/hardware_splicer
+      - name: Prove wheel contains canonical PCB engine data
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir /tmp/hardware-splicer-wheel
+          python -m venv /tmp/hardware-splicer-wheel-venv
+          /tmp/hardware-splicer-wheel-venv/bin/python -m pip install /tmp/hardware-splicer-wheel/hardware_splicer-*.whl
+          /tmp/hardware-splicer-wheel-venv/bin/python - <<'PY'
+          from importlib.resources import files
+          from hardware_splicer.pcb.module_registry import find_module
+
+          data = files("hardware_splicer").joinpath("data/engine_pcb_data.json")
+          assert data.is_file(), data
+          module = find_module("usb-power-5v")
+          assert module is not None
+          assert module["id"] == "usb-power-5v"
+          PY
       - name: Run reference-rich rover end to end
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
@@ -57,7 +90,7 @@ jobs:
           PYTHONPATH=src python scripts/run_robot_reference_e2e.py \
             --strict \
             --out /tmp/robot-reference-e2e
-      - name: Run focused reference-corpus tests
+      - name: Run focused reference-corpus and packaged-data tests
         if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
@@ -65,7 +98,11 @@ jobs:
           HARDWARE_SPLICER_OFFLINE_VISION: "1"
           HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
           QWEN_DISABLED: "1"
-        run: PYTHONPATH=src python -m pytest -q tests/test_robot_reference_e2e.py
+        run: |
+          PYTHONPATH=src python -m pytest -q \
+            tests/test_robot_reference_e2e.py \
+            tests/test_robot_model_import.py \
+            tests/test_pcb_module_registry_data.py
       - uses: actions/setup-node@v4
         if: ${{ !cancelled() }}
         with:
