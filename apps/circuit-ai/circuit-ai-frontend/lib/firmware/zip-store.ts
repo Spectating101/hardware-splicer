@@ -104,5 +104,8 @@ export function buildZipStore(files: Record<string, string>): Blob {
     u16(0),
   ]);
 
-  return new Blob([concat([localData, centralDir, end])], { type: "application/zip" });
+  const archiveBytes = concat([localData, centralDir, end]);
+  const archiveBuffer = new ArrayBuffer(archiveBytes.byteLength);
+  new Uint8Array(archiveBuffer).set(archiveBytes);
+  return new Blob([archiveBuffer], { type: "application/zip" });
 }

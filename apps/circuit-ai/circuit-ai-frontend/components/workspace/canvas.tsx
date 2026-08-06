@@ -12,6 +12,7 @@ import {
   type Node,
   type Edge,
   type NodeTypes,
+  type OnNodeDrag,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -82,8 +83,8 @@ function WorkspaceFlow() {
   });
 
   // Sync drag-stop position back to Zustand
-  const onNodeDragStop = useCallback(
-    (_: React.MouseEvent, node: Node) => {
+  const onNodeDragStop: OnNodeDrag = useCallback(
+    (_event, node: Node) => {
       updateNodePosition(node.id, node.position);
     },
     [updateNodePosition]

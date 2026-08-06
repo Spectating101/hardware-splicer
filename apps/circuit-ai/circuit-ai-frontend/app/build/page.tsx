@@ -662,6 +662,7 @@ function BuildInner() {
         const remote = await compileCatalogBuildRemote(buildId);
         const result: TranslationResult = {
           graph: remote.graph,
+          buildId,
           notes: remote.notes ?? [],
           warnings: remote.warnings ?? [],
         };
