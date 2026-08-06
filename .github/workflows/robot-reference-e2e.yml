@@ -19,6 +19,8 @@ on:
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
       - "docs/PCB_ENGINE_DATA_CONTRACT.md"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/modules/module-library.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/modules/module-footprints.ts"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
@@ -41,6 +43,8 @@ on:
       - "examples/robot_reference_e2e/**"
       - "docs/ROBOT_REFERENCE_E2E.md"
       - "docs/PCB_ENGINE_DATA_CONTRACT.md"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/modules/module-library.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/modules/module-footprints.ts"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/**"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-engineering-preflight-ui.cjs"
@@ -113,6 +117,11 @@ jobs:
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: npm ci
+      - name: Verify generated PCB engine data is current
+        if: ${{ !cancelled() }}
+        run: |
+          node scripts/export_engine_pcb_data.cjs
+          git diff --exit-code -- src/hardware_splicer/data/engine_pcb_data.json
       - name: Validate HS Preflight interface and production build
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend
