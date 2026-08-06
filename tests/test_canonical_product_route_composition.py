@@ -35,10 +35,18 @@ REQUIRED_PATHS = {
 
 def _path_counts(app) -> dict[str, int]:
     counts: dict[str, int] = {}
-    for route in app.routes:
-        path = getattr(route, "path", None)
-        if path:
-            counts[path] = counts.get(path, 0) + 1
+
+    def visit(routes, prefix: str = "") -> None:
+        for route in routes:
+            path = getattr(route, "path", None)
+            if path:
+                resolved = f"{prefix}{path}" if prefix else path
+                counts[resolved] = counts.get(resolved, 0) + 1
+            children = getattr(route, "routes", None)
+            if children:
+                visit(children, f"{prefix}{path or ''}")
+
+    visit(app.routes)
     return counts
 
 
@@ -48,7 +56,7 @@ def test_canonical_product_app_mounts_advanced_engineering_routes_once(tmp_path)
     counts = _path_counts(app)
 
     assert REQUIRED_PATHS <= paths
-    assert all(counts[path] == 1 for path in REQUIRED_PATHS)
+    assert all(counts.get(path) == 1 for path in REQUIRED_PATHS)
 
 
 def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -> None:
@@ -57,4 +65,4 @@ def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -
 
     assert set(canonical.openapi()["paths"]) == set(extended.openapi()["paths"])
     extended_counts = _path_counts(extended)
-    assert all(extended_counts[path] == 1 for path in REQUIRED_PATHS)
+    assert all(extended_counts.get(path) == 1 for path in REQUIRED_PATHS)

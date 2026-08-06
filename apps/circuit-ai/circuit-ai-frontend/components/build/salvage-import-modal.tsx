@@ -58,6 +58,7 @@ export function SalvageImportModal({
         setBusy(false);
         onImport({
           graph: remote.graph,
+          buildId,
           notes: remote.notes ?? [`Imported "${buildId}" via Python engine.`],
           warnings: remote.warnings ?? [],
         });

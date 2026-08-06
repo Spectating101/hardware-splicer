@@ -120,6 +120,28 @@ def test_mjcf_import_preserves_body_chain_and_actuators() -> None:
     assert topology.metadata["calibration_verified"] is False
 
 
+@pytest.mark.parametrize(
+    ("content", "expected_format"),
+    [
+        (URDF, "urdf"),
+        (SDF, "sdf"),
+        (MJCF, "mjcf"),
+    ],
+)
+def test_robot_model_import_infers_omitted_format_from_xml_root(
+    content: str,
+    expected_format: str,
+) -> None:
+    model = parse_robot_model(content, "")
+
+    assert model.model_format.value == expected_format
+
+
+def test_robot_model_import_preserves_explicit_unknown_format_rejection() -> None:
+    with pytest.raises(RobotModelImportError, match="unsupported robot model format"):
+        parse_robot_model(URDF, "invented-format")
+
+
 def test_robot_model_import_rejects_dtd_and_oversized_input() -> None:
     with pytest.raises(RobotModelImportError, match="DTD"):
         parse_robot_model('<!DOCTYPE robot [<!ENTITY x "bad">]><robot name="x"/>', "urdf")

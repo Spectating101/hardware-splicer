@@ -11,8 +11,8 @@ test('new user can resume a project and finish the visible JARVIS workflow in on
   await expect(page.getByText('Brief', { exact: true })).toBeVisible();
   await expect(page.getByText('Evidence', { exact: true })).toBeVisible();
   await expect(page.getByText('Candidate', { exact: true })).toBeVisible();
-  await expect(page.getByText('JARVIS', { exact: true })).toBeVisible();
-  await expect(page.getByText('Package', { exact: true })).toBeVisible();
+  await expect(page.getByRole('main').getByText('JARVIS', { exact: true })).toBeVisible();
+  await expect(page.getByRole('main').getByText('Package', { exact: true })).toBeVisible();
 
   const projectCard = page.getByRole('button', { name: /Outsider DUT fixture/ });
   await expect(projectCard).toBeVisible();

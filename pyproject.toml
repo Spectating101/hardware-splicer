@@ -33,6 +33,9 @@ hs-mcp = "hardware_splicer.cli_entry:main_mcp"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+hardware_splicer = ["data/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
