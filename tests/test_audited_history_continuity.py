@@ -89,6 +89,7 @@ def _decision(*, status: str = "authorized", reason: str = "Bench power supporte
         reviewed_at="2026-08-04T02:30:00+00:00",
         evidence_ids=["rail-test"],
         reason=reason,
+        revocation_reason=reason if status == "revoked" else None,
         expires_at="2026-09-01T00:00:00+00:00",
     )
 
