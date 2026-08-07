@@ -152,6 +152,8 @@ def compose_agent_loop(
                 "violation_types": sorted({str(v.get("type") or "unknown") for v in violations}),
             }
         )
+        if last_result.get("requires_human_review"):
+            break
         if errors == 0:
             break
         next_hints = propose_fixup_hints(violations, hints)
@@ -159,12 +161,14 @@ def compose_agent_loop(
             break
         hints = next_hints
 
+    review_blocked = bool(last_result.get("requires_human_review"))
     agent_loop = {
         "schema_version": SCHEMA_VERSION,
         "rounds": rounds,
         "manual_retries_used": max(0, len(rounds) - 1),
-        "resolved": errors == 0,
-        "final_kicad_drc_errors": errors,
+        "resolved": bool(errors == 0 and not review_blocked),
+        "review_blocked": review_blocked,
+        "final_kicad_drc_errors": None if review_blocked and not last_result.get("design_quality") else errors,
         "final_drc_fixup": dict(hints),
         "copper_tier": (last_result.get("design_quality") or {}).get("copper_tier"),
         "fab_recommendation": (last_result.get("design_quality") or {}).get("fab_recommendation"),
@@ -174,7 +178,14 @@ def compose_agent_loop(
     if salvage_package:
         payload["salvage_package"] = salvage_package
         payload["recommended_build_id"] = salvage_package.get("recommended_build_id")
-    if finalize_package and last_result.get("out_dir"):
+    if finalize_package and review_blocked:
+        payload["package_finalization"] = {
+            "status": "blocked",
+            "reason": last_result.get("error") or "semantic_module_review_required",
+            "requires_human_review": True,
+            "authority_effect": "none",
+        }
+    elif finalize_package and last_result.get("out_dir"):
         from .sdk import finalize_compose_job_result
 
         compose_for_finalize = {**last_result}
