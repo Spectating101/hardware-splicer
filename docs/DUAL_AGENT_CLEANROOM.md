@@ -1,6 +1,6 @@
 # Hardware Splicer Dual-Agent Cleanroom
 
-**Status:** development doctrine for the post-PR-55 cleanup line  
+**Status:** active implementation line after PR #55  
 **Base frontier:** `agent/public-visual-adapter-spike-20260805`  
 **Goal:** remove scripted semantic reasoning while preserving deterministic engineering truth.
 
@@ -8,264 +8,212 @@
 
 Hardware Splicer now has enough AI-facing surface area that ordinary source review is no longer sufficient to judge whether the product actually behaves like an engineering agent.
 
-A system can look agentic from the outside while still being driven by:
-
-- phrase rewrites that convert unfamiliar requests into known demo language;
-- regex/keyword routing that substitutes a canned ontology for interpretation;
-- preferred-component IDs that silently force a familiar architecture;
-- fixture-specific branches or golden-path assumptions;
-- tests that validate recognition of the fixture rather than competence on the task;
-- model calls used only after deterministic code has already made the important semantic decision.
-
-The cleanup target is therefore not "remove determinism". Hardware Splicer requires deterministic engineering contracts. The target is **deterministic code pretending to reason**.
+A system can look agentic from the outside while still being driven by phrase rewrites, regex/keyword routing, preferred-component IDs, fixture-specific branches, or tests that only prove recognition of the fixture. The cleanup target is therefore not "remove determinism". Hardware Splicer requires deterministic engineering contracts. The target is **deterministic code pretending to reason**.
 
 ## 2. Preserve the engineering constitution
 
-The following should remain deterministic and fail-closed unless there is a strong engineering reason to change them:
+Keep deterministic and fail-closed:
 
 - project/revision identity and optimistic concurrency;
 - evidence provenance and authority ceilings;
-- source hashes and artifact hashes;
+- source/artifact hashes;
 - action allowlists and execution boundaries;
 - human accept/reject decisions;
 - DRC/ERC and tool-result truth;
 - physical evidence requirements;
-- fabrication, flashing, power, motion, operation, and release authority gates;
-- electrical limits and explicit component/interface contracts;
+- fabrication, flashing, power, motion, operation, and release gates;
+- explicit electrical/component/interface contracts;
 - reproducible package construction;
-- filesystem, path, upload, storage, and security boundaries.
+- filesystem, upload, storage, and security boundaries.
 
 These are constraints and measurements, not cognition.
 
 ## 3. Purge semantic script brain
 
-The following are presumptively suspect when they influence engineering interpretation or architecture selection:
+Presumptively suspect when they decide engineering meaning:
 
 - natural-language regex routing;
-- phrase-expansion tables whose purpose is to turn user language into known trigger phrases;
-- keyword families used as substitutes for semantic interpretation;
-- magic preferred-component IDs selected from user prose;
-- demo-name or fixture-name conditionals in production reasoning paths;
-- architecture defaults that are not derived from evidence, constraints, or explicit policy;
+- phrase-expansion tables that translate users onto known trigger phrases;
+- keyword families used as a substitute for interpretation;
+- magic preferred-component IDs selected from prose;
+- demo/fixture-specific semantic branches;
+- architecture defaults not derived from evidence, constraints, or explicit policy;
 - silent fallback from unknown intent to a familiar project archetype;
-- hand-maintained synonym maps used to decide engineering meaning;
-- tests whose primary assertion is that a known phrase maps to a known canned design;
-- hidden test-only knowledge available to the product agent.
+- tests whose primary assertion is that a known phrase maps to a canned design.
 
 A deterministic parser is acceptable when it parses a declared format. A deterministic rule is acceptable when it enforces a declared contract. A deterministic heuristic becomes suspect when it answers a question that should require interpretation.
 
-### First confirmed examples
+### Confirmed targets
 
-`src/hardware_splicer/module_picker.py` currently contains a large hand-written `MODULE_HINTS` table mapping phrases such as robot, rover, plant, pump, weather, relay, camera, and stepper language onto preferred modules and architectures. It explicitly describes the path as "Regex for trained phrases; Qwen for novel goals".
+- `module_picker.py`: hand-written phrase/regex -> preferred-module routing; currently describes the path as "Regex for trained phrases; Qwen for novel goals".
+- `phrase_expander.py`: rewrites messy user language into phrases the deterministic router understands.
+- `circuit_synthesis/planner.py`: keyword families select topology planners.
+- legacy intake/archetype routing: derived classifier results can leak into later engineering layers as if they were declared truth.
 
-`src/hardware_splicer/phrase_expander.py` rewrites messy user language into phrases the deterministic router understands, including broad semantic rewrites such as beginner/no-experience language into a specific simple-build intent and "where do I start" into a plant-watering project.
+### First removals already implemented
 
-These are priority cleanup targets because they can make a system appear robust on paraphrases while actually translating the user back onto a scripted rail.
+`intent_clarifier.py` no longer translates broad answers such as "battery", "ESP32", or "pump motor" into invented voltage/current values, load classes, or catalog parts. Answers remain `authority: declared` observations with `interpretation_status: unresolved`.
+
+The source-agnostic engineering planner no longer passes the legacy intake `archetype` guess into robot topology as an authoritative hint. Only an explicitly structured `robot_genre` may act as a hint; otherwise topology derives from its own engineering inputs. This prevents one classifier's guess from overriding a contradictory brief.
 
 ## 4. Two-pronged agent model
 
-Hardware Splicer development should use two deliberately different model roles.
+### Outer System Engineer / Observer
 
-### A. System Engineer / Observer
+Works **on** Hardware Splicer and may inspect repository source, architecture, CI, tests, traces, persisted revisions, tool artifacts, failures, and inner-agent transcripts. It must separate what the code intended, what the embedded operator observed, and what deterministic evidence proves.
 
-The outer agent works **on** Hardware Splicer.
+### Embedded Operator / Engineer
 
-It may inspect:
+Works **inside** Hardware Splicer as an ordinary engineering operator.
 
-- repository source;
-- architecture and contracts;
-- tests and CI;
-- traces and persisted project revisions;
-- tool artifacts and failures;
-- operator-agent transcripts and action history.
+Implemented canonical HTTP path:
 
-It may propose or implement code changes, but it must distinguish:
+`POST /v1/projects/{project_id}/cleanroom/operator-turn`
 
-1. what the source appears to intend;
-2. what the embedded operator actually observed;
-3. what deterministic evidence proves.
+The caller supplies an exact expected revision, mission, and model controls. The server loads the persisted project snapshot itself. The caller cannot supply a project snapshot or arbitrary engineering constraints.
 
-It should prefer root-cause fixes over fixture patches.
+The embedded operator must not receive repository source, hidden golden answers, fixture expectations, implementation notes, outer-agent analysis, or hidden test assertions. Cleanroom code rejects those outer-only fields recursively and rejects model evidence/source IDs that do not resolve to product-visible project sources.
 
-### B. Embedded Operator / Engineer
+## 5. The system is the arbiter
 
-The inner agent works **inside** Hardware Splicer as an ordinary engineering operator.
+The agents do not vote on correctness. Correctness and authority come from source/evidence identities, interface contracts, DRC/ERC/tool output, valid simulation, artifact hashes, bench measurements, explicit human decisions, and physical-authority gates.
 
-It should be given only the product-visible information appropriate to the scenario:
-
-- user/project brief;
-- uploaded evidence available through the product;
-- Project Studio / JARVIS / public API / MCP / CLI surfaces under test;
-- tool results and errors returned through those surfaces.
-
-It must not receive:
-
-- repository source code;
-- hidden golden answers;
-- fixture-specific expected architecture;
-- private implementation notes;
-- outer-agent analysis;
-- test assertions that reveal the intended solution.
-
-The embedded operator should behave as if Hardware Splicer is the only engineering environment it has.
-
-## 5. The system itself is the arbiter
-
-The two agents do not vote on whether a design is correct.
-
-Correctness and authority come from deterministic evidence:
-
-- source/evidence identities;
-- interface contracts;
-- DRC/ERC/tool output;
-- simulation where valid;
-- artifact hashes;
-- bench measurements;
-- explicit human decisions;
-- physical-authority gates.
-
-The outer agent evaluates the inner agent's behavior against these records. The inner agent cannot promote its own confidence into project truth.
+The cleanroom path is evaluation-only: no automatic action execution, no project mutation, and no fabrication/flash/power/motion/operation/release authority elevation.
 
 ## 6. Evaluation loop
 
-Each cleanroom scenario should run as:
-
 ```text
 scenario seed
-  -> embedded operator uses public HS surface
-  -> HS records revisions, proposals, decisions, previews, failures, repairs
-  -> deterministic evidence establishes what actually happened
+  -> persisted HS project revision
+  -> embedded operator uses the product-visible cleanroom path
+  -> HS returns proposal/evidence/tool state
+  -> deterministic evidence establishes what happened
   -> outer engineer inspects trace + source
-  -> outer engineer classifies failure
-  -> patch or policy change
+  -> classify failure
+  -> patch root cause
   -> replay original scenario
   -> replay perturbed variants
 ```
 
 A fix is not accepted merely because the original case passes.
 
-## 7. Required perturbations
+## 7. Perturbations
 
-Every important scenario should have transformations designed to expose scripted reasoning:
+Important scenarios should be replayed with:
 
-- paraphrase the same engineering goal without known keywords;
-- change word order and irrelevant prose;
-- use an unfamiliar but functionally equivalent component;
-- omit brand/model names while preserving constraints;
-- introduce a plausible but incorrect analogy;
-- provide conflicting sources with different authority;
-- provide partial evidence and require a clarification/blocker rather than a guess;
-- change units or representation without changing the physical meaning;
-- reorder uploaded evidence;
-- inject a deterministic tool failure;
-- retry from a stale project revision;
-- remove the golden fixture name and IDs;
-- replace the demo domain while preserving the same class of engineering problem.
+- paraphrased goals without known keywords;
+- changed word order/irrelevant prose;
+- unfamiliar but functionally equivalent components;
+- omitted brand/model names while preserving constraints;
+- plausible but wrong analogies;
+- conflicting sources with different authority;
+- partial evidence requiring a blocker/clarification rather than a guess;
+- unit/representation changes preserving physical meaning;
+- reordered evidence;
+- deterministic tool failure;
+- stale project revision;
+- renamed fixture/project IDs;
+- changed demo domain preserving the same engineering class.
 
-The desired invariant is not identical prose. It is equivalent engineering state, blockers, and authority.
+Implemented first invariant: source collections are canonicalized by stable source identity before cleanroom context construction, so reversing upload order produces the same context hash.
 
-## 8. Core scenario families
+## 8. Scenario families
 
-The initial cleanroom suite should cover at least:
+1. greenfield fixture;
+2. salvage/inherited board;
+3. semiconductor DUT fixture;
+4. robot/machine;
+5. bench closure;
+6. unknown component;
+7. failure repair;
+8. conflicting evidence.
 
-1. **greenfield fixture** — requirements to candidate with no preselected architecture;
-2. **salvage / inherited board** — ambiguous donor hardware with partial interface evidence;
-3. **semiconductor DUT fixture** — conflicting voltage domains and default-off safety requirements;
-4. **robot / machine** — electrical + mechanical + firmware graph consistency;
-5. **bench closure** — measurements needed before firmware/power authority;
-6. **unknown component** — force evidence acquisition rather than catalog analogy;
-7. **failure repair** — preserve failed parent and create a bounded successor;
-8. **evidence conflict** — higher-authority evidence must defeat plausible lower-authority inference.
+Golden rover and semiconductor fixture traces are the first serious domains to connect to this path.
 
 ## 9. Metrics
 
-Track properties rather than a single pass/fail score.
+Track properties rather than one score.
 
 ### Agentic competence
-
-- **novel-intent success:** useful progress without matching a known phrase family;
-- **clarification quality:** asks for missing information rather than inventing it;
-- **proposal quality:** actions are technically relevant and evidence-linked;
-- **repair quality:** failure evidence changes the successor appropriately;
-- **tool-use quality:** chooses the right bounded tool rather than narrating around uncertainty.
+- novel-intent success;
+- clarification quality;
+- evidence-linked proposal quality;
+- failure-fed repair quality;
+- bounded tool-use quality.
 
 ### Anti-script robustness
-
-- **paraphrase invariance:** equivalent intent reaches equivalent engineering state;
-- **fixture independence:** success survives renamed IDs and unfamiliar components;
-- **ordering invariance:** source ordering does not change truth;
-- **unknown handling:** unknowns remain unknown instead of falling to a favorite module;
-- **golden leakage rate:** no hidden expected answer reaches the embedded operator.
+- paraphrase invariance;
+- fixture independence;
+- source-order invariance;
+- unknown handling;
+- golden leakage rate.
 
 ### Truth discipline
+- evidence identity fidelity;
+- authority discipline;
+- immutable failure preservation;
+- deterministic artifact reproducibility where required.
 
-- **evidence fidelity:** claims cite valid persisted evidence identities;
-- **authority discipline:** no model statement elevates physical authority;
-- **failure preservation:** failed evidence is immutable and visible;
-- **reproducibility:** replay of the same accepted revision yields the same deterministic artifacts where required.
+## 10. Failure taxonomy
 
-## 10. Failure taxonomy for the outer engineer
+Classify before patching:
 
-When the inner operator fails, classify the cause before patching:
+- `MODEL_REASONING`
+- `CONTEXT_CONSTRUCTION`
+- `SCRIPT_BRAIN`
+- `TOOL_CONTRACT`
+- `TOOL_IMPLEMENTATION`
+- `STATE_MODEL`
+- `UI_AFFORDANCE`
+- `EVIDENCE_MODEL`
+- `TEST_ORACLE`
+- `PHYSICAL_GAP`
 
-- **MODEL_REASONING** — model interpretation or planning failure;
-- **CONTEXT_CONSTRUCTION** — relevant evidence not exposed or too much irrelevant context;
-- **SCRIPT_BRAIN** — regex, phrase rewrite, keyword table, magic component/default, fixture branch;
-- **TOOL_CONTRACT** — product does not expose a needed bounded operation;
-- **TOOL_IMPLEMENTATION** — tool exists but returns incorrect/incomplete evidence;
-- **STATE_MODEL** — revision, lineage, persistence, or identity problem;
-- **UI_AFFORDANCE** — public surface hides or misrepresents a valid operation;
-- **EVIDENCE_MODEL** — authority/provenance schema cannot represent the needed truth;
-- **TEST_ORACLE** — test encodes the old implementation instead of desired behavior;
-- **PHYSICAL_GAP** — software cannot resolve the question without real-world evidence.
+Only `MODEL_REASONING` should normally be fixed with model/prompt changes. The others are system defects.
 
-Only `MODEL_REASONING` should normally be fixed with prompting/model changes. The others are system defects.
+## 11. Current implementation status
 
-## 11. Cleanup order
+### Baseline trust
 
-### Phase 0 — restore trustworthy baseline
+- runtime dependency profiles aligned;
+- stale Design Studio async-job tests replaced with the current finalization contract;
+- route uniqueness now checks actual HTTP operation identity rather than Starlette traversal internals;
+- trust reports distinguish unavailable DRC from failed DRC and never format unknown evidence as a fake zero;
+- structured-source adapter metadata is promoted into graph-visible representation without authority elevation.
 
-- repair the current PR-55 exact-head regressions;
-- keep the passing Project Studio, Visual Workbench, browser E2E, deployment, robot-reference, splice demo, golden-loop, and real-bench bars intact;
-- separate obsolete-test failures from real product regressions.
+### Embedded operator harness
 
-### Phase 1 — inventory semantic hardcodes
+Implemented:
 
-Audit production reasoning paths for:
+- source/outer-context isolation;
+- persisted-revision HTTP entry point;
+- stale-revision rejection;
+- caller snapshot injection rejection;
+- caller constraint injection rejection;
+- evidence identity validation;
+- zero-authority/evaluation-only contract;
+- source-order canonicalization.
 
-- regex and keyword routing;
-- phrase rewriting;
-- preferred component IDs;
-- demo-specific switches;
-- implicit architecture defaults;
-- model calls that happen only after deterministic semantic decisions.
+### Semantic cleanup
 
-Classify every hit as **contract**, **parser**, **heuristic**, **demo-only**, or **script-brain**. Do not remove a safety/format contract because it contains a regex.
+Started:
 
-### Phase 2 — establish embedded-operator harness
+- clarification answers no longer fabricate electrical facts;
+- legacy archetype guesses no longer override robot topology evidence.
 
-Create an operator adapter that can execute a scenario through the same public interfaces an outsider uses. Capture:
+Next:
 
-- all requests/responses;
-- project revisions;
-- model/provider identities;
-- proposed actions and human decisions;
-- tool results/failures;
-- evidence references;
-- final blockers and authority state.
+- put a typed semantic-intent/capability proposal in front of module selection;
+- demote `phrase_expander.py` and regex `module_picker.py` to offline/failure-only fallback;
+- stop keyword topology dispatch from owning normal LLM-enabled engineering paths;
+- connect cleanroom runs to rover + semiconductor golden domains and perturb them.
 
-No repository source is injected into the operator context.
-
-### Phase 3 — remove semantic shortcut layers behind reversible boundaries
-
-Start with `phrase_expander.py` and natural-language `module_picker.py` behavior.
-
-The replacement should move toward:
+Target architecture:
 
 ```text
 user intent
   -> model produces typed engineering intent / requirements
-  -> validator checks schema and evidence references
+  -> schema/evidence validation
   -> deterministic capability/catalog query
   -> model compares viable candidates against constraints
   -> explicit proposal
@@ -273,35 +221,18 @@ user intent
   -> deterministic verification
 ```
 
-The model should choose from evidence-bound capabilities, not from a regex-selected favorite part.
-
-### Phase 4 — adversarial replay
-
-For every removed shortcut, run original golden cases plus paraphrases, renamed fixtures, unfamiliar components, incomplete evidence, and conflicts. A regression that reveals the old golden depended on the shortcut is useful evidence, not a reason to restore the shortcut automatically.
-
-### Phase 5 — let the embedded operator criticize the product
-
-After completing each scenario, ask the embedded operator for a structured retrospective limited to what it could observe inside the product:
-
-- what it believed the current state was;
-- what information it could not obtain;
-- which action it wanted but could not express;
-- which UI/tool result was ambiguous;
-- where it was forced to guess;
-- what it would do next as an engineer.
-
-The outer engineer compares this retrospective with source and trace evidence. Disagreement is a diagnostic signal.
+The model chooses from evidence-bound capabilities; deterministic code enforces contracts and truth.
 
 ## 12. Acceptance rule
 
 A cleanup tranche is complete only when:
 
-1. the targeted semantic shortcut is removed or made non-authoritative;
-2. existing deterministic truth/safety contracts remain intact;
-3. original golden cases still have defensible outcomes or are intentionally corrected;
-4. perturbed cleanroom cases do not depend on known trigger phrases or fixture IDs;
+1. targeted semantic shortcut is removed or made non-authoritative;
+2. deterministic truth/safety contracts remain intact;
+3. original golden cases have defensible outcomes or are intentionally corrected;
+4. perturbed cases do not depend on trigger phrases/fixture IDs;
 5. the embedded operator can explain its next action from product-visible evidence;
-6. the outer engineer can trace that behavior to explicit system contracts rather than hidden script logic;
+6. the outer engineer can trace behavior to explicit contracts rather than hidden script logic;
 7. exact-head CI is green for the tranche's declared scope.
 
-The objective is not maximal model autonomy. The objective is **maximal model reasoning inside minimal, explicit, auditable engineering constraints**.
+The objective is **maximal model reasoning inside minimal, explicit, auditable engineering constraints**.
