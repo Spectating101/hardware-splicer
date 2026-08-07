@@ -88,6 +88,7 @@ def test_embedded_operator_turn_is_source_blind_and_zero_authority() -> None:
     assert result["role"] == "embedded_operator"
     assert result["isolation"]["repository_source_visible"] is False
     assert result["isolation"]["golden_answer_visible"] is False
+    assert result["isolation"]["source_order_canonicalized"] is True
     assert result["authority_effect"] == "none"
     assert result["power_on_authorized"] is False
     action = result["operator_session"]["actions"][0]
@@ -118,3 +119,43 @@ def test_embedded_operator_rejects_invented_evidence_identity() -> None:
             mission="Try the project.",
             llm_callable=_fake_llm(_proposal_response(source_id="source-does-not-exist")),
         )
+
+
+def test_cleanroom_context_is_invariant_to_source_upload_order() -> None:
+    source_1 = _snapshot()["engineeringSources"][0]
+    source_2 = {
+        "source_id": "source-2",
+        "source_type": "engineering_source_json",
+        "content_hash": "def456",
+        "authority_ceiling": "declared",
+        "metadata": {"label": "second operator-visible evidence source"},
+    }
+    forward = _snapshot()
+    forward["engineeringSources"] = [source_1, source_2]
+    reverse = _snapshot()
+    reverse["engineeringSources"] = [source_2, source_1]
+
+    first = run_embedded_operator_turn(
+        "project-1",
+        3,
+        forward,
+        mission="Determine the next defensible engineering action.",
+        llm_callable=_fake_llm(_proposal_response()),
+    )
+    second = run_embedded_operator_turn(
+        "project-1",
+        3,
+        reverse,
+        mission="Determine the next defensible engineering action.",
+        llm_callable=_fake_llm(_proposal_response()),
+    )
+
+    first_session = first["operator_session"]
+    second_session = second["operator_session"]
+    assert first_session["context_sha256"] == second_session["context_sha256"]
+    assert [
+        row["source_id"] for row in first_session["context"]["registered_sources"]
+    ] == ["source-1", "source-2"]
+    assert [
+        row["source_id"] for row in second_session["context"]["registered_sources"]
+    ] == ["source-1", "source-2"]
