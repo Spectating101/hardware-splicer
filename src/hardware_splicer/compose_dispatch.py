@@ -39,6 +39,37 @@ def _finalize_payload(
     return attach_compose_failure(out)
 
 
+def _semantic_review_payload(
+    proposal: Mapping[str, Any],
+    *,
+    target: Path,
+    mode: str,
+    wire_only: bool,
+    constraints: Mapping[str, Any],
+    material_mode: str,
+    request_id: str | None,
+) -> Dict[str, Any]:
+    return attach_compose_failure(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "ok": False,
+            "mode": mode,
+            "wire_only": wire_only,
+            "out_dir": str(target),
+            "module_ids": list(proposal.get("module_ids") or []),
+            "requires_human_review": True,
+            "semantic_intent": proposal.get("semantic_intent"),
+            "semantic_candidate_set": proposal.get("semantic_candidate_set"),
+            "semantic_selection": proposal.get("semantic_selection"),
+            "authority_effect": "none",
+            "automatic_execution": False,
+            "error": proposal.get("error") or "semantic_module_review_required",
+            **material_mode_summary(material_mode=material_mode, constraints=constraints),  # type: ignore[arg-type]
+            **({"request_id": request_id} if request_id else {}),
+        }
+    )
+
+
 def compose_dispatch(
     *,
     out_dir: str | Path,
@@ -59,7 +90,12 @@ def compose_dispatch(
     build_id: str | None = None,
     splice_plan: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    """Route compose requests through one implementation (bootstrap default; LLM-first opt-in)."""
+    """Route compose requests through one implementation.
+
+    Model-first phrase interpretation may return a reviewable semantic proposal rather
+    than silently executing a fallback selection. Explicit module IDs, canvas/netlist
+    inputs, accepted tool actions, and offline compatibility paths remain deterministic.
+    """
     constraints_map = dict(constraints or {})
     mode = material_mode or resolve_material_mode(
         constraints=constraints_map,
@@ -140,6 +176,23 @@ def compose_dispatch(
     if wire_only:
         ids = list(module_ids or [])
         if not ids and phrase:
+            if allow_llm_first:
+                from .jarvis_build import llm_first_enabled
+
+                if llm_first_enabled():
+                    from .integrations.qwen_netlist_compose import semantic_module_proposal_from_goal
+
+                    proposal = semantic_module_proposal_from_goal(phrase, constraints=constraints_map)
+                    if proposal.get("requires_human_review"):
+                        return _semantic_review_payload(
+                            proposal,
+                            target=target,
+                            mode="semantic_module_proposal",
+                            wire_only=True,
+                            constraints=constraints_map,
+                            material_mode=mode,
+                            request_id=request_id,
+                        )
             ids = list(pick_modules_for_goal(phrase).module_ids)
         if len(ids) < 2:
             raise ValueError(f"wire_only compose needs >=2 modules, got {ids}")
@@ -179,12 +232,13 @@ def compose_dispatch(
             compile_result = open_result.get("compile_result")
             quality = dict(compile_result.design_quality if compile_result else {})
             build_dir = target / "build_compilation"
-            _enrich_trust(
-                build_dir,
-                goal=phrase,
-                compose_mode=str(open_result.get("compose_mode") or "unknown"),
-                design_quality=quality,
-            )
+            if compile_result:
+                _enrich_trust(
+                    build_dir,
+                    goal=phrase,
+                    compose_mode=str(open_result.get("compose_mode") or "unknown"),
+                    design_quality=quality,
+                )
             return _finalize_payload(
                 {
                     "ok": bool(open_result.get("ok")),
@@ -197,6 +251,12 @@ def compose_dispatch(
                     "attempts": open_result.get("attempts") or [],
                     "fallback": open_result.get("fallback"),
                     "error": open_result.get("error"),
+                    "requires_human_review": bool(open_result.get("requires_human_review")),
+                    "semantic_intent": open_result.get("semantic_intent"),
+                    "semantic_candidate_set": open_result.get("semantic_candidate_set"),
+                    "semantic_selection": open_result.get("semantic_selection"),
+                    "authority_effect": open_result.get("authority_effect"),
+                    "automatic_execution": open_result.get("automatic_execution"),
                     "artifacts": {
                         "build_graph": str(build_dir / "build_graph.json")
                         if (build_dir / "build_graph.json").is_file()
@@ -246,6 +306,9 @@ def compose_dispatch(
             compile_payload=result.to_dict(),
         )
 
+    # Explicit offline/default compatibility path. Normal model-first compose returns
+    # above, including review-only semantic proposals; it does not reach this regex
+    # picker-backed scratch path after a model failure.
     scratch = compile_scratch_build(
         out_dir=str(target),
         goal=phrase,
@@ -269,6 +332,7 @@ def compose_dispatch(
             "error": scratch.error,
             "compile_result": compile_result.to_dict() if compile_result else None,
             "compile_casefile": scratch.compile_casefile,
+            "legacy_semantic_fallback": bool(phrase and not module_ids),
             "artifacts": {
                 "build_graph": str(build_dir / "build_graph.json")
                 if (build_dir / "build_graph.json").is_file()
