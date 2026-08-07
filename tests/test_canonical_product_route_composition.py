@@ -50,13 +50,21 @@ def _path_counts(app) -> dict[str, int]:
     return counts
 
 
+def _route_multiplicity_failures(app) -> dict[str, int]:
+    counts = _path_counts(app)
+    return {
+        path: counts.get(path, 0)
+        for path in sorted(REQUIRED_PATHS)
+        if counts.get(path, 0) != 1
+    }
+
+
 def test_canonical_product_app_mounts_advanced_engineering_routes_once(tmp_path) -> None:
     app = create_product_app(ProjectStore(tmp_path / "projects"))
     paths = set(app.openapi()["paths"])
-    counts = _path_counts(app)
 
     assert REQUIRED_PATHS <= paths
-    assert all(counts.get(path) == 1 for path in REQUIRED_PATHS)
+    assert _route_multiplicity_failures(app) == {}
 
 
 def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -> None:
@@ -64,5 +72,4 @@ def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -
     extended = create_extended_product_app(ProjectStore(tmp_path / "extended"))
 
     assert set(canonical.openapi()["paths"]) == set(extended.openapi()["paths"])
-    extended_counts = _path_counts(extended)
-    assert all(extended_counts.get(path) == 1 for path in REQUIRED_PATHS)
+    assert _route_multiplicity_failures(extended) == {}
