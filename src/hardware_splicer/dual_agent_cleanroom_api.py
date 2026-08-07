@@ -1,14 +1,15 @@
 """Revision-pinned HTTP surface for source-blind embedded-operator evaluation.
 
-Unlike an ordinary AI session request, the caller never supplies the project snapshot.
-The server loads the latest persisted revision and rejects stale callers before the
-embedded operator sees any context. Cleanroom turns are evaluation-only: they do not
-save project state, execute tools, or change physical authority.
+Unlike an ordinary AI session request, the caller never supplies the project snapshot
+or engineering constraints. The server loads the latest persisted revision and rejects
+stale callers before the embedded operator sees any context. Cleanroom turns are
+evaluation-only: they do not save project state, execute tools, or change physical
+authority.
 """
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Literal
+from typing import Any, Callable, Dict, Literal, Mapping
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
@@ -32,7 +33,6 @@ class CleanroomAPIModel(BaseModel):
 class EmbeddedOperatorTurnRequest(CleanroomAPIModel):
     expected_revision: int = Field(ge=1)
     mission: str = Field(min_length=1, max_length=8_000)
-    constraints: Dict[str, Any] = Field(default_factory=dict)
     model_profile: Literal["fast_draft", "deep_synthesis", "design_repair"] = "deep_synthesis"
     model: str | None = Field(default=None, max_length=256)
     max_actions: int = Field(default=8, ge=1, le=12)
@@ -99,6 +99,8 @@ def create_dual_agent_cleanroom_router(
             "schema_version": SCHEMA_VERSION,
             "role": "embedded_operator",
             "snapshot_supplied_by_caller": False,
+            "constraints_supplied_by_caller": False,
+            "constraints_source": "persisted_project_snapshot",
             "persisted_project_revision_required": True,
             "repository_source_visible": False,
             "golden_answer_visible": False,
@@ -123,12 +125,19 @@ def create_dual_agent_cleanroom_router(
                     f"project {project_id!r} is at revision {current_revision}, "
                     f"expected {request.expected_revision}"
                 )
+            snapshot = envelope["snapshot"]
+            persisted_constraints = snapshot.get("constraints")
+            constraints = (
+                dict(persisted_constraints)
+                if isinstance(persisted_constraints, Mapping)
+                else {}
+            )
             result = run_embedded_operator_turn(
                 project_id,
                 current_revision,
-                envelope["snapshot"],
+                snapshot,
                 mission=request.mission,
-                constraints=request.constraints,
+                constraints=constraints,
                 model_profile=request.model_profile,
                 model=request.model,
                 max_actions=request.max_actions,
@@ -143,6 +152,7 @@ def create_dual_agent_cleanroom_router(
             "evaluated_revision": current_revision,
             "saved_revision": None,
             "project_state_mutated": False,
+            "constraints_source": "persisted_project_snapshot",
             "cleanroom": result,
             "automatic_execution": False,
             "authority_effect": "none",
