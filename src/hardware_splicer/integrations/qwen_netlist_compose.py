@@ -124,9 +124,10 @@ Return ONLY one JSON object matching schema hardware_splicer.netlist.v1:
 
 Rules:
 - At least 2 components and 2 nets; every net needs >=2 pins.
-- If the design is USB or 5V powered, include usb-power-5v as U1 and wire V+/GND to loads.
-- Name power nets GND, +5V, +3V3, SDA, SCL, DATA where appropriate.
-- Only use module_id values from the catalog below unless truly custom.
+- Preserve explicit voltage/current/interface constraints; do not invent missing ratings.
+- Use conventional net names such as GND, +5V, +3V3, SDA, SCL, or DATA only when the actual design requires them.
+- Choose module IDs only from the supplied catalog unless the component is explicitly custom.
+- Do not prefer a catalog product merely because it appears in an example or familiar architecture.
 {_catalog_hint_for_goal(goal)}
 """
 
@@ -172,8 +173,16 @@ def compose_netlist_from_goal(
     *,
     constraints: Mapping[str, Any] | None = None,
     allow_qwen: bool = True,
+    allow_legacy_offline: bool = False,
 ) -> Dict[str, Any]:
-    """Model-first netlist compose; legacy module picker is offline compatibility only."""
+    """Model-first netlist compose with explicit legacy-offline permission.
+
+    ``allow_qwen=False`` means only that model-backed compose is disabled. It does not
+    itself authorize the old regex/module-picker path. Callers that intentionally need
+    legacy offline compatibility must set ``allow_legacy_offline=True`` explicitly.
+    This prevents failed model execution from being silently laundered into scripted
+    semantic selection by a retry that merely toggles Qwen off.
+    """
     from .llm_policy import offline_compose_enabled
 
     qwen_disabled = os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", "1").strip().lower() in (
@@ -181,7 +190,8 @@ def compose_netlist_from_goal(
         "false",
         "no",
     )
-    offline_ok = not allow_qwen or qwen_disabled or offline_compose_enabled()
+    explicit_offline = bool(allow_legacy_offline)
+    policy_offline = bool(offline_compose_enabled())
 
     if allow_qwen and not qwen_disabled:
         qwen = call_qwen_netlist_compose(goal, constraints=constraints)
@@ -196,21 +206,36 @@ def compose_netlist_from_goal(
                     "qwen_netlist_message": qwen.get("message"),
                     "usage": qwen.get("usage"),
                 }
-        if not offline_ok:
+        if not explicit_offline:
             return {**qwen, "compose_mode": "qwen_netlist_failed"}
 
-    if not offline_ok:
+    if not explicit_offline:
+        reason = "legacy_offline_permission_required"
+        if policy_offline or qwen_disabled or not allow_qwen:
+            return {
+                "ok": False,
+                "error": reason,
+                "compose_mode": "legacy_offline_blocked",
+                "legacy_offline_available": True,
+                "message": "Legacy regex/module-picker compose requires allow_legacy_offline=True.",
+                "authority_effect": "none",
+            }
         return {"ok": False, "error": "no_llm_compose", "compose_mode": "llm_required"}
 
-    # Explicit offline compatibility only. This path is intentionally still backed by
-    # the legacy regex picker until the semantic pipeline has an offline replacement.
+    # Explicit compatibility path only. This remains available for deterministic/offline
+    # regression work while normal model-first/product paths migrate away from it.
     from ..module_picker import pick_modules_for_goal
     from ..auto_wire import compose_build_graph_from_module_ids
     from ..netlist.lower import build_graph_to_netlist
 
     pick = pick_modules_for_goal(goal)
     if len(pick.module_ids) < 2:
-        return {"ok": False, "error": "no_modules", "compose_mode": "module_picker_offline_compat"}
+        return {
+            "ok": False,
+            "error": "no_modules",
+            "compose_mode": "module_picker_offline_compat",
+            "legacy_semantic_fallback": True,
+        }
     graph = compose_build_graph_from_module_ids(pick.module_ids)["graph"]
     netlist = build_graph_to_netlist(graph, source="module_picker_offline_compat")
     erc = run_erc(netlist)
@@ -221,5 +246,6 @@ def compose_netlist_from_goal(
         "erc": erc,
         "module_ids": list(pick.module_ids),
         "legacy_semantic_fallback": True,
+        "legacy_offline_explicitly_authorized": True,
         "authority_effect": "none",
     }
