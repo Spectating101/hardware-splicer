@@ -3,11 +3,13 @@
 The embedded operator is intentionally built on the existing proposal-only AI project
 orchestrator. This module adds the isolation rules needed for product evaluation:
 repository/golden-answer context is rejected, model evidence references must resolve to
-product-visible source identities, and physical authority remains unchanged.
+product-visible source identities, source ordering is canonicalized before context
+construction, and physical authority remains unchanged.
 """
 
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any, Callable, Dict, Mapping, Sequence
 
 from .ai_project_orchestrator import run_ai_project_orchestrator
@@ -35,6 +37,12 @@ _FORBIDDEN_CONTEXT_KEYS = {
     "hidden_tests",
 }
 
+_SOURCE_COLLECTION_KEYS = (
+    "engineeringSources",
+    "engineeringParsedSources",
+    "engineeringSourceParserRuns",
+)
+
 
 class CleanroomContractError(ValueError):
     """Raised when an embedded-operator run violates cleanroom isolation."""
@@ -53,6 +61,35 @@ def _assert_no_outer_context(value: Any, *, path: str = "context") -> None:
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
         for index, row in enumerate(value):
             _assert_no_outer_context(row, path=f"{path}[{index}]")
+
+
+def _source_sort_key(value: Any) -> tuple[str, str, str, str]:
+    if not isinstance(value, Mapping):
+        return ("~", "~", "~", repr(value))
+    return (
+        str(value.get("source_id") or ""),
+        str(value.get("content_hash") or ""),
+        str(value.get("parser_identity") or value.get("parser_route") or ""),
+        str(value.get("revision") or ""),
+    )
+
+
+def _canonicalize_product_snapshot(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
+    """Remove incidental upload ordering from evidence presented to the operator.
+
+    Project revision identity and content remain unchanged. Only collections whose
+    semantics are set-like evidence inventories are reordered by stable identities.
+    This makes upload/source order an explicit perturbation invariant rather than a
+    hidden influence on the model prompt.
+    """
+
+    body = deepcopy(dict(snapshot))
+    for key in _SOURCE_COLLECTION_KEYS:
+        value = body.get(key)
+        if not isinstance(value, list):
+            continue
+        body[key] = sorted(value, key=_source_sort_key)
+    return body
 
 
 def _known_source_ids(context: Mapping[str, Any]) -> set[str]:
@@ -114,11 +151,12 @@ def run_embedded_operator_turn(
 
     _assert_no_outer_context(snapshot, path="snapshot")
     _assert_no_outer_context(constraints or {}, path="constraints")
+    canonical_snapshot = _canonicalize_product_snapshot(snapshot)
 
     session = run_ai_project_orchestrator(
         project_id,
         project_revision,
-        snapshot,
+        canonical_snapshot,
         mission=mission,
         constraints=constraints,
         model_profile=model_profile,
@@ -140,6 +178,7 @@ def run_embedded_operator_turn(
             "outer_agent_analysis_visible": False,
             "product_visible_context_only": True,
             "evidence_references_must_resolve": True,
+            "source_order_canonicalized": True,
         },
         "operator_session": session,
         "authority_effect": "none",
