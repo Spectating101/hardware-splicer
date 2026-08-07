@@ -243,6 +243,26 @@ def _measurement_source(row: Mapping[str, Any], index: int, *, telemetry: bool) 
     }
 
 
+def _graph_visible_metadata(source: Mapping[str, Any]) -> Dict[str, Any]:
+    """Expose adapter metadata at the graph ingestion boundary without losing it.
+
+    ``EngineeringSourceGraph`` treats unknown top-level fields as source metadata. Older
+    adapter rows placed structured artifact identity only inside a nested ``metadata``
+    object, so graph normalization turned it into ``source.metadata[\"metadata\"]`` and
+    downstream projectors could not see ``artifact_kind`` or its manifest. Promote the
+    declared adapter metadata to graph-visible top-level keys while retaining the nested
+    object for backwards compatibility. No authority is upgraded here.
+    """
+
+    row = dict(source)
+    metadata = row.get("metadata")
+    if isinstance(metadata, Mapping):
+        for key, value in metadata.items():
+            if key not in row:
+                row[str(key)] = value
+    return row
+
+
 def adapt_engineering_source(value: Mapping[str, Any] | str, index: int = 0) -> tuple[Dict[str, Any] | str, ParsedRobotModel | None]:
     if not isinstance(value, Mapping):
         return str(value), None
@@ -255,15 +275,16 @@ def adapt_engineering_source(value: Mapping[str, Any] | str, index: int = 0) -> 
         or ""
     ).strip().lower().replace("-", "_")
     if artifact_kind in {"urdf", "sdf", "mjcf"}:
-        return _robot_model_source(row, index)
+        source, model = _robot_model_source(row, index)
+        return _graph_visible_metadata(source), model
     if artifact_kind in {"firmware_manifest", "firmware", "build_manifest"}:
-        return _firmware_manifest_source(row, index), None
+        return _graph_visible_metadata(_firmware_manifest_source(row, index)), None
     if artifact_kind in {"ros_manifest", "ros_interface_manifest", "ros_interfaces", "middleware_manifest"}:
-        return _ros_manifest_source(row, index), None
+        return _graph_visible_metadata(_ros_manifest_source(row, index)), None
     if artifact_kind in {"measurement", "measurements", "instrument_capture"}:
-        return _measurement_source(row, index, telemetry=False), None
+        return _graph_visible_metadata(_measurement_source(row, index, telemetry=False)), None
     if artifact_kind in {"telemetry", "rosbag", "ros_bag", "time_series"}:
-        return _measurement_source(row, index, telemetry=True), None
+        return _graph_visible_metadata(_measurement_source(row, index, telemetry=True)), None
     return row, None
 
 
