@@ -289,9 +289,13 @@ def plan_engineering_project(
         declared_conflicts=[row for row in conflict_rows if isinstance(row, Mapping)],
         unresolved_source_ids=unresolved_source_ids,
     )
+    # A legacy intake archetype is a derived guess, not declared robot truth. Only an
+    # explicit structured robot_genre may act as a topology hint; otherwise topology
+    # must reason from the engineering brief/parts instead of inheriting another
+    # classifier's conclusion.
     topology = build_robot_topology(
         body,
-        hinted_genre=str(body.get("robot_genre") or plan.get("archetype") or ""),
+        hinted_genre=str(body.get("robot_genre") or ""),
         machine_project=machine_project,
     )
     analysis = analyze_engineering_candidate(body, topology=topology)
