@@ -33,30 +33,42 @@ REQUIRED_PATHS = {
 }
 
 
-def _path_counts(app) -> dict[str, int]:
-    counts: dict[str, int] = {}
+def _api_operation_counts(app) -> dict[tuple[str, str], int]:
+    """Count concrete FastAPI route registrations without recursing into internals.
 
-    def visit(routes, prefix: str = "") -> None:
-        for route in routes:
-            path = getattr(route, "path", None)
-            if path:
-                resolved = f"{prefix}{path}" if prefix else path
-                counts[resolved] = counts.get(resolved, 0) + 1
-            children = getattr(route, "routes", None)
-            if children:
-                visit(children, f"{prefix}{path or ''}")
+    FastAPI's OpenAPI builder is the source of truth for path presence. This helper
+    separately verifies that no HTTP method/path pair was registered more than once.
+    APIRouter.include_router() flattens API routes onto app.routes, so recursive
+    traversal can double-prefix or otherwise misread Starlette implementation detail.
+    """
 
-    visit(app.routes)
+    counts: dict[tuple[str, str], int] = {}
+    for route in app.routes:
+        path = getattr(route, "path_format", None) or getattr(route, "path", None)
+        methods = getattr(route, "methods", None)
+        if not path or not methods:
+            continue
+        for raw_method in methods:
+            method = str(raw_method).upper()
+            if method in {"HEAD", "OPTIONS"}:
+                continue
+            key = (str(path), method)
+            counts[key] = counts.get(key, 0) + 1
     return counts
 
 
-def _route_multiplicity_failures(app) -> dict[str, int]:
-    counts = _path_counts(app)
-    return {
-        path: counts.get(path, 0)
-        for path in sorted(REQUIRED_PATHS)
-        if counts.get(path, 0) != 1
-    }
+def _duplicate_required_operations(app) -> dict[str, dict[str, int]]:
+    counts = _api_operation_counts(app)
+    duplicates: dict[str, dict[str, int]] = {}
+    for path in sorted(REQUIRED_PATHS):
+        repeated = {
+            method: count
+            for (registered_path, method), count in counts.items()
+            if registered_path == path and count > 1
+        }
+        if repeated:
+            duplicates[path] = repeated
+    return duplicates
 
 
 def test_canonical_product_app_mounts_advanced_engineering_routes_once(tmp_path) -> None:
@@ -64,7 +76,7 @@ def test_canonical_product_app_mounts_advanced_engineering_routes_once(tmp_path)
     paths = set(app.openapi()["paths"])
 
     assert REQUIRED_PATHS <= paths
-    assert _route_multiplicity_failures(app) == {}
+    assert _duplicate_required_operations(app) == {}
 
 
 def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -> None:
@@ -72,4 +84,4 @@ def test_extended_product_app_is_route_compatible_without_duplicates(tmp_path) -
     extended = create_extended_product_app(ProjectStore(tmp_path / "extended"))
 
     assert set(canonical.openapi()["paths"]) == set(extended.openapi()["paths"])
-    assert _route_multiplicity_failures(extended) == {}
+    assert _duplicate_required_operations(extended) == {}
