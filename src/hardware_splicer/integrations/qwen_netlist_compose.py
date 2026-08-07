@@ -10,6 +10,7 @@ from typing import Any, Dict, Mapping
 from ..netlist import run_erc
 from ..netlist.ir import CircuitNetlist
 from ..pcb.module_registry import find_module
+from ..semantic_module_selector import SemanticSelectionError, semantic_module_selection_pipeline
 from .catalog_context import catalog_context_for_goal
 from .qwen_model_policy import qwen_text_model_rotation
 from .qwen_text_client import call_qwen_chat, qwen_configured
@@ -47,6 +48,48 @@ def _normalize_netlist_payload(raw: Mapping[str, Any], *, source: str) -> Dict[s
         if mid and find_module(mid):
             comp["module_id"] = mid
     return body
+
+
+def semantic_module_proposal_from_goal(
+    goal: str,
+    *,
+    constraints: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Return a review-only module proposal after typed semantic interpretation.
+
+    This deliberately does not auto-wire or compile the selected modules. Stage 1 is
+    blind to module IDs; Stage 2 may select only from deterministic capability-query
+    candidates. The resulting selection therefore remains a proposal until a caller
+    explicitly carries it through a reviewed execution boundary.
+    """
+
+    try:
+        trace = semantic_module_selection_pipeline(goal, constraints=constraints)
+    except SemanticSelectionError as exc:
+        return {
+            "ok": False,
+            "error": "semantic_module_selection_failed",
+            "message": str(exc),
+            "compose_mode": "semantic_module_selection_failed",
+            "requires_human_review": True,
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    selection = trace.selection
+    return {
+        "ok": False,
+        "error": "semantic_module_review_required",
+        "message": "Typed module selection is available as a proposal and must not be auto-executed.",
+        "compose_mode": "semantic_module_proposal",
+        "requires_human_review": True,
+        "module_ids": list(selection.selected_module_ids),
+        "semantic_intent": trace.intent.model_dump(mode="json"),
+        "semantic_candidate_set": trace.candidate_set.model_dump(mode="json"),
+        "semantic_selection": selection.model_dump(mode="json"),
+        "authority_effect": "none",
+        "automatic_execution": False,
+    }
 
 
 def call_qwen_netlist_compose(
@@ -130,7 +173,7 @@ def compose_netlist_from_goal(
     constraints: Mapping[str, Any] | None = None,
     allow_qwen: bool = True,
 ) -> Dict[str, Any]:
-    """Deterministic module fallback, optional Qwen text when keyed."""
+    """Model-first netlist compose; legacy module picker is offline compatibility only."""
     from .llm_policy import offline_compose_enabled
 
     qwen_disabled = os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", "1").strip().lower() in (
@@ -145,47 +188,38 @@ def compose_netlist_from_goal(
         if qwen.get("ok"):
             return {**qwen, "compose_mode": "qwen_netlist"}
         if qwen.get("error") != "missing_api_key":
-            from .qwen_module_pick import call_qwen_module_pick, qwen_module_pick_enabled
-
-            if qwen_module_pick_enabled():
-                picked = call_qwen_module_pick(goal, constraints=constraints)
-                if picked.get("ok") and picked.get("module_ids"):
-                    from ..auto_wire import compose_build_graph_from_module_ids
-                    from ..netlist.lower import build_graph_to_netlist
-
-                    graph = compose_build_graph_from_module_ids(picked["module_ids"])["graph"]
-                    netlist = build_graph_to_netlist(graph, source="qwen_module_pick")
-                    erc = run_erc(netlist)
-                    if erc.get("pass"):
-                        return {
-                            "ok": True,
-                            "compose_mode": "qwen_module_pick",
-                            "netlist": netlist.to_dict(),
-                            "erc": erc,
-                            "module_ids": picked["module_ids"],
-                            "usage": picked.get("usage"),
-                            "reasoning": picked.get("reasoning"),
-                        }
-            if not offline_ok:
-                return {**qwen, "compose_mode": "qwen_netlist_failed"}
+            proposal = semantic_module_proposal_from_goal(goal, constraints=constraints)
+            if proposal.get("requires_human_review"):
+                return {
+                    **proposal,
+                    "qwen_netlist_error": qwen.get("error"),
+                    "qwen_netlist_message": qwen.get("message"),
+                    "usage": qwen.get("usage"),
+                }
+        if not offline_ok:
+            return {**qwen, "compose_mode": "qwen_netlist_failed"}
 
     if not offline_ok:
         return {"ok": False, "error": "no_llm_compose", "compose_mode": "llm_required"}
 
+    # Explicit offline compatibility only. This path is intentionally still backed by
+    # the legacy regex picker until the semantic pipeline has an offline replacement.
     from ..module_picker import pick_modules_for_goal
     from ..auto_wire import compose_build_graph_from_module_ids
     from ..netlist.lower import build_graph_to_netlist
 
     pick = pick_modules_for_goal(goal)
     if len(pick.module_ids) < 2:
-        return {"ok": False, "error": "no_modules", "compose_mode": "module_picker"}
+        return {"ok": False, "error": "no_modules", "compose_mode": "module_picker_offline_compat"}
     graph = compose_build_graph_from_module_ids(pick.module_ids)["graph"]
-    netlist = build_graph_to_netlist(graph, source="module_picker_fallback")
+    netlist = build_graph_to_netlist(graph, source="module_picker_offline_compat")
     erc = run_erc(netlist)
     return {
         "ok": bool(erc.get("pass")),
-        "compose_mode": "module_picker_fallback",
+        "compose_mode": "module_picker_offline_compat",
         "netlist": netlist.to_dict(),
         "erc": erc,
         "module_ids": list(pick.module_ids),
+        "legacy_semantic_fallback": True,
+        "authority_effect": "none",
     }
