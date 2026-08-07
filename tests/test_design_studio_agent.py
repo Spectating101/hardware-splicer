@@ -58,7 +58,7 @@ def test_agent_compose_canvas_returns_drc_fix_loop(tmp_path, monkeypatch: pytest
             "via_clearance_mm": 0.27,
         },
     )
-    graph = (retry.get("graph") or {})
+    graph = retry.get("graph") or {}
     assert graph.get("drc_fixup")
 
 
@@ -91,30 +91,62 @@ def test_compose_http_matches_agent_fields(tmp_path, monkeypatch: pytest.MonkeyP
     assert "drc_fix_loop" in dq or dq.get("kicad_drc_errors") is not None
 
 
-def test_finalize_compose_job_result_reads_job_result(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_finalize_compose_result_builds_package_and_bench_projection(
+    tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    build_dir = tmp_path / "compose-build"
+    build_dir.mkdir()
+    bench_session = {
+        "readiness": "blocked",
+        "open_gate_count": 1,
+        "critical_open_count": 1,
+        "power_on_authorized": False,
+        "level": "bench_required",
+        "gates": [{"gate_id": "power_input", "status": "open"}],
+        "bench_capture_template": "BENCH_CAPTURE_TEMPLATE.json",
+    }
+
     monkeypatch.setattr(
-        "hardware_splicer.sdk._read_compose_job",
-        lambda job_id, timeout_s: {
-            "job_id": job_id,
-            "status": "completed",
-            "result": {"ok": True, "out_dir": "/tmp/build"},
+        "hardware_splicer.project_package.write_project_package_artifacts",
+        lambda out_dir, result, source: {
+            "package": {"schema_version": "test.project_package.v1", "source": source},
+            "artifacts": {"project_package": str(out_dir / "PROJECT_PACKAGE.json")},
+        },
+    )
+    monkeypatch.setattr(
+        "hardware_splicer.splice_bench.open_bench_session",
+        lambda out_dir, force=False: dict(bench_session),
+    )
+    monkeypatch.setattr(
+        "hardware_splicer.bench_capture_bridge.sync_bench_session_template",
+        lambda out_dir: {
+            "session": dict(bench_session),
+            "template": {"template_path": str(out_dir / "BENCH_CAPTURE_TEMPLATE.json")},
         },
     )
 
-    result = finalize_compose_job_result("job-123", timeout_s=10)
-
-    assert result == {"ok": True, "out_dir": "/tmp/build"}
-
-
-def test_finalize_compose_job_result_refuses_failed_job(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        "hardware_splicer.sdk._read_compose_job",
-        lambda job_id, timeout_s: {
-            "job_id": job_id,
-            "status": "failed",
-            "error": "compose failed",
+    result = finalize_compose_job_result(
+        {
+            "ok": True,
+            "out_dir": str(build_dir),
+            "artifacts": {"pcb": str(build_dir / "board.kicad_pcb")},
         },
+        goal="exercise current finalization contract",
+        project_name="design-studio-contract",
     )
 
-    with pytest.raises(RuntimeError, match="compose failed"):
-        finalize_compose_job_result("job-123", timeout_s=10)
+    assert result["build_dir"] == str(build_dir.resolve())
+    assert result["project_name"] == "design-studio-contract"
+    assert result["goal"] == "exercise current finalization contract"
+    assert result["project_package"]["source"] == "compose"
+    assert result["bench_session"]["power_on_authorized"] is False
+    assert result["bench_session"]["critical_open_count"] == 1
+    assert result["artifacts"]["pcb"].endswith("board.kicad_pcb")
+    assert result["artifacts"]["project_package"].endswith("PROJECT_PACKAGE.json")
+
+
+def test_finalize_compose_result_refuses_missing_build_directory(tmp_path) -> None:
+    missing = tmp_path / "does-not-exist"
+
+    with pytest.raises(ValueError, match="compose out_dir missing"):
+        finalize_compose_job_result({"ok": False, "out_dir": str(missing)})
