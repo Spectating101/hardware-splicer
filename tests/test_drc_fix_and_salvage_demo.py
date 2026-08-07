@@ -65,5 +65,12 @@ def test_salvage_bringup_demo_script(tmp_path: Path, monkeypatch: pytest.MonkeyP
     report = run_salvage_bringup(intake, out_dir=tmp_path, export_gerber=False)
     assert report["salvage_mode"] is True
     assert (tmp_path / "SALVAGE_BRINGUP_REPORT.json").is_file()
-    assert report["quality_summary"]["kicad_drc_errors"] == 0
-    assert report["ok"] is True
+
+    drc_errors = report["quality_summary"].get("kicad_drc_errors")
+    if drc_errors is None:
+        # Dependency-light CI cannot claim a clean DRC receipt. The dedicated
+        # KiCad workflow remains the positive compile bar.
+        assert report["ok"] is False
+    else:
+        assert drc_errors == 0
+        assert report["ok"] is True
