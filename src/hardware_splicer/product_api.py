@@ -4,8 +4,8 @@ The core engine factory remains in :mod:`hardware_splicer.api`; this module moun
 product-level routers that own durable workspace state, canonical machine and
 electrical models, external interchange, runtime capability truth, source-agnostic
 engineering planning, manufacturing and mechanical closure, bounded execution,
-unified status, revision comparison, scoped physical evidence, review evidence, and
-source-blind dual-agent evaluation.
+unified status, revision comparison, scoped physical evidence, review evidence,
+semantic bounded-planner selection, and source-blind dual-agent evaluation.
 """
 
 from __future__ import annotations
@@ -49,6 +49,7 @@ from .project_api import create_project_router
 from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
 from .project_store import ProjectStore
+from .semantic_circuit_api import create_semantic_circuit_router
 from .source_conflict_api import create_source_conflict_router
 from .source_storage_operations_api import create_source_storage_operations_router
 from .source_upload_session_api import create_source_upload_session_router
@@ -67,6 +68,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_circuit_json_router())
     app.include_router(create_electrical_interchange_router())
     app.include_router(create_capability_router())
+    app.include_router(create_semantic_circuit_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_engineering_source_ingestion_router(resolved_store))
     app.include_router(create_engineering_source_multipart_router(resolved_store))
