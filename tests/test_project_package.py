@@ -15,20 +15,41 @@ def test_clarifier_flags_vague_goal() -> None:
     assert len(report["questions"]) >= 3
 
 
-def test_clarifier_enriches_answers() -> None:
+def test_clarifier_records_answers_without_inventing_engineering_facts() -> None:
     enriched = apply_clarification_answers(
         {
             "goal": "make a gadget",
             "clarification_answers": {
-                "power_source": "USB 5V",
+                "power_source": "battery",
                 "controller": "ESP32",
                 "load_type": "pump motor",
             },
         }
     )
-    assert enriched["supply_rails"]
-    assert "esp32-devkit" in enriched["allowed_modules"]
-    assert enriched["load_requirements"][0]["type"] == "dc_motor"
+
+    # User prose is preserved as declared evidence. The clarifier must not invent
+    # voltages, currents, load classes, or a particular catalog part.
+    assert "supply_rails" not in enriched
+    assert "allowed_modules" not in enriched
+    assert "load_requirements" not in enriched
+    observations = {
+        row["question_id"]: row for row in enriched["clarification_observations"]
+    }
+    assert observations["power_source"]["answer"] == "battery"
+    assert observations["controller"]["answer"] == "ESP32"
+    assert observations["load_type"]["answer"] == "pump motor"
+    assert all(row["authority"] == "declared" for row in observations.values())
+    assert all(row["interpretation_status"] == "unresolved" for row in observations.values())
+
+    report = analyze_intent_clarifications(
+        {
+            "goal": "make a gadget",
+            "clarification_answers": {"power_source": "battery"},
+        }
+    )
+    assert report["needs_clarification"] is False
+    assert report["semantic_interpretation_required"] is True
+    assert report["enriched_intent"]["clarification_observations"][0]["answer"] == "battery"
 
 
 def test_synthesis_package_blocked(tmp_path: Path) -> None:
