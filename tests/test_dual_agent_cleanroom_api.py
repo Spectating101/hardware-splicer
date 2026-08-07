@@ -10,10 +10,12 @@ from hardware_splicer.project_store import ProjectStore
 
 
 def _fake_llm(prompt: str, **kwargs: object) -> dict:
-    # The operator should see the persisted source identity/metadata, never an outer
-    # snapshot supplied through the request body.
+    # The operator should see persisted project state only, never snapshot or constraint
+    # payloads smuggled in by the outer caller.
     assert "persisted-source" in prompt
+    assert "persisted-constraint-marker" in prompt
     assert "caller-secret-source" not in prompt
+    assert "caller-solution" not in prompt
     response = {
         "summary": "The persisted evidence is incomplete; keep the interface blocked.",
         "requirements": [
@@ -57,6 +59,7 @@ def _seed(store: ProjectStore) -> dict:
         "fixture-project",
         {
             "name": "fixture-project",
+            "constraints": {"evaluation_marker": "persisted-constraint-marker"},
             "engineeringSources": [
                 {
                     "source_id": "persisted-source",
@@ -89,8 +92,10 @@ def test_cleanroom_operator_turn_loads_current_persisted_revision(tmp_path) -> N
     assert body["evaluated_revision"] == envelope["revision"]
     assert body["saved_revision"] is None
     assert body["project_state_mutated"] is False
+    assert body["constraints_source"] == "persisted_project_snapshot"
     assert body["authority_effect"] == "none"
     session = body["cleanroom"]["operator_session"]
+    assert session["constraints"]["evaluation_marker"] == "persisted-constraint-marker"
     assert session["actions"][0]["source_ids"] == ["persisted-source"]
     assert session["actions"][0]["status"] == "proposed"
 
@@ -136,12 +141,30 @@ def test_cleanroom_api_forbids_caller_supplied_snapshot(tmp_path) -> None:
     assert response.status_code == 422
 
 
+def test_cleanroom_api_forbids_caller_supplied_constraints(tmp_path) -> None:
+    client, store = _client(tmp_path)
+    envelope = _seed(store)
+
+    response = client.post(
+        "/v1/projects/fixture-project/cleanroom/operator-turn",
+        json={
+            "expected_revision": envelope["revision"],
+            "mission": "Try to inject a solution as a constraint.",
+            "constraints": {"solution": "caller-solution"},
+        },
+    )
+
+    assert response.status_code == 422
+
+
 def test_cleanroom_schema_declares_zero_authority_and_no_caller_snapshot(tmp_path) -> None:
     client, _ = _client(tmp_path)
 
     body = client.get("/v1/engineering/cleanroom/schema").json()
 
     assert body["snapshot_supplied_by_caller"] is False
+    assert body["constraints_supplied_by_caller"] is False
+    assert body["constraints_source"] == "persisted_project_snapshot"
     assert body["persisted_project_revision_required"] is True
     assert body["project_state_mutated"] is False
     assert body["authority_effect"] == "none"
