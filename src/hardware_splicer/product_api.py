@@ -4,7 +4,8 @@ The core engine factory remains in :mod:`hardware_splicer.api`; this module moun
 product-level routers that own durable workspace state, canonical machine and
 electrical models, external interchange, runtime capability truth, source-agnostic
 engineering planning, manufacturing and mechanical closure, bounded execution,
-unified status, revision comparison, scoped physical evidence, and review evidence.
+unified status, revision comparison, scoped physical evidence, review evidence, and
+source-blind dual-agent evaluation.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from .ai_project_tool_executor_api import create_ai_project_tool_executor_router
 from .api import create_app as create_engine_app
 from .capability_api import create_capability_router
 from .circuit_json_api import create_circuit_json_router
+from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
@@ -74,6 +76,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
+    app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))
     app.include_router(create_ai_project_repair_router(resolved_store))
     app.include_router(create_ai_project_conversation_router(resolved_store))
