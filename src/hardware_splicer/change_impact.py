@@ -188,13 +188,42 @@ def _text(value: Any) -> str:
 
 
 def _mode(intake: Mapping[str, Any]) -> ChangeMode:
+    """Resolve change mode with explicit structured mode taking precedence over prose.
+
+    Engineering Planner now persists a provenance-aware project mode before change-impact
+    analysis. Once that explicit mode exists, this layer must not silently reinterpret it
+    because the goal happens to contain words such as "repair", "brownout", or "upgrade".
+    The historical prose fallback remains only for direct legacy callers that provide no
+    explicit mode.
+    """
     explicit = str(intake.get("mode") or intake.get("project_mode") or "").strip().lower()
-    goal = _text(intake.get("goal") or intake.get("intent")).lower()
-    if explicit in {"evolve", "field_evolution"} or intake.get("field_failure") or "field failure" in goal:
+    explicit_modes = {
+        "greenfield": ChangeMode.GREENFIELD,
+        "modify": ChangeMode.MODIFY,
+        "modification": ChangeMode.MODIFY,
+        "repair": ChangeMode.REPAIR,
+        "evolve": ChangeMode.FIELD_EVOLUTION,
+        "field_evolution": ChangeMode.FIELD_EVOLUTION,
+    }
+    if explicit in explicit_modes:
+        return explicit_modes[explicit]
+
+    # Structured project facts remain stronger than free-form prose for direct callers.
+    if intake.get("field_failure"):
         return ChangeMode.FIELD_EVOLUTION
-    if explicit == "repair" or intake.get("repair") or intake.get("salvage_mode") or any(token in goal for token in ("repair", "recover", "donor", "splice")):
+    if intake.get("repair") or intake.get("salvage_mode"):
         return ChangeMode.REPAIR
-    if explicit in {"modify", "modification"} or intake.get("baseline_project") or intake.get("baseline_revision") is not None or any(token in goal for token in ("modify", "upgrade", "add a", "replace")):
+    if intake.get("baseline_project") or intake.get("baseline_revision") is not None:
+        return ChangeMode.MODIFY
+
+    # Legacy compatibility only: callers without an explicit/structured mode may still
+    # be classified from prose. This result remains a proposed impact-analysis input.
+    goal = _text(intake.get("goal") or intake.get("intent")).lower()
+    if "field failure" in goal:
+        return ChangeMode.FIELD_EVOLUTION
+    if any(token in goal for token in ("repair", "recover", "donor", "splice")):
+        return ChangeMode.REPAIR
+    if any(token in goal for token in ("modify", "upgrade", "add a", "replace")):
         return ChangeMode.MODIFY
     return ChangeMode.GREENFIELD
 
