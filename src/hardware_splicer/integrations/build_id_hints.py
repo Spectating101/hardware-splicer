@@ -219,6 +219,16 @@ def build_catalog_context_for_pick() -> str:
     return "\n".join(lines)
 
 
+def _legacy_fallback_allowed_by_policy() -> bool:
+    """Legacy architecture heuristics are available only in explicit offline salvage."""
+    try:
+        from .llm_policy import offline_salvage_enabled
+    except ImportError:
+        from hardware_splicer.integrations.llm_policy import offline_salvage_enabled
+
+    return bool(offline_salvage_enabled())
+
+
 def reconcile_build_pick_with_provenance(
     llm_build_id: str | None,
     keyword_build_id: str | None,
@@ -226,13 +236,13 @@ def reconcile_build_pick_with_provenance(
     diy_build_id: str = "",
     splice_build_id: str = "",
     llm_confidence: float = 0.0,
-    allow_legacy_fallback: bool = True,
+    allow_legacy_fallback: bool | None = None,
 ) -> Dict[str, Any]:
     """Resolve a build proposal without allowing heuristics to overrule the model.
 
     A valid model-selected catalog ID always wins. Keyword/DIY/splice values are legacy
-    compatibility signals only and are considered solely when no valid model proposal
-    exists *and* the caller explicitly permits legacy fallback.
+    compatibility signals only. If ``allow_legacy_fallback`` is omitted, availability
+    follows the explicit offline-salvage policy instead of silently defaulting to true.
     """
     llm = str(llm_build_id or "").strip()
     keyword = str(keyword_build_id or "").strip()
@@ -248,7 +258,12 @@ def reconcile_build_pick_with_provenance(
             "legacy_fallback_used": False,
         }
 
-    if not allow_legacy_fallback:
+    legacy_allowed = (
+        _legacy_fallback_allowed_by_policy()
+        if allow_legacy_fallback is None
+        else bool(allow_legacy_fallback)
+    )
+    if not legacy_allowed:
         return {
             "build_id": None,
             "source": "unresolved",
@@ -287,12 +302,12 @@ def reconcile_build_pick(
     diy_build_id: str = "",
     splice_build_id: str = "",
     llm_confidence: float = 0.0,
-    allow_legacy_fallback: bool = True,
+    allow_legacy_fallback: bool | None = None,
 ) -> Optional[str]:
     """Compatibility wrapper returning only the selected ID.
 
     Unlike the historical implementation, a keyword result can never override a valid
-    model proposal, regardless of model confidence or agreement between legacy planners.
+    model proposal, and an omitted fallback flag follows the explicit offline policy.
     """
     decision = reconcile_build_pick_with_provenance(
         llm_build_id,
