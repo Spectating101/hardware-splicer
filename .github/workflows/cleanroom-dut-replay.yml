@@ -1,0 +1,104 @@
+name: Cleanroom DUT Replay
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/cleanroom_dut_experiment.py"
+      - "src/hardware_splicer/cleanroom_replay.py"
+      - "src/hardware_splicer/cleanroom_retrospective.py"
+      - "src/hardware_splicer/cleanroom_perturbations.py"
+      - "src/hardware_splicer/dual_agent_cleanroom.py"
+      - "tests/test_cleanroom_dut_experiment.py"
+      - "scripts/run_cleanroom_dut_experiment.py"
+      - ".github/workflows/cleanroom-dut-replay.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cleanroom-dut-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deterministic-evaluator:
+    name: Deterministic evaluator probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test runner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Run experiment tests
+        run: pytest -q tests/test_cleanroom_dut_experiment.py tests/test_cleanroom_replay.py tests/test_cleanroom_retrospective.py
+
+      - name: Persist deterministic replay report
+        run: python scripts/run_cleanroom_dut_experiment.py --mode deterministic --out-dir artifacts/cleanroom-dut
+
+      - name: Upload deterministic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanroom-dut-deterministic
+          path: artifacts/cleanroom-dut
+          if-no-files-found: error
+
+  live-provider:
+    name: Live embedded operator probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      QWEN_API_KEY: ${{ secrets.QWEN_API_KEY }}
+      DASHSCOPE_API_KEY: ${{ secrets.DASHSCOPE_API_KEY }}
+      HARDWARE_SPLICER_LLM_PROVIDER: qwen
+      HARDWARE_SPLICER_LLM_CACHE: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Detect provider secret
+        id: provider
+        shell: bash
+        run: |
+          mkdir -p artifacts/cleanroom-dut-live
+          if [[ -n "${QWEN_API_KEY}" || -n "${DASHSCOPE_API_KEY}" ]]; then
+            echo "available=1" >> "$GITHUB_OUTPUT"
+            echo "provider secret present" > artifacts/cleanroom-dut-live/PROVIDER_STATUS.txt
+          else
+            echo "available=0" >> "$GITHUB_OUTPUT"
+            echo "live probe skipped: no QWEN_API_KEY or DASHSCOPE_API_KEY secret" > artifacts/cleanroom-dut-live/PROVIDER_STATUS.txt
+          fi
+
+      - name: Run live cleanroom replay
+        if: steps.provider.outputs.available == '1'
+        run: python scripts/run_cleanroom_dut_experiment.py --mode live --out-dir artifacts/cleanroom-dut-live
+
+      - name: Upload live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cleanroom-dut-live
+          path: artifacts/cleanroom-dut-live
+          if-no-files-found: error
