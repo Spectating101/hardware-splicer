@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hardware_splicer.integrations.build_id_hints as hints_module
 import hardware_splicer.integrations.qwen_build_pick as build_pick_module
 import hardware_splicer.integrations.qwen_intake_normalize as intake_module
 from hardware_splicer.integrations.build_id_hints import (
@@ -44,6 +45,37 @@ def test_model_first_reconciliation_can_refuse_all_legacy_fallbacks() -> None:
     assert decision["build_id"] is None
     assert decision["source"] == "unresolved"
     assert decision["legacy_fallback_used"] is False
+
+
+def test_omitted_fallback_flag_is_fail_closed_on_model_first_policy(monkeypatch) -> None:
+    monkeypatch.setattr(hints_module, "_legacy_fallback_allowed_by_policy", lambda: False)
+
+    decision = reconcile_build_pick_with_provenance(
+        None,
+        "automatic_plant_watering",
+        diy_build_id="robot_drive_base",
+        splice_build_id="sensor_logger",
+    )
+
+    assert decision["build_id"] is None
+    assert decision["source"] == "unresolved"
+    assert decision["legacy_fallback_used"] is False
+
+
+def test_omitted_fallback_flag_retains_explicit_offline_compatibility(monkeypatch) -> None:
+    monkeypatch.setattr(hints_module, "_legacy_fallback_allowed_by_policy", lambda: True)
+
+    decision = reconcile_build_pick_with_provenance(
+        None,
+        "automatic_plant_watering",
+        diy_build_id="robot_drive_base",
+        splice_build_id="sensor_logger",
+    )
+
+    assert decision["build_id"] == "automatic_plant_watering"
+    assert decision["source"] == "legacy_keyword"
+    assert decision["legacy_fallback_used"] is True
+    assert decision["authority_effect"] == "none"
 
 
 def test_model_build_prompt_is_not_seeded_with_keyword_answer(monkeypatch) -> None:
