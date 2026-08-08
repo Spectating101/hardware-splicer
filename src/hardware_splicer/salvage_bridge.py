@@ -17,7 +17,10 @@ from .module_resolver import (
     resolve_parts_to_modules_with_llm,
     salvage_plan_input_from_intake,
 )
-from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick
+from .integrations.build_id_hints import (
+    keyword_build_id,
+    reconcile_build_pick_with_provenance,
+)
 from .salvage_intelligence import analyze_salvage_gaps, build_bringup_card
 from .salvage_bom_estimate import build_salvage_bom_estimate
 from .firmware_scaffold import generate_firmware_from_salvage
@@ -41,57 +44,115 @@ def _keyword_build_id(
     return keyword_build_id(goal, parts, salvage_id=salvage_id)
 
 
-def _pick_build_id(
+def _pick_build_decision(
     goal: str,
     parts: List[Mapping[str, Any]],
     splice_plan: Mapping[str, Any],
     diy_plan: Mapping[str, Any],
-) -> str | None:
+) -> Dict[str, Any]:
+    """Choose a catalog architecture without laundering legacy planner answers.
+
+    On model-first paths, the model gets goal/parts and the bounded catalog only. IDs
+    emitted by the historical DIY/splice/keyword planners are deliberately excluded from
+    architecture selection. If the model cannot make a defensible selection, the result
+    stays unresolved and the caller may use scratch composition without inventing a
+    named catalog recommendation.
+
+    Explicit offline salvage mode preserves the historical planner stack for regression
+    and disconnected operation, with visible legacy provenance and zero authority.
+    """
     salvage_id = str((splice_plan.get("target") or {}).get("recommended_build_id") or "")
     diy_id = str(((diy_plan.get("project_intent") or {}).get("mapped_build_id")) or "")
 
     from .integrations.llm_policy import offline_salvage_enabled
     from .integrations.qwen_build_pick import call_qwen_build_pick, qwen_build_pick_enabled
 
-    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id)
-    llm_id: str | None = None
-    llm_confidence = 0.0
-
-    if qwen_build_pick_enabled() and not offline_salvage_enabled():
-        pick = call_qwen_build_pick(
-            goal=goal,
-            parts=parts,
-            planner_hints={
-                "diy_mapped_build_id": diy_id,
-                "splice_recommended_build_id": salvage_id,
-                "planners_agree": bool(diy_id and diy_id == salvage_id),
-                "keyword_build_hint": keyword_id,
+    offline = offline_salvage_enabled()
+    if not offline:
+        if qwen_build_pick_enabled():
+            pick = call_qwen_build_pick(goal=goal, parts=parts, planner_hints={})
+            if pick.get("ok") and pick.get("build_id"):
+                decision = reconcile_build_pick_with_provenance(
+                    str(pick["build_id"]),
+                    None,
+                    llm_confidence=float(pick.get("confidence") or 0.0),
+                    allow_legacy_fallback=False,
+                )
+                return {
+                    **decision,
+                    "reasoning": str(pick.get("reasoning") or ""),
+                    "unresolved_questions": list(pick.get("unresolved_questions") or []),
+                    "legacy_planner_ids_ignored": {
+                        "keyword": _keyword_build_id(goal, parts, salvage_id=salvage_id),
+                        "diy": diy_id or None,
+                        "splice": salvage_id or None,
+                    },
+                }
+            reason = str(
+                pick.get("message")
+                or pick.get("reason")
+                or pick.get("error")
+                or pick.get("reasoning")
+                or "No bounded catalog architecture was defensibly selected."
+            )
+            unresolved_questions = [
+                str(row).strip()
+                for row in list(pick.get("unresolved_questions") or [])[:24]
+                if str(row).strip()
+            ]
+        else:
+            reason = "Model-first architecture selector is unavailable."
+            unresolved_questions = []
+        return {
+            "build_id": None,
+            "source": "unresolved",
+            "confidence": 0.0,
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+            "reasoning": reason,
+            "unresolved_questions": unresolved_questions or [reason],
+            "legacy_planner_ids_ignored": {
+                "keyword": _keyword_build_id(goal, parts, salvage_id=salvage_id),
+                "diy": diy_id or None,
+                "splice": salvage_id or None,
             },
-        )
-        if pick.get("ok") and pick.get("build_id"):
-            llm_id = str(pick["build_id"])
-            llm_confidence = float(pick.get("confidence") or 0.75)
+        }
 
-    reconciled = reconcile_build_pick(
-        llm_id,
+    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id)
+    decision = reconcile_build_pick_with_provenance(
+        None,
         keyword_id,
         diy_build_id=diy_id,
         splice_build_id=salvage_id,
-        llm_confidence=llm_confidence,
+        allow_legacy_fallback=True,
     )
-    if reconciled:
-        return reconciled
+    if decision.get("build_id"):
+        return {
+            **decision,
+            "reasoning": "Explicit offline compatibility architecture selection.",
+            "unresolved_questions": [],
+        }
 
-    if keyword_id:
-        return keyword_id
-    if diy_id and salvage_id and diy_id == salvage_id:
-        return diy_id
-    if diy_id:
-        return diy_id
-    if salvage_id:
-        return salvage_id
+    generic = resolve_build_id(archetype="generic_mechatronics")
+    return {
+        "build_id": generic,
+        "source": "legacy_generic",
+        "confidence": 0.0,
+        "authority_effect": "none",
+        "legacy_fallback_used": True,
+        "reasoning": "Explicit offline compatibility fell back to the generic catalog build.",
+        "unresolved_questions": [],
+    }
 
-    return resolve_build_id(archetype="generic_mechatronics")
+
+def _pick_build_id(
+    goal: str,
+    parts: List[Mapping[str, Any]],
+    splice_plan: Mapping[str, Any],
+    diy_plan: Mapping[str, Any],
+) -> str | None:
+    """Compatibility projection returning only the build ID."""
+    return _pick_build_decision(goal, parts, splice_plan, diy_plan).get("build_id")
 
 
 def build_intake_salvage_package(
@@ -145,15 +206,28 @@ def build_intake_salvage_package(
             for r in resolved_modules
         ),
     }
-    build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
 
     from .catalog import CATALOG_BUILD_IDS
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    offline = offline_salvage_enabled()
+    build_selection = _pick_build_decision(goal, parts, splice_plan, diy_plan)
+    build_id = str(build_selection.get("build_id") or "").strip()
 
     explicit_build = str(
         constraints_map.get("target_build_id") or constraints_map.get("build_id") or ""
     ).strip()
     if explicit_build in CATALOG_BUILD_IDS:
         build_id = explicit_build
+        build_selection = {
+            "build_id": explicit_build,
+            "source": "declared",
+            "confidence": 1.0,
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+            "reasoning": "Explicit catalog build ID supplied in project constraints.",
+            "unresolved_questions": [],
+        }
 
     from .integrations.qwen_workshop_review import (
         apply_workshop_review,
@@ -177,19 +251,31 @@ def build_intake_salvage_package(
                 donor_context=fs_context,
             )
             suggested = str(workshop_review.get("suggested_build_id") or "").strip()
-            if suggested:
-                build_id = (
-                    reconcile_build_pick(
-                        suggested,
-                        keyword_build_id(goal, parts),
-                        splice_build_id=build_id,
-                    )
-                    or build_id
-                )
+            # A declared build remains the user's explicit constraint. Otherwise a
+            # bounded workshop-model suggestion may become the current proposal, but
+            # never through keyword/legacy reconciliation.
+            if suggested in CATALOG_BUILD_IDS and build_selection.get("source") != "declared":
+                build_id = suggested
+                build_selection = {
+                    "build_id": suggested,
+                    "source": "workshop_model_proposed",
+                    "confidence": float(workshop_review.get("confidence") or 0.0),
+                    "authority_effect": "none",
+                    "legacy_fallback_used": False,
+                    "reasoning": str(workshop_review.get("reasoning") or "Workshop review proposed a bounded catalog build."),
+                    "unresolved_questions": [],
+                }
     salvage_resolution["workshop_review"] = workshop_review
+
+    # The historical DIY profile may still support offline regression behavior, but its
+    # strategy/resource guesses cannot become model-first project truth.
     strategy_mode = str(
-        ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
-        or constraints_map.get("strategy_mode")
+        constraints_map.get("strategy_mode")
+        or (
+            ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
+            if offline
+            else "constrained"
+        )
         or "constrained"
     )
     constrained = strategy_mode == "constrained" or constraints_map.get("compose_from_inventory") is True
@@ -200,28 +286,29 @@ def build_intake_salvage_package(
     )
     power_topology = infer_power_topology(parts, merged_modules, constraints=constraints_map)
     merged_modules = coalesce_resolved_modules(parts, merged_modules, power_topology=power_topology)
-    use_scratch = should_use_scratch_compose(
+
+    # No defensible named architecture means scratch composition, not a fake generic
+    # recommendation. Scratch is an execution mechanism; it is not architecture truth.
+    use_scratch = bool(not build_id) or should_use_scratch_compose(
         goal=goal,
         build_id=build_id or None,
         resolved_modules=merged_modules,
         constraints=constraints_map,
         strategy_mode=strategy_mode,
     )
-    # Scratch compose must not erase a concrete catalog money-path build_id.
-    from .scratch_pipeline import NAMED_CATALOG_BUILD_IDS
 
-    if use_scratch and str(build_id or "") not in NAMED_CATALOG_BUILD_IDS:
-        build_id = "generic_low_voltage_build"
     if build_id:
         target = dict(splice_plan.get("target") or {})
         target["recommended_build_id"] = build_id
         splice_plan = {**splice_plan, "target": target}
-    resource_overrides = overrides_from_resource_plan(diy_plan)
+
+    resource_overrides = overrides_from_resource_plan(diy_plan) if offline else {}
     inventory_overrides = module_overrides_for_build(
         build_id=build_id or None,
         resolved_modules=merged_modules if use_scratch else resolved_modules,
     )
-    # Inventory wins over DIY resource guesses (e.g. usb-uart must not replace usb-power-5v).
+    # Inventory wins over legacy DIY resource guesses (e.g. usb-uart must not replace
+    # usb-power-5v). Model-first paths do not consume DIY resource guesses at all.
     module_overrides = merge_module_overrides(resource_overrides, inventory_overrides)
     if power_topology == "usb_5v":
         module_overrides["pwr"] = "usb-power-5v"
@@ -293,6 +380,8 @@ def build_intake_salvage_package(
         "compose_module_ids": module_ids_from_resolved(merged_modules) if use_scratch else [],
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
+        "build_selection": build_selection,
+        "legacy_planner_architecture_authority": "compatibility_only" if offline else "ignored",
         "verdict": splice_plan.get("verdict"),
         "planning_confidence": float(splice_plan.get("confidence") or 0.0),
         "salvage_resolution": salvage_resolution,
