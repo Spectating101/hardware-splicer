@@ -1,9 +1,9 @@
 """Bounded circuit-synthesis planning layer.
 
 This package represents circuit intent, topology operators, constraints, and candidate
-plans before handing work to the existing Hardware-Splicer compile/check spine. New
-model-enabled routing should prefer typed semantic planner selection; ``plan_circuit``
-remains the legacy keyword-compatible dispatcher until migration is complete.
+plans before handing work to the existing Hardware-Splicer compile/check spine.
+``plan_circuit`` uses typed semantic planner selection on model-first paths and retains
+the historical keyword dispatcher only for explicit offline compatibility/regression.
 """
 
 from .ir import (
