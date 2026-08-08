@@ -1,8 +1,10 @@
 """Deterministic seeding of a canonical machine project from project intake.
 
-The seed is intentionally conservative. It creates purpose, requirements,
-subsystems, components, and declared constraints, but it does not invent pin
-mappings, mechanical fits, firmware behavior, or verification evidence.
+The seed creates purpose, requirements, subsystems, components, and declared constraints
+without inventing pin mappings, mechanical fits, firmware behavior, or verification
+evidence. On model-first paths component discipline allocation uses declared structured
+fields only; human-facing part names are labels, not engineering classifiers. Historical
+name/keyword allocation remains available only in explicit offline compatibility.
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from .machine_project import (
     RequirementKind,
     Subsystem,
 )
+from .structured_part_roles import declared_part_domain, declared_part_role
 
 
 def _slug(value: str, fallback: str = "machine-project") -> str:
@@ -49,7 +52,7 @@ def _part_source(row: Mapping[str, Any]) -> ComponentSource:
     return ComponentSource.UNKNOWN
 
 
-def _part_bucket(row: Mapping[str, Any]) -> tuple[str, Domain]:
+def _legacy_part_bucket(row: Mapping[str, Any]) -> tuple[str, Domain]:
     kind = " ".join(
         str(row.get(key) or "").lower()
         for key in ("type", "category", "role", "name", "module_id")
@@ -65,6 +68,43 @@ def _part_bucket(row: Mapping[str, Any]) -> tuple[str, Domain]:
     if any(token in kind for token in ("sensor", "camera", "encoder", "display", "imu", "lidar")):
         return "perception-system", Domain.ELECTRICAL
     return "electrical-system", Domain.ELECTRICAL
+
+
+def _part_bucket(row: Mapping[str, Any]) -> tuple[str, Domain, str]:
+    explicit_domain = declared_part_domain(row)
+    if explicit_domain:
+        domain = Domain(explicit_domain)
+        subsystem_id = {
+            Domain.SYSTEM: "unclassified-components",
+            Domain.MECHANICAL: "mechanical-structure",
+            Domain.ELECTRICAL: "electrical-system",
+            Domain.FIRMWARE: "firmware-control",
+            Domain.SOFTWARE: "software-control",
+            Domain.SOURCING: "sourcing",
+            Domain.ASSEMBLY: "assembly",
+            Domain.VERIFICATION: "verification-system",
+        }[domain]
+        return subsystem_id, domain, "declared_domain"
+
+    role, role_source = declared_part_role(row)
+    structured = {
+        "actuator": ("actuation-system", Domain.MECHANICAL),
+        "structure": ("mechanical-structure", Domain.MECHANICAL),
+        "power": ("power-system", Domain.ELECTRICAL),
+        "controller": ("control-electronics", Domain.ELECTRICAL),
+        "sensor": ("perception-system", Domain.ELECTRICAL),
+        "electrical": ("electrical-system", Domain.ELECTRICAL),
+    }
+    if role in structured:
+        subsystem_id, domain = structured[role]
+        return subsystem_id, domain, role_source
+
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        subsystem_id, domain = _legacy_part_bucket(row)
+        return subsystem_id, domain, "legacy_name_keyword"
+    return "unclassified-components", Domain.SYSTEM, "unresolved"
 
 
 def _constraint_domain(key: str) -> Domain:
@@ -88,7 +128,7 @@ def _constraint_statement(key: str, value: Any) -> str:
 
 
 def machine_project_from_intake(intake: Mapping[str, Any]) -> MachineProject:
-    """Create a traceable architecture seed from a raw Hardware Splicer intake."""
+    """Create a traceable architecture seed from raw Hardware Splicer intake."""
 
     body = dict(intake or {})
     raw_name = str(body.get("project_name") or body.get("name") or body.get("goal") or "machine-project")
@@ -137,13 +177,17 @@ def machine_project_from_intake(intake: Mapping[str, Any]) -> MachineProject:
     component_ids_by_subsystem: dict[str, list[str]] = {}
 
     for index, row in enumerate(parts):
-        subsystem_id, domain = _part_bucket(row)
+        subsystem_id, domain, domain_source = _part_bucket(row)
         subsystem_specs.setdefault(
             subsystem_id,
             (
                 subsystem_id.replace("-", " ").title(),
                 domain,
-                "Seeded from declared intake parts.",
+                (
+                    "Declared component awaiting discipline allocation."
+                    if domain_source == "unresolved"
+                    else "Seeded from declared structured intake fields."
+                ),
             ),
         )
         component_id = _slug(
@@ -161,7 +205,11 @@ def machine_project_from_intake(intake: Mapping[str, Any]) -> MachineProject:
                 role=str(row.get("type") or row.get("role") or "declared intake component"),
                 source=_part_source(row),
                 authority=AuthorityState.DECLARED,
-                metadata={"intake_part": row},
+                metadata={
+                    "intake_part": row,
+                    "domain_projection_source": domain_source,
+                    "discipline_allocation_unresolved": domain_source == "unresolved",
+                },
             )
         )
         component_ids_by_subsystem.setdefault(subsystem_id, []).append(component_id)
@@ -222,6 +270,11 @@ def machine_project_from_intake(intake: Mapping[str, Any]) -> MachineProject:
             )
         )
 
+    unresolved_component_ids = [
+        row.component_id
+        for row in components
+        if row.metadata.get("discipline_allocation_unresolved")
+    ]
     return MachineProject(
         project_id=project_id,
         name=name,
@@ -234,9 +287,11 @@ def machine_project_from_intake(intake: Mapping[str, Any]) -> MachineProject:
         constraints=constraints,
         discipline_payloads={"project_intake": body},
         metadata={
-            "seed": "machine_project_from_intake.v1",
+            "seed": "machine_project_from_intake.v2",
             "interfaces_inferred": False,
             "verification_inferred": False,
             "authority_preserved_without_upgrade": True,
+            "part_domain_projection": "structured_declared_fields_or_offline_legacy",
+            "unresolved_component_allocation_ids": unresolved_component_ids,
         },
     )

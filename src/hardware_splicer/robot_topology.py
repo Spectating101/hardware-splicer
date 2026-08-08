@@ -1,8 +1,9 @@
 """Canonical robot topology for cross-domain identity and robotics scaling.
 
 The topology keeps stable identities for links, joints, actuators, sensors, frames,
-electrical components, firmware channels, and middleware names.  It describes a
-candidate architecture; it does not claim physical fit, calibration, or safe motion.
+electrical components, firmware channels, and middleware names. It describes a candidate
+architecture; it does not claim physical fit, calibration, or safe motion. Model-first
+part-role projection consumes structured declarations only; names remain labels.
 """
 
 from __future__ import annotations
@@ -11,11 +12,12 @@ import hashlib
 import json
 import re
 from enum import Enum
-from typing import Any, Dict, Iterable, Mapping, Sequence
+from typing import Any, Dict, Mapping, Sequence
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .machine_project import AuthorityState, MachineProject
+from .structured_part_roles import declared_part_role
 
 
 ROBOT_TOPOLOGY_SCHEMA = "hardware_splicer.robot_topology.v1"
@@ -205,6 +207,12 @@ def detect_robot_genre(goal: str, parts: Sequence[Mapping[str, Any]], hinted: st
         normalized = str(hinted).strip().lower().replace("-", "_")
         if normalized in _GENRE_ALIASES:
             return _GENRE_ALIASES[normalized]
+
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if not offline_salvage_enabled():
+        return RobotGenre.GENERIC
+
     text = " ".join(
         [goal]
         + [
@@ -262,7 +270,7 @@ def _part_component_id(part: Mapping[str, Any], lookup: Mapping[str, str]) -> st
     return None
 
 
-def _sensor_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+def _legacy_sensor_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
     tokens = ("sensor", "camera", "imu", "lidar", "encoder", "depth", "radar", "microphone")
     return [
         row for row in parts
@@ -270,7 +278,7 @@ def _sensor_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]
     ]
 
 
-def _actuator_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+def _legacy_actuator_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
     tokens = ("motor", "servo", "actuator", "esc", "drive")
     return [
         row for row in parts
@@ -278,11 +286,27 @@ def _actuator_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any
     ]
 
 
+def _sensor_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        return _legacy_sensor_parts(parts)
+    return [row for row in parts if declared_part_role(row)[0] == "sensor"]
+
+
+def _actuator_parts(parts: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        return _legacy_actuator_parts(parts)
+    return [row for row in parts if declared_part_role(row)[0] == "actuator"]
+
+
 def _expanded_part_slots(parts: Sequence[Mapping[str, Any]], count: int, prefix: str) -> list[tuple[str, Mapping[str, Any] | None]]:
     expanded: list[tuple[str, Mapping[str, Any] | None]] = []
     for row in parts:
         quantity = int(row.get("quantity") or 1)
-        for index in range(max(quantity, 1)):
+        for _ in range(max(quantity, 1)):
             expanded.append((f"{prefix}-{len(expanded) + 1}", row))
             if len(expanded) >= count:
                 return expanded
@@ -338,7 +362,7 @@ def _make_actuator(
 ) -> RobotActuator:
     part = part or {}
     actuator_type = str(part.get("type") or part.get("role") or "actuator")
-    source_part_id = str(part.get("component_id") or part.get("module_id") or part.get("name") or "").strip() or None
+    source_part_id = str(part.get("component_id") or part.get("module_id") or "").strip() or None
     return RobotActuator(
         actuator_id=actuator_id,
         name=str(part.get("name") or actuator_id).replace("-", " "),
@@ -350,6 +374,7 @@ def _make_actuator(
         firmware_channel_id=f"fw-{actuator_id}",
         command_interface=f"command/{actuator_id}",
         feedback_interface=f"state/{actuator_id}",
+        metadata={"source_part_declared": source_part_id is not None},
     )
 
 
@@ -602,10 +627,11 @@ def build_robot_topology(
                 name=str(part.get("name") or sensor_id),
                 sensor_type=str(part.get("type") or part.get("role") or "sensor"),
                 frame_id=frame_id,
-                source_part_id=str(part.get("component_id") or part.get("module_id") or part.get("name") or "").strip() or None,
+                source_part_id=str(part.get("component_id") or part.get("module_id") or "").strip() or None,
                 electrical_component_id=_part_component_id(part, lookup),
                 firmware_sensor_id=f"fw-{sensor_id}",
                 middleware_interfaces=[f"sensor/{sensor_id}"],
+                metadata={"source_part_declared": bool(part.get("component_id") or part.get("module_id"))},
             )
         )
 
@@ -613,10 +639,17 @@ def build_robot_topology(
     for joint in joints:
         if not joint.limits:
             unresolved.append({"object_id": joint.joint_id, "field": "limits", "reason": "Joint limits require design or measurement evidence."})
+    for actuator in actuators:
+        if not actuator.source_part_id:
+            unresolved.append({"object_id": actuator.actuator_id, "field": "source_part_id", "reason": "Topology requires an actuator role, but no declared structured actuator part is bound to this slot."})
     for sensor in sensors:
+        if not sensor.source_part_id:
+            unresolved.append({"object_id": sensor.sensor_id, "field": "source_part_id", "reason": "Sensor role is structurally declared, but no stable component/module identity is bound."})
         unresolved.append({"object_id": sensor.sensor_id, "field": "mount_pose", "reason": "Sensor pose requires CAD or measured mounting evidence."})
     if genre == RobotGenre.GENERIC:
         unresolved.append({"object_id": topology_id, "field": "robot_genre", "reason": "Native robot topology could not be resolved."})
+
+    from .integrations.llm_policy import offline_salvage_enabled
 
     return RobotTopology(
         topology_id=topology_id,
@@ -634,5 +667,6 @@ def build_robot_topology(
             "calibration_verified": False,
             "motion_authorized": False,
             "degree_of_freedom_count": sum(row.joint_type != JointType.FIXED for row in joints),
+            "part_role_projection": "legacy_name_keyword" if offline_salvage_enabled() else "declared_structured_fields_only",
         },
     )
