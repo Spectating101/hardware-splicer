@@ -16,6 +16,12 @@ from .machine_project import AuthorityState, MachineProject
 from .machine_project_seed import machine_project_from_intake
 from .project_intake import plan_project_from_intake
 from .robot_topology import RobotGenre, RobotTopology, build_robot_topology, detect_robot_genre
+from .semantic_project_mode import (
+    SemanticProjectModeError,
+    interpret_project_mode,
+    parse_project_mode_proposal,
+    unresolved_project_mode_proposal,
+)
 from .semantic_robot_genre import (
     SemanticRobotGenreError,
     interpret_robot_genre,
@@ -36,14 +42,12 @@ def _sequence(value: Any) -> list[Any]:
 
 
 def normalize_engineering_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
-    """Lift common nested change/failure fields into a consistent planning context."""
+    """Lift explicit nested change/failure fields without interpreting project prose."""
 
     body = dict(intake or {})
     constraints = _mapping(body.get("constraints"))
     change_request = _mapping(body.get("change_request"))
     repair_request = _mapping(body.get("repair"))
-    goal = str(body.get("goal") or body.get("intent") or body.get("brief") or "")
-    lowered = goal.lower()
 
     if body.get("baseline_revision") is None:
         nested_baseline = change_request.get("baseline_revision")
@@ -60,33 +64,9 @@ def normalize_engineering_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
             "must_preserve": change_request.get("must_preserve") or [],
         }
 
-    if body.get("mode") is None:
-        failure_tokens = (
-            "field failure",
-            "tipping",
-            "tipped",
-            "brownout",
-            "reboot",
-            "failed in field",
-            "return to field",
-            "returning to field",
-            "regression before field",
-        )
-        repair_tokens = ("repair", "recover", "salvage", "donor", "splice", "burned")
-        modification_tokens = ("modify", "upgrade", "revise", "replace", "add a", "add an")
-        if body.get("field_failure") or change_request.get("failure_event") or any(token in lowered for token in failure_tokens):
-            body["mode"] = "evolve"
-        elif body.get("salvage_mode") or repair_request or any(token in lowered for token in repair_tokens):
-            body["mode"] = "repair"
-        elif change_request or body.get("baseline_revision") is not None or any(token in lowered for token in modification_tokens):
-            body["mode"] = "modify"
-        else:
-            body["mode"] = "greenfield"
-
     context = _mapping(body.get("engineering_context"))
     context.update(
         {
-            "normalized_mode": body.get("mode"),
             "baseline_revision": body.get("baseline_revision"),
             "candidate_revision": body.get("candidate_revision"),
             "change_request_present": bool(change_request),
@@ -96,6 +76,120 @@ def normalize_engineering_intake(intake: Mapping[str, Any]) -> Dict[str, Any]:
     )
     body["engineering_context"] = context
     return body
+
+
+def _legacy_mode_from_goal(goal: str) -> str:
+    """Historical prose classifier retained only for explicit offline compatibility."""
+    lowered = str(goal or "").lower()
+    failure_tokens = (
+        "field failure",
+        "tipping",
+        "tipped",
+        "brownout",
+        "reboot",
+        "failed in field",
+        "return to field",
+        "returning to field",
+        "regression before field",
+    )
+    repair_tokens = ("repair", "recover", "salvage", "donor", "splice", "burned")
+    modification_tokens = ("modify", "upgrade", "revise", "replace", "add a", "add an")
+    if any(token in lowered for token in failure_tokens):
+        return "evolve"
+    if any(token in lowered for token in repair_tokens):
+        return "repair"
+    if any(token in lowered for token in modification_tokens):
+        return "modify"
+    return "greenfield"
+
+
+def _project_mode_proposal(body: Mapping[str, Any]) -> Dict[str, Any]:
+    """Resolve workflow mode from declared/structured state before semantic prose."""
+    explicit = str(body.get("mode") or body.get("project_mode") or "").strip()
+    if explicit:
+        try:
+            proposal = parse_project_mode_proposal(
+                {
+                    "status": "declared",
+                    "mode": explicit,
+                    "reasoning": "Structured project mode supplied by the project intake.",
+                    "confidence": 1.0,
+                    "unresolved_questions": [],
+                    "source": "declared",
+                    "authority_effect": "none",
+                    "automatic_execution": False,
+                }
+            )
+            return proposal.model_dump(mode="json")
+        except SemanticProjectModeError as exc:
+            return unresolved_project_mode_proposal(
+                f"Declared project mode is invalid: {exc}"
+            ).model_dump(mode="json")
+
+    if body.get("field_failure"):
+        return parse_project_mode_proposal(
+            {
+                "status": "structured_state",
+                "mode": "evolve",
+                "reasoning": "Persisted field_failure state requires a field-evolution workflow.",
+                "confidence": 1.0,
+                "unresolved_questions": [],
+                "source": "structured_state",
+                "authority_effect": "none",
+                "automatic_execution": False,
+            }
+        ).model_dump(mode="json")
+    if body.get("repair") or body.get("salvage_mode"):
+        return parse_project_mode_proposal(
+            {
+                "status": "structured_state",
+                "mode": "repair",
+                "reasoning": "Persisted repair/salvage state requires a repair workflow.",
+                "confidence": 1.0,
+                "unresolved_questions": [],
+                "source": "structured_state",
+                "authority_effect": "none",
+                "automatic_execution": False,
+            }
+        ).model_dump(mode="json")
+    if body.get("change_request") or body.get("baseline_revision") is not None or body.get("baseline_project"):
+        return parse_project_mode_proposal(
+            {
+                "status": "structured_state",
+                "mode": "modify",
+                "reasoning": "A persisted change request or baseline establishes a modification workflow.",
+                "confidence": 1.0,
+                "unresolved_questions": [],
+                "source": "structured_state",
+                "authority_effect": "none",
+                "automatic_execution": False,
+            }
+        ).model_dump(mode="json")
+
+    goal = str(body.get("goal") or body.get("intent") or body.get("brief") or "").strip()
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        return {
+            "schema_version": "hardware_splicer.semantic_project_mode.v1",
+            "status": "legacy_heuristic",
+            "mode": _legacy_mode_from_goal(goal),
+            "reasoning": "Explicit offline compatibility classifier; not canonical project truth.",
+            "confidence": 0.0,
+            "unresolved_questions": [],
+            "source": "legacy_keyword",
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    if not goal:
+        return unresolved_project_mode_proposal(
+            "No explicit project mode, structured change state, or project goal was supplied."
+        ).model_dump(mode="json")
+    try:
+        return interpret_project_mode(goal).model_dump(mode="json")
+    except SemanticProjectModeError as exc:
+        return unresolved_project_mode_proposal(str(exc)).model_dump(mode="json")
 
 
 def _source_id(value: Mapping[str, Any]) -> str:
@@ -345,6 +439,18 @@ def plan_engineering_project(
     """Produce an enriched source-agnostic engineering plan."""
 
     body = normalize_engineering_intake(intake)
+    mode_proposal = _project_mode_proposal(body)
+    body["mode"] = str(mode_proposal.get("mode") or "greenfield")
+    context = _mapping(body.get("engineering_context"))
+    context.update(
+        {
+            "normalized_mode": body["mode"],
+            "project_mode_status": mode_proposal.get("status"),
+            "project_mode_source": mode_proposal.get("source"),
+        }
+    )
+    body["engineering_context"] = context
+
     plan = dict(plan_project_from_intake(body, skip_vision=skip_vision))
     machine_project = machine_project_from_intake(body)
     resolved_sources, unresolved_source_ids = _resolve_sources(body, engineering_sources)
@@ -397,6 +503,7 @@ def plan_engineering_project(
             "legacy_intake_schema_version": "hardware_splicer.project_intake.v1",
             "normalized_intake": body,
             "engineering_context": body.get("engineering_context"),
+            "project_mode_proposal": mode_proposal,
             "archetype": native_archetype,
             "native_robot_genre": topology.robot_genre.value,
             "robot_genre_proposal": genre_proposal,
@@ -465,6 +572,7 @@ def plan_engineering_project(
         "unresolved_topology_fields": len(topology.unresolved),
         "blocking_analysis_findings": len(analysis.blocking_findings),
         "blocking_change_impacts": len(change_impact.blocking_impacts),
+        "project_mode_status": mode_proposal.get("status"),
         "power_on_authorized": False,
         "release_authorized": False,
     }
@@ -472,6 +580,10 @@ def plan_engineering_project(
 
     missing = list(plan.get("missing_info") or [])
     missing.extend(_engineering_missing_info(source_graph, topology, analysis, change_impact))
+    for question in list(mode_proposal.get("unresolved_questions") or []):
+        text = str(question).strip()
+        if text:
+            missing.append(f"Resolve project mode: {text}")
     for question in list(genre_proposal.get("unresolved_questions") or []):
         text = str(question).strip()
         if text:
@@ -481,13 +593,23 @@ def plan_engineering_project(
     confidence -= min(len(source_graph.blocking_conflicts) * 0.05, 0.25)
     confidence -= min(len(source_graph.unresolved_source_ids) * 0.03, 0.15)
     confidence -= min(len(analysis.blocking_findings) * 0.02, 0.2)
+    if str(mode_proposal.get("status") or "") == "unresolved":
+        confidence -= 0.05
     if str(genre_proposal.get("status") or "") == "unresolved":
         confidence -= 0.05
     plan["planning_confidence"] = round(max(0.0, min(confidence, 1.0)), 3)
-    blocked = bool(source_graph.blocking_conflicts or analysis.blocking_findings or change_impact.blocking_impacts)
+    blocked = bool(
+        source_graph.blocking_conflicts
+        or analysis.blocking_findings
+        or change_impact.blocking_impacts
+        or str(mode_proposal.get("status") or "") == "unresolved"
+    )
     plan["engineering_readiness"] = {
         "status": "blocked" if blocked else "candidate",
         "candidate_machine_synthesized": True,
+        "project_mode": body["mode"],
+        "project_mode_status": mode_proposal.get("status"),
+        "project_mode_source": mode_proposal.get("source"),
         "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC,
         "robot_genre_status": genre_proposal.get("status"),
         "robot_genre_source": genre_proposal.get("source"),
