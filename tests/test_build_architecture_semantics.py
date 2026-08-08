@@ -64,12 +64,31 @@ def test_model_build_prompt_is_not_seeded_with_keyword_answer(monkeypatch) -> No
     result = build_pick_module.call_qwen_build_pick(
         goal="water moves when an observation crosses a threshold",
         parts=[{"name": "unknown transducer", "type": "sensor"}],
+        planner_hints={
+            "keyword_build_hint": "automatic_plant_watering",
+            "diy_mapped_build_id": "automatic_plant_watering",
+            "splice_recommended_build_id": "automatic_plant_watering",
+            "planners_agree": True,
+            "constraint_note": "must use only declared low-voltage interfaces",
+            "nested": {
+                "archetype": "automatic_watering",
+                "evidence_note": "connector pinout unresolved",
+            },
+        },
     )
 
     assert result["ok"] is True
     assert result["build_id"] == "sensor_logger"
     prompt = captured["prompt"]
     assert "keyword_build_hint" not in prompt
+    assert "diy_mapped_build_id" not in prompt
+    assert "splice_recommended_build_id" not in prompt
+    assert "planners_agree" not in prompt
+    assert '"archetype"' not in prompt
+    assert "automatic_plant_watering" not in prompt.split("Build recipes", 1)[0]
+    assert "must use only declared low-voltage interfaces" in prompt
+    assert "connector pinout unresolved" in prompt
+    assert result["ignored_planner_hint_keys"]
     assert "Prefer keyword_build_hint" not in prompt
     assert "Fan, airflow, ventilation" not in prompt
     assert "Soil, plant, pump, irrigation" not in prompt
