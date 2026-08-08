@@ -1,8 +1,10 @@
-"""Source-agnostic engineering planning built on the existing Hardware Splicer intake.
+"""Source-agnostic engineering planning built on Hardware Splicer's truth-bound intake.
 
-This module does not replace the mature intake/compiler path. It enriches that path
-with canonical source provenance, robot topology, bounded quantitative analysis,
-change propagation, and a MachineProject projection.
+The canonical engineering path uses ``plan_project_from_intake_truthful`` so historical
+demo scaffolds cannot enter model-first project truth. The mature legacy intake planner is
+retained only as an injected offline-compatibility callback for existing regression/demo
+paths. Canonical source provenance, robot topology, bounded quantitative analysis, change
+propagation, and MachineProject projection are layered on top of that fail-closed intake.
 """
 
 from __future__ import annotations
@@ -15,6 +17,7 @@ from .engineering_source_graph import EngineeringSourceGraph, build_engineering_
 from .machine_project import AuthorityState, MachineProject
 from .machine_project_seed import machine_project_from_intake
 from .project_intake import plan_project_from_intake
+from .project_intake_truth import plan_project_from_intake_truthful
 from .robot_topology import RobotGenre, RobotTopology, build_robot_topology, detect_robot_genre
 from .semantic_project_mode import (
     SemanticProjectModeError,
@@ -451,7 +454,14 @@ def plan_engineering_project(
     )
     body["engineering_context"] = context
 
-    plan = dict(plan_project_from_intake(body, skip_vision=skip_vision))
+    plan = dict(
+        plan_project_from_intake_truthful(
+            body,
+            skip_vision=skip_vision,
+            legacy_planner=plan_project_from_intake,
+        )
+    )
+    architecture_truth = _mapping(plan.get("architecture_truth"))
     machine_project = machine_project_from_intake(body)
     resolved_sources, unresolved_source_ids = _resolve_sources(body, engineering_sources)
     conflict_rows = list(declared_conflicts or _sequence(body.get("declared_conflicts")))
@@ -501,9 +511,13 @@ def plan_engineering_project(
         {
             "schema_version": ENGINEERING_PLAN_SCHEMA,
             "legacy_intake_schema_version": "hardware_splicer.project_intake.v1",
+            "project_intake_truth_schema": "hardware_splicer.project_intake_truth.v1",
             "normalized_intake": body,
             "engineering_context": body.get("engineering_context"),
             "project_mode_proposal": mode_proposal,
+            "architecture_truth": architecture_truth,
+            "architecture_status": architecture_truth.get("status"),
+            "architecture_source": architecture_truth.get("source"),
             "archetype": native_archetype,
             "native_robot_genre": topology.robot_genre.value,
             "robot_genre_proposal": genre_proposal,
@@ -573,6 +587,8 @@ def plan_engineering_project(
         "blocking_analysis_findings": len(analysis.blocking_findings),
         "blocking_change_impacts": len(change_impact.blocking_impacts),
         "project_mode_status": mode_proposal.get("status"),
+        "architecture_status": architecture_truth.get("status"),
+        "architecture_source": architecture_truth.get("source"),
         "power_on_authorized": False,
         "release_authorized": False,
     }
@@ -588,6 +604,10 @@ def plan_engineering_project(
         text = str(question).strip()
         if text:
             missing.append(f"Resolve robot genre evidence: {text}")
+    for question in list(architecture_truth.get("unresolved_questions") or []):
+        text = str(question).strip()
+        if text:
+            missing.append(f"Resolve architecture truth: {text}")
     plan["missing_info"] = list(dict.fromkeys(missing))
     confidence = float(plan.get("planning_confidence") or 0.0)
     confidence -= min(len(source_graph.blocking_conflicts) * 0.05, 0.25)
@@ -597,12 +617,15 @@ def plan_engineering_project(
         confidence -= 0.05
     if str(genre_proposal.get("status") or "") == "unresolved":
         confidence -= 0.05
+    if str(architecture_truth.get("status") or "") == "unresolved":
+        confidence = min(confidence, 0.25)
     plan["planning_confidence"] = round(max(0.0, min(confidence, 1.0)), 3)
     blocked = bool(
         source_graph.blocking_conflicts
         or analysis.blocking_findings
         or change_impact.blocking_impacts
         or str(mode_proposal.get("status") or "") == "unresolved"
+        or str(architecture_truth.get("status") or "") == "unresolved"
     )
     plan["engineering_readiness"] = {
         "status": "blocked" if blocked else "candidate",
@@ -610,6 +633,9 @@ def plan_engineering_project(
         "project_mode": body["mode"],
         "project_mode_status": mode_proposal.get("status"),
         "project_mode_source": mode_proposal.get("source"),
+        "architecture_status": architecture_truth.get("status"),
+        "architecture_source": architecture_truth.get("source"),
+        "architecture_build_id": architecture_truth.get("build_id"),
         "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC,
         "robot_genre_status": genre_proposal.get("status"),
         "robot_genre_source": genre_proposal.get("source"),
