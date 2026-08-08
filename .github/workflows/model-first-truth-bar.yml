@@ -1,0 +1,63 @@
+name: Model-First Truth Bar
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/**"
+      - "tests/test_model_first_truth_audit.py"
+      - "tests/test_model_first_legacy_semantic_poison_bar.py"
+      - "tests/test_module_resolution_truth.py"
+      - "tests/test_salvage_physical_identity_bridge.py"
+      - "tests/test_circuit_synthesis_semantic_dispatch.py"
+      - "tests/test_change_impact_semantic_boundary.py"
+      - "tests/test_semantic_impact_scope.py"
+      - "tests/test_structured_part_roles.py"
+      - "tests/test_robot_topology_structured_part_roles.py"
+      - ".github/workflows/model-first-truth-bar.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-first-truth-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  truth-bar:
+    name: Model-first semantic authority
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "0"
+      HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE: "0"
+      HARDWARE_SPLICER_QWEN_BUILD_PICK: "0"
+      HARDWARE_SPLICER_QWEN_SALVAGE: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test runner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Run model-first truth bar
+        run: |
+          pytest -q \
+            tests/test_model_first_truth_audit.py \
+            tests/test_model_first_legacy_semantic_poison_bar.py \
+            tests/test_module_resolution_truth.py \
+            tests/test_salvage_physical_identity_bridge.py \
+            tests/test_circuit_synthesis_semantic_dispatch.py \
+            tests/test_change_impact_semantic_boundary.py \
+            tests/test_semantic_impact_scope.py \
+            tests/test_structured_part_roles.py \
+            tests/test_robot_topology_structured_part_roles.py
