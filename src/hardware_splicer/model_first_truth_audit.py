@@ -221,7 +221,7 @@ def _audit_salvage(package: Mapping[str, Any], violations: list[Dict[str, Any]])
             )
         )
     boundary = _mapping(_mapping(package.get("salvage_resolution")).get("physical_identity_boundary"))
-    if boundary.get("functional_similarity_is_identity") is not in (None, False):
+    if boundary.get("functional_similarity_is_identity") not in (None, False):
         violations.append(
             _violation(
                 "FUNCTIONAL_SIMILARITY_AS_IDENTITY",
