@@ -5,10 +5,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any, Mapping
 
-from hardware_splicer.cleanroom_dut_experiment import (
+# This repository already contains scripts/hardware_splicer.py. When any script inside
+# this directory imports ``hardware_splicer``, Python otherwise resolves that sibling
+# file before the installed ``src/hardware_splicer`` package and creates a circular
+# import. Remove the scripts directory from import search before importing the package.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path = [
+    entry
+    for entry in sys.path
+    if Path(entry or ".").resolve() != _SCRIPT_DIR
+]
+
+from hardware_splicer.cleanroom_dut_experiment import (  # noqa: E402
     run_deterministic_dut_experiment,
     run_live_dut_experiment,
 )
