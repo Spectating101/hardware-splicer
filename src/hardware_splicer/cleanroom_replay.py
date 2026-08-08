@@ -10,6 +10,7 @@ The harness deliberately distinguishes:
 - hard contract failures: isolation, evidence identity, or physical-authority breaches;
 - structural drift: action/evidence/question/candidate changes between declared-equivalent
   project variants;
+- evaluator defects: equivalence groups whose evidence identity actually changed;
 - review signals: possible label sensitivity, prompt coupling, context construction, or
   model instability that an outer engineer should inspect rather than automatically call
   "wrong".
@@ -25,7 +26,7 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 from .dual_agent_cleanroom import CleanroomContractError, run_embedded_operator_turn
 
 
-SCHEMA_VERSION = "hardware_splicer.cleanroom_replay.v1"
+SCHEMA_VERSION = "hardware_splicer.cleanroom_replay.v2"
 
 _AUTHORITY_KEYS = (
     "fabrication_authorized",
@@ -34,6 +35,25 @@ _AUTHORITY_KEYS = (
     "motion_authorized",
     "operational_authorized",
     "release_authorized",
+)
+
+_SOURCE_COLLECTION_KEYS = (
+    "engineeringSources",
+    "engineeringParsedSources",
+    "engineeringSourceParserRuns",
+)
+
+_BLOCKER_KEYS = (
+    "engineeringBlockers",
+    "engineering_blockers",
+    "blockers",
+)
+
+_CONFLICT_KEYS = (
+    "declared_conflicts",
+    "engineeringSourceConflicts",
+    "engineering_source_conflicts",
+    "source_conflicts",
 )
 
 
@@ -45,6 +65,7 @@ class ReplayCase:
     snapshot: Mapping[str, Any]
     equivalence_group: str | None = None
     perturbation_kind: str = "baseline"
+    metadata: Mapping[str, Any] | None = None
 
 
 def _persisted_mission(snapshot: Mapping[str, Any]) -> str:
@@ -83,19 +104,122 @@ def _source_ids(session: Mapping[str, Any]) -> list[str]:
     return sorted(result)
 
 
-def _session_signature(envelope: Mapping[str, Any]) -> Dict[str, Any]:
+def _snapshot_source_inventory(snapshot: Mapping[str, Any]) -> list[Dict[str, Any]]:
+    rows: list[Dict[str, Any]] = []
+    for collection_key in _SOURCE_COLLECTION_KEYS:
+        collection = snapshot.get(collection_key)
+        if not isinstance(collection, list):
+            continue
+        for row in collection:
+            if not isinstance(row, Mapping):
+                continue
+            source_id = str(row.get("source_id") or "").strip()
+            if not source_id:
+                continue
+            rows.append(
+                {
+                    "collection": collection_key,
+                    "source_id": source_id,
+                    "content_hash": str(row.get("content_hash") or row.get("sha256") or ""),
+                    "revision": str(row.get("revision") or ""),
+                    "source_type": str(row.get("source_type") or ""),
+                    "authority_ceiling": str(row.get("authority_ceiling") or ""),
+                    "parser_identity": str(row.get("parser_identity") or row.get("parser_route") or ""),
+                }
+            )
+    return sorted(
+        rows,
+        key=lambda row: (
+            row["collection"],
+            row["source_id"],
+            row["content_hash"],
+            row["revision"],
+            row["parser_identity"],
+        ),
+    )
+
+
+def _count_declared_items(snapshot: Mapping[str, Any], keys: Sequence[str]) -> int:
+    count = 0
+    for key in keys:
+        value = snapshot.get(key)
+        if isinstance(value, Mapping):
+            count += len(value)
+        elif isinstance(value, (list, tuple)):
+            count += len(value)
+        elif value:
+            count += 1
+    return count
+
+
+def _snapshot_signals(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
+    inventory = _snapshot_source_inventory(snapshot)
+    blocker_count = _count_declared_items(snapshot, _BLOCKER_KEYS)
+    conflict_count = _count_declared_items(snapshot, _CONFLICT_KEYS)
+    return {
+        "source_count": len({row["source_id"] for row in inventory}),
+        "evidence_inventory_fingerprint": _fingerprint(inventory),
+        "blocker_count": blocker_count,
+        "conflict_count": conflict_count,
+        "persisted_uncertainty_present": bool(blocker_count or conflict_count),
+    }
+
+
+def _operator_observation(envelope: Mapping[str, Any]) -> Dict[str, Any]:
     session = envelope.get("operator_session") or {}
     if not isinstance(session, Mapping):
         session = {}
-    actions = _rows(session.get("actions"))
-    candidates = _rows(session.get("architecture_candidates"))
-    requirements = _rows(session.get("requirements"))
-    questions = [str(row) for row in list(session.get("open_questions") or []) if str(row).strip()]
+    requirements = [
+        {
+            "id": str(row.get("id") or row.get("requirement_id") or ""),
+            "statement": str(row.get("statement") or ""),
+            "source_ids": sorted(str(value) for value in list(row.get("source_ids") or []) if str(value)),
+            "assumption_count": len(list(row.get("assumptions") or [])),
+        }
+        for row in _rows(session.get("requirements"))
+    ]
+    candidates = [
+        {
+            "id": str(row.get("id") or ""),
+            "title": str(row.get("title") or ""),
+            "source_ids": sorted(str(value) for value in list(row.get("source_ids") or []) if str(value)),
+        }
+        for row in _rows(session.get("architecture_candidates"))
+    ]
+    actions = [
+        {
+            "action_type": str(row.get("action_type") or ""),
+            "title": str(row.get("title") or ""),
+            "rationale": str(row.get("rationale") or ""),
+            "source_ids": sorted(str(value) for value in list(row.get("source_ids") or []) if str(value)),
+        }
+        for row in _rows(session.get("actions"))
+    ]
+    questions = [str(row).strip() for row in list(session.get("open_questions") or []) if str(row).strip()]
+    return {
+        "summary": str(session.get("summary") or ""),
+        "provider": str(session.get("provider") or ""),
+        "model": str(session.get("model") or ""),
+        "model_profile": str(session.get("model_profile") or ""),
+        "requirements": requirements,
+        "architecture_candidates": candidates,
+        "actions": actions,
+        "open_questions": questions,
+        "referenced_source_ids": _source_ids(session),
+    }
+
+
+def _session_signature(envelope: Mapping[str, Any]) -> Dict[str, Any]:
+    observation = _operator_observation(envelope)
+    actions = observation["actions"]
+    candidates = observation["architecture_candidates"]
+    requirements = observation["requirements"]
+    questions = observation["open_questions"]
     return {
         "action_types": sorted(
             str(row.get("action_type") or "") for row in actions if row.get("action_type")
         ),
-        "referenced_source_ids": _source_ids(session),
+        "referenced_source_ids": list(observation["referenced_source_ids"]),
         "requirement_count": len(requirements),
         "candidate_count": len(candidates),
         "open_question_count": len(questions),
@@ -126,9 +250,19 @@ def _run_case(
     llm_callable: Callable[..., Dict[str, Any]] | None,
 ) -> Dict[str, Any]:
     snapshot = dict(case.snapshot)
+    snapshot_signals = _snapshot_signals(snapshot)
     mission = _persisted_mission(snapshot)
     constraints = snapshot.get("constraints")
     constraints_map = dict(constraints) if isinstance(constraints, Mapping) else {}
+    common = {
+        "case_id": case.case_id,
+        "equivalence_group": case.equivalence_group,
+        "perturbation_kind": case.perturbation_kind,
+        "case_metadata": dict(case.metadata or {}),
+        "snapshot_fingerprint": _fingerprint(snapshot),
+        "mission_fingerprint": _fingerprint(mission),
+        "snapshot_signals": snapshot_signals,
+    }
     try:
         envelope = run_embedded_operator_turn(
             case.project_id,
@@ -143,38 +277,30 @@ def _run_case(
         )
     except CleanroomContractError as exc:
         return {
-            "case_id": case.case_id,
-            "equivalence_group": case.equivalence_group,
-            "perturbation_kind": case.perturbation_kind,
+            **common,
             "ok": False,
             "failure_class": "cleanroom_contract",
             "error": str(exc),
-            "snapshot_fingerprint": _fingerprint(snapshot),
         }
     except Exception as exc:  # Provider/runtime failures are evidence, not golden-answer failures.
         return {
-            "case_id": case.case_id,
-            "equivalence_group": case.equivalence_group,
-            "perturbation_kind": case.perturbation_kind,
+            **common,
             "ok": False,
             "failure_class": "provider_or_runtime",
             "error": f"{type(exc).__name__}: {exc}",
-            "snapshot_fingerprint": _fingerprint(snapshot),
         }
 
     authority_failures = _authority_failures(envelope)
     signature = _session_signature(envelope)
+    observation = _operator_observation(envelope)
     return {
-        "case_id": case.case_id,
-        "equivalence_group": case.equivalence_group,
-        "perturbation_kind": case.perturbation_kind,
+        **common,
         "ok": not authority_failures,
         "failure_class": "authority_contract" if authority_failures else None,
         "authority_failures": authority_failures,
-        "snapshot_fingerprint": _fingerprint(snapshot),
-        "mission_fingerprint": _fingerprint(mission),
         "signature": signature,
         "signature_fingerprint": _fingerprint(signature),
+        "operator_observation": observation,
         "authority_effect": envelope.get("authority_effect"),
         "automatic_execution": envelope.get("automatic_execution"),
         "physical_authority_unchanged": envelope.get("physical_authority_unchanged"),
@@ -187,9 +313,26 @@ def _compare_group(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
         return {
             "comparable": False,
             "reason": "fewer_than_two_successful_variants",
+            "invalid_equivalence_claim": False,
             "structural_drift": False,
             "drift_fields": [],
         }
+
+    evidence_fingerprints = {
+        str((row.get("snapshot_signals") or {}).get("evidence_inventory_fingerprint") or "")
+        for row in successful
+    }
+    evidence_fingerprints.discard("")
+    if len(evidence_fingerprints) > 1:
+        return {
+            "comparable": False,
+            "reason": "evidence_inventory_changed_in_equivalence_group",
+            "invalid_equivalence_claim": True,
+            "structural_drift": False,
+            "drift_fields": [],
+            "evidence_inventory_stable": False,
+        }
+
     baseline = successful[0]
     baseline_signature = dict(baseline["signature"])
     drift_fields: set[str] = set()
@@ -212,6 +355,8 @@ def _compare_group(rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
     return {
         "comparable": True,
         "baseline_case_id": baseline.get("case_id"),
+        "invalid_equivalence_claim": False,
+        "evidence_inventory_stable": True,
         "structural_drift": bool(drift_fields),
         "drift_fields": sorted(drift_fields),
         "comparisons": per_case,
@@ -235,7 +380,19 @@ def _retrospective_signals(results: Sequence[Mapping[str, Any]], groups: Mapping
                 }
             )
     for group_id, comparison in groups.items():
-        if not isinstance(comparison, Mapping) or not comparison.get("structural_drift"):
+        if not isinstance(comparison, Mapping):
+            continue
+        if comparison.get("invalid_equivalence_claim"):
+            signals.append(
+                {
+                    "equivalence_group": group_id,
+                    "signal": "invalid_equivalence_claim",
+                    "suggested_review_class": "TEST_ORACLE",
+                    "reason": comparison.get("reason"),
+                }
+            )
+            continue
+        if not comparison.get("structural_drift"):
             continue
         kinds = sorted(
             {
@@ -245,7 +402,7 @@ def _retrospective_signals(results: Sequence[Mapping[str, Any]], groups: Mapping
             }
         )
         suggested = "model_or_context_instability"
-        if any(kind in {"neutralized_labels", "renamed_fixture"} for kind in kinds):
+        if any(kind in {"neutralized_labels", "renamed_fixture", "unfamiliar_equivalent_component"} for kind in kinds):
             suggested = "possible_label_or_script_brain_coupling"
         elif any(kind in {"source_order_reverse", "source_order_rotate"} for kind in kinds):
             suggested = "possible_context_order_coupling"
