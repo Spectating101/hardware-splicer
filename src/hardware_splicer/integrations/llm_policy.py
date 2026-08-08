@@ -37,7 +37,7 @@ def qwen_llm_first() -> bool:
 
 
 def offline_compose_enabled() -> bool:
-    """Regex module_picker / phrase_expander allowed."""
+    """Legacy regex module selection is allowed for explicit/no-model compatibility."""
     if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
         return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_COMPOSE"):
@@ -48,7 +48,7 @@ def offline_compose_enabled() -> bool:
 
 
 def offline_salvage_enabled() -> bool:
-    """Regex part resolve / keyword build pick allowed."""
+    """Legacy regex part resolve / keyword build hints are allowed."""
     if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
         return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_SALVAGE"):
@@ -59,9 +59,23 @@ def offline_salvage_enabled() -> bool:
 
 
 def offline_phrase_expand_enabled() -> bool:
+    """Allow lexical typo normalization on compatibility paths.
+
+    This no longer authorizes semantic rewrites. Those require the separate explicit
+    ``HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE`` opt-in.
+    """
     if _truthy("HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND"):
         return True
     return offline_compose_enabled()
+
+
+def offline_semantic_rewrite_enabled() -> bool:
+    """Explicit opt-in for historical phrase-to-intent semantic rewrites.
+
+    Semantic rewrites can collapse an unknown request onto a canned architecture, so
+    they are never implied merely because no model is configured.
+    """
+    return _truthy("HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE")
 
 
 def compose_retry_enabled() -> bool:
@@ -77,6 +91,7 @@ def llm_policy_summary() -> dict[str, object]:
         "offline_compose": offline_compose_enabled(),
         "offline_salvage": offline_salvage_enabled(),
         "offline_phrase_expand": offline_phrase_expand_enabled(),
+        "offline_semantic_rewrite": offline_semantic_rewrite_enabled(),
         "qwen_llm_first": qwen_llm_first(),
         "compose_retry": compose_retry_enabled(),
         "llm_configured": _llm_configured(),
@@ -84,6 +99,8 @@ def llm_policy_summary() -> dict[str, object]:
         "env": {
             "HARDWARE_SPLICER_OFFLINE_COMPOSE": os.environ.get("HARDWARE_SPLICER_OFFLINE_COMPOSE", ""),
             "HARDWARE_SPLICER_OFFLINE_SALVAGE": os.environ.get("HARDWARE_SPLICER_OFFLINE_SALVAGE", ""),
+            "HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND": os.environ.get("HARDWARE_SPLICER_OFFLINE_PHRASE_EXPAND", ""),
+            "HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE": os.environ.get("HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE", ""),
             "HARDWARE_SPLICER_LLM_FIRST": os.environ.get("HARDWARE_SPLICER_LLM_FIRST", ""),
             "HARDWARE_SPLICER_QWEN_COMPOSE": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", ""),
             "HARDWARE_SPLICER_QWEN_COMPOSE_RETRY": os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE_RETRY", ""),
