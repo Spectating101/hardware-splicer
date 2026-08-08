@@ -15,7 +15,13 @@ from .engineering_source_graph import EngineeringSourceGraph, build_engineering_
 from .machine_project import AuthorityState, MachineProject
 from .machine_project_seed import machine_project_from_intake
 from .project_intake import plan_project_from_intake
-from .robot_topology import RobotGenre, RobotTopology, build_robot_topology
+from .robot_topology import RobotGenre, RobotTopology, build_robot_topology, detect_robot_genre
+from .semantic_robot_genre import (
+    SemanticRobotGenreError,
+    interpret_robot_genre,
+    parse_robot_genre_proposal,
+    unresolved_robot_genre_proposal,
+)
 
 
 ENGINEERING_PLAN_SCHEMA = "hardware_splicer.engineering_plan.v1"
@@ -139,6 +145,65 @@ def _resolve_sources(
 
 def _native_archetype(topology: RobotTopology, fallback: str) -> str:
     return fallback if topology.robot_genre == RobotGenre.GENERIC else topology.robot_genre.value
+
+
+def _robot_genre_proposal(body: Mapping[str, Any]) -> Dict[str, Any]:
+    """Resolve topology genre with explicit provenance and fail-closed model behavior."""
+    explicit = str(body.get("robot_genre") or "").strip()
+    if explicit:
+        try:
+            proposal = parse_robot_genre_proposal(
+                {
+                    "status": "declared",
+                    "genre": explicit,
+                    "reasoning": "Structured robot_genre supplied by the project intake.",
+                    "confidence": 1.0,
+                    "unresolved_questions": [],
+                    "source": "declared",
+                    "authority_effect": "none",
+                    "automatic_execution": False,
+                }
+            )
+            return proposal.model_dump(mode="json")
+        except SemanticRobotGenreError as exc:
+            return unresolved_robot_genre_proposal(
+                f"Declared robot_genre is invalid: {exc}"
+            ).model_dump(mode="json")
+
+    goal = str(body.get("goal") or body.get("intent") or body.get("brief") or "").strip()
+    parts = [
+        dict(row)
+        for row in _sequence(
+            body.get("available_parts") or body.get("parts") or body.get("resources") or []
+        )
+        if isinstance(row, Mapping)
+    ]
+    constraints = _mapping(body.get("constraints"))
+
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        legacy = detect_robot_genre(goal, parts)
+        return {
+            "schema_version": "hardware_splicer.semantic_robot_genre.v1",
+            "status": "legacy_heuristic",
+            "genre": legacy.value,
+            "reasoning": "Explicit offline compatibility classifier; not canonical engineering truth.",
+            "confidence": 0.0,
+            "unresolved_questions": [],
+            "source": "legacy_keyword",
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    try:
+        return interpret_robot_genre(
+            goal or "Resolve the machine topology genre from supplied evidence.",
+            parts=parts,
+            constraints=constraints,
+        ).model_dump(mode="json")
+    except SemanticRobotGenreError as exc:
+        return unresolved_robot_genre_proposal(str(exc)).model_dump(mode="json")
 
 
 def _identity_map(
@@ -289,14 +354,23 @@ def plan_engineering_project(
         declared_conflicts=[row for row in conflict_rows if isinstance(row, Mapping)],
         unresolved_source_ids=unresolved_source_ids,
     )
-    # A legacy intake archetype is a derived guess, not declared robot truth. Only an
-    # explicit structured robot_genre may act as a topology hint; otherwise topology
-    # must reason from the engineering brief/parts instead of inheriting another
-    # classifier's conclusion.
+
+    genre_proposal = _robot_genre_proposal(body)
     topology = build_robot_topology(
         body,
-        hinted_genre=str(body.get("robot_genre") or ""),
+        hinted_genre=str(genre_proposal.get("genre") or "generic_mechatronics"),
         machine_project=machine_project,
+    )
+    topology = topology.model_copy(
+        update={
+            "metadata": {
+                **dict(topology.metadata),
+                "robot_genre_proposal": genre_proposal,
+                "robot_genre_source": genre_proposal.get("source"),
+                "robot_genre_status": genre_proposal.get("status"),
+            }
+        },
+        deep=True,
     )
     analysis = analyze_engineering_candidate(body, topology=topology)
     change_impact = build_change_impact_graph(
@@ -325,6 +399,7 @@ def plan_engineering_project(
             "engineering_context": body.get("engineering_context"),
             "archetype": native_archetype,
             "native_robot_genre": topology.robot_genre.value,
+            "robot_genre_proposal": genre_proposal,
             "engineering_source_graph": source_graph.model_dump(mode="json"),
             "reference_sources": source_graph.model_dump(mode="json"),
             "source_conflicts": [row.model_dump(mode="json") for row in source_graph.conflicts],
@@ -397,17 +472,25 @@ def plan_engineering_project(
 
     missing = list(plan.get("missing_info") or [])
     missing.extend(_engineering_missing_info(source_graph, topology, analysis, change_impact))
+    for question in list(genre_proposal.get("unresolved_questions") or []):
+        text = str(question).strip()
+        if text:
+            missing.append(f"Resolve robot genre evidence: {text}")
     plan["missing_info"] = list(dict.fromkeys(missing))
     confidence = float(plan.get("planning_confidence") or 0.0)
     confidence -= min(len(source_graph.blocking_conflicts) * 0.05, 0.25)
     confidence -= min(len(source_graph.unresolved_source_ids) * 0.03, 0.15)
     confidence -= min(len(analysis.blocking_findings) * 0.02, 0.2)
+    if str(genre_proposal.get("status") or "") == "unresolved":
+        confidence -= 0.05
     plan["planning_confidence"] = round(max(0.0, min(confidence, 1.0)), 3)
     blocked = bool(source_graph.blocking_conflicts or analysis.blocking_findings or change_impact.blocking_impacts)
     plan["engineering_readiness"] = {
         "status": "blocked" if blocked else "candidate",
         "candidate_machine_synthesized": True,
         "native_robot_topology": topology.robot_genre != RobotGenre.GENERIC,
+        "robot_genre_status": genre_proposal.get("status"),
+        "robot_genre_source": genre_proposal.get("source"),
         "source_provenance_complete": source_graph.source_provenance_complete,
         "blocking_source_conflict_count": len(source_graph.blocking_conflicts),
         "blocking_analysis_finding_count": len(analysis.blocking_findings),
