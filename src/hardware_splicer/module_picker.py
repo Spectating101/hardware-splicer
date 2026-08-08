@@ -1,4 +1,10 @@
-"""Pick concrete library modules from natural-language goals (Python engine port)."""
+"""Concrete module selection with an explicitly isolated legacy regex picker.
+
+``MODULE_HINTS`` remains for offline/regression compatibility, but model-enabled product
+paths must not compute or prefer the regex answer before semantic model selection. The
+model-backed selector operates through typed capability intent and deterministic
+candidate validation; failure stays unresolved rather than falling through to regex.
+"""
 
 from __future__ import annotations
 
@@ -26,6 +32,8 @@ class ModuleHint:
     priority: int = 0
 
 
+# Legacy/offline semantic compatibility table. This table must never run ahead of a
+# configured model selector on normal product paths.
 MODULE_HINTS: list[ModuleHint] = [
     ModuleHint(
         patterns=[re.compile(r"ds18b20|one.?wire temp|digital temp probe", re.I)],
@@ -233,10 +241,10 @@ SENSOR_PREFER_IDS = {
 def _normalize_user_text(text: str) -> str:
     return (
         text.lower()
-        .replace("'", "'")
-        .replace("'", "'")
-        .replace(""", '"')
-        .replace(""", '"')
+        .replace("’", "'")
+        .replace("‘", "'")
+        .replace("“", '"')
+        .replace("”", '"')
     )
 
 
@@ -292,31 +300,40 @@ def _filter_redundant_hints(
 
 
 def pick_modules_for_goal(text: str) -> ModulePick:
-    """NL goal → module ids. Regex for trained phrases; Qwen for novel goals when keyed."""
+    """Select modules through model-first semantics or explicit offline compatibility.
+
+    When a model-backed selector is enabled, the legacy regex picker is never evaluated
+    first and is never used as a silent fallback. The model selector already performs a
+    typed capability interpretation followed by deterministic candidate validation. If
+    that selection cannot resolve, this function returns an empty, explicitly unresolved
+    pick. Regex selection is reserved for ``offline_compose_enabled()`` or environments
+    where the model selector is unavailable by policy.
+    """
     from .integrations.llm_policy import offline_compose_enabled
     from .integrations.qwen_module_pick import call_qwen_module_pick, qwen_module_pick_enabled
 
     goal = text.strip()
-    regex_pick = _pick_modules_regex(goal)
-
-    if not qwen_module_pick_enabled() or offline_compose_enabled():
-        return regex_pick
-
-    # MODULE_HINTS + phrase_expander are regression-tested on compose_phrases.json (56 cases).
-    if len(regex_pick.module_ids) >= 2 and regex_pick.hints:
-        return regex_pick
-
-    picked = call_qwen_module_pick(goal)
-    if picked.get("ok"):
-        return ModulePick(
-            module_ids=list(picked.get("module_ids") or []),
-            labels=[],
-            hints=[str(picked.get("reasoning") or "qwen_module_pick")],
+    if qwen_module_pick_enabled() and not offline_compose_enabled():
+        picked = call_qwen_module_pick(goal)
+        if picked.get("ok"):
+            return ModulePick(
+                module_ids=list(picked.get("module_ids") or []),
+                labels=[],
+                hints=[str(picked.get("reasoning") or "semantic_model_selection")],
+            )
+        reason = str(
+            picked.get("message")
+            or picked.get("reason")
+            or picked.get("error")
+            or "semantic_model_selection_unresolved"
         )
-    return regex_pick
+        return ModulePick(module_ids=[], labels=[], hints=[f"unresolved:{reason}"])
+
+    return _pick_modules_regex(goal)
 
 
 def _pick_modules_regex(text: str) -> ModulePick:
+    """Legacy/offline phrase-to-module compatibility path."""
     t = _normalize_user_text(expand_user_phrase(text))
     ranked = [
         (hint, _hint_match_score(hint, t))
