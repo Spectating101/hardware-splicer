@@ -21,13 +21,20 @@ const decisionProxy = read('app/api/proxy/engineering/projects/[projectId]/ai-se
 
 requireText(page, 'AI Project Studio', 'AI Studio page');
 requireText(page, 'Generate proposals', 'AI Studio page');
-requireText(page, 'Accept proposal', 'AI Studio page');
-requireText(page, 'Recorded without execution.', 'AI Studio page');
-requireText(page, 'Automatic execution is disabled.', 'AI Studio page');
-requireText(page, 'expected_revision: revision', 'AI Studio page');
-requireText(page, "model_profile: modelProfile", 'AI Studio page');
+
+// Assert the review state machine and authority boundary, not transient button copy.
+requireText(page, "actionStatus === 'proposed'", 'AI Studio page');
 requireText(page, "decideAction(actionId, 'accepted')", 'AI Studio page');
-requireText(page, 'No tool execution authorized.', 'AI Studio page');
+requireText(page, "decideAction(actionId, 'rejected')", 'AI Studio page');
+requireText(page, "canPreview = actionStatus === 'accepted'", 'AI Studio page');
+requireText(page, "previewActions.has(actionType)", 'AI Studio page');
+requireText(page, 'Accepted proposal; this action type is not executable in the current preview boundary.', 'AI Studio page');
+requireText(page, 'Rejected without execution.', 'AI Studio page');
+requireText(page, 'Automatic execution: false', 'AI Studio page');
+requireText(page, 'Software evidence only · physical authority unchanged', 'AI Studio page');
+requireText(page, 'expected_revision: revision', 'AI Studio page');
+requireText(page, 'model_profile: modelProfile', 'AI Studio page');
+
 requireText(layout, 'href="/engineering/ai-studio"', 'Engineering navigation');
 requireText(createProxy, '/v1/projects/${encodeURIComponent(projectId)}/ai-sessions', 'Session creation proxy');
 requireText(getProxy, '/ai-sessions/${encodeURIComponent(sessionId)}', 'Session retrieval proxy');
