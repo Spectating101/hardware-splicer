@@ -1,0 +1,60 @@
+name: Robot Arm Engineering Experiment
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/robot_arm_design.py"
+      - "src/hardware_splicer/robot_arm_experiment.py"
+      - "src/hardware_splicer/robot_topology.py"
+      - "tests/test_robot_arm_design.py"
+      - "scripts/run_robot_arm_experiment.py"
+      - ".github/workflows/robot-arm-engineering-experiment.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: robot-arm-experiment-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  robot-arm:
+    name: Typed arm design and engineering checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "0"
+      HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test runner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Run robot-arm engineering tests
+        run: |
+          pytest -q \
+            tests/test_robot_arm_design.py \
+            tests/test_robot_topology_structured_part_roles.py
+
+      - name: Persist robot-arm report
+        run: python scripts/run_robot_arm_experiment.py --out-dir artifacts/robot-arm
+
+      - name: Upload robot-arm evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-arm-engineering-experiment
+          path: artifacts/robot-arm
+          if-no-files-found: error
