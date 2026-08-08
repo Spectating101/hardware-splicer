@@ -1,8 +1,16 @@
-"""Turn messy everyday language into phrases the deterministic router understands."""
+"""Bounded phrase normalization for legacy/offline compatibility.
+
+Lexical typo repair is different from semantic interpretation. Correcting
+``tempurature`` to ``temperature`` preserves the user's stated objective; rewriting
+``where do I start`` into a plant-watering project does not. The historical semantic
+rewrite table therefore requires a separate explicit opt-in and is never implied merely
+because the model is unavailable.
+"""
 
 from __future__ import annotations
 
 import re
+from typing import Any, Dict
 
 TYPO_FIXES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\btempurature\b", re.I), "temperature"),
@@ -13,6 +21,9 @@ TYPO_FIXES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\brelayy\b", re.I), "relay"),
 ]
 
+# Historical semantic compatibility rewrites. These are SCRIPT_BRAIN and may only run
+# behind HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE=1. Keep the table isolated so old
+# regression fixtures can still be replayed without contaminating normal product paths.
 REWRITES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"make my plants happy|keep the herbs alive|plants? (?:are )?thirsty", re.I), "water my plants when soil is dry"),
     (re.compile(r"room (?:is )?too (?:hot|cold|humid)|how (?:hot|cold|humid) is (?:it|the room)", re.I), "track temperature and humidity in my room"),
@@ -49,20 +60,58 @@ REWRITES: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
-def expand_user_phrase(text: str) -> str:
-    """Offline-only phrase rewriting. LLM-first paths pass user text through unchanged."""
+def expand_user_phrase_with_provenance(text: str) -> Dict[str, Any]:
+    """Normalize a phrase while making every compatibility transformation explicit."""
     try:
-        from .integrations.llm_policy import offline_phrase_expand_enabled
+        from .integrations.llm_policy import (
+            offline_phrase_expand_enabled,
+            offline_semantic_rewrite_enabled,
+        )
     except ImportError:
-        from hardware_splicer.integrations.llm_policy import offline_phrase_expand_enabled
+        from hardware_splicer.integrations.llm_policy import (
+            offline_phrase_expand_enabled,
+            offline_semantic_rewrite_enabled,
+        )
 
+    original = text.strip()
     if not offline_phrase_expand_enabled():
-        return text.strip()
+        return {
+            "text": original,
+            "original_text": original,
+            "lexical_normalization_applied": False,
+            "semantic_rewrite_applied": False,
+            "semantic_rewrite_source": None,
+            "authority_effect": "none",
+        }
 
-    t = text.strip()
-    for pat, fix in TYPO_FIXES:
-        t = pat.sub(fix, t)
-    for pattern, replacement in REWRITES:
-        if pattern.search(t):
-            return f"{t} {replacement}"
-    return t
+    normalized = original
+    lexical_applied = False
+    for pattern, replacement in TYPO_FIXES:
+        updated = pattern.sub(replacement, normalized)
+        if updated != normalized:
+            lexical_applied = True
+            normalized = updated
+
+    semantic_applied = False
+    semantic_source: str | None = None
+    if offline_semantic_rewrite_enabled():
+        for pattern, replacement in REWRITES:
+            if pattern.search(normalized):
+                normalized = f"{normalized} {replacement}".strip()
+                semantic_applied = True
+                semantic_source = pattern.pattern
+                break
+
+    return {
+        "text": normalized,
+        "original_text": original,
+        "lexical_normalization_applied": lexical_applied,
+        "semantic_rewrite_applied": semantic_applied,
+        "semantic_rewrite_source": semantic_source,
+        "authority_effect": "none",
+    }
+
+
+def expand_user_phrase(text: str) -> str:
+    """Compatibility projection returning only normalized text."""
+    return str(expand_user_phrase_with_provenance(text)["text"])
