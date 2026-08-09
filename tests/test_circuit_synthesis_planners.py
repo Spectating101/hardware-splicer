@@ -127,7 +127,7 @@ def test_sensor_interface_blocks_5v_echo_without_level_shift() -> None:
     assert "sensor_logic_level_shift" in candidate["missing_evidence"]
 
 
-def test_h_bridge_planner_selects_reversible_driver_and_compiles(tmp_path: Path) -> None:
+def test_h_bridge_planner_keeps_unstructured_rating_and_threshold_unresolved() -> None:
     intent = {
         "goal": "make a reversible 12V DC geared motor wheel drive with direction control",
         "supply_rails": [{"name": "motor supply", "voltage_v": 12.0}],
@@ -137,15 +137,15 @@ def test_h_bridge_planner_selects_reversible_driver_and_compiles(tmp_path: Path)
     }
     candidate = plan_h_bridge(intent).to_dict()
 
-    assert candidate["result"] == "ready_for_review"
+    assert candidate["result"] == "blocked"
     assert candidate["generated_topology"][0]["operator_type"] == "h_bridge"
-    assert _constraint(candidate, "h_bridge_current_margin")["status"] == "pass"
-    assert plan_h_bridge_circuit(intent)["metadata"]["driver"] == "l298n"
-
-    compiled = synthesize_circuit(intent, out_dir=tmp_path, export_gerber=False)
-    assert compiled["ok"] is True
-    assert compiled["candidate"]["candidate_id"] == "h_bridge_motor_candidate"
-    assert compiled["compose_result"]["compile_result"]["ok"] is True
+    assert candidate["metadata"]["driver"] == "l298n"
+    assert "h_bridge_current_rating_contract" in candidate["missing_evidence"]
+    assert "h_bridge_logic_threshold_contract" in candidate["missing_evidence"]
+    assert _constraint(candidate, "h_bridge_current_margin")["status"] == "blocked"
+    assert _constraint(candidate, "h_bridge_logic_level")["status"] == "blocked"
+    assert candidate["metadata"]["electrical_truth"]["magic_rating_table_used"] is False
+    assert plan_h_bridge_circuit(intent)["result"] == "blocked"
 
 
 def test_relay_switch_planner_blocks_mains_and_handles_low_voltage() -> None:
