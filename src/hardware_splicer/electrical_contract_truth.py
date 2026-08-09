@@ -58,16 +58,19 @@ def structured_contract(module_id: str) -> Dict[str, Any]:
 
 
 def max_output_current_a(module_id: str) -> float | None:
-    """Maximum declared output current from structured contract/pin fields.
+    """Return a machine-readable output/load-current rating when one actually exists.
 
-    A component-level ``electricalContract.outputCurrentMaxA`` wins when present. Otherwise
-    use the most conservative explicit ``currentMaxMa`` among power-output pins. Text such
-    as "~2A/ch" in a summary is intentionally ignored.
+    A component-level ``electricalContract.outputCurrentMaxA`` is authoritative for any
+    module. Pin ``currentMaxMa`` is only interpreted as a source rating for catalog power
+    modules; on an actuator/driver a 5 V auxiliary pin must not be mistaken for motor
+    channel current. Text such as "~2A/ch" in a summary is intentionally ignored.
     """
     contract = structured_contract(module_id)
     direct = _float_or_none(contract.get("outputCurrentMaxA"))
     if direct is not None:
         return direct
+    if category(module_id) != "power":
+        return None
 
     declared: list[float] = []
     for row in pin_rows(module_id):
@@ -122,6 +125,10 @@ def is_power_source(module_id: str) -> bool:
 
 def is_mcu(module_id: str) -> bool:
     return category(module_id) == "mcu"
+
+
+def is_motor_or_load(module_id: str) -> bool:
+    return "motor_or_load" in capability_tags(module_id) and "actuator_driver" not in capability_tags(module_id)
 
 
 def is_h_bridge_interface(module_id: str) -> bool:
