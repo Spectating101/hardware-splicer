@@ -12,7 +12,7 @@ ErcViolation = Dict[str, Any]
 
 _POWER_NET_RE = re.compile(r"gnd|ground|vcc|vdd|v\+|5v|3v3|3\.3|vin|vbus|power", re.I)
 _OUTPUT_ROLES = {"power_out", "digital_out", "pwm"}
-_INPUT_ROLES = {"digital_in", "digital_io", "analog_in", "i2c_sda", "i2c_scl"}
+_INPUT_ROLES = {"digital_in", "digital_io", "analog_in", "i2c_sda", "i2c_scl", "uart_rx"}
 
 
 def _pin_electrical(pin: Mapping[str, Any] | None) -> Dict[str, Any]:
@@ -22,20 +22,34 @@ def _pin_electrical(pin: Mapping[str, Any] | None) -> Dict[str, Any]:
     text = str(pin.get("voltage") or "") + " " + str(pin.get("notes") or "")
     voltage_v: Optional[float] = None
     voltage_range: Optional[tuple[float, float]] = None
-    if re.search(r"3\.3\s*[-–to]+\s*5|3\.3\s*or\s*5|5\s*or\s*3\.3", text, re.I):
+
+    range_match = re.search(
+        r"([\d.]+)\s*(?:V\s*)?[-–]\s*([\d.]+)\s*V",
+        text,
+        re.I,
+    )
+    if range_match:
+        low, high = float(range_match.group(1)), float(range_match.group(2))
+        voltage_range = (min(low, high), max(low, high))
+    elif re.search(r"3\.3\s*V?\s*(?:or|↔|<->)\s*5\s*V|5\s*V?\s*(?:or|↔|<->)\s*3\.3\s*V", text, re.I):
         voltage_range = (3.3, 5.0)
-    match = re.search(r"([\d.]+)\s*V", text, re.I)
-    if match:
-        voltage_v = float(match.group(1))
+    else:
+        fixed_match = re.search(r"([\d.]+)\s*V", text, re.I)
+        if fixed_match:
+            voltage_v = float(fixed_match.group(1))
+
     return {"role": role, "voltage_v": voltage_v, "voltage_range": voltage_range}
 
 
 def _voltages_compatible(values: Set[float]) -> bool:
-    if len(values) <= 1:
-        return True
-    if values <= {3.3, 5.0}:
-        return True
-    return False
+    """Exact fixed-voltage pins are compatible only when they agree.
+
+    Historical ERC treated the common set {3.3 V, 5 V} as inherently compatible. That
+    silently approved direct 5 V outputs into 3.3 V GPIO. Voltage-domain translation or
+    tolerance must instead be represented by explicit component/net structure or catalog
+    range evidence; familiarity of the voltage pair is never a safety contract.
+    """
+    return len(values) <= 1
 
 
 def _net_is_power(net_name: str, pins: List[PinRef], comp_map: Mapping[str, Any]) -> bool:
@@ -99,7 +113,7 @@ def run_erc(netlist: CircuitNetlist) -> Dict[str, Any]:
                     "rule": "erc-voltage-mismatch",
                     "severity": "error",
                     "net": net.name,
-                    "message": f"Net {net.name} mixes logic/power voltages: {sorted(voltages)}.",
+                    "message": f"Net {net.name} directly mixes fixed logic/power voltages: {sorted(voltages)}. Explicit translation or tolerance evidence is required.",
                 }
             )
         elif len(voltages) > 1 and not _voltages_compatible(voltages):
@@ -108,7 +122,7 @@ def run_erc(netlist: CircuitNetlist) -> Dict[str, Any]:
                     "rule": "erc-voltage-mismatch",
                     "severity": "warn",
                     "net": net.name,
-                    "message": f"Net {net.name} mixes voltages {sorted(voltages)} — review before fab.",
+                    "message": f"Net {net.name} mixes voltages {sorted(voltages)} with range/tolerance evidence present — review before fab.",
                 }
             )
 
