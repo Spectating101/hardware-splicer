@@ -32,7 +32,9 @@ def test_generated_schematic_preserves_electrical_pin_types() -> None:
 
     # Catalog roles become KiCad electrical types rather than generic passive pins.
     assert re.search(r'\(pin output line .*\(name "ECHO" .*\(number "ECHO"\)\)', text)
-    assert re.search(r'\(pin bidirectional line .*\(name "GPIO16" .*\(number "GPIO16"\)\)', text)
+    # GPIO16 is intentionally specialized as uart_rx in the persisted catalog, so the
+    # exporter must preserve it as an input rather than broadening it back to digital_io.
+    assert re.search(r'\(pin input line .*\(name "GPIO16 / RX2" .*\(number "GPIO16"\)\)', text)
     assert re.search(r'\(pin power_out line .*\(name "3V3" .*\(number "3V3"\)\)', text)
     assert re.search(r'\(pin power_in line .*\(name "VIN" .*\(number "VIN"\)\)', text)
 
