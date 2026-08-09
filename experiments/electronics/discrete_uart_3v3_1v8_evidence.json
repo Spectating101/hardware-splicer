@@ -9,6 +9,20 @@
       "authority": "manufacturer_specification"
     },
     {
+      "source_id": "ti-tlv755p-product-package",
+      "publisher": "Texas Instruments",
+      "kind": "manufacturer_package_information",
+      "url": "https://www.ti.com/product/TLV755P",
+      "authority": "manufacturer_package_identity"
+    },
+    {
+      "source_id": "kicad-sot23-5-official",
+      "publisher": "KiCad",
+      "kind": "official_footprint_library",
+      "url": "https://gitlab.com/kicad/libraries/kicad-footprints/-/blob/master/Package_TO_SOT_SMD.pretty/SOT-23-5.kicad_mod",
+      "authority": "official_library_footprint"
+    },
+    {
       "source_id": "ti-sn74axc2t45-datasheet-revd",
       "publisher": "Texas Instruments",
       "kind": "manufacturer_datasheet",
@@ -21,6 +35,20 @@
       "kind": "manufacturer_datasheet",
       "url": "https://www.ti.com/document-viewer/SN74AXC2T245/datasheet",
       "authority": "manufacturer_specification"
+    },
+    {
+      "source_id": "ti-sn74axc2t245-product-package",
+      "publisher": "Texas Instruments",
+      "kind": "manufacturer_package_information",
+      "url": "https://www.ti.com/product/SN74AXC2T245",
+      "authority": "manufacturer_package_identity"
+    },
+    {
+      "source_id": "kicad-texas-rsw0010a-official",
+      "publisher": "KiCad",
+      "kind": "official_footprint_library",
+      "url": "https://gitlab.com/kicad/libraries/kicad-footprints/-/blob/master/Package_DFN_QFN.pretty/Texas_RSW0010A_UQFN-10_1.4x1.8mm_P0.4mm.kicad_mod",
+      "authority": "official_library_footprint"
     }
   ],
   "parts": [
@@ -31,8 +59,11 @@
       "function": "fixed_3v3_ldo",
       "package_code": "DBV",
       "package_family": "SOT-23-5",
+      "package_body_mm": [2.9, 2.8],
       "kicad_footprint": null,
-      "footprint_status": "unresolved_not_guessed",
+      "verified_kicad_footprint_candidate": "Package_TO_SOT_SMD:SOT-23-5",
+      "footprint_status": "verified_candidate_pending_runtime_library_presence",
+      "footprint_source_ids": ["ti-tlv755p-product-package", "kicad-sot23-5-official"],
       "pins": {
         "1": {"name": "IN", "type": "input"},
         "2": {"name": "GND", "type": "ground"},
@@ -51,7 +82,7 @@
         "effective_capacitance_min_uf": 0.47,
         "enable_may_tie_to_input_when_shutdown_not_required": true
       },
-      "source_ids": ["ti-tlv755p-datasheet-revd"]
+      "source_ids": ["ti-tlv755p-datasheet-revd", "ti-tlv755p-product-package", "kicad-sot23-5-official"]
     },
     {
       "evidence_id": "part-sn74axc2t45dcur",
@@ -61,7 +92,7 @@
       "package_code": "DCU",
       "package_family": "VSSOP-8",
       "kicad_footprint": null,
-      "footprint_status": "unresolved_not_guessed",
+      "footprint_status": "unresolved_not_needed_for_selected_design",
       "pins": {
         "1": {"name": "VCCA", "type": "power"},
         "2": {"name": "A1", "type": "io"},
@@ -91,9 +122,14 @@
       "mpn": "SN74AXC2T245RSWR",
       "function": "two_bit_independent_direction_voltage_translator",
       "package_code": "RSW",
+      "package_mechanical_code": "RSW0010A",
       "package_family": "UQFN-10",
+      "package_body_mm": [1.8, 1.4],
+      "package_pitch_mm": 0.4,
       "kicad_footprint": null,
-      "footprint_status": "unresolved_not_guessed",
+      "verified_kicad_footprint_candidate": "Package_DFN_QFN:Texas_RSW0010A_UQFN-10_1.4x1.8mm_P0.4mm",
+      "footprint_status": "verified_candidate_pending_runtime_library_presence",
+      "footprint_source_ids": ["ti-sn74axc2t245-product-package", "kicad-texas-rsw0010a-official"],
       "pins": {
         "1": {"name": "DIR2", "type": "input"},
         "2": {"name": "OE", "type": "input"},
@@ -120,7 +156,7 @@
         "oe_reference": "VCCA",
         "bypass_capacitor_recommended_uf": 0.1
       },
-      "source_ids": ["ti-sn74axc2t245-datasheet-reva"]
+      "source_ids": ["ti-sn74axc2t245-datasheet-reva", "ti-sn74axc2t245-product-package", "kicad-texas-rsw0010a-official"]
     }
   ]
 }
