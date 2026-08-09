@@ -7,6 +7,7 @@ on:
       - "tests/test_model_first_truth_audit.py"
       - "tests/test_model_first_legacy_semantic_poison_bar.py"
       - "tests/test_module_resolution_truth.py"
+      - "tests/test_salvage_build_selection_boundary.py"
       - "tests/test_salvage_physical_identity_bridge.py"
       - "tests/test_circuit_synthesis_semantic_dispatch.py"
       - "tests/test_change_impact_semantic_boundary.py"
@@ -55,6 +56,7 @@ jobs:
             tests/test_model_first_truth_audit.py \
             tests/test_model_first_legacy_semantic_poison_bar.py \
             tests/test_module_resolution_truth.py \
+            tests/test_salvage_build_selection_boundary.py \
             tests/test_salvage_physical_identity_bridge.py \
             tests/test_circuit_synthesis_semantic_dispatch.py \
             tests/test_change_impact_semantic_boundary.py \
