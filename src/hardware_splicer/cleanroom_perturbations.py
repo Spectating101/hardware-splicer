@@ -27,6 +27,18 @@ PART_COLLECTION_KEYS = (
     "resources",
 )
 
+_STRUCTURED_PART_MARKERS = {
+    "module_id",
+    "instance_id",
+    "component_id",
+    "role",
+    "category",
+    "type",
+    "class",
+    "domain",
+    "capabilities",
+}
+
 
 def _clone(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
     return deepcopy(dict(snapshot))
@@ -111,24 +123,31 @@ def neutralize_display_labels(
     return body
 
 
-def neutralize_part_labels(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
-    """Replace human-facing component names but preserve structured type/role/IDs.
+def _neutralize_structured_part_names(value: Any, *, counter: list[int]) -> None:
+    if isinstance(value, dict):
+        if isinstance(value.get("name"), str) and any(key in value for key in _STRUCTURED_PART_MARKERS):
+            counter[0] += 1
+            value["name"] = f"equivalent-component-{counter[0]}"
+        for child in value.values():
+            _neutralize_structured_part_names(child, counter=counter)
+        return
+    if isinstance(value, list):
+        for child in value:
+            _neutralize_structured_part_names(child, counter=counter)
 
-    This is useful for detecting familiar-name coupling. The outer evaluator is making
-    the equivalence claim, so callers should use it only when the structured attributes
-    really do describe an equivalent component.
+
+def neutralize_part_labels(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
+    """Replace human-facing part names while preserving structured roles/IDs/contracts.
+
+    The walk includes product-visible ``machineProject`` state, not merely top-level
+    inventory arrays, so an unfamiliar-equivalent-component perturbation actually reaches
+    the embedded operator context.
     """
     body = _clone(snapshot)
-    index = 0
+    counter = [0]
     for collection_key in PART_COLLECTION_KEYS:
-        collection = body.get(collection_key)
-        if not isinstance(collection, list):
-            continue
-        for row in collection:
-            if not isinstance(row, dict) or not isinstance(row.get("name"), str):
-                continue
-            index += 1
-            row["name"] = f"equivalent-component-{index}"
+        _neutralize_structured_part_names(body.get(collection_key), counter=counter)
+    _neutralize_structured_part_names(body.get("machineProject"), counter=counter)
     _assert_equivalent_evidence(snapshot, body)
     return body
 
@@ -266,6 +285,112 @@ def build_conflicting_evidence_case(
         metadata={
             **dict(base_case.metadata or {}),
             "baseline_case_id": base_case.case_id,
+            "expected_equivalent": False,
+        },
+    )
+
+
+def build_parser_failure_case(
+    base_case: ReplayCase,
+    *,
+    source_id: str,
+    parser_route: str = "deterministic_source_parser",
+) -> ReplayCase:
+    """Create a non-equivalent challenge where a deterministic parser/tool fails closed."""
+    source_id = str(source_id or "").strip()
+    if not source_id:
+        raise ValueError("source_id is required")
+    if source_id not in {row[1] for row in _source_identity(base_case.snapshot)}:
+        raise ValueError(f"source_id is not registered in baseline evidence: {source_id}")
+    body = _clone(base_case.snapshot)
+    runs = body.get("engineeringSourceParserRuns")
+    if not isinstance(runs, list):
+        runs = []
+    runs = list(runs)
+    runs.append(
+        {
+            "source_id": source_id,
+            "content_hash": "",
+            "status": "failed",
+            "parser_route": parser_route,
+            "parser_identity": parser_route,
+            "limitations": ["deterministic parser failed; no parsed claims are available from this run"],
+            "output": {},
+        }
+    )
+    body["engineeringSourceParserRuns"] = runs
+    blockers = list(body.get("engineeringBlockers") or [])
+    blockers.append(f"Deterministic parser failed for {source_id}; parsed claims from that tool run are unavailable.")
+    body["engineeringBlockers"] = blockers
+    return ReplayCase(
+        case_id=f"{base_case.case_id}:parser-failure",
+        project_id=base_case.project_id,
+        project_revision=base_case.project_revision + 40,
+        snapshot=body,
+        equivalence_group=None,
+        perturbation_kind="deterministic_tool_failure",
+        metadata={
+            **dict(base_case.metadata or {}),
+            "baseline_case_id": base_case.case_id,
+            "failed_source_id": source_id,
+            "expected_equivalent": False,
+        },
+    )
+
+
+def build_lower_authority_analogy_case(
+    base_case: ReplayCase,
+    *,
+    analogy_source_id: str,
+    metadata: Mapping[str, Any],
+) -> ReplayCase:
+    """Add a plausible but explicitly lower-authority analogy as a non-equivalent trap.
+
+    The evaluator does not prescribe what architecture to choose. The persisted conflict
+    merely requires the operator to keep uncertainty visible instead of laundering the
+    analogy into verified truth.
+    """
+    analogy_source_id = str(analogy_source_id or "").strip()
+    if not analogy_source_id:
+        raise ValueError("analogy_source_id is required")
+    body = _clone(base_case.snapshot)
+    sources = list(body.get("engineeringSources") or [])
+    sources.append(
+        {
+            "source_id": analogy_source_id,
+            "source_type": "engineering_source_json",
+            "content_hash": f"sha256:{analogy_source_id}",
+            "revision": "legacy",
+            "authority_ceiling": "advisory",
+            "metadata": deepcopy(dict(metadata)),
+        }
+    )
+    body["engineeringSources"] = sources
+    conflicts = list(body.get("engineeringSourceConflicts") or [])
+    conflicts.append(
+        {
+            "conflict_id": f"analogy-conflict:{analogy_source_id}",
+            "source_ids": ["src-dut", analogy_source_id],
+            "field": "dut_interface_assumption",
+            "status": "unresolved",
+            "authority_note": "analogy source is advisory and cannot override declared DUT evidence",
+        }
+    )
+    body["engineeringSourceConflicts"] = conflicts
+    blockers = list(body.get("engineeringBlockers") or [])
+    blockers.append("A lower-authority historical analogy conflicts with current DUT evidence and must not be promoted to verified truth.")
+    body["engineeringBlockers"] = blockers
+    return ReplayCase(
+        case_id=f"{base_case.case_id}:analogy-trap",
+        project_id=base_case.project_id,
+        project_revision=base_case.project_revision + 50,
+        snapshot=body,
+        equivalence_group=None,
+        perturbation_kind="plausible_wrong_analogy",
+        metadata={
+            **dict(base_case.metadata or {}),
+            "baseline_case_id": base_case.case_id,
+            "analogy_source_id": analogy_source_id,
             "expected_equivalent": False,
         },
     )
