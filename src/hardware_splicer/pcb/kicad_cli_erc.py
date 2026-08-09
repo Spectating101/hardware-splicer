@@ -1,4 +1,4 @@
-"""KiCad 9 CLI ERC on emitted schematics."""
+"""KiCad CLI ERC on emitted schematics."""
 
 from __future__ import annotations
 
@@ -8,6 +8,40 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Mapping, Optional
+
+
+def _extract_violations(payload: Mapping[str, Any]) -> list[Dict[str, Any]]:
+    """Normalize KiCad ERC JSON across supported report shapes.
+
+    KiCad 9 emitted violations at the report root. KiCad 10 emits them per
+    sheet under ``sheets[].violations``. Keep the adapter deterministic and
+    preserve the native violation payload while adding sheet provenance when
+    it is available.
+    """
+
+    direct = payload.get("violations")
+    if isinstance(direct, list):
+        return [dict(item) for item in direct if isinstance(item, Mapping)]
+
+    violations: list[Dict[str, Any]] = []
+    sheets = payload.get("sheets")
+    if not isinstance(sheets, list):
+        return violations
+
+    for sheet in sheets:
+        if not isinstance(sheet, Mapping):
+            continue
+        nested = sheet.get("violations")
+        if not isinstance(nested, list):
+            continue
+        for violation in nested:
+            if not isinstance(violation, Mapping):
+                continue
+            normalized = dict(violation)
+            if "sheet_path" not in normalized and sheet.get("path") is not None:
+                normalized["sheet_path"] = sheet.get("path")
+            violations.append(normalized)
+    return violations
 
 
 def run_kicad_cli_erc(
@@ -90,7 +124,7 @@ def run_kicad_cli_erc(
         }
 
     payload = json.loads(report_path.read_text(encoding="utf-8"))
-    violations = list(payload.get("violations") or [])
+    violations = _extract_violations(payload)
     errors = sum(1 for v in violations if str(v.get("severity") or "").lower() == "error")
     warnings = sum(1 for v in violations if str(v.get("severity") or "").lower() == "warning")
 
