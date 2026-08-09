@@ -56,7 +56,9 @@ def _pick_build_decision(
     from .integrations.qwen_build_pick import call_qwen_build_pick, qwen_build_pick_enabled
 
     offline = offline_salvage_enabled()
-    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id)
+    # Keyword routing is historical semantic machinery. Do not execute it in
+    # model-first mode merely to record a shadow answer.
+    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id) if offline else None
     ignored = {
         "keyword": keyword_id or None,
         "diy": diy_id or None,
@@ -137,11 +139,25 @@ def _sanitize_legacy_splice_plan(
     splice_plan: Mapping[str, Any],
     *,
     offline: bool,
+    executed: bool = True,
 ) -> tuple[Dict[str, Any], Dict[str, Any]]:
-    """Quarantine legacy architecture/reusable-block guesses on model-first paths."""
+    """Quarantine legacy guesses, or record that model-first never executed them."""
     body = dict(splice_plan or {})
     if offline:
         return body, {
+            "executed": executed,
+            "quarantined": False,
+            "legacy_recommended_build_id": None,
+            "legacy_reusable_block_count": 0,
+        }
+
+    if not executed:
+        return {
+            "target": dict(body.get("target") or {}),
+            "reusable_blocks": [],
+            "architecture_authority": "not_executed_model_first",
+        }, {
+            "executed": False,
             "quarantined": False,
             "legacy_recommended_build_id": None,
             "legacy_reusable_block_count": 0,
@@ -158,6 +174,7 @@ def _sanitize_legacy_splice_plan(
     body["reusable_blocks"] = []
     body["architecture_authority"] = "ignored_legacy_heuristic"
     return body, {
+        "executed": True,
         "quarantined": True,
         "legacy_recommended_build_id": legacy_build,
         "legacy_reusable_block_count": len(legacy_blocks),
@@ -211,8 +228,6 @@ def build_intake_salvage_package(
 ) -> Dict[str, Any]:
     """Build a salvage package while keeping physical identity distinct from capability."""
     ensure_circuit_import_path()
-    from src.intelligence.diy_project_engineer import build_diy_project_engineering_plan
-    from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
     from .integrations.llm_policy import offline_salvage_enabled
 
     offline = offline_salvage_enabled()
@@ -229,16 +244,27 @@ def build_intake_salvage_package(
                 payload[key] = donor_context[key]
 
     constraints_map = dict(constraints or {})
-    legacy_splice_plan = SalvageSplicePlanner().plan(payload)
-    diy_plan = build_diy_project_engineering_plan(payload)
+    if offline:
+        from src.intelligence.diy_project_engineer import build_diy_project_engineering_plan
+        from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
+
+        legacy_splice_plan = SalvageSplicePlanner().plan(payload)
+        diy_plan = build_diy_project_engineering_plan(payload)
+    else:
+        # Model-first mode must not run legacy semantic planners even as shadow
+        # evaluators. Their absence is explicit audit state, not an empty vote.
+        legacy_splice_plan = {}
+        diy_plan = {}
+
     build_selection = _pick_build_decision(goal, parts, legacy_splice_plan, diy_plan)
     splice_plan, legacy_quarantine = _sanitize_legacy_splice_plan(
         legacy_splice_plan,
         offline=offline,
+        executed=offline,
     )
 
     # Model-first donor capability truth comes only from persisted donor context.
-    # Synthetic blocks produced by the historical planner are quarantined above.
+    # Historical planner-generated blocks exist only in explicit offline compatibility.
     if offline:
         fs_context: Dict[str, Any] = {
             **dict(donor_context or {}),
@@ -460,7 +486,7 @@ def build_intake_salvage_package(
         "recommended_build_id": build_id or None,
         "build_selection": build_selection,
         "legacy_planner_architecture_authority": (
-            "compatibility_only" if offline else "ignored"
+            "compatibility_only" if offline else "not_executed"
         ),
         "legacy_planner_context": {
             **legacy_quarantine,
@@ -468,7 +494,7 @@ def build_intake_salvage_package(
                 ((diy_plan.get("project_intent") or {}).get("mapped_build_id")) or ""
             )
             or None,
-            "diy_architecture_authority": "compatibility_only" if offline else "ignored",
+            "diy_architecture_authority": "compatibility_only" if offline else "not_executed",
         },
         "physical_identity_schema": MODULE_IDENTITY_SCHEMA,
         "physical_identity_authority": (
