@@ -11,6 +11,7 @@ on:
       - "tests/test_salvage_physical_identity_bridge.py"
       - "tests/test_identity_propagation_audit.py"
       - "tests/test_downstream_identity_truth.py"
+      - "tests/test_motor_driver_planner.py"
       - "tests/test_circuit_synthesis_semantic_dispatch.py"
       - "tests/test_change_impact_semantic_boundary.py"
       - "tests/test_semantic_impact_scope.py"
@@ -62,6 +63,7 @@ jobs:
             tests/test_salvage_physical_identity_bridge.py \
             tests/test_identity_propagation_audit.py \
             tests/test_downstream_identity_truth.py \
+            tests/test_motor_driver_planner.py \
             tests/test_circuit_synthesis_semantic_dispatch.py \
             tests/test_change_impact_semantic_boundary.py \
             tests/test_semantic_impact_scope.py \
