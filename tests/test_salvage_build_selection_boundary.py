@@ -15,7 +15,11 @@ def _legacy_plans() -> tuple[dict, dict]:
     return splice, diy
 
 
-def test_model_first_salvage_build_uses_model_not_legacy_planner_ids(monkeypatch) -> None:
+def _explode_keyword(*args, **kwargs):
+    raise AssertionError("model-first salvage executed legacy keyword build routing")
+
+
+def test_model_first_salvage_build_uses_model_without_executing_keyword_shadow(monkeypatch) -> None:
     splice, diy = _legacy_plans()
     monkeypatch.setattr(llm_policy, "offline_salvage_enabled", lambda: False)
     monkeypatch.setattr(qwen_build_pick, "qwen_build_pick_enabled", lambda: True)
@@ -30,11 +34,7 @@ def test_model_first_salvage_build_uses_model_not_legacy_planner_ids(monkeypatch
             "unresolved_questions": [],
         },
     )
-    monkeypatch.setattr(
-        salvage_bridge,
-        "_keyword_build_id",
-        lambda *args, **kwargs: "usb_fume_extractor",
-    )
+    monkeypatch.setattr(salvage_bridge, "_keyword_build_id", _explode_keyword)
 
     decision = salvage_bridge._pick_build_decision(
         "plant rover fan trigger words",
@@ -47,14 +47,14 @@ def test_model_first_salvage_build_uses_model_not_legacy_planner_ids(monkeypatch
     assert decision["source"] == "model_proposed"
     assert decision["legacy_fallback_used"] is False
     assert decision["legacy_planner_ids_ignored"] == {
-        "keyword": "usb_fume_extractor",
+        "keyword": None,
         "diy": "robot_drive_base",
         "splice": "automatic_plant_watering",
     }
     assert decision["authority_effect"] == "none"
 
 
-def test_model_first_salvage_failure_stays_unresolved_without_legacy_fallback(monkeypatch) -> None:
+def test_model_first_salvage_failure_stays_unresolved_without_legacy_execution(monkeypatch) -> None:
     splice, diy = _legacy_plans()
     monkeypatch.setattr(llm_policy, "offline_salvage_enabled", lambda: False)
     monkeypatch.setattr(qwen_build_pick, "qwen_build_pick_enabled", lambda: True)
@@ -67,11 +67,7 @@ def test_model_first_salvage_failure_stays_unresolved_without_legacy_fallback(mo
             "message": "semantic build selector unavailable",
         },
     )
-    monkeypatch.setattr(
-        salvage_bridge,
-        "_keyword_build_id",
-        lambda *args, **kwargs: "usb_fume_extractor",
-    )
+    monkeypatch.setattr(salvage_bridge, "_keyword_build_id", _explode_keyword)
 
     decision = salvage_bridge._pick_build_decision(
         "watering rover fan",
@@ -84,26 +80,23 @@ def test_model_first_salvage_failure_stays_unresolved_without_legacy_fallback(mo
     assert decision["source"] == "unresolved"
     assert decision["legacy_fallback_used"] is False
     assert decision["unresolved_questions"]
-    assert decision["legacy_planner_ids_ignored"]["keyword"] == "usb_fume_extractor"
+    assert decision["legacy_planner_ids_ignored"]["keyword"] is None
     assert decision["legacy_planner_ids_ignored"]["diy"] == "robot_drive_base"
     assert decision["legacy_planner_ids_ignored"]["splice"] == "automatic_plant_watering"
 
 
-def test_model_first_salvage_without_model_does_not_fall_back_to_profiles(monkeypatch) -> None:
+def test_model_first_salvage_without_model_does_not_execute_profiles(monkeypatch) -> None:
     splice, diy = _legacy_plans()
     monkeypatch.setattr(llm_policy, "offline_salvage_enabled", lambda: False)
     monkeypatch.setattr(qwen_build_pick, "qwen_build_pick_enabled", lambda: False)
-    monkeypatch.setattr(
-        salvage_bridge,
-        "_keyword_build_id",
-        lambda *args, **kwargs: "automatic_plant_watering",
-    )
+    monkeypatch.setattr(salvage_bridge, "_keyword_build_id", _explode_keyword)
 
     decision = salvage_bridge._pick_build_decision("repair donor rover", [], splice, diy)
 
     assert decision["build_id"] is None
     assert decision["source"] == "unresolved"
     assert "unavailable" in decision["reasoning"].lower()
+    assert decision["legacy_planner_ids_ignored"]["keyword"] is None
 
 
 def test_explicit_offline_salvage_preserves_legacy_selection_with_provenance(monkeypatch) -> None:
