@@ -188,13 +188,24 @@ def _audit_circuit(candidate: Mapping[str, Any], violations: list[Dict[str, Any]
 
 
 def _audit_salvage(package: Mapping[str, Any], violations: list[Dict[str, Any]]) -> None:
-    if package.get("legacy_planner_architecture_authority") not in (None, "ignored"):
+    legacy_authority = package.get("legacy_planner_architecture_authority")
+    if legacy_authority not in (None, "ignored", "not_executed"):
         violations.append(
             _violation(
                 "LEGACY_SALVAGE_ARCHITECTURE_AUTHORITY",
                 "salvage.legacy_planner_architecture_authority",
                 "Legacy salvage planner retained effective architecture authority.",
-                observed=package.get("legacy_planner_architecture_authority"),
+                observed=legacy_authority,
+            )
+        )
+    legacy_context = _mapping(package.get("legacy_planner_context"))
+    if legacy_authority == "not_executed" and legacy_context.get("executed") is True:
+        violations.append(
+            _violation(
+                "LEGACY_SALVAGE_EXECUTION_STATE_DIVERGENCE",
+                "salvage.legacy_planner_context.executed",
+                "Salvage package claims legacy planners were not executed but audit context says they ran.",
+                observed=True,
             )
         )
     build_selection = _mapping(package.get("build_selection"))
@@ -306,6 +317,23 @@ def _audit_salvage(package: Mapping[str, Any], violations: list[Dict[str, Any]])
                 observed={"package": canonical_build, "splice_plan": target_build},
             )
         )
+
+    propagation = _mapping(package.get("identity_propagation_audit"))
+    if propagation:
+        for finding in _rows(propagation.get("findings")):
+            if finding.get("severity") != "blocking":
+                continue
+            violations.append(
+                _violation(
+                    "DOWNSTREAM_IDENTITY_PROPAGATION",
+                    f"salvage.{finding.get('path') or finding.get('surface') or 'downstream'}",
+                    str(finding.get("message") or "Downstream artifact launders an untrusted concrete module identity."),
+                    observed={
+                        "module_id": finding.get("module_id"),
+                        "surface": finding.get("surface"),
+                    },
+                )
+            )
 
 
 def _audit_topology(topology: Mapping[str, Any], violations: list[Dict[str, Any]]) -> None:
@@ -421,6 +449,9 @@ def audit_model_first_truth(
             "physical_authority_checked": True,
             "physical_identity_provenance_checked": True,
             "override_binding_checked": True,
+            "downstream_identity_propagation_checked": bool(
+                _mapping(salvage.get("identity_propagation_audit")) if salvage else False
+            ),
         },
         "authority_effect": "none",
     }
