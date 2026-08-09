@@ -47,3 +47,13 @@ def test_net_labels_attach_to_exact_pin_stubs_and_unused_signal_pins_get_no_conn
     assert '(label "TRIG_3V3"' in text
     assert '(label "TRIG_5V"' in text
     assert text.count("(no_connect") > 0
+
+
+def test_catalog_pin_local_y_is_inverted_when_projected_to_sheet_coordinates() -> None:
+    text = netlist_to_kicad_schematic(_safe_netlist())
+
+    # S1 is the fourth component: sheet origin (33.02, 88.90). HC-SR04 ECHO is the
+    # third of four pins, with library-local y=+1.27 mm. KiCad sheet Y increases down,
+    # so the physical ECHO connection is 88.90 - 1.27 = 87.63, not 90.17.
+    assert '(pts (xy 25.4000 87.6300) (xy 20.3200 87.6300))' in text
+    assert '(label "ECHO_5V" (at 20.3200 87.6300 180)' in text
