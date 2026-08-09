@@ -13,6 +13,7 @@ from ..compile_casefile import write_compile_casefile
 from ..integrations.freerouting_bridge import run_freerouting_pipeline, summarize_freerouting_for_quality
 from .build_to_geometry import build_graph_to_geometry
 from .drc import run_drc
+from .geometry_hygiene import clean_preview_geometry
 from .kicad_cli_drc import run_kicad_cli_drc, summarize_for_quality
 from .kicad_serializer import serialize_build_to_kicad_pcb
 from .safety_rules import analyze_build
@@ -54,7 +55,7 @@ def compile_graph_to_artifacts(
 
     nodes = graph.get("nodes") or []
     if nodes:
-        geometry = build_graph_to_geometry(dict(graph))
+        geometry = clean_preview_geometry(build_graph_to_geometry(dict(graph)))
         drc = run_drc(geometry)
         kicad_text = serialize_build_to_kicad_pcb(dict(graph), geometry)
     else:
@@ -156,6 +157,7 @@ def compile_graph_to_artifacts(
             for w in electrical
         ],
         "drc_violations": drc.get("violations") or [],
+        "geometry_hygiene": geometry.get("geometry_hygiene") or {},
         "supported_build_ids": CATALOG_BUILD_IDS,
         "geometry_engine": "python_pcb_stack",
         "copper_preview_mode": "single_layer"
@@ -163,7 +165,7 @@ def compile_graph_to_artifacts(
         else "dual_layer",
         "copper_preview_notes": [
             "Preview copper is cosmetic — not fabrication routing.",
-            "KiCad via_dangling warnings are expected until autoroute (HARDWARE_SPLICER_AUTOROUTE=1).",
+            "KiCad via_dangling warnings may remain on preview geometry until a fabrication router is used.",
         ],
         **({"material_mode": graph.get("material_mode")} if graph.get("material_mode") else {}),
         **summarize_for_quality(kicad_drc),
