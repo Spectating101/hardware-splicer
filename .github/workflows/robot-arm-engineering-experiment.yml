@@ -8,6 +8,8 @@ on:
       - "src/hardware_splicer/robot_topology.py"
       - "tests/test_robot_arm_design.py"
       - "scripts/run_robot_arm_experiment.py"
+      - "scripts/evaluate_external_robot_arm_proposal.py"
+      - "experiments/robot_arm/gpt56_sol_external_proposal.json"
       - ".github/workflows/robot-arm-engineering-experiment.yml"
   workflow_dispatch:
 
@@ -51,10 +53,24 @@ jobs:
       - name: Persist robot-arm report
         run: python scripts/run_robot_arm_experiment.py --out-dir artifacts/robot-arm
 
+      - name: Evaluate external GPT-5.6 Sol proposal
+        run: |
+          python scripts/evaluate_external_robot_arm_proposal.py \
+            --proposal experiments/robot_arm/gpt56_sol_external_proposal.json \
+            --out-dir artifacts/robot-arm-live
+
       - name: Upload robot-arm evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: robot-arm-engineering-experiment
           path: artifacts/robot-arm
+          if-no-files-found: error
+
+      - name: Upload external LLM evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-arm-external-gpt56-sol
+          path: artifacts/robot-arm-live
           if-no-files-found: error
