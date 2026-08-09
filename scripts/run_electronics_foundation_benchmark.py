@@ -20,36 +20,33 @@ from hardware_splicer.electronics_foundation_benchmark import (
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--proposal-bundle",
-        default="experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json",
-    )
+    parser.add_argument("--proposal-bundle", default="experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json")
     parser.add_argument("--out-dir", default="artifacts/electronics-foundation")
     args = parser.parse_args()
 
-    bundle = load_electronics_bundle(args.proposal_bundle)
-    report = run_electronics_foundation_benchmark(bundle)
+    report = run_electronics_foundation_benchmark(load_electronics_bundle(args.proposal_bundle))
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    report_path = out / "ELECTRONICS_FOUNDATION_BENCHMARK.json"
-    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    (out / "ELECTRONICS_FOUNDATION_BENCHMARK.json").write_text(
+        json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
 
     checks = dict(report.get("checks") or {})
     unsafe = dict(report.get("unsafe_direct_design") or {})
-    historical = dict(unsafe.get("historical_erc") or {})
+    hs_erc = dict(unsafe.get("hs_erc") or {})
     strict = dict(unsafe.get("strict_signal_audit") or {})
     lines = [
         "benchmark=esp32_hcsr04_logic_domain_truth",
         f"diagnostic_pass={bool(report.get('diagnostic_pass'))}",
-        f"historical_unsafe_erc_pass={historical.get('pass')}",
+        f"repaired_hs_unsafe_erc_pass={hs_erc.get('pass')}",
+        f"repaired_hs_unsafe_erc_errors={hs_erc.get('errors')}",
         f"strict_unsafe_erc_pass={strict.get('pass')}",
         f"strict_unsafe_errors={strict.get('errors')}",
-        f"system_diagnosis={(report.get('system_diagnosis') or {}).get('classification')}",
+        f"repair_classification={(report.get('repair_replay') or {}).get('classification')}",
         "fabrication_authorized=False",
         "power_on_authorized=False",
     ]
-    for key, value in checks.items():
-        lines.append(f"check.{key}={bool(value)}")
+    lines.extend(f"check.{key}={bool(value)}" for key, value in checks.items())
     summary = out / "ELECTRONICS_FOUNDATION_SUMMARY.txt"
     summary.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(summary.read_text(encoding="utf-8"), end="")
