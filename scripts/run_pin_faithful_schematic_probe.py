@@ -7,6 +7,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any, Mapping
 
 _SCRIPT_DIR = str(Path(__file__).resolve().parent)
 if sys.path and str(Path(sys.path[0]).resolve()) == _SCRIPT_DIR:
@@ -49,6 +50,23 @@ def _output_conflict_netlist() -> CircuitNetlist:
     )
 
 
+def _violation_mentions(violation: Mapping[str, Any], *fragments: str) -> bool:
+    descriptions = " ".join(
+        str(item.get("description") or "")
+        for item in (violation.get("items") or [])
+        if isinstance(item, Mapping)
+    )
+    return all(fragment in descriptions for fragment in fragments)
+
+
+def _echo_output_conflict_visible(violations: list[Mapping[str, Any]]) -> bool:
+    return any(
+        str(violation.get("type") or "") == "pin_to_pin"
+        and _violation_mentions(violation, "S1 Pin ECHO", "S2 Pin ECHO")
+        for violation in violations
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--bundle", default="experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json")
@@ -73,7 +91,7 @@ def main() -> int:
     checks = {
         "safe_schematic_kicad_erc_executed": not bool(safe_erc.get("skipped")),
         "conflict_schematic_kicad_erc_executed": not bool(conflict_erc.get("skipped")),
-        "output_output_conflict_is_visible_to_kicad": len(conflict_violations) > len(list(safe_erc.get("violations") or [])),
+        "output_output_conflict_is_visible_to_kicad": _echo_output_conflict_visible(conflict_violations),
         "generated_schematic_contains_real_echo_pin": '(pin "ECHO"' in conflict_path.read_text(encoding="utf-8"),
         "physical_authority_closed": True,
     }
