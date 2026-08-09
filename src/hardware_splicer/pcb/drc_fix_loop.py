@@ -1,4 +1,9 @@
-"""KiCad DRC violation → structured geometry fixups → recompile (neurosymbolic hook)."""
+"""KiCad DRC violation → bounded geometry fixups → recompile.
+
+Repair is deliberately narrower than reasoning: deterministic DRC evidence may adjust an
+allowlisted geometry-hint surface, but it cannot select components, rewrite topology, or
+open physical authority.
+"""
 
 from __future__ import annotations
 
@@ -7,6 +12,8 @@ import json
 import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Optional
+
+from ..repair_policy import normalize_geometry_fixup_hints, repair_policy_report
 
 SCHEMA_VERSION = "hardware_splicer.drc_fix_loop.v1"
 
@@ -30,7 +37,7 @@ def _max_attempts() -> int:
 
 
 def classify_violation(violation: Mapping[str, Any]) -> str:
-    """Map KiCad DRC JSON row to a fix strategy bucket."""
+    """Map KiCad DRC JSON row to a bounded geometry strategy bucket."""
     vtype = str(violation.get("type") or "").lower()
     desc = str(violation.get("description") or "").lower()
     if "edge" in vtype or "edge" in desc:
@@ -48,8 +55,8 @@ def propose_fixup_hints(
     violations: List[Mapping[str, Any]],
     current: Mapping[str, Any] | None = None,
 ) -> Dict[str, float]:
-    """Turn KiCad error violations into incremental geometry hint deltas."""
-    hints = dict(current or {})
+    """Turn KiCad error violations into allowlisted incremental geometry deltas."""
+    hints = normalize_geometry_fixup_hints(current)
     errors = [v for v in violations if str(v.get("severity") or "").lower() == "error"]
     if not errors:
         return hints
@@ -65,11 +72,12 @@ def propose_fixup_hints(
         hints["edge_pad_extra_mm"] = float(hints.get("edge_pad_extra_mm") or 0) + 0.25
         hints["via_clearance_mm"] = max(float(hints.get("via_clearance_mm") or 0.21), 0.21) + 0.04
 
-    return hints
+    return normalize_geometry_fixup_hints(hints)
 
 
 def apply_fixup_to_graph(graph: MutableMapping[str, Any], hints: Mapping[str, float]) -> None:
-    graph["drc_fixup"] = {k: round(float(v), 4) for k, v in hints.items()}
+    normalized = normalize_geometry_fixup_hints(hints)
+    graph["drc_fixup"] = {k: round(v, 4) for k, v in normalized.items()}
 
 
 def _violations_from_quality(quality: Mapping[str, Any], out_dir: Path) -> List[Dict[str, Any]]:
@@ -92,11 +100,11 @@ def compile_with_drc_fixup_loop(
     *,
     compile_kwargs: Optional[Mapping[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Compile, propose fixups from KiCad DRC errors, recompile until clean or budget exhausted."""
+    """Compile and retry only through the deterministic geometry-repair surface."""
     out = Path(out_dir)
     compile_kwargs = dict(compile_kwargs or {})
     working = copy.deepcopy(dict(graph))
-    hints: Dict[str, float] = dict(working.get("drc_fixup") or {})
+    hints: Dict[str, float] = normalize_geometry_fixup_hints(working.get("drc_fixup") or {})
     attempts: List[Dict[str, Any]] = []
     last_payload: Dict[str, Any] = {}
 
@@ -119,6 +127,7 @@ def compile_with_drc_fixup_loop(
                 "drc_fixup": dict(hints),
                 "fix_buckets": sorted({classify_violation(v) for v in error_violations}),
                 "violation_types": sorted({str(v.get("type") or "unknown") for v in error_violations}),
+                "repair_policy": repair_policy_report(hints),
             }
         )
         if kicad_errors == 0:
@@ -134,6 +143,11 @@ def compile_with_drc_fixup_loop(
         "attempts": attempts,
         "final_kicad_drc_errors": attempts[-1]["kicad_drc_errors"] if attempts else None,
         "resolved": bool(attempts and attempts[-1]["kicad_drc_errors"] == 0),
+        "repair_policy": repair_policy_report(hints),
+        "authority_effect": "none",
+        "fabrication_authorized": False,
+        "power_on_authorized": False,
+        "motion_authorized": False,
     }
     quality = dict(last_payload.get("quality") or {})
     quality["drc_fix_loop"] = loop_report
