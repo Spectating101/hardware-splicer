@@ -155,9 +155,26 @@ def is_motor_or_load(module_id: str) -> bool:
     return "motor_or_load" in capability_tags(module_id) and "actuator_driver" not in capability_tags(module_id)
 
 
+def is_bidirectional_motor_driver_interface(module_id: str) -> bool:
+    """Recognize a motor-driver interface from declared capabilities and pin roles."""
+    tags = capability_tags(module_id)
+    if not {"actuator_driver", "motor_or_load"}.issubset(tags):
+        return False
+    controls = 0
+    outputs = 0
+    for row in pin_rows(module_id):
+        role = str(row.get("role") or "")
+        pin_id = str(row.get("id") or "").upper()
+        if role in {"digital_in", "pwm", "digital_io"}:
+            controls += 1
+        if role == "power_out" and pin_id not in {"3V3", "5V", "VCC", "VDD"}:
+            outputs += 1
+    return controls >= 2 and outputs >= 2
+
+
 def is_h_bridge_interface(module_id: str) -> bool:
-    required = {"VCC", "GND", "IN1", "IN2", "OUT1", "OUT2"}
-    return required.issubset(pin_ids(module_id)) and "actuator_driver" in capability_tags(module_id)
+    # Backward-compatible name now uses the structural interface classifier.
+    return is_bidirectional_motor_driver_interface(module_id)
 
 
 def is_low_side_switch_interface(module_id: str) -> bool:
