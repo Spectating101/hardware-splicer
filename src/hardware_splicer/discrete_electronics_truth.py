@@ -2,9 +2,9 @@
 
 This is intentionally separate from the historical module catalog. A model may select exact
 parts and propose a circuit only from persisted manufacturer evidence. Deterministic checks
-then validate part identity, rails, control modes, required bypass/stability capacitors, and
-full-duplex directionality. Unknown package-to-KiCad footprint mappings remain unresolved and
-therefore block fabrication readiness rather than being guessed.
+then validate part identity, pin identity, rails, control modes, required bypass/stability
+capacitors, and full-duplex directionality. Unknown package-to-KiCad footprint mappings remain
+unresolved and therefore block fabrication readiness rather than being guessed.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any, Dict, Mapping
 
 
 SCHEMA_VERSION = "hardware_splicer.discrete_electronics_truth.v1"
@@ -101,10 +101,71 @@ def validate_exact_part_identity(proposal: Mapping[str, Any], evidence: Mapping[
         evidence_id = str(row.get("evidence_id") or "")
         part = parts.get(evidence_id)
         if part is None:
-            findings.append(_finding("UNKNOWN_PART_EVIDENCE", "Selected part has no persisted evidence.", ref=row.get("ref"), evidence_id=evidence_id))
+            findings.append(
+                _finding(
+                    "UNKNOWN_PART_EVIDENCE",
+                    "Selected part has no persisted evidence.",
+                    ref=row.get("ref"),
+                    evidence_id=evidence_id,
+                )
+            )
             continue
         if str(row.get("mpn") or "") != str(part.get("mpn") or ""):
-            findings.append(_finding("PART_MPN_EVIDENCE_MISMATCH", "Selected MPN does not match the referenced manufacturer evidence.", ref=row.get("ref"), selected_mpn=row.get("mpn"), evidence_mpn=part.get("mpn")))
+            findings.append(
+                _finding(
+                    "PART_MPN_EVIDENCE_MISMATCH",
+                    "Selected MPN does not match the referenced manufacturer evidence.",
+                    ref=row.get("ref"),
+                    selected_mpn=row.get("mpn"),
+                    evidence_mpn=part.get("mpn"),
+                )
+            )
+    return {"pass": not findings, "findings": findings, "authority_effect": "none"}
+
+
+def validate_selected_part_pin_identity(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
+    """Reject selected-part endpoint names that do not exist in manufacturer evidence."""
+
+    parts = _parts_by_id(evidence)
+    selected = _selected_by_ref(proposal)
+    selected_parts: Dict[str, Dict[str, Any]] = {}
+    allowed_pin_names: Dict[str, set[str]] = {}
+    for ref, row in selected.items():
+        part = parts.get(str(row.get("evidence_id") or ""))
+        if part is None:
+            continue
+        selected_parts[ref] = part
+        allowed_pin_names[ref] = {
+            str(pin.get("name") or "").strip()
+            for pin in dict(part.get("pins") or {}).values()
+            if isinstance(pin, Mapping) and str(pin.get("name") or "").strip()
+        }
+
+    findings: list[Dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for net_name, endpoints in _nets(proposal).items():
+        for endpoint in endpoints:
+            if "." not in endpoint:
+                continue
+            ref, pin_name = endpoint.split(".", 1)
+            if ref not in selected_parts:
+                continue
+            if pin_name not in allowed_pin_names.get(ref, set()):
+                key = (ref, pin_name, net_name)
+                if key in seen:
+                    continue
+                seen.add(key)
+                findings.append(
+                    _finding(
+                        "UNKNOWN_DATASHEET_PIN",
+                        "Proposed endpoint pin name is absent from the persisted manufacturer pin table.",
+                        ref=ref,
+                        mpn=selected_parts[ref].get("mpn"),
+                        pin=pin_name,
+                        net=net_name,
+                        allowed_pins=sorted(allowed_pin_names.get(ref, set())),
+                    )
+                )
     return {"pass": not findings, "findings": findings, "authority_effect": "none"}
 
 
@@ -124,9 +185,21 @@ def validate_ldo_3v3(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -
     vin = float(req.get("input_voltage_v") or 0.0)
     load = float(req.get("local_3v3_load_max_a") or 0.0)
     if not (float(c["input_voltage_min_v"]) <= vin <= float(c["input_voltage_max_v"])):
-        findings.append(_finding("LDO_INPUT_OUT_OF_RANGE", "Declared input voltage is outside the evidenced LDO operating range.", input_voltage_v=vin))
+        findings.append(
+            _finding(
+                "LDO_INPUT_OUT_OF_RANGE",
+                "Declared input voltage is outside the evidenced LDO operating range.",
+                input_voltage_v=vin,
+            )
+        )
     if load > float(c["output_current_max_a"]):
-        findings.append(_finding("LDO_LOAD_EXCEEDS_RATING", "Declared 3.3 V load exceeds the evidenced LDO output-current limit.", load_a=load))
+        findings.append(
+            _finding(
+                "LDO_LOAD_EXCEEDS_RATING",
+                "Declared 3.3 V load exceeds the evidenced LDO output-current limit.",
+                load_a=load,
+            )
+        )
     if float(c.get("output_voltage_v") or 0.0) != 3.3:
         findings.append(_finding("LDO_WRONG_FIXED_OUTPUT", "Selected LDO evidence is not the required 3.3 V fixed-output variant."))
 
@@ -136,18 +209,49 @@ def validate_ldo_3v3(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -
         findings.append(_finding("LDO_OUTPUT_NET_MISMATCH", "U1.OUT must source the +3V3 rail."))
     if _net_for_endpoint(nets, "U1.GND") != "GND":
         findings.append(_finding("LDO_GROUND_MISSING", "U1.GND must be connected to GND."))
-    if req.get("translator_always_enabled") and c.get("enable_may_tie_to_input_when_shutdown_not_required"):
+    if not bool(req.get("ldo_shutdown_required")) and c.get("enable_may_tie_to_input_when_shutdown_not_required"):
         if _net_for_endpoint(nets, "U1.EN") != "+5V":
-            findings.append(_finding("LDO_ENABLE_NOT_TIED_TO_INPUT", "Shutdown is not required; the proposed always-on LDO should tie EN to IN as supported by the datasheet evidence."))
+            findings.append(
+                _finding(
+                    "LDO_ENABLE_NOT_TIED_TO_INPUT",
+                    "Shutdown is not required; the proposed always-on LDO should tie EN to IN as supported by the datasheet evidence.",
+                )
+            )
 
-    cin = _cap_between(proposal, supply_net="+5V", ground_net="GND", minimum_uf=float(c["input_capacitor_min_nominal_uf"]))
-    cout = _cap_between(proposal, supply_net="+3V3", ground_net="GND", minimum_uf=float(c["output_capacitor_min_nominal_uf"]))
+    cin = _cap_between(
+        proposal,
+        supply_net="+5V",
+        ground_net="GND",
+        minimum_uf=float(c["input_capacitor_min_nominal_uf"]),
+    )
+    cout = _cap_between(
+        proposal,
+        supply_net="+3V3",
+        ground_net="GND",
+        minimum_uf=float(c["output_capacitor_min_nominal_uf"]),
+    )
     if not cin:
-        findings.append(_finding("LDO_INPUT_CAPACITOR_MISSING", "No input capacitor meeting the evidenced nominal minimum is connected from +5V to GND."))
+        findings.append(
+            _finding(
+                "LDO_INPUT_CAPACITOR_MISSING",
+                "No input capacitor meeting the evidenced nominal minimum is connected from +5V to GND.",
+            )
+        )
     if not cout:
-        findings.append(_finding("LDO_OUTPUT_CAPACITOR_MISSING", "No output capacitor meeting the evidenced nominal minimum is connected from +3V3 to GND."))
+        findings.append(
+            _finding(
+                "LDO_OUTPUT_CAPACITOR_MISSING",
+                "No output capacitor meeting the evidenced nominal minimum is connected from +3V3 to GND.",
+            )
+        )
 
-    return {"pass": not findings, "findings": findings, "input_capacitors": cin, "output_capacitors": cout, "authority_effect": "none"}
+    return {
+        "pass": not findings,
+        "findings": findings,
+        "input_capacitors": cin,
+        "output_capacitors": cout,
+        "authority_effect": "none",
+    }
 
 
 def validate_full_duplex_translator(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
@@ -164,14 +268,31 @@ def validate_full_duplex_translator(proposal: Mapping[str, Any], evidence: Mappi
     c = dict(part.get("constraints") or {})
 
     if req.get("uart_full_duplex_simultaneous_opposite_directions") and not c.get("direction_controls_independent"):
-        findings.append(_finding("TRANSLATOR_DIRECTION_TOPOLOGY_INCOMPATIBLE", "The selected translator shares one direction control across both channels and cannot implement simultaneous opposite UART directions."))
+        findings.append(
+            _finding(
+                "TRANSLATOR_DIRECTION_TOPOLOGY_INCOMPATIBLE",
+                "The selected translator shares one direction control across both channels and cannot implement simultaneous opposite UART directions.",
+            )
+        )
 
     host_v = float(req.get("host_logic_v") or 0.0)
     dut_v = float(req.get("dut_logic_v") or 0.0)
     if not (float(c.get("vcca_min_v") or 1e9) <= host_v <= float(c.get("vcca_max_v") or -1e9)):
-        findings.append(_finding("TRANSLATOR_VCCA_OUT_OF_RANGE", "Host-side VCCA is outside the evidenced translator supply range.", vcca_v=host_v))
+        findings.append(
+            _finding(
+                "TRANSLATOR_VCCA_OUT_OF_RANGE",
+                "Host-side VCCA is outside the evidenced translator supply range.",
+                vcca_v=host_v,
+            )
+        )
     if not (float(c.get("vccb_min_v") or 1e9) <= dut_v <= float(c.get("vccb_max_v") or -1e9)):
-        findings.append(_finding("TRANSLATOR_VCCB_OUT_OF_RANGE", "DUT-side VCCB is outside the evidenced translator supply range.", vccb_v=dut_v))
+        findings.append(
+            _finding(
+                "TRANSLATOR_VCCB_OUT_OF_RANGE",
+                "DUT-side VCCB is outside the evidenced translator supply range.",
+                vccb_v=dut_v,
+            )
+        )
 
     expected_nets = {
         "U2.VCCA": "+3V3",
@@ -184,10 +305,15 @@ def validate_full_duplex_translator(proposal: Mapping[str, Any], evidence: Mappi
     }
     for endpoint, expected in expected_nets.items():
         if _net_for_endpoint(nets, endpoint) != expected:
-            findings.append(_finding("TRANSLATOR_SIGNAL_NET_MISMATCH", f"{endpoint} is not on the required {expected} net.", endpoint=endpoint, expected_net=expected))
+            findings.append(
+                _finding(
+                    "TRANSLATOR_SIGNAL_NET_MISMATCH",
+                    f"{endpoint} is not on the required {expected} net.",
+                    endpoint=endpoint,
+                    expected_net=expected,
+                )
+            )
 
-    # DIR high (VCCA) means A→B; DIR low (GND) means B→A. For the full-duplex proposal,
-    # channel 1 carries host TX A1→B1 while channel 2 carries DUT TX B2→A2.
     if c.get("direction_controls_independent"):
         if _net_for_endpoint(nets, "U2.DIR1") != "+3V3":
             findings.append(_finding("TRANSLATOR_DIR1_WRONG", "DIR1 must be high on VCCA for host TX A1-to-B1."))
@@ -200,11 +326,27 @@ def validate_full_duplex_translator(proposal: Mapping[str, Any], evidence: Mappi
     cap_a = _cap_between(proposal, supply_net="+3V3", ground_net="GND", minimum_uf=bypass_min)
     cap_b = _cap_between(proposal, supply_net="+1V8_DUT", ground_net="GND", minimum_uf=bypass_min)
     if bypass_min and not cap_a:
-        findings.append(_finding("TRANSLATOR_VCCA_BYPASS_MISSING", "No bypass capacitor meeting the evidenced recommendation is connected from VCCA/+3V3 to GND."))
+        findings.append(
+            _finding(
+                "TRANSLATOR_VCCA_BYPASS_MISSING",
+                "No bypass capacitor meeting the evidenced recommendation is connected from VCCA/+3V3 to GND.",
+            )
+        )
     if bypass_min and not cap_b:
-        findings.append(_finding("TRANSLATOR_VCCB_BYPASS_MISSING", "No bypass capacitor meeting the evidenced recommendation is connected from VCCB/+1V8_DUT to GND."))
+        findings.append(
+            _finding(
+                "TRANSLATOR_VCCB_BYPASS_MISSING",
+                "No bypass capacitor meeting the evidenced recommendation is connected from VCCB/+1V8_DUT to GND.",
+            )
+        )
 
-    return {"pass": not findings, "findings": findings, "vcca_bypass": cap_a, "vccb_bypass": cap_b, "authority_effect": "none"}
+    return {
+        "pass": not findings,
+        "findings": findings,
+        "vcca_bypass": cap_a,
+        "vccb_bypass": cap_b,
+        "authority_effect": "none",
+    }
 
 
 def audit_footprint_closure(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
@@ -214,24 +356,30 @@ def audit_footprint_closure(proposal: Mapping[str, Any], evidence: Mapping[str, 
     for ref, row in selected.items():
         part = parts.get(str(row.get("evidence_id") or ""))
         if part and not part.get("kicad_footprint"):
-            unresolved.append({
-                "ref": ref,
-                "mpn": part.get("mpn"),
-                "package_code": part.get("package_code"),
-                "package_family": part.get("package_family"),
-                "reason": "Exact verified KiCad land-pattern mapping is unresolved and must not be guessed.",
-            })
-    return {"closed": not unresolved, "unresolved": unresolved, "fabrication_authorized": False, "authority_effect": "none"}
+            unresolved.append(
+                {
+                    "ref": ref,
+                    "mpn": part.get("mpn"),
+                    "package_code": part.get("package_code"),
+                    "package_family": part.get("package_family"),
+                    "reason": "Exact verified KiCad land-pattern mapping is unresolved and must not be guessed.",
+                }
+            )
+    return {
+        "closed": not unresolved,
+        "unresolved": unresolved,
+        "fabrication_authorized": False,
+        "authority_effect": "none",
+    }
 
 
 def run_discrete_electronics_benchmark(proposal: Mapping[str, Any], evidence: Mapping[str, Any]) -> Dict[str, Any]:
     identity = validate_exact_part_identity(proposal, evidence)
+    pins = validate_selected_part_pin_identity(proposal, evidence)
     ldo = validate_ldo_3v3(proposal, evidence)
     translator = validate_full_duplex_translator(proposal, evidence)
     footprints = audit_footprint_closure(proposal, evidence)
 
-    # Adversarial comparator 1: replace the independent-DIR translator with the visually
-    # similar shared-DIR 2T45. A retrieval/copy system may accept it; engineering should not.
     wrong_translator = copy.deepcopy(dict(proposal))
     for row in wrong_translator["selected_parts"]:
         if row.get("ref") == "U2":
@@ -239,7 +387,6 @@ def run_discrete_electronics_benchmark(proposal: Mapping[str, Any], evidence: Ma
             row["mpn"] = "SN74AXC2T45DCUR"
     wrong_translator_result = validate_full_duplex_translator(wrong_translator, evidence)
 
-    # Adversarial comparator 2: remove the LDO output stability capacitor.
     missing_cout = copy.deepcopy(dict(proposal))
     missing_cout["passives"] = [row for row in missing_cout["passives"] if row.get("ref") != "C2"]
     missing_cout["nets"] = [
@@ -250,6 +397,7 @@ def run_discrete_electronics_benchmark(proposal: Mapping[str, Any], evidence: Ma
 
     checks = {
         "exact_part_identity_grounded": identity["pass"],
+        "selected_part_pin_names_grounded_in_datasheets": pins["pass"],
         "ldo_rail_and_stability_contracts_pass": ldo["pass"],
         "full_duplex_translator_contract_pass": translator["pass"],
         "shared_direction_translator_rejected_for_full_duplex_uart": not wrong_translator_result["pass"],
@@ -268,6 +416,7 @@ def run_discrete_electronics_benchmark(proposal: Mapping[str, Any], evidence: Ma
         "checks": checks,
         "proposal": dict(proposal),
         "identity_audit": identity,
+        "pin_identity_audit": pins,
         "ldo_audit": ldo,
         "translator_audit": translator,
         "footprint_closure": footprints,
