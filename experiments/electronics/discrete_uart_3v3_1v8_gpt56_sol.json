@@ -9,6 +9,7 @@
   "requirements": {
     "input_voltage_v": 5.0,
     "local_3v3_load_max_a": 0.08,
+    "ldo_shutdown_required": false,
     "host_logic_v": 3.3,
     "dut_logic_v": 1.8,
     "dut_1v8_rail_is_external": true,
