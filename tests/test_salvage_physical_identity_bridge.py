@@ -5,6 +5,13 @@ import hardware_splicer.module_resolution_truth as truth_module
 import hardware_splicer.salvage_bridge as bridge
 
 
+def _explode(label: str):
+    def fail(*args, **kwargs):
+        raise AssertionError(f"model-first salvage executed legacy planner: {label}")
+
+    return fail
+
+
 def test_legacy_splice_plan_architecture_and_synthetic_blocks_are_quarantined() -> None:
     sanitized, audit = bridge._sanitize_legacy_splice_plan(
         {
@@ -25,10 +32,31 @@ def test_legacy_splice_plan_architecture_and_synthetic_blocks_are_quarantined() 
     assert sanitized["reusable_blocks"] == []
     assert sanitized["legacy_reusable_blocks_ignored"][0]["module_id"] == "l298n"
     assert sanitized["architecture_authority"] == "ignored_legacy_heuristic"
+    assert audit["executed"] is True
     assert audit["legacy_reusable_block_count"] == 1
 
 
-def test_model_first_salvage_package_preserves_unknown_donor_identity(monkeypatch) -> None:
+def test_model_first_nonexecution_is_distinct_from_legacy_quarantine() -> None:
+    sanitized, audit = bridge._sanitize_legacy_splice_plan(
+        {},
+        offline=False,
+        executed=False,
+    )
+
+    assert sanitized == {
+        "target": {},
+        "reusable_blocks": [],
+        "architecture_authority": "not_executed_model_first",
+    }
+    assert audit == {
+        "executed": False,
+        "quarantined": False,
+        "legacy_recommended_build_id": None,
+        "legacy_reusable_block_count": 0,
+    }
+
+
+def test_model_first_salvage_package_preserves_unknown_donor_identity_without_legacy_execution(monkeypatch) -> None:
     monkeypatch.setattr(llm_policy, "offline_salvage_enabled", lambda: False)
     monkeypatch.setattr(truth_module, "_identity_model_enabled", lambda: False)
 
@@ -38,31 +66,11 @@ def test_model_first_salvage_package_preserves_unknown_donor_identity(monkeypatc
     import hardware_splicer.integrations.qwen_workshop_review as workshop
     import hardware_splicer.evidence_salvage_bridge as evidence_bridge
 
-    monkeypatch.setattr(
-        SalvageSplicePlanner,
-        "plan",
-        lambda self, payload: {
-            "target": {"recommended_build_id": "automatic_plant_watering"},
-            "reusable_blocks": [
-                {
-                    "block_id": "synthetic-l298n",
-                    "name": "planner synthetic driver",
-                    "function_type": "actuator_driver",
-                    "module_id": "l298n",
-                    "capabilities": ["motor_drive"],
-                }
-            ],
-            "verdict": "candidate",
-            "confidence": 0.8,
-        },
-    )
+    monkeypatch.setattr(SalvageSplicePlanner, "plan", _explode("salvage_splice_planner"))
     monkeypatch.setattr(
         diy_engineer,
         "build_diy_project_engineering_plan",
-        lambda payload: {
-            "project_intent": {"mapped_build_id": "robot_drive_base"},
-            "resource_plan": {"strategy_mode": "constrained"},
-        },
+        _explode("diy_project_engineer"),
     )
     monkeypatch.setattr(
         bridge,
@@ -77,8 +85,8 @@ def test_model_first_salvage_package_preserves_unknown_donor_identity(monkeypatc
             "unresolved_questions": ["Resolve architecture."],
             "legacy_planner_ids_ignored": {
                 "keyword": None,
-                "diy": "robot_drive_base",
-                "splice": "automatic_plant_watering",
+                "diy": None,
+                "splice": None,
             },
         },
     )
@@ -139,11 +147,14 @@ def test_model_first_salvage_package_preserves_unknown_donor_identity(monkeypatc
     )
 
     assert package["recommended_build_id"] is None
-    assert package["legacy_planner_architecture_authority"] == "ignored"
-    assert package["splice_plan"]["target"].get("recommended_build_id") is None
+    assert package["legacy_planner_architecture_authority"] == "not_executed"
+    assert package["splice_plan"]["target"] == {}
     assert package["splice_plan"]["reusable_blocks"] == []
-    assert package["legacy_planner_context"]["legacy_recommended_build_id"] == "automatic_plant_watering"
-    assert package["legacy_planner_context"]["diy_mapped_build_id"] == "robot_drive_base"
+    assert package["splice_plan"]["architecture_authority"] == "not_executed_model_first"
+    assert package["legacy_planner_context"]["executed"] is False
+    assert package["legacy_planner_context"]["legacy_recommended_build_id"] is None
+    assert package["legacy_planner_context"]["diy_mapped_build_id"] is None
+    assert package["legacy_planner_context"]["diy_architecture_authority"] == "not_executed"
     assert package["power_topology"] == "usb_5v"
     assert package["module_overrides"].get("pwr") is None
 
@@ -187,15 +198,11 @@ def test_model_first_workshop_review_is_advisory_only(monkeypatch) -> None:
     import hardware_splicer.integrations.qwen_workshop_review as workshop
     import hardware_splicer.evidence_salvage_bridge as evidence_bridge
 
-    monkeypatch.setattr(
-        SalvageSplicePlanner,
-        "plan",
-        lambda self, payload: {"target": {}, "reusable_blocks": [], "verdict": "candidate", "confidence": 0.5},
-    )
+    monkeypatch.setattr(SalvageSplicePlanner, "plan", _explode("salvage_splice_planner"))
     monkeypatch.setattr(
         diy_engineer,
         "build_diy_project_engineering_plan",
-        lambda payload: {"project_intent": {}, "resource_plan": {"strategy_mode": "constrained"}},
+        _explode("diy_project_engineer"),
     )
     monkeypatch.setattr(
         bridge,
@@ -244,6 +251,7 @@ def test_model_first_workshop_review_is_advisory_only(monkeypatch) -> None:
     )
 
     assert package["recommended_build_id"] is None
+    assert package["legacy_planner_context"]["executed"] is False
     assert all(row.get("module_id") != "mosfet-irlz44n" for row in package["resolved_modules"])
     review = package["salvage_resolution"]["workshop_review"]
     assert review["application_status"] == "advisory_only_model_first"
