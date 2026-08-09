@@ -128,6 +128,62 @@ def _iter_reusable_blocks(package: Mapping[str, Any]) -> List[Dict[str, Any]]:
     return selected
 
 
+def _apply_model_first_downstream_truth(package: Dict[str, Any]) -> None:
+    """Replace prose/label-derived downstream projections with fail-closed evidence gates."""
+    from hardware_splicer.downstream_identity_truth import (
+        build_model_first_bringup_card,
+        build_model_first_firmware_scaffold,
+        build_model_first_gap_analysis,
+        build_model_first_mechanism_pack,
+    )
+
+    resolved = [
+        dict(row)
+        for row in (package.get("resolved_modules") or [])
+        if isinstance(row, Mapping)
+    ]
+    power_topology = str(package.get("power_topology") or "").strip() or None
+    goal = str(
+        (package.get("bringup_card") or {}).get("goal")
+        if isinstance(package.get("bringup_card"), Mapping)
+        else ""
+    ).strip()
+    build_id = str(package.get("recommended_build_id") or "").strip() or None
+    constraints = package.get("constraints") if isinstance(package.get("constraints"), Mapping) else {}
+
+    gap = build_model_first_gap_analysis(
+        resolved_modules=resolved,
+        power_topology=power_topology,
+    )
+    bringup = build_model_first_bringup_card(
+        goal=goal,
+        resolved_modules=resolved,
+        power_topology=power_topology,
+    )
+    firmware = build_model_first_firmware_scaffold(
+        build_id=build_id,
+        resolved_modules=resolved,
+        bringup_card=bringup,
+    )
+    mechanism = build_model_first_mechanism_pack(
+        resolved_modules=resolved,
+        constraints=constraints,
+    )
+
+    package["gap_analysis"] = gap
+    package["bringup_card"] = bringup
+    package["firmware_scaffold"] = firmware
+    package["mechanism_pack"] = mechanism
+    package["downstream_projection_policy"] = {
+        "mode": "model_first_evidence_only",
+        "legacy_gap_semantics_effective": False,
+        "legacy_auto_wire_effective": False,
+        "goal_keyword_firmware_effective": False,
+        "goal_keyword_geometry_effective": False,
+        "authority_effect": "none",
+    }
+
+
 def attach_evidence_first_integrations(
     salvage_package: Mapping[str, Any],
     *,
@@ -135,12 +191,18 @@ def attach_evidence_first_integrations(
 ) -> Dict[str, Any]:
     """Attach evidence contracts and authority decisions to an existing package.
 
-    This is a compatibility seam: existing graph generation remains untouched, while
-    downstream firmware and partner-facing claims can read the stricter authority
-    result and block on unresolved donor interfaces.
+    This is the final product-visible salvage seam. Model-first mode sanitizes downstream
+    projections here so unresolved identity cannot become guessed firmware or geometry;
+    explicit offline compatibility keeps the historical projections.
     """
 
     package = dict(salvage_package)
+    from hardware_splicer.integrations.llm_policy import offline_salvage_enabled
+
+    offline = offline_salvage_enabled()
+    if not offline:
+        _apply_model_first_downstream_truth(package)
+
     build_id = str(package.get("recommended_build_id") or "salvage-build")
     stack = IntegrationStack(graph_id=f"salvage:{build_id}")
     interface_blocks, ignored_blocks = _partition_interface_blocks(package)
@@ -157,9 +219,10 @@ def attach_evidence_first_integrations(
             for ref in c.reference_equivalents
         )
     ]
-    firmware_authorized = not unresolved_firmware_interfaces
 
     firmware = dict(package.get("firmware_scaffold") or {})
+    downstream_firmware_blocked = str(firmware.get("status") or "").startswith("blocked_")
+    firmware_authorized = not unresolved_firmware_interfaces and not downstream_firmware_blocked
     firmware["evidence_authorized"] = firmware_authorized
     if unresolved_firmware_interfaces:
         firmware["status"] = "blocked_needs_donor_control_interface"
@@ -182,9 +245,10 @@ def attach_evidence_first_integrations(
         "ignored_reusable_block_count": len(ignored_blocks),
         "unresolved_firmware_interfaces": [c.interface_id for c in unresolved_firmware_interfaces],
         "unresolved_driver_interfaces": [c.interface_id for c in unresolved_driver_interfaces],
+        "downstream_identity_projection_blocked": downstream_firmware_blocked,
         "claim_boundary": (
             "Generated design artifacts are candidates only. Power and function claims remain "
-            "blocked until required donor interface measurements pass."
+            "blocked until required donor interface measurements and downstream identity gates pass."
         ),
     }
     legacy_modules = [
@@ -225,6 +289,10 @@ def attach_evidence_first_integrations(
         },
     }
 
+    from hardware_splicer.identity_propagation_audit import audit_identity_propagation
+
+    package["identity_propagation_audit"] = audit_identity_propagation(package)
+
     if out_dir is not None:
         root = Path(out_dir)
         root.mkdir(parents=True, exist_ok=True)
@@ -235,6 +303,9 @@ def attach_evidence_first_integrations(
         )
         (evidence_dir / "EVIDENCE_GRAPH.json").write_text(
             json.dumps(stack.evidence_graph.to_dict(), indent=2), encoding="utf-8"
+        )
+        (evidence_dir / "IDENTITY_PROPAGATION_AUDIT.json").write_text(
+            json.dumps(package["identity_propagation_audit"], indent=2), encoding="utf-8"
         )
         for index, contract in enumerate(contracts, start=1):
             stack.write_package(contract.interface_id, evidence_dir / f"interface-{index:02d}")
