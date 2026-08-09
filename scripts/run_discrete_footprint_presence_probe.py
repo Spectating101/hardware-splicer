@@ -19,9 +19,10 @@ def _load(path: str | Path) -> Dict[str, Any]:
     return body
 
 
-def _footprint_file(root: Path, library_id: str) -> Path:
+def _footprint_location(root: Path, library_id: str) -> tuple[Path, Path, str]:
     lib, name = library_id.split(":", 1)
-    return root / f"{lib}.pretty" / f"{name}.kicad_mod"
+    library_dir = root / f"{lib}.pretty"
+    return library_dir, library_dir / f"{name}.kicad_mod", name
 
 
 def main() -> int:
@@ -43,7 +44,7 @@ def main() -> int:
         if not isinstance(part, dict) or part.get("evidence_id") not in selected_evidence_ids:
             continue
         candidate = str(part.get("verified_kicad_footprint_candidate") or "")
-        path = _footprint_file(root, candidate) if candidate else Path()
+        library_dir, path, footprint_name = _footprint_location(root, candidate) if candidate else (Path(), Path(), "")
         exists = bool(candidate) and path.is_file()
         export_ok = False
         returncode = None
@@ -53,7 +54,17 @@ def main() -> int:
             export_dir = out / str(part["evidence_id"])
             export_dir.mkdir(parents=True, exist_ok=True)
             proc = subprocess.run(
-                [kicad_cli, "fp", "export", "svg", "--output", str(export_dir), str(path)],
+                [
+                    kicad_cli,
+                    "fp",
+                    "export",
+                    "svg",
+                    "--output",
+                    str(export_dir),
+                    "--footprint",
+                    footprint_name,
+                    str(library_dir),
+                ],
                 text=True,
                 capture_output=True,
                 check=False,
@@ -70,6 +81,8 @@ def main() -> int:
                 "package_code": part.get("package_code"),
                 "package_mechanical_code": part.get("package_mechanical_code"),
                 "candidate": candidate,
+                "library_dir": str(library_dir),
+                "footprint_name": footprint_name,
                 "path": str(path),
                 "file_exists": exists,
                 "kicad_parse_export_ok": export_ok,
