@@ -7,6 +7,7 @@ from hardware_splicer.downstream_identity_truth import (
     build_model_first_mechanism_pack,
 )
 from hardware_splicer.identity_propagation_audit import audit_identity_propagation
+from hardware_splicer.model_first_truth_audit import audit_model_first_truth
 
 
 def _unresolved_rows():
@@ -129,3 +130,58 @@ def test_fail_closed_downstream_package_passes_identity_propagation_without_stan
     assert audit["status"] == "pass"
     assert audit["blocking_finding_count"] == 0
     assert audit["finding_count"] == 0
+
+
+def test_truth_audit_accepts_explicit_legacy_nonexecution_state() -> None:
+    package = {
+        "legacy_planner_architecture_authority": "not_executed",
+        "legacy_planner_context": {"executed": False},
+        "recommended_build_id": None,
+        "build_selection": {"source": "unresolved", "legacy_fallback_used": False},
+        "physical_identity_authority": "declared_or_validated_exact_only",
+        "resolved_modules": _unresolved_rows(),
+        "module_overrides": {},
+        "splice_plan": {"target": {}},
+        "identity_propagation_audit": {
+            "status": "pass",
+            "findings": [],
+        },
+    }
+
+    report = audit_model_first_truth(salvage_package=package)
+
+    assert report["status"] == "pass"
+    assert report["violation_count"] == 0
+    assert report["checks"]["downstream_identity_propagation_checked"] is True
+
+
+def test_truth_audit_rejects_false_nonexecution_claim_and_downstream_identity_leak() -> None:
+    package = {
+        "legacy_planner_architecture_authority": "not_executed",
+        "legacy_planner_context": {"executed": True},
+        "recommended_build_id": None,
+        "build_selection": {"source": "unresolved", "legacy_fallback_used": False},
+        "physical_identity_authority": "declared_or_validated_exact_only",
+        "resolved_modules": _unresolved_rows(),
+        "module_overrides": {},
+        "splice_plan": {"target": {}},
+        "identity_propagation_audit": {
+            "status": "blocked",
+            "findings": [
+                {
+                    "severity": "blocking",
+                    "surface": "firmware_scaffold",
+                    "path": "firmware_scaffold.driver_module_id",
+                    "module_id": "l298n",
+                    "message": "Untrusted driver identity reached firmware.",
+                }
+            ],
+        },
+    }
+
+    report = audit_model_first_truth(salvage_package=package)
+    codes = {row["code"] for row in report["violations"]}
+
+    assert report["status"] == "blocked"
+    assert "LEGACY_SALVAGE_EXECUTION_STATE_DIVERGENCE" in codes
+    assert "DOWNSTREAM_IDENTITY_PROPAGATION" in codes
