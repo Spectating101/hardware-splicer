@@ -1,0 +1,71 @@
+name: Discrete Footprint Presence Staging
+
+on:
+  push:
+    branches:
+      - "agent/electronics-foundation-next-20260810"
+    paths:
+      - "src/hardware_splicer/discrete_capacitance_truth.py"
+      - "experiments/electronics/discrete_uart_3v3_1v8_evidence.json"
+      - "experiments/electronics/discrete_uart_3v3_1v8_gpt56_sol.json"
+      - "tests/test_discrete_capacitance_truth.py"
+      - "scripts/run_discrete_footprint_presence_probe.py"
+      - ".github/workflows/discrete-footprint-presence-staging.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/discrete_capacitance_truth.py"
+      - "experiments/electronics/discrete_uart_3v3_1v8_evidence.json"
+      - "experiments/electronics/discrete_uart_3v3_1v8_gpt56_sol.json"
+      - "tests/test_discrete_capacitance_truth.py"
+      - "scripts/run_discrete_footprint_presence_probe.py"
+      - ".github/workflows/discrete-footprint-presence-staging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  footprint-presence:
+    name: Effective capacitance and manufacturer footprint closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Hardware Splicer and tests
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Prove nominal capacitance does not imply effective capacitance
+        run: pytest -q tests/test_discrete_capacitance_truth.py
+
+      - name: Install current stable KiCad
+        run: |
+          sudo add-apt-repository --yes ppa:kicad/kicad-10.0-releases
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes --install-recommends kicad
+          kicad-cli version
+
+      - name: Verify footprint candidates against installed library
+        run: |
+          python scripts/run_discrete_footprint_presence_probe.py \
+            --evidence experiments/electronics/discrete_uart_3v3_1v8_evidence.json \
+            --out-dir artifacts/discrete-footprint-presence \
+            --kicad-footprint-root /usr/share/kicad/footprints
+
+      - name: Upload footprint evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: discrete-footprint-presence-staging
+          path: artifacts/discrete-footprint-presence
+          if-no-files-found: warn
