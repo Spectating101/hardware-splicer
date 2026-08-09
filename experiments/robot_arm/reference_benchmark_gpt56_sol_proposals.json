@@ -1,0 +1,64 @@
+{
+  "schema_version": "hardware_splicer.robot_arm_reference_proposals.v1",
+  "producer": {
+    "model": "GPT-5.6 Sol",
+    "role": "external_live_engineering_model",
+    "cleanroom_grade": "integration_only_not_source_blind"
+  },
+  "blind_reconstruction": {
+    "reasoning": "From requirements and visible actuator evidence only, use four arm joints: a vertical base yaw for azimuth plus three pitch joints for planar reach. Keep the chain modestly above the 380 mm target and bind only visible actuator identities. This is a candidate architecture, not a claim of verified workspace, repeatability, dynamics, or physical safety.",
+    "joints": [
+      {"joint_id":"base-yaw","joint_type":"revolute","axis":[0,0,1],"link_length_mm":50,"actuator_part_id":"actuator-base-heavy","lower_limit_deg":-170,"upper_limit_deg":170},
+      {"joint_id":"shoulder-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":160,"actuator_part_id":"actuator-shoulder-heavy","lower_limit_deg":-95,"upper_limit_deg":110},
+      {"joint_id":"elbow-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":120,"actuator_part_id":"actuator-elbow-medium","lower_limit_deg":-135,"upper_limit_deg":135},
+      {"joint_id":"wrist-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":70,"actuator_part_id":"actuator-wrist-light","lower_limit_deg":-90,"upper_limit_deg":90}
+    ],
+    "end_effector": "parallel_gripper_candidate",
+    "source_ids": [],
+    "unresolved_questions": [
+      "What link masses, centers of mass, and inertias result from the mechanical design?",
+      "Can the declared repeatability target be supported by transmission, encoder, stiffness, and calibration evidence?",
+      "What collision geometry and actual reachable workspace result from the final CAD?"
+    ],
+    "authority_effect": "none",
+    "automatic_execution": false
+  },
+  "source_assisted_reconstruction": {
+    "reasoning": "Use the public references as engineering evidence rather than a blueprint. SO-101 demonstrates a practical printable five-axis arm pattern with wrist roll and explicit URDF mass/limit/collision data, while OpenMANIPULATOR-X demonstrates that a compact desktop manipulator can meet useful reach and payload targets with fewer arm axes. Propose a five-joint candidate to preserve wrist orientation flexibility, but choose new link dimensions and only the visible synthetic actuator identities. Do not reinterpret SO-101 stall torque as continuous torque.",
+    "joints": [
+      {"joint_id":"base-yaw","joint_type":"revolute","axis":[0,0,1],"link_length_mm":55,"actuator_part_id":"actuator-base-heavy","lower_limit_deg":-170,"upper_limit_deg":170},
+      {"joint_id":"shoulder-lift","joint_type":"revolute","axis":[0,1,0],"link_length_mm":145,"actuator_part_id":"actuator-shoulder-heavy","lower_limit_deg":-100,"upper_limit_deg":115},
+      {"joint_id":"elbow-flex","joint_type":"revolute","axis":[0,1,0],"link_length_mm":125,"actuator_part_id":"actuator-elbow-medium","lower_limit_deg":-135,"upper_limit_deg":135},
+      {"joint_id":"wrist-flex","joint_type":"revolute","axis":[0,1,0],"link_length_mm":65,"actuator_part_id":"actuator-wrist-light","lower_limit_deg":-95,"upper_limit_deg":95},
+      {"joint_id":"wrist-roll","joint_type":"revolute","axis":[1,0,0],"link_length_mm":30,"actuator_part_id":"actuator-weak","lower_limit_deg":-160,"upper_limit_deg":160}
+    ],
+    "end_effector": "parallel_gripper_candidate",
+    "source_ids": ["ref-openmanipulator-x-spec","ref-so101-urdf","ref-so101-project"],
+    "unresolved_questions": [
+      "The reference sources do not establish continuous torque for the SO-101 servo; do not use its stall rating as a continuous design rating.",
+      "Reference collision meshes and joint limits are evidence about those robots, not proof that this new geometry is collision-free.",
+      "A kinematics/collision tool must validate the proposed 420 mm chain and orientation workspace."
+    ],
+    "authority_effect": "none",
+    "automatic_execution": false
+  },
+  "mutated_requirement": {
+    "reasoning": "The mutated 550 mm / 750 g requirement exceeds what should be inherited from either reference without redesign. Retain a five-joint functional pattern, but leave the shoulder actuator unresolved because the visible continuous-torque candidates are not defensible for the worst-case payload-only shoulder gravity bound at the longer reach. Reuse only distal actuators whose visible continuous ratings can clear their bounded payload terms. This deliberately refuses a reference-copy answer.",
+    "joints": [
+      {"joint_id":"base-yaw","joint_type":"revolute","axis":[0,0,1],"link_length_mm":70,"actuator_part_id":"actuator-base-heavy","lower_limit_deg":-170,"upper_limit_deg":170},
+      {"joint_id":"shoulder-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":190,"actuator_part_id":null,"lower_limit_deg":-95,"upper_limit_deg":110},
+      {"joint_id":"elbow-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":150,"actuator_part_id":"actuator-shoulder-heavy","lower_limit_deg":-135,"upper_limit_deg":135},
+      {"joint_id":"wrist-pitch","joint_type":"revolute","axis":[0,1,0],"link_length_mm":100,"actuator_part_id":"actuator-elbow-medium","lower_limit_deg":-95,"upper_limit_deg":95},
+      {"joint_id":"wrist-roll","joint_type":"revolute","axis":[1,0,0],"link_length_mm":40,"actuator_part_id":"actuator-wrist-light","lower_limit_deg":-160,"upper_limit_deg":160}
+    ],
+    "end_effector": "parallel_gripper_candidate",
+    "source_ids": ["ref-openmanipulator-x-spec","ref-so101-urdf","ref-so101-project"],
+    "unresolved_questions": [
+      "Source or characterize a shoulder actuator with sufficient continuous torque after link self-weight, transmission loss, acceleration, and safety margin are included.",
+      "The longer links invalidate reference stiffness, inertia, collision, and repeatability assumptions; new mechanical evidence is required.",
+      "Run full FK/IK, collision, and dynamics before choosing final geometry or granting motion authority."
+    ],
+    "authority_effect": "none",
+    "automatic_execution": false
+  }
+}
