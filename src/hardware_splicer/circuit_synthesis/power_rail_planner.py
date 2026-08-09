@@ -1,32 +1,36 @@
-"""Bounded power-rail conversion planner."""
+"""Bounded power-rail conversion planner using structured electrical contracts."""
 
 from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping
 
+from ..electrical_contract_truth import (
+    contract_snapshot,
+    max_output_current_a,
+    output_voltage_range_v,
+)
 from .common import (
     available_module_ids,
     blocked,
     build_path,
     dedupe,
-    first_available,
+    first_controller,
     first_float,
     first_power_source,
     has_blocker,
-    module_current_limit_a,
     module_input_range,
     passed,
-    voltage_from_text,
     warned,
 )
 from .ir import CircuitIntent, Constraint, SynthesisCandidate, TopologyOperator
 
 
-BUCK_MODULES = ("buck-mp1584", "buck-lm2596")
-LDO_OUTPUT_V = {
-    "ldo-ams1117-3v3": 3.3,
-    "ldo-ams1117-5v": 5.0,
-}
+BUCK_MODULES = {"buck-mp1584", "buck-lm2596"}
+LDO_MODULES = {"ldo-ams1117-3v3", "ldo-ams1117-5v"}
+REGULATOR_MODULES = BUCK_MODULES | LDO_MODULES
+CURRENT_MARGIN_MULTIPLIER = 1.25
+LDO_REVIEW_DISSIPATION_W = 0.5
+LDO_BLOCK_DISSIPATION_W = 1.0
 
 
 def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandidate:
@@ -41,17 +45,37 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
     output_v = _output_voltage(circuit_intent)
     load_current_a = _load_current(circuit_intent)
     source_module = first_power_source(available, input_v)
-    regulator = _choose_regulator(available, input_v=input_v, output_v=output_v, load_current_a=load_current_a)
+    regulator, regulator_candidates = _choose_regulator(
+        available,
+        input_v=input_v,
+        output_v=output_v,
+    )
 
     if input_v is None:
         missing.append("input_voltage")
-        constraints.append(blocked("input_voltage", "voltage", "input_rail", "Declare source/input rail voltage."))
+        constraints.append(
+            blocked("input_voltage", "voltage", "input_rail", "Declare source/input rail voltage.")
+        )
     if output_v is None:
         missing.append("target_output_voltage")
-        constraints.append(blocked("target_output_voltage", "voltage", "output_rail", "Declare required regulated output voltage."))
+        constraints.append(
+            blocked(
+                "target_output_voltage",
+                "voltage",
+                "output_rail",
+                "Declare required regulated output voltage in structured project state.",
+            )
+        )
     if load_current_a is None:
         missing.append("load_current_estimate")
-        constraints.append(blocked("load_current_estimate", "measurement_required", "load", "Declare expected rail load current."))
+        constraints.append(
+            blocked(
+                "load_current_estimate",
+                "measurement_required",
+                "load",
+                "Declare expected rail load current.",
+            )
+        )
 
     if input_v is not None and output_v is not None:
         if input_v <= output_v + 0.25:
@@ -81,17 +105,22 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         if source_module:
             selected_modules.insert(0, source_module)
         _check_regulator(regulator, input_v, output_v, load_current_a, constraints, missing)
-        op_type = "ldo_regulator" if regulator in LDO_OUTPUT_V else "buck_regulator"
         topology.append(
             TopologyOperator(
                 operator_id=f"{regulator}_rail_conversion",
-                operator_type=op_type,
+                operator_type="ldo_regulator" if regulator in LDO_MODULES else "buck_regulator",
                 inputs=["input_rail", "ground"],
                 outputs=["regulated_output_rail", "ground"],
                 required_part_types=["regulator_module", "load"],
                 required_ports=["VIN", "GND", "VOUT"],
-                notes=f"{regulator} selected for bounded power rail conversion.",
-                metadata={"module_id": regulator, "input_v": input_v, "output_v": output_v, "load_current_a": load_current_a},
+                notes=f"{regulator} selected because it is the sole declared regulator compatible with structured constraints.",
+                metadata={
+                    "module_id": regulator,
+                    "input_v": input_v,
+                    "output_v": output_v,
+                    "load_current_a": load_current_a,
+                    "electrical_contract": contract_snapshot(regulator),
+                },
             )
         )
     else:
@@ -101,7 +130,12 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
                 "regulator_module",
                 "evidence_required",
                 "regulator",
-                "Provide a known buck/LDO regulator module that can generate the target rail.",
+                (
+                    "Multiple compatible regulator modules are declared; choose one explicitly."
+                    if len(regulator_candidates) > 1
+                    else "Provide one regulator with structured input/output/current contracts compatible with the target rail."
+                ),
+                value={"compatible_candidates": regulator_candidates},
             )
         )
 
@@ -111,8 +145,10 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         if result == "ready_for_review"
         else "Planner stopped before compile/readiness approval because rail evidence is missing or incompatible."
     ]
-    if regulator in LDO_OUTPUT_V and input_v is not None and output_v is not None and load_current_a is not None:
-        assumptions.append("LDO thermal estimate is first-order only; bench thermal capture still controls sustained-load confidence.")
+    if regulator in LDO_MODULES and input_v is not None and output_v is not None and load_current_a is not None:
+        assumptions.append(
+            "LDO dissipation thresholds are explicit design policy; bench thermal capture still controls sustained-load confidence."
+        )
 
     modules_for_build = _recommended_modules(available, selected_modules)
     return SynthesisCandidate(
@@ -131,7 +167,11 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         assumptions=assumptions,
         missing_evidence=dedupe(missing),
         constraints=constraints,
-        verification_gates=_verification_gates(input_v=input_v, output_v=output_v, load_current_a=load_current_a),
+        verification_gates=_verification_gates(
+            input_v=input_v,
+            output_v=output_v,
+            load_current_a=load_current_a,
+        ),
         recommended_build_path=build_path(available=available, selected=modules_for_build),
         result=result,
         notes="Bounded regulated power-rail topology plan.",
@@ -140,40 +180,59 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
             "input_voltage_v": input_v,
             "output_voltage_v": output_v,
             "load_current_a": load_current_a,
+            "regulator_candidates": regulator_candidates,
+            "electrical_truth": {
+                "source": "structured_project_and_catalog_fields_only",
+                "goal_prose_voltage_inference_used": False,
+                "current_default_used": False,
+                "design_policy": {
+                    "current_margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+                    "ldo_review_dissipation_w": LDO_REVIEW_DISSIPATION_W,
+                    "ldo_block_dissipation_w": LDO_BLOCK_DISSIPATION_W,
+                },
+                "authority_effect": "none",
+            },
         },
     )
 
 
 def _input_voltage(intent: CircuitIntent) -> float | None:
     for row in intent.supply_rails:
-        role = str(row.get("role") or row.get("kind") or row.get("name") or "").lower()
-        if any(token in role for token in ("input", "source", "vin", "adapter", "battery")):
+        role = str(row.get("role") or row.get("kind") or "").lower()
+        if role in {"input", "source", "vin", "adapter", "battery"}:
             return first_float(row, ("voltage_v", "input_voltage_v", "source_voltage_v"))
     if intent.supply_rails:
-        return first_float(intent.supply_rails[0], ("voltage_v", "input_voltage_v", "source_voltage_v"))
-    return voltage_from_text(intent.goal)
+        return first_float(
+            intent.supply_rails[0],
+            ("voltage_v", "input_voltage_v", "source_voltage_v"),
+        )
+    return None
 
 
 def _output_voltage(intent: CircuitIntent) -> float | None:
     for row in intent.voltage_constraints:
-        value = first_float(row, ("output_voltage_v", "target_voltage_v", "voltage_v", "required_voltage_v"))
+        value = first_float(
+            row,
+            ("output_voltage_v", "target_voltage_v", "voltage_v", "required_voltage_v"),
+        )
         if value is not None:
             return value
     for row in intent.supply_rails[1:]:
-        value = first_float(row, ("output_voltage_v", "target_voltage_v", "voltage_v", "required_voltage_v"))
+        value = first_float(
+            row,
+            ("output_voltage_v", "target_voltage_v", "voltage_v", "required_voltage_v"),
+        )
         if value is not None:
             return value
-    text = f"{intent.goal} {intent.notes}".lower()
-    if "3v3" in text or "3.3v" in text or "3.3 v" in text:
-        return 3.3
-    if "5v" in text or "5 v" in text:
-        return 5.0
     return None
 
 
 def _load_current(intent: CircuitIntent) -> float | None:
     for row in intent.current_constraints + intent.load_requirements + intent.voltage_constraints:
-        value = first_float(row, ("load_current_a", "current_a", "max_current_a", "required_current_a"))
+        value = first_float(
+            row,
+            ("load_current_a", "current_a", "max_current_a", "required_current_a"),
+        )
         if value is not None:
             return value
     return None
@@ -184,20 +243,19 @@ def _choose_regulator(
     *,
     input_v: float | None,
     output_v: float | None,
-    load_current_a: float | None,
-) -> str:
-    if output_v is not None and load_current_a is not None and load_current_a <= 0.25:
-        for module_id, fixed_v in LDO_OUTPUT_V.items():
-            if module_id in available and abs(fixed_v - output_v) <= 0.25:
-                return module_id
-    if input_v is not None and output_v is not None and input_v > output_v + 1.0:
-        buck = first_available(available, BUCK_MODULES)
-        if buck:
-            return buck
-    for module_id, fixed_v in LDO_OUTPUT_V.items():
-        if module_id in available and (output_v is None or abs(fixed_v - output_v) <= 0.25):
-            return module_id
-    return first_available(available, BUCK_MODULES)
+) -> tuple[str, List[str]]:
+    candidates: List[str] = []
+    for module_id in sorted(REGULATOR_MODULES & available):
+        min_in, max_in = module_input_range(module_id)
+        min_out, max_out = output_voltage_range_v(module_id)
+        if input_v is not None and min_in is not None and max_in is not None:
+            if not (min_in <= input_v <= max_in):
+                continue
+        if output_v is not None:
+            if min_out is None or max_out is None or not (min_out <= output_v <= max_out):
+                continue
+        candidates.append(module_id)
+    return (candidates[0] if len(candidates) == 1 else "", candidates)
 
 
 def _check_regulator(
@@ -209,14 +267,24 @@ def _check_regulator(
     missing: List[str],
 ) -> None:
     min_in, max_in = module_input_range(module_id)
-    if input_v is not None and min_in is not None and max_in is not None:
+    if min_in is None or max_in is None:
+        missing.append("regulator_input_range_contract")
+        constraints.append(
+            blocked(
+                f"{module_id}_input_range",
+                "voltage",
+                module_id,
+                "Regulator input range is absent from the structured component contract.",
+            )
+        )
+    elif input_v is not None:
         if min_in <= input_v <= max_in:
             constraints.append(
                 passed(
                     f"{module_id}_input_range",
                     "voltage",
                     module_id,
-                    "Input rail is inside regulator input range.",
+                    "Input rail is inside the structured regulator input range.",
                     value={"input_v": input_v, "min_in_v": min_in, "max_in_v": max_in},
                 )
             )
@@ -227,43 +295,79 @@ def _check_regulator(
                     f"{module_id}_input_range",
                     "voltage",
                     module_id,
-                    "Input rail is outside regulator input range.",
+                    "Input rail is outside the structured regulator input range.",
                     value={"input_v": input_v, "min_in_v": min_in, "max_in_v": max_in},
                 )
             )
 
-    if output_v is not None and module_id in LDO_OUTPUT_V and abs(LDO_OUTPUT_V[module_id] - output_v) > 0.25:
-        missing.append("fixed_regulator_output_mismatch")
+    min_out, max_out = output_voltage_range_v(module_id)
+    if min_out is None or max_out is None:
+        missing.append("regulator_output_range_contract")
         constraints.append(
             blocked(
                 f"{module_id}_output_voltage",
                 "voltage",
                 module_id,
-                "Fixed-output regulator does not match target output rail.",
-                value={"fixed_output_v": LDO_OUTPUT_V[module_id], "target_output_v": output_v},
+                "Regulator output range is absent from the structured component contract.",
             )
         )
     elif output_v is not None:
+        if min_out <= output_v <= max_out:
+            constraints.append(
+                passed(
+                    f"{module_id}_output_voltage",
+                    "voltage",
+                    module_id,
+                    "Target output rail is inside the structured regulator output range.",
+                    value={
+                        "target_output_v": output_v,
+                        "min_output_v": min_out,
+                        "max_output_v": max_out,
+                    },
+                )
+            )
+        else:
+            missing.append("regulator_output_range")
+            constraints.append(
+                blocked(
+                    f"{module_id}_output_voltage",
+                    "voltage",
+                    module_id,
+                    "Target output rail is outside the structured regulator output range.",
+                    value={
+                        "target_output_v": output_v,
+                        "min_output_v": min_out,
+                        "max_output_v": max_out,
+                    },
+                )
+            )
+
+    current_limit_a = max_output_current_a(module_id)
+    if current_limit_a is None:
+        missing.append("regulator_current_rating_contract")
         constraints.append(
-            passed(
-                f"{module_id}_output_voltage",
-                "voltage",
+            blocked(
+                f"{module_id}_current_margin",
+                "current",
                 module_id,
-                "Regulator can be set or is fixed to the target output rail.",
-                value={"target_output_v": output_v},
+                "Regulator output-current rating is absent from the structured component contract.",
+                value={"current_limit_a": None, "load_current_a": load_current_a},
             )
         )
-
-    current_limit_a = module_current_limit_a(module_id, default_a=3.0 if module_id == "buck-mp1584" else 2.0 if module_id == "buck-lm2596" else 1.0)
-    if load_current_a is not None and current_limit_a is not None:
-        if current_limit_a >= load_current_a * 1.25:
+    elif load_current_a is not None:
+        required = load_current_a * CURRENT_MARGIN_MULTIPLIER
+        if current_limit_a >= required:
             constraints.append(
                 passed(
                     f"{module_id}_current_margin",
                     "current",
                     module_id,
-                    "Regulator current rating covers load current with margin.",
-                    value={"current_limit_a": current_limit_a, "load_current_a": load_current_a},
+                    "Structured regulator current rating covers load current with design-policy margin.",
+                    value={
+                        "current_limit_a": current_limit_a,
+                        "load_current_a": load_current_a,
+                        "required_with_margin_a": required,
+                    },
                 )
             )
         else:
@@ -273,30 +377,34 @@ def _check_regulator(
                     f"{module_id}_current_margin",
                     "current",
                     module_id,
-                    "Regulator current rating is too close to or below expected load current.",
-                    value={"current_limit_a": current_limit_a, "load_current_a": load_current_a},
+                    "Structured regulator current rating is below the design-policy margin.",
+                    value={
+                        "current_limit_a": current_limit_a,
+                        "load_current_a": load_current_a,
+                        "required_with_margin_a": required,
+                    },
                 )
             )
 
-    if module_id in LDO_OUTPUT_V and input_v is not None and output_v is not None and load_current_a is not None:
+    if module_id in LDO_MODULES and input_v is not None and output_v is not None and load_current_a is not None:
         watts = max(0.0, input_v - output_v) * load_current_a
-        if watts <= 0.5:
+        if watts <= LDO_REVIEW_DISSIPATION_W:
             constraints.append(
                 passed(
                     f"{module_id}_thermal_dissipation",
                     "thermal",
                     module_id,
-                    "Estimated LDO dissipation is low enough for review.",
+                    "Estimated LDO dissipation is below the explicit review-policy threshold.",
                     value={"dissipation_w": round(watts, 3)},
                 )
             )
-        elif watts <= 1.0:
+        elif watts <= LDO_BLOCK_DISSIPATION_W:
             constraints.append(
                 warned(
                     f"{module_id}_thermal_dissipation",
                     "thermal",
                     module_id,
-                    "Estimated LDO dissipation needs bench thermal confirmation.",
+                    "Estimated LDO dissipation needs bench thermal confirmation under design policy.",
                     value={"dissipation_w": round(watts, 3)},
                 )
             )
@@ -307,7 +415,7 @@ def _check_regulator(
                     f"{module_id}_thermal_dissipation",
                     "thermal",
                     module_id,
-                    "Estimated LDO dissipation is too high for this bounded planner.",
+                    "Estimated LDO dissipation exceeds the explicit bounded-planner policy threshold.",
                     value={"dissipation_w": round(watts, 3)},
                 )
             )
@@ -315,14 +423,18 @@ def _check_regulator(
 
 def _recommended_modules(available: set[str], selected_modules: List[str]) -> List[str]:
     out = list(selected_modules)
-    for module_id in ("esp32-cam-module", "esp32-devkit", "arduino-nano", "rpi-pico"):
-        if module_id in available:
-            out.append(module_id)
-            break
+    controller = first_controller(available)
+    if controller:
+        out.append(controller)
     return dedupe(out)
 
 
-def _verification_gates(*, input_v: float | None, output_v: float | None, load_current_a: float | None) -> List[Dict[str, Any]]:
+def _verification_gates(
+    *,
+    input_v: float | None,
+    output_v: float | None,
+    load_current_a: float | None,
+) -> List[Dict[str, Any]]:
     return [
         {
             "gate_id": "regulator_no_load_voltage",
