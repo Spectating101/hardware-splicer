@@ -8,6 +8,7 @@ from hardware_splicer.discrete_electronics_truth import (
     run_discrete_electronics_benchmark,
     validate_full_duplex_translator,
     validate_ldo_3v3,
+    validate_selected_part_pin_identity,
 )
 
 _EVIDENCE = Path("experiments/electronics/discrete_uart_3v3_1v8_evidence.json")
@@ -24,6 +25,7 @@ def test_live_discrete_proposal_passes_datasheet_contracts_but_not_fabrication_c
 
     assert report["diagnostic_pass"] is True
     assert report["checks"]["exact_part_identity_grounded"] is True
+    assert report["checks"]["selected_part_pin_names_grounded_in_datasheets"] is True
     assert report["checks"]["ldo_rail_and_stability_contracts_pass"] is True
     assert report["checks"]["full_duplex_translator_contract_pass"] is True
     assert report["checks"]["shared_direction_translator_rejected_for_full_duplex_uart"] is True
@@ -32,6 +34,22 @@ def test_live_discrete_proposal_passes_datasheet_contracts_but_not_fabrication_c
     assert report["fabrication_ready"] is False
     assert report["power_on_ready"] is False
     assert report["fabrication_authorized"] is False
+
+
+def test_hallucinated_pin_name_is_rejected_against_manufacturer_pin_table() -> None:
+    proposal, evidence = _data()
+    bad = copy.deepcopy(proposal)
+    for net in bad["nets"]:
+        if net["name"] == "HOST_TX_3V3":
+            net["endpoints"] = ["J2.HOST_TX", "U2.A3"]
+    result = validate_selected_part_pin_identity(bad, evidence)
+
+    assert result["pass"] is False
+    finding = next(row for row in result["findings"] if row["code"] == "UNKNOWN_DATASHEET_PIN")
+    assert finding["ref"] == "U2"
+    assert finding["pin"] == "A3"
+    assert "A1" in finding["allowed_pins"]
+    assert "A2" in finding["allowed_pins"]
 
 
 def test_shared_dir_2t45_is_rejected_for_simultaneous_full_duplex_uart() -> None:
