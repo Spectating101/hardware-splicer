@@ -16,6 +16,9 @@ from .pcb.module_registry import find_module
 
 SCHEMA_VERSION = "hardware_splicer.electrical_contract_truth.v1"
 _EXACT_VOLTAGE_RE = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*[vV]\s*$")
+_VOLTAGE_RANGE_RE = re.compile(
+    r"^\s*([0-9]+(?:\.[0-9]+)?)\s*-\s*([0-9]+(?:\.[0-9]+)?)\s*[vV](?:\s+.*)?$"
+)
 
 
 def module_spec(module_id: str) -> Dict[str, Any]:
@@ -82,22 +85,43 @@ def max_output_current_a(module_id: str) -> float | None:
     return min(declared) if declared else None
 
 
-def exact_output_voltage_v(module_id: str) -> float | None:
-    """Return one exact declared power-output voltage, never an adjustable/range guess."""
+def output_voltage_range_v(module_id: str) -> tuple[float | None, float | None]:
+    """Return one unambiguous declared output range from structured contract/pin fields."""
     contract = structured_contract(module_id)
+    raw_range = contract.get("outputVoltageRangeV")
+    if isinstance(raw_range, Sequence) and not isinstance(raw_range, (str, bytes, bytearray)) and len(raw_range) >= 2:
+        low = _float_or_none(raw_range[0])
+        high = _float_or_none(raw_range[1])
+        if low is not None and high is not None:
+            return min(low, high), max(low, high)
     direct = _float_or_none(contract.get("outputVoltageV"))
     if direct is not None:
-        return direct
+        return direct, direct
 
-    values: set[float] = set()
+    ranges: set[tuple[float, float]] = set()
     for row in pin_rows(module_id):
         if str(row.get("role") or "") != "power_out":
             continue
         raw = str(row.get("voltage") or "")
-        match = _EXACT_VOLTAGE_RE.match(raw)
-        if match:
-            values.add(float(match.group(1)))
-    return next(iter(values)) if len(values) == 1 else None
+        exact = _EXACT_VOLTAGE_RE.match(raw)
+        if exact:
+            value = float(exact.group(1))
+            ranges.add((value, value))
+            continue
+        ranged = _VOLTAGE_RANGE_RE.match(raw)
+        if ranged:
+            low = float(ranged.group(1))
+            high = float(ranged.group(2))
+            ranges.add((min(low, high), max(low, high)))
+    return next(iter(ranges)) if len(ranges) == 1 else (None, None)
+
+
+def exact_output_voltage_v(module_id: str) -> float | None:
+    """Return one exact declared power-output voltage, never an adjustable/range guess."""
+    low, high = output_voltage_range_v(module_id)
+    if low is not None and high is not None and abs(low - high) <= 1e-12:
+        return low
+    return None
 
 
 def logic_input_min_v(module_id: str) -> float | None:
@@ -148,6 +172,7 @@ def is_level_shifter_interface(module_id: str) -> bool:
 
 def contract_snapshot(module_id: str) -> Dict[str, Any]:
     """Small auditable view used by planners/tests without copying catalog prose."""
+    low_v, high_v = output_voltage_range_v(module_id)
     return {
         "schema_version": SCHEMA_VERSION,
         "module_id": module_id,
@@ -155,6 +180,7 @@ def contract_snapshot(module_id: str) -> Dict[str, Any]:
         "capability_tags": sorted(capability_tags(module_id)),
         "pin_ids": sorted(pin_ids(module_id)),
         "exact_output_voltage_v": exact_output_voltage_v(module_id),
+        "output_voltage_range_v": [low_v, high_v] if low_v is not None and high_v is not None else None,
         "max_output_current_a": max_output_current_a(module_id),
         "logic_input_min_v": logic_input_min_v(module_id),
         "integrated_inductive_protection": integrated_inductive_protection(module_id),
