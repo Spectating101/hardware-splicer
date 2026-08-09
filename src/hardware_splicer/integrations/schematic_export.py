@@ -173,8 +173,11 @@ def netlist_to_kicad_schematic(
 
         if pins:
             sheet_lib = component_lib_ids[comp.ref]
+            # KiCad library-symbol Y coordinates are Cartesian (positive up), while
+            # schematic sheet coordinates increase downward. Project local pin Y with
+            # the opposite sign so wire stubs/no-connect markers land on the real pins.
             pin_positions[comp.ref] = {
-                str(pin.get("id")): (x + _PIN_X_MM, y + layout[str(pin.get("id"))])
+                str(pin.get("id")): (x + _PIN_X_MM, y - layout[str(pin.get("id"))])
                 for pin in pins
             }
         else:
