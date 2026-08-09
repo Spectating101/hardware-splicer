@@ -60,8 +60,9 @@
       "package_code": "DBV",
       "package_family": "SOT-23-5",
       "package_body_mm": [2.9, 2.8],
-      "kicad_footprint": "Package_TO_SOT_SMD:SOT-23-5",
-      "footprint_status": "resolved_manufacturer_package_to_official_kicad_footprint",
+      "kicad_footprint": null,
+      "verified_kicad_footprint_candidate": "Package_TO_SOT_SMD:SOT-23-5",
+      "footprint_status": "verified_candidate_pending_runtime_library_presence",
       "footprint_source_ids": ["ti-tlv755p-product-package", "kicad-sot23-5-official"],
       "pins": {
         "1": {"name": "IN", "type": "input"},
@@ -125,8 +126,9 @@
       "package_family": "UQFN-10",
       "package_body_mm": [1.8, 1.4],
       "package_pitch_mm": 0.4,
-      "kicad_footprint": "Package_DFN_QFN:Texas_RSW0010A_UQFN-10_1.4x1.8mm_P0.4mm",
-      "footprint_status": "resolved_exact_ti_package_code_to_official_kicad_footprint",
+      "kicad_footprint": null,
+      "verified_kicad_footprint_candidate": "Package_DFN_QFN:Texas_RSW0010A_UQFN-10_1.4x1.8mm_P0.4mm",
+      "footprint_status": "verified_candidate_pending_runtime_library_presence",
       "footprint_source_ids": ["ti-sn74axc2t245-product-package", "kicad-texas-rsw0010a-official"],
       "pins": {
         "1": {"name": "DIR2", "type": "input"},
