@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "src/hardware_splicer/cleanroom_dut_experiment.py"
+      - "src/hardware_splicer/cleanroom_extended_dut_experiment.py"
       - "src/hardware_splicer/cleanroom_conflict_audit.py"
       - "src/hardware_splicer/cleanroom_replay.py"
       - "src/hardware_splicer/cleanroom_retrospective.py"
       - "src/hardware_splicer/cleanroom_perturbations.py"
       - "src/hardware_splicer/dual_agent_cleanroom.py"
       - "tests/test_cleanroom_dut_experiment.py"
+      - "tests/test_cleanroom_extended_dut_experiment.py"
       - "tests/test_cleanroom_conflict_audit.py"
       - "scripts/run_cleanroom_dut_experiment.py"
       - ".github/workflows/cleanroom-dut-replay.yml"
@@ -46,6 +48,7 @@ jobs:
         run: |
           pytest -q \
             tests/test_cleanroom_dut_experiment.py \
+            tests/test_cleanroom_extended_dut_experiment.py \
             tests/test_cleanroom_conflict_audit.py \
             tests/test_cleanroom_replay.py \
             tests/test_cleanroom_retrospective.py
