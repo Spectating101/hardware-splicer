@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import hardware_splicer.circuit_synthesis.motor_driver_planner as motor_planner
 from hardware_splicer.api import create_app
 from hardware_splicer.circuit_synthesis import compile_synthesis_candidate, plan_circuit
 from hardware_splicer.sdk import plan_circuit_synthesis, sdk_info, synthesize_circuit
@@ -31,12 +32,14 @@ def _unsupported_intent():
     }
 
 
-def test_arbitrary_dispatch_routes_supported_motor_intent() -> None:
+def test_arbitrary_dispatch_routes_supported_motor_intent_without_inventing_ratings() -> None:
     candidate = plan_circuit(_motor_intent()).to_dict()
 
-    assert candidate["result"] == "ready_for_review"
+    assert candidate["result"] == "blocked"
     assert candidate["metadata"]["dispatch"]["selected_planner"] == "motor_driver"
     assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
+    assert "mosfet-irlz44n_output_current_rating" in candidate["missing_evidence"]
+    assert "mosfet-irlz44n_logic_input_threshold" in candidate["missing_evidence"]
 
 
 def test_arbitrary_dispatch_blocks_unsupported_intent() -> None:
@@ -57,7 +60,26 @@ def test_compile_bridge_refuses_blocked_candidate(tmp_path: Path) -> None:
     assert result["candidate"]["result"] == "blocked"
 
 
-def test_synthesize_circuit_compiles_ready_motor_candidate(tmp_path: Path) -> None:
+def test_synthesize_circuit_compiles_when_structured_driver_contract_is_available(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        motor_planner,
+        "max_output_current_a",
+        lambda module_id: 5.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "logic_input_min_v",
+        lambda module_id: 3.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "integrated_inductive_protection",
+        lambda module_id: False,
+    )
+
     result = synthesize_circuit(_motor_intent(), out_dir=tmp_path, export_gerber=False)
 
     assert result["schema_version"] == "hardware_splicer.circuit_synthesis_bridge.v1"
