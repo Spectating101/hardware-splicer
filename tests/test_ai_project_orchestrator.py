@@ -97,6 +97,46 @@ def test_context_omits_raw_content_and_closes_authority() -> None:
     assert context["context_policy"]["release_authorized"] is False
 
 
+def test_context_preserves_product_visible_source_conflicts() -> None:
+    snapshot = {
+        "engineeringSources": [
+            {"source_id": "src-current", "content_hash": "sha256:current", "revision": "2"},
+            {
+                "source_id": "src-stale",
+                "content_hash": "sha256:stale",
+                "revision": "1",
+                "authority_ceiling": "advisory",
+                "metadata": {
+                    "lifecycle_status": "superseded",
+                    "superseded_by_source_id": "src-current",
+                },
+            },
+        ],
+        "engineeringSourceConflicts": [
+            {
+                "conflict_id": "revision-precedence:src-stale",
+                "source_ids": ["src-current", "src-stale"],
+                "status": "resolved_by_revision_precedence",
+                "resolution_source_id": "src-current",
+            }
+        ],
+    }
+
+    context = build_ai_project_context(
+        "fixture",
+        8,
+        snapshot,
+        mission="Review persisted source provenance",
+    )
+
+    assert context["context_policy"]["source_conflicts_preserved"] is True
+    assert context["project_summary"]["engineeringSourceConflicts"] == snapshot["engineeringSourceConflicts"]
+    stale = next(row for row in context["registered_sources"] if row["source_id"] == "src-stale")
+    assert stale["authority_ceiling"] == "advisory"
+    assert stale["metadata"]["lifecycle_status"] == "superseded"
+    assert stale["metadata"]["superseded_by_source_id"] == "src-current"
+
+
 def test_run_returns_revision_pinned_proposals_only() -> None:
     calls: list[dict] = []
 
