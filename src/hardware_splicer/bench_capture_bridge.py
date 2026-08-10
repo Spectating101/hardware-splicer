@@ -266,6 +266,7 @@ def bench_capture_to_splice_measurements(
 ) -> List[Dict[str, Any]]:
     """Convert bench capture rows into splice_bench_submit payloads."""
     gate_rows = list(gates or [])
+    capture_operator = str(capture.get("operator_id") or "").strip()
     out: List[Dict[str, Any]] = []
     for row in collect_capture_measurements(capture):
         gate_id = _match_gate_id(row, gate_rows)
@@ -278,7 +279,7 @@ def bench_capture_to_splice_measurements(
                 "value": row.get("value", row.get("measured_value")),
                 "unit": row.get("unit"),
                 "method": row.get("method") or row.get("instrument_id") or row.get("instrument_type"),
-                "operator": row.get("operator_id"),
+                "operator": row.get("operator_id") or capture_operator or None,
                 "notes": row.get("notes") or row.get("target"),
             }
         )
