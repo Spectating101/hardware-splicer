@@ -20,9 +20,9 @@ sys.path = [
     if Path(entry or ".").resolve() != _SCRIPT_DIR
 ]
 
-from hardware_splicer.cleanroom_dut_experiment import (  # noqa: E402
-    run_deterministic_dut_experiment,
-    run_live_dut_experiment,
+from hardware_splicer.cleanroom_extended_dut_experiment import (  # noqa: E402
+    run_extended_deterministic_dut_experiment,
+    run_extended_live_dut_experiment,
 )
 
 
@@ -34,9 +34,11 @@ def _write(path: Path, body: Mapping[str, Any]) -> None:
 def _summary(result: Mapping[str, Any]) -> str:
     mode = str(result.get("mode") or "unknown")
     lines = [f"mode={mode}"]
-    if mode == "deterministic_evaluator_probe":
+    if mode == "deterministic_extended_evaluator_probe":
         checks = dict(result.get("checks") or {})
         lines.append(f"pass={bool(result.get('pass'))}")
+        lines.append(f"case_count={int(result.get('case_count') or 0)}")
+        lines.append(f"challenge_kinds={json.dumps(result.get('challenge_kinds') or [])}")
         for key, value in checks.items():
             lines.append(f"{key}={bool(value)}")
         return "\n".join(lines) + "\n"
@@ -48,6 +50,8 @@ def _summary(result: Mapping[str, Any]) -> str:
         [
             f"provider_configured={bool(result.get('provider_configured'))}",
             f"contract_pass={bool(result.get('contract_pass'))}",
+            f"case_count={int(result.get('case_count') or 0)}",
+            f"challenge_kinds={json.dumps(result.get('challenge_kinds') or [])}",
             f"hard_failure_count={int(replay.get('hard_failure_count') or 0)}",
             f"taxonomy_counts={json.dumps(retrospective.get('failure_taxonomy_counts') or {}, sort_keys=True)}",
             f"truth_metrics={json.dumps(metrics.get('truth') or {}, sort_keys=True)}",
@@ -69,7 +73,7 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.mode == "deterministic":
-        result = run_deterministic_dut_experiment()
+        result = run_extended_deterministic_dut_experiment()
         report_path = out_dir / "DETERMINISTIC_DUT_EXPERIMENT.json"
         summary_path = out_dir / "DETERMINISTIC_SUMMARY.txt"
         _write(report_path, result)
@@ -77,7 +81,7 @@ def main() -> int:
         print(summary_path.read_text(encoding="utf-8"), end="")
         return 0 if result.get("pass") else 2
 
-    result = run_live_dut_experiment(model=args.model)
+    result = run_extended_live_dut_experiment(model=args.model)
     report_path = out_dir / "LIVE_DUT_EXPERIMENT.json"
     summary_path = out_dir / "LIVE_SUMMARY.txt"
     _write(report_path, result)
