@@ -1,24 +1,50 @@
 """Structured electrical truth accessors for catalog modules.
 
-Only explicit machine-readable catalog fields count as electrical authority here. Human
-summaries, warnings, labels and module IDs are deliberately not parsed into ratings. When
-a precise rating/threshold is absent, callers receive ``None`` and must keep the
-engineering decision unresolved.
+Only explicit machine-readable catalog/component-contract fields count as electrical
+authority here. Human summaries, warnings, labels and module IDs are deliberately not
+parsed into ratings. When a precise rating/threshold is absent, callers receive ``None``
+and must keep the engineering decision unresolved.
 """
 
 from __future__ import annotations
 
+import json
 import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
 from .pcb.module_registry import find_module
 
 
 SCHEMA_VERSION = "hardware_splicer.electrical_contract_truth.v1"
+_CONTRACTS_PATH = Path(__file__).resolve().parent / "data" / "electrical_contracts.json"
 _EXACT_VOLTAGE_RE = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*[vV]\s*$")
 _VOLTAGE_RANGE_RE = re.compile(
     r"^\s*([0-9]+(?:\.[0-9]+)?)\s*-\s*([0-9]+(?:\.[0-9]+)?)\s*[vV](?:\s+.*)?$"
 )
+
+
+@lru_cache(maxsize=1)
+def _component_contracts() -> Dict[str, Dict[str, Any]]:
+    """Load explicit component contracts shipped as package data.
+
+    The sidecar exists so authoritative electrical facts do not have to be inferred from
+    human-facing catalog prose or wait for a generated frontend catalog refresh. Inline
+    ``electricalContract`` fields remain supported and are merged with this sidecar.
+    """
+    try:
+        payload = json.loads(_CONTRACTS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    rows = payload.get("contracts") if isinstance(payload, Mapping) else None
+    if not isinstance(rows, Mapping):
+        return {}
+    return {
+        str(module_id): dict(contract)
+        for module_id, contract in rows.items()
+        if isinstance(contract, Mapping)
+    }
 
 
 def module_spec(module_id: str) -> Dict[str, Any]:
@@ -54,10 +80,15 @@ def category(module_id: str) -> str:
 
 
 def structured_contract(module_id: str) -> Dict[str, Any]:
-    """Return optional explicit component contract fields without inventing defaults."""
+    """Return explicit component contract fields without inventing defaults."""
+    module_id = str(module_id or "").strip()
     spec = module_spec(module_id)
-    raw = spec.get("electricalContract")
-    return dict(raw) if isinstance(raw, Mapping) else {}
+    inline = spec.get("electricalContract")
+    merged = dict(inline) if isinstance(inline, Mapping) else {}
+    # Sidecar fields are deliberate authority upgrades and therefore win over stale
+    # generated catalog copies. Provenance travels with the same machine-readable row.
+    merged.update(_component_contracts().get(module_id) or {})
+    return merged
 
 
 def max_output_current_a(module_id: str) -> float | None:
@@ -125,9 +156,19 @@ def exact_output_voltage_v(module_id: str) -> float | None:
 
 
 def logic_input_min_v(module_id: str) -> float | None:
-    """Return an explicit guaranteed logic-high/input threshold if the catalog has one."""
+    """Return an explicit guaranteed logic-high/input threshold if one is structured."""
     contract = structured_contract(module_id)
     for key in ("logicInputHighMinV", "logicInputMinV"):
+        value = _float_or_none(contract.get(key))
+        if value is not None:
+            return value
+    return None
+
+
+def logic_input_max_v(module_id: str) -> float | None:
+    """Return an explicit normal logic-input ceiling when one is structured."""
+    contract = structured_contract(module_id)
+    for key in ("logicInputMaxV", "logicInputHighMaxV"):
         value = _float_or_none(contract.get(key))
         if value is not None:
             return value
@@ -190,6 +231,7 @@ def is_level_shifter_interface(module_id: str) -> bool:
 def contract_snapshot(module_id: str) -> Dict[str, Any]:
     """Small auditable view used by planners/tests without copying catalog prose."""
     low_v, high_v = output_voltage_range_v(module_id)
+    contract = structured_contract(module_id)
     return {
         "schema_version": SCHEMA_VERSION,
         "module_id": module_id,
@@ -200,8 +242,10 @@ def contract_snapshot(module_id: str) -> Dict[str, Any]:
         "output_voltage_range_v": [low_v, high_v] if low_v is not None and high_v is not None else None,
         "max_output_current_a": max_output_current_a(module_id),
         "logic_input_min_v": logic_input_min_v(module_id),
+        "logic_input_max_v": logic_input_max_v(module_id),
         "integrated_inductive_protection": integrated_inductive_protection(module_id),
-        "source": "structured_catalog_fields_only",
+        "contract_provenance": dict(contract.get("provenance") or {}) if isinstance(contract.get("provenance"), Mapping) else {},
+        "source": "structured_component_contracts",
         "authority_effect": "none",
     }
 
