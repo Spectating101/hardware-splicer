@@ -2,8 +2,8 @@
 
 Only explicit machine-readable catalog/component-contract fields count as electrical
 authority here. Human summaries, warnings, labels and module IDs are deliberately not
-parsed into ratings. When a precise rating/threshold is absent, callers receive ``None``
-and must keep the engineering decision unresolved.
+parsed into ratings or topology roles. When a precise rating/threshold/classification is
+absent, callers receive ``None`` and must keep the engineering decision unresolved.
 """
 
 from __future__ import annotations
@@ -23,6 +23,10 @@ _EXACT_VOLTAGE_RE = re.compile(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*[vV]\s*$")
 _VOLTAGE_RANGE_RE = re.compile(
     r"^\s*([0-9]+(?:\.[0-9]+)?)\s*-\s*([0-9]+(?:\.[0-9]+)?)\s*[vV](?:\s+.*)?$"
 )
+_POWER_CONVERSION_KINDS = {"buck", "boost", "ldo"}
+_BATTERY_CHARGER_KINDS = {"single_cell_li_ion"}
+_POWER_INPUT_KINDS = {"usb_5v"}
+_BATTERY_MONITOR_KINDS = {"fuel_gauge"}
 
 
 @lru_cache(maxsize=1)
@@ -89,6 +93,30 @@ def structured_contract(module_id: str) -> Dict[str, Any]:
     # generated catalog copies. Provenance travels with the same machine-readable row.
     merged.update(_component_contracts().get(module_id) or {})
     return merged
+
+
+def power_conversion_kind(module_id: str) -> str | None:
+    """Return explicit regulator topology (buck/boost/LDO), never infer it from IDs."""
+    value = str(structured_contract(module_id).get("powerConversionKind") or "").strip().lower()
+    return value if value in _POWER_CONVERSION_KINDS else None
+
+
+def battery_charger_kind(module_id: str) -> str | None:
+    """Return an explicit battery-charger family classification, otherwise unknown."""
+    value = str(structured_contract(module_id).get("batteryChargerKind") or "").strip().lower()
+    return value if value in _BATTERY_CHARGER_KINDS else None
+
+
+def power_input_kind(module_id: str) -> str | None:
+    """Return an explicit bounded source-interface classification, otherwise unknown."""
+    value = str(structured_contract(module_id).get("powerInputKind") or "").strip().lower()
+    return value if value in _POWER_INPUT_KINDS else None
+
+
+def battery_monitor_kind(module_id: str) -> str | None:
+    """Return an explicit battery-monitor classification, otherwise unknown."""
+    value = str(structured_contract(module_id).get("batteryMonitorKind") or "").strip().lower()
+    return value if value in _BATTERY_MONITOR_KINDS else None
 
 
 def max_output_current_a(module_id: str) -> float | None:
@@ -238,6 +266,10 @@ def contract_snapshot(module_id: str) -> Dict[str, Any]:
         "category": category(module_id) or None,
         "capability_tags": sorted(capability_tags(module_id)),
         "pin_ids": sorted(pin_ids(module_id)),
+        "power_conversion_kind": power_conversion_kind(module_id),
+        "battery_charger_kind": battery_charger_kind(module_id),
+        "power_input_kind": power_input_kind(module_id),
+        "battery_monitor_kind": battery_monitor_kind(module_id),
         "exact_output_voltage_v": exact_output_voltage_v(module_id),
         "output_voltage_range_v": [low_v, high_v] if low_v is not None and high_v is not None else None,
         "max_output_current_a": max_output_current_a(module_id),
