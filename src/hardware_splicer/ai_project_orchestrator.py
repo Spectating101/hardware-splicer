@@ -202,6 +202,10 @@ def build_ai_project_context(
             "engineeringAnalysis",
             "engineeringBlockers",
             "engineeringAdvisories",
+            "engineeringSourceConflicts",
+            "engineering_source_conflicts",
+            "declared_conflicts",
+            "source_conflicts",
             "rankedNextAction",
         )
         if snapshot.get(key) is not None
@@ -219,6 +223,7 @@ def build_ai_project_context(
         "context_policy": {
             "raw_registered_file_content_included": False,
             "source_authority_may_not_be_elevated": True,
+            "source_conflicts_preserved": True,
             "model_output_authority": "proposed",
             "automatic_execution": False,
             "fabrication_authorized": False,
@@ -240,6 +245,8 @@ def build_ai_project_context(
                 snapshot.get("engineering_readiness")
             ),
             "engineering_status": _sanitize_value(snapshot.get("engineering_status")),
+            "engineeringBlockers": _sanitize_value(snapshot.get("engineeringBlockers")),
+            "engineeringSourceConflicts": _sanitize_value(snapshot.get("engineeringSourceConflicts")),
         }
         context["context_policy"]["project_summary_reduced_for_context_bound"] = True
         encoded = _canonical_json(context)
@@ -304,122 +311,83 @@ def _validate_no_authority_elevation(value: Any, *, path: str = "response") -> N
             _validate_no_authority_elevation(row, path=f"{path}[{index}]")
 
 
-def parse_ai_project_response(
-    content: str,
-    *,
-    session_id: str,
-    project_id: str,
-    project_revision: int,
-    max_actions: int,
-) -> Dict[str, Any]:
+def _parse_provider_content(provider: Mapping[str, Any]) -> Dict[str, Any]:
+    content = _strip_json_fence(str(provider.get("content") or ""))
     try:
-        parsed = json.loads(_strip_json_fence(content))
+        parsed = json.loads(content)
     except json.JSONDecodeError as exc:
-        raise InvalidAIProjectResponse("model response is not valid JSON") from exc
-    if not isinstance(parsed, dict):
+        raise InvalidAIProjectResponse(f"model did not return valid JSON: {exc}") from exc
+    if not isinstance(parsed, Mapping):
         raise InvalidAIProjectResponse("model response must be one JSON object")
     _validate_no_authority_elevation(parsed)
+    return dict(parsed)
 
-    requirements: list[Dict[str, Any]] = []
-    for index, row in enumerate(list(parsed.get("requirements") or [])[:64]):
-        if not isinstance(row, Mapping):
-            raise InvalidAIProjectResponse(f"requirements[{index}] must be an object")
+
+def _normalize_source_ids(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    result: list[str] = []
+    for row in value[:32]:
+        source_id = str(row or "").strip()
+        if source_id and source_id not in result:
+            result.append(source_id)
+    return result
+
+
+def _normalize_requirements(value: Any) -> list[Dict[str, Any]]:
+    result: list[Dict[str, Any]] = []
+    for index, row in enumerate(_rows(value)[:32]):
         statement = _bounded_text(row.get("statement"), limit=4_000).strip()
         if not statement:
-            raise InvalidAIProjectResponse(f"requirements[{index}].statement is required")
-        requirements.append(
+            continue
+        result.append(
             {
-                "id": _bounded_text(row.get("id") or f"requirement-{index + 1}", limit=128),
+                "id": str(row.get("id") or f"req-{index + 1}"),
                 "statement": statement,
-                "source_ids": _string_list(row.get("source_ids"), limit=32),
-                "assumptions": _string_list(row.get("assumptions"), limit=32),
-                "authority": "proposed",
+                "source_ids": _normalize_source_ids(row.get("source_ids")),
+                "assumptions": _string_list(row.get("assumptions"), limit=16),
             }
         )
+    return result
 
-    candidates: list[Dict[str, Any]] = []
-    for index, row in enumerate(list(parsed.get("architecture_candidates") or [])[:3]):
-        if not isinstance(row, Mapping):
-            raise InvalidAIProjectResponse(
-                f"architecture_candidates[{index}] must be an object"
-            )
-        title = _bounded_text(row.get("title"), limit=256).strip()
-        summary = _bounded_text(row.get("summary"), limit=8_000).strip()
-        if not title or not summary:
-            raise InvalidAIProjectResponse(
-                f"architecture_candidates[{index}] requires title and summary"
-            )
-        candidates.append(
+
+def _normalize_candidates(value: Any) -> list[Dict[str, Any]]:
+    result: list[Dict[str, Any]] = []
+    for index, row in enumerate(_rows(value)[:3]):
+        result.append(
             {
-                "id": _bounded_text(row.get("id") or f"candidate-{index + 1}", limit=128),
-                "title": title,
-                "summary": summary,
-                "tradeoffs": _string_list(row.get("tradeoffs"), limit=32),
-                "assumptions": _string_list(row.get("assumptions"), limit=32),
-                "source_ids": _string_list(row.get("source_ids"), limit=32),
-                "authority": "proposed",
-                "status": "candidate",
+                "id": str(row.get("id") or f"candidate-{index + 1}"),
+                "title": _bounded_text(row.get("title"), limit=1_000),
+                "summary": _bounded_text(row.get("summary"), limit=6_000),
+                "tradeoffs": _string_list(row.get("tradeoffs"), limit=16),
+                "assumptions": _string_list(row.get("assumptions"), limit=16),
+                "source_ids": _normalize_source_ids(row.get("source_ids")),
             }
         )
+    return result
 
-    raw_actions = list(parsed.get("actions") or [])
-    if len(raw_actions) > max_actions:
-        raise InvalidAIProjectResponse(
-            f"model returned {len(raw_actions)} actions, maximum is {max_actions}"
-        )
-    actions: list[Dict[str, Any]] = []
-    for index, row in enumerate(raw_actions):
-        if not isinstance(row, Mapping):
-            raise InvalidAIProjectResponse(f"actions[{index}] must be an object")
-        action_type = str(row.get("action_type") or "")
+
+def _normalize_actions(value: Any, *, max_actions: int) -> list[Dict[str, Any]]:
+    result: list[Dict[str, Any]] = []
+    for index, row in enumerate(_rows(value)[:max_actions]):
+        action_type = str(row.get("action_type") or "").strip()
         if action_type not in ALLOWED_AI_ACTION_TYPES:
             raise InvalidAIProjectResponse(
-                f"actions[{index}].action_type {action_type!r} is not allowed"
+                f"unsupported AI action_type {action_type!r}; allowed={list(ALLOWED_AI_ACTION_TYPES)}"
             )
-        title = _bounded_text(row.get("title"), limit=256).strip()
-        rationale = _bounded_text(row.get("rationale"), limit=8_000).strip()
-        if not title or not rationale:
-            raise InvalidAIProjectResponse(
-                f"actions[{index}] requires title and rationale"
-            )
-        inputs = _sanitize_value(dict(row.get("inputs") or {}))
-        _validate_no_authority_elevation(inputs, path=f"actions[{index}].inputs")
-        identity_seed = {
-            "session_id": session_id,
-            "index": index,
-            "action_type": action_type,
-            "title": title,
-            "inputs": inputs,
-        }
-        action_id = "action-" + _sha256_json(identity_seed)[:16]
-        actions.append(
+        result.append(
             {
-                "schema_version": AI_PROJECT_ACTION_SCHEMA,
-                "action_id": action_id,
-                "session_id": session_id,
-                "project_id": project_id,
-                "project_revision": int(project_revision),
+                "action_id": str(row.get("action_id") or f"action-{index + 1}"),
                 "action_type": action_type,
-                "title": title,
-                "rationale": rationale,
-                "inputs": inputs,
-                "source_ids": _string_list(row.get("source_ids"), limit=32),
-                "status": "proposed",
-                "authority": "proposed",
+                "title": _bounded_text(row.get("title"), limit=1_000),
+                "rationale": _bounded_text(row.get("rationale"), limit=4_000),
+                "inputs": _sanitize_value(row.get("inputs") or {}),
+                "source_ids": _normalize_source_ids(row.get("source_ids")),
                 "authority_effect": "none",
                 "automatic_execution": False,
-                "tool_result": None,
-                "decision": None,
             }
         )
-
-    return {
-        "summary": _bounded_text(parsed.get("summary"), limit=12_000),
-        "requirements": requirements,
-        "open_questions": _string_list(parsed.get("open_questions"), limit=64),
-        "architecture_candidates": candidates,
-        "actions": actions,
-    }
+    return result
 
 
 def run_ai_project_orchestrator(
@@ -434,78 +402,66 @@ def run_ai_project_orchestrator(
     max_actions: int = 8,
     llm_callable: Callable[..., Dict[str, Any]] | None = None,
 ) -> Dict[str, Any]:
-    if model_profile not in MODEL_PROFILES:
-        raise ValueError(f"unsupported model_profile: {model_profile}")
-    if not 1 <= int(max_actions) <= 12:
-        raise ValueError("max_actions must be between 1 and 12")
-    mission_text = _bounded_text(mission, limit=8_000).strip()
-    if not mission_text:
-        raise ValueError("mission is required")
+    """Run one proposal-only AI engineering turn pinned to a project revision."""
 
-    session_id = f"ai-session-{uuid.uuid4().hex}"
+    project_id = str(project_id or "").strip()
+    if not project_id:
+        raise ValueError("project_id is required")
+    if int(project_revision) < 0:
+        raise ValueError("project_revision must be non-negative")
+    mission = str(mission or "").strip()
+    if not mission:
+        raise ValueError("mission is required")
+    if model_profile not in MODEL_PROFILES:
+        raise ValueError(f"unknown model_profile {model_profile!r}")
+    max_actions = max(1, min(int(max_actions), 16))
+
     context = build_ai_project_context(
         project_id,
-        project_revision,
+        int(project_revision),
         snapshot,
-        mission=mission_text,
+        mission=mission,
         constraints=constraints,
     )
     prompt = build_ai_project_prompt(context, max_actions=max_actions)
     profile = MODEL_PROFILES[model_profile]
     caller = llm_callable or call_llm_chat
-    result = caller(
+    provider = caller(
         prompt,
         model=model,
-        stage=profile["stage"],
+        stage=str(profile["stage"]),
         temperature=float(profile["temperature"]),
-        json_mode=True,
-        timeout_s=120,
-        system=(
-            "You are the proposal-only Hardware Splicer AI engineering orchestrator. "
-            "Return schema-shaped engineering proposals grounded only in supplied context."
-        ),
+        max_tokens=8_000,
+        timeout_s=90.0,
     )
-    if not isinstance(result, Mapping) or not result.get("ok"):
-        detail = dict(result) if isinstance(result, Mapping) else {"result": str(result)}
+    if not provider.get("ok"):
         raise AIProviderError(
-            f"AI provider failed: {detail.get('error') or 'unknown_provider_error'}"
+            str(provider.get("message") or provider.get("error") or "AI provider call failed")
         )
-    content = str(result.get("content") or "")
-    parsed = parse_ai_project_response(
-        content,
-        session_id=session_id,
-        project_id=project_id,
-        project_revision=project_revision,
-        max_actions=max_actions,
-    )
-    created_at = _utc_now()
+    parsed = _parse_provider_content(provider)
+    requirements = _normalize_requirements(parsed.get("requirements"))
+    candidates = _normalize_candidates(parsed.get("architecture_candidates"))
+    actions = _normalize_actions(parsed.get("actions"), max_actions=max_actions)
+    session_id = str(uuid.uuid4())
     return {
         "schema_version": AI_PROJECT_SESSION_SCHEMA,
         "session_id": session_id,
         "project_id": project_id,
         "project_revision": int(project_revision),
-        "created_at": created_at,
-        "updated_at": created_at,
-        "mission": mission_text,
-        "constraints": _sanitize_value(dict(constraints or {})),
-        "model_profile": model_profile,
-        "provider": str(result.get("provider") or "unknown"),
-        "model": str(result.get("model") or model or "unknown"),
-        "cached": bool(result.get("cached", False)),
-        "cache_key": str(result.get("cache_key") or ""),
-        "usage": _sanitize_value(result.get("usage") or {}),
+        "project_context_hash": _sha256_json(context),
         "prompt_version": AI_PROJECT_PROMPT_VERSION,
-        "prompt_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
-        "context_sha256": _sha256_json(context),
-        "response_sha256": hashlib.sha256(content.encode("utf-8")).hexdigest(),
+        "model_profile": model_profile,
+        "provider": str(provider.get("provider") or ""),
+        "model": str(provider.get("model") or model or ""),
+        "summary": _bounded_text(parsed.get("summary"), limit=8_000),
+        "requirements": requirements,
+        "open_questions": _string_list(parsed.get("open_questions"), limit=64),
+        "architecture_candidates": candidates,
+        "actions": actions,
         "context": context,
-        **parsed,
+        "usage": dict(provider.get("usage") or {}),
+        "created_at": _utc_now(),
+        "authority_effect": "none",
         "automatic_execution": False,
         "physical_authority_unchanged": True,
-        "fabrication_authorized": False,
-        "firmware_flash_authorized": False,
-        "power_on_authorized": False,
-        "motion_authorized": False,
-        "operational_authorized": False,
-        "release_authorized": False,
     }
