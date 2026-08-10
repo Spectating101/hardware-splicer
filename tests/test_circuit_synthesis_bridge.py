@@ -39,7 +39,8 @@ def test_arbitrary_dispatch_routes_supported_motor_intent_without_inventing_rati
     assert candidate["metadata"]["dispatch"]["selected_planner"] == "motor_driver"
     assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
     assert "mosfet-irlz44n_output_current_rating" in candidate["missing_evidence"]
-    assert "mosfet-irlz44n_logic_input_threshold" in candidate["missing_evidence"]
+    assert "level_shifter_or_compatible_driver" in candidate["missing_evidence"]
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
 
 
 def test_arbitrary_dispatch_blocks_unsupported_intent() -> None:
