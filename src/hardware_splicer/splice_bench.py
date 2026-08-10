@@ -14,6 +14,12 @@ _CRITICAL_PATTERNS = (
     "polarity", "ground", "voltage", "current", "short", "continuity",
     "do not connect", "input polarity", "rail voltage", "battery", "mains", "hazard",
 )
+_NUMERIC_EVIDENCE_GATE_TYPES = {
+    "voltage",
+    "current",
+    "interface_measurement",
+    "psu_ramp",
+}
 
 
 def _now() -> str:
@@ -346,11 +352,46 @@ def bench_status(build_dir: str | Path) -> Dict[str, Any]:
     return session
 
 
-def _validate_evidence_measurement(gate: Mapping[str, Any], item: Mapping[str, Any]) -> tuple[bool, str]:
-    """Validate evidence-recipe values before a gate may close."""
-    if str(gate.get("gate_type") or "") != "interface_measurement":
-        return True, "not an evidence measurement"
+def _has_observation(item: Mapping[str, Any]) -> bool:
     value = item.get("value", item.get("measured_value"))
+    if value is not None and (not isinstance(value, str) or value.strip()):
+        return True
+    return any(
+        str(item.get(key) or "").strip()
+        for key in ("notes", "ramp_observation", "artifact_uri")
+    )
+
+
+def _validate_evidence_measurement(gate: Mapping[str, Any], item: Mapping[str, Any]) -> tuple[bool, str]:
+    """Validate provenance and value evidence before a critical gate may close."""
+    gate_type = str(gate.get("gate_type") or "").strip().lower()
+    prompt = str(gate.get("prompt") or "").lower()
+    critical = bool(gate.get("critical"))
+    operator = str(item.get("operator") or item.get("operator_id") or "").strip()
+    method = str(item.get("method") or "").strip()
+    value = item.get("value", item.get("measured_value"))
+
+    if critical:
+        if not operator:
+            return False, "critical gate requires identified operator"
+        if not method:
+            return False, "critical gate requires measurement or inspection method"
+        if not _has_observation(item):
+            return False, "critical gate requires recorded observation or value"
+
+        numeric_expected = bool(
+            gate_type in _NUMERIC_EVIDENCE_GATE_TYPES
+            or (gate_type == "measurement" and any(token in prompt for token in ("voltage", "current", "rail", "vmotor")))
+        )
+        if numeric_expected:
+            if value is None or (isinstance(value, str) and not value.strip()):
+                return False, "numeric critical gate requires measured value"
+            if not str(item.get("unit") or "").strip():
+                return False, "numeric critical gate requires unit"
+
+    if gate_type != "interface_measurement":
+        return True, "evidence recorded"
+
     required = bool(gate.get("required", True))
     if value is None or (isinstance(value, str) and not value.strip()):
         return (not required), "required measurement missing"
@@ -463,7 +504,7 @@ def submit_bench_measurements(
         measurement = {
             "value": item.get("value", item.get("measured_value")),
             "unit": item.get("unit"),
-            "operator": item.get("operator"),
+            "operator": item.get("operator") or item.get("operator_id"),
             "method": item.get("method"),
             "recorded_at": _now(),
         }
