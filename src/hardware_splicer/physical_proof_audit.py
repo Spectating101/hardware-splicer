@@ -8,14 +8,16 @@ different claims and must remain distinguishable.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Any, Dict, Mapping, Sequence
 
 
 SCHEMA_VERSION = "hardware_splicer.physical_proof_audit.v1"
+SESSION_FILE = "SPLICE_BENCH_SESSION.json"
 _NUMERIC_GATE_TYPES = {
     "voltage",
     "current",
-    "measurement",
     "interface_measurement",
     "psu_ramp",
 }
@@ -39,6 +41,16 @@ def _finding(code: str, path: str, message: str, *, observed: Any = None) -> Dic
 
 def _nonempty(value: Any) -> bool:
     return bool(str(value or "").strip())
+
+
+def _numeric_gate_expected(gate: Mapping[str, Any]) -> bool:
+    gate_type = str(gate.get("gate_type") or "").strip().lower()
+    if gate_type in _NUMERIC_GATE_TYPES:
+        return True
+    if gate_type != "measurement":
+        return False
+    prompt = str(gate.get("prompt") or "").lower()
+    return any(token in prompt for token in ("voltage", "current", "rail", "vmotor"))
 
 
 def _contract_update_evidence(measurement: Mapping[str, Any]) -> tuple[bool, list[str]]:
@@ -73,8 +85,7 @@ def _measurement_evidence(gate: Mapping[str, Any]) -> tuple[bool, list[str]]:
     if value is None and not has_notes:
         missing.append("observation")
 
-    gate_type = str(gate.get("gate_type") or "").strip().lower()
-    if gate_type in _NUMERIC_GATE_TYPES:
+    if _numeric_gate_expected(gate):
         if value is None or (isinstance(value, str) and not value.strip()):
             if "observation" not in missing:
                 missing.append("value")
@@ -230,4 +241,38 @@ def audit_physical_proof(
         "power_on_authorized": False,
         "motion_authorized": False,
         "release_authorized": False,
+    }
+
+
+def audit_physical_proof_build(
+    build_dir: str | Path,
+    *,
+    capture_path: str | Path | None = None,
+) -> Dict[str, Any]:
+    """Load persisted bench/capture evidence and audit its defensible claim ceiling."""
+    root = Path(build_dir).resolve()
+    session_path = root / SESSION_FILE
+    if not session_path.is_file():
+        raise FileNotFoundError(f"bench session not found: {session_path}")
+    session = json.loads(session_path.read_text(encoding="utf-8"))
+    if not isinstance(session, Mapping):
+        raise ValueError(f"bench session must be a JSON object: {session_path}")
+
+    capture: Dict[str, Any] = {}
+    resolved_capture_path: Path | None = None
+    if capture_path is not None:
+        resolved_capture_path = Path(capture_path).resolve()
+        if not resolved_capture_path.is_file():
+            raise FileNotFoundError(f"bench capture not found: {resolved_capture_path}")
+        loaded = json.loads(resolved_capture_path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise ValueError(f"bench capture must be a JSON object: {resolved_capture_path}")
+        capture = loaded
+
+    report = audit_physical_proof(session, capture=capture)
+    return {
+        **report,
+        "build_dir": str(root),
+        "bench_session_path": str(session_path),
+        "capture_path": str(resolved_capture_path) if resolved_capture_path else None,
     }
