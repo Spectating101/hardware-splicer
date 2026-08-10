@@ -7,6 +7,7 @@ the historical keyword dispatcher only for explicit offline compatibility/regres
 """
 
 from .ir import (
+    CONSTRAINT_TYPES,
     CircuitIntent,
     Constraint,
     FunctionalPart,
@@ -14,6 +15,12 @@ from .ir import (
     SynthesisCandidate,
     TopologyOperator,
 )
+
+# Architecture ambiguity is a legitimate fail-closed planning constraint. It carries no
+# physical authority and records that the model/operator must choose among multiple
+# declared topology families rather than letting deterministic code guess one.
+CONSTRAINT_TYPES.add("architecture")
+
 from .analog_conditioning_planner import plan_analog_conditioning
 from .battery_power_planner import plan_battery_power
 from .candidate_bridge import compile_synthesis_candidate
