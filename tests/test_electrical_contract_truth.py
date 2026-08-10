@@ -56,8 +56,14 @@ def test_l298_logic_threshold_comes_from_explicit_component_contract() -> None:
     assert snapshot["source"] == "structured_component_contracts"
 
 
-def test_human_summary_and_nominal_pin_voltage_do_not_become_guaranteed_thresholds() -> None:
-    assert logic_input_min_v("mosfet-irlz44n") is None
+def test_irlz44n_uses_characterized_drive_instead_of_catalog_3v3_prose() -> None:
+    assert logic_input_min_v("mosfet-irlz44n") == pytest.approx(4.5)
+    assert logic_input_max_v("mosfet-irlz44n") == pytest.approx(5.0)
+    snapshot = contract_snapshot("mosfet-irlz44n")
+    assert snapshot["contract_provenance"]["manufacturer"] == "Infineon Technologies"
+
+
+def test_unstructured_human_summary_does_not_become_guaranteed_threshold() -> None:
     assert logic_input_min_v("mosfet-irf520") is None
     assert max_output_current_a("drv8833-motor") is None
     assert max_output_current_a("l9110-motor") is None
