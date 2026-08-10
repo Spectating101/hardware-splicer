@@ -49,26 +49,30 @@ def test_structured_catalog_current_truth_replaces_local_rating_table() -> None:
     assert max_output_current_a("mosfet-irf520") is None
 
 
-def test_exact_catalog_output_voltage_does_not_invent_adjustable_or_current_contracts() -> None:
+def test_exact_catalog_output_voltage_and_explicit_logic_contracts_remain_distinct() -> None:
     assert exact_output_voltage_v("usb-power-5v") == pytest.approx(5.0)
     assert exact_output_voltage_v("dc-barrel-12v") == pytest.approx(12.0)
     assert exact_output_voltage_v("buck-lm2596") is None
     assert exact_output_voltage_v("buck-mp1584") is None
-    assert logic_input_min_v("l298n") is None
-    assert logic_input_min_v("mosfet-irlz44n") is None
+    assert logic_input_min_v("l298n") == pytest.approx(2.3)
+    assert logic_input_min_v("mosfet-irlz44n") == pytest.approx(4.5)
     assert logic_input_min_v("mosfet-irf520") is None
 
 
-def test_motor_driver_planner_blocks_unstructured_switch_ratings_instead_of_guessing() -> None:
+def test_motor_driver_planner_blocks_unstructured_switch_current_and_known_logic_mismatch() -> None:
     candidate = plan_motor_driver(_intent()).to_dict()
 
     assert candidate["result"] == "blocked"
     assert candidate["selected_modules"] == ["mosfet-irlz44n"]
     assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
     assert "mosfet-irlz44n_output_current_rating" in candidate["missing_evidence"]
-    assert "mosfet-irlz44n_logic_input_threshold" in candidate["missing_evidence"]
+    assert "level_shifter_or_compatible_driver" in candidate["missing_evidence"]
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
     assert _constraint(candidate, "switch_current_rating")["status"] == "blocked"
-    assert _constraint(candidate, "mosfet-irlz44n_logic_level")["status"] == "blocked"
+    logic = _constraint(candidate, "mosfet-irlz44n_logic_level")
+    assert logic["status"] == "blocked"
+    assert logic["value"]["control_voltage_v"] == pytest.approx(3.3)
+    assert logic["value"]["required_min_v"] == pytest.approx(4.5)
     assert _constraint(candidate, "inductive_load_protection")["status"] == "pass"
     assert candidate["metadata"]["electrical_truth"]["summary_text_used_as_rating"] is False
     assert candidate["metadata"]["electrical_truth"]["magic_module_rating_table_used"] is False
@@ -149,7 +153,7 @@ def test_adjustable_buck_does_not_become_an_undeclared_output_voltage() -> None:
     assert "supply_voltage" in candidate["missing_evidence"]
 
 
-def test_motor_driver_planner_does_not_resolve_l298n_threshold_from_nominal_pin_label() -> None:
+def test_motor_driver_planner_uses_l298n_explicit_logic_contract() -> None:
     candidate = plan_motor_driver(
         _intent(
             allowed_modules=["usb-power-5v", "esp32-devkit", "l298n", "water_pump_5v"],
@@ -160,18 +164,20 @@ def test_motor_driver_planner_does_not_resolve_l298n_threshold_from_nominal_pin_
     assert candidate["result"] == "blocked"
     assert candidate["selected_modules"] == ["l298n"]
     assert "l298n_output_current_rating" in candidate["missing_evidence"]
-    assert "l298n_logic_input_threshold" in candidate["missing_evidence"]
+    assert "l298n_logic_input_threshold" not in candidate["missing_evidence"]
     assert _constraint(candidate, "driver_current_rating")["status"] == "blocked"
-    assert _constraint(candidate, "l298n_logic_level")["status"] == "blocked"
+    logic = _constraint(candidate, "l298n_logic_level")
+    assert logic["status"] == "pass"
+    assert logic["value"]["required_min_v"] == pytest.approx(2.3)
 
 
-def test_level_shifter_cannot_resolve_an_unknown_driver_threshold() -> None:
+def test_level_shifter_path_is_available_for_known_irlz44n_threshold() -> None:
     candidate = plan_motor_driver(
         _intent(
             allowed_modules=[
                 "usb-power-5v",
                 "esp32-devkit",
-                "l298n",
+                "mosfet-irlz44n",
                 "level-shifter-4ch",
                 "water_pump_5v",
             ],
@@ -180,8 +186,11 @@ def test_level_shifter_cannot_resolve_an_unknown_driver_threshold() -> None:
     ).to_dict()
 
     assert candidate["result"] == "blocked"
-    assert "l298n_logic_input_threshold" in candidate["missing_evidence"]
-    assert _constraint(candidate, "l298n_logic_level")["status"] == "blocked"
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
+    shifted = _constraint(candidate, "mosfet-irlz44n_logic_level_shifted")
+    assert shifted["status"] == "pass"
+    assert shifted["value"]["required_min_v"] == pytest.approx(4.5)
+    assert shifted["value"]["level_shifter_candidates"] == ["level-shifter-4ch"]
 
 
 def test_multiple_driver_families_require_explicit_topology_choice() -> None:
