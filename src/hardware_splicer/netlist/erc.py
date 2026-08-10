@@ -5,14 +5,16 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Mapping, Optional, Set
 
+from ..electrical_contract_truth import logic_input_max_v, logic_input_min_v
 from ..pcb.module_registry import find_module, find_pin
 from .ir import CircuitNetlist, PinRef
 
 ErcViolation = Dict[str, Any]
 
 _POWER_NET_RE = re.compile(r"gnd|ground|vcc|vdd|v\+|5v|3v3|3\.3|vin|vbus|power", re.I)
-_OUTPUT_ROLES = {"power_out", "digital_out", "pwm"}
-_INPUT_ROLES = {"digital_in", "digital_io", "analog_in", "i2c_sda", "i2c_scl", "uart_rx"}
+_OUTPUT_ROLES = {"power_out", "digital_out", "digital_io", "pwm", "uart_tx", "spi_mosi", "spi_sck", "spi_cs"}
+_INPUT_ROLES = {"digital_in", "digital_io", "analog_in", "i2c_sda", "i2c_scl", "uart_rx", "spi_miso"}
+_CONTRACT_RECEIVER_ROLES = {"digital_in", "uart_rx"}
 
 
 def _pin_electrical(pin: Mapping[str, Any] | None) -> Dict[str, Any]:
@@ -42,12 +44,13 @@ def _pin_electrical(pin: Mapping[str, Any] | None) -> Dict[str, Any]:
 
 
 def _voltages_compatible(values: Set[float]) -> bool:
-    """Exact fixed-voltage pins are compatible only when they agree.
+    """Exact fixed-voltage drivers are compatible only when they agree.
 
     Historical ERC treated the common set {3.3 V, 5 V} as inherently compatible. That
     silently approved direct 5 V outputs into 3.3 V GPIO. Voltage-domain translation or
-    tolerance must instead be represented by explicit component/net structure or catalog
-    range evidence; familiarity of the voltage pair is never a safety contract.
+    tolerance must instead be represented by explicit component/net structure or a
+    structured receiver contract; familiarity of the voltage pair is never a safety
+    contract.
     """
     return len(values) <= 1
 
@@ -68,6 +71,26 @@ def _net_is_power(net_name: str, pins: List[PinRef], comp_map: Mapping[str, Any]
         if pin_ref.pin.upper() in {"GND", "VCC", "V+", "V-", "5V", "3V3", "VIN", "VBUS"}:
             return True
     return False
+
+
+def _receiver_contract(module_id: str, pin_role: str) -> Dict[str, Any] | None:
+    """Return a bounded input contract only when both ends are explicit.
+
+    A minimum threshold alone cannot prove over-voltage safety, and a maximum alone cannot
+    prove a valid logic high. Requiring both keeps ERC fail-closed unless the component
+    contract genuinely defines an accepted logic-input window.
+    """
+    if pin_role not in _CONTRACT_RECEIVER_ROLES:
+        return None
+    low = logic_input_min_v(module_id)
+    high = logic_input_max_v(module_id)
+    if low is None or high is None:
+        return None
+    return {
+        "module_id": module_id,
+        "min_v": min(low, high),
+        "max_v": max(low, high),
+    }
 
 
 def run_erc(netlist: CircuitNetlist) -> Dict[str, Any]:
@@ -94,18 +117,35 @@ def run_erc(netlist: CircuitNetlist) -> Dict[str, Any]:
         voltages: Set[float] = set()
         roles: List[str] = []
         flexible = False
+        receiver_contracts: List[Dict[str, Any]] = []
         for pin_ref in net.pins:
             comp = comp_map.get(pin_ref.component_ref)
             if not comp or not comp.module_id:
                 continue
             spec = find_module(comp.module_id)
-            elec = _pin_electrical(find_pin(spec, pin_ref.pin) if spec else None)
+            pin = find_pin(spec, pin_ref.pin) if spec else None
+            elec = _pin_electrical(pin)
+            role = str(elec.get("role") or "")
+            if role:
+                roles.append(role)
+
+            receiver = _receiver_contract(str(comp.module_id), role)
+            if receiver is not None:
+                receiver_contracts.append(
+                    {
+                        **receiver,
+                        "component_ref": pin_ref.component_ref,
+                        "pin": pin_ref.pin,
+                    }
+                )
+                # The catalog pin's human-facing nominal logic label is not a driven
+                # voltage. The structured receiver window is the authoritative fact.
+                continue
+
             if elec.get("voltage_range"):
                 flexible = True
             if elec["voltage_v"] is not None:
                 voltages.add(float(elec["voltage_v"]))
-            if elec["role"]:
-                roles.append(str(elec["role"]))
 
         if len(voltages) > 1 and not flexible and not _voltages_compatible(voltages):
             violations.append(
@@ -125,6 +165,32 @@ def run_erc(netlist: CircuitNetlist) -> Dict[str, Any]:
                     "message": f"Net {net.name} mixes voltages {sorted(voltages)} with range/tolerance evidence present — review before fab.",
                 }
             )
+
+        # Validate explicit logic receivers against every fixed voltage visible on the
+        # signal net. This admits evidence-backed 3.3 V -> TTL inputs without restoring
+        # the old global 3.3/5 V compatibility exception.
+        for receiver in receiver_contracts:
+            outside = sorted(
+                value
+                for value in voltages
+                if value < float(receiver["min_v"]) or value > float(receiver["max_v"])
+            )
+            if outside:
+                violations.append(
+                    {
+                        "rule": "erc-logic-input-range",
+                        "severity": "error",
+                        "net": net.name,
+                        "component_ref": receiver["component_ref"],
+                        "pin": receiver["pin"],
+                        "module_id": receiver["module_id"],
+                        "message": (
+                            f"Net {net.name} drives {receiver['module_id']} {receiver['pin']} "
+                            f"outside its structured logic-input window "
+                            f"[{receiver['min_v']}, {receiver['max_v']}] V: {outside}."
+                        ),
+                    }
+                )
 
         if "power_out" in roles and any(r in _INPUT_ROLES for r in roles) and len(voltages) <= 1:
             pass
