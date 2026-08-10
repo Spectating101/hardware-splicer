@@ -30,6 +30,39 @@ def test_l298_structured_ttl_contract_accepts_esp32_3v3_drive() -> None:
     assert not [row for row in result["violations"] if row["severity"] == "error"]
 
 
+def test_irlz44n_characterized_window_accepts_nano_5v_drive() -> None:
+    netlist = CircuitNetlist(
+        source="contract_test",
+        components=[
+            _component("U1", "arduino-nano"),
+            _component("Q1", "mosfet-irlz44n"),
+        ],
+        nets=[Net(name="FAN_ENABLE", pins=[PinRef("U1", "D2"), PinRef("Q1", "SIG")])],
+    )
+
+    result = run_erc(netlist)
+
+    assert result["pass"] is True
+    assert result["errors"] == 0
+
+
+def test_irlz44n_does_not_promote_unproven_3v3_drive_to_guaranteed() -> None:
+    netlist = CircuitNetlist(
+        source="contract_test",
+        components=[
+            _component("U1", "esp32-devkit"),
+            _component("Q1", "mosfet-irlz44n"),
+        ],
+        nets=[Net(name="FAN_ENABLE", pins=[PinRef("U1", "GPIO4"), PinRef("Q1", "SIG")])],
+    )
+
+    result = run_erc(netlist)
+
+    assert result["pass"] is False
+    assert result["errors"] == 1
+    assert result["violations"][0]["rule"] == "erc-logic-input-range"
+
+
 def test_uncontracted_3v3_5v_logic_pair_remains_blocked() -> None:
     netlist = CircuitNetlist(
         source="contract_test",
