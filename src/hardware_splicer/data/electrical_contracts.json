@@ -1,6 +1,30 @@
 {
   "schema_version": "hardware_splicer.electrical_contracts.v1",
   "contracts": {
+    "buck-mp1584": {
+      "powerConversionKind": "buck"
+    },
+    "buck-lm2596": {
+      "powerConversionKind": "buck"
+    },
+    "boost-mt3608": {
+      "powerConversionKind": "boost"
+    },
+    "ldo-ams1117-3v3": {
+      "powerConversionKind": "ldo"
+    },
+    "ldo-ams1117-5v": {
+      "powerConversionKind": "ldo"
+    },
+    "tp4056": {
+      "batteryChargerKind": "single_cell_li_ion"
+    },
+    "usb-power-5v": {
+      "powerInputKind": "usb_5v"
+    },
+    "lc709203f-fuel-gauge": {
+      "batteryMonitorKind": "fuel_gauge"
+    },
     "l298n": {
       "logicInputHighMinV": 2.3,
       "logicInputMaxV": 5.0,
