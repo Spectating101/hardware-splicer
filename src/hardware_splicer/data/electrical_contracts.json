@@ -1,0 +1,17 @@
+{
+  "schema_version": "hardware_splicer.electrical_contracts.v1",
+  "contracts": {
+    "l298n": {
+      "logicInputHighMinV": 2.3,
+      "logicInputMaxV": 5.0,
+      "provenance": {
+        "manufacturer": "STMicroelectronics",
+        "part_number": "L298",
+        "document": "L298 datasheet DS0218 Rev 5",
+        "document_section": "Electrical characteristics, logic input levels",
+        "datasheet_url": "https://www.st.com/resource/en/datasheet/l298.pdf",
+        "basis": "The L298 accepts standard TTL logic; ViH is specified at 2.3 V minimum. Hardware Splicer conservatively bounds the normal module logic-input ceiling to its 5 V logic rail."
+      }
+    }
+  }
+}
