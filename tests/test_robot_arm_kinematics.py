@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+import pytest
+
 from hardware_splicer.robot_arm_design import parse_robot_arm_design
 from hardware_splicer.robot_arm_experiment import robot_arm_inventory
 from hardware_splicer.robot_arm_kinematics import generate_robot_arm_urdf, run_pybullet_kinematics_oracle
@@ -41,6 +43,10 @@ def test_generated_urdf_is_kinematics_only_and_preserves_joint_structure() -> No
 
 
 def test_pybullet_blind_lane_runs_fk_ik_and_unreachable_probe(tmp_path: Path) -> None:
+    # The general Core Diagnostics lane intentionally installs only the base/dev package.
+    # The dedicated Robot Arm Kinematics workflow owns the positive PyBullet execution bar.
+    pytest.importorskip("pybullet")
+
     proposal = _proposal("blind_reconstruction", allow_sources=False)
     artifact = generate_robot_arm_urdf(proposal)
     urdf = tmp_path / "blind.urdf"
@@ -66,6 +72,8 @@ def test_pybullet_blind_lane_runs_fk_ik_and_unreachable_probe(tmp_path: Path) ->
 
 
 def test_mutation_can_be_kinematically_valid_while_actuator_identity_stays_unresolved(tmp_path: Path) -> None:
+    pytest.importorskip("pybullet")
+
     proposal = _proposal("mutated_requirement", allow_sources=True)
     shoulder = next(row for row in proposal.joints if row.joint_id == "shoulder-pitch")
     assert shoulder.actuator_part_id is None
