@@ -130,6 +130,27 @@ def _accepted(value: Any, *, unit: str | None, evidence_id: str, method: str, pr
     )
 
 
+def _require_evidence_provenance(update: Mapping[str, Any]) -> tuple[str, str, str]:
+    evidence_id = str(update.get("evidence_id") or "").strip()
+    method = str(update.get("method") or "").strip()
+    producer = str(update.get("producer") or "").strip()
+    missing = [
+        key
+        for key, value in (
+            ("evidence_id", evidence_id),
+            ("method", method),
+            ("producer", producer),
+        )
+        if not value
+    ]
+    if missing:
+        raise ValueError(
+            "interface contract update requires explicit physical evidence provenance: "
+            + ", ".join(missing)
+        )
+    return evidence_id, method, producer
+
+
 def _upsert_contact(contract: InterfaceContract, update: Mapping[str, Any], evidence_id: str) -> str:
     contact_id = str(update.get("contact_id") or "").strip()
     if not contact_id:
@@ -163,7 +184,14 @@ def _upsert_contact(contract: InterfaceContract, update: Mapping[str, Any], evid
     return contact_id
 
 
-def _upsert_signal(contract: InterfaceContract, update: Mapping[str, Any], evidence_id: str) -> SignalContract:
+def _upsert_signal(
+    contract: InterfaceContract,
+    update: Mapping[str, Any],
+    evidence_id: str,
+    *,
+    method: str,
+    producer: str,
+) -> SignalContract:
     signal_id = str(update.get("signal_id") or "").strip()
     if not signal_id:
         raise ValueError("signal_id is required")
@@ -173,8 +201,6 @@ def _upsert_signal(contract: InterfaceContract, update: Mapping[str, Any], evide
         direction = SignalDirection(str(update.get("direction") or (current.direction.value if current else "unknown")))
     except ValueError as exc:
         raise ValueError("direction must be input, output, bidirectional, power_input, power_output, passive, or unknown") from exc
-    method = str(update.get("method") or "operator-reviewed interface contract")
-    producer = str(update.get("producer") or "human+instrument")
 
     def measured(key: str, unit: str | None, fallback: EvidenceValue) -> EvidenceValue:
         if key not in update or update.get(key) in {None, ""}:
@@ -248,9 +274,15 @@ def apply_interface_contract_update(
     operation = str(update.get("operation") or "upsert_signal")
     if operation != "upsert_signal":
         raise ValueError("only upsert_signal is currently supported")
-    evidence_id = str(update.get("evidence_id") or f"interface-update:{interface_id}:{int(datetime.now(timezone.utc).timestamp())}")
+    evidence_id, method, producer = _require_evidence_provenance(update)
     contract = _contract_from_dict(target.get("interface_contract") or {})
-    signal = _upsert_signal(contract, update, evidence_id)
+    signal = _upsert_signal(
+        contract,
+        update,
+        evidence_id,
+        method=method,
+        producer=producer,
+    )
     contract.blockers = []
     contract.recompute_status()
 
@@ -288,8 +320,8 @@ def apply_interface_contract_update(
         {
             "evidence_id": evidence_id,
             "kind": "interface_contract_update",
-            "method": str(update.get("method") or "operator-reviewed interface contract"),
-            "producer": str(update.get("producer") or "human+instrument"),
+            "method": method,
+            "producer": producer,
             "payload": {
                 "interface_id": interface_id,
                 "signal_id": signal.signal_id,
