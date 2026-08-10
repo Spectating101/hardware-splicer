@@ -12,6 +12,18 @@
         "datasheet_url": "https://www.st.com/resource/en/datasheet/l298.pdf",
         "basis": "The L298 accepts standard TTL logic; ViH is specified at 2.3 V minimum. Hardware Splicer conservatively bounds the normal module logic-input ceiling to its 5 V logic rail."
       }
+    },
+    "mosfet-irlz44n": {
+      "logicInputHighMinV": 4.5,
+      "logicInputMaxV": 5.0,
+      "provenance": {
+        "manufacturer": "Infineon Technologies",
+        "part_number": "IRLZ44N",
+        "document": "IRLZ44N product electrical characteristics",
+        "document_section": "Logic-level feature; RDS(on) characterized at VGS = 4.5 V",
+        "datasheet_url": "https://www.infineon.com/part/IRLZ44N",
+        "basis": "Hardware Splicer only treats 4.5-5.0 V as a guaranteed normal control-drive window for the catalog module. The device is logic-level and allows higher VGS, but a blanket 3.3 V low-resistance guarantee is not promoted from human catalog prose."
+      }
     }
   }
 }
