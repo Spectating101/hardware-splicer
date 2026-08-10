@@ -82,6 +82,8 @@ def test_capture_template_separates_contract_actions_from_measurements() -> None
     assert len(simulated["measurements"]) == 1
     assert simulated["measurements"][0]["value"] == 2.75
     assert simulated["measurements"][0]["unit"] == "V"
+    assert simulated["measurements"][0]["operator_id"] == "bench_loop_sim"
+    assert simulated["measurements"][0]["method"] == "bench_loop_simulator"
 
 
 def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path: Path) -> None:
@@ -104,6 +106,7 @@ def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path
                 "status": "verified",
                 "value": "input",
                 "method": "operator assertion",
+                "operator": "test_operator",
             },
             {
                 "gate_id": measurement_gate["gate_id"],
@@ -111,6 +114,7 @@ def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path
                 "value": 3.3,
                 "unit": "V",
                 "method": "DMM",
+                "operator": "test_operator",
             },
         ],
     )
@@ -122,6 +126,7 @@ def test_structural_contract_gate_cannot_be_closed_by_scalar_submission(tmp_path
     stored = {row["gate_id"]: row for row in result["gates"]}
     assert stored[field_gate["gate_id"]]["status"] == "open"
     assert stored[measurement_gate["gate_id"]]["status"] == "closed"
+    assert stored[measurement_gate["gate_id"]]["measurement"]["operator"] == "test_operator"
     assert result["power_on_authorized"] is False
     assert result["critical_open_count"] == 1
 
@@ -182,7 +187,6 @@ def test_typed_contract_update_persists_and_recomputes_authority(tmp_path: Path)
     applied = result["last_submission"]["applied"][0]
     assert applied["ok"] is True
     assert applied["contract_update"] is True
-    # One evidenced signal must not clear structural completeness or authorize firmware.
     assert "interface_complete" in applied["unresolved_fields"]
     assert result["evidence_integrations"]["authority"]["firmware_authorized"] is False
     assert result["power_on_authorized"] is False
@@ -250,6 +254,7 @@ def test_out_of_range_evidence_measurement_stays_blocked(tmp_path: Path) -> None
             "value": 8.0,
             "unit": "V",
             "method": "DMM",
+            "operator": "test_operator",
         }],
     )
 
@@ -278,6 +283,7 @@ def test_wrong_unit_evidence_measurement_stays_blocked(tmp_path: Path) -> None:
             "value": 3.3,
             "unit": "A",
             "method": "DMM",
+            "operator": "test_operator",
         }],
     )
 
