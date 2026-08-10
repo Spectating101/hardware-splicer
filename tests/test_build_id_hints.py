@@ -145,4 +145,12 @@ def test_salvage_model_proposal_is_not_overridden_by_keyword(monkeypatch: pytest
             constraints=dict(intake.get("constraints") or {}),
             project_name="fan_controller",
         )
-    assert pkg.get("recommended_build_id") == "generic_low_voltage_build"
+
+    # The semantic proposal wins the architecture decision; no keyword fallback replaces
+    # it. Generic scratch execution is intentionally not promoted to an effective catalog
+    # architecture in model-first mode, so the public recommendation remains unresolved.
+    selection = pkg.get("build_selection") or {}
+    assert selection.get("build_id") == "generic_low_voltage_build"
+    assert selection.get("source") == "model_proposed"
+    assert selection.get("legacy_fallback_used") is False
+    assert pkg.get("recommended_build_id") is None
