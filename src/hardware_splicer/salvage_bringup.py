@@ -37,6 +37,10 @@ def run_salvage_bringup(
         quality = json.loads(quality_path.read_text(encoding="utf-8"))
 
     gate = build_design_quality_gate(quality)
+    drc_errors = quality.get("kicad_drc_errors")
+    # A software compile result is not a KiCad receipt. Bring-up remains fail-closed when
+    # the independent DRC did not execute or did not produce an interpretable error count.
+    verified_ok = bool(result.get("ok")) and drc_errors is not None and int(drc_errors) == 0
     report: Dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -44,7 +48,8 @@ def run_salvage_bringup(
         "goal": intake.get("goal"),
         "salvage_mode": bool(intake.get("salvage_mode")),
         "parts_count": len(intake.get("available_parts") or []),
-        "ok": bool(result.get("ok")),
+        "ok": verified_ok,
+        "compile_ok": bool(result.get("ok")),
         "build_id": result.get("build_id"),
         "seconds": round(time.time() - t0, 2),
         "quality_summary": {
@@ -53,7 +58,7 @@ def run_salvage_bringup(
             "strategy_mode": quality.get("strategy_mode"),
             "copper_preview_mode": quality.get("copper_preview_mode"),
             "kicad_truth_pass": quality.get("kicad_truth_pass"),
-            "kicad_drc_errors": quality.get("kicad_drc_errors"),
+            "kicad_drc_errors": drc_errors,
             "kicad_drc_warnings": quality.get("kicad_drc_warnings"),
             "copper_tier": quality.get("copper_tier"),
             "fab_recommendation": quality.get("fab_recommendation"),
