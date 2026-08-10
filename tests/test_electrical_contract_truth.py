@@ -3,6 +3,8 @@ from __future__ import annotations
 import pytest
 
 from hardware_splicer.electrical_contract_truth import (
+    battery_charger_kind,
+    battery_monitor_kind,
     contract_snapshot,
     exact_output_voltage_v,
     is_bidirectional_motor_driver_interface,
@@ -10,6 +12,8 @@ from hardware_splicer.electrical_contract_truth import (
     logic_input_min_v,
     max_output_current_a,
     output_voltage_range_v,
+    power_conversion_kind,
+    power_input_kind,
 )
 
 
@@ -29,6 +33,24 @@ def test_power_module_ranges_and_currents_come_from_structured_fields() -> None:
 
     assert output_voltage_range_v("tp4056") == pytest.approx((3.0, 4.2))
     assert max_output_current_a("tp4056") == pytest.approx(1.0)
+
+
+def test_power_topology_roles_come_from_explicit_component_contracts() -> None:
+    assert power_conversion_kind("buck-lm2596") == "buck"
+    assert power_conversion_kind("buck-mp1584") == "buck"
+    assert power_conversion_kind("boost-mt3608") == "boost"
+    assert power_conversion_kind("ldo-ams1117-3v3") == "ldo"
+    assert power_conversion_kind("ldo-ams1117-5v") == "ldo"
+    assert battery_charger_kind("tp4056") == "single_cell_li_ion"
+    assert power_input_kind("usb-power-5v") == "usb_5v"
+    assert battery_monitor_kind("lc709203f-fuel-gauge") == "fuel_gauge"
+
+
+def test_topology_roles_are_not_inferred_from_module_id_text() -> None:
+    assert power_conversion_kind("buck-looking-unknown") is None
+    assert battery_charger_kind("tp4056-looking-unknown") is None
+    assert power_input_kind("usb-power-looking-unknown") is None
+    assert battery_monitor_kind("fuel-gauge-looking-unknown") is None
 
 
 def test_fixed_source_voltage_does_not_invent_source_current() -> None:
@@ -81,5 +103,6 @@ def test_contract_snapshot_labels_fact_source_and_zero_authority_effect() -> Non
     snapshot = contract_snapshot("buck-lm2596")
     assert snapshot["source"] == "structured_component_contracts"
     assert snapshot["authority_effect"] == "none"
+    assert snapshot["power_conversion_kind"] == "buck"
     assert snapshot["output_voltage_range_v"] == pytest.approx([1.2, 30.0])
     assert snapshot["max_output_current_a"] == pytest.approx(2.0)
