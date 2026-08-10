@@ -13,7 +13,12 @@ import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Optional
 
-from ..repair_policy import normalize_geometry_fixup_hints, repair_policy_report
+from ..repair_policy import (
+    assert_repair_preserves_authority,
+    normalize_geometry_fixup_hints,
+    repair_authority_projection,
+    repair_policy_report,
+)
 
 SCHEMA_VERSION = "hardware_splicer.drc_fix_loop.v1"
 
@@ -77,7 +82,9 @@ def propose_fixup_hints(
 
 def apply_fixup_to_graph(graph: MutableMapping[str, Any], hints: Mapping[str, float]) -> None:
     normalized = normalize_geometry_fixup_hints(hints)
+    before = repair_authority_projection(graph)
     graph["drc_fixup"] = {k: round(v, 4) for k, v in normalized.items()}
+    assert_repair_preserves_authority(before, graph)
 
 
 def _violations_from_quality(quality: Mapping[str, Any], out_dir: Path) -> List[Dict[str, Any]]:
@@ -104,6 +111,7 @@ def compile_with_drc_fixup_loop(
     out = Path(out_dir)
     compile_kwargs = dict(compile_kwargs or {})
     working = copy.deepcopy(dict(graph))
+    authority_baseline = repair_authority_projection(working)
     hints: Dict[str, float] = normalize_geometry_fixup_hints(working.get("drc_fixup") or {})
     attempts: List[Dict[str, Any]] = []
     last_payload: Dict[str, Any] = {}
@@ -114,7 +122,13 @@ def compile_with_drc_fixup_loop(
     limit = _max_attempts()
     for attempt in range(limit + 1):
         apply_fixup_to_graph(working, hints)
+        assert_repair_preserves_authority(authority_baseline, working)
+
         last_payload = compile_fn(build_id, out, working, **compile_kwargs)
+        # A compile callback is allowed to observe the repair graph, not mutate design
+        # authority as a side effect of a retry. Catch that boundary violation immediately.
+        assert_repair_preserves_authority(authority_baseline, working)
+
         quality = dict(last_payload.get("quality") or {})
         kicad_errors = int(quality.get("kicad_drc_errors") or 0)
         violations = _violations_from_quality(quality, out)
@@ -127,6 +141,7 @@ def compile_with_drc_fixup_loop(
                 "drc_fixup": dict(hints),
                 "fix_buckets": sorted({classify_violation(v) for v in error_violations}),
                 "violation_types": sorted({str(v.get("type") or "unknown") for v in error_violations}),
+                "design_authority_preserved": True,
                 "repair_policy": repair_policy_report(hints),
             }
         )
@@ -143,6 +158,8 @@ def compile_with_drc_fixup_loop(
         "attempts": attempts,
         "final_kicad_drc_errors": attempts[-1]["kicad_drc_errors"] if attempts else None,
         "resolved": bool(attempts and attempts[-1]["kicad_drc_errors"] == 0),
+        "design_authority_preserved": True,
+        "repair_proposal_only": True,
         "repair_policy": repair_policy_report(hints),
         "authority_effect": "none",
         "fabrication_authorized": False,
