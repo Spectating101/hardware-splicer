@@ -11,6 +11,7 @@ from hardware_splicer.salvage_bridge import build_intake_salvage_package
 
 
 def test_keyword_fan_airflow_maps_to_fume_extractor() -> None:
+    """The legacy compatibility helper remains available when explicitly invoked."""
     intake = load_project_intake("examples/intakes/fan_controller_brief.json")
     got = keyword_build_id(str(intake.get("goal") or ""), list(intake.get("available_parts") or []))
     assert got == "usb_fume_extractor"
@@ -28,7 +29,10 @@ def test_keyword_enabot_maps_to_robot_drive_base() -> None:
     assert got == "robot_drive_base"
 
 
-def test_printer_splice_intake_resolves_plotter_build_id() -> None:
+def test_printer_splice_intake_resolves_plotter_build_id_in_offline_compatibility(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "1")
     intake = load_project_intake("examples/intakes/splice_printer_motion_brief.json")
     pkg = build_intake_salvage_package(
         goal=str(intake.get("goal") or ""),
@@ -40,14 +44,14 @@ def test_printer_splice_intake_resolves_plotter_build_id() -> None:
     assert pkg.get("recommended_build_id") == "plotter_motion_stage"
 
 
-def test_reconcile_prefers_keyword_over_generic_llm() -> None:
+def test_reconcile_keeps_valid_model_proposal_over_keyword() -> None:
     got = reconcile_build_pick(
         "generic_low_voltage_build",
         "usb_fume_extractor",
         diy_build_id="usb_fume_extractor",
         llm_confidence=0.6,
     )
-    assert got == "usb_fume_extractor"
+    assert got == "generic_low_voltage_build"
 
 
 def test_reconcile_keeps_confident_llm_when_no_keyword() -> None:
@@ -59,7 +63,9 @@ def test_reconcile_keeps_confident_llm_when_no_keyword() -> None:
     assert got == "sensor_logger"
 
 
-def test_online_compose_uses_regex_for_trained_phrase(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_online_compose_calls_model_even_for_previously_trained_phrase(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(
         "hardware_splicer.integrations.llm_policy.offline_compose_enabled",
         lambda: False,
@@ -70,11 +76,16 @@ def test_online_compose_uses_regex_for_trained_phrase(monkeypatch: pytest.Monkey
     )
     with mock.patch(
         "hardware_splicer.integrations.qwen_module_pick.call_qwen_module_pick",
+        return_value={
+            "ok": True,
+            "module_ids": ["usb-power-5v", "esp32-devkit", "bme280"],
+            "reasoning": "semantic model selection",
+        },
     ) as llm_pick:
         pick = pick_modules_for_goal("something that measures temperature")
-        llm_pick.assert_not_called()
-    assert "dht22" in pick.module_ids
-    assert "esp32-devkit" in pick.module_ids
+        llm_pick.assert_called_once_with("something that measures temperature")
+    assert pick.module_ids == ["usb-power-5v", "esp32-devkit", "bme280"]
+    assert pick.hints == ["semantic model selection"]
 
 
 def test_online_compose_calls_llm_for_novel_phrase(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -105,7 +116,7 @@ def test_online_compose_calls_llm_for_novel_phrase(monkeypatch: pytest.MonkeyPat
     assert "bme280" in pick.module_ids
 
 
-def test_salvage_fan_intake_uses_keyword_when_llm_generic(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_salvage_model_proposal_is_not_overridden_by_keyword(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_WORKSHOP", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_SALVAGE_RESOLVE", "heuristic")
@@ -128,4 +139,4 @@ def test_salvage_fan_intake_uses_keyword_when_llm_generic(monkeypatch: pytest.Mo
             constraints=dict(intake.get("constraints") or {}),
             project_name="fan_controller",
         )
-    assert pkg.get("recommended_build_id") == "usb_fume_extractor"
+    assert pkg.get("recommended_build_id") == "generic_low_voltage_build"
