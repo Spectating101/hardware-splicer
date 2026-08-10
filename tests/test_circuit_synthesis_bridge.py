@@ -84,7 +84,11 @@ def test_synthesize_circuit_compiles_when_structured_driver_contract_is_availabl
 
     assert result["schema_version"] == "hardware_splicer.circuit_synthesis_bridge.v1"
     assert result["candidate"]["result"] == "ready_for_review"
-    assert result["module_ids"] == ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "water_pump_5v"]
+    # The declared load remains a functional selected_part/topology endpoint rather than
+    # being laundered into a concrete catalog module identity. Only validated catalog
+    # modules are handed to the compile bridge.
+    assert result["module_ids"] == ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n"]
+    assert result["candidate"]["selected_parts"][0]["id"] == "pump"
     assert result["compose_result"]["mode"] == "strict_synthesis_netlist"
     assert result["compose_result"]["compile_result"]["ok"] is True
     assert result["design_quality_gate"]["build_ready"] is True
