@@ -117,7 +117,13 @@ def test_online_compose_calls_llm_for_novel_phrase(monkeypatch: pytest.MonkeyPat
 
 
 def test_salvage_model_proposal_is_not_overridden_by_keyword(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
+    # Core regression intentionally exports QWEN_DISABLED/OFFLINE_SALVAGE globally.
+    # This test is specifically about the model-first decision boundary, so isolate
+    # that policy rather than accidentally exercising the compatibility lane.
+    monkeypatch.setattr(
+        "hardware_splicer.integrations.llm_policy.offline_salvage_enabled",
+        lambda: False,
+    )
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_WORKSHOP", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_SALVAGE_RESOLVE", "heuristic")
     monkeypatch.setattr(
