@@ -8,6 +8,7 @@ from ..electrical_contract_truth import (
     contract_snapshot,
     max_output_current_a,
     output_voltage_range_v,
+    power_conversion_kind,
 )
 from .common import (
     available_module_ids,
@@ -25,10 +26,9 @@ from .common import (
 from .ir import CircuitIntent, Constraint, SynthesisCandidate, TopologyOperator
 
 
-BUCK_MODULES = {"buck-mp1584", "buck-lm2596"}
-LDO_MODULES = {"ldo-ams1117-3v3", "ldo-ams1117-5v"}
-REGULATOR_MODULES = BUCK_MODULES | LDO_MODULES
+STEP_DOWN_KINDS = {"buck", "ldo"}
 CURRENT_MARGIN_MULTIPLIER = 1.25
+STEP_DOWN_HEADROOM_POLICY_V = 0.25
 LDO_REVIEW_DISSIPATION_W = 0.5
 LDO_BLOCK_DISSIPATION_W = 1.0
 
@@ -50,6 +50,7 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         input_v=input_v,
         output_v=output_v,
     )
+    regulator_kind = power_conversion_kind(regulator) if regulator else None
 
     if input_v is None:
         missing.append("input_voltage")
@@ -78,15 +79,19 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         )
 
     if input_v is not None and output_v is not None:
-        if input_v <= output_v + 0.25:
+        if input_v <= output_v + STEP_DOWN_HEADROOM_POLICY_V:
             missing.append("step_down_headroom")
             constraints.append(
                 blocked(
                     "step_down_headroom",
                     "voltage",
                     "regulator",
-                    "Step-down regulator needs input voltage above output voltage.",
-                    value={"input_v": input_v, "output_v": output_v},
+                    "Step-down regulator needs input voltage above output voltage by the explicit planner-policy headroom.",
+                    value={
+                        "input_v": input_v,
+                        "output_v": output_v,
+                        "policy_headroom_v": STEP_DOWN_HEADROOM_POLICY_V,
+                    },
                 )
             )
         else:
@@ -95,8 +100,12 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
                     "step_down_headroom",
                     "voltage",
                     "regulator",
-                    "Input voltage is above target output rail.",
-                    value={"input_v": input_v, "output_v": output_v},
+                    "Input voltage is above target output rail by the explicit planner-policy headroom.",
+                    value={
+                        "input_v": input_v,
+                        "output_v": output_v,
+                        "policy_headroom_v": STEP_DOWN_HEADROOM_POLICY_V,
+                    },
                 )
             )
 
@@ -108,7 +117,7 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         topology.append(
             TopologyOperator(
                 operator_id=f"{regulator}_rail_conversion",
-                operator_type="ldo_regulator" if regulator in LDO_MODULES else "buck_regulator",
+                operator_type="ldo_regulator" if regulator_kind == "ldo" else "buck_regulator",
                 inputs=["input_rail", "ground"],
                 outputs=["regulated_output_rail", "ground"],
                 required_part_types=["regulator_module", "load"],
@@ -116,6 +125,7 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
                 notes=f"{regulator} selected because it is the sole declared regulator compatible with structured constraints.",
                 metadata={
                     "module_id": regulator,
+                    "power_conversion_kind": regulator_kind,
                     "input_v": input_v,
                     "output_v": output_v,
                     "load_current_a": load_current_a,
@@ -133,7 +143,7 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
                 (
                     "Multiple compatible regulator modules are declared; choose one explicitly."
                     if len(regulator_candidates) > 1
-                    else "Provide one regulator with structured input/output/current contracts compatible with the target rail."
+                    else "Provide one regulator with an explicit step-down topology contract plus structured input/output/current contracts compatible with the target rail."
                 ),
                 value={"compatible_candidates": regulator_candidates},
             )
@@ -145,7 +155,7 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
         if result == "ready_for_review"
         else "Planner stopped before compile/readiness approval because rail evidence is missing or incompatible."
     ]
-    if regulator in LDO_MODULES and input_v is not None and output_v is not None and load_current_a is not None:
+    if regulator_kind == "ldo" and input_v is not None and output_v is not None and load_current_a is not None:
         assumptions.append(
             "LDO dissipation thresholds are explicit design policy; bench thermal capture still controls sustained-load confidence."
         )
@@ -181,12 +191,15 @@ def plan_power_rail(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandi
             "output_voltage_v": output_v,
             "load_current_a": load_current_a,
             "regulator_candidates": regulator_candidates,
+            "regulator_kind": regulator_kind,
             "electrical_truth": {
-                "source": "structured_project_and_catalog_fields_only",
+                "source": "structured_project_and_component_contracts_only",
                 "goal_prose_voltage_inference_used": False,
                 "current_default_used": False,
+                "module_id_family_table_used": False,
                 "design_policy": {
                     "current_margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+                    "step_down_headroom_v": STEP_DOWN_HEADROOM_POLICY_V,
                     "ldo_review_dissipation_w": LDO_REVIEW_DISSIPATION_W,
                     "ldo_block_dissipation_w": LDO_BLOCK_DISSIPATION_W,
                 },
@@ -245,7 +258,9 @@ def _choose_regulator(
     output_v: float | None,
 ) -> tuple[str, List[str]]:
     candidates: List[str] = []
-    for module_id in sorted(REGULATOR_MODULES & available):
+    for module_id in sorted(available):
+        if power_conversion_kind(module_id) not in STEP_DOWN_KINDS:
+            continue
         min_in, max_in = module_input_range(module_id)
         min_out, max_out = output_voltage_range_v(module_id)
         if input_v is not None and min_in is not None and max_in is not None:
@@ -386,7 +401,7 @@ def _check_regulator(
                 )
             )
 
-    if module_id in LDO_MODULES and input_v is not None and output_v is not None and load_current_a is not None:
+    if power_conversion_kind(module_id) == "ldo" and input_v is not None and output_v is not None and load_current_a is not None:
         watts = max(0.0, input_v - output_v) * load_current_a
         if watts <= LDO_REVIEW_DISSIPATION_W:
             constraints.append(
