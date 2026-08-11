@@ -63,7 +63,9 @@ def test_offline_phrase_netlist_roundtrip_respects_deterministic_truth(
 
     if _direct_uncharacterized_mosfet_drive(pick.module_ids):
         assert result.ok is False
-        assert quality.get("electrical_safety_pass") is False
+        assert quality.get("erc_pass") is False
+        assert int(quality.get("erc_errors") or 0) > 0
+        assert quality.get("circuit_readiness") == "erc_blocked"
         return
 
     assert result.ok is True, result.error
