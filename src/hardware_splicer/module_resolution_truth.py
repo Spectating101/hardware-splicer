@@ -362,10 +362,12 @@ def resolve_inventory_identity(
 
 
 def _iter_functional_blocks(donor_context: Mapping[str, Any] | None) -> list[Dict[str, Any]]:
+    """Traverse persisted donor wrappers without interpreting human-facing labels."""
     if not isinstance(donor_context, Mapping):
         return []
     blocks: list[Dict[str, Any]] = []
     seen: set[str] = set()
+
     def take(value: Any) -> None:
         if isinstance(value, Mapping):
             if value.get("block_id") and (value.get("function_type") or value.get("capabilities")):
@@ -373,13 +375,23 @@ def _iter_functional_blocks(donor_context: Mapping[str, Any] | None) -> list[Dic
                 if key not in seen:
                     seen.add(key)
                     blocks.append(deepcopy(dict(value)))
-            for key in ("reusable_blocks", "functional_salvage", "blocks"):
+            # These are structural schema wrappers only.  In particular, circuit/boards
+            # are needed for persisted donor captures where functional_salvage belongs to
+            # a particular board.  No arbitrary mapping recursion or name-based inference.
+            for key in (
+                "circuit",
+                "boards",
+                "functional_salvage",
+                "reusable_blocks",
+                "blocks",
+            ):
                 child = value.get(key)
                 if isinstance(child, (list, tuple, Mapping)):
                     take(child)
         elif isinstance(value, (list, tuple)):
             for child in value:
                 take(child)
+
     take(donor_context)
     return blocks
 
