@@ -34,6 +34,16 @@ _KIND_BY_GATE_TYPE = {
 def _gate_kind(gate: Mapping[str, Any]) -> str:
     gate_type = str(gate.get("gate_type") or "").strip().lower()
     if gate_type in _KIND_BY_GATE_TYPE:
+        # Interface recipes may contain qualitative observations as well as numeric
+        # measurements. Prefer the declared measurement semantics over the broad gate type.
+        if gate_type == "interface_measurement":
+            expected_unit = str(gate.get("expected_unit") or "").strip()
+            measurement_id = str(gate.get("measurement_id") or "").lower()
+            prompt = str(gate.get("prompt") or "").lower()
+            if not expected_unit and not any(
+                token in f"{measurement_id} {prompt}" for token in ("voltage", "current", "resistance", "temperature")
+            ):
+                return "functional_response"
         return _KIND_BY_GATE_TYPE[gate_type]
     prompt = str(gate.get("prompt") or "").lower()
     if "continuity" in prompt or "short" in prompt:
@@ -227,6 +237,58 @@ def _slug(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", str(text or "").lower()).strip("_")
 
 
+def _structured_measurement_gate_id(
+    measurement: Mapping[str, Any],
+    gates: Sequence[Mapping[str, Any]],
+) -> str:
+    """Resolve an evidence-recipe gate from persisted structured identity.
+
+    Measurement identity and interface/board selectors are stronger than labels or prose.
+    Ambiguity fails closed instead of guessing which physical gate a reading should close.
+    """
+
+    measurement_id = str(measurement.get("measurement_id") or "").strip()
+    if not measurement_id:
+        return ""
+
+    candidates = [
+        gate
+        for gate in gates
+        if str(gate.get("measurement_id") or "").strip() == measurement_id
+    ]
+    if not candidates:
+        return ""
+
+    interface_id = str(measurement.get("interface_id") or "").strip()
+    if interface_id:
+        candidates = [
+            gate for gate in candidates
+            if str(gate.get("interface_id") or "").strip() == interface_id
+        ]
+
+    selector = measurement.get("interface_selector")
+    selector = selector if isinstance(selector, Mapping) else {}
+    board_id = str(selector.get("board_id") or measurement.get("board_id") or "").strip()
+    if board_id:
+        candidates = [
+            gate for gate in candidates
+            if str(gate.get("board_id") or "").strip() == board_id
+        ]
+    block_id = str(selector.get("block_id") or measurement.get("block_id") or "").strip()
+    if block_id:
+        candidates = [
+            gate for gate in candidates
+            if str(gate.get("block_id") or "").strip() == block_id
+        ]
+
+    gate_ids = {
+        str(gate.get("gate_id") or "").strip()
+        for gate in candidates
+        if str(gate.get("gate_id") or "").strip()
+    }
+    return next(iter(gate_ids)) if len(gate_ids) == 1 else ""
+
+
 def _match_gate_id(
     measurement: Mapping[str, Any],
     gates: Sequence[Mapping[str, Any]],
@@ -234,6 +296,11 @@ def _match_gate_id(
     explicit = str(measurement.get("gate_id") or measurement.get("requirement_id") or "").strip()
     if explicit:
         return explicit
+
+    structured = _structured_measurement_gate_id(measurement, gates)
+    if structured:
+        return structured
+
     target = str(measurement.get("target") or measurement.get("label") or measurement.get("prompt") or "").strip().lower()
     kind = str(measurement.get("kind") or measurement.get("gate_type") or measurement.get("type") or "").strip().lower()
     if not target and not kind:
@@ -279,6 +346,7 @@ def bench_capture_to_splice_measurements(
                 "value": row.get("value", row.get("measured_value")),
                 "unit": row.get("unit"),
                 "method": row.get("method") or row.get("instrument_id") or row.get("instrument_type"),
+                "instrument_id": row.get("instrument_id"),
                 "operator": row.get("operator_id") or capture_operator or None,
                 "notes": row.get("notes") or row.get("target"),
             }
