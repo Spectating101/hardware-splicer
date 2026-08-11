@@ -13,8 +13,15 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_robot_drive_keeps_unknown_donor_hbridge_and_motor_identity_unresolved(monkeypatch) -> None:
     # This is an identity-boundary test, so do not let the suite-wide offline compatibility
     # environment silently re-enable the historical representative-module resolver.
+    # QWEN_DISABLED itself means "force offline compatibility" in the central policy, so it
+    # must also be cleared; with no provider credentials, model-first identity remains
+    # unresolved rather than falling back to heuristics.
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
-    monkeypatch.setenv("QWEN_DISABLED", "1")
+    monkeypatch.setenv("QWEN_DISABLED", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_QWEN_DISABLED", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_QWEN_SALVAGE", "1")
+    monkeypatch.delenv("QWEN_API_KEY", raising=False)
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
 
     intake = load_project_intake(ROOT / "examples" / "intakes" / "splice_robot_drive_brief.json")
     package = build_intake_salvage_package(
