@@ -480,14 +480,15 @@ const usbToMcu = (usb: string, mcu: string, mcuPin: string): Wire[] => [
 //     rpi-pico (3.3V logic) instead of arduino-nano (5V logic) to avoid a
 //     real level mismatch.
 const RECIPES: Record<string, Recipe> = {
-  // ESP32 USB-powered; soil sensor on 3V3/GPIO34; pump on a dedicated 5V buck +
-  // MOSFET rail so the MCU is not loaded by pump inrush.
+  // ESP32 soil sensor on 3V3/GPIO34; pump on a dedicated 5V buck. GPIO4 is
+  // translated explicitly to the 5V-side driver control domain.
   automatic_plant_watering: {
     modules: [
       { role: "pwr", moduleId: "dc-barrel-12v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "sns", moduleId: "soil_moisture" },
       { role: "buck", moduleId: "buck-mp1584" },
+      { role: "shift", moduleId: "level-shifter-4ch" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
@@ -501,23 +502,29 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
       { from: { role: "sns", pin: "A0" }, to: { role: "mcu", pin: "GPIO34" } },
-      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "shift", pin: "LV" } },
+      { from: { role: "buck", pin: "OUT+" }, to: { role: "shift", pin: "HV" } },
+      { from: { role: "buck", pin: "OUT-" }, to: { role: "shift", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "shift", pin: "LV1" } },
+      { from: { role: "shift", pin: "HV1" }, to: { role: "drv", pin: "SIG" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
     ],
     notes: [
-      "Set the MP1584 output to 5.0V with a multimeter before connecting the pump.",
+      "Set the MP1584 output to 5.0V with a multimeter before connecting the pump or level-shifter HV rail.",
+      "ESP32 GPIO4 reaches the MOSFET SIG input only through an explicit 3.3V-to-5V level-shifter boundary.",
       "Wire the mini pump to driver VOUT+/VOUT-; keep electronics above the wet zone.",
-      "ESP32 may also be powered via USB for programming; share GND with the 12V supply.",
       "Add a flyback diode across the pump if the module does not include one.",
     ],
   },
 
-  // Salvage path: USB power bank only (no 12V barrel). 5V rail feeds MCU + pump driver.
+  // Salvage path: USB power bank only. The same explicit logic-domain boundary
+  // is retained instead of treating ESP32 3.3V as proven 5V driver control.
   automatic_plant_watering_usb: {
     modules: [
       { role: "pwr", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "sns", moduleId: "soil_moisture" },
+      { role: "shift", moduleId: "level-shifter-4ch" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
     ],
     wires: [
@@ -528,11 +535,16 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
       { from: { role: "sns", pin: "A0" }, to: { role: "mcu", pin: "GPIO34" } },
-      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "shift", pin: "LV" } },
+      { from: { role: "pwr", pin: "V+" }, to: { role: "shift", pin: "HV" } },
+      { from: { role: "pwr", pin: "GND" }, to: { role: "shift", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "shift", pin: "LV1" } },
+      { from: { role: "shift", pin: "HV1" }, to: { role: "drv", pin: "SIG" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
     ],
     notes: [
-      "USB power bank feeds ESP32 VIN and pump driver — no buck converter in the salvage path.",
+      "USB power bank feeds ESP32 VIN, pump driver, and the level-shifter 5V side.",
+      "ESP32 GPIO4 reaches the MOSFET SIG input only through the explicit level-shifter boundary.",
       "Wire mini pump to driver VOUT+/VOUT-; add flyback diode if the module lacks one.",
       "Keep electronics above the wet zone; common GND across all modules.",
     ],
@@ -559,13 +571,14 @@ const RECIPES: Record<string, Recipe> = {
     ],
   },
 
-  // USB desk fume / airflow: MCU + MOSFET low-side switch + optional DHT + fan load.
-  // (Legacy barrel+buck-only recipe omitted MCU — that failed junk→intent honesty.)
+  // USB desk fume / airflow: MCU + explicit logic translation + MOSFET low-side
+  // switch + optional DHT + fan load. All recipe GPIOs exist in the engine pad model.
   usb_fume_extractor: {
     modules: [
       { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "sns", moduleId: "dht22" },
+      { role: "shift", moduleId: "level-shifter-4ch" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
       { role: "load", moduleId: "cooling_fan_5v" },
     ],
@@ -576,15 +589,19 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "usb", pin: "GND" }, to: { role: "drv", pin: "GND" } },
       { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
-      { from: { role: "sns", pin: "DATA" }, to: { role: "mcu", pin: "GPIO15" } },
-      { from: { role: "mcu", pin: "GPIO25" }, to: { role: "drv", pin: "SIG" } },
+      { from: { role: "sns", pin: "DATA" }, to: { role: "mcu", pin: "GPIO2" } },
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "shift", pin: "LV" } },
+      { from: { role: "usb", pin: "V+" }, to: { role: "shift", pin: "HV" } },
+      { from: { role: "usb", pin: "GND" }, to: { role: "shift", pin: "GND" } },
+      { from: { role: "mcu", pin: "GPIO4" }, to: { role: "shift", pin: "LV1" } },
+      { from: { role: "shift", pin: "HV1" }, to: { role: "drv", pin: "SIG" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "drv", pin: "GND" } },
       { from: { role: "drv", pin: "VOUT+" }, to: { role: "load", pin: "VCC" } },
       { from: { role: "drv", pin: "VOUT-" }, to: { role: "load", pin: "GND" } },
     ],
     notes: [
-      "USB 5V feeds MCU + MOSFET high side; fan on driver VOUT+/VOUT-.",
-      "GPIO25 = fan enable; DHT22 DATA on GPIO15 for optional temp-triggered airflow.",
+      "USB 5V feeds MCU, MOSFET load rail, and the level-shifter 5V side; fan stays on driver VOUT+/VOUT-.",
+      "GPIO4 via the level shifter is fan enable; DHT22 DATA uses footprint-backed GPIO2.",
     ],
   },
 
@@ -925,9 +942,6 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
 
   const recipe = RECIPES[recipeKey];
   if (!recipe) {
-    // Fall-back: use capability matcher against the library to suggest modules
-    // for this build's requires_any. Returns an unwired starter graph the user
-    // can complete on the canvas — strictly better than an empty result.
     const reqAny = BUILD_CATALOG_CAPS[buildId];
     if (reqAny) {
       const picked = pickModulesForRequirements(reqAny);
@@ -966,7 +980,6 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     );
   }
 
-  // Materialize role -> nodeId; build BuildGraph nodes.
   const idOf = new Map<string, string>();
   const nodes = adaptedRecipe.modules.map((m, i) => {
     const nodeId = `n${i + 1}`;
@@ -974,7 +987,6 @@ export function splicePlanToBuildGraph(plan: SalvagePlanInput | null | undefined
     return { id: nodeId, moduleId: m.moduleId };
   });
 
-  // Resolve wires; drop (with warning) any whose roles aren't present.
   const wires = adaptedRecipe.wires.flatMap((w, i) => {
     const from = idOf.get(w.from.role);
     const to = idOf.get(w.to.role);
