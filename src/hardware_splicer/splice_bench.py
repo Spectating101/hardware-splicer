@@ -17,7 +17,6 @@ _CRITICAL_PATTERNS = (
 _NUMERIC_EVIDENCE_GATE_TYPES = {
     "voltage",
     "current",
-    "interface_measurement",
     "psu_ramp",
 }
 
@@ -362,10 +361,27 @@ def _has_observation(item: Mapping[str, Any]) -> bool:
     )
 
 
+def _gate_expects_numeric_evidence(gate: Mapping[str, Any]) -> bool:
+    """Return whether a gate's declared schema requires a numeric value with units."""
+
+    gate_type = str(gate.get("gate_type") or "").strip().lower()
+    if gate_type in _NUMERIC_EVIDENCE_GATE_TYPES:
+        return True
+    if gate_type == "interface_measurement":
+        return bool(
+            str(gate.get("expected_unit") or "").strip()
+            or gate.get("lower") is not None
+            or gate.get("upper") is not None
+        )
+    if gate_type == "measurement":
+        prompt = str(gate.get("prompt") or "").lower()
+        return any(token in prompt for token in ("voltage", "current", "rail", "vmotor"))
+    return False
+
+
 def _validate_evidence_measurement(gate: Mapping[str, Any], item: Mapping[str, Any]) -> tuple[bool, str]:
     """Validate provenance and value evidence before a critical gate may close."""
     gate_type = str(gate.get("gate_type") or "").strip().lower()
-    prompt = str(gate.get("prompt") or "").lower()
     critical = bool(gate.get("critical"))
     operator = str(item.get("operator") or item.get("operator_id") or "").strip()
     method = str(item.get("method") or "").strip()
@@ -379,11 +395,7 @@ def _validate_evidence_measurement(gate: Mapping[str, Any], item: Mapping[str, A
         if not _has_observation(item):
             return False, "critical gate requires recorded observation or value"
 
-        numeric_expected = bool(
-            gate_type in _NUMERIC_EVIDENCE_GATE_TYPES
-            or (gate_type == "measurement" and any(token in prompt for token in ("voltage", "current", "rail", "vmotor")))
-        )
-        if numeric_expected:
+        if _gate_expects_numeric_evidence(gate):
             if value is None or (isinstance(value, str) and not value.strip()):
                 return False, "numeric critical gate requires measured value"
             if not str(item.get("unit") or "").strip():
@@ -506,6 +518,7 @@ def submit_bench_measurements(
             "unit": item.get("unit"),
             "operator": item.get("operator") or item.get("operator_id"),
             "method": item.get("method"),
+            "instrument_id": item.get("instrument_id"),
             "recorded_at": _now(),
         }
         gate["measurement"] = measurement
