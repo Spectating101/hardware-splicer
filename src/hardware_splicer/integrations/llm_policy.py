@@ -42,17 +42,27 @@ def offline_compose_enabled() -> bool:
         return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_COMPOSE"):
         return True
+    if _falsy("HARDWARE_SPLICER_OFFLINE_COMPOSE"):
+        return False
     if _falsy("HARDWARE_SPLICER_QWEN_COMPOSE"):
         return True
     return not _llm_configured()
 
 
 def offline_salvage_enabled() -> bool:
-    """Legacy regex part resolve / keyword build hints are allowed."""
+    """Return whether legacy regex identity/build hints may execute.
+
+    No-model compatibility remains the default when no explicit policy is supplied.  An
+    explicit ``HARDWARE_SPLICER_OFFLINE_SALVAGE=0`` is stronger: it requests the strict
+    model-first identity boundary even when the provider is unavailable, so unresolved
+    hardware stays unresolved instead of silently falling back to regex/catalog stand-ins.
+    """
     if _truthy("QWEN_DISABLED") or _truthy("HARDWARE_SPLICER_QWEN_DISABLED"):
         return True
     if _truthy("HARDWARE_SPLICER_OFFLINE_SALVAGE"):
         return True
+    if _falsy("HARDWARE_SPLICER_OFFLINE_SALVAGE"):
+        return False
     if _falsy("HARDWARE_SPLICER_QWEN_SALVAGE"):
         return True
     return not _llm_configured()
