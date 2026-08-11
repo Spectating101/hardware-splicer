@@ -40,13 +40,28 @@ def _finding(
 
 
 def load_catalog_recipes(path: str | Path | None = None) -> Dict[str, Dict[str, Any]]:
+    """Load the canonical recipe map while tolerating the historical flat fixture shape."""
+
     source = Path(path).resolve() if path is not None else _RECIPES_PATH
     payload = json.loads(source.read_text(encoding="utf-8"))
     if not isinstance(payload, Mapping):
         raise ValueError(f"catalog recipes must be a JSON object: {source}")
+
+    # Current generated data is an envelope:
+    # {schema_version, build_catalog_capability_groups, recipes}.  The original audit
+    # accidentally iterated that envelope, so it inspected zero modules/endpoints while
+    # reporting success.  Explicit caller-supplied flat recipe maps remain supported for
+    # focused fixtures, but production data must descend through `recipes`.
+    if "recipes" in payload:
+        raw_recipes = payload.get("recipes")
+        if not isinstance(raw_recipes, Mapping):
+            raise ValueError(f"catalog recipes envelope has non-object recipes field: {source}")
+    else:
+        raw_recipes = payload
+
     return {
         str(build_id): dict(recipe)
-        for build_id, recipe in payload.items()
+        for build_id, recipe in raw_recipes.items()
         if isinstance(recipe, Mapping)
     }
 
@@ -189,6 +204,8 @@ def audit_catalog_recipe_pins(
     by_build: Dict[str, list[Dict[str, Any]]] = {}
     for row in findings:
         by_build.setdefault(str(row.get("build_id") or ""), []).append(row)
+
+    codes = {str(row.get("code") or "") for row in blocking}
     return {
         "schema_version": SCHEMA_VERSION,
         "status": "blocked" if blocking else "pass",
@@ -200,10 +217,10 @@ def audit_catalog_recipe_pins(
         "findings": findings,
         "findings_by_build": by_build,
         "checks": {
-            "module_identity_exists": True,
-            "wire_endpoint_role_bound": True,
-            "wire_pin_in_module_contract": True,
-            "wire_pin_in_engine_pad_model": True,
+            "module_identity_exists": "RECIPE_MODULE_UNKNOWN" not in codes,
+            "wire_endpoint_role_bound": "RECIPE_ENDPOINT_ROLE_UNBOUND" not in codes,
+            "wire_pin_in_module_contract": "RECIPE_PIN_NOT_IN_MODULE_CONTRACT" not in codes,
+            "wire_pin_in_engine_pad_model": "RECIPE_PIN_NOT_IN_ENGINE_PADS" not in codes,
             "architecture_repair_attempted": False,
         },
         "authority_effect": "none",
