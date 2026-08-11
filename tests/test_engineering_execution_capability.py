@@ -18,6 +18,7 @@ def test_capability_report_distinguishes_adapters_tools_and_host_policy(monkeypa
     assert report.execution_enabled is False
     assert by_operation["artifact_hash"].tool_installed is True
     assert by_operation["python_compile"].tool_installed is True
+    assert by_operation["pytest"].tool_installed is True
     assert by_operation["ngspice"].tool_installed is True
     assert by_operation["kicad_erc"].tool_installed is False
     assert all(row.preview_available is True for row in report.operations)
@@ -43,8 +44,9 @@ def test_enabled_host_only_exposes_installed_operations(monkeypatch, tmp_path) -
 
     assert by_operation["artifact_hash"].executable_under_host_policy is True
     assert by_operation["python_compile"].executable_under_host_policy is True
+    assert by_operation["pytest"].executable_under_host_policy is True
     assert by_operation["kicad_erc"].executable_under_host_policy is True
     assert by_operation["kicad_drc"].executable_under_host_policy is True
     assert by_operation["platformio_build"].executable_under_host_policy is True
     assert by_operation["ngspice"].executable_under_host_policy is False
-    assert report.metadata["executable_operation_count"] == 5
+    assert report.metadata["executable_operation_count"] == 6
