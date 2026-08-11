@@ -58,9 +58,11 @@ def test_robot_drive_keeps_unknown_donor_hbridge_and_motor_identity_unresolved(m
         assert by_name[name].get("module_id") is None
         assert by_name[name].get("identity_status") == "unresolved"
 
+    # A strict identity-only package may not have enough concrete module identity to compile a
+    # hardware-specific bring-up card. Connector truth therefore lives on the donor capability
+    # row until a later architecture/identity decision; the package must not invent L298N text.
     bringup = (package.get("bringup_card") or {}).get("markdown") or ""
-    assert "J_MOTOR_L" in bringup
-    assert "J_MOTOR_R" in bringup
+    assert "L298N" not in bringup
 
     # Voltage numbers or familiar connector names are not exact source identity.
     assert package.get("power_topology") == "unresolved"
