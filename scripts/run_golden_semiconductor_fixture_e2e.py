@@ -218,383 +218,406 @@ def repair_llm(prompt: str, **kwargs: object) -> dict[str, Any]:
 
 
 def conversation_llm(state: Mapping[str, str]):
-    def _llm(prompt: str, **kwargs: object) -> dict[str, Any]:
+    def call(prompt: str, **kwargs: object) -> dict[str, Any]:
+        action_id = state.get("failed_action_id", "")
+        assert action_id and action_id in prompt
+        assert "dut-datasheet-r1" in prompt
         assert kwargs.get("json_mode") is True
-        assert "CONVERSATION_CONTEXT=" in prompt
-        body = {
-            "summary": "The fixture candidate is blocked until the translated DUT interface is re-previewed and passes deterministic checks.",
-            "key_points": [
-                "The failed direct 3.3 V controller path remains immutable evidence.",
-                "The repair candidate proposes a default-off 1.8 V translation boundary.",
-            ],
-            "open_questions": [
-                "Which translator part meets the powered-off high-impedance requirement?"
-            ],
-            "recommended_next_action_ids": [state["repair_preview_action_id"]],
-        }
-        return llm_payload(body, "golden-semiconductor-conversation-v1")
-
-    return _llm
-
-
-class GoldenFixtureComposeAdapter:
-    """Deterministic proposal adapter used by the fixture E2E.
-
-    The first preview fails on the intentional 3.3 V -> 1.8 V DUT interface gap.
-    The repair preview emits a bounded protected candidate with closed software checks.
-    """
-
-    def preview(self, payload: Mapping[str, Any]) -> dict[str, Any]:
-        phrase = str(payload.get("phrase") or "").lower()
-        protected = "default-off 1.8 v translated" in phrase
-        if protected:
-            return {
-                "ok": True,
-                "mode": "fixture_adapter_candidate",
-                "schema_version": "hardware_splicer.fixture_adapter_candidate.v1",
-                "project_name": "golden_fixture_adapter",
-                "candidate_id": "protected-dut-adapter",
-                "source_ids": [
-                    "dut-datasheet-r1",
-                    "dut-pin-map-r1",
-                    "socket-drawing-r1",
-                    "fixture-controller-manual-r1",
-                    "test-limits-r1",
-                    "lab-supply-procedure-r1",
-                ],
-                "interfaces": {
-                    "dut_domain_v": 1.8,
-                    "controller_domain_v": 3.3,
-                    "translator": {
-                        "required": True,
-                        "powered_off_high_impedance_required": True,
+        return llm_payload(
+            {
+                "answer_kind": "decision_briefing",
+                "answer": "The fixture is not pre-fabrication ready. The direct 3.3 V controller assumption violates the declared 1.8 V DUT domain, and the successor still needs a verified powered-off translation part and sequencing evidence.",
+                "evidence_refs": [
+                    {
+                        "kind": "tool_result",
+                        "id": action_id,
+                        "reason": "The persisted deterministic preview failed on the unprotected voltage-domain boundary."
                     },
-                },
-                "checks": {
-                    "dut_overvoltage_path": "closed_by_translator_candidate",
-                    "reserved_pins_no_connect": True,
-                    "socket_orientation_review": "open_physical_gate",
-                    "bench_current_limit_review": "open_physical_gate",
-                },
-                "warnings": [
-                    "Software preview only; translator part number and bench limits still require evidence closure."
+                    {
+                        "kind": "source",
+                        "id": "dut-datasheet-r1",
+                        "reason": "The declared DUT limits prohibit direct 3.3 V drive and cap digital pins at 2.0 V absolute maximum."
+                    },
+                    {
+                        "kind": "source",
+                        "id": "fixture-controller-manual-r1",
+                        "reason": "The controller manual declares 3.3 V GPIO and reset-time pull-up risk."
+                    }
                 ],
-                "authority_effect": "none",
-            }
-        return {
-            "ok": False,
-            "mode": "fixture_adapter_candidate",
-            "schema_version": "hardware_splicer.fixture_adapter_candidate.v1",
-            "project_name": "golden_fixture_adapter",
-            "candidate_id": "direct-controller-dut-adapter",
-            "source_ids": ["dut-datasheet-r1", "fixture-controller-manual-r1"],
-            "error": {
-                "code": "fixture_interface_voltage_domain_unclosed",
-                "message": "1.8 V DUT interface is not protected from 3.3 V controller outputs and pull-ups.",
+                "blockers": [
+                    "No exact level-translator part and powered-off behavior are proven.",
+                    "No deterministic no-connect check for reserved DUT pins has passed.",
+                    "No physical resistance, current-limited power, thermal, or functional DUT evidence exists."
+                ],
+                "recommended_action": {
+                    "action_type": "prepare_verification",
+                    "title": "Prepare fixture pre-fabrication verification",
+                    "rationale": "Define schematic, netlist, sequencing, no-connect, current-limit, and socket-orientation evidence required before fabrication review.",
+                    "inputs": {
+                        "scope": "dut_voltage_domains_and_fixture_safety",
+                        "required_checks": [
+                            "powered_off_translation",
+                            "reserved_pin_no_connect",
+                            "rail_current_limit",
+                            "socket_pin1_orientation"
+                        ]
+                    },
+                    "source_ids": [
+                        "dut-datasheet-r1",
+                        "dut-pin-map-r1",
+                        "socket-drawing-r1",
+                        "test-limits-r1",
+                        "fixture-controller-manual-r1"
+                    ]
+                },
+                "additional_proposals": []
             },
-            "checks": {
-                "dut_overvoltage_path": "blocked",
-                "reserved_pins_no_connect": "not_evaluated_after_blocker",
-            },
-            "authority_effect": "none",
-        }
-
-
-def fixture_app(case: Mapping[str, Any], store: ProjectStore) -> FastAPI:
-    app = FastAPI()
-    app.include_router(
-        create_ai_project_orchestrator_router(
-            store=store,
-            llm_callable=proposal_llm,
-            include_in_schema=False,
+            "golden-semiconductor-jarvis-v1",
         )
-    )
-    app.include_router(
-        create_ai_project_tool_executor_router(
-            store=store,
-            compose_adapter=GoldenFixtureComposeAdapter(),
-            include_in_schema=False,
-        )
-    )
-    app.include_router(
-        create_ai_project_repair_router(
-            store=store,
-            llm_callable=repair_llm,
-            include_in_schema=False,
-        )
-    )
-    app.include_router(
-        create_ai_project_conversation_router(
-            store=store,
-            llm_callable=conversation_llm(case["state"]),
-            include_in_schema=False,
-        )
-    )
-    app.include_router(create_engineering_package_router(store=store, include_in_schema=False))
-    app.include_router(create_engineering_package_download_router(store=store, include_in_schema=False))
-    return app
+
+    return call
 
 
-def post_json(client: TestClient, path: str, body: Mapping[str, Any]) -> dict[str, Any]:
-    response = client.post(path, json=dict(body))
-    if response.status_code != 200:
-        raise RuntimeError(f"POST {path} failed: {response.status_code} {response.text}")
-    payload = response.json()
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"POST {path} did not return an object")
-    return payload
+def failing_compose(**kwargs: object) -> dict[str, Any]:
+    assert kwargs.get("allow_llm_first") is False
+    assert kwargs.get("export_gerber") is False
+    raise RuntimeError(
+        "1.8 V DUT interface is not protected from 3.3 V controller; direct drive exceeds declared DUT limits"
+    )
 
 
-def require_ok(response, *, label: str) -> dict[str, Any]:
+def initial_snapshot(case: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "projectId": case["project_id"],
+        "name": case["name"],
+        "mission": case["mission"],
+        "mode": case.get("mode", "build"),
+        "constraints": dict(case.get("constraints") or {}),
+        "available_parts": list(case.get("available_parts") or []),
+        "parts": list(case.get("available_parts") or []),
+        "engineeringSources": list(case.get("engineering_sources") or []),
+        "engineeringParsedSources": [],
+        "engineeringSourceParserRuns": [],
+        "engineeringSourceConflicts": [],
+        "fabrication_authorized": False,
+        "firmware_flash_authorized": False,
+        "flash_authorized": False,
+        "power_on_authorized": False,
+        "motion_authorized": False,
+        "operational_authorized": False,
+        "release_authorized": False
+    }
+
+
+def require_ok(response, label: str) -> dict[str, Any]:
     if response.status_code != 200:
         raise RuntimeError(f"{label} failed: {response.status_code} {response.text}")
-    payload = response.json()
-    if not isinstance(payload, dict):
-        raise RuntimeError(f"{label} did not return an object")
-    return payload
+    return response.json()
+
+
+def package_json(archive: zipfile.ZipFile, name: str) -> Any:
+    return json.loads(archive.read(f"{PACKAGE_PREFIX}{name}").decode("utf-8"))
+
+
+def check(name: str, passed: bool, observed: Any, expected: Any) -> dict[str, Any]:
+    return {
+        "name": name,
+        "passed": bool(passed),
+        "observed": observed,
+        "expected": expected
+    }
 
 
 def run(case: Mapping[str, Any], out_dir: Path) -> dict[str, Any]:
-    out_dir = Path(out_dir).resolve()
-    if out_dir.exists():
-        shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    workspace = out_dir / "workspace"
+    shutil.rmtree(workspace, ignore_errors=True)
 
-    store = ProjectStore(root=out_dir / "store")
-    project_id = str(case["project"]["project_id"])
-    initial_state = dict(case["project"]["initial_state"])
-    initial_state.setdefault("projectId", project_id)
-    initial_state.setdefault("name", str(case["project"]["name"]))
-    initial_state.setdefault("mode", str(case["project"]["mode"]))
-    project = store.save(project_id, initial_state)
-    current = project
-    case_with_state = dict(case)
-    case_with_state["state"] = {}
-    app = fixture_app(case_with_state, store)
+    project_id = str(case["project_id"])
+    expected = dict(case.get("expected") or {})
+    sources = list(case.get("engineering_sources") or [])
+    source_ids = {str(row.get("source_id") or "") for row in sources}
+    required_sources = {
+        "dut-datasheet-r1",
+        "dut-pin-map-r1",
+        "socket-drawing-r1",
+        "test-limits-r1",
+        "fixture-controller-manual-r1",
+        "lab-supply-procedure-r1"
+    }
+    if source_ids != required_sources:
+        raise RuntimeError(
+            f"fixture source identities differ: expected {sorted(required_sources)}, got {sorted(source_ids)}"
+        )
+
+    store = ProjectStore(workspace / "projects")
+    initial = store.save(project_id, initial_snapshot(case))
+    state: dict[str, str] = {}
+    app = FastAPI()
+    app.include_router(create_ai_project_orchestrator_router(store, llm_callable=proposal_llm))
+    app.include_router(create_ai_project_tool_executor_router(store, compose_callable=failing_compose))
+    app.include_router(create_ai_project_repair_router(store, llm_callable=repair_llm))
+    app.include_router(create_ai_project_conversation_router(store, llm_callable=conversation_llm(state)))
+    app.include_router(create_engineering_package_router(store))
+    app.include_router(create_engineering_package_download_router(store))
     client = TestClient(app)
 
-    proposal = require_ok(
+    proposed = require_ok(
         client.post(
-            f"/v1/projects/{project['project_id']}/ai/sessions",
+            f"/v1/projects/{project_id}/ai-sessions",
             json={
-                "project_revision": current["revision"],
-                "mission": str(case["mission"]),
+                "mission": case["mission"],
+                "expected_revision": 1,
                 "constraints": dict(case.get("constraints") or {}),
-            },
+                "model_profile": "deep_synthesis",
+                "max_actions": 4
+            }
         ),
-        label="fixture proposal",
+        "fixture proposal"
     )
-    proposal_session = proposal["session"]
-    preview_action = next(
-        action
-        for action in proposal_session["actions"]
-        if action["action_type"] == "run_compose"
-    )
-    failed_preview = require_ok(
-        client.post(
-            f"/v1/projects/{project['project_id']}/ai/sessions/{proposal_session['session_id']}/actions/{preview_action['action_id']}/execute",
-            json={"project_revision": proposal_session["project_revision"]},
-        ),
-        label="fixture failed preview",
-    )
-    failed_action = failed_preview["action"]
-    if failed_action["status"] != "failed":
-        raise RuntimeError("fixture failed preview unexpectedly passed")
+    parent_session = dict(proposed["session"])
+    parent_session_id = str(parent_session["session_id"])
+    failed_action_id = str(parent_session["actions"][0]["action_id"])
+    state["failed_action_id"] = failed_action_id
 
+    decided = require_ok(
+        client.post(
+            f"/v1/projects/{project_id}/ai-sessions/{parent_session_id}/actions/{failed_action_id}/decision",
+            json={
+                "expected_revision": 2,
+                "decision": "accepted",
+                "reviewer": "golden-fixture-reviewer",
+                "note": "Accepted for a software pre-fabrication preview only."
+            }
+        ),
+        "fixture decision"
+    )
+    previewed = require_ok(
+        client.post(
+            f"/v1/projects/{project_id}/ai-sessions/{parent_session_id}/actions/{failed_action_id}/execute-preview",
+            json={"expected_revision": 3}
+        ),
+        "fixture preview"
+    )
     repaired = require_ok(
         client.post(
-            f"/v1/projects/{project['project_id']}/ai/sessions/{proposal_session['session_id']}/actions/{preview_action['action_id']}/repair",
-            json={
-                "project_revision": proposal_session["project_revision"],
-                "repair_iteration": 1,
-            },
+            f"/v1/projects/{project_id}/ai-sessions/{parent_session_id}/actions/{failed_action_id}/repair",
+            json={"expected_revision": 4, "max_actions": 4}
         ),
-        label="fixture repair",
+        "fixture repair"
     )
-    repair_session = repaired["repair_session"]
-    repair_preview_action = next(
-        action
-        for action in repair_session["actions"]
-        if action["action_type"] == "run_compose"
-    )
-    case_with_state["state"]["repair_preview_action_id"] = repair_preview_action["action_id"]
-    repaired_preview = require_ok(
+    repair_session = dict(repaired["repair_session"])
+    repair_session_id = str(repair_session["session_id"])
+    briefed = require_ok(
         client.post(
-            f"/v1/projects/{project['project_id']}/ai/sessions/{repair_session['session_id']}/actions/{repair_preview_action['action_id']}/execute",
-            json={"project_revision": repair_session["project_revision"]},
-        ),
-        label="fixture repair preview",
-    )
-    repaired_action = repaired_preview["action"]
-    if repaired_action["status"] != "succeeded":
-        raise RuntimeError("fixture repair preview did not succeed")
-
-    briefing = require_ok(
-        client.post(
-            f"/v1/projects/{project['project_id']}/ai/conversations",
+            f"/v1/projects/{project_id}/ai-sessions/{parent_session_id}/turns",
             json={
-                "project_revision": repaired_action["project_revision"],
-                "message": "Summarize what changed, what still blocks fabrication, and the next review action.",
-            },
+                "expected_revision": 5,
+                "message": "Is this fixture ready for fabrication, and what evidence is still missing?",
+                "client_request_id": "golden-semiconductor-fixture-briefing-v1",
+                "max_proposals": 2
+            }
         ),
-        label="fixture conversation",
+        "fixture JARVIS briefing"
     )
-
-    package = require_ok(
+    turn = dict(briefed["turn"])
+    packaged = require_ok(
         client.post(
-            f"/v1/projects/{project['project_id']}/engineering-package",
-            json={
-                "project_revision": repaired_action["project_revision"],
-                "selected_candidate_id": "candidate-protected-dut-adapter",
-                "selected_action_ids": [repair_preview_action["action_id"]],
-            },
+            f"/v1/projects/{project_id}/engineering-packages",
+            json={"expected_revision": 6}
         ),
-        label="fixture package",
+        "fixture package export"
     )
-    package_id = package["package"]["package_id"]
-    download = client.get(
-        f"/v1/projects/{project['project_id']}/engineering-package/{package_id}/download"
+    package = dict(packaged["package"])
+    replayed = require_ok(
+        client.post(
+            f"/v1/projects/{project_id}/engineering-packages",
+            json={"expected_revision": 6}
+        ),
+        "fixture package replay"
     )
-    if download.status_code != 200:
+    downloaded = client.get(
+        f"/v1/projects/{project_id}/engineering-packages/{package['package_id']}/download"
+    )
+    if downloaded.status_code != 200:
         raise RuntimeError(
-            f"fixture package download failed: {download.status_code} {download.text}"
+            f"fixture package download failed: {downloaded.status_code} {downloaded.text}"
         )
-    zip_bytes = download.content
-    zip_path = out_dir / "GOLDEN_SEMICONDUCTOR_FIXTURE_PACKAGE.zip"
-    zip_path.write_bytes(zip_bytes)
-    with zipfile.ZipFile(BytesIO(zip_bytes), "r") as archive:
-        names = set(archive.namelist())
-        missing = sorted(PACKAGE_PREFIX + name for name in REQUIRED_PACKAGE_FILES if PACKAGE_PREFIX + name not in names)
-        if missing:
-            raise RuntimeError(f"fixture package missing required files: {missing}")
-        manifest = json.loads(archive.read(PACKAGE_PREFIX + "MANIFEST.json"))
-        authority = json.loads(archive.read(PACKAGE_PREFIX + "AUTHORITY_STATE.json"))
-        blockers = json.loads(archive.read(PACKAGE_PREFIX + "BLOCKERS.json"))
-        repair_lineage = json.loads(archive.read(PACKAGE_PREFIX + "REPAIR_LINEAGE.json"))
-        tool_results = json.loads(archive.read(PACKAGE_PREFIX + "TOOL_RESULTS.json"))
-        project_brief = json.loads(archive.read(PACKAGE_PREFIX + "PROJECT_BRIEF.json"))
-        source_manifest = json.loads(archive.read(PACKAGE_PREFIX + "SOURCE_MANIFEST.json"))
-        source_conflicts = json.loads(archive.read(PACKAGE_PREFIX + "SOURCE_CONFLICTS.json"))
-        requirements = json.loads(archive.read(PACKAGE_PREFIX + "REQUIREMENTS.json"))
-        decisions = json.loads(archive.read(PACKAGE_PREFIX + "DECISIONS.json"))
-        action_trace = json.loads(archive.read(PACKAGE_PREFIX + "ACTION_TRACE.json"))
-        conversation_briefings = json.loads(archive.read(PACKAGE_PREFIX + "CONVERSATION_BRIEFINGS.json"))
-        artifact_references = json.loads(archive.read(PACKAGE_PREFIX + "ARTIFACT_REFERENCES.json"))
+    package_bytes = downloaded.content
+    package_path = out_dir / "GOLDEN_SEMICONDUCTOR_FIXTURE_PACKAGE.zip"
+    package_path.write_bytes(package_bytes)
 
-    checks = {
-        "proposal_revision_pinned": proposal_session["project_revision"] == current["revision"],
-        "initial_candidate_visible": any(
-            row["id"] == "candidate-direct-controller-adapter"
-            for row in proposal_session["architecture_candidates"]
-        ),
-        "failed_preview_persisted": failed_action["status"] == "failed",
-        "failure_code_visible": (
-            (((failed_action.get("tool_result") or {}).get("error") or {}).get("code"))
-            == "fixture_interface_voltage_domain_unclosed"
-        ),
-        "repair_lineage_points_to_failure": (
-            repair_session["repair_of"]["parent_session_id"] == proposal_session["session_id"]
-            and repair_session["repair_of"]["parent_action_id"] == preview_action["action_id"]
-            and repair_session["repair_of"]["failure_sha256"]
-            == repair_session["architecture_candidates"][0]["lineage"]["failure_sha256"]
-        ),
-        "repair_successor_visible": repair_session["architecture_candidates"][0]["id"]
-        == "candidate-protected-dut-adapter",
-        "repair_preview_succeeded": repaired_action["status"] == "succeeded",
-        "conversation_grounded_in_repair": (
-            briefing["conversation"]["session_id"] == repair_session["session_id"]
-            and briefing["conversation"]["recommended_next_action_ids"]
-            == [repair_preview_action["action_id"]]
-        ),
-        "package_manifest_complete": not missing,
-        "package_manifest_matches_zip": sorted(manifest["files"]) == sorted(name.removeprefix(PACKAGE_PREFIX) for name in names if name.startswith(PACKAGE_PREFIX) and not name.endswith("/") and name != PACKAGE_PREFIX + "MANIFEST.json"),
-        "package_preserves_project_identity": project_brief["project_id"] == project["project_id"],
-        "package_preserves_sources": {row["source_id"] for row in source_manifest["sources"]} >= {
-            "dut-datasheet-r1",
-            "dut-pin-map-r1",
-            "socket-drawing-r1",
-            "fixture-controller-manual-r1",
-            "test-limits-r1",
-            "lab-supply-procedure-r1",
-        },
-        "package_preserves_source_conflicts": source_conflicts["source_conflicts"] == case["project"]["initial_state"]["engineeringSourceConflicts"],
-        "package_preserves_requirements": any(
-            row["id"] == "req-default-off-translation" for row in requirements["requirements"]
-        ),
-        "package_preserves_decision": decisions["selected_candidate_id"] == "candidate-protected-dut-adapter",
-        "package_preserves_action_trace": any(
-            row["action_id"] == repair_preview_action["action_id"] for row in action_trace["actions"]
-        ),
-        "package_preserves_tool_results": any(
-            row.get("status") == "failed"
-            and (((row.get("error") or {}).get("code")) == "fixture_interface_voltage_domain_unclosed")
-            for row in tool_results["tool_results"]
-        )
-        and any(row.get("status") == "succeeded" for row in tool_results["tool_results"]),
-        "package_preserves_repair_lineage": any(
-            row.get("parent_session_id") == proposal_session["session_id"]
-            and row.get("parent_action_id") == preview_action["action_id"]
-            for row in repair_lineage["repairs"]
-        ),
-        "package_preserves_conversation": any(
-            row.get("session_id") == repair_session["session_id"]
-            for row in conversation_briefings["briefings"]
-        ),
-        "package_preserves_artifact_refs": bool(artifact_references["artifacts"]),
-        "fabrication_authority_closed": authority["fabrication_authorized"] is False,
-        "flash_authority_closed": authority["firmware_flash_authorized"] is False,
-        "power_authority_closed": authority["power_on_authorized"] is False,
-        "motion_authority_closed": authority["motion_authorized"] is False,
-        "release_authority_closed": authority["release_authorized"] is False,
-        "blockers_visible": bool(blockers["blockers"]),
-    }
+    with zipfile.ZipFile(BytesIO(package_bytes)) as archive:
+        names = {Path(name).name for name in archive.namelist()}
+        source_manifest = package_json(archive, "SOURCE_MANIFEST.json")
+        requirements = package_json(archive, "REQUIREMENTS.json")["requirements"]
+        candidates = package_json(archive, "ARCHITECTURE_CANDIDATES.json")["candidates"]
+        actions = package_json(archive, "ACTION_TRACE.json")["actions"]
+        tools = package_json(archive, "TOOL_RESULTS.json")["tool_results"]
+        repairs = package_json(archive, "REPAIR_LINEAGE.json")["repairs"]
+        turns = package_json(archive, "CONVERSATION_BRIEFINGS.json")["turns"]
+        blockers = package_json(archive, "BLOCKERS.json")["blockers"]
+        authority = package_json(archive, "AUTHORITY_STATE.json")
+        manifest = package_json(archive, "MANIFEST.json")
 
-    report = {
-        "schema_version": REPORT_SCHEMA,
-        "project_id": project["project_id"],
-        "project_revision": repaired_action["project_revision"],
-        "proposal_session_id": proposal_session["session_id"],
-        "repair_session_id": repair_session["session_id"],
-        "package_id": package_id,
-        "package_zip": str(zip_path),
-        "package_sha256": hashlib.sha256(zip_bytes).hexdigest(),
-        "checks": checks,
-        "pass": all(checks.values()),
-    }
-    (out_dir / "GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
+    latest = store.load(project_id)
+    sessions = list(latest["snapshot"].get("engineeringAiSessions") or [])
+    saved_parent = next(row for row in sessions if row.get("session_id") == parent_session_id)
+    saved_action = next(
+        row for row in saved_parent["actions"] if row.get("action_id") == failed_action_id
     )
-    markdown = [
-        "# Golden Semiconductor Fixture E2E",
+    saved_repair = next(row for row in sessions if row.get("session_id") == repair_session_id)
+    physical = {
+        key: latest["snapshot"].get(key)
+        for key in (
+            "fabrication_authorized",
+            "firmware_flash_authorized",
+            "power_on_authorized",
+            "motion_authorized",
+            "operational_authorized",
+            "release_authorized"
+        )
+    }
+    raw_markers = [
+        str(row.get("content") or "").encode("utf-8")
+        for row in sources
+        if row.get("content")
+    ]
+    revision_chain = [
+        initial["revision"],
+        proposed["revision"],
+        decided["revision"],
+        previewed["revision"],
+        repaired["revision"],
+        briefed["revision"],
+        packaged["revision"]
+    ]
+    repair_action_types = [str(row.get("action_type")) for row in saved_repair.get("actions") or []]
+    registered_sources = source_manifest.get("registered_sources") or []
+    raw_fields_present = any(
+        "content" in row or "raw" in row or "bytes" in row
+        for row in registered_sources
+        if isinstance(row, dict)
+    )
+
+    checks = [
+        check("fixture-source-count", len(sources) == int(expected["source_count"]), len(sources), expected["source_count"]),
+        check("revision-chain", revision_chain == [1, 2, 3, 4, 5, 6, 7], revision_chain, [1, 2, 3, 4, 5, 6, 7]),
+        check("proposal-action", parent_session["actions"][0]["action_type"] == expected["proposal_action_type"], parent_session["actions"][0]["action_type"], expected["proposal_action_type"]),
+        check("persisted-domain-failure", saved_action.get("status") == "failed" and dict(saved_action.get("tool_result") or {}).get("status") == "failed" and expected["failure_contains"] in str(dict(saved_action.get("tool_result") or {}).get("error", {}).get("message") or ""), saved_action.get("tool_result"), expected["failure_contains"]),
+        check("repair-successor", dict(saved_repair.get("repair_of") or {}).get("parent_action_id") == failed_action_id and repair_action_types == expected["repair_action_types"] and all(row.get("status") == "proposed" for row in saved_repair.get("actions") or []), {"repair_of": saved_repair.get("repair_of"), "action_types": repair_action_types}, {"parent_action_id": failed_action_id, "action_types": expected["repair_action_types"]}),
+        check("jarvis-pre-fab-block", turn.get("answer_kind") == "decision_briefing" and any(row.get("kind") == "tool_result" and row.get("id") == failed_action_id for row in turn.get("evidence_refs") or []) and any(row.get("kind") == "source" and row.get("id") == "dut-datasheet-r1" for row in turn.get("evidence_refs") or []) and bool(turn.get("recommended_action_id")), turn, "grounded blocked briefing with typed verification proposal"),
+        check("jarvis-action-type", any(row.get("origin_turn_id") == turn.get("turn_id") and row.get("action_type") == expected["conversation_action_type"] and row.get("status") == "proposed" for row in saved_parent.get("actions") or []), saved_parent.get("actions"), expected["conversation_action_type"]),
+        check("package-replay", replayed.get("idempotent") is True and replayed.get("revision") == 7 and dict(replayed.get("package") or {}).get("package_id") == package.get("package_id"), replayed, "verified replay without revision 8"),
+        check("package-files", REQUIRED_PACKAGE_FILES.issubset(names), sorted(names), sorted(REQUIRED_PACKAGE_FILES)),
+        check("package-hash", hashlib.sha256(package_bytes).hexdigest() == package.get("zip_sha256") and len(package_bytes) == package.get("zip_size_bytes"), {"sha256": hashlib.sha256(package_bytes).hexdigest(), "bytes": len(package_bytes)}, {"sha256": package.get("zip_sha256"), "bytes": package.get("zip_size_bytes")}),
+        check("package-source-revision", package.get("source_revision") == expected["source_revision_for_package"], package.get("source_revision"), expected["source_revision_for_package"]),
+        check("raw-source-bytes-omitted", not any(marker and marker in package_bytes for marker in raw_markers) and not raw_fields_present and source_manifest.get("raw_source_bytes_included") is False, {"raw_marker_found": any(marker and marker in package_bytes for marker in raw_markers), "raw_fields_present": raw_fields_present, "manifest_flag": source_manifest.get("raw_source_bytes_included")}, "all false"),
+        check("package-domain-requirements", any(row.get("id") == "req-dut-domain" for row in requirements) and any(row.get("id") == "req-default-off-translation" for row in requirements), [row.get("id") for row in requirements], ["req-dut-domain", "req-default-off-translation"]),
+        check("package-successor-candidate", any(row.get("id") == "candidate-protected-dut-adapter" for row in candidates), [row.get("id") for row in candidates], "candidate-protected-dut-adapter"),
+        check("package-failed-action", any(row.get("action_id") == failed_action_id and row.get("status") == "failed" for row in actions), actions, "failed parent action"),
+        check("package-failed-tool", any(row.get("action_id") == failed_action_id and row.get("status") == "failed" for row in tools), tools, "failed deterministic preview"),
+        check("package-repair-lineage", any(row.get("session_id") == repair_session_id and dict(row.get("repair_of") or {}).get("parent_action_id") == failed_action_id for row in repairs), repairs, "repair child linked to failure"),
+        check("package-conversation", any(row.get("turn_id") == turn.get("turn_id") and row.get("recommended_action_id") == turn.get("recommended_action_id") for row in turns), turns, "JARVIS briefing and recommendation"),
+        check("package-blockers", len(blockers) >= 5, blockers, ">=5 open questions, failure, and JARVIS blockers"),
+        check("manifest-count", len(manifest.get("files") or []) == package.get("file_count") - 1 and package.get("file_count") == expected["package_file_count"], {"manifest_files": len(manifest.get("files") or []), "package_files": package.get("file_count")}, {"manifest_files": expected["package_file_count"] - 1, "package_files": expected["package_file_count"]}),
+        check("authority-fail-closed", not any(value is True for value in physical.values()) and authority.get("package_authorizes_physical_action") is False, {"project": physical, "package": authority}, "fabrication, power, operation, and release remain false")
+    ]
+    passed = all(row["passed"] for row in checks)
+    return {
+        "schema_version": REPORT_SCHEMA,
+        "scenario_id": case["scenario_id"],
+        "passed": passed,
+        "revision_chain": {
+            "initial": 1,
+            "proposal": 2,
+            "decision": 3,
+            "preview_failure": 4,
+            "repair": 5,
+            "conversation": 6,
+            "package_record": 7
+        },
+        "identities": {
+            "parent_session_id": parent_session_id,
+            "failed_action_id": failed_action_id,
+            "repair_session_id": repair_session_id,
+            "conversation_turn_id": turn.get("turn_id"),
+            "recommended_action_id": turn.get("recommended_action_id"),
+            "package_id": package.get("package_id")
+        },
+        "package": {
+            "path": package_path.name,
+            "source_revision": package.get("source_revision"),
+            "snapshot_sha256": package.get("snapshot_sha256"),
+            "manifest_sha256": package.get("manifest_sha256"),
+            "zip_sha256": package.get("zip_sha256"),
+            "zip_size_bytes": package.get("zip_size_bytes"),
+            "file_count": package.get("file_count")
+        },
+        "physical_authority": physical,
+        "checks": checks,
+        "limitations": [
+            "The DUT, documents, and parts are synthetic deterministic fixtures.",
+            "AI responses are injected schema-shaped fixtures rather than live-model output.",
+            "The compose failure is deliberate and validates domain-conflict persistence.",
+            "No schematic, PCB, socket, DUT, instrument, or physical measurement is treated as fabricated evidence.",
+            "No fabrication, DUT power, firmware flashing, operation, or release is authorized."
+        ]
+    }
+
+
+def markdown(report: Mapping[str, Any]) -> str:
+    lines = [
+        "# Golden Semiconductor Fixture JARVIS End-to-End Report",
         "",
-        f"- project: `{project['project_id']}`",
-        f"- proposal session: `{proposal_session['session_id']}`",
-        f"- repair session: `{repair_session['session_id']}`",
-        f"- package: `{package_id}`",
-        f"- package sha256: `{report['package_sha256']}`",
-        f"- overall: `{'PASS' if report['pass'] else 'FAIL'}`",
+        f"**Scenario:** `{report.get('scenario_id')}`",
+        f"**Result:** `{'PASS' if report.get('passed') else 'FAIL'}`",
+        "",
+        "This validates a pre-fabrication software workflow. It is not a fabrication or DUT power certificate.",
         "",
         "## Checks",
+        "",
+        "| Check | Result |",
+        "|---|---|"
     ]
-    markdown.extend(
-        f"- {'PASS' if value else 'FAIL'} `{key}`" for key, value in checks.items()
+    lines.extend(
+        f"| {row.get('name')} | {'PASS' if row.get('passed') else 'FAIL'} |"
+        for row in report.get("checks") or []
     )
-    (out_dir / "GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.md").write_text(
-        "\n".join(markdown) + "\n", encoding="utf-8"
-    )
-    return report
+    lines.extend(["", "## Limits", ""])
+    lines.extend(f"- {value}" for value in report.get("limitations") or [])
+    lines.append("")
+    return "\n".join(lines)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser()
     parser.add_argument("--case", type=Path, default=DEFAULT_CASE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
+
     report = run(load_case(args.case), args.out)
-    print(json.dumps(report, indent=2))
-    if args.strict and not report["pass"]:
-        return 2
+    json_path = args.out / "GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.json"
+    md_path = args.out / "GOLDEN_SEMICONDUCTOR_FIXTURE_E2E.md"
+    json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    md_path.write_text(markdown(report), encoding="utf-8")
+    print(
+        json.dumps(
+            {
+                "passed": report["passed"],
+                "revision_chain": report["revision_chain"],
+                "identities": report["identities"],
+                "package": report["package"],
+                "physical_authority": report["physical_authority"]
+            },
+            indent=2
+        )
+    )
+    print(f"wrote {json_path}")
+    print(f"wrote {md_path}")
+    if args.strict and not report["passed"]:
+        return 1
     return 0
 
 
