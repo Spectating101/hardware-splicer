@@ -361,13 +361,13 @@ def run(case: Mapping[str, Any], out_dir: Path) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     store = ProjectStore(root=out_dir / "store")
-    project = store.create_project(
-        project_id=str(case["project"]["project_id"]),
-        name=str(case["project"]["name"]),
-        mode=str(case["project"]["mode"]),
-        initial_state=dict(case["project"]["initial_state"]),
-    )
-    current = store.get_project(project["project_id"])
+    project_id = str(case["project"]["project_id"])
+    initial_state = dict(case["project"]["initial_state"])
+    initial_state.setdefault("projectId", project_id)
+    initial_state.setdefault("name", str(case["project"]["name"]))
+    initial_state.setdefault("mode", str(case["project"]["mode"]))
+    project = store.save(project_id, initial_state)
+    current = project
     case_with_state = dict(case)
     case_with_state["state"] = {}
     app = fixture_app(case_with_state, store)
