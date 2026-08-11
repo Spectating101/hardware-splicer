@@ -24,7 +24,7 @@ from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
 from .engineering_api import create_engineering_router
-from .engineering_execution_api import create_engineering_execution_router
+from .engineering_execution_anchored_api import create_engineering_execution_router
 from .engineering_package_api import create_engineering_package_router
 from .engineering_package_download_api import (
     create_engineering_package_download_router,
@@ -87,6 +87,9 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
+    # Canonical product persistence must be revision-anchored.  The wrapper preserves
+    # preview/run/in-memory evidence routes but replaces only /evidence/save with the
+    # stored-revision implementation so caller payloads cannot overwrite project truth.
     app.include_router(create_engineering_execution_router(resolved_store))
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))
