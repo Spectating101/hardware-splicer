@@ -19,7 +19,7 @@ def _cases():
 
 def test_guidance_corpus_covers_build_and_multiple_modification_genres() -> None:
     cases = _cases()
-    assert len(cases) == 4
+    assert len(cases) == 5
     assert {case["mode"] for case in cases} == {"build", "modify"}
     assert {case["expected_archetype"] for case in cases} == {
         "rover",
@@ -115,6 +115,7 @@ def test_current_custom_robot_mods_expose_native_and_change_impact_gaps() -> Non
     assert set(results) == {
         "crazyflie_custom_sensor_deck",
         "openmanipulator_wrist_camera_sorter",
+        "pupper_depth_camera_inspection",
         "pupper_depth_camera_inspection_mod",
     }
     for result in results.values():
@@ -128,8 +129,8 @@ def test_current_custom_robot_mods_expose_native_and_change_impact_gaps() -> Non
 
 def test_current_suite_does_not_overclaim_robot_build_readiness() -> None:
     report = evaluate_robot_guidance_suite(_cases())
-    assert report["scenario_count"] == 4
+    assert report["scenario_count"] == 5
     assert report["guided_build_ready_count"] == 0
-    assert len(report["rows"]) == 4
+    assert len(report["rows"]) == 5
     assert all(row["guidance_score"] <= 100.0 for row in report["rows"])
     assert all(row["gaps"] for row in report["rows"])
