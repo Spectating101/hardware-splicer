@@ -1,7 +1,21 @@
 from __future__ import annotations
 
-from hardware_splicer.catalog import get_catalog_build
+import json
+from pathlib import Path
+
 from hardware_splicer.inventory_topology import adapt_recipe_to_inventory
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _recipe(build_id: str) -> dict:
+    payload = json.loads(
+        (ROOT / "src" / "hardware_splicer" / "data" / "catalog_recipes.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    return dict(payload["recipes"][build_id])
 
 
 def _module_ids(recipe: dict) -> dict[str, str]:
@@ -12,9 +26,8 @@ def _module_ids(recipe: dict) -> dict[str, str]:
 
 
 def test_nano_direct_drive_removes_redundant_esp32_level_shifter() -> None:
-    recipe = get_catalog_build("usb_fume_extractor")
     adapted, _ = adapt_recipe_to_inventory(
-        recipe,
+        _recipe("usb_fume_extractor"),
         {
             "module_overrides": {"mcu": "arduino-nano"},
             "resolved_modules": [],
@@ -32,9 +45,8 @@ def test_nano_direct_drive_removes_redundant_esp32_level_shifter() -> None:
 
 
 def test_esp32_keeps_level_shifter_when_receiver_requires_4v5_logic() -> None:
-    recipe = get_catalog_build("usb_fume_extractor")
     adapted, _ = adapt_recipe_to_inventory(
-        recipe,
+        _recipe("usb_fume_extractor"),
         {
             "module_overrides": {"mcu": "esp32-devkit"},
             "resolved_modules": [],
