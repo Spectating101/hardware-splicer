@@ -81,12 +81,21 @@ def _result_and_manifest(
     if isinstance(value, ExecutionResult):
         result = value
         return result, execution_manifest(result)
-    payload = dict(value)
-    result = ExecutionResult.model_validate(payload)
-    manifest = dict(payload)
-    if not manifest.get("manifest_hash"):
-        manifest = execution_manifest(result)
-    return result, manifest
+
+    # execution_manifest() is an envelope: the strict ExecutionResult payload plus a
+    # detached integrity hash.  Never broaden ExecutionResult to accept envelope fields.
+    # Instead validate the result payload, recompute the canonical manifest, and reject a
+    # supplied hash that does not match the validated content.
+    envelope = dict(value)
+    supplied_hash = str(envelope.pop("manifest_hash", "") or "").strip()
+    result = ExecutionResult.model_validate(envelope)
+    canonical_manifest = execution_manifest(result)
+    canonical_hash = str(canonical_manifest.get("manifest_hash") or "")
+    if supplied_hash and supplied_hash != canonical_hash:
+        raise ValueError(
+            "execution manifest hash does not match validated execution result"
+        )
+    return result, canonical_manifest
 
 
 def attach_execution_evidence(

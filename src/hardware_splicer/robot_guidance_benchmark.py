@@ -137,6 +137,70 @@ def _bom_quality(plan: Mapping[str, Any], expectations: Mapping[str, Any]) -> tu
     return not gaps, gaps
 
 
+def _has_structured_custom_mechanics(plan: Mapping[str, Any]) -> bool:
+    """Require canonical topology + structured mount inventory + mechanical change impact.
+
+    The benchmark used to recognize only a few historical ``compile_spec`` field names.
+    Modern plans carry mechanical identity in ``robot_topology`` and change propagation in
+    ``modification_delta``/``change_impact``.  Raw goal prose is deliberately ignored here:
+    a custom-mechanics score requires structured evidence on all three surfaces.
+    """
+
+    topology = _mapping(plan.get("robot_topology"))
+    has_topology = bool(_sequence(topology.get("links"))) and bool(
+        _sequence(topology.get("joints")) or _sequence(topology.get("frames"))
+    )
+    if not has_topology:
+        return False
+
+    mechanical_part_tokens = {
+        "mechanical_mount",
+        "mechanical_structure",
+        "gripper_part",
+        "bracket",
+        "mount",
+        "fixture",
+        "link",
+    }
+    has_structured_mechanical_part = False
+    for row in _sequence(plan.get("normalized_parts")):
+        if not isinstance(row, Mapping):
+            continue
+        values = {
+            str(row.get(key) or "").strip().lower().replace("-", "_")
+            for key in ("type", "class", "category", "role")
+            if str(row.get(key) or "").strip()
+        }
+        if values & mechanical_part_tokens:
+            has_structured_mechanical_part = True
+            break
+    if not has_structured_mechanical_part:
+        return False
+
+    delta = _mapping(plan.get("modification_delta"))
+    affected_domains = {
+        str(value).strip().lower()
+        for value in _sequence(delta.get("affected_domains"))
+        if str(value).strip()
+    }
+    affected_targets = {
+        str(value).strip()
+        for value in _sequence(delta.get("affected_target_ids"))
+        if str(value).strip()
+    }
+    change_impact = _mapping(plan.get("change_impact"))
+    mechanical_impacts = [
+        row
+        for row in _sequence(change_impact.get("impacts"))
+        if isinstance(row, Mapping)
+        and str(row.get("domain") or "").strip().lower() == "mechanical"
+    ]
+    return "mechanical" in affected_domains or bool(mechanical_impacts) or any(
+        "mechan" in target.lower() or "mount" in target.lower()
+        for target in affected_targets
+    )
+
+
 def evaluate_robot_guidance_scenario(
     scenario: Mapping[str, Any],
     *,
@@ -198,21 +262,29 @@ def evaluate_robot_guidance_scenario(
         "evidence": [f"{len(_sequence(plan.get('normalized_parts')))} normalized part lines"] if bom_ok else [],
     }
 
+    mechanical_scope = {
+        "compile_spec": spec,
+        "robot_topology": plan.get("robot_topology"),
+        "modification_delta": plan.get("modification_delta"),
+        "change_impact": plan.get("change_impact"),
+    }
     mechanical_ok = _contains_key(
-        spec,
+        mechanical_scope,
         {"mechanism", "dimensions", "clearance", "mount", "link", "joint_axis", "coordinate_frame"},
     )
-    if expectations.get("custom_mechanics") and not _contains_key(
-        spec,
-        {"custom_mount", "mount_delta", "center_of_mass", "collision_geometry", "payload_inertia"},
-    ):
-        mechanical_ok = False
-        gaps.append("custom_mechanical_impact_missing")
+    if expectations.get("custom_mechanics"):
+        historical_custom_mechanics = _contains_key(
+            spec,
+            {"custom_mount", "mount_delta", "center_of_mass", "collision_geometry", "payload_inertia"},
+        )
+        if not (historical_custom_mechanics or _has_structured_custom_mechanics(plan)):
+            mechanical_ok = False
+            gaps.append("custom_mechanical_impact_missing")
     record(
         "mechanical_guidance",
         mechanical_ok,
         "mechanical_build_guidance_missing",
-        "mechanical compile specification",
+        "canonical robot topology and structured mechanical change impact",
     )
 
     record(

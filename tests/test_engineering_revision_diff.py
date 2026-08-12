@@ -125,7 +125,10 @@ def test_diff_tracks_resolved_opened_identity_artifact_and_execution_changes() -
         candidate_revision=2,
     )
 
-    assert {row.blocker_id for row in report.resolved_blockers} == {"analysis-current"}
+    assert {row.blocker_id for row in report.resolved_blockers} == {
+        "analysis-current",
+        "execution-result-pytest-main",
+    }
     assert {row.blocker_id for row in report.opened_blockers} == {"harness-pinout"}
     component_change = next(row for row in report.identity_changes if row.category == "machine_components")
     assert component_change.added_ids == ["current-sensor"]
@@ -134,7 +137,7 @@ def test_diff_tracks_resolved_opened_identity_artifact_and_execution_changes() -
     assert report.artifact_changes[0].candidate["revision"] == "r2"
     assert report.execution_changes[0]["base"]["status"] == "failed"
     assert report.execution_changes[0]["candidate"]["status"] == "passed"
-    assert report.summary["resolved_blocker_count"] == 1
+    assert report.summary["resolved_blocker_count"] == 2
     assert report.summary["opened_blocker_count"] == 1
 
 

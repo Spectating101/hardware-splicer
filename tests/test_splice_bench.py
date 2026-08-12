@@ -68,7 +68,14 @@ def test_bench_submit_closes_gates_and_updates_readiness(tmp_path: Path) -> None
 
     critical_ids = [row["gate_id"] for row in session["gates"] if row.get("critical")]
     measurements = [
-        {"gate_id": gate_id, "status": "closed", "value": 6.0, "unit": "V", "method": "DMM"}
+        {
+            "gate_id": gate_id,
+            "status": "closed",
+            "value": 6.0,
+            "unit": "V",
+            "method": "DMM",
+            "operator": "test_operator",
+        }
         for gate_id in critical_ids
     ]
     updated = submit_bench_measurements(root, measurements)
@@ -76,6 +83,25 @@ def test_bench_submit_closes_gates_and_updates_readiness(tmp_path: Path) -> None
     assert updated["power_on_authorized"] is True
     assert updated["readiness"] in {"ready_for_power_on", "bench_complete"}
     assert (root / SESSION_FILE).is_file()
+
+
+def test_critical_gate_cannot_close_from_anonymous_status_flip(tmp_path: Path) -> None:
+    root = _write_minimal_bench_artifacts(tmp_path / "anonymous")
+    session = open_bench_session(root)
+    gate = next(row for row in session["gates"] if row.get("critical"))
+
+    updated = submit_bench_measurements(
+        root,
+        [{"gate_id": gate["gate_id"], "status": "closed", "value": 6.0, "unit": "V"}],
+    )
+
+    applied = updated["last_submission"]["applied"][0]
+    assert applied["ok"] is False
+    assert applied["error"] == "measurement_validation_failed"
+    assert "operator" in applied["reason"]
+    stored = next(row for row in updated["gates"] if row["gate_id"] == gate["gate_id"])
+    assert stored["status"] == "blocked"
+    assert updated["power_on_authorized"] is False
 
 
 def test_bench_status_persists_session(tmp_path: Path) -> None:
@@ -92,7 +118,16 @@ def test_sdk_bench_wrappers(tmp_path: Path) -> None:
     assert status["schema_version"].startswith("hardware_splicer")
     submit = splice_bench_submit(
         root,
-        [{"gate_id": "vmotor_rail", "status": "closed", "value": 6.1, "unit": "V"}],
+        [
+            {
+                "gate_id": "vmotor_rail",
+                "status": "closed",
+                "value": 6.1,
+                "unit": "V",
+                "method": "DMM",
+                "operator": "test_operator",
+            }
+        ],
     )
     assert submit["gate_count"] >= 1
 
@@ -119,8 +154,16 @@ def test_splice_build_bench_submit_integration(tmp_path: Path, monkeypatch) -> N
     critical_open = [row for row in session.get("gates") or [] if row.get("critical") and row.get("status") != "closed"]
     assert critical_open
     measurements = [
-        {"gate_id": row["gate_id"], "status": "closed", "value": 6.0, "unit": "V", "method": "DMM"}
+        {
+            "gate_id": row["gate_id"],
+            "status": "closed",
+            "value": 6.0,
+            "unit": "V",
+            "method": "DMM",
+            "operator": "test_operator",
+        }
         for row in critical_open
+        if not row.get("requires_contract_edit")
     ]
     updated = submit_bench_measurements(out, measurements)
     structural_open = [

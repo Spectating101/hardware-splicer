@@ -57,6 +57,21 @@ def _rows(value: Any) -> list[dict[str, Any]]:
     return []
 
 
+def _source_metadata(value: Any) -> dict[str, Any]:
+    """Return one normalized metadata view from persisted source-graph rows.
+
+    Older/current graph construction can preserve a caller's explicit ``metadata`` object
+    under the source model's own metadata field, producing ``metadata.metadata`` alongside
+    other extension keys. Execution planning must read that persisted shape without
+    promoting any value or parsing prose. Explicit outer extension keys win only when they
+    are actually present.
+    """
+
+    outer = _mapping(value)
+    nested = _mapping(outer.get("metadata"))
+    return {**nested, **{key: val for key, val in outer.items() if key != "metadata"}}
+
+
 def _slug(value: Any, fallback: str) -> str:
     token = re.sub(r"[^A-Za-z0-9_.-]+", "-", str(value or "").strip()).strip("-._").lower()
     return token[:100] or fallback
@@ -137,7 +152,7 @@ def build_engineering_execution_plan(
         )
 
     for source in graph.sources:
-        metadata = source.metadata if isinstance(source.metadata, Mapping) else {}
+        metadata = _source_metadata(source.metadata)
         artifact_kind = str(metadata.get("artifact_kind") or "").lower()
         path = _local_path(source.uri)
         if artifact_kind == "urdf":

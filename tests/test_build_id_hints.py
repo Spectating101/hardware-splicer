@@ -44,14 +44,16 @@ def test_printer_splice_intake_resolves_plotter_build_id_in_offline_compatibilit
     assert pkg.get("recommended_build_id") == "plotter_motion_stage"
 
 
-def test_reconcile_keeps_valid_model_proposal_over_keyword() -> None:
+def test_reconcile_keeps_generic_scaffold_from_falling_back_to_keyword() -> None:
     got = reconcile_build_pick(
         "generic_low_voltage_build",
         "usb_fume_extractor",
         diy_build_id="usb_fume_extractor",
         llm_confidence=0.6,
     )
-    assert got == "generic_low_voltage_build"
+    # The generic build is an execution scaffold, not canonical architecture. It also
+    # prevents a legacy keyword from replacing the model's unresolved architecture choice.
+    assert got is None
 
 
 def test_reconcile_keeps_confident_llm_when_no_keyword() -> None:
@@ -146,11 +148,11 @@ def test_salvage_model_proposal_is_not_overridden_by_keyword(monkeypatch: pytest
             project_name="fan_controller",
         )
 
-    # The semantic proposal wins the architecture decision; no keyword fallback replaces
-    # it. Generic scratch execution is intentionally not promoted to an effective catalog
-    # architecture in model-first mode, so the public recommendation remains unresolved.
+    # The semantic proposal is retained as an execution scaffold; no keyword fallback
+    # replaces it and it is not promoted to canonical architecture.
     selection = pkg.get("build_selection") or {}
-    assert selection.get("build_id") == "generic_low_voltage_build"
-    assert selection.get("source") == "model_proposed"
+    assert selection.get("build_id") is None
+    assert selection.get("proposed_build_id") == "generic_low_voltage_build"
+    assert selection.get("source") == "model_execution_scaffold"
     assert selection.get("legacy_fallback_used") is False
     assert pkg.get("recommended_build_id") is None

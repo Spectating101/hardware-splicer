@@ -8,15 +8,19 @@ from pathlib import Path
 
 import pytest
 
+from hardware_splicer.auto_wire import compose_build_graph_from_module_ids
+from hardware_splicer.canvas_compose import build_canvas_graph
 from hardware_splicer.pcb.drc_fix_loop import (
     apply_fixup_to_graph,
     classify_violation,
-    propose_fixup_hints,
     compile_with_drc_fixup_loop,
+    propose_fixup_hints,
 )
 from hardware_splicer.pcb.geometry_compile import compile_graph_to_artifacts
-from hardware_splicer.auto_wire import compose_build_graph_from_module_ids
-from hardware_splicer.repair_policy import repair_policy_report
+from hardware_splicer.repair_policy import (
+    assert_repair_preserves_authority,
+    repair_policy_report,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -37,12 +41,37 @@ def test_propose_fixup_hints_accumulates() -> None:
 
 
 def test_repair_policy_rejects_identity_or_architecture_mutation_channels() -> None:
+    for forbidden in (
+        "module_id",
+        "module_overrides",
+        "recommended_build_id",
+        "build_id",
+        "net_topology",
+        "electrical_contract",
+        "pinout",
+    ):
+        with pytest.raises(ValueError, match="outside geometry authority"):
+            repair_policy_report({forbidden: 1})
+
+
+def test_canvas_fixup_surface_uses_same_repair_authority_boundary() -> None:
+    nodes = [{"id": "n1", "moduleId": "esp32-devkit"}]
+    wires = [{"id": "w1", "from": {"nodeId": "n1"}, "to": {"nodeId": "n1"}}]
+
     with pytest.raises(ValueError, match="outside geometry authority"):
-        repair_policy_report({"module_id": 1})
-    with pytest.raises(ValueError, match="outside geometry authority"):
-        repair_policy_report({"recommended_build_id": 1})
-    with pytest.raises(ValueError, match="outside geometry authority"):
-        repair_policy_report({"net_topology": 1})
+        build_canvas_graph(nodes=nodes, wires=wires, drc_fixup={"module_id": 1.0})
+
+    graph = build_canvas_graph(
+        nodes=nodes,
+        wires=wires,
+        drc_fixup={"via_clearance_mm": 0.27000001, "edge_pad_extra_mm": 0.35},
+    )
+    assert graph["nodes"] == nodes
+    assert graph["wires"] == wires
+    assert graph["drc_fixup"] == {
+        "via_clearance_mm": 0.27,
+        "edge_pad_extra_mm": 0.35,
+    }
 
 
 def test_apply_fixup_changes_only_drc_geometry_surface() -> None:
@@ -73,14 +102,57 @@ def test_apply_fixup_changes_only_drc_geometry_surface() -> None:
         "via_clearance_mm": 0.27,
         "module_gap_extra_mm": 4.0,
     }
+    assert_repair_preserves_authority(original, graph)
+
+
+def test_repair_authority_invariant_detects_identity_or_topology_change() -> None:
+    before = {
+        "build_id": "generic_low_voltage_build",
+        "nodes": [{"id": "n1", "moduleId": "esp32-devkit"}],
+        "wires": [{"id": "w1", "net": "DATA"}],
+    }
+    after = copy.deepcopy(before)
+    after["nodes"][0]["moduleId"] = "arduino-nano"
+    after["drc_fixup"] = {"via_clearance_mm": 0.27}
+
+    with pytest.raises(ValueError, match="outside geometry authority: nodes"):
+        assert_repair_preserves_authority(before, after)
+
+
+def test_repair_loop_rejects_compile_callback_design_mutation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
+    graph = {
+        "build_id": "generic_low_voltage_build",
+        "nodes": [{"id": "n1", "moduleId": "esp32-devkit"}],
+        "wires": [],
+    }
+
+    def mutating_compile(build_id, out_dir, working_graph, **kwargs):
+        working_graph["nodes"][0]["moduleId"] = "arduino-nano"
+        return {"quality": {"kicad_drc_errors": 0, "kicad_drc_warnings": 0}}
+
+    with pytest.raises(ValueError, match="outside geometry authority: nodes"):
+        compile_with_drc_fixup_loop(
+            mutating_compile,
+            "generic_low_voltage_build",
+            tmp_path,
+            graph,
+        )
 
 
 def test_repair_policy_never_opens_physical_authority() -> None:
     report = repair_policy_report({"via_clearance_mm": 0.27})
+    assert report["repair_proposal_only"] is True
+    assert report["verified_truth_effect"] == "none"
+    assert report["mutable_graph_keys"] == ["drc_fixup"]
     assert report["component_identity_mutation_allowed"] is False
     assert report["module_override_mutation_allowed"] is False
     assert report["net_topology_mutation_allowed"] is False
     assert report["architecture_selection_allowed"] is False
+    assert report["electrical_contract_mutation_allowed"] is False
     assert report["fabrication_authorized"] is False
     assert report["power_on_authorized"] is False
     assert report["motion_authorized"] is False
@@ -100,6 +172,9 @@ def test_drc_fix_loop_records_attempts(tmp_path: Path, monkeypatch: pytest.Monke
     loop = (payload.get("quality") or {}).get("drc_fix_loop") or {}
     assert loop.get("enabled") is True
     assert len(loop.get("attempts") or []) >= 1
+    assert loop["design_authority_preserved"] is True
+    assert loop["repair_proposal_only"] is True
+    assert all(row["design_authority_preserved"] is True for row in loop["attempts"])
     assert loop["repair_policy"]["architecture_selection_allowed"] is False
     assert loop["repair_policy"]["component_identity_mutation_allowed"] is False
     assert loop["authority_effect"] == "none"

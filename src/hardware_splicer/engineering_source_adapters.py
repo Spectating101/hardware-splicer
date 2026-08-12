@@ -267,6 +267,18 @@ def adapt_engineering_source(value: Mapping[str, Any] | str, index: int = 0) -> 
     if not isinstance(value, Mapping):
         return str(value), None
     row = dict(value)
+
+    # A source that already carries graph identity and an explicit claims list is already
+    # normalized. Re-adapting it as a raw measurement/telemetry artifact would discard the
+    # claims and rewrite provenance metadata. Preserve graph-ready rows byte-for-structure;
+    # downstream graph validation remains responsible for judging the claims themselves.
+    if (
+        str(row.get("source_id") or "").strip()
+        and str(row.get("source_type") or "").strip()
+        and isinstance(row.get("claims"), list)
+    ):
+        return row, None
+
     artifact_kind = str(
         row.get("artifact_kind")
         or row.get("format")

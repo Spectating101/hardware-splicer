@@ -202,6 +202,10 @@ def build_ai_project_context(
             "engineeringAnalysis",
             "engineeringBlockers",
             "engineeringAdvisories",
+            "engineeringSourceConflicts",
+            "engineering_source_conflicts",
+            "declared_conflicts",
+            "source_conflicts",
             "rankedNextAction",
         )
         if snapshot.get(key) is not None
@@ -219,6 +223,7 @@ def build_ai_project_context(
         "context_policy": {
             "raw_registered_file_content_included": False,
             "source_authority_may_not_be_elevated": True,
+            "source_conflicts_preserved": True,
             "model_output_authority": "proposed",
             "automatic_execution": False,
             "fabrication_authorized": False,
@@ -240,6 +245,10 @@ def build_ai_project_context(
                 snapshot.get("engineering_readiness")
             ),
             "engineering_status": _sanitize_value(snapshot.get("engineering_status")),
+            "engineeringBlockers": _sanitize_value(snapshot.get("engineeringBlockers")),
+            "engineeringSourceConflicts": _sanitize_value(
+                snapshot.get("engineeringSourceConflicts")
+            ),
         }
         context["context_policy"]["project_summary_reduced_for_context_bound"] = True
         encoded = _canonical_json(context)

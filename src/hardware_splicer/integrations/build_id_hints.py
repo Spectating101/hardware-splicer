@@ -28,7 +28,7 @@ BUILD_ID_GUIDE: dict[str, str] = {
     "sensor_logger": "BME280/DHT data logger, environmental logging, WiFi sensor node",
     "inspection_motion_fixture": "Pan-tilt, camera mount, gimbal, inspection head",
     "low_voltage_motor_test_jig": "Motor test, gripper, claw, bench motor jig",
-    "generic_low_voltage_build": "General low-voltage build when no bounded recipe is a defensible fit",
+    "generic_low_voltage_build": "General low-voltage execution scaffold when no bounded recipe is a defensible fit",
 }
 
 
@@ -240,14 +240,26 @@ def reconcile_build_pick_with_provenance(
 ) -> Dict[str, Any]:
     """Resolve a build proposal without allowing heuristics to overrule the model.
 
-    A valid model-selected catalog ID always wins. Keyword/DIY/splice values are legacy
-    compatibility signals only. If ``allow_legacy_fallback`` is omitted, availability
-    follows the explicit offline-salvage policy instead of silently defaulting to true.
+    A valid model-selected bounded catalog ID wins. ``generic_low_voltage_build`` is
+    different: it is an execution scaffold for scratch composition, not a bounded product
+    architecture, so reconciliation preserves it as ``proposed_build_id`` while leaving
+    canonical ``build_id`` unresolved. Keyword/DIY/splice values remain explicit
+    offline-compatibility signals only.
     """
     llm = str(llm_build_id or "").strip()
     keyword = str(keyword_build_id or "").strip()
     diy = str(diy_build_id or "").strip()
     splice = str(splice_build_id or "").strip()
+
+    if llm == GENERIC_BUILD_ID:
+        return {
+            "build_id": None,
+            "proposed_build_id": llm,
+            "source": "model_execution_scaffold",
+            "confidence": max(0.0, min(1.0, float(llm_confidence or 0.0))),
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+        }
 
     if llm and llm in CATALOG_BUILD_IDS:
         return {
@@ -304,10 +316,11 @@ def reconcile_build_pick(
     llm_confidence: float = 0.0,
     allow_legacy_fallback: bool | None = None,
 ) -> Optional[str]:
-    """Compatibility wrapper returning only the selected ID.
+    """Compatibility wrapper returning only the canonical selected ID.
 
     Unlike the historical implementation, a keyword result can never override a valid
-    model proposal, and an omitted fallback flag follows the explicit offline policy.
+    model proposal, an omitted fallback flag follows the explicit offline policy, and the
+    generic scratch scaffold does not masquerade as canonical architecture.
     """
     decision = reconcile_build_pick_with_provenance(
         llm_build_id,

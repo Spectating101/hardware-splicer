@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence
 from .auto_wire import compose_build_graph_from_canvas_nodes
 from .build_compiler import BuildCompileResult, compile_catalog_build
 from .material_modes import material_mode_summary, resolve_material_mode
+from .repair_policy import normalize_geometry_fixup_hints
 
 
 @dataclass
@@ -42,7 +43,12 @@ def build_canvas_graph(
     material_mode: str | None = None,
     drc_fixup: Mapping[str, float] | None = None,
 ) -> Dict[str, Any]:
-    """Merge editor nodes/wires or auto-wire unknown connections."""
+    """Merge editor nodes/wires or auto-wire unknown connections.
+
+    Caller-supplied repair hints cross the same allowlisted geometry authority boundary as
+    the deterministic DRC retry loop. The canvas surface cannot create a second, looser
+    mutation channel for component identity, architecture, topology or electrical truth.
+    """
     mode = str(material_mode or resolve_material_mode(constraints=constraints, salvage_mode=salvage_mode))
     if wires:
         graph = {
@@ -53,8 +59,9 @@ def build_canvas_graph(
         graph = compose_build_graph_from_canvas_nodes(list(nodes))
     graph.update(material_mode_summary(material_mode=mode, constraints=constraints))  # type: ignore[arg-type]
     graph["graph_mode"] = "canvas"
-    if drc_fixup:
-        graph["drc_fixup"] = {k: round(float(v), 4) for k, v in drc_fixup.items()}
+    if drc_fixup is not None:
+        normalized = normalize_geometry_fixup_hints(drc_fixup)
+        graph["drc_fixup"] = {key: round(value, 4) for key, value in normalized.items()}
     return graph
 
 

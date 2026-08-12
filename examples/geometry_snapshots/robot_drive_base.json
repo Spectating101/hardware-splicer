@@ -47,8 +47,8 @@
       "height": 83.05000000000001
     },
     "footprint_count": 5,
-    "trace_segments": 82,
-    "via_count": 80
+    "trace_segments": 80,
+    "via_count": 64
   },
   "drc_pass": true,
   "kicad_drc_errors": 0

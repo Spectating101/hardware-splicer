@@ -94,11 +94,14 @@ def test_bench_capture_maps_to_splice_gates(tmp_path: Path) -> None:
                 "target": "motor harness",
                 "value": "pass",
                 "status": "verified",
+                "method": "dmm_continuity",
+                "instrument_id": "bench_dmm_01",
             },
         ],
     }
     mapped = bench_capture_to_splice_measurements(capture, gates=session["gates"])
     assert len(mapped) == 2
+    assert all(row["operator"] == "bench_rig_01" for row in mapped)
     result = submit_bench_capture(str(root), capture)
     assert result["ok"] is True
     assert result["mapped_count"] == 2

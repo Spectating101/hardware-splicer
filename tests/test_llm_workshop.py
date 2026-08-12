@@ -29,10 +29,16 @@ def test_salvage_workshop_heuristic_only(monkeypatch: pytest.MonkeyPatch) -> Non
 
 
 def test_workshop_review_apply_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Core CI deliberately disables live providers suite-wide. This test supplies a mocked
+    # provider, so clear every policy switch that would otherwise skip the call before the
+    # mock is reached.
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_WORKSHOP", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_LLM_FIRST", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_LLM", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_SALVAGE", "1")
+    monkeypatch.setenv("QWEN_DISABLED", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_QWEN_DISABLED", "0")
     monkeypatch.setenv("DASHSCOPE_API_KEY", "test-key")
     monkeypatch.setattr(
         "hardware_splicer.integrations.qwen_text_client.qwen_configured",

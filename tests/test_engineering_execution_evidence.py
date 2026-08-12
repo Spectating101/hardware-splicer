@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from hardware_splicer.engineering_execution import (
     ExecutionOperation,
     ExecutionResult,
@@ -64,6 +66,14 @@ def test_passing_execution_closes_software_verification_only() -> None:
         if not row.simulated and row.authority in {AuthorityState.MEASURED, AuthorityState.VERIFIED, AuthorityState.AUTHORIZED}
     ]
     assert project.assess_release().achieved_state.value != "operationally_authorized"
+
+
+def test_tampered_execution_manifest_is_rejected() -> None:
+    manifest = execution_manifest(_result(ExecutionStatus.PASSED))
+    manifest["stdout"] = "tampered after manifest hash"
+
+    with pytest.raises(ValueError, match="manifest hash"):
+        attach_execution_evidence(_project(), manifest)
 
 
 def test_failed_execution_blocks_its_verification() -> None:
