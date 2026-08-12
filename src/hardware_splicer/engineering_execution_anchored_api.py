@@ -1,8 +1,8 @@
 """Canonical execution router with revision-anchored evidence persistence.
 
 The existing execution router owns preview, run, capabilities, and in-memory evidence
-attachment. This wrapper preserves those exact route objects, removes only the legacy
-``/evidence/save`` route, and installs a persistence endpoint that applies execution
+attachment. This wrapper preserves that router, removes only the legacy
+``/evidence/save`` endpoint, and installs a persistence endpoint that applies execution
 evidence to the stored project revision instead of a caller-supplied replacement plan.
 """
 
@@ -30,6 +30,7 @@ from .project_store import (
 
 
 _SAVE_PATH = "/v1/engineering/execution/evidence/save"
+_SAVE_RELATIVE_PATH = "/evidence/save"
 
 
 def _engineering_plan_from_envelope(envelope: Mapping[str, Any]) -> Dict[str, Any]:
@@ -87,18 +88,22 @@ def _anchored_base_plan(
 def create_engineering_execution_router(
     project_store: ProjectStore | None = None,
 ) -> APIRouter:
-    """Return the existing execution surface with an anchored save endpoint."""
+    """Return the execution surface with exactly one revision-anchored save endpoint."""
 
-    legacy = create_legacy_execution_router(project_store)
-    router = APIRouter()
-    router.routes.extend(
+    # Keep the legacy router itself rather than transplanting route objects into a second
+    # router. FastAPI route prefixes are composition state; copying already-built routes
+    # into an unprefixed router made the canonical save path disappear under newer
+    # Starlette/FastAPI versions. Remove the unsafe save route in place and register the
+    # anchored replacement relative to the existing execution prefix.
+    router = create_legacy_execution_router(project_store)
+    router.routes[:] = [
         route
-        for route in legacy.routes
+        for route in router.routes
         if getattr(route, "path", None) != _SAVE_PATH
-    )
+    ]
 
     @router.post(
-        _SAVE_PATH,
+        _SAVE_RELATIVE_PATH,
         tags=["engineering", "execution"],
     )
     def ingest_and_save_evidence(
