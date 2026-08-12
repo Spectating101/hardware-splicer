@@ -1,8 +1,8 @@
 {
   "schema_version": "hardware_splicer.geometry_snapshot.v1",
   "build_id": "automatic_plant_watering",
-  "module_count": 5,
-  "wire_count": 12,
+  "module_count": 6,
+  "wire_count": 16,
   "node_positions": [
     {
       "id": "n1",
@@ -30,25 +30,31 @@
     },
     {
       "id": "n5",
+      "module_id": "level-shifter-4ch",
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "id": "n6",
       "module_id": "mosfet-irlz44n",
       "x": 0.0,
       "y": 0.0
     }
   ],
   "board_outline": {
-    "width_mm": 210.04999999999998,
-    "height_mm": 89.05000000000001,
+    "width_mm": 245.04999999999998,
+    "height_mm": 95.05000000000001,
     "bbox_mm": {
       "min_x": -0.8250000000000001,
       "min_y": -0.8250000000000001,
-      "max_x": 209.225,
-      "max_y": 88.22500000000001,
-      "width": 210.04999999999998,
-      "height": 89.05000000000001
+      "max_x": 244.225,
+      "max_y": 94.22500000000001,
+      "width": 245.04999999999998,
+      "height": 95.05000000000001
     },
-    "footprint_count": 5,
-    "trace_segments": 99,
-    "via_count": 90
+    "footprint_count": 6,
+    "trace_segments": 119,
+    "via_count": 92
   },
   "drc_pass": true,
   "kicad_drc_errors": 0
