@@ -42,7 +42,14 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
     assert result.ok, result.error
     assert int(q.get("kicad_drc_errors") or 0) == 0, q
     assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
-    assert q.get("fab_recommendation") == "review_required_preview_copper"
+
+    # Fabrication recommendation must reflect ERC truth. A DRC-clean preview can still
+    # contain unresolved electrical-rule findings; in that case the correct outcome is
+    # blocked_erc, not an optimistic review-only recommendation.
+    if q.get("erc_pass") is False:
+        assert q.get("fab_recommendation") == "blocked_erc", q
+    else:
+        assert q.get("fab_recommendation") == "review_required_preview_copper", q
     assert q.get("kicad_truth_pass") is True
 
 
