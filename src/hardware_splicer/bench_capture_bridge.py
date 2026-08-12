@@ -121,6 +121,7 @@ def build_bench_capture_template_from_gates(
         "source": "hardware_splicer.splice_bench.v1",
         "operator_id": "",
         "recorded_at": "",
+        "simulated": None,
         "instruments": [
             {"instrument_id": "bench_dmm_01", "instrument_type": "calibrated_dmm", "calibration_status": "valid"},
             {"instrument_id": "bench_supply_01", "instrument_type": "current_limited_supply", "calibration_status": "valid"},
