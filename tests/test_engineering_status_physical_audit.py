@@ -191,19 +191,27 @@ def test_tampered_audit_rebuilds_release_blocker_and_action() -> None:
     assert status.metadata["automatic_authorization"] is False
 
 
-def test_valid_audit_rebuilds_authorized_scope_without_broad_flags() -> None:
+def test_valid_bench_power_audit_remains_narrower_than_bench_ready() -> None:
     status = build_engineering_status(_plan(valid=True))
 
-    assert status.blockers == []
-    assert status.summary["physical_scope_authorized"] is True
-    assert status.summary["authorized_operation_count"] == 1
-    assert status.summary["physical_evidence_envelope_count"] == 1
-    assert status.metadata["authorized_operations"] == ["bench_power"]
+    # The envelope and ledger are valid, but their human authorization is deliberately
+    # bounded to BENCH_POWER. A broader bench-ready request must remain blocked rather than
+    # inheriting authority from a narrower decision.
+    assert status.overall_status == "blocked"
+    assert status.current_phase == "release"
+    assert len(status.blockers) == 1
+    blocker = status.blockers[0]
+    assert blocker.blocker_id == "physical-authorization-scope"
+    assert "requested bench_ready" in blocker.message
+    assert "supports only build_ready" in blocker.message
+    assert blocker.metadata.get("audited") is True
+    assert blocker.metadata.get("ledger_valid") is True
     assert status.metadata["power_on_authorized"] is False
-    assert status.next_actions[0].action_id == "next-release"
+    assert status.metadata["automatic_authorization"] is False
+    assert status.next_actions[0].category == "release"
 
 
-def test_revision_diff_rebuilds_physical_blocker_instead_of_trusting_cache() -> None:
+def test_revision_diff_rebuilds_persisting_physical_blocker_instead_of_trusting_cache() -> None:
     report = diff_engineering_revisions(
         _plan(valid=True),
         _plan(valid=False),
@@ -211,8 +219,14 @@ def test_revision_diff_rebuilds_physical_blocker_instead_of_trusting_cache() -> 
         candidate_revision="r2",
     )
 
-    assert {
-        row.blocker_id for row in report.opened_blockers
-    } == {"physical-authorization-scope"}
+    # The base revision is already blocked because BENCH_POWER is narrower than the
+    # requested bench-ready scope. Tampering therefore does not *open* a new blocker; the
+    # same candidate-bound blocker is rebuilt and persists with the candidate status.
+    assert {row.blocker_id for row in report.opened_blockers} == set()
     assert report.candidate_status.overall_status == "blocked"
-    assert report.summary["opened_blocker_count"] == 1
+    candidate = next(
+        row for row in report.candidate_status.blockers
+        if row.blocker_id == "physical-authorization-scope"
+    )
+    assert "envelope" in candidate.message.lower()
+    assert report.summary["opened_blocker_count"] == 0
