@@ -24,7 +24,10 @@ from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
 from .engineering_api import create_engineering_router
-from .engineering_execution_anchored_api import create_engineering_execution_router
+from .engineering_execution_anchored_api import (
+    _SAVE_PATH as ENGINEERING_EXECUTION_SAVE_PATH,
+    create_engineering_execution_router,
+)
 from .engineering_package_api import create_engineering_package_router
 from .engineering_package_download_api import (
     create_engineering_package_download_router,
@@ -54,6 +57,44 @@ from .source_conflict_api import create_source_conflict_router
 from .source_storage_operations_api import create_source_storage_operations_router
 from .source_upload_session_api import create_source_upload_session_router
 from .stored_source_parser_api import create_stored_source_parser_router
+
+
+def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> None:
+    """Mount execution routes and guarantee one anchored persistence path on the app.
+
+    FastAPI/Starlette have changed nested ``APIRouter`` prefix-copy behavior over time.
+    The canonical product boundary therefore verifies the safety-critical persistence path
+    after inclusion. If nested composition omitted it, reuse the already-created anchored
+    route's endpoint and register that handler directly on the app. The legacy caller-plan
+    save endpoint is never restored.
+    """
+    router = create_engineering_execution_router(store)
+    app.include_router(router)
+    existing = [
+        route
+        for route in app.routes
+        if getattr(route, "path", None) == ENGINEERING_EXECUTION_SAVE_PATH
+    ]
+    if existing:
+        return
+
+    anchored = [
+        route
+        for route in router.routes
+        if getattr(route, "path", None) == ENGINEERING_EXECUTION_SAVE_PATH
+    ]
+    if len(anchored) != 1:
+        raise RuntimeError(
+            "anchored execution persistence route is missing from its canonical router"
+        )
+    route = anchored[0]
+    app.add_api_route(
+        ENGINEERING_EXECUTION_SAVE_PATH,
+        route.endpoint,
+        methods=sorted(getattr(route, "methods", None) or {"POST"}),
+        tags=["engineering", "execution"],
+        name=getattr(route, "name", None) or "ingest_and_save_evidence",
+    )
 
 
 def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
@@ -87,10 +128,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
     app.include_router(create_mechanical_router())
-    # Canonical product persistence must be revision-anchored.  The wrapper preserves
-    # preview/run/in-memory evidence routes but replaces only /evidence/save with the
-    # stored-revision implementation so caller payloads cannot overwrite project truth.
-    app.include_router(create_engineering_execution_router(resolved_store))
+    _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))
     app.include_router(create_physical_evidence_router())
