@@ -67,8 +67,9 @@ def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path):
     assert scorecard["honest_fabrication_ready"] is True
     assert scorecard["functional_delivery_score"] >= 90.0
     inspection = scorecard["fabrication_inspection"]
-    # USB salvage brief: 4 modules (no 12V barrel / buck on the 5V bank path).
-    assert inspection["pcb"]["footprint_count"] == 4
+    # USB salvage brief now has five physical modules: USB power, MCU, sensor, the
+    # contract-required 3.3→5 V logic shifter, and the MOSFET/load switching module.
+    assert inspection["pcb"]["footprint_count"] == 5
     assert inspection["pcb"]["generic_header_footprints"] == 0
     names = inspection["pcb"].get("footprint_names") or []
     assert any("ESP32" in name for name in names)
