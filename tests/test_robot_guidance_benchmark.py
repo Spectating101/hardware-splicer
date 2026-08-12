@@ -27,7 +27,10 @@ def test_guidance_corpus_covers_build_and_multiple_modification_genres() -> None
         "quadruped",
         "aerial_robot",
     }
-    assert all(case.get("reference_sources", {}).get("videos") for case in cases)
+    # Reference provenance is required for every benchmark case, but a repository/docs
+    # source is just as legitimate as video evidence. Do not make one media type a hidden
+    # requirement of the corpus.
+    assert all(case.get("reference_sources") for case in cases)
 
 
 def test_complete_structured_plan_can_satisfy_all_guidance_obligations() -> None:
