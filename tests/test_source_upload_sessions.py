@@ -70,6 +70,18 @@ def _chunks(content: bytes) -> list[bytes]:
     ]
 
 
+def _assert_no_raw_payload(value: object) -> None:
+    """Raw source bytes must never be embedded in persisted project JSON."""
+    if isinstance(value, dict):
+        forbidden = {"content", "raw_bytes", "raw_content", "body_bytes"}
+        assert not (forbidden & set(value))
+        for child in value.values():
+            _assert_no_raw_payload(child)
+    elif isinstance(value, list):
+        for child in value:
+            _assert_no_raw_payload(child)
+
+
 def test_resumable_session_does_not_mutate_project_until_finalize(
     tmp_path: Path,
 ) -> None:
@@ -123,7 +135,7 @@ def test_resumable_session_does_not_mutate_project_until_finalize(
     assert snapshot["engineeringSourceUploads"][0]["transport_encoding"] == (
         "resumable-raw-chunks"
     )
-    assert "content" not in str(snapshot)
+    _assert_no_raw_payload(snapshot)
     blob_ref = payload["ingestion"]["blob_ref"]
     assert (tmp_path / "robot-r1" / blob_ref).read_bytes() == content
     session_dir = (
@@ -160,8 +172,9 @@ def test_chunk_retry_is_idempotent_and_conflicting_retry_is_rejected(
     assert duplicate.status_code == 200
     assert duplicate.json()["registered"] is False
     assert duplicate.json()["received_chunk_count"] == 1
-    assert conflict.status_code == 422
-    assert "exactly" in conflict.json()["detail"]["message"]
+    assert conflict.status_code == 409
+    assert conflict.json()["detail"]["type"] == "source_upload_session_conflict"
+    assert "different content" in conflict.json()["detail"]["message"]
 
 
 def test_wrong_chunk_hash_is_rejected_without_manifest_progress(

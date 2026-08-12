@@ -1,0 +1,61 @@
+name: Robot Arm Kinematics Benchmark
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/robot_arm_design.py"
+      - "src/hardware_splicer/robot_arm_kinematics.py"
+      - "src/hardware_splicer/robot_arm_reference_benchmark.py"
+      - "experiments/robot_arm/reference_benchmark_gpt56_sol_proposals.json"
+      - "tests/test_robot_arm_kinematics.py"
+      - "scripts/run_robot_arm_kinematics_benchmark.py"
+      - ".github/workflows/robot-arm-kinematics.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: robot-arm-kinematics-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  kinematics:
+    name: URDF FK IK and proxy collision checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "0"
+      HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and independent robotics engine
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest pybullet
+
+      - name: Test URDF and PyBullet oracle
+        run: pytest -q tests/test_robot_arm_kinematics.py
+
+      - name: Persist kinematics benchmark report
+        run: |
+          python scripts/run_robot_arm_kinematics_benchmark.py \
+            --proposal-bundle experiments/robot_arm/reference_benchmark_gpt56_sol_proposals.json \
+            --out-dir artifacts/robot-arm-kinematics
+
+      - name: Upload kinematics evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-arm-kinematics-benchmark
+          path: artifacts/robot-arm-kinematics
+          if-no-files-found: error

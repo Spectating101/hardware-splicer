@@ -129,7 +129,11 @@ def _topology_to_machine_map(project: MachineProject) -> Dict[str, str]:
     for component in project.components:
         topology_id = component.metadata.get("topology_object_id") if isinstance(component.metadata, Mapping) else None
         if topology_id:
-            mapping[str(topology_id)] = component.component_id
+            # Robot projection deliberately creates physical, firmware, and middleware
+            # components for one topology sensor/actuator. The first projected component is
+            # the physical topology object; later channel/interface components must not
+            # overwrite that canonical identity mapping.
+            mapping.setdefault(str(topology_id), component.component_id)
     return mapping
 
 

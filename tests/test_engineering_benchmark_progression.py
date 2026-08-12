@@ -103,7 +103,10 @@ def test_arm_modification_gains_native_topology_delta_and_operator_procedure() -
     result = evaluate_robot_guidance_scenario(scenario, planner=planner)
     plan = planner(scenario["intake"], skip_vision=True)
 
-    assert plan["native_robot_genre"] == "serial_manipulator"
+    # Use the scenario's persisted archetype instead of an obsolete synonym.  Taxonomy
+    # aliases must not become hidden fixture-specific routing rules.
+    assert scenario["expected_archetype"] == "robotic_arm"
+    assert plan["native_robot_genre"] == scenario["expected_archetype"]
     assert plan["robot_topology"]["joints"]
     assert plan["modification_delta"]["mode"] == "modify"
     assert plan["operator_guide"]["steps"]

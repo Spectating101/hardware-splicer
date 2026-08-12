@@ -25,6 +25,9 @@ export default function EngineeringLayout({ children }: { children: ReactNode })
         <Link href="/engineering/resumable-uploads" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <PauseCircle className="h-3.5 w-3.5" /> Resume
         </Link>
+        <Link href="/engineering/sources" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
+          <FileSearch className="h-3.5 w-3.5" /> Sources
+        </Link>
         <Link href="/engineering/source-lab" className="inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/5 hover:text-white">
           <FileSearch className="h-3.5 w-3.5" /> Source lab
         </Link>

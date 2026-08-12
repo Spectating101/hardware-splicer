@@ -1,8 +1,13 @@
-"""Dispatcher for bounded circuit synthesis planners."""
+"""Dispatcher for bounded circuit synthesis planners.
+
+Model-first routing uses the typed semantic planner registry and never falls back to
+natural-language keyword selection when semantic selection fails. The historical keyword
+dispatcher is retained only for explicit offline compatibility/regression.
+"""
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+from typing import Any, Callable, Dict, Mapping
 
 from .analog_conditioning_planner import plan_analog_conditioning
 from .battery_power_planner import plan_battery_power
@@ -13,9 +18,16 @@ from .relay_switch_planner import plan_relay_switch
 from .sensor_interface_planner import plan_sensor_interface
 from .ir import CircuitIntent, Constraint, SynthesisCandidate
 from .motor_driver_planner import plan_motor_driver
+from .semantic_planner_selector import (
+    SemanticPlannerSelection,
+    SemanticPlannerSelectionError,
+    plan_circuit_from_semantic_selection,
+    select_semantic_circuit_planner,
+)
 
 
-SCHEMA_VERSION = "hardware_splicer.circuit_synthesis_dispatch.v1"
+SCHEMA_VERSION = "hardware_splicer.circuit_synthesis_dispatch.v2"
+LEGACY_SCHEMA_VERSION = "hardware_splicer.circuit_synthesis_dispatch.v1"
 
 MOTOR_KEYWORDS = {
     "motor",
@@ -114,15 +126,146 @@ SENSOR_KEYWORDS = {
 }
 
 
-def plan_circuit(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandidate:
-    """Route a circuit intent to a bounded planner or return a structured block.
+def plan_circuit(
+    intent: CircuitIntent | Mapping[str, Any],
+    *,
+    llm_callable: Callable[..., Dict[str, Any]] | None = None,
+) -> SynthesisCandidate:
+    """Route arbitrary circuit intent through the bounded planner registry.
 
-    This is the safe "arbitrary synthesis" entry point: arbitrary requests are
-    accepted, but only supported domains produce topology candidates. Everything
-    else returns explicit blockers and missing evidence instead of a fake plan.
+    Production/model-first mode asks the model only which bounded planner applies. The
+    selected deterministic planner remains responsible for electrical constraints and may
+    still block on missing evidence. If semantic selection is unresolved or unavailable,
+    this dispatcher returns a structured blocked candidate; it never falls back to
+    keyword routing. Explicit offline compatibility retains the historical dispatcher.
     """
 
     circuit_intent = intent if isinstance(intent, CircuitIntent) else CircuitIntent.from_dict(intent)
+    from ..integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        return _legacy_plan_circuit(circuit_intent)
+
+    try:
+        selection = select_semantic_circuit_planner(
+            circuit_intent,
+            llm_callable=llm_callable,
+        )
+    except SemanticPlannerSelectionError as exc:
+        return _semantic_selection_blocked(
+            circuit_intent,
+            rationale=str(exc),
+            unresolved_questions=["Resolve bounded circuit planner selection before synthesis."],
+            selection_source="semantic_selection_error",
+        )
+
+    if selection.selected_planner is None:
+        return _semantic_selection_blocked(
+            circuit_intent,
+            rationale=selection.rationale,
+            unresolved_questions=selection.unresolved_questions,
+            selection_source="semantic_typed_selection",
+            selection=selection,
+        )
+
+    trace = plan_circuit_from_semantic_selection(circuit_intent, selection)
+    if not isinstance(trace.candidate, Mapping):
+        return _semantic_selection_blocked(
+            circuit_intent,
+            rationale="Semantic planner selection produced no deterministic candidate.",
+            unresolved_questions=selection.unresolved_questions,
+            selection_source="semantic_typed_selection",
+            selection=selection,
+        )
+    candidate = SynthesisCandidate.from_dict(trace.candidate)
+    body = candidate.to_dict()
+    metadata = dict(body.get("metadata") or {})
+    dispatch = dict(metadata.get("dispatch") or {})
+    dispatch.update(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "selected_planner": selection.selected_planner,
+            "selection_source": "semantic_typed_selection",
+            "selection_rationale": selection.rationale,
+            "legacy_keyword_dispatch_used": False,
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+    )
+    metadata["dispatch"] = dispatch
+    metadata["semantic_planner_selection"] = selection.model_dump(mode="json")
+    body["metadata"] = metadata
+    return SynthesisCandidate.from_dict(body)
+
+
+def _semantic_selection_blocked(
+    intent: CircuitIntent,
+    *,
+    rationale: str,
+    unresolved_questions: list[str],
+    selection_source: str,
+    selection: SemanticPlannerSelection | None = None,
+) -> SynthesisCandidate:
+    questions = [str(row).strip() for row in unresolved_questions if str(row).strip()]
+    missing = ["bounded_planner_selection"]
+    missing.extend(f"planner_question:{index + 1}" for index, _ in enumerate(questions))
+    selection_payload = (
+        selection.model_dump(mode="json")
+        if selection is not None
+        else {
+            "selected_planner": None,
+            "rationale": rationale,
+            "unresolved_questions": questions,
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+    )
+    return SynthesisCandidate(
+        candidate_id="semantic_planner_selection_unresolved",
+        result="blocked",
+        assumptions=[],
+        missing_evidence=missing,
+        constraints=[
+            Constraint(
+                constraint_id="bounded_planner_selection",
+                type="unsupported_goal",
+                target="circuit_intent",
+                requirement=(
+                    questions[0]
+                    if questions
+                    else rationale or "Resolve a bounded circuit planner before synthesis."
+                ),
+                status="blocked",
+            )
+        ],
+        recommended_build_path={
+            "build_id": None,
+            "compose_mode": "blocked_semantic_planner_selection",
+            "module_ids": [],
+            "can_compile_with_existing_auto_wire": False,
+            "notes": [
+                "No deterministic bounded circuit planner executes until semantic selection is resolved.",
+            ],
+        },
+        notes=rationale or "Circuit planner selection remains unresolved.",
+        metadata={
+            "goal": intent.goal,
+            "dispatch": {
+                "schema_version": SCHEMA_VERSION,
+                "selected_planner": None,
+                "selection_source": selection_source,
+                "selection_rationale": rationale,
+                "legacy_keyword_dispatch_used": False,
+                "authority_effect": "none",
+                "automatic_execution": False,
+            },
+            "semantic_planner_selection": selection_payload,
+        },
+    )
+
+
+def _legacy_plan_circuit(circuit_intent: CircuitIntent) -> SynthesisCandidate:
+    """Historical natural-language dispatcher for explicit offline compatibility only."""
     if _looks_like_battery_power(circuit_intent):
         return _with_dispatch(
             plan_battery_power(circuit_intent),
@@ -177,9 +320,13 @@ def plan_circuit(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandidat
 def _with_dispatch(candidate: SynthesisCandidate, *, selected_planner: str, reason: str) -> SynthesisCandidate:
     body = candidate.to_dict()
     body.setdefault("metadata", {})["dispatch"] = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": LEGACY_SCHEMA_VERSION,
         "selected_planner": selected_planner,
         "reason": reason,
+        "selection_source": "legacy_keyword",
+        "legacy_keyword_dispatch_used": True,
+        "authority_effect": "none",
+        "automatic_execution": False,
     }
     return SynthesisCandidate.from_dict(body)
 
@@ -265,7 +412,7 @@ def _unsupported_candidate(intent: CircuitIntent) -> SynthesisCandidate:
         result="blocked",
         assumptions=[
             "No bounded topology planner is registered for this intent yet.",
-            "The arbitrary synthesis dispatcher refuses unsupported goals instead of inventing a schematic.",
+            "The offline compatibility dispatcher refuses unsupported goals instead of inventing a schematic.",
         ],
         missing_evidence=["bounded_planner", "functional_requirements", "component_constraints"],
         constraints=[
@@ -273,7 +420,7 @@ def _unsupported_candidate(intent: CircuitIntent) -> SynthesisCandidate:
                 constraint_id="unsupported_goal",
                 type="unsupported_goal",
                 target="circuit_intent",
-                requirement="Add a bounded planner or provide a supported motor/pump driver intent.",
+                requirement="Add a bounded planner or provide a supported intent.",
                 status="blocked",
             )
         ],
@@ -291,9 +438,13 @@ def _unsupported_candidate(intent: CircuitIntent) -> SynthesisCandidate:
         metadata={
             "goal": intent.goal,
             "dispatch": {
-                "schema_version": SCHEMA_VERSION,
+                "schema_version": LEGACY_SCHEMA_VERSION,
                 "selected_planner": None,
                 "reason": "No registered bounded planner matched this request.",
+                "selection_source": "legacy_keyword",
+                "legacy_keyword_dispatch_used": True,
+                "authority_effect": "none",
+                "automatic_execution": False,
             },
         },
     )

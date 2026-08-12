@@ -14,6 +14,7 @@ on:
       - "scripts/run_robot_reference_e2e.py"
       - "scripts/export_engine_pcb_data.cjs"
       - "scripts/export_catalog_recipes.cjs"
+      - "scripts/check_generated_engine_data_current.py"
       - "tests/test_robot_reference_e2e.py"
       - "tests/test_robot_model_import.py"
       - "tests/test_pcb_module_registry_data.py"
@@ -43,6 +44,7 @@ on:
       - "scripts/run_robot_reference_e2e.py"
       - "scripts/export_engine_pcb_data.cjs"
       - "scripts/export_catalog_recipes.cjs"
+      - "scripts/check_generated_engine_data_current.py"
       - "tests/test_robot_reference_e2e.py"
       - "tests/test_robot_model_import.py"
       - "tests/test_pcb_module_registry_data.py"
@@ -147,7 +149,7 @@ jobs:
           if-no-files-found: error
       - name: Verify generated engine data is current
         if: ${{ !cancelled() }}
-        run: git diff --exit-code -- src/hardware_splicer/data/engine_pcb_data.json src/hardware_splicer/data/catalog_recipes.json
+        run: python scripts/check_generated_engine_data_current.py
       - name: Validate HS Preflight interface and production build
         if: ${{ !cancelled() }}
         working-directory: apps/circuit-ai/circuit-ai-frontend

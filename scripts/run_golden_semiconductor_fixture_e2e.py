@@ -206,7 +206,7 @@ def repair_llm(prompt: str, **kwargs: object) -> dict[str, Any]:
                         "constraints": {
                             "dut_io_v": 1.8,
                             "controller_io_v": 3.3,
-                            "powered_off_high_impedance_required": true
+                            "powered_off_high_impedance_required": True
                         }
                     },
                     "source_ids": ["dut-datasheet-r1", "fixture-controller-manual-r1", "test-limits-r1"]

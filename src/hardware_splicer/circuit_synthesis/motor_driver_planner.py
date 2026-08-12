@@ -1,60 +1,57 @@
-"""Bounded motor/pump driver topology planner."""
+"""Bounded motor/pump driver topology planner.
+
+Electrical ratings are read only from structured catalog/component contracts. Human-facing
+module summaries, warnings and magic per-module rating tables are not engineering truth.
+When a rating or threshold is absent, the candidate remains blocked on explicit evidence.
+"""
 
 from __future__ import annotations
 
 from typing import Any, Dict, Iterable, List, Mapping, Sequence
 
+from ..electrical_contract_truth import (
+    contract_snapshot,
+    exact_output_voltage_v,
+    integrated_inductive_protection,
+    is_h_bridge_interface,
+    is_level_shifter_interface,
+    is_low_side_switch_interface,
+    is_mcu,
+    is_motor_or_load,
+    is_power_source,
+    logic_input_min_v,
+    max_output_current_a,
+)
 from ..pcb.module_registry import find_module
 from .ir import CircuitIntent, Constraint, SynthesisCandidate, TopologyOperator
 
 
-MOTOR_DRIVER_RATINGS_A = {
-    "l298n": 1.2,
-}
-MOTOR_DRIVER_LOGIC_MIN_V = {
-    "l298n": 4.5,
-}
-MOTOR_DRIVER_HAS_PROTECTION = {
-    "l298n": True,
-}
-MOSFET_RATINGS_A = {
-    "mosfet-irlz44n": 5.0,
-    "mosfet-irf520": 1.0,
-}
-MOSFET_LOGIC_MIN_V = {
-    "mosfet-irlz44n": 3.0,
-    "mosfet-irf520": 4.5,
-}
-POWER_SOURCE_CURRENT_A = {
-    "usb-power-5v": 0.9,
-    "dc-barrel-12v": 2.0,
-    "buck-mp1584": 3.0,
-    "buck-lm2596": 3.0,
-}
-MCU_MODULE_IDS = {"esp32-devkit", "esp32-cam-module", "arduino-nano", "rpi-pico"}
-LOAD_MODULE_IDS = {"water_pump_5v", "mini-pump-5v", "cooling_fan_5v"}
+CURRENT_MARGIN_MULTIPLIER = 1.25
 PROTECTION_EVIDENCE = {
     "flyback_or_driver_protection",
     "flyback_or_tvs",
     "protection_diode",
     "driver_integrated_clamp",
 }
-PROTECTION_MODULE_IDS = {"flyback-diode", "protection-diode", "diode-1n5819", "tvs-diode"}
-LEVEL_SHIFTER_MODULE_IDS = {"level-shifter-4ch"}
 
 
 def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCandidate:
-    """Plan one bounded DC motor/pump driver topology.
+    """Plan one bounded DC motor/pump driver topology from declared structured truth.
 
-    The planner never emits a production-ready claim. It produces a candidate,
-    blocked candidate, or ready-for-review candidate with explicit constraints
-    and bench gates for the existing Hardware-Splicer authority path.
+    The planner never emits a production-ready claim. It may select a uniquely declared
+    interface shape, but precise current ratings, logic thresholds and protection claims
+    must come from machine-readable component contracts or explicit evidence. Unknowns
+    stay unknown.
     """
 
     circuit_intent = intent if isinstance(intent, CircuitIntent) else CircuitIntent.from_dict(intent)
     available = _available_module_ids(circuit_intent)
     evidence = set(circuit_intent.required_evidence)
-    evidence.update(str(row.get("id") or row.get("type") or "") for row in circuit_intent.allowed_parts if row.get("evidence"))
+    evidence.update(
+        str(row.get("id") or row.get("type") or "")
+        for row in circuit_intent.allowed_parts
+        if row.get("evidence")
+    )
 
     load = _first_load(circuit_intent)
     signal = _first_signal(circuit_intent)
@@ -66,29 +63,70 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
     selected_parts: List[Dict[str, Any]] = []
     topology: List[TopologyOperator] = []
 
-    load_current_a = _float_or_none(load.get("current_a") or load.get("run_current_a") or load.get("stall_current_a"))
+    load_current_a = _float_or_none(
+        load.get("current_a") or load.get("run_current_a") or load.get("stall_current_a")
+    )
     load_voltage_v = _float_or_none(load.get("voltage_v")) or _float_or_none(supply.get("voltage_v"))
     control_voltage_v = _float_or_none(signal.get("voltage_v"))
     supply_current_a = _float_or_none(supply.get("max_current_a") or supply.get("current_limit_a"))
 
     if not load:
         missing.append("load_requirement")
-        constraints.append(_blocked("load_requirement", "measurement_required", "load", "Declare the motor/pump load."))
+        constraints.append(
+            _blocked("load_requirement", "measurement_required", "load", "Declare the motor/pump load.")
+        )
     if load and load_current_a is None:
         missing.append("load_current_estimate")
-        constraints.append(_blocked("load_current_estimate", "measurement_required", "load_current", "Measure or estimate motor run/stall current."))
+        constraints.append(
+            _blocked(
+                "load_current_estimate",
+                "measurement_required",
+                "load_current",
+                "Measure or estimate motor run/stall current.",
+            )
+        )
     if not supply:
         missing.append("supply_rail")
-        constraints.append(_blocked("supply_rail", "voltage", "supply", "Declare the motor supply rail."))
+        constraints.append(
+            _blocked(
+                "supply_rail",
+                "voltage",
+                "supply",
+                "Declare the motor supply rail or provide one unambiguous structured power source.",
+            )
+        )
+    if supply and _float_or_none(supply.get("voltage_v")) is None:
+        missing.append("supply_voltage")
+        constraints.append(
+            _blocked(
+                "supply_voltage",
+                "voltage",
+                "supply",
+                "Power source output voltage is not an exact structured contract value; declare the configured rail.",
+                value={"source": supply.get("name"), "provenance": supply.get("source")},
+            )
+        )
     if supply and supply_current_a is None:
         missing.append("supply_current_limit")
-        constraints.append(_blocked("supply_current_limit", "current", "supply", "Declare supply current limit."))
+        constraints.append(
+            _blocked(
+                "supply_current_limit",
+                "current",
+                "supply",
+                "Supply current limit is absent from structured evidence; declare or measure it.",
+                value={"source": supply.get("name"), "provenance": supply.get("source")},
+            )
+        )
     if not signal:
         missing.append("control_signal")
-        constraints.append(_blocked("control_signal", "logic_level", "control", "Declare MCU control voltage."))
+        constraints.append(
+            _blocked("control_signal", "logic_level", "control", "Declare MCU control voltage.")
+        )
     if signal and control_voltage_v is None:
         missing.append("control_signal_voltage")
-        constraints.append(_blocked("control_signal_voltage", "logic_level", "control", "Declare MCU control voltage."))
+        constraints.append(
+            _blocked("control_signal_voltage", "logic_level", "control", "Declare MCU control voltage.")
+        )
 
     if load_current_a is not None and supply_current_a is not None:
         if supply_current_a < load_current_a:
@@ -113,12 +151,23 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
                 )
             )
 
-    driver_id = _choose_driver(available, load_current_a)
-    mosfet_id = "" if driver_id else _choose_mosfet(available, load_current_a)
+    driver_id, switch_id, interface_ambiguity = _select_driver_interface(available)
+    if interface_ambiguity:
+        missing.append("driver_topology_choice")
+        constraints.append(
+            _blocked(
+                "driver_topology_choice",
+                "architecture",
+                "driver",
+                "Multiple declared driver interface families are available; choose the intended topology explicitly.",
+                value=interface_ambiguity,
+            )
+        )
 
+    selected_driver = driver_id or switch_id
     if driver_id:
         selected_modules.append(driver_id)
-        rating = MOTOR_DRIVER_RATINGS_A[driver_id]
+        rating = max_output_current_a(driver_id)
         topology.append(
             TopologyOperator(
                 operator_id=f"{driver_id}_motor_driver",
@@ -127,49 +176,78 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
                 outputs=["motor_out_a", "motor_out_b"],
                 required_part_types=["motor_driver", "dc_motor_or_pump"],
                 required_ports=["VCC", "GND", "IN1", "IN2", "OUT1", "OUT2"],
-                notes=f"{driver_id} selected as bounded motor-driver module.",
-                metadata={"current_rating_a": rating, "module_id": driver_id},
+                notes=f"{driver_id} selected from its declared H-bridge interface shape.",
+                metadata={
+                    "current_rating_a": rating,
+                    "module_id": driver_id,
+                    "rating_source": "structured_catalog_contract" if rating is not None else "unresolved",
+                },
             )
         )
-        constraints.append(
-            _passed(
-                "driver_current_rating",
-                "current",
-                driver_id,
-                "Driver current rating covers estimated load current.",
-                value={"driver_current_rating_a": rating, "load_current_a": load_current_a},
-            )
+        _check_current_rating(
+            driver_id,
+            rating,
+            load_current_a,
+            constraint_id="driver_current_rating",
+            label="Driver",
+            constraints=constraints,
+            missing=missing,
         )
-        _check_logic_level(driver_id, MOTOR_DRIVER_LOGIC_MIN_V.get(driver_id), control_voltage_v, available, constraints, missing)
-    elif mosfet_id:
-        selected_modules.append(mosfet_id)
-        rating = MOSFET_RATINGS_A[mosfet_id]
+        _check_logic_level(
+            driver_id,
+            logic_input_min_v(driver_id),
+            control_voltage_v,
+            available,
+            constraints,
+            missing,
+        )
+    elif switch_id:
+        selected_modules.append(switch_id)
+        rating = max_output_current_a(switch_id)
         topology.append(
             TopologyOperator(
-                operator_id=f"{mosfet_id}_low_side_switch",
+                operator_id=f"{switch_id}_low_side_switch",
                 operator_type="low_side_switch",
                 inputs=["motor_supply", "control_signal", "ground"],
                 outputs=["switched_load_return"],
                 required_part_types=["logic_level_mosfet", "dc_motor_or_pump"],
                 required_ports=["VIN", "VIN-", "SIG", "GND", "VOUT+", "VOUT-"],
                 missing_evidence_conditions=["flyback_or_driver_protection"],
-                notes=f"{mosfet_id} selected as bounded low-side switch module.",
-                metadata={"current_rating_a": rating, "module_id": mosfet_id},
+                notes=f"{switch_id} selected from its declared low-side-switch interface shape.",
+                metadata={
+                    "current_rating_a": rating,
+                    "module_id": switch_id,
+                    "rating_source": "structured_catalog_contract" if rating is not None else "unresolved",
+                },
             )
         )
-        constraints.append(
-            _passed(
-                "switch_current_rating",
-                "current",
-                mosfet_id,
-                "Switch current rating covers estimated load current.",
-                value={"switch_current_rating_a": rating, "load_current_a": load_current_a},
-            )
+        _check_current_rating(
+            switch_id,
+            rating,
+            load_current_a,
+            constraint_id="switch_current_rating",
+            label="Switch",
+            constraints=constraints,
+            missing=missing,
         )
-        _check_logic_level(mosfet_id, MOSFET_LOGIC_MIN_V.get(mosfet_id), control_voltage_v, available, constraints, missing)
-    else:
+        _check_logic_level(
+            switch_id,
+            logic_input_min_v(switch_id),
+            control_voltage_v,
+            available,
+            constraints,
+            missing,
+        )
+    elif not interface_ambiguity:
         missing.append("driver_topology")
-        constraints.append(_blocked("driver_topology", "current", "driver", "Provide a rated motor driver or logic-level MOSFET switch."))
+        constraints.append(
+            _blocked(
+                "driver_topology",
+                "architecture",
+                "driver",
+                "Provide one declared H-bridge or low-side-switch interface; no representative driver is substituted.",
+            )
+        )
 
     if load:
         selected_parts.append(
@@ -190,26 +268,37 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
             }
         )
 
-    if _load_is_inductive(load) and not (driver_id and MOTOR_DRIVER_HAS_PROTECTION.get(driver_id)):
-        has_protection = bool(PROTECTION_MODULE_IDS & available or PROTECTION_EVIDENCE & evidence)
-        if has_protection:
+    if _load_is_inductive(load):
+        integrated = integrated_inductive_protection(selected_driver) if selected_driver else None
+        if integrated is True:
+            constraints.append(
+                _passed(
+                    "inductive_load_protection",
+                    "protection",
+                    selected_driver,
+                    "Structured component contract declares integrated inductive-load protection.",
+                    value={"integrated_inductive_protection": True},
+                )
+            )
+        elif PROTECTION_EVIDENCE & evidence:
             constraints.append(
                 _passed(
                     "inductive_load_protection",
                     "protection",
                     "load",
-                    "Inductive load protection evidence/module is present.",
+                    "Explicit external inductive-load protection evidence is present.",
+                    value={"evidence": sorted(PROTECTION_EVIDENCE & evidence)},
                 )
             )
             topology.append(
                 TopologyOperator(
-                    operator_id="flyback_or_tvs_protection",
+                    operator_id="evidenced_inductive_protection",
                     operator_type="protection_diode",
                     inputs=["load_positive", "switched_load_return"],
                     outputs=["clamped_inductive_spike"],
                     required_part_types=["diode_or_tvs"],
                     required_ports=["anode", "cathode"],
-                    notes="Protection must be physically confirmed before power-on.",
+                    notes="Protection remains subject to physical evidence before power-on.",
                 )
             )
         else:
@@ -218,8 +307,9 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
                 _blocked(
                     "inductive_load_protection",
                     "protection",
-                    "load",
-                    "Inductive motor/pump load needs flyback, TVS, or integrated driver protection evidence.",
+                    selected_driver or "load",
+                    "Integrated protection is not explicitly structured and no external protection evidence was supplied.",
+                    value={"integrated_inductive_protection": integrated},
                 )
             )
 
@@ -228,9 +318,10 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
     if result == "ready_for_review":
         assumptions.append("Candidate is ready for human review only; bench gates must close before first power-on.")
     else:
-        assumptions.append("Planner stopped before compile/readiness approval because required evidence is missing.")
+        assumptions.append("Planner stopped before compile/readiness approval because required structured evidence is missing.")
 
     modules_for_build = _recommended_module_ids(available, selected_modules)
+    contract_ids = _dedupe(list(modules_for_build) + list(selected_modules))
     return SynthesisCandidate(
         candidate_id="motor_pump_driver_candidate",
         selected_parts=selected_parts,
@@ -257,6 +348,14 @@ def plan_motor_driver(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCan
             "supply": supply,
             "load": load,
             "signal": signal,
+            "electrical_truth": {
+                "source": "structured_catalog_fields_only",
+                "design_current_margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+                "module_contracts": [contract_snapshot(module_id) for module_id in contract_ids],
+                "summary_text_used_as_rating": False,
+                "magic_module_rating_table_used": False,
+                "authority_effect": "none",
+            },
         },
     )
 
@@ -289,40 +388,90 @@ def _first_signal(intent: CircuitIntent) -> Dict[str, Any]:
 
 def _first_supply(intent: CircuitIntent, available: set[str]) -> Dict[str, Any]:
     if intent.supply_rails:
-        return dict(intent.supply_rails[0])
-    for module_id in available:
-        if module_id in POWER_SOURCE_CURRENT_A:
-            spec = find_module(module_id) or {}
-            voltage_v = None
-            input_range = spec.get("inputVoltageRange")
-            if isinstance(input_range, list) and input_range:
-                voltage_v = input_range[-1]
-            if module_id == "usb-power-5v":
-                voltage_v = 5.0
-            if module_id == "dc-barrel-12v":
-                voltage_v = 12.0
-            return {
-                "name": module_id,
-                "voltage_v": voltage_v,
-                "max_current_a": POWER_SOURCE_CURRENT_A[module_id],
-                "source": "module_default",
-            }
-    return {}
+        declared = dict(intent.supply_rails[0])
+        declared.setdefault("source", "declared_supply_rail")
+        return declared
+
+    candidates = sorted(module_id for module_id in available if is_power_source(module_id))
+    if len(candidates) != 1:
+        return {}
+    module_id = candidates[0]
+    return {
+        "name": module_id,
+        "voltage_v": exact_output_voltage_v(module_id),
+        "max_current_a": max_output_current_a(module_id),
+        "source": "structured_catalog_contract",
+    }
 
 
-def _choose_driver(available: set[str], load_current_a: float | None) -> str:
-    for module_id, rating in MOTOR_DRIVER_RATINGS_A.items():
-        if module_id in available and (load_current_a is None or rating >= load_current_a * 1.25):
-            return module_id
-    return ""
+def _select_driver_interface(available: set[str]) -> tuple[str, str, Dict[str, Any]]:
+    h_bridges = sorted(module_id for module_id in available if is_h_bridge_interface(module_id))
+    switches = sorted(module_id for module_id in available if is_low_side_switch_interface(module_id))
+    if len(h_bridges) == 1 and not switches:
+        return h_bridges[0], "", {}
+    if len(switches) == 1 and not h_bridges:
+        return "", switches[0], {}
+    if not h_bridges and not switches:
+        return "", "", {}
+    return "", "", {"h_bridge_candidates": h_bridges, "low_side_switch_candidates": switches}
 
 
-def _choose_mosfet(available: set[str], load_current_a: float | None) -> str:
-    for module_id in ("mosfet-irlz44n", "mosfet-irf520"):
-        rating = MOSFET_RATINGS_A[module_id]
-        if module_id in available and (load_current_a is None or rating >= load_current_a * 1.25):
-            return module_id
-    return ""
+def _check_current_rating(
+    module_id: str,
+    rating_a: float | None,
+    load_current_a: float | None,
+    *,
+    constraint_id: str,
+    label: str,
+    constraints: List[Constraint],
+    missing: List[str],
+) -> None:
+    if rating_a is None:
+        missing.append(f"{module_id}_output_current_rating")
+        constraints.append(
+            _blocked(
+                constraint_id,
+                "current",
+                module_id,
+                f"{label} output/load-current rating is absent from the structured component contract.",
+                value={"current_rating_a": None, "load_current_a": load_current_a},
+            )
+        )
+        return
+    if load_current_a is None:
+        return
+    required = load_current_a * CURRENT_MARGIN_MULTIPLIER
+    if rating_a + 1e-12 >= required:
+        constraints.append(
+            _passed(
+                constraint_id,
+                "current",
+                module_id,
+                f"{label} structured current rating covers the explicit design-policy margin.",
+                value={
+                    "current_rating_a": rating_a,
+                    "load_current_a": load_current_a,
+                    "required_with_margin_a": required,
+                    "margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+                },
+            )
+        )
+        return
+    missing.append(f"{module_id}_current_margin")
+    constraints.append(
+        _blocked(
+            constraint_id,
+            "current",
+            module_id,
+            f"{label} structured current rating does not cover the explicit design-policy margin.",
+            value={
+                "current_rating_a": rating_a,
+                "load_current_a": load_current_a,
+                "required_with_margin_a": required,
+                "margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+            },
+        )
+    )
 
 
 def _check_logic_level(
@@ -333,7 +482,19 @@ def _check_logic_level(
     constraints: List[Constraint],
     missing: List[str],
 ) -> None:
-    if min_voltage_v is None or control_voltage_v is None:
+    if control_voltage_v is None:
+        return
+    if min_voltage_v is None:
+        missing.append(f"{module_id}_logic_input_threshold")
+        constraints.append(
+            _blocked(
+                f"{module_id}_logic_level",
+                "logic_level",
+                module_id,
+                "Guaranteed logic-input threshold is absent from the structured component contract.",
+                value={"control_voltage_v": control_voltage_v, "required_min_v": None},
+            )
+        )
         return
     if control_voltage_v + 1e-9 >= min_voltage_v:
         constraints.append(
@@ -341,19 +502,24 @@ def _check_logic_level(
                 f"{module_id}_logic_level",
                 "logic_level",
                 module_id,
-                "Control signal voltage meets selected driver/switch input requirement.",
+                "Control signal voltage meets the structured driver/switch input threshold.",
                 value={"control_voltage_v": control_voltage_v, "required_min_v": min_voltage_v},
             )
         )
         return
-    if LEVEL_SHIFTER_MODULE_IDS & available:
+    shifters = sorted(module_id for module_id in available if is_level_shifter_interface(module_id))
+    if shifters:
         constraints.append(
             _passed(
                 f"{module_id}_logic_level_shifted",
                 "logic_level",
                 module_id,
-                "Level shifter module is available for control-signal compatibility.",
-                value={"control_voltage_v": control_voltage_v, "required_min_v": min_voltage_v},
+                "A declared level-shifter interface is available for control-signal compatibility.",
+                value={
+                    "control_voltage_v": control_voltage_v,
+                    "required_min_v": min_voltage_v,
+                    "level_shifter_candidates": shifters,
+                },
             )
         )
         return
@@ -363,7 +529,7 @@ def _check_logic_level(
             f"{module_id}_logic_level",
             "logic_level",
             module_id,
-            "Control signal voltage is below selected driver/switch input requirement.",
+            "Control signal voltage is below the structured driver/switch input threshold.",
             value={"control_voltage_v": control_voltage_v, "required_min_v": min_voltage_v},
         )
     )
@@ -382,7 +548,7 @@ def _verification_gates(*, load_current_a: float | None, supply_current_a: float
             "gate_id": "psu_current_limit_ramp",
             "gate_type": "psu_ramp",
             "critical": True,
-            "prompt": "Ramp motor supply with current limit set below expected fault current; record voltage/current at each step.",
+            "prompt": "Ramp motor supply with an explicit current limit; record voltage/current at each step.",
             "expected_load_current_a": load_current_a,
             "supply_current_limit_a": supply_current_a,
             "status": "open",
@@ -405,15 +571,13 @@ def _verification_gates(*, load_current_a: float | None, supply_current_a: float
 
 
 def _recommended_module_ids(available: set[str], selected: Sequence[str]) -> List[str]:
-    out: List[str] = []
-    for group in (POWER_SOURCE_CURRENT_A.keys(), MCU_MODULE_IDS, selected, LOAD_MODULE_IDS, LEVEL_SHIFTER_MODULE_IDS):
-        for module_id in group:
-            if module_id in available:
-                out.append(module_id)
-                break
-    for module_id in selected:
-        out.append(module_id)
-    return _dedupe(out)
+    ordered: List[str] = []
+    ordered.extend(sorted(module_id for module_id in available if is_power_source(module_id)))
+    ordered.extend(sorted(module_id for module_id in available if is_mcu(module_id)))
+    ordered.extend(selected)
+    ordered.extend(sorted(module_id for module_id in available if is_motor_or_load(module_id)))
+    ordered.extend(sorted(module_id for module_id in available if is_level_shifter_interface(module_id)))
+    return _dedupe(ordered)
 
 
 def _passed(

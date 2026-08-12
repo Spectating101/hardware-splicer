@@ -4,20 +4,22 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
-from .build_compiler import ensure_circuit_import_path, resolve_build_id
+from .build_compiler import ensure_circuit_import_path
 from .module_resolver import (
-    coalesce_resolved_modules,
-    fill_salvage_gaps,
-    infer_power_topology,
-    merge_functional_salvage_modules,
     merge_module_overrides,
-    module_overrides_for_build,
     overrides_from_resource_plan,
-    resolve_parts_to_modules,
-    resolve_parts_to_modules_with_llm,
     salvage_plan_input_from_intake,
 )
-from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick
+from .module_resolution_truth import (
+    SCHEMA_VERSION as MODULE_IDENTITY_SCHEMA,
+    fill_capability_gaps,
+    functional_salvage_identity_rows,
+    infer_power_topology_truth,
+    merge_truth_rows,
+    module_overrides_truth,
+    resolve_inventory_identity,
+)
+from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick_with_provenance
 from .salvage_intelligence import analyze_salvage_gaps, build_bringup_card
 from .salvage_bom_estimate import build_salvage_bom_estimate
 from .firmware_scaffold import generate_firmware_from_salvage
@@ -41,57 +43,178 @@ def _keyword_build_id(
     return keyword_build_id(goal, parts, salvage_id=salvage_id)
 
 
-def _pick_build_id(
+def _pick_build_decision(
     goal: str,
     parts: List[Mapping[str, Any]],
     splice_plan: Mapping[str, Any],
     diy_plan: Mapping[str, Any],
-) -> str | None:
+) -> Dict[str, Any]:
     salvage_id = str((splice_plan.get("target") or {}).get("recommended_build_id") or "")
     diy_id = str(((diy_plan.get("project_intent") or {}).get("mapped_build_id")) or "")
 
     from .integrations.llm_policy import offline_salvage_enabled
     from .integrations.qwen_build_pick import call_qwen_build_pick, qwen_build_pick_enabled
 
-    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id)
-    llm_id: str | None = None
-    llm_confidence = 0.0
+    offline = offline_salvage_enabled()
+    # Keyword routing is historical semantic machinery. Do not execute it in
+    # model-first mode merely to record a shadow answer.
+    keyword_id = _keyword_build_id(goal, parts, salvage_id=salvage_id) if offline else None
+    ignored = {
+        "keyword": keyword_id or None,
+        "diy": diy_id or None,
+        "splice": salvage_id or None,
+    }
 
-    if qwen_build_pick_enabled() and not offline_salvage_enabled():
-        pick = call_qwen_build_pick(
-            goal=goal,
-            parts=parts,
-            planner_hints={
-                "diy_mapped_build_id": diy_id,
-                "splice_recommended_build_id": salvage_id,
-                "planners_agree": bool(diy_id and diy_id == salvage_id),
-                "keyword_build_hint": keyword_id,
-            },
+    if offline:
+        decision = reconcile_build_pick_with_provenance(
+            None,
+            keyword_id,
+            diy_build_id=diy_id,
+            splice_build_id=salvage_id,
+            allow_legacy_fallback=True,
         )
+        return {
+            **decision,
+            "reasoning": "Explicit offline compatibility may use historical build-selection signals.",
+            "unresolved_questions": [],
+            "legacy_planner_ids_ignored": {},
+        }
+
+    if qwen_build_pick_enabled():
+        pick = call_qwen_build_pick(goal=goal, parts=parts, planner_hints={})
         if pick.get("ok") and pick.get("build_id"):
-            llm_id = str(pick["build_id"])
-            llm_confidence = float(pick.get("confidence") or 0.75)
+            decision = reconcile_build_pick_with_provenance(
+                str(pick.get("build_id") or ""),
+                None,
+                llm_confidence=float(pick.get("confidence") or 0.0),
+                allow_legacy_fallback=False,
+            )
+            return {
+                **decision,
+                "reasoning": str(pick.get("reasoning") or ""),
+                "unresolved_questions": list(pick.get("unresolved_questions") or []),
+                "legacy_planner_ids_ignored": ignored,
+                "model": pick.get("model"),
+            }
+        return {
+            "build_id": None,
+            "source": "unresolved",
+            "confidence": 0.0,
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+            "reasoning": str(
+                pick.get("message")
+                or pick.get("error")
+                or "Semantic build selector did not resolve a bounded catalog architecture."
+            ),
+            "unresolved_questions": list(pick.get("unresolved_questions") or [])
+            or ["Resolve a bounded build architecture from project evidence before selecting a catalog recipe."],
+            "legacy_planner_ids_ignored": ignored,
+        }
 
-    reconciled = reconcile_build_pick(
-        llm_id,
-        keyword_id,
-        diy_build_id=diy_id,
-        splice_build_id=salvage_id,
-        llm_confidence=llm_confidence,
-    )
-    if reconciled:
-        return reconciled
+    return {
+        "build_id": None,
+        "source": "unresolved",
+        "confidence": 0.0,
+        "authority_effect": "none",
+        "legacy_fallback_used": False,
+        "reasoning": "Semantic build selection is unavailable; legacy planner IDs are not architecture truth in model-first mode.",
+        "unresolved_questions": [
+            "Resolve a bounded build architecture from project evidence before selecting a catalog recipe."
+        ],
+        "legacy_planner_ids_ignored": ignored,
+    }
 
-    if keyword_id:
-        return keyword_id
-    if diy_id and salvage_id and diy_id == salvage_id:
-        return diy_id
-    if diy_id:
-        return diy_id
-    if salvage_id:
-        return salvage_id
 
-    return resolve_build_id(archetype="generic_mechatronics")
+def _pick_build_id(
+    goal: str,
+    parts: List[Mapping[str, Any]],
+    splice_plan: Mapping[str, Any],
+    diy_plan: Mapping[str, Any],
+) -> str | None:
+    return _pick_build_decision(goal, parts, splice_plan, diy_plan).get("build_id")
+
+
+def _sanitize_legacy_splice_plan(
+    splice_plan: Mapping[str, Any],
+    *,
+    offline: bool,
+    executed: bool = True,
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """Quarantine legacy guesses, or record that model-first never executed them."""
+    body = dict(splice_plan or {})
+    if offline:
+        return body, {
+            "executed": executed,
+            "quarantined": False,
+            "legacy_recommended_build_id": None,
+            "legacy_reusable_block_count": 0,
+        }
+
+    if not executed:
+        return {
+            "target": dict(body.get("target") or {}),
+            "reusable_blocks": [],
+            "architecture_authority": "not_executed_model_first",
+        }, {
+            "executed": False,
+            "quarantined": False,
+            "legacy_recommended_build_id": None,
+            "legacy_reusable_block_count": 0,
+        }
+
+    target = dict(body.get("target") or {})
+    legacy_build = str(target.pop("recommended_build_id", "") or "").strip() or None
+    legacy_blocks = list(body.get("reusable_blocks") or [])
+    if legacy_build:
+        target["legacy_recommended_build_id_ignored"] = legacy_build
+    body["target"] = target
+    if legacy_blocks:
+        body["legacy_reusable_blocks_ignored"] = legacy_blocks
+    body["reusable_blocks"] = []
+    body["architecture_authority"] = "ignored_legacy_heuristic"
+    return body, {
+        "executed": True,
+        "quarantined": True,
+        "legacy_recommended_build_id": legacy_build,
+        "legacy_reusable_block_count": len(legacy_blocks),
+    }
+
+
+def _identity_summary(
+    rows: Sequence[Mapping[str, Any]],
+    resolution: Mapping[str, Any],
+    *,
+    offline: bool,
+) -> Dict[str, Any]:
+    physical_rows = [
+        row
+        for row in rows
+        if str(row.get("source") or "")
+        in {"declared_catalog_identity", "model_identity_proposed", "unresolved_identity"}
+    ]
+    donor_rows = [
+        row
+        for row in rows
+        if str(row.get("source") or "").startswith("donor_functional_salvage")
+    ]
+    return {
+        "schema_version": MODULE_IDENTITY_SCHEMA,
+        "mode": "offline_compatibility" if offline else "model_first_identity",
+        "resolved_physical_identity_count": sum(bool(row.get("module_id")) for row in physical_rows),
+        "unresolved_physical_identity_count": sum(not bool(row.get("module_id")) for row in physical_rows),
+        "external_donor_capability_count": sum(bool(row.get("external_capability_only")) for row in donor_rows),
+        "unresolved_capability_gap_count": sum(
+            str(row.get("source") or "") == "unresolved_capability_gap" for row in rows
+        ),
+        "legacy_heuristic_used": bool(
+            resolution.get("mode") not in {None, "model_first_identity"}
+        )
+        if offline
+        else False,
+        "functional_similarity_is_identity": False if not offline else None,
+        "authority_effect": "none",
+    }
 
 
 def build_intake_salvage_package(
@@ -103,11 +226,11 @@ def build_intake_salvage_package(
     budget: Mapping[str, Any] | None = None,
     donor_context: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
-    """Run Circuit-AI salvage + DIY planners on intake-normalized parts."""
+    """Build a salvage package while keeping physical identity distinct from capability."""
     ensure_circuit_import_path()
-    from src.intelligence.diy_project_engineer import build_diy_project_engineering_plan
-    from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
+    from .integrations.llm_policy import offline_salvage_enabled
 
+    offline = offline_salvage_enabled()
     payload: Dict[str, Any] = {
         "goal": goal,
         "title": project_name or goal,
@@ -119,34 +242,66 @@ def build_intake_salvage_package(
         for key in ("analysis", "circuit", "functional_salvage", "donor_boards"):
             if key in donor_context and donor_context.get(key) is not None:
                 payload[key] = donor_context[key]
+
     constraints_map = dict(constraints or {})
-    splice_plan = SalvageSplicePlanner().plan(payload)
-    diy_plan = build_diy_project_engineering_plan(payload)
-    # Bind planner-expanded donor reusable_blocks BEFORE gap_fill so junk drivers
-    # are kept (not catalog-substituted L298N/A4988).
-    fs_context: Dict[str, Any] = {
-        **dict(donor_context or {}),
-        "splice_plan": splice_plan,
-        "reusable_blocks": list(splice_plan.get("reusable_blocks") or []),
-    }
-    fs_rows = merge_functional_salvage_modules(fs_context, parts)
-    resolved_modules, salvage_resolution = resolve_parts_to_modules_with_llm(parts, goal=goal)
-    resolved_modules = coalesce_resolved_modules(parts, list(fs_rows) + list(resolved_modules))
-    resolved_modules = fill_salvage_gaps(
-        resolved_modules,
-        parts=parts,
-        donor_context=fs_context,
+    if offline:
+        from src.intelligence.diy_project_engineer import build_diy_project_engineering_plan
+        from src.intelligence.salvage_splice_planner import SalvageSplicePlanner
+
+        legacy_splice_plan = SalvageSplicePlanner().plan(payload)
+        diy_plan = build_diy_project_engineering_plan(payload)
+    else:
+        # Model-first mode must not run legacy semantic planners even as shadow
+        # evaluators. Their absence is explicit audit state, not an empty vote.
+        legacy_splice_plan = {}
+        diy_plan = {}
+
+    build_selection = _pick_build_decision(goal, parts, legacy_splice_plan, diy_plan)
+    splice_plan, legacy_quarantine = _sanitize_legacy_splice_plan(
+        legacy_splice_plan,
+        offline=offline,
+        executed=offline,
     )
+
+    # Model-first donor capability truth comes only from persisted donor context.
+    # Historical planner-generated blocks exist only in explicit offline compatibility.
+    if offline:
+        fs_context: Dict[str, Any] = {
+            **dict(donor_context or {}),
+            "splice_plan": legacy_splice_plan,
+            "reusable_blocks": list(legacy_splice_plan.get("reusable_blocks") or []),
+        }
+    else:
+        fs_context = dict(donor_context or {})
+
+    fs_rows = functional_salvage_identity_rows(fs_context, parts=parts)
+    inventory_rows, salvage_resolution = resolve_inventory_identity(parts, goal=goal)
+    resolved_modules = merge_truth_rows(fs_rows, inventory_rows)
+    resolved_modules = fill_capability_gaps(resolved_modules, parts=parts)
+
+    salvage_resolution = dict(salvage_resolution or {})
+    salvage_resolution["physical_identity_boundary"] = _identity_summary(
+        resolved_modules,
+        salvage_resolution,
+        offline=offline,
+    )
+    salvage_resolution["legacy_planner_quarantine"] = legacy_quarantine
     salvage_resolution["functional_salvage_bound"] = {
         "rows": len(fs_rows),
-        "donor_block_ids": [str(r.get("donor_block_id") or "") for r in fs_rows if r.get("donor_block_id")],
-        "skipped_catalog_driver_gap_fill": any(
-            str(r.get("source") or "") == "donor_functional_salvage" and str(r.get("role") or "") == "drv"
-            for r in resolved_modules
+        "donor_block_ids": [
+            str(row.get("donor_block_id") or "")
+            for row in fs_rows
+            if row.get("donor_block_id")
+        ],
+        "external_capability_rows": sum(
+            bool(row.get("external_capability_only")) for row in fs_rows
         ),
+        "declared_catalog_identity_rows": sum(bool(row.get("module_id")) for row in fs_rows),
+        "driver_capability_present": any(str(row.get("role") or "") == "drv" for row in fs_rows),
+        "catalog_standin_required": False if not offline else None,
     }
-    build_id = _pick_build_id(goal, parts, splice_plan, diy_plan) or ""
 
+    build_id = str(build_selection.get("build_id") or "")
     from .catalog import CATALOG_BUILD_IDS
 
     explicit_build = str(
@@ -154,6 +309,16 @@ def build_intake_salvage_package(
     ).strip()
     if explicit_build in CATALOG_BUILD_IDS:
         build_id = explicit_build
+        build_selection = {
+            "build_id": explicit_build,
+            "source": "declared",
+            "confidence": 1.0,
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+            "reasoning": "Explicit target_build_id/build_id persisted in project constraints.",
+            "unresolved_questions": [],
+            "legacy_planner_ids_ignored": build_selection.get("legacy_planner_ids_ignored") or {},
+        }
 
     from .integrations.qwen_workshop_review import (
         apply_workshop_review,
@@ -171,35 +336,48 @@ def build_intake_salvage_package(
             recommended_build_id=build_id or None,
         )
         if workshop_review.get("ok"):
-            resolved_modules = fill_salvage_gaps(
-                apply_workshop_review(resolved_modules, workshop_review),
-                parts=parts,
-                donor_context=fs_context,
-            )
-            suggested = str(workshop_review.get("suggested_build_id") or "").strip()
-            if suggested:
-                build_id = (
-                    reconcile_build_pick(
+            if offline:
+                resolved_modules = apply_workshop_review(resolved_modules, workshop_review)
+                resolved_modules = fill_capability_gaps(resolved_modules, parts=parts)
+                suggested = str(workshop_review.get("suggested_build_id") or "").strip()
+                if suggested:
+                    build_selection = reconcile_build_pick_with_provenance(
                         suggested,
-                        keyword_build_id(goal, parts),
+                        _keyword_build_id(goal, parts),
                         splice_build_id=build_id,
+                        allow_legacy_fallback=True,
                     )
-                    or build_id
-                )
+                    build_id = str(build_selection.get("build_id") or build_id)
+            else:
+                workshop_review = {
+                    **workshop_review,
+                    "application_status": "advisory_only_model_first",
+                    "physical_identity_mutated": False,
+                    "architecture_mutated": False,
+                    "authority_effect": "none",
+                }
     salvage_resolution["workshop_review"] = workshop_review
+
     strategy_mode = str(
-        ((diy_plan.get("resource_plan") or {}).get("strategy_mode"))
+        ((diy_plan.get("resource_plan") or {}).get("strategy_mode") if offline else None)
         or constraints_map.get("strategy_mode")
         or "constrained"
     )
-    constrained = strategy_mode == "constrained" or constraints_map.get("compose_from_inventory") is True
+    constrained = (
+        strategy_mode == "constrained"
+        or constraints_map.get("compose_from_inventory") is True
+    )
     merged_modules = merge_goal_modules_with_inventory(
         goal,
         resolved_modules,
         constrained=constrained,
     )
-    power_topology = infer_power_topology(parts, merged_modules, constraints=constraints_map)
-    merged_modules = coalesce_resolved_modules(parts, merged_modules, power_topology=power_topology)
+    power_topology = infer_power_topology_truth(
+        parts,
+        merged_modules,
+        constraints=constraints_map,
+    )
+
     use_scratch = should_use_scratch_compose(
         goal=goal,
         build_id=build_id or None,
@@ -207,26 +385,29 @@ def build_intake_salvage_package(
         constraints=constraints_map,
         strategy_mode=strategy_mode,
     )
-    # Scratch compose must not erase a concrete catalog money-path build_id.
     from .scratch_pipeline import NAMED_CATALOG_BUILD_IDS
 
     if use_scratch and str(build_id or "") not in NAMED_CATALOG_BUILD_IDS:
-        build_id = "generic_low_voltage_build"
+        # Scratch is an execution mechanism, not architecture truth.
+        build_id = "generic_low_voltage_build" if offline else ""
     if build_id:
         target = dict(splice_plan.get("target") or {})
         target["recommended_build_id"] = build_id
+        target["recommendation_source"] = str(build_selection.get("source") or "unknown")
         splice_plan = {**splice_plan, "target": target}
-    resource_overrides = overrides_from_resource_plan(diy_plan)
-    inventory_overrides = module_overrides_for_build(
+
+    resource_overrides = overrides_from_resource_plan(diy_plan) if offline else {}
+    inventory_overrides = module_overrides_truth(
+        merged_modules if use_scratch else resolved_modules,
         build_id=build_id or None,
-        resolved_modules=merged_modules if use_scratch else resolved_modules,
     )
-    # Inventory wins over DIY resource guesses (e.g. usb-uart must not replace usb-power-5v).
     module_overrides = merge_module_overrides(resource_overrides, inventory_overrides)
-    if power_topology == "usb_5v":
+    if offline and power_topology == "usb_5v":
+        # Historical compatibility only. A topology requirement is not exact identity.
         module_overrides["pwr"] = "usb-power-5v"
         for drop_role in ("buck", "psu", "mot_psu", "svo_psu"):
             module_overrides.pop(drop_role, None)
+
     graph_input = salvage_plan_input_from_intake(
         splice_plan,
         resolved_modules=merged_modules if use_scratch else resolved_modules,
@@ -236,6 +417,7 @@ def build_intake_salvage_package(
         compose_from_inventory=use_scratch,
     )
     graph_mode = "scratch" if use_scratch else "catalog"
+
     bringup_card = build_bringup_card(
         goal=goal,
         resolved_modules=merged_modules if use_scratch else resolved_modules,
@@ -256,19 +438,22 @@ def build_intake_salvage_package(
         gap_analysis=gap_analysis,
         budget=budget,
     )
-    module_id_list = [str(r.get("module_id") or "") for r in resolved_for_bom if r.get("module_id")]
+    module_id_list = [
+        str(row.get("module_id") or "")
+        for row in resolved_for_bom
+        if row.get("module_id")
+    ]
     firmware_scaffold = generate_firmware_from_salvage(
         build_id=build_id or "salvage_build",
         bringup_card=bringup_card,
         module_ids=module_id_list,
         goal=goal,
     )
-    resolved_for_mech = merged_modules if use_scratch else resolved_modules
     mech_plan = build_mecha_project_spec(
         project_name=str(project_name or build_id or "salvage_mech"),
         build_id=str(build_id or ""),
         goal=goal,
-        resolved_modules=resolved_for_mech,
+        resolved_modules=resolved_for_bom,
     )
     mechanism_pack = {
         "schema_version": "hardware_splicer.mechanism_pack.v1",
@@ -281,18 +466,42 @@ def build_intake_salvage_package(
         "claim_boundary": "Starter printable pack from electronics roles — verify fit on bench.",
         "degraded_reason": None,
     }
+
     package = {
         "schema_version": SCHEMA_VERSION,
         "splice_plan": splice_plan,
         "diy_plan": diy_plan,
-        "resolved_modules": merged_modules if use_scratch else resolved_modules,
+        "resolved_modules": resolved_for_bom,
         "module_overrides": module_overrides,
         "power_topology": power_topology,
+        "power_topology_status": (
+            "resolved"
+            if power_topology in {"usb_5v", "barrel_12v", "hybrid"}
+            else "unresolved"
+        ),
         "strategy_mode": strategy_mode,
         "graph_mode": graph_mode,
         "compose_module_ids": module_ids_from_resolved(merged_modules) if use_scratch else [],
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
+        "build_selection": build_selection,
+        "legacy_planner_architecture_authority": (
+            "compatibility_only" if offline else "not_executed"
+        ),
+        "legacy_planner_context": {
+            **legacy_quarantine,
+            "diy_mapped_build_id": str(
+                ((diy_plan.get("project_intent") or {}).get("mapped_build_id")) or ""
+            )
+            or None,
+            "diy_architecture_authority": "compatibility_only" if offline else "not_executed",
+        },
+        "physical_identity_schema": MODULE_IDENTITY_SCHEMA,
+        "physical_identity_authority": (
+            "declared_or_validated_exact_only"
+            if not offline
+            else "legacy_compatibility"
+        ),
         "verdict": splice_plan.get("verdict"),
         "planning_confidence": float(splice_plan.get("confidence") or 0.0),
         "salvage_resolution": salvage_resolution,
@@ -302,8 +511,6 @@ def build_intake_salvage_package(
         "firmware_scaffold": firmware_scaffold,
         "mechanism_pack": mechanism_pack,
     }
-    # Canonical evidence is attached on every salvage planning path. This is the
-    # authority boundary consumed by the UI and specialist backends.
     from .evidence_salvage_bridge import attach_evidence_first_integrations
 
     return attach_evidence_first_integrations(package)
@@ -321,7 +528,6 @@ def resolve_salvage_compose_inputs(
     module_ids: Sequence[str] | None = None,
     canvas_nodes: Sequence[Mapping[str, Any]] | None = None,
 ) -> Dict[str, Any] | None:
-    """Map donor_context / salvage parts into compose_dispatch kwargs + salvage_package."""
     if canvas_nodes:
         return None
     donor = dict(donor_context or {})
@@ -342,7 +548,11 @@ def resolve_salvage_compose_inputs(
     )
     constraints_out = dict(constraints or {})
     graph_mode = str(pkg.get("graph_mode") or "scratch")
-    resolved = [dict(row) for row in (pkg.get("resolved_modules") or []) if isinstance(row, Mapping)]
+    resolved = [
+        dict(row)
+        for row in (pkg.get("resolved_modules") or [])
+        if isinstance(row, Mapping)
+    ]
     compose_ids = list(module_ids or []) or list(pkg.get("compose_module_ids") or [])
     if not compose_ids and graph_mode == "scratch":
         compose_ids = module_ids_from_resolved(resolved)
@@ -376,7 +586,6 @@ def write_compose_salvage_bench_artifacts(
     donor_context: Mapping[str, Any] | None = None,
     parts: Sequence[Mapping[str, Any]] | None = None,
 ) -> Dict[str, str]:
-    """Emit splice-shaped bench artifacts so compose salvage builds get evidence gates."""
     root = Path(out_dir).resolve()
     root.mkdir(parents=True, exist_ok=True)
     pkg = dict(salvage_package)
@@ -391,7 +600,11 @@ def write_compose_salvage_bench_artifacts(
         "goal": goal or project_name or root.name,
         "salvage_mode": True,
         "recommended_build_id": pkg.get("recommended_build_id"),
-        "available_parts": [dict(row) for row in (parts or []) if isinstance(row, Mapping)],
+        "available_parts": [
+            dict(row)
+            for row in (parts or [])
+            if isinstance(row, Mapping)
+        ],
     }
     donor = dict(donor_context or {})
     for key in ("circuit", "functional_salvage", "donor_boards", "analysis", "evidence_notes"):

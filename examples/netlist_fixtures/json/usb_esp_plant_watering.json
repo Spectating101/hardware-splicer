@@ -7,162 +7,119 @@
       "value": "USB 5V power input",
       "footprint": "usb-power-5v",
       "module_id": "usb-power-5v",
-      "metadata": {
-        "graph_node_id": "n1"
-      }
+      "metadata": {"graph_node_id": "n1"}
     },
     {
       "ref": "U2",
       "value": "ESP32 DevKit",
       "footprint": "esp32-devkit",
       "module_id": "esp32-devkit",
-      "metadata": {
-        "graph_node_id": "n2"
-      }
+      "metadata": {"graph_node_id": "n2"}
     },
     {
       "ref": "U3",
       "value": "Soil Moisture Sensor",
       "footprint": "soil_moisture",
       "module_id": "soil_moisture",
-      "metadata": {
-        "graph_node_id": "n3"
-      }
+      "metadata": {"graph_node_id": "n3"}
     },
     {
       "ref": "U4",
       "value": "IRLZ44N logic-level MOSFET module",
       "footprint": "mosfet-irlz44n",
       "module_id": "mosfet-irlz44n",
-      "metadata": {
-        "graph_node_id": "n4"
-      }
+      "metadata": {"graph_node_id": "n4"}
     },
     {
       "ref": "U5",
       "value": "5V mini water pump",
       "footprint": "mini-pump-5v",
       "module_id": "mini-pump-5v",
-      "metadata": {
-        "graph_node_id": "n5"
-      }
+      "metadata": {"graph_node_id": "n5"}
+    },
+    {
+      "ref": "U6",
+      "value": "4-channel bidirectional level shifter",
+      "footprint": "level-shifter-4ch",
+      "module_id": "level-shifter-4ch",
+      "metadata": {"graph_node_id": "n6"}
     }
   ],
   "nets": [
     {
       "name": "+5V",
       "pins": [
-        {
-          "component_ref": "U1",
-          "pin": "V+"
-        },
-        {
-          "component_ref": "U2",
-          "pin": "VIN"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "VCC"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "VIN"
-        }
+        {"component_ref": "U1", "pin": "V+"},
+        {"component_ref": "U2", "pin": "VIN"},
+        {"component_ref": "U4", "pin": "VIN"},
+        {"component_ref": "U6", "pin": "HV"}
       ]
     },
     {
-      "name": "N2",
+      "name": "+3V3",
       "pins": [
-        {
-          "component_ref": "U2",
-          "pin": "GPIO16"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "SIG"
-        }
+        {"component_ref": "U2", "pin": "3V3"},
+        {"component_ref": "U3", "pin": "VCC"},
+        {"component_ref": "U6", "pin": "LV"}
       ]
     },
     {
-      "name": "N3",
+      "name": "PUMP_CTRL_LV",
       "pins": [
-        {
-          "component_ref": "U2",
-          "pin": "GPIO2"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "D0"
-        }
+        {"component_ref": "U2", "pin": "GPIO4"},
+        {"component_ref": "U6", "pin": "LV1"}
       ]
     },
     {
-      "name": "N4",
+      "name": "PUMP_CTRL_5V",
       "pins": [
-        {
-          "component_ref": "U2",
-          "pin": "GPIO4"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "A0"
-        }
+        {"component_ref": "U6", "pin": "HV1"},
+        {"component_ref": "U4", "pin": "SIG"}
       ]
     },
     {
-      "name": "+5V_2",
+      "name": "SOIL_DIGITAL",
       "pins": [
-        {
-          "component_ref": "U4",
-          "pin": "VOUT+"
-        },
-        {
-          "component_ref": "U5",
-          "pin": "VCC"
-        }
+        {"component_ref": "U2", "pin": "GPIO2"},
+        {"component_ref": "U3", "pin": "D0"}
+      ]
+    },
+    {
+      "name": "SOIL_ANALOG",
+      "pins": [
+        {"component_ref": "U3", "pin": "A0"},
+        {"component_ref": "U2", "pin": "GPIO34"}
+      ]
+    },
+    {
+      "name": "+5V_LOAD",
+      "pins": [
+        {"component_ref": "U4", "pin": "VOUT+"},
+        {"component_ref": "U5", "pin": "VCC"}
       ]
     },
     {
       "name": "GND",
       "pins": [
-        {
-          "component_ref": "U1",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U2",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "VIN-"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U5",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "VOUT-"
-        }
+        {"component_ref": "U1", "pin": "GND"},
+        {"component_ref": "U2", "pin": "GND"},
+        {"component_ref": "U3", "pin": "GND"},
+        {"component_ref": "U4", "pin": "VIN-"},
+        {"component_ref": "U4", "pin": "GND"},
+        {"component_ref": "U5", "pin": "GND"},
+        {"component_ref": "U4", "pin": "VOUT-"},
+        {"component_ref": "U6", "pin": "GND"}
       ]
     }
   ],
   "metadata": {
-    "node_count": 5,
-    "wire_count": 14,
+    "node_count": 6,
+    "wire_count": 16,
     "module_ids": [
       "usb-power-5v",
       "esp32-devkit",
       "soil_moisture",
+      "level-shifter-4ch",
       "mosfet-irlz44n",
       "mini-pump-5v"
     ],

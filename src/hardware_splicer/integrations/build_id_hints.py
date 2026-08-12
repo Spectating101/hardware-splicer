@@ -1,14 +1,22 @@
-"""Deterministic catalog build_id hints from goal + parts (shared by salvage and Qwen build pick)."""
+"""Catalog build descriptions plus explicitly legacy keyword compatibility hints.
+
+The catalog descriptions are safe model context: they describe bounded build recipes.
+``keyword_build_id`` is different. It interprets free-form prose with a hand-written
+ontology and therefore must never outrank a valid model proposal or masquerade as
+canonical engineering truth. It remains only for explicit offline/legacy compatibility
+while callers migrate to typed semantic architecture proposals.
+"""
 
 from __future__ import annotations
 
-from typing import Any, List, Mapping, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 from ..catalog import CATALOG_BUILD_IDS
 
 GENERIC_BUILD_ID = "generic_low_voltage_build"
 
-# One-line routing guide for LLM build-pick prompts.
+# One-line descriptions for model/catalog browsing. These are descriptions, not routing
+# rules; callers must not turn them into keyword trigger tables.
 BUILD_ID_GUIDE: dict[str, str] = {
     "automatic_plant_watering": "Soil moisture / plant watering / drip pump / irrigation",
     "automatic_plant_watering_usb": "USB-powered plant watering variant",
@@ -20,7 +28,7 @@ BUILD_ID_GUIDE: dict[str, str] = {
     "sensor_logger": "BME280/DHT data logger, environmental logging, WiFi sensor node",
     "inspection_motion_fixture": "Pan-tilt, camera mount, gimbal, inspection head",
     "low_voltage_motor_test_jig": "Motor test, gripper, claw, bench motor jig",
-    "generic_low_voltage_build": "Vague beginner MCU project only when nothing else fits",
+    "generic_low_voltage_build": "General low-voltage execution scaffold when no bounded recipe is a defensible fit",
 }
 
 
@@ -38,7 +46,12 @@ def keyword_build_id(
     *,
     salvage_id: str = "",
 ) -> Optional[str]:
-    """High-confidence keyword routing — regression-tested against golden intakes."""
+    """Return a *legacy heuristic* build hint from prose.
+
+    This function is intentionally retained for explicit offline/demo compatibility.
+    Its result has no authority and must not override a valid model proposal. New
+    product paths should use typed semantic architecture selection instead.
+    """
     text = intake_goal_parts_text(goal, parts)
 
     if any(word in text for word in ["soil", "water", "watering", "pump", "irrigation", "plant"]):
@@ -206,6 +219,94 @@ def build_catalog_context_for_pick() -> str:
     return "\n".join(lines)
 
 
+def _legacy_fallback_allowed_by_policy() -> bool:
+    """Legacy architecture heuristics are available only in explicit offline salvage."""
+    try:
+        from .llm_policy import offline_salvage_enabled
+    except ImportError:
+        from hardware_splicer.integrations.llm_policy import offline_salvage_enabled
+
+    return bool(offline_salvage_enabled())
+
+
+def reconcile_build_pick_with_provenance(
+    llm_build_id: str | None,
+    keyword_build_id: str | None,
+    *,
+    diy_build_id: str = "",
+    splice_build_id: str = "",
+    llm_confidence: float = 0.0,
+    allow_legacy_fallback: bool | None = None,
+) -> Dict[str, Any]:
+    """Resolve a build proposal without allowing heuristics to overrule the model.
+
+    A valid model-selected bounded catalog ID wins. ``generic_low_voltage_build`` is
+    different: it is an execution scaffold for scratch composition, not a bounded product
+    architecture, so reconciliation preserves it as ``proposed_build_id`` while leaving
+    canonical ``build_id`` unresolved. Keyword/DIY/splice values remain explicit
+    offline-compatibility signals only.
+    """
+    llm = str(llm_build_id or "").strip()
+    keyword = str(keyword_build_id or "").strip()
+    diy = str(diy_build_id or "").strip()
+    splice = str(splice_build_id or "").strip()
+
+    if llm == GENERIC_BUILD_ID:
+        return {
+            "build_id": None,
+            "proposed_build_id": llm,
+            "source": "model_execution_scaffold",
+            "confidence": max(0.0, min(1.0, float(llm_confidence or 0.0))),
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+        }
+
+    if llm and llm in CATALOG_BUILD_IDS:
+        return {
+            "build_id": llm,
+            "source": "model_proposed",
+            "confidence": max(0.0, min(1.0, float(llm_confidence or 0.0))),
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+        }
+
+    legacy_allowed = (
+        _legacy_fallback_allowed_by_policy()
+        if allow_legacy_fallback is None
+        else bool(allow_legacy_fallback)
+    )
+    if not legacy_allowed:
+        return {
+            "build_id": None,
+            "source": "unresolved",
+            "confidence": 0.0,
+            "authority_effect": "none",
+            "legacy_fallback_used": False,
+        }
+
+    for source, candidate in (
+        ("legacy_keyword", keyword),
+        ("legacy_diy_planner", diy),
+        ("legacy_splice_planner", splice),
+    ):
+        if candidate and candidate in CATALOG_BUILD_IDS:
+            return {
+                "build_id": candidate,
+                "source": source,
+                "confidence": 0.0,
+                "authority_effect": "none",
+                "legacy_fallback_used": True,
+            }
+
+    return {
+        "build_id": None,
+        "source": "unresolved",
+        "confidence": 0.0,
+        "authority_effect": "none",
+        "legacy_fallback_used": False,
+    }
+
+
 def reconcile_build_pick(
     llm_build_id: str | None,
     keyword_build_id: str | None,
@@ -213,27 +314,20 @@ def reconcile_build_pick(
     diy_build_id: str = "",
     splice_build_id: str = "",
     llm_confidence: float = 0.0,
+    allow_legacy_fallback: bool | None = None,
 ) -> Optional[str]:
-    """Merge LLM pick with deterministic keyword + planner agreement."""
-    generic = GENERIC_BUILD_ID
-    llm = str(llm_build_id or "").strip()
-    keyword = str(keyword_build_id or "").strip() or None
-    diy = str(diy_build_id or "").strip()
-    splice = str(splice_build_id or "").strip()
+    """Compatibility wrapper returning only the canonical selected ID.
 
-    if keyword and keyword != generic:
-        planners_agree = keyword in {diy, splice} and bool(diy or splice)
-        if not llm or llm == generic:
-            return keyword
-        if llm != keyword and (planners_agree or llm_confidence < 0.85):
-            return keyword
-
-    if llm and llm in CATALOG_BUILD_IDS:
-        return llm
-    if keyword:
-        return keyword
-    if diy:
-        return diy
-    if splice:
-        return splice
-    return None
+    Unlike the historical implementation, a keyword result can never override a valid
+    model proposal, an omitted fallback flag follows the explicit offline policy, and the
+    generic scratch scaffold does not masquerade as canonical architecture.
+    """
+    decision = reconcile_build_pick_with_provenance(
+        llm_build_id,
+        keyword_build_id,
+        diy_build_id=diy_build_id,
+        splice_build_id=splice_build_id,
+        llm_confidence=llm_confidence,
+        allow_legacy_fallback=allow_legacy_fallback,
+    )
+    return decision["build_id"]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -48,6 +49,7 @@ def test_inspect_fab_build_dir_on_catalog_compile(tmp_path: Path, monkeypatch: p
     assert result.get("checks_total", 0) > 0
 
 
+@pytest.mark.skipif(shutil.which("kicad-cli") is None, reason="geometry DRC golden requires KiCad CLI")
 def test_geometry_golden_snapshots_match(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
     from hardware_splicer.build_compiler import compile_catalog_build

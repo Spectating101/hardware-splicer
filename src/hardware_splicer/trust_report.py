@@ -19,11 +19,14 @@ def build_trust_report(
     q = dict(design_quality or {})
     sim = dict(simulation or {})
     erc_body = dict(erc or {})
+    drc_errors = q.get("kicad_drc_errors")
+    drc_available = drc_errors is not None or q.get("kicad_drc_pass") is not None
 
     gates = {
         "erc_pass": bool(q.get("erc_pass") if q.get("erc_pass") is not None else erc_body.get("pass")),
         "electrical_safety_pass": bool(q.get("electrical_safety_pass")),
-        "kicad_drc_pass": bool(q.get("kicad_drc_pass")),
+        "kicad_drc_available": bool(drc_available),
+        "kicad_drc_pass": bool(q.get("kicad_drc_pass")) if drc_available else False,
         "kicad_erc_pass": bool(q.get("kicad_erc_pass", True)),
         "build_graph_compiled": bool(q.get("build_graph_compiled")),
         "simulation_pass": sim.get("simulation_pass"),
@@ -37,8 +40,10 @@ def build_trust_report(
         blockers.append("Build graph did not compile.")
     if not gates["electrical_safety_pass"]:
         blockers.append("Electrical safety checks failed.")
-    if not gates["kicad_drc_pass"]:
-        blockers.append(f"KiCad DRC has {int(q.get('kicad_drc_errors') or 0)} error(s).")
+    if not gates["kicad_drc_available"]:
+        blockers.append("KiCad DRC was not available; no clean DRC receipt exists.")
+    elif not gates["kicad_drc_pass"]:
+        blockers.append(f"KiCad DRC has {int(drc_errors or 0)} error(s).")
     if gates["erc_pass"] is False:
         blockers.append("Schematic ERC failed.")
     if sim.get("enabled") and sim.get("simulation_pass") is False:
@@ -81,7 +86,9 @@ def build_trust_report(
         f"Build `{build_id or q.get('effective_build_id') or 'unknown'}` electrical trust report.",
         f"Trust level: **{trust_level}** (score {min(score, 1.0):.2f}).",
     ]
-    if gates["kicad_drc_pass"]:
+    if not gates["kicad_drc_available"]:
+        summary_lines.append("KiCad DRC: unavailable; no verification claim made.")
+    elif gates["kicad_drc_pass"]:
         summary_lines.append("KiCad DRC: clean.")
     else:
         summary_lines.append("KiCad DRC: failed.")
@@ -111,7 +118,7 @@ def build_trust_report(
             "fabrication_ready": q.get("fabrication_ready"),
             "copper_tier": q.get("copper_tier"),
             "fab_recommendation": q.get("fab_recommendation"),
-            "kicad_drc_errors": q.get("kicad_drc_errors"),
+            "kicad_drc_errors": drc_errors,
         },
         "simulation": {
             "pass": sim.get("simulation_pass"),

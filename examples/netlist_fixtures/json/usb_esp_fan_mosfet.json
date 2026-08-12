@@ -7,118 +7,95 @@
       "value": "USB 5V power input",
       "footprint": "usb-power-5v",
       "module_id": "usb-power-5v",
-      "metadata": {
-        "graph_node_id": "n1"
-      }
+      "metadata": {"graph_node_id": "n1"}
     },
     {
       "ref": "U2",
       "value": "ESP32 DevKit",
       "footprint": "esp32-devkit",
       "module_id": "esp32-devkit",
-      "metadata": {
-        "graph_node_id": "n2"
-      }
+      "metadata": {"graph_node_id": "n2"}
     },
     {
       "ref": "U3",
       "value": "IRLZ44N logic-level MOSFET module",
       "footprint": "mosfet-irlz44n",
       "module_id": "mosfet-irlz44n",
-      "metadata": {
-        "graph_node_id": "n3"
-      }
+      "metadata": {"graph_node_id": "n3"}
     },
     {
       "ref": "U4",
       "value": "5V DC Cooling Fan 40mm",
       "footprint": "cooling_fan_5v",
       "module_id": "cooling_fan_5v",
-      "metadata": {
-        "graph_node_id": "n4"
-      }
+      "metadata": {"graph_node_id": "n4"}
+    },
+    {
+      "ref": "U5",
+      "value": "4-channel bidirectional level shifter",
+      "footprint": "level-shifter-4ch",
+      "module_id": "level-shifter-4ch",
+      "metadata": {"graph_node_id": "n5"}
     }
   ],
   "nets": [
     {
       "name": "+5V",
       "pins": [
-        {
-          "component_ref": "U1",
-          "pin": "V+"
-        },
-        {
-          "component_ref": "U2",
-          "pin": "VIN"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "VIN"
-        }
+        {"component_ref": "U1", "pin": "V+"},
+        {"component_ref": "U2", "pin": "VIN"},
+        {"component_ref": "U3", "pin": "VIN"},
+        {"component_ref": "U5", "pin": "HV"}
       ]
     },
     {
-      "name": "N2",
+      "name": "+3V3",
       "pins": [
-        {
-          "component_ref": "U2",
-          "pin": "GPIO4"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "SIG"
-        }
+        {"component_ref": "U2", "pin": "3V3"},
+        {"component_ref": "U5", "pin": "LV"}
       ]
     },
     {
-      "name": "+5V_2",
+      "name": "FAN_CTRL_LV",
       "pins": [
-        {
-          "component_ref": "U3",
-          "pin": "VOUT+"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "VCC"
-        }
+        {"component_ref": "U2", "pin": "GPIO4"},
+        {"component_ref": "U5", "pin": "LV1"}
+      ]
+    },
+    {
+      "name": "FAN_CTRL_5V",
+      "pins": [
+        {"component_ref": "U5", "pin": "HV1"},
+        {"component_ref": "U3", "pin": "SIG"}
+      ]
+    },
+    {
+      "name": "+5V_LOAD",
+      "pins": [
+        {"component_ref": "U3", "pin": "VOUT+"},
+        {"component_ref": "U4", "pin": "VCC"}
       ]
     },
     {
       "name": "GND",
       "pins": [
-        {
-          "component_ref": "U1",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U2",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "VIN-"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U4",
-          "pin": "GND"
-        },
-        {
-          "component_ref": "U3",
-          "pin": "VOUT-"
-        }
+        {"component_ref": "U1", "pin": "GND"},
+        {"component_ref": "U2", "pin": "GND"},
+        {"component_ref": "U3", "pin": "VIN-"},
+        {"component_ref": "U3", "pin": "GND"},
+        {"component_ref": "U4", "pin": "GND"},
+        {"component_ref": "U3", "pin": "VOUT-"},
+        {"component_ref": "U5", "pin": "GND"}
       ]
     }
   ],
   "metadata": {
-    "node_count": 4,
-    "wire_count": 10,
+    "node_count": 5,
+    "wire_count": 14,
     "module_ids": [
       "usb-power-5v",
       "esp32-devkit",
+      "level-shifter-4ch",
       "mosfet-irlz44n",
       "cooling_fan_5v"
     ],

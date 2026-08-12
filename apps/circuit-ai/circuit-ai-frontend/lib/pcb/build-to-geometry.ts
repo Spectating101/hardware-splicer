@@ -470,9 +470,6 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
         const root = roots.get(`${pl.nodeId}|${pid}`);
         return root != null && kOf.has(root) && (netSize.get(root) ?? 0) >= 2;
       });
-      const m = routed.length;
-      const chLo = pl.padMinX - PAD_SIZE / 2 - HALF + 0.6;
-      const chHi = pl.padMaxX + PAD_SIZE / 2 + HALF - 0.6;
       let idx = 0;
       for (const { pid } of routed) {
         const key = `${pl.nodeId}|${pid}`;
@@ -482,7 +479,7 @@ export function buildGraphToGeometry(graph: BuildGraph): PcbGeometry {
         const tag = { id: net.id, name: net.name };
         const p = pl.padPos.get(pid)!;
         const stageY = nextBusY();
-        const escapeX = chLo + ((idx + 1) * (chHi - chLo)) / (m + 1);
+        const escapeX = p.x;
         idx += 1;
 
         let hopY = p.y;

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 
@@ -14,6 +15,40 @@ from hardware_splicer.salvage_bridge import resolve_salvage_compose_inputs
 
 ROOT = Path(__file__).resolve().parents[1]
 ROBOT_INTAKE = ROOT / "examples" / "intakes" / "splice_robot_drive_brief.json"
+
+
+def _drc_diagnostics(root: Path) -> dict:
+    """Return compact raw KiCad evidence when the robot-drive golden is not clean."""
+    reports = []
+    for path in sorted(root.rglob("KICAD_DRC.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            reports.append({"path": str(path), "read_error": str(exc)})
+            continue
+        violations = list(payload.get("violations") or [])
+        if not violations:
+            for sheet in list(payload.get("sheets") or []):
+                if isinstance(sheet, dict):
+                    violations.extend(list(sheet.get("violations") or []))
+        reports.append(
+            {
+                "path": str(path),
+                "errors": payload.get("errors"),
+                "warnings": payload.get("warnings"),
+                "violations": [
+                    {
+                        "type": row.get("type"),
+                        "severity": row.get("severity"),
+                        "description": row.get("description"),
+                        "items": row.get("items"),
+                    }
+                    for row in violations
+                    if isinstance(row, dict)
+                ],
+            }
+        )
+    return {"root": str(root), "reports": reports}
 
 
 def test_resolve_salvage_compose_inputs_robot_drive_catalog() -> None:
@@ -40,6 +75,7 @@ def test_compose_agent_loop_donor_context_robot_drive(tmp_path: Path, monkeypatc
     monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
 
+    out_dir = tmp_path / "salvage_agent_loop"
     intake = load_project_intake(ROBOT_INTAKE)
     result = compose_agent_loop(
         goal=str(intake["goal"]),
@@ -47,7 +83,7 @@ def test_compose_agent_loop_donor_context_robot_drive(tmp_path: Path, monkeypatc
         constraints=dict(intake.get("constraints") or {}),
         donor_context=_donor_context_from_intake(intake),
         salvage_mode=True,
-        out_dir=tmp_path / "salvage_agent_loop",
+        out_dir=out_dir,
         export_gerber=False,
         finalize_package=True,
         project_name=str(intake["project_name"]),
@@ -59,7 +95,7 @@ def test_compose_agent_loop_donor_context_robot_drive(tmp_path: Path, monkeypatc
     assert result.get("build_id") == "robot_drive_base"
     assert result.get("salvage_package")
     assert result.get("recommended_build_id") == "robot_drive_base"
-    assert loop.get("final_kicad_drc_errors") == 0
+    assert loop.get("final_kicad_drc_errors") == 0, _drc_diagnostics(out_dir)
     assert result.get("project_package")
 
 
@@ -75,6 +111,7 @@ def test_compose_agent_loop_http_donor_context(tmp_path: Path, monkeypatch: pyte
     monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
 
+    out_dir = tmp_path / "http_salvage_agent_loop"
     intake = load_project_intake(ROBOT_INTAKE)
     client = TestClient(create_app())
     response = client.post(
@@ -89,11 +126,11 @@ def test_compose_agent_loop_http_donor_context(tmp_path: Path, monkeypatch: pyte
             "project_name": intake["project_name"],
             "allow_llm_first": False,
             "export_gerber": False,
-            "out_dir": str(tmp_path / "http_salvage_agent_loop"),
+            "out_dir": str(out_dir),
         },
     )
     assert response.status_code == 200, response.text
     payload = response.json()
     assert payload.get("mode") == "salvage_catalog"
-    assert payload.get("agent_loop", {}).get("final_kicad_drc_errors") == 0
+    assert payload.get("agent_loop", {}).get("final_kicad_drc_errors") == 0, _drc_diagnostics(out_dir)
     assert payload.get("salvage_package")

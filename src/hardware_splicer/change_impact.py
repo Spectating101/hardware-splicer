@@ -1,8 +1,9 @@
 """Cross-domain change and failure impact graph.
 
 The graph connects a requirement change, donor replacement, or field failure to
-proposed subsystem effects and regression scope.  Inferences remain proposed until
-supported by analysis, measurement, simulation, bench, or field evidence.
+proposed subsystem effects and regression scope. Semantic domain selection is bounded
+and proposal-only on model-first paths; deterministic policy preserves conservative
+review requirements and never upgrades engineering authority.
 """
 
 from __future__ import annotations
@@ -18,6 +19,12 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from .engineering_source_graph import EngineeringSourceGraph
 from .machine_project import AuthorityState, MachineProject
 from .robot_topology import RobotTopology
+from .semantic_impact_scope import (
+    ALLOWED_IMPACT_DOMAINS,
+    SemanticImpactScopeError,
+    interpret_impact_scope,
+    unresolved_impact_scope,
+)
 
 
 CHANGE_IMPACT_SCHEMA = "hardware_splicer.change_impact_graph.v1"
@@ -188,18 +195,47 @@ def _text(value: Any) -> str:
 
 
 def _mode(intake: Mapping[str, Any]) -> ChangeMode:
+    """Resolve change mode with explicit structured mode taking precedence over prose."""
     explicit = str(intake.get("mode") or intake.get("project_mode") or "").strip().lower()
-    goal = _text(intake.get("goal") or intake.get("intent")).lower()
-    if explicit in {"evolve", "field_evolution"} or intake.get("field_failure") or "field failure" in goal:
+    explicit_modes = {
+        "greenfield": ChangeMode.GREENFIELD,
+        "modify": ChangeMode.MODIFY,
+        "modification": ChangeMode.MODIFY,
+        "repair": ChangeMode.REPAIR,
+        "evolve": ChangeMode.FIELD_EVOLUTION,
+        "field_evolution": ChangeMode.FIELD_EVOLUTION,
+    }
+    if explicit in explicit_modes:
+        return explicit_modes[explicit]
+    if intake.get("field_failure"):
         return ChangeMode.FIELD_EVOLUTION
-    if explicit == "repair" or intake.get("repair") or intake.get("salvage_mode") or any(token in goal for token in ("repair", "recover", "donor", "splice")):
+    if intake.get("repair") or intake.get("salvage_mode"):
         return ChangeMode.REPAIR
-    if explicit in {"modify", "modification"} or intake.get("baseline_project") or intake.get("baseline_revision") is not None or any(token in goal for token in ("modify", "upgrade", "add a", "replace")):
+    if intake.get("baseline_project") or intake.get("baseline_revision") is not None:
         return ChangeMode.MODIFY
+
+    # Direct callers without the Engineering Planner may still be legacy/offline. A
+    # model-first canonical caller always arrives with an explicit provenance-aware mode.
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        goal = _text(intake.get("goal") or intake.get("intent")).lower()
+        if "field failure" in goal:
+            return ChangeMode.FIELD_EVOLUTION
+        if any(token in goal for token in ("repair", "recover", "donor", "splice")):
+            return ChangeMode.REPAIR
+        if any(token in goal for token in ("modify", "upgrade", "add a", "replace")):
+            return ChangeMode.MODIFY
     return ChangeMode.GREENFIELD
 
 
-def _source_ids(source_graph: EngineeringSourceGraph | None, tokens: Sequence[str]) -> list[str]:
+def _known_source_ids(source_graph: EngineeringSourceGraph | None) -> set[str]:
+    if source_graph is None:
+        return set()
+    return {source.source_id for source in source_graph.sources}
+
+
+def _legacy_source_ids(source_graph: EngineeringSourceGraph | None, tokens: Sequence[str]) -> list[str]:
     if source_graph is None:
         return []
     wanted = [token.lower() for token in tokens]
@@ -211,6 +247,19 @@ def _source_ids(source_graph: EngineeringSourceGraph | None, tokens: Sequence[st
         if not wanted or any(token in haystack for token in wanted):
             matches.append(source.source_id)
     return matches
+
+
+def _declared_refs(value: Any, source_graph: EngineeringSourceGraph | None) -> tuple[list[str], list[str], list[str]]:
+    if not isinstance(value, Mapping):
+        return [], [], []
+    known = _known_source_ids(source_graph)
+    raw_sources = [str(row).strip() for row in _sequence(value.get("source_ids")) if str(row).strip()]
+    evidence_ids = [str(row).strip() for row in _sequence(value.get("evidence_ids")) if str(row).strip()]
+    if not known:
+        return raw_sources, evidence_ids, []
+    valid = [row for row in raw_sources if row in known]
+    invalid = [row for row in raw_sources if row not in known]
+    return valid, evidence_ids, invalid
 
 
 def _trigger_rows(intake: Mapping[str, Any], source_graph: EngineeringSourceGraph | None) -> list[ChangeTrigger]:
@@ -232,6 +281,9 @@ def _trigger_rows(intake: Mapping[str, Any], source_graph: EngineeringSourceGrap
     elif isinstance(telemetry, list):
         candidates.extend((f"measurement_{index + 1}", value) for index, value in enumerate(telemetry))
 
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    legacy_binding = offline_salvage_enabled()
     seen: set[str] = set()
     for trigger_type, value in candidates:
         statement = _text(value).strip()
@@ -241,20 +293,30 @@ def _trigger_rows(intake: Mapping[str, Any], source_graph: EngineeringSourceGrap
         measured = trigger_type.startswith("measurement")
         observed = trigger_type.startswith("observation") or trigger_type == "field_failure"
         authority = AuthorityState.MEASURED if measured else AuthorityState.OBSERVED if observed else AuthorityState.DECLARED
-        tokens = re.findall(r"[a-zA-Z0-9_.-]+", statement.lower())[:8]
+        source_ids, evidence_ids, invalid_sources = _declared_refs(value, source_graph)
+        source_binding = "declared" if source_ids else "none"
+        if not source_ids and legacy_binding:
+            tokens = re.findall(r"[a-zA-Z0-9_.-]+", statement.lower())[:8]
+            source_ids = _legacy_source_ids(source_graph, tokens)
+            source_binding = "legacy_text_match" if source_ids else "none"
         rows.append(
             ChangeTrigger(
                 trigger_id=_stable_id("trigger", trigger_type, statement),
                 trigger_type=trigger_type,
                 statement=statement,
-                source_ids=_source_ids(source_graph, tokens),
+                source_ids=source_ids,
+                evidence_ids=evidence_ids,
                 authority=authority,
+                metadata={
+                    "source_binding": source_binding,
+                    "unresolved_source_ids": invalid_sources,
+                },
             )
         )
     return rows
 
 
-def _inferred_domains(text: str, mode: ChangeMode) -> set[ImpactDomain]:
+def _legacy_inferred_domains(text: str, mode: ChangeMode) -> set[ImpactDomain]:
     lowered = text.lower()
     domains: set[ImpactDomain] = {ImpactDomain.SYSTEM, ImpactDomain.VERIFICATION}
     keyword_map = {
@@ -298,7 +360,128 @@ def _inferred_domains(text: str, mode: ChangeMode) -> set[ImpactDomain]:
     return domains
 
 
-def _target_for_domain(
+def _declared_impact_domains(intake: Mapping[str, Any]) -> list[ImpactDomain]:
+    raw = intake.get("impact_domains")
+    if raw is None:
+        raw = intake.get("affected_domains")
+    if not isinstance(raw, (list, tuple)):
+        return []
+    allowed = set(ALLOWED_IMPACT_DOMAINS)
+    resolved: list[ImpactDomain] = []
+    for value in raw:
+        token = str(value or "").strip().lower()
+        if token in allowed:
+            resolved.append(ImpactDomain(token))
+    return list(dict.fromkeys(resolved))
+
+
+def _topology_summary(topology: RobotTopology | None) -> Dict[str, Any]:
+    if topology is None:
+        return {}
+    return {
+        "robot_genre": topology.robot_genre.value,
+        "topology_id": topology.topology_id,
+        "link_count": len(topology.links),
+        "joint_count": len(topology.joints),
+        "actuator_count": len(topology.actuators),
+        "sensor_count": len(topology.sensors),
+        "unresolved_count": len(topology.unresolved),
+    }
+
+
+def _subsystem_summary(machine_project: MachineProject | None) -> list[Dict[str, Any]]:
+    if machine_project is None:
+        return []
+    return [
+        {
+            "subsystem_id": row.subsystem_id,
+            "domain": row.domain.value,
+            "component_count": len(row.component_ids),
+            "interface_count": len(row.interface_ids),
+        }
+        for row in machine_project.subsystems
+    ]
+
+
+def _impact_scope(
+    intake: Mapping[str, Any],
+    triggers: Sequence[ChangeTrigger],
+    mode: ChangeMode,
+    *,
+    machine_project: MachineProject | None,
+    topology: RobotTopology | None,
+) -> tuple[set[ImpactDomain], Dict[str, Any]]:
+    base: set[ImpactDomain] = {ImpactDomain.SYSTEM, ImpactDomain.VERIFICATION}
+    policy_added = {ImpactDomain.SYSTEM, ImpactDomain.VERIFICATION}
+    if mode in {ChangeMode.MODIFY, ChangeMode.REPAIR, ChangeMode.FIELD_EVOLUTION}:
+        base.update({ImpactDomain.SAFETY, ImpactDomain.ASSEMBLY})
+        policy_added.update({ImpactDomain.SAFETY, ImpactDomain.ASSEMBLY})
+
+    declared = _declared_impact_domains(intake)
+    if declared:
+        domains = base | set(declared)
+        return domains, {
+            "schema_version": "hardware_splicer.semantic_impact_scope.v1",
+            "status": "declared",
+            "domains": sorted(row.value for row in declared),
+            "effective_domains": sorted(row.value for row in domains),
+            "policy_added_domains": sorted(row.value for row in policy_added),
+            "reasoning": "Persisted impact-domain scope supplied by the project/user; conservative policy domains remain additive.",
+            "confidence": 1.0,
+            "unresolved_questions": [],
+            "source": "declared",
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    combined_text = " ".join(row.statement for row in triggers)
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    if offline_salvage_enabled():
+        legacy = _legacy_inferred_domains(combined_text, mode)
+        return legacy, {
+            "schema_version": "hardware_splicer.semantic_impact_scope.v1",
+            "status": "legacy_heuristic",
+            "domains": sorted(row.value for row in legacy),
+            "effective_domains": sorted(row.value for row in legacy),
+            "policy_added_domains": sorted(row.value for row in policy_added),
+            "reasoning": "Historical keyword impact projection retained only for explicit offline compatibility.",
+            "confidence": 0.0,
+            "unresolved_questions": [],
+            "source": "legacy_keyword",
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    if not triggers:
+        unresolved = unresolved_impact_scope("No persisted change/failure/observation statement is available for semantic impact scoping.")
+        proposal = unresolved.model_dump(mode="json")
+        proposal["effective_domains"] = sorted(row.value for row in base)
+        proposal["policy_added_domains"] = sorted(row.value for row in policy_added)
+        return base, proposal
+
+    try:
+        proposal_model = interpret_impact_scope(
+            [row.statement for row in triggers],
+            mode=mode.value,
+            topology_summary=_topology_summary(topology),
+            subsystem_summary=_subsystem_summary(machine_project),
+        )
+    except SemanticImpactScopeError as exc:
+        proposal_model = unresolved_impact_scope(str(exc))
+    proposal = proposal_model.model_dump(mode="json")
+    proposed_domains = {
+        ImpactDomain(value)
+        for value in proposal_model.domains
+        if value in set(ALLOWED_IMPACT_DOMAINS)
+    }
+    domains = base | proposed_domains if proposal_model.status == "model_proposed" else base
+    proposal["effective_domains"] = sorted(row.value for row in domains)
+    proposal["policy_added_domains"] = sorted(row.value for row in policy_added)
+    return domains, proposal
+
+
+def _legacy_target_for_domain(
     domain: ImpactDomain,
     machine_project: MachineProject | None,
     topology: RobotTopology | None,
@@ -317,21 +500,39 @@ def _target_for_domain(
             return topology.actuators[0].electrical_component_id or topology.actuators[0].actuator_id
         if domain == ImpactDomain.SOFTWARE and topology.sensors:
             return topology.sensors[0].sensor_id
+    return _structural_target_for_domain(domain, machine_project, topology)
+
+
+def _structural_target_for_domain(
+    domain: ImpactDomain,
+    machine_project: MachineProject | None,
+    topology: RobotTopology | None,
+) -> str:
+    if domain == ImpactDomain.CONTROL and topology is not None:
+        return topology.topology_id
     if machine_project is not None:
         preferred = _DOMAIN_TARGETS[domain]
         if any(row.subsystem_id == preferred for row in machine_project.subsystems):
             return preferred
         domain_alias = {
+            ImpactDomain.SYSTEM: "system",
             ImpactDomain.MECHANICAL: "mechanical",
             ImpactDomain.ELECTRICAL: "electrical",
             ImpactDomain.FIRMWARE: "firmware",
             ImpactDomain.SOFTWARE: "software",
+            ImpactDomain.SOURCING: "sourcing",
+            ImpactDomain.ASSEMBLY: "assembly",
+            ImpactDomain.VERIFICATION: "verification",
         }.get(domain)
         if domain_alias:
             for subsystem in machine_project.subsystems:
                 if subsystem.domain.value == domain_alias:
                     return subsystem.subsystem_id
         return machine_project.project_id
+    if domain == ImpactDomain.MECHANICAL and topology is not None:
+        return topology.root_link_id
+    if topology is not None and domain in {ImpactDomain.CONTROL, ImpactDomain.SYSTEM}:
+        return topology.topology_id
     return _DOMAIN_TARGETS[domain]
 
 
@@ -352,12 +553,21 @@ def _effect(domain: ImpactDomain, trigger_text: str, mode: ChangeMode) -> str:
     return templates[domain]
 
 
-def _severity(domain: ImpactDomain, text: str, mode: ChangeMode) -> ImpactSeverity:
-    lowered = text.lower()
-    if domain == ImpactDomain.SAFETY or any(token in lowered for token in ("tipping", "brownout", "burned", "flight", "overcurrent")):
-        return ImpactSeverity.SAFETY_CRITICAL if domain == ImpactDomain.SAFETY else ImpactSeverity.BLOCKING
+def _severity(
+    domain: ImpactDomain,
+    mode: ChangeMode,
+    *,
+    legacy_text: str = "",
+    legacy_semantics: bool = False,
+) -> ImpactSeverity:
+    if domain == ImpactDomain.SAFETY:
+        return ImpactSeverity.SAFETY_CRITICAL
     if mode == ChangeMode.FIELD_EVOLUTION:
         return ImpactSeverity.BLOCKING
+    if legacy_semantics:
+        lowered = legacy_text.lower()
+        if any(token in lowered for token in ("tipping", "brownout", "burned", "flight", "overcurrent")):
+            return ImpactSeverity.BLOCKING
     return ImpactSeverity.REVIEW
 
 
@@ -421,29 +631,50 @@ def build_change_impact_graph(
     )
     triggers = _trigger_rows(body, source_graph)
     combined_text = " ".join(row.statement for row in triggers)
-    domains = _inferred_domains(combined_text, mode)
+    domains, scope_proposal = _impact_scope(
+        body,
+        triggers,
+        mode,
+        machine_project=machine_project,
+        topology=topology,
+    )
+    policy_added = set(scope_proposal.get("policy_added_domains") or [])
     if mode != ChangeMode.GREENFIELD and baseline_revision is None:
-        # Without a pinned baseline the existing wiring, pin contracts, and power
-        # distribution are unknown. Conservatively require electrical review rather
-        # than inferring that a visually mechanical or software-facing change is
-        # electrically isolated.
         domains.add(ImpactDomain.ELECTRICAL)
+        policy_added.add(ImpactDomain.ELECTRICAL.value)
+        scope_proposal["effective_domains"] = sorted(row.value for row in domains)
+        scope_proposal["policy_added_domains"] = sorted(policy_added)
 
+    legacy_semantics = scope_proposal.get("source") == "legacy_keyword"
     impacts: list[ImpactNode] = []
     checks: list[RegressionCheck] = []
     edges: list[ImpactEdge] = []
     for domain in sorted(domains, key=lambda value: value.value):
-        target_id = _target_for_domain(domain, machine_project, topology, combined_text)
+        target_id = (
+            _legacy_target_for_domain(domain, machine_project, topology, combined_text)
+            if legacy_semantics
+            else _structural_target_for_domain(domain, machine_project, topology)
+        )
         impact_id = _stable_id("impact", change_id, domain.value, target_id, combined_text)
         impact = ImpactNode(
             impact_id=impact_id,
             domain=domain,
             target_id=target_id,
             effect=_effect(domain, combined_text, mode),
-            severity=_severity(domain, combined_text, mode),
+            severity=_severity(
+                domain,
+                mode,
+                legacy_text=combined_text,
+                legacy_semantics=legacy_semantics,
+            ),
             source_trigger_ids=[row.trigger_id for row in triggers],
             verification_target_ids=[],
-            metadata={"inference_basis": "keyword_and_topology_projection", "requires_engineering_review": True},
+            metadata={
+                "inference_basis": str(scope_proposal.get("source") or "unresolved"),
+                "impact_scope_status": scope_proposal.get("status"),
+                "requires_engineering_review": True,
+                "target_projection": "legacy_text_and_topology" if legacy_semantics else "structural_domain_projection",
+            },
         )
         check = _regression_check(domain, target_id, change_id)
         impact.verification_target_ids = [check.check_id]
@@ -456,7 +687,7 @@ def build_change_impact_graph(
                     source_id=trigger.trigger_id,
                     target_id=impact_id,
                     relationship="may_affect",
-                    rationale=f"{trigger.trigger_type} indicates a possible {domain.value} consequence.",
+                    rationale=f"{trigger.trigger_type} indicates a proposed {domain.value} review consequence.",
                 )
             )
         edges.append(
@@ -474,6 +705,25 @@ def build_change_impact_graph(
         unresolved.append({"field": "baseline_revision", "reason": "A modification, repair, or field evolution requires a pinned baseline revision."})
     if not triggers:
         unresolved.append({"field": "change_trigger", "reason": "No explicit change request, repair description, or failure evidence was supplied."})
+    if str(scope_proposal.get("status") or "") == "unresolved":
+        questions = list(scope_proposal.get("unresolved_questions") or [])
+        unresolved.append(
+            {
+                "field": "impact_scope",
+                "reason": str(scope_proposal.get("reasoning") or "Impact domain scope remains unresolved."),
+                "questions": questions,
+            }
+        )
+    for trigger in triggers:
+        invalid = list(trigger.metadata.get("unresolved_source_ids") or [])
+        if invalid:
+            unresolved.append(
+                {
+                    "field": f"trigger.{trigger.trigger_id}.source_ids",
+                    "reason": "Trigger references unknown engineering source identities.",
+                    "source_ids": invalid,
+                }
+            )
     if mode == ChangeMode.FIELD_EVOLUTION and source_graph and not any(
         source.source_type.value in {"measurement", "telemetry", "test_log", "operator_observation"}
         for source in source_graph.sources
@@ -494,6 +744,9 @@ def build_change_impact_graph(
         metadata={
             "candidate_only": True,
             "impact_analysis_authority": AuthorityState.PROPOSED.value,
+            "impact_scope_proposal": scope_proposal,
+            "impact_scope_source": scope_proposal.get("source"),
+            "impact_scope_status": scope_proposal.get("status"),
             "affected_domains": sorted(domain.value for domain in domains),
             "blocking_impact_count": sum(
                 row.severity in {ImpactSeverity.BLOCKING, ImpactSeverity.SAFETY_CRITICAL}

@@ -1,9 +1,9 @@
 """Canonical execution router with revision-anchored evidence persistence.
 
 The existing execution router owns preview, run, capabilities, and in-memory evidence
-attachment. This wrapper preserves those exact route objects, removes only the legacy
-``/evidence/save`` route, and installs a persistence endpoint that applies execution
-evidence to the stored project revision instead of a caller-supplied replacement plan.
+attachment. This wrapper preserves those routes, removes only the legacy persistence
+endpoint, and installs a persistence endpoint that applies execution evidence to the
+stored project revision instead of a caller-supplied replacement plan.
 """
 
 from __future__ import annotations
@@ -87,15 +87,21 @@ def _anchored_base_plan(
 def create_engineering_execution_router(
     project_store: ProjectStore | None = None,
 ) -> APIRouter:
-    """Return the existing execution surface with an anchored save endpoint."""
+    """Return the execution surface with exactly one revision-anchored save endpoint."""
 
+    # APIRouter stores prefix-expanded route paths, and FastAPI/Starlette versions differ
+    # in how an existing prefixed router behaves when routes are added or copied later.
+    # Build a prefix-free canonical wrapper instead: retain every safe legacy route through
+    # include_router(), omit only the legacy save route, then register the anchored endpoint
+    # at its full path. This makes the public path invariant across router composition.
     legacy = create_legacy_execution_router(project_store)
-    router = APIRouter()
-    router.routes.extend(
+    legacy.routes[:] = [
         route
         for route in legacy.routes
         if getattr(route, "path", None) != _SAVE_PATH
-    )
+    ]
+    router = APIRouter()
+    router.include_router(legacy)
 
     @router.post(
         _SAVE_PATH,

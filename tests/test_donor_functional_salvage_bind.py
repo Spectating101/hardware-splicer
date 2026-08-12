@@ -1,4 +1,4 @@
-"""Donor functional_salvage must bind into resolved_modules — not catalog gap-fill."""
+"""Donor functional salvage must preserve donor capability without catalog stand-ins."""
 
 from __future__ import annotations
 
@@ -10,7 +10,19 @@ from hardware_splicer.salvage_bridge import build_intake_salvage_package
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_robot_drive_binds_donor_hbridge_not_l298n_gap_fill() -> None:
+def test_robot_drive_keeps_unknown_donor_hbridge_and_motor_identity_unresolved(monkeypatch) -> None:
+    # This is an identity-boundary test, so do not let the suite-wide offline compatibility
+    # environment silently re-enable the historical representative-module resolver.
+    # QWEN_DISABLED itself means "force offline compatibility" in the central policy, so it
+    # must also be cleared; with no provider credentials, model-first identity remains
+    # unresolved rather than falling back to heuristics.
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
+    monkeypatch.setenv("QWEN_DISABLED", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_QWEN_DISABLED", "0")
+    monkeypatch.setenv("HARDWARE_SPLICER_QWEN_SALVAGE", "1")
+    monkeypatch.delenv("QWEN_API_KEY", raising=False)
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+
     intake = load_project_intake(ROOT / "examples" / "intakes" / "splice_robot_drive_brief.json")
     package = build_intake_salvage_package(
         goal=str(intake.get("goal") or ""),
@@ -23,29 +35,40 @@ def test_robot_drive_binds_donor_hbridge_not_l298n_gap_fill() -> None:
         },
     )
     resolved = list(package.get("resolved_modules") or [])
-    assert not any(
-        row.get("module_id") == "l298n" and row.get("source") == "gap_fill" for row in resolved
-    ), resolved
+
+    # An unknown donor H-bridge is useful capability evidence, but it is not an L298N.
+    assert not any(row.get("module_id") == "l298n" for row in resolved), resolved
     donor_drv = [
         row
         for row in resolved
-        if row.get("source") == "donor_functional_salvage" and row.get("role") == "drv"
+        if str(row.get("source") or "").startswith("donor_functional_salvage")
+        and row.get("role") == "drv"
     ]
     assert donor_drv, resolved
-    assert donor_drv[0].get("module_id") == "l298n"
+    assert donor_drv[0].get("module_id") is None
+    assert donor_drv[0].get("external_capability_only") is True
     assert "J_MOTOR_L" in (donor_drv[0].get("connector_refs") or [])
+    assert "J_MOTOR_R" in (donor_drv[0].get("connector_refs") or [])
 
-    motors = [row for row in resolved if row.get("module_id") == "dc_motor_3v_6v"]
-    assert len(motors) == 2, motors
+    # The two physical motors must remain two inventory instances even though neither generic
+    # name is sufficient evidence for a particular catalog motor identity.
+    by_name = {str(row.get("part_name") or ""): row for row in resolved}
+    for name in ("left 6V DC gear motor", "right 6V DC gear motor"):
+        assert name in by_name, resolved
+        assert by_name[name].get("module_id") is None
+        assert by_name[name].get("identity_status") == "unresolved"
 
+    # A strict identity-only package may not have enough concrete module identity to compile a
+    # hardware-specific bring-up card. Connector truth therefore lives on the donor capability
+    # row until a later architecture/identity decision; the package must not invent L298N text.
     bringup = (package.get("bringup_card") or {}).get("markdown") or ""
-    assert "J_MOTOR_L" in bringup
-    assert "J_MOTOR_R" in bringup
+    assert "L298N" not in bringup
 
-    assert package.get("power_topology") == "hybrid"
-    assert package.get("salvage_resolution", {}).get("functional_salvage_bound", {}).get(
-        "skipped_catalog_driver_gap_fill"
-    )
+    # Voltage numbers or familiar connector names are not exact source identity.
+    assert package.get("power_topology") == "unresolved"
+    bound = package.get("salvage_resolution", {}).get("functional_salvage_bound", {})
+    assert bound.get("driver_capability_present") is True
+    assert bound.get("catalog_standin_required") is False
 
 
 def test_enabot_lite_intake_keeps_donor_drive(tmp_path: Path) -> None:

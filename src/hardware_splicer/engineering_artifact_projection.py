@@ -116,6 +116,37 @@ def _mapped_target(subject_id: str, identity_map: Mapping[str, Any], project: Ma
     return subject_id if subject_id in valid else project.project_id
 
 
+def _artifact_ref(
+    *,
+    artifact_id: str,
+    kind: str,
+    ref: str | None,
+    authority: AuthorityState,
+    source_id: str,
+    revision: Any = None,
+    content_hash: Any = None,
+    metadata: Mapping[str, Any] | None = None,
+) -> ArtifactRef:
+    """Build the current canonical ArtifactRef without reviving retired schema fields."""
+    resolved_ref = str(ref or content_hash or f"source://{source_id}").strip()
+    details = {
+        "projection": ARTIFACT_PROJECTION_SCHEMA,
+        "source_id": source_id,
+        **dict(metadata or {}),
+    }
+    if revision not in (None, ""):
+        details["revision"] = str(revision)
+    if content_hash not in (None, ""):
+        details["content_hash"] = str(content_hash)
+    return ArtifactRef(
+        artifact_id=artifact_id,
+        kind=kind,
+        ref=resolved_ref,
+        authority=authority,
+        metadata=details,
+    )
+
+
 def project_engineering_artifacts(
     project: MachineProject,
     *,
@@ -187,28 +218,28 @@ def project_engineering_artifacts(
                 ),
             )
             source_artifact_id = f"artifact-firmware-source-{source_token}"
-            artifacts[source_artifact_id] = ArtifactRef(
+            artifacts[source_artifact_id] = _artifact_ref(
                 artifact_id=source_artifact_id,
                 kind="firmware_source_manifest",
-                path=source.uri,
-                revision=str(_first(claims, "source_revision") or source.revision or "") or None,
+                ref=source.uri,
+                revision=_first(claims, "source_revision") or source.revision,
                 content_hash=source.content_hash,
                 authority=source.authority_ceiling,
-                metadata={"projection": ARTIFACT_PROJECTION_SCHEMA, "source_id": source.source_id},
+                source_id=source.source_id,
             )
             binary_hash = _first(claims, "binary_hash")
             binary_artifact_id: str | None = None
             if binary_hash:
                 binary_artifact_id = f"artifact-firmware-binary-{source_token}"
-                artifacts[binary_artifact_id] = ArtifactRef(
+                artifacts[binary_artifact_id] = _artifact_ref(
                     artifact_id=binary_artifact_id,
                     kind="firmware_binary",
-                    revision=str(_first(claims, "source_revision") or source.revision or "") or None,
+                    ref=str(binary_hash),
+                    revision=_first(claims, "source_revision") or source.revision,
                     content_hash=str(binary_hash),
                     authority=source.authority_ceiling,
+                    source_id=source.source_id,
                     metadata={
-                        "projection": ARTIFACT_PROJECTION_SCHEMA,
-                        "source_id": source.source_id,
                         "hardware_revision": _first(claims, "hardware_revision"),
                         "board_profile": _first(claims, "board_profile"),
                     },
@@ -294,14 +325,14 @@ def project_engineering_artifacts(
                 ),
             )
             artifact_id = f"artifact-middleware-manifest-{source_token}"
-            artifacts[artifact_id] = ArtifactRef(
+            artifacts[artifact_id] = _artifact_ref(
                 artifact_id=artifact_id,
                 kind="middleware_interface_manifest",
-                path=source.uri,
+                ref=source.uri,
                 revision=source.revision,
                 content_hash=source.content_hash,
                 authority=source.authority_ceiling,
-                metadata={"projection": ARTIFACT_PROJECTION_SCHEMA, "source_id": source.source_id},
+                source_id=source.source_id,
             )
             topics = _first(claims, "ros_topics") or []
             services = _first(claims, "ros_services") or []

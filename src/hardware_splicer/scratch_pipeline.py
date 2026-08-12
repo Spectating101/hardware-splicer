@@ -78,17 +78,30 @@ def merge_goal_modules_with_inventory(
     *,
     constrained: bool = False,
 ) -> List[Dict[str, Any]]:
-    """Merge NL module picker output with inventory-resolved rows (inventory wins on id clash)."""
+    """Merge zero-authority goal picks only on explicit legacy/offline salvage paths.
+
+    On the model-first physical-identity path, inventory/donor rows are canonical even when
+    their ``module_id`` is unresolved.  A goal picker—regex or model-backed—may propose an
+    architecture elsewhere, but it cannot manufacture physical inventory identity, module
+    overrides, BOM identity, or donor bindings.  Returning the persisted rows unchanged also
+    preserves external donor capability rows that intentionally have ``module_id=None``.
+    """
+    from .integrations.llm_policy import offline_salvage_enabled
+
+    inventory_rows = [dict(row) for row in (resolved_modules or []) if isinstance(row, Mapping)]
+    if not offline_salvage_enabled():
+        return inventory_rows
+
     from .module_resolver import donor_has_bound_driver
 
     by_id: Dict[str, Dict[str, Any]] = {}
-    for row in resolved_modules or []:
+    for row in inventory_rows:
         module_id = str(row.get("module_id") or "").strip()
         if module_id:
             by_id[module_id] = dict(row)
     if constrained and by_id:
         return list(by_id.values())
-    donor_drv = donor_has_bound_driver(list(resolved_modules or []))
+    donor_drv = donor_has_bound_driver(inventory_rows)
     pick = pick_modules_for_goal(goal)
     for index, module_id in enumerate(pick.module_ids):
         if module_id in by_id:

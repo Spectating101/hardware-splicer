@@ -4,15 +4,22 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Mapping
 
+from ..electrical_contract_truth import (
+    battery_charger_kind,
+    battery_monitor_kind,
+    contract_snapshot,
+    max_output_current_a,
+    output_voltage_range_v,
+    power_conversion_kind,
+    power_input_kind,
+)
 from .common import (
     available_module_ids,
     blocked,
     build_path,
     dedupe,
-    first_available,
     first_float,
     has_blocker,
-    module_current_limit_a,
     module_input_range,
     passed,
     warned,
@@ -20,12 +27,10 @@ from .common import (
 from .ir import CircuitIntent, Constraint, SynthesisCandidate, TopologyOperator
 
 
-CHARGER_MODULES = ("tp4056",)
-BOOST_MODULES = ("boost-mt3608",)
-LDO_MODULES = ("ldo-ams1117-3v3", "ldo-ams1117-5v")
-BUCK_MODULES = ("buck-mp1584", "buck-lm2596")
-USB_INPUT_MODULES = ("usb-power-5v",)
-FUEL_GAUGE_MODULES = ("lc709203f-fuel-gauge",)
+REGULATOR_KINDS = {"buck", "boost", "ldo"}
+CURRENT_MARGIN_MULTIPLIER = 1.25
+RAW_CELL_NEAR_MIN_POLICY_V = 0.4
+SMALL_CELL_REVIEW_CAPACITY_MAH = 500.0
 PROTECTION_EVIDENCE = {
     "protected_cell",
     "protected_lipo",
@@ -46,20 +51,72 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
     missing: List[str] = []
     topology: List[TopologyOperator] = []
 
-    usb_input = first_available(available, USB_INPUT_MODULES)
-    charger = first_available(available, CHARGER_MODULES)
-    fuel_gauge = first_available(available, FUEL_GAUGE_MODULES)
+    usb_inputs = sorted(
+        module_id for module_id in available if power_input_kind(module_id) == "usb_5v"
+    )
+    chargers = sorted(
+        module_id
+        for module_id in available
+        if battery_charger_kind(module_id) == "single_cell_li_ion"
+    )
+    fuel_gauges = sorted(
+        module_id for module_id in available if battery_monitor_kind(module_id) == "fuel_gauge"
+    )
+    usb_input = usb_inputs[0] if len(usb_inputs) == 1 else ""
+    charger = chargers[0] if len(chargers) == 1 else ""
+    fuel_gauge = fuel_gauges[0] if len(fuel_gauges) == 1 else ""
+
     target_output_v = _target_output_voltage(circuit_intent)
     load_current_a = _load_current(circuit_intent)
     cell_capacity_mah = _cell_capacity(circuit_intent)
-    regulator = _choose_output_regulator(available, target_output_v=target_output_v, load_current_a=load_current_a)
+    cell_min_v, cell_max_v = output_voltage_range_v(charger) if charger else (None, None)
+    regulator = _choose_output_regulator(
+        available,
+        target_output_v=target_output_v,
+        cell_range=(cell_min_v, cell_max_v),
+    )
+    regulator_kind = power_conversion_kind(regulator) if regulator else None
 
     if not usb_input:
         missing.append("usb_charge_input")
-        constraints.append(blocked("usb_charge_input", "evidence_required", "charger_input", "Provide a known 5V charge input module."))
+        constraints.append(
+            blocked(
+                "usb_charge_input",
+                "evidence_required",
+                "charger_input",
+                (
+                    "Multiple 5V USB input contracts are declared; choose one explicitly."
+                    if len(usb_inputs) > 1
+                    else "Provide one declared 5V USB charge-input contract."
+                ),
+                value={"compatible_candidates": usb_inputs},
+            )
+        )
     if not charger:
         missing.append("single_cell_charger_module")
-        constraints.append(blocked("single_cell_charger_module", "evidence_required", "charger", "Provide a known single-cell charger/protection module."))
+        constraints.append(
+            blocked(
+                "single_cell_charger_module",
+                "evidence_required",
+                "charger",
+                (
+                    "Multiple single-cell charger contracts are declared; choose one explicitly."
+                    if len(chargers) > 1
+                    else "Provide one declared single-cell Li-ion/LiPo charger contract."
+                ),
+                value={"compatible_candidates": chargers},
+            )
+        )
+    elif cell_min_v is None or cell_max_v is None:
+        missing.append("battery_voltage_range_contract")
+        constraints.append(
+            blocked(
+                "battery_voltage_range_contract",
+                "voltage",
+                charger,
+                "Charger/cell output range is absent from structured component truth.",
+            )
+        )
     if not (evidence & PROTECTION_EVIDENCE):
         missing.append("battery_protection_evidence")
         constraints.append(
@@ -67,7 +124,7 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                 "battery_protection_evidence",
                 "protection",
                 "li_ion_cell",
-                "Li-ion/LiPo use requires protected cell or protection-board evidence before planning power-on.",
+                "Li-ion/LiPo use requires protected-cell or protection-board evidence before planning power-on.",
             )
         )
     else:
@@ -81,10 +138,24 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
         )
     if load_current_a is None:
         missing.append("battery_load_current")
-        constraints.append(blocked("battery_load_current", "measurement_required", "load", "Declare expected output/load current."))
+        constraints.append(
+            blocked(
+                "battery_load_current",
+                "measurement_required",
+                "load",
+                "Declare expected output/load current.",
+            )
+        )
     if target_output_v is None:
         missing.append("target_output_voltage")
-        constraints.append(blocked("target_output_voltage", "voltage", "output_rail", "Declare target output voltage."))
+        constraints.append(
+            blocked(
+                "target_output_voltage",
+                "voltage",
+                "output_rail",
+                "Declare target output voltage in structured project state.",
+            )
+        )
     if cell_capacity_mah is None:
         constraints.append(
             warned(
@@ -94,14 +165,17 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                 "Runtime and charge-rate review need cell capacity; planner can continue but cannot estimate runtime.",
             )
         )
-    elif cell_capacity_mah < 500:
+    elif cell_capacity_mah < SMALL_CELL_REVIEW_CAPACITY_MAH:
         constraints.append(
             warned(
                 "cell_capacity_low",
                 "current",
                 "cell",
-                "Small cell capacity may be unsuitable for high-current loads; bench/runtime review required.",
-                value={"cell_capacity_mah": cell_capacity_mah},
+                "Cell capacity is below the explicit small-cell review policy; high-current loads require bench/runtime review.",
+                value={
+                    "cell_capacity_mah": cell_capacity_mah,
+                    "review_policy_below_mah": SMALL_CELL_REVIEW_CAPACITY_MAH,
+                },
             )
         )
 
@@ -114,16 +188,32 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                 outputs=["battery_voltage_rail"],
                 required_part_types=["charger_module", "protected_single_cell_battery"],
                 required_ports=["IN+", "IN-", "BAT+", "BAT-", "OUT+", "OUT-"],
-                notes="TP4056 charge path candidate; protected version or external protection evidence is mandatory.",
-                metadata={"module_id": charger, "nominal_cell_v": 3.7, "full_cell_v": 4.2},
+                notes="Single-cell charge-path candidate; protected version or external protection evidence is mandatory.",
+                metadata={
+                    "module_id": charger,
+                    "battery_charger_kind": battery_charger_kind(charger),
+                    "battery_output_range_v": [cell_min_v, cell_max_v]
+                    if cell_min_v is not None and cell_max_v is not None
+                    else None,
+                    "electrical_contract": contract_snapshot(charger),
+                },
             )
         )
 
-    if target_output_v is not None:
-        if target_output_v > 4.3:
-            if regulator and regulator in BOOST_MODULES:
-                _check_regulator(regulator, target_output_v, load_current_a, constraints, missing)
-                topology.append(_regulator_operator(regulator, "boost_regulator", target_output_v, load_current_a))
+    if target_output_v is not None and cell_min_v is not None and cell_max_v is not None:
+        if target_output_v > cell_max_v:
+            if regulator and regulator_kind == "boost":
+                _check_regulator(
+                    regulator,
+                    cell_range=(cell_min_v, cell_max_v),
+                    target_output_v=target_output_v,
+                    load_current_a=load_current_a,
+                    constraints=constraints,
+                    missing=missing,
+                )
+                topology.append(
+                    _regulator_operator(regulator, "boost_regulator", target_output_v, load_current_a)
+                )
             else:
                 missing.append("boost_regulator_module")
                 constraints.append(
@@ -131,24 +221,37 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                         "boost_regulator_module",
                         "voltage",
                         "output_rail",
-                        "Single-cell battery needs a boost regulator for target output above 4.2V.",
-                        value={"target_output_v": target_output_v},
+                        "Target output exceeds the structured cell/charger rail; provide one compatible regulator with an explicit boost topology contract.",
+                        value={
+                            "target_output_v": target_output_v,
+                            "cell_output_range_v": [cell_min_v, cell_max_v],
+                        },
                     )
                 )
-        elif target_output_v <= 3.4:
-            if regulator:
-                _check_regulator(regulator, target_output_v, load_current_a, constraints, missing)
-                op_type = "ldo_regulator" if regulator in LDO_MODULES else "buck_regulator"
+        elif target_output_v < cell_max_v and target_output_v <= cell_min_v + RAW_CELL_NEAR_MIN_POLICY_V:
+            if regulator and regulator_kind in {"buck", "ldo"}:
+                _check_regulator(
+                    regulator,
+                    cell_range=(cell_min_v, cell_max_v),
+                    target_output_v=target_output_v,
+                    load_current_a=load_current_a,
+                    constraints=constraints,
+                    missing=missing,
+                )
+                op_type = "ldo_regulator" if regulator_kind == "ldo" else "buck_regulator"
                 topology.append(_regulator_operator(regulator, op_type, target_output_v, load_current_a))
             else:
-                missing.append("3v3_regulator_module")
+                missing.append("battery_output_regulator_module")
                 constraints.append(
                     blocked(
-                        "3v3_regulator_module",
+                        "battery_output_regulator_module",
                         "voltage",
                         "output_rail",
-                        "Provide a 3.3V regulator for stable logic from a single-cell battery.",
-                        value={"target_output_v": target_output_v},
+                        "Provide one regulator with an explicit buck/LDO topology contract whose structured ranges support the requested lower output rail.",
+                        value={
+                            "target_output_v": target_output_v,
+                            "cell_output_range_v": [cell_min_v, cell_max_v],
+                        },
                     )
                 )
         else:
@@ -157,8 +260,12 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                     "raw_battery_voltage_range",
                     "voltage",
                     "output_rail",
-                    "Target can be reviewed as raw single-cell battery rail.",
-                    value={"target_output_v": target_output_v, "cell_range_v": [3.0, 4.2]},
+                    "Target can be reviewed against the structured raw single-cell charger rail.",
+                    value={
+                        "target_output_v": target_output_v,
+                        "cell_range_v": [cell_min_v, cell_max_v],
+                        "near_min_policy_v": RAW_CELL_NEAR_MIN_POLICY_V,
+                    },
                 )
             )
 
@@ -172,7 +279,10 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                 required_part_types=["fuel_gauge", "controller"],
                 required_ports=["VCC", "GND", "SDA", "SCL"],
                 notes="Fuel gauge is optional instrumentation; it does not replace protection evidence.",
-                metadata={"module_id": fuel_gauge},
+                metadata={
+                    "module_id": fuel_gauge,
+                    "battery_monitor_kind": battery_monitor_kind(fuel_gauge),
+                },
             )
         )
 
@@ -190,7 +300,9 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
                 "cell_capacity_mah": cell_capacity_mah,
             }
         ],
-        selected_modules=dedupe([module_id for module_id in (charger, regulator, fuel_gauge) if module_id]),
+        selected_modules=dedupe(
+            [module_id for module_id in (charger, regulator, fuel_gauge) if module_id]
+        ),
         generated_topology=topology,
         assumptions=[
             "Battery power candidate is ready for human review only; charge/protection and loaded-rail gates must close before use."
@@ -199,38 +311,61 @@ def plan_battery_power(intent: CircuitIntent | Mapping[str, Any]) -> SynthesisCa
         ],
         missing_evidence=dedupe(missing),
         constraints=constraints,
-        verification_gates=_verification_gates(target_output_v=target_output_v, load_current_a=load_current_a),
+        verification_gates=_verification_gates(
+            target_output_v=target_output_v,
+            load_current_a=load_current_a,
+        ),
         recommended_build_path=build_path(
             available=available,
             selected=selected_modules,
             build_id="generic_low_voltage_build",
             notes=[
-                "Compile path captures known charger/regulator modules only; battery cell and protection are evidence gates.",
+                "Compile path captures only modules with explicit charger/regulator/monitor contracts; battery cell and protection remain evidence gates.",
                 "Never close this candidate from model output alone.",
             ],
         ),
         result=result,
         notes="Bounded single-cell battery/charger power topology plan.",
-        metadata={"goal": circuit_intent.goal, "charger": charger, "regulator": regulator, "fuel_gauge": fuel_gauge},
+        metadata={
+            "goal": circuit_intent.goal,
+            "usb_input": usb_input,
+            "charger": charger,
+            "regulator": regulator,
+            "regulator_kind": regulator_kind,
+            "fuel_gauge": fuel_gauge,
+            "electrical_truth": {
+                "source": "structured_project_and_component_contracts_only",
+                "goal_prose_voltage_inference_used": False,
+                "current_default_used": False,
+                "module_id_family_table_used": False,
+                "design_policy": {
+                    "current_margin_multiplier": CURRENT_MARGIN_MULTIPLIER,
+                    "raw_cell_near_min_policy_v": RAW_CELL_NEAR_MIN_POLICY_V,
+                    "small_cell_review_capacity_mah": SMALL_CELL_REVIEW_CAPACITY_MAH,
+                },
+                "authority_effect": "none",
+            },
+        },
     )
 
 
 def _target_output_voltage(intent: CircuitIntent) -> float | None:
     for row in intent.voltage_constraints + intent.supply_rails + intent.load_requirements:
-        value = first_float(row, ("target_output_v", "output_voltage_v", "required_voltage_v", "voltage_v"))
+        value = first_float(
+            row,
+            ("target_output_v", "output_voltage_v", "required_voltage_v", "voltage_v"),
+        )
         if value is not None:
             return value
-    text = f"{intent.goal} {intent.notes}".lower()
-    if "3v3" in text or "3.3v" in text or "3.3 v" in text:
-        return 3.3
-    if "5v" in text or "5 v" in text:
-        return 5.0
     return None
 
 
 def _load_current(intent: CircuitIntent) -> float | None:
     for row in intent.current_constraints + intent.load_requirements + intent.voltage_constraints:
-        value = first_float(row, ("load_current_a", "current_a", "max_current_a", "required_current_a"))
+        value = first_float(
+            row,
+            ("load_current_a", "current_a", "max_current_a", "required_current_a"),
+        )
         if value is not None:
             return value
     return None
@@ -238,54 +373,168 @@ def _load_current(intent: CircuitIntent) -> float | None:
 
 def _cell_capacity(intent: CircuitIntent) -> float | None:
     for row in intent.supply_rails + intent.allowed_parts:
-        value = first_float(row, ("capacity_mah", "cell_capacity_mah", "battery_capacity_mah"))
+        value = first_float(
+            row,
+            ("capacity_mah", "cell_capacity_mah", "battery_capacity_mah"),
+        )
         if value is not None:
             return value
     return None
 
 
-def _choose_output_regulator(available: set[str], *, target_output_v: float | None, load_current_a: float | None) -> str:
+def _choose_output_regulator(
+    available: set[str],
+    *,
+    target_output_v: float | None,
+    cell_range: tuple[float | None, float | None],
+) -> str:
     if target_output_v is None:
         return ""
-    if target_output_v > 4.3:
-        return first_available(available, BOOST_MODULES)
-    if target_output_v <= 3.4:
-        if load_current_a is not None and load_current_a <= 0.25:
-            ldo = first_available(available, ("ldo-ams1117-3v3",))
-            if ldo:
-                return ldo
-        return first_available(available, ("buck-mp1584", "buck-lm2596", "ldo-ams1117-3v3"))
-    return ""
+    cell_min_v, cell_max_v = cell_range
+    if cell_min_v is None or cell_max_v is None:
+        return ""
+
+    if target_output_v > cell_max_v:
+        allowed_kinds = {"boost"}
+    elif target_output_v <= cell_min_v + RAW_CELL_NEAR_MIN_POLICY_V:
+        allowed_kinds = {"buck", "ldo"}
+    else:
+        return ""
+
+    candidates: List[str] = []
+    for module_id in sorted(available):
+        if power_conversion_kind(module_id) not in allowed_kinds:
+            continue
+        min_in, max_in = module_input_range(module_id)
+        min_out, max_out = output_voltage_range_v(module_id)
+        if min_in is None or max_in is None or min_out is None or max_out is None:
+            continue
+        if min_in > cell_min_v or max_in < cell_max_v:
+            continue
+        if not (min_out <= target_output_v <= max_out):
+            continue
+        candidates.append(module_id)
+    return candidates[0] if len(candidates) == 1 else ""
 
 
 def _check_regulator(
     module_id: str,
+    *,
+    cell_range: tuple[float | None, float | None],
     target_output_v: float | None,
     load_current_a: float | None,
     constraints: List[Constraint],
     missing: List[str],
 ) -> None:
+    cell_min_v, cell_max_v = cell_range
     min_in, max_in = module_input_range(module_id)
-    if min_in is not None and max_in is not None:
+    if min_in is None or max_in is None:
+        missing.append("battery_regulator_input_range_contract")
         constraints.append(
-            passed(
+            blocked(
                 f"{module_id}_battery_input_range",
                 "voltage",
                 module_id,
-                "Single-cell battery voltage can feed selected regulator input range for review.",
-                value={"battery_range_v": [3.0, 4.2], "min_in_v": min_in, "max_in_v": max_in},
+                "Regulator input range is absent from structured component truth.",
             )
         )
-    current_limit_a = module_current_limit_a(module_id, default_a=2.0 if module_id in BOOST_MODULES else 1.0)
-    if load_current_a is not None and current_limit_a is not None:
-        if current_limit_a >= load_current_a * 1.25:
+    elif cell_min_v is not None and cell_max_v is not None:
+        if min_in <= cell_min_v and max_in >= cell_max_v:
+            constraints.append(
+                passed(
+                    f"{module_id}_battery_input_range",
+                    "voltage",
+                    module_id,
+                    "Structured regulator input range covers the structured cell rail.",
+                    value={
+                        "battery_range_v": [cell_min_v, cell_max_v],
+                        "min_in_v": min_in,
+                        "max_in_v": max_in,
+                    },
+                )
+            )
+        else:
+            missing.append("battery_regulator_input_range")
+            constraints.append(
+                blocked(
+                    f"{module_id}_battery_input_range",
+                    "voltage",
+                    module_id,
+                    "Structured regulator input range does not cover the full structured cell rail.",
+                    value={
+                        "battery_range_v": [cell_min_v, cell_max_v],
+                        "min_in_v": min_in,
+                        "max_in_v": max_in,
+                    },
+                )
+            )
+
+    min_out, max_out = output_voltage_range_v(module_id)
+    if min_out is None or max_out is None:
+        missing.append("battery_regulator_output_range_contract")
+        constraints.append(
+            blocked(
+                f"{module_id}_target_output_review",
+                "voltage",
+                module_id,
+                "Regulator output range is absent from structured component truth.",
+            )
+        )
+    elif target_output_v is not None:
+        if min_out <= target_output_v <= max_out:
+            constraints.append(
+                passed(
+                    f"{module_id}_target_output_review",
+                    "voltage",
+                    module_id,
+                    "Target output is inside the structured regulator output range.",
+                    value={
+                        "target_output_v": target_output_v,
+                        "output_range_v": [min_out, max_out],
+                    },
+                )
+            )
+        else:
+            missing.append("battery_regulator_output_range")
+            constraints.append(
+                blocked(
+                    f"{module_id}_target_output_review",
+                    "voltage",
+                    module_id,
+                    "Target output is outside the structured regulator output range.",
+                    value={
+                        "target_output_v": target_output_v,
+                        "output_range_v": [min_out, max_out],
+                    },
+                )
+            )
+
+    current_limit_a = max_output_current_a(module_id)
+    if current_limit_a is None:
+        missing.append("battery_regulator_current_rating_contract")
+        constraints.append(
+            blocked(
+                f"{module_id}_current_margin",
+                "current",
+                module_id,
+                "Regulator output-current rating is absent from structured component truth.",
+                value={"current_limit_a": None, "load_current_a": load_current_a},
+            )
+        )
+    elif load_current_a is not None:
+        required = load_current_a * CURRENT_MARGIN_MULTIPLIER
+        if current_limit_a >= required:
             constraints.append(
                 passed(
                     f"{module_id}_current_margin",
                     "current",
                     module_id,
-                    "Regulator output current rating covers expected load with margin.",
-                    value={"current_limit_a": current_limit_a, "load_current_a": load_current_a},
+                    "Structured regulator current rating covers expected load with design-policy margin.",
+                    value={
+                        "current_limit_a": current_limit_a,
+                        "load_current_a": load_current_a,
+                        "required_with_margin_a": required,
+                    },
                 )
             )
         else:
@@ -295,23 +544,22 @@ def _check_regulator(
                     f"{module_id}_current_margin",
                     "current",
                     module_id,
-                    "Regulator output current rating is too close to or below expected load.",
-                    value={"current_limit_a": current_limit_a, "load_current_a": load_current_a},
+                    "Structured regulator current rating is below expected load margin.",
+                    value={
+                        "current_limit_a": current_limit_a,
+                        "load_current_a": load_current_a,
+                        "required_with_margin_a": required,
+                    },
                 )
             )
-    if target_output_v is not None:
-        constraints.append(
-            passed(
-                f"{module_id}_target_output_review",
-                "voltage",
-                module_id,
-                "Selected regulator can be reviewed/set for target output rail.",
-                value={"target_output_v": target_output_v},
-            )
-        )
 
 
-def _regulator_operator(module_id: str, op_type: str, target_output_v: float | None, load_current_a: float | None) -> TopologyOperator:
+def _regulator_operator(
+    module_id: str,
+    op_type: str,
+    target_output_v: float | None,
+    load_current_a: float | None,
+) -> TopologyOperator:
     return TopologyOperator(
         operator_id=f"{module_id}_battery_output_rail",
         operator_type=op_type,
@@ -320,11 +568,21 @@ def _regulator_operator(module_id: str, op_type: str, target_output_v: float | N
         required_part_types=["regulator_module", "battery_power_path"],
         required_ports=["IN+", "IN-", "OUT+", "OUT-"],
         notes=f"{module_id} selected for battery output rail conversion.",
-        metadata={"module_id": module_id, "target_output_v": target_output_v, "load_current_a": load_current_a},
+        metadata={
+            "module_id": module_id,
+            "power_conversion_kind": power_conversion_kind(module_id),
+            "target_output_v": target_output_v,
+            "load_current_a": load_current_a,
+            "electrical_contract": contract_snapshot(module_id),
+        },
     )
 
 
-def _verification_gates(*, target_output_v: float | None, load_current_a: float | None) -> List[Dict[str, Any]]:
+def _verification_gates(
+    *,
+    target_output_v: float | None,
+    load_current_a: float | None,
+) -> List[Dict[str, Any]]:
     return [
         {
             "gate_id": "battery_protection_inspection",

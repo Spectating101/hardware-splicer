@@ -16,6 +16,7 @@ dependencies = [
   "httpx>=0.27",
   "pillow>=10.0",
   "pydantic>=2.0",
+  "pydantic-settings>=2.0",
   "python-multipart>=0.0.9",
   "python-dotenv>=1.0",
   "loguru>=0.7",
@@ -23,7 +24,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.2.0"]
-dev = ["pytest>=8.0", "httpx>=0.27"]
+dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
 
 [project.scripts]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"

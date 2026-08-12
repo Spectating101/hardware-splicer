@@ -199,6 +199,10 @@ def prepare_engineering_action(
 ) -> PreparedEngineeringAction:
     """Prepare the selected ranked action without automatic physical execution."""
 
+    # Engineering status performs fresh candidate-bound physical revalidation. Prepared
+    # actions must consume that status rather than trusting cached plan flags; otherwise a
+    # stale scoped_release_assessment can say "ready" after the candidate revision has
+    # invalidated authorization.
     status = build_engineering_status(plan)
     action = _select_action(status, action_id)
     payload: Dict[str, Any]
@@ -227,6 +231,11 @@ def prepare_engineering_action(
         payload = _verification_payload(plan)
     elif category == "release":
         payload, blockers = _release_payload(plan)
+        blockers.extend(
+            row.message
+            for row in status.blockers
+            if str(row.category or "") == "release"
+        )
     else:
         payload = {
             "missing_info": list(plan.get("missing_info") or []),
@@ -250,5 +259,13 @@ def prepare_engineering_action(
             "power_on_authorized": False,
             "motion_authorized": False,
             "release_authorized": False,
+            "physical_authorization_revalidated": bool(
+                status.metadata.get("physical_authorization_revalidated")
+            ),
         },
     )
+
+
+# Compatibility marker retained for callers/tests that previously installed an external
+# action-layer wrapper. Revalidation is now native to prepare_engineering_action itself.
+_physical_action_revalidation_installed = True

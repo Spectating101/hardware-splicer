@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import hardware_splicer.circuit_synthesis.motor_driver_planner as motor_planner
 from hardware_splicer.api import create_app
 from hardware_splicer.circuit_synthesis import compile_synthesis_candidate, plan_circuit
 from hardware_splicer.sdk import plan_circuit_synthesis, sdk_info, synthesize_circuit
@@ -22,6 +23,16 @@ def _motor_intent(**extra):
     return payload
 
 
+def _five_volt_motor_intent(**extra):
+    payload = _motor_intent(
+        goal="build a 5V-logic controlled 5V pump driver",
+        signal_requirements=[{"name": "pump_enable", "type": "pwm", "voltage_v": 5.0}],
+        allowed_modules=["usb-power-5v", "arduino-nano", "mosfet-irlz44n", "water_pump_5v"],
+    )
+    payload.update(extra)
+    return payload
+
+
 def _unsupported_intent():
     return {
         "goal": "design a low noise analog audio preamplifier from discrete transistors",
@@ -31,12 +42,15 @@ def _unsupported_intent():
     }
 
 
-def test_arbitrary_dispatch_routes_supported_motor_intent() -> None:
+def test_arbitrary_dispatch_routes_supported_motor_intent_without_inventing_ratings() -> None:
     candidate = plan_circuit(_motor_intent()).to_dict()
 
-    assert candidate["result"] == "ready_for_review"
+    assert candidate["result"] == "blocked"
     assert candidate["metadata"]["dispatch"]["selected_planner"] == "motor_driver"
     assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
+    assert "mosfet-irlz44n_output_current_rating" in candidate["missing_evidence"]
+    assert "level_shifter_or_compatible_driver" in candidate["missing_evidence"]
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
 
 
 def test_arbitrary_dispatch_blocks_unsupported_intent() -> None:
@@ -57,12 +71,65 @@ def test_compile_bridge_refuses_blocked_candidate(tmp_path: Path) -> None:
     assert result["candidate"]["result"] == "blocked"
 
 
-def test_synthesize_circuit_compiles_ready_motor_candidate(tmp_path: Path) -> None:
+def test_compile_bridge_rechecks_authoritative_contract_after_planner_local_override(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Deliberately lie only to the bounded planner. The real structured contract says
+    # IRLZ44N is characterized for 4.5-5.0 V drive, so a 3.3 V ESP32 signal must still
+    # fail closed when the candidate is lowered into the authoritative netlist/ERC path.
+    monkeypatch.setattr(
+        motor_planner,
+        "max_output_current_a",
+        lambda module_id: 5.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "logic_input_min_v",
+        lambda module_id: 3.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "integrated_inductive_protection",
+        lambda module_id: False,
+    )
+
     result = synthesize_circuit(_motor_intent(), out_dir=tmp_path, export_gerber=False)
 
     assert result["schema_version"] == "hardware_splicer.circuit_synthesis_bridge.v1"
     assert result["candidate"]["result"] == "ready_for_review"
-    assert result["module_ids"] == ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "water_pump_5v"]
+    assert result["module_ids"] == ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n"]
+    assert result["candidate"]["selected_parts"][0]["id"] == "pump"
+    assert result["compose_result"]["mode"] == "strict_synthesis_netlist"
+    assert result["compose_result"]["compile_result"]["ok"] is False
+    assert result["ok"] is False
+    assert result["design_quality_gate"]["build_ready"] is False
+
+
+def test_synthesize_circuit_compiles_with_physically_compatible_5v_control(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Only the missing carrier current rating is supplied to the planner. Logic-level
+    # compatibility remains real structured truth: Arduino 5 V drive satisfies the
+    # IRLZ44N 4.5-5.0 V characterized control window used again by compile/ERC.
+    monkeypatch.setattr(
+        motor_planner,
+        "max_output_current_a",
+        lambda module_id: 5.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "integrated_inductive_protection",
+        lambda module_id: False,
+    )
+
+    result = synthesize_circuit(_five_volt_motor_intent(), out_dir=tmp_path, export_gerber=False)
+
+    assert result["schema_version"] == "hardware_splicer.circuit_synthesis_bridge.v1"
+    assert result["candidate"]["result"] == "ready_for_review"
+    assert result["module_ids"] == ["usb-power-5v", "arduino-nano", "mosfet-irlz44n"]
+    assert result["candidate"]["selected_parts"][0]["id"] == "pump"
     assert result["compose_result"]["mode"] == "strict_synthesis_netlist"
     assert result["compose_result"]["compile_result"]["ok"] is True
     assert result["design_quality_gate"]["build_ready"] is True

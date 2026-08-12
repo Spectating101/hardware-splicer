@@ -1,0 +1,57 @@
+{
+  "schema_version": "hardware_splicer.robot_arm_design.v1",
+  "status": "model_proposed",
+  "reasoning": "Use the four defensible visible actuators as a four-DOF serial candidate: base yaw for azimuth, shoulder and elbow pitch for primary planar reach, and wrist pitch for end-effector attitude. Keep the chain modest rather than inventing a fifth actuator. Proposed link lengths total 480 mm, above the declared 450 mm reach requirement, while actuator suitability remains subject to deterministic payload-torque checks and unresolved full dynamics.",
+  "joints": [
+    {
+      "joint_id": "base-yaw",
+      "joint_type": "revolute",
+      "axis": [0.0, 0.0, 1.0],
+      "link_length_mm": 60.0,
+      "actuator_part_id": "actuator-base-heavy",
+      "lower_limit_deg": -170.0,
+      "upper_limit_deg": 170.0
+    },
+    {
+      "joint_id": "shoulder-pitch",
+      "joint_type": "revolute",
+      "axis": [0.0, 1.0, 0.0],
+      "link_length_mm": 180.0,
+      "actuator_part_id": "actuator-shoulder-heavy",
+      "lower_limit_deg": -85.0,
+      "upper_limit_deg": 120.0
+    },
+    {
+      "joint_id": "elbow-pitch",
+      "joint_type": "revolute",
+      "axis": [0.0, 1.0, 0.0],
+      "link_length_mm": 150.0,
+      "actuator_part_id": "actuator-elbow-medium",
+      "lower_limit_deg": -130.0,
+      "upper_limit_deg": 130.0
+    },
+    {
+      "joint_id": "wrist-pitch",
+      "joint_type": "revolute",
+      "axis": [0.0, 1.0, 0.0],
+      "link_length_mm": 90.0,
+      "actuator_part_id": "actuator-wrist-light",
+      "lower_limit_deg": -90.0,
+      "upper_limit_deg": 90.0
+    }
+  ],
+  "end_effector": "parallel_gripper_function_unbound",
+  "source_ids": [
+    "src-arm-requirements",
+    "src-actuator-candidates"
+  ],
+  "unresolved_questions": [
+    "What link and end-effector masses/inertias should be used for gravity and dynamic torque closure?",
+    "What exact motor-driver/current/thermal limits correspond to the four visible actuator candidates?",
+    "What base, link, and end-effector collision geometry should constrain workspace?",
+    "What transmission ratio, backlash, encoder resolution, and calibration evidence support the 5 mm repeatability target?",
+    "Which physical end-effector identity, if any, is available and what mass does it add?"
+  ],
+  "authority_effect": "none",
+  "automatic_execution": false
+}

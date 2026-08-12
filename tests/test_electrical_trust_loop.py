@@ -43,9 +43,10 @@ def test_trust_report_marks_build_trusted_when_clean(tmp_path: Path) -> None:
     report = build_trust_report(design_quality=quality, simulation=sim, build_id="sensor_logger")
     assert report["trust_level"] == "build_trusted"
     assert report["gates"]["simulation_pass"] is True
+    assert report["gates"]["kicad_drc_available"] is True
 
 
-def test_compile_emits_trust_report(tmp_path: Path) -> None:
+def test_compile_emits_truthful_trust_report(tmp_path: Path) -> None:
     result = compile_catalog_build("sensor_logger", tmp_path, export_gerber=False)
     build_dir = tmp_path / "build_compilation"
     trust = build_dir / "TRUST_REPORT.json"
@@ -53,5 +54,15 @@ def test_compile_emits_trust_report(tmp_path: Path) -> None:
     assert trust.is_file(), "TRUST_REPORT.json missing"
     assert sim.is_file(), "ELECTRICAL_SIMULATION.json missing"
     payload = json.loads(trust.read_text(encoding="utf-8"))
-    assert payload.get("trust_level") in {"build_trusted", "review_recommended"}
+
+    drc_errors = payload["design_quality"].get("kicad_drc_errors")
+    if drc_errors is None:
+        assert payload["trust_level"] == "blocked"
+        assert payload["gates"]["kicad_drc_available"] is False
+        assert any("not available" in row.lower() for row in payload["blockers"])
+        assert "no verification claim made" in payload["summary_markdown"].lower()
+    else:
+        assert payload["gates"]["kicad_drc_available"] is True
+        assert payload.get("trust_level") in {"build_trusted", "review_recommended"}
+
     assert result.design_quality.get("trust_report_path")

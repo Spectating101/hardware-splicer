@@ -73,9 +73,11 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     "esp32-devkit": {
         "kicadFootprint": "Module:ESP32-WROOM-32",
         "bodyMm": {"w": 26, "h": 50},
+        # Every pin declared by the structured ESP32 DevKit contract must have a
+        # physical pad. Omitting valid pins lets recipe wires disappear before DRC.
         "pads": _dual_col(
-            ["VIN", "GND", "GPIO4", "GPIO16", "GPIO17"],
-            ["3V3", "GPIO2", "GPIO21", "GPIO22", "GPIO34"],
+            ["VIN", "GND", "GPIO4", "GPIO5", "GPIO16", "GPIO17", "GPIO18"],
+            ["3V3", "GPIO2", "GPIO15", "GPIO21", "GPIO22", "GPIO23", "GPIO34"],
             _P * 5,
         ),
     },
