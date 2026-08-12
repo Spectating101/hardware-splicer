@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from . import engineering_action as _target
+from . import engineering_status as _status
 
 
 def _mapping(value: Any) -> dict[str, Any]:
@@ -29,6 +30,12 @@ def install_audited_release_action_compatibility() -> None:
         return
     original = _target._release_payload
 
+    # engineering_action imported build_engineering_status before the status compatibility
+    # stack installed candidate-bound physical revalidation. Rebind that module-level name
+    # to the final wrapped status builder so every prepared action consumes the same fresh
+    # authority view as the status endpoint. This removes import-order-dependent authority.
+    _target.build_engineering_status = _status.build_engineering_status
+
     def _release_payload(plan: Mapping[str, Any]):
         payload, blockers = original(plan)
         payload = dict(payload)
@@ -38,7 +45,7 @@ def install_audited_release_action_compatibility() -> None:
             # Re-evaluate applicability against the current candidate before projecting a
             # release action so a stale ``applicable=True`` flag cannot survive a revision
             # change. Keep the input plan immutable and expose the revalidated copy only.
-            fresh_status = _target.build_engineering_status(plan)
+            fresh_status = _status.build_engineering_status(plan)
             fresh_applicable = bool(fresh_status.metadata.get("physical_scope_authorized"))
             audited = dict(audited)
             audited["applicable"] = fresh_applicable
