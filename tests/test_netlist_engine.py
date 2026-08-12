@@ -80,12 +80,13 @@ def test_plant_watering_netlist_compiles_with_pump(tmp_path: Path) -> None:
             "usb-power-5v",
             "esp32-devkit",
             "soil_moisture",
+            "level-shifter-4ch",
             "mosfet-irlz44n",
             "mini-pump-5v",
         ]
     )["graph"]
     module_ids = {n["moduleId"] for n in graph.get("nodes") or []}
-    assert "mini-pump-5v" in module_ids
+    assert {"mini-pump-5v", "level-shifter-4ch"} <= module_ids
     netlist = build_graph_to_netlist(graph)
     roundtrip = netlist_to_build_graph(netlist)
     from hardware_splicer.pcb.safety_rules import analyze_build
@@ -125,7 +126,13 @@ def test_ultrasonic_netlist_compiles_with_level_shifter(tmp_path: Path) -> None:
 
 def test_fan_mosfet_netlist_compiles_switched_load(tmp_path: Path) -> None:
     _assert_netlist_stack_compiles(
-        ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "cooling_fan_5v"],
+        [
+            "usb-power-5v",
+            "esp32-devkit",
+            "level-shifter-4ch",
+            "mosfet-irlz44n",
+            "cooling_fan_5v",
+        ],
         tmp_path,
-        require={"mosfet-irlz44n", "cooling_fan_5v"},
+        require={"level-shifter-4ch", "mosfet-irlz44n", "cooling_fan_5v"},
     )
