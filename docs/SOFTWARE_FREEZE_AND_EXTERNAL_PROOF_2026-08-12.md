@@ -94,6 +94,22 @@ Therefore the correct state is:
 
 A future green Cleanroom DUT Replay run must not be counted as live-model evidence unless `LIVE_DUT_EXPERIMENT.json` and `LIVE_SUMMARY.txt` were actually produced by the model-execution step.
 
+## Canonical physical-proof path
+
+`SPLICE_BENCH_SESSION.json`, `BENCH_CAPTURE_TEMPLATE.json`, and `PHYSICAL_PROOF_AUDIT.json` are useful **bench collection and claim-ceiling surfaces**, but they are not by themselves the canonical revision-bound authorization record. Their authority effect remains none.
+
+For physical evidence that can later support a narrowly scoped human authorization, preserve this boundary:
+
+1. collect real bench observations/captures and explicitly declare `simulated: false`;
+2. construct a `hardware_splicer.physical_evidence.v1` record with the exact `project_id`, `candidate_revision`, procedure/operator, calibration references as applicable, artifact hashes, and raw evidence references;
+3. wrap raw evidence files in a `hardware_splicer.physical_evidence_envelope.v1` envelope with SHA-256 content hashes and a content-bound envelope hash;
+4. persist audited physical evidence against the **exact stored project revision** through `/v1/engineering/physical-evidence/audited-apply-save` (or the attested variant) using `expected_revision`;
+5. only after explicit human review, represent any authorization as a scoped `AuthorizationDecision` / chained `hardware_splicer.authorization_ledger.v1` entry and revalidate it against the stored candidate revision, artifact-hash boundary, evidence kinds, operating envelope, and history.
+
+A project-revision mismatch, stale artifact hash, broken envelope hash, calibration/evidence defect, authorization-ledger discontinuity, or changed authorization scope must fail closed. Authorization does not carry across revisions or artifact hashes automatically.
+
+The bench-session layer is therefore where observations are collected and audited for defensibility; the physical-evidence record/envelope/ledger plus revision-anchored persistence is the canonical path for durable physical proof and scoped authorization.
+
 ## Resume sequence — do not restart product development
 
 The next work is a proof tranche, in this order:
@@ -102,7 +118,7 @@ The next work is a proof tranche, in this order:
 2. **Fresh unseen adversarial case** — use a project not sculpted around the rover or DUT goldens; perturb labels, ordering, equivalent parts, stale/partial/conflicting evidence and plausible analogies without adding canned answer logic.
 3. **Fresh independent checkout** — run from the frozen revision, not a developer working tree with untracked conveniences.
 4. **Real project/components** — ingest actual component identities and evidence, generate the normal revisioned Engineering Package and preserve every blocker/failure.
-5. **Physical loop** — fabrication/assembly as appropriate, powered-off checks, controlled power-up, measurements, flashing/function/motion where relevant, failures/repairs and final outcome, all bound to exact revision/artifact hashes.
+5. **Physical loop** — fabrication/assembly as appropriate, powered-off checks, controlled power-up, measurements, flashing/function/motion where relevant, failures/repairs and final outcome, all bound to exact revision/artifact hashes through the canonical physical-evidence path above.
 6. **Independent operator attempt** — a user without repository/source knowledge operates the actual product surface.
 7. **Outer truth audit** — compare what the embedded operator believed, what deterministic tools said and what the bench actually showed.
 
@@ -116,7 +132,8 @@ Until the proof tranche produces a concrete defect, do **not**:
 - add canned cases merely to raise a score;
 - reopen generic feature development because a live provider secret is missing;
 - treat software CI as physical proof;
-- treat an optional/skipped live-provider job as live-model evidence.
+- treat an optional/skipped live-provider job as live-model evidence;
+- treat a closed bench session or standalone proof-audit report as revision-bound authorization.
 
 Unknown hardware stays unknown. Proposals stay proposals. Physical authority stays evidence-based.
 
