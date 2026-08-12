@@ -142,9 +142,19 @@ def audit_physical_proof(
         )
 
     capture_present = bool(capture_body)
-    capture_simulated = bool(capture_body.get("simulated")) if capture_present else None
+    capture_simulated_raw = capture_body.get("simulated") if capture_present else None
+    capture_simulated = capture_simulated_raw if isinstance(capture_simulated_raw, bool) else None
     capture_operator = str(capture_body.get("operator_id") or "").strip()
     capture_recorded_at = str(capture_body.get("recorded_at") or "").strip()
+    if capture_present and capture_simulated is None:
+        findings.append(
+            _finding(
+                "BENCH_CAPTURE_SIMULATION_STATUS_MISSING",
+                "capture.simulated",
+                "Physical capture must explicitly declare whether it is simulated.",
+                observed=capture_simulated_raw,
+            )
+        )
     if capture_present and capture_simulated:
         findings.append(
             _finding(
