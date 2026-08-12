@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -15,6 +16,7 @@ ROVER_SCENARIO = ROOT / "examples" / "scenarios" / "rover_project.json"
 BAD_SPEED_SCENARIO = ROOT / "examples" / "scenarios" / "rover_bad_speed_project.json"
 PAN_TILT_SCENARIO = ROOT / "examples" / "scenarios" / "closed_pan_tilt_mechatronics_project.json"
 FULL_3D_RUNTIME = importlib.util.find_spec("cadquery") is not None
+KICAD_RUNTIME = shutil.which("kicad-cli") is not None
 
 
 def test_scenario_to_compile_spec_resolves_relative_spec_path():
@@ -79,7 +81,10 @@ def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
     assert Path(result["artifacts"]["production_release_metrics"]).exists()
 
 
-@pytest.mark.skipif(not FULL_3D_RUNTIME, reason="closed pan/tilt authority requires full 3D runtime")
+@pytest.mark.skipif(
+    not (FULL_3D_RUNTIME and KICAD_RUNTIME),
+    reason="closed pan/tilt STEP authority requires full 3D and KiCad runtimes",
+)
 def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path):
     scenario = load_hardware_scenario(PAN_TILT_SCENARIO)
 
