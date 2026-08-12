@@ -42,6 +42,27 @@
       "LIVE_SUMMARY.txt"
     ]
   },
+  "physical_proof_surfaces": {
+    "bench_collection": [
+      "SPLICE_BENCH_SESSION.json",
+      "BENCH_CAPTURE_TEMPLATE.json",
+      "PHYSICAL_PROOF_AUDIT.json"
+    ],
+    "bench_collection_authority_effect": "none",
+    "canonical_record_schema": "hardware_splicer.physical_evidence.v1",
+    "canonical_envelope_schema": "hardware_splicer.physical_evidence_envelope.v1",
+    "authorization_ledger_schema": "hardware_splicer.authorization_ledger.v1",
+    "audited_persistence_endpoint": "/v1/engineering/physical-evidence/audited-apply-save",
+    "attested_audited_persistence_endpoint": "/v1/engineering/physical-evidence/attested-audited-apply-save",
+    "expected_revision_required": true,
+    "candidate_revision_bound": true,
+    "artifact_hash_bound": true,
+    "raw_evidence_hashes_required_for_envelope": true,
+    "authorization_is_human_scoped": true,
+    "authorization_carries_across_revisions": false,
+    "authorization_carries_across_artifact_hashes": false,
+    "standalone_bench_session_is_revision_bound_authorization": false
+  },
   "representative_green_workflows": [
     {"name": "Hardware-Splicer", "run_id": 31591252954, "run_number": 1893},
     {"name": "Core Diagnostics", "run_id": 31591252958, "run_number": 692},
@@ -71,6 +92,7 @@
     "do_not_add_canned_cases_to_raise_scores",
     "do_not_reopen_generic_feature_development_for_missing_provider_secret",
     "do_not_treat_software_ci_as_physical_proof",
-    "do_not_treat_skipped_live_provider_job_as_live_model_evidence"
+    "do_not_treat_skipped_live_provider_job_as_live_model_evidence",
+    "do_not_treat_standalone_bench_session_as_revision_bound_authorization"
   ]
 }
