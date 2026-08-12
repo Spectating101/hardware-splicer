@@ -42,9 +42,10 @@ def test_fill_salvage_gaps_adds_driver() -> None:
 
 
 def test_qwen_salvage_merge_mocked(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Full-regression CI deliberately runs with QWEN_DISABLED=1 and offline salvage on.
-    # This test exercises the mocked model path, so it must explicitly opt back into that
-    # path instead of inheriting suite-wide compatibility policy.
+    # Full-regression CI deliberately runs with its model surfaces offline. This test
+    # exercises a fully mocked provider path, so explicitly disable every suite-wide
+    # offline/disabled switch instead of inheriting compatibility policy from the runner.
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_LLM", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "0")
     monkeypatch.setenv("QWEN_DISABLED", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_QWEN_DISABLED", "0")
