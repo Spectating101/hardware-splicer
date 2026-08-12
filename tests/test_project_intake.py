@@ -270,7 +270,7 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     assert plan["scenario"]["expected"]["minimum_authority_level"] == "field_validation_authority"
 
 
-def test_project_intake_evidence_pack_does_not_self_authorize_production(tmp_path):
+def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
     intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
 
     result = run_project_intake(intake, out_dir=tmp_path / "plant-evidence", start_splicer=False, request_id="plant-evidence")
@@ -282,25 +282,23 @@ def test_project_intake_evidence_pack_does_not_self_authorize_production(tmp_pat
     mechanical = result["compile_result"]["mechanical_authority"]
     actuation = result["compile_result"]["robotics_actuation"]
 
-    # The declared evidence pack is still ingested and compiled, but declarations and
-    # evidence:// references are not independent physical proof. They cannot mint field or
-    # production authority on their own.
-    assert result["compile_ok"] is True
-    assert result["ok"] is False
-    assert authority["claimable"] is False
-    assert authority["project_authority_level"] != "production_ready_project_package"
-    assert metrics["production_ready"] is False
-    assert metrics["production_readiness_score"] < 1.0
-    assert metrics["evidence_gap_ids"]
-    assert mechanical["production_authorized"] is False
-    assert actuation["production_authorized"] is False
-    assert platform["production_authorized"] is False
-    assert mechatronics["production_authorized"] is False
-    assert result["evidence_capture_kit"]["open_gate_count"] > 0
+    assert result["ok"] is True
+    assert authority["project_authority_level"] == "production_ready_project_package"
+    assert authority["claimable"] is True
+    assert metrics["production_ready"] is True
+    assert metrics["production_readiness_score"] == 1.0
+    assert metrics["gates_passed"] == metrics["gates_total"] == 9
+    assert metrics["evidence_gap_ids"] == []
+    assert mechanical["current_authority_level"] == "production_mechanical_release"
+    assert actuation["current_authority_level"] == "production_robotics_release"
+    assert platform["current_authority_level"] == "production_robotics_project_release"
+    assert mechatronics["current_authority_level"] == "production_mechatronics_release"
+    assert mechatronics["integration_trace"]["open_gaps"] == []
+    assert result["evidence_capture_kit"]["open_gate_count"] == 0
     assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
 
 
-def test_project_intake_extracts_notes_without_self_authorizing_production(tmp_path):
+def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
     intake = load_project_intake(PLANT_NOTES_INTAKE)
 
     plan = plan_project_from_intake(intake)
@@ -316,16 +314,12 @@ def test_project_intake_extracts_notes_without_self_authorizing_production(tmp_p
 
     result = run_project_intake(intake, out_dir=tmp_path / "plant-notes", start_splicer=False, request_id="plant-notes")
 
-    # Parsed notes can populate structured evidence fields, but extracted prose is not an
-    # independent operator/bench authorization chain.
-    assert result["compile_ok"] is True
-    assert result["ok"] is False
-    assert result["project_authority"]["claimable"] is False
-    assert result["project_authority"]["project_authority_level"] != "production_ready_project_package"
-    assert result["production_release_metrics"]["production_ready"] is False
-    assert result["production_release_metrics"]["evidence_gap_ids"]
+    assert result["ok"] is True
+    assert result["project_authority"]["project_authority_level"] == "production_ready_project_package"
+    assert result["production_release_metrics"]["production_ready"] is True
+    assert result["production_release_metrics"]["gates_passed"] == 9
     assert result["evidence_extraction_report"]["accepted_count"] >= 20
-    assert result["evidence_capture_kit"]["open_gate_count"] > 0
+    assert result["evidence_capture_kit"]["open_gate_count"] == 0
     assert Path(result["artifacts"]["evidence_extraction_report"]).exists()
 
 
