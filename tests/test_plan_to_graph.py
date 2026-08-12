@@ -14,6 +14,22 @@ from hardware_splicer.plan_to_graph import splice_plan_to_build_graph, supported
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "apps" / "circuit-ai" / "circuit-ai-frontend"
 PLAN_TO_GRAPH = FRONTEND / "lib" / "salvage" / "plan-to-graph.ts"
+TS_LIB = FRONTEND / "node_modules" / "typescript" / "lib" / "typescript.js"
+
+
+def _typescript_runtime_available() -> bool:
+    if TS_LIB.is_file():
+        return True
+    if not shutil.which("node"):
+        return False
+    probe = subprocess.run(
+        ["node", "-e", "require.resolve('typescript')"],
+        cwd=str(ROOT),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return probe.returncode == 0
 
 
 def _ts_splice_plan_to_graph(plan: dict) -> dict:
@@ -67,6 +83,8 @@ def test_python_graph_matches_typescript_recipe(build_id: str) -> None:
 
     if not PLAN_TO_GRAPH.is_file() or not shutil.which("node"):
         pytest.skip("node or plan-to-graph.ts unavailable")
+    if not _typescript_runtime_available():
+        pytest.skip("TypeScript runtime unavailable in this Python-only test environment")
 
     ts_graph = _ts_splice_plan_to_graph(plan)
     assert py_graph == ts_graph, build_id
