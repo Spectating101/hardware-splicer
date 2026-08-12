@@ -59,7 +59,13 @@ def test_functional_delivery_is_not_100_for_empty_pcb_claiming_pass(tmp_path):
     assert scorecard["honest_fabrication_ready"] is False
 
 
-def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path):
+def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path, monkeypatch):
+    # This test inspects the deterministic fabrication artifact itself. Pin it to the
+    # explicit offline compatibility lane rather than letting provider availability decide
+    # whether model-first architecture remains unresolved in the general test environment.
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_LLM", "1")
+    monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "1")
+    monkeypatch.setenv("QWEN_DISABLED", "1")
     intake = load_project_intake(Path(__file__).resolve().parents[1] / "examples/intakes/plant_watering_brief.json")
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=True)
     scorecard = result["functional_delivery"]
