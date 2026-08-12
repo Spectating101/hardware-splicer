@@ -34,6 +34,15 @@ def install_audited_release_action_compatibility() -> None:
         payload = dict(payload)
         audited = _mapping(plan.get("audited_physical_evidence"))
         if audited:
+            # Cached audited evidence is historical input, not current candidate authority.
+            # Re-evaluate applicability against the current candidate before projecting a
+            # release action so a stale ``applicable=True`` flag cannot survive a revision
+            # change. Keep the input plan immutable and expose the revalidated copy only.
+            fresh_status = _target.build_engineering_status(plan)
+            fresh_applicable = bool(fresh_status.metadata.get("physical_scope_authorized"))
+            audited = dict(audited)
+            audited["applicable"] = fresh_applicable
+
             ledger = _mapping(audited.get("ledger_assessment"))
             audit_metadata = _mapping(audited.get("metadata"))
             payload.update(
@@ -42,7 +51,7 @@ def install_audited_release_action_compatibility() -> None:
                     "evidence_envelope_count": len(audited.get("envelopes") or []),
                     "authorization_ledger_entry_count": len(audited.get("ledger_entries") or []),
                     "authorization_ledger_valid": bool(ledger.get("valid")),
-                    "audited_authorization_applicable": bool(audited.get("applicable")),
+                    "audited_authorization_applicable": fresh_applicable,
                     "server_attestation_required": bool(
                         audit_metadata.get("server_attestation_required")
                     ),
@@ -53,7 +62,7 @@ def install_audited_release_action_compatibility() -> None:
             )
             blockers.extend(_messages(audited.get("blockers")))
             blockers.extend(_messages(ledger.get("blockers")))
-            if not audited.get("applicable"):
+            if not fresh_applicable:
                 blockers.append(
                     "Tamper-evident physical authorization is not applicable to the current candidate."
                 )
