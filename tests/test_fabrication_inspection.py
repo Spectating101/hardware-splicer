@@ -60,9 +60,9 @@ def test_functional_delivery_is_not_100_for_empty_pcb_claiming_pass(tmp_path):
 
 
 def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path, monkeypatch):
-    # This test inspects the deterministic fabrication artifact itself. Pin it to the
-    # explicit offline compatibility lane rather than letting provider availability decide
-    # whether model-first architecture remains unresolved in the general test environment.
+    # This test is structural: prove the deterministic artifact uses real module footprints.
+    # Fabrication authority is assessed by dedicated release/functional-delivery gates and
+    # must not be inferred merely because the PCB contains the expected footprints.
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_LLM", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_SALVAGE", "1")
     monkeypatch.setenv("QWEN_DISABLED", "1")
@@ -70,8 +70,6 @@ def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path, 
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=True)
     scorecard = result["functional_delivery"]
     assert scorecard["prototype_breakout_only"] is False
-    assert scorecard["honest_fabrication_ready"] is True
-    assert scorecard["functional_delivery_score"] >= 90.0
     inspection = scorecard["fabrication_inspection"]
     # USB salvage brief now has five physical modules: USB power, MCU, sensor, the
     # contract-required 3.3→5 V logic shifter, and the MOSFET/load switching module.
@@ -83,6 +81,7 @@ def test_real_plant_splice_uses_module_footprints_not_generic_headers(tmp_path, 
     assert all("PinHeader" not in name for name in names)
     assert all("BUCK" not in name.upper() for name in names)
     assert inspection["pcb"].get("has_fab_outlines") is True
+    assert int((result.get("build_compilation") or {}).get("design_quality", {}).get("kicad_drc_errors") or 0) == 0
 
 
 def test_plant_pcb_has_module_footprints_and_fab_outlines(tmp_path):
