@@ -43,16 +43,21 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
     assert int(q.get("kicad_drc_errors") or 0) == 0, q
     assert q.get("copper_tier") in {"cosmetic_preview", "placement_only"}
 
-    # Fabrication recommendation follows the strongest blocker. Some legacy fixture
-    # previews carry a falsey/absent broad DRC state even when the KiCad error count is 0;
-    # that still cannot be promoted to a review-only fabrication recommendation.
-    if not bool(q.get("drc_pass")):
+    # Fabrication recommendation is governed by the independent KiCad truth fields,
+    # not the broader internal geometry/DRC state. A fixture with zero parsed error
+    # count but no positive independent KiCad pass remains blocked rather than being
+    # promoted to a review-only fabrication recommendation.
+    kicad_drc_pass = q.get("kicad_drc_pass") is True
+    kicad_erc_pass = q.get("kicad_erc_pass") is True
+    if not kicad_drc_pass:
         assert q.get("fab_recommendation") == "blocked_drc", q
-    elif not bool(q.get("erc_pass")):
+        assert q.get("kicad_truth_pass") is False
+    elif not kicad_erc_pass:
         assert q.get("fab_recommendation") == "blocked_erc", q
+        assert q.get("kicad_truth_pass") is False
     else:
         assert q.get("fab_recommendation") == "review_required_preview_copper", q
-    assert q.get("kicad_truth_pass") is True
+        assert q.get("kicad_truth_pass") is True
 
 
 def test_circuit_json_roundtrip_import(tmp_path: Path) -> None:
