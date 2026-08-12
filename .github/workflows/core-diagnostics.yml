@@ -78,8 +78,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
-      - name: Install package and test dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev]'
+      - name: Install package and full integration test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          python -m pip install -r apps/3d-splicer/requirements.txt
       - name: Run complete Python suite
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
