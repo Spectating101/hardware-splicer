@@ -127,6 +127,8 @@ def _plan(*, valid: bool) -> dict:
         "candidate_revision": "candidate-1",
         "machine_project": {
             "project_id": "physical-status",
+            "name": "Physical status test project",
+            "purpose": "Exercise candidate-bound physical evidence and authorization revalidation.",
             "components": [],
             "interfaces": [],
             "artifacts": [
