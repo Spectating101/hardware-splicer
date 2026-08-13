@@ -1,0 +1,52 @@
+{
+  "schema_version": "hardware_splicer.external_physical_case_manifest.v1",
+  "case_id": "spi-flash-adapter-physical-case",
+  "status": "not_executed",
+  "source_repository_commit": "",
+  "project_id": "",
+  "candidate_revision": null,
+  "engineering_package": {
+    "id_or_path": "",
+    "artifact_hashes": {}
+  },
+  "identity_evidence": [],
+  "unresolved_items_at_entry": [],
+  "assembly": {
+    "artifact_id": "",
+    "assembled_at": "",
+    "operator_id": "",
+    "installed_components": [],
+    "substitutions": [],
+    "artifact_references": []
+  },
+  "powered_off_checks": [],
+  "power_up_checks": [],
+  "functional_checks": [],
+  "failures": [],
+  "repairs": [],
+  "raw_evidence": [],
+  "physical_evidence_record": {
+    "record_id": "",
+    "candidate_revision": null,
+    "artifact_hashes": {}
+  },
+  "physical_evidence_envelope": {
+    "envelope_id": "",
+    "content_hashes": {},
+    "envelope_hash": ""
+  },
+  "authorization": {
+    "decision_id": "",
+    "status": "not_issued",
+    "scope": [],
+    "ledger_entry_id": ""
+  },
+  "independent_operator": {
+    "status": "not_run",
+    "procedure_id": "",
+    "operator_id": "",
+    "attestation_artifact": ""
+  },
+  "final_outcome": "",
+  "claim_change_supported": []
+}
