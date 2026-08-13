@@ -11,7 +11,7 @@ This is a routing dashboard, not a substitute for the canonical evidence ledger.
 | Frozen architecture | PR #56 / `0a55515cc683abccce6308c918f679199d5ebf87` | frozen |
 | Software→proof checkpoint | PR #59 / `0164d47e25bfea8179073e46e869a8725ca03b83` | exact-head green |
 | Canonical evaluator package | PR #60 | prepared |
-| Fresh unseen SPI-flash corpus | PR #61 / `0004b644b8d6e2632fd8d87a24c6d1fec9953626` | corrected corpus validated; live provider pending |
+| Fresh unseen SPI-flash corpus | PR #61 / `0004b644b8d6e2632fd8d87a24c6d1fec9953626` | corrected corpus prepared; fresh exact-head validation pending; live provider pending |
 | Physical + independent-user protocol | PR #62 / `4b45fb66e98dd7030005181d227d2afc83fa40d4` | prepared / not executed |
 | Verified route overlays | PR #63 | active |
 
@@ -21,7 +21,7 @@ This is a routing dashboard, not a substitute for the canonical evidence ledger.
 |---|---|---|
 | exact-head software baseline | **PROVEN** | foundation for all routes |
 | deterministic cleanroom | **PROVEN** | architecture/evidence story |
-| fresh unseen corpus construction | **PROVEN** | validates the case/evidence design, not model success |
+| fresh unseen corpus construction | **CORRECTED — exact-head revalidation pending** | prior corpus artifact predates the partial-evidence correction; does not prove model success |
 | live embedded-model execution | **PENDING — provider secret absent in Actions** | high-value gap for all routes |
 | live unseen-case model behavior | **PENDING** | especially important for TAAI / anti-script-brain story |
 | physical correctness | **PENDING** | largest credibility multiplier |
@@ -102,7 +102,7 @@ The AMD route requires an AMD-related runtime/resource at finals. Keep that adap
 ## Work priority from this snapshot
 
 1. **Configure a genuine live provider for the source-blind cleanroom.**
-2. Freeze and run the live unseen SPI-flash corpus without changing it to fit the model.
+2. Revalidate the corrected unseen SPI-flash corpus at the exact current #61 head, then run the live source-blind experiment without changing it to fit the model.
 3. Update the canonical proof slot from actual artifacts.
 4. Produce a candidate through the normal HS product surface.
 5. Execute the prepared revision-bound physical protocol.
