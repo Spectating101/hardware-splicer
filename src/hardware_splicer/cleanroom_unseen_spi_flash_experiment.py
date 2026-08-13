@@ -229,6 +229,59 @@ def spi_flash_adapter_snapshot(*, name: str = "SPI Flash Programming Adapter") -
     }
 
 
+def _partial_without_dut_evidence(base: ReplayCase) -> ReplayCase:
+    """Remove DUT manufacturer evidence without leaking its removed facts through prose.
+
+    ``build_partial_evidence_case`` deliberately mutates source collections only. This
+    case-specific wrapper also rewrites baseline blocker/advisory text that was derived
+    from ``src-dut`` so the product-visible challenge cannot recover removed manufacturer
+    facts from copied prose. The separate fixture declaration may still name the intended
+    DUT family; what is absent is authoritative DUT manufacturer/package/electrical evidence.
+    """
+
+    partial = build_partial_evidence_case(base, remove_source_ids=["src-dut"])
+    snapshot = deepcopy(dict(partial.snapshot))
+
+    blockers = [
+        str(row)
+        for row in list(snapshot.get("engineeringBlockers") or [])
+        if "W25Q128JW product-page VCC range" not in str(row)
+    ]
+    blockers.append(
+        "Authoritative DUT manufacturer electrical-limit evidence is unavailable in this case; "
+        "absolute-maximum I/O tolerance remains unverified."
+    )
+    snapshot["engineeringBlockers"] = blockers
+
+    advisories = [
+        str(row)
+        for row in list(snapshot.get("engineeringAdvisories") or [])
+        if "manufacturer product-page facts" not in str(row)
+        and "W25Q family name" not in str(row)
+    ]
+    advisories.extend(
+        [
+            "Do not infer missing DUT electrical or package facts from the declared target family or nominal supply target.",
+            "A similar flash-family name is not sufficient evidence of identical voltage or package requirements.",
+        ]
+    )
+    snapshot["engineeringAdvisories"] = advisories
+
+    return ReplayCase(
+        case_id=partial.case_id,
+        project_id=partial.project_id,
+        project_revision=partial.project_revision,
+        snapshot=snapshot,
+        equivalence_group=partial.equivalence_group,
+        perturbation_kind=partial.perturbation_kind,
+        metadata={
+            **dict(partial.metadata or {}),
+            "source_derived_prose_scrubbed": True,
+            "remaining_identity_authority": "fixture_declaration_only",
+        },
+    )
+
+
 def _identity_conflict_case(base: ReplayCase) -> ReplayCase:
     """Add an unresolved lower-authority JV-vs-JW procurement identity conflict."""
 
@@ -302,7 +355,7 @@ def build_unseen_spi_flash_cases() -> list[ReplayCase]:
             "work before fabrication or power-on and keep unresolved identity/electrical facts explicit."
         ),
     )
-    partial = build_partial_evidence_case(base, remove_source_ids=["src-dut"])
+    partial = _partial_without_dut_evidence(base)
     identity_conflict = _identity_conflict_case(base)
     parser_failure = build_parser_failure_case(
         base,
@@ -373,6 +426,13 @@ def validate_unseen_spi_flash_corpus() -> Dict[str, Any]:
         if isinstance(row, Mapping) and row.get("source_id") == "src-dut"
     )
     dut_facts = dict((dut.get("metadata") or {}).get("facts") or {})
+    partial_case = next(case for case in cases if case.perturbation_kind == "partial_evidence")
+    partial_serialized = _canonical_json(partial_case.snapshot)
+    partial_source_ids = {
+        str(row.get("source_id") or "")
+        for row in list(partial_case.snapshot.get("engineeringSources") or [])
+        if isinstance(row, Mapping)
+    }
     identity_case = next(case for case in cases if case.perturbation_kind == "conflicting_component_identity")
     identity_conflicts = list(identity_case.snapshot.get("engineeringSourceConflicts") or [])
     stale_case = next(case for case in cases if case.perturbation_kind == "stale_revision_evidence")
@@ -407,6 +467,23 @@ def validate_unseen_spi_flash_corpus() -> Dict[str, Any]:
             _source_inventory(case.snapshot) == baseline_inventory for case in equivalent
         ),
         "required_non_equivalent_challenges_present": required_challenges.issubset(challenge_kinds),
+        "partial_dut_source_removed": "src-dut" not in partial_source_ids,
+        "partial_removed_dut_facts_do_not_leak": all(
+            token not in partial_serialized
+            for token in (
+                WINBOND_W25Q128JW_URL,
+                "vcc_min_v",
+                "vcc_max_v",
+                "SOP8 208mil",
+                "SOP16 300mil",
+                "WSON8 6x5mm",
+                "product-page VCC range",
+            )
+        ),
+        "partial_missing_evidence_is_explicit": any(
+            "Authoritative DUT manufacturer electrical-limit evidence is unavailable" in str(row)
+            for row in list(partial_case.snapshot.get("engineeringBlockers") or [])
+        ),
         "identity_conflict_is_explicitly_unresolved": any(
             isinstance(row, Mapping)
             and row.get("field") == "candidate_part_identity"
