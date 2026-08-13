@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import json
+
 from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
+    WINBOND_W25Q128JW_URL,
     build_unseen_spi_flash_cases,
     spi_flash_adapter_snapshot,
     validate_unseen_spi_flash_corpus,
@@ -45,6 +48,33 @@ def test_unseen_spi_flash_equivalence_variants_preserve_evidence_identity() -> N
     assert all(identity(case) == baseline_identity for case in equivalent)
 
 
+def test_partial_evidence_case_removes_dut_source_facts_without_prose_leakage() -> None:
+    cases = build_unseen_spi_flash_cases()
+    partial = next(case for case in cases if case.perturbation_kind == "partial_evidence")
+    snapshot = dict(partial.snapshot)
+    source_ids = {row["source_id"] for row in snapshot["engineeringSources"]}
+    serialized = json.dumps(snapshot, sort_keys=True)
+
+    assert "src-dut" not in source_ids
+    assert WINBOND_W25Q128JW_URL not in serialized
+    for leaked_fact in (
+        "vcc_min_v",
+        "vcc_max_v",
+        "SOP8 208mil",
+        "SOP16 300mil",
+        "WSON8 6x5mm",
+        "product-page VCC range",
+    ):
+        assert leaked_fact not in serialized
+
+    assert any(
+        "Authoritative DUT manufacturer electrical-limit evidence is unavailable" in blocker
+        for blocker in snapshot["engineeringBlockers"]
+    )
+    assert partial.metadata["source_derived_prose_scrubbed"] is True
+    assert partial.metadata["remaining_identity_authority"] == "fixture_declaration_only"
+
+
 def test_unseen_spi_flash_challenges_cover_identity_tool_analogy_and_revision() -> None:
     cases = build_unseen_spi_flash_cases()
     challenge_kinds = {
@@ -84,3 +114,6 @@ def test_unseen_spi_flash_corpus_validation_passes_without_golden_answer() -> No
     assert report["checks"]["no_golden_architecture_declared"] is True
     assert report["checks"]["io_abs_max_remains_unverified"] is True
     assert report["checks"]["physical_authority_closed"] is True
+    assert report["checks"]["partial_dut_source_removed"] is True
+    assert report["checks"]["partial_removed_dut_facts_do_not_leak"] is True
+    assert report["checks"]["partial_missing_evidence_is_explicit"] is True
