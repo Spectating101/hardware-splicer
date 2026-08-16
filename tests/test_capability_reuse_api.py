@@ -263,10 +263,18 @@ def test_derivative_economics_endpoint_evaluates_cleanroom_comparator_only() -> 
 
 
 def test_routes_are_mounted_on_canonical_product_app() -> None:
-    paths = {getattr(route, "path", None) for route in create_product_app().routes}
+    app = create_product_app()
+    paths = set(app.openapi()["paths"])
 
     assert "/v1/capabilities/freeze" in paths
     assert "/v1/capabilities/derive" in paths
     assert "/v1/capabilities/derive/adjudicate" in paths
     assert "/v1/capabilities/derivative-metrics" in paths
     assert "/v1/capabilities/derivative-economics" in paths
+
+    response = TestClient(app).post(
+        "/v1/capabilities/derivative-economics",
+        json={"record": _economics_record()},
+    )
+    assert response.status_code == 200
+    assert response.json()["hypothesis_gate"]["result"] == "PASS"
