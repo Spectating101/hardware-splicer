@@ -189,3 +189,24 @@ def test_negative_cost_is_invalid() -> None:
 
     assert report["hypothesis_gate"]["result"] == "INVALID"
     assert "negative_value:reuse.model_tool_cost" in report["hypothesis_gate"]["validation_errors"]
+
+
+def test_malformed_authority_count_is_invalid_instead_of_raising() -> None:
+    record = _record()
+    record["reuse"]["authority_violations"] = "unknown"
+
+    report = evaluate_derivative_economics(record)
+
+    assert report["hypothesis_gate"]["result"] == "INVALID"
+    assert "invalid_integer:reuse.authority_violations" in report["hypothesis_gate"]["validation_errors"]
+    assert report["hypothesis_gate"]["computed_checks"]["authority_violations"] is False
+
+
+def test_fractional_authority_count_is_invalid_instead_of_truncated() -> None:
+    record = _record()
+    record["reuse"]["authority_violations"] = 0.5
+
+    report = evaluate_derivative_economics(record)
+
+    assert report["hypothesis_gate"]["result"] == "INVALID"
+    assert "invalid_integer:reuse.authority_violations" in report["hypothesis_gate"]["validation_errors"]
