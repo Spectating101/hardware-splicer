@@ -94,7 +94,23 @@ jobs:
 
       - name: Run live unseen cleanroom replay
         if: steps.provider.outputs.available == '1'
-        run: python scripts/run_unseen_spi_flash_experiment.py --mode live --out-dir artifacts/unseen-spi-flash-live
+        shell: bash
+        run: |
+          set +e
+          echo "live unseen replay started" > artifacts/unseen-spi-flash-live/LIVE_RUN_STATUS.txt
+          timeout --signal=TERM --kill-after=30s 17m \
+            python scripts/run_unseen_spi_flash_experiment.py \
+              --mode live \
+              --out-dir artifacts/unseen-spi-flash-live
+          code=$?
+          if [[ "$code" -eq 124 || "$code" -eq 137 ]]; then
+            echo "live unseen replay timed out before the 20-minute job ceiling; partial/status evidence preserved" \
+              > artifacts/unseen-spi-flash-live/LIVE_RUN_STATUS.txt
+          else
+            echo "live unseen replay exit_code=$code" \
+              > artifacts/unseen-spi-flash-live/LIVE_RUN_STATUS.txt
+          fi
+          exit "$code"
 
       - name: Upload live unseen evidence
         if: always()

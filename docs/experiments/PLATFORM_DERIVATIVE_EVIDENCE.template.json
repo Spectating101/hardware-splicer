@@ -1,0 +1,109 @@
+{
+  "schema_version": "hardware_splicer.platform_derivative_evidence.v1",
+  "experiment_id": "",
+  "captured_at": "",
+  "repository_sha": "",
+  "platform": {
+    "core_id": "",
+    "core_revision": "",
+    "description": "",
+    "validated_artifact_hashes": []
+  },
+  "derivative": {
+    "variant_id": "",
+    "variant_revision": "",
+    "market_role": "",
+    "description": ""
+  },
+  "artifact_accounting": {
+    "accounting_policy_id": "platform-artifact-units-v1",
+    "baseline_inventory_hash": "",
+    "artifact_units": [],
+    "validated_artifact_count_total": 0,
+    "validated_artifact_count_inherited": 0,
+    "validated_artifact_count_new_or_changed": 0,
+    "engineering_reuse_ratio": null,
+    "class_reuse_ratios": {},
+    "class_balanced_reuse_ratio": null,
+    "artifact_inventory_hash": null
+  },
+  "evidence_accounting": {
+    "required_evidence_ids": [],
+    "valid_inherited_evidence_ids": [],
+    "required_evidence_count": 0,
+    "valid_inherited_evidence_count": 0,
+    "invalidation_score": null,
+    "invalidated_inherited_evidence_count": 0,
+    "should_invalidate_inherited_evidence_count": 0,
+    "unnecessarily_invalidated_evidence_count": 0,
+    "evidence_reuse_ratio": null,
+    "invalidation_precision": null,
+    "invalidation_recall": null,
+    "invalidation_f1": null,
+    "unnecessary_invalidation_rate": null
+  },
+  "effort_accounting": {
+    "baseline_type": null,
+    "baseline_independent_build_hours": null,
+    "task_hours_complete": false,
+    "derivative_engineering_hours": null,
+    "marginal_engineering_ratio": null,
+    "hours_by_task_class": {
+      "requirements": 0,
+      "component_selection": 0,
+      "electrical_design": 0,
+      "pcb_or_wiring": 0,
+      "firmware": 0,
+      "mechanical": 0,
+      "data_or_model": 0,
+      "deterministic_verification": 0,
+      "physical_test": 0,
+      "debug_repair": 0,
+      "documentation_packaging": 0
+    }
+  },
+  "physical_retest": {
+    "blank_slate_test_count": 0,
+    "tests_reused_or_safely_waived": 0,
+    "tests_rerun": 0,
+    "physical_retest_compression": null,
+    "rationale": []
+  },
+  "failures": [],
+  "repairs": [],
+  "authority": {
+    "violations": 0,
+    "fabrication_authorized": false,
+    "power_on_authorized": false,
+    "authorization_records": []
+  },
+  "external_evidence": {
+    "independent_operator": null,
+    "partner_or_user": null,
+    "judge_or_venue": null
+  },
+  "hypothesis_gate": {
+    "engineering_reuse_ratio_target": 0.70,
+    "evidence_reuse_ratio_target": 0.65,
+    "marginal_engineering_ratio_max": 0.40,
+    "invalidation_precision_target": 0.95,
+    "invalidation_recall_target": 0.95,
+    "authority_violations_max": 0,
+    "require_frozen_artifact_inventory": true,
+    "require_scored_invalidation": true,
+    "require_complete_task_log": true,
+    "require_measured_baseline": true,
+    "computed_checks": {},
+    "missing_metrics": [],
+    "proof_blockers": [],
+    "threshold_failures": [],
+    "validation_errors": [],
+    "measurement_warnings": [],
+    "result": "PENDING"
+  },
+  "notes": [
+    "A full PASS is intentionally reserved for measured rather than estimated arbitrage evidence.",
+    "The baseline artifact inventory and accounting policy must be frozen before derivative results are observed.",
+    "Invalidation precision/recall should be populated from a frozen prediction followed by outer adjudication, not by self-scoring the same dependency graph."
+  ]
+}

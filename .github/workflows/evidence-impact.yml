@@ -1,0 +1,79 @@
+name: Evidence Impact and Platform Reuse
+
+on:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "src/hardware_splicer/cli_entry.py"
+      - "src/hardware_splicer/capability_manifest.py"
+      - "src/hardware_splicer/capability_reuse_api.py"
+      - "src/hardware_splicer/derivative_economics.py"
+      - "src/hardware_splicer/derivative_reuse.py"
+      - "src/hardware_splicer/evidence_impact.py"
+      - "src/hardware_splicer/platform_derivative_metrics.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_capability_reuse_api.py"
+      - "tests/test_cli_capability_freeze.py"
+      - "tests/test_cli_derive.py"
+      - "tests/test_capability_manifest.py"
+      - "tests/test_derivative_economics.py"
+      - "tests/test_derivative_reuse.py"
+      - "tests/test_evidence_impact.py"
+      - "tests/test_platform_derivative_metrics.py"
+      - "scripts/evaluate_evidence_impact.py"
+      - "scripts/run_derivative_reuse_experiment.py"
+      - "docs/experiments/**"
+      - ".github/workflows/evidence-impact.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: evidence-impact-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-impact:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and test runner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+      - name: Run capability/reuse tests
+        run: |
+          pytest -q \
+            tests/test_capability_reuse_api.py \
+            tests/test_cli_capability_freeze.py \
+            tests/test_cli_derive.py \
+            tests/test_capability_manifest.py \
+            tests/test_derivative_economics.py \
+            tests/test_derivative_reuse.py \
+            tests/test_evidence_impact.py \
+            tests/test_platform_derivative_metrics.py
+      - name: Verify installed operator surfaces
+        run: |
+          hs-capability-freeze --help
+          hs-derive --help
+      - name: Persist controlled dependency-impact dry run
+        run: |
+          python scripts/evaluate_evidence_impact.py \
+            docs/experiments/vision_camera_revision_substitution.case.json \
+            --out artifacts/evidence-impact/vision-camera-revision-substitution.report.json
+      - name: Persist manifest-derived frozen reuse prediction
+        run: |
+          python scripts/run_derivative_reuse_experiment.py \
+            docs/experiments/vision_camera_manifest_derivative.case.json \
+            --out artifacts/evidence-impact/vision-camera-manifest-derivative.report.json
+      - name: Upload deterministic evidence-impact artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-impact-dry-run
+          path: artifacts/evidence-impact
+          if-no-files-found: error
