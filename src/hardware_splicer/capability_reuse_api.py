@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from .capability_manifest import project_capability_manifest
+from .derivative_economics import evaluate_derivative_economics
 from .derivative_reuse import adjudicate_derivative_reuse, predict_derivative_reuse
 from .machine_project import MachineProject
 from .platform_derivative_metrics import evaluate_platform_derivative_evidence
@@ -127,7 +128,7 @@ def create_capability_reuse_router() -> APIRouter:
 
     @router.post("/derivative-metrics")
     def derivative_metrics(request: DerivativeMetricsRequest) -> Dict[str, Any]:
-        """Evaluate measured platform reuse/economics without upgrading authority."""
+        """Evaluate platform artifact/evidence reuse without upgrading authority."""
 
         result = evaluate_platform_derivative_evidence(request.record)
         return {
@@ -138,5 +139,11 @@ def create_capability_reuse_router() -> APIRouter:
                 "physical_authority_granted": False,
             },
         }
+
+    @router.post("/derivative-economics")
+    def derivative_economics(request: DerivativeMetricsRequest) -> Dict[str, Any]:
+        """Evaluate the cleanroom blank-slate vs reuse development comparator."""
+
+        return evaluate_derivative_economics(request.record)
 
     return router
