@@ -7,6 +7,7 @@ on:
       - "src/hardware_splicer/cli_entry.py"
       - "src/hardware_splicer/capability_manifest.py"
       - "src/hardware_splicer/capability_reuse_api.py"
+      - "src/hardware_splicer/derivative_economics.py"
       - "src/hardware_splicer/derivative_reuse.py"
       - "src/hardware_splicer/evidence_impact.py"
       - "src/hardware_splicer/platform_derivative_metrics.py"
@@ -15,6 +16,7 @@ on:
       - "tests/test_cli_capability_freeze.py"
       - "tests/test_cli_derive.py"
       - "tests/test_capability_manifest.py"
+      - "tests/test_derivative_economics.py"
       - "tests/test_derivative_reuse.py"
       - "tests/test_evidence_impact.py"
       - "tests/test_platform_derivative_metrics.py"
@@ -23,6 +25,10 @@ on:
       - "docs/experiments/**"
       - ".github/workflows/evidence-impact.yml"
   workflow_dispatch:
+
+concurrency:
+  group: evidence-impact-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -47,6 +53,7 @@ jobs:
             tests/test_cli_capability_freeze.py \
             tests/test_cli_derive.py \
             tests/test_capability_manifest.py \
+            tests/test_derivative_economics.py \
             tests/test_derivative_reuse.py \
             tests/test_evidence_impact.py \
             tests/test_platform_derivative_metrics.py
