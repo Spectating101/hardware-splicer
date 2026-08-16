@@ -94,7 +94,7 @@ For each path record:
 - model/tool calls if available;
 - final completion state.
 
-Use one precommitted labor-rate assumption to translate human hours into comparable development cost. Keep raw human hours visible so the result does not depend only on the chosen rate.
+Use one precommitted labor-rate assumption to translate human hours into comparable development cost. Keep raw human hours and direct cash cost visible so the result does not depend only on the chosen rate.
 
 Do **not** mix production BOM/COGS with development cost. Production unit economics are a later product-market measurement.
 
@@ -104,14 +104,34 @@ Let `R` be the HS reuse path and `B` the blank-slate comparator.
 
 - `human_intervention_ratio = R human hours / B human hours`
 - `elapsed_time_ratio = R elapsed hours / B elapsed hours`
+- `development_cash_cost_ratio = R direct development cash / B direct development cash`
 - `development_variable_cost_ratio = R development variable cost / B development variable cost`
 - `physical_retest_ratio = R physical retest effort / B physical retest effort`
 
+Direct development cash is:
+
+`model/tool cost + external-service cost + development consumables`
+
 Development variable cost is:
 
-`human hours × frozen labor rate + model/tool cost + external-service cost + development consumables`
+`human hours × frozen labor rate + direct development cash`
 
-## 7. Initial precommitted hypotheses
+The cash-cost ratio is reported as sensitivity evidence; the initial hard economics gate remains human intervention + total development-variable cost.
+
+## 7. Labor-rate sensitivity
+
+A single chosen labor rate must not be able to create a favorable story by itself. Report the human-hours and direct-cash deltas separately and classify the comparison over **all nonnegative labor rates**:
+
+- reuse uses no more human time **and** no more direct cash → `reuse_weakly_dominates_for_all_nonnegative_labor_rates`;
+- blank-slate uses no more human time **and** no more direct cash → `baseline_weakly_dominates_for_all_nonnegative_labor_rates`;
+- both are equal → equal for all nonnegative labor rates;
+- one path saves human time but spends more cash → labor-rate tradeoff.
+
+For a tradeoff, calculate the break-even labor rate where total development-variable costs are equal. Also report whether reuse becomes cheaper **above** or **below** that rate.
+
+This sensitivity result is descriptive rather than a separate initial pass/fail gate. It exists to show whether the primary cost conclusion is robust or assumption-dependent.
+
+## 8. Initial precommitted hypotheses
 
 For the first Vision Core derivative family, before results are observed:
 
@@ -121,9 +141,9 @@ For the first Vision Core derivative family, before results are observed:
 
 These are project hypotheses, not industry-standard thresholds. Keep them fixed for the first registered experiment even if the result is unfavorable.
 
-Elapsed-time and physical-retest ratios are reported but not initial hard pass/fail thresholds because queueing, fabrication delivery and parallelism can distort wall-clock comparisons.
+Elapsed-time, direct-cash and physical-retest ratios are reported but not initial hard pass/fail thresholds. Queueing/fabrication can distort wall-clock time, and cash-vs-labor tradeoffs are retained explicitly through the sensitivity analysis.
 
-## 8. Validity requirements for a strong arbitrage claim
+## 9. Validity requirements for a strong arbitrage claim
 
 A proof-grade comparator requires:
 
@@ -133,12 +153,13 @@ A proof-grade comparator requires:
 - blank-slate path isolated from private platform/reuse assets;
 - interventions logged;
 - complete raw cost/effort accounting;
-- same currency and labor-rate policy;
+- explicit authority-violation accounting for both paths;
+- same currency and positive precommitted labor-rate policy;
 - both outcomes preserved, including failure.
 
 If these do not hold, the economics may still be exploratory evidence but not a strong causal arbitrage result.
 
-## 9. Interpretation
+## 10. Interpretation
 
 Possible outcomes are intentionally symmetric:
 
