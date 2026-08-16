@@ -121,6 +121,8 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         blockers.append("currency_required")
     if labor_rate is None:
         blockers.append("labor_rate_required")
+    elif labor_rate <= 0:
+        blockers.append("positive_labor_rate_required")
     if comparison.get("mode") != "parallel_cleanroom":
         blockers.append("parallel_cleanroom_comparator_required")
     for flag, code in (
@@ -139,6 +141,11 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
     terminal_states = {"completed", "failed"}
     still_running = baseline_state not in terminal_states or reuse_state not in terminal_states
 
+    authority_present = (
+        "authority_violations" in baseline and "authority_violations" in reuse
+    )
+    if not authority_present:
+        blockers.append("authority_violation_counts_required")
     baseline_authority = int(baseline.get("authority_violations") or 0)
     reuse_authority = int(reuse.get("authority_violations") or 0)
     if baseline_authority < 0 or reuse_authority < 0:
@@ -150,7 +157,8 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         and metrics["human_intervention_ratio"] <= human_max,
         "development_variable_cost_ratio": metrics["development_variable_cost_ratio"] is not None
         and metrics["development_variable_cost_ratio"] <= cost_max,
-        "authority_violations": baseline_authority <= authority_max
+        "authority_violations": authority_present
+        and baseline_authority <= authority_max
         and reuse_authority <= authority_max,
     }
     threshold_failures = sorted(name for name, passed in checks.items() if not passed)
