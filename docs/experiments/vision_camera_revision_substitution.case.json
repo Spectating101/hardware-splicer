@@ -1,0 +1,79 @@
+{
+  "schema_version": "hardware_splicer.evidence_impact_case.v1",
+  "case_id": "vision-camera-revision-substitution-dry-run-v1",
+  "purpose": "Deterministic plumbing test for selective evidence invalidation before any real Vision Core derivative is built.",
+  "claim_ceiling": "dry_run_only",
+  "source_notes": [
+    {
+      "source": "https://github.com/espressif/esp32-camera",
+      "role": "Primary upstream camera-driver context; used only to motivate a realistic multi-sensor substitution class."
+    },
+    {
+      "source": "https://github.com/espressif/esp32-camera/releases/tag/v2.1.4",
+      "role": "Primary upstream release context for XIAO/OV3660 support; not treated as physical evidence for a local board."
+    }
+  ],
+  "changed_dependency_ids": [
+    "component:camera:sensor_identity",
+    "interface:camera:sensor_configuration"
+  ],
+  "unresolved_dependency_ids": [],
+  "evidence_items": [
+    {
+      "evidence_id": "ev-camera-identity",
+      "depends_on": ["component:camera:sensor_identity"],
+      "dependencies_complete": true,
+      "metadata": {"class": "identity"}
+    },
+    {
+      "evidence_id": "ev-camera-driver-config",
+      "depends_on": [
+        "ev-camera-identity",
+        "interface:camera:sensor_configuration"
+      ],
+      "dependencies_complete": true,
+      "metadata": {"class": "software_interface"}
+    },
+    {
+      "evidence_id": "ev-optical-benchmark",
+      "depends_on": [
+        "ev-camera-driver-config",
+        "condition:lighting:baseline",
+        "condition:lens_mount:baseline"
+      ],
+      "dependencies_complete": true,
+      "metadata": {"class": "performance"}
+    },
+    {
+      "evidence_id": "ev-model-accuracy",
+      "depends_on": [
+        "ev-optical-benchmark",
+        "dataset:vision-a:v1"
+      ],
+      "dependencies_complete": true,
+      "metadata": {"class": "ml_performance"}
+    },
+    {
+      "evidence_id": "ev-wifi-api-contract",
+      "depends_on": ["interface:wifi:config_api:v1"],
+      "dependencies_complete": true,
+      "metadata": {"class": "software_interface"}
+    },
+    {
+      "evidence_id": "ev-enclosure-base",
+      "depends_on": ["mechanical:base:mount_pattern:v1"],
+      "dependencies_complete": true,
+      "metadata": {"class": "mechanical"}
+    }
+  ],
+  "adjudication": {
+    "kind": "synthetic_precommitted_fixture",
+    "independent": false,
+    "expected_invalidated_evidence_ids": [
+      "ev-camera-identity",
+      "ev-camera-driver-config",
+      "ev-optical-benchmark",
+      "ev-model-accuracy"
+    ]
+  }
+}
