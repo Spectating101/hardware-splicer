@@ -226,3 +226,49 @@ def test_outer_score_populates_precision_recall_counts_without_manual_retyping()
     assert report["evidence_accounting"]["invalidation_precision"] == 5 / 6
     assert report["evidence_accounting"]["invalidation_recall"] == 5 / 6
     assert report["hypothesis_gate"]["result"] == "FAIL"
+
+
+def test_malformed_external_counts_fail_closed_instead_of_raising() -> None:
+    record = _record()
+    record["artifact_accounting"]["validated_artifact_count_total"] = "ten"
+    record["physical_retest"]["tests_rerun"] = 3.5
+    record["authority"]["violations"] = "unknown"
+
+    report = evaluate_platform_derivative_evidence(record)
+
+    assert report["hypothesis_gate"]["result"] == "INVALID"
+    errors = report["hypothesis_gate"]["validation_errors"]
+    assert "invalid_integer:artifact_accounting.validated_artifact_count_total" in errors
+    assert "invalid_integer:physical_retest.tests_rerun" in errors
+    assert "invalid_integer:authority.violations" in errors
+
+
+def test_nonfinite_measurements_and_thresholds_fail_closed() -> None:
+    record = _record()
+    record["effort_accounting"]["baseline_independent_build_hours"] = float("nan")
+    record["hypothesis_gate"]["engineering_reuse_ratio_target"] = float("inf")
+
+    report = evaluate_platform_derivative_evidence(record)
+
+    assert report["hypothesis_gate"]["result"] == "INVALID"
+    errors = report["hypothesis_gate"]["validation_errors"]
+    assert "invalid_number:effort_accounting.baseline_independent_build_hours" in errors
+    assert "invalid_number:hypothesis_gate.engineering_reuse_ratio_target" in errors
+
+
+def test_malformed_scored_invalidation_fails_closed() -> None:
+    record = _record()
+    record["evidence_accounting"]["invalidation_score"] = {
+        "status": "scored",
+        "correctly_invalidated_count": "five",
+        "unnecessarily_invalidated_count": 0,
+        "missed_invalidation_count": 1,
+    }
+
+    report = evaluate_platform_derivative_evidence(record)
+
+    assert report["hypothesis_gate"]["result"] == "INVALID"
+    assert (
+        "invalid_integer:invalidation_score.correctly_invalidated_count"
+        in report["hypothesis_gate"]["validation_errors"]
+    )
