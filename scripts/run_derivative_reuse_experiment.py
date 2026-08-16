@@ -9,10 +9,17 @@ import sys
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_SRC_DIR = _SCRIPT_DIR.parent / "src"
+_SRC_RESOLVED = _SRC_DIR.resolve()
+sys.path = [
+    str(_SRC_DIR),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or ".").resolve() not in {_SCRIPT_DIR, _SRC_RESOLVED}
+    ],
+]
 
 from hardware_splicer.derivative_reuse import (  # noqa: E402
     adjudicate_derivative_reuse,
