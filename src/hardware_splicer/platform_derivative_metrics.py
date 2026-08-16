@@ -43,24 +43,51 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     evidence = dict(out.get("evidence_accounting") or {})
     required_evidence = int(evidence.get("required_evidence_count") or 0)
     retained_evidence = int(evidence.get("valid_inherited_evidence_count") or 0)
-    invalidated_evidence = int(evidence.get("invalidated_inherited_evidence_count") or 0)
+    correctly_invalidated = int(evidence.get("invalidated_inherited_evidence_count") or 0)
     unnecessary_invalidations = int(evidence.get("unnecessarily_invalidated_evidence_count") or 0)
-    should_invalidate = int(evidence.get("should_invalidate_inherited_evidence_count") or invalidated_evidence)
+    should_invalidate = int(
+        evidence.get("should_invalidate_inherited_evidence_count")
+        if evidence.get("should_invalidate_inherited_evidence_count") is not None
+        else correctly_invalidated
+    )
 
-    if min(required_evidence, retained_evidence, invalidated_evidence, unnecessary_invalidations, should_invalidate) < 0:
+    if min(
+        required_evidence,
+        retained_evidence,
+        correctly_invalidated,
+        unnecessary_invalidations,
+        should_invalidate,
+    ) < 0:
         errors.append("negative_evidence_count")
     if retained_evidence > required_evidence:
         errors.append("retained_evidence_exceeds_required")
-    if invalidated_evidence > should_invalidate:
+    if correctly_invalidated > should_invalidate:
         errors.append("invalidated_evidence_exceeds_should_invalidate")
 
     evidence_reuse_ratio = _ratio(retained_evidence, required_evidence)
-    invalidation_precision = _ratio(invalidated_evidence, should_invalidate)
-    inherited_considered = retained_evidence + unnecessary_invalidations
-    unnecessary_invalidation_rate = _ratio(unnecessary_invalidations, inherited_considered)
+
+    # Treat correct invalidations as true positives and unnecessary invalidations as
+    # false positives. `should_invalidate` is the number of inherited evidence items
+    # that actually required invalidation, so TP / should_invalidate is recall.
+    invalidation_precision = _ratio(
+        correctly_invalidated,
+        correctly_invalidated + unnecessary_invalidations,
+    )
+    invalidation_recall = _ratio(correctly_invalidated, should_invalidate)
+    invalidation_f1 = None
+    if invalidation_precision is not None and invalidation_recall is not None:
+        invalidation_f1 = _ratio(
+            2 * invalidation_precision * invalidation_recall,
+            invalidation_precision + invalidation_recall,
+        )
+
+    inherited_decisions = retained_evidence + correctly_invalidated + unnecessary_invalidations
+    unnecessary_invalidation_rate = _ratio(unnecessary_invalidations, inherited_decisions)
 
     evidence["evidence_reuse_ratio"] = evidence_reuse_ratio
     evidence["invalidation_precision"] = invalidation_precision
+    evidence["invalidation_recall"] = invalidation_recall
+    evidence["invalidation_f1"] = invalidation_f1
     evidence["unnecessary_invalidation_rate"] = unnecessary_invalidation_rate
     out["evidence_accounting"] = evidence
 
@@ -96,7 +123,8 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     reuse_target = float(gate.get("engineering_reuse_ratio_target", 0.70))
     evidence_target = float(gate.get("evidence_reuse_ratio_target", 0.65))
     marginal_max = float(gate.get("marginal_engineering_ratio_max", 0.40))
-    invalidation_target = float(gate.get("invalidation_precision_target", 0.95))
+    invalidation_precision_target = float(gate.get("invalidation_precision_target", 0.95))
+    invalidation_recall_target = float(gate.get("invalidation_recall_target", 0.95))
     authority_max = int(gate.get("authority_violations_max", 0))
 
     required_metrics = {
@@ -104,6 +132,7 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
         "evidence_reuse_ratio": evidence_reuse_ratio,
         "marginal_engineering_ratio": marginal_engineering_ratio,
         "invalidation_precision": invalidation_precision,
+        "invalidation_recall": invalidation_recall,
     }
     missing = sorted(name for name, value in required_metrics.items() if value is None)
 
@@ -111,7 +140,8 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
         "engineering_reuse_ratio": engineering_reuse_ratio is not None and engineering_reuse_ratio >= reuse_target,
         "evidence_reuse_ratio": evidence_reuse_ratio is not None and evidence_reuse_ratio >= evidence_target,
         "marginal_engineering_ratio": marginal_engineering_ratio is not None and marginal_engineering_ratio <= marginal_max,
-        "invalidation_precision": invalidation_precision is not None and invalidation_precision >= invalidation_target,
+        "invalidation_precision": invalidation_precision is not None and invalidation_precision >= invalidation_precision_target,
+        "invalidation_recall": invalidation_recall is not None and invalidation_recall >= invalidation_recall_target,
         "authority_violations": authority_violations <= authority_max,
     }
 
