@@ -9,10 +9,19 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
-from hardware_splicer.evidence_impact import (
+# Running a file from scripts/ puts that directory first on sys.path. This repo
+# also has scripts/hardware_splicer.py, which would otherwise shadow the installed
+# hardware_splicer package. Pin src/ before importing the package.
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from hardware_splicer.evidence_impact import (  # noqa: E402
     evaluate_evidence_impact,
     score_evidence_invalidation,
 )
