@@ -69,8 +69,6 @@ def _dependency_rows(manifest: Mapping[str, Any]) -> tuple[dict[str, dict[str, A
         resolved = row.get("resolved") is not False
         row["dependency_id"] = dependency_id
         row["resolved"] = resolved
-        # These fields describe record bookkeeping rather than the engineering
-        # dependency itself and therefore do not change its semantic fingerprint.
         semantic = {
             key: value
             for key, value in row.items()
@@ -158,6 +156,7 @@ def project_capability_manifest(
         )
         selected_object_ids.append(object_id)
 
+    project_payload = project.model_dump(mode="json")
     return {
         "schema_version": CAPABILITY_MANIFEST_SCHEMA,
         "capability_id": str(capability_id),
@@ -166,6 +165,7 @@ def project_capability_manifest(
         "source_boundary": {
             "project_id": project.project_id,
             "project_revision": str(project_revision),
+            "project_content_hash": _fingerprint(project_payload),
             "machine_project_schema": project.schema_version,
             "lifecycle_state": project.lifecycle_state.value,
             "requested_release_state": project.requested_release_state.value,
@@ -247,8 +247,6 @@ def diff_capability_manifests(
             continue
         baseline_row = baseline_rows[dependency_id]
         if not baseline_row["resolved"]:
-            # A previously unresolved dependency becoming resolved is still a
-            # dependency-state change and cannot inherit old validation by default.
             changed.append(dependency_id)
         elif baseline_row["semantic_fingerprint"] != candidate_row["semantic_fingerprint"]:
             changed.append(dependency_id)
@@ -261,10 +259,6 @@ def diff_capability_manifests(
         if not candidate_rows[dependency_id]["resolved"]
     )
     added_resolved = sorted(set(added) - set(unresolved))
-
-    # Removed dependencies invalidate anything that depended on them. Added
-    # resolved dependencies are changes in capability state, though inherited
-    # evidence will only be affected when it explicitly depends on those ids.
     changed_dependency_ids = sorted(set(changed) | set(removed) | set(added_resolved))
     unresolved_dependency_ids = sorted(set(unresolved))
 
