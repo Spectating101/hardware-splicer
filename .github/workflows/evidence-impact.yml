@@ -6,9 +6,12 @@ on:
       - "pyproject.toml"
       - "src/hardware_splicer/cli_entry.py"
       - "src/hardware_splicer/capability_manifest.py"
+      - "src/hardware_splicer/capability_reuse_api.py"
       - "src/hardware_splicer/derivative_reuse.py"
       - "src/hardware_splicer/evidence_impact.py"
       - "src/hardware_splicer/platform_derivative_metrics.py"
+      - "src/hardware_splicer/product_api.py"
+      - "tests/test_capability_reuse_api.py"
       - "tests/test_cli_capability_freeze.py"
       - "tests/test_cli_derive.py"
       - "tests/test_capability_manifest.py"
@@ -40,6 +43,7 @@ jobs:
       - name: Run capability/reuse tests
         run: |
           pytest -q \
+            tests/test_capability_reuse_api.py \
             tests/test_cli_capability_freeze.py \
             tests/test_cli_derive.py \
             tests/test_capability_manifest.py \
