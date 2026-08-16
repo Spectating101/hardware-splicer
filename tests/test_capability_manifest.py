@@ -213,6 +213,18 @@ def test_capability_id_mismatch_is_invalid() -> None:
     assert "capability_id_mismatch" in diff["validation_errors"]
 
 
+def test_manifest_requires_explicit_boolean_resolution_state() -> None:
+    baseline = _manifest("vision-a-r1", "camera-A", "camera-A-config")
+    candidate = _manifest("vision-a-r2", "camera-A", "camera-A-config")
+    del candidate["dependencies"][0]["resolved"]
+
+    diff = diff_capability_manifests(baseline, candidate)
+
+    assert diff["status"] == "invalid"
+    assert "candidate:dependency_0_resolved_must_be_boolean" in diff["validation_errors"]
+    assert "component:camera:sensor_identity" in diff["unresolved_dependency_ids"]
+
+
 def test_machine_project_projection_binds_manifest_to_canonical_source_boundary() -> None:
     project = _machine_project("OV2640")
     manifest = project_capability_manifest(
