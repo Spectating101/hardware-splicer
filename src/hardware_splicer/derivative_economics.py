@@ -42,6 +42,67 @@ def _number(value: Any, *, field: str, errors: list[str]) -> float | None:
     return number
 
 
+def _labor_rate_sensitivity(
+    *,
+    baseline_hours: float | None,
+    reuse_hours: float | None,
+    baseline_cash: float | None,
+    reuse_cash: float | None,
+) -> dict[str, Any]:
+    """Describe whether the result depends on the chosen nonnegative labor rate."""
+
+    if None in {baseline_hours, reuse_hours, baseline_cash, reuse_cash}:
+        return {
+            "status": "unavailable",
+            "dominance": None,
+            "break_even_labor_rate": None,
+            "reuse_cheaper_when": None,
+        }
+
+    assert baseline_hours is not None
+    assert reuse_hours is not None
+    assert baseline_cash is not None
+    assert reuse_cash is not None
+
+    human_delta = reuse_hours - baseline_hours
+    cash_delta = reuse_cash - baseline_cash
+
+    if human_delta == 0 and cash_delta == 0:
+        return {
+            "status": "evaluated",
+            "dominance": "equal_for_all_nonnegative_labor_rates",
+            "break_even_labor_rate": None,
+            "reuse_cheaper_when": "never_strictly_cheaper",
+        }
+    if human_delta <= 0 and cash_delta <= 0:
+        return {
+            "status": "evaluated",
+            "dominance": "reuse_weakly_dominates_for_all_nonnegative_labor_rates",
+            "break_even_labor_rate": None,
+            "reuse_cheaper_when": "all_nonnegative_labor_rates_except_possible_tie_at_zero",
+        }
+    if human_delta >= 0 and cash_delta >= 0:
+        return {
+            "status": "evaluated",
+            "dominance": "baseline_weakly_dominates_for_all_nonnegative_labor_rates",
+            "break_even_labor_rate": None,
+            "reuse_cheaper_when": "never_for_nonnegative_labor_rates",
+        }
+
+    # Opposite signs imply a real tradeoff and a nonnegative crossing point.
+    break_even = -cash_delta / human_delta
+    if human_delta < 0:
+        reuse_cheaper_when = "labor_rate_above_break_even"
+    else:
+        reuse_cheaper_when = "labor_rate_below_break_even"
+    return {
+        "status": "evaluated",
+        "dominance": "labor_rate_tradeoff",
+        "break_even_labor_rate": break_even,
+        "reuse_cheaper_when": reuse_cheaper_when,
+    }
+
+
 def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
     """Evaluate a frozen reuse-vs-cleanroom comparator without filling gaps."""
 
@@ -74,11 +135,17 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
             path.get("external_service_cost"),
             path.get("development_consumables_cost"),
         )
-        if labor_rate is not None and path.get("human_active_hours") is not None and all(
-            value is not None for value in cash_fields
+        if all(value is not None for value in cash_fields):
+            path["development_cash_cost"] = sum(cash_fields)
+        else:
+            path["development_cash_cost"] = None
+        if (
+            labor_rate is not None
+            and path.get("human_active_hours") is not None
+            and path.get("development_cash_cost") is not None
         ):
             path["development_variable_cost"] = (
-                path["human_active_hours"] * labor_rate + sum(cash_fields)
+                path["human_active_hours"] * labor_rate + path["development_cash_cost"]
             )
         else:
             path["development_variable_cost"] = None
@@ -94,6 +161,9 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         "elapsed_time_ratio": _ratio_optional(
             reuse.get("elapsed_hours"), baseline.get("elapsed_hours")
         ),
+        "development_cash_cost_ratio": _ratio_optional(
+            reuse.get("development_cash_cost"), baseline.get("development_cash_cost")
+        ),
         "development_variable_cost_ratio": _ratio_optional(
             reuse.get("development_variable_cost"), baseline.get("development_variable_cost")
         ),
@@ -102,6 +172,12 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         ),
     }
     out["metrics"] = metrics
+    out["labor_rate_sensitivity"] = _labor_rate_sensitivity(
+        baseline_hours=baseline.get("human_active_hours"),
+        reuse_hours=reuse.get("human_active_hours"),
+        baseline_cash=baseline.get("development_cash_cost"),
+        reuse_cash=reuse.get("development_cash_cost"),
+    )
 
     gate = dict(out.get("hypothesis_gate") or {})
     human_max = float(gate.get("human_intervention_ratio_max", 0.40))
@@ -135,7 +211,15 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         if comparison.get(flag) is not True:
             blockers.append(code)
 
-    missing_metrics = sorted(name for name, value in metrics.items() if value is None)
+    required_metric_names = (
+        "human_intervention_ratio",
+        "elapsed_time_ratio",
+        "development_variable_cost_ratio",
+        "physical_retest_ratio",
+    )
+    missing_metrics = sorted(
+        name for name in required_metric_names if metrics.get(name) is None
+    )
     baseline_state = str(baseline.get("completion_state") or "")
     reuse_state = str(reuse.get("completion_state") or "")
     terminal_states = {"completed", "failed"}
@@ -184,5 +268,6 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
         "production_unit_economics_proven": False,
         "physical_authority_granted": False,
         "economic_result_scope": "development_comparator_only",
+        "labor_rate_sensitivity_reported": True,
     }
     return out
