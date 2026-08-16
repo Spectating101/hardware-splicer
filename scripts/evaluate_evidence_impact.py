@@ -14,12 +14,21 @@ from pathlib import Path
 from typing import Any
 
 # Running a file from scripts/ puts that directory first on sys.path. This repo
-# also has scripts/hardware_splicer.py, which would otherwise shadow the installed
-# hardware_splicer package. Pin src/ before importing the package.
-ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
+# also has scripts/hardware_splicer.py, which would otherwise shadow the real
+# hardware_splicer package. Editable installs may already place src/ later on
+# sys.path, so membership alone is not enough: remove both locations and put
+# src/ first deterministically.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_SRC_DIR = _SCRIPT_DIR.parent / "src"
+_SRC_RESOLVED = _SRC_DIR.resolve()
+sys.path = [
+    str(_SRC_DIR),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or ".").resolve() not in {_SCRIPT_DIR, _SRC_RESOLVED}
+    ],
+]
 
 from hardware_splicer.evidence_impact import (  # noqa: E402
     evaluate_evidence_impact,
