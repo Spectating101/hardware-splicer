@@ -1,0 +1,6 @@
+{
+  "max_marginal_engineering_ratio": 0.40,
+  "min_core_artifact_share": 0.60,
+  "min_core_artifact_retention_ratio": 0.75,
+  "min_evidence_reuse_ratio": 0.60
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "hardware_splicer.platform_leverage_experiment.v1",
+  "core_id": "vision-core-a",
+  "variant_id": "replace-me",
+  "effort": {
+    "variant_engineering_hours": 0,
+    "independent_counterfactual_hours": 1,
+    "counterfactual_basis": "estimated"
+  },
+  "artifacts": [
+    {
+      "artifact_id": "camera-interface",
+      "origin": "core",
+      "reuse_state": "unchanged",
+      "engineering_hours": 0
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "camera-interface-contract",
+      "origin": "core",
+      "reuse_state": "survived",
+      "engineering_hours": 0
+    }
+  ]
+}
