@@ -2,10 +2,10 @@
 
 The core engine factory remains in :mod:`hardware_splicer.api`; this module mounts
 product-level routers that own durable workspace state, canonical machine and
-electrical models, external interchange, runtime capability truth, source-agnostic
-engineering planning, manufacturing and mechanical closure, bounded execution,
-unified status, revision comparison, scoped physical evidence, review evidence,
-semantic bounded-planner selection, and source-blind dual-agent evaluation.
+electrical models, external interchange, runtime capability truth, capability reuse,
+source-agnostic engineering planning, manufacturing and mechanical closure, bounded
+execution, unified status, revision comparison, scoped physical evidence, review
+evidence, semantic bounded-planner selection, and source-blind dual-agent evaluation.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from .ai_project_repair_api import create_ai_project_repair_router
 from .ai_project_tool_executor_api import create_ai_project_tool_executor_router
 from .api import create_app as create_engine_app
 from .capability_api import create_capability_router
+from .capability_reuse_api import create_capability_reuse_router
 from .circuit_json_api import create_circuit_json_router
 from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
 from .electrical_design_api import create_electrical_design_router
@@ -29,16 +30,12 @@ from .engineering_execution_anchored_api import (
     create_engineering_execution_router,
 )
 from .engineering_package_api import create_engineering_package_router
-from .engineering_package_download_api import (
-    create_engineering_package_download_router,
-)
+from .engineering_package_download_api import create_engineering_package_download_router
 from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
 from .engineering_review_identity_api import create_engineering_review_identity_router
 from .engineering_source_ingestion_api import create_engineering_source_ingestion_router
-from .engineering_source_multipart_api import (
-    create_engineering_source_multipart_router,
-)
+from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
 from .machine_project_api import create_machine_project_router
@@ -60,14 +57,7 @@ from .stored_source_parser_api import create_stored_source_parser_router
 
 
 def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> None:
-    """Mount execution routes and guarantee one anchored persistence path on the app.
-
-    FastAPI/Starlette have changed nested ``APIRouter`` prefix-copy behavior over time.
-    The canonical product boundary therefore verifies the safety-critical persistence path
-    after inclusion. If nested composition omitted it, reuse the already-created anchored
-    route's endpoint and register that handler directly on the app. The legacy caller-plan
-    save endpoint is never restored.
-    """
+    """Mount execution routes and guarantee one anchored persistence path on the app."""
     router = create_engineering_execution_router(store)
     app.include_router(router)
     existing = [
@@ -109,6 +99,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_circuit_json_router())
     app.include_router(create_electrical_interchange_router())
     app.include_router(create_capability_router())
+    app.include_router(create_capability_reuse_router())
     app.include_router(create_semantic_circuit_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_engineering_source_ingestion_router(resolved_store))
