@@ -23,6 +23,12 @@ def _ratio(numerator: float, denominator: float) -> float | None:
     return numerator / denominator
 
 
+def _ratio_optional(numerator: float | None, denominator: float | None) -> float | None:
+    if numerator is None or denominator is None:
+        return None
+    return _ratio(numerator, denominator)
+
+
 def _number(value: Any, *, field: str, errors: list[str]) -> float | None:
     if value is None:
         return None
@@ -82,21 +88,17 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
     baseline = paths["baseline"]
     reuse = paths["reuse"]
     metrics = {
-        "human_intervention_ratio": _ratio(
-            reuse.get("human_active_hours") or 0.0,
-            baseline.get("human_active_hours") or 0.0,
+        "human_intervention_ratio": _ratio_optional(
+            reuse.get("human_active_hours"), baseline.get("human_active_hours")
         ),
-        "elapsed_time_ratio": _ratio(
-            reuse.get("elapsed_hours") or 0.0,
-            baseline.get("elapsed_hours") or 0.0,
+        "elapsed_time_ratio": _ratio_optional(
+            reuse.get("elapsed_hours"), baseline.get("elapsed_hours")
         ),
-        "development_variable_cost_ratio": _ratio(
-            reuse.get("development_variable_cost") or 0.0,
-            baseline.get("development_variable_cost") or 0.0,
+        "development_variable_cost_ratio": _ratio_optional(
+            reuse.get("development_variable_cost"), baseline.get("development_variable_cost")
         ),
-        "physical_retest_ratio": _ratio(
-            reuse.get("physical_retest_hours") or 0.0,
-            baseline.get("physical_retest_hours") or 0.0,
+        "physical_retest_ratio": _ratio_optional(
+            reuse.get("physical_retest_hours"), baseline.get("physical_retest_hours")
         ),
     }
     out["metrics"] = metrics
