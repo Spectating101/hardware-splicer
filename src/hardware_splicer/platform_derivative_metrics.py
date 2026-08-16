@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from copy import deepcopy
 from typing import Any, Mapping
 
@@ -36,6 +37,56 @@ def _unique_strings(values: Any) -> list[str]:
     return list(dict.fromkeys(str(value) for value in values if str(value)))
 
 
+def _number(
+    value: Any,
+    *,
+    field: str,
+    errors: list[str],
+    default: float | None = 0.0,
+) -> float | None:
+    """Parse a finite numeric measurement without allowing conversion failures to escape."""
+
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        errors.append(f"invalid_number:{field}")
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"invalid_number:{field}")
+        return default
+    if not math.isfinite(number):
+        errors.append(f"invalid_number:{field}")
+        return default
+    return number
+
+
+def _integer(
+    value: Any,
+    *,
+    field: str,
+    errors: list[str],
+    default: int | None = 0,
+) -> int | None:
+    """Parse a finite integral count without truncating fractions or booleans."""
+
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        errors.append(f"invalid_integer:{field}")
+        return default
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"invalid_integer:{field}")
+        return default
+    if not math.isfinite(number) or not number.is_integer():
+        errors.append(f"invalid_integer:{field}")
+        return default
+    return int(number)
+
+
 def apply_invalidation_score(
     record: Mapping[str, Any], score: Mapping[str, Any]
 ) -> dict[str, Any]:
@@ -50,12 +101,29 @@ def apply_invalidation_score(
     evidence = dict(out.get("evidence_accounting") or {})
     evidence["invalidation_score"] = deepcopy(dict(score))
     if score.get("status") == "scored":
-        tp = int(score.get("correctly_invalidated_count") or 0)
-        fp = int(score.get("unnecessarily_invalidated_count") or 0)
-        fn = int(score.get("missed_invalidation_count") or 0)
-        evidence["invalidated_inherited_evidence_count"] = tp
-        evidence["unnecessarily_invalidated_evidence_count"] = fp
-        evidence["should_invalidate_inherited_evidence_count"] = tp + fn
+        score_errors: list[str] = []
+        tp = _integer(
+            score.get("correctly_invalidated_count"),
+            field="invalidation_score.correctly_invalidated_count",
+            errors=score_errors,
+            default=None,
+        )
+        fp = _integer(
+            score.get("unnecessarily_invalidated_count"),
+            field="invalidation_score.unnecessarily_invalidated_count",
+            errors=score_errors,
+            default=None,
+        )
+        fn = _integer(
+            score.get("missed_invalidation_count"),
+            field="invalidation_score.missed_invalidation_count",
+            errors=score_errors,
+            default=None,
+        )
+        if not score_errors and tp is not None and fp is not None and fn is not None:
+            evidence["invalidated_inherited_evidence_count"] = tp
+            evidence["unnecessarily_invalidated_evidence_count"] = fp
+            evidence["should_invalidate_inherited_evidence_count"] = tp + fn
     out["evidence_accounting"] = evidence
     return out
 
@@ -137,13 +205,30 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
             if class_ratios
             else None
         )
-        artifacts["artifact_inventory_hash"] = _hash(sorted(normalized_units, key=lambda row: row["unit_id"]))
+        artifacts["artifact_inventory_hash"] = _hash(
+            sorted(normalized_units, key=lambda row: row["unit_id"])
+        )
     else:
         warnings.append("artifact_reuse_uses_manual_counts")
 
-    total_artifacts = int(artifacts.get("validated_artifact_count_total") or 0)
-    inherited_artifacts = int(artifacts.get("validated_artifact_count_inherited") or 0)
-    changed_artifacts = int(artifacts.get("validated_artifact_count_new_or_changed") or 0)
+    total_artifacts = _integer(
+        artifacts.get("validated_artifact_count_total"),
+        field="artifact_accounting.validated_artifact_count_total",
+        errors=errors,
+    )
+    inherited_artifacts = _integer(
+        artifacts.get("validated_artifact_count_inherited"),
+        field="artifact_accounting.validated_artifact_count_inherited",
+        errors=errors,
+    )
+    changed_artifacts = _integer(
+        artifacts.get("validated_artifact_count_new_or_changed"),
+        field="artifact_accounting.validated_artifact_count_new_or_changed",
+        errors=errors,
+    )
+    assert total_artifacts is not None
+    assert inherited_artifacts is not None
+    assert changed_artifacts is not None
     if min(total_artifacts, inherited_artifacts, changed_artifacts) < 0:
         errors.append("negative_artifact_count")
     if inherited_artifacts + changed_artifacts != total_artifacts:
@@ -173,9 +258,24 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
 
     invalidation_score = evidence.get("invalidation_score")
     if isinstance(invalidation_score, Mapping) and invalidation_score.get("status") == "scored":
-        tp = int(invalidation_score.get("correctly_invalidated_count") or 0)
-        fp = int(invalidation_score.get("unnecessarily_invalidated_count") or 0)
-        fn = int(invalidation_score.get("missed_invalidation_count") or 0)
+        tp = _integer(
+            invalidation_score.get("correctly_invalidated_count"),
+            field="invalidation_score.correctly_invalidated_count",
+            errors=errors,
+        )
+        fp = _integer(
+            invalidation_score.get("unnecessarily_invalidated_count"),
+            field="invalidation_score.unnecessarily_invalidated_count",
+            errors=errors,
+        )
+        fn = _integer(
+            invalidation_score.get("missed_invalidation_count"),
+            field="invalidation_score.missed_invalidation_count",
+            errors=errors,
+        )
+        assert tp is not None
+        assert fp is not None
+        assert fn is not None
         evidence["invalidated_inherited_evidence_count"] = tp
         evidence["unnecessarily_invalidated_evidence_count"] = fp
         evidence["should_invalidate_inherited_evidence_count"] = tp + fn
@@ -184,15 +284,38 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     else:
         warnings.append("invalidation_metrics_use_manual_counts")
 
-    required_evidence = int(evidence.get("required_evidence_count") or 0)
-    retained_evidence = int(evidence.get("valid_inherited_evidence_count") or 0)
-    correctly_invalidated = int(evidence.get("invalidated_inherited_evidence_count") or 0)
-    unnecessary_invalidations = int(evidence.get("unnecessarily_invalidated_evidence_count") or 0)
-    should_invalidate = int(
-        evidence.get("should_invalidate_inherited_evidence_count")
-        if evidence.get("should_invalidate_inherited_evidence_count") is not None
-        else correctly_invalidated
+    required_evidence = _integer(
+        evidence.get("required_evidence_count"),
+        field="evidence_accounting.required_evidence_count",
+        errors=errors,
     )
+    retained_evidence = _integer(
+        evidence.get("valid_inherited_evidence_count"),
+        field="evidence_accounting.valid_inherited_evidence_count",
+        errors=errors,
+    )
+    correctly_invalidated = _integer(
+        evidence.get("invalidated_inherited_evidence_count"),
+        field="evidence_accounting.invalidated_inherited_evidence_count",
+        errors=errors,
+    )
+    unnecessary_invalidations = _integer(
+        evidence.get("unnecessarily_invalidated_evidence_count"),
+        field="evidence_accounting.unnecessarily_invalidated_evidence_count",
+        errors=errors,
+    )
+    should_invalidate_raw = evidence.get("should_invalidate_inherited_evidence_count")
+    should_invalidate = _integer(
+        should_invalidate_raw,
+        field="evidence_accounting.should_invalidate_inherited_evidence_count",
+        errors=errors,
+        default=correctly_invalidated,
+    )
+    assert required_evidence is not None
+    assert retained_evidence is not None
+    assert correctly_invalidated is not None
+    assert unnecessary_invalidations is not None
+    assert should_invalidate is not None
 
     if min(
         required_evidence,
@@ -232,7 +355,12 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
 
     effort = dict(out.get("effort_accounting") or {})
     baseline_hours_raw = effort.get("baseline_independent_build_hours")
-    baseline_hours = float(baseline_hours_raw) if baseline_hours_raw is not None else 0.0
+    baseline_hours = _number(
+        baseline_hours_raw,
+        field="effort_accounting.baseline_independent_build_hours",
+        errors=errors,
+    )
+    assert baseline_hours is not None
     baseline_type = effort.get("baseline_type")
     if baseline_hours_raw is not None and baseline_type not in {"measured", "estimated"}:
         errors.append("baseline_type_must_be_measured_or_estimated")
@@ -246,24 +374,39 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
         else:
             values: list[float] = []
             for key, raw in task_hours.items():
-                try:
-                    value = float(raw)
-                except (TypeError, ValueError):
-                    errors.append(f"invalid_task_hours:{key}")
-                    continue
+                value = _number(
+                    raw,
+                    field=f"task_hours:{key}",
+                    errors=errors,
+                    default=0.0,
+                )
+                assert value is not None
                 if value < 0:
                     errors.append(f"negative_task_hours:{key}")
                 values.append(value)
             computed_derivative_hours = sum(values)
             supplied = effort.get("derivative_engineering_hours")
-            if supplied is not None and abs(float(supplied) - computed_derivative_hours) > 1e-9:
-                errors.append("derivative_engineering_hours_disagrees_with_task_log")
+            if supplied is not None:
+                supplied_hours = _number(
+                    supplied,
+                    field="effort_accounting.derivative_engineering_hours",
+                    errors=errors,
+                    default=0.0,
+                )
+                assert supplied_hours is not None
+                if abs(supplied_hours - computed_derivative_hours) > 1e-9:
+                    errors.append("derivative_engineering_hours_disagrees_with_task_log")
             effort["derivative_engineering_hours"] = computed_derivative_hours
     else:
         warnings.append("derivative_hours_not_from_complete_task_log")
 
     derivative_hours_raw = effort.get("derivative_engineering_hours")
-    derivative_hours = float(derivative_hours_raw) if derivative_hours_raw is not None else 0.0
+    derivative_hours = _number(
+        derivative_hours_raw,
+        field="effort_accounting.derivative_engineering_hours",
+        errors=errors,
+    )
+    assert derivative_hours is not None
     if baseline_hours < 0 or derivative_hours < 0:
         errors.append("negative_effort_hours")
     marginal_engineering_ratio = _ratio(derivative_hours, baseline_hours)
@@ -271,9 +414,24 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     out["effort_accounting"] = effort
 
     physical = dict(out.get("physical_retest") or {})
-    blank_slate_tests = int(physical.get("blank_slate_test_count") or 0)
-    safely_reused = int(physical.get("tests_reused_or_safely_waived") or 0)
-    rerun = int(physical.get("tests_rerun") or 0)
+    blank_slate_tests = _integer(
+        physical.get("blank_slate_test_count"),
+        field="physical_retest.blank_slate_test_count",
+        errors=errors,
+    )
+    safely_reused = _integer(
+        physical.get("tests_reused_or_safely_waived"),
+        field="physical_retest.tests_reused_or_safely_waived",
+        errors=errors,
+    )
+    rerun = _integer(
+        physical.get("tests_rerun"),
+        field="physical_retest.tests_rerun",
+        errors=errors,
+    )
+    assert blank_slate_tests is not None
+    assert safely_reused is not None
+    assert rerun is not None
     if min(blank_slate_tests, safely_reused, rerun) < 0:
         errors.append("negative_physical_test_count")
     if safely_reused + rerun > blank_slate_tests:
@@ -283,17 +441,58 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     out["physical_retest"] = physical
 
     authority = dict(out.get("authority") or {})
-    authority_violations = int(authority.get("violations") or 0)
+    authority_violations = _integer(
+        authority.get("violations"),
+        field="authority.violations",
+        errors=errors,
+    )
+    assert authority_violations is not None
     if authority_violations < 0:
         errors.append("negative_authority_violation_count")
 
     gate = dict(out.get("hypothesis_gate") or {})
-    reuse_target = float(gate.get("engineering_reuse_ratio_target", 0.70))
-    evidence_target = float(gate.get("evidence_reuse_ratio_target", 0.65))
-    marginal_max = float(gate.get("marginal_engineering_ratio_max", 0.40))
-    invalidation_precision_target = float(gate.get("invalidation_precision_target", 0.95))
-    invalidation_recall_target = float(gate.get("invalidation_recall_target", 0.95))
-    authority_max = int(gate.get("authority_violations_max", 0))
+    reuse_target = _number(
+        gate.get("engineering_reuse_ratio_target", 0.70),
+        field="hypothesis_gate.engineering_reuse_ratio_target",
+        errors=errors,
+        default=0.70,
+    )
+    evidence_target = _number(
+        gate.get("evidence_reuse_ratio_target", 0.65),
+        field="hypothesis_gate.evidence_reuse_ratio_target",
+        errors=errors,
+        default=0.65,
+    )
+    marginal_max = _number(
+        gate.get("marginal_engineering_ratio_max", 0.40),
+        field="hypothesis_gate.marginal_engineering_ratio_max",
+        errors=errors,
+        default=0.40,
+    )
+    invalidation_precision_target = _number(
+        gate.get("invalidation_precision_target", 0.95),
+        field="hypothesis_gate.invalidation_precision_target",
+        errors=errors,
+        default=0.95,
+    )
+    invalidation_recall_target = _number(
+        gate.get("invalidation_recall_target", 0.95),
+        field="hypothesis_gate.invalidation_recall_target",
+        errors=errors,
+        default=0.95,
+    )
+    authority_max = _integer(
+        gate.get("authority_violations_max", 0),
+        field="hypothesis_gate.authority_violations_max",
+        errors=errors,
+        default=0,
+    )
+    assert reuse_target is not None
+    assert evidence_target is not None
+    assert marginal_max is not None
+    assert invalidation_precision_target is not None
+    assert invalidation_recall_target is not None
+    assert authority_max is not None
 
     required_metrics = {
         "engineering_reuse_ratio": engineering_reuse_ratio,
@@ -305,11 +504,16 @@ def evaluate_platform_derivative_evidence(record: Mapping[str, Any]) -> dict[str
     missing = sorted(name for name, value in required_metrics.items() if value is None)
 
     checks = {
-        "engineering_reuse_ratio": engineering_reuse_ratio is not None and engineering_reuse_ratio >= reuse_target,
-        "evidence_reuse_ratio": evidence_reuse_ratio is not None and evidence_reuse_ratio >= evidence_target,
-        "marginal_engineering_ratio": marginal_engineering_ratio is not None and marginal_engineering_ratio <= marginal_max,
-        "invalidation_precision": invalidation_precision is not None and invalidation_precision >= invalidation_precision_target,
-        "invalidation_recall": invalidation_recall is not None and invalidation_recall >= invalidation_recall_target,
+        "engineering_reuse_ratio": engineering_reuse_ratio is not None
+        and engineering_reuse_ratio >= reuse_target,
+        "evidence_reuse_ratio": evidence_reuse_ratio is not None
+        and evidence_reuse_ratio >= evidence_target,
+        "marginal_engineering_ratio": marginal_engineering_ratio is not None
+        and marginal_engineering_ratio <= marginal_max,
+        "invalidation_precision": invalidation_precision is not None
+        and invalidation_precision >= invalidation_precision_target,
+        "invalidation_recall": invalidation_recall is not None
+        and invalidation_recall >= invalidation_recall_target,
         "authority_violations": authority_violations <= authority_max,
     }
 
