@@ -3,8 +3,10 @@ name: Evidence Impact and Platform Reuse
 on:
   pull_request:
     paths:
+      - "src/hardware_splicer/capability_manifest.py"
       - "src/hardware_splicer/evidence_impact.py"
       - "src/hardware_splicer/platform_derivative_metrics.py"
+      - "tests/test_capability_manifest.py"
       - "tests/test_evidence_impact.py"
       - "tests/test_platform_derivative_metrics.py"
       - "scripts/evaluate_evidence_impact.py"
@@ -28,9 +30,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e . pytest
-      - name: Run selective-reuse tests
+      - name: Run capability/reuse tests
         run: |
-          pytest -q tests/test_evidence_impact.py tests/test_platform_derivative_metrics.py
+          pytest -q \
+            tests/test_capability_manifest.py \
+            tests/test_evidence_impact.py \
+            tests/test_platform_derivative_metrics.py
       - name: Persist controlled camera-substitution dry run
         run: |
           python scripts/evaluate_evidence_impact.py \
