@@ -1,7 +1,13 @@
 from __future__ import annotations
 
-from hardware_splicer.capability_manifest import diff_capability_manifests
+import pytest
+
+from hardware_splicer.capability_manifest import (
+    diff_capability_manifests,
+    project_capability_manifest,
+)
 from hardware_splicer.evidence_impact import evaluate_evidence_impact
+from hardware_splicer.machine_project import MachineProject
 
 
 def _manifest(revision: str, camera: str, camera_config: str) -> dict:
@@ -69,6 +75,49 @@ def _evidence_rows() -> list[dict]:
             "dependencies_complete": True,
         },
     ]
+
+
+def _machine_project(camera_part: str) -> MachineProject:
+    return MachineProject.model_validate(
+        {
+            "project_id": "vision-project",
+            "name": "Vision Core",
+            "purpose": "Embedded vision baseline",
+            "lifecycle_state": "verify",
+            "requested_release_state": "design_ready",
+            "subsystems": [
+                {
+                    "subsystem_id": "vision-electrical",
+                    "name": "Vision electrical",
+                    "domain": "electrical",
+                    "component_ids": ["camera"],
+                }
+            ],
+            "components": [
+                {
+                    "component_id": "camera",
+                    "name": "Camera sensor",
+                    "domain": "electrical",
+                    "subsystem_id": "vision-electrical",
+                    "source": "new",
+                    "part": {
+                        "manufacturer": "OmniVision",
+                        "manufacturer_part_number": camera_part,
+                    },
+                    "authority": "declared",
+                }
+            ],
+            "artifacts": [
+                {
+                    "artifact_id": "firmware",
+                    "kind": "firmware",
+                    "ref": "firmware.bin",
+                    "authority": "verified",
+                    "metadata": {"content_hash": "sha256:firmware"},
+                }
+            ],
+        }
+    )
 
 
 def test_camera_manifest_change_produces_selective_change_set() -> None:
@@ -162,3 +211,82 @@ def test_capability_id_mismatch_is_invalid() -> None:
 
     assert diff["status"] == "invalid"
     assert "capability_id_mismatch" in diff["validation_errors"]
+
+
+def test_machine_project_projection_binds_manifest_to_canonical_source_boundary() -> None:
+    project = _machine_project("OV2640")
+    manifest = project_capability_manifest(
+        project,
+        capability_id="vision-core",
+        revision="vision-a-r1",
+        project_revision="project-rev-7",
+        dependency_specs=[
+            {
+                "object_id": "camera",
+                "dependency_id": "component:camera:sensor_identity",
+                "kind": "component_identity",
+                "resolved": True,
+            }
+        ],
+    )
+
+    assert manifest["status"] == "machine_project_projection"
+    assert manifest["source_boundary"]["project_id"] == "vision-project"
+    assert manifest["source_boundary"]["project_revision"] == "project-rev-7"
+    assert manifest["source_boundary"]["project_artifact_hashes"] == {
+        "firmware": "sha256:firmware"
+    }
+    assert manifest["dependencies"][0]["source_object_id"] == "camera"
+    assert manifest["dependencies"][0]["value"]["part"]["manufacturer_part_number"] == "OV2640"
+    assert manifest["metadata"]["alternate_engineering_truth_store"] is False
+
+
+def test_machine_project_projection_diff_detects_canonical_component_change() -> None:
+    baseline = project_capability_manifest(
+        _machine_project("OV2640"),
+        capability_id="vision-core",
+        revision="a",
+        project_revision="project-a",
+        dependency_specs=[
+            {
+                "object_id": "camera",
+                "dependency_id": "component:camera:sensor_identity",
+                "resolved": True,
+            }
+        ],
+    )
+    candidate = project_capability_manifest(
+        _machine_project("OV3660"),
+        capability_id="vision-core",
+        revision="b",
+        project_revision="project-b",
+        dependency_specs=[
+            {
+                "object_id": "camera",
+                "dependency_id": "component:camera:sensor_identity",
+                "resolved": True,
+            }
+        ],
+    )
+
+    diff = diff_capability_manifests(baseline, candidate)
+
+    assert diff["status"] == "evaluated"
+    assert diff["changed_dependency_ids"] == ["component:camera:sensor_identity"]
+    assert diff["metadata"]["baseline_source_boundary_present"] is True
+    assert diff["metadata"]["candidate_source_boundary_present"] is True
+
+
+def test_machine_project_projection_requires_explicit_known_source_object() -> None:
+    project = _machine_project("OV2640")
+
+    with pytest.raises(ValueError, match="unknown MachineProject object"):
+        project_capability_manifest(
+            project,
+            capability_id="vision-core",
+            revision="a",
+            project_revision="project-a",
+            dependency_specs=[
+                {"object_id": "not-real", "dependency_id": "x", "resolved": True}
+            ],
+        )
