@@ -33,6 +33,7 @@
     "required_evidence_count": 0,
     "valid_inherited_evidence_count": 0,
     "invalidated_inherited_evidence_count": 0,
+    "should_invalidate_inherited_evidence_count": 0,
     "unnecessarily_invalidated_evidence_count": 0,
     "evidence_reuse_ratio": null,
     "invalidation_precision": null,
@@ -86,6 +87,9 @@
     "marginal_engineering_ratio_max": 0.40,
     "invalidation_precision_target": 0.95,
     "authority_violations_max": 0,
+    "computed_checks": {},
+    "missing_metrics": [],
+    "validation_errors": [],
     "result": "PENDING"
   },
   "notes": []
