@@ -33,6 +33,7 @@ def _record() -> dict:
             "evidence_reuse_ratio_target": 0.65,
             "marginal_engineering_ratio_max": 0.40,
             "invalidation_precision_target": 0.95,
+            "invalidation_recall_target": 0.95,
             "authority_violations_max": 0,
         },
     }
@@ -44,6 +45,8 @@ def test_platform_derivative_gate_passes_when_precommitted_targets_clear() -> No
     assert report["artifact_accounting"]["engineering_reuse_ratio"] == 0.8
     assert report["evidence_accounting"]["evidence_reuse_ratio"] == 0.7
     assert report["evidence_accounting"]["invalidation_precision"] == 1.0
+    assert report["evidence_accounting"]["invalidation_recall"] == 1.0
+    assert report["evidence_accounting"]["invalidation_f1"] == 1.0
     assert report["effort_accounting"]["marginal_engineering_ratio"] == 0.3
     assert report["physical_retest"]["physical_retest_compression"] == 0.6
     assert report["hypothesis_gate"]["result"] == "PASS"
@@ -60,6 +63,31 @@ def test_platform_derivative_gate_fails_on_weak_economics_without_rewriting_thre
     assert report["hypothesis_gate"]["result"] == "FAIL"
     assert report["hypothesis_gate"]["computed_checks"]["engineering_reuse_ratio"] is False
     assert report["hypothesis_gate"]["computed_checks"]["marginal_engineering_ratio"] is False
+
+
+def test_unnecessary_invalidation_reduces_precision_and_fails_gate() -> None:
+    record = _record()
+    record["evidence_accounting"]["unnecessarily_invalidated_evidence_count"] = 2
+
+    report = evaluate_platform_derivative_evidence(record)
+
+    assert report["evidence_accounting"]["invalidation_precision"] == 0.75
+    assert report["evidence_accounting"]["invalidation_recall"] == 1.0
+    assert report["hypothesis_gate"]["computed_checks"]["invalidation_precision"] is False
+    assert report["hypothesis_gate"]["result"] == "FAIL"
+
+
+def test_missed_required_invalidation_reduces_recall_and_fails_gate() -> None:
+    record = _record()
+    record["evidence_accounting"]["invalidated_inherited_evidence_count"] = 5
+    record["evidence_accounting"]["should_invalidate_inherited_evidence_count"] = 6
+
+    report = evaluate_platform_derivative_evidence(record)
+
+    assert report["evidence_accounting"]["invalidation_precision"] == 1.0
+    assert report["evidence_accounting"]["invalidation_recall"] == 5 / 6
+    assert report["hypothesis_gate"]["computed_checks"]["invalidation_recall"] is False
+    assert report["hypothesis_gate"]["result"] == "FAIL"
 
 
 def test_platform_derivative_gate_is_pending_when_required_denominators_are_missing() -> None:
