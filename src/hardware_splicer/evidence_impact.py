@@ -168,7 +168,6 @@ def evaluate_evidence_impact(case: Mapping[str, Any]) -> dict[str, Any]:
                 if not row["dependencies_complete"]:
                     next_reasons.append({"kind": "dependency_coverage_incomplete", "ids": []})
             else:
-                # If an evidence dependency has not resolved yet, defer this row.
                 unresolved_evidence_deps = [
                     dep for dep in deps if dep in evidence_ids and dep not in status
                 ]
@@ -184,7 +183,6 @@ def evaluate_evidence_impact(case: Mapping[str, Any]) -> dict[str, Any]:
         if not changed_any:
             break
 
-    # Acyclic graphs should always resolve. Keep a defensive fail-closed branch.
     unresolved_rows = sorted(evidence_ids - set(status))
     for evidence_id in unresolved_rows:
         status[evidence_id] = BLOCKED
@@ -230,10 +228,9 @@ def score_evidence_invalidation(
 ) -> dict[str, Any]:
     """Score predicted invalidations against an independently adjudicated set.
 
-    This scorer exists so the same engine that predicts impact cannot grade its
-    own dependency graph as correct by definition. Real platform experiments
-    should freeze the prediction first, then supply the outer-audited expected
-    invalidation set.
+    The predicted report and outer judgment must refer to the same explicit
+    evidence inventory. Unknown expected/adjudicated ids therefore invalidate the
+    scoring record rather than being silently discarded.
     """
 
     rows = [dict(row) for row in report.get("results") or [] if isinstance(row, Mapping)]
@@ -243,8 +240,26 @@ def score_evidence_invalidation(
         if adjudicated_evidence_ids is not None
         else set(known_ids)
     )
+    expected_raw = set(_unique_strings(expected_invalidated_evidence_ids))
     unknown_adjudicated = sorted(adjudicated - known_ids)
-    expected = set(_unique_strings(expected_invalidated_evidence_ids)) & adjudicated
+    unknown_expected = sorted(expected_raw - known_ids)
+    expected_outside_adjudication = sorted(expected_raw - adjudicated)
+    validation_errors: list[str] = []
+    if unknown_adjudicated:
+        validation_errors.append(
+            "adjudicated_unknown_evidence_ids:" + ",".join(unknown_adjudicated)
+        )
+    if unknown_expected:
+        validation_errors.append(
+            "expected_unknown_evidence_ids:" + ",".join(unknown_expected)
+        )
+    if expected_outside_adjudication and not unknown_expected:
+        validation_errors.append(
+            "expected_evidence_outside_adjudicated_scope:"
+            + ",".join(expected_outside_adjudication)
+        )
+
+    expected = expected_raw & adjudicated & known_ids
     predicted = {
         str(row["evidence_id"])
         for row in rows
@@ -262,12 +277,8 @@ def score_evidence_invalidation(
     true_negative = adjudicated - expected - predicted
 
     return {
-        "status": "invalid" if unknown_adjudicated else "scored",
-        "validation_errors": (
-            ["adjudicated_unknown_evidence_ids:" + ",".join(unknown_adjudicated)]
-            if unknown_adjudicated
-            else []
-        ),
+        "status": "invalid" if validation_errors else "scored",
+        "validation_errors": validation_errors,
         "adjudicated_count": len(adjudicated),
         "predicted_invalidated_count": len(predicted),
         "expected_invalidated_count": len(expected),
