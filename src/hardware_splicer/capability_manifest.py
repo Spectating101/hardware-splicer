@@ -8,6 +8,10 @@ The diff is intentionally syntactic over canonical persisted dependency payloads
 It does not ask an LLM whether two parts are 'basically equivalent'. If callers
 want to preserve evidence across a replacement they must represent the stable
 contract explicitly and separately from the changed implementation identity.
+
+Where a Hardware-Splicer ``MachineProject`` already exists, use
+``project_capability_manifest`` so the manifest is a revision-bound projection of
+canonical project objects rather than a second independently edited truth store.
 """
 
 from __future__ import annotations
@@ -15,10 +19,24 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
+
+from .machine_project import MachineProject
 
 CAPABILITY_MANIFEST_SCHEMA = "hardware_splicer.capability_manifest.v1"
 CAPABILITY_DIFF_SCHEMA = "hardware_splicer.capability_manifest_diff.v1"
+
+_PROJECT_COLLECTIONS: tuple[tuple[str, str], ...] = (
+    ("requirements", "requirement_id"),
+    ("functions", "function_id"),
+    ("subsystems", "subsystem_id"),
+    ("components", "component_id"),
+    ("interfaces", "interface_id"),
+    ("constraints", "constraint_id"),
+    ("verifications", "verification_id"),
+    ("evidence", "evidence_id"),
+    ("artifacts", "artifact_id"),
+)
 
 
 def _canonical(value: Any) -> str:
@@ -63,6 +81,106 @@ def _dependency_rows(manifest: Mapping[str, Any]) -> tuple[dict[str, dict[str, A
     return by_id, errors
 
 
+def _project_object_index(project: MachineProject) -> dict[str, tuple[str, Any]]:
+    index: dict[str, tuple[str, Any]] = {project.project_id: ("project", project)}
+    for collection_name, field_name in _PROJECT_COLLECTIONS:
+        for row in getattr(project, collection_name):
+            index[str(getattr(row, field_name))] = (collection_name, row)
+    return index
+
+
+def _project_artifact_hashes(project: MachineProject) -> dict[str, str]:
+    hashes: dict[str, str] = {}
+    for artifact in project.artifacts:
+        content_hash = artifact.metadata.get("content_hash")
+        if content_hash:
+            hashes[artifact.artifact_id] = str(content_hash)
+    return hashes
+
+
+def project_capability_manifest(
+    project: MachineProject,
+    *,
+    capability_id: str,
+    revision: str,
+    project_revision: str,
+    dependency_specs: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Project explicit canonical MachineProject objects into a capability manifest.
+
+    ``dependency_specs`` deliberately requires callers to select the source object
+    and declare whether dependency coverage is resolved. The adapter copies the
+    engineering value from MachineProject; it does not infer semantic equivalence,
+    choose hidden dependencies, or upgrade authority.
+    """
+
+    if not str(capability_id).strip():
+        raise ValueError("capability_id is required")
+    if not str(revision).strip():
+        raise ValueError("revision is required")
+    if not str(project_revision).strip():
+        raise ValueError("project_revision is required")
+
+    index = _project_object_index(project)
+    dependencies: list[dict[str, Any]] = []
+    selected_object_ids: list[str] = []
+    seen_dependency_ids: set[str] = set()
+
+    for position, raw_spec in enumerate(dependency_specs):
+        spec = dict(raw_spec)
+        object_id = str(spec.get("object_id") or "").strip()
+        if not object_id:
+            raise ValueError(f"dependency_specs[{position}] has no object_id")
+        if object_id not in index:
+            raise ValueError(f"dependency_specs[{position}] references unknown MachineProject object {object_id!r}")
+        dependency_id = str(spec.get("dependency_id") or f"machine:{object_id}").strip()
+        if dependency_id in seen_dependency_ids:
+            raise ValueError(f"duplicate dependency_id {dependency_id!r}")
+        seen_dependency_ids.add(dependency_id)
+
+        collection_name, source_object = index[object_id]
+        source_payload = source_object.model_dump(mode="json")
+        authority = source_payload.get("authority")
+        dependencies.append(
+            {
+                "dependency_id": dependency_id,
+                "kind": str(spec.get("kind") or f"machine_project:{collection_name}"),
+                "resolved": spec.get("resolved") is True,
+                "authority": authority,
+                "value": source_payload,
+                "source_object_id": object_id,
+                "source_collection": collection_name,
+                "source_refs": [
+                    f"machine_project:{project.project_id}@{project_revision}:{object_id}"
+                ],
+                "notes": spec.get("notes"),
+            }
+        )
+        selected_object_ids.append(object_id)
+
+    return {
+        "schema_version": CAPABILITY_MANIFEST_SCHEMA,
+        "capability_id": str(capability_id),
+        "revision": str(revision),
+        "status": "machine_project_projection",
+        "source_boundary": {
+            "project_id": project.project_id,
+            "project_revision": str(project_revision),
+            "machine_project_schema": project.schema_version,
+            "lifecycle_state": project.lifecycle_state.value,
+            "requested_release_state": project.requested_release_state.value,
+            "selected_object_ids": selected_object_ids,
+            "project_artifact_hashes": _project_artifact_hashes(project),
+        },
+        "dependencies": dependencies,
+        "metadata": {
+            "alternate_engineering_truth_store": False,
+            "projection_only": True,
+            "semantic_equivalence_inferred": False,
+        },
+    }
+
+
 def validate_capability_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
     """Validate the minimum identity/revision/dependency contract."""
 
@@ -83,6 +201,7 @@ def validate_capability_manifest(manifest: Mapping[str, Any]) -> dict[str, Any]:
         "capability_id": capability_id,
         "revision": revision,
         "dependency_count": len(dependencies),
+        "source_boundary_present": isinstance(manifest.get("source_boundary"), Mapping),
         "unresolved_dependency_ids": sorted(
             dependency_id
             for dependency_id, row in dependencies.items()
@@ -165,5 +284,7 @@ def diff_capability_manifests(
         "metadata": {
             "semantic_equivalence_inferred": False,
             "identity_or_contract_change_requires_explicit_representation": True,
+            "baseline_source_boundary_present": baseline_check["source_boundary_present"],
+            "candidate_source_boundary_present": candidate_check["source_boundary_present"],
         },
     }
