@@ -1,0 +1,142 @@
+{
+  "schema_version": "hardware_splicer.capability_manifest.v1",
+  "capability_id": "vision-core",
+  "revision": "vision-a-candidate-2026-08-17-r1",
+  "status": "candidate_not_physically_validated",
+  "captured_at": "2026-08-17T01:45:00+08:00",
+  "dependencies": [
+    {
+      "dependency_id": "product:vision-board:model",
+      "kind": "product_identity",
+      "resolved": true,
+      "authority": "manufacturer_declared_product_line",
+      "value": "Seeed Studio XIAO ESP32-S3 Sense",
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"]
+    },
+    {
+      "dependency_id": "component:mcu:identity",
+      "kind": "component_identity",
+      "resolved": true,
+      "authority": "manufacturer_declared_product_line",
+      "value": "ESP32-S3R8",
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"]
+    },
+    {
+      "dependency_id": "resource:memory:product_line",
+      "kind": "resource_contract",
+      "resolved": true,
+      "authority": "manufacturer_declared_product_line",
+      "value": {"psram_mb": 8, "flash_mb": 8},
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"]
+    },
+    {
+      "dependency_id": "component:camera:product_line_identity",
+      "kind": "component_identity",
+      "resolved": true,
+      "authority": "manufacturer_declared_current_product_line",
+      "value": "OV3660",
+      "source_refs": [
+        "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/",
+        "https://github.com/espressif/esp32-camera/releases/tag/v2.1.4"
+      ]
+    },
+    {
+      "dependency_id": "component:camera:physical_unit_identity",
+      "kind": "component_identity",
+      "resolved": false,
+      "authority": "unresolved_until_physical_inspection",
+      "value": null,
+      "notes": "Do not promote current product-line documentation into the identity of an acquired physical unit. Old-stock OV2640 units may exist."
+    },
+    {
+      "dependency_id": "interface:camera:gpio_contract",
+      "kind": "interface_contract",
+      "resolved": true,
+      "authority": "manufacturer_and_upstream_declared",
+      "value": {
+        "xclk": 10,
+        "sccb_sda": 40,
+        "sccb_scl": 39,
+        "d7_y9": 48,
+        "d6_y8": 11,
+        "d5_y7": 12,
+        "d4_y6": 14,
+        "d3_y5": 16,
+        "d2_y4": 18,
+        "d1_y3": 17,
+        "d0_y2": 15,
+        "vsync": 38,
+        "href": 47,
+        "pclk": 13,
+        "pwdn": -1,
+        "reset": -1
+      },
+      "source_refs": [
+        "https://github.com/Seeed-Studio/wiki-documents/blob/docusaurus-version/sites/en/docs/Sensor/SeeedStudio_XIAO/SeeedStudio_XIAO_ESP32S3/XIAO_ESP32S3_Getting_Started.md",
+        "https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/Camera/CameraWebServer/camera_pins.h"
+      ]
+    },
+    {
+      "dependency_id": "software:camera:xclk_profile",
+      "kind": "software_configuration",
+      "resolved": true,
+      "authority": "manufacturer_example_configuration",
+      "value": {"xclk_hz": 20000000},
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_camera_usage/"]
+    },
+    {
+      "dependency_id": "software:camera:driver_release",
+      "kind": "software_dependency",
+      "resolved": true,
+      "authority": "upstream_release",
+      "value": {
+        "repository": "espressif/esp32-camera",
+        "candidate_release": "v2.1.7",
+        "xiao_ov3660_support_introduced": "v2.1.4"
+      },
+      "source_refs": ["https://github.com/espressif/esp32-camera/releases"]
+    },
+    {
+      "dependency_id": "interface:wifi:radio_product_line",
+      "kind": "interface_contract",
+      "resolved": true,
+      "authority": "manufacturer_declared_product_line",
+      "value": {"wifi_ghz": 2.4, "ble": "5.0"},
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"]
+    },
+    {
+      "dependency_id": "resource:sd:product_line",
+      "kind": "storage_contract",
+      "resolved": true,
+      "authority": "manufacturer_declared_product_line",
+      "value": {"onboard_slot": true, "documented_fat_capacity_gb": 32},
+      "source_refs": ["https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/"]
+    },
+    {
+      "dependency_id": "condition:illumination:baseline",
+      "kind": "test_condition",
+      "resolved": false,
+      "authority": "experiment_not_yet_frozen",
+      "value": null
+    },
+    {
+      "dependency_id": "mechanical:camera_mount:baseline",
+      "kind": "mechanical_contract",
+      "resolved": false,
+      "authority": "experiment_not_yet_frozen",
+      "value": null
+    },
+    {
+      "dependency_id": "software:model_pipeline:baseline",
+      "kind": "ml_pipeline_contract",
+      "resolved": false,
+      "authority": "experiment_not_yet_frozen",
+      "value": null
+    }
+  ],
+  "notes": [
+    "This is a procurement/development candidate manifest, not a validated capability manifest.",
+    "Manufacturer/upstream declarations can seed engineering work but do not establish physical-unit identity, optical performance, ML accuracy, or power-on authority.",
+    "The baseline becomes eligible for derivative reuse accounting only after unresolved experiment dependencies are frozen and physical evidence is attached to the exact acquired unit/revision."
+  ]
+}
