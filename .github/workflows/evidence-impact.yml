@@ -46,6 +46,27 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e . pytest
+      - name: Diagnose canonical capability route composition
+        run: |
+          python - <<'PY'
+          import hardware_splicer.product_api as product_api
+          from hardware_splicer.capability_reuse_api import create_capability_reuse_router
+
+          direct_paths = sorted(
+              str(getattr(route, "path", ""))
+              for route in create_capability_reuse_router().routes
+          )
+          composed_paths = sorted(
+              str(getattr(route, "path", ""))
+              for route in product_api.create_product_app().routes
+              if "/v1/capabilities" in str(getattr(route, "path", ""))
+          )
+          print("product_api_file=", product_api.__file__)
+          print("direct_capability_paths=", direct_paths)
+          print("composed_capability_paths=", composed_paths)
+          if "/v1/capabilities/freeze" not in composed_paths:
+              raise SystemExit("canonical product app omitted capability reuse routes")
+          PY
       - name: Run capability/reuse tests
         run: |
           pytest -q \
