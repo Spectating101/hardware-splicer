@@ -84,6 +84,47 @@ def _evidence() -> list[dict]:
     ]
 
 
+def _economics_record() -> dict:
+    return {
+        "schema_version": "hardware_splicer.derivative_economics.v1",
+        "currency": "TWD",
+        "labor_rate_per_hour": 500,
+        "comparison": {
+            "mode": "parallel_cleanroom",
+            "baseline_requirements_hash": "sha256:req",
+            "reuse_requirements_hash": "sha256:req",
+            "baseline_exit_criteria_hash": "sha256:exit",
+            "reuse_exit_criteria_hash": "sha256:exit",
+            "inputs_frozen_before_execution": True,
+            "reuse_result_hidden_from_baseline": True,
+            "baseline_private_reuse_assets_excluded": True,
+            "intervention_log_complete": True,
+            "same_measurement_policy": True,
+        },
+        "baseline": {
+            "completion_state": "completed",
+            "human_active_hours": 20,
+            "elapsed_hours": 30,
+            "model_tool_cost": 1000,
+            "external_service_cost": 500,
+            "development_consumables_cost": 1500,
+            "physical_retest_hours": 8,
+            "authority_violations": 0,
+        },
+        "reuse": {
+            "completion_state": "completed",
+            "human_active_hours": 6,
+            "elapsed_hours": 12,
+            "model_tool_cost": 700,
+            "external_service_cost": 200,
+            "development_consumables_cost": 900,
+            "physical_retest_hours": 3,
+            "authority_violations": 0,
+        },
+        "hypothesis_gate": {},
+    }
+
+
 def test_freeze_endpoint_projects_canonical_machine_project() -> None:
     response = _client().post(
         "/v1/capabilities/freeze",
@@ -207,6 +248,20 @@ def test_derivative_metrics_endpoint_does_not_upgrade_physical_authority() -> No
     assert report["metadata"]["automatic_authorization"] is False
 
 
+def test_derivative_economics_endpoint_evaluates_cleanroom_comparator_only() -> None:
+    response = _client().post(
+        "/v1/capabilities/derivative-economics",
+        json={"record": _economics_record()},
+    )
+
+    assert response.status_code == 200
+    report = response.json()
+    assert report["hypothesis_gate"]["result"] == "PASS"
+    assert report["metrics"]["human_intervention_ratio"] == 0.3
+    assert report["metadata"]["production_unit_economics_proven"] is False
+    assert report["metadata"]["physical_authority_granted"] is False
+
+
 def test_routes_are_mounted_on_canonical_product_app() -> None:
     paths = {getattr(route, "path", None) for route in create_product_app().routes}
 
@@ -214,3 +269,4 @@ def test_routes_are_mounted_on_canonical_product_app() -> None:
     assert "/v1/capabilities/derive" in paths
     assert "/v1/capabilities/derive/adjudicate" in paths
     assert "/v1/capabilities/derivative-metrics" in paths
+    assert "/v1/capabilities/derivative-economics" in paths
