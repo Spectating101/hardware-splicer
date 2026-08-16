@@ -42,6 +42,26 @@ def _number(value: Any, *, field: str, errors: list[str]) -> float | None:
     return number
 
 
+def _integer(value: Any, *, field: str, errors: list[str]) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        errors.append(f"invalid_integer:{field}")
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        errors.append(f"invalid_integer:{field}")
+        return None
+    if not number.is_integer():
+        errors.append(f"invalid_integer:{field}")
+        return None
+    integer = int(number)
+    if integer < 0:
+        errors.append(f"negative_value:{field}")
+    return integer
+
+
 def _labor_rate_sensitivity(
     *,
     baseline_hours: float | None,
@@ -180,9 +200,21 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
     )
 
     gate = dict(out.get("hypothesis_gate") or {})
-    human_max = float(gate.get("human_intervention_ratio_max", 0.40))
-    cost_max = float(gate.get("development_variable_cost_ratio_max", 0.50))
-    authority_max = int(gate.get("authority_violations_max", 0))
+    human_max = _number(
+        gate.get("human_intervention_ratio_max", 0.40),
+        field="hypothesis_gate.human_intervention_ratio_max",
+        errors=errors,
+    )
+    cost_max = _number(
+        gate.get("development_variable_cost_ratio_max", 0.50),
+        field="hypothesis_gate.development_variable_cost_ratio_max",
+        errors=errors,
+    )
+    authority_max = _integer(
+        gate.get("authority_violations_max", 0),
+        field="hypothesis_gate.authority_violations_max",
+        errors=errors,
+    )
 
     blockers: list[str] = []
     if not baseline_req or not reuse_req:
@@ -230,18 +262,37 @@ def evaluate_derivative_economics(record: Mapping[str, Any]) -> dict[str, Any]:
     )
     if not authority_present:
         blockers.append("authority_violation_counts_required")
-    baseline_authority = int(baseline.get("authority_violations") or 0)
-    reuse_authority = int(reuse.get("authority_violations") or 0)
-    if baseline_authority < 0 or reuse_authority < 0:
-        errors.append("negative_authority_violation_count")
+    baseline_authority = (
+        _integer(
+            baseline.get("authority_violations"),
+            field="baseline.authority_violations",
+            errors=errors,
+        )
+        if "authority_violations" in baseline
+        else None
+    )
+    reuse_authority = (
+        _integer(
+            reuse.get("authority_violations"),
+            field="reuse.authority_violations",
+            errors=errors,
+        )
+        if "authority_violations" in reuse
+        else None
+    )
 
     checks = {
         "both_paths_reached_exit": baseline_state == "completed" and reuse_state == "completed",
         "human_intervention_ratio": metrics["human_intervention_ratio"] is not None
+        and human_max is not None
         and metrics["human_intervention_ratio"] <= human_max,
         "development_variable_cost_ratio": metrics["development_variable_cost_ratio"] is not None
+        and cost_max is not None
         and metrics["development_variable_cost_ratio"] <= cost_max,
         "authority_violations": authority_present
+        and baseline_authority is not None
+        and reuse_authority is not None
+        and authority_max is not None
         and baseline_authority <= authority_max
         and reuse_authority <= authority_max,
     }
