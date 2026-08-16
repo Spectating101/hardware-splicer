@@ -1,0 +1,126 @@
+{
+  "case_id": "vision-camera-manifest-derivative-dry-run-v1",
+  "claim_ceiling": "deterministic_fixture_only",
+  "baseline_manifest": {
+    "schema_version": "hardware_splicer.capability_manifest.v1",
+    "capability_id": "vision-core",
+    "revision": "fixture-ov2640-r1",
+    "dependencies": [
+      {
+        "dependency_id": "component:camera:sensor_identity",
+        "kind": "component_identity",
+        "resolved": true,
+        "value": "OV2640",
+        "source_refs": ["https://github.com/espressif/esp32-camera"]
+      },
+      {
+        "dependency_id": "interface:camera:sensor_configuration",
+        "kind": "interface_contract",
+        "resolved": true,
+        "value": {"sensor_family": "OV2640", "configuration_profile": "fixture-ov2640"}
+      },
+      {
+        "dependency_id": "interface:wifi:config_api:v1",
+        "kind": "interface_contract",
+        "resolved": true,
+        "value": {"api": "vision-config-v1"}
+      },
+      {
+        "dependency_id": "mechanical:base:mount_pattern:v1",
+        "kind": "mechanical_contract",
+        "resolved": true,
+        "value": {"pattern": "vision-base-v1"}
+      }
+    ]
+  },
+  "candidate_manifest": {
+    "schema_version": "hardware_splicer.capability_manifest.v1",
+    "capability_id": "vision-core",
+    "revision": "fixture-ov3660-r1",
+    "dependencies": [
+      {
+        "dependency_id": "component:camera:sensor_identity",
+        "kind": "component_identity",
+        "resolved": true,
+        "value": "OV3660",
+        "source_refs": [
+          "https://github.com/espressif/esp32-camera",
+          "https://github.com/espressif/esp32-camera/releases/tag/v2.1.4"
+        ]
+      },
+      {
+        "dependency_id": "interface:camera:sensor_configuration",
+        "kind": "interface_contract",
+        "resolved": true,
+        "value": {"sensor_family": "OV3660", "configuration_profile": "fixture-ov3660"}
+      },
+      {
+        "dependency_id": "interface:wifi:config_api:v1",
+        "kind": "interface_contract",
+        "resolved": true,
+        "value": {"api": "vision-config-v1"}
+      },
+      {
+        "dependency_id": "mechanical:base:mount_pattern:v1",
+        "kind": "mechanical_contract",
+        "resolved": true,
+        "value": {"pattern": "vision-base-v1"}
+      }
+    ]
+  },
+  "inherited_evidence_items": [
+    {
+      "evidence_id": "ev-camera-identity",
+      "depends_on": ["component:camera:sensor_identity"],
+      "dependencies_complete": true
+    },
+    {
+      "evidence_id": "ev-camera-driver-config",
+      "depends_on": [
+        "ev-camera-identity",
+        "interface:camera:sensor_configuration"
+      ],
+      "dependencies_complete": true
+    },
+    {
+      "evidence_id": "ev-optical-benchmark",
+      "depends_on": [
+        "ev-camera-driver-config",
+        "condition:lighting:baseline",
+        "condition:lens_mount:baseline"
+      ],
+      "dependencies_complete": true
+    },
+    {
+      "evidence_id": "ev-model-accuracy",
+      "depends_on": ["ev-optical-benchmark", "dataset:vision-a:v1"],
+      "dependencies_complete": true
+    },
+    {
+      "evidence_id": "ev-wifi-api-contract",
+      "depends_on": ["interface:wifi:config_api:v1"],
+      "dependencies_complete": true
+    },
+    {
+      "evidence_id": "ev-enclosure-base",
+      "depends_on": ["mechanical:base:mount_pattern:v1"],
+      "dependencies_complete": true
+    }
+  ],
+  "adjudication": {
+    "kind": "synthetic_precommitted_fixture",
+    "independent": false,
+    "adjudicator": "deterministic-fixture-author",
+    "adjudication_basis": "The fixture intentionally changes only camera identity/configuration while preserving Wi-Fi API and base mount contracts.",
+    "expected_invalidated_evidence_ids": [
+      "ev-camera-identity",
+      "ev-camera-driver-config",
+      "ev-optical-benchmark",
+      "ev-model-accuracy"
+    ]
+  },
+  "notes": [
+    "OV2640/OV3660 names are used to make the fixture realistic; this is not evidence that any local physical board has either sensor.",
+    "The synthetic adjudication proves prediction-freeze/scoring plumbing only and must not be counted as independent or physical validation."
+  ]
+}
