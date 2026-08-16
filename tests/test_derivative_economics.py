@@ -124,6 +124,27 @@ def test_authority_violation_fails_economic_gate() -> None:
     assert report["hypothesis_gate"]["computed_checks"]["authority_violations"] is False
 
 
+def test_missing_authority_accounting_stays_pending_instead_of_assuming_zero() -> None:
+    record = _record()
+    del record["reuse"]["authority_violations"]
+
+    report = evaluate_derivative_economics(record)
+
+    assert report["hypothesis_gate"]["result"] == "PENDING"
+    assert "authority_violation_counts_required" in report["hypothesis_gate"]["proof_blockers"]
+    assert report["hypothesis_gate"]["computed_checks"]["authority_violations"] is False
+
+
+def test_zero_labor_rate_cannot_earn_proof_grade_economic_pass() -> None:
+    record = _record()
+    record["labor_rate_per_hour"] = 0
+
+    report = evaluate_derivative_economics(record)
+
+    assert report["hypothesis_gate"]["result"] == "PENDING"
+    assert "positive_labor_rate_required" in report["hypothesis_gate"]["proof_blockers"]
+
+
 def test_negative_cost_is_invalid() -> None:
     record = _record()
     record["reuse"]["model_tool_cost"] = -1
