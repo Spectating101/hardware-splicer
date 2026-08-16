@@ -3,10 +3,13 @@ name: Evidence Impact and Platform Reuse
 on:
   pull_request:
     paths:
+      - "pyproject.toml"
+      - "src/hardware_splicer/cli_entry.py"
       - "src/hardware_splicer/capability_manifest.py"
       - "src/hardware_splicer/derivative_reuse.py"
       - "src/hardware_splicer/evidence_impact.py"
       - "src/hardware_splicer/platform_derivative_metrics.py"
+      - "tests/test_cli_derive.py"
       - "tests/test_capability_manifest.py"
       - "tests/test_derivative_reuse.py"
       - "tests/test_evidence_impact.py"
@@ -36,10 +39,13 @@ jobs:
       - name: Run capability/reuse tests
         run: |
           pytest -q \
+            tests/test_cli_derive.py \
             tests/test_capability_manifest.py \
             tests/test_derivative_reuse.py \
             tests/test_evidence_impact.py \
             tests/test_platform_derivative_metrics.py
+      - name: Verify installed derivative planner
+        run: hs-derive --help
       - name: Persist controlled dependency-impact dry run
         run: |
           python scripts/evaluate_evidence_impact.py \
