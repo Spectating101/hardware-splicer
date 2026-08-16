@@ -66,7 +66,12 @@ def _dependency_rows(manifest: Mapping[str, Any]) -> tuple[dict[str, dict[str, A
         if dependency_id in by_id:
             errors.append(f"duplicate_dependency_id:{dependency_id}")
             continue
-        resolved = row.get("resolved") is not False
+        raw_resolved = row.get("resolved")
+        if not isinstance(raw_resolved, bool):
+            errors.append(f"dependency_{index}_resolved_must_be_boolean")
+            resolved = False
+        else:
+            resolved = raw_resolved
         row["dependency_id"] = dependency_id
         row["resolved"] = resolved
         semantic = {
