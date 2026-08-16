@@ -138,8 +138,6 @@ def test_outer_adjudication_scores_false_positive_and_false_negative() -> None:
             "ev-camera-identity",
             "ev-camera-driver-config",
             "ev-optical-benchmark",
-            # Outer audit says model accuracy did not actually depend on the changed camera,
-            # and says enclosure evidence should have been invalidated due a missed mount dependency.
             "ev-enclosure-base",
         },
     )
@@ -163,3 +161,30 @@ def test_unknown_adjudication_id_is_invalid() -> None:
 
     assert score["status"] == "invalid"
     assert score["validation_errors"] == ["adjudicated_unknown_evidence_ids:ev-does-not-exist"]
+
+
+def test_unknown_expected_invalidation_is_invalid_instead_of_silently_dropped() -> None:
+    report = evaluate_evidence_impact(_vision_camera_case())
+
+    score = score_evidence_invalidation(
+        report,
+        expected_invalidated_evidence_ids=["ev-camera-identity", "ev-does-not-exist"],
+    )
+
+    assert score["status"] == "invalid"
+    assert score["validation_errors"] == ["expected_unknown_evidence_ids:ev-does-not-exist"]
+
+
+def test_expected_invalidation_outside_explicit_adjudication_scope_is_invalid() -> None:
+    report = evaluate_evidence_impact(_vision_camera_case())
+
+    score = score_evidence_invalidation(
+        report,
+        expected_invalidated_evidence_ids=["ev-camera-identity", "ev-optical-benchmark"],
+        adjudicated_evidence_ids=["ev-camera-identity", "ev-wifi-api-contract"],
+    )
+
+    assert score["status"] == "invalid"
+    assert score["validation_errors"] == [
+        "expected_evidence_outside_adjudicated_scope:ev-optical-benchmark"
+    ]
