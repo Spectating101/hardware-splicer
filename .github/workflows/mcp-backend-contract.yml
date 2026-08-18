@@ -1,0 +1,50 @@
+name: Canonical MCP Backend Contract
+
+on:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "src/hardware_splicer/backend_mcp_server.py"
+      - "src/hardware_splicer/mcp_backend_gateway.py"
+      - "src/hardware_splicer/product_api.py"
+      - "src/hardware_splicer/**/*_api.py"
+      - "tests/test_mcp_backend_gateway.py"
+      - "scripts/smoke_backend_mcp_stdio.py"
+      - ".github/workflows/mcp-backend-contract.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: canonical-mcp-backend-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-backend-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package, tests, and MCP SDK
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,mcp]'
+      - name: Verify OpenAPI-to-MCP coverage and in-process dispatch
+        run: pytest -q tests/test_mcp_backend_gateway.py
+      - name: Exercise a real MCP stdio client session
+        run: python scripts/smoke_backend_mcp_stdio.py
+      - name: Verify installed canonical MCP entrypoint
+        run: |
+          command -v hs-backend-mcp
+          python - <<'PY'
+          from hardware_splicer.mcp_backend_gateway import backend_contract
+          contract = backend_contract()
+          assert contract["operation_count"] > 0
+          assert contract["authority_contract"]["mcp_grants_physical_authority"] is False
+          print(contract)
+          PY
