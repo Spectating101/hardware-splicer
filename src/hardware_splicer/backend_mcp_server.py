@@ -39,8 +39,10 @@ from .mcp_backend_gateway import (
     dispatch_operation,
     filtered_operations,
 )
+from .product_api import create_product_app
 
 app = Server("hardware-splicer-canonical-backend")
+_product_app = create_product_app()
 
 
 def _result(payload: Any) -> list[TextContent]:
@@ -101,9 +103,9 @@ async def list_tools() -> list[Tool]:
             name="hs_backend_call",
             description=(
                 "Invoke one canonical backend operation by OpenAPI operation_id through the same "
-                "in-process FastAPI handlers used by the product. Supports path/query/JSON and "
-                "multipart form+base64 file input. This is not an arbitrary HTTP proxy and does not "
-                "grant fabrication, flashing, power, motion, operation, release, or other physical authority."
+                "stateful in-process FastAPI handlers used by the product. Supports path/query/JSON "
+                "and multipart form+base64 file input. This is not an arbitrary HTTP proxy and does "
+                "not grant fabrication, flashing, power, motion, operation, release, or other physical authority."
             ),
             inputSchema={
                 "type": "object",
@@ -148,7 +150,7 @@ async def list_tools() -> list[Tool]:
 async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextContent]:
     args = dict(arguments or {})
     if name == "hs_backend_status":
-        return _result(backend_contract())
+        return _result(backend_contract(_product_app))
 
     if name == "hs_backend_list_operations":
         offset = int(args.pop("offset", 0) or 0)
@@ -162,6 +164,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
             tag=args.get("tag"),
             path_prefix=args.get("path_prefix"),
             text=args.get("text"),
+            app=_product_app,
         )
         return _result(
             {
@@ -176,7 +179,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
         operation_id = args.get("operation_id")
         if not isinstance(operation_id, str) or not operation_id:
             raise ValueError("operation_id is required")
-        return _result(describe_operation(operation_id))
+        return _result(describe_operation(operation_id, _product_app))
 
     if name == "hs_backend_call":
         operation_id = args.get("operation_id")
@@ -190,6 +193,7 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextCon
             form=args.get("form"),
             files=args.get("files"),
             response_mode=args.get("response_mode", "auto"),
+            app=_product_app,
         )
         return _result(payload)
 
