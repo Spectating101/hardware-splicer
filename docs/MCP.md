@@ -1,14 +1,33 @@
 # Hardware-Splicer MCP / Agent SDK
 
-Expose the **compile engine** (not the legacy Circuit-AI generative stubs) to any MCP-capable model: Cursor, Claude Desktop, custom agents.
+Hardware-Splicer currently has two MCP-facing concepts. Do not confuse them.
 
-## What agents get
+## Recommended: canonical whole-backend MCP
+
+Use **`hs-backend-mcp`** when the goal is to let an arbitrary MCP agent discover and exercise the same canonical backend used by the Hardware-Splicer product.
+
+It derives its operation catalog from `hardware_splicer.product_api` OpenAPI, so durable project state, source ingestion/storage/parsing, AI orchestration/repair, source-blind cleanroom evaluation, capability reuse/economics, manufacturing/mechanical closure, status/revision/review, physical-evidence surfaces, and the older engine routes stay mechanically discoverable without maintaining a second list of wrappers.
+
+Start here: [`MCP_CANONICAL_BACKEND.md`](MCP_CANONICAL_BACKEND.md)
+
+```bash
+python -m pip install -e '.[mcp]'
+hs-backend-mcp
+```
+
+The canonical MCP gateway is authority-neutral: it re-enters the same FastAPI handlers and cannot bypass revision, evidence, deterministic-verification, physical-evidence, or human-authorization requirements.
+
+## Compatibility: historical compile-engine MCP
+
+The older **`hs-mcp`** / `hardware_splicer.mcp_server` surface exposes the compile/salvage engine directly through `hardware_splicer.sdk`. It remains useful for compatibility and focused engine workflows, but it must not be treated as a complete map of the current product backend.
+
+### What the historical engine surface exposes
 
 | Capability | Tool / API |
 |------------|------------|
-| **Agent handoff (start here)** | [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md) |
+| **Agent handoff** | [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md) |
 | Donor splice + carrier compile | `hs_splice_build` / `POST /v1/splice-and-build` |
-| S3 golden loop (one-shot) | `hs_splice_golden_loop` / `POST /v1/splice-golden-loop` |
+| S3 golden loop (one-shot compatibility surface) | `hs_splice_golden_loop` / `POST /v1/splice-golden-loop` |
 | S3 bench gate status | `hs_splice_bench_status` / `POST /v1/splice-bench/status` |
 | S3 bench measurements | `hs_splice_bench_submit` / `POST /v1/splice-bench/submit` |
 | Donor board → functional_salvage | `hs_donor_board_vision` / `POST /v1/donor-board-vision` |
@@ -18,7 +37,7 @@ Expose the **compile engine** (not the legacy Circuit-AI generative stubs) to an
 | Vision inventory | `hs_vision_capabilities` / `GET /v1/vision/capabilities` |
 | Fab package review | `hs_inspect_fab` |
 | Junk-drawer parts → module IDs | `hs_resolve_parts` |
-| Salvage plan (fast, no KiCad) | `hs_plan_salvage` |
+| Salvage plan | `hs_plan_salvage` |
 | NL / modules / canvas → PCB | `hs_compose` |
 | Full salvage bring-up + report | `hs_salvage_bringup` |
 | Catalog KiCad DRC bar | `hs_verify_engine` |
@@ -28,26 +47,9 @@ Expose the **compile engine** (not the legacy Circuit-AI generative stubs) to an
 | Circuit synthesis compile | `hs_synthesize_circuit` / `POST /v1/circuit-synthesis/compile` |
 | Project package refresh | `hs_render_project_package` / `POST /v1/project-package/render` |
 
-**Truth model:** KiCad ERC/DRC is external compile truth. Default copper is **cosmetic preview** (`copper_tier: cosmetic_preview`). FreeRouting is off unless `HARDWARE_SPLICER_AUTOROUTE=1`.
+The historical tool list predates the canonical project/product API and therefore is not used as the coverage oracle for whole-backend MCP testing.
 
-**vs Flux (honest positioning):**
-
-- **Stronger:** headless salvage/inventory path, deterministic compile, KiCad-gated quality, same engine for scratch + salvage, agent-native HTTP/MCP/SDK
-- **Weaker today:** interactive editor UX, autorouted production copper, parts marketplace polish
-
-Call `hs_sdk_info` first so the model reads capability boundaries.
-
-## Install
-
-```bash
-make setup
-pip install -r requirements-mcp.txt
-make doctor
-```
-
-## MCP (stdio)
-
-From repo root:
+### Run historical engine MCP
 
 ```bash
 export PYTHONPATH=src
@@ -55,14 +57,12 @@ export HARDWARE_SPLICER_AUTOROUTE=0
 python -m hardware_splicer.mcp_server
 ```
 
-### Cursor
-
-Merge into `.cursor/mcp.json` (set `HARDWARE_SPLICER_ROOT` to this repo):
+Example local client block:
 
 ```json
 {
   "mcpServers": {
-    "hardware-splicer": {
+    "hardware-splicer-engine": {
       "command": "python3",
       "args": ["-m", "hardware_splicer.mcp_server"],
       "env": {
@@ -76,35 +76,17 @@ Merge into `.cursor/mcp.json` (set `HARDWARE_SPLICER_ROOT` to this repo):
 }
 ```
 
-Template: [`mcp/hardware-splicer.mcp.json`](../mcp/hardware-splicer.mcp.json)
-
-### Claude Desktop
-
-Same stdio block under `mcpServers` in `claude_desktop_config.json`.
-
 ## Python SDK (no MCP)
 
+The SDK remains appropriate when the caller is Python-native and intentionally wants direct engine functions instead of the canonical product API.
+
 ```python
-from hardware_splicer.sdk import (
-    compose_design,
-    plan_salvage,
-    resolve_inventory_parts,
-    salvage_bringup,
-    sdk_info,
-    splice_build,
-    splice_bench_status,
-    splice_bench_submit,
-    inspect_fab_build_dir,
-)
+from hardware_splicer.sdk import compose_design, resolve_inventory_parts, sdk_info
 
 print(sdk_info())
-
 resolved = resolve_inventory_parts([
     {"name": "ESP32 devkit", "type": "microcontroller", "module_id": "esp32-devkit"},
-    {"name": "DHT22", "type": "sensor", "module_id": "dht22"},
-    {"name": "USB 5V wall wart", "type": "power_source", "module_id": "usb-power-5v", "voltage_v": 5},
 ])
-
 result = compose_design(
     phrase="wifi temperature logger",
     constraints={"strategy_mode": "constrained", "compose_from_inventory": True},
@@ -112,31 +94,12 @@ result = compose_design(
 )
 ```
 
-## HTTP API (alternative)
+## HTTP API
 
-For remote agents or multi-tenant hosts:
+The canonical HTTP product backend remains available independently of MCP:
 
 ```bash
-python scripts/hardware_splicer.py serve --host 127.0.0.1 --port 8787
+hs-serve --host 127.0.0.1 --port 8787
 ```
 
-Key routes: `POST /v1/splice-and-build`, `POST /v1/splice-bench/status`, `POST /v1/splice-bench/submit`, `POST /v1/compose`, `POST /v1/engine-verify`.
-
-Full agent flow: [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md).
-
-## Suggested agent workflow
-
-1. `hs_sdk_info` or read `docs/AGENT_HANDOFF.md`
-2. `hs_engine_doctor` — abort early if KiCad/node missing
-3. **Splice path:** `hs_splice_build` → `hs_splice_bench_status` → `hs_splice_bench_submit` → `hs_inspect_fab`
-4. **Scratch/salvage compose path:** `hs_resolve_parts` or `hs_plan_salvage` → `hs_compose` or `hs_salvage_bringup`
-5. Read `design_quality_gate` / `bench_session.power_on_authorized` — **do not claim fab-ready or power-on-safe without both**
-
-## Environment
-
-| Variable | Default | Meaning |
-|----------|---------|---------|
-| `HARDWARE_SPLICER_AUTOROUTE` | `0` | No Java FreeRouting |
-| `HARDWARE_SPLICER_JLC_ENRICH` | `0` in agents | Skip slow BOM enrich |
-| `HARDWARE_SPLICER_DRC_FIX_LOOP` | `1` | Geometry nudge retries |
-| `HARDWARE_SPLICER_OUTPUT_ROOT` | `/tmp/hardware_splicer_api` | HTTP API output sandbox |
+For a complete agent-facing backend test, prefer `hs-backend-mcp` because its discovery contract is generated from that canonical API rather than from a manually curated engine tool list.
