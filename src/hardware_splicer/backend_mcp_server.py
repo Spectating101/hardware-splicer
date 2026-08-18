@@ -123,17 +123,23 @@ async def hs_backend_call(
     operation_id: str,
     path_params: dict[str, Any] | None = None,
     query: dict[str, Any] | None = None,
+    headers: dict[str, Any] | None = None,
+    cookies: dict[str, Any] | None = None,
     json_body: Any | None = None,
     form: dict[str, Any] | None = None,
     files: list[dict[str, Any]] | None = None,
+    body_base64: str | None = None,
+    body_content_type: str | None = None,
     response_mode: Literal["auto", "metadata", "base64"] = "auto",
 ) -> str:
     """Invoke one canonical backend operation by OpenAPI ``operation_id``.
 
     The call is dispatched through the same stateful in-process FastAPI application
-    used by the product.  ``files`` accepts objects with ``field``, ``filename``,
-    ``content_base64`` and optional ``content_type``.  This is not an arbitrary HTTP
-    proxy and it cannot bypass backend evidence, revision or physical-authority gates.
+    used by the product.  Path/query/header/cookie parameters are supported.  JSON,
+    form/multipart, and arbitrary base64 raw request bodies are supported; ``files``
+    accepts ``field``, ``filename``, ``content_base64`` and optional ``content_type``.
+    This is not an arbitrary HTTP proxy and it cannot bypass backend evidence,
+    revision or physical-authority gates.
     """
 
     if not operation_id:
@@ -142,9 +148,13 @@ async def hs_backend_call(
         operation_id,
         path_params=path_params,
         query=query,
+        headers=headers,
+        cookies=cookies,
         json_body=json_body,
         form=form,
         files=files,
+        body_base64=body_base64,
+        body_content_type=body_content_type,
         response_mode=response_mode,
         app=_product_app,
     )
