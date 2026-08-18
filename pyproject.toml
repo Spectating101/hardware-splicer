@@ -30,6 +30,7 @@ dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"
 hs-serve = "hardware_splicer.cli_entry:main_serve"
 hs-mcp = "hardware_splicer.cli_entry:main_mcp"
+hs-backend-mcp = "hardware_splicer.cli_entry:main_backend_mcp"
 hs-capability-freeze = "hardware_splicer.cli_entry:main_capability_freeze"
 hs-derive = "hardware_splicer.cli_entry:main_derive"
 
