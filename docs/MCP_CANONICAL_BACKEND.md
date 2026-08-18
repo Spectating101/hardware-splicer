@@ -14,9 +14,11 @@ That is useful compatibility surface, but it is no longer a complete description
 
 A hand-maintained MCP list can therefore become stale even while the HTTP backend remains healthy.
 
+The historical server also targets the MCP Python SDK v1 API. Its dependency is now explicitly bounded to `mcp>=1.2,<2` so a fresh install cannot silently resolve the breaking v2 line and pretend compatibility.
+
 ## Canonical approach
 
-`hs-backend-mcp` derives discovery from the actual FastAPI OpenAPI document produced by `hardware_splicer.product_api`.
+`hs-backend-mcp` targets the current MCP Python SDK v2 line (`mcp>=2,<3`) and derives discovery from the actual FastAPI OpenAPI document produced by `hardware_splicer.product_api`.
 
 The MCP surface intentionally stays small:
 
@@ -32,7 +34,7 @@ The gateway is not an arbitrary HTTP proxy. `hs_backend_call` accepts only an `o
 A generic agent should be able to operate without repository-specific Python imports:
 
 ```text
-initialize MCP
+connect to MCP
     ↓
 hs_backend_status
     ↓
@@ -51,9 +53,17 @@ The server creates one canonical FastAPI application for the lifetime of the MCP
 
 ## Install and run
 
+Current whole-backend MCP:
+
 ```bash
-python -m pip install -e '.[mcp]'
+python -m pip install -e '.[backend-mcp]'
 hs-backend-mcp
+```
+
+Equivalent requirements file:
+
+```bash
+python -m pip install -r requirements-backend-mcp.txt
 ```
 
 Equivalent module invocation:
@@ -98,7 +108,7 @@ Multipart file object:
 
 For responses:
 
-- JSON is returned as JSON;
+- JSON is returned as JSON inside the MCP text result;
 - text is returned as text;
 - binary responses default to metadata (`byte_length`, SHA-256, content type) so a large artifact is not dumped into model context accidentally;
 - set `response_mode=base64` when binary bytes are actually required;
@@ -124,21 +134,23 @@ Every invocation re-enters the canonical FastAPI handler. If the backend require
 
 `tests/test_mcp_backend_gateway.py` requires the gateway catalog to equal the complete canonical OpenAPI `{method, path}` set. This prevents a newly added backend route from silently remaining invisible to MCP.
 
-`.github/workflows/mcp-backend-contract.yml` then performs a real protocol smoke test:
+`.github/workflows/mcp-backend-contract.yml` then performs a real protocol smoke test against the current v2 SDK:
 
-1. install package + MCP SDK;
+1. install the package + `backend-mcp` dependency;
 2. verify OpenAPI/MCP coverage;
 3. launch the backend MCP server over stdio;
-4. initialize an MCP client session;
+4. connect with the current first-class MCP `Client`;
 5. discover the four gateway tools;
 6. discover a real canonical route;
 7. describe its request contract;
 8. invoke it through MCP;
 9. assert no MCP authority grant.
 
+The stdio smoke is externally bounded to 60 seconds and the client has a 20-second read timeout so a broken transport cannot turn this test into an unbounded CI wait.
+
 ## What this test proves if green
 
-It proves that the canonical backend is mechanically discoverable and callable through MCP and that MCP coverage tracks canonical OpenAPI.
+It proves that the canonical backend is mechanically discoverable and callable through current MCP and that MCP coverage tracks canonical OpenAPI.
 
 It does **not** prove:
 
