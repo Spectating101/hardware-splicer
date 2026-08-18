@@ -63,11 +63,13 @@ def test_describe_operation_returns_referenced_request_schemas():
     assert isinstance(described["referenced_schemas"], dict)
 
 
-def test_backend_contract_is_authority_neutral_and_counts_exact_surface():
+def test_backend_contract_is_authority_neutral_and_transport_complete():
     app = create_product_app()
     contract = backend_contract(app)
 
     assert contract["operation_count"] == len(operation_catalog(app))
+    assert contract["unsupported_parameter_locations"] == []
+    assert all(contract["request_transport"].values())
     assert contract["authority_contract"]["mcp_grants_physical_authority"] is False
     assert contract["authority_contract"]["adapter_bypasses_backend_gates"] is False
 
@@ -93,3 +95,17 @@ def test_gateway_rejects_unknown_operation_instead_of_becoming_http_proxy():
 
     with pytest.raises(ValueError, match="unknown canonical operation_id"):
         asyncio.run(dispatch_operation("definitely_not_a_real_operation", app=app))
+
+
+def test_gateway_rejects_invalid_raw_base64_before_backend_dispatch():
+    app = create_product_app()
+    row = next(row for row in operation_catalog(app) if row["method"] == "GET")
+
+    with pytest.raises(ValueError, match="body_base64 is invalid base64"):
+        asyncio.run(
+            dispatch_operation(
+                row["operation_id"],
+                body_base64="%%%not-base64%%%",
+                app=app,
+            )
+        )
