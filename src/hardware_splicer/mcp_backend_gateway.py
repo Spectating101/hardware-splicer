@@ -23,6 +23,7 @@ from .product_api import create_product_app
 
 _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 _PATH_PARAM_RE = re.compile(r"\{([^{}]+)\}")
+_SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
 
 
 def _app(app: FastAPI | None = None) -> FastAPI:
@@ -58,6 +59,11 @@ def operation_catalog(app: FastAPI | None = None) -> list[dict[str, Any]]:
         if operation_id in seen_ids:
             raise ValueError(f"duplicate canonical OpenAPI operationId: {operation_id}")
         seen_ids.add(operation_id)
+        parameters = [
+            parameter
+            for parameter in operation.get("parameters", [])
+            if isinstance(parameter, Mapping)
+        ]
         rows.append(
             {
                 "operation_id": operation_id,
@@ -69,9 +75,16 @@ def operation_catalog(app: FastAPI | None = None) -> list[dict[str, Any]]:
                 "has_request_body": "requestBody" in operation,
                 "parameter_names": [
                     str(parameter.get("name"))
-                    for parameter in operation.get("parameters", [])
-                    if isinstance(parameter, Mapping) and parameter.get("name")
+                    for parameter in parameters
+                    if parameter.get("name")
                 ],
+                "parameter_locations": sorted(
+                    {
+                        str(parameter.get("in"))
+                        for parameter in parameters
+                        if parameter.get("in")
+                    }
+                ),
             }
         )
     rows.sort(key=lambda row: (row["path"], row["method"], row["operation_id"]))
@@ -146,8 +159,13 @@ def backend_contract(app: FastAPI | None = None) -> dict[str, Any]:
     rows = operation_catalog(app)
     method_counts = Counter(row["method"] for row in rows)
     tag_counts: Counter[str] = Counter()
+    parameter_locations: set[str] = set()
     for row in rows:
         tag_counts.update(row["tags"])
+        parameter_locations.update(row["parameter_locations"])
+    unsupported_parameter_locations = sorted(
+        parameter_locations.difference(_SUPPORTED_PARAMETER_LOCATIONS)
+    )
     return {
         "surface": "canonical_product_api",
         "discovery_source": "FastAPI OpenAPI generated from hardware_splicer.product_api",
@@ -156,6 +174,18 @@ def backend_contract(app: FastAPI | None = None) -> dict[str, Any]:
         "mutation_operation_count": sum(1 for row in rows if row["mutation"]),
         "method_counts": dict(sorted(method_counts.items())),
         "tag_counts": dict(sorted(tag_counts.items())),
+        "parameter_locations": sorted(parameter_locations),
+        "unsupported_parameter_locations": unsupported_parameter_locations,
+        "request_transport": {
+            "path": True,
+            "query": True,
+            "headers": True,
+            "cookies": True,
+            "json": True,
+            "form": True,
+            "multipart_base64_files": True,
+            "raw_body_base64": True,
+        },
         "authority_contract": {
             "mcp_grants_physical_authority": False,
             "adapter_bypasses_backend_gates": False,
@@ -216,6 +246,13 @@ def _render_path(template: str, path_params: Mapping[str, Any] | None) -> str:
     return rendered
 
 
+def _decode_base64(value: str, *, field_name: str) -> bytes:
+    try:
+        return base64.b64decode(value, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError(f"{field_name} is invalid base64") from exc
+
+
 def _prepare_files(files: list[Mapping[str, Any]] | None) -> list[tuple[str, tuple[str, bytes, str]]]:
     prepared: list[tuple[str, tuple[str, bytes, str]]] = []
     for index, item in enumerate(files or []):
@@ -229,10 +266,7 @@ def _prepare_files(files: list[Mapping[str, Any]] | None) -> list[tuple[str, tup
             raise ValueError(f"files[{index}].filename must be a non-empty string")
         if not isinstance(content_base64, str):
             raise ValueError(f"files[{index}].content_base64 must be a base64 string")
-        try:
-            content = base64.b64decode(content_base64, validate=True)
-        except (binascii.Error, ValueError) as exc:
-            raise ValueError(f"files[{index}].content_base64 is invalid base64") from exc
+        content = _decode_base64(content_base64, field_name=f"files[{index}].content_base64")
         prepared.append((field, (filename, content, str(content_type))))
     return prepared
 
@@ -277,9 +311,13 @@ async def dispatch_operation(
     *,
     path_params: Mapping[str, Any] | None = None,
     query: Mapping[str, Any] | None = None,
+    headers: Mapping[str, Any] | None = None,
+    cookies: Mapping[str, Any] | None = None,
     json_body: Any = None,
     form: Mapping[str, Any] | None = None,
     files: list[Mapping[str, Any]] | None = None,
+    body_base64: str | None = None,
+    body_content_type: str | None = None,
     response_mode: str = "auto",
     app: FastAPI | None = None,
 ) -> dict[str, Any]:
@@ -291,8 +329,15 @@ async def dispatch_operation(
 
     if response_mode not in {"auto", "metadata", "base64"}:
         raise ValueError("response_mode must be one of: auto, metadata, base64")
-    if json_body is not None and (form is not None or files):
-        raise ValueError("json_body cannot be combined with form/files multipart input")
+    body_modes = sum(
+        [
+            json_body is not None,
+            form is not None or bool(files),
+            body_base64 is not None,
+        ]
+    )
+    if body_modes > 1:
+        raise ValueError("use only one request body mode: json_body, form/files, or body_base64")
 
     resolved_app = _app(app)
     lookup = _operation_lookup(resolved_app)
@@ -303,15 +348,26 @@ async def dispatch_operation(
 
     path = _render_path(path_template, path_params)
     prepared_files = _prepare_files(files)
+    request_headers = {str(key): str(value) for key, value in dict(headers or {}).items()}
+    request_cookies = {str(key): str(value) for key, value in dict(cookies or {}).items()}
+    raw_body: bytes | None = None
+    if body_base64 is not None:
+        raw_body = _decode_base64(body_base64, field_name="body_base64")
+        if body_content_type and not any(key.lower() == "content-type" for key in request_headers):
+            request_headers["content-type"] = body_content_type
+
     transport = httpx.ASGITransport(app=resolved_app)
     async with httpx.AsyncClient(transport=transport, base_url="http://hardware-splicer.local") as client:
         response = await client.request(
             method,
             path,
             params=dict(query or {}),
+            headers=request_headers or None,
+            cookies=request_cookies or None,
             json=json_body if json_body is not None else None,
             data=dict(form or {}) if form is not None else None,
             files=prepared_files or None,
+            content=raw_body,
         )
     payload = _decode_response(response, response_mode)
     payload.update({"operation_id": operation_id, "method": method, "path": path})
