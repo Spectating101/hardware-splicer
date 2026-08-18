@@ -5,7 +5,10 @@ surface, this server discovers operations from ``product_api`` OpenAPI at runtim
 That keeps MCP coverage coupled to the canonical backend instead of duplicating a
 large hand-maintained list of wrappers.
 
-Run from an installed checkout with the optional MCP dependency::
+This module targets the current MCP Python SDK v2.  The historical ``hs-mcp``
+entrypoint remains a separate v1 compatibility surface.
+
+Run from an installed checkout with the canonical MCP optional dependency::
 
     hs-backend-mcp
 
@@ -16,22 +19,16 @@ or::
 
 from __future__ import annotations
 
-import asyncio
 import json
-import sys
-from typing import Any
+from typing import Any, Literal
 
 try:
-    from mcp.server import Server
-    from mcp.server.stdio import stdio_server
-    from mcp.types import TextContent, Tool
+    from mcp.server import MCPServer
 except ImportError as exc:  # pragma: no cover - optional dependency
-    print(
-        "Hardware-Splicer canonical backend MCP requires the 'mcp' package.\n"
-        "  pip install -e '.[mcp]'\n",
-        file=sys.stderr,
-    )
-    raise SystemExit(1) from exc
+    raise SystemExit(
+        "Hardware-Splicer canonical backend MCP requires MCP Python SDK v2.\n"
+        "  pip install -e '.[backend-mcp]'"
+    ) from exc
 
 from .mcp_backend_gateway import (
     backend_contract,
@@ -41,173 +38,124 @@ from .mcp_backend_gateway import (
 )
 from .product_api import create_product_app
 
-app = Server("hardware-splicer-canonical-backend")
+mcp = MCPServer(
+    "hardware-splicer-canonical-backend",
+    instructions=(
+        "Use hs_backend_status first. Discover operations with hs_backend_list_operations, "
+        "inspect unfamiliar request contracts with hs_backend_describe_operation, then invoke "
+        "only canonical operations with hs_backend_call. MCP does not grant physical authority; "
+        "all revision, evidence, deterministic-verification and human-authorization gates remain "
+        "owned by the Hardware-Splicer backend."
+    ),
+)
+
+# One canonical application/store for the lifetime of the MCP process.  Multi-step
+# agent workflows must observe the same state rather than recreating a backend per call.
 _product_app = create_product_app()
 
 
-def _result(payload: Any) -> list[TextContent]:
-    return [
-        TextContent(
-            type="text",
-            text=json.dumps(payload, indent=2, sort_keys=True, default=str),
-        )
-    ]
+def _render(payload: Any) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True, default=str)
 
 
-@app.list_tools()
-async def list_tools() -> list[Tool]:
-    return [
-        Tool(
-            name="hs_backend_status",
-            description=(
-                "Start here. Summarize the canonical Hardware-Splicer FastAPI surface that this MCP "
-                "gateway can reach. The MCP adapter grants no physical authority and never bypasses "
-                "backend evidence/revision/human-authorization gates."
-            ),
-            inputSchema={"type": "object", "properties": {}, "additionalProperties": False},
-        ),
-        Tool(
-            name="hs_backend_list_operations",
-            description=(
-                "Discover canonical backend operations from live FastAPI OpenAPI. Filter by HTTP "
-                "method, tag, path prefix, or text; then call hs_backend_describe_operation before "
-                "invoking unfamiliar operations."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "method": {"type": "string", "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
-                    "tag": {"type": "string"},
-                    "path_prefix": {"type": "string"},
-                    "text": {"type": "string"},
-                    "offset": {"type": "integer", "minimum": 0, "default": 0},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 100},
-                },
-                "additionalProperties": False,
-            },
-        ),
-        Tool(
-            name="hs_backend_describe_operation",
-            description=(
-                "Return the exact OpenAPI definition for one canonical operation_id plus every "
-                "referenced component schema needed to construct its request."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {"operation_id": {"type": "string"}},
-                "required": ["operation_id"],
-                "additionalProperties": False,
-            },
-        ),
-        Tool(
-            name="hs_backend_call",
-            description=(
-                "Invoke one canonical backend operation by OpenAPI operation_id through the same "
-                "stateful in-process FastAPI handlers used by the product. Supports path/query/JSON "
-                "and multipart form+base64 file input. This is not an arbitrary HTTP proxy and does "
-                "not grant fabrication, flashing, power, motion, operation, release, or other physical authority."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "operation_id": {"type": "string"},
-                    "path_params": {"type": "object", "additionalProperties": True},
-                    "query": {"type": "object", "additionalProperties": True},
-                    "json_body": {},
-                    "form": {"type": "object", "additionalProperties": True},
-                    "files": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "field": {"type": "string"},
-                                "filename": {"type": "string"},
-                                "content_base64": {"type": "string"},
-                                "content_type": {"type": "string"},
-                            },
-                            "required": ["field", "filename", "content_base64"],
-                            "additionalProperties": False,
-                        },
-                    },
-                    "response_mode": {
-                        "type": "string",
-                        "enum": ["auto", "metadata", "base64"],
-                        "default": "auto",
-                        "description": (
-                            "auto returns JSON/text and only metadata for binary; base64 returns binary bytes; "
-                            "metadata suppresses all response bodies"
-                        ),
-                    },
-                },
-                "required": ["operation_id"],
-                "additionalProperties": False,
-            },
-        ),
-    ]
+@mcp.tool(structured_output=False)
+async def hs_backend_status() -> str:
+    """Summarize the complete canonical backend exposed through this MCP gateway.
+
+    Start here.  The returned authority contract must remain fail-closed: this
+    adapter discovers and invokes backend handlers but owns no project or physical
+    truth and grants no fabrication, flashing, power, motion, operation or release
+    authority.
+    """
+
+    return _render(backend_contract(_product_app))
 
 
-@app.call_tool()
-async def call_tool(name: str, arguments: dict[str, Any] | None) -> list[TextContent]:
-    args = dict(arguments or {})
-    if name == "hs_backend_status":
-        return _result(backend_contract(_product_app))
+@mcp.tool(structured_output=False)
+async def hs_backend_list_operations(
+    method: Literal["GET", "POST", "PUT", "PATCH", "DELETE"] | None = None,
+    tag: str | None = None,
+    path_prefix: str | None = None,
+    text: str | None = None,
+    offset: int = 0,
+    limit: int = 100,
+) -> str:
+    """Discover canonical FastAPI operations from the live OpenAPI contract.
 
-    if name == "hs_backend_list_operations":
-        offset = int(args.pop("offset", 0) or 0)
-        limit = int(args.pop("limit", 100) or 100)
-        if offset < 0:
-            raise ValueError("offset must be >= 0")
-        if limit < 1 or limit > 500:
-            raise ValueError("limit must be between 1 and 500")
-        rows = filtered_operations(
-            method=args.get("method"),
-            tag=args.get("tag"),
-            path_prefix=args.get("path_prefix"),
-            text=args.get("text"),
-            app=_product_app,
-        )
-        return _result(
-            {
-                "total": len(rows),
-                "offset": offset,
-                "limit": limit,
-                "operations": rows[offset : offset + limit],
-            }
-        )
+    Filter by HTTP method, OpenAPI tag, path prefix or free text.  Use the returned
+    ``operation_id`` with ``hs_backend_describe_operation`` before calling an
+    unfamiliar operation.  Results are paginated locally so large backends do not
+    flood an agent's context.
+    """
 
-    if name == "hs_backend_describe_operation":
-        operation_id = args.get("operation_id")
-        if not isinstance(operation_id, str) or not operation_id:
-            raise ValueError("operation_id is required")
-        return _result(describe_operation(operation_id, _product_app))
-
-    if name == "hs_backend_call":
-        operation_id = args.get("operation_id")
-        if not isinstance(operation_id, str) or not operation_id:
-            raise ValueError("operation_id is required")
-        payload = await dispatch_operation(
-            operation_id,
-            path_params=args.get("path_params"),
-            query=args.get("query"),
-            json_body=args.get("json_body"),
-            form=args.get("form"),
-            files=args.get("files"),
-            response_mode=args.get("response_mode", "auto"),
-            app=_product_app,
-        )
-        return _result(payload)
-
-    raise ValueError(f"unknown Hardware-Splicer backend MCP tool: {name}")
+    if offset < 0:
+        raise ValueError("offset must be >= 0")
+    if limit < 1 or limit > 500:
+        raise ValueError("limit must be between 1 and 500")
+    rows = filtered_operations(
+        method=method,
+        tag=tag,
+        path_prefix=path_prefix,
+        text=text,
+        app=_product_app,
+    )
+    return _render(
+        {
+            "total": len(rows),
+            "offset": offset,
+            "limit": limit,
+            "operations": rows[offset : offset + limit],
+        }
+    )
 
 
-async def main() -> None:
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options(),
-        )
+@mcp.tool(structured_output=False)
+async def hs_backend_describe_operation(operation_id: str) -> str:
+    """Return one exact OpenAPI operation plus all referenced component schemas."""
+
+    if not operation_id:
+        raise ValueError("operation_id is required")
+    return _render(describe_operation(operation_id, _product_app))
+
+
+@mcp.tool(structured_output=False)
+async def hs_backend_call(
+    operation_id: str,
+    path_params: dict[str, Any] | None = None,
+    query: dict[str, Any] | None = None,
+    json_body: Any | None = None,
+    form: dict[str, Any] | None = None,
+    files: list[dict[str, Any]] | None = None,
+    response_mode: Literal["auto", "metadata", "base64"] = "auto",
+) -> str:
+    """Invoke one canonical backend operation by OpenAPI ``operation_id``.
+
+    The call is dispatched through the same stateful in-process FastAPI application
+    used by the product.  ``files`` accepts objects with ``field``, ``filename``,
+    ``content_base64`` and optional ``content_type``.  This is not an arbitrary HTTP
+    proxy and it cannot bypass backend evidence, revision or physical-authority gates.
+    """
+
+    if not operation_id:
+        raise ValueError("operation_id is required")
+    payload = await dispatch_operation(
+        operation_id,
+        path_params=path_params,
+        query=query,
+        json_body=json_body,
+        form=form,
+        files=files,
+        response_mode=response_mode,
+        app=_product_app,
+    )
+    return _render(payload)
+
+
+def main() -> None:
+    """Run the canonical whole-backend MCP server over stdio."""
+
+    mcp.run()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
