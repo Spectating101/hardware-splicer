@@ -9,6 +9,7 @@ must not duplicate project truth, verification logic, evidence state, or authori
 from __future__ import annotations
 
 import base64
+import binascii
 import hashlib
 import json
 import re
@@ -230,7 +231,7 @@ def _prepare_files(files: list[Mapping[str, Any]] | None) -> list[tuple[str, tup
             raise ValueError(f"files[{index}].content_base64 must be a base64 string")
         try:
             content = base64.b64decode(content_base64, validate=True)
-        except ValueError as exc:
+        except (binascii.Error, ValueError) as exc:
             raise ValueError(f"files[{index}].content_base64 is invalid base64") from exc
         prepared.append((field, (filename, content, str(content_type))))
     return prepared
