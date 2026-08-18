@@ -8,10 +8,12 @@ Use **`hs-backend-mcp`** when the goal is to let an arbitrary MCP agent discover
 
 It derives its operation catalog from `hardware_splicer.product_api` OpenAPI, so durable project state, source ingestion/storage/parsing, AI orchestration/repair, source-blind cleanroom evaluation, capability reuse/economics, manufacturing/mechanical closure, status/revision/review, physical-evidence surfaces, and the older engine routes stay mechanically discoverable without maintaining a second list of wrappers.
 
+This path targets the current MCP Python SDK v2 line and has its own optional dependency so the historical server is not accidentally broken by a major-version upgrade.
+
 Start here: [`MCP_CANONICAL_BACKEND.md`](MCP_CANONICAL_BACKEND.md)
 
 ```bash
-python -m pip install -e '.[mcp]'
+python -m pip install -e '.[backend-mcp]'
 hs-backend-mcp
 ```
 
@@ -20,6 +22,8 @@ The canonical MCP gateway is authority-neutral: it re-enters the same FastAPI ha
 ## Compatibility: historical compile-engine MCP
 
 The older **`hs-mcp`** / `hardware_splicer.mcp_server` surface exposes the compile/salvage engine directly through `hardware_splicer.sdk`. It remains useful for compatibility and focused engine workflows, but it must not be treated as a complete map of the current product backend.
+
+It uses the MCP Python SDK v1 API. Install that compatibility surface with `.[mcp]` or `requirements-mcp.txt`; both are explicitly bounded below v2.
 
 ### What the historical engine surface exposes
 
@@ -52,6 +56,7 @@ The historical tool list predates the canonical project/product API and therefor
 ### Run historical engine MCP
 
 ```bash
+python -m pip install -e '.[mcp]'
 export PYTHONPATH=src
 export HARDWARE_SPLICER_AUTOROUTE=0
 python -m hardware_splicer.mcp_server
