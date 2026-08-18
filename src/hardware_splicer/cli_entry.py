@@ -37,12 +37,11 @@ def main_mcp() -> None:
 
 
 def main_backend_mcp() -> None:
-    """Expose the complete canonical product backend through the OpenAPI-backed MCP gateway."""
+    """Expose the complete canonical product backend through the current MCP gateway."""
 
     from hardware_splicer.backend_mcp_server import main as mcp_main
-    import asyncio
 
-    asyncio.run(mcp_main())
+    mcp_main()
 
 
 def _load_json(path: Path) -> Any:
