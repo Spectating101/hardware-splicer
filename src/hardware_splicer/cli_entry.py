@@ -36,6 +36,14 @@ def main_mcp() -> None:
     asyncio.run(mcp_main())
 
 
+def main_backend_mcp() -> None:
+    """Expose the complete canonical product backend through the current MCP gateway."""
+
+    from hardware_splicer.backend_mcp_server import main as mcp_main
+
+    mcp_main()
+
+
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
