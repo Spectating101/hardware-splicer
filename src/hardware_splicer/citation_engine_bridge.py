@@ -27,7 +27,8 @@ def _store():
         return MemoryStore(), "memory"
     path = Path(configured).expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
-    return JsonlStore(path), str(path)
+    # Verification artifacts may leave the local machine; never expose host paths.
+    return JsonlStore(path), "jsonl"
 
 
 def record_golden_real_report(
