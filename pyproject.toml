@@ -19,6 +19,7 @@ dependencies = [
   "python-multipart>=0.0.9",
   "python-dotenv>=1.0",
   "loguru>=0.7",
+  "citation-engine @ https://github.com/Spectating101/citation-engine/archive/01066927ce2949ccbee40a1245d81421ef517906.zip",
 ]
 
 [project.optional-dependencies]
