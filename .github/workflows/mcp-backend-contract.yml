@@ -49,8 +49,19 @@ jobs:
       - name: Validate external-agent proof harness and frozen case inventory
         run: |
           python scripts/run_external_mcp_agent_proof.py --help >/dev/null
-          python scripts/run_external_mcp_agent_proof.py --list-cases | tee /tmp/external-mcp-cases.txt
-          test "$(wc -l < /tmp/external-mcp-cases.txt)" -eq 10
+          python scripts/run_external_mcp_agent_proof.py --list-cases
+          python - <<'PY'
+          from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
+              build_unseen_spi_flash_cases,
+              validate_unseen_spi_flash_corpus,
+          )
+          cases = build_unseen_spi_flash_cases()
+          validation = validate_unseen_spi_flash_corpus()
+          assert len(cases) == 10, len(cases)
+          assert validation["pass"] is True, validation
+          assert len({case.case_id for case in cases}) == 10
+          print({"frozen_external_case_count": len(cases), "corpus_validation": "pass"})
+          PY
       - name: Verify installed canonical MCP entrypoint
         run: |
           command -v hs-backend-mcp
