@@ -44,6 +44,8 @@ jobs:
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
       - name: Exercise a real MCP Streamable HTTP client session
         run: timeout --signal=TERM --kill-after=5s 90s python scripts/smoke_backend_mcp_http.py
+      - name: Validate external-agent proof harness CLI
+        run: python scripts/run_external_mcp_agent_proof.py --help
       - name: Verify installed canonical MCP entrypoint
         run: |
           command -v hs-backend-mcp
