@@ -5,6 +5,10 @@ This is an evidence harness, not an evaluator. It freezes the product-visible un
 SPI mission, sends a general-purpose model only that mission plus the four canonical
 HS MCP gateway tools, and persists the exact remote-MCP response trace for later
 frozen evaluation. It never treats model prose as physical evidence or authority.
+
+The MCP locator may be either an HTTPS/HTTP ``server_url`` or an OpenAI Secure MCP
+Tunnel ``tunnel_id``.  Locator credentials/opaque identifiers are not persisted in
+clear text in proof artifacts.
 """
 
 from __future__ import annotations
@@ -151,6 +155,7 @@ def main() -> int:
         description="Run a frozen external OpenAI model against HS through remote MCP and persist the trace."
     )
     parser.add_argument("--server-url", default=os.getenv("HS_MCP_SERVER_URL"))
+    parser.add_argument("--tunnel-id", default=os.getenv("HS_MCP_TUNNEL_ID"))
     parser.add_argument("--model", default=os.getenv("HS_EXTERNAL_AGENT_MODEL", "gpt-5.6"))
     parser.add_argument("--project-id", default=None)
     parser.add_argument("--out-dir", default="artifacts/external-mcp-agent")
@@ -160,14 +165,19 @@ def main() -> int:
         action="append",
         default=[],
         metavar="HEADER=ENV_VAR",
-        help="Send an MCP HTTP header from an environment variable without persisting its value.",
+        help="Send an MCP HTTP header from an environment variable without persisting its value (server-url mode only).",
     )
     args = parser.parse_args()
 
-    if not args.server_url:
-        raise SystemExit("--server-url or HS_MCP_SERVER_URL is required")
-    if not args.server_url.startswith(("https://", "http://")):
+    if bool(args.server_url) == bool(args.tunnel_id):
+        raise SystemExit(
+            "Provide exactly one MCP locator: --server-url/HS_MCP_SERVER_URL or "
+            "--tunnel-id/HS_MCP_TUNNEL_ID."
+        )
+    if args.server_url and not args.server_url.startswith(("https://", "http://")):
         raise SystemExit("MCP server URL must start with https:// or http://")
+    if args.tunnel_id and args.header_env:
+        raise SystemExit("--header-env is only supported with --server-url; Secure MCP Tunnel needs no proxy header here")
     if args.max_output_tokens < 1:
         raise SystemExit("--max-output-tokens must be positive")
 
@@ -187,12 +197,25 @@ def main() -> int:
             "Canonical Hardware-Splicer backend gateway. It exposes project/evidence/verification "
             "operations while remaining authority-neutral."
         ),
-        "server_url": args.server_url,
         "allowed_tools": _REQUIRED_MCP_TOOLS,
         "require_approval": "never",
     }
-    if mcp_headers:
-        tool["headers"] = mcp_headers
+    locator_manifest: dict[str, Any]
+    if args.tunnel_id:
+        tool["tunnel_id"] = args.tunnel_id
+        locator_manifest = {
+            "mode": "openai_secure_mcp_tunnel",
+            "tunnel_id_sha256": _sha256(args.tunnel_id),
+            "tunnel_id_persisted": False,
+        }
+    else:
+        tool["server_url"] = args.server_url
+        locator_manifest = {
+            "mode": "server_url",
+            "server_url": _redacted_url(args.server_url),
+        }
+        if mcp_headers:
+            tool["headers"] = mcp_headers
 
     request_payload: dict[str, Any] = {
         "model": args.model,
@@ -214,7 +237,7 @@ def main() -> int:
         "corpus_schema": SCHEMA_VERSION,
         "project_id": project_id,
         "requested_model": args.model,
-        "server_url": _redacted_url(args.server_url),
+        "mcp_locator": locator_manifest,
         "mcp_allowed_tools": _REQUIRED_MCP_TOOLS,
         "mcp_header_sources": header_manifest,
         "mission_sha256": _sha256(snapshot),
@@ -265,6 +288,7 @@ def main() -> int:
             "hardware_splicer_git_head": manifest["hardware_splicer_git_head"],
             "mission_sha256": manifest["mission_sha256"],
             "response_sha256": _sha256(response_payload),
+            "mcp_locator_mode": locator_manifest["mode"],
         }
     )
     _write_json(out_dir / "RUN_SUMMARY.json", summary)
