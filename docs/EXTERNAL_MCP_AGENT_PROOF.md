@@ -12,7 +12,7 @@ turning model prose into physical evidence.
 ```text
 external model / agent
         |
-        | MCP Streamable HTTP
+        | MCP
         v
 hs-backend-mcp
         |
@@ -40,7 +40,7 @@ hand-maintained engineering implementation.
 ## Claim boundary
 
 A successful remote-agent run can prove that an external model genuinely operated HS through
-the public MCP boundary and produced a persisted tool trace. It does **not**, by itself, prove:
+the MCP boundary and produced a persisted tool trace. It does **not**, by itself, prove:
 
 - that the model's engineering result is correct;
 - physical correctness of the proposed adapter;
@@ -79,9 +79,10 @@ that MCP itself grants no physical authority.
 
 This leg is also part of `.github/workflows/mcp-backend-contract.yml`.
 
-## 3. Run a guarded remote experiment endpoint
+## 3. Run a guarded local experiment endpoint
 
-Remote mode is intentionally opt-in. Do not point it at a normal development project store.
+Remote-capable mode is intentionally opt-in. Do not point it at a normal development project
+store.
 
 ```bash
 export HARDWARE_SPLICER_PROJECT_ROOT="$PWD/.proof-state/external-mcp"
@@ -92,18 +93,23 @@ export HS_MCP_PORT=8000
 hs-backend-mcp
 ```
 
-The endpoint is then:
+The private local endpoint is then:
 
 ```text
 http://127.0.0.1:8000/mcp
 ```
 
-For an external model provider, keep HS bound locally and put an **authenticated** tunnel or
-reverse proxy in front of it. Do not publish the bare mutable MCP endpoint to the Internet.
-The proof harness can send provider/tunnel authentication headers without persisting their
-values.
+Keep HS bound to loopback unless there is a concrete reason not to. The preferred OpenAI reachability
+path is **Secure MCP Tunnel** when it is available to the Platform organization: the customer-run
+`tunnel-client` makes an outbound connection to OpenAI and forwards requests to the localhost/private
+MCP server, so HS itself does not need public ingress.
 
-If the reverse proxy preserves a public Host header, explicitly allow only that hostname:
+Secure MCP Tunnel availability and permissions are organization/account dependent. If it is not
+available, use an authenticated HTTPS tunnel/reverse proxy as the fallback; never publish the bare
+mutable MCP endpoint directly to the Internet.
+
+For a direct non-local bind or a reverse proxy that preserves a public Host header, explicitly allow
+only the expected hostname:
 
 ```bash
 export HS_MCP_ALLOWED_HOSTS='mcp.example.com,mcp.example.com:*'
@@ -119,7 +125,7 @@ A direct non-local bind is refused unless `HS_MCP_ALLOWED_HOSTS` is configured.
 
 ## 4. Run the external OpenAI agent
 
-The experiment harness uses the OpenAI Responses API's remote MCP tool. It sends the model only:
+The experiment harness uses the OpenAI Responses API MCP tool. It sends the model only:
 
 - the frozen product-visible unseen SPI snapshot;
 - the experiment project id;
@@ -128,6 +134,23 @@ The experiment harness uses the OpenAI Responses API's remote MCP tool. It sends
 
 It does **not** provide HS source code or evaluator internals.
 
+### Preferred: OpenAI Secure MCP Tunnel
+
+After a Secure MCP Tunnel has been provisioned and its `tunnel-client` is connected to the local HS
+MCP endpoint, give the Responses API the tunnel id directly:
+
+```bash
+export OPENAI_API_KEY='...'
+export HS_MCP_TUNNEL_ID='tunnel_...'
+python scripts/run_external_mcp_agent_proof.py \
+  --model gpt-5.6
+```
+
+The harness sends `tunnel_id` in the MCP tool definition and stores only a SHA-256 of the tunnel id
+in the proof manifest.
+
+### Fallback: authenticated HTTPS MCP endpoint
+
 ```bash
 export OPENAI_API_KEY='...'
 export HS_MCP_SERVER_URL='https://mcp.example.com/mcp'
@@ -135,8 +158,8 @@ python scripts/run_external_mcp_agent_proof.py \
   --model gpt-5.6
 ```
 
-If the authenticated tunnel expects HTTP headers, read them from environment variables so the
-proof artifacts contain only header names and value sources, never the secret values:
+If the authenticated endpoint expects HTTP headers, read them from environment variables so the
+proof artifacts contain only header names and value sources, never secret values:
 
 ```bash
 export MCP_CLIENT_ID='...'
@@ -147,8 +170,11 @@ python scripts/run_external_mcp_agent_proof.py \
   --header-env 'CF-Access-Client-Secret=MCP_CLIENT_SECRET'
 ```
 
-The script sets `store=false` on the Responses API request and does not persist the OpenAI API
-key or MCP header values.
+Provide exactly one locator: `--tunnel-id`/`HS_MCP_TUNNEL_ID` or
+`--server-url`/`HS_MCP_SERVER_URL`.
+
+The script sets `store=false` on the Responses API request and does not persist the OpenAI API key,
+Secure MCP Tunnel id in clear text, or MCP header values.
 
 ## 5. Persisted evidence
 
@@ -156,7 +182,7 @@ Each run creates a timestamped directory under `artifacts/external-mcp-agent/` c
 
 - `MISSION.json` — exact product-visible unseen snapshot;
 - `REQUEST_MANIFEST.json` — HS git head, requested model, project id, hashes, MCP tool allowlist,
-  and redacted header provenance;
+  redacted locator metadata, and header provenance;
 - `OPENAI_RESPONSE.json` — exact Responses API result including MCP calls/tool outputs returned by
   the provider;
 - `RUN_SUMMARY.json` — transport/gateway traversal summary and explicit nonclaims.
@@ -171,7 +197,8 @@ Use this order:
 
 1. freeze exact HS/evaluator/corpus SHA;
 2. run and preserve the no-key Streamable HTTP contract proof;
-3. expose only the isolated experiment store through an authenticated remote endpoint;
+3. expose only the isolated experiment store through Secure MCP Tunnel when available, otherwise an
+   authenticated remote endpoint;
 4. run one external model against the unchanged mission;
 5. persist the complete response/MCP trace;
 6. run the frozen unseen evaluator without changing the case after seeing the result;
