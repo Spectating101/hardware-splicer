@@ -39,18 +39,19 @@ hand-maintained engineering implementation.
 
 ## Claim boundary
 
-A successful remote-agent run can prove that an external model genuinely operated HS through
-the MCP boundary and produced a persisted tool trace. It does **not**, by itself, prove:
+A successful remote-agent replay can prove that an external model genuinely operated HS through
+the MCP boundary across the frozen unseen corpus and produced persisted tool traces. It does **not**,
+by itself, prove:
 
 - that the model's engineering result is correct;
-- physical correctness of the proposed adapter;
+- physical correctness of a proposed adapter;
 - fabrication readiness or power-on readiness;
 - independent human-operator success;
 - production deployment security;
 - physical authority.
 
-The frozen evaluator must adjudicate model competence separately. Revision-bound real bench
-measurements must adjudicate physical correctness separately.
+Outer evaluation must adjudicate model competence separately. Revision-bound real bench measurements
+must adjudicate physical correctness separately.
 
 ## 1. Install the canonical MCP surface
 
@@ -81,8 +82,7 @@ This leg is also part of `.github/workflows/mcp-backend-contract.yml`.
 
 ## 3. Run a guarded local experiment endpoint
 
-Remote-capable mode is intentionally opt-in. Do not point it at a normal development project
-store.
+Remote-capable mode is intentionally opt-in. Do not point it at a normal development project store.
 
 ```bash
 export HARDWARE_SPLICER_PROJECT_ROOT="$PWD/.proof-state/external-mcp"
@@ -123,16 +123,39 @@ export HS_MCP_ALLOWED_ORIGINS='https://app.example.com'
 
 A direct non-local bind is refused unless `HS_MCP_ALLOWED_HOSTS` is configured.
 
-## 4. Run the external OpenAI agent
+## 4. Inspect the frozen external replay inventory
 
-The experiment harness uses the OpenAI Responses API MCP tool. It sends the model only:
+The proof runner consumes the existing 10-case unseen SPI corpus directly. This command performs no
+network or model call:
 
-- the frozen product-visible unseen SPI snapshot;
-- the experiment project id;
+```bash
+python scripts/run_external_mcp_agent_proof.py --list-cases
+```
+
+The full replay includes the baseline/evidence-equivalent variants plus the frozen non-equivalent
+challenges. **Evaluator-only case ids, equivalence groups, perturbation names, and case metadata are
+never included in model requests.** Each model call receives only an opaque experiment project id,
+the persisted mission, and that case's product-visible snapshot.
+
+CI verifies that corpus validation passes and that the external runner still sees exactly 10 frozen
+cases.
+
+## 5. Run the external OpenAI replay
+
+The experiment harness uses the OpenAI Responses API MCP tool. For every selected case it sends the
+model only:
+
+- an opaque experiment project id;
+- the product-visible unseen case snapshot and persisted mission;
 - operating rules that preserve unresolved evidence and physical authority;
 - the four canonical HS MCP gateway tools.
 
-It does **not** provide HS source code or evaluator internals.
+It does **not** provide HS source code, hidden tests, equivalence labels, perturbation labels, expected
+answers, or evaluator internals.
+
+With no `--case-id`, one invocation runs the **entire 10-case frozen corpus** as separate Responses API
+requests. Use an exact `--case-id` only for an explicitly scoped transport/debug run; do not present a
+single-case debug run as full unseen competence evidence.
 
 ### Preferred: OpenAI Secure MCP Tunnel
 
@@ -173,25 +196,32 @@ python scripts/run_external_mcp_agent_proof.py \
 Provide exactly one locator: `--tunnel-id`/`HS_MCP_TUNNEL_ID` or
 `--server-url`/`HS_MCP_SERVER_URL`.
 
-The script sets `store=false` on the Responses API request and does not persist the OpenAI API key,
+The script sets `store=false` on every Responses API request and does not persist the OpenAI API key,
 Secure MCP Tunnel id in clear text, or MCP header values.
 
-## 5. Persisted evidence
+## 6. Persisted evidence
 
-Each run creates a timestamped directory under `artifacts/external-mcp-agent/` containing:
+Each replay creates a timestamped directory under `artifacts/external-mcp-agent/` containing:
 
-- `MISSION.json` — exact product-visible unseen snapshot;
-- `REQUEST_MANIFEST.json` — HS git head, requested model, project id, hashes, MCP tool allowlist,
-  redacted locator metadata, and header provenance;
-- `OPENAI_RESPONSE.json` — exact Responses API result including MCP calls/tool outputs returned by
-  the provider;
-- `RUN_SUMMARY.json` — transport/gateway traversal summary and explicit nonclaims.
+- `CORPUS_VALIDATION.json` — deterministic frozen-corpus validation at run time;
+- `RUN_MANIFEST.json` — exact HS git head, corpus hash, requested model, selected case inventory,
+  MCP locator mode, allowed gateway tools, and redacted secret provenance;
+- `cases/<index>-<outer-case-id>/MISSION.json` — exact product-visible snapshot supplied for that case;
+- `cases/.../CASE_MANIFEST.json` — outer-only case/equivalence/perturbation metadata and request hashes;
+- `cases/.../OPENAI_RESPONSE.json` — exact Responses API result including MCP calls/tool outputs;
+- `cases/.../CASE_SUMMARY.json` — transport, gateway, project-scope, and explicit nonclaim summary;
+- `EXTERNAL_REPLAY.json` — aggregate result across all selected cases, including whether the entire
+  frozen corpus completed.
 
-The summary deliberately leaves `live_unseen_competence` as `UNADJUDICATED`. A model using all
-four gateway tools without transport failure proves external MCP operation, not engineering
-correctness.
+Outer-only labels live in the evidence directory but are not inserted into the model input. The runner
+also records project ids referenced in MCP call arguments and flags a case if the agent explicitly
+references a foreign project id.
 
-## 6. Frozen proof sequence
+`EXTERNAL_REPLAY.json` deliberately leaves `live_unseen_competence` as `UNADJUDICATED`. Ten clean MCP
+traces prove live external operation across the corpus; they are not, by themselves, a correctness
+verdict.
+
+## 7. Frozen proof sequence
 
 Use this order:
 
@@ -199,12 +229,12 @@ Use this order:
 2. run and preserve the no-key Streamable HTTP contract proof;
 3. expose only the isolated experiment store through Secure MCP Tunnel when available, otherwise an
    authenticated remote endpoint;
-4. run one external model against the unchanged mission;
-5. persist the complete response/MCP trace;
-6. run the frozen unseen evaluator without changing the case after seeing the result;
+4. run the **full unchanged 10-case corpus** through the external model;
+5. persist every response/MCP trace and the aggregate replay manifest;
+6. apply outer cleanroom/truth adjudication without changing cases after observing the model;
 7. physicalize the exact resulting candidate if appropriate;
 8. collect revision-bound real measurements and failure/repair history;
 9. run an independent human operator;
 10. update paper/product/gauntlet claims only from those canonical artifacts.
 
-A failure in steps 4-9 is evidence. Do not alter the unseen case merely to obtain a passing run.
+A failure in steps 4-9 is evidence. Do not alter the unseen cases merely to obtain a passing run.
