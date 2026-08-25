@@ -20,10 +20,27 @@ import json
 import os
 import re
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit, urlunsplit
+
+# Executing a file under scripts/ puts that directory first on sys.path. This repo has
+# a legacy scripts/hardware_splicer.py entrypoint, which would otherwise shadow the
+# installed src/hardware_splicer package and create a circular import before argparse
+# can even run. Prefer the repository root/editable install and remove only this
+# script-directory shadowing path.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
+    ],
+]
 
 import httpx
 
