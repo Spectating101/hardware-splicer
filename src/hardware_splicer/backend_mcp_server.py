@@ -8,22 +8,24 @@ large hand-maintained list of wrappers.
 This module targets the current MCP Python SDK v2.  The historical ``hs-mcp``
 entrypoint remains a separate v1 compatibility surface.
 
-Run from an installed checkout with the canonical MCP optional dependency::
+Run locally over stdio from an installed checkout with the canonical MCP optional
+dependency::
 
     hs-backend-mcp
 
-or::
-
-    python -m hardware_splicer.backend_mcp_server
+For the deliberately guarded remote-experiment transport, see
+``docs/EXTERNAL_MCP_AGENT_PROOF.md``.
 """
 
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, Literal
 
 try:
     from mcp.server import MCPServer
+    from mcp.server.transport_security import TransportSecuritySettings
 except ImportError as exc:  # pragma: no cover - optional dependency
     raise SystemExit(
         "Hardware-Splicer canonical backend MCP requires MCP Python SDK v2.\n"
@@ -56,6 +58,75 @@ _product_app = create_product_app()
 
 def _render(payload: Any) -> str:
     return json.dumps(payload, indent=2, sort_keys=True, default=str)
+
+
+def _csv_env(name: str) -> list[str]:
+    value = os.getenv(name, "")
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _remote_transport_kwargs() -> dict[str, Any]:
+    """Resolve guarded Streamable HTTP settings for an external-agent proof run.
+
+    Remote MCP deliberately requires an explicit experiment acknowledgement and a
+    dedicated project root.  The canonical gateway can mutate normal project state,
+    so accidentally publishing a developer's default store would invalidate both
+    the safety posture and the evidence value of the experiment.
+    """
+
+    if os.getenv("HS_MCP_REMOTE_EXPERIMENT", "").strip() != "1":
+        raise SystemExit(
+            "Refusing remote MCP without HS_MCP_REMOTE_EXPERIMENT=1. "
+            "Use stdio for normal local operation."
+        )
+
+    project_root = os.getenv("HARDWARE_SPLICER_PROJECT_ROOT", "").strip()
+    if not project_root:
+        raise SystemExit(
+            "Remote MCP requires HARDWARE_SPLICER_PROJECT_ROOT to point at an isolated "
+            "experiment store."
+        )
+
+    host = os.getenv("HS_MCP_HOST", "127.0.0.1").strip() or "127.0.0.1"
+    try:
+        port = int(os.getenv("HS_MCP_PORT", "8000"))
+    except ValueError as exc:
+        raise SystemExit("HS_MCP_PORT must be an integer") from exc
+    if port < 1 or port > 65535:
+        raise SystemExit("HS_MCP_PORT must be between 1 and 65535")
+
+    path = os.getenv("HS_MCP_PATH", "/mcp").strip() or "/mcp"
+    if not path.startswith("/"):
+        raise SystemExit("HS_MCP_PATH must start with '/'")
+
+    allowed_hosts = _csv_env("HS_MCP_ALLOWED_HOSTS")
+    allowed_origins = _csv_env("HS_MCP_ALLOWED_ORIGINS")
+    security: TransportSecuritySettings | None = None
+    if allowed_hosts or allowed_origins:
+        if not allowed_hosts:
+            raise SystemExit(
+                "HS_MCP_ALLOWED_HOSTS is required whenever an explicit transport-security "
+                "allowlist is configured."
+            )
+        security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=True,
+            allowed_hosts=allowed_hosts,
+            allowed_origins=allowed_origins,
+        )
+    elif host not in {"127.0.0.1", "localhost", "::1"}:
+        raise SystemExit(
+            "Refusing a non-local bind without HS_MCP_ALLOWED_HOSTS. Bind locally behind an "
+            "authenticated tunnel/reverse proxy or configure an explicit Host allowlist."
+        )
+
+    return {
+        "host": host,
+        "port": port,
+        "streamable_http_path": path,
+        "stateless_http": True,
+        "json_response": True,
+        "transport_security": security,
+    }
 
 
 @mcp.tool(structured_output=False)
@@ -162,9 +233,18 @@ async def hs_backend_call(
 
 
 def main() -> None:
-    """Run the canonical whole-backend MCP server over stdio."""
+    """Run stdio by default, or a guarded Streamable HTTP experiment endpoint."""
 
-    mcp.run()
+    transport = os.getenv("HS_MCP_TRANSPORT", "stdio").strip().lower()
+    if transport == "stdio":
+        mcp.run()
+        return
+    if transport in {"http", "streamable-http", "streamable_http"}:
+        mcp.run(transport="streamable-http", **_remote_transport_kwargs())
+        return
+    raise SystemExit(
+        "HS_MCP_TRANSPORT must be 'stdio' or 'streamable-http' (alias: 'http')."
+    )
 
 
 if __name__ == "__main__":
