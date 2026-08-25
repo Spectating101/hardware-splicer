@@ -11,6 +11,9 @@ on:
       - "src/hardware_splicer/**/*_api.py"
       - "tests/test_mcp_backend_gateway.py"
       - "scripts/smoke_backend_mcp_stdio.py"
+      - "scripts/smoke_backend_mcp_http.py"
+      - "scripts/run_external_mcp_agent_proof.py"
+      - "docs/EXTERNAL_MCP_AGENT_PROOF.md"
       - ".github/workflows/mcp-backend-contract.yml"
   workflow_dispatch:
 
@@ -39,6 +42,8 @@ jobs:
         run: pytest -q tests/test_mcp_backend_gateway.py
       - name: Exercise a real MCP stdio client session
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
+      - name: Exercise a real MCP Streamable HTTP client session
+        run: timeout --signal=TERM --kill-after=5s 90s python scripts/smoke_backend_mcp_http.py
       - name: Verify installed canonical MCP entrypoint
         run: |
           command -v hs-backend-mcp
