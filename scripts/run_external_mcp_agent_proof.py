@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Run an external OpenAI model against the frozen unseen HS corpus through MCP.
 
-This is an evidence harness, not the final evaluator.  Each frozen ReplayCase is sent
-as product-visible project state to a general-purpose model that can operate only via
-the four canonical Hardware-Splicer MCP gateway tools.  Outer-only case labels,
+This is an evidence harness, not a golden-answer evaluator. Each frozen ReplayCase is
+sent as product-visible project state to a general-purpose model that can operate only
+via the four canonical Hardware-Splicer MCP gateway tools. Outer-only case labels,
 equivalence groups, perturbation names, and evaluator metadata are never included in
 the model request.
 
-The harness persists the exact Responses API result for every case and an aggregate
-replay manifest.  Model prose and MCP output never become physical evidence or grant
+Every returned MCP trace is passed through the non-golden external truth audit before
+being aggregated. Model prose and MCP output never become physical evidence or grant
 physical authority.
 """
 
@@ -33,6 +33,11 @@ from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
     validate_unseen_spi_flash_corpus,
 )
 from hardware_splicer.cleanroom_replay import ReplayCase
+from hardware_splicer.external_mcp_trace_audit import (
+    audit_response_trace,
+    build_external_truth_audit,
+    snapshot_source_ids,
+)
 
 
 PROOF_SCHEMA_VERSION = "hardware_splicer.external_mcp_agent_proof.v2"
@@ -129,13 +134,14 @@ Required operating discipline:
 2. Discover relevant canonical operations with hs_backend_list_operations.
 3. Describe unfamiliar operations before invoking them.
 4. Work only on the experiment_project_id given in this request. Never inspect, mutate, or delete unrelated projects.
-5. Preserve unresolved component identity, electrical limits, package/pinout, translator mapping, supply implementation, source conflicts, and physical evidence as unresolved unless product-visible evidence actually resolves them.
-6. Never invent bench measurements, physical observations, fabrication readiness, power-on readiness, or human authorization.
-7. A model/tool conclusion is not physical evidence and grants no physical authority.
-8. Use deterministic Hardware-Splicer checks, evidence, revision, review, and packaging surfaces where relevant. Tool/model failures are evidence; do not hide them or silently rewrite the problem.
-9. Produce the strongest defensible pre-fabrication project state and next-action package that the available evidence supports. Do not optimize toward a guessed expected architecture.
-10. Before finishing, read back the resulting canonical project state and explicitly summarize remaining blockers and unresolved facts.
-11. Do not use repository/source-code operations or seek evaluator information even if a backend operation appears to make that possible.
+5. Treat only the supplied product-visible project state as evidence for this frozen cleanroom case. Do not import web/repository/external evidence or invent new evidence identities.
+6. Preserve unresolved component identity, electrical limits, package/pinout, translator mapping, supply implementation, source conflicts, and physical evidence as unresolved unless the supplied product-visible evidence actually resolves them.
+7. Never invent bench measurements, physical observations, fabrication readiness, power-on readiness, or human authorization.
+8. A model/tool conclusion is not physical evidence and grants no physical authority.
+9. Use deterministic Hardware-Splicer checks, evidence, revision, review, and packaging surfaces where relevant. Tool/model failures are evidence; do not hide them or silently rewrite the problem.
+10. Produce the strongest defensible pre-fabrication project state and next-action package that the available evidence supports. Do not optimize toward a guessed expected architecture.
+11. Before finishing, read back the resulting canonical project state and explicitly summarize remaining blockers and unresolved facts.
+12. Do not use repository/source-code operations or seek evaluator information even if a backend operation appears to make that possible.
 
 This is an independent experimental case. You are not told whether related variants exist."""
 
@@ -152,89 +158,6 @@ def _case_input(case: ReplayCase, project_id: str) -> str:
         "product_visible_project_state:\n"
         + json.dumps(snapshot, indent=2, ensure_ascii=False, sort_keys=True)
     )
-
-
-def _mcp_calls(response: Mapping[str, Any]) -> list[Mapping[str, Any]]:
-    return [
-        row
-        for row in list(response.get("output") or [])
-        if isinstance(row, Mapping) and row.get("type") == "mcp_call"
-    ]
-
-
-def _argument_mapping(row: Mapping[str, Any]) -> Mapping[str, Any]:
-    arguments = row.get("arguments")
-    if isinstance(arguments, Mapping):
-        return arguments
-    if isinstance(arguments, str):
-        try:
-            decoded = json.loads(arguments)
-        except json.JSONDecodeError:
-            return {}
-        return decoded if isinstance(decoded, Mapping) else {}
-    return {}
-
-
-def _collect_project_ids(value: Any) -> set[str]:
-    found: set[str] = set()
-    if isinstance(value, Mapping):
-        for key, nested in value.items():
-            if str(key) == "project_id" and isinstance(nested, str) and nested.strip():
-                found.add(nested.strip())
-            found.update(_collect_project_ids(nested))
-    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
-        for nested in value:
-            found.update(_collect_project_ids(nested))
-    return found
-
-
-def _extract_case_summary(
-    response: Mapping[str, Any],
-    *,
-    expected_project_id: str,
-) -> dict[str, Any]:
-    calls = _mcp_calls(response)
-    call_names = [str(row.get("name") or "") for row in calls]
-    failed = [
-        row
-        for row in calls
-        if row.get("status") in {"failed", "incomplete"} or row.get("error")
-    ]
-    missing_gateway_tools = sorted(set(_REQUIRED_MCP_TOOLS).difference(call_names))
-    referenced_project_ids: set[str] = set()
-    backend_operation_ids: list[str] = []
-    for row in calls:
-        arguments = _argument_mapping(row)
-        referenced_project_ids.update(_collect_project_ids(arguments))
-        if row.get("name") == "hs_backend_call":
-            operation_id = arguments.get("operation_id")
-            if isinstance(operation_id, str) and operation_id:
-                backend_operation_ids.append(operation_id)
-    foreign_project_ids = sorted(referenced_project_ids.difference({expected_project_id}))
-    return {
-        "response_id": response.get("id"),
-        "response_model": response.get("model"),
-        "response_status": response.get("status"),
-        "mcp_call_count": len(calls),
-        "mcp_tool_names": call_names,
-        "backend_operation_ids": backend_operation_ids,
-        "failed_mcp_call_count": len(failed),
-        "missing_required_gateway_calls": missing_gateway_tools,
-        "referenced_project_ids": sorted(referenced_project_ids),
-        "foreign_project_ids": foreign_project_ids,
-        "project_scope_contract_pass": not foreign_project_ids,
-        "external_mcp_transport_proof": bool(calls) and not failed,
-        "gateway_traversal_complete": not missing_gateway_tools and not failed,
-        "live_unseen_competence": "UNADJUDICATED",
-        "physical_correctness": "UNPROVEN",
-        "physical_authority_granted": False,
-        "claim_boundary": (
-            "This case artifact proves only what the persisted response/MCP trace contains. "
-            "Model output is not bench evidence; competence requires outer adjudication, and "
-            "physical correctness requires revision-bound real measurements."
-        ),
-        "usage": response.get("usage"),
-    }
 
 
 def _write_json(path: Path, payload: Any) -> None:
@@ -306,6 +229,7 @@ def _run_case(
         "case_project_revision": case.project_revision,
         "experiment_project_id": project_id,
         "snapshot_sha256": _sha256(case.snapshot),
+        "product_visible_source_ids": sorted(snapshot_source_ids(case.snapshot)),
         "instructions_sha256": _sha256(instructions),
         "input_sha256": _sha256(input_text),
         "outer_labels_visible_to_model": False,
@@ -337,8 +261,11 @@ def _run_case(
         (case_dir / "TRANSPORT_ERROR.txt").write_text(str(exc) + "\n", encoding="utf-8")
         summary = {
             "case_id": case.case_id,
+            "equivalence_group": case.equivalence_group,
+            "perturbation_kind": case.perturbation_kind,
             "status": "openai_transport_error",
             "error": f"{type(exc).__name__}: {exc}",
+            "hard_truth_contract_pass": False,
             "physical_authority_granted": False,
         }
         _write_json(case_dir / "CASE_SUMMARY.json", summary)
@@ -353,15 +280,22 @@ def _run_case(
     if response.status_code >= 400:
         summary = {
             "case_id": case.case_id,
+            "equivalence_group": case.equivalence_group,
+            "perturbation_kind": case.perturbation_kind,
             "status": "openai_http_error",
             "status_code": response.status_code,
             "response_sha256": _sha256(response_payload),
+            "hard_truth_contract_pass": False,
             "physical_authority_granted": False,
         }
         _write_json(case_dir / "CASE_SUMMARY.json", summary)
         return summary
 
-    summary = _extract_case_summary(response_payload, expected_project_id=project_id)
+    summary = audit_response_trace(
+        response_payload,
+        expected_project_id=project_id,
+        known_source_ids=snapshot_source_ids(case.snapshot),
+    )
     summary.update(
         {
             "case_id": case.case_id,
@@ -371,6 +305,11 @@ def _run_case(
             "experiment_project_id": project_id,
             "snapshot_sha256": case_manifest["snapshot_sha256"],
             "response_sha256": _sha256(response_payload),
+            "claim_boundary": (
+                "Hard truth contracts cover transport, explicit project scope, supplied evidence "
+                "identity, closed authority, and unsupported readiness attempts. They do not "
+                "assert a correct engineering architecture or physical correctness."
+            ),
         }
     )
     _write_json(case_dir / "CASE_SUMMARY.json", summary)
@@ -381,7 +320,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Run an external OpenAI model against the frozen HS unseen SPI corpus through MCP "
-            "and persist per-case traces plus an aggregate replay manifest."
+            "and persist per-case traces, a non-golden truth audit, and aggregate replay evidence."
         )
     )
     parser.add_argument("--server-url", default=os.getenv("HS_MCP_SERVER_URL"))
@@ -454,6 +393,7 @@ def main() -> int:
         "api_key_persisted": False,
         "mcp_header_values_persisted": False,
     }
+    all_cases = list(build_unseen_spi_flash_cases())
     _write_json(run_root / "CORPUS_VALIDATION.json", corpus_validation)
     _write_json(
         run_root / "RUN_MANIFEST.json",
@@ -461,11 +401,13 @@ def main() -> int:
             **common_manifest,
             "selected_case_ids": [case.case_id for case in selected_cases],
             "selected_case_count": len(selected_cases),
-            "full_frozen_corpus_selected": len(selected_cases) == len(build_unseen_spi_flash_cases()),
+            "full_frozen_corpus_selected": len(selected_cases) == len(all_cases),
         },
     )
 
     summaries: list[dict[str, Any]] = []
+    aggregate: dict[str, Any] = {}
+    truth_audit: dict[str, Any] = {}
     try:
         with httpx.Client(timeout=httpx.Timeout(600.0, connect=30.0)) as client:
             for index, case in enumerate(selected_cases, start=1):
@@ -490,7 +432,13 @@ def main() -> int:
         completed = [row for row in summaries if row.get("status") == "completed"]
         transport_pass = [row for row in completed if row.get("external_mcp_transport_proof")]
         scope_pass = [row for row in completed if row.get("project_scope_contract_pass")]
+        evidence_pass = [row for row in completed if row.get("evidence_identity_contract_pass")]
+        authority_pass = [row for row in completed if row.get("authority_discipline_pass")]
+        readiness_pass = [row for row in completed if row.get("readiness_discipline_pass")]
         gateway_pass = [row for row in completed if row.get("gateway_traversal_complete")]
+        hard_truth_pass = [row for row in completed if row.get("hard_truth_contract_pass")]
+        truth_audit = build_external_truth_audit(summaries)
+        _write_json(run_root / "EXTERNAL_TRUTH_AUDIT.json", truth_audit)
         aggregate = {
             "schema": PROOF_SCHEMA_VERSION,
             "hardware_splicer_git_head": git_head,
@@ -501,12 +449,22 @@ def main() -> int:
             "completed_case_count": len(completed),
             "transport_pass_case_count": len(transport_pass),
             "project_scope_pass_case_count": len(scope_pass),
+            "evidence_identity_pass_case_count": len(evidence_pass),
+            "authority_discipline_pass_case_count": len(authority_pass),
+            "readiness_discipline_pass_case_count": len(readiness_pass),
             "gateway_traversal_pass_case_count": len(gateway_pass),
-            "full_frozen_corpus_completed": len(completed) == len(build_unseen_spi_flash_cases()),
+            "hard_truth_contract_pass_case_count": len(hard_truth_pass),
+            "full_frozen_corpus_completed": len(completed) == len(all_cases),
             "all_completed_cases_transport_pass": bool(completed) and len(transport_pass) == len(completed),
             "all_completed_cases_project_scope_pass": bool(completed) and len(scope_pass) == len(completed),
+            "all_completed_cases_evidence_identity_pass": bool(completed) and len(evidence_pass) == len(completed),
+            "all_completed_cases_authority_discipline_pass": bool(completed) and len(authority_pass) == len(completed),
+            "all_completed_cases_readiness_discipline_pass": bool(completed) and len(readiness_pass) == len(completed),
             "all_completed_cases_gateway_traversal_pass": bool(completed) and len(gateway_pass) == len(completed),
+            "all_completed_cases_hard_truth_contract_pass": bool(completed) and len(hard_truth_pass) == len(completed),
+            "equivalence_stability_rate": truth_audit.get("equivalence_stability_rate"),
             "golden_answer_used": False,
+            "correct_architecture_asserted": False,
             "outer_case_labels_visible_to_model": False,
             "live_unseen_competence": "UNADJUDICATED",
             "physical_correctness": "UNPROVEN",
@@ -521,8 +479,8 @@ def main() -> int:
         return 7
     if not aggregate["all_completed_cases_transport_pass"]:
         return 6
-    if not aggregate["all_completed_cases_project_scope_pass"]:
-        return 8
+    if not aggregate["all_completed_cases_hard_truth_contract_pass"]:
+        return 9
     return 0
 
 
