@@ -2,102 +2,67 @@
 
 Hardware-Splicer uses **one canonical evidence core** and thin venue overlays. A venue may change emphasis; it may not change truth.
 
+For current 2026 eligibility/deadline routing, [`SOLO_ROUTING_2026.md`](SOLO_ROUTING_2026.md) is the operational source of truth.
+
+## Current route states
+
+| Route | State | Team dependency | Primary package |
+|---|---|---|---|
+| TAIA 2026 Graduate AI Creative Design | **FIRE** | none; 1–3 people explicitly allowed | <=15-page deck |
+| WanRun 2026 College | **FIRE after one-member form check** | public notice says max 5; minimum must be verified | innovation deck/form |
+| TAAI 2026 Domestic | **FIRE** | none; ordinary academic authorship | extended abstract/full paper |
+| InnoServe 2026 | **FIRE / FACULTY** | no peer team required by current interpretation; 1–2 school advisers required | system overview + 3-min video |
+| DATE 2027 LBR | **FIRE-LATER** | none; ordinary academic authorship | 2-page LBR |
+| TAS 2026 | **HOLD** | none; travel/attendance blocker | 2–4 page short paper / 1-page abstract |
+| A* / institutional physical-intelligence routes | **HOLD / FACULTY-PI** | faculty representative/PI | evaluator package |
+| APICTA 2026 Taiwan student selection | **KILL** | 2026 student selection is for high-school students | none |
+
 ## Route-neutral evidence priorities
 
-| Evidence | YZU semiconductor route | APICTA | InnoServe | TAAI | Industry pilot |
-|---|---|---|---|---|---|
-| Exact-head software green | Essential | Essential | Essential | Essential | Essential |
-| Canonical evaluator package | Essential | Essential | Essential | Useful | Useful |
-| Live embedded model | Very high | High | High | High | High |
-| Fresh unseen case | High | High | High | Very high | High |
-| Physical bench result | Very high | Very high | Very high | Very high | Essential |
-| Independent operator | High | High | Very high | Medium | Essential |
-| External industry user | Bonus | Very high | Very high | Medium | Goal |
-| 3-minute video | Useful | Useful | Route-dependent | — | — |
-| 10-minute demo | Useful | Important | Finals-oriented | — | Useful |
+| Evidence | TAIA | WanRun | TAAI | InnoServe | DATE LBR | TAS |
+|---|---:|---:|---:|---:|---:|---:|
+| current claim/evidence package | Essential | Essential | Essential | Essential | Essential | Essential |
+| canonical MCP proof | High | Medium | Very high | High | Very high | Very high |
+| live external-model run | Upgrade | Upgrade | Major result | Major result | Strong submission trigger | Major result |
+| fresh physical SPI result | Upgrade | High | Major result | High | Strong submission trigger | Case-study evidence |
+| independent operator | Bonus | Bonus | Useful | High | Useful | High |
+| 3-minute video | Useful | Useful | Optional | Core | Optional | Optional demo |
 
-Administrative deadlines, category eligibility and submission mechanics must be independently reverified before submission. This file is an evidence-routing document, not an authoritative competition rulebook.
+## Venue overlays
 
-## YZU / semiconductor academy overlay
+Use the files in [`overlays/`](overlays/) rather than inventing a new project story for each submission.
 
-Emphasize:
+- `TAIA_2026.md`
+- `WANRUN_2026.md`
+- `TAAI_2026.md`
+- `INNOSERVE_2026.md`
+- `DATE_2027_LBR.md`
+- `TAS_2026.md`
 
-- semiconductor validation-support hardware;
-- agent task quality;
-- harness engineering;
-- evidence discipline;
-- live demonstration;
-- refusal to promote model guesses into physical authority.
+The older `APICTA_2026.md` is historical packaging material and should not be treated as a live 2026 route because current Taiwan student-selection eligibility is high-school-specific.
 
-Do not turn the project into generic robotics.
+## Submission dominance gate
 
-## APICTA overlay
+Do not submit merely because a route exists. A route must satisfy:
 
-Emphasize:
+1. actual eligibility;
+2. no peer-team recruitment requirement unless the user explicitly chooses it;
+3. low marginal adaptation cost;
+4. project identity remains coherent;
+5. claim/evidence boundaries remain unchanged;
+6. downstream attendance/cost is rational;
+7. no new generic feature work is required just for the venue.
 
-- uniqueness;
-- proof of concept;
-- industrial applicability;
-- stability/quality;
-- integrable engineering pipeline;
-- defensible separation between AI reasoning and deterministic/physical authority.
+If a route requires pretending pending proof exists, weakening evidence rules, or turning Hardware-Splicer into a different project, skip it.
 
-Before submission, explicitly verify the correct category/eligibility route for a master's-level project rather than assuming a generic student category.
+## Packaging rule
 
-## InnoServe overlay
+The expensive artifact is the canonical package. A submission should mostly consist of:
 
-### Industry AI route
+- selecting a venue title;
+- mapping judging criteria;
+- shortening/reordering the master deck or paper source;
+- uploading the same screenshots/video/evidence;
+- filling administrative identity/adviser fields.
 
-Emphasize:
-
-- innovation;
-- practical user value;
-- technically mature working system;
-- clean visual demonstration;
-- evidence from one real physical case.
-
-### AI-agent / platform-specific route
-
-If a finals rule requires a specific compute/runtime platform, add a **demo execution path** only. Do not redesign Hardware-Splicer's authority architecture around a sponsor/vendor.
-
-## TAAI / academic overlay
-
-Frame the contribution around:
-
-- Agentic AI;
-- Physical AI;
-- source-blind embedded engineering operator;
-- outer truth evaluator;
-- semantic reasoning vs deterministic authority;
-- unresolved-state preservation;
-- revision/evidence invalidation;
-- physical evidence as final authority.
-
-Working paper identities may include:
-
-- **Evidence-Constrained Physical AI for Pre-Fabrication Hardware Readiness**
-- **Separating Model Reasoning from Physical Authority in Agentic Hardware Engineering**
-
-Do not submit a generic “AI for hardware design” paper.
-
-## Industry-pilot overlay
-
-The first pilot is not primarily a sales exercise. The key question is:
-
-> Can a technically competent outsider use Hardware-Splicer on a real hardware preparation task, and does the evidence/authority architecture prevent dangerous false confidence?
-
-A legitimate partner case can multiply the value of every other route.
-
-## Dominance gate
-
-Do not submit merely because a route is available.
-
-A route should clear a venue-specific review of:
-
-1. evidence completeness;
-2. judge-facing clarity;
-3. proof relevance to the rubric;
-4. administrative eligibility;
-5. whether the project can be represented without distorting its architecture or claims.
-
-If a route requires weakening identity/evidence rules or pretending pending proof exists, skip the route.
+Everything else is conversion waste.

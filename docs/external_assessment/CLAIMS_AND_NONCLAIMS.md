@@ -1,73 +1,110 @@
 # Claims and Nonclaims
 
-This document is the canonical judge-facing claim boundary for the current Hardware-Splicer evidence package.
+This is the canonical judge-facing claim boundary for the 2026 Q3 Hardware-Splicer submission package.
 
-## Proven at the frozen software checkpoint
+The rule is simple: **claim only what an exact artifact, revision, workflow or physical record can support.**
 
-### Exact-head software reproducibility
+## Proven
 
-At PR #59 source head:
+### 1. Frozen software architecture and reproducible software checkpoint
+
+At the software-freeze checkpoint in PR #59, source head:
 
 `0164d47e25bfea8179073e46e869a8725ca03b83`
 
-completed successful aggregate runs include:
+successful exact-head aggregate evidence included:
 
 - Hardware-Splicer #1902;
 - Core Diagnostics #699;
 - Model-First Truth Bar #211.
 
-### Deterministic cleanroom behavior
+This supports software-baseline and regression claims. It does not constitute physical proof.
 
-The deterministic cleanroom evidence passed its persisted challenge corpus, including cases involving:
+### 2. Deterministic evidence/authority separation
 
-- conflicting evidence;
-- partial evidence;
-- deterministic tool failure;
-- plausible wrong analogy;
-- stale-revision evidence;
-- invented evidence;
-- forced guessing;
-- label-sensitive script-brain behavior.
-
-### Evidence/authority architecture
-
-The repository contains explicit boundaries between:
+Hardware-Splicer maintains explicit boundaries between:
 
 - model reasoning and deterministic truth;
 - proposal and verified state;
+- exact/unresolved component identity;
+- evidence provenance and unsupported assertion;
+- one project revision and another;
 - bench collection and revision-bound physical evidence;
-- physical evidence and human authorization;
-- one candidate revision/artifact boundary and another.
+- physical evidence and scoped human authorization.
 
-### Fail-closed proof correction
+Relevant revision/artifact changes can invalidate prior evidence or authority rather than silently carrying it forward.
 
-A present bench capture cannot count as explicitly real physical evidence merely because simulation status is omitted. Missing simulation status is blocking; real evidence must explicitly declare `simulated: false`.
+### 3. Fail-closed treatment of ambiguous physical evidence
+
+A bench capture cannot count as explicitly real merely because simulation state is omitted. Missing simulation status is blocking; real evidence must explicitly declare `simulated: false`.
+
+### 4. Frozen adversarial unseen SPI corpus exists and validates
+
+The repository contains an unchanged ten-case SPI-flash cleanroom corpus covering a baseline plus source-order and adversarial variants including:
+
+- source reversal and rotation;
+- neutral labels and mission paraphrase;
+- partial evidence;
+- component-identity conflict;
+- parser/tool failure;
+- plausible wrong analogy;
+- stale-revision evidence.
+
+The corpus/protocol itself is validated. **This does not mean a live external model has passed it.**
+
+### 5. Canonical MCP engineering surface is real
+
+On PR #70 head `bb313f283fc25ad75ea1ce0dd384ebb36d0d6911`, Canonical MCP Backend Contract run #15 completed successfully. The gateway:
+
+- is generated from the canonical FastAPI/OpenAPI product backend rather than a second engineering implementation;
+- exposes 193 canonical operations through a four-tool MCP gateway contract;
+- works through a real MCP stdio client;
+- works through a real MCP Streamable HTTP client;
+- supports canonical stateful project write → read → delete across the MCP boundary;
+- preserves the backend's revision/evidence/authority rules;
+- does not independently grant physical authority.
+
+### 6. External-agent proof harness is executable infrastructure
+
+The exact-head CI validates the external-model runner, frozen ten-case inventory and non-golden external trace audit. The runner can persist model requests, provider responses, MCP calls, per-case state and replay manifests while keeping live competence `UNADJUDICATED` until an actual provider call occurs.
 
 ## Pending — do not present as proven
 
-### Live embedded-model competence
+### Live external-model unseen competence
 
-**Pending.**
+**PENDING.**
 
-The previous cleanroom workflow did not execute the live model step because a supported provider credential was not configured. A green workflow label is not live-model proof.
+No paid/live external model has yet executed the unchanged full ten-case corpus through the current MCP proof harness. A green harness/transport workflow is not model-competence evidence.
 
-### Fresh unseen-project generalization
+To change this claim, preserve at minimum:
 
-**Pending.**
+- exact code/evaluator/corpus revision;
+- model/provider/configuration;
+- actual model inputs and outputs;
+- actual MCP calls and responses;
+- trace-audit result;
+- outer adjudication result;
+- failures as well as successes.
 
-A deliberately unfamiliar case outside the established golden family still needs to be run and preserved.
+### Fresh SPI physical correctness
 
-### Physical correctness
+**PENDING.**
 
-**Pending.**
+The project has exercised real-bench infrastructure in a golden-real verification path, but that does not close the fresh adversarial SPI candidate's revision-bound physical proof chain.
 
-Software jobs whose names contain “bench” do not prove that real hardware was assembled, powered or measured.
+A fresh claim requires exact component/package identity, candidate hashes, preassembly checks, assembly/substitutions, powered-off measurements, controlled power-up, bounded functional/signal evidence and preserved failure→repair→revision history.
 
-### Independent-operator usability
+### Independent human-operator usability
 
-**Pending.**
+**PENDING.**
 
-A technically competent outsider has not yet completed the canonical independent-user protocol.
+A technically competent outsider who did not author the candidate/evaluator has not yet completed the canonical independent-operator protocol.
+
+### Demonstrated industrial economics or partner value
+
+**PENDING.**
+
+Platform reuse, intervention ratios, development-cost ratios and commercial value remain measurement hypotheses until real external cases establish them.
 
 ## Explicitly not claimed
 
@@ -78,16 +115,19 @@ Hardware-Splicer does not currently claim:
 - universal hardware correctness;
 - zero hallucination;
 - replacement of a qualified hardware engineer;
-- chip/wafer-process design automation;
+- chip or wafer-process design automation;
 - that CI constitutes physical evidence;
 - that a model may authorize its own proposal;
 - that authorization survives arbitrary design revisions;
-- that a skipped provider job proves live-model competence.
+- that a skipped or unrun provider step proves live-model competence;
+- that MCP transport safety proves engineering correctness;
+- that the ten-case corpus has been passed by a live model;
+- that a prior golden-real bench path proves the fresh SPI case physically correct.
 
 ## Preferred evaluator language
 
-When asked “What happens when Hardware-Splicer is wrong?” the intended answer is not merely “we are accurate.”
+If asked, “What happens when Hardware-Splicer is wrong?” the answer is not “the model is always right.”
 
 > **The system is designed so that being wrong does not automatically grant physical authority.**
 
-That is a stronger and more defensible claim than promising model infallibility.
+That is the project’s core safety and engineering claim.

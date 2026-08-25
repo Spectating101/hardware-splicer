@@ -1,69 +1,123 @@
-# 3-Minute Demo
+# Hardware-Splicer — Canonical 3-Minute Demo
 
 ## Purpose
 
-Demonstrate that Hardware-Splicer's refusal behavior is part of the product rather than a limitation to hide.
+Demonstrate three things quickly:
 
-## 0:00–0:30 — problem and identity
+1. Hardware-Splicer is a real engineering system, not a concept deck.
+2. A general-purpose agent can operate it through MCP without becoming the source of engineering truth.
+3. Refusal/unresolved behavior is part of the product because physical authority is deliberately harder to obtain than a fluent answer.
 
-> AI can generate engineering output faster than an engineer can verify every assumption. In hardware, that creates a dangerous gap between a plausible answer and a physically defensible one.
+## 0:00–0:25 — the problem
 
-> Hardware-Splicer is an evidence-constrained AI engineering agent for pre-fabrication hardware readiness.
-
-## 0:30–1:15 — inner agent vs deterministic truth
-
-Show the embedded operator receiving normal engineering material and reasoning about it.
-
-Call out that the embedded operator does not receive hidden source/golden truth.
-
-Then show at least two of the following behaviors:
-
-- exact component identity remains unresolved when evidence is insufficient;
-- a similar component is not promoted to identical by analogy;
-- a missing driver/controller/interface remains a blocker;
-- conflicting evidence remains visible;
-- a deterministic tool failure is preserved instead of rewritten by the model.
+Show a plausible AI-generated hardware answer or candidate.
 
 Narration:
 
-> The model is allowed to reason. It is not allowed to turn uncertainty into verified identity or electrical truth.
+> AI can produce engineering output faster than every assumption can be verified. In hardware, a fluent mistake can become a fabricated or powered mistake.
 
-## 1:15–2:00 — engineering package and closed authority
+Overlay five questions:
 
-Show the revisioned Engineering Package and the relevant deterministic/evidence output.
+- exact component?
+- compatible interface/voltage?
+- which source?
+- which revision?
+- actually measured?
 
-Highlight that a generated package does **not** automatically mean fabrication/power/motion/release authority is open.
+Then:
 
-> A software-success state and a physical-success state are deliberately different claims.
+> Hardware-Splicer is the auditable engineering layer between an AI agent and the physical world.
 
-## 2:00–2:35 — physical-evidence boundary
+## 0:25–0:45 — doctrine
 
-Show the bench capture / physical-proof surface and the current fail-closed rule:
+Show the four-layer architecture:
 
-- `simulated: false` must be explicit for a real capture;
-- missing simulation status is blocking.
+`general-purpose agent → MCP/API → Hardware-Splicer → candidate/evidence → human authority → physical world`
 
-Use the line:
+Narration:
+
+> **AI proposes. Deterministic systems constrain. Bench evidence decides. Human authorizes.**
+
+> The model is allowed to reason. It is not allowed to silently turn confidence into verified identity, physical evidence or power-on authority.
+
+## 0:45–1:25 — real product workflow
+
+Show one clean project/revision in Hardware-Splicer.
+
+Move through:
+
+1. source/evidence state;
+2. engineering plan/candidate;
+3. one deterministic or evidence gate;
+4. Engineering Package / revisioned output.
+
+Prefer a real state where something remains unresolved or blocked.
+
+Narration:
+
+> Hardware-Splicer preserves exact project state, evidence provenance and deterministic engineering constraints outside the model. An unresolved fact remains unresolved instead of being completed by analogy.
+
+## 1:25–1:55 — model independence through MCP
+
+Show the canonical MCP gateway and one real stateful interaction.
+
+Narration:
+
+> The agent is replaceable. Hardware-Splicer exposes its canonical product backend through MCP rather than reimplementing engineering logic inside a model adapter.
+
+> The current gateway exposes 193 canonical operations. Real stdio and Streamable HTTP clients have completed stateful project write, read and delete operations, while MCP itself remains unable to grant physical authority.
+
+Do not imply that the current chat/model has completed the live unseen experiment unless it actually has.
+
+## 1:55–2:25 — adversarial evidence
+
+Show the ten-case SPI corpus matrix:
+
+- baseline;
+- source reverse;
+- source rotate;
+- neutral labels;
+- mission paraphrase;
+- partial evidence;
+- identity conflict;
+- parser failure;
+- analogy trap;
+- stale revision.
+
+Then zoom into one conflict/failure example.
+
+Narration:
+
+> We are not evaluating only a happy path. The frozen corpus deliberately contains partial, conflicting, stale and misleading evidence. The cases are frozen before the live model run so the benchmark cannot be rewritten after seeing the result.
+
+## 2:25–2:45 — physical-evidence boundary
+
+Show the physical-evidence/authority surface.
+
+Narration:
+
+> Software success and physical success are different claims. Real evidence must explicitly declare that it is real; missing simulation status blocks the proof. Physical evidence remains tied to exact revisions and artifacts before a human can authorize the next physical action.
+
+Use if useful:
 
 > **Even the evidence proving the hardware is real has to prove that it is real.**
 
-Then show the canonical chain:
+## 2:45–3:00 — truth-state close
 
-`PhysicalEvidenceRecord → hash-bound envelope → exact revision → human authorization`.
+Show a simple state card:
 
-## 2:35–3:00 — close
+- software/MCP/corpus infrastructure — **PROVEN**;
+- live external-model unseen result — **PENDING**;
+- fresh SPI physical result — **PENDING**;
+- independent operator — **PENDING**;
+- production readiness — **NOT CLAIMED**.
 
-> Hardware-Splicer does not promise that an AI will never be wrong. It is designed so that being wrong does not automatically grant physical authority.
+Close:
 
-End with:
+> Hardware-Splicer does not need the AI to be infallible. It needs uncertainty and error to remain unable to silently become physical authority.
 
 > **AI proposes → deterministic systems constrain → bench evidence decides → human authorizes.**
 
-## Proof-status disclosure
+## Recording rule
 
-If this demo is recorded before the pending proof phases are completed, state explicitly:
-
-- deterministic/software baseline: proven;
-- live embedded-model competence: pending unless a genuine live run has been preserved;
-- real physical correctness: pending unless a revision-bound physical case has been completed;
-- independent operator: pending unless the outsider protocol has been completed.
+Never substitute a simulated/past/golden result for the pending fresh proof just because it produces a cleaner video. If the live or physical tranche is still pending, make the pending state part of the demonstration.
