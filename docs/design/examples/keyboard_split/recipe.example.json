@@ -1,0 +1,74 @@
+{
+  "fixture_notice": "DESIGN_FIXTURE_ONLY_NO_PHYSICAL_EVIDENCE",
+  "recipe_family_id": "recipe:keyboard/commodity-to-split",
+  "recipe_version": "0.1",
+  "status": "OBSERVED_SYNTHETIC_FIXTURE_ONLY",
+  "transformation_goal": "Convert a commodity keyboard into independently positionable left/right halves while preserving rational donor reuse and normal keyboard functionality.",
+  "applicability_constraints": [
+    "donor construction must be inspectable",
+    "key matrix or equivalent input topology must be characterizable",
+    "proposed physical separation must have an evidence-backed modification plan"
+  ],
+  "donor_archetypes": [
+    "mechanical_keyboard_conventional_matrix",
+    "rubber_dome_keyboard_with_accessible_matrix"
+  ],
+  "known_incompatible_or_high_risk_variants": [
+    "uninspectable multilayer routing across required cut corridor",
+    "fragile membrane tails with no reliable retermination method",
+    "proprietary integrated assemblies where donor reuse cost exceeds replacement"
+  ],
+  "required_observations": [
+    "baseline functionality",
+    "controller location",
+    "matrix topology",
+    "desired physical split corridor",
+    "nets/components intersecting the corridor",
+    "mechanical keep-outs"
+  ],
+  "decision_graph": [
+    {
+      "branch": "retain_original_controller",
+      "choose_when": "matrix bridging burden and physical routing remain defensible"
+    },
+    {
+      "branch": "dual_controller_conversion",
+      "choose_when": "retained matrix regions are reusable but shared-controller bridging is excessive"
+    },
+    {
+      "branch": "abandon_donor_pcb_rebuild_matrix",
+      "choose_when": "donor PCB cannot be safely/economically divided"
+    }
+  ],
+  "required_measurements": [
+    "continuity mapping for ambiguous row/column nets",
+    "pre-cut power/ground short check",
+    "post-cut continuity of retained nets",
+    "post-rework short/continuity checks before power"
+  ],
+  "physical_operation_templates": [
+    "pcb_cut",
+    "case_or_plate_cut",
+    "jumper_installation",
+    "controller_replacement",
+    "inter_half_harness_installation"
+  ],
+  "validation_protocol": [
+    "USB enumeration",
+    "all expected keys detected",
+    "modifier/chord behavior",
+    "inter-half communication stability",
+    "reconnect/power-cycle behavior"
+  ],
+  "known_failure_modes": [
+    "severed matrix net not restored",
+    "unintended row/column short",
+    "incorrect controller pin mapping",
+    "inter-half connector polarity/wiring fault",
+    "mechanical cut damages retained trace or mounting structure"
+  ],
+  "validated_instance_refs": [
+    "urn:hs:unit:split-kb-0001"
+  ],
+  "maturity_note": "A real first completed keyboard would justify OBSERVED only. REPLICATED requires multiple sufficiently independent artifact-backed instances."
+}
