@@ -1,4 +1,5 @@
 name: Hardware-Splicer
+# Canonical promotion gate: keep external KiCad setup bounded and rerun this workflow on the final candidate head.
 
 on:
   push:
@@ -94,13 +95,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - name: Splice v1 slim install (with dev for pytest)
+        run: INSTALL_DEV=1 bash scripts/install_splice_v1.sh
       - name: Install KiCad 9 CLI
         run: |
-          sudo apt-get update
+          retry() {
+            local attempt=1
+            local max_attempts=4
+            local delay=5
+            until "$@"; do
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Command failed after ${max_attempts} attempts: $*" >&2
+                return 1
+              fi
+              echo "Transient dependency failure (attempt ${attempt}/${max_attempts}); retrying in ${delay}s: $*" >&2
+              sleep "${delay}"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+          retry sudo apt-get update
           sudo apt-get install -y software-properties-common
-          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
-          sudo apt-get update
-          sudo apt-get install --install-recommends -y kicad
+          retry sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          retry sudo apt-get update
+          retry sudo apt-get install --install-recommends -y kicad
           KICAD_VERSION="$(kicad-cli --version)"
           echo "KiCad CLI: ${KICAD_VERSION}"
           case "${KICAD_VERSION}" in
@@ -109,8 +127,6 @@ jobs:
           esac
           kicad-cli pcb drc --help | grep -q -- "--format"
           kicad-cli sch erc --help | grep -q -- "--format"
-      - name: Splice v1 slim install (with dev for pytest)
-        run: INSTALL_DEV=1 bash scripts/install_splice_v1.sh
       - name: Doctor
         run: |
           source .venv/bin/activate
@@ -202,11 +218,26 @@ jobs:
           node-version: "20"
       - name: Install KiCad 9 CLI
         run: |
-          sudo apt-get update
+          retry() {
+            local attempt=1
+            local max_attempts=4
+            local delay=5
+            until "$@"; do
+              if [ "${attempt}" -ge "${max_attempts}" ]; then
+                echo "Command failed after ${max_attempts} attempts: $*" >&2
+                return 1
+              fi
+              echo "Transient dependency failure (attempt ${attempt}/${max_attempts}); retrying in ${delay}s: $*" >&2
+              sleep "${delay}"
+              attempt=$((attempt + 1))
+              delay=$((delay * 2))
+            done
+          }
+          retry sudo apt-get update
           sudo apt-get install -y software-properties-common
-          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
-          sudo apt-get update
-          sudo apt-get install --install-recommends -y kicad
+          retry sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          retry sudo apt-get update
+          retry sudo apt-get install --install-recommends -y kicad
           KICAD_VERSION="$(kicad-cli --version)"
           echo "KiCad CLI: ${KICAD_VERSION}"
           case "${KICAD_VERSION}" in

@@ -554,10 +554,6 @@ def build_graph_to_geometry(graph: dict) -> dict:
                 and r in k_of
                 and net_size.get(r, 0) >= 2
             ]
-            m = len(routed)
-            ch_lo = pl["padMinX"] - PAD_SIZE / 2 - HALF + 0.6
-            ch_hi = pl["padMaxX"] + PAD_SIZE / 2 + HALF - 0.6
-
             idx2 = 0
             for entry in routed:
                 pid = entry["pid"]
@@ -568,7 +564,7 @@ def build_graph_to_geometry(graph: dict) -> dict:
                 tag  = {"id": net["id"], "name": net["name"]}
                 p_pos = pl["padPos"][pid]
                 stage_y = next_bus_y()
-                escape_x = ch_lo + ((idx2 + 1) * (ch_hi - ch_lo)) / (m + 1)
+                escape_x = p_pos["x"]
                 idx2 += 1
 
                 hop_y = p_pos["y"]

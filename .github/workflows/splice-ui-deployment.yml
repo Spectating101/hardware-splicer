@@ -1,0 +1,44 @@
+name: Splice UI Deployment
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "apps/splice-ui/**"
+      - ".github/workflows/splice-ui-deployment.yml"
+  pull_request:
+    paths:
+      - "apps/splice-ui/**"
+      - ".github/workflows/splice-ui-deployment.yml"
+
+jobs:
+  build:
+    name: Test and build deployable splice-ui
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/splice-ui/package-lock.json
+      - name: Install locked dependencies
+        working-directory: apps/splice-ui
+        run: npm ci
+      - name: Run UI tests
+        working-directory: apps/splice-ui
+        run: npm test
+      - name: Build production assets
+        working-directory: apps/splice-ui
+        run: npm run build
+      - name: Verify deployment bundle
+        run: |
+          test -f apps/splice-ui/dist/index.html
+          test -n "$(find apps/splice-ui/dist/assets -maxdepth 1 -type f -name '*.js' -print -quit)"
+      - name: Upload deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: splice-ui-dist
+          path: apps/splice-ui/dist
+          if-no-files-found: error

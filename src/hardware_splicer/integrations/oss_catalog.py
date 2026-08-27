@@ -6,6 +6,17 @@ from typing import Any, Dict, List
 
 OSS_CATALOG: List[Dict[str, Any]] = [
     {
+        "id": "capability-studio",
+        "layer": "product-flow",
+        "name": "Interchange Review Studio",
+        "url": "/capability-studio.html",
+        "license": "Apache-2.0",
+        "status": "wired",
+        "priority": "P0",
+        "hook": "Capability Studio: Circuit JSON inspect → compile → engineering review → handoff",
+        "claim": "One governed workflow from external circuit source to reviewable evidence package",
+    },
+    {
         "id": "kicanvas",
         "layer": "viewer",
         "name": "KiCanvas",
@@ -24,8 +35,19 @@ OSS_CATALOG: List[Dict[str, Any]] = [
         "license": "MIT",
         "status": "wired",
         "priority": "P0",
-        "hook": "circuit_json_import.py + POST /v1/netlist-compile + artifact export",
-        "claim": "Web-native circuit interchange into the compile spine",
+        "hook": "source graph importer + POST /v1/interchange/circuit-json/inspect + netlist compile",
+        "claim": "Upstream source components, ports, nets, traces, and diagnostics into the compile spine",
+    },
+    {
+        "id": "kicad-happy",
+        "layer": "engineering-review",
+        "name": "kicad-happy",
+        "url": "https://github.com/aklofas/kicad-happy",
+        "license": "MIT",
+        "status": "opt_in",
+        "priority": "P0",
+        "hook": "Engineering Review panel + /v1/build-files/engineering-review/*",
+        "claim": "Optional read-only schematic, PCB, and Gerber findings with observed-only authority",
     },
     {
         "id": "compose-canvas",
@@ -222,7 +244,7 @@ def integration_catalog() -> Dict[str, Any]:
     return {
         "ok": True,
         "schema_version": "hardware_splicer.oss_catalog.v1",
-        "thesis": "Engine is under-interfaced, not under-powered — embed OSS layers, own gates/package truth.",
+        "thesis": "External engines become useful when one governed workflow carries identity, evidence, gates, and handoff.",
         "integrations": OSS_CATALOG,
         "wired_count": len(wired),
         "total_count": len(OSS_CATALOG),

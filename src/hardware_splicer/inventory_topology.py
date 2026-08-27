@@ -8,6 +8,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Set, Tuple
 
+from .electrical_contract_truth import logic_input_max_v, logic_input_min_v
 from .pcb.module_registry import find_module, resolve_module_pads
 
 Wire = Dict[str, Dict[str, str]]
@@ -383,6 +384,130 @@ def _alias_overrides_for_recipe(recipe: Recipe, overrides: Mapping[str, str]) ->
     return out
 
 
+def _module_logic_voltage_v(module_id: str) -> float | None:
+    """Return the explicit machine-readable controller logic voltage, never infer it."""
+    spec = find_module(module_id) or {}
+    try:
+        value = float(spec.get("logicVoltage"))
+    except (TypeError, ValueError):
+        return None
+    return value if value > 0 else None
+
+
+def _bypass_redundant_level_shifters(recipe: Recipe) -> Recipe:
+    """Remove a level shifter only when every used LV→HV channel is contract-safe direct.
+
+    Module substitution can change the controller voltage domain. A recipe authored for a
+    3.3 V MCU may therefore retain a shifter after inventory replaces that MCU with a 5 V
+    controller. This transform follows structured roles and explicit electrical contracts:
+    it never keys on a controller name, goal phrase, or fixture ID.
+    """
+    modules = [dict(row) for row in recipe.get("modules") or []]
+    module_by_role = {
+        str(row.get("role") or ""): str(row.get("moduleId") or "")
+        for row in modules
+        if str(row.get("role") or "")
+    }
+    shift_roles = {
+        role
+        for role, module_id in module_by_role.items()
+        if {"LV", "HV", "GND", "LV1", "HV1"}.issubset(_module_pin_ids(module_id))
+    }
+    if not shift_roles:
+        return recipe
+
+    wires = [
+        {"from": dict(row.get("from") or {}), "to": dict(row.get("to") or {})}
+        for row in recipe.get("wires") or []
+    ]
+    removable: Set[str] = set()
+    replacements: List[Wire] = []
+
+    for shift_role in shift_roles:
+        incoming = [
+            row
+            for row in wires
+            if str(row.get("to", {}).get("role") or "") == shift_role
+            and str(row.get("to", {}).get("pin") or "").startswith("LV")
+            and str(row.get("to", {}).get("pin") or "") != "LV"
+        ]
+        outgoing = [
+            row
+            for row in wires
+            if str(row.get("from", {}).get("role") or "") == shift_role
+            and str(row.get("from", {}).get("pin") or "").startswith("HV")
+            and str(row.get("from", {}).get("pin") or "") != "HV"
+        ]
+        if not incoming or not outgoing:
+            continue
+
+        channel_replacements: List[Wire] = []
+        safe = True
+        for source_wire in incoming:
+            lv_pin = str(source_wire.get("to", {}).get("pin") or "")
+            suffix = lv_pin[2:]
+            matching = [
+                row
+                for row in outgoing
+                if str(row.get("from", {}).get("pin") or "") == f"HV{suffix}"
+            ]
+            if len(matching) != 1:
+                safe = False
+                break
+            target_wire = matching[0]
+            source_role = str(source_wire.get("from", {}).get("role") or "")
+            target_role = str(target_wire.get("to", {}).get("role") or "")
+            source_id = module_by_role.get(source_role, "")
+            target_id = module_by_role.get(target_role, "")
+            source_logic_v = _module_logic_voltage_v(source_id)
+            target_min_v = logic_input_min_v(target_id)
+            target_max_v = logic_input_max_v(target_id)
+            if (
+                source_logic_v is None
+                or target_min_v is None
+                or target_max_v is None
+                or source_logic_v < target_min_v
+                or source_logic_v > target_max_v
+            ):
+                safe = False
+                break
+            channel_replacements.append(
+                {
+                    "from": dict(source_wire.get("from") or {}),
+                    "to": dict(target_wire.get("to") or {}),
+                }
+            )
+
+        # Refuse removal if an outgoing signal channel was not paired and proven safe.
+        paired_hv_pins = {
+            f"HV{str(row.get('to', {}).get('pin') or '')[2:]}"
+            for row in incoming
+        }
+        if safe and all(str(row.get("from", {}).get("pin") or "") in paired_hv_pins for row in outgoing):
+            removable.add(shift_role)
+            replacements.extend(channel_replacements)
+
+    if not removable:
+        return recipe
+
+    new_modules = [row for row in modules if str(row.get("role") or "") not in removable]
+    new_wires = [
+        row
+        for row in wires
+        if str(row.get("from", {}).get("role") or "") not in removable
+        and str(row.get("to", {}).get("role") or "") not in removable
+    ]
+    for row in replacements:
+        if row not in new_wires:
+            new_wires.append(row)
+    notes = list(recipe.get("notes") or [])
+    notes.append(
+        "Inventory: removed redundant level shifter after explicit source logic voltage "
+        "matched the receiver logic-input contract."
+    )
+    return {**recipe, "modules": new_modules, "wires": new_wires, "notes": notes}
+
+
 def _rewrite_mcu_5v_loads_to_usb(recipe: Recipe) -> Recipe:
     """ESP32 has no 5V out pin — feed relay/sensor 5V loads from USB rail instead."""
     modules = list(recipe.get("modules") or [])
@@ -519,6 +644,7 @@ def adapt_recipe_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Tuple[
     overrides = _alias_overrides_for_recipe(adapted, overrides)
     adapted = _apply_module_overrides(adapted, overrides)
     adapted = _remap_recipe_pins_for_modules(adapted)
+    adapted = _bypass_redundant_level_shifters(adapted)
     adapted = _rewrite_mcu_5v_loads_to_usb(adapted)
     adapted = _rewrite_i2c_sensor_to_dht(adapted, overrides)
     adapted = _append_inventory_sensors(adapted, overrides)

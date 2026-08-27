@@ -1,0 +1,126 @@
+{
+  "schema_version": "hardware_splicer.discrete_evidence.v1",
+  "sources": [
+    {
+      "source_id": "ti-tlv755p-datasheet-revd",
+      "publisher": "Texas Instruments",
+      "kind": "manufacturer_datasheet",
+      "url": "https://www.ti.com/document-viewer/TLV755P/datasheet",
+      "authority": "manufacturer_specification"
+    },
+    {
+      "source_id": "ti-sn74axc2t45-datasheet-revd",
+      "publisher": "Texas Instruments",
+      "kind": "manufacturer_datasheet",
+      "url": "https://www.ti.com/document-viewer/SN74AXC2T45/datasheet",
+      "authority": "manufacturer_specification"
+    },
+    {
+      "source_id": "ti-sn74axc2t245-datasheet-reva",
+      "publisher": "Texas Instruments",
+      "kind": "manufacturer_datasheet",
+      "url": "https://www.ti.com/document-viewer/SN74AXC2T245/datasheet",
+      "authority": "manufacturer_specification"
+    }
+  ],
+  "parts": [
+    {
+      "evidence_id": "part-tlv75533pdbvr",
+      "manufacturer": "Texas Instruments",
+      "mpn": "TLV75533PDBVR",
+      "function": "fixed_3v3_ldo",
+      "package_code": "DBV",
+      "package_family": "SOT-23-5",
+      "kicad_footprint": null,
+      "footprint_status": "unresolved_not_guessed",
+      "pins": {
+        "1": {"name": "IN", "type": "input"},
+        "2": {"name": "GND", "type": "ground"},
+        "3": {"name": "EN", "type": "input"},
+        "4": {"name": "NC", "type": "no_connect"},
+        "5": {"name": "OUT", "type": "output"}
+      },
+      "constraints": {
+        "input_voltage_min_v": 1.45,
+        "input_voltage_max_v": 5.5,
+        "output_voltage_v": 3.3,
+        "output_current_max_a": 0.5,
+        "input_capacitor_min_nominal_uf": 1.0,
+        "output_capacitor_min_nominal_uf": 1.0,
+        "output_capacitor_max_nominal_uf": 200.0,
+        "effective_capacitance_min_uf": 0.47,
+        "enable_may_tie_to_input_when_shutdown_not_required": true
+      },
+      "source_ids": ["ti-tlv755p-datasheet-revd"]
+    },
+    {
+      "evidence_id": "part-sn74axc2t45dcur",
+      "manufacturer": "Texas Instruments",
+      "mpn": "SN74AXC2T45DCUR",
+      "function": "two_bit_shared_direction_voltage_translator",
+      "package_code": "DCU",
+      "package_family": "VSSOP-8",
+      "kicad_footprint": null,
+      "footprint_status": "unresolved_not_guessed",
+      "pins": {
+        "1": {"name": "VCCA", "type": "power"},
+        "2": {"name": "A1", "type": "io"},
+        "3": {"name": "A2", "type": "io"},
+        "4": {"name": "GND", "type": "ground"},
+        "5": {"name": "DIR", "type": "input"},
+        "6": {"name": "B2", "type": "io"},
+        "7": {"name": "B1", "type": "io"},
+        "8": {"name": "VCCB", "type": "power"}
+      },
+      "constraints": {
+        "vcca_min_v": 0.65,
+        "vcca_max_v": 3.6,
+        "vccb_min_v": 0.65,
+        "vccb_max_v": 3.6,
+        "direction_controls_independent": false,
+        "dir_low_operation": "B_to_A_both_channels",
+        "dir_high_operation": "A_to_B_both_channels",
+        "dir_reference": "VCCA",
+        "bypass_capacitor_recommended_uf": 0.1
+      },
+      "source_ids": ["ti-sn74axc2t45-datasheet-revd"]
+    },
+    {
+      "evidence_id": "part-sn74axc2t245rsw",
+      "manufacturer": "Texas Instruments",
+      "mpn": "SN74AXC2T245RSWR",
+      "function": "two_bit_independent_direction_voltage_translator",
+      "package_code": "RSW",
+      "package_family": "UQFN-10",
+      "kicad_footprint": null,
+      "footprint_status": "unresolved_not_guessed",
+      "pins": {
+        "1": {"name": "DIR2", "type": "input"},
+        "2": {"name": "OE", "type": "input"},
+        "3": {"name": "GND", "type": "ground"},
+        "4": {"name": "B2", "type": "io"},
+        "5": {"name": "B1", "type": "io"},
+        "6": {"name": "VCCB", "type": "power"},
+        "7": {"name": "VCCA", "type": "power"},
+        "8": {"name": "A1", "type": "io"},
+        "9": {"name": "A2", "type": "io"},
+        "10": {"name": "DIR1", "type": "input"}
+      },
+      "constraints": {
+        "vcca_min_v": 0.65,
+        "vcca_max_v": 3.6,
+        "vccb_min_v": 0.65,
+        "vccb_max_v": 3.6,
+        "direction_controls_independent": true,
+        "dir_low_operation": "B_to_A_per_channel",
+        "dir_high_operation": "A_to_B_per_channel",
+        "dir_reference": "VCCA",
+        "oe_high_operation": "all_outputs_high_impedance",
+        "oe_low_operation": "direction_controls_active",
+        "oe_reference": "VCCA",
+        "bypass_capacitor_recommended_uf": 0.1
+      },
+      "source_ids": ["ti-sn74axc2t245-datasheet-reva"]
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": "hardware_splicer.electronics_benchmark_proposals.v1",
+  "producer": {
+    "model": "GPT-5.6 Sol",
+    "role": "external_live_engineering_model",
+    "cleanroom_grade": "integration_only_not_source_blind"
+  },
+  "requirements": {
+    "input_rail_v": 5.0,
+    "controller_logic_v": 3.3,
+    "sensor_logic_v": 5.0,
+    "must_protect_3v3_gpio_from_5v_output": true,
+    "fabrication_authorized": false,
+    "power_on_authorized": false,
+    "release_authorized": false
+  },
+  "translated_design": {
+    "schema_version": "hardware_splicer.netlist.v1",
+    "source": "gpt56_sol_external_electronics_proposal",
+    "components": [
+      {"ref":"J1","value":"5V USB power input","footprint":"usb-power-5v","module_id":"usb-power-5v","metadata":{"authority":"visible_catalog_identity"}},
+      {"ref":"U1","value":"ESP32 DevKit","footprint":"esp32-devkit","module_id":"esp32-devkit","metadata":{"authority":"visible_catalog_identity"}},
+      {"ref":"U2","value":"4-channel level shifter","footprint":"level-shifter-4ch","module_id":"level-shifter-4ch","metadata":{"authority":"visible_catalog_identity"}},
+      {"ref":"S1","value":"HC-SR04 ultrasonic sensor","footprint":"hc-sr04","module_id":"hc-sr04","metadata":{"authority":"visible_catalog_identity"}}
+    ],
+    "nets": [
+      {"name":"+5V","pins":[{"component_ref":"J1","pin":"V+"},{"component_ref":"U1","pin":"VIN"},{"component_ref":"U2","pin":"HV"},{"component_ref":"S1","pin":"VCC"}]},
+      {"name":"GND","pins":[{"component_ref":"J1","pin":"GND"},{"component_ref":"U1","pin":"GND"},{"component_ref":"U2","pin":"GND"},{"component_ref":"S1","pin":"GND"}]},
+      {"name":"+3V3","pins":[{"component_ref":"U1","pin":"3V3"},{"component_ref":"U2","pin":"LV"}]},
+      {"name":"TRIG_3V3","pins":[{"component_ref":"U1","pin":"GPIO4"},{"component_ref":"U2","pin":"LV1"}]},
+      {"name":"TRIG_5V","pins":[{"component_ref":"U2","pin":"HV1"},{"component_ref":"S1","pin":"TRIG"}]},
+      {"name":"ECHO_5V","pins":[{"component_ref":"S1","pin":"ECHO"},{"component_ref":"U2","pin":"HV2"}]},
+      {"name":"ECHO_3V3","pins":[{"component_ref":"U2","pin":"LV2"},{"component_ref":"U1","pin":"GPIO16"}]}
+    ],
+    "metadata": {
+      "reasoning": "Keep the 5 V HC-SR04 signal domain separated from ESP32 3.3 V GPIO by a visible bidirectional level-shifter module. The high- and low-side channel pins are deliberately on different nets; only the translator bridges the voltage domains internally. This is a proposal, not fabrication or power-on approval.",
+      "unresolved_questions": [
+        "Confirm the chosen level-shifter topology is electrically appropriate for HC-SR04 push-pull TRIG/ECHO signaling, not merely nominally bidirectional.",
+        "Confirm connector protection, decoupling, surge/ESD requirements, and actual module current draw before physical release.",
+        "Run independent KiCad ERC/DRC after lowering the reviewed netlist to schematic/PCB artifacts."
+      ],
+      "authority_effect": "none",
+      "automatic_execution": false
+    }
+  },
+  "unsafe_direct_design": {
+    "schema_version": "hardware_splicer.netlist.v1",
+    "source": "adversarial_unsafe_direct_comparator",
+    "components": [
+      {"ref":"J1","value":"5V USB power input","footprint":"usb-power-5v","module_id":"usb-power-5v","metadata":{}},
+      {"ref":"U1","value":"ESP32 DevKit","footprint":"esp32-devkit","module_id":"esp32-devkit","metadata":{}},
+      {"ref":"S1","value":"HC-SR04 ultrasonic sensor","footprint":"hc-sr04","module_id":"hc-sr04","metadata":{}}
+    ],
+    "nets": [
+      {"name":"+5V","pins":[{"component_ref":"J1","pin":"V+"},{"component_ref":"U1","pin":"VIN"},{"component_ref":"S1","pin":"VCC"}]},
+      {"name":"GND","pins":[{"component_ref":"J1","pin":"GND"},{"component_ref":"U1","pin":"GND"},{"component_ref":"S1","pin":"GND"}]},
+      {"name":"TRIG_DIRECT","pins":[{"component_ref":"U1","pin":"GPIO4"},{"component_ref":"S1","pin":"TRIG"}]},
+      {"name":"ECHO_DIRECT","pins":[{"component_ref":"S1","pin":"ECHO"},{"component_ref":"U1","pin":"GPIO16"}]}
+    ],
+    "metadata": {
+      "reasoning": "Deliberately unsafe comparator: connect the 5 V sensor logic directly to 3.3 V MCU GPIO so the electrical truth layer must reject it even if PCB geometry is clean.",
+      "authority_effect": "none",
+      "automatic_execution": false
+    }
+  }
+}

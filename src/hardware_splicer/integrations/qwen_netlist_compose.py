@@ -10,6 +10,7 @@ from typing import Any, Dict, Mapping
 from ..netlist import run_erc
 from ..netlist.ir import CircuitNetlist
 from ..pcb.module_registry import find_module
+from ..semantic_module_selector import SemanticSelectionError, semantic_module_selection_pipeline
 from .catalog_context import catalog_context_for_goal
 from .qwen_model_policy import qwen_text_model_rotation
 from .qwen_text_client import call_qwen_chat, qwen_configured
@@ -49,6 +50,48 @@ def _normalize_netlist_payload(raw: Mapping[str, Any], *, source: str) -> Dict[s
     return body
 
 
+def semantic_module_proposal_from_goal(
+    goal: str,
+    *,
+    constraints: Mapping[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Return a review-only module proposal after typed semantic interpretation.
+
+    This deliberately does not auto-wire or compile the selected modules. Stage 1 is
+    blind to module IDs; Stage 2 may select only from deterministic capability-query
+    candidates. The resulting selection therefore remains a proposal until a caller
+    explicitly carries it through a reviewed execution boundary.
+    """
+
+    try:
+        trace = semantic_module_selection_pipeline(goal, constraints=constraints)
+    except SemanticSelectionError as exc:
+        return {
+            "ok": False,
+            "error": "semantic_module_selection_failed",
+            "message": str(exc),
+            "compose_mode": "semantic_module_selection_failed",
+            "requires_human_review": True,
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    selection = trace.selection
+    return {
+        "ok": False,
+        "error": "semantic_module_review_required",
+        "message": "Typed module selection is available as a proposal and must not be auto-executed.",
+        "compose_mode": "semantic_module_proposal",
+        "requires_human_review": True,
+        "module_ids": list(selection.selected_module_ids),
+        "semantic_intent": trace.intent.model_dump(mode="json"),
+        "semantic_candidate_set": trace.candidate_set.model_dump(mode="json"),
+        "semantic_selection": selection.model_dump(mode="json"),
+        "authority_effect": "none",
+        "automatic_execution": False,
+    }
+
+
 def call_qwen_netlist_compose(
     goal: str,
     *,
@@ -81,9 +124,10 @@ Return ONLY one JSON object matching schema hardware_splicer.netlist.v1:
 
 Rules:
 - At least 2 components and 2 nets; every net needs >=2 pins.
-- If the design is USB or 5V powered, include usb-power-5v as U1 and wire V+/GND to loads.
-- Name power nets GND, +5V, +3V3, SDA, SCL, DATA where appropriate.
-- Only use module_id values from the catalog below unless truly custom.
+- Preserve explicit voltage/current/interface constraints; do not invent missing ratings.
+- Use conventional net names such as GND, +5V, +3V3, SDA, SCL, or DATA only when the actual design requires them.
+- Choose module IDs only from the supplied catalog unless the component is explicitly custom.
+- Do not prefer a catalog product merely because it appears in an example or familiar architecture.
 {_catalog_hint_for_goal(goal)}
 """
 
@@ -129,8 +173,16 @@ def compose_netlist_from_goal(
     *,
     constraints: Mapping[str, Any] | None = None,
     allow_qwen: bool = True,
+    allow_legacy_offline: bool = False,
 ) -> Dict[str, Any]:
-    """Deterministic module fallback, optional Qwen text when keyed."""
+    """Model-first netlist compose with explicit legacy-offline permission.
+
+    ``allow_qwen=False`` means only that model-backed compose is disabled. It does not
+    itself authorize the old regex/module-picker path. Callers that intentionally need
+    legacy offline compatibility must set ``allow_legacy_offline=True`` explicitly.
+    This prevents failed model execution from being silently laundered into scripted
+    semantic selection by a retry that merely toggles Qwen off.
+    """
     from .llm_policy import offline_compose_enabled
 
     qwen_disabled = os.environ.get("HARDWARE_SPLICER_QWEN_COMPOSE", "1").strip().lower() in (
@@ -138,54 +190,62 @@ def compose_netlist_from_goal(
         "false",
         "no",
     )
-    offline_ok = not allow_qwen or qwen_disabled or offline_compose_enabled()
+    explicit_offline = bool(allow_legacy_offline)
+    policy_offline = bool(offline_compose_enabled())
 
     if allow_qwen and not qwen_disabled:
         qwen = call_qwen_netlist_compose(goal, constraints=constraints)
         if qwen.get("ok"):
             return {**qwen, "compose_mode": "qwen_netlist"}
         if qwen.get("error") != "missing_api_key":
-            from .qwen_module_pick import call_qwen_module_pick, qwen_module_pick_enabled
+            proposal = semantic_module_proposal_from_goal(goal, constraints=constraints)
+            if proposal.get("requires_human_review"):
+                return {
+                    **proposal,
+                    "qwen_netlist_error": qwen.get("error"),
+                    "qwen_netlist_message": qwen.get("message"),
+                    "usage": qwen.get("usage"),
+                }
+        if not explicit_offline:
+            return {**qwen, "compose_mode": "qwen_netlist_failed"}
 
-            if qwen_module_pick_enabled():
-                picked = call_qwen_module_pick(goal, constraints=constraints)
-                if picked.get("ok") and picked.get("module_ids"):
-                    from ..auto_wire import compose_build_graph_from_module_ids
-                    from ..netlist.lower import build_graph_to_netlist
-
-                    graph = compose_build_graph_from_module_ids(picked["module_ids"])["graph"]
-                    netlist = build_graph_to_netlist(graph, source="qwen_module_pick")
-                    erc = run_erc(netlist)
-                    if erc.get("pass"):
-                        return {
-                            "ok": True,
-                            "compose_mode": "qwen_module_pick",
-                            "netlist": netlist.to_dict(),
-                            "erc": erc,
-                            "module_ids": picked["module_ids"],
-                            "usage": picked.get("usage"),
-                            "reasoning": picked.get("reasoning"),
-                        }
-            if not offline_ok:
-                return {**qwen, "compose_mode": "qwen_netlist_failed"}
-
-    if not offline_ok:
+    if not explicit_offline:
+        reason = "legacy_offline_permission_required"
+        if policy_offline or qwen_disabled or not allow_qwen:
+            return {
+                "ok": False,
+                "error": reason,
+                "compose_mode": "legacy_offline_blocked",
+                "legacy_offline_available": True,
+                "message": "Legacy regex/module-picker compose requires allow_legacy_offline=True.",
+                "authority_effect": "none",
+            }
         return {"ok": False, "error": "no_llm_compose", "compose_mode": "llm_required"}
 
+    # Explicit compatibility path only. This remains available for deterministic/offline
+    # regression work while normal model-first/product paths migrate away from it.
     from ..module_picker import pick_modules_for_goal
     from ..auto_wire import compose_build_graph_from_module_ids
     from ..netlist.lower import build_graph_to_netlist
 
     pick = pick_modules_for_goal(goal)
     if len(pick.module_ids) < 2:
-        return {"ok": False, "error": "no_modules", "compose_mode": "module_picker"}
+        return {
+            "ok": False,
+            "error": "no_modules",
+            "compose_mode": "module_picker_offline_compat",
+            "legacy_semantic_fallback": True,
+        }
     graph = compose_build_graph_from_module_ids(pick.module_ids)["graph"]
-    netlist = build_graph_to_netlist(graph, source="module_picker_fallback")
+    netlist = build_graph_to_netlist(graph, source="module_picker_offline_compat")
     erc = run_erc(netlist)
     return {
         "ok": bool(erc.get("pass")),
-        "compose_mode": "module_picker_fallback",
+        "compose_mode": "module_picker_offline_compat",
         "netlist": netlist.to_dict(),
         "erc": erc,
         "module_ids": list(pick.module_ids),
+        "legacy_semantic_fallback": True,
+        "legacy_offline_explicitly_authorized": True,
+        "authority_effect": "none",
     }

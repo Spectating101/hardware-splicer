@@ -1,0 +1,64 @@
+name: Robot Arm Reference Benchmark
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/robot_arm_reference_benchmark.py"
+      - "src/hardware_splicer/robot_arm_design.py"
+      - "src/hardware_splicer/robot_arm_experiment.py"
+      - "experiments/robot_arm/reference_benchmark_gpt56_sol_proposals.json"
+      - "tests/test_robot_arm_reference_benchmark.py"
+      - "scripts/run_robot_arm_reference_benchmark.py"
+      - ".github/workflows/robot-arm-reference-benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: robot-arm-reference-benchmark-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reference-benchmark:
+    name: Blind, assisted, and mutation arm benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HARDWARE_SPLICER_OFFLINE_SALVAGE: "0"
+      HARDWARE_SPLICER_OFFLINE_SEMANTIC_REWRITE: "0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test runner
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Run reference benchmark tests
+        run: |
+          pytest -q \
+            tests/test_robot_arm_reference_benchmark.py \
+            tests/test_robot_arm_design.py
+
+      - name: Persist reference benchmark report
+        run: |
+          python scripts/run_robot_arm_reference_benchmark.py \
+            --proposal-bundle experiments/robot_arm/reference_benchmark_gpt56_sol_proposals.json \
+            --out-dir artifacts/robot-arm-reference-benchmark
+
+      - name: Upload reference benchmark evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: robot-arm-reference-benchmark
+          path: artifacts/robot-arm-reference-benchmark
+          if-no-files-found: error

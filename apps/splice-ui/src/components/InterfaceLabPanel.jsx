@@ -37,7 +37,7 @@ const PATH_HELP = [
   {
     id: "circuit-json",
     title: "circuit-json",
-    body: "tscircuit-style JSON interchange. Good for agents and web-native editors that emit circuit-json.",
+    body: "Inspect upstream tscircuit source identity and connectivity, compile the accepted graph, then carry the build into deterministic engineering review.",
   },
   {
     id: "kicad-netlist",
@@ -201,10 +201,10 @@ export default function InterfaceLabPanel({ llmPolicy, onOpenDesignPreview, onRu
     <div className="panel-stack">
       <section className="card lab-hero">
         <p className="eyebrow">Interface lab · v1.1 preview</p>
-        <h2>Adapter proving ground — not the main product path</h2>
+        <h2>Adapter proving ground</h2>
         <p className="muted">
-          Borrowed OSS interchange layers feed the same compile spine. Use this to test imports; use the project wizard
-          for donor bring-up, gates, and PROJECT_PACKAGE.
+          Borrowed OSS interchange layers feed the same compile spine. Use the guided Capability Studio for the complete
+          Circuit JSON → KiCad build → engineering-review handoff, or use the probes below for focused adapter testing.
         </p>
         <ul className="lab-path-help">
           {PATH_HELP.map((row) => (
@@ -213,11 +213,21 @@ export default function InterfaceLabPanel({ llmPolicy, onOpenDesignPreview, onRu
             </li>
           ))}
         </ul>
-        {onRunFullDemo && (
-          <button type="button" className="secondary" onClick={onRunFullDemo}>
-            Run repair-café demo build →
+        <div className="lab-actions">
+          <button
+            type="button"
+            className="primary"
+            onClick={() => window.location.assign("/capability-studio.html")}
+            data-testid="open-capability-studio"
+          >
+            Open guided interchange → review flow
           </button>
-        )}
+          {onRunFullDemo && (
+            <button type="button" className="secondary" onClick={onRunFullDemo}>
+              Run repair-café demo build →
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="card lab-llm-card">

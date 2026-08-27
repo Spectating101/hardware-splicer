@@ -1,3 +1,4 @@
-# MCP agent surface (optional — core compiler works without this)
+# Historical compile-engine MCP compatibility surface.
+# The current whole-product MCP gateway uses requirements-backend-mcp.txt instead.
 -r requirements.txt
-mcp>=1.2.0
+mcp>=1.2,<2

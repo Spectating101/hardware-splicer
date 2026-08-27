@@ -95,7 +95,13 @@ def test_compile_hardware_bundle_without_3d_service(tmp_path):
     assert bundle["input"]["use_3d_splicer"] is False
     assert bundle["casefile"]["schema_version"] == "hardware_splicer.casefile.v1"
     assert bundle["project_log"]["schema_version"] == "hardware_splicer.project_log.v1"
-    assert bundle["mechanical_authority"]["current_authority_level"] in {"reference_geometry", "measured_geometry", "fit_load_simulation"}
+    assert bundle["mechanical_authority"]["current_authority_level"] in {
+        "mechanical_candidate",
+        "reference_geometry",
+        "measured_geometry",
+        "fit_load_simulation",
+    }
+    assert bundle["mechanical_authority"]["production_authorized"] is False
     assert bundle["robotics_actuation"]["actuation_profile"]["actuator_count"] == 2
     assert bundle["robotics_simulation"]["schema_version"] == "hardware_splicer.robotics_simulation.v1"
     assert bundle["robotics_platform_authority"]["schema_version"] == "hardware_splicer.robotics_platform_authority.v1"

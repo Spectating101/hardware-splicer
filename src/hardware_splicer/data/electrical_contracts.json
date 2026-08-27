@@ -1,0 +1,53 @@
+{
+  "schema_version": "hardware_splicer.electrical_contracts.v1",
+  "contracts": {
+    "buck-mp1584": {
+      "powerConversionKind": "buck"
+    },
+    "buck-lm2596": {
+      "powerConversionKind": "buck"
+    },
+    "boost-mt3608": {
+      "powerConversionKind": "boost"
+    },
+    "ldo-ams1117-3v3": {
+      "powerConversionKind": "ldo"
+    },
+    "ldo-ams1117-5v": {
+      "powerConversionKind": "ldo"
+    },
+    "tp4056": {
+      "batteryChargerKind": "single_cell_li_ion"
+    },
+    "usb-power-5v": {
+      "powerInputKind": "usb_5v"
+    },
+    "lc709203f-fuel-gauge": {
+      "batteryMonitorKind": "fuel_gauge"
+    },
+    "l298n": {
+      "logicInputHighMinV": 2.3,
+      "logicInputMaxV": 5.0,
+      "provenance": {
+        "manufacturer": "STMicroelectronics",
+        "part_number": "L298",
+        "document": "L298 datasheet DS0218 Rev 5",
+        "document_section": "Electrical characteristics, logic input levels",
+        "datasheet_url": "https://www.st.com/resource/en/datasheet/l298.pdf",
+        "basis": "The L298 accepts standard TTL logic; ViH is specified at 2.3 V minimum. Hardware Splicer conservatively bounds the normal module logic-input ceiling to its 5 V logic rail."
+      }
+    },
+    "mosfet-irlz44n": {
+      "logicInputHighMinV": 4.5,
+      "logicInputMaxV": 5.0,
+      "provenance": {
+        "manufacturer": "Infineon Technologies",
+        "part_number": "IRLZ44N",
+        "document": "IRLZ44N product electrical characteristics",
+        "document_section": "Logic-level feature; RDS(on) characterized at VGS = 4.5 V",
+        "datasheet_url": "https://www.infineon.com/part/IRLZ44N",
+        "basis": "Hardware Splicer only treats 4.5-5.0 V as a guaranteed normal control-drive window for the catalog module. The device is logic-level and allows higher VGS, but a blanket 3.3 V low-resistance guarantee is not promoted from human catalog prose."
+      }
+    }
+  }
+}

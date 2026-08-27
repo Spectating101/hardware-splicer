@@ -1,0 +1,74 @@
+name: Canonical MCP Backend Contract
+
+on:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "requirements-backend-mcp.txt"
+      - "src/hardware_splicer/backend_mcp_server.py"
+      - "src/hardware_splicer/mcp_backend_gateway.py"
+      - "src/hardware_splicer/external_mcp_trace_audit.py"
+      - "src/hardware_splicer/product_api.py"
+      - "src/hardware_splicer/**/*_api.py"
+      - "tests/test_mcp_backend_gateway.py"
+      - "tests/test_external_mcp_trace_audit.py"
+      - "scripts/smoke_backend_mcp_stdio.py"
+      - "scripts/smoke_backend_mcp_http.py"
+      - "scripts/run_external_mcp_agent_proof.py"
+      - "docs/EXTERNAL_MCP_AGENT_PROOF.md"
+      - ".github/workflows/mcp-backend-contract.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: canonical-mcp-backend-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-backend-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package, tests, and current MCP SDK
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,backend-mcp]'
+      - name: Verify OpenAPI-to-MCP coverage and external truth audit
+        run: pytest -q tests/test_mcp_backend_gateway.py tests/test_external_mcp_trace_audit.py
+      - name: Exercise a real MCP stdio client session
+        run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
+      - name: Exercise a real MCP Streamable HTTP client session
+        run: timeout --signal=TERM --kill-after=5s 90s python scripts/smoke_backend_mcp_http.py
+      - name: Validate external-agent proof harness and frozen case inventory
+        run: |
+          python scripts/run_external_mcp_agent_proof.py --help >/dev/null
+          python scripts/run_external_mcp_agent_proof.py --list-cases
+          python - <<'PY'
+          from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
+              build_unseen_spi_flash_cases,
+              validate_unseen_spi_flash_corpus,
+          )
+          cases = build_unseen_spi_flash_cases()
+          validation = validate_unseen_spi_flash_corpus()
+          assert len(cases) == 10, len(cases)
+          assert validation["pass"] is True, validation
+          assert len({case.case_id for case in cases}) == 10
+          print({"frozen_external_case_count": len(cases), "corpus_validation": "pass"})
+          PY
+      - name: Verify installed canonical MCP entrypoint
+        run: |
+          command -v hs-backend-mcp
+          python - <<'PY'
+          from hardware_splicer.mcp_backend_gateway import backend_contract
+          contract = backend_contract()
+          assert contract["operation_count"] > 0
+          assert contract["authority_contract"]["mcp_grants_physical_authority"] is False
+          print(contract)
+          PY

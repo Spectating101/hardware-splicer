@@ -1,0 +1,68 @@
+name: Pin-Faithful Schematic Staging
+
+on:
+  push:
+    branches:
+      - "agent/pin-faithful-schematic-staging-20260810"
+    paths:
+      - "src/hardware_splicer/integrations/schematic_export.py"
+      - "tests/test_pin_faithful_schematic_export.py"
+      - "scripts/run_pin_faithful_schematic_probe.py"
+      - "experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json"
+      - ".github/workflows/pin-faithful-schematic-staging.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/integrations/schematic_export.py"
+      - "tests/test_pin_faithful_schematic_export.py"
+      - "scripts/run_pin_faithful_schematic_probe.py"
+      - "experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json"
+      - ".github/workflows/pin-faithful-schematic-staging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schematic-fidelity:
+    name: Catalog pins survive into KiCad ERC
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Hardware Splicer
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Test pin-faithful schematic structure
+        run: pytest -q tests/test_pin_faithful_schematic_export.py
+
+      - name: Install current stable KiCad
+        run: |
+          sudo add-apt-repository --yes ppa:kicad/kicad-10.0-releases
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes --install-recommends kicad
+          kicad-cli version
+
+      - name: Run independent pin-type ERC probe
+        run: |
+          python scripts/run_pin_faithful_schematic_probe.py \
+            --bundle experiments/electronics/esp32_hcsr04_level_shift_gpt56_sol.json \
+            --out-dir artifacts/pin-faithful-schematic
+
+      - name: Upload schematic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pin-faithful-schematic-staging
+          path: artifacts/pin-faithful-schematic
+          if-no-files-found: warn

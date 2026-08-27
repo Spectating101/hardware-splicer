@@ -14,9 +14,30 @@ from hardware_splicer.plan_to_graph import splice_plan_to_build_graph, supported
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "apps" / "circuit-ai" / "circuit-ai-frontend"
 PLAN_TO_GRAPH = FRONTEND / "lib" / "salvage" / "plan-to-graph.ts"
+TS_LIB = FRONTEND / "node_modules" / "typescript" / "lib" / "typescript.js"
 
 
-def _ts_splice_plan_to_graph(plan: dict) -> dict:
+def _typescript_runtime_path() -> str | None:
+    """Return the exact TypeScript runtime the parity subprocess can load."""
+    if TS_LIB.is_file():
+        return str(TS_LIB)
+    if not shutil.which("node"):
+        return None
+    probe = subprocess.run(
+        ["node", "-e", "process.stdout.write(require.resolve('typescript'))"],
+        cwd=str(ROOT),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+        check=False,
+    )
+    if probe.returncode != 0:
+        return None
+    resolved = probe.stdout.strip()
+    return resolved or None
+
+
+def _ts_splice_plan_to_graph(plan: dict, *, typescript_runtime: str) -> dict:
     """Invoke splicePlanToBuildGraph in TS for golden parity."""
     script = f"""
 const path = require("path");
@@ -30,8 +51,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {{
   }}
   return originalResolve.call(this, request, parent, isMain, options);
 }};
-const TS_LIB = path.join(FRONTEND, "node_modules", "typescript", "lib", "typescript.js");
-const ts = fs.existsSync(TS_LIB) ? require(TS_LIB) : require("typescript");
+const ts = require({json.dumps(str(typescript_runtime))});
 require.extensions[".ts"] = (mod, filename) => {{
   const source = fs.readFileSync(filename, "utf8");
   mod._compile(ts.transpileModule(source, {{
@@ -67,8 +87,11 @@ def test_python_graph_matches_typescript_recipe(build_id: str) -> None:
 
     if not PLAN_TO_GRAPH.is_file() or not shutil.which("node"):
         pytest.skip("node or plan-to-graph.ts unavailable")
+    typescript_runtime = _typescript_runtime_path()
+    if not typescript_runtime:
+        pytest.skip("TypeScript runtime unavailable in this Python-only test environment")
 
-    ts_graph = _ts_splice_plan_to_graph(plan)
+    ts_graph = _ts_splice_plan_to_graph(plan, typescript_runtime=typescript_runtime)
     assert py_graph == ts_graph, build_id
 
 

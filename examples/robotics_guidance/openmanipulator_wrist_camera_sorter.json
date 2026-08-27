@@ -1,0 +1,66 @@
+{
+  "scenario_id": "openmanipulator_wrist_camera_sorter",
+  "mode": "modify",
+  "reference_project": "OpenMANIPULATOR-X",
+  "expected_archetype": "robotic_arm",
+  "user_need": "Modify an OpenMANIPULATOR-X to sort small labeled packages by adding a wrist-mounted depth camera and a wider compliant gripper while preserving at least 200 g usable payload.",
+  "reference_sources": {
+    "repository": "https://github.com/ROBOTIS-GIT/open_manipulator",
+    "documentation": [
+      "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/assembly/",
+      "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/ros_perceptions/",
+      "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/tool_modification/"
+    ],
+    "videos": [
+      "https://www.youtube.com/@ROBOTISOpenSourceTeam"
+    ]
+  },
+  "guidance_expectations": {
+    "minimum_part_lines": 8,
+    "tools_required": true,
+    "custom_mechanics": true,
+    "firmware_required": false,
+    "middleware_required": true
+  },
+  "intake": {
+    "project_name": "openmanipulator_wrist_camera_sorter",
+    "goal": "Modify an existing OpenMANIPULATOR-X with a wrist-mounted RealSense depth camera, a wider compliant gripper, updated URDF and MoveIt collision geometry, and a perception-to-pick workflow for small packages.",
+    "salvage_mode": false,
+    "baseline": {
+      "platform": "OpenMANIPULATOR-X",
+      "dof": 5,
+      "actuator_model": "DYNAMIXEL XM430-W350-T",
+      "rated_payload_g": 500,
+      "input_voltage_v": 12
+    },
+    "change_request": {
+      "add": ["wrist depth camera", "camera mount", "compliant gripper fingers"],
+      "modify": ["tool geometry", "URDF", "MoveIt collision model", "camera transforms"],
+      "preserve": ["joint chain", "DYNAMIXEL bus", "base controller"]
+    },
+    "available_parts": [
+      {"name": "OpenMANIPULATOR-X", "type": "robotic_arm", "quantity": 1},
+      {"name": "Intel RealSense D435", "type": "depth_camera", "quantity": 1},
+      {"name": "USB 3 cable with strain relief", "type": "cable", "quantity": 1},
+      {"name": "3D printed wrist camera bracket", "type": "mechanical_mount", "quantity": 1},
+      {"name": "compliant gripper finger", "type": "gripper_part", "quantity": 2},
+      {"name": "M2.5 mounting hardware", "type": "fastener", "quantity": 8},
+      {"name": "ROS 2 Jazzy workstation", "type": "computer", "quantity": 1},
+      {"name": "12V 5A power supply", "type": "power_source", "quantity": 1}
+    ],
+    "constraints": {
+      "minimum_remaining_payload_g": 200,
+      "camera_mass_limit_g": 120,
+      "target_object_width_mm": 110,
+      "maximum_object_mass_g": 180,
+      "minimum_camera_clearance_mm": 10,
+      "collision_check_required": true,
+      "first_motion_speed_scale": 0.1,
+      "human_exclusion_zone_required": true
+    },
+    "reference_sources": {
+      "baseline_repository": "https://github.com/ROBOTIS-GIT/open_manipulator",
+      "official_video_channel": "https://www.youtube.com/@ROBOTISOpenSourceTeam"
+    }
+  }
+}

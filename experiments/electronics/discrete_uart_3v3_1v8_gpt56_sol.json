@@ -1,0 +1,53 @@
+{
+  "schema_version": "hardware_splicer.discrete_design_proposal.v1",
+  "producer": {
+    "model": "GPT-5.6 Sol",
+    "role": "external_live_engineering_model",
+    "cleanroom_grade": "integration_only_not_source_blind"
+  },
+  "mission": "From a 5 V input, generate a local 3.3 V rail and provide simultaneous full-duplex UART translation between a 3.3 V host and an externally powered 1.8 V DUT.",
+  "requirements": {
+    "input_voltage_v": 5.0,
+    "local_3v3_load_max_a": 0.08,
+    "ldo_shutdown_required": false,
+    "host_logic_v": 3.3,
+    "dut_logic_v": 1.8,
+    "dut_1v8_rail_is_external": true,
+    "uart_full_duplex_simultaneous_opposite_directions": true,
+    "translator_always_enabled": true,
+    "fabrication_authorized": false,
+    "power_on_authorized": false
+  },
+  "selected_parts": [
+    {"ref": "U1", "evidence_id": "part-tlv75533pdbvr", "mpn": "TLV75533PDBVR"},
+    {"ref": "U2", "evidence_id": "part-sn74axc2t245rsw", "mpn": "SN74AXC2T245RSWR"}
+  ],
+  "passives": [
+    {"ref": "C1", "kind": "capacitor", "value_uf": 1.0, "dielectric": "X7R", "purpose": "U1 input capacitor"},
+    {"ref": "C2", "kind": "capacitor", "value_uf": 1.0, "dielectric": "X7R", "purpose": "U1 output capacitor"},
+    {"ref": "C3", "kind": "capacitor", "value_uf": 0.1, "dielectric": "X7R", "purpose": "U2 VCCA bypass"},
+    {"ref": "C4", "kind": "capacitor", "value_uf": 0.1, "dielectric": "X7R", "purpose": "U2 VCCB bypass"}
+  ],
+  "nets": [
+    {"name": "+5V", "endpoints": ["J1.5V", "U1.IN", "U1.EN", "C1.1"]},
+    {"name": "+3V3", "endpoints": ["U1.OUT", "U2.VCCA", "J2.HOST_3V3", "C2.1", "C3.1", "U2.DIR1"]},
+    {"name": "+1V8_DUT", "endpoints": ["J3.DUT_1V8", "U2.VCCB", "C4.1"]},
+    {"name": "GND", "endpoints": ["J1.GND", "U1.GND", "C1.2", "C2.2", "U2.GND", "C3.2", "C4.2", "J2.GND", "J3.GND", "U2.DIR2", "U2.OE"]},
+    {"name": "HOST_TX_3V3", "endpoints": ["J2.HOST_TX", "U2.A1"]},
+    {"name": "DUT_RX_1V8", "endpoints": ["U2.B1", "J3.DUT_RX"]},
+    {"name": "DUT_TX_1V8", "endpoints": ["J3.DUT_TX", "U2.B2"]},
+    {"name": "HOST_RX_3V3", "endpoints": ["U2.A2", "J2.HOST_RX"]}
+  ],
+  "reasoning": "The 5 V input is within the TLV75533PDBVR range and the 80 mA local load is below its 500 mA maximum. EN is tied to IN because shutdown is not required. A 1 uF X7R capacitor is placed at both IN and OUT. Full-duplex UART requires the two translator channels to operate in opposite directions at the same time, so SN74AXC2T245 is selected rather than SN74AXC2T45 because it provides independent DIR1 and DIR2. The A side is 3.3 V and B side is 1.8 V. DIR1 is tied high to VCCA for host TX A1-to-B1, DIR2 is tied low for DUT TX B2-to-A2, and OE is tied low for continuous enable. Each translator supply receives a 0.1 uF bypass capacitor. Exact KiCad land-pattern mapping remains unresolved rather than guessed.",
+  "unresolved_questions": [
+    "Resolve an exact verified KiCad footprint or imported manufacturer land pattern for TI RSW UQFN-10 before PCB lowering.",
+    "Resolve capacitor package, voltage rating, tolerance and DC-bias derating before fabrication.",
+    "Confirm host/DUT connector choice, ESD protection and required UART edge-rate/EMI constraints.",
+    "Run thermal and load-transient checks using the actual 3.3 V load profile before power-on authority."
+  ],
+  "authority_effect": "none",
+  "automatic_execution": false,
+  "fabrication_authorized": false,
+  "power_on_authorized": false,
+  "release_authorized": false
+}

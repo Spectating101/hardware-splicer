@@ -25,6 +25,46 @@ def test_compose_dispatch_wire_only_phrase() -> None:
     assert len((result.get("graph") or {}).get("wires") or []) >= 2
 
 
+def test_compose_dispatch_llm_wire_only_surfaces_semantic_review(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "hardware_splicer.jarvis_build.llm_first_enabled",
+        lambda: True,
+    )
+    monkeypatch.setattr(
+        "hardware_splicer.integrations.qwen_netlist_compose.semantic_module_proposal_from_goal",
+        lambda goal, constraints=None: {
+            "ok": False,
+            "error": "semantic_module_review_required",
+            "compose_mode": "semantic_module_proposal",
+            "requires_human_review": True,
+            "module_ids": ["candidate-a", "candidate-b"],
+            "semantic_intent": {"goal_summary": "typed intent"},
+            "semantic_candidate_set": {"candidates_by_requirement": {}},
+            "semantic_selection": {"selected_module_ids": ["candidate-a", "candidate-b"]},
+            "authority_effect": "none",
+            "automatic_execution": False,
+        },
+    )
+
+    result = compose_dispatch(
+        out_dir=tmp_path / "semantic-review",
+        phrase="novel hardware request",
+        wire_only=True,
+        allow_llm_first=True,
+    )
+
+    assert result.get("ok") is False
+    assert result.get("mode") == "semantic_module_proposal"
+    assert result.get("requires_human_review") is True
+    assert result.get("automatic_execution") is False
+    assert result.get("authority_effect") == "none"
+    assert result.get("module_ids") == ["candidate-a", "candidate-b"]
+    assert result.get("graph") is None
+
+
 def test_compose_dispatch_scratch_matches_direct_pipeline(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_OFFLINE_COMPOSE", "1")
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")

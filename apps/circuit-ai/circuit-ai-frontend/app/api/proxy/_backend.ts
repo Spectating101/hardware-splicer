@@ -74,7 +74,7 @@ export function getHardwareSplicerApiUrl() {
   );
 }
 
-export function getProxyAuthHeaders(request?: Request): HeadersInit {
+export function getProxyAuthHeaders(request?: Request): Record<string, string> {
   const forwardedAuthorization = request?.headers.get("authorization");
   if (forwardedAuthorization) {
     return { Authorization: forwardedAuthorization };

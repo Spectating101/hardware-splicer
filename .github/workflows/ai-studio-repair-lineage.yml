@@ -1,0 +1,43 @@
+name: AI Studio Repair Lineage
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/ai-sessions/**/actions/**/repair/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "docs/AI_STUDIO_REPAIR_LINEAGE.md"
+      - ".github/workflows/ai-studio-repair-lineage.yml"
+  pull_request:
+    paths:
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/ai-studio/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/ai-sessions/**/actions/**/repair/**"
+      - "apps/circuit-ai/circuit-ai-frontend/scripts/test-ai-studio-repair-lineage.cjs"
+      - "docs/AI_STUDIO_REPAIR_LINEAGE.md"
+      - ".github/workflows/ai-studio-repair-lineage.yml"
+
+jobs:
+  repair-ui-contract:
+    name: Repair lineage product contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm ci
+      - name: Validate repair lineage contract
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: node scripts/test-ai-studio-repair-lineage.cjs
+      - name: Run strict TypeScript
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm run typecheck
+      - name: Build production frontend
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+        run: npm run build

@@ -1,0 +1,76 @@
+{
+  "scenario_id": "donor_repair_rover",
+  "mode": "repair",
+  "expected_archetype": "rover",
+  "challenge": {
+    "expected_conflict_count": 2,
+    "donor_reuse_required": true,
+    "identity_continuity_required": true,
+    "description": "Recover a useful low-speed rover from damaged and partly undocumented donor hardware."
+  },
+  "engineering_sources": [
+    {
+      "source_id": "damaged_rover_photos",
+      "source_type": "photo_set",
+      "uri": "evidence://repair/damaged-rover-photos",
+      "version": "capture-1",
+      "authority_ceiling": "observed",
+      "claims": ["four motors installed", "one driver visibly burned", "connector labels incomplete"]
+    },
+    {
+      "source_id": "motor_measurements",
+      "source_type": "measurement",
+      "uri": "evidence://repair/motor-resistance-speed",
+      "version": "bench-1",
+      "authority_ceiling": "measured",
+      "claims": ["three motors have matching resistance", "one motor differs materially"]
+    },
+    {
+      "source_id": "candidate_driver_datasheet",
+      "source_type": "datasheet",
+      "uri": "evidence://repair/driver-datasheet",
+      "version": "rev-c",
+      "authority_ceiling": "declared",
+      "claims": ["logic input range", "continuous current rating", "thermal protection"]
+    },
+    {
+      "source_id": "old_firmware_binary",
+      "source_type": "binary",
+      "uri": "evidence://repair/original-firmware.bin",
+      "version": "unknown",
+      "authority_ceiling": "observed",
+      "claims": ["unknown pin map", "unknown controller revision"]
+    }
+  ],
+  "declared_conflicts": [
+    {"conflict_id": "motor_population", "claim_a": "four identical motors", "claim_b": "one motor electrically mismatched"},
+    {"conflict_id": "driver_current", "claim_a": "donor board label suggests high current", "claim_b": "datasheet package rating is lower"}
+  ],
+  "intake": {
+    "project_name": "donor_repair_rover",
+    "goal": "Recover a supervised low-speed rover from a damaged four-wheel donor chassis, retaining only measured-compatible motors and safe donor electronics. Replace the burned driver, reconstruct the pin map, and produce a current-limited bring-up sequence.",
+    "salvage_mode": true,
+    "available_parts": [
+      {"name": "damaged four-wheel chassis", "type": "mechanical_structure", "quantity": 1},
+      {"name": "candidate geared DC motors", "type": "dc_motor", "quantity": 4},
+      {"name": "ESP32 donor controller", "type": "microcontroller", "quantity": 1},
+      {"name": "BTS7960 donor motor drivers", "type": "motor_driver", "quantity": 2},
+      {"name": "12 V bench battery", "type": "power_source", "quantity": 1},
+      {"name": "multimeter", "type": "instrument", "quantity": 1},
+      {"name": "current-limited bench supply", "type": "instrument", "quantity": 1}
+    ],
+    "constraints": {
+      "maximum_speed_mps": 0.25,
+      "first_motion_current_limit_a": 1.0,
+      "operator_emergency_stop": true,
+      "mismatched_motor_must_be_rejected_or_derated": true,
+      "unknown_firmware_must_not_be_flashed": true,
+      "battery_voltage_v": 12
+    },
+    "repair_context": {
+      "baseline_state": "nonfunctional",
+      "known_failures": ["burned motor driver", "unknown pin mapping", "one mismatched motor"],
+      "required_reuse": ["chassis", "at least two measured-compatible motors"]
+    }
+  }
+}

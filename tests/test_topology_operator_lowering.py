@@ -35,32 +35,22 @@ def test_operator_lowering_marks_h_bridge_floating_motor_terminals() -> None:
     assert "n3:5V" not in lowered.graph["terminal_semantics"]
 
 
-def test_h_bridge_compile_uses_operator_lowering_with_actual_motor_load(tmp_path) -> None:
+def test_h_bridge_synthesis_does_not_bypass_unknown_carrier_current_contract(tmp_path) -> None:
     result = synthesize_circuit(_h_bridge_intent(), out_dir=tmp_path, export_gerber=False)
 
-    assert result["ok"] is True
-    assert result["module_ids"] == ["dc-barrel-12v", "arduino-nano", "l298n", "dc_geared_motor_12v"]
-    assert result["compose_result"]["compile_result"]["ok"] is True
-    electrical_errors = [
-        row
-        for row in result["compose_result"]["design_quality"]["electrical_issues"]
-        if row.get("level") == "error"
-    ]
-    assert electrical_errors == []
-    assert result["topology_lowering"]["operator_count"] == 1
-    lowered_terminals = {
-        (row.get("node_id"), row.get("pin_id"), row.get("role"))
-        for row in result["topology_lowering"]["actions"]
-        if row.get("action") == "mark_terminal"
-    }
-    assert lowered_terminals == {
-        ("n3", "OUT1", "floating_motor_terminal"),
-        ("n3", "OUT2", "floating_motor_terminal"),
-        ("n3", "OUT3", "floating_motor_terminal"),
-        ("n3", "OUT4", "floating_motor_terminal"),
-        ("n4", "VCC", "floating_motor_terminal"),
-        ("n4", "GND", "floating_motor_terminal"),
-    }
+    # Operator lowering is independently proven above. End-to-end synthesis must still
+    # refuse fabrication/readiness when the carrier-board motor-current rating is not an
+    # explicit structured contract. The L298 IC rating is not silently promoted to an
+    # arbitrary L298N module/carrier guarantee.
+    assert result["ok"] is False
+    assert result["error"] == "candidate_blocked"
+    assert "h_bridge_current_rating_contract" in result["missing_evidence"]
+    assert result["candidate"]["metadata"]["driver"] == "l298n"
+    current_constraint = next(
+        row for row in result["candidate"]["constraints"] if row.get("constraint_id") == "h_bridge_current_margin"
+    )
+    assert current_constraint["status"] == "blocked"
+    assert current_constraint["value"]["driver_rating_a"] is None
 
 
 def test_analog_conditioning_lowering_emits_physical_divider_and_filter_parts(tmp_path) -> None:

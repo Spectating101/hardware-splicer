@@ -132,7 +132,7 @@ export function analyzeBuild(graph: BuildGraph): BuildWarning[] {
         const snkRange = voltageRange(snk.pin.voltage) ?? (snk.moduleSpec.inputVoltageRange ?? null);
         const srcV = parseVoltage(src.pin.voltage);
         if (srcRange && snkRange && srcRange[1] >= snkRange[0] && srcRange[0] <= snkRange[1]) {
-          if (/adjust|trim|set/i.test(src.pin.voltage) || /adjust|trim|set/i.test(src.pin.notes ?? "")) {
+          if (/adjust|trim|set/i.test(src.pin.voltage ?? "") || /adjust|trim|set/i.test(src.pin.notes ?? "")) {
             warnings.push({
               id: `${w.id}-adjustable`,
               level: "info",

@@ -7,6 +7,7 @@ import {
 } from "../utils/compileTruth.js";
 import { StatusPill } from "./ProjectPanels.jsx";
 import DesignFlowStepper from "./DesignFlowStepper.jsx";
+import EngineeringReviewPanel from "./EngineeringReviewPanel.jsx";
 import { DesignArtifactsPanel, DesignReadinessPanel } from "./IntegrationsPanel.jsx";
 
 function useKiCanvasScript() {
@@ -254,6 +255,7 @@ export default function DesignPreviewPanel({ buildDir, pkg, qualityHint, title, 
           </button>
         )}
       </section>
+      <EngineeringReviewPanel buildDir={buildDir} />
       <DesignReadinessPanel buildDir={buildDir} onRecheckComplete={reloadQuality} />
       <DesignArtifactsPanel buildDir={buildDir} />
     </div>

@@ -2,6 +2,8 @@ import DesignPreviewPanel from "../components/DesignPreviewPanel.jsx";
 import DesignStudioPanel from "../components/DesignStudioPanel.jsx";
 import EvidenceWorkbenchPanel from "../components/EvidenceWorkbenchPanel.jsx";
 import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx";
+import MachineAuthoringPanel from "../components/MachineAuthoringPanel.jsx";
+import MachineEvidencePanel from "../components/MachineEvidencePanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
 import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
@@ -156,6 +158,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.design && (
           <div className="panel-stack" data-testid="stage-design">
+            <MachineAuthoringPanel session={session} onToast={onToast} />
             <MachineArchitecturePanel
               project={session.machineProject}
               onOpenDiscipline={(domain) => {
@@ -194,6 +197,7 @@ export default function ProjectWorkspace({
 
         {stage === STAGES.verify && (
           <div className="panel-stack" data-testid="stage-verify">
+            <MachineEvidencePanel session={session} onToast={onToast} />
             {session.mode === "salvage" && (
               <EvidenceWorkbenchPanel
                 session={session}

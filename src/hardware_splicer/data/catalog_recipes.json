@@ -1,0 +1,494 @@
+{
+  "schema_version": "hardware_splicer.catalog_recipes.v1",
+  "supported_build_ids": [
+    "automatic_plant_watering",
+    "automatic_plant_watering_usb",
+    "bench_power_adapter",
+    "camera_ir_light_or_sensor_mount",
+    "generic_low_voltage_build",
+    "indicator_or_task_light",
+    "inspection_motion_fixture",
+    "low_voltage_motor_test_jig",
+    "network_status_indicator",
+    "plotter_motion_stage",
+    "robot_drive_base",
+    "room_display_station",
+    "salvaged_input_panel",
+    "sensor_logger",
+    "small_audio_amp_box",
+    "smart_relay_box",
+    "usb_fume_extractor",
+    "usb_uart_debug_adapter"
+  ],
+  "build_catalog_capability_groups": {
+    "automatic_plant_watering": [
+      ["controller"],
+      ["sensor_or_adc"],
+      ["actuator_driver"],
+      ["motor_or_load", "fan_or_pump"],
+      ["power"]
+    ],
+    "usb_fume_extractor": [
+      ["controller"],
+      ["motor_or_load", "fan_or_pump"],
+      ["actuator_driver"],
+      ["power"]
+    ],
+    "inspection_motion_fixture": [
+      ["mechanical_motion"],
+      ["led_or_light", "camera_or_vision"],
+      ["power"]
+    ],
+    "low_voltage_motor_test_jig": [
+      ["motor_or_load", "fan_or_pump", "mechanical_motion"],
+      ["power"],
+      ["connector", "switch_or_button"]
+    ],
+    "robot_drive_base": [
+      ["motor_or_load", "wheel_or_drive"],
+      ["actuator_driver", "controller"],
+      ["power"]
+    ],
+    "plotter_motion_stage": [
+      ["mechanical_motion"],
+      ["switch_or_button", "sensor_or_adc"],
+      ["power"]
+    ],
+    "smart_relay_box": [
+      ["controller"],
+      ["actuator_driver"],
+      ["power"]
+    ],
+    "sensor_logger": [
+      ["controller"],
+      ["sensor_or_adc"],
+      ["power"]
+    ],
+    "room_display_station": [
+      ["controller"],
+      ["sensor_or_adc"],
+      ["display_or_ui"],
+      ["power"]
+    ],
+    "network_status_indicator": [
+      ["wireless", "network_interface"],
+      ["display_or_ui", "led_or_light"],
+      ["power"]
+    ],
+    "small_audio_amp_box": [
+      ["speaker_or_audio"],
+      ["power"],
+      ["switch_or_button", "connector"]
+    ],
+    "salvaged_input_panel": [
+      ["switch_or_button"],
+      ["connector"],
+      ["power", "controller"]
+    ],
+    "camera_ir_light_or_sensor_mount": [
+      ["camera_or_vision", "sensor_or_adc"],
+      ["power"],
+      ["enclosure_candidate", "connector"]
+    ],
+    "bench_power_adapter": [
+      ["power"],
+      ["connector"]
+    ],
+    "usb_uart_debug_adapter": [
+      ["usb_serial"],
+      ["connector"]
+    ],
+    "indicator_or_task_light": [
+      ["led_or_light"],
+      ["power"]
+    ],
+    "generic_low_voltage_build": [
+      ["controller"],
+      ["power"],
+      ["connector"]
+    ]
+  },
+  "recipes": {
+    "automatic_plant_watering": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "sns", "moduleId": "soil_moisture"},
+        {"role": "buck", "moduleId": "buck-mp1584"},
+        {"role": "shift", "moduleId": "level-shifter-4ch"},
+        {"role": "drv", "moduleId": "mosfet-irlz44n"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "buck", "pin": "IN+"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "buck", "pin": "IN-"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "buck", "pin": "OUT+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "buck", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VIN"}},
+        {"from": {"role": "buck", "pin": "OUT-"}, "to": {"role": "drv", "pin": "VIN-"}},
+        {"from": {"role": "buck", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+        {"from": {"role": "sns", "pin": "A0"}, "to": {"role": "mcu", "pin": "GPIO34"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "shift", "pin": "LV"}},
+        {"from": {"role": "buck", "pin": "OUT+"}, "to": {"role": "shift", "pin": "HV"}},
+        {"from": {"role": "buck", "pin": "OUT-"}, "to": {"role": "shift", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO4"}, "to": {"role": "shift", "pin": "LV1"}},
+        {"from": {"role": "shift", "pin": "HV1"}, "to": {"role": "drv", "pin": "SIG"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}}
+      ],
+      "notes": [
+        "Set the MP1584 output to 5.0V with a multimeter before connecting the pump or level-shifter HV rail.",
+        "ESP32 GPIO4 reaches the MOSFET SIG input only through an explicit 3.3V-to-5V level-shifter boundary.",
+        "Wire the mini pump to driver VOUT+/VOUT-; keep electronics above the wet zone.",
+        "Add a flyback diode across the pump if the module does not include one."
+      ]
+    },
+    "automatic_plant_watering_usb": {
+      "modules": [
+        {"role": "pwr", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "sns", "moduleId": "soil_moisture"},
+        {"role": "shift", "moduleId": "level-shifter-4ch"},
+        {"role": "drv", "moduleId": "mosfet-irlz44n"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "drv", "pin": "VIN"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "drv", "pin": "VIN-"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+        {"from": {"role": "sns", "pin": "A0"}, "to": {"role": "mcu", "pin": "GPIO34"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "shift", "pin": "LV"}},
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "shift", "pin": "HV"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "shift", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO4"}, "to": {"role": "shift", "pin": "LV1"}},
+        {"from": {"role": "shift", "pin": "HV1"}, "to": {"role": "drv", "pin": "SIG"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}}
+      ],
+      "notes": [
+        "USB power bank feeds ESP32 VIN, pump driver, and the level-shifter 5V side.",
+        "ESP32 GPIO4 reaches the MOSFET SIG input only through the explicit level-shifter boundary.",
+        "Wire mini pump to driver VOUT+/VOUT-; add flyback diode if the module lacks one.",
+        "Keep electronics above the wet zone; common GND across all modules."
+      ]
+    },
+    "bench_power_adapter": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "chg", "moduleId": "tp4056"},
+        {"role": "ldo", "moduleId": "ldo-ams1117-3v3"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "chg", "pin": "IN+"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "chg", "pin": "IN-"}},
+        {"from": {"role": "chg", "pin": "OUT+"}, "to": {"role": "ldo", "pin": "VIN"}},
+        {"from": {"role": "chg", "pin": "OUT-"}, "to": {"role": "ldo", "pin": "GND"}}
+      ],
+      "notes": [
+        "3.3V on LDO VOUT for sensors/MCU.",
+        "Optional Li-ion cell on TP4056 BAT+/BAT- for charging."
+      ]
+    },
+    "usb_fume_extractor": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "sns", "moduleId": "dht22"},
+        {"role": "shift", "moduleId": "level-shifter-4ch"},
+        {"role": "drv", "moduleId": "mosfet-irlz44n"},
+        {"role": "load", "moduleId": "cooling_fan_5v"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "drv", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "drv", "pin": "VIN-"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+        {"from": {"role": "sns", "pin": "DATA"}, "to": {"role": "mcu", "pin": "GPIO2"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "shift", "pin": "LV"}},
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "shift", "pin": "HV"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "shift", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO4"}, "to": {"role": "shift", "pin": "LV1"}},
+        {"from": {"role": "shift", "pin": "HV1"}, "to": {"role": "drv", "pin": "SIG"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "drv", "pin": "VOUT+"}, "to": {"role": "load", "pin": "VCC"}},
+        {"from": {"role": "drv", "pin": "VOUT-"}, "to": {"role": "load", "pin": "GND"}}
+      ],
+      "notes": [
+        "USB 5V feeds MCU, MOSFET load rail, and the level-shifter 5V side; fan stays on driver VOUT+/VOUT-.",
+        "GPIO4 via the level shifter is fan enable; DHT22 DATA uses footprint-backed GPIO2."
+      ]
+    },
+    "indicator_or_task_light": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "psu", "moduleId": "buck-mp1584"},
+        {"role": "drv", "moduleId": "mosfet-irlz44n"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "psu", "pin": "IN+"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "psu", "pin": "IN-"}},
+        {"from": {"role": "psu", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VIN"}},
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "VIN-"}},
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}}
+      ],
+      "notes": ["LED load on VOUT+/VOUT- with appropriate series resistor."]
+    },
+    "low_voltage_motor_test_jig": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "psu", "moduleId": "buck-mp1584"},
+        {"role": "drv", "moduleId": "mosfet-irlz44n"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "psu", "pin": "IN+"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "psu", "pin": "IN-"}},
+        {"from": {"role": "psu", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VIN"}},
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "VIN-"}},
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}}
+      ],
+      "notes": ["Add a manual switch on SIG for benchtop on/off."]
+    },
+    "smart_relay_box": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "arduino-nano"},
+        {"role": "rly", "moduleId": "relay-1ch-5v"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "5V"}, "to": {"role": "rly", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "rly", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "D2"}, "to": {"role": "rly", "pin": "IN"}}
+      ],
+      "notes": ["Add a fly-back diode if switching inductive loads."]
+    },
+    "sensor_logger": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "sns", "moduleId": "bme280"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO21"}, "to": {"role": "sns", "pin": "SDA"}},
+        {"from": {"role": "mcu", "pin": "GPIO22"}, "to": {"role": "sns", "pin": "SCL"}}
+      ],
+      "notes": ["3V3 from ESP32 feeds the BME280 directly."]
+    },
+    "room_display_station": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "ui", "moduleId": "ili9341_tft"},
+        {"role": "sns", "moduleId": "dht22"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "ui", "pin": "VCC"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "ui", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO23"}, "to": {"role": "ui", "pin": "SDI"}},
+        {"from": {"role": "mcu", "pin": "GPIO18"}, "to": {"role": "ui", "pin": "SCK"}},
+        {"from": {"role": "mcu", "pin": "GPIO15"}, "to": {"role": "ui", "pin": "CS"}},
+        {"from": {"role": "mcu", "pin": "GPIO2"}, "to": {"role": "ui", "pin": "RST"}},
+        {"from": {"role": "mcu", "pin": "GPIO4"}, "to": {"role": "ui", "pin": "DC"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "sns", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "sns", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO16"}, "to": {"role": "sns", "pin": "DATA"}}
+      ],
+      "notes": [
+        "ILI9341 color TFT on SPI; DHT22 on GPIO16.",
+        "Install TFT_eSPI + DHT libraries — match User_Setup pins to wiring above."
+      ]
+    },
+    "network_status_indicator": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "ui", "moduleId": "ssd1306-128x64"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "ui", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "ui", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO21"}, "to": {"role": "ui", "pin": "SDA"}},
+        {"from": {"role": "mcu", "pin": "GPIO22"}, "to": {"role": "ui", "pin": "SCL"}}
+      ],
+      "notes": ["ESP32 supplies Wi-Fi; OLED on shared 3V3 I2C bus."]
+    },
+    "inspection_motion_fixture": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "rpi-pico"},
+        {"role": "ui", "moduleId": "ssd1306-128x64"},
+        {"role": "svo_psu", "moduleId": "ldo-ams1117-5v"},
+        {"role": "svo", "moduleId": "sg90"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VBUS"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "svo_psu", "pin": "VIN"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "svo_psu", "pin": "GND"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "ui", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "ui", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GP4"}, "to": {"role": "ui", "pin": "SDA"}},
+        {"from": {"role": "mcu", "pin": "GP5"}, "to": {"role": "ui", "pin": "SCL"}},
+        {"from": {"role": "svo_psu", "pin": "VOUT"}, "to": {"role": "svo", "pin": "VCC"}},
+        {"from": {"role": "svo_psu", "pin": "GND"}, "to": {"role": "svo", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GP0"}, "to": {"role": "svo", "pin": "SIG"}}
+      ],
+      "notes": [
+        "12V barrel feeds the servo LDO; USB 5V feeds the Pico.",
+        "Common GND between Pico, display, and servo rail."
+      ]
+    },
+    "plotter_motion_stage": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "arduino-nano"},
+        {"role": "mot_psu", "moduleId": "buck-mp1584"},
+        {"role": "drv", "moduleId": "a4988-stepper"},
+        {"role": "lim_x", "moduleId": "limit-switch-3pin"},
+        {"role": "lim_y", "moduleId": "limit-switch-3pin"},
+        {"role": "svo_psu", "moduleId": "ldo-ams1117-5v"},
+        {"role": "svo", "moduleId": "sg90"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "mot_psu", "pin": "IN+"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mot_psu", "pin": "IN-"}},
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mot_psu", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VMOT"}},
+        {"from": {"role": "mot_psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND_MOTOR"}},
+        {"from": {"role": "mcu", "pin": "5V"}, "to": {"role": "drv", "pin": "VDD"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "drv", "pin": "GND_LOGIC"}},
+        {"from": {"role": "mcu", "pin": "D2"}, "to": {"role": "drv", "pin": "STEP"}},
+        {"from": {"role": "mcu", "pin": "D3"}, "to": {"role": "drv", "pin": "DIR"}},
+        {"from": {"role": "mcu", "pin": "5V"}, "to": {"role": "lim_x", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "lim_x", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "A0"}, "to": {"role": "lim_x", "pin": "SIG"}},
+        {"from": {"role": "mcu", "pin": "5V"}, "to": {"role": "lim_y", "pin": "VCC"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "lim_y", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "A4"}, "to": {"role": "lim_y", "pin": "SIG"}},
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "svo_psu", "pin": "VIN"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "svo_psu", "pin": "GND"}},
+        {"from": {"role": "svo_psu", "pin": "VOUT"}, "to": {"role": "svo", "pin": "VCC"}},
+        {"from": {"role": "svo_psu", "pin": "GND"}, "to": {"role": "svo", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "A5"}, "to": {"role": "svo", "pin": "SIG"}}
+      ],
+      "notes": [
+        "A4988 stepper on motor buck; dual limit switches on A0/A4; tie EN to GND to enable driver.",
+        "12V barrel feeds motor buck + servo LDO; USB 5V feeds Arduino."
+      ]
+    },
+    "robot_drive_base": {
+      "modules": [
+        {"role": "pwr", "moduleId": "dc-barrel-12v"},
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "arduino-nano"},
+        {"role": "mot_psu", "moduleId": "buck-mp1584"},
+        {"role": "drv", "moduleId": "l298n"}
+      ],
+      "wires": [
+        {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "mot_psu", "pin": "IN+"}},
+        {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "mot_psu", "pin": "IN-"}},
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mot_psu", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VCC"}},
+        {"from": {"role": "mot_psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "D2"}, "to": {"role": "drv", "pin": "IN1"}},
+        {"from": {"role": "mcu", "pin": "D3"}, "to": {"role": "drv", "pin": "IN2"}}
+      ],
+      "notes": [
+        "Set motor buck to motor rated voltage. Motors on OUT1/OUT2.",
+        "USB 5V feeds Arduino; 12V barrel feeds motor driver supply."
+      ]
+    },
+    "usb_uart_debug_adapter": {
+      "modules": [
+        {"role": "adapter", "moduleId": "ch340-usb-ttl"},
+        {"role": "target", "moduleId": "arduino-nano"}
+      ],
+      "wires": [
+        {"from": {"role": "adapter", "pin": "VCC"}, "to": {"role": "target", "pin": "VIN"}},
+        {"from": {"role": "adapter", "pin": "GND"}, "to": {"role": "target", "pin": "GND"}},
+        {"from": {"role": "adapter", "pin": "TX"}, "to": {"role": "target", "pin": "D2"}},
+        {"from": {"role": "adapter", "pin": "RX"}, "to": {"role": "target", "pin": "D3"}}
+      ],
+      "notes": [
+        "CH340 is powered from its USB cable; VCC feeds the target MCU.",
+        "Wire to native UART pins on your target for production use."
+      ]
+    },
+    "small_audio_amp_box": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"},
+        {"role": "amp", "moduleId": "max98357a-i2s-amp"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "3V3"}, "to": {"role": "amp", "pin": "VIN"}},
+        {"from": {"role": "mcu", "pin": "GND"}, "to": {"role": "amp", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "GPIO21"}, "to": {"role": "amp", "pin": "LRC"}},
+        {"from": {"role": "mcu", "pin": "GPIO22"}, "to": {"role": "amp", "pin": "BCLK"}},
+        {"from": {"role": "mcu", "pin": "GPIO4"}, "to": {"role": "amp", "pin": "DIN"}}
+      ],
+      "notes": ["MAX98357A I2S Class-D mono amp — connect 4Ω+ speaker across SPK+/SPK-."]
+    },
+    "salvaged_input_panel": {
+      "modules": [
+        {"role": "mcu", "moduleId": "arduino-nano"},
+        {"role": "adapter", "moduleId": "ch340-usb-ttl"}
+      ],
+      "wires": [
+        {"from": {"role": "adapter", "pin": "VCC"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "adapter", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "adapter", "pin": "TX"}, "to": {"role": "mcu", "pin": "D2"}},
+        {"from": {"role": "adapter", "pin": "RX"}, "to": {"role": "mcu", "pin": "D3"}}
+      ],
+      "notes": ["Switches wire to A0..A5; read over USB serial via CH340."]
+    },
+    "camera_ir_light_or_sensor_mount": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "cam", "moduleId": "esp32-cam-module"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "cam", "pin": "5V"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "cam", "pin": "GND"}}
+      ],
+      "notes": [
+        "ESP32-CAM OV2640 module — use U0T/U0R for flashing when GPIO0 strapped.",
+        "Mount mechanics are handled by Mecha-Splicer enclosure output."
+      ]
+    },
+    "generic_low_voltage_build": {
+      "modules": [
+        {"role": "usb", "moduleId": "usb-power-5v"},
+        {"role": "mcu", "moduleId": "esp32-devkit"}
+      ],
+      "wires": [
+        {"from": {"role": "usb", "pin": "V+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "usb", "pin": "GND"}, "to": {"role": "mcu", "pin": "GND"}}
+      ],
+      "notes": ["Flexible USB-powered starter — use compose_from_inventory to auto-wire owned modules."]
+    }
+  }
+}

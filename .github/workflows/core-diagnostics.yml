@@ -13,6 +13,85 @@ on:
       - ".github/workflows/core-diagnostics.yml"
 
 jobs:
+  engineering-core:
+    name: Engineering core fast bar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install package and test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev]'
+      - name: Compile engineering package
+        run: python -m compileall -q src/hardware_splicer
+      - name: Run every Python test changed by this pull request
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          git fetch --no-tags origin "$BASE_REF:refs/remotes/origin/$BASE_REF"
+          mapfile -t changed_tests < <(
+            git diff --name-only "origin/$BASE_REF...HEAD" \
+              | grep -E '^tests/test_.*\.py$' \
+              | sort
+          )
+          if (( ${#changed_tests[@]} == 0 )); then
+            echo "No changed Python tests to run."
+            exit 0
+          fi
+          printf 'Running %s changed test files:\n' "${#changed_tests[@]}"
+          printf ' - %s\n' "${changed_tests[@]}"
+          PYTHONPATH=src python -m pytest -q --tb=short --maxfail=5 "${changed_tests[@]}"
+
+  project-store-regression:
+    name: Project store and review regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install package and test dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev]'
+      - name: Run focused project persistence tests
+        env:
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          PYTHONPATH=src python -m pytest -q --tb=short --maxfail=5 \
+            tests/test_project_review_store.py \
+            tests/test_project_review_api.py \
+            tests/test_project_store.py \
+            tests/test_project_api.py \
+            tests/test_product_api_projects.py
+
+  python-suite:
+    name: Full Python regression suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install package and full integration test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          python -m pip install -r apps/3d-splicer/requirements.txt
+      - name: Run complete Python suite
+        env:
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          HARDWARE_SPLICER_OFFLINE_LLM: "1"
+          HARDWARE_SPLICER_OFFLINE_VISION: "1"
+          HARDWARE_SPLICER_OFFLINE_SALVAGE: "1"
+          QWEN_DISABLED: "1"
+        run: PYTHONPATH=src python -m pytest -q --tb=short --maxfail=5
+
   diagnose:
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +115,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           source .venv/bin/activate
-          PYTHONPATH=src pytest -q \
+          PYTHONPATH=src pytest -q --tb=short --maxfail=5 \
             tests/test_project_review_store.py \
             tests/test_project_review_api.py \
             tests/test_project_store.py \
@@ -46,6 +125,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+          PYTEST_ADDOPTS: "--tb=short --maxfail=5"
         run: |
           source .venv/bin/activate
           make test

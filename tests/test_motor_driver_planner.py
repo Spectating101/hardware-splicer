@@ -2,8 +2,14 @@ from __future__ import annotations
 
 import pytest
 
+import hardware_splicer.circuit_synthesis.motor_driver_planner as motor_planner
 from hardware_splicer.api import create_app
 from hardware_splicer.circuit_synthesis import plan_motor_driver
+from hardware_splicer.electrical_contract_truth import (
+    exact_output_voltage_v,
+    logic_input_min_v,
+    max_output_current_a,
+)
 from hardware_splicer.sdk import plan_motor_driver_circuit, sdk_info
 
 
@@ -11,9 +17,16 @@ def _intent(**extra):
     payload = {
         "goal": "drive a small DC pump from a microcontroller GPIO",
         "supply_rails": [{"name": "+5V", "voltage_v": 5.0, "max_current_a": 1.0}],
-        "load_requirements": [{"name": "pump", "type": "dc_motor", "voltage_v": 5.0, "current_a": 0.45}],
+        "load_requirements": [
+            {"name": "pump", "type": "dc_motor", "voltage_v": 5.0, "current_a": 0.45}
+        ],
         "signal_requirements": [{"name": "control", "type": "pwm", "voltage_v": 3.3}],
-        "allowed_modules": ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "water_pump_5v"],
+        "allowed_modules": [
+            "usb-power-5v",
+            "esp32-devkit",
+            "mosfet-irlz44n",
+            "water_pump_5v",
+        ],
         "required_evidence": ["flyback_or_driver_protection"],
     }
     payload.update(extra)
@@ -26,16 +39,70 @@ def _constraint(candidate, constraint_id: str):
     return rows[0]
 
 
-def test_motor_driver_planner_returns_ready_for_review_low_side_switch() -> None:
+def test_structured_catalog_current_truth_replaces_local_rating_table() -> None:
+    assert max_output_current_a("buck-lm2596") == pytest.approx(2.0)
+    assert max_output_current_a("buck-mp1584") == pytest.approx(3.0)
+    assert max_output_current_a("usb-power-5v") is None
+    assert max_output_current_a("dc-barrel-12v") is None
+    assert max_output_current_a("l298n") is None
+    assert max_output_current_a("mosfet-irlz44n") is None
+    assert max_output_current_a("mosfet-irf520") is None
+
+
+def test_exact_catalog_output_voltage_and_explicit_logic_contracts_remain_distinct() -> None:
+    assert exact_output_voltage_v("usb-power-5v") == pytest.approx(5.0)
+    assert exact_output_voltage_v("dc-barrel-12v") == pytest.approx(12.0)
+    assert exact_output_voltage_v("buck-lm2596") is None
+    assert exact_output_voltage_v("buck-mp1584") is None
+    assert logic_input_min_v("l298n") == pytest.approx(2.3)
+    assert logic_input_min_v("mosfet-irlz44n") == pytest.approx(4.5)
+    assert logic_input_min_v("mosfet-irf520") is None
+
+
+def test_motor_driver_planner_blocks_unstructured_switch_current_and_known_logic_mismatch() -> None:
+    candidate = plan_motor_driver(_intent()).to_dict()
+
+    assert candidate["result"] == "blocked"
+    assert candidate["selected_modules"] == ["mosfet-irlz44n"]
+    assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
+    assert "mosfet-irlz44n_output_current_rating" in candidate["missing_evidence"]
+    assert "level_shifter_or_compatible_driver" in candidate["missing_evidence"]
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
+    assert _constraint(candidate, "switch_current_rating")["status"] == "blocked"
+    logic = _constraint(candidate, "mosfet-irlz44n_logic_level")
+    assert logic["status"] == "blocked"
+    assert logic["value"]["control_voltage_v"] == pytest.approx(3.3)
+    assert logic["value"]["required_min_v"] == pytest.approx(4.5)
+    assert _constraint(candidate, "inductive_load_protection")["status"] == "pass"
+    assert candidate["metadata"]["electrical_truth"]["summary_text_used_as_rating"] is False
+    assert candidate["metadata"]["electrical_truth"]["magic_module_rating_table_used"] is False
+
+
+def test_motor_driver_planner_becomes_reviewable_with_explicit_structured_contract(monkeypatch) -> None:
+    monkeypatch.setattr(
+        motor_planner,
+        "max_output_current_a",
+        lambda module_id: 5.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "logic_input_min_v",
+        lambda module_id: 3.0 if module_id == "mosfet-irlz44n" else None,
+    )
+    monkeypatch.setattr(
+        motor_planner,
+        "integrated_inductive_protection",
+        lambda module_id: False,
+    )
+
     candidate = plan_motor_driver(_intent()).to_dict()
 
     assert candidate["result"] == "ready_for_review"
-    assert candidate["selected_modules"] == ["mosfet-irlz44n"]
-    assert candidate["generated_topology"][0]["operator_type"] == "low_side_switch"
-    assert _constraint(candidate, "supply_current_margin")["status"] == "pass"
+    assert _constraint(candidate, "switch_current_rating")["status"] == "pass"
+    assert _constraint(candidate, "mosfet-irlz44n_logic_level")["status"] == "pass"
     assert _constraint(candidate, "inductive_load_protection")["status"] == "pass"
-    assert "psu_current_limit_ramp" in [gate["gate_id"] for gate in candidate["verification_gates"]]
-    assert candidate["recommended_build_path"]["can_compile_with_existing_auto_wire"] is True
+    rating = candidate["generated_topology"][0]["metadata"]["current_rating_a"]
+    assert rating == pytest.approx(5.0)
 
 
 def test_motor_driver_planner_blocks_missing_inductive_protection() -> None:
@@ -65,7 +132,28 @@ def test_motor_driver_planner_blocks_undersized_supply() -> None:
     assert _constraint(candidate, "supply_current_margin")["status"] == "blocked"
 
 
-def test_motor_driver_planner_blocks_3v3_signal_into_5v_driver_without_level_shift() -> None:
+def test_catalog_power_source_without_current_contract_stays_unresolved() -> None:
+    candidate = plan_motor_driver(
+        _intent(supply_rails=[], allowed_modules=["usb-power-5v", "mosfet-irlz44n"])
+    ).to_dict()
+
+    assert candidate["metadata"]["supply"]["source"] == "structured_catalog_contract"
+    assert candidate["metadata"]["supply"]["voltage_v"] == pytest.approx(5.0)
+    assert candidate["metadata"]["supply"]["max_current_a"] is None
+    assert "supply_current_limit" in candidate["missing_evidence"]
+
+
+def test_adjustable_buck_does_not_become_an_undeclared_output_voltage() -> None:
+    candidate = plan_motor_driver(
+        _intent(supply_rails=[], allowed_modules=["buck-lm2596", "mosfet-irlz44n"])
+    ).to_dict()
+
+    assert candidate["metadata"]["supply"]["max_current_a"] == pytest.approx(2.0)
+    assert candidate["metadata"]["supply"]["voltage_v"] is None
+    assert "supply_voltage" in candidate["missing_evidence"]
+
+
+def test_motor_driver_planner_uses_l298n_explicit_logic_contract() -> None:
     candidate = plan_motor_driver(
         _intent(
             allowed_modules=["usb-power-5v", "esp32-devkit", "l298n", "water_pump_5v"],
@@ -75,30 +163,57 @@ def test_motor_driver_planner_blocks_3v3_signal_into_5v_driver_without_level_shi
 
     assert candidate["result"] == "blocked"
     assert candidate["selected_modules"] == ["l298n"]
-    assert "level_shifter_or_compatible_driver" in candidate["missing_evidence"]
-    assert _constraint(candidate, "l298n_logic_level")["status"] == "blocked"
+    assert "l298n_output_current_rating" in candidate["missing_evidence"]
+    assert "l298n_logic_input_threshold" not in candidate["missing_evidence"]
+    assert _constraint(candidate, "driver_current_rating")["status"] == "blocked"
+    logic = _constraint(candidate, "l298n_logic_level")
+    assert logic["status"] == "pass"
+    assert logic["value"]["required_min_v"] == pytest.approx(2.3)
 
 
-def test_motor_driver_planner_allows_5v_driver_with_level_shifter() -> None:
+def test_level_shifter_path_is_available_for_known_irlz44n_threshold() -> None:
     candidate = plan_motor_driver(
         _intent(
-            allowed_modules=["usb-power-5v", "esp32-devkit", "l298n", "level-shifter-4ch", "water_pump_5v"],
+            allowed_modules=[
+                "usb-power-5v",
+                "esp32-devkit",
+                "mosfet-irlz44n",
+                "level-shifter-4ch",
+                "water_pump_5v",
+            ],
             required_evidence=[],
         )
     ).to_dict()
 
-    assert candidate["result"] == "ready_for_review"
-    assert _constraint(candidate, "l298n_logic_level_shifted")["status"] == "pass"
-    assert candidate["generated_topology"][0]["operator_type"] == "motor_driver"
+    assert candidate["result"] == "blocked"
+    assert "mosfet-irlz44n_logic_input_threshold" not in candidate["missing_evidence"]
+    shifted = _constraint(candidate, "mosfet-irlz44n_logic_level_shifted")
+    assert shifted["status"] == "pass"
+    assert shifted["value"]["required_min_v"] == pytest.approx(4.5)
+    assert shifted["value"]["level_shifter_candidates"] == ["level-shifter-4ch"]
 
 
-def test_motor_driver_planner_sdk_and_api_surface() -> None:
+def test_multiple_driver_families_require_explicit_topology_choice() -> None:
+    candidate = plan_motor_driver(
+        _intent(allowed_modules=["l298n", "mosfet-irlz44n", "usb-power-5v"])
+    ).to_dict()
+
+    assert candidate["result"] == "blocked"
+    assert candidate["selected_modules"] == []
+    assert "driver_topology_choice" in candidate["missing_evidence"]
+    row = _constraint(candidate, "driver_topology_choice")
+    assert row["status"] == "blocked"
+    assert row["value"] == {
+        "h_bridge_candidates": ["l298n"],
+        "low_side_switch_candidates": ["mosfet-irlz44n"],
+    }
+
+
+def test_motor_driver_planner_sdk_and_api_surface_remains_available() -> None:
     sdk_candidate = plan_motor_driver_circuit(_intent())
-    assert sdk_candidate["result"] == "ready_for_review"
+    assert sdk_candidate["result"] == "blocked"
     assert "hs_plan_motor_driver_circuit" in sdk_info()["agent_handoff"]["primary_tools"]
 
     pytest.importorskip("fastapi")
-
     routes = {getattr(route, "path", "") for route in create_app().routes}
-
     assert "/v1/circuit-synthesis/motor-driver" in routes

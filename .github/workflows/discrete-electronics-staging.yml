@@ -1,0 +1,64 @@
+name: Discrete Electronics Staging
+
+on:
+  push:
+    branches:
+      - "agent/discrete-electronics-staging-20260810"
+    paths:
+      - "src/hardware_splicer/discrete_electronics_truth.py"
+      - "experiments/electronics/discrete_uart_3v3_1v8_evidence.json"
+      - "experiments/electronics/discrete_uart_3v3_1v8_gpt56_sol.json"
+      - "tests/test_discrete_electronics_truth.py"
+      - "scripts/run_discrete_electronics_benchmark.py"
+      - ".github/workflows/discrete-electronics-staging.yml"
+  pull_request:
+    paths:
+      - "src/hardware_splicer/discrete_electronics_truth.py"
+      - "experiments/electronics/discrete_uart_3v3_1v8_evidence.json"
+      - "experiments/electronics/discrete_uart_3v3_1v8_gpt56_sol.json"
+      - "tests/test_discrete_electronics_truth.py"
+      - "scripts/run_discrete_electronics_benchmark.py"
+      - ".github/workflows/discrete-electronics-staging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discrete-truth:
+    name: Datasheet-backed rail and translator contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and tests
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e . pytest
+
+      - name: Run discrete electronics truth tests
+        run: pytest -q tests/test_discrete_electronics_truth.py
+
+      - name: Persist discrete electronics report
+        run: |
+          python scripts/run_discrete_electronics_benchmark.py \
+            --proposal experiments/electronics/discrete_uart_3v3_1v8_gpt56_sol.json \
+            --evidence experiments/electronics/discrete_uart_3v3_1v8_evidence.json \
+            --out-dir artifacts/discrete-electronics
+
+      - name: Upload discrete electronics evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: discrete-electronics-staging
+          path: artifacts/discrete-electronics
+          if-no-files-found: error

@@ -1,0 +1,78 @@
+{
+  "scenario_id": "pupper_depth_camera_inspection_mod",
+  "mode": "modify",
+  "reference_project": "Stanford Pupper",
+  "expected_archetype": "quadruped",
+  "user_need": "Modify a Stanford Pupper-style quadruped for slow indoor inspection by adding a forward depth camera and protective payload mount without destabilizing the gait or overloading the power system.",
+  "reference_sources": {
+    "repository": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+    "documentation": [
+      "https://pupper.readthedocs.io/en/latest/guide/assembly.html",
+      "https://pupper.readthedocs.io/en/latest/guide/calibration.html"
+    ],
+    "videos": [
+      "https://youtu.be/NIjodHA78UE",
+      "https://youtu.be/aUnK3Wvj8CU",
+      "https://youtu.be/gvaUp9pQ-W4"
+    ]
+  },
+  "guidance_expectations": {
+    "minimum_part_lines": 16,
+    "tools_required": true,
+    "custom_mechanics": true,
+    "firmware_required": true,
+    "middleware_required": true
+  },
+  "intake": {
+    "project_name": "pupper_depth_camera_inspection_mod",
+    "goal": "Modify an existing twelve-actuator Pupper quadruped with a forward depth camera, protected mount, onboard perception process and slow inspection gait while preserving joint calibration and safe first-motion limits.",
+    "salvage_mode": false,
+    "baseline": {
+      "platform": "Stanford Pupper",
+      "leg_count": 4,
+      "joints_per_leg": 3,
+      "actuator_count": 12,
+      "robot_computer": "Raspberry Pi",
+      "control_model": "gait scheduler, stance controller, swing controller and inverse kinematics"
+    },
+    "change_request": {
+      "add": ["forward depth camera", "camera mount", "protective bumper", "perception process"],
+      "modify": ["body payload", "center of mass", "power budget", "inspection gait limits"],
+      "preserve": ["servo calibration", "joint identities", "emergency stop", "existing locomotion controller"]
+    },
+    "available_parts": [
+      {"name": "Pupper body and four leg assemblies", "type": "quadruped_structure", "quantity": 1},
+      {"name": "smart servo actuator", "type": "smart_servo", "quantity": 12},
+      {"name": "Raspberry Pi robot computer", "type": "computer", "quantity": 1},
+      {"name": "servo control board", "type": "motor_controller", "quantity": 1},
+      {"name": "IMU", "type": "imu", "quantity": 1},
+      {"name": "Luxonis OAK-D Lite depth camera", "type": "depth_camera", "quantity": 1},
+      {"name": "3D printed camera mount", "type": "mechanical_mount", "quantity": 1},
+      {"name": "camera protective bumper", "type": "mechanical_guard", "quantity": 1},
+      {"name": "USB cable with strain relief", "type": "cable", "quantity": 1},
+      {"name": "2S lithium battery", "type": "power_source", "quantity": 1},
+      {"name": "battery voltage monitor", "type": "sensor", "quantity": 1},
+      {"name": "hardware emergency stop", "type": "safety_switch", "quantity": 1},
+      {"name": "M3 mounting screw", "type": "fastener", "quantity": 8},
+      {"name": "thread-locking compound", "type": "assembly_material", "quantity": 1},
+      {"name": "calibration stand", "type": "tool", "quantity": 1},
+      {"name": "current-limited bench supply", "type": "tool", "quantity": 1}
+    ],
+    "constraints": {
+      "payload_mass_limit_g": 180,
+      "camera_mount_height_limit_mm": 90,
+      "first_motion_current_limit_a": 5,
+      "maximum_inspection_speed_mps": 0.2,
+      "minimum_static_stability_margin_mm": 20,
+      "camera_fov_unobstructed": true,
+      "recalibration_required_after_mounting": true,
+      "tethered_first_motion_required": true,
+      "emergency_stop_required": true
+    },
+    "reference_sources": {
+      "baseline_repository": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+      "assembly_video": "https://youtu.be/aUnK3Wvj8CU",
+      "range_of_motion_video": "https://youtu.be/gvaUp9pQ-W4"
+    }
+  }
+}

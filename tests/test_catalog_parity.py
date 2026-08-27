@@ -12,6 +12,14 @@ from hardware_splicer.catalog import CATALOG_BUILD_IDS
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPILE_SCRIPT = ROOT / "scripts" / "compile_build_graph.cjs"
+TYPESCRIPT_MODULE = (
+    ROOT
+    / "apps"
+    / "circuit-ai"
+    / "circuit-ai-frontend"
+    / "node_modules"
+    / "typescript"
+)
 
 
 def test_python_catalog_is_sorted_unique() -> None:
@@ -19,7 +27,10 @@ def test_python_catalog_is_sorted_unique() -> None:
     assert len(CATALOG_BUILD_IDS) == len(set(CATALOG_BUILD_IDS))
 
 
-@pytest.mark.skipif(not shutil.which("node"), reason="node not available")
+@pytest.mark.skipif(
+    not shutil.which("node") or not TYPESCRIPT_MODULE.is_dir(),
+    reason="Node and the locked frontend TypeScript toolchain are required for source parity",
+)
 def test_catalog_matches_typescript_supported_build_ids() -> None:
     proc = subprocess.run(
         ["node", str(COMPILE_SCRIPT), "--list-build-ids"],

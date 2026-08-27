@@ -1,0 +1,181 @@
+{
+  "schema_version": "hardware_splicer.semiconductor_fixture_e2e_case.v1",
+  "scenario_id": "low_voltage_dut_validation_adapter",
+  "description": "Pre-fabrication readiness validation for a low-voltage mixed-signal DUT socket adapter. The case is intentionally blocked by an unproven 3.3 V controller to 1.8 V DUT interface.",
+  "project_id": "golden-dut-fixture",
+  "name": "Golden low-voltage DUT validation adapter",
+  "mission": "Prepare a reviewable pre-fabrication design for a socketed mixed-signal DUT validation adapter that provides controlled 1.8 V power, current measurement, protected digital stimulus, analog observation, fixture identification, and deterministic test-point access without authorizing fabrication or DUT power-up.",
+  "mode": "build",
+  "constraints": {
+    "dut_core_nominal_v": 1.8,
+    "dut_core_tolerance_percent": 5,
+    "dut_io_nominal_v": 1.8,
+    "controller_io_v": 3.3,
+    "dut_absolute_max_pin_v": 2.0,
+    "dut_startup_current_limit_ma": 80,
+    "dut_steady_state_current_limit_ma": 35,
+    "analog_measurement_range_v": 1.8,
+    "fixture_supply_input_v": 5.0,
+    "fixture_max_width_mm": 100,
+    "fixture_max_length_mm": 120,
+    "socket_replaceable": true,
+    "keyed_external_connectors": true,
+    "fabrication_requires_closed_drc": true,
+    "power_on_requires_physical_evidence": true
+  },
+  "available_parts": [
+    {
+      "part_id": "dut-socket",
+      "name": "Replaceable 32-pin QFN evaluation socket",
+      "type": "socket",
+      "quantity": 1
+    },
+    {
+      "part_id": "fixture-mcu",
+      "name": "3.3 V USB fixture controller",
+      "type": "microcontroller",
+      "quantity": 1
+    },
+    {
+      "part_id": "level-translator",
+      "name": "Bidirectional 1.8 V to 3.3 V level translator",
+      "type": "level_shifter",
+      "quantity": 1
+    },
+    {
+      "part_id": "core-regulator",
+      "name": "Programmable current-limited 1.8 V regulator",
+      "type": "power_converter",
+      "quantity": 1
+    },
+    {
+      "part_id": "current-monitor",
+      "name": "High-side current monitor",
+      "type": "current_sensor",
+      "quantity": 1
+    },
+    {
+      "part_id": "analog-buffer",
+      "name": "Rail-to-rail analog observation buffer",
+      "type": "analog_frontend",
+      "quantity": 2
+    },
+    {
+      "part_id": "esd-array",
+      "name": "Low-capacitance ESD protection array",
+      "type": "protection",
+      "quantity": 2
+    },
+    {
+      "part_id": "fixture-eeprom",
+      "name": "Fixture identity EEPROM",
+      "type": "memory",
+      "quantity": 1
+    },
+    {
+      "part_id": "pogo-header",
+      "name": "Keyed test-equipment pogo interface",
+      "type": "connector",
+      "quantity": 1
+    }
+  ],
+  "engineering_sources": [
+    {
+      "source_id": "dut-datasheet-r1",
+      "source_type": "datasheet",
+      "media_type": "application/pdf",
+      "content_hash": "sha256:fixture-dut-datasheet-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "Fixture DUT electrical limits",
+        "document_role": "electrical_authority",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC FIXTURE DATASHEET R1: VCORE=1.8 V +/-5%; VIO=1.8 V; absolute maximum for all digital pins=2.0 V; direct 3.3 V drive is prohibited; startup current must remain below 80 mA; steady-state current must remain below 35 mA."
+    },
+    {
+      "source_id": "dut-pin-map-r1",
+      "source_type": "pin_map",
+      "media_type": "application/json",
+      "content_hash": "sha256:fixture-dut-pin-map-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "DUT socket pin map",
+        "document_role": "interface_authority",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC PIN MAP: pins 1-4 VCORE; pins 5-6 ground; pins 7-12 1.8 V digital input; pins 13-18 1.8 V digital output; pins 19-22 analog output; pin 23 reset_n; pins 24-32 reserved or no-connect."
+    },
+    {
+      "source_id": "socket-drawing-r1",
+      "source_type": "mechanical_drawing",
+      "media_type": "application/pdf",
+      "content_hash": "sha256:fixture-socket-drawing-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "QFN socket mechanical and keepout drawing",
+        "document_role": "mechanical_authority",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC SOCKET DRAWING: 32-pin replaceable socket; 24 mm square body; 34 mm lever sweep; 5 mm component keepout around body; pin 1 orientation must be visible after assembly."
+    },
+    {
+      "source_id": "test-limits-r1",
+      "source_type": "test_specification",
+      "media_type": "application/json",
+      "content_hash": "sha256:fixture-test-limits-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "DUT validation limits",
+        "document_role": "test_authority",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC TEST LIMITS: pre-power resistance check required; first energization at 20 mA limit; ramp to 80 mA only after no-short evidence; logic stimulus must remain in the 1.8 V domain; analog outputs observed through buffers only; reserved pins remain no-connect."
+    },
+    {
+      "source_id": "fixture-controller-manual-r1",
+      "source_type": "manual",
+      "media_type": "application/pdf",
+      "content_hash": "sha256:fixture-controller-manual-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "USB fixture controller electrical manual",
+        "document_role": "controller_authority",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC CONTROLLER MANUAL: all GPIO are 3.3 V CMOS; reset defaults may enable weak 3.3 V pull-ups; pins are not safe for direct connection to a 1.8 V-only DUT; outputs are disabled only after firmware initialization."
+    },
+    {
+      "source_id": "lab-supply-procedure-r1",
+      "source_type": "procedure",
+      "media_type": "text/markdown",
+      "content_hash": "sha256:fixture-lab-supply-procedure-r1",
+      "revision": "R1",
+      "authority_ceiling": "declared",
+      "metadata": {
+        "title": "Current-limited DUT bring-up procedure",
+        "document_role": "bench_procedure",
+        "synthetic_fixture": true
+      },
+      "content": "SYNTHETIC BENCH PROCEDURE: verify polarity and resistance with DUT absent; insert known-good DUT; begin at 1.8 V and 20 mA; record current and thermal response; do not enable stimulus until rail and level translation are verified."
+    }
+  ],
+  "expected": {
+    "source_count": 6,
+    "proposal_action_type": "run_compose",
+    "failure_contains": "1.8 V DUT interface is not protected from 3.3 V controller",
+    "repair_action_types": [
+      "revise_candidate",
+      "run_compose"
+    ],
+    "conversation_action_type": "prepare_verification",
+    "package_file_count": 15,
+    "source_revision_for_package": 6,
+    "all_physical_authority_false": true
+  }
+}

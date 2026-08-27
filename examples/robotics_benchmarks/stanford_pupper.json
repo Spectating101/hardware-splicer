@@ -1,0 +1,61 @@
+{
+  "benchmark_id": "stanford_pupper",
+  "robot_genre": "legged_quadruped",
+  "reference_project": "Stanford Pupper",
+  "expected_archetype": "quadruped",
+  "reference_sources": {
+    "repository": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+    "documentation": ["https://pupper.readthedocs.io/en/latest/guide/assembly.html"],
+    "videos": ["https://www.youtube.com/results?search_query=Stanford+Pupper+assembly"]
+  },
+  "stress_profile": {
+    "actuator_count": 12,
+    "kinematic_chains": 4,
+    "sensor_count": 13,
+    "control_loops": 8,
+    "power_domains": 3,
+    "external_interfaces": 10,
+    "firmware_components": 2,
+    "ros_interfaces": 8,
+    "dynamic_coupling": "high",
+    "safety_criticality": "high",
+    "required_domains": ["mechanical", "actuation", "control", "platform", "safety", "electrical", "perception", "firmware", "ros", "evidence"]
+  },
+  "intake": {
+    "project_name": "stanford_pupper_reference",
+    "goal": "Build a twelve-actuator quadruped robot with four three-joint legs, joint calibration, IMU feedback, gait control, torque or impedance control, battery protection and dynamic locomotion validation.",
+    "salvage_mode": false,
+    "available_parts": [
+      {"name": "front-left hip actuator", "type": "smart_servo"},
+      {"name": "front-left upper-leg actuator", "type": "smart_servo"},
+      {"name": "front-left knee actuator", "type": "smart_servo"},
+      {"name": "front-right hip actuator", "type": "smart_servo"},
+      {"name": "front-right upper-leg actuator", "type": "smart_servo"},
+      {"name": "front-right knee actuator", "type": "smart_servo"},
+      {"name": "rear-left hip actuator", "type": "smart_servo"},
+      {"name": "rear-left upper-leg actuator", "type": "smart_servo"},
+      {"name": "rear-left knee actuator", "type": "smart_servo"},
+      {"name": "rear-right hip actuator", "type": "smart_servo"},
+      {"name": "rear-right upper-leg actuator", "type": "smart_servo"},
+      {"name": "rear-right knee actuator", "type": "smart_servo"},
+      {"name": "IMU", "type": "imu"},
+      {"name": "robot computer", "type": "computer"},
+      {"name": "motor control board", "type": "motor_controller"},
+      {"name": "lithium battery pack", "type": "power_source"},
+      {"name": "four leg assemblies and body frame", "type": "mechanical_structure"}
+    ],
+    "constraints": {
+      "degrees_of_freedom": 12,
+      "leg_count": 4,
+      "joints_per_leg": 3,
+      "battery_voltage_v": 12,
+      "current_limit_a": 30,
+      "first_motion_current_limit_a": 5,
+      "emergency_stop_required": true
+    },
+    "reference_sources": {
+      "repository": "https://github.com/stanfordroboticsclub/StanfordQuadruped",
+      "video_query": "Stanford Pupper assembly and gait calibration"
+    }
+  }
+}

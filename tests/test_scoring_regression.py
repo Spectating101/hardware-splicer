@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -14,8 +15,10 @@ from hardware_splicer.scoring_summary import scorecard_from_artifacts
 
 
 ROOT = Path(__file__).resolve().parents[1]
+FULL_3D_RUNTIME = importlib.util.find_spec("cadquery") is not None
 
 
+@pytest.mark.skipif(not FULL_3D_RUNTIME, reason="9/9 production scoring requires full 3D runtime")
 @pytest.mark.parametrize(
     "brief_rel,expected_gates",
     [

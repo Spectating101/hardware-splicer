@@ -15,7 +15,7 @@ from .integrations.qwen_jarvis_narrative import (
     generate_jarvis_narrative,
     jarvis_narrative_enabled,
 )
-from .integrations.qwen_netlist_compose import compose_netlist_from_goal
+from .integrations.qwen_netlist_compose import compose_netlist_from_goal, semantic_module_proposal_from_goal
 from .integrations.qwen_compose_retry import call_qwen_compose_retry, compose_retry_enabled
 from .integrations.llm_workshop import (
     run_open_workshop,
@@ -80,6 +80,30 @@ def _enrich_trust(
     return narrative
 
 
+def _semantic_review_result(
+    proposal: Mapping[str, Any],
+    *,
+    qwen_usage: Any = None,
+    compile_result: Any = None,
+    fallback: str | None = None,
+) -> Dict[str, Any]:
+    return {
+        "ok": False,
+        "compose_mode": str(proposal.get("compose_mode") or "semantic_module_proposal"),
+        "qwen_usage": qwen_usage,
+        "module_ids": list(proposal.get("module_ids") or []),
+        "compile_result": compile_result,
+        "error": proposal.get("error") or "semantic_module_review_required",
+        "requires_human_review": True,
+        "semantic_intent": proposal.get("semantic_intent"),
+        "semantic_candidate_set": proposal.get("semantic_candidate_set"),
+        "semantic_selection": proposal.get("semantic_selection"),
+        "authority_effect": "none",
+        "automatic_execution": False,
+        "fallback": fallback,
+    }
+
+
 def _open_compose_llm_first(
     goal: str,
     target: Path,
@@ -88,9 +112,20 @@ def _open_compose_llm_first(
     export_gerber: bool,
     allow_qwen: bool,
 ) -> Dict[str, Any]:
+    """Model-first compose without silently falling back to semantic script brain.
+
+    A valid model netlist may be compiled as the requested software preview. If model
+    netlist generation or deterministic compile proof fails, a typed module selection
+    may be returned for review, but it is never auto-wired here. Explicit offline mode
+    uses ``_open_compose_scratch_only`` instead.
+    """
+
     planned = compose_netlist_from_goal(goal, constraints=constraints, allow_qwen=allow_qwen)
     compose_mode = str(planned.get("compose_mode") or "unknown")
     qwen_usage = planned.get("usage")
+
+    if planned.get("requires_human_review"):
+        return _semantic_review_result(planned, qwen_usage=qwen_usage)
 
     if planned.get("netlist"):
         result = compile_from_netlist(planned["netlist"], target, export_gerber=export_gerber)
@@ -104,6 +139,7 @@ def _open_compose_llm_first(
                 "erc": planned.get("erc"),
                 "module_ids": planned.get("module_ids"),
                 "compile_result": result,
+                "requires_human_review": False,
             }
         if (
             compose_mode == "qwen_netlist"
@@ -131,43 +167,45 @@ def _open_compose_llm_first(
                         "module_ids": retry.get("module_ids"),
                         "compile_result": retry_result,
                         "fallback": "qwen_compose_retry",
-                    }
-        if compose_mode == "qwen_netlist" and allow_qwen:
-            planned = compose_netlist_from_goal(goal, constraints=constraints, allow_qwen=False)
-            compose_mode = str(planned.get("compose_mode") or "module_picker_fallback")
-            if planned.get("netlist"):
-                result = compile_from_netlist(planned["netlist"], target, export_gerber=export_gerber)
-                quality = dict(result.design_quality or {})
-                gate = build_design_quality_gate(quality)
-                if result.ok and gate.get("build_ready"):
-                    return {
-                        "ok": True,
-                        "compose_mode": compose_mode,
-                        "qwen_usage": qwen_usage,
-                        "erc": planned.get("erc"),
-                        "module_ids": planned.get("module_ids"),
-                        "compile_result": result,
-                        "fallback": "module_picker_after_qwen_drc",
+                        "requires_human_review": False,
                     }
 
-    scratch = compile_scratch_build(
-        out_dir=str(target),
-        goal=goal,
-        export_gerber=export_gerber,
-        constraints=constraints,
-    )
-    compile_result = scratch.compile_result
-    quality = dict(compile_result.design_quality if compile_result else {})
-    gate = build_design_quality_gate(quality)
+        # Do not convert a failed model design into a hidden regex-selected build. The
+        # failed compile result is preserved, and a separate semantic proposal may be
+        # reviewed before another execution attempt.
+        if allow_qwen:
+            proposal = semantic_module_proposal_from_goal(goal, constraints=constraints)
+            if proposal.get("requires_human_review"):
+                return _semantic_review_result(
+                    proposal,
+                    qwen_usage=qwen_usage,
+                    compile_result=result,
+                    fallback="semantic_module_proposal_after_qwen_compile_failure",
+                )
+        return {
+            "ok": False,
+            "compose_mode": compose_mode,
+            "qwen_usage": qwen_usage,
+            "module_ids": planned.get("module_ids") or [],
+            "compile_result": result,
+            "error": "llm_netlist_compile_failed",
+            "requires_human_review": True,
+            "authority_effect": "none",
+            "automatic_execution": False,
+        }
+
+    # LLM-first means exactly that. If no model-backed netlist or review proposal can be
+    # produced, stay blocked rather than quietly switching to the offline regex picker.
     return {
-        "ok": bool(scratch.ok and gate.get("build_ready")),
-        "compose_mode": compose_mode if planned.get("netlist") else "scratch_pipeline",
+        "ok": False,
+        "compose_mode": compose_mode,
         "qwen_usage": qwen_usage,
-        "module_ids": scratch.module_ids,
-        "attempts": scratch.attempts,
-        "compile_result": compile_result,
-        "error": scratch.error,
-        "fallback": "scratch_pipeline",
+        "module_ids": list(planned.get("module_ids") or []),
+        "compile_result": None,
+        "error": planned.get("error") or "llm_compose_unresolved",
+        "requires_human_review": True,
+        "authority_effect": "none",
+        "automatic_execution": False,
     }
 
 
@@ -187,6 +225,11 @@ def jarvis_build(
     target = Path(out_dir) if out_dir else Path(os.environ.get("TMPDIR", "/tmp")) / "hardware_splicer_jarvis"
     target.mkdir(parents=True, exist_ok=True)
     constraints_map = dict(constraints or {})
+    requires_human_review = False
+    semantic_intent = None
+    semantic_candidate_set = None
+    semantic_selection = None
+    open_error = None
 
     if parts:
         intake = {
@@ -229,6 +272,11 @@ def jarvis_build(
         compose_mode = str(open_result.get("compose_mode") or "unknown")
         module_ids = list(open_result.get("module_ids") or [])
         build_id = getattr(compile_result, "build_id", None) if compile_result else None
+        requires_human_review = bool(open_result.get("requires_human_review"))
+        semantic_intent = open_result.get("semantic_intent")
+        semantic_candidate_set = open_result.get("semantic_candidate_set")
+        semantic_selection = open_result.get("semantic_selection")
+        open_error = open_result.get("error")
         splice = None
 
     build_dir = target / "build_compilation"
@@ -271,6 +319,12 @@ def jarvis_build(
         "jarvis": narrative,
         "jarvis_enabled": jarvis_narrative_enabled(),
         "llm_first": llm_first_enabled() and allow_qwen and not parts,
+        "requires_human_review": requires_human_review,
+        "semantic_intent": semantic_intent,
+        "semantic_candidate_set": semantic_candidate_set,
+        "semantic_selection": semantic_selection,
+        "authority_effect": "none" if requires_human_review else None,
+        "automatic_execution": False if requires_human_review else None,
         "artifacts": {
             "trust_report": str(build_dir / "TRUST_REPORT.json") if (build_dir / "TRUST_REPORT.json").is_file() else None,
             "trust_report_md": str(build_dir / "TRUST_REPORT.md") if (build_dir / "TRUST_REPORT.md").is_file() else None,
@@ -282,7 +336,7 @@ def jarvis_build(
         },
         "salvage_package": (splice or {}).get("salvage_package"),
         "workshop_trace": workshop_trace,
-        "error": None if ok else (quality.get("drc_violations") or trust.get("blockers")),
+        "error": None if ok else (open_error or quality.get("drc_violations") or trust.get("blockers")),
     }
 
 
@@ -306,6 +360,7 @@ def _open_compose_scratch_only(
                 "qwen_usage": planned.get("usage"),
                 "module_ids": planned.get("module_ids") or [],
                 "compile_result": result,
+                "requires_human_review": False,
             }
 
     scratch = compile_scratch_build(
@@ -324,4 +379,5 @@ def _open_compose_scratch_only(
         "attempts": scratch.attempts,
         "compile_result": compile_result,
         "error": scratch.error,
+        "requires_human_review": False,
     }
