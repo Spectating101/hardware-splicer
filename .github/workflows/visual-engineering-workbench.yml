@@ -61,12 +61,17 @@ jobs:
           node-version: "22"
           cache: "npm"
           cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
-      - name: Install frontend and isolated browser dependencies
+      - name: Install locked frontend and isolated browser harness
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
           npm ci
-          npm install --no-save --package-lock=false --legacy-peer-deps @playwright/test@1.55.0
-          npx playwright install --with-deps chromium
+          rm -rf /tmp/hs-playwright
+          npm install --prefix /tmp/hs-playwright --no-save @playwright/test@1.55.0
+          /tmp/hs-playwright/node_modules/.bin/playwright install --with-deps chromium
+          mkdir -p node_modules/@playwright
+          ln -s /tmp/hs-playwright/node_modules/@playwright/test node_modules/@playwright/test
+          ln -s /tmp/hs-playwright/node_modules/playwright node_modules/playwright
+          ln -s /tmp/hs-playwright/node_modules/playwright-core node_modules/playwright-core
       - name: Validate moat contracts and production build
         working-directory: apps/circuit-ai/circuit-ai-frontend
         run: |
@@ -99,7 +104,7 @@ jobs:
             sleep 2
           done
           pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
-          npx playwright test e2e/visual-engineering-workbench.spec.js \
+          /tmp/hs-playwright/node_modules/.bin/playwright test e2e/visual-engineering-workbench.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
