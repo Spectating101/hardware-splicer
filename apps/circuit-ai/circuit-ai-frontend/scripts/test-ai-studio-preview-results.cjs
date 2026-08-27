@@ -26,7 +26,7 @@ requireText(page, 'Software preview', 'AI Studio');
 requireText(page, 'artifact.project_relative_path', 'AI Studio');
 requireText(page, 'artifact.sha256', 'AI Studio');
 requireText(page, 'Software evidence only · physical authority unchanged', 'AI Studio');
-requireText(page, 'Proposal acceptance and preview execution are separate revisions.', 'AI Studio');
+requireText(page, 'Accepted as a proposal only. Software preview requires a separate action.', 'AI Studio');
 requireText(proxy, '/actions/${encodeURIComponent(actionId)}/execute-preview', 'Preview proxy');
 requireText(proxy, 'getProxyAuthHeaders(request)', 'Preview proxy');
 requireText(proxy, 'forwardUiJsonResponse', 'Preview proxy');
