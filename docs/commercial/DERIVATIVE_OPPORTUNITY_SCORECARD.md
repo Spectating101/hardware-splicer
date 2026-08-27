@@ -4,6 +4,8 @@ Purpose: decide whether an adjacent product deserves an internal experiment befo
 
 This is not a weighted market score. It is a fail-closed gate plus an ordinal hypothesis record and must not be tuned to rescue a favored candidate.
 
+**Authority references:** historical derivative-campaign anchor `8d687da6e29e110bdc969d9632385f3f31239e5c`; architecture freeze `0a55515cc683abccce6308c918f679199d5ebf87`; software-proof checkpoint `0164d47e25bfea8179073e46e869a8725ca03b83`; current canonical software baseline `3748078847382fa3c838e809d4900b71448994a8` (PR #72, merged 2026-08-28 Asia/Taipei). Apply the relevant evidence boundary rather than substituting the newest SHA.
+
 ## Gate 0 — eligibility
 
 A candidate is `INELIGIBLE` if it:

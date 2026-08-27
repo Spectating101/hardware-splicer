@@ -4,6 +4,8 @@ Purpose: prevent internal technical progress from being upgraded into commercial
 
 This matrix covers both **HS-as-product** and **HS-as-factory**. A higher state does not erase lower-state evidence requirements.
 
+**Authority references:** derivative-campaign anchor `8d687da6e29e110bdc969d9632385f3f31239e5c`; architecture freeze `0a55515cc683abccce6308c918f679199d5ebf87`; software-proof checkpoint `0164d47e25bfea8179073e46e869a8725ca03b83`; current canonical software baseline `3748078847382fa3c838e809d4900b71448994a8` (PR #72, merged 2026-08-28 Asia/Taipei). These are separate references, not interchangeable claim authority.
+
 ## Readiness states
 
 ### R0 — SOFTWARE_BASELINE

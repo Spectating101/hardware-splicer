@@ -4,6 +4,10 @@ Purpose: convert a physically validated HS capability into an adjacent product e
 
 This prepares internal conversion only. It does not change the frozen unseen SPI experiment or authorize external claims/sales.
 
+## Authority references
+
+Use the derivative-campaign anchor `8d687da6e29e110bdc969d9632385f3f31239e5c` only to reconstruct this campaign's original implementation context. The architecture freeze (`0a55515cc683abccce6308c918f679199d5ebf87`), software-proof checkpoint (`0164d47e25bfea8179073e46e869a8725ca03b83`), and current canonical software baseline (`3748078847382fa3c838e809d4900b71448994a8`, PR #72 merged 2026-08-28 Asia/Taipei) remain distinct. None upgrades a frozen experiment or physical-evidence claim on its own.
+
 ## 0. Candidate
 
 Record the product idea, operator/job, why it appears adjacent to validated capability, and the cheapest experiment that could disprove it.

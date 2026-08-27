@@ -2,9 +2,11 @@
 
 **Status:** pre-proof scouting only; no candidate is authorized for fabrication, purchasing, external validation, or commercial claims.
 
-**Snapshot date:** 2026-08-18
+**Initial scouting snapshot:** 2026-08-18
 
-**Frozen technical anchor:** `8d687da6e29e110bdc969d9632385f3f31239e5c`
+**Derivative-campaign anchor:** `8d687da6e29e110bdc969d9632385f3f31239e5c` (historical campaign implementation anchor, not a repository freeze declaration)
+
+**Authority reconciliation:** architecture freeze `0a55515cc683abccce6308c918f679199d5ebf87`; software-proof checkpoint `0164d47e25bfea8179073e46e869a8725ca03b83`; current canonical software baseline `3748078847382fa3c838e809d4900b71448994a8` (PR #72, merged 2026-08-28 Asia/Taipei).
 
 ## Why this cycle exists
 
@@ -12,11 +14,11 @@ The purpose is to exercise the commercial conversion logic before spending money
 
 This cycle does **not** qualify any candidate under `DERIVATIVE_OPPORTUNITY_SCORECARD.md` because the required physical baseline is not yet closed. Required Gate 1 items therefore remain `OPEN`, so otherwise promising candidates are `HOLD`.
 
-The current authoritative HS state remains:
+At the initial snapshot, the authoritative HS state was:
 
 > **NO DEMONSTRATED SOFTWARE BLOCKER REMAINS ON THE FROZEN HEAD / LIVE-UNSEEN EVIDENCE BLOCKED BY PROVIDER CREDENTIAL**
 
-A repeated live-job check on 2026-08-18 again reached provider-secret detection, then skipped the live replay because no usable Qwen/DashScope Actions credential was available.
+The initial 2026-08-18 live-job check reached provider-secret detection, then skipped the live replay because no usable Qwen/DashScope Actions credential was available. This is a historical observation, not a claim about the current provider configuration.
 
 ## Contamination firewall
 

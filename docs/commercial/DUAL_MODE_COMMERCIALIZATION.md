@@ -2,7 +2,14 @@
 
 Status: internal conversion preparation only.
 
-Frozen technical anchor: `8d687da6e29e110bdc969d9632385f3f31239e5c`.
+## Authority references
+
+- **Derivative-campaign anchor:** `8d687da6e29e110bdc969d9632385f3f31239e5c` — the historical implementation anchor for this campaign; it is not an architecture or proof-freeze declaration.
+- **Architecture freeze:** `0a55515cc683abccce6308c918f679199d5ebf87`.
+- **Software-proof checkpoint:** `0164d47e25bfea8179073e46e869a8725ca03b83`.
+- **Current canonical software baseline:** `3748078847382fa3c838e809d4900b71448994a8` (Hardware-Splicer PR #72, merged 2026-08-28 Asia/Taipei).
+
+These identifiers carry different authority. Canonicalization does not replace the frozen experiment/evidence boundary.
 
 This document does not authorize external outreach, product claims, purchasing, inventory, or changes to the frozen unseen experiment.
 
