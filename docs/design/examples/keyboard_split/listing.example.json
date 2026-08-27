@@ -1,0 +1,48 @@
+{
+  "fixture_notice": "DESIGN_FIXTURE_ONLY_NOT_FOR_SALE",
+  "projection_type": "buyer_listing",
+  "source_unit_id": "urn:hs:unit:split-kb-0001",
+  "title": "HS Split Keyboard Prototype — Donor-Reuse Conversion",
+  "price": {
+    "currency": "TWD",
+    "amount": 1800,
+    "status": "illustrative_only"
+  },
+  "condition": {
+    "cosmetic": "B_demo",
+    "functional": "verified_in_synthetic_fixture_only",
+    "verification_depth": "illustrative_protocol_complete"
+  },
+  "origin_summary": "Illustrative conversion from one commodity keyboard donor into a physically split keyboard using retained donor key/switch/PCB/case regions plus two new controllers and an inter-half harness.",
+  "major_modifications": [
+    "PCB/case physically divided",
+    "original controller region removed",
+    "dual-controller architecture added",
+    "inter-half harness added",
+    "jumper J04 added after illustrative ROW4 continuity failure"
+  ],
+  "tested_capabilities": [
+    {
+      "label": "USB keyboard enumeration",
+      "claim_ref": "claim:usb-enumeration"
+    },
+    {
+      "label": "Expected key coverage",
+      "claim_ref": "claim:key-coverage"
+    },
+    {
+      "label": "Inter-half communication stability",
+      "claim_ref": "claim:inter-half-stability"
+    }
+  ],
+  "known_limitations": [
+    "Synthetic design fixture only; no real product exists"
+  ],
+  "warranty": {
+    "duration_days": 90,
+    "status": "illustrative_only",
+    "scope": "Example functional warranty for transformed hardware; not an actual offer"
+  },
+  "verification_link": "/u/split-kb-0001",
+  "projection_rule": "Every functional statement must resolve to a passport claim; listing text cannot promote weaker evidence."
+}

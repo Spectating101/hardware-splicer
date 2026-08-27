@@ -1,0 +1,73 @@
+{
+  "fixture_notice": "DESIGN_FIXTURE_ONLY_NO_PHYSICAL_EVIDENCE",
+  "passport_schema": "hardware_splicer.unit_passport.design.v0",
+  "unit": {
+    "unit_id": "urn:hs:unit:split-kb-0001",
+    "current_product_identity": "HS Split Keyboard Prototype",
+    "origin": "major_transformation",
+    "current_revision": "R4",
+    "public_visibility": "demo"
+  },
+  "lineage": {
+    "input_units": ["urn:hs:unit:donor-kb-0001"],
+    "transformation_ref": "tx:hs-demo-keyboard-0001",
+    "recipe_ref": "recipe:keyboard/commodity-to-split@0.1"
+  },
+  "configuration": {
+    "left_half": {
+      "origin": "donor_original_region",
+      "controller": "new:left-controller"
+    },
+    "right_half": {
+      "origin": "donor_original_region",
+      "controller": "new:right-controller"
+    },
+    "inter_half_link": "new:inter-half-harness",
+    "firmware_ref": "fw:demo-split-r4"
+  },
+  "claims": [
+    {
+      "claim_id": "claim:key-coverage",
+      "predicate": "expected_keys_functional",
+      "value": true,
+      "status": "PROVEN_IN_SYNTHETIC_FIXTURE_ONLY",
+      "evidence_refs": ["test:key-coverage"],
+      "unit_revision": "R4"
+    },
+    {
+      "claim_id": "claim:usb-enumeration",
+      "predicate": "usb_keyboard_enumerates",
+      "value": true,
+      "status": "PROVEN_IN_SYNTHETIC_FIXTURE_ONLY",
+      "evidence_refs": ["test:usb-enumeration"],
+      "unit_revision": "R4"
+    },
+    {
+      "claim_id": "claim:inter-half-stability",
+      "predicate": "inter_half_link_stable",
+      "value": true,
+      "status": "PROVEN_IN_SYNTHETIC_FIXTURE_ONLY",
+      "evidence_refs": ["test:inter-half-stability"],
+      "unit_revision": "R4"
+    }
+  ],
+  "known_history": [
+    "evt:row4-fail",
+    "evt:j04-install",
+    "evt:row4-pass"
+  ],
+  "current_limitations": [
+    "This entire passport is synthetic and cannot support a real sale, warranty, engineering claim, or compliance claim"
+  ],
+  "warranty": {
+    "status": "illustrative_only",
+    "policy_ref": "warranty:demo-90-day",
+    "disclaimer": "No real warranty exists"
+  },
+  "views": {
+    "consumer": "/u/split-kb-0001",
+    "machine_json": "/u/split-kb-0001.json",
+    "service": "/u/split-kb-0001/service",
+    "evidence": "/u/split-kb-0001/evidence"
+  }
+}

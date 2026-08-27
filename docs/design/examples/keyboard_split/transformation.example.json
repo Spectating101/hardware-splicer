@@ -1,0 +1,104 @@
+{
+  "fixture_notice": "DESIGN_FIXTURE_ONLY_NO_PHYSICAL_EVIDENCE",
+  "transformation_id": "tx:hs-demo-keyboard-0001",
+  "transformation_type": "major_physical_transformation",
+  "input_units": [
+    {
+      "unit_id": "urn:hs:unit:donor-kb-0001",
+      "manufacturer": "ExampleCo",
+      "model": "Commodity Keyboard 104",
+      "role": "primary_donor",
+      "baseline_state": "functional_intact"
+    }
+  ],
+  "output_unit": {
+    "unit_id": "urn:hs:unit:split-kb-0001",
+    "product_identity": "HS Split Keyboard Prototype",
+    "lineage_policy": "new_output_identity_preserves_donor_link"
+  },
+  "hs_project": {
+    "project_id": "demo-keyboard-split-001",
+    "baseline_revision": "R0",
+    "final_revision": "R4"
+  },
+  "selected_architecture": "retain_original_matrix_segments_with_dual_controllers",
+  "decision_history": [
+    {
+      "revision": "R1",
+      "decision": "original_controller_retention",
+      "outcome": "rejected",
+      "reason": "illustrative cut corridor would require excessive inter-half matrix bridging"
+    },
+    {
+      "revision": "R2",
+      "decision": "dual_controller_split",
+      "outcome": "selected",
+      "reason": "illustrative lower wiring burden and clearer left/right fault isolation"
+    }
+  ],
+  "retained_components": [
+    "donor:keycaps",
+    "donor:switches",
+    "donor:stabilizers",
+    "donor:left-pcb-region",
+    "donor:right-pcb-region",
+    "donor:case-sections"
+  ],
+  "removed_components": [
+    "donor:original-controller-region"
+  ],
+  "added_components": [
+    "new:left-controller",
+    "new:right-controller",
+    "new:inter-half-harness"
+  ],
+  "physical_operations": [
+    {
+      "operation_id": "op:cut-001",
+      "type": "pcb_cut",
+      "status": "illustrative_complete",
+      "evidence_refs": ["ev:cut-before-photo", "ev:cut-after-photo"]
+    },
+    {
+      "operation_id": "op:wire-001",
+      "type": "jumper_installation",
+      "status": "illustrative_complete",
+      "evidence_refs": ["ev:wiring-photo"]
+    }
+  ],
+  "failure_repair_history": [
+    {
+      "event_id": "evt:row4-fail",
+      "state": "FAIL",
+      "description": "Illustrative post-cut ROW4 continuity failure",
+      "evidence_refs": ["ev:continuity-row4-fail"]
+    },
+    {
+      "event_id": "evt:j04-install",
+      "state": "REWORK",
+      "description": "Illustrative jumper J04 installed",
+      "evidence_refs": ["ev:j04-photo"]
+    },
+    {
+      "event_id": "evt:row4-pass",
+      "state": "PASS",
+      "description": "Illustrative ROW4 continuity restored",
+      "evidence_refs": ["ev:continuity-row4-pass"]
+    }
+  ],
+  "verification_summary": {
+    "status": "SYNTHETIC_PASS_FOR_SCHEMA_EXERCISE_ONLY",
+    "test_run_refs": [
+      "test:continuity-final",
+      "test:usb-enumeration",
+      "test:key-coverage",
+      "test:inter-half-stability"
+    ]
+  },
+  "open_limitations": [
+    "No real donor keyboard inspected",
+    "No actual PCB cut performed",
+    "No actual firmware compiled or flashed",
+    "No real electrical or functional measurements exist"
+  ]
+}
