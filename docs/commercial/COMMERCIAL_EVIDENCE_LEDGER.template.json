@@ -1,0 +1,118 @@
+{
+  "schema_version": "hs-commercial-evidence-ledger-v0",
+  "status": "PENDING",
+  "candidate_id": null,
+  "conversion_mode": null,
+  "authority_references": {
+    "derivative_campaign_anchor": "8d687da6e29e110bdc969d9632385f3f31239e5c",
+    "architecture_freeze": "0a55515cc683abccce6308c918f679199d5ebf87",
+    "software_proof_checkpoint": "0164d47e25bfea8179073e46e869a8725ca03b83",
+    "current_canonical_software_baseline": "3748078847382fa3c838e809d4900b71448994a8",
+    "baseline_project_id": null,
+    "baseline_revision": null,
+    "baseline_capability_manifest_sha256": null,
+    "requirements_sha256": null,
+    "acceptance_criteria_sha256": null,
+    "artifact_inventory_sha256": null,
+    "reuse_prediction_sha256": null
+  },
+  "execution": {
+    "reuse_run_id": null,
+    "blank_slate_run_id": null,
+    "reuse_result_status": "PENDING",
+    "blank_slate_result_status": "PENDING",
+    "interventions": [],
+    "authority_violations": null
+  },
+  "development_economics": {
+    "evidence_status": "PENDING",
+    "reuse": {
+      "human_active_hours": null,
+      "elapsed_hours": null,
+      "model_tool_cash": null,
+      "external_service_cash": null,
+      "prototype_consumables_cash": null,
+      "physical_retest_events": null
+    },
+    "blank_slate": {
+      "human_active_hours": null,
+      "elapsed_hours": null,
+      "model_tool_cash": null,
+      "external_service_cash": null,
+      "prototype_consumables_cash": null,
+      "physical_retest_events": null
+    },
+    "derivative_metrics_sha256": null,
+    "economics_result_sha256": null,
+    "notes": []
+  },
+  "product_economics": {
+    "prototype_bom": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "prospective_production_cogs": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "assembly_test_cost": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "packaging_fulfillment_cost": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "support_warranty_cost": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "selling_price": {
+      "value": null,
+      "evidence_class": "HYPOTHESIS"
+    },
+    "currency": null,
+    "notes": []
+  },
+  "market_evidence": {
+    "target_operator_or_customer": {
+      "statement": null,
+      "evidence_class": "HYPOTHESIS"
+    },
+    "job_to_be_done": {
+      "statement": null,
+      "evidence_class": "HYPOTHESIS"
+    },
+    "willingness_to_pay": {
+      "value": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "distribution_access": {
+      "statement": null,
+      "evidence_class": "UNKNOWN"
+    },
+    "external_pilot_ids": []
+  },
+  "physical_evidence": {
+    "status": "PENDING",
+    "record_ids": [],
+    "envelope_ids": [],
+    "authorized_revision": null
+  },
+  "decision": {
+    "state": "HOLD",
+    "changed_evidence": [],
+    "remaining_unknowns": [],
+    "forbidden_claims": [],
+    "next_cheapest_information_gain_experiment": null,
+    "spend_cap": null,
+    "kill_condition": null
+  },
+  "evidence_class_semantics": {
+    "UNKNOWN": "No defensible value is recorded.",
+    "HYPOTHESIS": "A preregistered commercial assumption; not observed evidence.",
+    "ESTIMATED": "Derived from identified inputs/model; not directly measured.",
+    "MEASURED": "Observed and bound to a referenced evidence record.",
+    "INVALID": "Recorded data are inconsistent, contaminated, or otherwise unusable."
+  }
+}
