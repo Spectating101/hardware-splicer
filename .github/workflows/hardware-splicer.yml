@@ -1,4 +1,5 @@
 name: Hardware-Splicer
+# Canonical promotion gate: keep external KiCad setup bounded and rerun this workflow on the final candidate head.
 
 on:
   push:
