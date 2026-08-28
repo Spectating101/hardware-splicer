@@ -11,7 +11,7 @@ import {
   type ResourceSource,
   type WorkbenchEntity,
 } from '@/lib/workbench-demo';
-import { useWorkbenchStore } from '@/lib/workbench-store';
+import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 
 const AUTHORITY_COLORS: Record<AuthorityState, string> = {
   verified: '#22c55e',
@@ -46,11 +46,11 @@ function explodedPosition(entity: WorkbenchEntity, exploded: boolean): [number, 
 }
 
 function MachinePart({ entity }: { entity: WorkbenchEntity }) {
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const isolatedEntityId = useWorkbenchStore((state) => state.isolatedEntityId);
-  const activeLens = useWorkbenchStore((state) => state.activeLens);
-  const exploded = useWorkbenchStore((state) => state.exploded);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const isolatedEntityId = useMachineWorkbenchStore((state) => state.isolatedEntityId);
+  const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
 
   if (!entity.spatial) return null;
 
@@ -95,10 +95,10 @@ function MachinePart({ entity }: { entity: WorkbenchEntity }) {
 }
 
 function InterfaceLines() {
-  const activeLens = useWorkbenchStore((state) => state.activeLens);
-  const exploded = useWorkbenchStore((state) => state.exploded);
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
+  const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
 
   if (activeLens !== 'interfaces' && activeLens !== 'constraints') return null;
 
@@ -131,8 +131,8 @@ function InterfaceLines() {
 }
 
 export function MachineAssemblyViewport() {
-  const activeLens = useWorkbenchStore((state) => state.activeLens);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
+  const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const parts = useMemo(() => deck001Entities.filter((entity) => entity.kind === 'component' && entity.spatial), []);
 
   return (
