@@ -155,7 +155,8 @@ export function MachineWorkbench() {
                       setSelectedEntityId('cmp-mainboard');
                     }}
                     lenses={{ drc: true, netFocus: Boolean(pcbSelection.footprintRef) }}
-                    renderMode="production"
+                    renderMode="engineering"
+                    topDown
                   />
                   <div className="pointer-events-none absolute left-4 top-4 max-w-[520px] rounded-lg border border-white/10 bg-slate-950/85 px-3 py-2 text-[10px] leading-4 text-slate-400 shadow-xl backdrop-blur">
                     Representative x86 board fixture in the existing HS PCB renderer. Geometry remains synthetic until donor identity and measurements close.
