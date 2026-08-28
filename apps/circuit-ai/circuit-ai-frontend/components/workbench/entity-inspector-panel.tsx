@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ExternalLink, Eye, EyeOff, LockKeyhole } from 'lucide-react';
 import { authorityLabel, deck001EntityMap } from '@/lib/workbench-demo';
-import { useWorkbenchStore } from '@/lib/workbench-store';
+import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 
 function authorityClasses(state: string) {
   if (state === 'verified') return 'border-emerald-300/25 bg-emerald-300/10 text-emerald-200';
@@ -14,9 +14,9 @@ function authorityClasses(state: string) {
 }
 
 export function EntityInspectorPanel() {
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const isolatedEntityId = useWorkbenchStore((state) => state.isolatedEntityId);
-  const setIsolatedEntityId = useWorkbenchStore((state) => state.setIsolatedEntityId);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const isolatedEntityId = useMachineWorkbenchStore((state) => state.isolatedEntityId);
+  const setIsolatedEntityId = useMachineWorkbenchStore((state) => state.setIsolatedEntityId);
   const entity = deck001EntityMap.get(selectedEntityId) ?? deck001EntityMap.get('deck-001');
 
   if (!entity) return null;
