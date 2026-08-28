@@ -22,7 +22,7 @@ import { WorkbenchBottomPanel } from '@/components/workbench/workbench-bottom-pa
 import { usePageTitle } from '@/components/use-page-title';
 import { demoValidation } from '@/lib/cad-demo';
 import { deck001Constraints, deck001EntityMap } from '@/lib/workbench-demo';
-import { useWorkbenchStore, type WorkbenchLens } from '@/lib/workbench-store';
+import { useMachineWorkbenchStore, type WorkbenchLens } from '@/lib/machine-workbench-store';
 
 const lenses: Array<{ id: WorkbenchLens; label: string; icon: typeof Eye }> = [
   { id: 'authority', label: 'Authority', icon: LockKeyhole },
@@ -34,15 +34,15 @@ const lenses: Array<{ id: WorkbenchLens; label: string; icon: typeof Eye }> = [
 export function MachineWorkbench() {
   usePageTitle('Machine Workbench | Hardware Splicer');
 
-  const activeLens = useWorkbenchStore((state) => state.activeLens);
-  const activeView = useWorkbenchStore((state) => state.activeView);
-  const exploded = useWorkbenchStore((state) => state.exploded);
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const setActiveLens = useWorkbenchStore((state) => state.setActiveLens);
-  const setActiveView = useWorkbenchStore((state) => state.setActiveView);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
-  const toggleExploded = useWorkbenchStore((state) => state.toggleExploded);
-  const resetViewState = useWorkbenchStore((state) => state.resetViewState);
+  const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const activeView = useMachineWorkbenchStore((state) => state.activeView);
+  const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const setActiveLens = useMachineWorkbenchStore((state) => state.setActiveLens);
+  const setActiveView = useMachineWorkbenchStore((state) => state.setActiveView);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const toggleExploded = useMachineWorkbenchStore((state) => state.toggleExploded);
+  const resetViewState = useMachineWorkbenchStore((state) => state.resetViewState);
   const [pcbSelection, setPcbSelection] = useState<PcbSelectionState>({ footprintRef: null });
 
   const selected = deck001EntityMap.get(selectedEntityId) ?? deck001EntityMap.get('deck-001');
