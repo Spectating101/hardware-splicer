@@ -49,8 +49,8 @@ export function MachineWorkbench() {
   const openBlockingConstraints = deck001Constraints.filter((constraint) => constraint.severity === 'blocking' && constraint.state === 'open').length;
 
   return (
-    <main className="flex min-h-screen flex-col bg-[#040811] text-slate-100">
-      <header className="z-20 flex min-h-[58px] items-center gap-3 border-b border-white/10 bg-[#07101d]/95 px-3 py-2 backdrop-blur lg:px-4">
+    <main className="flex min-h-screen flex-col bg-[#040811] text-slate-100 xl:h-screen xl:min-h-0 xl:overflow-hidden">
+      <header className="z-20 flex min-h-[58px] shrink-0 items-center gap-3 border-b border-white/10 bg-[#07101d]/95 px-3 py-2 backdrop-blur lg:px-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="rounded-lg border border-cyan-300/20 bg-cyan-300/8 p-2 text-cyan-200">
             <Box className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function MachineWorkbench() {
               {activeView === 'assembly' ? (
                 <MachineAssemblyViewport />
               ) : (
-                <div className="h-full min-h-[420px] bg-[#050912]">
+                <div className="h-full min-h-[420px] bg-[#050912] xl:min-h-0">
                   <PcbViewport
                     geometry={demoValidation.pcb_geometry ?? null}
                     issues={demoValidation.validation.issues}
@@ -164,7 +164,7 @@ export function MachineWorkbench() {
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-3 border-t border-white/10 bg-[#07101d] px-3 py-1.5 text-[10px] text-slate-500">
+            <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/10 bg-[#07101d] px-3 py-1.5 text-[10px] text-slate-500">
               <span className="truncate">Selected: <strong className="font-medium text-slate-300">{selected?.name ?? 'DECK-001'}</strong></span>
               <span className="hidden md:block">Orbit · inspect · isolate · switch semantic lenses</span>
             </div>
