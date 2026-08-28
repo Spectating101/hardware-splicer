@@ -47,9 +47,10 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('authority lens', { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-assembly.png') });
 
-  // Existing PCB rendering remains a specialized drill-down inside the machine workspace.
+  // Existing PCB renderer remains the specialized drill-down, but fixture truth stays explicit.
   await page.getByRole('button', { name: 'Compute PCB', exact: true }).click();
-  await expect(page.getByText(/existing HS PCB renderer embedded inside the machine workbench/)).toBeVisible();
+  await expect(page.getByText(/Representative x86 board fixture in the existing HS PCB renderer/)).toBeVisible();
+  await expect(page.getByText(/Geometry remains synthetic until donor identity and measurements close/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
   await expect(page.getByText('Donor x86 mainboard', { exact: true }).last()).toBeVisible();
 
