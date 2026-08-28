@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { deck001Entities, deck001EntityMap, type WorkbenchEntity } from '@/lib/workbench-demo';
-import { useWorkbenchStore } from '@/lib/workbench-store';
+import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 
 function stateDot(entity: WorkbenchEntity) {
   if (entity.authority === 'verified') return 'bg-emerald-400';
@@ -14,8 +14,8 @@ function stateDot(entity: WorkbenchEntity) {
 }
 
 export function MachineTreePanel() {
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
 
