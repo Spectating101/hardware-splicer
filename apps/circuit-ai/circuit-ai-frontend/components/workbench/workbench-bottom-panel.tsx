@@ -5,10 +5,12 @@ import {
   GitBranch,
   History,
   Link2,
+  SearchX,
   ShieldAlert,
 } from 'lucide-react';
 import {
   deck001Constraints,
+  deck001EntityMap,
   deck001Evidence,
   deck001History,
   deck001Interfaces,
@@ -31,16 +33,49 @@ function stateClass(state: string) {
   return 'text-sky-300';
 }
 
+function entityFallsWithinSelection(entityId: string, selectedEntityId: string) {
+  if (selectedEntityId === 'deck-001') return true;
+  let current = deck001EntityMap.get(entityId);
+  while (current) {
+    if (current.id === selectedEntityId) return true;
+    current = current.parentId ? deck001EntityMap.get(current.parentId) : undefined;
+  }
+  return false;
+}
+
+function EmptyState({ noun, selection }: { noun: string; selection: string }) {
+  return (
+    <div className="flex min-h-[112px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-white/[0.015] px-5 text-center">
+      <div>
+        <SearchX className="mx-auto h-4 w-4 text-slate-600" />
+        <div className="mt-2 text-xs font-medium text-slate-300">No {noun} bound to this scope</div>
+        <div className="mt-1 text-[11px] text-slate-600">{selection} remains selected; choose a child entity or another tray for adjacent engineering context.</div>
+      </div>
+    </div>
+  );
+}
+
 export function WorkbenchBottomPanel() {
   const activeBottomTab = useMachineWorkbenchStore((state) => state.activeBottomTab);
   const setActiveBottomTab = useMachineWorkbenchStore((state) => state.setActiveBottomTab);
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const selectedEntity = deck001EntityMap.get(selectedEntityId);
 
-  const selectedFilter = (entityId: string) => selectedEntityId === 'deck-001' || entityId === selectedEntityId;
+  const evidenceRows = deck001Evidence.filter((row) => entityFallsWithinSelection(row.entityId, selectedEntityId));
+  const constraintRows = deck001Constraints.filter((row) => entityFallsWithinSelection(row.entityId, selectedEntityId));
+  const verificationRows = deck001Verifications.filter((row) => entityFallsWithinSelection(row.entityId, selectedEntityId));
+  const historyRows = deck001History.filter((row) => entityFallsWithinSelection(row.entityId, selectedEntityId));
+  const interfaceRows = deck001Interfaces.filter((row) =>
+    selectedEntityId === 'deck-001'
+      || entityFallsWithinSelection(row.from, selectedEntityId)
+      || entityFallsWithinSelection(row.to, selectedEntityId)
+  );
+
+  const selectionLabel = selectedEntity?.name ?? selectedEntityId;
 
   return (
-    <section className="flex min-h-[210px] flex-col border-t border-white/10 bg-[#060d18]">
+    <section className="flex min-h-[190px] max-h-[290px] flex-col border-t border-white/10 bg-[#060d18]">
       <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 px-2 py-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -59,83 +94,94 @@ export function WorkbenchBottomPanel() {
             </button>
           );
         })}
-        <div className="ml-auto hidden text-[10px] uppercase tracking-[0.14em] text-slate-600 lg:block">
-          filtered by current selection where applicable
+        <div className="ml-auto hidden items-center gap-2 text-[10px] uppercase tracking-[0.13em] text-slate-600 lg:flex">
+          <span>scope</span>
+          <span className="max-w-[210px] truncate rounded border border-white/8 bg-white/[0.025] px-2 py-1 text-slate-400">{selectionLabel}</span>
         </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-auto p-3">
         {activeBottomTab === 'evidence' ? (
-          <div className="grid gap-2 xl:grid-cols-2">
-            {deck001Evidence.filter((row) => selectedFilter(row.entityId)).map((row) => (
-              <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:bg-white/[0.05]">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-slate-100">{row.title}</span>
-                  <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
-                </div>
-                <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-slate-600">{row.method}</div>
-                <p className="mt-2 text-[11px] leading-5 text-slate-400">{row.note}</p>
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {activeBottomTab === 'interfaces' ? (
-          <div className="grid gap-2 xl:grid-cols-2">
-            {deck001Interfaces.filter((row) => selectedEntityId === 'deck-001' || row.from === selectedEntityId || row.to === selectedEntityId).map((row) => (
-              <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.authority === 'blocked' ? row.to : row.from)} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:bg-white/[0.05]">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs font-medium text-slate-100">{row.name}</span>
-                  <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.authority)}`}>{row.authority}</span>
-                </div>
-                <div className="mt-2 text-[11px] text-slate-500">{row.kind} · {row.from} → {row.to}</div>
-                {row.unresolved.length ? <div className="mt-2 text-[11px] text-amber-200/70">Open: {row.unresolved.join(', ')}</div> : null}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {activeBottomTab === 'constraints' ? (
-          <div className="space-y-2">
-            {deck001Constraints.filter((row) => selectedFilter(row.entityId)).map((row) => (
-              <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-start gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:bg-white/[0.05]">
-                <ShieldAlert className={`mt-0.5 h-4 w-4 shrink-0 ${row.severity === 'blocking' ? 'text-red-300' : 'text-amber-300'}`} />
-                <div className="min-w-0 flex-1">
+          evidenceRows.length ? (
+            <div className="grid gap-2 xl:grid-cols-2 2xl:grid-cols-3">
+              {evidenceRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-xs font-medium text-slate-100">{row.title}</span>
                     <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
                   </div>
-                  <p className="mt-1 text-[11px] leading-5 text-slate-400">{row.note}</p>
-                </div>
-              </button>
-            ))}
-          </div>
+                  <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-slate-600">{row.method}</div>
+                  <p className="mt-2 text-[11px] leading-5 text-slate-400">{row.note}</p>
+                </button>
+              ))}
+            </div>
+          ) : <EmptyState noun="evidence" selection={selectionLabel} />
+        ) : null}
+
+        {activeBottomTab === 'interfaces' ? (
+          interfaceRows.length ? (
+            <div className="grid gap-2 xl:grid-cols-2 2xl:grid-cols-3">
+              {interfaceRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.authority === 'blocked' ? row.to : row.from)} className="rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-slate-100">{row.name}</span>
+                    <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.authority)}`}>{row.authority}</span>
+                  </div>
+                  <div className="mt-2 text-[11px] text-slate-500">{row.kind} · {row.from} → {row.to}</div>
+                  {row.unresolved.length ? <div className="mt-2 text-[11px] text-amber-200/70">Open: {row.unresolved.join(', ')}</div> : null}
+                </button>
+              ))}
+            </div>
+          ) : <EmptyState noun="interfaces" selection={selectionLabel} />
+        ) : null}
+
+        {activeBottomTab === 'constraints' ? (
+          constraintRows.length ? (
+            <div className="grid gap-2 xl:grid-cols-2">
+              {constraintRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-start gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
+                  <ShieldAlert className={`mt-0.5 h-4 w-4 shrink-0 ${row.severity === 'blocking' ? 'text-red-300' : 'text-amber-300'}`} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-xs font-medium text-slate-100">{row.title}</span>
+                      <span className={`text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] leading-5 text-slate-400">{row.note}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : <EmptyState noun="constraints" selection={selectionLabel} />
         ) : null}
 
         {activeBottomTab === 'verification' ? (
-          <div className="space-y-2">
-            {deck001Verifications.filter((row) => selectedFilter(row.entityId)).map((row) => (
-              <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2.5 text-left transition hover:bg-white/[0.05]">
-                <span className={`w-16 shrink-0 text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
-                <span className="min-w-0 flex-1 truncate text-xs font-medium text-slate-100">{row.title}</span>
-                <span className="hidden text-[10px] text-slate-500 md:block">{row.method}</span>
-              </button>
-            ))}
-          </div>
+          verificationRows.length ? (
+            <div className="grid gap-2 xl:grid-cols-2">
+              {verificationRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2.5 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
+                  <span className={`w-16 shrink-0 text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
+                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-slate-100">{row.title}</span>
+                  <span className="hidden text-[10px] text-slate-500 md:block">{row.method}</span>
+                </button>
+              ))}
+            </div>
+          ) : <EmptyState noun="verification records" selection={selectionLabel} />
         ) : null}
 
         {activeBottomTab === 'history' ? (
-          <div className="space-y-2">
-            {deck001History.filter((row) => selectedFilter(row.entityId)).map((row) => (
-              <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="grid w-full grid-cols-[42px_1fr] gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:bg-white/[0.05]">
-                <span className="text-[10px] font-semibold text-cyan-300">{row.at}</span>
-                <span>
-                  <span className="block text-xs font-medium text-slate-100">{row.title}</span>
-                  <span className="mt-1 block text-[11px] leading-5 text-slate-400">{row.note}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+          historyRows.length ? (
+            <div className="grid gap-2 xl:grid-cols-2">
+              {historyRows.map((row) => (
+                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="grid w-full grid-cols-[42px_1fr] gap-3 rounded-lg border border-white/10 bg-white/[0.025] p-3 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
+                  <span className="text-[10px] font-semibold text-cyan-300">{row.at}</span>
+                  <span>
+                    <span className="block text-xs font-medium text-slate-100">{row.title}</span>
+                    <span className="mt-1 block text-[11px] leading-5 text-slate-400">{row.note}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : <EmptyState noun="history" selection={selectionLabel} />
         ) : null}
       </div>
     </section>
