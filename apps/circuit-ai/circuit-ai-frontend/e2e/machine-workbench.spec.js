@@ -5,7 +5,7 @@ const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 test('machine workbench keeps spatial selection, authority, and evidence context coherent', async ({ page }, testInfo) => {
   await page.goto(`${APP_URL}/workbench`);
 
-  await expect(page.getByRole('heading', { name: 'DECK-001' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
   await expect(page.getByText(/Build blocked · 3 gates/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
