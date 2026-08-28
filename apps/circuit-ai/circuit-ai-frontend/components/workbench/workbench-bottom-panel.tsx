@@ -14,7 +14,7 @@ import {
   deck001Interfaces,
   deck001Verifications,
 } from '@/lib/workbench-demo';
-import { useWorkbenchStore, type WorkbenchBottomTab } from '@/lib/workbench-store';
+import { useMachineWorkbenchStore, type WorkbenchBottomTab } from '@/lib/machine-workbench-store';
 
 const tabs: Array<{ id: WorkbenchBottomTab; label: string; icon: typeof Activity }> = [
   { id: 'evidence', label: 'Evidence', icon: Activity },
@@ -32,10 +32,10 @@ function stateClass(state: string) {
 }
 
 export function WorkbenchBottomPanel() {
-  const activeBottomTab = useWorkbenchStore((state) => state.activeBottomTab);
-  const setActiveBottomTab = useWorkbenchStore((state) => state.setActiveBottomTab);
-  const selectedEntityId = useWorkbenchStore((state) => state.selectedEntityId);
-  const setSelectedEntityId = useWorkbenchStore((state) => state.setSelectedEntityId);
+  const activeBottomTab = useMachineWorkbenchStore((state) => state.activeBottomTab);
+  const setActiveBottomTab = useMachineWorkbenchStore((state) => state.setActiveBottomTab);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
 
   const selectedFilter = (entityId: string) => selectedEntityId === 'deck-001' || entityId === selectedEntityId;
 
