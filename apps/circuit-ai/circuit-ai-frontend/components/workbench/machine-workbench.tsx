@@ -20,8 +20,8 @@ import { MachineAssemblyViewport } from '@/components/workbench/machine-assembly
 import { MachineTreePanel } from '@/components/workbench/machine-tree-panel';
 import { WorkbenchBottomPanel } from '@/components/workbench/workbench-bottom-panel';
 import { usePageTitle } from '@/components/use-page-title';
-import { demoValidation } from '@/lib/cad-demo';
 import { deck001Constraints, deck001EntityMap } from '@/lib/workbench-demo';
+import { workbenchPcbGeometry, workbenchPcbIssues } from '@/lib/workbench-pcb-demo';
 import { useMachineWorkbenchStore, type WorkbenchLens } from '@/lib/machine-workbench-store';
 
 const lenses: Array<{ id: WorkbenchLens; label: string; icon: typeof Eye }> = [
@@ -147,18 +147,18 @@ export function MachineWorkbench() {
               ) : (
                 <div className="h-full min-h-[420px] bg-[#050912] xl:min-h-0">
                   <PcbViewport
-                    geometry={demoValidation.pcb_geometry ?? null}
-                    issues={demoValidation.validation.issues}
+                    geometry={workbenchPcbGeometry}
+                    issues={workbenchPcbIssues}
                     selection={pcbSelection}
                     onSelectionChange={(selection) => {
                       setPcbSelection(selection);
                       setSelectedEntityId('cmp-mainboard');
                     }}
                     lenses={{ drc: true, netFocus: Boolean(pcbSelection.footprintRef) }}
-                    renderMode="engineering"
+                    renderMode="production"
                   />
-                  <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-white/10 bg-slate-950/85 px-3 py-2 text-[10px] text-slate-400 backdrop-blur">
-                    Board-level view is the existing HS PCB renderer embedded inside the machine workbench.
+                  <div className="pointer-events-none absolute left-4 top-4 max-w-[520px] rounded-lg border border-white/10 bg-slate-950/85 px-3 py-2 text-[10px] leading-4 text-slate-400 shadow-xl backdrop-blur">
+                    Representative x86 board fixture in the existing HS PCB renderer. Geometry remains synthetic until donor identity and measurements close.
                   </div>
                 </div>
               )}
