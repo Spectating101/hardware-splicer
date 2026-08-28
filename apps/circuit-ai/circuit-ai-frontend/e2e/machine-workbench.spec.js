@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
 test('machine workbench keeps spatial selection, authority, and evidence context coherent', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto(`${APP_URL}/workbench`);
 
   await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
@@ -33,13 +34,18 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('Display identity required', { exact: true })).toBeVisible();
   await expect(page.getByText(/Do not infer a raw panel pinout/)).toBeVisible();
 
-  // Power selection exposes the physical-authority blocker rather than hiding it behind geometry.
+  // Power selection exposes the physical-authority blocker and inherits child evidence.
   await page.getByRole('button', { name: /^Power/ }).click();
   await expect(page.getByText('Physical authority', { exact: true })).toBeVisible();
   await expect(page.getByText('BLOCKED', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('PD profiles', { exact: true })).toBeVisible();
+  await expect(page.getByText('Power envelope required', { exact: true })).toBeVisible();
 
-  await page.screenshot({ path: testInfo.outputPath('machine-workbench-assembly.png'), fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-constraints.png') });
+
+  await page.getByRole('button', { name: 'Authority', exact: true }).click();
+  await expect(page.getByText('authority lens', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-assembly.png') });
 
   // Existing PCB rendering remains a specialized drill-down inside the machine workspace.
   await page.getByRole('button', { name: 'Compute PCB', exact: true }).click();
@@ -47,5 +53,5 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.locator('canvas').first()).toBeVisible();
   await expect(page.getByText('Donor x86 mainboard', { exact: true }).last()).toBeVisible();
 
-  await page.screenshot({ path: testInfo.outputPath('machine-workbench-pcb.png'), fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-pcb.png') });
 });
