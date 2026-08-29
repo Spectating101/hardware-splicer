@@ -67,7 +67,7 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   setActiveLens: (activeLens) => set({ activeLens }),
   setActiveBottomTab: (activeBottomTab) => set({ activeBottomTab }),
   setActiveView: (activeView) => set({ activeView }),
-  setPhase: (phase) => set({ phase, immersive: phase === 'construct' ? false : undefined } as Partial<MachineWorkbenchState>),
+  setPhase: (phase) => set({ phase, immersive: false }),
   setConstructorDockTab: (constructorDockTab) => set({ constructorDockTab }),
   setActiveCandidateId: (activeCandidateId) => set({ activeCandidateId, selectedProposalId: null, selectedResourceId: null }),
   setSelectedResourceId: (selectedResourceId) => set({ selectedResourceId }),
