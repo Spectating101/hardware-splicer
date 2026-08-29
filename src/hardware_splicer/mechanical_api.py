@@ -7,6 +7,7 @@ from typing import Any, Dict
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
+from .mechanical_access import DeclaredInterfaceAccess, build_declared_access_box
 from .mechanical_fit import (
     ClearanceBox,
     ClearanceRequirement,
@@ -40,6 +41,11 @@ class MechanicalGeometryParseRequest(BaseModel):
 class MechanicalGeometryPlaceRequest(BaseModel):
     geometry: MechanicalGeometryReport
     placements: list[DeclaredGeometryPlacement] = Field(min_length=1)
+
+
+class MechanicalInterfaceAccessRequest(BaseModel):
+    object_box: ClearanceBox
+    access: DeclaredInterfaceAccess
 
 
 class MechanicalGeometryApplyRequest(BaseModel):
@@ -84,14 +90,17 @@ def create_mechanical_router() -> APIRouter:
             "ok": True,
             "geometry_parse_request_schema": MechanicalGeometryParseRequest.model_json_schema(),
             "geometry_place_request_schema": MechanicalGeometryPlaceRequest.model_json_schema(),
+            "interface_access_request_schema": MechanicalInterfaceAccessRequest.model_json_schema(),
             "geometry_report_schema": MechanicalGeometryReport.model_json_schema(),
             "placement_schema": DeclaredGeometryPlacement.model_json_schema(),
+            "interface_access_schema": DeclaredInterfaceAccess.model_json_schema(),
             "fit_report_schema": MechanicalFitReport.model_json_schema(),
             "fit_check_request_schema": MechanicalFitCheckRequest.model_json_schema(),
             "geometry_apply_request_schema": MechanicalGeometryApplyRequest.model_json_schema(),
             "fit_apply_request_schema": MechanicalFitApplyRequest.model_json_schema(),
             "step_point_envelope_only": True,
             "declared_rigid_placement_only": True,
+            "declared_interface_access_only": True,
             "full_brep_collision": False,
             "structural_analysis": False,
             "thread_strength_verified": False,
@@ -153,6 +162,28 @@ def create_mechanical_router() -> APIRouter:
             "placement_count": len(boxes),
             "declared_rigid_placement_only": True,
             "aabb_only": True,
+            "full_brep_collision": False,
+            "physical_measurement": False,
+            **_authority_payload(),
+        }
+
+    @router.post("/interfaces/access-envelope")
+    def build_interface_access(request: MechanicalInterfaceAccessRequest) -> Dict[str, Any]:
+        try:
+            access_box = build_declared_access_box(request.object_box, request.access)
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_interface_access", "message": str(exc)},
+            ) from exc
+        return {
+            "ok": True,
+            "access_box": access_box.model_dump(mode="json"),
+            "declared_interface_access_only": True,
+            "aabb_only": True,
+            "cable_routing_verified": False,
+            "connector_mating_verified": False,
+            "service_access_verified": False,
             "full_brep_collision": False,
             "physical_measurement": False,
             **_authority_payload(),
