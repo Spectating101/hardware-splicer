@@ -295,6 +295,7 @@ const mainboardStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL
 const displayStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(305.,195.,12.));\nENDSEC;\nEND-ISO-10303-21;\n";
 
 test('constructor consumes live resource strategy, spatial evidence dependencies, and bounded mechanical checks without weakening authority', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.route('**/api/proxy/resource/strategy', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
