@@ -91,6 +91,7 @@ def test_product_mounts_bounded_mechanical_routes() -> None:
 
     assert "/v1/engineering/mechanical/schema" in paths
     assert "/v1/engineering/mechanical/geometry/parse" in paths
+    assert "/v1/engineering/mechanical/geometry/place" in paths
     assert "/v1/engineering/mechanical/geometry/apply" in paths
     assert "/v1/engineering/mechanical/fit/check" in paths
     assert "/v1/engineering/mechanical/fit/apply" in paths
@@ -140,6 +141,81 @@ def test_geometry_parse_rejects_non_step_source() -> None:
 
     assert response.status_code == 422
     assert response.json()["detail"]["type"] == "invalid_step_geometry"
+
+
+def test_geometry_place_rotates_step_envelope_into_explicit_common_frame_without_authority() -> None:
+    client = TestClient(create_product_app())
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/place",
+        json={
+            "geometry": _geometry(),
+            "placements": [
+                {
+                    "placement_id": "place-left",
+                    "object_id": "left-part",
+                    "model_id": "left",
+                    "target_frame": "assembly",
+                    "translation_mm": [10.0, 20.0, 30.0],
+                    "rotation_deg_xyz": [0.0, 0.0, 90.0],
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["placement_count"] == 1
+    assert body["declared_rigid_placement_only"] is True
+    assert body["aabb_only"] is True
+    assert body["full_brep_collision"] is False
+    assert body["physical_measurement"] is False
+    assert body["fabrication_authorized"] is False
+    box = body["clearance_boxes"][0]
+    assert box["object_id"] == "left-part"
+    assert box["frame_id"] == "assembly"
+    assert box["state"] == "declared_placement"
+    assert box["source_model_id"] == "left"
+    assert box["minimum_mm"] == [-40.0, 20.0, 30.0]
+    assert box["maximum_mm"][0] == 10.0
+    assert box["maximum_mm"][1] == 120.0
+    assert box["maximum_mm"][2] == 40.0
+    assert box["metadata"]["rotation_convention"] == "Rz*Ry*Rx; canonical STEP XYZ"
+    assert box["metadata"]["physical_measurement"] is False
+
+
+def test_geometry_place_rejects_unknown_model_and_authority_promotion() -> None:
+    client = TestClient(create_product_app())
+    unknown = client.post(
+        "/v1/engineering/mechanical/geometry/place",
+        json={
+            "geometry": _geometry(),
+            "placements": [
+                {
+                    "placement_id": "missing",
+                    "object_id": "missing-part",
+                    "model_id": "does-not-exist",
+                }
+            ],
+        },
+    )
+    assert unknown.status_code == 422
+    assert unknown.json()["detail"]["type"] == "invalid_mechanical_placement"
+
+    promoted = client.post(
+        "/v1/engineering/mechanical/geometry/place",
+        json={
+            "geometry": _geometry(),
+            "placements": [
+                {
+                    "placement_id": "promoted",
+                    "object_id": "left-part",
+                    "model_id": "left",
+                    "authority": "verified",
+                }
+            ],
+        },
+    )
+    assert promoted.status_code == 422
 
 
 def test_fit_check_and_apply_block_clearance_without_authority() -> None:
