@@ -21,6 +21,21 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('connector pinout', { exact: true })).toBeVisible();
   await expect(page.getByText('backlight power', { exact: true })).toBeVisible();
 
+  // The assembly is a real spatial inspection surface: frame, x-ray, and engineering views are operable.
+  await expect(page.getByRole('button', { name: 'Frame selection in 3D' })).toBeVisible();
+  const xray = page.getByRole('button', { name: 'X-ray shell' });
+  await xray.click();
+  await expect(xray).toHaveAttribute('aria-pressed', 'true');
+  await xray.click();
+  await expect(xray).toHaveAttribute('aria-pressed', 'false');
+  const topView = page.getByRole('button', { name: 'Top view' });
+  await topView.click();
+  await expect(topView).toHaveAttribute('aria-pressed', 'true');
+  const isoView = page.getByRole('button', { name: 'Isometric view' });
+  await isoView.click();
+  await expect(isoView).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Frame selection in 3D' }).click();
+
   // Semantic lenses are operable without changing the underlying machine truth.
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
   await expect(page.getByText('interfaces lens', { exact: true })).toBeVisible();
