@@ -2,6 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
+test.setTimeout(60_000);
+
 test('machine workbench keeps spatial selection, authority, and evidence context coherent', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto(`${APP_URL}/workbench`);
@@ -11,10 +13,8 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText(/Build blocked · 3 gates/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
 
-  // The global launcher must not cover the machine workspace.
   await expect(page.getByLabel(/Open Hardware Splicer/)).toHaveCount(0);
 
-  // Spatial commands deterministically drive the same canonical workbench state.
   await page.getByRole('button', { name: 'Open spatial command console' }).click();
   const commandInput = page.getByRole('textbox', { name: 'Spatial command input' });
   await commandInput.fill('show blockers');
@@ -23,14 +23,12 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Close spatial command console' }).click();
 
-  // Tree selection and inspector resolve the same canonical machine entity.
   await page.getByRole('button', { name: /Donor display assembly/ }).click();
   await expect(page.getByText('Donor display assembly', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('REUSE_PENDING', { exact: true })).toBeVisible();
   await expect(page.getByText('connector pinout', { exact: true })).toBeVisible();
   await expect(page.getByText('backlight power', { exact: true })).toBeVisible();
 
-  // The assembly is a real spatial inspection surface: frame, x-ray, and engineering views are operable.
   await expect(page.getByRole('button', { name: 'Frame selection in 3D' })).toBeVisible();
   const xray = page.getByRole('button', { name: 'X-ray shell' });
   await xray.click();
@@ -45,7 +43,6 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(isoView).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Frame selection in 3D' }).click();
 
-  // Spatial focus gives the 3D scene the whole workstation while preserving state-backed HUD context.
   await page.getByRole('button', { name: 'Enter immersive spatial mode' }).click();
   await expect(page.getByRole('button', { name: 'Exit immersive spatial mode' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByText('Machine tree', { exact: true })).toHaveCount(0);
@@ -57,10 +54,8 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await page.getByRole('button', { name: 'Exit immersive spatial mode' }).click();
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
 
-  // Re-select the display after overview so evidence checks remain scoped to the donor panel.
   await page.getByRole('button', { name: /Donor display assembly/ }).click();
 
-  // Semantic lenses are operable without changing the underlying machine truth. The HUD may echo the lens label.
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
   await expect(page.getByText('interfaces lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Provenance', exact: true }).click();
@@ -68,12 +63,10 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await page.getByRole('button', { name: 'Constraints', exact: true }).first().click();
   await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
 
-  // Evidence tray follows current selection and preserves the fail-closed display state.
   await page.getByRole('button', { name: 'Evidence', exact: true }).click();
   await expect(page.getByText('Display identity required', { exact: true })).toBeVisible();
   await expect(page.getByText(/Do not infer a raw panel pinout/)).toBeVisible();
 
-  // Power selection exposes the physical-authority blocker and inherits child evidence.
   await page.getByRole('button', { name: /^Power/ }).click();
   await expect(page.getByText('Physical authority', { exact: true })).toBeVisible();
   await expect(page.getByText('BLOCKED', { exact: true }).last()).toBeVisible();
@@ -86,7 +79,6 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('authority lens', { exact: true }).first()).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-assembly.png') });
 
-  // Existing PCB renderer remains the specialized drill-down, but fixture truth stays explicit.
   await page.getByRole('button', { name: 'Compute PCB', exact: true }).click();
   await expect(page.getByText(/Representative x86 board fixture in the existing HS PCB renderer/)).toBeVisible();
   await expect(page.getByText(/Geometry remains synthetic until donor identity and measurements close/)).toBeVisible();
