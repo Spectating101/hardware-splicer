@@ -90,9 +90,56 @@ def test_product_mounts_bounded_mechanical_routes() -> None:
     paths = set(create_product_app().openapi()["paths"])
 
     assert "/v1/engineering/mechanical/schema" in paths
+    assert "/v1/engineering/mechanical/geometry/parse" in paths
     assert "/v1/engineering/mechanical/geometry/apply" in paths
     assert "/v1/engineering/mechanical/fit/check" in paths
     assert "/v1/engineering/mechanical/fit/apply" in paths
+
+
+def test_geometry_parse_builds_declared_step_envelope_without_authority() -> None:
+    client = TestClient(create_product_app())
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/parse",
+        json={
+            "project_id": "mechanical-api",
+            "sources": [
+                {
+                    "source_id": "fixture.step",
+                    "model_id": "fixture-mainboard",
+                    "content": STEP,
+                }
+            ],
+            "mounts": [],
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["model_count"] == 1
+    assert body["step_point_envelope_only"] is True
+    assert body["full_brep_collision"] is False
+    assert body["mass_properties_verified"] is False
+    assert body["fabrication_authorized"] is False
+    model = body["mechanical_geometry"]["models"][0]
+    assert model["model_id"] == "fixture-mainboard"
+    assert model["authority"] == "declared"
+    assert model["bounding_box"]["size"] == [100.0, 50.0, 10.0]
+    assert model["bounding_box"]["units"] == "mm"
+    assert model["content_hash"].startswith("sha256:")
+
+
+def test_geometry_parse_rejects_non_step_source() -> None:
+    client = TestClient(create_product_app())
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/parse",
+        json={
+            "project_id": "mechanical-api",
+            "sources": [{"source_id": "bad.step", "content": "not a STEP file"}],
+        },
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"]["type"] == "invalid_step_geometry"
 
 
 def test_fit_check_and_apply_block_clearance_without_authority() -> None:
