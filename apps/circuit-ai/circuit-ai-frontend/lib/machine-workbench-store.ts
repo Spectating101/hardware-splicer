@@ -22,7 +22,7 @@ export type MechanicalGeometryEvidence = {
   sizeMm: [number, number, number];
   minimumMm: [number, number, number];
   maximumMm: [number, number, number];
-  axisMapping: 'step_xyz_to_scene_xzy';
+  axisMapping?: 'step_xyz_to_scene_xzy';
   pointCount: number;
   unresolved: Array<{ field?: string; reason?: string }>;
   stepPointEnvelopeOnly: true;
@@ -165,6 +165,10 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   })),
   setMechanicalGeometryEvidence: (candidateId, evidence) => set((state) => {
     const current = state.plannerProjections[candidateId] ?? emptyProjection(candidateId);
+    const normalizedEvidence: MechanicalGeometryEvidence = {
+      ...evidence,
+      axisMapping: 'step_xyz_to_scene_xzy',
+    };
     return {
       plannerProjections: {
         ...state.plannerProjections,
@@ -172,7 +176,7 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
           ...current,
           mechanicalGeometryByEntity: {
             ...(current.mechanicalGeometryByEntity ?? {}),
-            [evidence.entityId]: evidence,
+            [normalizedEvidence.entityId]: normalizedEvidence,
           },
         },
       },
