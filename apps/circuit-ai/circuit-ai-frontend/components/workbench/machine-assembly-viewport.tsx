@@ -22,6 +22,7 @@ import {
   type WorkbenchCameraPreset,
   type WorkbenchLens,
 } from '@/lib/machine-workbench-store';
+import { DeclaredInterfaceAccessOverlays } from '@/components/workbench/declared-interface-access-overlay';
 
 const AUTHORITY_COLORS: Record<AuthorityState, string> = {
   verified: '#22c55e',
@@ -488,6 +489,7 @@ export function MachineAssemblyViewport() {
         <group position={[0, -0.18, 0]}>
           {parts.map((entity) => <MachinePart key={entity.id} entity={entity} candidateProjection={candidateProjection} />)}
           <InterfaceLines candidateProjection={candidateProjection} />
+          <DeclaredInterfaceAccessOverlays />
         </group>
         <Grid args={[32, 32]} cellSize={0.5} cellThickness={0.35} cellColor="#16243a" sectionSize={5} sectionThickness={0.8} sectionColor="#25466b" fadeDistance={28} fadeStrength={1.8} position={[0, -0.42, 0]} />
         <CameraControls ref={controlsRef} makeDefault minDistance={3.5} maxDistance={38} smoothTime={0.22} draggingSmoothTime={0.1} />
