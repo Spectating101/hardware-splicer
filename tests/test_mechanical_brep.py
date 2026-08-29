@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from hardware_splicer.mechanical_brep import (
     BrepStatus,
     _sanitized_environment,
@@ -173,3 +175,55 @@ def test_worker_environment_does_not_inherit_provider_secrets() -> None:
     assert "OPENAI_API_KEY" not in environment
     assert "ANTHROPIC_API_KEY" not in environment
     assert "AWS_SECRET_ACCESS_KEY" not in environment
+
+
+def test_real_cadquery_worker_when_optional_specialist_is_installed(tmp_path) -> None:
+    cq = pytest.importorskip("cadquery", reason="optional cadquery-isolated specialist is not installed")
+    step_path = tmp_path / "box.step"
+    cq.exporters.export(cq.Workplane("XY").box(10.0, 10.0, 10.0), str(step_path))
+    step_content = step_path.read_text(encoding="utf-8")
+
+    overlapping = check_step_brep_interference(
+        project_id="brep-real",
+        first_content=step_content,
+        first_source_id="left-box.step",
+        first_model_id="left-box",
+        first_placement=_placement("place-left-box", "left-box-object", "left-box"),
+        second_content=step_content,
+        second_source_id="right-box.step",
+        second_model_id="right-box",
+        second_placement={
+            **_placement("place-right-box", "right-box-object", "right-box"),
+            "translation_mm": [5.0, 0.0, 0.0],
+        },
+        kernel_available=True,
+    )
+
+    assert overlapping.status == BrepStatus.INTERFERENCE
+    assert overlapping.exact_pair_interference_evaluated is True
+    assert overlapping.exact_solid_interference is True
+    assert overlapping.minimum_distance_mm == pytest.approx(0.0, abs=1e-9)
+    assert overlapping.intersection_volume_mm3 == pytest.approx(500.0, rel=1e-6, abs=1e-6)
+    assert overlapping.metadata["worker_isolated"] is True
+
+    separated = check_step_brep_interference(
+        project_id="brep-real",
+        first_content=step_content,
+        first_source_id="left-box.step",
+        first_model_id="left-box",
+        first_placement=_placement("place-left-box", "left-box-object", "left-box"),
+        second_content=step_content,
+        second_source_id="right-box.step",
+        second_model_id="right-box",
+        second_placement={
+            **_placement("place-right-box", "right-box-object", "right-box"),
+            "translation_mm": [20.0, 0.0, 0.0],
+        },
+        kernel_available=True,
+    )
+
+    assert separated.status == BrepStatus.CLEAR
+    assert separated.exact_pair_interference_evaluated is True
+    assert separated.exact_solid_interference is False
+    assert separated.minimum_distance_mm == pytest.approx(10.0, rel=1e-6, abs=1e-6)
+    assert separated.intersection_volume_mm3 == pytest.approx(0.0, abs=1e-9)
