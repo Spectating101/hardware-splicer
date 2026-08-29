@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, Mapping
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
@@ -19,18 +19,26 @@ from .mechanical_fit import (
 from .mechanical_fit_plan_update import apply_mechanical_fit_to_plan
 from .mechanical_geometry_plan_update import apply_mechanical_geometry_to_plan
 from .mechanical_placement import DeclaredGeometryPlacement, build_declared_placement_box
+from .project_store import ProjectNotFound, ProjectStore, ProjectStoreError
 from .step_geometry import (
     DeclaredMountInterface,
     MechanicalGeometryReport,
     build_mechanical_geometry_report,
     parse_step_model,
 )
+from .stored_source_parser import read_registered_source_bytes
 
 
 class MechanicalStepSource(BaseModel):
     source_id: str = Field(min_length=1)
     content: str = Field(min_length=1)
     model_id: str | None = None
+
+
+class RegisteredMechanicalStepSource(BaseModel):
+    source_id: str = Field(min_length=1)
+    content_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    model_id: str = Field(min_length=1)
 
 
 class MechanicalGeometryParseRequest(BaseModel):
@@ -48,6 +56,15 @@ class MechanicalBrepInterferenceRequest(BaseModel):
     project_id: str = Field(min_length=1)
     first_source: MechanicalStepSource
     second_source: MechanicalStepSource
+    first_placement: DeclaredGeometryPlacement
+    second_placement: DeclaredGeometryPlacement
+    timeout_s: float = Field(default=60.0, gt=0.0, le=120.0)
+
+
+class MechanicalStoredBrepInterferenceRequest(BaseModel):
+    project_id: str = Field(min_length=1)
+    first_source: RegisteredMechanicalStepSource
+    second_source: RegisteredMechanicalStepSource
     first_placement: DeclaredGeometryPlacement
     second_placement: DeclaredGeometryPlacement
     timeout_s: float = Field(default=60.0, gt=0.0, le=120.0)
@@ -88,7 +105,76 @@ def _authority_payload() -> Dict[str, Any]:
     }
 
 
-def create_mechanical_router() -> APIRouter:
+def _brep_payload(report: BrepPairInterferenceReport) -> Dict[str, Any]:
+    return {
+        "ok": True,
+        "brep_interference": report.model_dump(mode="json"),
+        "kernel_available": report.kernel_available,
+        "exact_pair_interference_evaluated": report.exact_pair_interference_evaluated,
+        "exact_solid_interference": report.exact_solid_interference,
+        "minimum_distance_mm": report.minimum_distance_mm,
+        "intersection_volume_mm3": report.intersection_volume_mm3,
+        "aabb_fallback_used": False,
+        "full_brep_collision": False,
+        "connector_mating_verified": False,
+        "cable_routing_verified": False,
+        "service_access_verified": False,
+        "structural_analysis": False,
+        "physical_measurement": False,
+        **_authority_payload(),
+    }
+
+
+def _source_hash(source: Mapping[str, Any]) -> str:
+    return str(source.get("content_hash") or source.get("revision") or "")
+
+
+def _resolve_registered_step_source(
+    snapshot: Mapping[str, Any],
+    reference: RegisteredMechanicalStepSource,
+) -> Mapping[str, Any]:
+    sources = snapshot.get("engineeringSources")
+    if not isinstance(sources, list):
+        raise ValueError("project snapshot contains no registered engineering sources")
+    matches = [
+        row
+        for row in sources
+        if isinstance(row, Mapping)
+        and str(row.get("source_id") or "") == reference.source_id
+        and _source_hash(row) == reference.content_hash
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"registered STEP source {reference.source_id!r} at {reference.content_hash!r} was not found exactly once"
+        )
+    source = matches[0]
+    metadata = source.get("metadata")
+    parser_route = str(metadata.get("parser_route") or "") if isinstance(metadata, Mapping) else ""
+    if parser_route != "step_geometry":
+        raise ValueError(
+            f"registered source {reference.source_id!r} is not classified for bounded STEP geometry"
+        )
+    return source
+
+
+def _registered_step_text(
+    store: ProjectStore,
+    project_id: str,
+    source: Mapping[str, Any],
+) -> str:
+    content = read_registered_source_bytes(
+        project_id,
+        source,
+        project_root=store.root,
+    )
+    try:
+        return content.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("registered STEP source must be UTF-8/ASCII text for the canonical STEP parser") from exc
+
+
+def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRouter:
+    store = project_store or ProjectStore()
     router = APIRouter(
         prefix="/v1/engineering/mechanical",
         tags=["engineering", "mechanical"],
@@ -101,6 +187,7 @@ def create_mechanical_router() -> APIRouter:
             "geometry_parse_request_schema": MechanicalGeometryParseRequest.model_json_schema(),
             "geometry_place_request_schema": MechanicalGeometryPlaceRequest.model_json_schema(),
             "brep_pair_interference_request_schema": MechanicalBrepInterferenceRequest.model_json_schema(),
+            "stored_brep_pair_interference_request_schema": MechanicalStoredBrepInterferenceRequest.model_json_schema(),
             "interface_access_request_schema": MechanicalInterfaceAccessRequest.model_json_schema(),
             "geometry_report_schema": MechanicalGeometryReport.model_json_schema(),
             "placement_schema": DeclaredGeometryPlacement.model_json_schema(),
@@ -115,6 +202,8 @@ def create_mechanical_router() -> APIRouter:
             "declared_interface_access_only": True,
             "optional_brep_kernel": "cadquery-isolated",
             "exact_pair_brep_interference_when_kernel_available": True,
+            "registered_source_brep_materialization": "content_addressed_hash_reverified_server_side",
+            "raw_registered_source_bytes_returned": False,
             "full_brep_collision": False,
             "structural_analysis": False,
             "thread_strength_verified": False,
@@ -201,22 +290,64 @@ def create_mechanical_router() -> APIRouter:
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={"type": "invalid_brep_interference_request", "message": str(exc)},
             ) from exc
+        return _brep_payload(report)
+
+    @router.post("/geometry/brep/interference/stored")
+    def check_stored_brep_interference(request: MechanicalStoredBrepInterferenceRequest) -> Dict[str, Any]:
+        try:
+            envelope = store.load_latest_with_recovery(request.project_id)
+            snapshot = envelope.get("snapshot")
+            if not isinstance(snapshot, Mapping):
+                raise ValueError("project snapshot is unavailable")
+            first_descriptor = _resolve_registered_step_source(snapshot, request.first_source)
+            second_descriptor = _resolve_registered_step_source(snapshot, request.second_source)
+            first_content = _registered_step_text(store, request.project_id, first_descriptor)
+            second_content = _registered_step_text(store, request.project_id, second_descriptor)
+            report = check_step_brep_interference(
+                project_id=request.project_id,
+                first_content=first_content,
+                first_source_id=request.first_source.source_id,
+                first_model_id=request.first_source.model_id,
+                first_placement=request.first_placement,
+                second_content=second_content,
+                second_source_id=request.second_source.source_id,
+                second_model_id=request.second_source.model_id,
+                second_placement=request.second_placement,
+                timeout_s=request.timeout_s,
+            )
+            if report.first_content_hash != request.first_source.content_hash:
+                raise ValueError("first stored STEP canonical hash disagrees with the registered source identity")
+            if report.second_content_hash != request.second_source.content_hash:
+                raise ValueError("second stored STEP canonical hash disagrees with the registered source identity")
+            report = report.model_copy(
+                update={
+                    "metadata": {
+                        **report.metadata,
+                        "source_materialization": "registered_blob_hash_reverified_server_side",
+                        "registered_raw_bytes_returned": False,
+                    }
+                }
+            )
+        except ProjectNotFound as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"type": "project_not_found", "message": str(exc)},
+            ) from exc
+        except ProjectStoreError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={"type": "project_store_error", "message": str(exc)},
+            ) from exc
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_stored_brep_interference_request", "message": str(exc)},
+            ) from exc
         return {
-            "ok": True,
-            "brep_interference": report.model_dump(mode="json"),
-            "kernel_available": report.kernel_available,
-            "exact_pair_interference_evaluated": report.exact_pair_interference_evaluated,
-            "exact_solid_interference": report.exact_solid_interference,
-            "minimum_distance_mm": report.minimum_distance_mm,
-            "intersection_volume_mm3": report.intersection_volume_mm3,
-            "aabb_fallback_used": False,
-            "full_brep_collision": False,
-            "connector_mating_verified": False,
-            "cable_routing_verified": False,
-            "service_access_verified": False,
-            "structural_analysis": False,
-            "physical_measurement": False,
-            **_authority_payload(),
+            **_brep_payload(report),
+            "registered_source_materialized": True,
+            "registered_source_hash_reverified": True,
+            "raw_registered_source_bytes_returned": False,
         }
 
     @router.post("/interfaces/access-envelope")
