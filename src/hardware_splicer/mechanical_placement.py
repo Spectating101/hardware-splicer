@@ -21,6 +21,7 @@ from .step_geometry import StepModelSummary
 
 
 PLACEMENT_SCHEMA = "hardware_splicer.declared_geometry_placement.v1"
+_ROTATION_TERM_TOLERANCE = 1e-12
 
 
 class PlacementBase(BaseModel):
@@ -62,13 +63,25 @@ def _bbox_mm(model: StepModelSummary) -> tuple[list[float], list[float]]:
     )
 
 
+def _stable_rotation_term(value: float) -> float:
+    """Canonicalize trig residue at exact cardinal rotations without rounding geometry."""
+
+    if abs(value) <= _ROTATION_TERM_TOLERANCE:
+        return 0.0
+    if abs(value - 1.0) <= _ROTATION_TERM_TOLERANCE:
+        return 1.0
+    if abs(value + 1.0) <= _ROTATION_TERM_TOLERANCE:
+        return -1.0
+    return value
+
+
 def _rotation_matrix_xyz(rotation_deg_xyz: list[float]) -> list[list[float]]:
     """Return Rz * Ry * Rx for intrinsic XYZ angles, operating in canonical STEP XYZ."""
 
     rx, ry, rz = (radians(float(value)) for value in rotation_deg_xyz)
-    cx, sx = cos(rx), sin(rx)
-    cy, sy = cos(ry), sin(ry)
-    cz, sz = cos(rz), sin(rz)
+    cx, sx = (_stable_rotation_term(value) for value in (cos(rx), sin(rx)))
+    cy, sy = (_stable_rotation_term(value) for value in (cos(ry), sin(ry)))
+    cz, sz = (_stable_rotation_term(value) for value in (cos(rz), sin(rz)))
     return [
         [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
         [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx],
