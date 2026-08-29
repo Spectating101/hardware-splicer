@@ -36,6 +36,17 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(isoView).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Frame selection in 3D' }).click();
 
+  // Spatial focus gives the 3D scene the whole workstation while preserving state-backed HUD context.
+  const enterSpatial = page.getByRole('button', { name: 'Enter immersive spatial mode' });
+  await enterSpatial.click();
+  await expect(page.getByRole('button', { name: 'Exit immersive spatial mode' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('Machine tree', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('live spatial model', { exact: true })).toBeVisible();
+  await expect(page.getByText('Spatial focus', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-immersive.png') });
+  await page.getByRole('button', { name: 'Exit immersive spatial mode' }).click();
+  await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
+
   // Semantic lenses are operable without changing the underlying machine truth.
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
   await expect(page.getByText('interfaces lens', { exact: true })).toBeVisible();
