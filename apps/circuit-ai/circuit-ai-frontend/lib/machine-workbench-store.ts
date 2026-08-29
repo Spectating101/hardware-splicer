@@ -9,6 +9,20 @@ export type WorkbenchCameraPreset = 'iso' | 'top' | 'front' | 'right';
 export type WorkbenchPhase = 'construct' | 'inspect';
 export type ConstructorDockTab = 'target' | 'resources';
 export type ConstructorCandidateId = 'balanced' | 'max-reuse' | 'low-risk';
+export type PlannerSourceState = 'loading' | 'live' | 'fixture';
+
+export type PlannerCandidateProjection = {
+  strategyMode: 'hybrid' | 'constrained' | 'open_procurement';
+  readinessStatus: string;
+  readinessReason: string;
+  coverageScore: number;
+  openGateCount: number;
+  blockedResourceCount: number;
+  selectedResourceIds: string[];
+  missingCapabilities: string[];
+  procurementItemCount: number;
+  procurementCostUsd: number;
+};
 
 export type MachineWorkbenchState = {
   selectedEntityId: string;
@@ -21,6 +35,9 @@ export type MachineWorkbenchState = {
   selectedResourceId: string | null;
   selectedProposalId: string | null;
   proposalDecisions: Record<string, 'accepted' | 'held'>;
+  plannerSource: PlannerSourceState;
+  plannerMessage: string;
+  plannerProjections: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>;
   isolatedEntityId: string | null;
   exploded: boolean;
   xray: boolean;
@@ -37,6 +54,7 @@ export type MachineWorkbenchState = {
   setSelectedResourceId: (id: string | null) => void;
   setSelectedProposalId: (id: string | null) => void;
   setProposalDecision: (id: string, decision: 'accepted' | 'held') => void;
+  setPlannerState: (source: PlannerSourceState, message: string, projections?: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>) => void;
   setIsolatedEntityId: (id: string | null) => void;
   setCameraPreset: (preset: WorkbenchCameraPreset) => void;
   requestFrameSelection: () => void;
@@ -57,6 +75,9 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   selectedResourceId: null,
   selectedProposalId: null,
   proposalDecisions: {},
+  plannerSource: 'loading',
+  plannerMessage: 'Checking Hardware-Splicer resource planner…',
+  plannerProjections: {},
   isolatedEntityId: null,
   exploded: false,
   xray: false,
@@ -73,6 +94,11 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   setSelectedResourceId: (selectedResourceId) => set({ selectedResourceId }),
   setSelectedProposalId: (selectedProposalId) => set({ selectedProposalId }),
   setProposalDecision: (id, decision) => set((state) => ({ proposalDecisions: { ...state.proposalDecisions, [id]: decision } })),
+  setPlannerState: (plannerSource, plannerMessage, plannerProjections) => set((state) => ({
+    plannerSource,
+    plannerMessage,
+    plannerProjections: plannerProjections ?? state.plannerProjections,
+  })),
   setIsolatedEntityId: (isolatedEntityId) => set({ isolatedEntityId }),
   setCameraPreset: (cameraPreset) => set({ cameraPreset }),
   requestFrameSelection: () => set((state) => ({ frameRequest: state.frameRequest + 1 })),
