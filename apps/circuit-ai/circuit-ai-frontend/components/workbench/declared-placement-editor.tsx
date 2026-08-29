@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader2, Move3D, Rotate3D, Trash2 } from 'lucide-react';
 import type { ConstructorCandidateId, MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
@@ -49,6 +49,16 @@ export function DeclaredPlacementEditor({
   const [rotation, setRotation] = useState(() => (existing?.rotationDegXyz ?? [0, 0, 0]).map(String));
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    setTranslation((existing?.translationMm ?? [0, 0, 0]).map(String));
+    setRotation((existing?.rotationDegXyz ?? [0, 0, 0]).map(String));
+    setState('idle');
+    setMessage('');
+    // Identity changes are the only reset trigger. A placement write for the same
+    // resource must not erase its just-returned backend status message.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [candidateId, resourceId, entityId]);
 
   function updateVector(kind: 'translation' | 'rotation', index: number, value: string) {
     if (kind === 'translation') {
