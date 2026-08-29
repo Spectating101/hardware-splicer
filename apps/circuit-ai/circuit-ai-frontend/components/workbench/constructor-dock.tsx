@@ -1,6 +1,7 @@
 'use client';
 
-import { Activity, Boxes, Crosshair, PackageSearch, ShieldAlert, Target } from 'lucide-react';
+import { type ChangeEvent, useState } from 'react';
+import { Activity, Boxes, Crosshair, FileUp, Loader2, PackageSearch, Ruler, ShieldAlert, Target } from 'lucide-react';
 import {
   constructorCandidateMap,
   constructorRequirements,
@@ -8,7 +9,7 @@ import {
   constructorTarget,
   type RequirementState,
 } from '@/lib/workbench-constructor-demo';
-import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
+import { useMachineWorkbenchStore, type MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 
 function requirementTone(state: RequirementState) {
   if (state === 'pass') return 'border-emerald-300/20 bg-emerald-300/[0.055] text-emerald-200';
@@ -29,7 +30,25 @@ function normalizeId(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function tuple3(value: unknown): [number, number, number] | null {
+  if (!Array.isArray(value) || value.length !== 3) return null;
+  const rows = value.map(Number);
+  return rows.every(Number.isFinite) ? rows as [number, number, number] : null;
+}
+
+function normalizeMillimeters(value: [number, number, number], units: string) {
+  if (units === 'mm') return value;
+  if (units === 'm') return value.map((row) => row * 1000) as [number, number, number];
+  return null;
+}
+
 export function ConstructorDock() {
+  const [geometryState, setGeometryState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [geometryMessage, setGeometryMessage] = useState('');
   const tab = useMachineWorkbenchStore((state) => state.constructorDockTab);
   const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
   const selectedResourceId = useMachineWorkbenchStore((state) => state.selectedResourceId);
@@ -39,16 +58,102 @@ export function ConstructorDock() {
   const setTab = useMachineWorkbenchStore((state) => state.setConstructorDockTab);
   const setSelectedResourceId = useMachineWorkbenchStore((state) => state.setSelectedResourceId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
   const activeCandidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
   const livePlanner = plannerSource === 'live' && Boolean(plannerProjection);
   const liveSelected = new Set((plannerProjection?.selectedResourceIds ?? []).map(normalizeId));
+  const selectedResource = constructorResources.find((resource) => resource.id === selectedResourceId) ?? null;
+  const selectedGeometry = selectedResource?.mappedEntityId
+    ? plannerProjection?.mechanicalGeometryByEntity?.[selectedResource.mappedEntityId]
+    : undefined;
+  const geometryForSelectedResource = selectedGeometry?.resourceId === selectedResource?.id ? selectedGeometry : undefined;
 
   function inspectResource(resourceId: string, mappedEntityId?: string) {
     setSelectedResourceId(resourceId);
+    setGeometryState('idle');
+    setGeometryMessage('');
     if (mappedEntityId) {
       setSelectedEntityId(mappedEntityId);
       window.setTimeout(requestFrameSelection, 0);
+    }
+  }
+
+  async function importStepEnvelope(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !selectedResource?.mappedEntityId) return;
+
+    setGeometryState('loading');
+    setGeometryMessage(`Parsing ${file.name} with Hardware-Splicer…`);
+    try {
+      const content = await file.text();
+      const response = await fetch('/api/proxy/engineering/mechanical/geometry/parse', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          project_id: 'deck-001',
+          sources: [{
+            source_id: file.name,
+            model_id: `${activeCandidateId}-${selectedResource.id}`,
+            content,
+          }],
+          mounts: [],
+        }),
+        cache: 'no-store',
+      });
+      const payload = record(await response.json());
+      if (!response.ok || payload.ok !== true) {
+        throw new Error(String(payload.error || `mechanical geometry HTTP ${response.status}`));
+      }
+      const geometry = record(payload.mechanical_geometry);
+      const models = Array.isArray(geometry.models) ? geometry.models : [];
+      const model = record(models[0]);
+      const boundingBox = record(model.bounding_box);
+      const rawSize = tuple3(boundingBox.size);
+      const rawMinimum = tuple3(boundingBox.minimum);
+      const rawMaximum = tuple3(boundingBox.maximum);
+      const units = String(boundingBox.units || model.units || 'unknown');
+      if (!rawSize || !rawMinimum || !rawMaximum) throw new Error('STEP source did not produce a bounded Cartesian-point envelope.');
+      const sizeMm = normalizeMillimeters(rawSize, units);
+      const minimumMm = normalizeMillimeters(rawMinimum, units);
+      const maximumMm = normalizeMillimeters(rawMaximum, units);
+      if (!sizeMm || !minimumMm || !maximumMm) throw new Error(`STEP length units are ${units}; explicit millimetre/metre units are required before spatial scaling.`);
+      if (sizeMm.some((value) => value <= 0)) throw new Error('STEP envelope has a zero-size axis; HS will not promote it to a 3D resource envelope.');
+
+      const unresolved = Array.isArray(model.unresolved)
+        ? model.unresolved.map((row) => {
+            const item = record(row);
+            return { field: typeof item.field === 'string' ? item.field : undefined, reason: typeof item.reason === 'string' ? item.reason : undefined };
+          })
+        : [];
+      const evidence: MechanicalGeometryEvidence = {
+        entityId: selectedResource.mappedEntityId,
+        resourceId: selectedResource.id,
+        sourceId: String(model.source_id || file.name),
+        modelId: String(model.model_id || `${activeCandidateId}-${selectedResource.id}`),
+        contentHash: String(model.content_hash || ''),
+        authority: 'declared',
+        units: 'mm',
+        sizeMm,
+        minimumMm,
+        maximumMm,
+        pointCount: Number(boundingBox.point_count || model.cartesian_point_count || 0),
+        unresolved,
+        stepPointEnvelopeOnly: true,
+        fullBrepCollision: false,
+        fabricationAuthorized: false,
+      };
+      if (!evidence.contentHash.startsWith('sha256:')) throw new Error('HS geometry response did not include the canonical STEP content hash.');
+
+      setMechanicalGeometryEvidence(activeCandidateId, evidence);
+      setSelectedEntityId(selectedResource.mappedEntityId);
+      window.setTimeout(requestFrameSelection, 0);
+      setGeometryState('success');
+      setGeometryMessage(`${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · ${evidence.pointCount} STEP points · declared envelope only.`);
+    } catch (error: unknown) {
+      setGeometryState('error');
+      setGeometryMessage(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -121,10 +226,40 @@ export function ConstructorDock() {
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[9px] leading-4 text-slate-500">
             <PackageSearch className="h-3.5 w-3.5 shrink-0" /> {livePlanner ? 'Candidate membership below is selected by the live resource planner.' : 'Owned, salvaged, procurable and designed parts share one resource pool.'}
           </div>
+
+          {selectedResource?.mappedEntityId ? (
+            <div className="mb-3 rounded-lg border border-cyan-300/12 bg-cyan-300/[0.025] p-2.5" data-testid="step-geometry-import">
+              <div className="flex items-start gap-2">
+                <Ruler className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[9px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
+                  {geometryForSelectedResource ? (
+                    <div className="mt-1 text-[8px] leading-4 text-emerald-200/75">
+                      STEP envelope attached: {geometryForSelectedResource.sizeMm.join(' × ')} mm · {geometryForSelectedResource.pointCount} points · DECLARED
+                    </div>
+                  ) : (
+                    <div className="mt-1 text-[8px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope; placement remains fixture-anchored until datum transforms exist.</div>
+                  )}
+                  <div className="mt-2 flex items-center gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-cyan-200 hover:bg-cyan-300/[0.08]">
+                      {geometryState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileUp className="h-3 w-3" />}
+                      {geometryForSelectedResource ? 'Replace STEP' : 'Attach STEP'}
+                      <input type="file" accept=".step,.stp,model/step" className="sr-only" disabled={geometryState === 'loading'} onChange={importStepEnvelope} aria-label={`Attach STEP geometry for ${selectedResource.name}`} />
+                    </label>
+                    <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">no BREP · no collision authority</span>
+                  </div>
+                  {geometryMessage ? <div className={`mt-1.5 text-[8px] leading-4 ${geometryState === 'error' ? 'text-red-300/80' : geometryState === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{geometryMessage}</div> : null}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <div className="space-y-2">
             {constructorResources.map((resource) => {
               const selected = selectedResourceId === resource.id;
               const used = livePlanner ? liveSelected.has(normalizeId(resource.id)) : activeCandidate?.resourceIds.includes(resource.id);
+              const geometry = resource.mappedEntityId ? plannerProjection?.mechanicalGeometryByEntity?.[resource.mappedEntityId] : undefined;
+              const hasGeometry = geometry?.resourceId === resource.id;
               return (
                 <button
                   key={resource.id}
@@ -138,6 +273,7 @@ export function ConstructorDock() {
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[10px] font-medium text-slate-100">{resource.name}</span>
                         {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-cyan-300">{livePlanner ? 'planner selected' : 'candidate'}</span> : null}
+                        {hasGeometry ? <span className="rounded bg-emerald-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-emerald-300">STEP envelope</span> : null}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[8px] uppercase tracking-[0.12em] text-slate-600">
                         <span>{resource.kind}</span><span>·</span><span className={decisionTone(resource.decision)}>{resource.decision}</span><span>·</span><span>{resource.costNtd ? `NT$${resource.costNtd.toLocaleString()}` : 'owned'}</span>
