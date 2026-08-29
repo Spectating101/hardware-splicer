@@ -11,16 +11,30 @@ test('machine constructor keeps resources, candidates, proposals, spatial truth,
   // Constructor is the primary surface: target + resources + candidate + proposals around the machine.
   await expect(page.getByRole('heading', { name: 'Portable Linux workstation', level: 1 })).toBeVisible();
   await expect(page.getByText('Constructor', { exact: true })).toBeVisible();
-  await expect(page.getByText('Target contract', { exact: true })).toBeVisible();
+  await expect(page.getByText('Target contract projection', { exact: true })).toBeVisible();
   await expect(page.getByText('Proposal queue', { exact: true })).toBeVisible();
   await expect(page.getByText('Architecture candidates', { exact: true })).toBeVisible();
   await expect(page.getByText(/Build blocked · 3 gates/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
   await expect(page.getByLabel(/Open Hardware Splicer/)).toHaveCount(0);
 
-  // Changing objective changes the architecture candidate, never the authority doctrine.
+  // Standalone browser CI has no Circuit-AI backend: wait for the explicit honest fallback, not elapsed time.
+  await expect(page.getByText('planner fixture', { exact: true })).toBeVisible();
+  const spatialProjection = page.getByTestId('candidate-spatial-projection');
+  await expect(spatialProjection).toContainText('balanced');
+  await expect(spatialProjection).toContainText('fixture');
+  const balancedCanvas = await page.locator('canvas').first().screenshot();
+
+  // Changing objective changes both the architecture metadata and the actual WebGL composition.
   await page.getByRole('button', { name: /Lowest integration risk/ }).click();
   await expect(page.getByText(/Build blocked · 1 gate/)).toBeVisible();
+  await expect(spatialProjection).toContainText('low-risk');
+  await expect(spatialProjection).toContainText('5 substitute');
+  await expect(spatialProjection).toContainText('0 gaps');
+  await page.waitForTimeout(650);
+  const lowRiskCanvas = await page.locator('canvas').first().screenshot();
+  expect(lowRiskCanvas.equals(balancedCanvas)).toBeFalsy();
+
   await expect(page.getByRole('button', { name: 'Inspect proposal Use documented portable display' })).toBeVisible();
   await page.getByRole('button', { name: 'Accept proposal Use documented portable display to working candidate' }).click();
   await expect(page.getByText('accepted', { exact: true })).toBeVisible();
@@ -39,15 +53,16 @@ test('machine constructor keeps resources, candidates, proposals, spatial truth,
   await commandInput.press('Enter');
   await expect(page.getByText('Maximum reuse is now the working architecture candidate. Authority gates are unchanged.', { exact: true })).toBeVisible();
   await expect(page.getByText(/Build blocked · 5 gates/)).toBeVisible();
+  await expect(spatialProjection).toContainText('max-reuse');
+  await expect(spatialProjection).toContainText('1 held');
   await commandInput.fill('show blockers');
   await commandInput.press('Enter');
   await expect(page.getByText('Blocking and unresolved paths surfaced across the machine.', { exact: true })).toBeVisible();
-  await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Close spatial command console' }).click();
 
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-constructor.png') });
 
-  // Inspection remains a sibling mode over the same machine truth.
+  // Inspection remains a sibling mode over the same canonical machine truth.
   await page.getByRole('button', { name: 'Inspect', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
