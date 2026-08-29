@@ -14,6 +14,15 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   // The global launcher must not cover the machine workspace.
   await expect(page.getByLabel(/Open Hardware Splicer/)).toHaveCount(0);
 
+  // Spatial commands deterministically drive the same canonical workbench state.
+  await page.getByRole('button', { name: 'Open spatial command console' }).click();
+  const commandInput = page.getByRole('textbox', { name: 'Spatial command input' });
+  await commandInput.fill('show blockers');
+  await commandInput.press('Enter');
+  await expect(page.getByText('Blocking and unresolved paths surfaced across the machine.', { exact: true })).toBeVisible();
+  await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Close spatial command console' }).click();
+
   // Tree selection and inspector resolve the same canonical machine entity.
   await page.getByRole('button', { name: /Donor display assembly/ }).click();
   await expect(page.getByText('Donor display assembly', { exact: true }).last()).toBeVisible();
