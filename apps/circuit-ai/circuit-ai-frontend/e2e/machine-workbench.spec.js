@@ -2,26 +2,55 @@ const { test, expect } = require('@playwright/test');
 
 const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
-test.setTimeout(60_000);
+test.setTimeout(75_000);
 
-test('machine workbench keeps spatial selection, authority, and evidence context coherent', async ({ page }, testInfo) => {
+test('machine constructor keeps resources, candidates, proposals, spatial truth, and inspection coherent', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto(`${APP_URL}/workbench`);
 
-  await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
-  await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
+  // Constructor is the primary surface: target + resources + candidate + proposals around the machine.
+  await expect(page.getByRole('heading', { name: 'Portable Linux workstation', level: 1 })).toBeVisible();
+  await expect(page.getByText('Constructor', { exact: true })).toBeVisible();
+  await expect(page.getByText('Target contract', { exact: true })).toBeVisible();
+  await expect(page.getByText('Proposal queue', { exact: true })).toBeVisible();
+  await expect(page.getByText('Architecture candidates', { exact: true })).toBeVisible();
   await expect(page.getByText(/Build blocked · 3 gates/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
-
   await expect(page.getByLabel(/Open Hardware Splicer/)).toHaveCount(0);
 
+  // Changing objective changes the architecture candidate, never the authority doctrine.
+  await page.getByRole('button', { name: /Lowest integration risk/ }).click();
+  await expect(page.getByText(/Build blocked · 1 gate/)).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Inspect proposal Use documented portable display' })).toBeVisible();
+  await page.getByRole('button', { name: 'Accept proposal Use documented portable display to working candidate' }).click();
+  await expect(page.getByText('accepted', { exact: true })).toBeVisible();
+  await expect(page.getByText(/working design only/)).toBeVisible();
+
+  // Resource selection maps back into the same spatial machine model.
+  await page.getByRole('button', { name: 'Resources', exact: true }).click();
+  await expect(page.getByText('Unknown old lithium pack', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Donor display \+ validated controller/ }).click();
+  await expect(page.getByText(/selected Donor display assembly/i)).toBeVisible();
+
+  // The Jarvis-style command surface also drives constructor state.
   await page.getByRole('button', { name: 'Open spatial command console' }).click();
   const commandInput = page.getByRole('textbox', { name: 'Spatial command input' });
+  await commandInput.fill('candidate max reuse');
+  await commandInput.press('Enter');
+  await expect(page.getByText('Maximum reuse is now the working architecture candidate. Authority gates are unchanged.', { exact: true })).toBeVisible();
+  await expect(page.getByText(/Build blocked · 5 gates/)).toBeVisible();
   await commandInput.fill('show blockers');
   await commandInput.press('Enter');
   await expect(page.getByText('Blocking and unresolved paths surfaced across the machine.', { exact: true })).toBeVisible();
   await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Close spatial command console' }).click();
+
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-constructor.png') });
+
+  // Inspection remains a sibling mode over the same machine truth.
+  await page.getByRole('button', { name: 'Inspect', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
+  await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: /Donor display assembly/ }).click();
   await expect(page.getByText('Donor display assembly', { exact: true }).last()).toBeVisible();
@@ -55,7 +84,6 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: /Donor display assembly/ }).click();
-
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
   await expect(page.getByText('interfaces lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Provenance', exact: true }).click();
@@ -72,7 +100,6 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('BLOCKED', { exact: true }).last()).toBeVisible();
   await expect(page.getByText('PD profiles', { exact: true })).toBeVisible();
   await expect(page.getByText('Power envelope required', { exact: true })).toBeVisible();
-
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-constraints.png') });
 
   await page.getByRole('button', { name: 'Authority', exact: true }).click();
@@ -84,6 +111,5 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText(/Geometry remains synthetic until donor identity and measurements close/)).toBeVisible();
   await expect(page.locator('canvas').first()).toBeVisible();
   await expect(page.getByText('Donor x86 mainboard', { exact: true }).last()).toBeVisible();
-
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-pcb.png') });
 });
