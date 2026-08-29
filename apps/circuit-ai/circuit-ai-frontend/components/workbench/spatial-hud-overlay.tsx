@@ -75,7 +75,7 @@ export function SpatialHudOverlay() {
         </>
       ) : null}
 
-      <div className={`absolute bottom-5 left-5 max-w-[390px] border-l border-cyan-200/20 pl-3 ${immersive ? '' : 'hidden 2xl:block'}`}>
+      <div className={`absolute bottom-5 left-5 max-w-[390px] border-l border-cyan-200/20 pl-3 ${immersive ? '' : phase === 'construct' ? 'hidden' : 'hidden 2xl:block'}`}>
         <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-200/70">
           <span className="hs-hud-pulse h-1.5 w-1.5 rounded-full bg-cyan-200" style={{ animation: 'hs-hud-pulse 2.2s ease-in-out infinite' }} />
           {phase === 'construct' ? 'working architecture' : 'live spatial model'}
