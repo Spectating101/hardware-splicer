@@ -155,6 +155,86 @@ function placementResponse(body) {
   };
 }
 
+function accessEnvelopeResponse(body) {
+  const parent = body.object_box || {};
+  const access = body.access || {};
+  const faceAxes = {
+    '+x': [0, 1, 1, 2], '-x': [0, -1, 1, 2],
+    '+y': [1, 1, 0, 2], '-y': [1, -1, 0, 2],
+    '+z': [2, 1, 0, 1], '-z': [2, -1, 0, 1],
+  };
+  const [normalAxis, normalSign, uAxis, vAxis] = faceAxes[access.face || '+x'];
+  const minimum = parent.minimum_mm || [0, 0, 0];
+  const maximum = parent.maximum_mm || [1, 1, 1];
+  const anchor = [0, 1, 2].map((index) => (minimum[index] + maximum[index]) / 2);
+  anchor[normalAxis] = normalSign > 0 ? maximum[normalAxis] : minimum[normalAxis];
+  anchor[uAxis] += Number(access.offset_u_mm || 0);
+  anchor[vAxis] += Number(access.offset_v_mm || 0);
+  const accessMinimum = [...anchor];
+  const accessMaximum = [...anchor];
+  accessMinimum[uAxis] = anchor[uAxis] - Number(access.width_mm) / 2;
+  accessMaximum[uAxis] = anchor[uAxis] + Number(access.width_mm) / 2;
+  accessMinimum[vAxis] = anchor[vAxis] - Number(access.height_mm) / 2;
+  accessMaximum[vAxis] = anchor[vAxis] + Number(access.height_mm) / 2;
+  if (normalSign > 0) {
+    accessMinimum[normalAxis] = anchor[normalAxis];
+    accessMaximum[normalAxis] = anchor[normalAxis] + Number(access.depth_mm);
+  } else {
+    accessMinimum[normalAxis] = anchor[normalAxis] - Number(access.depth_mm);
+    accessMaximum[normalAxis] = anchor[normalAxis];
+  }
+  const outwardNormal = [0, 0, 0];
+  outwardNormal[normalAxis] = normalSign;
+  return {
+    ok: true,
+    access_box: {
+      object_id: `access:${access.access_id}`,
+      frame_id: access.frame_id || parent.frame_id || 'assembly',
+      minimum_mm: accessMinimum,
+      maximum_mm: accessMaximum,
+      source_model_id: parent.source_model_id || null,
+      state: 'declared_access_envelope',
+      metadata: {
+        schema_version: 'hardware_splicer.declared_interface_access.v1',
+        access_id: access.access_id,
+        interface_id: access.interface_id,
+        parent_object_id: access.object_id,
+        parent_placement_id: parent.metadata?.placement_id,
+        access_authority: 'declared',
+        face: access.face,
+        anchor_point_mm: anchor,
+        outward_normal: outwardNormal,
+        width_mm: access.width_mm,
+        height_mm: access.height_mm,
+        depth_mm: access.depth_mm,
+        offset_u_mm: access.offset_u_mm || 0,
+        offset_v_mm: access.offset_v_mm || 0,
+        aabb_only: true,
+        cable_routing_verified: false,
+        connector_mating_verified: false,
+        service_access_verified: false,
+        full_brep_collision: false,
+        physical_measurement: false,
+        fabrication_authorized: false,
+      },
+    },
+    declared_interface_access_only: true,
+    aabb_only: true,
+    cable_routing_verified: false,
+    connector_mating_verified: false,
+    service_access_verified: false,
+    full_brep_collision: false,
+    physical_measurement: false,
+    automatic_execution: false,
+    physical_action: false,
+    manufacturing_authorized: false,
+    fabrication_authorized: false,
+    power_on_authorized: false,
+    motion_authorized: false,
+    release_authorized: false,
+  };
+}
+
 function fitResponse(body) {
   const [first, second] = body.clearance_boxes || [];
   const requirement = body.clearance_requirements?.[0] || { minimum_clearance_mm: 0 };
@@ -214,7 +294,7 @@ function fitResponse(body) {
 const mainboardStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(210.,130.,18.));\nENDSEC;\nEND-ISO-10303-21;\n";
 const displayStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(305.,195.,12.));\nENDSEC;\nEND-ISO-10303-21;\n";
 
-test('constructor consumes live resource strategy, STEP evidence, placement, and bounded clearance without weakening authority', async ({ page }, testInfo) => {
+test('constructor consumes live resource strategy, spatial evidence dependencies, and bounded mechanical checks without weakening authority', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.route('**/api/proxy/resource/strategy', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
@@ -228,6 +308,10 @@ test('constructor consumes live resource strategy, STEP evidence, placement, and
   await page.route('**/api/proxy/engineering/mechanical/geometry/place', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(placementResponse(body)) });
+  });
+  await page.route('**/api/proxy/engineering/mechanical/interfaces/access-envelope', async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(accessEnvelopeResponse(body)) });
   });
   await page.route('**/api/proxy/engineering/mechanical/fit/check', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
@@ -291,8 +375,8 @@ test('constructor consumes live resource strategy, STEP evidence, placement, and
   await page.getByRole('button', { name: 'Apply declared placement' }).click();
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [270, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
 
-  // Two independently sourced/placed STEP envelopes now share a declared assembly frame.
-  // Their X envelopes are 20 mm apart. A 25 mm requirement fails; a 15 mm requirement passes.
+  // Two independently sourced/placed STEP envelopes share a declared assembly frame.
+  // Their X envelopes are 20 mm apart. A 25 mm requirement fails; 15 mm passes.
   const clearanceChecker = page.getByTestId('declared-clearance-checker');
   await expect(clearanceChecker).toBeVisible();
   await expect(clearanceChecker).toContainText('same-frame AABB only');
@@ -304,7 +388,45 @@ test('constructor consumes live resource strategy, STEP evidence, placement, and
   await expect(clearanceChecker).toContainText('AABB clearance 20.000 mm meets the 15.000 mm requirement.');
   await expect(clearanceChecker).toContainText('does not establish BREP collision freedom');
 
-  // Candidate changes must hide both imported/placement projections and their clearance surface.
+  // Interface semantics now gain a bounded spatial keep-out only after placement.
+  await donorMainboard.click();
+  await expect(page.getByLabel('Placement translation X mm for Donor x86 mainboard')).toHaveValue('40');
+  const accessEditor = page.getByTestId('declared-interface-access-editor');
+  await expect(accessEditor).toBeVisible();
+  await expect(page.getByLabel('Interface access for Donor x86 mainboard')).toHaveValue('if-display');
+  await expect(page.getByLabel('Interface access face for Donor x86 mainboard')).toHaveValue('+x');
+  await page.getByRole('button', { name: 'Build access envelope' }).click();
+  await expect(accessEditor).toContainText('Compute → display · +x · 20 × 10 × 30 mm access AABB · DECLARED.');
+
+  // Mainboard is X=40..250, display starts X=270. A 30 mm +X access prism reaches
+  // X=280 and overlaps the display by 10 mm; the smallest overlap axis is 8 mm.
+  await page.getByLabel('Interface access minimum clearance mm for Donor x86 mainboard').fill('0');
+  await page.getByRole('button', { name: 'Check interface access' }).click();
+  await expect(accessEditor).toContainText('AABB clearance -8.000 mm is below the 0.000 mm requirement.');
+
+  // Shrinking only the declared outward access depth to 15 mm leaves a 5 mm gap.
+  await page.getByLabel('Depth interface access mm for Donor x86 mainboard').fill('15');
+  await page.getByRole('button', { name: 'Build access envelope' }).click();
+  await expect(accessEditor).toContainText('Compute → display · +x · 20 × 10 × 15 mm access AABB · DECLARED.');
+  await page.getByLabel('Interface access minimum clearance mm for Donor x86 mainboard').fill('2');
+  await page.getByRole('button', { name: 'Check interface access' }).click();
+  await expect(accessEditor).toContainText('AABB clearance 5.000 mm meets the 2.000 mm requirement.');
+  await expect(accessEditor).toContainText('not connector mating, cable routing, service ergonomics, BREP collision truth, or fabrication authority');
+
+  // A parent placement change invalidates its derived access envelope.
+  await page.getByLabel('Placement translation X mm for Donor x86 mainboard').fill('45');
+  await page.getByRole('button', { name: 'Apply declared placement' }).click();
+  await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [45, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
+  await expect(page.getByRole('button', { name: 'Check interface access' })).toHaveCount(0);
+
+  // Replacing the upstream STEP source invalidates the placement derived from the old geometry.
+  await page.getByLabel('Attach STEP geometry for Donor x86 mainboard').setInputFiles({ name: 'donor-mainboard-r2.step', mimeType: 'model/step', buffer: Buffer.from(mainboardStep) });
+  await expect(page.getByTestId('step-geometry-import')).toContainText('STEP envelope attached: 210 × 130 × 18 mm · 8 points · DECLARED');
+  await expect(page.getByTestId('declared-interface-access-editor')).toHaveCount(0);
+  await expect(page.getByTestId('declared-clearance-checker')).toHaveCount(0);
+  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toBeVisible();
+
+  // Candidate changes still isolate all imported spatial evidence from another objective profile.
   await page.getByRole('button', { name: /Maximum reuse/ }).click();
   await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('88% capability coverage', { exact: true })).toBeVisible();
