@@ -1,5 +1,6 @@
 'use client';
 
+import { constructorCandidateMap } from '@/lib/workbench-constructor-demo';
 import { deck001Constraints, deck001EntityMap, deck001Interfaces } from '@/lib/workbench-demo';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 
@@ -14,8 +15,11 @@ function authorityTone(authority: string) {
 export function SpatialHudOverlay() {
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const phase = useMachineWorkbenchStore((state) => state.phase);
+  const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
   const immersive = useMachineWorkbenchStore((state) => state.immersive);
   const selected = deck001EntityMap.get(selectedEntityId) ?? deck001EntityMap.get('deck-001');
+  const candidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
 
   if (!selected) return null;
 
@@ -30,10 +34,11 @@ export function SpatialHudOverlay() {
     selected.kind === 'machine' || scope.has(link.from) || scope.has(link.to),
   );
   const blockedInterfaces = interfaces.filter((link) => link.authority === 'blocked').length;
-  const openConstraints = deck001Constraints.filter((constraint) =>
+  const inspectionOpenConstraints = deck001Constraints.filter((constraint) =>
     (selected.kind === 'machine' || scope.has(constraint.entityId) || constraint.entityId === selected.id)
     && constraint.state === 'open',
   ).length;
+  const openGates = phase === 'construct' ? candidate?.blockerCount ?? inspectionOpenConstraints : inspectionOpenConstraints;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
@@ -70,18 +75,22 @@ export function SpatialHudOverlay() {
         </>
       ) : null}
 
-      <div className={`absolute bottom-5 left-5 max-w-[360px] border-l border-cyan-200/20 pl-3 ${immersive ? '' : 'hidden 2xl:block'}`}>
+      <div className={`absolute bottom-5 left-5 max-w-[390px] border-l border-cyan-200/20 pl-3 ${immersive ? '' : 'hidden 2xl:block'}`}>
         <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-200/70">
           <span className="hs-hud-pulse h-1.5 w-1.5 rounded-full bg-cyan-200" style={{ animation: 'hs-hud-pulse 2.2s ease-in-out infinite' }} />
-          live spatial model
+          {phase === 'construct' ? 'working architecture' : 'live spatial model'}
         </div>
-        <div className="mt-1 truncate text-sm font-semibold text-slate-100">{selected.name}</div>
+        <div className="mt-1 truncate text-sm font-semibold text-slate-100">{phase === 'construct' ? candidate?.name ?? 'Working candidate' : selected.name}</div>
         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[9px] uppercase tracking-[0.11em] text-slate-500">
-          <span>{selected.domain}</span>
-          <span>·</span>
-          <span>{selected.source}</span>
-          <span>·</span>
-          <span>{activeLens} lens</span>
+          {phase === 'construct' ? (
+            <>
+              <span>{candidate?.strategyMode}</span><span>·</span><span>{candidate?.reusePercent}% reuse</span><span>·</span><span>{candidate?.risk} risk</span><span>·</span><span>{activeLens} lens</span>
+            </>
+          ) : (
+            <>
+              <span>{selected.domain}</span><span>·</span><span>{selected.source}</span><span>·</span><span>{activeLens} lens</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -95,9 +104,9 @@ export function SpatialHudOverlay() {
           <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">blocked paths</div>
           <div className={`mt-0.5 text-sm font-semibold ${blockedInterfaces ? 'text-red-300' : 'text-slate-200'}`}>{blockedInterfaces}</div>
         </div>
-        <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${openConstraints ? 'border-amber-300/20 bg-amber-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
-          <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">open gates</div>
-          <div className={`mt-0.5 text-sm font-semibold ${openConstraints ? 'text-amber-300' : 'text-slate-200'}`}>{openConstraints}</div>
+        <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${openGates ? 'border-amber-300/20 bg-amber-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
+          <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">{phase === 'construct' ? 'candidate gates' : 'open gates'}</div>
+          <div className={`mt-0.5 text-sm font-semibold ${openGates ? 'text-amber-300' : 'text-slate-200'}`}>{openGates}</div>
         </div>
         <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${authorityTone(selected.authority)}`}>
           <div className="text-[8px] uppercase tracking-[0.16em] opacity-60">authority</div>
