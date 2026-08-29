@@ -234,7 +234,15 @@ function applyStepEnvelope(
   const entity = deck001EntityMap.get(projection.entityId);
   if (!entity?.spatial) return projection;
 
-  const sceneSize = evidence.sizeMm.map((value) => Math.max(value * SCENE_UNITS_PER_MM, 0.04)) as [number, number, number];
+  // ISO STEP coordinates are treated as XYZ / Z-up at this bounded evidence layer.
+  // The R3F workbench is Y-up, so dimensions map X,Y,Z -> scene X,Z,Y. This does
+  // not solve the part's assembly datum/rotation; position remains fixture anchored.
+  const [xMm, yMm, zMm] = evidence.sizeMm;
+  const sceneSize: [number, number, number] = [
+    Math.max(xMm * SCENE_UNITS_PER_MM, 0.04),
+    Math.max(zMm * SCENE_UNITS_PER_MM, 0.04),
+    Math.max(yMm * SCENE_UNITS_PER_MM, 0.04),
+  ];
   const sizeScale = entity.spatial.size.map((value, index) => sceneSize[index] / value) as [number, number, number];
   const unresolved = evidence.unresolved
     .map((row) => row.field || row.reason)
@@ -247,7 +255,7 @@ function applyStepEnvelope(
     opacity: 0.06,
     sizeScale,
     label: 'DECLARED STEP ENVELOPE',
-    note: `HS parsed ${evidence.sourceId} as ${evidence.sizeMm.join(' × ')} mm from ${evidence.pointCount} Cartesian points (${evidence.contentHash.slice(0, 19)}…). Placement still uses the fixture anchor because assembly datum transforms are unresolved. Full BREP/collision and fabrication authority remain false.${unresolved ? ` Unresolved: ${unresolved}.` : ''}`,
+    note: `HS parsed ${evidence.sourceId} as ${evidence.sizeMm.join(' × ')} mm from ${evidence.pointCount} Cartesian points (${evidence.contentHash.slice(0, 19)}…). STEP XYZ is displayed as scene XZY (Z-up → Y-up). Placement still uses the fixture anchor because assembly datum transforms are unresolved. Full BREP/collision and fabrication authority remain false.${unresolved ? ` Unresolved: ${unresolved}.` : ''}`,
   };
 }
 
