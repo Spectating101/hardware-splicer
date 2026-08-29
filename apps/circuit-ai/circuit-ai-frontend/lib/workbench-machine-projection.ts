@@ -13,7 +13,7 @@ import type {
   PlannerCandidateProjection,
   PlannerSourceState,
 } from '@/lib/machine-workbench-store';
-import type { DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 
 export type ProjectionDisposition = 'retained' | 'substituted' | 'held' | 'gap' | 'implicit' | 'suppressed';
 export type ProjectionGeometryState = 'fixture' | 'working_projection' | 'held_volume' | 'gap_envelope' | 'step_envelope' | 'placed_step_envelope';
@@ -43,7 +43,6 @@ export type MachinePartProjection = {
   opacity: number;
   sizeScale: [number, number, number];
   positionOffset: [number, number, number];
-  absolutePosition?: [number, number, number];
   label: string;
   note: string;
 };
@@ -243,6 +242,14 @@ function canonicalPositionToScene(positionMm: [number, number, number]) {
   return [xMm * SCENE_UNITS_PER_MM, zMm * SCENE_UNITS_PER_MM, yMm * SCENE_UNITS_PER_MM] as [number, number, number];
 }
 
+function fixtureScenePosition(entityId: string): [number, number, number] {
+  const entity = deck001EntityMap.get(entityId);
+  if (!entity?.spatial) return [0, 0, 0];
+  if (entityId === 'cmp-display') return [0, 3.35, -3.05];
+  if (entityId === 'cmp-keyboard') return [0.55, 0.72, 2.25];
+  return entity.spatial.position;
+}
+
 function applyStepEnvelope(
   projection: MachinePartProjection,
   evidence: MechanicalGeometryEvidence | undefined,
@@ -262,14 +269,17 @@ function applyStepEnvelope(
 
   if (placement && placement.resourceId === projection.resourceId && placement.modelId === evidence.modelId) {
     const centerMm = placement.minimumMm.map((value, index) => (value + placement.maximumMm[index]) / 2) as [number, number, number];
+    const targetPosition = canonicalPositionToScene(centerMm);
+    const basePosition = fixtureScenePosition(projection.entityId);
+    const positionOffset = targetPosition.map((value, index) => value - basePosition[index]) as [number, number, number];
     return {
       ...projection,
       geometryState: 'placed_step_envelope' as const,
       opacity: 0.045,
       sizeScale,
-      absolutePosition: canonicalPositionToScene(centerMm),
+      positionOffset,
       label: 'DECLARED PLACED ENVELOPE',
-      note: `HS placed ${evidence.sourceId} in ${placement.frameId} using declared translation ${placement.translationMm.join(', ')} mm and XYZ rotation ${placement.rotationDegXyz.join(', ')}°. The rendered box is the transformed STEP AABB only; full BREP collision, physical measurement and fabrication authority remain false.${unresolved ? ` Unresolved STEP fields: ${unresolved}.` : ''}`,
+      note: `HS placed ${evidence.sourceId} in ${placement.frameId} using declared translation ${placement.translationMm.join(', ')} mm and XYZ rotation ${placement.rotationDegXyz.join(', ')}°. Canonical STEP XYZ is displayed as scene XZY. The rendered box is the transformed STEP AABB only; full BREP collision, physical measurement and fabrication authority remain false.${unresolved ? ` Unresolved STEP fields: ${unresolved}.` : ''}`,
     };
   }
 
@@ -287,9 +297,12 @@ export function buildCandidateMachineProjection(
   candidateId: ConstructorCandidateId,
   source: PlannerSourceState,
   planner?: PlannerCandidateProjection,
-  placementsByEntity: Record<string, DeclaredPlacementEvidence> = {},
+  placementsByEntity?: Record<string, DeclaredPlacementEvidence>,
 ): CandidateMachineProjection {
   const selected = selectedSet(candidateId, source, planner);
+  const resolvedPlacements = placementsByEntity
+    ?? useWorkbenchPlacementStore.getState().placementsByCandidate[candidateId]
+    ?? {};
   const parts: Record<string, MachinePartProjection> = {};
 
   for (const entityId of Object.values(ROLE_ENTITY)) {
@@ -321,7 +334,7 @@ export function buildCandidateMachineProjection(
   }
 
   for (const [entityId, evidence] of Object.entries(planner?.mechanicalGeometryByEntity ?? {})) {
-    if (parts[entityId]) parts[entityId] = applyStepEnvelope(parts[entityId], evidence, placementsByEntity[entityId]);
+    if (parts[entityId]) parts[entityId] = applyStepEnvelope(parts[entityId], evidence, resolvedPlacements[entityId]);
   }
 
   const rows = Object.values(parts);
