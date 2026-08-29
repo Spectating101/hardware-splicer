@@ -10,6 +10,8 @@ import {
   GitBranch,
   Layers3,
   LockKeyhole,
+  Maximize2,
+  Minimize2,
   RotateCcw,
   ShieldAlert,
   Waypoints,
@@ -18,6 +20,7 @@ import { PcbViewport, type SelectionState as PcbSelectionState } from '@/compone
 import { EntityInspectorPanel } from '@/components/workbench/entity-inspector-panel';
 import { MachineAssemblyViewport } from '@/components/workbench/machine-assembly-viewport';
 import { MachineTreePanel } from '@/components/workbench/machine-tree-panel';
+import { SpatialHudOverlay } from '@/components/workbench/spatial-hud-overlay';
 import { WorkbenchBottomPanel } from '@/components/workbench/workbench-bottom-panel';
 import { usePageTitle } from '@/components/use-page-title';
 import { deck001Constraints, deck001EntityMap } from '@/lib/workbench-demo';
@@ -37,11 +40,13 @@ export function MachineWorkbench() {
   const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
   const activeView = useMachineWorkbenchStore((state) => state.activeView);
   const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const immersive = useMachineWorkbenchStore((state) => state.immersive);
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const setActiveLens = useMachineWorkbenchStore((state) => state.setActiveLens);
   const setActiveView = useMachineWorkbenchStore((state) => state.setActiveView);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const toggleExploded = useMachineWorkbenchStore((state) => state.toggleExploded);
+  const toggleImmersive = useMachineWorkbenchStore((state) => state.toggleImmersive);
   const resetViewState = useMachineWorkbenchStore((state) => state.resetViewState);
   const [pcbSelection, setPcbSelection] = useState<PcbSelectionState>({ footprintRef: null });
 
@@ -59,6 +64,7 @@ export function MachineWorkbench() {
             <div className="flex items-center gap-2">
               <h1 className="truncate text-sm font-semibold text-white">DECK-001</h1>
               <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">R0</span>
+              {immersive ? <span className="rounded border border-cyan-300/20 bg-cyan-300/8 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-200">Spatial focus</span> : null}
             </div>
             <div className="truncate text-[10px] uppercase tracking-[0.14em] text-slate-500">Machine Workbench · synthetic architecture fixture</div>
           </div>
@@ -69,16 +75,22 @@ export function MachineWorkbench() {
             <LockKeyhole className="h-3.5 w-3.5" />
             Build blocked · {openBlockingConstraints} gates
           </div>
-          <Link href="/engineering/studio" className="rounded-md border border-white/10 px-3 py-2 text-[11px] font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Project Studio</Link>
-          <Link href="/cad" className="rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-3 py-2 text-[11px] font-medium text-cyan-100 transition hover:bg-cyan-300/[0.08]">PCB CAD</Link>
+          {!immersive ? (
+            <>
+              <Link href="/engineering/studio" className="rounded-md border border-white/10 px-3 py-2 text-[11px] font-medium text-slate-300 transition hover:bg-white/5 hover:text-white">Project Studio</Link>
+              <Link href="/cad" className="rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-3 py-2 text-[11px] font-medium text-cyan-100 transition hover:bg-cyan-300/[0.08]">PCB CAD</Link>
+            </>
+          ) : null}
         </div>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="grid min-h-[680px] flex-1 grid-cols-1 xl:min-h-0 xl:grid-cols-[250px_minmax(0,1fr)_320px]">
-          <div className="min-h-[300px] xl:min-h-0">
-            <MachineTreePanel />
-          </div>
+        <div className={`grid min-h-[680px] flex-1 grid-cols-1 xl:min-h-0 ${immersive ? 'xl:grid-cols-1' : 'xl:grid-cols-[250px_minmax(0,1fr)_320px]'}`}>
+          {!immersive ? (
+            <div className="min-h-[300px] xl:min-h-0">
+              <MachineTreePanel />
+            </div>
+          ) : null}
 
           <section className="flex min-h-[520px] min-w-0 flex-col bg-[#050912] xl:min-h-0">
             <div className="flex flex-wrap items-center gap-2 border-b border-white/10 bg-[#07101d] px-3 py-2">
@@ -132,6 +144,17 @@ export function MachineWorkbench() {
                 </button>
                 <button
                   type="button"
+                  onClick={toggleImmersive}
+                  disabled={activeView !== 'assembly'}
+                  aria-label={immersive ? 'Exit immersive spatial mode' : 'Enter immersive spatial mode'}
+                  aria-pressed={immersive}
+                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-medium transition ${immersive && activeView === 'assembly' ? 'bg-cyan-300/10 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-slate-500 hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30'}`}
+                >
+                  {immersive ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                  {immersive ? 'Exit spatial' : 'Spatial focus'}
+                </button>
+                <button
+                  type="button"
                   onClick={resetViewState}
                   className="rounded-md p-1.5 text-slate-500 transition hover:bg-white/5 hover:text-slate-200"
                   aria-label="Reset workbench view state"
@@ -143,7 +166,10 @@ export function MachineWorkbench() {
 
             <div className="relative min-h-0 flex-1">
               {activeView === 'assembly' ? (
-                <MachineAssemblyViewport />
+                <>
+                  <MachineAssemblyViewport />
+                  <SpatialHudOverlay />
+                </>
               ) : (
                 <div className="h-full min-h-[420px] bg-[#050912] xl:min-h-0">
                   <PcbViewport
@@ -167,16 +193,18 @@ export function MachineWorkbench() {
 
             <div className="flex shrink-0 items-center justify-between gap-3 border-t border-white/10 bg-[#07101d] px-3 py-1.5 text-[10px] text-slate-500">
               <span className="truncate">Selected: <strong className="font-medium text-slate-300">{selected?.name ?? 'DECK-001'}</strong></span>
-              <span className="hidden md:block">Orbit · inspect · isolate · switch semantic lenses</span>
+              <span className="hidden md:block">Orbit · inspect · isolate · frame · semantic lenses</span>
             </div>
           </section>
 
-          <div className="min-h-[360px] xl:min-h-0">
-            <EntityInspectorPanel />
-          </div>
+          {!immersive ? (
+            <div className="min-h-[360px] xl:min-h-0">
+              <EntityInspectorPanel />
+            </div>
+          ) : null}
         </div>
 
-        <WorkbenchBottomPanel />
+        {!immersive ? <WorkbenchBottomPanel /> : null}
       </div>
     </main>
   );
