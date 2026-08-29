@@ -7,6 +7,8 @@ import { useWorkbenchAccessStore, type DeclaredAccessEvidence } from '@/lib/work
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 
 const SCENE_UNITS_PER_MM = 0.025;
+const EMPTY_ACCESS_MAP: Record<string, DeclaredAccessEvidence> = {};
+const EMPTY_PLACEMENT_MAP: Record<string, DeclaredPlacementEvidence> = {};
 
 function canonicalPointToScene(point: [number, number, number]): [number, number, number] {
   const [xMm, yMm, zMm] = point;
@@ -106,8 +108,8 @@ export function DeclaredInterfaceAccessOverlays() {
   const phase = useMachineWorkbenchStore((state) => state.phase);
   const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
-  const accessMap = useWorkbenchAccessStore((state) => state.accessByCandidate[activeCandidateId] ?? {});
-  const placements = useWorkbenchPlacementStore((state) => state.placementsByCandidate[activeCandidateId] ?? {});
+  const accessMap = useWorkbenchAccessStore((state) => state.accessByCandidate[activeCandidateId] ?? EMPTY_ACCESS_MAP);
+  const placements = useWorkbenchPlacementStore((state) => state.placementsByCandidate[activeCandidateId] ?? EMPTY_PLACEMENT_MAP);
 
   if (phase !== 'construct') return null;
 
