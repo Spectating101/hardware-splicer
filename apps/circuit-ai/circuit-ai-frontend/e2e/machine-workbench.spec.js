@@ -37,8 +37,7 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await page.getByRole('button', { name: 'Frame selection in 3D' }).click();
 
   // Spatial focus gives the 3D scene the whole workstation while preserving state-backed HUD context.
-  const enterSpatial = page.getByRole('button', { name: 'Enter immersive spatial mode' });
-  await enterSpatial.click();
+  await page.getByRole('button', { name: 'Enter immersive spatial mode' }).click();
   await expect(page.getByRole('button', { name: 'Exit immersive spatial mode' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByText('Machine tree', { exact: true })).toHaveCount(0);
   await expect(page.getByText('live spatial model', { exact: true })).toBeVisible();
@@ -47,13 +46,13 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await page.getByRole('button', { name: 'Exit immersive spatial mode' }).click();
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
 
-  // Semantic lenses are operable without changing the underlying machine truth.
+  // Semantic lenses are operable without changing the underlying machine truth. The HUD may echo the lens label.
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
-  await expect(page.getByText('interfaces lens', { exact: true })).toBeVisible();
+  await expect(page.getByText('interfaces lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Provenance', exact: true }).click();
-  await expect(page.getByText('provenance lens', { exact: true })).toBeVisible();
+  await expect(page.getByText('provenance lens', { exact: true }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Constraints', exact: true }).first().click();
-  await expect(page.getByText('constraints lens', { exact: true })).toBeVisible();
+  await expect(page.getByText('constraints lens', { exact: true }).first()).toBeVisible();
 
   // Evidence tray follows current selection and preserves the fail-closed display state.
   await page.getByRole('button', { name: 'Evidence', exact: true }).click();
@@ -70,7 +69,7 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-constraints.png') });
 
   await page.getByRole('button', { name: 'Authority', exact: true }).click();
-  await expect(page.getByText('authority lens', { exact: true })).toBeVisible();
+  await expect(page.getByText('authority lens', { exact: true }).first()).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-assembly.png') });
 
   // Existing PCB renderer remains the specialized drill-down, but fixture truth stays explicit.
