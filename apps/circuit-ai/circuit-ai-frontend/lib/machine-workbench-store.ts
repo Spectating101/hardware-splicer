@@ -11,6 +11,24 @@ export type ConstructorDockTab = 'target' | 'resources';
 export type ConstructorCandidateId = 'balanced' | 'max-reuse' | 'low-risk';
 export type PlannerSourceState = 'loading' | 'live' | 'fixture';
 
+export type MechanicalGeometryEvidence = {
+  entityId: string;
+  resourceId: string;
+  sourceId: string;
+  modelId: string;
+  contentHash: string;
+  authority: 'declared';
+  units: string;
+  sizeMm: [number, number, number];
+  minimumMm: [number, number, number];
+  maximumMm: [number, number, number];
+  pointCount: number;
+  unresolved: Array<{ field?: string; reason?: string }>;
+  stepPointEnvelopeOnly: true;
+  fullBrepCollision: false;
+  fabricationAuthorized: false;
+};
+
 export type PlannerCandidateProjection = {
   strategyMode: 'hybrid' | 'constrained' | 'open_procurement';
   readinessStatus: string;
@@ -22,6 +40,7 @@ export type PlannerCandidateProjection = {
   missingCapabilities: string[];
   procurementItemCount: number;
   procurementCostUsd: number;
+  mechanicalGeometryByEntity?: Record<string, MechanicalGeometryEvidence>;
 };
 
 export type MachineWorkbenchState = {
@@ -55,6 +74,7 @@ export type MachineWorkbenchState = {
   setSelectedProposalId: (id: string | null) => void;
   setProposalDecision: (id: string, decision: 'accepted' | 'held') => void;
   setPlannerState: (source: PlannerSourceState, message: string, projections?: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>) => void;
+  setMechanicalGeometryEvidence: (candidateId: ConstructorCandidateId, evidence: MechanicalGeometryEvidence) => void;
   setIsolatedEntityId: (id: string | null) => void;
   setCameraPreset: (preset: WorkbenchCameraPreset) => void;
   requestFrameSelection: () => void;
@@ -63,6 +83,47 @@ export type MachineWorkbenchState = {
   toggleImmersive: () => void;
   resetViewState: () => void;
 };
+
+const STRATEGY_BY_CANDIDATE: Record<ConstructorCandidateId, PlannerCandidateProjection['strategyMode']> = {
+  balanced: 'hybrid',
+  'max-reuse': 'constrained',
+  'low-risk': 'open_procurement',
+};
+
+function emptyProjection(candidateId: ConstructorCandidateId): PlannerCandidateProjection {
+  return {
+    strategyMode: STRATEGY_BY_CANDIDATE[candidateId],
+    readinessStatus: 'fixture',
+    readinessReason: 'No live planner projection is attached.',
+    coverageScore: 0,
+    openGateCount: 0,
+    blockedResourceCount: 0,
+    selectedResourceIds: [],
+    missingCapabilities: [],
+    procurementItemCount: 0,
+    procurementCostUsd: 0,
+    mechanicalGeometryByEntity: {},
+  };
+}
+
+function mergeGeometryIntoPlannerState(
+  existing: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>,
+  incoming: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>,
+) {
+  const merged: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>> = {};
+  for (const id of ['balanced', 'max-reuse', 'low-risk'] as ConstructorCandidateId[]) {
+    const next = incoming[id];
+    if (!next) continue;
+    merged[id] = {
+      ...next,
+      mechanicalGeometryByEntity: {
+        ...(next.mechanicalGeometryByEntity ?? {}),
+        ...(existing[id]?.mechanicalGeometryByEntity ?? {}),
+      },
+    };
+  }
+  return merged;
+}
 
 export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => ({
   selectedEntityId: 'deck-001',
@@ -97,8 +158,26 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   setPlannerState: (plannerSource, plannerMessage, plannerProjections) => set((state) => ({
     plannerSource,
     plannerMessage,
-    plannerProjections: plannerProjections ?? state.plannerProjections,
+    plannerProjections: plannerProjections
+      ? mergeGeometryIntoPlannerState(state.plannerProjections, plannerProjections)
+      : state.plannerProjections,
   })),
+  setMechanicalGeometryEvidence: (candidateId, evidence) => set((state) => {
+    const current = state.plannerProjections[candidateId] ?? emptyProjection(candidateId);
+    return {
+      plannerProjections: {
+        ...state.plannerProjections,
+        [candidateId]: {
+          ...current,
+          mechanicalGeometryByEntity: {
+            ...(current.mechanicalGeometryByEntity ?? {}),
+            [evidence.entityId]: evidence,
+          },
+        },
+      },
+      frameRequest: state.frameRequest + 1,
+    };
+  }),
   setIsolatedEntityId: (isolatedEntityId) => set({ isolatedEntityId }),
   setCameraPreset: (cameraPreset) => set({ cameraPreset }),
   requestFrameSelection: () => set((state) => ({ frameRequest: state.frameRequest + 1 })),
