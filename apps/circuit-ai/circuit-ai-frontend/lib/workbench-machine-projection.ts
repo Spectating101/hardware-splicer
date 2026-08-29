@@ -6,14 +6,16 @@ import {
   constructorResources,
   type ConstructorResource,
 } from '@/lib/workbench-constructor-demo';
+import { deck001EntityMap } from '@/lib/workbench-demo';
 import type {
   ConstructorCandidateId,
+  MechanicalGeometryEvidence,
   PlannerCandidateProjection,
   PlannerSourceState,
 } from '@/lib/machine-workbench-store';
 
 export type ProjectionDisposition = 'retained' | 'substituted' | 'held' | 'gap' | 'implicit' | 'suppressed';
-export type ProjectionGeometryState = 'fixture' | 'working_projection' | 'held_volume' | 'gap_envelope';
+export type ProjectionGeometryState = 'fixture' | 'working_projection' | 'held_volume' | 'gap_envelope' | 'step_envelope';
 export type MachinePartVariant =
   | 'donor-mainboard'
   | 'documented-mainboard'
@@ -53,6 +55,7 @@ export type CandidateMachineProjection = {
   heldCount: number;
   gapCount: number;
   suppressedCount: number;
+  evidenceGeometryCount: number;
 };
 
 const ROLE_ENTITY: Record<string, string> = {
@@ -103,6 +106,8 @@ const PREFERENCE: Record<ConstructorCandidateId, string[]> = {
     'res-shell-generated',
   ],
 };
+
+const SCENE_UNITS_PER_MM = 0.025;
 
 function normalizeId(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -221,6 +226,31 @@ function implicitProjection(entityId: string, variant: MachinePartVariant, label
   };
 }
 
+function applyStepEnvelope(
+  projection: MachinePartProjection,
+  evidence: MechanicalGeometryEvidence | undefined,
+) {
+  if (!evidence || evidence.resourceId !== projection.resourceId) return projection;
+  const entity = deck001EntityMap.get(projection.entityId);
+  if (!entity?.spatial) return projection;
+
+  const sceneSize = evidence.sizeMm.map((value) => Math.max(value * SCENE_UNITS_PER_MM, 0.04)) as [number, number, number];
+  const sizeScale = entity.spatial.size.map((value, index) => sceneSize[index] / value) as [number, number, number];
+  const unresolved = evidence.unresolved
+    .map((row) => row.field || row.reason)
+    .filter(Boolean)
+    .join(', ');
+
+  return {
+    ...projection,
+    geometryState: 'step_envelope' as const,
+    opacity: 0.06,
+    sizeScale,
+    label: 'DECLARED STEP ENVELOPE',
+    note: `HS parsed ${evidence.sourceId} as ${evidence.sizeMm.join(' × ')} mm from ${evidence.pointCount} Cartesian points (${evidence.contentHash.slice(0, 19)}…). Placement still uses the fixture anchor because assembly datum transforms are unresolved. Full BREP/collision and fabrication authority remain false.${unresolved ? ` Unresolved: ${unresolved}.` : ''}`,
+  };
+}
+
 export function buildCandidateMachineProjection(
   candidateId: ConstructorCandidateId,
   source: PlannerSourceState,
@@ -257,6 +287,10 @@ export function buildCandidateMachineProjection(
     };
   }
 
+  for (const [entityId, evidence] of Object.entries(planner?.mechanicalGeometryByEntity ?? {})) {
+    if (parts[entityId]) parts[entityId] = applyStepEnvelope(parts[entityId], evidence);
+  }
+
   const rows = Object.values(parts);
   return {
     candidateId,
@@ -267,5 +301,6 @@ export function buildCandidateMachineProjection(
     heldCount: rows.filter((row) => row.disposition === 'held').length,
     gapCount: rows.filter((row) => row.disposition === 'gap').length,
     suppressedCount: rows.filter((row) => row.disposition === 'suppressed').length,
+    evidenceGeometryCount: rows.filter((row) => row.geometryState === 'step_envelope').length,
   };
 }
