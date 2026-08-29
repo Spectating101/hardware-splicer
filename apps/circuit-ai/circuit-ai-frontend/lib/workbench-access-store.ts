@@ -32,6 +32,7 @@ type AccessState = {
   accessByCandidate: Partial<Record<ConstructorCandidateId, Record<string, DeclaredAccessEvidence>>>;
   setAccess: (candidateId: ConstructorCandidateId, access: DeclaredAccessEvidence) => void;
   clearAccess: (candidateId: ConstructorCandidateId, accessId: string) => void;
+  clearAccessForEntity: (candidateId: ConstructorCandidateId, entityId: string) => void;
 };
 
 export const useWorkbenchAccessStore = create<AccessState>((set) => ({
@@ -48,6 +49,18 @@ export const useWorkbenchAccessStore = create<AccessState>((set) => ({
   clearAccess: (candidateId, accessId) => set((state) => {
     const current = { ...(state.accessByCandidate[candidateId] ?? {}) };
     delete current[accessId];
+    return {
+      accessByCandidate: {
+        ...state.accessByCandidate,
+        [candidateId]: current,
+      },
+    };
+  }),
+  clearAccessForEntity: (candidateId, entityId) => set((state) => {
+    const current = { ...(state.accessByCandidate[candidateId] ?? {}) };
+    for (const [accessId, access] of Object.entries(current)) {
+      if (access.entityId === entityId) delete current[accessId];
+    }
     return {
       accessByCandidate: {
         ...state.accessByCandidate,
