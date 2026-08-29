@@ -33,15 +33,25 @@ type PlacementState = {
 export const useWorkbenchPlacementStore = create<PlacementState>((set) => ({
   placementsByCandidate: {},
   geometryReportsByCandidate: {},
-  setGeometryReport: (candidateId, resourceId, report) => set((state) => ({
-    geometryReportsByCandidate: {
-      ...state.geometryReportsByCandidate,
-      [candidateId]: {
-        ...(state.geometryReportsByCandidate[candidateId] ?? {}),
-        [resourceId]: report,
+  setGeometryReport: (candidateId, resourceId, report) => set((state) => {
+    const placements = { ...(state.placementsByCandidate[candidateId] ?? {}) };
+    for (const [entityId, placement] of Object.entries(placements)) {
+      if (placement.resourceId === resourceId) delete placements[entityId];
+    }
+    return {
+      geometryReportsByCandidate: {
+        ...state.geometryReportsByCandidate,
+        [candidateId]: {
+          ...(state.geometryReportsByCandidate[candidateId] ?? {}),
+          [resourceId]: report,
+        },
       },
-    },
-  })),
+      placementsByCandidate: {
+        ...state.placementsByCandidate,
+        [candidateId]: placements,
+      },
+    };
+  }),
   setPlacement: (candidateId, placement) => set((state) => ({
     placementsByCandidate: {
       ...state.placementsByCandidate,
