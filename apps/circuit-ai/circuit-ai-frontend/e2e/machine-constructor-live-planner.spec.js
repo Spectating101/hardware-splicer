@@ -56,7 +56,10 @@ function strategyResponse(mode) {
   };
 }
 
-function stepGeometryResponse(sourceId = 'donor-mainboard.step') {
+function stepGeometryResponse(sourceId, modelId) {
+  const display = sourceId.includes('display');
+  const size = display ? [305, 195, 12] : [210, 130, 18];
+  const pointCount = display ? 12 : 8;
   return {
     ok: true,
     mechanical_geometry: {
@@ -65,19 +68,19 @@ function stepGeometryResponse(sourceId = 'donor-mainboard.step') {
       models: [{
         schema_version: 'hardware_splicer.step_geometry.v1',
         source_id: sourceId,
-        model_id: 'balanced-res-mainboard-donor',
-        content_hash: `sha256:${'a'.repeat(64)}`,
-        byte_count: 512,
+        model_id: modelId,
+        content_hash: `sha256:${(display ? 'b' : 'a').repeat(64)}`,
+        byte_count: display ? 768 : 512,
         file_schema: ['AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'],
-        products: ['Donor Mainboard'],
+        products: [display ? 'Donor Display Assembly' : 'Donor Mainboard'],
         units: 'mm',
-        entity_count: 42,
-        cartesian_point_count: 8,
+        entity_count: display ? 57 : 42,
+        cartesian_point_count: pointCount,
         bounding_box: {
           minimum: [0, 0, 0],
-          maximum: [210, 130, 18],
-          size: [210, 130, 18],
-          point_count: 8,
+          maximum: size,
+          size,
+          point_count: pointCount,
           units: 'mm',
         },
         authority: 'declared',
@@ -111,20 +114,25 @@ function stepGeometryResponse(sourceId = 'donor-mainboard.step') {
 
 function placementResponse(body) {
   const placement = body.placements?.[0] || {};
+  const model = (body.geometry?.models || []).find((row) => row.model_id === placement.model_id) || body.geometry?.models?.[0] || {};
+  const box = model.bounding_box || { minimum: [0, 0, 0], maximum: [1, 1, 1] };
+  const translation = placement.translation_mm || [0, 0, 0];
+  const minimum = box.minimum.map((value, index) => value + translation[index]);
+  const maximum = box.maximum.map((value, index) => value + translation[index]);
   return {
     ok: true,
     clearance_boxes: [{
-      object_id: placement.object_id || 'cmp-mainboard',
+      object_id: placement.object_id || 'component',
       frame_id: placement.target_frame || 'assembly',
-      minimum_mm: [40, -65, 10],
-      maximum_mm: [250, 65, 28],
-      source_model_id: placement.model_id || 'balanced-res-mainboard-donor',
+      minimum_mm: minimum,
+      maximum_mm: maximum,
+      source_model_id: placement.model_id || model.model_id,
       state: 'declared_placement',
       metadata: {
         placement_id: placement.placement_id,
         placement_authority: 'declared',
-        translation_mm: placement.translation_mm,
-        rotation_deg_xyz: placement.rotation_deg_xyz,
+        translation_mm: translation,
+        rotation_deg_xyz: placement.rotation_deg_xyz || [0, 0, 0],
         rotation_convention: 'Rz*Ry*Rx; canonical STEP XYZ',
         source_envelope_only: true,
         full_brep_collision: false,
@@ -147,23 +155,83 @@ function placementResponse(body) {
   };
 }
 
-test('constructor consumes live resource strategy, STEP evidence, and declared placement without weakening authority', async ({ page }, testInfo) => {
+function fitResponse(body) {
+  const [first, second] = body.clearance_boxes || [];
+  const requirement = body.clearance_requirements?.[0] || { minimum_clearance_mm: 0 };
+  const separations = [0, 1, 2].map((index) => Math.max(
+    second.minimum_mm[index] - first.maximum_mm[index],
+    first.minimum_mm[index] - second.maximum_mm[index],
+    0,
+  ));
+  let clearance;
+  if (separations.some((value) => value > 0)) {
+    clearance = Math.sqrt(separations.reduce((sum, value) => sum + value * value, 0));
+  } else {
+    const overlaps = [0, 1, 2].map((index) => Math.min(first.maximum_mm[index], second.maximum_mm[index]) - Math.max(first.minimum_mm[index], second.minimum_mm[index]));
+    clearance = overlaps.every((value) => value > 0) ? -Math.min(...overlaps) : 0;
+  }
+  const passed = clearance >= requirement.minimum_clearance_mm;
+  const message = passed
+    ? `AABB clearance ${clearance.toFixed(3)} mm meets the ${Number(requirement.minimum_clearance_mm).toFixed(3)} mm requirement.`
+    : `AABB clearance ${clearance.toFixed(3)} mm is below the ${Number(requirement.minimum_clearance_mm).toFixed(3)} mm requirement.`;
+  return {
+    ok: true,
+    mechanical_fit: {
+      schema_version: 'hardware_splicer.mechanical_fit.v1',
+      project_id: 'deck-001',
+      geometry_report_schema: 'hardware_splicer.mechanical_geometry_report.v1',
+      clearance_boxes: body.clearance_boxes,
+      clearance_requirements: body.clearance_requirements,
+      fastener_stacks: [],
+      checks: [{
+        check_id: requirement.requirement_id,
+        category: 'aabb_clearance',
+        status: passed ? 'pass' : 'fail',
+        message,
+        target_ids: [first.object_id, second.object_id],
+        unresolved_fields: [],
+        blocking: true,
+        metadata: { clearance_mm: clearance, minimum_clearance_mm: requirement.minimum_clearance_mm, frame_id: first.frame_id, aabb_only: true },
+      }],
+      status: passed ? 'candidate' : 'blocked',
+      required_evidence: passed ? [] : [{ check_id: requirement.requirement_id, category: 'aabb_clearance' }],
+      metadata: { full_brep_collision: false },
+    },
+    blocking_check_count: passed ? 0 : 1,
+    full_brep_collision: false,
+    structural_analysis: false,
+    thread_strength_verified: false,
+    automatic_execution: false,
+    physical_action: false,
+    manufacturing_authorized: false,
+    fabrication_authorized: false,
+    power_on_authorized: false,
+    motion_authorized: false,
+    release_authorized: false,
+  };
+}
+
+const mainboardStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(210.,130.,18.));\nENDSEC;\nEND-ISO-10303-21;\n";
+const displayStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(305.,195.,12.));\nENDSEC;\nEND-ISO-10303-21;\n";
+
+test('constructor consumes live resource strategy, STEP evidence, placement, and bounded clearance without weakening authority', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.route('**/api/proxy/resource/strategy', async (route) => {
-    const request = route.request();
-    const body = JSON.parse(request.postData() || '{}');
-    const mode = body.strategy_mode || 'hybrid';
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(strategyResponse(mode)) });
+    const body = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(strategyResponse(body.strategy_mode || 'hybrid')) });
   });
   await page.route('**/api/proxy/engineering/mechanical/geometry/parse', async (route) => {
-    const request = route.request();
-    const body = JSON.parse(request.postData() || '{}');
-    const sourceId = body.sources?.[0]?.source_id || 'donor-mainboard.step';
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stepGeometryResponse(sourceId)) });
+    const body = JSON.parse(route.request().postData() || '{}');
+    const source = body.sources?.[0] || {};
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stepGeometryResponse(source.source_id || 'component.step', source.model_id || 'component-model')) });
   });
   await page.route('**/api/proxy/engineering/mechanical/geometry/place', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(placementResponse(body)) });
+  });
+  await page.route('**/api/proxy/engineering/mechanical/fit/check', async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fitResponse(body)) });
   });
 
   await page.goto(`${APP_URL}/workbench`);
@@ -180,20 +248,17 @@ test('constructor consumes live resource strategy, STEP evidence, and declared p
 
   await page.getByRole('button', { name: 'Resources', exact: true }).click();
   const donorMainboard = page.getByRole('button', { name: /Donor x86 mainboard.*planner selected/i });
+  const donorDisplay = page.getByRole('button', { name: /Donor display \+ validated controller.*planner selected/i });
   await expect(donorMainboard).toBeVisible();
-  await expect(page.getByRole('button', { name: /Donor display \+ validated controller.*planner selected/i })).toBeVisible();
+  await expect(donorDisplay).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
 
-  // Resource fixture -> parsed STEP point envelope.
+  // Resource fixture -> parsed STEP point envelope -> declared common-frame placement.
   await donorMainboard.click();
   await expect(page.getByTestId('step-geometry-import')).toContainText('Spatial evidence · Donor x86 mainboard');
   await page.waitForTimeout(650);
   const fixtureMainboardCanvas = await page.locator('canvas').first().screenshot();
-  await page.getByLabel('Attach STEP geometry for Donor x86 mainboard').setInputFiles({
-    name: 'donor-mainboard.step',
-    mimeType: 'model/step',
-    buffer: Buffer.from("ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(210.,130.,18.));\nENDSEC;\nEND-ISO-10303-21;\n"),
-  });
+  await page.getByLabel('Attach STEP geometry for Donor x86 mainboard').setInputFiles({ name: 'donor-mainboard.step', mimeType: 'model/step', buffer: Buffer.from(mainboardStep) });
   await expect(page.getByTestId('step-geometry-import')).toContainText('STEP envelope attached: 210 × 130 × 18 mm · 8 points · DECLARED');
   await expect(donorMainboard).toContainText('STEP envelope');
   await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toBeVisible();
@@ -201,7 +266,6 @@ test('constructor consumes live resource strategy, STEP evidence, and declared p
   const stepMainboardCanvas = await page.locator('canvas').first().screenshot();
   expect(stepMainboardCanvas.equals(fixtureMainboardCanvas)).toBeFalsy();
 
-  // Parsed envelope -> explicit declared rigid placement in the common assembly frame.
   await expect(page.getByTestId('declared-placement-editor')).toBeVisible();
   await page.getByLabel('Placement translation X mm for Donor x86 mainboard').fill('40');
   await page.getByLabel('Placement translation Y mm for Donor x86 mainboard').fill('-65');
@@ -209,12 +273,38 @@ test('constructor consumes live resource strategy, STEP evidence, and declared p
   await page.getByRole('button', { name: 'Apply declared placement' }).click();
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [40, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
   await expect(page.getByText('DECLARED PLACED ENVELOPE', { exact: true })).toBeVisible();
-  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toHaveCount(0);
   await page.waitForTimeout(650);
   const placedMainboardCanvas = await page.locator('canvas').first().screenshot();
   expect(placedMainboardCanvas.equals(stepMainboardCanvas)).toBeFalsy();
 
-  // Constrained planning materially changes the machine; imported/placement evidence remains candidate scoped.
+  // A second resource must start with its own transform controls, never the previous resource's values.
+  await donorDisplay.click();
+  await expect(page.getByTestId('step-geometry-import')).toContainText('Spatial evidence · Donor display + validated controller');
+  await page.getByLabel('Attach STEP geometry for Donor display + validated controller').setInputFiles({ name: 'donor-display.step', mimeType: 'model/step', buffer: Buffer.from(displayStep) });
+  await expect(page.getByTestId('step-geometry-import')).toContainText('STEP envelope attached: 305 × 195 × 12 mm · 12 points · DECLARED');
+  await expect(page.getByLabel('Placement translation X mm for Donor display + validated controller')).toHaveValue('0');
+  await expect(page.getByLabel('Placement translation Y mm for Donor display + validated controller')).toHaveValue('0');
+  await expect(page.getByLabel('Placement translation Z mm for Donor display + validated controller')).toHaveValue('0');
+  await page.getByLabel('Placement translation X mm for Donor display + validated controller').fill('270');
+  await page.getByLabel('Placement translation Y mm for Donor display + validated controller').fill('-65');
+  await page.getByLabel('Placement translation Z mm for Donor display + validated controller').fill('10');
+  await page.getByRole('button', { name: 'Apply declared placement' }).click();
+  await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [270, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
+
+  // Two independently sourced/placed STEP envelopes now share a declared assembly frame.
+  // Their X envelopes are 20 mm apart. A 25 mm requirement fails; a 15 mm requirement passes.
+  const clearanceChecker = page.getByTestId('declared-clearance-checker');
+  await expect(clearanceChecker).toBeVisible();
+  await expect(clearanceChecker).toContainText('same-frame AABB only');
+  await page.getByLabel('Minimum declared clearance mm').fill('25');
+  await page.getByRole('button', { name: 'Check AABB clearance' }).click();
+  await expect(clearanceChecker).toContainText('AABB clearance 20.000 mm is below the 25.000 mm requirement.');
+  await page.getByLabel('Minimum declared clearance mm').fill('15');
+  await page.getByRole('button', { name: 'Check AABB clearance' }).click();
+  await expect(clearanceChecker).toContainText('AABB clearance 20.000 mm meets the 15.000 mm requirement.');
+  await expect(clearanceChecker).toContainText('does not establish BREP collision freedom');
+
+  // Candidate changes must hide both imported/placement projections and their clearance surface.
   await page.getByRole('button', { name: /Maximum reuse/ }).click();
   await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('88% capability coverage', { exact: true })).toBeVisible();
@@ -224,12 +314,13 @@ test('constructor consumes live resource strategy, STEP evidence, and declared p
   await expect(spatialProjection).toContainText('2 gaps');
   await expect(page.getByText('DECLARED PLACED ENVELOPE', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Resources', exact: true }).click();
+  await expect(page.getByTestId('declared-clearance-checker')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Raw donor LCD panel.*planner selected/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
   await page.waitForTimeout(650);
   const constrainedCanvas = await page.locator('canvas').first().screenshot();
 
-  // Open procurement substitutes documented compute/display geometry and closes the projected resource gaps.
+  // Open procurement substitutes documented compute/display geometry and closes projected resource gaps.
   await page.getByRole('button', { name: /Lowest integration risk/ }).click();
   await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('Open procurement covers the target with documented modules and fewer evidence gaps.', { exact: true }).first()).toBeVisible();
