@@ -16,6 +16,7 @@ function stateDot(entity: WorkbenchEntity) {
 export function MachineTreePanel() {
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
   const [query, setQuery] = useState('');
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
 
@@ -45,12 +46,17 @@ export function MachineTreePanel() {
     });
   }
 
+  function selectAndFrame(id: string) {
+    setSelectedEntityId(id);
+    requestFrameSelection();
+  }
+
   function EntityButton({ entity, depth = 0 }: { entity: WorkbenchEntity; depth?: number }) {
     const selected = selectedEntityId === entity.id;
     return (
       <button
         type="button"
-        onClick={() => setSelectedEntityId(entity.id)}
+        onClick={() => selectAndFrame(entity.id)}
         className={`group flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left transition ${
           selected ? 'bg-cyan-300/12 text-cyan-50 ring-1 ring-cyan-300/20' : 'text-slate-300 hover:bg-white/5 hover:text-white'
         }`}
@@ -117,7 +123,7 @@ export function MachineTreePanel() {
       </div>
 
       <div className="border-t border-white/10 px-3 py-2 text-[10px] leading-4 text-slate-500">
-        {deck001Entities.length} entities · selection is shared across tree, viewport, inspector and evidence trays.
+        {deck001Entities.length} entities · tree selections frame the shared 3D/evidence context.
       </div>
     </section>
   );
