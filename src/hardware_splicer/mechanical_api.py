@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 from .mechanical_access import DeclaredInterfaceAccess, build_declared_access_box
+from .mechanical_brep import BrepPairInterferenceReport, check_step_brep_interference
 from .mechanical_fit import (
     ClearanceBox,
     ClearanceRequirement,
@@ -41,6 +42,15 @@ class MechanicalGeometryParseRequest(BaseModel):
 class MechanicalGeometryPlaceRequest(BaseModel):
     geometry: MechanicalGeometryReport
     placements: list[DeclaredGeometryPlacement] = Field(min_length=1)
+
+
+class MechanicalBrepInterferenceRequest(BaseModel):
+    project_id: str = Field(min_length=1)
+    first_source: MechanicalStepSource
+    second_source: MechanicalStepSource
+    first_placement: DeclaredGeometryPlacement
+    second_placement: DeclaredGeometryPlacement
+    timeout_s: float = Field(default=60.0, gt=0.0, le=120.0)
 
 
 class MechanicalInterfaceAccessRequest(BaseModel):
@@ -90,9 +100,11 @@ def create_mechanical_router() -> APIRouter:
             "ok": True,
             "geometry_parse_request_schema": MechanicalGeometryParseRequest.model_json_schema(),
             "geometry_place_request_schema": MechanicalGeometryPlaceRequest.model_json_schema(),
+            "brep_pair_interference_request_schema": MechanicalBrepInterferenceRequest.model_json_schema(),
             "interface_access_request_schema": MechanicalInterfaceAccessRequest.model_json_schema(),
             "geometry_report_schema": MechanicalGeometryReport.model_json_schema(),
             "placement_schema": DeclaredGeometryPlacement.model_json_schema(),
+            "brep_pair_interference_report_schema": BrepPairInterferenceReport.model_json_schema(),
             "interface_access_schema": DeclaredInterfaceAccess.model_json_schema(),
             "fit_report_schema": MechanicalFitReport.model_json_schema(),
             "fit_check_request_schema": MechanicalFitCheckRequest.model_json_schema(),
@@ -101,6 +113,8 @@ def create_mechanical_router() -> APIRouter:
             "step_point_envelope_only": True,
             "declared_rigid_placement_only": True,
             "declared_interface_access_only": True,
+            "optional_brep_kernel": "cadquery-isolated",
+            "exact_pair_brep_interference_when_kernel_available": True,
             "full_brep_collision": False,
             "structural_analysis": False,
             "thread_strength_verified": False,
@@ -163,6 +177,44 @@ def create_mechanical_router() -> APIRouter:
             "declared_rigid_placement_only": True,
             "aabb_only": True,
             "full_brep_collision": False,
+            "physical_measurement": False,
+            **_authority_payload(),
+        }
+
+    @router.post("/geometry/brep/interference")
+    def check_brep_interference(request: MechanicalBrepInterferenceRequest) -> Dict[str, Any]:
+        try:
+            report = check_step_brep_interference(
+                project_id=request.project_id,
+                first_content=request.first_source.content,
+                first_source_id=request.first_source.source_id,
+                first_model_id=request.first_source.model_id,
+                first_placement=request.first_placement,
+                second_content=request.second_source.content,
+                second_source_id=request.second_source.source_id,
+                second_model_id=request.second_source.model_id,
+                second_placement=request.second_placement,
+                timeout_s=request.timeout_s,
+            )
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_brep_interference_request", "message": str(exc)},
+            ) from exc
+        return {
+            "ok": True,
+            "brep_interference": report.model_dump(mode="json"),
+            "kernel_available": report.kernel_available,
+            "exact_pair_interference_evaluated": report.exact_pair_interference_evaluated,
+            "exact_solid_interference": report.exact_solid_interference,
+            "minimum_distance_mm": report.minimum_distance_mm,
+            "intersection_volume_mm3": report.intersection_volume_mm3,
+            "aabb_fallback_used": False,
+            "full_brep_collision": False,
+            "connector_mating_verified": False,
+            "cable_routing_verified": False,
+            "service_access_verified": False,
+            "structural_analysis": False,
             "physical_measurement": False,
             **_authority_payload(),
         }
