@@ -1,6 +1,6 @@
 'use client';
 
-import { Boxes, Crosshair, PackageSearch, ShieldAlert, Target } from 'lucide-react';
+import { Activity, Boxes, Crosshair, PackageSearch, ShieldAlert, Target } from 'lucide-react';
 import {
   constructorCandidateMap,
   constructorRequirements,
@@ -25,15 +25,24 @@ function decisionTone(decision: string) {
   return 'text-orange-300';
 }
 
+function normalizeId(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
 export function ConstructorDock() {
   const tab = useMachineWorkbenchStore((state) => state.constructorDockTab);
   const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
   const selectedResourceId = useMachineWorkbenchStore((state) => state.selectedResourceId);
+  const plannerSource = useMachineWorkbenchStore((state) => state.plannerSource);
+  const plannerMessage = useMachineWorkbenchStore((state) => state.plannerMessage);
+  const plannerProjection = useMachineWorkbenchStore((state) => state.plannerProjections[state.activeCandidateId]);
   const setTab = useMachineWorkbenchStore((state) => state.setConstructorDockTab);
   const setSelectedResourceId = useMachineWorkbenchStore((state) => state.setSelectedResourceId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
   const activeCandidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
+  const livePlanner = plannerSource === 'live' && Boolean(plannerProjection);
+  const liveSelected = new Set((plannerProjection?.selectedResourceIds ?? []).map(normalizeId));
 
   function inspectResource(resourceId: string, mappedEntityId?: string) {
     setSelectedResourceId(resourceId);
@@ -46,7 +55,12 @@ export function ConstructorDock() {
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-white/10 bg-[#07101d]">
       <div className="border-b border-white/10 p-3">
-        <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Constructor</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Constructor</div>
+          <span title={plannerMessage} className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] ${livePlanner ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : plannerSource === 'loading' ? 'border-sky-300/20 bg-sky-300/8 text-sky-200' : 'border-amber-300/15 bg-amber-300/[0.05] text-amber-200/75'}`}>
+            <Activity className="h-2.5 w-2.5" /> {livePlanner ? 'live planner' : plannerSource}
+          </span>
+        </div>
         <div className="mt-2 flex rounded-lg border border-white/10 bg-black/20 p-0.5">
           <button type="button" onClick={() => setTab('target')} className={`flex flex-1 items-center justify-center gap-2 rounded-md px-2 py-2 text-[10px] font-medium ${tab === 'target' ? 'bg-cyan-300/10 text-cyan-100' : 'text-slate-500 hover:text-white'}`}>
             <Target className="h-3.5 w-3.5" /> Target
@@ -69,8 +83,21 @@ export function ConstructorDock() {
             </div>
           </div>
 
+          {livePlanner ? (
+            <div className="mt-3 rounded-lg border border-emerald-300/15 bg-emerald-300/[0.035] p-2.5">
+              <div className="flex items-center justify-between gap-3 text-[8px] font-semibold uppercase tracking-[0.13em] text-emerald-200/80">
+                <span>resource_strategy.v1</span>
+                <span>{Math.round((plannerProjection?.coverageScore ?? 0) * 100)}% capability coverage</span>
+              </div>
+              <div className="mt-1 text-[9px] leading-4 text-slate-400">{plannerProjection?.readinessReason}</div>
+              {(plannerProjection?.missingCapabilities.length ?? 0) > 0 ? <div className="mt-1 text-[8px] text-amber-300/75">Missing: {plannerProjection?.missingCapabilities.join(', ')}</div> : null}
+            </div>
+          ) : (
+            <div className="mt-3 rounded-lg border border-amber-300/10 bg-amber-300/[0.025] px-2.5 py-2 text-[8px] leading-4 text-amber-100/55">{plannerMessage}</div>
+          )}
+
           <div className="mt-4 flex items-center justify-between">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Target contract</span>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Target contract projection</span>
             <span className="text-[9px] text-slate-600">{activeCandidate?.name}</span>
           </div>
           <div className="mt-2 space-y-1.5">
@@ -92,12 +119,12 @@ export function ConstructorDock() {
       ) : (
         <div className="min-h-0 flex-1 overflow-auto p-3">
           <div className="mb-3 flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[9px] leading-4 text-slate-500">
-            <PackageSearch className="h-3.5 w-3.5 shrink-0" /> Owned, salvaged, procurable and designed parts share one resource pool.
+            <PackageSearch className="h-3.5 w-3.5 shrink-0" /> {livePlanner ? 'Candidate membership below is selected by the live resource planner.' : 'Owned, salvaged, procurable and designed parts share one resource pool.'}
           </div>
           <div className="space-y-2">
             {constructorResources.map((resource) => {
               const selected = selectedResourceId === resource.id;
-              const used = activeCandidate?.resourceIds.includes(resource.id);
+              const used = livePlanner ? liveSelected.has(normalizeId(resource.id)) : activeCandidate?.resourceIds.includes(resource.id);
               return (
                 <button
                   key={resource.id}
@@ -110,7 +137,7 @@ export function ConstructorDock() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[10px] font-medium text-slate-100">{resource.name}</span>
-                        {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-cyan-300">candidate</span> : null}
+                        {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-cyan-300">{livePlanner ? 'planner selected' : 'candidate'}</span> : null}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[8px] uppercase tracking-[0.12em] text-slate-600">
                         <span>{resource.kind}</span><span>·</span><span className={decisionTone(resource.decision)}>{resource.decision}</span><span>·</span><span>{resource.costNtd ? `NT$${resource.costNtd.toLocaleString()}` : 'owned'}</span>
