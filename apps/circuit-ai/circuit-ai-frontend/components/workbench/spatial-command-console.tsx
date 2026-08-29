@@ -293,7 +293,7 @@ export function SpatialCommandConsole() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open spatial command console"
-        className={`fixed left-1/2 z-[90] -translate-x-1/2 rounded-full border px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] shadow-2xl backdrop-blur transition ${immersive ? 'bottom-5 border-cyan-300/25 bg-[#06111d]/88 text-cyan-100 hover:bg-[#0a1a2b]' : 'bottom-4 border-white/10 bg-[#07101d]/92 text-slate-300 hover:border-cyan-300/25 hover:text-cyan-100'}`}
+        className={`fixed left-1/2 z-[90] -translate-x-1/2 rounded-full border px-3.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] shadow-2xl backdrop-blur transition ${immersive ? 'bottom-5 border-cyan-300/25 bg-[#06111d]/88 text-cyan-100 hover:bg-[#0a1a2b]' : 'top-[118px] border-white/10 bg-[#07101d]/92 text-slate-300 hover:border-cyan-300/25 hover:text-cyan-100'}`}
       >
         <span className="inline-flex items-center gap-2"><Command className="h-3.5 w-3.5" /> Spatial command <span className="text-slate-600">⌘K</span></span>
       </button>
