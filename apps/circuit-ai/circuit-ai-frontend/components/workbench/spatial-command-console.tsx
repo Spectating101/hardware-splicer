@@ -2,10 +2,13 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Command, CornerDownLeft, Sparkles, X } from 'lucide-react';
+import { constructorCandidateMap } from '@/lib/workbench-constructor-demo';
 import { deck001EntityMap } from '@/lib/workbench-demo';
-import { useMachineWorkbenchStore, type WorkbenchCameraPreset } from '@/lib/machine-workbench-store';
+import { useMachineWorkbenchStore, type ConstructorCandidateId, type WorkbenchCameraPreset } from '@/lib/machine-workbench-store';
 
 const QUICK_COMMANDS = [
+  'build mode',
+  'candidate max reuse',
   'show blockers',
   'focus power',
   'trace interfaces',
@@ -35,6 +38,13 @@ function entityForCommand(command: string) {
   return null;
 }
 
+function candidateForCommand(command: string): ConstructorCandidateId | null {
+  if (command.includes('max reuse') || command.includes('maximum reuse') || command.includes('reuse candidate')) return 'max-reuse';
+  if (command.includes('low risk') || command.includes('lowest risk') || command.includes('safe candidate')) return 'low-risk';
+  if (command.includes('balanced') || command.includes('hybrid candidate')) return 'balanced';
+  return null;
+}
+
 export function SpatialCommandConsole() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -43,6 +53,8 @@ export function SpatialCommandConsole() {
 
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const activeView = useMachineWorkbenchStore((state) => state.activeView);
+  const phase = useMachineWorkbenchStore((state) => state.phase);
+  const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
   const xray = useMachineWorkbenchStore((state) => state.xray);
   const exploded = useMachineWorkbenchStore((state) => state.exploded);
   const immersive = useMachineWorkbenchStore((state) => state.immersive);
@@ -50,6 +62,9 @@ export function SpatialCommandConsole() {
   const setActiveLens = useMachineWorkbenchStore((state) => state.setActiveLens);
   const setActiveBottomTab = useMachineWorkbenchStore((state) => state.setActiveBottomTab);
   const setActiveView = useMachineWorkbenchStore((state) => state.setActiveView);
+  const setPhase = useMachineWorkbenchStore((state) => state.setPhase);
+  const setConstructorDockTab = useMachineWorkbenchStore((state) => state.setConstructorDockTab);
+  const setActiveCandidateId = useMachineWorkbenchStore((state) => state.setActiveCandidateId);
   const setIsolatedEntityId = useMachineWorkbenchStore((state) => state.setIsolatedEntityId);
   const setCameraPreset = useMachineWorkbenchStore((state) => state.setCameraPreset);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
@@ -58,6 +73,7 @@ export function SpatialCommandConsole() {
   const toggleImmersive = useMachineWorkbenchStore((state) => state.toggleImmersive);
 
   const selected = deck001EntityMap.get(selectedEntityId) ?? deck001EntityMap.get('deck-001');
+  const candidate = constructorCandidateMap.get(activeCandidateId);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -78,7 +94,7 @@ export function SpatialCommandConsole() {
     return () => window.clearTimeout(id);
   }, [open]);
 
-  const contextLabel = useMemo(() => selected?.name ?? 'DECK-001', [selected]);
+  const contextLabel = useMemo(() => phase === 'construct' ? `${candidate?.name ?? 'working'} candidate` : selected?.name ?? 'DECK-001', [candidate?.name, phase, selected]);
 
   function frame(entityId: string, preset?: WorkbenchCameraPreset) {
     setActiveView('assembly');
@@ -91,6 +107,48 @@ export function SpatialCommandConsole() {
   function execute(raw: string) {
     const command = raw.trim().toLowerCase();
     if (!command) return;
+
+    if (command.includes('build mode') || command.includes('construct mode') || command === 'construct') {
+      setPhase('construct');
+      setActiveView('assembly');
+      setLastResult('Constructor restored: target, resources, candidates and design proposals are active.');
+      setQuery('');
+      return;
+    }
+
+    if (command.includes('inspect mode') || command === 'inspect') {
+      setPhase('inspect');
+      setLastResult('Machine inspection mode restored.');
+      setQuery('');
+      return;
+    }
+
+    if (command.includes('show resources') || command.includes('resource pool') || command === 'resources') {
+      setPhase('construct');
+      setConstructorDockTab('resources');
+      setLastResult('Resource pool opened. Candidate resources remain evidence-bounded.');
+      setQuery('');
+      return;
+    }
+
+    if (command.includes('show target') || command.includes('requirements') || command === 'target') {
+      setPhase('construct');
+      setConstructorDockTab('target');
+      setLastResult('Target contract opened against the working candidate.');
+      setQuery('');
+      return;
+    }
+
+    const candidateId = candidateForCommand(command);
+    if (candidateId && (command.includes('candidate') || command.includes('architecture') || command.includes('switch') || command.includes('use'))) {
+      setPhase('construct');
+      setActiveCandidateId(candidateId);
+      frame('deck-001', 'iso');
+      const next = constructorCandidateMap.get(candidateId);
+      setLastResult(`${next?.name ?? candidateId} is now the working architecture candidate. Authority gates are unchanged.`);
+      setQuery('');
+      return;
+    }
 
     if (command.includes('open compute board') || command === 'pcb' || command.includes('open board')) {
       if (immersive) toggleImmersive();
@@ -221,7 +279,7 @@ export function SpatialCommandConsole() {
       return;
     }
 
-    setLastResult('Command not mapped yet. Try “show blockers”, “focus power”, “trace interfaces”, “x-ray”, “overview”, or “open compute board”.');
+    setLastResult('Command not mapped yet. Try “build mode”, “candidate max reuse”, “show resources”, “show blockers”, “focus power”, “x-ray”, or “open compute board”.');
   }
 
   function onSubmit(event: FormEvent) {
@@ -249,7 +307,7 @@ export function SpatialCommandConsole() {
           <div className="rounded-lg border border-cyan-300/20 bg-cyan-300/8 p-2 text-cyan-200"><Sparkles className="h-4 w-4" /></div>
           <div className="min-w-0 flex-1">
             <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">HS spatial command</div>
-            <div className="mt-0.5 truncate text-[10px] text-slate-500">Deterministic viewport operations · current context: {contextLabel}</div>
+            <div className="mt-0.5 truncate text-[10px] text-slate-500">Deterministic constructor / viewport operations · current context: {contextLabel}</div>
           </div>
           <button type="button" onClick={() => setOpen(false)} className="rounded-md p-2 text-slate-500 hover:bg-white/5 hover:text-white" aria-label="Close spatial command console"><X className="h-4 w-4" /></button>
         </div>
@@ -260,7 +318,7 @@ export function SpatialCommandConsole() {
             ref={inputRef}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="show blockers · focus power · trace interfaces · x-ray · overview…"
+            placeholder="candidate max reuse · show resources · focus power · trace interfaces…"
             className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-600"
             aria-label="Spatial command input"
           />
@@ -273,7 +331,7 @@ export function SpatialCommandConsole() {
           {QUICK_COMMANDS.map((command) => (
             <button key={command} type="button" onClick={() => execute(command)} className="rounded-full border border-white/8 bg-white/[0.025] px-2.5 py-1 text-[9px] text-slate-500 transition hover:border-cyan-300/15 hover:text-cyan-100">{command}</button>
           ))}
-          <div className="ml-auto max-w-[48%] truncate text-[9px] text-slate-600">{lastResult}</div>
+          <div className="ml-auto max-w-[42%] truncate text-[9px] text-slate-600">{lastResult}</div>
         </div>
       </div>
     </div>
