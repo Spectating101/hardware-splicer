@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { Loader2, Move3D, Rotate3D, Trash2 } from 'lucide-react';
 import type { ConstructorCandidateId, MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
+import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 import { DeclaredClearanceChecker } from '@/components/workbench/declared-clearance-checker';
+import { DeclaredInterfaceAccessEditor } from '@/components/workbench/declared-interface-access-editor';
 
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -41,6 +43,7 @@ export function DeclaredPlacementEditor({
   const geometryReport = useWorkbenchPlacementStore((state) => state.geometryReportsByCandidate[candidateId]?.[resourceId]);
   const setPlacement = useWorkbenchPlacementStore((state) => state.setPlacement);
   const clearPlacement = useWorkbenchPlacementStore((state) => state.clearPlacement);
+  const clearAccessForEntity = useWorkbenchAccessStore((state) => state.clearAccessForEntity);
   const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
@@ -131,6 +134,9 @@ export function DeclaredPlacementEditor({
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
+      // Any interface/access geometry was derived from the previous pose and must
+      // fail closed when the parent placement changes.
+      clearAccessForEntity(candidateId, entityId);
       setPlacement(candidateId, placement);
       // Re-write the same parsed evidence to create a new planner projection object;
       // the spatial adapter then composes the separately stored placement evidence.
@@ -146,10 +152,11 @@ export function DeclaredPlacementEditor({
   }
 
   function removePlacement() {
+    clearAccessForEntity(candidateId, entityId);
     clearPlacement(candidateId, entityId);
     setMechanicalGeometryEvidence(candidateId, evidence);
     setState('idle');
-    setMessage('Declared placement cleared; STEP envelope returned to the fixture anchor.');
+    setMessage('Declared placement cleared; dependent interface access evidence was invalidated.');
   }
 
   return (
@@ -212,6 +219,15 @@ export function DeclaredPlacementEditor({
         {message ? <div className={`mt-1.5 text-[8px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
         <div className="mt-1 text-[7px] leading-3 text-amber-100/45">Placement establishes a common coordinate frame only. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
       </div>
+      {existing ? (
+        <DeclaredInterfaceAccessEditor
+          candidateId={candidateId}
+          resourceId={resourceId}
+          resourceName={resourceName}
+          entityId={entityId}
+          placement={existing}
+        />
+      ) : null}
       <DeclaredClearanceChecker />
     </>
   );
