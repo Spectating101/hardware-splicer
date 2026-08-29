@@ -63,6 +63,10 @@ export function DeclaredPlacementEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [candidateId, resourceId, entityId]);
 
+  useEffect(() => {
+    if (!existing) clearAccessForEntity(candidateId, entityId);
+  }, [candidateId, clearAccessForEntity, entityId, existing]);
+
   function updateVector(kind: 'translation' | 'rotation', index: number, value: string) {
     if (kind === 'translation') {
       setTranslation((current) => current.map((row, rowIndex) => rowIndex === index ? value : row));
@@ -134,8 +138,8 @@ export function DeclaredPlacementEditor({
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
-      // Any interface/access geometry was derived from the previous pose and must
-      // fail closed when the parent placement changes.
+      // Interface/access geometry is derived from the parent pose, so every pose
+      // change invalidates it before the new placement becomes visible.
       clearAccessForEntity(candidateId, entityId);
       setPlacement(candidateId, placement);
       // Re-write the same parsed evidence to create a new planner projection object;
