@@ -13,9 +13,10 @@ import type {
   PlannerCandidateProjection,
   PlannerSourceState,
 } from '@/lib/machine-workbench-store';
+import type { DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 
 export type ProjectionDisposition = 'retained' | 'substituted' | 'held' | 'gap' | 'implicit' | 'suppressed';
-export type ProjectionGeometryState = 'fixture' | 'working_projection' | 'held_volume' | 'gap_envelope' | 'step_envelope';
+export type ProjectionGeometryState = 'fixture' | 'working_projection' | 'held_volume' | 'gap_envelope' | 'step_envelope' | 'placed_step_envelope';
 export type MachinePartVariant =
   | 'donor-mainboard'
   | 'documented-mainboard'
@@ -42,6 +43,7 @@ export type MachinePartProjection = {
   opacity: number;
   sizeScale: [number, number, number];
   positionOffset: [number, number, number];
+  absolutePosition?: [number, number, number];
   label: string;
   note: string;
 };
@@ -56,6 +58,7 @@ export type CandidateMachineProjection = {
   gapCount: number;
   suppressedCount: number;
   evidenceGeometryCount: number;
+  placedGeometryCount: number;
 };
 
 const ROLE_ENTITY: Record<string, string> = {
@@ -226,28 +229,49 @@ function implicitProjection(entityId: string, variant: MachinePartVariant, label
   };
 }
 
+function canonicalSizeToScene(sizeMm: [number, number, number]) {
+  const [xMm, yMm, zMm] = sizeMm;
+  return [
+    Math.max(xMm * SCENE_UNITS_PER_MM, 0.04),
+    Math.max(zMm * SCENE_UNITS_PER_MM, 0.04),
+    Math.max(yMm * SCENE_UNITS_PER_MM, 0.04),
+  ] as [number, number, number];
+}
+
+function canonicalPositionToScene(positionMm: [number, number, number]) {
+  const [xMm, yMm, zMm] = positionMm;
+  return [xMm * SCENE_UNITS_PER_MM, zMm * SCENE_UNITS_PER_MM, yMm * SCENE_UNITS_PER_MM] as [number, number, number];
+}
+
 function applyStepEnvelope(
   projection: MachinePartProjection,
   evidence: MechanicalGeometryEvidence | undefined,
+  placement?: DeclaredPlacementEvidence,
 ) {
   if (!evidence || evidence.resourceId !== projection.resourceId) return projection;
   const entity = deck001EntityMap.get(projection.entityId);
   if (!entity?.spatial) return projection;
 
-  // ISO STEP coordinates are treated as XYZ / Z-up at this bounded evidence layer.
-  // The R3F workbench is Y-up, so dimensions map X,Y,Z -> scene X,Z,Y. This does
-  // not solve the part's assembly datum/rotation; position remains fixture anchored.
-  const [xMm, yMm, zMm] = evidence.sizeMm;
-  const sceneSize: [number, number, number] = [
-    Math.max(xMm * SCENE_UNITS_PER_MM, 0.04),
-    Math.max(zMm * SCENE_UNITS_PER_MM, 0.04),
-    Math.max(yMm * SCENE_UNITS_PER_MM, 0.04),
-  ];
+  const boundedSize = placement?.sizeMm ?? evidence.sizeMm;
+  const sceneSize = canonicalSizeToScene(boundedSize);
   const sizeScale = entity.spatial.size.map((value, index) => sceneSize[index] / value) as [number, number, number];
   const unresolved = evidence.unresolved
     .map((row) => row.field || row.reason)
     .filter(Boolean)
     .join(', ');
+
+  if (placement && placement.resourceId === projection.resourceId && placement.modelId === evidence.modelId) {
+    const centerMm = placement.minimumMm.map((value, index) => (value + placement.maximumMm[index]) / 2) as [number, number, number];
+    return {
+      ...projection,
+      geometryState: 'placed_step_envelope' as const,
+      opacity: 0.045,
+      sizeScale,
+      absolutePosition: canonicalPositionToScene(centerMm),
+      label: 'DECLARED PLACED ENVELOPE',
+      note: `HS placed ${evidence.sourceId} in ${placement.frameId} using declared translation ${placement.translationMm.join(', ')} mm and XYZ rotation ${placement.rotationDegXyz.join(', ')}°. The rendered box is the transformed STEP AABB only; full BREP collision, physical measurement and fabrication authority remain false.${unresolved ? ` Unresolved STEP fields: ${unresolved}.` : ''}`,
+    };
+  }
 
   return {
     ...projection,
@@ -255,7 +279,7 @@ function applyStepEnvelope(
     opacity: 0.06,
     sizeScale,
     label: 'DECLARED STEP ENVELOPE',
-    note: `HS parsed ${evidence.sourceId} as ${evidence.sizeMm.join(' × ')} mm from ${evidence.pointCount} Cartesian points (${evidence.contentHash.slice(0, 19)}…). STEP XYZ is displayed as scene XZY (Z-up → Y-up). Placement still uses the fixture anchor because assembly datum transforms are unresolved. Full BREP/collision and fabrication authority remain false.${unresolved ? ` Unresolved: ${unresolved}.` : ''}`,
+    note: `HS parsed ${evidence.sourceId} as ${evidence.sizeMm.join(' × ')} mm from ${evidence.pointCount} Cartesian points (${evidence.contentHash.slice(0, 19)}…). STEP XYZ is displayed as scene XZY (Z-up → Y-up). Placement still uses the fixture anchor because an assembly transform has not been declared. Full BREP/collision and fabrication authority remain false.${unresolved ? ` Unresolved: ${unresolved}.` : ''}`,
   };
 }
 
@@ -263,6 +287,7 @@ export function buildCandidateMachineProjection(
   candidateId: ConstructorCandidateId,
   source: PlannerSourceState,
   planner?: PlannerCandidateProjection,
+  placementsByEntity: Record<string, DeclaredPlacementEvidence> = {},
 ): CandidateMachineProjection {
   const selected = selectedSet(candidateId, source, planner);
   const parts: Record<string, MachinePartProjection> = {};
@@ -296,7 +321,7 @@ export function buildCandidateMachineProjection(
   }
 
   for (const [entityId, evidence] of Object.entries(planner?.mechanicalGeometryByEntity ?? {})) {
-    if (parts[entityId]) parts[entityId] = applyStepEnvelope(parts[entityId], evidence);
+    if (parts[entityId]) parts[entityId] = applyStepEnvelope(parts[entityId], evidence, placementsByEntity[entityId]);
   }
 
   const rows = Object.values(parts);
@@ -309,6 +334,7 @@ export function buildCandidateMachineProjection(
     heldCount: rows.filter((row) => row.disposition === 'held').length,
     gapCount: rows.filter((row) => row.disposition === 'gap').length,
     suppressedCount: rows.filter((row) => row.disposition === 'suppressed').length,
-    evidenceGeometryCount: rows.filter((row) => row.geometryState === 'step_envelope').length,
+    evidenceGeometryCount: rows.filter((row) => row.geometryState === 'step_envelope' || row.geometryState === 'placed_step_envelope').length,
+    placedGeometryCount: rows.filter((row) => row.geometryState === 'placed_step_envelope').length,
   };
 }
