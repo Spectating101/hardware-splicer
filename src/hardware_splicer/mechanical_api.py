@@ -16,6 +16,7 @@ from .mechanical_fit import (
 )
 from .mechanical_fit_plan_update import apply_mechanical_fit_to_plan
 from .mechanical_geometry_plan_update import apply_mechanical_geometry_to_plan
+from .mechanical_placement import DeclaredGeometryPlacement, build_declared_placement_box
 from .step_geometry import (
     DeclaredMountInterface,
     MechanicalGeometryReport,
@@ -34,6 +35,11 @@ class MechanicalGeometryParseRequest(BaseModel):
     project_id: str = Field(min_length=1)
     sources: list[MechanicalStepSource] = Field(min_length=1)
     mounts: list[DeclaredMountInterface] = Field(default_factory=list)
+
+
+class MechanicalGeometryPlaceRequest(BaseModel):
+    geometry: MechanicalGeometryReport
+    placements: list[DeclaredGeometryPlacement] = Field(min_length=1)
 
 
 class MechanicalGeometryApplyRequest(BaseModel):
@@ -77,12 +83,15 @@ def create_mechanical_router() -> APIRouter:
         return {
             "ok": True,
             "geometry_parse_request_schema": MechanicalGeometryParseRequest.model_json_schema(),
+            "geometry_place_request_schema": MechanicalGeometryPlaceRequest.model_json_schema(),
             "geometry_report_schema": MechanicalGeometryReport.model_json_schema(),
+            "placement_schema": DeclaredGeometryPlacement.model_json_schema(),
             "fit_report_schema": MechanicalFitReport.model_json_schema(),
             "fit_check_request_schema": MechanicalFitCheckRequest.model_json_schema(),
             "geometry_apply_request_schema": MechanicalGeometryApplyRequest.model_json_schema(),
             "fit_apply_request_schema": MechanicalFitApplyRequest.model_json_schema(),
             "step_point_envelope_only": True,
+            "declared_rigid_placement_only": True,
             "full_brep_collision": False,
             "structural_analysis": False,
             "thread_strength_verified": False,
@@ -118,6 +127,34 @@ def create_mechanical_router() -> APIRouter:
             "step_point_envelope_only": True,
             "full_brep_collision": False,
             "mass_properties_verified": False,
+            **_authority_payload(),
+        }
+
+    @router.post("/geometry/place")
+    def place_geometry(request: MechanicalGeometryPlaceRequest) -> Dict[str, Any]:
+        models = {model.model_id: model for model in request.geometry.models}
+        try:
+            boxes = []
+            for placement in request.placements:
+                model = models.get(placement.model_id)
+                if model is None:
+                    raise ValueError(
+                        f"placement {placement.placement_id!r} references unknown STEP model {placement.model_id!r}"
+                    )
+                boxes.append(build_declared_placement_box(model, placement))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_mechanical_placement", "message": str(exc)},
+            ) from exc
+        return {
+            "ok": True,
+            "clearance_boxes": [box.model_dump(mode="json") for box in boxes],
+            "placement_count": len(boxes),
+            "declared_rigid_placement_only": True,
+            "aabb_only": True,
+            "full_brep_collision": False,
+            "physical_measurement": False,
             **_authority_payload(),
         }
 
