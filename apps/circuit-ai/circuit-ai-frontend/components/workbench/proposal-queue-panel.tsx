@@ -66,7 +66,7 @@ export function ProposalQueuePanel() {
             const resource = proposal.resourceId ? constructorResourceMap.get(proposal.resourceId) : null;
             return (
               <div key={proposal.id} className={`rounded-xl border p-3 transition ${selected ? 'border-cyan-300/25 bg-cyan-300/[0.045]' : 'border-white/8 bg-white/[0.02]'}`}>
-                <button type="button" onClick={() => inspectProposal(proposal)} className="w-full text-left">
+                <button type="button" aria-label={`Inspect proposal ${proposal.title}`} onClick={() => inspectProposal(proposal)} className="w-full text-left">
                   <div className="flex items-start gap-2">
                     <span className={`rounded border px-1.5 py-0.5 text-[7px] font-semibold tracking-[0.12em] ${opTone(proposal.operation)}`}>{proposal.operation}</span>
                     <div className="min-w-0 flex-1">
@@ -85,10 +85,10 @@ export function ProposalQueuePanel() {
                   <span className="mr-auto text-[8px] uppercase tracking-[0.12em] text-slate-600">{effectiveState}</span>
                   {proposal.state !== 'rejected' ? (
                     <>
-                      <button type="button" onClick={() => setProposalDecision(proposal.id, 'held')} className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[8px] font-medium ${decision === 'held' ? 'border-amber-300/25 bg-amber-300/8 text-amber-200' : 'border-white/8 text-slate-500 hover:text-amber-200'}`}>
+                      <button type="button" aria-label={`Hold proposal ${proposal.title}`} onClick={() => setProposalDecision(proposal.id, 'held')} className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[8px] font-medium ${decision === 'held' ? 'border-amber-300/25 bg-amber-300/8 text-amber-200' : 'border-white/8 text-slate-500 hover:text-amber-200'}`}>
                         <CirclePause className="h-3 w-3" /> Hold
                       </button>
-                      <button type="button" onClick={() => setProposalDecision(proposal.id, 'accepted')} className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[8px] font-medium ${decision === 'accepted' ? 'border-emerald-300/25 bg-emerald-300/8 text-emerald-200' : 'border-white/8 text-slate-500 hover:text-emerald-200'}`}>
+                      <button type="button" aria-label={`Accept proposal ${proposal.title} to working candidate`} onClick={() => setProposalDecision(proposal.id, 'accepted')} className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[8px] font-medium ${decision === 'accepted' ? 'border-emerald-300/25 bg-emerald-300/8 text-emerald-200' : 'border-white/8 text-slate-500 hover:text-emerald-200'}`}>
                         <Check className="h-3 w-3" /> Accept to working
                       </button>
                     </>
