@@ -2,7 +2,8 @@
 
 import { Canvas } from '@react-three/fiber';
 import { CameraControls, Grid, Html, Line } from '@react-three/drei';
-import { useMemo } from 'react';
+import { Crosshair, Eye, EyeOff } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
 import {
   deck001Entities,
   deck001EntityMap,
@@ -11,7 +12,11 @@ import {
   type ResourceSource,
   type WorkbenchEntity,
 } from '@/lib/workbench-demo';
-import { useMachineWorkbenchStore, type WorkbenchLens } from '@/lib/machine-workbench-store';
+import {
+  useMachineWorkbenchStore,
+  type WorkbenchCameraPreset,
+  type WorkbenchLens,
+} from '@/lib/machine-workbench-store';
 
 const AUTHORITY_COLORS: Record<AuthorityState, string> = {
   verified: '#22c55e',
@@ -41,6 +46,13 @@ const PHYSICAL_COLORS: Record<string, string> = {
   'cmp-enclosure': '#334155',
 };
 
+const CAMERA_PRESETS: Array<{ id: WorkbenchCameraPreset; label: string; aria: string }> = [
+  { id: 'iso', label: 'ISO', aria: 'Isometric view' },
+  { id: 'top', label: 'TOP', aria: 'Top view' },
+  { id: 'front', label: 'FRONT', aria: 'Front view' },
+  { id: 'right', label: 'SIDE', aria: 'Right side view' },
+];
+
 function semanticColor(entity: WorkbenchEntity, lens: WorkbenchLens) {
   if (lens === 'provenance') return SOURCE_COLORS[entity.source];
   if (lens === 'constraints') {
@@ -66,6 +78,95 @@ function explodedPosition(entity: WorkbenchEntity, exploded: boolean): [number, 
   const magnitude = Math.max(Math.hypot(x, z), 1);
   const spread = 1.15;
   return [x + (x / magnitude) * spread, y + 0.38, z + (z / magnitude) * spread];
+}
+
+function spatialPartsForSelection(selectedEntityId: string) {
+  const selected = deck001EntityMap.get(selectedEntityId);
+  const allParts = deck001Entities.filter((entity) => entity.kind === 'component' && entity.spatial);
+  if (!selected || selected.kind === 'machine') return allParts;
+  if (selected.spatial) return [selected];
+  const childParts = selected.children
+    .map((id) => deck001EntityMap.get(id))
+    .filter((entity): entity is WorkbenchEntity => Boolean(entity?.spatial));
+  return childParts.length ? childParts : allParts;
+}
+
+function selectionScope(selectedEntityId: string) {
+  const selected = deck001EntityMap.get(selectedEntityId);
+  if (!selected || selected.kind === 'machine') return new Set<string>();
+  if (selected.spatial) return new Set([selected.id]);
+  return new Set(selected.children);
+}
+
+function CameraDirector({ controlsRef }: { controlsRef: React.RefObject<CameraControls | null> }) {
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const cameraPreset = useMachineWorkbenchStore((state) => state.cameraPreset);
+  const frameRequest = useMachineWorkbenchStore((state) => state.frameRequest);
+  const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const initialized = useRef(false);
+  const targets = spatialPartsForSelection(selectedEntityId);
+
+  useEffect(() => {
+    const controls = controlsRef.current;
+    if (!controls || targets.length === 0) return;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let minZ = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    let maxZ = -Infinity;
+
+    for (const entity of targets) {
+      if (!entity.spatial) continue;
+      const [x, y, z] = explodedPosition(entity, exploded);
+      const [width, height, depth] = entity.spatial.size;
+      minX = Math.min(minX, x - width / 2);
+      maxX = Math.max(maxX, x + width / 2);
+      minY = Math.min(minY, y - height / 2);
+      maxY = Math.max(maxY, y + height / 2);
+      minZ = Math.min(minZ, z - depth / 2);
+      maxZ = Math.max(maxZ, z + depth / 2);
+    }
+
+    if (![minX, minY, minZ, maxX, maxY, maxZ].every(Number.isFinite)) return;
+
+    const center: [number, number, number] = [
+      (minX + maxX) / 2,
+      (minY + maxY) / 2,
+      (minZ + maxZ) / 2,
+    ];
+    const extent = Math.max(maxX - minX, maxY - minY, maxZ - minZ, 1);
+    const distance = Math.max(6.5, extent * 1.75);
+    const directions: Record<WorkbenchCameraPreset, [number, number, number]> = {
+      iso: [0.82, 0.62, 1],
+      top: [0.001, 1, 0.001],
+      front: [0, 0.18, 1],
+      right: [1, 0.18, 0],
+    };
+    const [dx, dy, dz] = directions[cameraPreset];
+    const length = Math.hypot(dx, dy, dz) || 1;
+    const position: [number, number, number] = [
+      center[0] + (dx / length) * distance,
+      center[1] + (dy / length) * distance,
+      center[2] + (dz / length) * distance,
+    ];
+
+    controls.setLookAt(
+      position[0],
+      position[1],
+      position[2],
+      center[0],
+      center[1],
+      center[2],
+      initialized.current,
+    );
+    initialized.current = true;
+    // Intentionally frame only on explicit camera/explode requests, not every single-click selection.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cameraPreset, frameRequest, exploded, controlsRef]);
+
+  return null;
 }
 
 function StatusShell({ entity, width, height, depth, selected }: { entity: WorkbenchEntity; width: number; height: number; depth: number; selected: boolean }) {
@@ -179,23 +280,24 @@ function CoolingBody() {
 }
 
 function EnclosureBody({ width, depth }: { width: number; depth: number }) {
+  const xray = useMachineWorkbenchStore((state) => state.xray);
   return (
     <>
       <mesh position={[0, -0.18, 0]} receiveShadow>
         <boxGeometry args={[width, 0.26, depth]} />
-        <meshStandardMaterial color={PHYSICAL_COLORS['cmp-enclosure']} transparent opacity={0.42} roughness={0.5} metalness={0.3} />
+        <meshStandardMaterial color={PHYSICAL_COLORS['cmp-enclosure']} transparent opacity={xray ? 0.08 : 0.42} roughness={0.5} metalness={0.3} depthWrite={!xray} />
       </mesh>
       <mesh position={[0, 0.03, -depth / 2 + 0.12]}>
         <boxGeometry args={[width, 0.38, 0.16]} />
-        <meshStandardMaterial color="#475569" transparent opacity={0.58} roughness={0.44} metalness={0.34} />
+        <meshStandardMaterial color="#475569" transparent opacity={xray ? 0.12 : 0.58} roughness={0.44} metalness={0.34} depthWrite={!xray} />
       </mesh>
       <mesh position={[-width / 2 + 0.12, 0.03, 0]}>
         <boxGeometry args={[0.16, 0.34, depth]} />
-        <meshStandardMaterial color="#475569" transparent opacity={0.5} roughness={0.44} metalness={0.34} />
+        <meshStandardMaterial color="#475569" transparent opacity={xray ? 0.1 : 0.5} roughness={0.44} metalness={0.34} depthWrite={!xray} />
       </mesh>
       <mesh position={[width / 2 - 0.12, 0.03, 0]}>
         <boxGeometry args={[0.16, 0.34, depth]} />
-        <meshStandardMaterial color="#475569" transparent opacity={0.5} roughness={0.44} metalness={0.34} />
+        <meshStandardMaterial color="#475569" transparent opacity={xray ? 0.1 : 0.5} roughness={0.44} metalness={0.34} depthWrite={!xray} />
       </mesh>
     </>
   );
@@ -225,10 +327,14 @@ function MachinePart({ entity }: { entity: WorkbenchEntity }) {
   const isolatedEntityId = useMachineWorkbenchStore((state) => state.isolatedEntityId);
   const exploded = useMachineWorkbenchStore((state) => state.exploded);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
 
   if (!entity.spatial) return null;
 
-  const selected = selectedEntityId === entity.id;
+  const selectedEntity = deck001EntityMap.get(selectedEntityId);
+  const directlySelected = selectedEntityId === entity.id;
+  const inSelectedSubsystem = selectedEntity?.kind === 'subsystem' && selectedEntity.children.includes(entity.id);
+  const emphasized = directlySelected || inSelectedSubsystem;
   const hiddenByIsolation = Boolean(isolatedEntityId && isolatedEntityId !== entity.id);
   const [width, height, depth] = entity.spatial.size;
   const position = explodedPosition(entity, exploded);
@@ -241,10 +347,15 @@ function MachinePart({ entity }: { entity: WorkbenchEntity }) {
         event.stopPropagation();
         setSelectedEntityId(entity.id);
       }}
+      onDoubleClick={(event) => {
+        event.stopPropagation();
+        setSelectedEntityId(entity.id);
+        requestFrameSelection();
+      }}
     >
       <PhysicalBody entity={entity} width={width} height={height} depth={depth} />
-      {entity.id !== 'cmp-enclosure' ? <StatusShell entity={entity} width={width} height={height} depth={depth} selected={selected} /> : null}
-      {selected ? (
+      {entity.id !== 'cmp-enclosure' ? <StatusShell entity={entity} width={width} height={height} depth={depth} selected={emphasized} /> : null}
+      {directlySelected ? (
         <Html center position={[0, Math.max(height / 2 + 0.46, 0.62), 0]} distanceFactor={9}>
           <div className="pointer-events-none whitespace-nowrap rounded-md border border-cyan-300/30 bg-slate-950/92 px-2.5 py-1.5 text-[10px] font-semibold text-cyan-50 shadow-2xl">
             {entity.name} <span className="ml-1 text-slate-500">·</span> <span className="ml-1 text-cyan-300">{entity.authority.toUpperCase()}</span>
@@ -260,6 +371,7 @@ function InterfaceLines() {
   const exploded = useMachineWorkbenchStore((state) => state.exploded);
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const scopedIds = selectionScope(selectedEntityId);
 
   if (activeLens !== 'interfaces' && activeLens !== 'constraints') return null;
 
@@ -275,20 +387,43 @@ function InterfaceLines() {
         if (!from?.spatial || !to?.spatial) return null;
         const fromPosition = explodedPosition(from, exploded);
         const toPosition = explodedPosition(to, exploded);
-        const highlighted = selectedEntityId === from.id || selectedEntityId === to.id;
+        const highlighted = scopedIds.has(from.id) || scopedIds.has(to.id);
+        const midpoint: [number, number, number] = [
+          (fromPosition[0] + toPosition[0]) / 2,
+          (fromPosition[1] + toPosition[1]) / 2 + 0.24,
+          (fromPosition[2] + toPosition[2]) / 2,
+        ];
         return (
-          <Line
-            key={link.id}
-            points={[fromPosition, toPosition]}
-            color={AUTHORITY_COLORS[link.authority]}
-            lineWidth={highlighted ? 2.4 : 0.9}
-            transparent
-            opacity={highlighted ? 0.95 : 0.38}
-            onClick={(event) => {
-              event.stopPropagation();
-              setSelectedEntityId(link.authority === 'blocked' ? link.to : link.from);
-            }}
-          />
+          <group key={link.id}>
+            <Line
+              points={[fromPosition, toPosition]}
+              color={AUTHORITY_COLORS[link.authority]}
+              lineWidth={highlighted ? 2.5 : 0.8}
+              transparent
+              opacity={highlighted ? 0.98 : 0.22}
+              onClick={(event) => {
+                event.stopPropagation();
+                setSelectedEntityId(link.authority === 'blocked' ? link.to : link.from);
+              }}
+            />
+            {highlighted ? (
+              <>
+                <mesh position={fromPosition}>
+                  <sphereGeometry args={[0.095, 16, 16]} />
+                  <meshBasicMaterial color={AUTHORITY_COLORS[link.authority]} />
+                </mesh>
+                <mesh position={toPosition}>
+                  <sphereGeometry args={[0.095, 16, 16]} />
+                  <meshBasicMaterial color={AUTHORITY_COLORS[link.authority]} />
+                </mesh>
+                <Html center position={midpoint} distanceFactor={10}>
+                  <div className="pointer-events-none whitespace-nowrap rounded border border-white/10 bg-slate-950/88 px-2 py-1 text-[9px] font-medium text-slate-200 shadow-xl">
+                    {link.kind} <span className="ml-1 uppercase text-slate-500">{link.authority}</span>
+                  </div>
+                </Html>
+              </>
+            ) : null}
+          </group>
         );
       })}
     </>
@@ -311,9 +446,15 @@ function legendForLens(lens: WorkbenchLens) {
 
 export function MachineAssemblyViewport() {
   const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
+  const xray = useMachineWorkbenchStore((state) => state.xray);
+  const cameraPreset = useMachineWorkbenchStore((state) => state.cameraPreset);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const setCameraPreset = useMachineWorkbenchStore((state) => state.setCameraPreset);
+  const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
+  const toggleXray = useMachineWorkbenchStore((state) => state.toggleXray);
   const parts = useMemo(() => deck001Entities.filter((entity) => entity.kind === 'component' && entity.spatial), []);
   const legend = legendForLens(activeLens);
+  const controlsRef = useRef<CameraControls | null>(null);
 
   return (
     <div className="relative h-full min-h-[420px] overflow-hidden bg-[#050912]">
@@ -344,12 +485,51 @@ export function MachineAssemblyViewport() {
           fadeStrength={1.8}
           position={[0, -0.42, 0]}
         />
-        <CameraControls makeDefault minDistance={5} maxDistance={34} />
+        <CameraControls ref={controlsRef} makeDefault minDistance={3.5} maxDistance={38} smoothTime={0.22} draggingSmoothTime={0.1} />
+        <CameraDirector controlsRef={controlsRef} />
       </Canvas>
 
       <div className="pointer-events-none absolute left-4 top-4 rounded-lg border border-white/10 bg-slate-950/82 px-3 py-2.5 text-[11px] text-slate-300 shadow-xl backdrop-blur">
-        <div className="font-semibold uppercase tracking-[0.16em] text-slate-100">{activeLens} lens</div>
-        <div className="mt-1 text-slate-400">Spatial architecture fixture · click hardware to inspect.</div>
+        <div className="flex items-center gap-2 font-semibold uppercase tracking-[0.16em] text-slate-100">
+          {activeLens} lens
+          {xray ? <span className="rounded border border-cyan-300/20 bg-cyan-300/10 px-1.5 py-0.5 text-[8px] tracking-[0.12em] text-cyan-200">XRAY</span> : null}
+        </div>
+        <div className="mt-1 text-slate-400">Click to inspect · double-click to frame · orbit directly in 3D.</div>
+      </div>
+
+      <div className="pointer-events-auto absolute right-4 top-4 flex items-center gap-1 rounded-lg border border-white/10 bg-slate-950/82 p-1 shadow-xl backdrop-blur">
+        <button
+          type="button"
+          onClick={requestFrameSelection}
+          aria-label="Frame selection in 3D"
+          title="Frame selected hardware"
+          className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-300 transition hover:bg-white/8 hover:text-white"
+        >
+          <Crosshair className="h-3.5 w-3.5" /> Frame
+        </button>
+        <button
+          type="button"
+          onClick={toggleXray}
+          aria-label="X-ray shell"
+          aria-pressed={xray}
+          title="Ghost the enclosure shell"
+          className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-[9px] font-semibold uppercase tracking-[0.1em] transition ${xray ? 'bg-cyan-300/10 text-cyan-100 ring-1 ring-cyan-300/20' : 'text-slate-400 hover:bg-white/8 hover:text-white'}`}
+        >
+          {xray ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />} X-ray
+        </button>
+        <span className="mx-0.5 h-5 w-px bg-white/10" />
+        {CAMERA_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            onClick={() => setCameraPreset(preset.id)}
+            aria-label={preset.aria}
+            aria-pressed={cameraPreset === preset.id}
+            className={`h-8 rounded-md px-2 text-[9px] font-semibold tracking-[0.08em] transition ${cameraPreset === preset.id ? 'bg-white/10 text-white' : 'text-slate-500 hover:bg-white/6 hover:text-slate-200'}`}
+          >
+            {preset.label}
+          </button>
+        ))}
       </div>
 
       <div className="pointer-events-none absolute bottom-4 right-4 flex max-w-[75%] flex-wrap justify-end gap-2 text-[10px] font-medium text-slate-300">
