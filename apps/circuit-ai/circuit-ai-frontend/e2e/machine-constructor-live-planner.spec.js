@@ -56,13 +56,72 @@ function strategyResponse(mode) {
   };
 }
 
-test('constructor consumes live resource_strategy.v1 projections without weakening authority', async ({ page }, testInfo) => {
+function stepGeometryResponse(sourceId = 'donor-mainboard.step') {
+  return {
+    ok: true,
+    mechanical_geometry: {
+      schema_version: 'hardware_splicer.mechanical_geometry_report.v1',
+      project_id: 'deck-001',
+      models: [{
+        schema_version: 'hardware_splicer.step_geometry.v1',
+        source_id: sourceId,
+        model_id: 'balanced-res-mainboard-donor',
+        content_hash: `sha256:${'a'.repeat(64)}`,
+        byte_count: 512,
+        file_schema: ['AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'],
+        products: ['Donor Mainboard'],
+        units: 'mm',
+        entity_count: 42,
+        cartesian_point_count: 8,
+        bounding_box: {
+          minimum: [0, 0, 0],
+          maximum: [210, 130, 18],
+          size: [210, 130, 18],
+          point_count: 8,
+          units: 'mm',
+        },
+        authority: 'declared',
+        unresolved: [],
+        metadata: {
+          full_brep_validation: false,
+          collision_analysis: false,
+          fabrication_authorized: false,
+        },
+      }],
+      mounts: [],
+      checks: [],
+      status: 'candidate',
+      required_evidence: [],
+      metadata: {},
+    },
+    model_count: 1,
+    blocking_check_count: 0,
+    step_point_envelope_only: true,
+    full_brep_collision: false,
+    mass_properties_verified: false,
+    automatic_execution: false,
+    physical_action: false,
+    manufacturing_authorized: false,
+    fabrication_authorized: false,
+    power_on_authorized: false,
+    motion_authorized: false,
+    release_authorized: false,
+  };
+}
+
+test('constructor consumes live resource_strategy.v1 and bounded STEP evidence without weakening authority', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.route('**/api/proxy/resource/strategy', async (route) => {
     const request = route.request();
     const body = JSON.parse(request.postData() || '{}');
     const mode = body.strategy_mode || 'hybrid';
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(strategyResponse(mode)) });
+  });
+  await page.route('**/api/proxy/engineering/mechanical/geometry/parse', async (route) => {
+    const request = route.request();
+    const body = JSON.parse(request.postData() || '{}');
+    const sourceId = body.sources?.[0]?.source_id || 'donor-mainboard.step';
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stepGeometryResponse(sourceId)) });
   });
 
   await page.goto(`${APP_URL}/workbench`);
@@ -78,11 +137,29 @@ test('constructor consumes live resource_strategy.v1 projections without weakeni
   await expect(spatialProjection).toContainText('1 gaps');
 
   await page.getByRole('button', { name: 'Resources', exact: true }).click();
-  await expect(page.getByRole('button', { name: /Donor x86 mainboard.*planner selected/i })).toBeVisible();
+  const donorMainboard = page.getByRole('button', { name: /Donor x86 mainboard.*planner selected/i });
+  await expect(donorMainboard).toBeVisible();
   await expect(page.getByRole('button', { name: /Donor display \+ validated controller.*planner selected/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
 
-  // Constrained planning materially changes the machine: raw LCD is held and power becomes explicit gaps.
+  // Real file input -> canonical mechanical parser contract -> exact resource envelope -> WebGL geometry delta.
+  await donorMainboard.click();
+  await expect(page.getByTestId('step-geometry-import')).toContainText('Spatial evidence · Donor x86 mainboard');
+  await page.waitForTimeout(650);
+  const fixtureMainboardCanvas = await page.locator('canvas').first().screenshot();
+  await page.getByLabel('Attach STEP geometry for Donor x86 mainboard').setInputFiles({
+    name: 'donor-mainboard.step',
+    mimeType: 'model/step',
+    buffer: Buffer.from("ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(210.,130.,18.));\nENDSEC;\nEND-ISO-10303-21;\n"),
+  });
+  await expect(page.getByTestId('step-geometry-import')).toContainText('STEP envelope attached: 210 × 130 × 18 mm · 8 points · DECLARED');
+  await expect(donorMainboard).toContainText('STEP envelope');
+  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toBeVisible();
+  await page.waitForTimeout(650);
+  const stepMainboardCanvas = await page.locator('canvas').first().screenshot();
+  expect(stepMainboardCanvas.equals(fixtureMainboardCanvas)).toBeFalsy();
+
+  // Constrained planning materially changes the machine; geometry evidence remains candidate/resource scoped.
   await page.getByRole('button', { name: /Maximum reuse/ }).click();
   await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('88% capability coverage', { exact: true })).toBeVisible();
@@ -90,6 +167,7 @@ test('constructor consumes live resource_strategy.v1 projections without weakeni
   await expect(spatialProjection).toContainText('max-reuse');
   await expect(spatialProjection).toContainText('1 held');
   await expect(spatialProjection).toContainText('2 gaps');
+  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Resources', exact: true }).click();
   await expect(page.getByRole('button', { name: /Raw donor LCD panel.*planner selected/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
