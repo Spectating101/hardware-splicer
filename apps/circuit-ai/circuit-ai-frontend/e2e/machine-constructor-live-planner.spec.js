@@ -398,6 +398,11 @@ test('constructor consumes live resource strategy, spatial evidence dependencies
   await expect(page.getByLabel('Interface access face for Donor x86 mainboard')).toHaveValue('+x');
   await page.getByRole('button', { name: 'Build access envelope' }).click();
   await expect(accessEditor).toContainText('Compute → display · +x · 20 × 10 × 30 mm access AABB · DECLARED.');
+  const accessOverlay = page.getByTestId('declared-access-overlay');
+  await expect(accessOverlay).toBeVisible();
+  await expect(accessOverlay).toHaveAttribute('data-aabb-blocked', 'true');
+  await expect(accessOverlay).toContainText('BLOCKED');
+  await expect(accessOverlay).toContainText('not service-access proof');
 
   // Mainboard is X=40..250, display starts X=270. A 30 mm +X access prism reaches
   // X=280 and overlaps the display by 10 mm; the smallest overlap axis is 8 mm.
@@ -409,6 +414,9 @@ test('constructor consumes live resource strategy, spatial evidence dependencies
   await page.getByLabel('Depth interface access mm for Donor x86 mainboard').fill('15');
   await page.getByRole('button', { name: 'Build access envelope' }).click();
   await expect(accessEditor).toContainText('Compute → display · +x · 20 × 10 × 15 mm access AABB · DECLARED.');
+  await expect(accessOverlay).toHaveAttribute('data-aabb-blocked', 'false');
+  await expect(accessOverlay).toContainText('FREE');
+  await expect(accessOverlay).toContainText('not service-access proof');
   await page.getByLabel('Interface access minimum clearance mm for Donor x86 mainboard').fill('2');
   await page.getByRole('button', { name: 'Check interface access' }).click();
   await expect(accessEditor).toContainText('AABB clearance 5.000 mm meets the 2.000 mm requirement.');
@@ -419,6 +427,7 @@ test('constructor consumes live resource strategy, spatial evidence dependencies
   await page.getByRole('button', { name: 'Apply declared placement' }).click();
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [45, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
   await expect(page.getByRole('button', { name: 'Check interface access' })).toHaveCount(0);
+  await expect(accessOverlay).toHaveCount(0);
 
   // Replacing the upstream STEP source invalidates the placement derived from the old geometry.
   await page.getByLabel('Attach STEP geometry for Donor x86 mainboard').setInputFiles({ name: 'donor-mainboard-r2.step', mimeType: 'model/step', buffer: Buffer.from(mainboardStep) });
