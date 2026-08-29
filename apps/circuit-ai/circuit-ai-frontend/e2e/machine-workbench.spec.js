@@ -42,9 +42,14 @@ test('machine workbench keeps spatial selection, authority, and evidence context
   await expect(page.getByText('Machine tree', { exact: true })).toHaveCount(0);
   await expect(page.getByText('live spatial model', { exact: true })).toBeVisible();
   await expect(page.getByText('Spatial focus', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Frame whole machine' }).click();
+  await page.waitForTimeout(450);
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-immersive.png') });
   await page.getByRole('button', { name: 'Exit immersive spatial mode' }).click();
   await expect(page.getByText('Machine tree', { exact: true })).toBeVisible();
+
+  // Re-select the display after overview so evidence checks remain scoped to the donor panel.
+  await page.getByRole('button', { name: /Donor display assembly/ }).click();
 
   // Semantic lenses are operable without changing the underlying machine truth. The HUD may echo the lens label.
   await page.getByRole('button', { name: 'Interfaces', exact: true }).first().click();
