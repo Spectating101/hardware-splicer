@@ -5,6 +5,7 @@ import { Loader2, Move3D, Rotate3D, Trash2 } from 'lucide-react';
 import type { ConstructorCandidateId, MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { DeclaredClearanceChecker } from '@/components/workbench/declared-clearance-checker';
 
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -142,63 +143,66 @@ export function DeclaredPlacementEditor({
   }
 
   return (
-    <div className="mt-2 rounded-lg border border-violet-300/10 bg-violet-300/[0.025] p-2" data-testid="declared-placement-editor">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-violet-200/80">
-          <Move3D className="h-3 w-3" /> Declared assembly placement
+    <>
+      <div className="mt-2 rounded-lg border border-violet-300/10 bg-violet-300/[0.025] p-2" data-testid="declared-placement-editor">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-violet-200/80">
+            <Move3D className="h-3 w-3" /> Declared assembly placement
+          </div>
+          <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">Rz·Ry·Rx · AABB only</span>
         </div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">Rz·Ry·Rx · AABB only</span>
-      </div>
-      <div className="mt-2 grid grid-cols-3 gap-1.5">
-        {['X', 'Y', 'Z'].map((axis, index) => (
-          <label key={`t-${axis}`} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
-            T{axis} mm
-            <input
-              value={translation[index]}
-              onChange={(event) => updateVector('translation', index, event.target.value)}
-              inputMode="decimal"
-              aria-label={`Placement translation ${axis} mm for ${resourceName}`}
-              className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-violet-300/25"
-            />
-          </label>
-        ))}
-      </div>
-      <div className="mt-2 grid grid-cols-3 gap-1.5">
-        {['X', 'Y', 'Z'].map((axis, index) => (
-          <label key={`r-${axis}`} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
-            R{axis} °
-            <div className="relative mt-1">
-              <Rotate3D className="pointer-events-none absolute left-1.5 top-1.5 h-2.5 w-2.5 text-slate-700" />
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
+          {['X', 'Y', 'Z'].map((axis, index) => (
+            <label key={`t-${axis}`} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+              T{axis} mm
               <input
-                value={rotation[index]}
-                onChange={(event) => updateVector('rotation', index, event.target.value)}
+                value={translation[index]}
+                onChange={(event) => updateVector('translation', index, event.target.value)}
                 inputMode="decimal"
-                aria-label={`Placement rotation ${axis} degrees for ${resourceName}`}
-                className="w-full rounded border border-white/8 bg-black/20 py-1 pl-5 pr-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-violet-300/25"
+                aria-label={`Placement translation ${axis} mm for ${resourceName}`}
+                className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-violet-300/25"
               />
-            </div>
-          </label>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={applyPlacement}
-          disabled={state === 'loading'}
-          className="inline-flex items-center gap-1.5 rounded-md border border-violet-300/15 bg-violet-300/[0.05] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.09em] text-violet-200 hover:bg-violet-300/[0.09] disabled:opacity-50"
-        >
-          {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Move3D className="h-3 w-3" />}
-          Apply declared placement
-        </button>
-        {existing ? (
-          <button type="button" onClick={removePlacement} aria-label={`Clear declared placement for ${resourceName}`} className="rounded-md border border-white/8 p-1.5 text-slate-600 hover:text-red-300">
-            <Trash2 className="h-3 w-3" />
+            </label>
+          ))}
+        </div>
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
+          {['X', 'Y', 'Z'].map((axis, index) => (
+            <label key={`r-${axis}`} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+              R{axis} °
+              <div className="relative mt-1">
+                <Rotate3D className="pointer-events-none absolute left-1.5 top-1.5 h-2.5 w-2.5 text-slate-700" />
+                <input
+                  value={rotation[index]}
+                  onChange={(event) => updateVector('rotation', index, event.target.value)}
+                  inputMode="decimal"
+                  aria-label={`Placement rotation ${axis} degrees for ${resourceName}`}
+                  className="w-full rounded border border-white/8 bg-black/20 py-1 pl-5 pr-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-violet-300/25"
+                />
+              </div>
+            </label>
+          ))}
+        </div>
+        <div className="mt-2 flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={applyPlacement}
+            disabled={state === 'loading'}
+            className="inline-flex items-center gap-1.5 rounded-md border border-violet-300/15 bg-violet-300/[0.05] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.09em] text-violet-200 hover:bg-violet-300/[0.09] disabled:opacity-50"
+          >
+            {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Move3D className="h-3 w-3" />}
+            Apply declared placement
           </button>
-        ) : null}
+          {existing ? (
+            <button type="button" onClick={removePlacement} aria-label={`Clear declared placement for ${resourceName}`} className="rounded-md border border-white/8 p-1.5 text-slate-600 hover:text-red-300">
+              <Trash2 className="h-3 w-3" />
+            </button>
+          ) : null}
+        </div>
+        {existing ? <div className="mt-1.5 text-[8px] leading-4 text-violet-200/65">Placed in {existing.frameId}: T [{existing.translationMm.join(', ')}] mm · R [{existing.rotationDegXyz.join(', ')}]° · DECLARED.</div> : null}
+        {message ? <div className={`mt-1.5 text-[8px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
+        <div className="mt-1 text-[7px] leading-3 text-amber-100/45">Placement establishes a common coordinate frame only. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
       </div>
-      {existing ? <div className="mt-1.5 text-[8px] leading-4 text-violet-200/65">Placed in {existing.frameId}: T [{existing.translationMm.join(', ')}] mm · R [{existing.rotationDegXyz.join(', ')}]° · DECLARED.</div> : null}
-      {message ? <div className={`mt-1.5 text-[8px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
-      <div className="mt-1 text-[7px] leading-3 text-amber-100/45">Placement establishes a common coordinate frame only. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
-    </div>
+      <DeclaredClearanceChecker />
+    </>
   );
 }
