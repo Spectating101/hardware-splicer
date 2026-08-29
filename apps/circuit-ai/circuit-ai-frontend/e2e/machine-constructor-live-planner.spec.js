@@ -84,24 +84,28 @@ test('constructor consumes live resource_strategy.v1 projections without weakeni
 
   // Constrained planning materially changes the machine: raw LCD is held and power becomes explicit gaps.
   await page.getByRole('button', { name: /Maximum reuse/ }).click();
-  await expect(page.getByText('87.5% capability coverage', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Target', exact: true }).click();
+  await expect(page.getByText('88% capability coverage', { exact: true })).toBeVisible();
   await expect(page.getByText('Missing: power', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Raw donor LCD panel.*planner selected/i })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
   await expect(spatialProjection).toContainText('max-reuse');
   await expect(spatialProjection).toContainText('1 held');
   await expect(spatialProjection).toContainText('2 gaps');
+  await page.getByRole('button', { name: 'Resources', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Raw donor LCD panel.*planner selected/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
   await page.waitForTimeout(650);
   const constrainedCanvas = await page.locator('canvas').first().screenshot();
 
   // Open procurement substitutes documented compute/display geometry and closes the projected resource gaps.
   await page.getByRole('button', { name: /Lowest integration risk/ }).click();
+  await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('Open procurement covers the target with documented modules and fewer evidence gaps.', { exact: true }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: /Documented modular x86 board.*planner selected/i })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Documented portable display.*planner selected/i })).toBeVisible();
   await expect(spatialProjection).toContainText('low-risk');
   await expect(spatialProjection).toContainText('5 substitute');
   await expect(spatialProjection).toContainText('0 gaps');
+  await page.getByRole('button', { name: 'Resources', exact: true }).click();
+  await expect(page.getByRole('button', { name: /Documented modular x86 board.*planner selected/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Documented portable display.*planner selected/i })).toBeVisible();
   await page.waitForTimeout(650);
   const lowRiskCanvas = await page.locator('canvas').first().screenshot();
   expect(lowRiskCanvas.equals(constrainedCanvas)).toBeFalsy();
