@@ -10,6 +10,8 @@ import {
   type RequirementState,
 } from '@/lib/workbench-constructor-demo';
 import { useMachineWorkbenchStore, type MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
+import { useWorkbenchPlacementStore } from '@/lib/workbench-placement-store';
+import { DeclaredPlacementEditor } from '@/components/workbench/declared-placement-editor';
 
 function requirementTone(state: RequirementState) {
   if (state === 'pass') return 'border-emerald-300/20 bg-emerald-300/[0.055] text-emerald-200';
@@ -60,6 +62,7 @@ export function ConstructorDock() {
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
+  const setGeometryReport = useWorkbenchPlacementStore((state) => state.setGeometryReport);
   const activeCandidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
   const livePlanner = plannerSource === 'live' && Boolean(plannerProjection);
   const liveSelected = new Set((plannerProjection?.selectedResourceIds ?? []).map(normalizeId));
@@ -146,6 +149,7 @@ export function ConstructorDock() {
       };
       if (!evidence.contentHash.startsWith('sha256:')) throw new Error('HS geometry response did not include the canonical STEP content hash.');
 
+      setGeometryReport(activeCandidateId, selectedResource.id, geometry);
       setMechanicalGeometryEvidence(activeCandidateId, evidence);
       setSelectedEntityId(selectedResource.mappedEntityId);
       window.setTimeout(requestFrameSelection, 0);
@@ -238,7 +242,7 @@ export function ConstructorDock() {
                       STEP envelope attached: {geometryForSelectedResource.sizeMm.join(' × ')} mm · {geometryForSelectedResource.pointCount} points · DECLARED
                     </div>
                   ) : (
-                    <div className="mt-1 text-[8px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope; placement remains fixture-anchored until datum transforms exist.</div>
+                    <div className="mt-1 text-[8px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope. You can then declare an assembly-frame placement; neither step establishes collision or build authority.</div>
                   )}
                   <div className="mt-2 flex items-center gap-2">
                     <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-cyan-200 hover:bg-cyan-300/[0.08]">
@@ -246,9 +250,20 @@ export function ConstructorDock() {
                       {geometryForSelectedResource ? 'Replace STEP' : 'Attach STEP'}
                       <input type="file" accept=".step,.stp,model/step" className="sr-only" disabled={geometryState === 'loading'} onChange={importStepEnvelope} aria-label={`Attach STEP geometry for ${selectedResource.name}`} />
                     </label>
-                    <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">no BREP · no collision authority</span>
+                    <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">point envelope · no BREP authority</span>
                   </div>
                   {geometryMessage ? <div className={`mt-1.5 text-[8px] leading-4 ${geometryState === 'error' ? 'text-red-300/80' : geometryState === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{geometryMessage}</div> : null}
+                  {geometryForSelectedResource ? (
+                    <DeclaredPlacementEditor
+                      key={`${activeCandidateId}-${selectedResource.id}-${geometryForSelectedResource.contentHash}`}
+                      candidateId={activeCandidateId}
+                      resourceId={selectedResource.id}
+                      resourceName={selectedResource.name}
+                      entityId={selectedResource.mappedEntityId}
+                      modelId={geometryForSelectedResource.modelId}
+                      evidence={geometryForSelectedResource}
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>
