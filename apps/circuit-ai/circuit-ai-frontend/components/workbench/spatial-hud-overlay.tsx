@@ -85,23 +85,25 @@ export function SpatialHudOverlay() {
         </div>
       </div>
 
-      <div className={`absolute bottom-5 right-5 flex items-end gap-2 ${immersive ? '' : 'hidden 2xl:flex'}`}>
-        <div className="rounded-md border border-white/10 bg-slate-950/74 px-2.5 py-2 backdrop-blur">
+      <div className={`absolute right-5 top-1/2 flex -translate-y-1/2 flex-col items-end gap-2 ${immersive ? '' : 'hidden 2xl:flex'}`}>
+        <div className="mr-1 h-12 w-px bg-gradient-to-b from-transparent via-cyan-200/25 to-cyan-200/5" />
+        <div className="min-w-[104px] rounded-md border border-white/10 bg-slate-950/74 px-2.5 py-2 text-right backdrop-blur">
           <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">interfaces</div>
           <div className="mt-0.5 text-sm font-semibold text-slate-200">{interfaces.length}</div>
         </div>
-        <div className={`rounded-md border px-2.5 py-2 backdrop-blur ${blockedInterfaces ? 'border-red-300/20 bg-red-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
+        <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${blockedInterfaces ? 'border-red-300/20 bg-red-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
           <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">blocked paths</div>
           <div className={`mt-0.5 text-sm font-semibold ${blockedInterfaces ? 'text-red-300' : 'text-slate-200'}`}>{blockedInterfaces}</div>
         </div>
-        <div className={`rounded-md border px-2.5 py-2 backdrop-blur ${openConstraints ? 'border-amber-300/20 bg-amber-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
+        <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${openConstraints ? 'border-amber-300/20 bg-amber-300/[0.06]' : 'border-white/10 bg-slate-950/74'}`}>
           <div className="text-[8px] uppercase tracking-[0.16em] text-slate-600">open gates</div>
           <div className={`mt-0.5 text-sm font-semibold ${openConstraints ? 'text-amber-300' : 'text-slate-200'}`}>{openConstraints}</div>
         </div>
-        <div className={`rounded-md border px-2.5 py-2 backdrop-blur ${authorityTone(selected.authority)}`}>
+        <div className={`min-w-[104px] rounded-md border px-2.5 py-2 text-right backdrop-blur ${authorityTone(selected.authority)}`}>
           <div className="text-[8px] uppercase tracking-[0.16em] opacity-60">authority</div>
           <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]">{selected.authority}</div>
         </div>
+        <div className="mr-1 h-12 w-px bg-gradient-to-b from-cyan-200/5 via-cyan-200/20 to-transparent" />
       </div>
     </div>
   );
