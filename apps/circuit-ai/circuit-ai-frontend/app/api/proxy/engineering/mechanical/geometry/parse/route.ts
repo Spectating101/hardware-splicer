@@ -3,7 +3,7 @@ import {
   getHardwareSplicerApiUrl,
   getProxyAuthHeaders,
   proxyUiFailureResponse,
-} from "../../../../../_backend";
+} from "../../../../_backend";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
