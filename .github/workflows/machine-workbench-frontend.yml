@@ -44,7 +44,7 @@ jobs:
         run: npm run typecheck
       - name: Production build
         run: npm run build
-      - name: Run machine workbench browser path
+      - name: Run machine constructor and workbench browser paths
         run: |
           set -euo pipefail
           npm run start -- -H 127.0.0.1 -p 3000 > /tmp/machine-workbench-frontend.log 2>&1 &
@@ -63,7 +63,9 @@ jobs:
             fi
             sleep 2
           done
-          /tmp/hs-playwright/node_modules/.bin/playwright test e2e/machine-workbench.spec.js \
+          /tmp/hs-playwright/node_modules/.bin/playwright test \
+            e2e/machine-workbench.spec.js \
+            e2e/machine-constructor-live-planner.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
