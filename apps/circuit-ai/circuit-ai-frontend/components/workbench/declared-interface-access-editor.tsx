@@ -20,7 +20,7 @@ function tuple3(value: unknown): [number, number, number] | null {
   return rows.every(Number.isFinite) ? rows as [number, number, number] : null;
 }
 
-function finite(value: string) {
+function finite(value: string): number | null {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -99,7 +99,11 @@ export function DeclaredInterfaceAccessEditor({
     const depthMm = finite(depth);
     const offsetUMm = finite(offsetU);
     const offsetVMm = finite(offsetV);
-    if ([widthMm, heightMm, depthMm, offsetUMm, offsetVMm].some((row) => row === null) || !widthMm || !heightMm || !depthMm) {
+    if (
+      widthMm === null || heightMm === null || depthMm === null ||
+      offsetUMm === null || offsetVMm === null ||
+      widthMm <= 0 || heightMm <= 0 || depthMm <= 0
+    ) {
       setState('error');
       setMessage('Access width, height and depth must be positive finite numbers; offsets must be finite.');
       return;
@@ -301,11 +305,15 @@ export function DeclaredInterfaceAccessEditor({
         </label>
       </div>
       <div className="mt-2 grid grid-cols-3 gap-1.5">
-        {[['Width', width, setWidth], ['Height', height, setHeight], ['Depth', depth, setDepth]].map(([label, value, setter]) => (
-          <label key={String(label)} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">{String(label)} mm
-            <input aria-label={`${String(label)} interface access mm for ${resourceName}`} value={String(value)} onChange={(event) => (setter as (value: string) => void)(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
-          </label>
-        ))}
+        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Width mm
+          <input aria-label={`Width interface access mm for ${resourceName}`} value={width} onChange={(event) => setWidth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        </label>
+        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Height mm
+          <input aria-label={`Height interface access mm for ${resourceName}`} value={height} onChange={(event) => setHeight(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        </label>
+        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Depth mm
+          <input aria-label={`Depth interface access mm for ${resourceName}`} value={depth} onChange={(event) => setDepth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        </label>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Offset U mm
