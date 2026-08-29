@@ -109,7 +109,45 @@ function stepGeometryResponse(sourceId = 'donor-mainboard.step') {
   };
 }
 
-test('constructor consumes live resource_strategy.v1 and bounded STEP evidence without weakening authority', async ({ page }, testInfo) => {
+function placementResponse(body) {
+  const placement = body.placements?.[0] || {};
+  return {
+    ok: true,
+    clearance_boxes: [{
+      object_id: placement.object_id || 'cmp-mainboard',
+      frame_id: placement.target_frame || 'assembly',
+      minimum_mm: [40, -65, 10],
+      maximum_mm: [250, 65, 28],
+      source_model_id: placement.model_id || 'balanced-res-mainboard-donor',
+      state: 'declared_placement',
+      metadata: {
+        placement_id: placement.placement_id,
+        placement_authority: 'declared',
+        translation_mm: placement.translation_mm,
+        rotation_deg_xyz: placement.rotation_deg_xyz,
+        rotation_convention: 'Rz*Ry*Rx; canonical STEP XYZ',
+        source_envelope_only: true,
+        full_brep_collision: false,
+        physical_measurement: false,
+        fabrication_authorized: false,
+      },
+    }],
+    placement_count: 1,
+    declared_rigid_placement_only: true,
+    aabb_only: true,
+    full_brep_collision: false,
+    physical_measurement: false,
+    fabrication_authorized: false,
+    automatic_execution: false,
+    physical_action: false,
+    manufacturing_authorized: false,
+    power_on_authorized: false,
+    motion_authorized: false,
+    release_authorized: false,
+  };
+}
+
+test('constructor consumes live resource strategy, STEP evidence, and declared placement without weakening authority', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await page.route('**/api/proxy/resource/strategy', async (route) => {
     const request = route.request();
@@ -122,6 +160,10 @@ test('constructor consumes live resource_strategy.v1 and bounded STEP evidence w
     const body = JSON.parse(request.postData() || '{}');
     const sourceId = body.sources?.[0]?.source_id || 'donor-mainboard.step';
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(stepGeometryResponse(sourceId)) });
+  });
+  await page.route('**/api/proxy/engineering/mechanical/geometry/place', async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(placementResponse(body)) });
   });
 
   await page.goto(`${APP_URL}/workbench`);
@@ -142,7 +184,7 @@ test('constructor consumes live resource_strategy.v1 and bounded STEP evidence w
   await expect(page.getByRole('button', { name: /Donor display \+ validated controller.*planner selected/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
 
-  // Real file input -> canonical mechanical parser contract -> exact resource envelope -> WebGL geometry delta.
+  // Resource fixture -> parsed STEP point envelope.
   await donorMainboard.click();
   await expect(page.getByTestId('step-geometry-import')).toContainText('Spatial evidence · Donor x86 mainboard');
   await page.waitForTimeout(650);
@@ -159,7 +201,20 @@ test('constructor consumes live resource_strategy.v1 and bounded STEP evidence w
   const stepMainboardCanvas = await page.locator('canvas').first().screenshot();
   expect(stepMainboardCanvas.equals(fixtureMainboardCanvas)).toBeFalsy();
 
-  // Constrained planning materially changes the machine; geometry evidence remains candidate/resource scoped.
+  // Parsed envelope -> explicit declared rigid placement in the common assembly frame.
+  await expect(page.getByTestId('declared-placement-editor')).toBeVisible();
+  await page.getByLabel('Placement translation X mm for Donor x86 mainboard').fill('40');
+  await page.getByLabel('Placement translation Y mm for Donor x86 mainboard').fill('-65');
+  await page.getByLabel('Placement translation Z mm for Donor x86 mainboard').fill('10');
+  await page.getByRole('button', { name: 'Apply declared placement' }).click();
+  await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [40, -65, 10] mm · R [0, 0, 0]° · DECLARED.');
+  await expect(page.getByText('DECLARED PLACED ENVELOPE', { exact: true })).toBeVisible();
+  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toHaveCount(0);
+  await page.waitForTimeout(650);
+  const placedMainboardCanvas = await page.locator('canvas').first().screenshot();
+  expect(placedMainboardCanvas.equals(stepMainboardCanvas)).toBeFalsy();
+
+  // Constrained planning materially changes the machine; imported/placement evidence remains candidate scoped.
   await page.getByRole('button', { name: /Maximum reuse/ }).click();
   await page.getByRole('button', { name: 'Target', exact: true }).click();
   await expect(page.getByText('88% capability coverage', { exact: true })).toBeVisible();
@@ -167,7 +222,7 @@ test('constructor consumes live resource_strategy.v1 and bounded STEP evidence w
   await expect(spatialProjection).toContainText('max-reuse');
   await expect(spatialProjection).toContainText('1 held');
   await expect(spatialProjection).toContainText('2 gaps');
-  await expect(page.getByText('DECLARED STEP ENVELOPE', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('DECLARED PLACED ENVELOPE', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Resources', exact: true }).click();
   await expect(page.getByRole('button', { name: /Raw donor LCD panel.*planner selected/i })).toBeVisible();
   await expect(page.getByRole('button', { name: /Unknown old lithium pack/i })).not.toContainText('planner selected');
@@ -189,7 +244,7 @@ test('constructor consumes live resource_strategy.v1 and bounded STEP evidence w
   expect(lowRiskCanvas.equals(constrainedCanvas)).toBeFalsy();
   await page.screenshot({ path: testInfo.outputPath('machine-constructor-live-planner.png') });
 
-  // Proposal acceptance remains a working-design decision even under a live planner projection.
+  // Proposal acceptance remains a working-design decision even under live planner/geometry state.
   await page.getByRole('button', { name: 'Accept proposal Use documented portable display to working candidate' }).click();
   await expect(page.getByText('accepted', { exact: true })).toBeVisible();
   await expect(page.getByText(/working design only/)).toBeVisible();
