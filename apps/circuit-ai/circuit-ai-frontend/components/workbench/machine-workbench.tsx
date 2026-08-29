@@ -45,6 +45,7 @@ export function MachineWorkbench() {
   const setActiveLens = useMachineWorkbenchStore((state) => state.setActiveLens);
   const setActiveView = useMachineWorkbenchStore((state) => state.setActiveView);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
+  const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
   const toggleExploded = useMachineWorkbenchStore((state) => state.toggleExploded);
   const toggleImmersive = useMachineWorkbenchStore((state) => state.toggleImmersive);
   const resetViewState = useMachineWorkbenchStore((state) => state.resetViewState);
@@ -52,6 +53,12 @@ export function MachineWorkbench() {
 
   const selected = deck001EntityMap.get(selectedEntityId) ?? deck001EntityMap.get('deck-001');
   const openBlockingConstraints = deck001Constraints.filter((constraint) => constraint.severity === 'blocking' && constraint.state === 'open').length;
+
+  function frameMachineOverview() {
+    setActiveView('assembly');
+    setSelectedEntityId('deck-001');
+    requestFrameSelection();
+  }
 
   return (
     <main className="flex min-h-screen flex-col bg-[#040811] text-slate-100 xl:h-screen xl:min-h-0 xl:overflow-hidden">
@@ -105,6 +112,7 @@ export function MachineWorkbench() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (immersive) toggleImmersive();
                     setActiveView('pcb');
                     setSelectedEntityId('cmp-mainboard');
                   }}
@@ -134,6 +142,15 @@ export function MachineWorkbench() {
               </div>
 
               <div className="ml-auto flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={frameMachineOverview}
+                  disabled={activeView !== 'assembly'}
+                  aria-label="Frame whole machine"
+                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-[10px] font-medium text-slate-500 transition hover:bg-white/5 hover:text-slate-200 disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <Box className="h-3.5 w-3.5" /> Overview
+                </button>
                 <button
                   type="button"
                   onClick={toggleExploded}
