@@ -92,6 +92,7 @@ def test_product_mounts_bounded_mechanical_routes() -> None:
     assert "/v1/engineering/mechanical/schema" in paths
     assert "/v1/engineering/mechanical/geometry/parse" in paths
     assert "/v1/engineering/mechanical/geometry/place" in paths
+    assert "/v1/engineering/mechanical/interfaces/access-envelope" in paths
     assert "/v1/engineering/mechanical/geometry/apply" in paths
     assert "/v1/engineering/mechanical/fit/check" in paths
     assert "/v1/engineering/mechanical/fit/apply" in paths
@@ -213,6 +214,135 @@ def test_geometry_place_rejects_unknown_model_and_authority_promotion() -> None:
                     "authority": "verified",
                 }
             ],
+        },
+    )
+    assert promoted.status_code == 422
+
+
+def test_declared_interface_access_builds_outward_keepout_and_can_be_fit_checked() -> None:
+    client = TestClient(create_product_app())
+    access = client.post(
+        "/v1/engineering/mechanical/interfaces/access-envelope",
+        json={
+            "object_box": {
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "minimum_mm": [0.0, 0.0, 0.0],
+                "maximum_mm": [100.0, 50.0, 10.0],
+                "source_model_id": "left",
+                "state": "declared_placement",
+                "metadata": {"placement_id": "place-left", "placement_authority": "declared"},
+            },
+            "access": {
+                "access_id": "display-egress",
+                "interface_id": "if-display",
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "face": "+x",
+                "width_mm": 20.0,
+                "height_mm": 10.0,
+                "depth_mm": 30.0,
+            },
+        },
+    )
+
+    assert access.status_code == 200, access.text
+    body = access.json()
+    assert body["declared_interface_access_only"] is True
+    assert body["aabb_only"] is True
+    assert body["connector_mating_verified"] is False
+    assert body["cable_routing_verified"] is False
+    assert body["fabrication_authorized"] is False
+    box = body["access_box"]
+    assert box["object_id"] == "access:display-egress"
+    assert box["state"] == "declared_access_envelope"
+    assert box["minimum_mm"] == [100.0, 15.0, 0.0]
+    assert box["maximum_mm"] == [130.0, 35.0, 10.0]
+    assert box["metadata"]["interface_id"] == "if-display"
+    assert box["metadata"]["anchor_point_mm"] == [100.0, 25.0, 5.0]
+    assert box["metadata"]["outward_normal"] == [1.0, 0.0, 0.0]
+
+    checked = client.post(
+        "/v1/engineering/mechanical/fit/check",
+        json={
+            "geometry": _geometry(),
+            "clearance_boxes": [
+                box,
+                {
+                    "object_id": "blocking-display",
+                    "frame_id": "assembly",
+                    "minimum_mm": [125.0, 20.0, 2.0],
+                    "maximum_mm": [150.0, 30.0, 8.0],
+                    "state": "declared_placement",
+                },
+            ],
+            "clearance_requirements": [
+                {
+                    "requirement_id": "display-egress-clear",
+                    "first_object_id": "access:display-egress",
+                    "second_object_id": "blocking-display",
+                    "minimum_clearance_mm": 0.0,
+                }
+            ],
+        },
+    )
+    assert checked.status_code == 200, checked.text
+    fit = checked.json()["mechanical_fit"]
+    clearance = next(row for row in fit["checks"] if row["category"] == "aabb_clearance")
+    assert clearance["status"] == "fail"
+    assert clearance["metadata"]["overlap"] is True
+    assert clearance["metadata"]["clearance_mm"] < 0.0
+    assert checked.json()["fabrication_authorized"] is False
+
+
+def test_interface_access_rejects_fixture_geometry_and_authority_promotion() -> None:
+    client = TestClient(create_product_app())
+    fixture = client.post(
+        "/v1/engineering/mechanical/interfaces/access-envelope",
+        json={
+            "object_box": {
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "minimum_mm": [0.0, 0.0, 0.0],
+                "maximum_mm": [100.0, 50.0, 10.0],
+                "state": "fixture",
+            },
+            "access": {
+                "access_id": "fixture-access",
+                "interface_id": "if-display",
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "face": "+x",
+                "width_mm": 20.0,
+                "height_mm": 10.0,
+                "depth_mm": 20.0,
+            },
+        },
+    )
+    assert fixture.status_code == 422
+    assert fixture.json()["detail"]["type"] == "invalid_interface_access"
+
+    promoted = client.post(
+        "/v1/engineering/mechanical/interfaces/access-envelope",
+        json={
+            "object_box": {
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "minimum_mm": [0.0, 0.0, 0.0],
+                "maximum_mm": [100.0, 50.0, 10.0],
+                "state": "declared_placement",
+            },
+            "access": {
+                "access_id": "promoted-access",
+                "interface_id": "if-display",
+                "object_id": "left-part",
+                "frame_id": "assembly",
+                "face": "+x",
+                "width_mm": 20.0,
+                "height_mm": 10.0,
+                "depth_mm": 20.0,
+                "authority": "verified",
+            },
         },
     )
     assert promoted.status_code == 422
