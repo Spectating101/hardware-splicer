@@ -22,6 +22,7 @@ export type MechanicalGeometryEvidence = {
   sizeMm: [number, number, number];
   minimumMm: [number, number, number];
   maximumMm: [number, number, number];
+  axisMapping: 'step_xyz_to_scene_xzy';
   pointCount: number;
   unresolved: Array<{ field?: string; reason?: string }>;
   stepPointEnvelopeOnly: true;
