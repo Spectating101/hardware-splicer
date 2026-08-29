@@ -15,6 +15,7 @@ export type MachineWorkbenchState = {
   isolatedEntityId: string | null;
   exploded: boolean;
   xray: boolean;
+  immersive: boolean;
   cameraPreset: WorkbenchCameraPreset;
   frameRequest: number;
   setSelectedEntityId: (id: string) => void;
@@ -26,6 +27,7 @@ export type MachineWorkbenchState = {
   requestFrameSelection: () => void;
   toggleExploded: () => void;
   toggleXray: () => void;
+  toggleImmersive: () => void;
   resetViewState: () => void;
 };
 
@@ -37,6 +39,7 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   isolatedEntityId: null,
   exploded: false,
   xray: false,
+  immersive: false,
   cameraPreset: 'iso',
   frameRequest: 0,
   setSelectedEntityId: (selectedEntityId) => set({ selectedEntityId }),
@@ -48,6 +51,7 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
   requestFrameSelection: () => set((state) => ({ frameRequest: state.frameRequest + 1 })),
   toggleExploded: () => set((state) => ({ exploded: !state.exploded })),
   toggleXray: () => set((state) => ({ xray: !state.xray })),
+  toggleImmersive: () => set((state) => ({ immersive: !state.immersive })),
   resetViewState: () =>
     set((state) => ({
       activeLens: 'authority',
@@ -56,6 +60,7 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
       isolatedEntityId: null,
       exploded: false,
       xray: false,
+      immersive: false,
       cameraPreset: 'iso',
       frameRequest: state.frameRequest + 1,
     })),
