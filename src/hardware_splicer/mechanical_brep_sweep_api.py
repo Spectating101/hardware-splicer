@@ -28,6 +28,9 @@ from .mechanical_brep_transition_refinement import (
 from .mechanical_placement import DeclaredGeometryPlacement
 
 
+MAX_REFINEMENT_TOTAL_POSE_BUDGET = 256
+
+
 class MechanicalBrepSweepStepSource(BaseModel):
     source_id: str = Field(min_length=1)
     content: str = Field(min_length=1)
@@ -100,6 +103,15 @@ def _require_expected_hashes(
         raise ValueError("fixed inline STEP content no longer matches its expected canonical content_hash")
 
 
+def _worst_case_refinement_pose_count(
+    request: MechanicalBrepMatingPathRefinementRequest,
+) -> int:
+    # Each adjacent coarse interval can change both independent predicates. The
+    # refinement worker evaluates two endpoints plus at most max_depth midpoints.
+    candidate_upper_bound = 2 * (request.sample_count - 1)
+    return request.sample_count + candidate_upper_bound * (request.refinement_max_depth + 2)
+
+
 def _payload(report: BrepMatingPathSweepReport) -> Dict[str, Any]:
     return {
         "ok": True,
@@ -133,6 +145,7 @@ def _refinement_payload(report: BrepMatingPathRefinementReport) -> Dict[str, Any
         "refined_boundary_count": report.refined_boundary_count,
         "refinement_evaluated_pose_count": report.refinement_evaluated_pose_count,
         "total_exact_pose_evaluations": report.total_exact_pose_evaluations,
+        "max_total_pose_budget": MAX_REFINEMENT_TOTAL_POSE_BUDGET,
         "aabb_fallback_used": False,
         **_authority_payload(),
     }
@@ -178,6 +191,8 @@ def create_mechanical_brep_sweep_router() -> APIRouter:
                 "minimum": MIN_REFINEMENT_FRACTION_TOLERANCE,
                 "maximum": MAX_REFINEMENT_FRACTION_TOLERANCE,
             },
+            "max_total_pose_budget": MAX_REFINEMENT_TOTAL_POSE_BUDGET,
+            "timeout_budget_scope": "coarse_and_refinement_total",
             "unique_transition_pose_verified": False,
             "monotonicity_inside_bracket_verified": False,
             **_authority_payload(),
@@ -214,6 +229,17 @@ def create_mechanical_brep_sweep_router() -> APIRouter:
     @router.post("/geometry/brep/mating-path/refine")
     def refine_mating_path(request: MechanicalBrepMatingPathRefinementRequest) -> Dict[str, Any]:
         try:
+            worst_case_poses = _worst_case_refinement_pose_count(request)
+            if worst_case_poses > MAX_REFINEMENT_TOTAL_POSE_BUDGET:
+                raise ValueError(
+                    "adaptive refinement worst-case exact pose budget "
+                    f"{worst_case_poses} exceeds {MAX_REFINEMENT_TOTAL_POSE_BUDGET}; "
+                    "reduce coarse sample_count or refinement_max_depth"
+                )
+            # The evaluator has two isolated stages (coarse sampling then transition
+            # refinement). Split the user-visible timeout evenly so the product API's
+            # timeout remains a total request budget rather than silently doubling it.
+            stage_timeout_s = request.timeout_s / 2.0
             report = evaluate_step_brep_mating_path_refinement(
                 project_id=request.project_id,
                 sweep_id=request.sweep_id,
@@ -231,7 +257,7 @@ def create_mechanical_brep_sweep_router() -> APIRouter:
                 contact_distance_tolerance_mm=request.contact_distance_tolerance_mm,
                 refinement_max_depth=request.refinement_max_depth,
                 refinement_fraction_tolerance=request.refinement_fraction_tolerance,
-                timeout_s=request.timeout_s,
+                timeout_s=stage_timeout_s,
             )
             _require_expected_hashes(request, report)
         except (TypeError, ValueError) as exc:
