@@ -60,19 +60,19 @@ export function BrepSurfaceAnchorControl({
   return (
     <div className="mt-2 rounded-lg border border-fuchsia-300/10 bg-fuchsia-300/[0.025] p-2" data-testid="brep-surface-anchor-control">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-fuchsia-200/80">
+        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-fuchsia-200/80">
           <Crosshair className="h-3 w-3" /> Exact BREP surface anchor
         </div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">OCCT point + normal</span>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">OCCT point + normal</span>
       </div>
-      <label className="mt-2 block text-[7px] uppercase tracking-[0.08em] text-slate-600">
+      <label className="mt-2 block text-[8px] uppercase tracking-[0.08em] text-slate-600">
         Bind picked surface to interface
         <select
           aria-label={`BREP anchor interface for ${resourceName}`}
           value={selectedInterface?.id ?? ''}
           onChange={(event) => setInterfaceId(event.target.value)}
           disabled={pickStatus === 'loading'}
-          className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-fuchsia-300/25 disabled:opacity-50"
+          className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] normal-case tracking-normal text-slate-200 outline-none focus:border-fuchsia-300/25 disabled:opacity-50"
         >
           {interfaces.map((row) => (
             <option key={row.id} value={row.id}>{row.name} · {row.kind}</option>
@@ -84,15 +84,15 @@ export function BrepSurfaceAnchorControl({
           type="button"
           onClick={armed ? cancelPick : arm}
           disabled={pickStatus === 'loading'}
-          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-50 ${armed ? 'border-amber-300/20 bg-amber-300/[0.06] text-amber-200' : 'border-fuchsia-300/15 bg-fuchsia-300/[0.04] text-fuchsia-200 hover:bg-fuchsia-300/[0.08]'}`}
+          className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-50 ${armed ? 'border-amber-300/20 bg-amber-300/[0.06] text-amber-200' : 'border-fuchsia-300/15 bg-fuchsia-300/[0.04] text-fuchsia-200 hover:bg-fuchsia-300/[0.08]'}`}
         >
           {pickStatus === 'loading' && armed ? <Loader2 className="h-3 w-3 animate-spin" /> : armed ? <X className="h-3 w-3" /> : <MousePointer2 className="h-3 w-3" />}
           {pickStatus === 'loading' && armed ? 'Snapping surface' : armed ? 'Cancel surface pick' : 'Arm surface pick'}
         </button>
-        {entityAnchors.length ? <span className="text-[7px] text-emerald-300/65">{entityAnchors.length} declared anchor{entityAnchors.length === 1 ? '' : 's'}</span> : null}
+        {entityAnchors.length ? <span className="text-[8px] text-emerald-300/65">{entityAnchors.length} declared anchor{entityAnchors.length === 1 ? '' : 's'}</span> : null}
       </div>
       {armed && pickStatus !== 'loading' ? (
-        <div className="mt-1.5 text-[8px] leading-4 text-amber-200/75">
+        <div className="mt-1.5 text-[9px] leading-4 text-amber-200/75">
           Click this exact BREP mesh in the 3D scene. The click is only a probe; OCCT snaps it to the nearest exact face and returns the surface point + normal.
         </div>
       ) : null}
@@ -100,17 +100,17 @@ export function BrepSurfaceAnchorControl({
         <div
           data-testid="brep-surface-anchor-feedback"
           data-pick-status={pickStatus}
-          className={`mt-1.5 text-[8px] leading-4 ${pickStatus === 'success' ? 'text-emerald-300/75' : pickStatus === 'error' ? 'text-red-300/80' : pickStatus === 'unknown' ? 'text-amber-300/80' : 'text-slate-500'}`}
+          className={`mt-1.5 text-[9px] leading-4 ${pickStatus === 'success' ? 'text-emerald-300/75' : pickStatus === 'error' ? 'text-red-300/80' : pickStatus === 'unknown' ? 'text-amber-300/80' : 'text-slate-500'}`}
         >
           {pickMessage}
         </div>
       ) : null}
       {entityAnchors.map((anchor) => (
-        <div key={anchor.anchorId} className="mt-1 text-[7px] leading-3 text-fuchsia-200/55">
+        <div key={anchor.anchorId} className="mt-1 text-[8px] leading-4 text-fuchsia-200/55">
           {anchor.interfaceId} · face {anchor.faceIndex} {anchor.faceGeomType} · normal [{anchor.outwardNormal.map((value) => value.toFixed(3)).join(', ')}] · DECLARED
         </div>
       ))}
-      <div className="mt-1 text-[7px] leading-3 text-fuchsia-100/45">
+      <div className="mt-1 text-[8px] leading-4 text-fuchsia-100/45">
         Interface binding is DECLARED geometry evidence only. It does not verify connector mating, fit, serviceability, measurement truth, or fabrication authority.
       </div>
       <BrepAnchorMatingControl candidateId={candidateId} entityId={entityId} />

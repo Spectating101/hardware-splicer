@@ -202,8 +202,8 @@ export function ConstructorDock() {
     <aside className="flex h-full min-h-0 flex-col border-r border-white/10 bg-[#07101d]">
       <div className="border-b border-white/10 p-3">
         <div className="flex items-center justify-between gap-2">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Constructor</div>
-          <span title={plannerMessage} className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] ${livePlanner ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : plannerSource === 'loading' ? 'border-sky-300/20 bg-sky-300/8 text-sky-200' : 'border-amber-300/15 bg-amber-300/[0.05] text-amber-200/75'}`}>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-300">Constructor</div>
+          <span title={plannerMessage} className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ${livePlanner ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : plannerSource === 'loading' ? 'border-sky-300/20 bg-sky-300/8 text-sky-200' : 'border-amber-300/15 bg-amber-300/[0.05] text-amber-200/75'}`}>
             <Activity className="h-2.5 w-2.5" /> {livePlanner ? 'live planner' : plannerSource}
           </span>
         </div>
@@ -231,20 +231,20 @@ export function ConstructorDock() {
 
           {livePlanner ? (
             <div className="mt-3 rounded-lg border border-emerald-300/15 bg-emerald-300/[0.035] p-2.5">
-              <div className="flex items-center justify-between gap-3 text-[8px] font-semibold uppercase tracking-[0.13em] text-emerald-200/80">
+              <div className="flex items-center justify-between gap-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-emerald-200/80">
                 <span>resource_strategy.v1</span>
                 <span>{Math.round((plannerProjection?.coverageScore ?? 0) * 100)}% capability coverage</span>
               </div>
-              <div className="mt-1 text-[9px] leading-4 text-slate-400">{plannerProjection?.readinessReason}</div>
-              {(plannerProjection?.missingCapabilities.length ?? 0) > 0 ? <div className="mt-1 text-[8px] text-amber-300/75">Missing: {plannerProjection?.missingCapabilities.join(', ')}</div> : null}
+              <div className="mt-1 text-[10px] leading-4 text-slate-400">{plannerProjection?.readinessReason}</div>
+              {(plannerProjection?.missingCapabilities.length ?? 0) > 0 ? <div className="mt-1 text-[9px] text-amber-300/75">Missing: {plannerProjection?.missingCapabilities.join(', ')}</div> : null}
             </div>
           ) : (
-            <div className="mt-3 rounded-lg border border-amber-300/10 bg-amber-300/[0.025] px-2.5 py-2 text-[8px] leading-4 text-amber-100/55">{plannerMessage}</div>
+            <div className="mt-3 rounded-lg border border-amber-300/10 bg-amber-300/[0.025] px-2.5 py-2 text-[9px] leading-4 text-amber-100/55">{plannerMessage}</div>
           )}
 
           <div className="mt-4 flex items-center justify-between">
-            <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">Target contract projection</span>
-            <span className="text-[9px] text-slate-600">{activeCandidate?.name}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">Target contract projection</span>
+            <span className="text-[10px] text-slate-600">{activeCandidate?.name}</span>
           </div>
           <div className="mt-2 space-y-1.5">
             {constructorRequirements.map((requirement) => {
@@ -252,11 +252,11 @@ export function ConstructorDock() {
               return (
                 <div key={requirement.id} className="rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2">
                   <div className="flex items-center gap-2">
-                    <span className={`rounded border px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] ${requirementTone(state)}`}>{state}</span>
+                    <span className={`rounded border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.12em] ${requirementTone(state)}`}>{state}</span>
                     <span className="min-w-0 flex-1 truncate text-[10px] font-medium text-slate-200">{requirement.label}</span>
                     {requirement.hard ? <ShieldAlert className="h-3 w-3 shrink-0 text-slate-600" /> : null}
                   </div>
-                  <div className="mt-1 pl-[52px] text-[9px] text-slate-600">{requirement.target}</div>
+                  <div className="mt-1 pl-[52px] text-[10px] text-slate-600">{requirement.target}</div>
                 </div>
               );
             })}
@@ -264,7 +264,7 @@ export function ConstructorDock() {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-auto p-3">
-          <div className="mb-3 flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[9px] leading-4 text-slate-500">
+          <div className="mb-3 flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.02] px-2.5 py-2 text-[10px] leading-4 text-slate-500">
             <PackageSearch className="h-3.5 w-3.5 shrink-0" /> {livePlanner ? 'Candidate membership below is selected by the live resource planner.' : 'Owned, salvaged, procurable and designed parts share one resource pool.'}
           </div>
 
@@ -273,23 +273,23 @@ export function ConstructorDock() {
               <div className="flex items-start gap-2">
                 <Ruler className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[9px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
+                  <div className="text-[10px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
                   {geometryForSelectedResource ? (
-                    <div className="mt-1 text-[8px] leading-4 text-emerald-200/75">
+                    <div className="mt-1 text-[9px] leading-4 text-emerald-200/75">
                       STEP envelope attached: {geometryForSelectedResource.sizeMm.join(' × ')} mm · {geometryForSelectedResource.pointCount} points · DECLARED
                     </div>
                   ) : (
-                    <div className="mt-1 text-[8px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope. You can then declare an assembly-frame placement; neither step establishes collision or build authority.</div>
+                    <div className="mt-1 text-[9px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope. You can then declare an assembly-frame placement; neither step establishes collision or build authority.</div>
                   )}
                   <div className="mt-2 flex items-center gap-2">
-                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-cyan-200 hover:bg-cyan-300/[0.08]">
+                    <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-cyan-200 hover:bg-cyan-300/[0.08]">
                       {geometryState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileUp className="h-3 w-3" />}
                       {geometryForSelectedResource ? 'Replace STEP' : 'Attach STEP'}
                       <input type="file" accept=".step,.stp,model/step" className="sr-only" disabled={geometryState === 'loading'} onChange={importStepEnvelope} aria-label={`Attach STEP geometry for ${selectedResource.name}`} />
                     </label>
-                    <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">point envelope · no BREP authority</span>
+                    <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">point envelope · no BREP authority</span>
                   </div>
-                  {geometryMessage ? <div className={`mt-1.5 text-[8px] leading-4 ${geometryState === 'error' ? 'text-red-300/80' : geometryState === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{geometryMessage}</div> : null}
+                  {geometryMessage ? <div className={`mt-1.5 text-[9px] leading-4 ${geometryState === 'error' ? 'text-red-300/80' : geometryState === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{geometryMessage}</div> : null}
                   {geometryForSelectedResource ? (
                     <DeclaredPlacementEditor
                       key={`${activeCandidateId}-${selectedResource.id}-${geometryForSelectedResource.contentHash}`}
@@ -324,13 +324,13 @@ export function ConstructorDock() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[10px] font-medium text-slate-100">{resource.name}</span>
-                        {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-cyan-300">{livePlanner ? 'planner selected' : 'candidate'}</span> : null}
-                        {hasGeometry ? <span className="rounded bg-emerald-300/8 px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] text-emerald-300">STEP envelope</span> : null}
+                        {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-cyan-300">{livePlanner ? 'planner selected' : 'candidate'}</span> : null}
+                        {hasGeometry ? <span className="rounded bg-emerald-300/8 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-emerald-300">STEP envelope</span> : null}
                       </div>
-                      <div className="mt-1 flex items-center gap-2 text-[8px] uppercase tracking-[0.12em] text-slate-600">
+                      <div className="mt-1 flex items-center gap-2 text-[9px] uppercase tracking-[0.12em] text-slate-600">
                         <span>{resource.kind}</span><span>·</span><span className={decisionTone(resource.decision)}>{resource.decision}</span><span>·</span><span>{resource.costNtd ? `NT$${resource.costNtd.toLocaleString()}` : 'owned'}</span>
                       </div>
-                      <p className="mt-1.5 text-[9px] leading-4 text-slate-500">{resource.note}</p>
+                      <p className="mt-1.5 text-[10px] leading-4 text-slate-500">{resource.note}</p>
                     </div>
                   </div>
                 </button>

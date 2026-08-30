@@ -182,12 +182,12 @@ export function BrepRenderMeshControl({
     <>
       <div className="mt-2 rounded-lg border border-cyan-300/10 bg-cyan-300/[0.025] p-2" data-testid="brep-render-mesh-control">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-cyan-200/80">
+          <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-200/80">
             <Box className="h-3 w-3" /> Exact BREP display mesh
           </div>
-          <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">OCCT tessellation · render only</span>
+          <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">OCCT tessellation · render only</span>
         </div>
-        <div className="mt-1 text-[7px] leading-3 text-slate-500">
+        <div className="mt-1 text-[8px] leading-4 text-slate-500">
           {meshCurrent
             ? `${resourceName} is rendered from the hash-bound STEP solid at the current declared pose.`
             : sourceReady
@@ -198,16 +198,16 @@ export function BrepRenderMeshControl({
           type="button"
           onClick={generateMesh}
           disabled={state === 'loading' || !sourceReady}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-cyan-200 hover:bg-cyan-300/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-cyan-200 hover:bg-cyan-300/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : meshCurrent ? <CheckCircle2 className="h-3 w-3" /> : <Box className="h-3 w-3" />}
           {meshCurrent ? 'Regenerate exact mesh' : 'Generate exact mesh'}
         </button>
-        {message ? <div className={`mt-1.5 text-[8px] leading-4 ${state === 'success' ? 'text-emerald-300/75' : state === 'unknown' ? 'text-amber-300/75' : state === 'error' ? 'text-red-300/80' : 'text-slate-500'}`}>{message}</div> : null}
+        {message ? <div className={`mt-1.5 text-[9px] leading-4 ${state === 'success' ? 'text-emerald-300/75' : state === 'unknown' ? 'text-amber-300/75' : state === 'error' ? 'text-red-300/80' : 'text-slate-500'}`}>{message}</div> : null}
         {!meshCurrent && meshEvidence ? (
-          <div className="mt-1 text-[7px] leading-3 text-amber-200/55"><TriangleAlert className="mr-1 inline h-2.5 w-2.5" />A previous exact mesh is stale for this pose and is not rendered.</div>
+          <div className="mt-1 text-[8px] leading-4 text-amber-200/55"><TriangleAlert className="mr-1 inline h-2.5 w-2.5" />A previous exact mesh is stale for this pose and is not rendered.</div>
         ) : null}
-        <div className="mt-1 text-[7px] leading-3 text-cyan-100/45">Triangle evidence improves visual geometry only. It does not prove whole-assembly collision freedom, fit, service access, structural safety, measurement truth, or fabrication authority.</div>
+        <div className="mt-1 text-[8px] leading-4 text-cyan-100/45">Triangle evidence improves visual geometry only. It does not prove whole-assembly collision freedom, fit, service access, structural safety, measurement truth, or fabrication authority.</div>
       </div>
       {meshCurrent ? (
         <BrepSurfaceAnchorControl

@@ -285,55 +285,55 @@ export function BrepAnchorMatingControl({
   return (
     <div className="mt-2 rounded-lg border border-emerald-300/10 bg-emerald-300/[0.025] p-2" data-testid="brep-anchor-mating-control">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-emerald-200/80">
+        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-emerald-200/80">
           <GitCompareArrows className="h-3 w-3" /> Exact anchor mating geometry
         </div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">pairwise · declared tolerances</span>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">pairwise · declared tolerances</span>
       </div>
       {pairs.length > 1 ? (
-        <label className="mt-2 block text-[7px] uppercase tracking-[0.08em] text-slate-600">
+        <label className="mt-2 block text-[8px] uppercase tracking-[0.08em] text-slate-600">
           Exact anchor pair
           <select
             aria-label="Exact BREP mating anchor pair"
             value={pair.key}
             onChange={(event) => setPairKey(event.target.value)}
-            className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[8px] normal-case tracking-normal text-slate-200"
+            className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] normal-case tracking-normal text-slate-200"
           >
             {pairs.map((row) => <option key={row.key} value={row.key}>{row.first.interfaceId} · {row.first.entityId} ↔ {row.second.entityId}</option>)}
           </select>
         </label>
       ) : (
-        <div className="mt-1 text-[8px] text-slate-500">{pair.first.interfaceId} · {pair.first.entityId} ↔ {pair.second.entityId}</div>
+        <div className="mt-1 text-[9px] text-slate-500">{pair.first.interfaceId} · {pair.first.entityId} ↔ {pair.second.entityId}</div>
       )}
       <div className="mt-2 grid grid-cols-2 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Normal error ≤ °<input aria-label="Maximum normal opposition error degrees" value={normalTolerance} onChange={(event) => setNormalTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Lateral ≤ mm<input aria-label="Maximum mating lateral offset mm" value={lateralTolerance} onChange={(event) => setLateralTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Target axial mm<input aria-label="Target mating axial offset mm" value={targetAxialOffset} onChange={(event) => setTargetAxialOffset(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Axial ± mm<input aria-label="Mating axial offset tolerance mm" value={axialTolerance} onChange={(event) => setAxialTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Normal error ≤ °<input aria-label="Maximum normal opposition error degrees" value={normalTolerance} onChange={(event) => setNormalTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Lateral ≤ mm<input aria-label="Maximum mating lateral offset mm" value={lateralTolerance} onChange={(event) => setLateralTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Target axial mm<input aria-label="Target mating axial offset mm" value={targetAxialOffset} onChange={(event) => setTargetAxialOffset(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Axial ± mm<input aria-label="Mating axial offset tolerance mm" value={axialTolerance} onChange={(event) => setAxialTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
       </div>
-      <div className="mt-2 text-[7px] uppercase tracking-[0.08em] text-slate-600">Declared mating axis · optional for coaxiality</div>
+      <div className="mt-2 text-[8px] uppercase tracking-[0.08em] text-slate-600">Declared mating axis · optional for coaxiality</div>
       <div className="mt-1 grid grid-cols-4 gap-1">
-        {['X', 'Y', 'Z'].map((label, index) => <input key={label} aria-label={`Declared mating axis ${label}`} placeholder={label} value={axis[index]} onChange={(event) => updateAxis(index, event.target.value)} className="rounded border border-white/8 bg-black/20 px-1 py-1 text-[8px] text-slate-200" />)}
-        <input aria-label="Maximum mating axis alignment error degrees" value={axisTolerance} onChange={(event) => setAxisTolerance(event.target.value)} title="Axis alignment tolerance degrees" className="rounded border border-white/8 bg-black/20 px-1 py-1 text-[8px] text-slate-200" />
+        {['X', 'Y', 'Z'].map((label, index) => <input key={label} aria-label={`Declared mating axis ${label}`} placeholder={label} value={axis[index]} onChange={(event) => updateAxis(index, event.target.value)} className="rounded border border-white/8 bg-black/20 px-1 py-1 text-[9px] text-slate-200" />)}
+        <input aria-label="Maximum mating axis alignment error degrees" value={axisTolerance} onChange={(event) => setAxisTolerance(event.target.value)} title="Axis alignment tolerance degrees" className="rounded border border-white/8 bg-black/20 px-1 py-1 text-[9px] text-slate-200" />
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Required engagement mm<input aria-label="Required mating engagement depth mm" placeholder="optional" value={requiredEngagement} onChange={(event) => setRequiredEngagement(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Declared engagement mm<input aria-label="Declared mating engagement depth mm" placeholder="not inferred" value={declaredEngagement} onChange={(event) => setDeclaredEngagement(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Required engagement mm<input aria-label="Required mating engagement depth mm" placeholder="optional" value={requiredEngagement} onChange={(event) => setRequiredEngagement(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Declared engagement mm<input aria-label="Declared mating engagement depth mm" placeholder="not inferred" value={declaredEngagement} onChange={(event) => setDeclaredEngagement(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] text-slate-200" /></label>
       </div>
       <button
         type="button"
         onClick={evaluateMating}
         disabled={state === 'loading'}
-        className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-emerald-300/15 bg-emerald-300/[0.05] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-emerald-200 hover:bg-emerald-300/[0.09] disabled:opacity-50"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-emerald-300/15 bg-emerald-300/[0.05] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-emerald-200 hover:bg-emerald-300/[0.09] disabled:opacity-50"
       >
         {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : geometricPassed === true ? <CheckCircle2 className="h-3 w-3" /> : <GitCompareArrows className="h-3 w-3" />}
         Evaluate anchor mating
       </button>
       {message ? (
-        <div data-testid="brep-anchor-mating-feedback" data-mating-status={state} className={`mt-1.5 text-[8px] leading-4 ${state === 'success' && geometricPassed === true ? 'text-emerald-300/80' : state === 'error' ? 'text-red-300/80' : 'text-amber-300/80'}`}>{message}</div>
+        <div data-testid="brep-anchor-mating-feedback" data-mating-status={state} className={`mt-1.5 text-[9px] leading-4 ${state === 'success' && geometricPassed === true ? 'text-emerald-300/80' : state === 'error' ? 'text-red-300/80' : 'text-amber-300/80'}`}>{message}</div>
       ) : null}
       {visibleReport ? (
-        <div data-testid="brep-anchor-mating-result" data-geometric-pass={String(visibleReport.geometric_mating_passed)} className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[7px] leading-3 text-slate-500">
+        <div data-testid="brep-anchor-mating-result" data-geometric-pass={String(visibleReport.geometric_mating_passed)} className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[8px] leading-4 text-slate-500">
           <span>Separation</span><span className="text-right text-slate-300">{format(visibleReport.anchor_separation_mm)} mm</span>
           <span>Normal opposition error</span><span className="text-right text-slate-300">{format(visibleReport.normal_opposition_error_deg)}°</span>
           <span>Axial offset / error</span><span className="text-right text-slate-300">{format(visibleReport.signed_axial_offset_mm)} / {format(visibleReport.axial_offset_error_mm)} mm</span>
@@ -342,8 +342,8 @@ export function BrepAnchorMatingControl({
           <span>Engagement</span><span className="text-right text-slate-300">{visibleReport.engagement_evaluated === true ? `${format(visibleReport.declared_engagement_depth_mm)} / ${format(visibleReport.required_engagement_depth_mm)} mm` : 'not kernel-inferred'}</span>
         </div>
       ) : null}
-      {state === 'success' && geometricPassed === false ? <div className="mt-1 text-[7px] text-amber-300/60"><TriangleAlert className="mr-1 inline h-2.5 w-2.5" />One or more declared geometric tolerances failed.</div> : null}
-      <div className="mt-1 text-[7px] leading-3 text-emerald-100/45">A pass means only that these two exact BREP surface anchors satisfy the declared geometry tolerances. Protocol, pins, retention, swept insertion collision, physical fit and connector mating remain unverified.</div>
+      {state === 'success' && geometricPassed === false ? <div className="mt-1 text-[8px] text-amber-300/60"><TriangleAlert className="mr-1 inline h-2.5 w-2.5" />One or more declared geometric tolerances failed.</div> : null}
+      <div className="mt-1 text-[8px] leading-4 text-emerald-100/45">A pass means only that these two exact BREP surface anchors satisfy the declared geometry tolerances. Protocol, pins, retention, swept insertion collision, physical fit and connector mating remain unverified.</div>
     </div>
   );
 }

@@ -289,68 +289,68 @@ export function DeclaredInterfaceAccessEditor({
   return (
     <div className="mt-2 rounded-lg border border-orange-300/10 bg-orange-300/[0.025] p-2" data-testid="declared-interface-access-editor">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-orange-200/80"><Cable className="h-3 w-3" /> Interface access envelope</div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">placed parent · AABB only</span>
+        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-orange-200/80"><Cable className="h-3 w-3" /> Interface access envelope</div>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">placed parent · AABB only</span>
       </div>
       <div className="mt-2 grid grid-cols-[1fr_64px] gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Interface
-          <select aria-label={`Interface access for ${resourceName}`} value={interfaceId} onChange={(event) => setInterfaceId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-300 outline-none">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Interface
+          <select aria-label={`Interface access for ${resourceName}`} value={interfaceId} onChange={(event) => setInterfaceId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-300 outline-none">
             {interfaces.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}
           </select>
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Face
-          <select aria-label={`Interface access face for ${resourceName}`} value={face} onChange={(event) => setFace(event.target.value as DeclaredAccessEvidence['face'])} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-300 outline-none">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Face
+          <select aria-label={`Interface access face for ${resourceName}`} value={face} onChange={(event) => setFace(event.target.value as DeclaredAccessEvidence['face'])} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-300 outline-none">
             {FACES.map((row) => <option key={row} value={row}>{row}</option>)}
           </select>
         </label>
       </div>
       <div className="mt-2 grid grid-cols-3 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Width mm
-          <input aria-label={`Width interface access mm for ${resourceName}`} value={width} onChange={(event) => setWidth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Width mm
+          <input aria-label={`Width interface access mm for ${resourceName}`} value={width} onChange={(event) => setWidth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Height mm
-          <input aria-label={`Height interface access mm for ${resourceName}`} value={height} onChange={(event) => setHeight(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Height mm
+          <input aria-label={`Height interface access mm for ${resourceName}`} value={height} onChange={(event) => setHeight(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Depth mm
-          <input aria-label={`Depth interface access mm for ${resourceName}`} value={depth} onChange={(event) => setDepth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Depth mm
+          <input aria-label={`Depth interface access mm for ${resourceName}`} value={depth} onChange={(event) => setDepth(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Offset U mm
-          <input aria-label={`Interface access offset U mm for ${resourceName}`} value={offsetU} onChange={(event) => setOffsetU(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Offset U mm
+          <input aria-label={`Interface access offset U mm for ${resourceName}`} value={offsetU} onChange={(event) => setOffsetU(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Offset V mm
-          <input aria-label={`Interface access offset V mm for ${resourceName}`} value={offsetV} onChange={(event) => setOffsetV(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Offset V mm
+          <input aria-label={`Interface access offset V mm for ${resourceName}`} value={offsetV} onChange={(event) => setOffsetV(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
       </div>
       <div className="mt-2 flex items-center gap-1.5">
-        <button type="button" onClick={buildAccessEnvelope} disabled={state === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-orange-300/15 bg-orange-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-orange-200 hover:bg-orange-300/[0.08] disabled:opacity-50">
+        <button type="button" onClick={buildAccessEnvelope} disabled={state === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-orange-300/15 bg-orange-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-orange-200 hover:bg-orange-300/[0.08] disabled:opacity-50">
           {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Cable className="h-3 w-3" />} Build access envelope
         </button>
         {existing ? <button type="button" onClick={removeAccess} aria-label={`Clear interface access for ${resourceName}`} className="rounded-md border border-white/8 p-1.5 text-slate-600 hover:text-red-300"><Trash2 className="h-3 w-3" /></button> : null}
       </div>
-      {message ? <div className={`mt-1.5 text-[8px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
+      {message ? <div className={`mt-1.5 text-[9px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
 
       {existing && otherPlacements.length ? (
         <div className="mt-2 border-t border-white/8 pt-2">
           <div className="grid grid-cols-[1fr_82px] gap-1.5">
-            <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Obstacle
-              <select aria-label={`Access obstacle for ${resourceName}`} value={obstacleId} onChange={(event) => setObstacleId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-300 outline-none">
+            <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Obstacle
+              <select aria-label={`Access obstacle for ${resourceName}`} value={obstacleId} onChange={(event) => setObstacleId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-300 outline-none">
                 {otherPlacements.map((row) => <option key={row.entityId} value={row.entityId}>{deck001EntityMap.get(row.entityId)?.name ?? row.entityId}</option>)}
               </select>
             </label>
-            <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Min clear mm
-              <input aria-label={`Interface access minimum clearance mm for ${resourceName}`} value={minimumClearance} onChange={(event) => setMinimumClearance(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+            <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Min clear mm
+              <input aria-label={`Interface access minimum clearance mm for ${resourceName}`} value={minimumClearance} onChange={(event) => setMinimumClearance(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
             </label>
           </div>
-          <button type="button" onClick={checkAccessClearance} disabled={checkState === 'loading'} className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-amber-300/15 bg-amber-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-amber-200 hover:bg-amber-300/[0.08] disabled:opacity-50">
+          <button type="button" onClick={checkAccessClearance} disabled={checkState === 'loading'} className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-amber-300/15 bg-amber-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-amber-200 hover:bg-amber-300/[0.08] disabled:opacity-50">
             {checkState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : checkState === 'pass' ? <CheckCircle2 className="h-3 w-3" /> : <ShieldAlert className="h-3 w-3" />} Check interface access
           </button>
-          {checkMessage ? <div className={`mt-1.5 text-[8px] leading-4 ${checkState === 'pass' ? 'text-emerald-300/80' : checkState === 'fail' ? 'text-red-300/80' : checkState === 'error' ? 'text-red-300/75' : 'text-amber-300/70'}`}>{checkMessage}</div> : null}
+          {checkMessage ? <div className={`mt-1.5 text-[9px] leading-4 ${checkState === 'pass' ? 'text-emerald-300/80' : checkState === 'fail' ? 'text-red-300/80' : checkState === 'error' ? 'text-red-300/75' : 'text-amber-300/70'}`}>{checkMessage}</div> : null}
         </div>
       ) : null}
 
-      <div className="mt-1.5 text-[7px] leading-3 text-orange-100/45">This is an interface-centered keep-out/access prism, not connector mating, cable routing, service ergonomics, BREP collision truth, or fabrication authority.</div>
+      <div className="mt-1.5 text-[8px] leading-4 text-orange-100/45">This is an interface-centered keep-out/access prism, not connector mating, cable routing, service ergonomics, BREP collision truth, or fabrication authority.</div>
     </div>
   );
 }

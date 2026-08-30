@@ -320,55 +320,55 @@ export function BrepMatingPathRefinementControl({
   return (
     <div className="mt-2 rounded-lg border border-rose-300/10 bg-rose-300/[0.025] p-2" data-testid="brep-mating-path-refinement-control">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-rose-200/85">
+        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-rose-200/85">
           <Route className="h-3 w-3" /> Adaptive transition brackets
         </div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">exact OCCT · range only</span>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">exact OCCT · range only</span>
       </div>
-      <div className="mt-1 text-[8px] leading-4 text-slate-500">
+      <div className="mt-1 text-[9px] leading-4 text-slate-500">
         Coarse-sample {activePair.moving.entityId} against {activePair.fixed.entityId}, then bisect only predicate-changing intervals. No unique contact pose or continuous clearance is inferred.
       </div>
       {!sourceReady ? (
-        <div className="mt-1.5 text-[8px] leading-4 text-amber-200/75">
+        <div className="mt-1.5 text-[9px] leading-4 text-amber-200/75">
           Current session STEP bytes are not available for both hash-bound anchors. Re-import/re-anchor before refinement.
         </div>
       ) : null}
       <div className="mt-2 grid grid-cols-3 gap-1.5">
         {['X', 'Y', 'Z'].map((axis, index) => (
-          <label key={axis} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+          <label key={axis} className="text-[8px] uppercase tracking-[0.08em] text-slate-600">
             End {axis} mm
             <input
               aria-label={`Adaptive refinement end translation ${axis}`}
               value={endTranslation[index]}
               onChange={(event) => setEndTranslation((current) => current.map((value, row) => row === index ? event.target.value : value))}
-              className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-rose-300/25"
+              className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] normal-case tracking-normal text-slate-200 outline-none focus:border-rose-300/25"
             />
           </label>
         ))}
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">
           Coarse samples
-          <input aria-label="Refined mating path coarse sample count" value={sampleCount} onChange={(event) => setSampleCount(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] text-slate-200 outline-none focus:border-rose-300/25" />
+          <input aria-label="Refined mating path coarse sample count" value={sampleCount} onChange={(event) => setSampleCount(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] text-slate-200 outline-none focus:border-rose-300/25" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">
           Contact mm
-          <input aria-label="Refined mating path contact tolerance mm" value={contactTolerance} onChange={(event) => setContactTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] text-slate-200 outline-none focus:border-rose-300/25" />
+          <input aria-label="Refined mating path contact tolerance mm" value={contactTolerance} onChange={(event) => setContactTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] text-slate-200 outline-none focus:border-rose-300/25" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">
           Max bisection depth
-          <input aria-label="Mating path refinement max depth" value={refinementDepth} onChange={(event) => setRefinementDepth(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] text-slate-200 outline-none focus:border-rose-300/25" />
+          <input aria-label="Mating path refinement max depth" value={refinementDepth} onChange={(event) => setRefinementDepth(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] text-slate-200 outline-none focus:border-rose-300/25" />
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">
           Fraction tolerance
-          <input aria-label="Mating path refinement fraction tolerance" value={fractionTolerance} onChange={(event) => setFractionTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] text-slate-200 outline-none focus:border-rose-300/25" />
+          <input aria-label="Mating path refinement fraction tolerance" value={fractionTolerance} onChange={(event) => setFractionTolerance(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[10px] text-slate-200 outline-none focus:border-rose-300/25" />
         </label>
       </div>
       <button
         type="button"
         onClick={refineTransitions}
         disabled={!sourceReady || state === 'loading'}
-        className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-rose-300/15 bg-rose-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-rose-100 hover:bg-rose-300/[0.08] disabled:cursor-not-allowed disabled:opacity-45"
+        className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-rose-300/15 bg-rose-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-rose-100 hover:bg-rose-300/[0.08] disabled:cursor-not-allowed disabled:opacity-45"
       >
         {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Activity className="h-3 w-3" />}
         {state === 'loading' ? 'Refining transitions' : 'Refine sampled transitions'}
@@ -377,14 +377,14 @@ export function BrepMatingPathRefinementControl({
         <div
           data-testid="brep-mating-path-refinement-feedback"
           data-refinement-state={state}
-          className={`mt-1.5 text-[8px] leading-4 ${state === 'success' ? 'text-emerald-300/75' : state === 'error' ? 'text-red-300/80' : state === 'unknown' ? 'text-amber-300/80' : 'text-slate-500'}`}
+          className={`mt-1.5 text-[9px] leading-4 ${state === 'success' ? 'text-emerald-300/75' : state === 'error' ? 'text-red-300/80' : state === 'unknown' ? 'text-amber-300/80' : 'text-slate-500'}`}
         >
           {message}
         </div>
       ) : null}
       {report && state === 'success' ? (
         <div data-testid="brep-mating-path-refinement-result" className="mt-2 space-y-1 rounded border border-white/8 bg-black/15 p-1.5">
-          <div className="flex items-center justify-between gap-2 text-[7px] uppercase tracking-[0.08em] text-slate-500">
+          <div className="flex items-center justify-between gap-2 text-[8px] uppercase tracking-[0.08em] text-slate-500">
             <span>{brackets.length} predicate bracket{brackets.length === 1 ? '' : 's'}</span>
             <span>{totalEvaluations ?? '—'} total exact poses</span>
           </div>
@@ -395,7 +395,7 @@ export function BrepMatingPathRefinementControl({
             const upperDistance = finite(row.upper_path_distance_mm);
             const widthMm = finite(row.bracket_width_mm);
             return (
-              <div key={`${String(row.kind)}-${index}`} data-testid="brep-transition-bracket" className="rounded border border-rose-300/10 bg-rose-300/[0.02] px-1.5 py-1 text-[7px] leading-3 text-slate-400">
+              <div key={`${String(row.kind)}-${index}`} data-testid="brep-transition-bracket" className="rounded border border-rose-300/10 bg-rose-300/[0.02] px-1.5 py-1 text-[8px] leading-4 text-slate-400">
                 <div className="font-semibold uppercase tracking-[0.08em] text-rose-200/70">{String(row.kind || 'predicate boundary')}</div>
                 <div>
                   fraction {lowerFraction?.toFixed(6) ?? '—'}–{upperFraction?.toFixed(6) ?? '—'} · path {lowerDistance?.toFixed(4) ?? '—'}–{upperDistance?.toFixed(4) ?? '—'} mm
@@ -406,10 +406,10 @@ export function BrepMatingPathRefinementControl({
               </div>
             );
           })}
-          {brackets.length === 0 ? <div className="text-[7px] text-slate-500">No adjacent coarse predicate change required refinement.</div> : null}
+          {brackets.length === 0 ? <div className="text-[8px] text-slate-500">No adjacent coarse predicate change required refinement.</div> : null}
         </div>
       ) : null}
-      <div className="mt-1.5 flex gap-1.5 text-[7px] leading-3 text-rose-100/45">
+      <div className="mt-1.5 flex gap-1.5 text-[8px] leading-4 text-rose-100/45">
         <TriangleAlert className="mt-0.5 h-2.5 w-2.5 shrink-0" />
         Refined brackets localize sampled boolean predicate changes only. They do not prove a unique transition pose, monotonic behavior inside the bracket, continuous collision-free motion, connector mating, whole-assembly clearance, measurement truth, or fabrication authority.
       </div>

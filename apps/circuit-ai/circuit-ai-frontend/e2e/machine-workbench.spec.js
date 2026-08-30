@@ -62,6 +62,18 @@ test('machine constructor keeps resources, candidates, proposals, spatial truth,
 
   await page.screenshot({ path: testInfo.outputPath('machine-workbench-constructor.png') });
 
+  // Visual-comfort checkpoint: the full constructor remains usable on a compact desktop.
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await expect(page.getByText('Constructor', { exact: true })).toBeVisible();
+  await expect(page.getByText('Proposal queue', { exact: true })).toBeVisible();
+  await expect(page.getByText('Architecture candidates', { exact: true })).toBeVisible();
+  const compactCanvasBox = await page.locator('canvas').first().boundingBox();
+  expect(compactCanvasBox).not.toBeNull();
+  expect(compactCanvasBox.width).toBeGreaterThan(620);
+  expect(compactCanvasBox.height).toBeGreaterThan(340);
+  await page.screenshot({ path: testInfo.outputPath('machine-workbench-constructor-compact.png') });
+  await page.setViewportSize({ width: 1600, height: 1000 });
+
   // Inspection remains a sibling mode over the same canonical machine truth.
   await page.getByRole('button', { name: 'Inspect', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();

@@ -280,38 +280,38 @@ export function DeclaredClearanceChecker() {
   return (
     <div className="mb-3 rounded-lg border border-amber-300/12 bg-amber-300/[0.025] p-2.5" data-testid="declared-clearance-checker">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-amber-200/80"><Ruler className="h-3 w-3" /> Placed-envelope clearance</div>
-        <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">same-frame AABB only</span>
+        <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-amber-200/80"><Ruler className="h-3 w-3" /> Placed-envelope clearance</div>
+        <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">same-frame AABB only</span>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">First
-          <select aria-label="First placed resource for clearance" value={firstId} onChange={(event) => setFirstId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-300 outline-none">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">First
+          <select aria-label="First placed resource for clearance" value={firstId} onChange={(event) => setFirstId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-300 outline-none">
             {placements.map((row) => <option key={row.entityId} value={row.entityId}>{nameFor(row.entityId)}</option>)}
           </select>
         </label>
-        <label className="text-[7px] uppercase tracking-[0.08em] text-slate-600">Second
-          <select aria-label="Second placed resource for clearance" value={secondId} onChange={(event) => setSecondId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-300 outline-none">
+        <label className="text-[8px] uppercase tracking-[0.08em] text-slate-600">Second
+          <select aria-label="Second placed resource for clearance" value={secondId} onChange={(event) => setSecondId(event.target.value)} className="mt-1 w-full rounded border border-white/8 bg-[#08111e] px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-300 outline-none">
             {placements.map((row) => <option key={row.entityId} value={row.entityId}>{nameFor(row.entityId)}</option>)}
           </select>
         </label>
       </div>
       <div className="mt-2 flex items-end gap-2">
-        <label className="min-w-0 flex-1 text-[7px] uppercase tracking-[0.08em] text-slate-600">Minimum clearance mm
-          <input aria-label="Minimum declared clearance mm" value={minimumClearance} onChange={(event) => setMinimumClearance(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[9px] normal-case tracking-normal text-slate-200 outline-none" />
+        <label className="min-w-0 flex-1 text-[8px] uppercase tracking-[0.08em] text-slate-600">Minimum clearance mm
+          <input aria-label="Minimum declared clearance mm" value={minimumClearance} onChange={(event) => setMinimumClearance(event.target.value)} inputMode="decimal" className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1 text-[10px] normal-case tracking-normal text-slate-200 outline-none" />
         </label>
-        <button type="button" onClick={checkClearance} disabled={state === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/15 bg-amber-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-amber-200 hover:bg-amber-300/[0.08] disabled:opacity-50">
+        <button type="button" onClick={checkClearance} disabled={state === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/15 bg-amber-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-amber-200 hover:bg-amber-300/[0.08] disabled:opacity-50">
           {state === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : state === 'pass' ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />} Check AABB clearance
         </button>
       </div>
-      {message ? <div className={`mt-2 text-[8px] leading-4 ${state === 'pass' ? 'text-emerald-300/80' : state === 'fail' ? 'text-red-300/80' : state === 'unknown' ? 'text-amber-300/75' : state === 'error' ? 'text-red-300/75' : 'text-slate-500'}`}>{message}</div> : null}
-      <div className="mt-1 text-[7px] leading-3 text-amber-100/45">A pass applies only to declared axis-aligned envelopes in the common frame. It does not establish BREP collision freedom, deformation margin, service access, or structural safety.</div>
+      {message ? <div className={`mt-2 text-[9px] leading-4 ${state === 'pass' ? 'text-emerald-300/80' : state === 'fail' ? 'text-red-300/80' : state === 'unknown' ? 'text-amber-300/75' : state === 'error' ? 'text-red-300/75' : 'text-slate-500'}`}>{message}</div> : null}
+      <div className="mt-1 text-[8px] leading-4 text-amber-100/45">A pass applies only to declared axis-aligned envelopes in the common frame. It does not establish BREP collision freedom, deformation margin, service access, or structural safety.</div>
 
       <div className="mt-3 border-t border-white/8 pt-2.5" data-testid="exact-brep-clearance-checker">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-cyan-200/80"><Box className="h-3 w-3" /> Exact STEP solid pair</div>
-          <span className="text-[7px] uppercase tracking-[0.1em] text-slate-600">CadQuery/OCCT · no AABB fallback</span>
+          <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-cyan-200/80"><Box className="h-3 w-3" /> Exact STEP solid pair</div>
+          <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">CadQuery/OCCT · no AABB fallback</span>
         </div>
-        <div className="mt-1.5 text-[7px] leading-3 text-slate-500">
+        <div className="mt-1.5 text-[8px] leading-4 text-slate-500">
           {exactSourcesReady
             ? 'Both canonical STEP uploads and their parser-issued hashes are available in this browser session for an isolated exact pair check.'
             : 'Exact pair evidence needs both original STEP uploads plus canonical parser hashes in this browser session. Canonical persisted projects use registered hash-reverified sources server-side.'}
@@ -320,13 +320,13 @@ export function DeclaredClearanceChecker() {
           type="button"
           onClick={checkExactBrepClearance}
           disabled={exactState === 'loading' || !exactSourcesReady}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[8px] font-semibold uppercase tracking-[0.08em] text-cyan-200 hover:bg-cyan-300/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-cyan-200 hover:bg-cyan-300/[0.08] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {exactState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : exactState === 'pass' ? <CheckCircle2 className="h-3 w-3" /> : <Box className="h-3 w-3" />}
           Check exact BREP clearance
         </button>
-        {exactMessage ? <div className={`mt-2 text-[8px] leading-4 ${exactState === 'pass' ? 'text-emerald-300/80' : exactState === 'fail' ? 'text-red-300/80' : exactState === 'unknown' ? 'text-amber-300/75' : exactState === 'error' ? 'text-red-300/75' : 'text-slate-500'}`}>{exactMessage}</div> : null}
-        <div className="mt-1 text-[7px] leading-3 text-cyan-100/45">Exact means this hash-bound placed STEP solid pair only. It does not establish full-assembly collision freedom, connector mating, cable routing, service ergonomics, structural safety, measurement truth, or fabrication authority.</div>
+        {exactMessage ? <div className={`mt-2 text-[9px] leading-4 ${exactState === 'pass' ? 'text-emerald-300/80' : exactState === 'fail' ? 'text-red-300/80' : exactState === 'unknown' ? 'text-amber-300/75' : exactState === 'error' ? 'text-red-300/75' : 'text-slate-500'}`}>{exactMessage}</div> : null}
+        <div className="mt-1 text-[8px] leading-4 text-cyan-100/45">Exact means this hash-bound placed STEP solid pair only. It does not establish full-assembly collision freedom, connector mating, cable routing, service ergonomics, structural safety, measurement truth, or fabrication authority.</div>
       </div>
     </div>
   );

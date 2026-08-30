@@ -36,12 +36,12 @@ export function CandidateArchitectureTray() {
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <GitCompareArrows className="h-3.5 w-3.5 text-cyan-300" />
-          <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-400">Architecture candidates</span>
-          <span title={plannerMessage} className={`rounded-full border px-2 py-0.5 text-[7px] font-semibold uppercase tracking-[0.12em] ${plannerTone(plannerSource)}`}>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">Architecture candidates</span>
+          <span title={plannerMessage} className={`rounded-full border px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] ${plannerTone(plannerSource)}`}>
             planner {plannerSource}
           </span>
         </div>
-        <span className="hidden text-[9px] text-slate-600 md:block">Objective changes the candidate. Evidence gates do not.</span>
+        <span className="hidden text-[10px] text-slate-600 md:block">Objective changes the candidate. Evidence gates do not.</span>
       </div>
       <div className="grid gap-2 lg:grid-cols-3">
         {constructorCandidates.map((candidate) => {
@@ -62,34 +62,34 @@ export function CandidateArchitectureTray() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="text-xs font-semibold text-white">{candidate.name}</div>
-                  <div className="mt-0.5 flex items-center gap-1.5 text-[8px] uppercase tracking-[0.14em] text-slate-600">
+                  <div className="mt-0.5 flex items-center gap-1.5 text-[9px] uppercase tracking-[0.14em] text-slate-600">
                     <span>{candidate.strategyMode}</span>
                     {plannerLive ? <><span>·</span><span className="text-emerald-300/70">resource_strategy.v1</span></> : null}
                   </div>
                 </div>
-                {active ? <span className="rounded-full border border-cyan-300/20 bg-cyan-300/8 px-2 py-0.5 text-[7px] font-semibold uppercase tracking-[0.12em] text-cyan-200">working</span> : null}
+                {active ? <span className="rounded-full border border-cyan-300/20 bg-cyan-300/8 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-cyan-200">working</span> : null}
               </div>
-              <p className="mt-2 text-[9px] leading-4 text-slate-500">{plannerLive ? planner?.readinessReason : candidate.tagline}</p>
+              <p className="mt-2 text-[10px] leading-4 text-slate-500">{plannerLive ? planner?.readinessReason : candidate.tagline}</p>
               <div className="mt-2 grid grid-cols-4 gap-1.5">
                 <div className="rounded-md border border-white/7 bg-black/10 p-1.5">
                   <CircleDollarSign className="h-3 w-3 text-slate-500" />
-                  <div className="mt-1 text-[9px] font-semibold text-slate-200">{plannerLive ? `$${(planner?.procurementCostUsd ?? 0).toFixed(0)}` : `NT$${candidate.costNtd.toLocaleString()}`}</div>
-                  <div className="text-[7px] text-slate-600">{plannerLive ? 'planner buy' : 'scenario cash'}</div>
+                  <div className="mt-1 text-[10px] font-semibold text-slate-200">{plannerLive ? `$${(planner?.procurementCostUsd ?? 0).toFixed(0)}` : `NT$${candidate.costNtd.toLocaleString()}`}</div>
+                  <div className="text-[8px] text-slate-600">{plannerLive ? 'planner buy' : 'scenario cash'}</div>
                 </div>
                 <div className="rounded-md border border-white/7 bg-black/10 p-1.5">
                   {plannerLive ? <Activity className="h-3 w-3 text-slate-500" /> : <Recycle className="h-3 w-3 text-slate-500" />}
-                  <div className="mt-1 text-[9px] font-semibold text-slate-200">{plannerLive ? `${coveragePercent}%` : `${candidate.reusePercent}%`}</div>
-                  <div className="text-[7px] text-slate-600">{plannerLive ? 'coverage' : 'reuse'}</div>
+                  <div className="mt-1 text-[10px] font-semibold text-slate-200">{plannerLive ? `${coveragePercent}%` : `${candidate.reusePercent}%`}</div>
+                  <div className="text-[8px] text-slate-600">{plannerLive ? 'coverage' : 'reuse'}</div>
                 </div>
                 <div className="rounded-md border border-white/7 bg-black/10 p-1.5">
                   <ShieldCheck className="h-3 w-3 text-slate-500" />
-                  <div className={`mt-1 text-[9px] font-semibold uppercase ${riskTone(candidate.risk)}`}>{candidate.risk}</div>
-                  <div className="text-[7px] text-slate-600">scenario risk</div>
+                  <div className={`mt-1 text-[10px] font-semibold uppercase ${riskTone(candidate.risk)}`}>{candidate.risk}</div>
+                  <div className="text-[8px] text-slate-600">scenario risk</div>
                 </div>
                 <div className="rounded-md border border-white/7 bg-black/10 p-1.5">
                   <div className="text-[10px] font-semibold text-red-300">{gateCount}</div>
-                  <div className="mt-1 text-[7px] text-slate-600">{plannerLive ? 'planner gates' : 'blockers'}</div>
-                  <div className="text-[7px] text-amber-300/70">{missingCount} {plannerLive ? 'missing caps' : 'unknown'}</div>
+                  <div className="mt-1 text-[8px] text-slate-600">{plannerLive ? 'planner gates' : 'blockers'}</div>
+                  <div className="text-[8px] text-amber-300/70">{missingCount} {plannerLive ? 'missing caps' : 'unknown'}</div>
                 </div>
               </div>
             </button>
