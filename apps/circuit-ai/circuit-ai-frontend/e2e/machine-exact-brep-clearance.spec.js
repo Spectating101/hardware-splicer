@@ -126,13 +126,89 @@ function placementResponse(body) {
   };
 }
 
+function meshResponse(body) {
+  const placement = body.placement;
+  const [x, y, z] = placement.translation_mm;
+  const vertices = [
+    [x, y, z],
+    [x + 30, y, z],
+    [x + 30, y + 20, z],
+    [x, y + 20, z],
+    [x, y, z + 8],
+    [x + 30, y, z + 8],
+    [x + 30, y + 20, z + 8],
+    [x, y + 20, z + 8],
+  ];
+  const triangles = [
+    [0, 1, 2], [0, 2, 3],
+    [4, 6, 5], [4, 7, 6],
+    [0, 4, 5], [0, 5, 1],
+    [1, 5, 6], [1, 6, 2],
+    [2, 6, 7], [2, 7, 3],
+    [3, 7, 4], [3, 4, 0],
+  ];
+  return {
+    ok: true,
+    brep_mesh: {
+      schema_version: 'hardware_splicer.brep_render_mesh.v1',
+      project_id: body.project_id,
+      source_id: body.source.source_id,
+      model_id: body.source.model_id,
+      content_hash: body.source.content_hash,
+      frame_id: placement.target_frame,
+      placement_id: placement.placement_id,
+      status: 'ready',
+      kernel_available: true,
+      kernel: 'cadquery_occt',
+      cadquery_version: '2.8.0',
+      shape_valid: true,
+      solid_count: 1,
+      vertex_count: vertices.length,
+      triangle_count: triangles.length,
+      vertices_mm: vertices,
+      triangles,
+      tolerance_mm: body.tolerance_mm,
+      angular_tolerance_rad: body.angular_tolerance_rad,
+      required_evidence: [],
+      metadata: {
+        render_evidence_only: true,
+        exact_brep_mesh_source: true,
+        declared_placement_applied: true,
+        physical_measurement: false,
+        fabrication_authorized: false,
+      },
+    },
+    kernel_available: true,
+    exact_brep_mesh_evaluated: true,
+    declared_placement_applied: true,
+    vertex_count: vertices.length,
+    triangle_count: triangles.length,
+    raw_step_bytes_returned: false,
+    render_evidence_only: true,
+    full_assembly_collision: false,
+    connector_mating_verified: false,
+    cable_routing_verified: false,
+    service_access_verified: false,
+    structural_analysis: false,
+    physical_measurement: false,
+    automatic_execution: false,
+    physical_action: false,
+    manufacturing_authorized: false,
+    fabrication_authorized: false,
+    power_on_authorized: false,
+    motion_authorized: false,
+    release_authorized: false,
+  };
+}
+
 const mainboardStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(210.,130.,18.));\nENDSEC;\nEND-ISO-10303-21;\n";
 const displayStep = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(305.,195.,12.));\nENDSEC;\nEND-ISO-10303-21;\n";
 
-test('workbench exact BREP pair clearance stays distinct from AABB and reproduces fail-25 pass-15', async ({ page }) => {
+test('workbench exact BREP mesh and pair clearance stay hash-bound, pose-bound, and distinct from AABB', async ({ page }) => {
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 1600, height: 1000 });
   const exactRequirements = [];
+  const meshRequests = [];
 
   await page.route('**/api/proxy/resource/strategy', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
@@ -157,6 +233,22 @@ test('workbench exact BREP pair clearance stays distinct from AABB and reproduce
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify(placementResponse(body)),
+    });
+  });
+  await page.route('**/api/proxy/engineering/mechanical/geometry/brep/mesh', async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    meshRequests.push(body);
+    expect(body.source.content).toContain('ISO-10303-21');
+    expect(body.source.content_hash).toBe(`sha256:${'b'.repeat(64)}`);
+    expect(body.source.model_id).toBe('balanced-res-display-controlled');
+    expect(body.placement.authority).toBe('declared');
+    expect(body.placement.target_frame).toBe('assembly');
+    expect(body.placement.translation_mm).toEqual([270, -65, 10]);
+    expect(body.placement.rotation_deg_xyz).toEqual([0, 0, 0]);
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(meshResponse(body)),
     });
   });
   await page.route('**/api/proxy/engineering/mechanical/geometry/brep/interference', async (route) => {
@@ -241,6 +333,14 @@ test('workbench exact BREP pair clearance stays distinct from AABB and reproduce
   await page.getByLabel('Placement translation Z mm for Donor display + validated controller').fill('10');
   await page.getByRole('button', { name: 'Apply declared placement' }).click();
 
+  const meshControl = page.getByTestId('brep-render-mesh-control');
+  await expect(meshControl).toContainText('Generate bounded triangle evidence for this exact source + declared pose.');
+  await page.getByRole('button', { name: 'Generate exact mesh' }).click();
+  await expect(meshControl).toContainText('8 vertices · 12 triangles · placed assembly render evidence.');
+  await expect(page.getByTestId('exact-brep-render-mesh')).toContainText('EXACT BREP DISPLAY MESH · 12 triangles');
+  await expect(page.getByTestId('exact-brep-render-mesh')).toHaveAttribute('data-content-hash', `sha256:${'b'.repeat(64)}`);
+  expect(meshRequests).toHaveLength(1);
+
   const exactChecker = page.getByTestId('exact-brep-clearance-checker');
   await expect(exactChecker).toBeVisible();
   await expect(exactChecker).toContainText('Both canonical STEP uploads and their parser-issued hashes are available in this browser session');
@@ -256,6 +356,17 @@ test('workbench exact BREP pair clearance stays distinct from AABB and reproduce
   await page.getByRole('button', { name: 'Check exact BREP clearance' }).click();
   await expect(exactChecker).toContainText('Exact BREP minimum distance 20.000 mm meets the 15.000 mm requirement.');
   await expect(exactChecker).toContainText('NO SOLID OVERLAP · 20.000 mm minimum BREP distance.');
-
   expect(exactRequirements).toEqual([25, 15]);
+
+  // The failed 25 mm pair check focuses the first object. Re-select the display,
+  // prove the exact mesh is still current, then alter its declared pose. The pose
+  // write must invalidate the old tessellation before the new AABB becomes visible.
+  await display.click();
+  await expect(page.getByTestId('exact-brep-render-mesh')).toBeVisible();
+  await page.getByLabel('Placement translation X mm for Donor display + validated controller').fill('280');
+  await page.getByRole('button', { name: 'Apply declared placement' }).click();
+  await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [280, -65, 10] mm');
+  await expect(page.getByTestId('exact-brep-render-mesh')).toHaveCount(0);
+  await expect(meshControl).toContainText('Generate bounded triangle evidence for this exact source + declared pose.');
+  await expect(page.getByRole('button', { name: 'Generate exact mesh' })).toBeVisible();
 });
