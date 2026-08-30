@@ -163,6 +163,8 @@ test('workbench exact BREP pair clearance stays distinct from AABB and reproduce
     const body = JSON.parse(route.request().postData() || '{}');
     expect(body.first_source.content).toContain('ISO-10303-21');
     expect(body.second_source.content).toContain('ISO-10303-21');
+    expect(body.first_source.content_hash).toBe(`sha256:${'a'.repeat(64)}`);
+    expect(body.second_source.content_hash).toBe(`sha256:${'b'.repeat(64)}`);
     expect(body.first_placement.authority).toBe('declared');
     expect(body.second_placement.authority).toBe('declared');
     const required = Number(body.minimum_clearance_mm);
@@ -241,14 +243,14 @@ test('workbench exact BREP pair clearance stays distinct from AABB and reproduce
 
   const exactChecker = page.getByTestId('exact-brep-clearance-checker');
   await expect(exactChecker).toBeVisible();
-  await expect(exactChecker).toContainText('Both canonical STEP uploads are available in this browser session');
+  await expect(exactChecker).toContainText('Both canonical STEP uploads and their parser-issued hashes are available in this browser session');
   await expect(exactChecker).toContainText('CadQuery/OCCT · no AABB fallback');
 
   await page.getByLabel('Minimum declared clearance mm').fill('25');
   await page.getByRole('button', { name: 'Check exact BREP clearance' }).click();
   await expect(exactChecker).toContainText('Exact BREP minimum distance 20.000 mm is below the 25.000 mm requirement.');
   await expect(exactChecker).toContainText('NO SOLID OVERLAP · 20.000 mm minimum BREP distance.');
-  await expect(exactChecker).toContainText('Exact means this placed STEP solid pair only.');
+  await expect(exactChecker).toContainText('Exact means this hash-bound placed STEP solid pair only.');
 
   await page.getByLabel('Minimum declared clearance mm').fill('15');
   await page.getByRole('button', { name: 'Check exact BREP clearance' }).click();
