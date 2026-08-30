@@ -6,9 +6,18 @@ process, so the optional CadQuery dependency remains optional for the base insta
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
+
+
+WORKER_SCHEMA = "hardware_splicer.cadquery_brep_worker.v1"
+ROTATION_CONVENTION = "Rz*Ry*Rx; canonical STEP XYZ"
+
+
+def _content_hash(path: str) -> str:
+    return f"sha256:{hashlib.sha256(Path(path).read_bytes()).hexdigest()}"
 
 
 def _load_shape(cq, path: str):
@@ -43,8 +52,12 @@ def main() -> None:
     import cadquery as cq  # Optional specialist dependency; worker process only.
 
     request = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-    first = _place(_load_shape(cq, request["first_step_path"]), request["first_placement"])
-    second = _place(_load_shape(cq, request["second_step_path"]), request["second_placement"])
+    first_path = str(request["first_step_path"])
+    second_path = str(request["second_step_path"])
+    first_content_hash = _content_hash(first_path)
+    second_content_hash = _content_hash(second_path)
+    first = _place(_load_shape(cq, first_path), request["first_placement"])
+    second = _place(_load_shape(cq, second_path), request["second_placement"])
 
     first_valid = bool(first.isValid())
     second_valid = bool(second.isValid())
@@ -55,16 +68,19 @@ def main() -> None:
     print(
         json.dumps(
             {
+                "schema_version": WORKER_SCHEMA,
                 "ok": True,
                 "kernel": "cadquery_occt",
                 "cadquery_version": getattr(cq, "__version__", None),
+                "first_content_hash": first_content_hash,
+                "second_content_hash": second_content_hash,
                 "first_shape_valid": first_valid,
                 "second_shape_valid": second_valid,
                 "first_solid_count": len(first.Solids()),
                 "second_solid_count": len(second.Solids()),
                 "minimum_distance_mm": minimum_distance_mm,
                 "intersection_volume_mm3": intersection_volume_mm3,
-                "rotation_convention": "Rz*Ry*Rx; canonical STEP XYZ",
+                "rotation_convention": ROTATION_CONVENTION,
             }
         )
     )
