@@ -30,11 +30,23 @@ def product_capability_report(
         if not isinstance(row, dict) or row.get("id") not in _OPTIONAL_SPECIALISTS:
             continue
         row["required"] = False
+        if row.get("id") == "cadquery-isolated":
+            row["product_scope"] = [
+                "generated_mechanical_output",
+                "exact_step_brep_pair_interference",
+                "exact_step_brep_minimum_clearance",
+                "bounded_placed_step_tessellation",
+            ]
+            row["authority_boundary"] = (
+                "CadQuery/OCCT output is geometry evidence only; specialist availability or successful "
+                "execution does not establish physical measurement, whole-assembly validity, mating, "
+                "structural safety, fabrication, power-on, motion, or release authority."
+            )
         if row.get("readiness") == "missing_required":
             row["readiness"] = "missing_optional"
             row["next_action"] = (
-                "Install and configure this specialist only when the current project "
-                "requires generated mechanical output."
+                "Install and configure this specialist only when the current project requires "
+                "generated mechanical output or exact STEP/BREP geometry work."
             )
 
     required_missing = sorted(
