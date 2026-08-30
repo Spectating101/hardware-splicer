@@ -58,6 +58,7 @@ class MechanicalBrepInterferenceRequest(BaseModel):
     second_source: MechanicalStepSource
     first_placement: DeclaredGeometryPlacement
     second_placement: DeclaredGeometryPlacement
+    minimum_clearance_mm: float | None = Field(default=None, ge=0.0)
     timeout_s: float = Field(default=60.0, gt=0.0, le=120.0)
 
 
@@ -67,6 +68,7 @@ class MechanicalStoredBrepInterferenceRequest(BaseModel):
     second_source: RegisteredMechanicalStepSource
     first_placement: DeclaredGeometryPlacement
     second_placement: DeclaredGeometryPlacement
+    minimum_clearance_mm: float | None = Field(default=None, ge=0.0)
     timeout_s: float = Field(default=60.0, gt=0.0, le=120.0)
 
 
@@ -105,7 +107,63 @@ def _authority_payload() -> Dict[str, Any]:
     }
 
 
-def _brep_payload(report: BrepPairInterferenceReport) -> Dict[str, Any]:
+def _brep_clearance_payload(
+    report: BrepPairInterferenceReport,
+    minimum_clearance_mm: float | None,
+) -> Dict[str, Any]:
+    if minimum_clearance_mm is None:
+        return {
+            "exact_minimum_clearance_evaluated": False,
+            "minimum_clearance_requirement_mm": None,
+            "minimum_clearance_passed": None,
+            "minimum_clearance_message": None,
+        }
+    if (
+        not report.exact_pair_interference_evaluated
+        or report.exact_solid_interference is None
+        or report.minimum_distance_mm is None
+    ):
+        return {
+            "exact_minimum_clearance_evaluated": False,
+            "minimum_clearance_requirement_mm": minimum_clearance_mm,
+            "minimum_clearance_passed": None,
+            "minimum_clearance_message": (
+                f"Exact BREP minimum-clearance requirement {minimum_clearance_mm:.3f} mm remains UNKNOWN "
+                "because pairwise kernel evidence is unavailable."
+            ),
+        }
+
+    passed = (
+        report.exact_solid_interference is False
+        and report.minimum_distance_mm >= minimum_clearance_mm
+    )
+    if report.exact_solid_interference:
+        message = (
+            f"Exact BREP solids interfere by {float(report.intersection_volume_mm3 or 0.0):.3f} mm^3; "
+            f"the {minimum_clearance_mm:.3f} mm minimum-clearance requirement fails."
+        )
+    elif passed:
+        message = (
+            f"Exact BREP minimum distance {report.minimum_distance_mm:.3f} mm meets the "
+            f"{minimum_clearance_mm:.3f} mm requirement."
+        )
+    else:
+        message = (
+            f"Exact BREP minimum distance {report.minimum_distance_mm:.3f} mm is below the "
+            f"{minimum_clearance_mm:.3f} mm requirement."
+        )
+    return {
+        "exact_minimum_clearance_evaluated": True,
+        "minimum_clearance_requirement_mm": minimum_clearance_mm,
+        "minimum_clearance_passed": passed,
+        "minimum_clearance_message": message,
+    }
+
+
+def _brep_payload(
+    report: BrepPairInterferenceReport,
+    minimum_clearance_mm: float | None = None,
+) -> Dict[str, Any]:
     return {
         "ok": True,
         "brep_interference": report.model_dump(mode="json"),
@@ -114,6 +172,7 @@ def _brep_payload(report: BrepPairInterferenceReport) -> Dict[str, Any]:
         "exact_solid_interference": report.exact_solid_interference,
         "minimum_distance_mm": report.minimum_distance_mm,
         "intersection_volume_mm3": report.intersection_volume_mm3,
+        **_brep_clearance_payload(report, minimum_clearance_mm),
         "aabb_fallback_used": False,
         "full_brep_collision": False,
         "connector_mating_verified": False,
@@ -202,6 +261,7 @@ def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRo
             "declared_interface_access_only": True,
             "optional_brep_kernel": "cadquery-isolated",
             "exact_pair_brep_interference_when_kernel_available": True,
+            "exact_pair_brep_minimum_clearance_when_kernel_available": True,
             "registered_source_brep_materialization": "content_addressed_hash_reverified_server_side",
             "raw_registered_source_bytes_returned": False,
             "full_brep_collision": False,
@@ -290,7 +350,7 @@ def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRo
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail={"type": "invalid_brep_interference_request", "message": str(exc)},
             ) from exc
-        return _brep_payload(report)
+        return _brep_payload(report, request.minimum_clearance_mm)
 
     @router.post("/geometry/brep/interference/stored")
     def check_stored_brep_interference(request: MechanicalStoredBrepInterferenceRequest) -> Dict[str, Any]:
@@ -344,7 +404,7 @@ def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRo
                 detail={"type": "invalid_stored_brep_interference_request", "message": str(exc)},
             ) from exc
         return {
-            **_brep_payload(report),
+            **_brep_payload(report, request.minimum_clearance_mm),
             "registered_source_materialized": True,
             "registered_source_hash_reverified": True,
             "raw_registered_source_bytes_returned": False,
