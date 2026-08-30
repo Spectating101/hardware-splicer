@@ -36,6 +36,7 @@ def product_capability_report(
                 "exact_step_brep_pair_interference",
                 "exact_step_brep_minimum_clearance",
                 "bounded_placed_step_tessellation",
+                "exact_step_brep_surface_anchor",
             ]
             row["authority_boundary"] = (
                 "CadQuery/OCCT output is geometry evidence only; specialist availability or successful "
