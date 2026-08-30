@@ -1,9 +1,17 @@
 from __future__ import annotations
 
+import base64
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 import hardware_splicer.mechanical_brep as mechanical_brep
+from hardware_splicer.engineering_source_ingestion import (
+    EngineeringSourceIngestionRequest,
+    ingest_engineering_source,
+)
 from hardware_splicer.product_api import create_product_app
+from hardware_splicer.project_store import ProjectStore
 
 
 STEP = """ISO-10303-21;
@@ -19,12 +27,16 @@ ENDSEC;
 END-ISO-10303-21;
 """
 
+STEP_RIGHT = STEP.replace("'fixture','Fixture'", "'fixture-right','Fixture Right'").replace(
+    "(100.0,50.0,10.0)", "(80.0,40.0,8.0)"
+)
+
 
 def _request() -> dict:
     return {
         "project_id": "brep-api",
         "first_source": {"source_id": "left.step", "model_id": "left", "content": STEP},
-        "second_source": {"source_id": "right.step", "model_id": "right", "content": STEP},
+        "second_source": {"source_id": "right.step", "model_id": "right", "content": STEP_RIGHT},
         "first_placement": {
             "placement_id": "place-left",
             "object_id": "left-part",
@@ -46,10 +58,70 @@ def _request() -> dict:
     }
 
 
+def _b64(value: bytes) -> str:
+    return base64.b64encode(value).decode("ascii")
+
+
+def _stored_project(tmp_path: Path, project_id: str = "brep-stored") -> tuple[ProjectStore, dict, dict]:
+    store = ProjectStore(tmp_path)
+    store.save(
+        project_id,
+        {
+            "projectId": project_id,
+            "projectName": "Stored STEP BREP",
+            "engineeringSources": [],
+        },
+        expected_revision=0,
+        metadata={"source": "test"},
+    )
+    first = ingest_engineering_source(
+        EngineeringSourceIngestionRequest(
+            project_id=project_id,
+            filename="left.step",
+            content_base64=_b64(STEP.encode("utf-8")),
+        ),
+        project_root=tmp_path,
+    ).source_descriptor
+    second = ingest_engineering_source(
+        EngineeringSourceIngestionRequest(
+            project_id=project_id,
+            filename="right.step",
+            content_base64=_b64(STEP_RIGHT.encode("utf-8")),
+        ),
+        project_root=tmp_path,
+    ).source_descriptor
+    snapshot = store.load(project_id)["snapshot"]
+    snapshot["engineeringSources"] = [first, second]
+    store.save(
+        project_id,
+        snapshot,
+        expected_revision=1,
+        metadata={"source": "test_registered_step_sources"},
+    )
+    return store, first, second
+
+
+def _stored_request(first: dict, second: dict, project_id: str = "brep-stored") -> dict:
+    request = _request()
+    request["project_id"] = project_id
+    request["first_source"] = {
+        "source_id": first["source_id"],
+        "content_hash": first["content_hash"],
+        "model_id": "left",
+    }
+    request["second_source"] = {
+        "source_id": second["source_id"],
+        "content_hash": second["content_hash"],
+        "model_id": "right",
+    }
+    return request
+
+
 def test_product_mounts_optional_brep_pair_route_and_declares_scope() -> None:
     app = create_product_app()
     paths = set(app.openapi()["paths"])
     assert "/v1/engineering/mechanical/geometry/brep/interference" in paths
+    assert "/v1/engineering/mechanical/geometry/brep/interference/stored" in paths
 
     client = TestClient(app)
     schema = client.get("/v1/engineering/mechanical/schema")
@@ -57,8 +129,11 @@ def test_product_mounts_optional_brep_pair_route_and_declares_scope() -> None:
     body = schema.json()
     assert body["optional_brep_kernel"] == "cadquery-isolated"
     assert body["exact_pair_brep_interference_when_kernel_available"] is True
+    assert body["registered_source_brep_materialization"] == "content_addressed_hash_reverified_server_side"
+    assert body["raw_registered_source_bytes_returned"] is False
     assert body["full_brep_collision"] is False
     assert "brep_pair_interference_request_schema" in body
+    assert "stored_brep_pair_interference_request_schema" in body
     assert "brep_pair_interference_report_schema" in body
 
 
@@ -90,6 +165,79 @@ def test_brep_pair_route_returns_unknown_without_optional_kernel_and_never_falls
     assert report["required_evidence"][0]["field"] == "cadquery-isolated"
     assert report["metadata"]["aabb_fallback_used"] is False
     assert report["metadata"]["specialist_capability"] == "cadquery-isolated"
+
+
+def test_stored_brep_route_uses_injected_project_store_and_reverifies_registered_hashes(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    store, first, second = _stored_project(tmp_path)
+    monkeypatch.setattr(mechanical_brep, "_cadquery_available", lambda: False)
+    client = TestClient(create_product_app(store))
+
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference/stored",
+        json=_stored_request(first, second),
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["ok"] is True
+    assert body["registered_source_materialized"] is True
+    assert body["registered_source_hash_reverified"] is True
+    assert body["raw_registered_source_bytes_returned"] is False
+    assert body["kernel_available"] is False
+    assert body["exact_pair_interference_evaluated"] is False
+    assert body["aabb_fallback_used"] is False
+    report = body["brep_interference"]
+    assert report["first_content_hash"] == first["content_hash"]
+    assert report["second_content_hash"] == second["content_hash"]
+    assert report["metadata"]["source_materialization"] == "registered_blob_hash_reverified_server_side"
+    assert report["metadata"]["registered_raw_bytes_returned"] is False
+    assert "content" not in body
+    assert STEP not in response.text
+
+
+def test_stored_brep_route_rejects_tampered_registered_blob_before_kernel_execution(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    store, first, second = _stored_project(tmp_path)
+    monkeypatch.setattr(
+        mechanical_brep,
+        "_cadquery_available",
+        lambda: (_ for _ in ()).throw(AssertionError("kernel availability must not be queried after blob tamper")),
+    )
+    blob = tmp_path / "brep-stored" / first["metadata"]["blob_ref"]
+    blob.write_bytes(b"tampered STEP bytes")
+    client = TestClient(create_product_app(store))
+
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference/stored",
+        json=_stored_request(first, second),
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["type"] == "invalid_stored_brep_interference_request"
+    assert "no longer matches its content_hash" in detail["message"]
+
+
+def test_stored_brep_route_requires_exact_registered_source_identity(tmp_path: Path) -> None:
+    store, first, second = _stored_project(tmp_path)
+    request = _stored_request(first, second)
+    request["first_source"]["content_hash"] = f"sha256:{'0' * 64}"
+    client = TestClient(create_product_app(store))
+
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference/stored",
+        json=request,
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["type"] == "invalid_stored_brep_interference_request"
+    assert "was not found exactly once" in detail["message"]
 
 
 def test_brep_pair_route_rejects_source_placement_identity_mismatch() -> None:
