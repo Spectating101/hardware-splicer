@@ -51,3 +51,12 @@ def test_machine_workbench_keeps_one_compact_desktop_visual_checkpoint() -> None
     assert spec.count("width: 1366, height: 768") == 1
     assert "compactCanvasBox.width).toBeGreaterThan(620)" in spec
     assert "compactCanvasBox.height).toBeGreaterThan(340)" in spec
+
+
+def test_dense_brep_refinement_visual_evidence_is_kept_in_the_browser_gate() -> None:
+    spec = (
+        ROOT
+        / "apps/circuit-ai/circuit-ai-frontend/e2e/machine-brep-mating-path-refinement.spec.js"
+    ).read_text(encoding="utf-8")
+    assert spec.count("machine-brep-mating-path-refinement-dense.png") == 1
+    assert "testInfo.outputPath" in spec
