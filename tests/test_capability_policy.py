@@ -31,8 +31,17 @@ def test_missing_optional_cadquery_does_not_fail_base_product_readiness() -> Non
         row for row in report["capabilities"] if row["id"] == "cadquery-isolated"
     )
     assert cadquery["required"] is False
+    assert cadquery["product_scope"] == [
+        "generated_mechanical_output",
+        "exact_step_brep_pair_interference",
+        "exact_step_brep_minimum_clearance",
+        "bounded_placed_step_tessellation",
+    ]
+    assert "whole-assembly validity" in cadquery["authority_boundary"]
+    assert "fabrication" in cadquery["authority_boundary"]
     if cadquery["runtime"]["discovered"] is False:
         assert cadquery["readiness"] == "missing_optional"
+        assert "exact STEP/BREP geometry work" in cadquery["next_action"]
         assert "cadquery-isolated" not in report["required_missing"]
     assert report["policy"] == {
         "schema_version": "hardware_splicer.capability_policy.v1",
