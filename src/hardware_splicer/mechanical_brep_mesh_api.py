@@ -18,6 +18,7 @@ from .mechanical_brep_mesh import (
     BrepRenderMeshReport,
     build_step_brep_render_mesh,
 )
+from .mechanical_placement import DeclaredGeometryPlacement
 
 
 class MechanicalBrepMeshSource(BaseModel):
@@ -30,6 +31,7 @@ class MechanicalBrepMeshSource(BaseModel):
 class MechanicalBrepMeshRequest(BaseModel):
     project_id: str = Field(min_length=1)
     source: MechanicalBrepMeshSource
+    placement: DeclaredGeometryPlacement | None = None
     tolerance_mm: float = Field(default=0.5, ge=MIN_TOLERANCE_MM, le=MAX_TOLERANCE_MM)
     angular_tolerance_rad: float = Field(
         default=0.1,
@@ -72,6 +74,8 @@ def create_mechanical_brep_mesh_router() -> APIRouter:
             "maximum_vertices": MAX_MESH_VERTICES,
             "maximum_triangles": MAX_MESH_TRIANGLES,
             "hash_bound_inline_source_supported": True,
+            "declared_placement_supported": True,
+            "placement_transform_convention": "Rz*Ry*Rx; canonical STEP XYZ",
             "raw_step_bytes_returned": False,
             "render_evidence_only": True,
             "full_assembly_collision": False,
@@ -89,6 +93,7 @@ def create_mechanical_brep_mesh_router() -> APIRouter:
                 source_id=request.source.source_id,
                 model_id=request.source.model_id,
                 expected_content_hash=request.source.content_hash,
+                placement=request.placement,
                 tolerance_mm=request.tolerance_mm,
                 angular_tolerance_rad=request.angular_tolerance_rad,
                 timeout_s=request.timeout_s,
@@ -103,6 +108,7 @@ def create_mechanical_brep_mesh_router() -> APIRouter:
             "brep_mesh": report.model_dump(mode="json"),
             "kernel_available": report.kernel_available,
             "exact_brep_mesh_evaluated": report.status.value == "ready",
+            "declared_placement_applied": report.metadata.get("declared_placement_applied") is True,
             "vertex_count": report.vertex_count,
             "triangle_count": report.triangle_count,
             "raw_step_bytes_returned": False,
