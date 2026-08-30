@@ -37,8 +37,11 @@ def test_missing_optional_cadquery_does_not_fail_base_product_readiness() -> Non
         "exact_step_brep_minimum_clearance",
         "bounded_placed_step_tessellation",
         "exact_step_brep_surface_anchor",
+        "exact_step_brep_anchor_mating_geometry",
     ]
     assert "whole-assembly validity" in cadquery["authority_boundary"]
+    assert "connector mating" in cadquery["authority_boundary"]
+    assert "protocol/pin compatibility" in cadquery["authority_boundary"]
     assert "fabrication" in cadquery["authority_boundary"]
     if cadquery["runtime"]["discovered"] is False:
         assert cadquery["readiness"] == "missing_optional"
