@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, GitCompareArrows, Loader2, TriangleAlert } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
 import {
   useWorkbenchBrepAnchorStore,
@@ -45,6 +45,26 @@ function toApiAnchor(anchor: BrepSurfaceAnchorEvidence) {
     physical_measurement: false,
     fabrication_authorized: false,
   };
+}
+
+function anchorFingerprint(anchor: BrepSurfaceAnchorEvidence) {
+  return [
+    anchor.anchorId,
+    anchor.interfaceId,
+    anchor.entityId,
+    anchor.resourceId,
+    anchor.sourceId,
+    anchor.modelId,
+    anchor.contentHash,
+    anchor.frameId,
+    anchor.placementId,
+    ...anchor.translationMm,
+    ...anchor.rotationDegXyz,
+    ...anchor.anchorPointMm,
+    ...anchor.outwardNormal,
+    anchor.faceIndex,
+    anchor.faceGeomType,
+  ].join('|');
 }
 
 type AnchorPair = {
@@ -91,6 +111,25 @@ export function BrepAnchorMatingControl({
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'unknown' | 'error'>('idle');
   const [message, setMessage] = useState('');
   const [report, setReport] = useState<Record<string, unknown> | null>(null);
+  const [evaluatedFingerprint, setEvaluatedFingerprint] = useState<string | null>(null);
+
+  const activePair = pairs.find((row) => row.key === pairKey) ?? pairs[0] ?? null;
+  const currentEvaluationFingerprint = activePair
+    ? [
+        anchorFingerprint(activePair.first),
+        anchorFingerprint(activePair.second),
+        normalTolerance,
+        lateralTolerance,
+        targetAxialOffset,
+        axialTolerance,
+        axis.join(','),
+        axisTolerance,
+        requiredEngagement,
+        declaredEngagement,
+      ].join('::')
+    : '';
+  const currentFingerprintRef = useRef(currentEvaluationFingerprint);
+  currentFingerprintRef.current = currentEvaluationFingerprint;
 
   useEffect(() => {
     if (!pairs.length) {
@@ -98,6 +137,7 @@ export function BrepAnchorMatingControl({
       setState('idle');
       setMessage('');
       setReport(null);
+      setEvaluatedFingerprint(null);
       return;
     }
     if (!pairs.some((pair) => pair.key === pairKey)) {
@@ -105,12 +145,21 @@ export function BrepAnchorMatingControl({
       setState('idle');
       setMessage('');
       setReport(null);
+      setEvaluatedFingerprint(null);
     }
   }, [pairKey, pairs]);
 
-  if (!pairs.length) return null;
+  useEffect(() => {
+    if (evaluatedFingerprint && evaluatedFingerprint !== currentEvaluationFingerprint) {
+      setState('idle');
+      setMessage('');
+      setReport(null);
+      setEvaluatedFingerprint(null);
+    }
+  }, [currentEvaluationFingerprint, evaluatedFingerprint]);
 
-  const pair = pairs.find((row) => row.key === pairKey) ?? pairs[0];
+  if (!activePair) return null;
+  const pair = activePair;
 
   function parseRequiredNumber(label: string, raw: string, minimum = 0) {
     const value = Number(raw);
@@ -140,6 +189,7 @@ export function BrepAnchorMatingControl({
   }
 
   async function evaluateMating() {
+    const requestFingerprint = currentEvaluationFingerprint;
     const selectedAxis = parseAxis();
     const requiredDepth = parseOptionalNumber('Required engagement depth', requiredEngagement);
     const declaredDepth = parseOptionalNumber('Declared engagement depth', declaredEngagement);
@@ -147,12 +197,14 @@ export function BrepAnchorMatingControl({
       setState('error');
       setMessage('Declared engagement depth needs a required engagement depth to compare against.');
       setReport(null);
+      setEvaluatedFingerprint(null);
       return;
     }
 
     setState('loading');
     setMessage('Evaluating exact anchor geometry against the declared mating tolerances…');
     setReport(null);
+    setEvaluatedFingerprint(null);
     try {
       const response = await fetch('/api/proxy/engineering/mechanical/geometry/brep/mating', {
         method: 'POST',
@@ -176,6 +228,11 @@ export function BrepAnchorMatingControl({
         cache: 'no-store',
       });
       const payload = record(await response.json());
+      if (currentFingerprintRef.current !== requestFingerprint) {
+        setState('idle');
+        setMessage('');
+        return;
+      }
       if (!response.ok || payload.ok !== true) {
         const detail = record(payload.detail);
         throw new Error(String(detail.message || payload.error || `BREP mating HTTP ${response.status}`));
@@ -198,6 +255,7 @@ export function BrepAnchorMatingControl({
         throw new Error('HS mating response identity disagrees with the selected exact anchor pair.');
       }
       setReport(nextReport);
+      setEvaluatedFingerprint(requestFingerprint);
       if (nextReport.status === 'unknown' || payload.mating_geometry_evaluated !== true) {
         const required = Array.isArray(nextReport.required_evidence) ? nextReport.required_evidence.map(record) : [];
         setState('unknown');
@@ -212,9 +270,11 @@ export function BrepAnchorMatingControl({
           : 'Exact anchors are OUTSIDE the declared geometric mating tolerances.',
       );
     } catch (error: unknown) {
+      if (currentFingerprintRef.current !== requestFingerprint) return;
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
       setReport(null);
+      setEvaluatedFingerprint(null);
     }
   }
 
@@ -222,7 +282,9 @@ export function BrepAnchorMatingControl({
     setAxis((current) => current.map((row, rowIndex) => rowIndex === index ? value : row));
   }
 
-  const geometricPassed = report?.geometric_mating_passed;
+  const reportCurrent = Boolean(report && evaluatedFingerprint === currentEvaluationFingerprint);
+  const visibleReport = reportCurrent ? report : null;
+  const geometricPassed = visibleReport?.geometric_mating_passed;
 
   return (
     <div className="mt-2 rounded-lg border border-emerald-300/10 bg-emerald-300/[0.025] p-2" data-testid="brep-anchor-mating-control">
@@ -274,14 +336,14 @@ export function BrepAnchorMatingControl({
       {message ? (
         <div data-testid="brep-anchor-mating-feedback" data-mating-status={state} className={`mt-1.5 text-[8px] leading-4 ${state === 'success' && geometricPassed === true ? 'text-emerald-300/80' : state === 'error' ? 'text-red-300/80' : 'text-amber-300/80'}`}>{message}</div>
       ) : null}
-      {report ? (
-        <div data-testid="brep-anchor-mating-result" data-geometric-pass={String(report.geometric_mating_passed)} className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[7px] leading-3 text-slate-500">
-          <span>Separation</span><span className="text-right text-slate-300">{format(report.anchor_separation_mm)} mm</span>
-          <span>Normal opposition error</span><span className="text-right text-slate-300">{format(report.normal_opposition_error_deg)}°</span>
-          <span>Axial offset / error</span><span className="text-right text-slate-300">{format(report.signed_axial_offset_mm)} / {format(report.axial_offset_error_mm)} mm</span>
-          <span>Lateral offset</span><span className="text-right text-slate-300">{format(report.lateral_offset_mm)} mm</span>
-          <span>Coaxiality</span><span className="text-right text-slate-300">{report.coaxiality_evaluated === true ? `${format(report.coaxial_offset_mm)} mm` : 'not evaluated · declare axis'}</span>
-          <span>Engagement</span><span className="text-right text-slate-300">{report.engagement_evaluated === true ? `${format(report.declared_engagement_depth_mm)} / ${format(report.required_engagement_depth_mm)} mm` : 'not kernel-inferred'}</span>
+      {visibleReport ? (
+        <div data-testid="brep-anchor-mating-result" data-geometric-pass={String(visibleReport.geometric_mating_passed)} className="mt-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[7px] leading-3 text-slate-500">
+          <span>Separation</span><span className="text-right text-slate-300">{format(visibleReport.anchor_separation_mm)} mm</span>
+          <span>Normal opposition error</span><span className="text-right text-slate-300">{format(visibleReport.normal_opposition_error_deg)}°</span>
+          <span>Axial offset / error</span><span className="text-right text-slate-300">{format(visibleReport.signed_axial_offset_mm)} / {format(visibleReport.axial_offset_error_mm)} mm</span>
+          <span>Lateral offset</span><span className="text-right text-slate-300">{format(visibleReport.lateral_offset_mm)} mm</span>
+          <span>Coaxiality</span><span className="text-right text-slate-300">{visibleReport.coaxiality_evaluated === true ? `${format(visibleReport.coaxial_offset_mm)} mm` : 'not evaluated · declare axis'}</span>
+          <span>Engagement</span><span className="text-right text-slate-300">{visibleReport.engagement_evaluated === true ? `${format(visibleReport.declared_engagement_depth_mm)} / ${format(visibleReport.required_engagement_depth_mm)} mm` : 'not kernel-inferred'}</span>
         </div>
       ) : null}
       {state === 'success' && geometricPassed === false ? <div className="mt-1 text-[7px] text-amber-300/60"><TriangleAlert className="mr-1 inline h-2.5 w-2.5" />One or more declared geometric tolerances failed.</div> : null}
