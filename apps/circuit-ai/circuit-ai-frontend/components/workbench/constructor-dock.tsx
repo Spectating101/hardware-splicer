@@ -11,6 +11,7 @@ import {
 } from '@/lib/workbench-constructor-demo';
 import { useMachineWorkbenchStore, type MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 import { useWorkbenchPlacementStore } from '@/lib/workbench-placement-store';
+import { cacheSessionStepSource } from '@/lib/workbench-session-step-sources';
 import { DeclaredPlacementEditor } from '@/components/workbench/declared-placement-editor';
 
 function requirementTone(state: RequirementState) {
@@ -149,6 +150,15 @@ export function ConstructorDock() {
       };
       if (!evidence.contentHash.startsWith('sha256:')) throw new Error('HS geometry response did not include the canonical STEP content hash.');
 
+      cacheSessionStepSource({
+        candidateId: activeCandidateId,
+        resourceId: selectedResource.id,
+        entityId: selectedResource.mappedEntityId,
+        sourceId: evidence.sourceId,
+        modelId: evidence.modelId,
+        contentHash: evidence.contentHash,
+        content,
+      });
       setGeometryReport(activeCandidateId, selectedResource.id, geometry);
       setMechanicalGeometryEvidence(activeCandidateId, evidence);
       setSelectedEntityId(selectedResource.mappedEntityId);
