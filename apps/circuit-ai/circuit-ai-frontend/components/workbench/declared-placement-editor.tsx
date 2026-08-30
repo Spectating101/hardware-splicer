@@ -5,6 +5,7 @@ import { Loader2, Move3D, Rotate3D, Trash2 } from 'lucide-react';
 import type { ConstructorCandidateId, MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
+import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 import { BrepRenderMeshControl } from '@/components/workbench/brep-render-mesh-control';
 import { DeclaredClearanceChecker } from '@/components/workbench/declared-clearance-checker';
@@ -45,6 +46,7 @@ export function DeclaredPlacementEditor({
   const setPlacement = useWorkbenchPlacementStore((state) => state.setPlacement);
   const clearPlacement = useWorkbenchPlacementStore((state) => state.clearPlacement);
   const clearAccessForEntity = useWorkbenchAccessStore((state) => state.clearAccessForEntity);
+  const clearAnchorsForEntity = useWorkbenchBrepAnchorStore((state) => state.clearAnchorsForEntity);
   const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
   const clearBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.clearBrepRenderMeshEvidence);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
@@ -66,8 +68,11 @@ export function DeclaredPlacementEditor({
   }, [candidateId, resourceId, entityId]);
 
   useEffect(() => {
-    if (!existing) clearAccessForEntity(candidateId, entityId);
-  }, [candidateId, clearAccessForEntity, entityId, existing]);
+    if (!existing) {
+      clearAccessForEntity(candidateId, entityId);
+      clearAnchorsForEntity(candidateId, entityId);
+    }
+  }, [candidateId, clearAccessForEntity, clearAnchorsForEntity, entityId, existing]);
 
   function updateVector(kind: 'translation' | 'rotation', index: number, value: string) {
     if (kind === 'translation') {
@@ -140,9 +145,11 @@ export function DeclaredPlacementEditor({
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
-      // Access envelopes and exact render meshes are pose-derived evidence. Every
-      // placement write invalidates both before the new pose becomes visible.
+      // Access envelopes, exact render meshes and exact surface anchors are all
+      // pose-derived evidence. Every placement write invalidates them before the
+      // new pose becomes visible.
       clearAccessForEntity(candidateId, entityId);
+      clearAnchorsForEntity(candidateId, entityId);
       clearBrepRenderMeshEvidence(candidateId, entityId);
       setPlacement(candidateId, placement);
       // Re-write the same parsed evidence to create a new planner projection object;
@@ -151,7 +158,7 @@ export function DeclaredPlacementEditor({
       setSelectedEntityId(entityId);
       window.setTimeout(requestFrameSelection, 0);
       setState('success');
-      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement. Exact mesh evidence, if any, was invalidated.`);
+      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement. Exact mesh and surface-anchor evidence, if any, were invalidated.`);
     } catch (error: unknown) {
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
@@ -160,11 +167,12 @@ export function DeclaredPlacementEditor({
 
   function removePlacement() {
     clearAccessForEntity(candidateId, entityId);
+    clearAnchorsForEntity(candidateId, entityId);
     clearBrepRenderMeshEvidence(candidateId, entityId);
     clearPlacement(candidateId, entityId);
     setMechanicalGeometryEvidence(candidateId, evidence);
     setState('idle');
-    setMessage('Declared placement cleared; dependent interface access and exact mesh evidence were invalidated.');
+    setMessage('Declared placement cleared; dependent interface access, exact mesh and exact surface-anchor evidence were invalidated.');
   }
 
   return (
