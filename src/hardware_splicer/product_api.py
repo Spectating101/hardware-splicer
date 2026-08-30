@@ -118,7 +118,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_package_download_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
-    app.include_router(create_mechanical_router())
+    app.include_router(create_mechanical_router(resolved_store))
     _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))
