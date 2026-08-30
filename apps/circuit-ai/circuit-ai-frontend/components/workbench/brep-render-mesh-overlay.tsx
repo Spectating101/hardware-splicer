@@ -3,6 +3,7 @@
 import { Html } from '@react-three/drei';
 import { useEffect, useMemo } from 'react';
 import { BufferGeometry, Float32BufferAttribute, Vector3 } from 'three';
+import { buildCandidateMachineProjection } from '@/lib/workbench-machine-projection';
 import {
   useMachineWorkbenchStore,
   type BrepRenderMeshEvidence,
@@ -91,21 +92,33 @@ function ExactMesh({ mesh, selected }: { mesh: BrepRenderMeshEvidence; selected:
 export function BrepRenderMeshOverlays() {
   const phase = useMachineWorkbenchStore((state) => state.phase);
   const activeCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
+  const plannerSource = useMachineWorkbenchStore((state) => state.plannerSource);
+  const plannerProjection = useMachineWorkbenchStore((state) => state.plannerProjections[activeCandidateId]);
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
-  const meshes = useMachineWorkbenchStore(
-    (state) => state.plannerProjections[activeCandidateId]?.brepRenderMeshByEntity ?? EMPTY_MESHES,
-  );
+  const isolatedEntityId = useMachineWorkbenchStore((state) => state.isolatedEntityId);
+  const exploded = useMachineWorkbenchStore((state) => state.exploded);
+  const meshes = plannerProjection?.brepRenderMeshByEntity ?? EMPTY_MESHES;
   const placements = useWorkbenchPlacementStore(
     (state) => state.placementsByCandidate[activeCandidateId] ?? EMPTY_PLACEMENTS,
   );
+  const candidateProjection = useMemo(
+    () => buildCandidateMachineProjection(activeCandidateId, plannerSource, plannerProjection, placements),
+    [activeCandidateId, plannerSource, plannerProjection, placements],
+  );
 
-  if (phase !== 'construct') return null;
+  // Explode is a presentation transform, not declared engineering geometry. Rather
+  // than inventing a second transform for exact evidence, suppress it until the
+  // scene returns to the declared assembly pose.
+  if (phase !== 'construct' || exploded) return null;
 
   return (
     <>
       {Object.values(meshes).map((mesh) => {
         const placement = placements[mesh.entityId];
+        const part = candidateProjection.parts[mesh.entityId];
         if (!meshMatchesPlacement(mesh, placement)) return null;
+        if (!part || part.visible === false || part.resourceId !== mesh.resourceId) return null;
+        if (isolatedEntityId && isolatedEntityId !== mesh.entityId) return null;
         return <ExactMesh key={`${mesh.entityId}-${mesh.contentHash}-${mesh.placementId}`} mesh={mesh} selected={selectedEntityId === mesh.entityId} />;
       })}
     </>
