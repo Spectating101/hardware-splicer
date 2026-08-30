@@ -18,6 +18,8 @@ from pathlib import Path
 
 WORKER_SCHEMA = "hardware_splicer.cadquery_brep_transition_refinement_worker.v1"
 ROTATION_CONVENTION = "Rz*Ry*Rx; canonical STEP XYZ"
+ROTATION_MATCH_TOLERANCE_DEG = 1e-9
+MAX_REFINEMENT_EVALUATIONS = 256
 
 
 def _content_hash(path: str) -> str:
@@ -109,8 +111,12 @@ def main() -> None:
     end = dict(request["moving_end_placement"])
     start_translation = list(start["translation_mm"])
     end_translation = list(end["translation_mm"])
-    rotation = list(start["rotation_deg_xyz"])
-    if [float(value) for value in rotation] != [float(value) for value in end["rotation_deg_xyz"]]:
+    rotation = [float(value) for value in start["rotation_deg_xyz"]]
+    end_rotation = [float(value) for value in end["rotation_deg_xyz"]]
+    if any(
+        abs(start_value - end_value) > ROTATION_MATCH_TOLERANCE_DEG
+        for start_value, end_value in zip(rotation, end_rotation)
+    ):
         raise RuntimeError("transition refinement requires translation-only matching rotations")
 
     contact_tolerance = float(request["contact_distance_tolerance_mm"])
@@ -118,6 +124,12 @@ def main() -> None:
     fraction_tolerance = float(request["refinement_fraction_tolerance"])
     max_depth = int(request["refinement_max_depth"])
     candidates = list(request["candidates"])
+    worst_case_evaluations = len(candidates) * (max_depth + 2)
+    if worst_case_evaluations > MAX_REFINEMENT_EVALUATIONS:
+        raise RuntimeError(
+            "adaptive transition refinement worst-case exact evaluation count "
+            f"{worst_case_evaluations} exceeds bounded worker budget {MAX_REFINEMENT_EVALUATIONS}"
+        )
 
     brackets = []
     evaluation_count = 0
@@ -198,6 +210,7 @@ def main() -> None:
                 "moving_solid_count": len(moving_base.Solids()),
                 "fixed_solid_count": len(fixed.Solids()),
                 "rotation_convention": ROTATION_CONVENTION,
+                "evaluation_budget": MAX_REFINEMENT_EVALUATIONS,
                 "evaluation_count": evaluation_count,
                 "brackets": brackets,
             }
