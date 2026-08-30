@@ -38,7 +38,10 @@ def test_missing_optional_cadquery_does_not_fail_base_product_readiness() -> Non
         "bounded_placed_step_tessellation",
         "exact_step_brep_surface_anchor",
         "exact_step_brep_anchor_mating_geometry",
+        "bounded_sampled_step_brep_mating_path",
     ]
+    assert "sampled mating-path clearance" in cadquery["authority_boundary"]
+    assert "continuous-path clearance" in cadquery["authority_boundary"]
     assert "whole-assembly validity" in cadquery["authority_boundary"]
     assert "connector mating" in cadquery["authority_boundary"]
     assert "protocol/pin compatibility" in cadquery["authority_boundary"]
