@@ -10,6 +10,7 @@ on:
       - "src/hardware_splicer/mechanical_api.py"
       - "tests/test_mechanical_brep.py"
       - "tests/test_mechanical_brep_api.py"
+      - "tests/test_mechanical_brep_live_api.py"
       - "pyproject.toml"
       - ".github/workflows/exact-brep-kernel.yml"
 
@@ -35,10 +36,11 @@ jobs:
           assert cq.__version__ == "2.8.0", cq.__version__
           print(f"CadQuery {cq.__version__} / OCCT specialist import OK")
           PY
-      - name: Run exact BREP contracts and real solid smoke
+      - name: Run exact BREP contracts and real solid API proof
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
           PYTHONPATH=src python -m pytest -q --tb=short --maxfail=1 \
             tests/test_mechanical_brep.py \
-            tests/test_mechanical_brep_api.py
+            tests/test_mechanical_brep_api.py \
+            tests/test_mechanical_brep_live_api.py
