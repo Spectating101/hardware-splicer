@@ -190,22 +190,18 @@ export function BrepAnchorMatingControl({
 
   async function evaluateMating() {
     const requestFingerprint = currentEvaluationFingerprint;
-    const selectedAxis = parseAxis();
-    const requiredDepth = parseOptionalNumber('Required engagement depth', requiredEngagement);
-    const declaredDepth = parseOptionalNumber('Declared engagement depth', declaredEngagement);
-    if (declaredDepth !== null && requiredDepth === null) {
-      setState('error');
-      setMessage('Declared engagement depth needs a required engagement depth to compare against.');
+    try {
+      const selectedAxis = parseAxis();
+      const requiredDepth = parseOptionalNumber('Required engagement depth', requiredEngagement);
+      const declaredDepth = parseOptionalNumber('Declared engagement depth', declaredEngagement);
+      if (declaredDepth !== null && requiredDepth === null) {
+        throw new Error('Declared engagement depth needs a required engagement depth to compare against.');
+      }
+
+      setState('loading');
+      setMessage('Evaluating exact anchor geometry against the declared mating tolerances…');
       setReport(null);
       setEvaluatedFingerprint(null);
-      return;
-    }
-
-    setState('loading');
-    setMessage('Evaluating exact anchor geometry against the declared mating tolerances…');
-    setReport(null);
-    setEvaluatedFingerprint(null);
-    try {
       const response = await fetch('/api/proxy/engineering/mechanical/geometry/brep/mating', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
