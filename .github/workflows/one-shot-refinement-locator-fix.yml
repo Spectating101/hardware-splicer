@@ -1,0 +1,43 @@
+name: One-shot refinement locator fix
+
+on:
+  push:
+    branches:
+      - tmp-refinement-locator-fix-20260831
+
+permissions:
+  contents: write
+
+jobs:
+  patch-feature-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/machine-workbench-v0-20260829
+          fetch-depth: 0
+      - name: Patch stale refinement E2E locator
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('apps/circuit-ai/circuit-ai-frontend/e2e/machine-brep-mating-path-refinement.spec.js')
+          text = path.read_text(encoding='utf-8')
+          old = 'Refined mating path end translation X'
+          new = 'Adaptive refinement end translation X'
+          count = text.count(old)
+          if count != 2:
+              raise SystemExit(f'expected exactly 2 stale locator occurrences, found {count}')
+          path.write_text(text.replace(old, new), encoding='utf-8')
+          PY
+      - name: Commit locator repair
+        run: |
+          if git diff --quiet; then
+            echo 'No locator repair required.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/circuit-ai/circuit-ai-frontend/e2e/machine-brep-mating-path-refinement.spec.js
+          git commit -m 'Align adaptive refinement browser locator'
+          git push origin HEAD:feat/machine-workbench-v0-20260829
