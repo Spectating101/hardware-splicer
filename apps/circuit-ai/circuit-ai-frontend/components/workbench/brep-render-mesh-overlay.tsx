@@ -2,7 +2,7 @@
 
 import { Html } from '@react-three/drei';
 import { useEffect, useMemo } from 'react';
-import { BufferGeometry, Float32BufferAttribute } from 'three';
+import { BufferGeometry, Float32BufferAttribute, Vector3 } from 'three';
 import {
   useMachineWorkbenchStore,
   type BrepRenderMeshEvidence,
@@ -58,7 +58,7 @@ function ExactMesh({ mesh, selected }: { mesh: BrepRenderMeshEvidence; selected:
 
   useEffect(() => () => geometry.dispose(), [geometry]);
 
-  const center = geometry.boundingBox?.getCenter({ x: 0, y: 0, z: 0 } as never);
+  const center = geometry.boundingBox?.getCenter(new Vector3());
   const labelPosition: [number, number, number] = center
     ? [center.x, (geometry.boundingBox?.max.y ?? center.y) + 0.38, center.z]
     : [0, 0, 0];
