@@ -79,7 +79,9 @@ def _require_expected_hashes(
 def _payload(report: BrepMatingPathSweepReport) -> Dict[str, Any]:
     return {
         "ok": True,
-        "brep_mating_path": report.model_dump(mode="json"),
+        # Absent sampled events remain absent rather than JSON null. That prevents UI
+        # number coercion from manufacturing a fictitious sample zero for "not observed".
+        "brep_mating_path": report.model_dump(mode="json", exclude_none=True),
         "kernel_available": report.kernel_available,
         "sampled_path_evaluated": report.status.value == "ready",
         "sampled_path_interference_free": report.sampled_path_interference_free,
