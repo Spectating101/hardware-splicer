@@ -168,9 +168,11 @@ def test_step_parser_executes_canonical_point_envelope_without_brep_promotion(tm
     assert model["metadata"]["registered_source_hash_reverified"] is True
     report = result.parsed_output["mechanical_geometry"]
     assert report["models"][0]["authority"] == "proposed"
-    assert report["metadata"]["full_brep_collision"] is False
+    assert report["metadata"]["full_brep_validation"] is False
+    assert report["metadata"]["collision_analysis"] is False
     assert "content" not in result.model_dump(mode="json")
-    assert all("fabrication authority" in row or "BREP validity" in row for row in result.limitations)
+    assert any("BREP validity" in row for row in result.limitations)
+    assert any("fabrication authority" in row for row in result.limitations)
 
 
 def test_registered_blob_is_reverified_before_parser_execution(tmp_path: Path) -> None:
