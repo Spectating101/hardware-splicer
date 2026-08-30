@@ -37,10 +37,12 @@ def product_capability_report(
                 "exact_step_brep_minimum_clearance",
                 "bounded_placed_step_tessellation",
                 "exact_step_brep_surface_anchor",
+                "exact_step_brep_anchor_mating_geometry",
             ]
             row["authority_boundary"] = (
-                "CadQuery/OCCT output is geometry evidence only; specialist availability or successful "
-                "execution does not establish physical measurement, whole-assembly validity, mating, "
+                "CadQuery/OCCT output is geometry evidence only; specialist availability, successful "
+                "execution, or anchor-pair geometric tolerance closure does not establish physical "
+                "measurement, whole-assembly validity, connector mating, protocol/pin compatibility, "
                 "structural safety, fabrication, power-on, motion, or release authority."
             )
         if row.get("readiness") == "missing_required":
