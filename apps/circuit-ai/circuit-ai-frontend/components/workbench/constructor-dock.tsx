@@ -10,6 +10,8 @@ import {
   type RequirementState,
 } from '@/lib/workbench-constructor-demo';
 import { useMachineWorkbenchStore, type MechanicalGeometryEvidence } from '@/lib/machine-workbench-store';
+import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
+import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
 import { useWorkbenchPlacementStore } from '@/lib/workbench-placement-store';
 import { cacheSessionStepSource } from '@/lib/workbench-session-step-sources';
 import { DeclaredPlacementEditor } from '@/components/workbench/declared-placement-editor';
@@ -62,8 +64,12 @@ export function ConstructorDock() {
   const setSelectedResourceId = useMachineWorkbenchStore((state) => state.setSelectedResourceId);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
+  const clearBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.clearBrepRenderMeshEvidence);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
   const setGeometryReport = useWorkbenchPlacementStore((state) => state.setGeometryReport);
+  const clearPlacement = useWorkbenchPlacementStore((state) => state.clearPlacement);
+  const clearAccessForEntity = useWorkbenchAccessStore((state) => state.clearAccessForEntity);
+  const clearAnchorsForEntity = useWorkbenchBrepAnchorStore((state) => state.clearAnchorsForEntity);
   const activeCandidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
   const livePlanner = plannerSource === 'live' && Boolean(plannerProjection);
   const liveSelected = new Set((plannerProjection?.selectedResourceIds ?? []).map(normalizeId));
@@ -150,6 +156,25 @@ export function ConstructorDock() {
       };
       if (!evidence.contentHash.startsWith('sha256:')) throw new Error('HS geometry response did not include the canonical STEP content hash.');
 
+      const priorGeometry = geometryForSelectedResource;
+      const sourceIdentityChanged = Boolean(
+        priorGeometry
+        && (
+          priorGeometry.contentHash !== evidence.contentHash
+          || priorGeometry.sourceId !== evidence.sourceId
+          || priorGeometry.modelId !== evidence.modelId
+        ),
+      );
+      if (sourceIdentityChanged) {
+        // Placement AABBs, access envelopes, exact tessellation and surface anchors all
+        // derive from the imported source identity. A replacement source must not keep
+        // any of those results alive merely because the resource/entity id is stable.
+        clearAccessForEntity(activeCandidateId, selectedResource.mappedEntityId);
+        clearAnchorsForEntity(activeCandidateId, selectedResource.mappedEntityId);
+        clearBrepRenderMeshEvidence(activeCandidateId, selectedResource.mappedEntityId);
+        clearPlacement(activeCandidateId, selectedResource.mappedEntityId);
+      }
+
       cacheSessionStepSource({
         candidateId: activeCandidateId,
         resourceId: selectedResource.id,
@@ -164,7 +189,9 @@ export function ConstructorDock() {
       setSelectedEntityId(selectedResource.mappedEntityId);
       window.setTimeout(requestFrameSelection, 0);
       setGeometryState('success');
-      setGeometryMessage(`${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · ${evidence.pointCount} STEP points · declared envelope only.`);
+      setGeometryMessage(
+        `${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · ${evidence.pointCount} STEP points · declared envelope only.${sourceIdentityChanged ? ' Prior placement and dependent exact evidence were invalidated; re-place this source.' : ''}`,
+      );
     } catch (error: unknown) {
       setGeometryState('error');
       setGeometryMessage(error instanceof Error ? error.message : String(error));
