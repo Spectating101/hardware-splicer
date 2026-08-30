@@ -26,6 +26,20 @@ from hardware_splicer.stored_source_parser_api import (
 )
 
 
+STEP = b"""ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));
+ENDSEC;
+DATA;
+#1=PRODUCT('frame','Frame','',());
+#2=SI_UNIT(.MILLI.,.METRE.);
+#3=CARTESIAN_POINT('',(0.0,0.0,0.0));
+#4=CARTESIAN_POINT('',(100.0,50.0,10.0));
+ENDSEC;
+END-ISO-10303-21;
+"""
+
+
 def _b64(value: bytes) -> str:
     return base64.b64encode(value).decode("ascii")
 
@@ -124,12 +138,13 @@ def test_json_descriptor_parser_caps_nested_authority(tmp_path: Path) -> None:
     assert graph["claims"][0]["authority"] == "declared"
 
 
-def test_step_parser_is_explicitly_unavailable_not_faked(tmp_path: Path) -> None:
+def test_step_parser_executes_canonical_point_envelope_without_brep_promotion(tmp_path: Path) -> None:
     source = _registered_source(
         tmp_path,
         filename="frame.step",
-        content=b"ISO-10303-21;\nHEADER;\nENDSEC;\nDATA;\nENDSEC;\nEND-ISO-10303-21;",
+        content=STEP,
     )
+    source["authority_ceiling"] = "proposed"
 
     result = execute_stored_source_parser(
         "robot-r1",
@@ -137,10 +152,25 @@ def test_step_parser_is_explicitly_unavailable_not_faked(tmp_path: Path) -> None
         project_root=tmp_path,
     )
 
-    assert result.status == StoredParserStatus.SKIPPED
+    assert result.status == StoredParserStatus.PARSED
     assert result.parser_route == "step_geometry"
-    assert result.metadata["parser_available"] is False
-    assert any("No callable bounded STEP parser" in row for row in result.limitations)
+    assert result.authority_ceiling.value == "proposed"
+    assert result.metadata["parser_available"] is True
+    assert result.metadata["parser_reverified_hash"] is True
+    assert result.metadata["step_point_envelope_only"] is True
+    assert result.metadata["full_brep_validation"] is False
+    assert result.raw_bytes_returned is False
+    model = result.parsed_output["step_model"]
+    assert model["content_hash"] == source["content_hash"]
+    assert model["authority"] == "proposed"
+    assert model["units"] == "mm"
+    assert model["bounding_box"]["size"] == [100.0, 50.0, 10.0]
+    assert model["metadata"]["registered_source_hash_reverified"] is True
+    report = result.parsed_output["mechanical_geometry"]
+    assert report["models"][0]["authority"] == "proposed"
+    assert report["metadata"]["full_brep_collision"] is False
+    assert "content" not in result.model_dump(mode="json")
+    assert all("fabrication authority" in row or "BREP validity" in row for row in result.limitations)
 
 
 def test_registered_blob_is_reverified_before_parser_execution(tmp_path: Path) -> None:
@@ -205,6 +235,46 @@ def test_parser_api_persists_run_and_derived_sources_idempotently(
     assert duplicate.json()["registered"] is False
     assert duplicate.json()["revision"] == 3
     assert store.load("robot-r1")["revision"] == 3
+
+
+def test_parser_api_persists_step_geometry_without_raw_source_bytes(tmp_path: Path) -> None:
+    store = ProjectStore(tmp_path)
+    _seed(store)
+    app = FastAPI()
+    app.include_router(create_engineering_source_ingestion_router(store))
+    app.include_router(create_stored_source_parser_router(store))
+    client = TestClient(app)
+
+    ingestion = client.post(
+        "/v1/projects/robot-r1/sources/ingest",
+        json={
+            "filename": "frame.step",
+            "content_base64": _b64(STEP),
+            "expected_revision": 1,
+        },
+    )
+    assert ingestion.status_code == 201, ingestion.text
+    source_id = ingestion.json()["ingestion"]["source_id"]
+
+    parsed = client.post(
+        f"/v1/projects/robot-r1/sources/{source_id}/parse",
+        json={"expected_revision": 2},
+    )
+    assert parsed.status_code == 201, parsed.text
+    body = parsed.json()
+    assert body["registered"] is True
+    assert body["derived_source_count"] == 0
+    assert body["result"]["status"] == "parsed"
+    assert body["result"]["parser_route"] == "step_geometry"
+    assert body["result"]["parsed_output"]["step_model"]["bounding_box"]["size"] == [100.0, 50.0, 10.0]
+
+    saved = store.load("robot-r1", revision=3)["snapshot"]
+    run = saved["engineeringSourceParserRuns"][0]
+    assert run["status"] == "parsed"
+    assert run["parser_route"] == "step_geometry"
+    assert run["parsed_output"]["mechanical_geometry"]["models"][0]["content_hash"] == ingestion.json()["ingestion"]["content_hash"]
+    assert "content_base64" not in str(saved)
+    assert STEP.decode("utf-8") not in str(saved)
 
 
 def test_parser_api_refuses_stale_revision_before_blob_read(tmp_path: Path) -> None:
