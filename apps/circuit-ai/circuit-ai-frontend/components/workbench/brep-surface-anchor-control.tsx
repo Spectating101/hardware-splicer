@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
 import { deck001Interfaces } from '@/lib/workbench-demo';
 import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
+import { BrepAnchorMatingControl } from '@/components/workbench/brep-anchor-mating-control';
 
 export function BrepSurfaceAnchorControl({
   candidateId,
@@ -110,6 +111,7 @@ export function BrepSurfaceAnchorControl({
       <div className="mt-1 text-[7px] leading-3 text-fuchsia-100/45">
         Interface binding is DECLARED geometry evidence only. It does not verify connector mating, fit, serviceability, measurement truth, or fabrication authority.
       </div>
+      <BrepAnchorMatingControl candidateId={candidateId} entityId={entityId} />
     </div>
   );
 }
