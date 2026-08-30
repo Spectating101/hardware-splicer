@@ -30,6 +30,30 @@ export type MechanicalGeometryEvidence = {
   fabricationAuthorized: false;
 };
 
+export type BrepRenderMeshEvidence = {
+  entityId: string;
+  resourceId: string;
+  sourceId: string;
+  modelId: string;
+  contentHash: string;
+  frameId: string;
+  placementId: string;
+  translationMm: [number, number, number];
+  rotationDegXyz: [number, number, number];
+  vertexCount: number;
+  triangleCount: number;
+  verticesMm: [number, number, number][];
+  triangles: [number, number, number][];
+  toleranceMm: number;
+  angularToleranceRad: number;
+  kernel: string;
+  axisMapping: 'step_xyz_to_scene_xzy';
+  renderEvidenceOnly: true;
+  fullAssemblyCollision: false;
+  physicalMeasurement: false;
+  fabricationAuthorized: false;
+};
+
 export type PlannerCandidateProjection = {
   strategyMode: 'hybrid' | 'constrained' | 'open_procurement';
   readinessStatus: string;
@@ -42,6 +66,7 @@ export type PlannerCandidateProjection = {
   procurementItemCount: number;
   procurementCostUsd: number;
   mechanicalGeometryByEntity?: Record<string, MechanicalGeometryEvidence>;
+  brepRenderMeshByEntity?: Record<string, BrepRenderMeshEvidence>;
 };
 
 export type MachineWorkbenchState = {
@@ -76,6 +101,8 @@ export type MachineWorkbenchState = {
   setProposalDecision: (id: string, decision: 'accepted' | 'held') => void;
   setPlannerState: (source: PlannerSourceState, message: string, projections?: Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>) => void;
   setMechanicalGeometryEvidence: (candidateId: ConstructorCandidateId, evidence: MechanicalGeometryEvidence) => void;
+  setBrepRenderMeshEvidence: (candidateId: ConstructorCandidateId, evidence: BrepRenderMeshEvidence) => void;
+  clearBrepRenderMeshEvidence: (candidateId: ConstructorCandidateId, entityId: string) => void;
   setIsolatedEntityId: (id: string | null) => void;
   setCameraPreset: (preset: WorkbenchCameraPreset) => void;
   requestFrameSelection: () => void;
@@ -104,6 +131,7 @@ function emptyProjection(candidateId: ConstructorCandidateId): PlannerCandidateP
     procurementItemCount: 0,
     procurementCostUsd: 0,
     mechanicalGeometryByEntity: {},
+    brepRenderMeshByEntity: {},
   };
 }
 
@@ -120,6 +148,10 @@ function mergeGeometryIntoPlannerState(
       mechanicalGeometryByEntity: {
         ...(next.mechanicalGeometryByEntity ?? {}),
         ...(existing[id]?.mechanicalGeometryByEntity ?? {}),
+      },
+      brepRenderMeshByEntity: {
+        ...(next.brepRenderMeshByEntity ?? {}),
+        ...(existing[id]?.brepRenderMeshByEntity ?? {}),
       },
     };
   }
@@ -169,6 +201,18 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
       ...evidence,
       axisMapping: 'step_xyz_to_scene_xzy',
     };
+    const currentMeshes = { ...(current.brepRenderMeshByEntity ?? {}) };
+    const existingMesh = currentMeshes[normalizedEvidence.entityId];
+    if (
+      existingMesh
+      && (
+        existingMesh.resourceId !== normalizedEvidence.resourceId
+        || existingMesh.modelId !== normalizedEvidence.modelId
+        || existingMesh.contentHash !== normalizedEvidence.contentHash
+      )
+    ) {
+      delete currentMeshes[normalizedEvidence.entityId];
+    }
     return {
       plannerProjections: {
         ...state.plannerProjections,
@@ -178,9 +222,40 @@ export const useMachineWorkbenchStore = create<MachineWorkbenchState>((set) => (
             ...(current.mechanicalGeometryByEntity ?? {}),
             [normalizedEvidence.entityId]: normalizedEvidence,
           },
+          brepRenderMeshByEntity: currentMeshes,
         },
       },
       frameRequest: state.frameRequest + 1,
+    };
+  }),
+  setBrepRenderMeshEvidence: (candidateId, evidence) => set((state) => {
+    const current = state.plannerProjections[candidateId] ?? emptyProjection(candidateId);
+    return {
+      plannerProjections: {
+        ...state.plannerProjections,
+        [candidateId]: {
+          ...current,
+          brepRenderMeshByEntity: {
+            ...(current.brepRenderMeshByEntity ?? {}),
+            [evidence.entityId]: evidence,
+          },
+        },
+      },
+      frameRequest: state.frameRequest + 1,
+    };
+  }),
+  clearBrepRenderMeshEvidence: (candidateId, entityId) => set((state) => {
+    const current = state.plannerProjections[candidateId] ?? emptyProjection(candidateId);
+    const meshes = { ...(current.brepRenderMeshByEntity ?? {}) };
+    delete meshes[entityId];
+    return {
+      plannerProjections: {
+        ...state.plannerProjections,
+        [candidateId]: {
+          ...current,
+          brepRenderMeshByEntity: meshes,
+        },
+      },
     };
   }),
   setIsolatedEntityId: (isolatedEntityId) => set({ isolatedEntityId }),
