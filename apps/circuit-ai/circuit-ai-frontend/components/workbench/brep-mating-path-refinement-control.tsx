@@ -10,6 +10,7 @@ import {
 import { getSessionStepSource } from '@/lib/workbench-session-step-sources';
 
 const EMPTY_ANCHORS: Record<string, BrepSurfaceAnchorEvidence> = {};
+const MAX_REFINEMENT_TOTAL_POSE_BUDGET = 256;
 
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -175,6 +176,14 @@ export function BrepMatingPathRefinementControl({
       setMessage('Refinement fraction tolerance must be between 0.000001 and 0.25.');
       return;
     }
+    const worstCasePoseCount = samples + 2 * (samples - 1) * (depth + 2);
+    if (worstCasePoseCount > MAX_REFINEMENT_TOTAL_POSE_BUDGET) {
+      setState('error');
+      setMessage(
+        `Adaptive refinement worst-case exact pose budget ${worstCasePoseCount} exceeds ${MAX_REFINEMENT_TOTAL_POSE_BUDGET}; reduce coarse samples or max bisection depth.`,
+      );
+      return;
+    }
     const endValues = end as [number, number, number];
     if (endValues.every((value, index) => Math.abs(value - activePair.moving.translationMm[index]) <= 1e-12)) {
       setState('error');
@@ -329,7 +338,7 @@ export function BrepMatingPathRefinementControl({
           <label key={axis} className="text-[7px] uppercase tracking-[0.08em] text-slate-600">
             End {axis} mm
             <input
-              aria-label={`Refined mating path end translation ${axis}`}
+              aria-label={`Adaptive refinement end translation ${axis}`}
               value={endTranslation[index]}
               onChange={(event) => setEndTranslation((current) => current.map((value, row) => row === index ? event.target.value : value))}
               className="mt-1 w-full rounded border border-white/8 bg-black/20 px-1.5 py-1.5 text-[9px] normal-case tracking-normal text-slate-200 outline-none focus:border-rose-300/25"
