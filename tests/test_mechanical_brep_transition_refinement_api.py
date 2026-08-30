@@ -74,6 +74,8 @@ def test_product_mounts_brep_mating_path_refinement_surface() -> None:
     assert body["adaptive_transition_refinement"] is True
     assert body["transition_brackets_only"] is True
     assert body["refined_predicates"] == ["clearance_boundary", "interference_boundary"]
+    assert body["max_total_pose_budget"] == 256
+    assert body["timeout_budget_scope"] == "coarse_and_refinement_total"
     assert body["unique_transition_pose_verified"] is False
     assert body["monotonicity_inside_bracket_verified"] is False
     assert body["continuous_path_verified"] is False
@@ -103,6 +105,7 @@ def test_refinement_api_fails_closed_without_optional_kernel_and_never_uses_aabb
     assert body["unique_transition_pose_verified"] is False
     assert body["monotonicity_inside_bracket_verified"] is False
     assert body["aabb_fallback_used"] is False
+    assert body["max_total_pose_budget"] == 256
     assert body["continuous_path_verified"] is False
     assert body["continuous_collision_free_verified"] is False
     assert body["connector_mating_verified"] is False
@@ -150,3 +153,20 @@ def test_refinement_api_bounds_depth_and_fraction_tolerance() -> None:
     assert client.post(
         "/v1/engineering/mechanical/geometry/brep/mating-path/refine", json=request
     ).status_code == 422
+
+
+def test_refinement_api_rejects_requests_whose_worst_case_pose_budget_is_too_large() -> None:
+    request = _request()
+    request["sample_count"] = 33
+    request["refinement_max_depth"] = 12
+
+    response = TestClient(create_product_app()).post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine",
+        json=request,
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["type"] == "invalid_brep_mating_path_refinement_request"
+    assert "pose budget" in detail["message"]
+    assert "reduce coarse sample_count or refinement_max_depth" in detail["message"]
