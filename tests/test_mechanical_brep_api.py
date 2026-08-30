@@ -5,11 +5,13 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+import hardware_splicer.mechanical_api as mechanical_api
 import hardware_splicer.mechanical_brep as mechanical_brep
 from hardware_splicer.engineering_source_ingestion import (
     EngineeringSourceIngestionRequest,
     ingest_engineering_source,
 )
+from hardware_splicer.mechanical_brep import BrepPairInterferenceReport, BrepStatus
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
 
@@ -56,6 +58,37 @@ def _request() -> dict:
             "authority": "declared",
         },
     }
+
+
+def _exact_report(
+    *,
+    minimum_distance_mm: float = 20.0,
+    interference: bool = False,
+    intersection_volume_mm3: float = 0.0,
+) -> BrepPairInterferenceReport:
+    return BrepPairInterferenceReport(
+        project_id="brep-api",
+        first_source_id="left.step",
+        second_source_id="right.step",
+        first_model_id="left",
+        second_model_id="right",
+        first_content_hash=f"sha256:{'a' * 64}",
+        second_content_hash=f"sha256:{'b' * 64}",
+        frame_id="assembly",
+        status=BrepStatus.INTERFERENCE if interference else BrepStatus.CLEAR,
+        kernel_available=True,
+        kernel="cadquery_occt",
+        cadquery_version="test",
+        first_shape_valid=True,
+        second_shape_valid=True,
+        first_solid_count=1,
+        second_solid_count=1,
+        minimum_distance_mm=minimum_distance_mm,
+        intersection_volume_mm3=intersection_volume_mm3,
+        exact_solid_interference=interference,
+        exact_pair_interference_evaluated=True,
+        metadata={"aabb_fallback_used": False},
+    )
 
 
 def _b64(value: bytes) -> str:
@@ -129,6 +162,7 @@ def test_product_mounts_optional_brep_pair_route_and_declares_scope() -> None:
     body = schema.json()
     assert body["optional_brep_kernel"] == "cadquery-isolated"
     assert body["exact_pair_brep_interference_when_kernel_available"] is True
+    assert body["exact_pair_brep_minimum_clearance_when_kernel_available"] is True
     assert body["registered_source_brep_materialization"] == "content_addressed_hash_reverified_server_side"
     assert body["raw_registered_source_bytes_returned"] is False
     assert body["full_brep_collision"] is False
@@ -140,10 +174,12 @@ def test_product_mounts_optional_brep_pair_route_and_declares_scope() -> None:
 def test_brep_pair_route_returns_unknown_without_optional_kernel_and_never_falls_back(monkeypatch) -> None:
     monkeypatch.setattr(mechanical_brep, "_cadquery_available", lambda: False)
     client = TestClient(create_product_app())
+    request = _request()
+    request["minimum_clearance_mm"] = 25.0
 
     response = client.post(
         "/v1/engineering/mechanical/geometry/brep/interference",
-        json=_request(),
+        json=request,
     )
 
     assert response.status_code == 200, response.text
@@ -154,6 +190,10 @@ def test_brep_pair_route_returns_unknown_without_optional_kernel_and_never_falls
     assert body["exact_solid_interference"] is None
     assert body["minimum_distance_mm"] is None
     assert body["intersection_volume_mm3"] is None
+    assert body["exact_minimum_clearance_evaluated"] is False
+    assert body["minimum_clearance_requirement_mm"] == 25.0
+    assert body["minimum_clearance_passed"] is None
+    assert "remains UNKNOWN" in body["minimum_clearance_message"]
     assert body["aabb_fallback_used"] is False
     assert body["full_brep_collision"] is False
     assert body["connector_mating_verified"] is False
@@ -167,6 +207,88 @@ def test_brep_pair_route_returns_unknown_without_optional_kernel_and_never_falls
     assert report["metadata"]["specialist_capability"] == "cadquery-isolated"
 
 
+def test_exact_brep_minimum_clearance_fails_25_and_passes_15_without_ui_math(monkeypatch) -> None:
+    monkeypatch.setattr(
+        mechanical_api,
+        "check_step_brep_interference",
+        lambda **_kwargs: _exact_report(minimum_distance_mm=20.0),
+    )
+    client = TestClient(create_product_app())
+
+    request = _request()
+    request["minimum_clearance_mm"] = 25.0
+    failed = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference",
+        json=request,
+    )
+    assert failed.status_code == 200, failed.text
+    failed_body = failed.json()
+    assert failed_body["exact_pair_interference_evaluated"] is True
+    assert failed_body["exact_minimum_clearance_evaluated"] is True
+    assert failed_body["minimum_distance_mm"] == 20.0
+    assert failed_body["minimum_clearance_requirement_mm"] == 25.0
+    assert failed_body["minimum_clearance_passed"] is False
+    assert failed_body["minimum_clearance_message"] == (
+        "Exact BREP minimum distance 20.000 mm is below the 25.000 mm requirement."
+    )
+
+    request["minimum_clearance_mm"] = 15.0
+    passed = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference",
+        json=request,
+    )
+    assert passed.status_code == 200, passed.text
+    passed_body = passed.json()
+    assert passed_body["exact_minimum_clearance_evaluated"] is True
+    assert passed_body["minimum_clearance_passed"] is True
+    assert passed_body["minimum_clearance_message"] == (
+        "Exact BREP minimum distance 20.000 mm meets the 15.000 mm requirement."
+    )
+    assert passed_body["full_brep_collision"] is False
+    assert passed_body["service_access_verified"] is False
+    assert passed_body["fabrication_authorized"] is False
+
+
+def test_exact_brep_interference_fails_even_zero_clearance_requirement(monkeypatch) -> None:
+    monkeypatch.setattr(
+        mechanical_api,
+        "check_step_brep_interference",
+        lambda **_kwargs: _exact_report(
+            minimum_distance_mm=0.0,
+            interference=True,
+            intersection_volume_mm3=12.5,
+        ),
+    )
+    client = TestClient(create_product_app())
+    request = _request()
+    request["minimum_clearance_mm"] = 0.0
+
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference",
+        json=request,
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["exact_solid_interference"] is True
+    assert body["exact_minimum_clearance_evaluated"] is True
+    assert body["minimum_clearance_passed"] is False
+    assert "interfere by 12.500 mm^3" in body["minimum_clearance_message"]
+
+
+def test_brep_pair_route_rejects_negative_exact_clearance_requirement() -> None:
+    client = TestClient(create_product_app())
+    request = _request()
+    request["minimum_clearance_mm"] = -0.1
+
+    response = client.post(
+        "/v1/engineering/mechanical/geometry/brep/interference",
+        json=request,
+    )
+
+    assert response.status_code == 422
+
+
 def test_stored_brep_route_uses_injected_project_store_and_reverifies_registered_hashes(
     tmp_path: Path,
     monkeypatch,
@@ -174,10 +296,12 @@ def test_stored_brep_route_uses_injected_project_store_and_reverifies_registered
     store, first, second = _stored_project(tmp_path)
     monkeypatch.setattr(mechanical_brep, "_cadquery_available", lambda: False)
     client = TestClient(create_product_app(store))
+    request = _stored_request(first, second)
+    request["minimum_clearance_mm"] = 25.0
 
     response = client.post(
         "/v1/engineering/mechanical/geometry/brep/interference/stored",
-        json=_stored_request(first, second),
+        json=request,
     )
 
     assert response.status_code == 200, response.text
@@ -188,6 +312,9 @@ def test_stored_brep_route_uses_injected_project_store_and_reverifies_registered
     assert body["raw_registered_source_bytes_returned"] is False
     assert body["kernel_available"] is False
     assert body["exact_pair_interference_evaluated"] is False
+    assert body["exact_minimum_clearance_evaluated"] is False
+    assert body["minimum_clearance_requirement_mm"] == 25.0
+    assert body["minimum_clearance_passed"] is None
     assert body["aabb_fallback_used"] is False
     report = body["brep_interference"]
     assert report["first_content_hash"] == first["content_hash"]
