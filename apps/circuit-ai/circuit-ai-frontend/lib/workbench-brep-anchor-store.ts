@@ -1,0 +1,89 @@
+'use client';
+
+import { create } from 'zustand';
+import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
+
+export type BrepSurfaceAnchorEvidence = {
+  anchorId: string;
+  interfaceId: string;
+  entityId: string;
+  resourceId: string;
+  sourceId: string;
+  modelId: string;
+  contentHash: string;
+  frameId: string;
+  placementId: string;
+  translationMm: [number, number, number];
+  rotationDegXyz: [number, number, number];
+  probePointMm: [number, number, number];
+  anchorPointMm: [number, number, number];
+  outwardNormal: [number, number, number];
+  snapDistanceMm: number;
+  faceIndex: number;
+  faceGeomType: string;
+  faceAreaMm2: number;
+  authority: 'declared';
+  connectorMatingVerified: false;
+  physicalMeasurement: false;
+  fabricationAuthorized: false;
+};
+
+export type ArmedBrepAnchorPick = {
+  candidateId: ConstructorCandidateId;
+  entityId: string;
+  resourceId: string;
+  interfaceId: string;
+};
+
+type BrepAnchorState = {
+  anchorsByCandidate: Partial<Record<ConstructorCandidateId, Record<string, BrepSurfaceAnchorEvidence>>>;
+  armedPick: ArmedBrepAnchorPick | null;
+  armPick: (pick: ArmedBrepAnchorPick) => void;
+  cancelPick: () => void;
+  setAnchor: (candidateId: ConstructorCandidateId, anchor: BrepSurfaceAnchorEvidence) => void;
+  clearAnchor: (candidateId: ConstructorCandidateId, anchorId: string) => void;
+  clearAnchorsForEntity: (candidateId: ConstructorCandidateId, entityId: string) => void;
+};
+
+export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
+  anchorsByCandidate: {},
+  armedPick: null,
+  armPick: (armedPick) => set({ armedPick }),
+  cancelPick: () => set({ armedPick: null }),
+  setAnchor: (candidateId, anchor) => set((state) => ({
+    anchorsByCandidate: {
+      ...state.anchorsByCandidate,
+      [candidateId]: {
+        ...(state.anchorsByCandidate[candidateId] ?? {}),
+        [anchor.anchorId]: anchor,
+      },
+    },
+    armedPick: null,
+  })),
+  clearAnchor: (candidateId, anchorId) => set((state) => {
+    const current = { ...(state.anchorsByCandidate[candidateId] ?? {}) };
+    delete current[anchorId];
+    return {
+      anchorsByCandidate: {
+        ...state.anchorsByCandidate,
+        [candidateId]: current,
+      },
+    };
+  }),
+  clearAnchorsForEntity: (candidateId, entityId) => set((state) => {
+    const current = { ...(state.anchorsByCandidate[candidateId] ?? {}) };
+    for (const [anchorId, anchor] of Object.entries(current)) {
+      if (anchor.entityId === entityId) delete current[anchorId];
+    }
+    const armedPick = state.armedPick?.candidateId === candidateId && state.armedPick.entityId === entityId
+      ? null
+      : state.armedPick;
+    return {
+      anchorsByCandidate: {
+        ...state.anchorsByCandidate,
+        [candidateId]: current,
+      },
+      armedPick,
+    };
+  }),
+}));
