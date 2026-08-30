@@ -10,6 +10,7 @@ on:
       - "src/hardware_splicer/mechanical_api.py"
       - "tests/test_mechanical_brep.py"
       - "tests/test_mechanical_brep_api.py"
+      - "tests/test_mechanical_brep_hash_binding.py"
       - "tests/test_mechanical_brep_live_api.py"
       - "pyproject.toml"
       - ".github/workflows/exact-brep-kernel.yml"
@@ -43,4 +44,5 @@ jobs:
           PYTHONPATH=src python -m pytest -q --tb=short --maxfail=1 \
             tests/test_mechanical_brep.py \
             tests/test_mechanical_brep_api.py \
+            tests/test_mechanical_brep_hash_binding.py \
             tests/test_mechanical_brep_live_api.py
