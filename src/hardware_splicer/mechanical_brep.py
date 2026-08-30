@@ -18,16 +18,21 @@ import subprocess
 import sys
 import tempfile
 from enum import Enum
+from math import isfinite
 from pathlib import Path
 from typing import Any, Callable, Dict, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
 from .mechanical_placement import DeclaredGeometryPlacement
 from .step_geometry import StepModelSummary, parse_step_model
 
 
 BREP_INTERFERENCE_SCHEMA = "hardware_splicer.brep_pair_interference.v1"
+BREP_WORKER_SCHEMA = "hardware_splicer.cadquery_brep_worker.v1"
+BREP_KERNEL = "cadquery_occt"
+BREP_ROTATION_CONVENTION = "Rz*Ry*Rx; canonical STEP XYZ"
 _DEFAULT_TIMEOUT_S = 60.0
 _MAX_DIAGNOSTIC_CHARS = 4000
 _VOLUME_TOLERANCE_MM3 = 1e-9
@@ -95,6 +100,12 @@ def _cadquery_available() -> bool:
 
 
 def _source_model(content: str, source_id: str, model_id: str | None) -> StepModelSummary:
+    size_bytes = len(content.encode("utf-8"))
+    if size_bytes > MAX_ENGINEERING_SOURCE_BYTES:
+        raise ValueError(
+            f"STEP source {source_id!r} is {size_bytes} bytes; exact BREP input is bounded to "
+            f"{MAX_ENGINEERING_SOURCE_BYTES} bytes"
+        )
     return parse_step_model(content, source_id=source_id, model_id=model_id)
 
 
@@ -102,7 +113,7 @@ def _base_metadata() -> Dict[str, Any]:
     return {
         "specialist_capability": "cadquery-isolated",
         "scope": "pairwise_static_step_solid_interference_and_minimum_distance",
-        "rotation_convention": "Rz*Ry*Rx; canonical STEP XYZ",
+        "rotation_convention": BREP_ROTATION_CONVENTION,
         "aabb_fallback_used": False,
         "connector_mating_verified": False,
         "cable_routing_verified": False,
@@ -146,6 +157,33 @@ def _unknown_report(
             }
         ],
         metadata={**_base_metadata(), **dict(metadata or {})},
+    )
+
+
+def _worker_contract_failure(
+    *,
+    project_id: str,
+    first: StepModelSummary,
+    second: StepModelSummary,
+    frame_id: str,
+    reason: str,
+    required_field: str = "valid_brep_kernel_result",
+    payload: Mapping[str, Any] | None = None,
+) -> BrepPairInterferenceReport:
+    worker = payload or {}
+    return _unknown_report(
+        project_id=project_id,
+        first=first,
+        second=second,
+        frame_id=frame_id,
+        kernel_available=True,
+        reason=reason,
+        required_field=required_field,
+        metadata={
+            "worker_schema": worker.get("schema_version"),
+            "worker_kernel": worker.get("kernel"),
+            "worker_rotation_convention": worker.get("rotation_convention"),
+        },
     )
 
 
@@ -240,14 +278,53 @@ def check_step_brep_interference(
         )
 
     if payload.get("ok") is not True:
-        return _unknown_report(
+        return _worker_contract_failure(
             project_id=project_id,
             first=first,
             second=second,
             frame_id=frame_id,
-            kernel_available=True,
             reason="isolated CadQuery BREP worker did not report success",
-            required_field="valid_brep_kernel_result",
+            payload=payload,
+        )
+    if payload.get("schema_version") != BREP_WORKER_SCHEMA:
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason=f"CadQuery worker schema must be {BREP_WORKER_SCHEMA!r}",
+            required_field="compatible_brep_worker",
+            payload=payload,
+        )
+    if payload.get("kernel") != BREP_KERNEL:
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason=f"CadQuery worker kernel identity must be {BREP_KERNEL!r}",
+            required_field="compatible_brep_worker",
+            payload=payload,
+        )
+    if payload.get("rotation_convention") != BREP_ROTATION_CONVENTION:
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason="CadQuery worker placement convention disagrees with the declared HS placement convention",
+            required_field="compatible_brep_worker",
+            payload=payload,
+        )
+    if payload.get("first_content_hash") != first.content_hash or payload.get("second_content_hash") != second.content_hash:
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason="CadQuery worker input hashes disagree with the canonical STEP identities",
+            required_field="kernel_input_identity",
+            payload=payload,
         )
 
     first_valid = payload.get("first_shape_valid") is True
@@ -267,25 +344,58 @@ def check_step_brep_interference(
             reason=f"CadQuery/OCCT reports invalid imported BREP shape(s): {', '.join(invalid)}",
             required_field="valid_step_brep",
             metadata={
-                "kernel": payload.get("kernel") or "cadquery_occt",
+                "kernel": payload.get("kernel"),
                 "cadquery_version": payload.get("cadquery_version"),
                 "first_shape_valid": first_valid,
                 "second_shape_valid": second_valid,
+                "worker_schema": payload.get("schema_version"),
             },
         )
 
     try:
-        minimum_distance_mm = max(0.0, float(payload["minimum_distance_mm"]))
-        intersection_volume_mm3 = max(0.0, float(payload["intersection_volume_mm3"]))
-    except (KeyError, TypeError, ValueError) as exc:
-        return _unknown_report(
+        first_solid_count = int(payload["first_solid_count"])
+        second_solid_count = int(payload["second_solid_count"])
+    except (KeyError, TypeError, ValueError):
+        return _worker_contract_failure(
             project_id=project_id,
             first=first,
             second=second,
             frame_id=frame_id,
-            kernel_available=True,
-            reason=f"CadQuery/OCCT result omitted numeric BREP evidence: {type(exc).__name__}",
-            required_field="valid_brep_kernel_result",
+            reason="CadQuery/OCCT result omitted valid solid counts",
+            required_field="solid_step_brep",
+            payload=payload,
+        )
+    if first_solid_count <= 0 or second_solid_count <= 0:
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason="exact solid interference requires at least one imported solid in each STEP source",
+            required_field="solid_step_brep",
+            payload=payload,
+        )
+
+    try:
+        minimum_distance_mm = float(payload["minimum_distance_mm"])
+        intersection_volume_mm3 = float(payload["intersection_volume_mm3"])
+    except (KeyError, TypeError, ValueError):
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason="CadQuery/OCCT result omitted numeric BREP evidence",
+            payload=payload,
+        )
+    if not all(isfinite(value) and value >= 0.0 for value in (minimum_distance_mm, intersection_volume_mm3)):
+        return _worker_contract_failure(
+            project_id=project_id,
+            first=first,
+            second=second,
+            frame_id=frame_id,
+            reason="CadQuery/OCCT returned non-finite or negative BREP metrics",
+            payload=payload,
         )
 
     interference = intersection_volume_mm3 > volume_tolerance_mm3
@@ -300,12 +410,12 @@ def check_step_brep_interference(
         frame_id=frame_id,
         status=BrepStatus.INTERFERENCE if interference else BrepStatus.CLEAR,
         kernel_available=True,
-        kernel=str(payload.get("kernel") or "cadquery_occt"),
+        kernel=BREP_KERNEL,
         cadquery_version=(str(payload["cadquery_version"]) if payload.get("cadquery_version") else None),
         first_shape_valid=True,
         second_shape_valid=True,
-        first_solid_count=int(payload.get("first_solid_count", 0)),
-        second_solid_count=int(payload.get("second_solid_count", 0)),
+        first_solid_count=first_solid_count,
+        second_solid_count=second_solid_count,
         minimum_distance_mm=minimum_distance_mm,
         intersection_volume_mm3=intersection_volume_mm3,
         exact_solid_interference=interference,
@@ -315,6 +425,9 @@ def check_step_brep_interference(
             "touching_or_intersecting_distance": minimum_distance_mm <= 1e-12,
             "intersection_volume_tolerance_mm3": volume_tolerance_mm3,
             "worker_isolated": True,
+            "worker_schema": BREP_WORKER_SCHEMA,
+            "kernel_input_hash_reverified": True,
+            "solid_brep_required": True,
         },
     )
 
