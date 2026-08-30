@@ -1,0 +1,152 @@
+from __future__ import annotations
+
+import hashlib
+
+from fastapi.testclient import TestClient
+
+from hardware_splicer.product_api import create_product_app
+
+
+STEP = """ISO-10303-21;
+HEADER;
+FILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));
+ENDSEC;
+DATA;
+#1=CARTESIAN_POINT('',(0.,0.,0.));
+#2=CARTESIAN_POINT('',(10.,10.,10.));
+ENDSEC;
+END-ISO-10303-21;
+"""
+
+
+def _hash(content: str) -> str:
+    return f"sha256:{hashlib.sha256(content.encode('utf-8')).hexdigest()}"
+
+
+def _placement(placement_id: str, object_id: str, model_id: str, x_mm: float) -> dict:
+    return {
+        "placement_id": placement_id,
+        "object_id": object_id,
+        "model_id": model_id,
+        "target_frame": "assembly",
+        "translation_mm": [x_mm, 0.0, 0.0],
+        "rotation_deg_xyz": [0.0, 0.0, 0.0],
+        "authority": "declared",
+    }
+
+
+def _request() -> dict:
+    return {
+        "project_id": "deck-001",
+        "sweep_id": "display-approach-refine",
+        "moving_source": {
+            "source_id": "display.step",
+            "model_id": "display-model",
+            "content_hash": _hash(STEP),
+            "content": STEP,
+        },
+        "fixed_source": {
+            "source_id": "board.step",
+            "model_id": "board-model",
+            "content_hash": _hash(STEP),
+            "content": STEP,
+        },
+        "moving_start_placement": _placement("display-start", "display-object", "display-model", 30.0),
+        "moving_end_placement": _placement("display-end", "display-object", "display-model", 5.0),
+        "fixed_placement": _placement("board-fixed", "board-object", "board-model", 0.0),
+        "sample_count": 6,
+        "engagement_start_fraction": 0.8,
+        "contact_distance_tolerance_mm": 0.001,
+        "refinement_max_depth": 8,
+        "refinement_fraction_tolerance": 0.001,
+    }
+
+
+def test_product_mounts_brep_mating_path_refinement_surface() -> None:
+    app = create_product_app()
+    paths = set(app.openapi()["paths"])
+    assert "/v1/engineering/mechanical/geometry/brep/mating-path/refine" in paths
+    assert "/v1/engineering/mechanical/geometry/brep/mating-path/refine/schema" in paths
+
+    body = TestClient(app).get(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine/schema"
+    ).json()
+    assert body["adaptive_transition_refinement"] is True
+    assert body["transition_brackets_only"] is True
+    assert body["refined_predicates"] == ["clearance_boundary", "interference_boundary"]
+    assert body["unique_transition_pose_verified"] is False
+    assert body["monotonicity_inside_bracket_verified"] is False
+    assert body["continuous_path_verified"] is False
+    assert body["continuous_collision_free_verified"] is False
+    assert body["connector_mating_verified"] is False
+    assert body["whole_assembly_collision"] is False
+    assert body["fabrication_authorized"] is False
+
+
+def test_refinement_api_fails_closed_without_optional_kernel_and_never_uses_aabb() -> None:
+    response = TestClient(create_product_app()).post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine",
+        json=_request(),
+    )
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    report = body["brep_mating_path_refinement"]
+    if body["kernel_available"] is False:
+        assert body["refinement_evaluated"] is False
+        assert report["status"] == "unknown"
+        assert report["required_evidence"]
+    else:
+        assert report["status"] in {"ready", "not_required", "unknown"}
+    assert body["adaptive_transition_refinement"] is True
+    assert body["transition_brackets_only"] is True
+    assert body["unique_transition_pose_verified"] is False
+    assert body["monotonicity_inside_bracket_verified"] is False
+    assert body["aabb_fallback_used"] is False
+    assert body["continuous_path_verified"] is False
+    assert body["continuous_collision_free_verified"] is False
+    assert body["connector_mating_verified"] is False
+    assert body["whole_assembly_collision"] is False
+    assert body["fabrication_authorized"] is False
+
+
+def test_refinement_api_rejects_stale_inline_source_hash_before_any_authority_promotion() -> None:
+    request = _request()
+    request["moving_source"]["content_hash"] = f"sha256:{'f' * 64}"
+    response = TestClient(create_product_app()).post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine",
+        json=request,
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["type"] == "invalid_brep_mating_path_refinement_request"
+    assert "content_hash" in detail["message"]
+
+
+def test_refinement_api_bounds_depth_and_fraction_tolerance() -> None:
+    client = TestClient(create_product_app())
+
+    request = _request()
+    request["refinement_max_depth"] = 0
+    assert client.post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine", json=request
+    ).status_code == 422
+
+    request = _request()
+    request["refinement_max_depth"] = 13
+    assert client.post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine", json=request
+    ).status_code == 422
+
+    request = _request()
+    request["refinement_fraction_tolerance"] = 0.0000001
+    assert client.post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine", json=request
+    ).status_code == 422
+
+    request = _request()
+    request["refinement_fraction_tolerance"] = 0.3
+    assert client.post(
+        "/v1/engineering/mechanical/geometry/brep/mating-path/refine", json=request
+    ).status_code == 422
