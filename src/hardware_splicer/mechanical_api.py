@@ -33,6 +33,7 @@ class MechanicalStepSource(BaseModel):
     source_id: str = Field(min_length=1)
     content: str = Field(min_length=1)
     model_id: str | None = None
+    content_hash: str | None = Field(default=None, pattern=r"^sha256:[0-9a-f]{64}$")
 
 
 class RegisteredMechanicalStepSource(BaseModel):
@@ -188,6 +189,22 @@ def _source_hash(source: Mapping[str, Any]) -> str:
     return str(source.get("content_hash") or source.get("revision") or "")
 
 
+def _require_inline_source_hashes(
+    request: MechanicalBrepInterferenceRequest,
+    report: BrepPairInterferenceReport,
+) -> None:
+    if (
+        request.first_source.content_hash is not None
+        and report.first_content_hash != request.first_source.content_hash
+    ):
+        raise ValueError("first inline STEP content no longer matches its expected canonical content_hash")
+    if (
+        request.second_source.content_hash is not None
+        and report.second_content_hash != request.second_source.content_hash
+    ):
+        raise ValueError("second inline STEP content no longer matches its expected canonical content_hash")
+
+
 def _resolve_registered_step_source(
     snapshot: Mapping[str, Any],
     reference: RegisteredMechanicalStepSource,
@@ -262,6 +279,7 @@ def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRo
             "optional_brep_kernel": "cadquery-isolated",
             "exact_pair_brep_interference_when_kernel_available": True,
             "exact_pair_brep_minimum_clearance_when_kernel_available": True,
+            "inline_brep_expected_content_hash_supported": True,
             "registered_source_brep_materialization": "content_addressed_hash_reverified_server_side",
             "raw_registered_source_bytes_returned": False,
             "full_brep_collision": False,
@@ -345,6 +363,7 @@ def create_mechanical_router(project_store: ProjectStore | None = None) -> APIRo
                 second_placement=request.second_placement,
                 timeout_s=request.timeout_s,
             )
+            _require_inline_source_hashes(request, report)
         except (TypeError, ValueError) as exc:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
