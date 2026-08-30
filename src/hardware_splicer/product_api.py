@@ -42,6 +42,7 @@ from .machine_project_api import create_machine_project_router
 from .manufacturing_api import create_manufacturing_router
 from .mechanical_api import create_mechanical_router
 from .mechanical_brep_anchor_api import create_mechanical_brep_anchor_router
+from .mechanical_brep_mating_api import create_mechanical_brep_mating_router
 from .mechanical_brep_mesh_api import create_mechanical_brep_mesh_router
 from .physical_evidence_api import create_physical_evidence_router
 from .physical_evidence_attested_api import create_physical_evidence_attested_router
@@ -123,6 +124,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_mechanical_router(resolved_store))
     app.include_router(create_mechanical_brep_mesh_router(resolved_store))
     app.include_router(create_mechanical_brep_anchor_router(resolved_store))
+    app.include_router(create_mechanical_brep_mating_router())
     _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))
