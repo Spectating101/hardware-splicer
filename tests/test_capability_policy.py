@@ -39,8 +39,11 @@ def test_missing_optional_cadquery_does_not_fail_base_product_readiness() -> Non
         "exact_step_brep_surface_anchor",
         "exact_step_brep_anchor_mating_geometry",
         "bounded_sampled_step_brep_mating_path",
+        "adaptive_step_brep_transition_refinement",
     ]
     assert "sampled mating-path clearance" in cadquery["authority_boundary"]
+    assert "adaptively refined predicate brackets" in cadquery["authority_boundary"]
+    assert "unique transition pose" in cadquery["authority_boundary"]
     assert "continuous-path clearance" in cadquery["authority_boundary"]
     assert "whole-assembly validity" in cadquery["authority_boundary"]
     assert "connector mating" in cadquery["authority_boundary"]
