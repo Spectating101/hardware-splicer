@@ -6,6 +6,7 @@ import type { ConstructorCandidateId, MechanicalGeometryEvidence } from '@/lib/m
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { BrepRenderMeshControl } from '@/components/workbench/brep-render-mesh-control';
 import { DeclaredClearanceChecker } from '@/components/workbench/declared-clearance-checker';
 import { DeclaredInterfaceAccessEditor } from '@/components/workbench/declared-interface-access-editor';
 
@@ -45,6 +46,7 @@ export function DeclaredPlacementEditor({
   const clearPlacement = useWorkbenchPlacementStore((state) => state.clearPlacement);
   const clearAccessForEntity = useWorkbenchAccessStore((state) => state.clearAccessForEntity);
   const setMechanicalGeometryEvidence = useMachineWorkbenchStore((state) => state.setMechanicalGeometryEvidence);
+  const clearBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.clearBrepRenderMeshEvidence);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
 
@@ -138,9 +140,10 @@ export function DeclaredPlacementEditor({
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
-      // Interface/access geometry is derived from the parent pose, so every pose
-      // change invalidates it before the new placement becomes visible.
+      // Access envelopes and exact render meshes are pose-derived evidence. Every
+      // placement write invalidates both before the new pose becomes visible.
       clearAccessForEntity(candidateId, entityId);
+      clearBrepRenderMeshEvidence(candidateId, entityId);
       setPlacement(candidateId, placement);
       // Re-write the same parsed evidence to create a new planner projection object;
       // the spatial adapter then composes the separately stored placement evidence.
@@ -148,7 +151,7 @@ export function DeclaredPlacementEditor({
       setSelectedEntityId(entityId);
       window.setTimeout(requestFrameSelection, 0);
       setState('success');
-      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement.`);
+      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement. Exact mesh evidence, if any, was invalidated.`);
     } catch (error: unknown) {
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
@@ -157,10 +160,11 @@ export function DeclaredPlacementEditor({
 
   function removePlacement() {
     clearAccessForEntity(candidateId, entityId);
+    clearBrepRenderMeshEvidence(candidateId, entityId);
     clearPlacement(candidateId, entityId);
     setMechanicalGeometryEvidence(candidateId, evidence);
     setState('idle');
-    setMessage('Declared placement cleared; dependent interface access evidence was invalidated.');
+    setMessage('Declared placement cleared; dependent interface access and exact mesh evidence were invalidated.');
   }
 
   return (
@@ -224,13 +228,23 @@ export function DeclaredPlacementEditor({
         <div className="mt-1 text-[7px] leading-3 text-amber-100/45">Placement establishes a common coordinate frame only. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
       </div>
       {existing ? (
-        <DeclaredInterfaceAccessEditor
-          candidateId={candidateId}
-          resourceId={resourceId}
-          resourceName={resourceName}
-          entityId={entityId}
-          placement={existing}
-        />
+        <>
+          <BrepRenderMeshControl
+            candidateId={candidateId}
+            resourceId={resourceId}
+            resourceName={resourceName}
+            entityId={entityId}
+            evidence={evidence}
+            placement={existing}
+          />
+          <DeclaredInterfaceAccessEditor
+            candidateId={candidateId}
+            resourceId={resourceId}
+            resourceName={resourceName}
+            entityId={entityId}
+            placement={existing}
+          />
+        </>
       ) : null}
       <DeclaredClearanceChecker />
     </>
