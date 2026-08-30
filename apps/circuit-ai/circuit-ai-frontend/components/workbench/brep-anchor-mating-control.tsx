@@ -8,6 +8,8 @@ import {
   type BrepSurfaceAnchorEvidence,
 } from '@/lib/workbench-brep-anchor-store';
 
+const EMPTY_ANCHORS: Record<string, BrepSurfaceAnchorEvidence> = {};
+
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
@@ -58,7 +60,8 @@ export function BrepAnchorMatingControl({
   candidateId: ConstructorCandidateId;
   entityId: string;
 }) {
-  const anchors = useWorkbenchBrepAnchorStore((state) => state.anchorsByCandidate[candidateId] ?? {});
+  const candidateAnchors = useWorkbenchBrepAnchorStore((state) => state.anchorsByCandidate[candidateId]);
+  const anchors = candidateAnchors ?? EMPTY_ANCHORS;
   const pairs = useMemo(() => {
     const rows = Object.values(anchors);
     const result: AnchorPair[] = [];
@@ -115,6 +118,12 @@ export function BrepAnchorMatingControl({
     return value;
   }
 
+  function parseSignedNumber(label: string, raw: string) {
+    const value = Number(raw);
+    if (!Number.isFinite(value)) throw new Error(`${label} must be a finite number.`);
+    return value;
+  }
+
   function parseOptionalNumber(label: string, raw: string) {
     if (!raw.trim()) return null;
     return parseRequiredNumber(label, raw);
@@ -156,7 +165,7 @@ export function BrepAnchorMatingControl({
           requirements: {
             max_normal_opposition_error_deg: parseRequiredNumber('Normal opposition tolerance', normalTolerance),
             max_lateral_offset_mm: parseRequiredNumber('Lateral offset tolerance', lateralTolerance),
-            target_axial_offset_mm: Number(targetAxialOffset),
+            target_axial_offset_mm: parseSignedNumber('Target axial offset', targetAxialOffset),
             axial_offset_tolerance_mm: parseRequiredNumber('Axial offset tolerance', axialTolerance),
             declared_mating_axis: selectedAxis,
             max_axis_alignment_error_deg: parseRequiredNumber('Axis alignment tolerance', axisTolerance),
