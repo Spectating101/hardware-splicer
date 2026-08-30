@@ -35,6 +35,15 @@ def _request() -> dict:
             "content_hash": _hash(),
             "content": STEP,
         },
+        "placement": {
+            "placement_id": "place-fixture",
+            "object_id": "fixture-object",
+            "model_id": "fixture",
+            "target_frame": "assembly",
+            "translation_mm": [20.0, 0.0, 0.0],
+            "rotation_deg_xyz": [0.0, 0.0, 0.0],
+            "authority": "declared",
+        },
         "tolerance_mm": 0.5,
         "angular_tolerance_rad": 0.1,
     }
@@ -53,12 +62,14 @@ def test_product_mounts_bounded_brep_render_mesh_surface() -> None:
     assert body["maximum_vertices"] == 25_000
     assert body["maximum_triangles"] == 50_000
     assert body["hash_bound_inline_source_supported"] is True
+    assert body["declared_placement_supported"] is True
+    assert body["placement_transform_convention"] == "Rz*Ry*Rx; canonical STEP XYZ"
     assert body["render_evidence_only"] is True
     assert body["physical_measurement"] is False
     assert body["fabrication_authorized"] is False
 
 
-def test_mesh_route_returns_unknown_without_optional_kernel_and_never_fakes_geometry(monkeypatch) -> None:
+def test_mesh_route_returns_unknown_without_optional_kernel_and_preserves_placement_identity(monkeypatch) -> None:
     monkeypatch.setattr(brep_mesh, "_cadquery_available", lambda: False)
     response = TestClient(create_product_app()).post(
         "/v1/engineering/mechanical/geometry/brep/mesh",
@@ -70,6 +81,7 @@ def test_mesh_route_returns_unknown_without_optional_kernel_and_never_fakes_geom
     assert body["ok"] is True
     assert body["kernel_available"] is False
     assert body["exact_brep_mesh_evaluated"] is False
+    assert body["declared_placement_applied"] is True
     assert body["vertex_count"] == 0
     assert body["triangle_count"] == 0
     assert body["raw_step_bytes_returned"] is False
@@ -77,6 +89,8 @@ def test_mesh_route_returns_unknown_without_optional_kernel_and_never_fakes_geom
     assert body["fabrication_authorized"] is False
     report = body["brep_mesh"]
     assert report["status"] == "unknown"
+    assert report["frame_id"] == "assembly"
+    assert report["placement_id"] == "place-fixture"
     assert report["vertices_mm"] == []
     assert report["triangles"] == []
     assert report["required_evidence"][0]["field"] == "cadquery-isolated"
@@ -100,3 +114,18 @@ def test_mesh_route_rejects_changed_bytes_against_parser_issued_hash_before_kern
     detail = response.json()["detail"]
     assert detail["type"] == "invalid_brep_mesh_request"
     assert "expected canonical content_hash" in detail["message"]
+
+
+def test_mesh_route_rejects_placement_model_identity_mismatch() -> None:
+    request = _request()
+    request["placement"]["model_id"] = "wrong"
+
+    response = TestClient(create_product_app()).post(
+        "/v1/engineering/mechanical/geometry/brep/mesh",
+        json=request,
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert detail["type"] == "invalid_brep_mesh_request"
+    assert "mesh placement targets model 'wrong'" in detail["message"]
