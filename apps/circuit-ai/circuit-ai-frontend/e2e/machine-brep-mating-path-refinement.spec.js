@@ -463,8 +463,8 @@ test('adaptive exact BREP refinement renders bounded predicate brackets without 
   const refinement = page.getByTestId('brep-mating-path-refinement-control');
   await expect(refinement).toContainText('exact OCCT · range only');
   await expect(refinement).toContainText('No unique contact pose or continuous clearance is inferred');
-  await expect(page.getByLabel('Refined mating path end translation X')).toHaveValue('150');
-  await page.getByLabel('Refined mating path end translation X').fill('5');
+  await expect(page.getByLabel('Adaptive refinement end translation X')).toHaveValue('150');
+  await page.getByLabel('Adaptive refinement end translation X').fill('5');
   await page.getByLabel('Refined mating path coarse sample count').fill('6');
   await page.getByRole('button', { name: 'Refine sampled transitions' }).click();
 
