@@ -266,9 +266,9 @@ def test_parser_api_persists_step_geometry_without_raw_source_bytes(tmp_path: Pa
     body = parsed.json()
     assert body["registered"] is True
     assert body["derived_source_count"] == 0
-    assert body["result"]["status"] == "parsed"
-    assert body["result"]["parser_route"] == "step_geometry"
-    assert body["result"]["parsed_output"]["step_model"]["bounding_box"]["size"] == [100.0, 50.0, 10.0]
+    assert body["parser_run"]["status"] == "parsed"
+    assert body["parser_run"]["parser_route"] == "step_geometry"
+    assert body["parser_run"]["parsed_output"]["step_model"]["bounding_box"]["size"] == [100.0, 50.0, 10.0]
 
     saved = store.load("robot-r1", revision=3)["snapshot"]
     run = saved["engineeringSourceParserRuns"][0]
@@ -296,7 +296,15 @@ def test_parser_api_refuses_stale_revision_before_blob_read(tmp_path: Path) -> N
 
 
 def test_product_app_mounts_parser_routes(tmp_path: Path) -> None:
-    paths = create_product_app(ProjectStore(tmp_path)).openapi()["paths"]
+    client = TestClient(create_product_app(ProjectStore(tmp_path)))
+    paths = client.app.openapi()["paths"]
 
     assert "/v1/engineering/sources/parser/schema" in paths
     assert "/v1/projects/{project_id}/sources/{source_id}/parse" in paths
+    schema = client.get("/v1/engineering/sources/parser/schema")
+    assert schema.status_code == 200
+    body = schema.json()
+    assert "step_geometry" in body["supported_routes"]
+    assert "step_geometry" not in body["explicitly_unavailable_routes"]
+    assert body["step_geometry_point_envelope_only"] is True
+    assert body["step_geometry_full_brep_validation"] is False
