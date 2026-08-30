@@ -39,13 +39,15 @@ def product_capability_report(
                 "exact_step_brep_surface_anchor",
                 "exact_step_brep_anchor_mating_geometry",
                 "bounded_sampled_step_brep_mating_path",
+                "adaptive_step_brep_transition_refinement",
             ]
             row["authority_boundary"] = (
                 "CadQuery/OCCT output is geometry evidence only; specialist availability, successful "
-                "execution, anchor-pair geometric tolerance closure, or sampled mating-path clearance "
-                "does not establish continuous-path clearance, physical measurement, whole-assembly "
-                "validity, connector mating, protocol/pin compatibility, structural safety, fabrication, "
-                "power-on, motion, or release authority."
+                "execution, anchor-pair geometric tolerance closure, sampled mating-path clearance, or "
+                "adaptively refined predicate brackets do not establish a unique transition pose, "
+                "continuous-path clearance, physical measurement, whole-assembly validity, connector "
+                "mating, protocol/pin compatibility, structural safety, fabrication, power-on, motion, "
+                "or release authority."
             )
         if row.get("readiness") == "missing_required":
             row["readiness"] = "missing_optional"
