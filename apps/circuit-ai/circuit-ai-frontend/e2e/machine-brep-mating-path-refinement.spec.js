@@ -375,7 +375,7 @@ async function clickSelectedExactMesh(page) {
   await expect(page.getByTestId('brep-surface-anchor-feedback')).toHaveAttribute('data-pick-status', 'success');
 }
 
-test('adaptive exact BREP refinement renders bounded predicate brackets without collapsing them to point events', async ({ page }) => {
+test('adaptive exact BREP refinement renders bounded predicate brackets without collapsing them to point events', async ({ page }, testInfo) => {
   test.setTimeout(150_000);
   await page.setViewportSize({ width: 1600, height: 1000 });
   const refinementRequests = [];
@@ -481,6 +481,7 @@ test('adaptive exact BREP refinement renders bounded predicate brackets without 
   await expect(brackets.nth(1)).toContainText('contact → interference');
   await expect(refinement).toContainText('They do not prove a unique transition pose');
   expect(refinementRequests).toHaveLength(1);
+  await page.screenshot({ path: testInfo.outputPath('machine-brep-mating-path-refinement-dense.png') });
 
   // Any refinement-parameter edit invalidates the old bracket evidence immediately.
   await page.getByLabel('Mating path refinement fraction tolerance').fill('0.002');
