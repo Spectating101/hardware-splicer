@@ -68,6 +68,7 @@ jobs:
             e2e/machine-constructor-live-planner.spec.js \
             e2e/machine-exact-brep-clearance.spec.js \
             e2e/machine-brep-surface-anchor.spec.js \
+            e2e/machine-brep-anchor-mating.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
