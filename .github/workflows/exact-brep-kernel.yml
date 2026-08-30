@@ -5,19 +5,25 @@ on:
     paths:
       - "src/hardware_splicer/mechanical_brep.py"
       - "src/hardware_splicer/_cadquery_brep_worker.py"
+      - "src/hardware_splicer/mechanical_brep_mesh.py"
+      - "src/hardware_splicer/_cadquery_brep_mesh_worker.py"
+      - "src/hardware_splicer/mechanical_brep_mesh_api.py"
       - "src/hardware_splicer/mechanical_placement.py"
       - "src/hardware_splicer/step_geometry.py"
       - "src/hardware_splicer/mechanical_api.py"
+      - "src/hardware_splicer/product_api.py"
       - "tests/test_mechanical_brep.py"
       - "tests/test_mechanical_brep_api.py"
       - "tests/test_mechanical_brep_hash_binding.py"
       - "tests/test_mechanical_brep_live_api.py"
+      - "tests/test_mechanical_brep_mesh.py"
+      - "tests/test_mechanical_brep_mesh_api.py"
       - "pyproject.toml"
       - ".github/workflows/exact-brep-kernel.yml"
 
 jobs:
   cadquery-occt:
-    name: CadQuery OCCT pair interference
+    name: CadQuery OCCT pair interference and render mesh
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,7 +43,7 @@ jobs:
           assert cq.__version__ == "2.8.0", cq.__version__
           print(f"CadQuery {cq.__version__} / OCCT specialist import OK")
           PY
-      - name: Run exact BREP contracts and real solid API proof
+      - name: Run exact BREP contracts, real solid API proof, and tessellation proof
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
@@ -45,4 +51,6 @@ jobs:
             tests/test_mechanical_brep.py \
             tests/test_mechanical_brep_api.py \
             tests/test_mechanical_brep_hash_binding.py \
-            tests/test_mechanical_brep_live_api.py
+            tests/test_mechanical_brep_live_api.py \
+            tests/test_mechanical_brep_mesh.py \
+            tests/test_mechanical_brep_mesh_api.py
