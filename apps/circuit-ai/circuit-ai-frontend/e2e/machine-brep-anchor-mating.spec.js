@@ -3,8 +3,10 @@ const { test, expect } = require('@playwright/test');
 const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 const HASH_A = `sha256:${'a'.repeat(64)}`;
 const HASH_B = `sha256:${'b'.repeat(64)}`;
+const HASH_C = `sha256:${'c'.repeat(64)}`;
 const MAINBOARD_STEP = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(100.,80.,10.));\nENDSEC;\nEND-ISO-10303-21;\n";
 const DISPLAY_STEP = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(120.,90.,12.));\nENDSEC;\nEND-ISO-10303-21;\n";
+const DISPLAY_REPLACEMENT_STEP = "ISO-10303-21;\nHEADER;\nFILE_SCHEMA(('AP242_MANAGED_MODEL_BASED_3D_ENGINEERING_MIM_LF'));\nENDSEC;\nDATA;\n#1=CARTESIAN_POINT('',(0.,0.,0.));\n#2=CARTESIAN_POINT('',(125.,92.,13.));\nENDSEC;\nEND-ISO-10303-21;\n";
 
 function strategyResponse(mode) {
   return {
@@ -34,6 +36,9 @@ function strategyResponse(mode) {
 }
 
 function sourceConfig(sourceId) {
+  if (sourceId.includes('replacement')) {
+    return { hash: HASH_C, size: [125, 92, 13], product: 'Replacement Controlled Display' };
+  }
   const display = sourceId.includes('display');
   return {
     hash: display ? HASH_B : HASH_A,
@@ -377,7 +382,7 @@ test('two exact BREP anchors evaluate pair geometry without promoting connector 
   });
   await page.route('**/api/proxy/engineering/mechanical/geometry/brep/mesh', async (route) => {
     const body = JSON.parse(route.request().postData() || '{}');
-    const expectedHash = body.source.source_id.includes('display') ? HASH_B : HASH_A;
+    const expectedHash = sourceConfig(body.source.source_id).hash;
     expect(body.source.content_hash).toBe(expectedHash);
     expect(body.source.content).toContain('ISO-10303-21');
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(meshResponse(body)) });
@@ -471,4 +476,23 @@ test('two exact BREP anchors evaluate pair geometry without promoting connector 
   await expect(page.getByTestId('brep-anchor-mating-feedback')).toContainText('Mating geometry UNKNOWN');
   expect(matingRequests.at(-1).requirements.declared_engagement_depth_mm).toBeNull();
   expect(matingRequests).toHaveLength(4);
+
+  // Replacing a STEP source changes canonical source identity. The old display pose,
+  // tessellation and anchor cannot remain valid merely because entity/resource ids are
+  // unchanged. The mainboard evidence remains intact because invalidation is scoped.
+  await page.getByLabel('Attach STEP geometry for Donor display + validated controller').setInputFiles({
+    name: 'display-replacement.step',
+    mimeType: 'model/step',
+    buffer: Buffer.from(DISPLAY_REPLACEMENT_STEP),
+  });
+  await expect(page.getByTestId('step-geometry-import')).toContainText('STEP envelope attached: 125 × 92 × 13 mm');
+  await expect(page.getByTestId('step-geometry-import')).toContainText('Prior placement and dependent exact evidence were invalidated; re-place this source.');
+  await expect(page.getByTestId('exact-brep-render-mesh')).toHaveCount(0);
+  await expect(page.getByTestId('exact-brep-surface-anchor')).toHaveCount(0);
+  await expect(page.getByTestId('brep-anchor-mating-control')).toHaveCount(0);
+
+  await mainboard.click();
+  await expect(page.getByTestId('exact-brep-render-mesh')).toBeVisible();
+  await expect(page.getByTestId('exact-brep-surface-anchor')).toHaveAttribute('data-anchor-id', 'anchor-balanced-cmp-mainboard-if-display');
+  await expect(page.getByTestId('brep-anchor-mating-control')).toHaveCount(0);
 });
