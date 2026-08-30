@@ -7,6 +7,7 @@ import { deck001Interfaces } from '@/lib/workbench-demo';
 import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
 import { BrepAnchorMatingControl } from '@/components/workbench/brep-anchor-mating-control';
 import { BrepMatingPathControl } from '@/components/workbench/brep-mating-path-control';
+import { BrepMatingPathRefinementControl } from '@/components/workbench/brep-mating-path-refinement-control';
 
 export function BrepSurfaceAnchorControl({
   candidateId,
@@ -114,6 +115,7 @@ export function BrepSurfaceAnchorControl({
       </div>
       <BrepAnchorMatingControl candidateId={candidateId} entityId={entityId} />
       <BrepMatingPathControl candidateId={candidateId} entityId={entityId} />
+      <BrepMatingPathRefinementControl candidateId={candidateId} entityId={entityId} />
     </div>
   );
 }
