@@ -5,6 +5,7 @@ import { deck001EntityMap, deck001Interfaces } from '@/lib/workbench-demo';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore, type DeclaredAccessEvidence } from '@/lib/workbench-access-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { BrepRenderMeshOverlays } from '@/components/workbench/brep-render-mesh-overlay';
 
 const SCENE_UNITS_PER_MM = 0.025;
 const EMPTY_ACCESS_MAP: Record<string, DeclaredAccessEvidence> = {};
@@ -115,6 +116,7 @@ export function DeclaredInterfaceAccessOverlays() {
 
   return (
     <>
+      <BrepRenderMeshOverlays />
       {Object.values(accessMap).map((access) => (
         <AccessEnvelope
           key={access.accessId}
