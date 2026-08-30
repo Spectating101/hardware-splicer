@@ -16,6 +16,8 @@ on:
       - "src/hardware_splicer/mechanical_brep_sweep.py"
       - "src/hardware_splicer/_cadquery_brep_sweep_worker.py"
       - "src/hardware_splicer/mechanical_brep_sweep_api.py"
+      - "src/hardware_splicer/mechanical_brep_transition_refinement.py"
+      - "src/hardware_splicer/_cadquery_brep_transition_refinement_worker.py"
       - "src/hardware_splicer/mechanical_placement.py"
       - "src/hardware_splicer/step_geometry.py"
       - "src/hardware_splicer/mechanical_api.py"
@@ -32,12 +34,14 @@ on:
       - "tests/test_mechanical_brep_mating_api.py"
       - "tests/test_mechanical_brep_sweep.py"
       - "tests/test_mechanical_brep_sweep_api.py"
+      - "tests/test_mechanical_brep_transition_refinement.py"
+      - "tests/test_mechanical_brep_transition_refinement_api.py"
       - "pyproject.toml"
       - ".github/workflows/exact-brep-kernel.yml"
 
 jobs:
   cadquery-occt:
-    name: CadQuery OCCT pair interference, render mesh, anchors, mating, and sampled mating path
+    name: CadQuery OCCT interference, mesh, anchors, mating, sampled path, and adaptive refinement
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -57,7 +61,7 @@ jobs:
           assert cq.__version__ == "2.8.0", cq.__version__
           print(f"CadQuery {cq.__version__} / OCCT specialist import OK")
           PY
-      - name: Run exact BREP contracts, real solid API proof, tessellation, anchors, mating geometry, and sampled path
+      - name: Run exact BREP contracts, real solid proof, sampled path, and adaptive transition refinement
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
@@ -73,4 +77,6 @@ jobs:
             tests/test_mechanical_brep_mating.py \
             tests/test_mechanical_brep_mating_api.py \
             tests/test_mechanical_brep_sweep.py \
-            tests/test_mechanical_brep_sweep_api.py
+            tests/test_mechanical_brep_sweep_api.py \
+            tests/test_mechanical_brep_transition_refinement.py \
+            tests/test_mechanical_brep_transition_refinement_api.py
