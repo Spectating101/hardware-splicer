@@ -11,6 +11,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import os
 import subprocess
 import sys
 import tempfile
@@ -21,11 +22,13 @@ from typing import Any, Callable, Dict, Mapping
 from pydantic import BaseModel, ConfigDict, Field
 
 from .mechanical_brep import _diagnostic_suffix, _sanitized_environment, _terminate_process_tree
+from .mechanical_placement import DeclaredGeometryPlacement
 from .step_geometry import StepModelSummary, parse_step_model
 
 
 BREP_MESH_SCHEMA = "hardware_splicer.brep_render_mesh.v1"
 BREP_MESH_WORKER_SCHEMA = "hardware_splicer.cadquery_brep_mesh_worker.v1"
+ROTATION_CONVENTION = "Rz*Ry*Rx; canonical STEP XYZ"
 MIN_TOLERANCE_MM = 0.1
 MAX_TOLERANCE_MM = 5.0
 MIN_ANGULAR_TOLERANCE_RAD = 0.01
@@ -52,6 +55,8 @@ class BrepRenderMeshReport(BrepMeshBase):
     source_id: str = Field(min_length=1)
     model_id: str = Field(min_length=1)
     content_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    frame_id: str | None = None
+    placement_id: str | None = None
     status: BrepMeshStatus
     kernel_available: bool
     kernel: str | None = None
@@ -71,7 +76,10 @@ class BrepRenderMeshReport(BrepMeshBase):
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
-Runner = Callable[[str, str, float, float, float], Mapping[str, Any]]
+Runner = Callable[
+    [str, str, Mapping[str, Any], float, float, float],
+    Mapping[str, Any],
+]
 
 
 def _cadquery_available() -> bool:
@@ -84,9 +92,10 @@ def _cadquery_available() -> bool:
 def _base_metadata() -> Dict[str, Any]:
     return {
         "specialist_capability": "cadquery-isolated",
-        "scope": "single_step_render_tessellation",
+        "scope": "single_step_placed_render_tessellation",
         "render_evidence_only": True,
         "exact_brep_mesh_source": True,
+        "rotation_convention": ROTATION_CONVENTION,
         "full_assembly_collision": False,
         "connector_mating_verified": False,
         "cable_routing_verified": False,
@@ -101,10 +110,35 @@ def _base_metadata() -> Dict[str, Any]:
     }
 
 
+def _placement_payload(
+    model: StepModelSummary,
+    placement: DeclaredGeometryPlacement | Mapping[str, Any] | None,
+) -> tuple[DeclaredGeometryPlacement | None, Dict[str, Any]]:
+    if placement is None:
+        return None, {
+            "translation_mm": [0.0, 0.0, 0.0],
+            "rotation_deg_xyz": [0.0, 0.0, 0.0],
+        }
+    resolved = (
+        placement
+        if isinstance(placement, DeclaredGeometryPlacement)
+        else DeclaredGeometryPlacement.model_validate(placement)
+    )
+    if resolved.model_id != model.model_id:
+        raise ValueError(
+            f"mesh placement targets model {resolved.model_id!r}, not imported STEP model {model.model_id!r}"
+        )
+    return resolved, {
+        "translation_mm": list(resolved.translation_mm),
+        "rotation_deg_xyz": list(resolved.rotation_deg_xyz),
+    }
+
+
 def _unknown(
     *,
     project_id: str,
     model: StepModelSummary,
+    placement: DeclaredGeometryPlacement | None,
     tolerance_mm: float,
     angular_tolerance_rad: float,
     kernel_available: bool,
@@ -117,12 +151,18 @@ def _unknown(
         source_id=model.source_id,
         model_id=model.model_id,
         content_hash=model.content_hash,
+        frame_id=placement.target_frame if placement else None,
+        placement_id=placement.placement_id if placement else None,
         status=BrepMeshStatus.UNKNOWN,
         kernel_available=kernel_available,
         tolerance_mm=tolerance_mm,
         angular_tolerance_rad=angular_tolerance_rad,
         required_evidence=[{"field": required_field, "reason": reason}],
-        metadata={**_base_metadata(), **dict(metadata or {})},
+        metadata={
+            **_base_metadata(),
+            "declared_placement_applied": placement is not None,
+            **dict(metadata or {}),
+        },
     )
 
 
@@ -135,6 +175,10 @@ def _validate_mesh_payload(
         raise ValueError("CadQuery mesh worker schema is incompatible")
     if payload.get("input_content_hash") != expected_hash:
         raise ValueError("CadQuery mesh worker input hash disagrees with canonical STEP identity")
+    if payload.get("rotation_convention") != ROTATION_CONVENTION:
+        raise ValueError("CadQuery mesh worker rotation convention is incompatible")
+    if payload.get("placement_applied") is not True:
+        raise ValueError("CadQuery mesh worker did not confirm placement application")
     if payload.get("shape_valid") is not True:
         raise ValueError("CadQuery mesh worker did not validate the imported shape")
 
@@ -172,7 +216,9 @@ def _validate_mesh_payload(
         if any(value < 0 or value >= vertex_count for value in row):
             raise ValueError("CadQuery mesh worker emitted an out-of-range triangle index")
         triangles.append(row)
-    return vertices, triangles, solid_count, len(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
+    return vertices, triangles, solid_count, len(
+        json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    )
 
 
 def build_step_brep_render_mesh(
@@ -182,6 +228,7 @@ def build_step_brep_render_mesh(
     source_id: str,
     model_id: str | None = None,
     expected_content_hash: str | None = None,
+    placement: DeclaredGeometryPlacement | Mapping[str, Any] | None = None,
     tolerance_mm: float = 0.5,
     angular_tolerance_rad: float = 0.1,
     timeout_s: float = _DEFAULT_TIMEOUT_S,
@@ -206,12 +253,14 @@ def build_step_brep_render_mesh(
     model = parse_step_model(content, source_id=source_id, model_id=model_id)
     if expected_content_hash is not None and expected_content_hash != model.content_hash:
         raise ValueError("inline STEP content no longer matches its expected canonical content_hash")
+    resolved_placement, placement_payload = _placement_payload(model, placement)
 
     available = _cadquery_available() if kernel_available is None else bool(kernel_available)
     if not available:
         return _unknown(
             project_id=project_id,
             model=model,
+            placement=resolved_placement,
             tolerance_mm=tolerance_mm,
             angular_tolerance_rad=angular_tolerance_rad,
             kernel_available=False,
@@ -225,6 +274,7 @@ def build_step_brep_render_mesh(
             selected_runner(
                 content,
                 model.content_hash,
+                placement_payload,
                 tolerance_mm,
                 angular_tolerance_rad,
                 timeout_s,
@@ -242,6 +292,7 @@ def build_step_brep_render_mesh(
         return _unknown(
             project_id=project_id,
             model=model,
+            placement=resolved_placement,
             tolerance_mm=tolerance_mm,
             angular_tolerance_rad=angular_tolerance_rad,
             kernel_available=True,
@@ -255,6 +306,8 @@ def build_step_brep_render_mesh(
         source_id=model.source_id,
         model_id=model.model_id,
         content_hash=model.content_hash,
+        frame_id=resolved_placement.target_frame if resolved_placement else None,
+        placement_id=resolved_placement.placement_id if resolved_placement else None,
         status=BrepMeshStatus.READY,
         kernel_available=True,
         kernel=str(payload.get("kernel") or "cadquery_occt"),
@@ -276,6 +329,7 @@ def build_step_brep_render_mesh(
             "worker_isolated": True,
             "worker_schema": BREP_MESH_WORKER_SCHEMA,
             "worker_input_hash_reverified": True,
+            "declared_placement_applied": resolved_placement is not None,
             "mesh_response_bytes": response_bytes,
             "vertex_limit": MAX_MESH_VERTICES,
             "triangle_limit": MAX_MESH_TRIANGLES,
@@ -286,6 +340,7 @@ def build_step_brep_render_mesh(
 def _run_isolated_worker(
     content: str,
     expected_content_hash: str,
+    placement: Mapping[str, Any],
     tolerance_mm: float,
     angular_tolerance_rad: float,
     timeout_s: float,
@@ -303,22 +358,27 @@ def _run_isolated_worker(
                 {
                     "step_path": str(step_path),
                     "expected_content_hash": expected_content_hash,
+                    "placement": dict(placement),
                     "tolerance_mm": tolerance_mm,
                     "angular_tolerance_rad": angular_tolerance_rad,
                 }
             ),
             encoding="utf-8",
         )
-        process = subprocess.Popen(
-            [sys.executable, "-I", str(_WORKER_PATH), str(input_path)],
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=_sanitized_environment(),
-            cwd=str(root),
-            start_new_session=True,
-        )
+        kwargs: dict[str, object] = {
+            "args": [sys.executable, "-I", str(_WORKER_PATH), str(input_path)],
+            "stdin": subprocess.DEVNULL,
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            "text": True,
+            "env": _sanitized_environment(),
+            "cwd": str(root),
+        }
+        if os.name == "nt":
+            kwargs["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        else:
+            kwargs["start_new_session"] = True
+        process = subprocess.Popen(**kwargs)  # type: ignore[arg-type]
         try:
             stdout, stderr = process.communicate(timeout=timeout_s)
         except subprocess.TimeoutExpired as exc:
