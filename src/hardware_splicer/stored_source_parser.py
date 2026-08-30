@@ -20,6 +20,7 @@ from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
 from .machine_project import AuthorityState
 from .project_store import default_project_root, validate_project_id
 from .robot_model_import import parse_robot_model, topology_from_robot_model
+from .step_geometry import build_mechanical_geometry_report, parse_step_model
 
 
 STORED_SOURCE_PARSER_SCHEMA = "hardware_splicer.stored_source_parser.v1"
@@ -368,21 +369,55 @@ def execute_stored_source_parser(
         )
 
     if parser_route == "step_geometry":
+        model = parse_step_model(content, source_id=source_id, model_id=source_id)
+        if model.content_hash != content_hash:
+            raise ValueError("STEP parser hash disagrees with registered source")
+        model = model.model_copy(
+            update={
+                "authority": authority,
+                "metadata": {
+                    **model.metadata,
+                    "registered_source_hash_reverified": True,
+                    "authority_bounded_by_parent_upload": True,
+                    "physical_authority_unchanged": True,
+                },
+            }
+        )
+        report = build_mechanical_geometry_report(
+            project_id=project_id,
+            models=[model],
+            mounts=[],
+        )
         return StoredSourceParserResult(
             project_id=project_id,
             source_id=source_id,
             content_hash=content_hash,
             parser_route=parser_route,
-            status=StoredParserStatus.SKIPPED,
+            status=StoredParserStatus.PARSED,
             authority_ceiling=authority,
+            parsed_output={
+                "step_model": model.model_dump(mode="json"),
+                "mechanical_geometry": report.model_dump(mode="json"),
+                "summary": {
+                    "model_id": model.model_id,
+                    "units": model.units,
+                    "entity_count": model.entity_count,
+                    "cartesian_point_count": model.cartesian_point_count,
+                    "has_bounding_box": model.bounding_box is not None,
+                    "unresolved_count": len(model.unresolved),
+                },
+            },
             limitations=[
-                "No callable bounded STEP parser is registered in this build; "
-                "the file remains hash-verified inventory."
+                "Stored STEP parsing establishes bounded file identity and a Cartesian-point envelope only.",
+                "It does not establish BREP validity, solid interference, mass properties, service access, structural safety, or fabrication authority.",
             ],
             metadata={
-                "blob_hash_reverified": True,
+                "parser_reverified_hash": True,
                 "verified_size_bytes": len(content),
-                "parser_available": False,
+                "parser_available": True,
+                "step_point_envelope_only": True,
+                "full_brep_validation": False,
+                "authority_bounded_by_parent_upload": True,
                 "physical_authority_unchanged": True,
             },
         )
