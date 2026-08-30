@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 WORKER_SCHEMA = "hardware_splicer.cadquery_brep_mesh_worker.v1"
+ROTATION_CONVENTION = "Rz*Ry*Rx; canonical STEP XYZ"
 MAX_MESH_VERTICES = 25_000
 MAX_MESH_TRIANGLES = 50_000
 
@@ -22,6 +23,21 @@ def _load_shape(cq, path: str):
     if len(shapes) == 1:
         return shapes[0]
     return cq.Compound.makeCompound(shapes)
+
+
+def _place(shape, row: dict):
+    translation = [float(value) for value in row.get("translation_mm", [0.0, 0.0, 0.0])]
+    rotation = [float(value) for value in row.get("rotation_deg_xyz", [0.0, 0.0, 0.0])]
+    if len(translation) != 3 or len(rotation) != 3:
+        raise RuntimeError("CadQuery placement requires three translation and three rotation values")
+    return shape.moved(
+        x=translation[0],
+        y=translation[1],
+        z=translation[2],
+        rx=rotation[0],
+        ry=rotation[1],
+        rz=rotation[2],
+    )
 
 
 def _finite_vertex(vertex) -> list[float]:
@@ -46,7 +62,11 @@ def main() -> None:
 
     tolerance_mm = float(request["tolerance_mm"])
     angular_tolerance_rad = float(request["angular_tolerance_rad"])
-    shape = _load_shape(cq, str(step_path))
+    placement = request.get("placement") or {
+        "translation_mm": [0.0, 0.0, 0.0],
+        "rotation_deg_xyz": [0.0, 0.0, 0.0],
+    }
+    shape = _place(_load_shape(cq, str(step_path)), placement)
     shape_valid = bool(shape.isValid())
     solid_count = len(shape.Solids())
     if not shape_valid:
@@ -88,6 +108,8 @@ def main() -> None:
                 "triangles": triangle_rows,
                 "tolerance_mm": tolerance_mm,
                 "angular_tolerance_rad": angular_tolerance_rad,
+                "rotation_convention": ROTATION_CONVENTION,
+                "placement_applied": True,
             },
             separators=(",", ":"),
         )
