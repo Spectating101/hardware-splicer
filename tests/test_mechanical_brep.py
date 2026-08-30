@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import hashlib
+
 import pytest
 
+import hardware_splicer.mechanical_brep as mechanical_brep
 from hardware_splicer.mechanical_brep import (
+    BREP_KERNEL,
+    BREP_ROTATION_CONVENTION,
+    BREP_WORKER_SCHEMA,
     BrepStatus,
     _sanitized_environment,
     check_step_brep_interference,
@@ -21,6 +27,30 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+
+
+def _hash(content: str) -> str:
+    return f"sha256:{hashlib.sha256(content.encode('utf-8')).hexdigest()}"
+
+
+def _worker_payload(first_content: str, second_content: str, **overrides):
+    payload = {
+        "schema_version": BREP_WORKER_SCHEMA,
+        "ok": True,
+        "kernel": BREP_KERNEL,
+        "cadquery_version": "test",
+        "first_content_hash": _hash(first_content),
+        "second_content_hash": _hash(second_content),
+        "first_shape_valid": True,
+        "second_shape_valid": True,
+        "first_solid_count": 1,
+        "second_solid_count": 1,
+        "minimum_distance_mm": 0.0,
+        "intersection_volume_mm3": 0.0,
+        "rotation_convention": BREP_ROTATION_CONVENTION,
+    }
+    payload.update(overrides)
+    return payload
 
 
 def _placement(placement_id: str, object_id: str, model_id: str, *, frame: str = "assembly") -> dict:
@@ -82,18 +112,13 @@ def test_frame_mismatch_fails_closed_before_kernel_execution() -> None:
 
 
 def test_valid_kernel_result_reports_exact_solid_interference_without_authority() -> None:
-    def runner(*_args):
-        return {
-            "ok": True,
-            "kernel": "cadquery_occt",
-            "cadquery_version": "test",
-            "first_shape_valid": True,
-            "second_shape_valid": True,
-            "first_solid_count": 1,
-            "second_solid_count": 2,
-            "minimum_distance_mm": 0.0,
-            "intersection_volume_mm3": 12.5,
-        }
+    def runner(first_content, second_content, *_args):
+        return _worker_payload(
+            first_content,
+            second_content,
+            second_solid_count=2,
+            intersection_volume_mm3=12.5,
+        )
 
     report = _check(kernel_available=True, runner=runner)
 
@@ -106,6 +131,9 @@ def test_valid_kernel_result_reports_exact_solid_interference_without_authority(
     assert report.minimum_distance_mm == 0.0
     assert report.first_content_hash.startswith("sha256:")
     assert report.second_content_hash.startswith("sha256:")
+    assert report.metadata["worker_schema"] == BREP_WORKER_SCHEMA
+    assert report.metadata["kernel_input_hash_reverified"] is True
+    assert report.metadata["solid_brep_required"] is True
     assert report.metadata["aabb_fallback_used"] is False
     assert report.metadata["connector_mating_verified"] is False
     assert report.metadata["cable_routing_verified"] is False
@@ -114,17 +142,12 @@ def test_valid_kernel_result_reports_exact_solid_interference_without_authority(
 
 
 def test_valid_kernel_result_can_report_clear_pair_and_exact_shape_distance() -> None:
-    def runner(*_args):
-        return {
-            "ok": True,
-            "kernel": "cadquery_occt",
-            "first_shape_valid": True,
-            "second_shape_valid": True,
-            "first_solid_count": 1,
-            "second_solid_count": 1,
-            "minimum_distance_mm": 5.0,
-            "intersection_volume_mm3": 0.0,
-        }
+    def runner(first_content, second_content, *_args):
+        return _worker_payload(
+            first_content,
+            second_content,
+            minimum_distance_mm=5.0,
+        )
 
     report = _check(kernel_available=True, runner=runner)
 
@@ -138,15 +161,13 @@ def test_valid_kernel_result_can_report_clear_pair_and_exact_shape_distance() ->
 
 
 def test_invalid_imported_brep_remains_unknown_even_if_worker_returns_numbers() -> None:
-    def runner(*_args):
-        return {
-            "ok": True,
-            "kernel": "cadquery_occt",
-            "first_shape_valid": False,
-            "second_shape_valid": True,
-            "minimum_distance_mm": 0.0,
-            "intersection_volume_mm3": 50.0,
-        }
+    def runner(first_content, second_content, *_args):
+        return _worker_payload(
+            first_content,
+            second_content,
+            first_shape_valid=False,
+            intersection_volume_mm3=50.0,
+        )
 
     report = _check(kernel_available=True, runner=runner)
 
@@ -155,6 +176,80 @@ def test_invalid_imported_brep_remains_unknown_even_if_worker_returns_numbers() 
     assert report.exact_solid_interference is None
     assert report.required_evidence[0]["field"] == "valid_step_brep"
     assert report.metadata["first_shape_valid"] is False
+
+
+def test_worker_input_hash_mismatch_fails_closed() -> None:
+    def runner(first_content, second_content, *_args):
+        return _worker_payload(
+            first_content,
+            second_content,
+            first_content_hash=f"sha256:{'0' * 64}",
+            intersection_volume_mm3=50.0,
+        )
+
+    report = _check(kernel_available=True, runner=runner)
+
+    assert report.status == BrepStatus.UNKNOWN
+    assert report.exact_pair_interference_evaluated is False
+    assert report.required_evidence[0]["field"] == "kernel_input_identity"
+    assert report.metadata["aabb_fallback_used"] is False
+
+
+def test_worker_requires_compatible_schema_kernel_and_rotation_convention() -> None:
+    for overrides in (
+        {"schema_version": "hardware_splicer.cadquery_brep_worker.v0"},
+        {"kernel": "unknown_kernel"},
+        {"rotation_convention": "Rx*Ry*Rz"},
+    ):
+        def runner(first_content, second_content, *_args, _overrides=overrides):
+            return _worker_payload(first_content, second_content, **_overrides)
+
+        report = _check(kernel_available=True, runner=runner)
+        assert report.status == BrepStatus.UNKNOWN
+        assert report.required_evidence[0]["field"] == "compatible_brep_worker"
+        assert report.exact_pair_interference_evaluated is False
+
+
+def test_worker_requires_actual_solids_for_solid_interference_claim() -> None:
+    def runner(first_content, second_content, *_args):
+        return _worker_payload(
+            first_content,
+            second_content,
+            first_solid_count=0,
+            intersection_volume_mm3=20.0,
+        )
+
+    report = _check(kernel_available=True, runner=runner)
+
+    assert report.status == BrepStatus.UNKNOWN
+    assert report.required_evidence[0]["field"] == "solid_step_brep"
+    assert report.exact_solid_interference is None
+
+
+def test_worker_non_finite_or_negative_metrics_fail_closed() -> None:
+    for overrides in (
+        {"minimum_distance_mm": float("nan")},
+        {"minimum_distance_mm": -1.0},
+        {"intersection_volume_mm3": float("inf")},
+        {"intersection_volume_mm3": -0.1},
+    ):
+        def runner(first_content, second_content, *_args, _overrides=overrides):
+            return _worker_payload(first_content, second_content, **_overrides)
+
+        report = _check(kernel_available=True, runner=runner)
+        assert report.status == BrepStatus.UNKNOWN
+        assert report.required_evidence[0]["field"] == "valid_brep_kernel_result"
+        assert report.exact_pair_interference_evaluated is False
+
+
+def test_exact_brep_input_size_is_bounded_before_kernel_execution(monkeypatch) -> None:
+    monkeypatch.setattr(mechanical_brep, "MAX_ENGINEERING_SOURCE_BYTES", 64)
+
+    with pytest.raises(ValueError, match="exact BREP input is bounded"):
+        _check(
+            kernel_available=True,
+            runner=lambda *_args: (_ for _ in ()).throw(AssertionError("worker must not run")),
+        )
 
 
 def test_worker_environment_does_not_inherit_provider_secrets() -> None:
@@ -205,6 +300,7 @@ def test_real_cadquery_worker_when_optional_specialist_is_installed(tmp_path) ->
     assert overlapping.minimum_distance_mm == pytest.approx(0.0, abs=1e-9)
     assert overlapping.intersection_volume_mm3 == pytest.approx(500.0, rel=1e-6, abs=1e-6)
     assert overlapping.metadata["worker_isolated"] is True
+    assert overlapping.metadata["kernel_input_hash_reverified"] is True
 
     separated = check_step_brep_interference(
         project_id="brep-real",
