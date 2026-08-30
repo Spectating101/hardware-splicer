@@ -1,0 +1,44 @@
+name: Exact BREP Kernel
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/mechanical_brep.py"
+      - "src/hardware_splicer/_cadquery_brep_worker.py"
+      - "src/hardware_splicer/mechanical_placement.py"
+      - "src/hardware_splicer/step_geometry.py"
+      - "src/hardware_splicer/mechanical_api.py"
+      - "tests/test_mechanical_brep.py"
+      - "tests/test_mechanical_brep_api.py"
+      - "pyproject.toml"
+      - ".github/workflows/exact-brep-kernel.yml"
+
+jobs:
+  cadquery-occt:
+    name: CadQuery OCCT pair interference
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install HS with isolated BREP specialist
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,brep]'
+      - name: Prove specialist identity
+        run: |
+          python - <<'PY'
+          import cadquery as cq
+          assert cq.__version__ == "2.8.0", cq.__version__
+          print(f"CadQuery {cq.__version__} / OCCT specialist import OK")
+          PY
+      - name: Run exact BREP contracts and real solid smoke
+        env:
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          PYTHONPATH=src python -m pytest -q --tb=short --maxfail=1 \
+            tests/test_mechanical_brep.py \
+            tests/test_mechanical_brep_api.py
