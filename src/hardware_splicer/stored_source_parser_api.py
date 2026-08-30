@@ -123,8 +123,11 @@ def create_stored_source_parser_router(
             "supported_routes": [
                 "robot_model_import",
                 "engineering_source_descriptor",
+                "step_geometry",
             ],
-            "explicitly_unavailable_routes": ["step_geometry"],
+            "explicitly_unavailable_routes": [],
+            "step_geometry_point_envelope_only": True,
+            "step_geometry_full_brep_validation": False,
             "raw_bytes_returned": False,
             "automatic_authorization": False,
         }
