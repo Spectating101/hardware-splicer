@@ -35,11 +35,16 @@ export type ArmedBrepAnchorPick = {
   interfaceId: string;
 };
 
+export type BrepAnchorPickStatus = 'idle' | 'armed' | 'loading' | 'success' | 'unknown' | 'error';
+
 type BrepAnchorState = {
   anchorsByCandidate: Partial<Record<ConstructorCandidateId, Record<string, BrepSurfaceAnchorEvidence>>>;
   armedPick: ArmedBrepAnchorPick | null;
+  pickStatus: BrepAnchorPickStatus;
+  pickMessage: string;
   armPick: (pick: ArmedBrepAnchorPick) => void;
   cancelPick: () => void;
+  setPickFeedback: (status: BrepAnchorPickStatus, message: string) => void;
   setAnchor: (candidateId: ConstructorCandidateId, anchor: BrepSurfaceAnchorEvidence) => void;
   clearAnchor: (candidateId: ConstructorCandidateId, anchorId: string) => void;
   clearAnchorsForEntity: (candidateId: ConstructorCandidateId, entityId: string) => void;
@@ -48,8 +53,15 @@ type BrepAnchorState = {
 export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
   anchorsByCandidate: {},
   armedPick: null,
-  armPick: (armedPick) => set({ armedPick }),
-  cancelPick: () => set({ armedPick: null }),
+  pickStatus: 'idle',
+  pickMessage: '',
+  armPick: (armedPick) => set({
+    armedPick,
+    pickStatus: 'armed',
+    pickMessage: 'Click the exact BREP mesh to send a bounded surface probe to OCCT.',
+  }),
+  cancelPick: () => set({ armedPick: null, pickStatus: 'idle', pickMessage: '' }),
+  setPickFeedback: (pickStatus, pickMessage) => set({ pickStatus, pickMessage }),
   setAnchor: (candidateId, anchor) => set((state) => ({
     anchorsByCandidate: {
       ...state.anchorsByCandidate,
@@ -59,6 +71,8 @@ export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
       },
     },
     armedPick: null,
+    pickStatus: 'success',
+    pickMessage: `${anchor.interfaceId} anchored to exact BREP face ${anchor.faceIndex} at ${anchor.snapDistanceMm.toFixed(3)} mm snap distance.`,
   })),
   clearAnchor: (candidateId, anchorId) => set((state) => {
     const current = { ...(state.anchorsByCandidate[candidateId] ?? {}) };
@@ -84,6 +98,8 @@ export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
         [candidateId]: current,
       },
       armedPick,
+      pickStatus: armedPick ? state.pickStatus : 'idle',
+      pickMessage: armedPick ? state.pickMessage : '',
     };
   }),
 }));
