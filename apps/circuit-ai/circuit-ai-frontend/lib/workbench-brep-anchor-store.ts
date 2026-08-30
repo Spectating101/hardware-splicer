@@ -1,7 +1,10 @@
 'use client';
 
 import { create } from 'zustand';
-import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
+import {
+  useMachineWorkbenchStore,
+  type ConstructorCandidateId,
+} from '@/lib/machine-workbench-store';
 
 export type BrepSurfaceAnchorEvidence = {
   anchorId: string;
@@ -50,7 +53,7 @@ type BrepAnchorState = {
   clearAnchorsForEntity: (candidateId: ConstructorCandidateId, entityId: string) => void;
 };
 
-export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
+export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set, get) => ({
   anchorsByCandidate: {},
   armedPick: null,
   pickStatus: 'idle',
@@ -62,18 +65,35 @@ export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set) => ({
   }),
   cancelPick: () => set({ armedPick: null, pickStatus: 'idle', pickMessage: '' }),
   setPickFeedback: (pickStatus, pickMessage) => set({ pickStatus, pickMessage }),
-  setAnchor: (candidateId, anchor) => set((state) => ({
-    anchorsByCandidate: {
-      ...state.anchorsByCandidate,
-      [candidateId]: {
-        ...(state.anchorsByCandidate[candidateId] ?? {}),
-        [anchor.anchorId]: anchor,
+  setAnchor: (candidateId, anchor) => {
+    const activePick = get().armedPick;
+    const acceptsActivePick = Boolean(
+      activePick
+      && activePick.candidateId === candidateId
+      && activePick.entityId === anchor.entityId
+      && activePick.resourceId === anchor.resourceId
+      && activePick.interfaceId === anchor.interfaceId,
+    );
+    if (acceptsActivePick) {
+      // A surface-pick gesture can also produce a separate click on synthetic scene
+      // geometry underneath the exact mesh. Reassert the accepted exact anchor's
+      // owning entity only while this same pick is still active; stale/cancelled
+      // async responses must not steal the user's later selection.
+      useMachineWorkbenchStore.setState({ selectedEntityId: anchor.entityId });
+    }
+    set((state) => ({
+      anchorsByCandidate: {
+        ...state.anchorsByCandidate,
+        [candidateId]: {
+          ...(state.anchorsByCandidate[candidateId] ?? {}),
+          [anchor.anchorId]: anchor,
+        },
       },
-    },
-    armedPick: null,
-    pickStatus: 'success',
-    pickMessage: `${anchor.interfaceId} anchored to exact BREP face ${anchor.faceIndex} at ${anchor.snapDistanceMm.toFixed(3)} mm snap distance.`,
-  })),
+      armedPick: null,
+      pickStatus: 'success',
+      pickMessage: `${anchor.interfaceId} anchored to exact BREP face ${anchor.faceIndex} at ${anchor.snapDistanceMm.toFixed(3)} mm snap distance.`,
+    }));
+  },
   clearAnchor: (candidateId, anchorId) => set((state) => {
     const current = { ...(state.anchorsByCandidate[candidateId] ?? {}) };
     delete current[anchorId];
