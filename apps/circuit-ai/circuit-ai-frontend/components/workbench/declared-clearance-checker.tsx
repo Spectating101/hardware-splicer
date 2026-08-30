@@ -72,7 +72,9 @@ export function DeclaredClearanceChecker() {
     && firstSessionSource
     && secondSessionSource
     && firstSessionSource.modelId === firstPlacement.modelId
-    && secondSessionSource.modelId === secondPlacement.modelId,
+    && secondSessionSource.modelId === secondPlacement.modelId
+    && firstSessionSource.contentHash.startsWith('sha256:')
+    && secondSessionSource.contentHash.startsWith('sha256:'),
   );
 
   function nameFor(entityId: string) {
@@ -211,6 +213,11 @@ export function DeclaredClearanceChecker() {
       setExactMessage('Session STEP identity no longer matches the declared placement; re-attach and replace the source before exact checking.');
       return;
     }
+    if (!firstSource.contentHash.startsWith('sha256:') || !secondSource.contentHash.startsWith('sha256:')) {
+      setExactState('error');
+      setExactMessage('Session STEP source is missing canonical hash identity; re-attach it through the bounded parser before exact checking.');
+      return;
+    }
 
     setExactState('loading');
     setExactMessage('Running isolated CadQuery/OCCT pair clearance…');
@@ -223,11 +230,13 @@ export function DeclaredClearanceChecker() {
           first_source: {
             source_id: firstSource.sourceId,
             model_id: firstSource.modelId,
+            content_hash: firstSource.contentHash,
             content: firstSource.content,
           },
           second_source: {
             source_id: secondSource.sourceId,
             model_id: secondSource.modelId,
+            content_hash: secondSource.contentHash,
             content: secondSource.content,
           },
           first_placement: placementPayload(first),
@@ -304,8 +313,8 @@ export function DeclaredClearanceChecker() {
         </div>
         <div className="mt-1.5 text-[7px] leading-3 text-slate-500">
           {exactSourcesReady
-            ? 'Both canonical STEP uploads are available in this browser session for an isolated exact pair check.'
-            : 'Exact pair evidence needs both original STEP uploads in this browser session. Canonical persisted projects use registered hash-reverified sources server-side.'}
+            ? 'Both canonical STEP uploads and their parser-issued hashes are available in this browser session for an isolated exact pair check.'
+            : 'Exact pair evidence needs both original STEP uploads plus canonical parser hashes in this browser session. Canonical persisted projects use registered hash-reverified sources server-side.'}
         </div>
         <button
           type="button"
@@ -317,7 +326,7 @@ export function DeclaredClearanceChecker() {
           Check exact BREP clearance
         </button>
         {exactMessage ? <div className={`mt-2 text-[8px] leading-4 ${exactState === 'pass' ? 'text-emerald-300/80' : exactState === 'fail' ? 'text-red-300/80' : exactState === 'unknown' ? 'text-amber-300/75' : exactState === 'error' ? 'text-red-300/75' : 'text-slate-500'}`}>{exactMessage}</div> : null}
-        <div className="mt-1 text-[7px] leading-3 text-cyan-100/45">Exact means this placed STEP solid pair only. It does not establish full-assembly collision freedom, connector mating, cable routing, service ergonomics, structural safety, measurement truth, or fabrication authority.</div>
+        <div className="mt-1 text-[7px] leading-3 text-cyan-100/45">Exact means this hash-bound placed STEP solid pair only. It does not establish full-assembly collision freedom, connector mating, cable routing, service ergonomics, structural safety, measurement truth, or fabrication authority.</div>
       </div>
     </div>
   );
