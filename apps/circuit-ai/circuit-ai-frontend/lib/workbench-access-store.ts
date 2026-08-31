@@ -36,7 +36,15 @@ type AccessState = {
 };
 
 export const useWorkbenchAccessStore = create<AccessState>((set) => ({
-  accessByCandidate: {},
+  // Keep stable empty candidate buckets from the first snapshot. Components may mount
+  // after a durable scene reload before any access envelope has been created; a
+  // selector fallback such as `?? {}` would otherwise manufacture a new object on
+  // every useSyncExternalStore read and can trigger React maximum-update-depth loops.
+  accessByCandidate: {
+    balanced: {},
+    'max-reuse': {},
+    'low-risk': {},
+  },
   setAccess: (candidateId, access) => set((state) => ({
     accessByCandidate: {
       ...state.accessByCandidate,
