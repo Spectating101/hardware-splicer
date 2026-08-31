@@ -5,6 +5,7 @@ import {
   constructorResources,
   constructorTarget,
 } from '@/lib/workbench-constructor-demo';
+import { useWorkbenchDonorIntakeStore, type WorkbenchDonorResource } from '@/lib/workbench-donor-intake-store';
 import {
   useMachineWorkbenchStore,
   type ConstructorCandidateId,
@@ -71,8 +72,25 @@ function plannerRow(resource: (typeof constructorResources)[number]) {
   };
 }
 
-function buildPayload(strategyMode: PlannerCandidateProjection['strategyMode']) {
-  const available = constructorResources.filter((resource) => resource.kind !== 'procurable').map(plannerRow);
+function donorPlannerRow(resource: WorkbenchDonorResource) {
+  return {
+    resource_id: resource.resourceId,
+    name: resource.name,
+    resource_kind: 'salvaged',
+    capabilities: resource.capabilities,
+    confidence: resource.confidence,
+    evidence_status: 'needs_evidence',
+    provenance: `photo:${resource.sourceName}`,
+    cost_usd: 0,
+    notes: `${resource.note} Visual label: ${resource.observedLabel}.`,
+  };
+}
+
+function buildPayload(strategyMode: PlannerCandidateProjection['strategyMode'], donorResources: WorkbenchDonorResource[]) {
+  const available = [
+    ...constructorResources.filter((resource) => resource.kind !== 'procurable').map(plannerRow),
+    ...donorResources.map(donorPlannerRow),
+  ];
   const procurable = constructorResources.filter((resource) => resource.kind === 'procurable').map(plannerRow);
   return {
     goal: constructorTarget.prompt,
@@ -134,11 +152,15 @@ function projectionFromResponse(payload: unknown, expectedMode: PlannerCandidate
   };
 }
 
-async function fetchProjection(strategyMode: PlannerCandidateProjection['strategyMode'], signal: AbortSignal) {
+async function fetchProjection(
+  strategyMode: PlannerCandidateProjection['strategyMode'],
+  signal: AbortSignal,
+  donorResources: WorkbenchDonorResource[],
+) {
   const response = await fetch('/api/proxy/resource/strategy', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(buildPayload(strategyMode)),
+    body: JSON.stringify(buildPayload(strategyMode, donorResources)),
     cache: 'no-store',
     signal,
   });
@@ -148,18 +170,27 @@ async function fetchProjection(strategyMode: PlannerCandidateProjection['strateg
 
 export function ConstructorPlannerBridge() {
   const setPlannerState = useMachineWorkbenchStore((state) => state.setPlannerState);
+  const donorResources = useWorkbenchDonorIntakeStore((state) => state.resources);
+  const donorHydrated = useWorkbenchDonorIntakeStore((state) => state.hydrated);
+  const hydrateDonors = useWorkbenchDonorIntakeStore((state) => state.hydrate);
 
   useEffect(() => {
+    if (!donorHydrated) {
+      hydrateDonors();
+      return;
+    }
+
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 2200);
     let active = true;
 
-    setPlannerState('loading', 'Checking Hardware-Splicer resource_strategy.v1…', {});
-    Promise.all(MODES.map(async ({ id, strategyMode }) => [id, await fetchProjection(strategyMode, controller.signal)] as const))
+    const donorNote = donorResources.length > 0 ? ` with ${donorResources.length} provisional donor observations` : '';
+    setPlannerState('loading', `Checking Hardware-Splicer resource_strategy.v1${donorNote}…`, {});
+    Promise.all(MODES.map(async ({ id, strategyMode }) => [id, await fetchProjection(strategyMode, controller.signal, donorResources)] as const))
       .then((rows) => {
         if (!active) return;
         const projections = Object.fromEntries(rows) as Partial<Record<ConstructorCandidateId, PlannerCandidateProjection>>;
-        setPlannerState('live', 'Live resource_strategy.v1 projections are driving resource coverage and candidate gates.', projections);
+        setPlannerState('live', `Live resource_strategy.v1 projections are driving resource coverage and candidate gates${donorNote}.`, projections);
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -173,7 +204,7 @@ export function ConstructorPlannerBridge() {
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [setPlannerState]);
+  }, [donorHydrated, donorResources, hydrateDonors, setPlannerState]);
 
   return null;
 }
