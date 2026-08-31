@@ -7,6 +7,10 @@ import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
 import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import {
+  getRegisteredWorkbenchStepSource,
+  useWorkbenchProjectSourceStore,
+} from '@/lib/workbench-project-sources';
 import { BrepRenderMeshControl } from '@/components/workbench/brep-render-mesh-control';
 import { DeclaredClearanceChecker } from '@/components/workbench/declared-clearance-checker';
 import { DeclaredInterfaceAccessEditor } from '@/components/workbench/declared-interface-access-editor';
@@ -24,6 +28,10 @@ function tuple3(value: unknown): [number, number, number] | null {
 function parseVector(values: string[]) {
   const parsed = values.map((value) => Number(value));
   return parsed.length === 3 && parsed.every(Number.isFinite) ? parsed as [number, number, number] : null;
+}
+
+function sameTuple(left: [number, number, number], right: [number, number, number]) {
+  return left.every((value, index) => value === right[index]);
 }
 
 export function DeclaredPlacementEditor({
@@ -51,6 +59,21 @@ export function DeclaredPlacementEditor({
   const clearBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.clearBrepRenderMeshEvidence);
   const setSelectedEntityId = useMachineWorkbenchStore((state) => state.setSelectedEntityId);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
+  const projectSourceState = useWorkbenchProjectSourceStore();
+  const setProjectRevision = useWorkbenchProjectSourceStore((state) => state.setProjectRevision);
+  const registeredSource = getRegisteredWorkbenchStepSource(projectSourceState, candidateId, resourceId);
+  const projectIntent = projectSourceState.status !== 'unbound';
+  const registeredReady = Boolean(
+    registeredSource
+    && projectSourceState.status === 'bound'
+    && projectSourceState.projectId === registeredSource.projectId
+    && Number.isInteger(projectSourceState.revision)
+    && Number(projectSourceState.revision) >= 1
+    && registeredSource.entityId === entityId
+    && registeredSource.modelId === modelId
+    && registeredSource.sourceId === evidence.sourceId
+    && registeredSource.contentHash === evidence.contentHash,
+  );
 
   const [translation, setTranslation] = useState(() => (existing?.translationMm ?? [0, 0, 0]).map(String));
   const [rotation, setRotation] = useState(() => (existing?.rotationDegXyz ?? [0, 0, 0]).map(String));
@@ -95,10 +118,17 @@ export function DeclaredPlacementEditor({
       setMessage('Parsed STEP report is unavailable; re-attach the source before placing it.');
       return;
     }
+    if (projectIntent && !registeredReady) {
+      setState('error');
+      setMessage('Durable project placement requires the current registered STEP occurrence binding and project revision.');
+      return;
+    }
 
     const placementId = `placement-${candidateId}-${resourceId}`;
     setState('loading');
-    setMessage('Transforming STEP envelope into the assembly frame…');
+    setMessage(projectIntent
+      ? 'Transforming the registered STEP envelope, then persisting only the declared source-bound transform…'
+      : 'Transforming STEP envelope into the assembly frame…');
     try {
       const response = await fetch('/api/proxy/engineering/mechanical/geometry/place', {
         method: 'POST',
@@ -145,6 +175,72 @@ export function DeclaredPlacementEditor({
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
+
+      let durableRevision: number | null = null;
+      if (projectIntent) {
+        if (!registeredSource || !projectSourceState.projectId || !registeredReady) {
+          throw new Error('Registered project source identity disappeared before placement persistence.');
+        }
+        const persistResponse = await fetch(
+          `/api/proxy/engineering/projects/${encodeURIComponent(projectSourceState.projectId)}/workbench/placements`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              expected_revision: projectSourceState.revision,
+              candidate_id: candidateId,
+              resource_id: resourceId,
+              entity_id: entityId,
+              source_id: registeredSource.sourceId,
+              model_id: registeredSource.modelId,
+              content_hash: registeredSource.contentHash,
+              placement_id: placementId,
+              target_frame: placement.frameId,
+              translation_mm: translationMm,
+              rotation_deg_xyz: rotationDegXyz,
+              authority: 'declared',
+            }),
+            cache: 'no-store',
+          },
+        );
+        const persistPayload = record(await persistResponse.json());
+        if (!persistResponse.ok || persistPayload.ok !== true) {
+          throw new Error(String(record(persistPayload.detail).message || persistPayload.error || `workbench placement HTTP ${persistResponse.status}`));
+        }
+        if (
+          persistPayload.registered_source_hash_reverified !== true
+          || persistPayload.derived_geometry_persisted !== false
+          || persistPayload.physical_authority_unchanged !== true
+        ) {
+          throw new Error('Durable workbench placement response violated the source-bound transform-only authority contract.');
+        }
+        const durable = record(persistPayload.workbench_placement);
+        const durableTranslation = tuple3(durable.translation_mm);
+        const durableRotation = tuple3(durable.rotation_deg_xyz);
+        if (
+          durable.candidate_id !== candidateId
+          || durable.resource_id !== resourceId
+          || durable.entity_id !== entityId
+          || durable.source_id !== registeredSource.sourceId
+          || durable.model_id !== registeredSource.modelId
+          || durable.content_hash !== registeredSource.contentHash
+          || durable.placement_id !== placementId
+          || durable.target_frame !== placement.frameId
+          || durable.authority !== 'declared'
+          || !durableTranslation
+          || !durableRotation
+          || !sameTuple(durableTranslation, translationMm)
+          || !sameTuple(durableRotation, rotationDegXyz)
+        ) {
+          throw new Error('Durable workbench placement identity disagrees with the current declared source and pose.');
+        }
+        durableRevision = Number(persistPayload.revision);
+        if (!Number.isInteger(durableRevision) || durableRevision < 1) {
+          throw new Error('Durable workbench placement did not return a valid project revision.');
+        }
+        setProjectRevision(projectSourceState.projectId, durableRevision);
+      }
+
       // Access envelopes, exact render meshes and exact surface anchors are all
       // pose-derived evidence. Every placement write invalidates them before the
       // new pose becomes visible.
@@ -158,21 +254,71 @@ export function DeclaredPlacementEditor({
       setSelectedEntityId(entityId);
       window.setTimeout(requestFrameSelection, 0);
       setState('success');
-      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement. Exact mesh and surface-anchor evidence, if any, were invalidated.`);
+      setMessage(`${placement.frameId} AABB ${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · DECLARED placement. ${durableRevision ? `Source-bound transform persisted at project revision ${durableRevision}; derived AABB is recomputed on reopen. ` : ''}Exact mesh and surface-anchor evidence, if any, were invalidated.`);
     } catch (error: unknown) {
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
     }
   }
 
-  function removePlacement() {
-    clearAccessForEntity(candidateId, entityId);
-    clearAnchorsForEntity(candidateId, entityId);
-    clearBrepRenderMeshEvidence(candidateId, entityId);
-    clearPlacement(candidateId, entityId);
-    setMechanicalGeometryEvidence(candidateId, evidence);
-    setState('idle');
-    setMessage('Declared placement cleared; dependent interface access, exact mesh and exact surface-anchor evidence were invalidated.');
+  async function removePlacement() {
+    if (!existing) return;
+    if (projectIntent && !registeredReady) {
+      setState('error');
+      setMessage('Durable project placement clear requires the current registered STEP occurrence binding and project revision.');
+      return;
+    }
+    setState('loading');
+    setMessage(projectIntent ? 'Clearing the durable declared transform…' : 'Clearing declared placement…');
+    try {
+      let durableRevision: number | null = null;
+      if (projectIntent) {
+        if (!registeredSource || !projectSourceState.projectId || !registeredReady) {
+          throw new Error('Registered project source identity disappeared before placement clear.');
+        }
+        const response = await fetch(
+          `/api/proxy/engineering/projects/${encodeURIComponent(projectSourceState.projectId)}/workbench/placements/clear`,
+          {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              expected_revision: projectSourceState.revision,
+              candidate_id: candidateId,
+              resource_id: resourceId,
+              entity_id: entityId,
+              source_id: registeredSource.sourceId,
+              model_id: registeredSource.modelId,
+              content_hash: registeredSource.contentHash,
+              placement_id: existing.placementId,
+            }),
+            cache: 'no-store',
+          },
+        );
+        const payload = record(await response.json());
+        if (!response.ok || payload.ok !== true) {
+          throw new Error(String(record(payload.detail).message || payload.error || `workbench placement clear HTTP ${response.status}`));
+        }
+        if (payload.physical_authority_unchanged !== true) {
+          throw new Error('Durable workbench placement clear violated the non-authoritative contract.');
+        }
+        durableRevision = Number(payload.revision);
+        if (!Number.isInteger(durableRevision) || durableRevision < 1) {
+          throw new Error('Durable workbench placement clear did not return a valid project revision.');
+        }
+        setProjectRevision(projectSourceState.projectId, durableRevision);
+      }
+
+      clearAccessForEntity(candidateId, entityId);
+      clearAnchorsForEntity(candidateId, entityId);
+      clearBrepRenderMeshEvidence(candidateId, entityId);
+      clearPlacement(candidateId, entityId);
+      setMechanicalGeometryEvidence(candidateId, evidence);
+      setState('success');
+      setMessage(`Declared placement cleared${durableRevision ? ` at project revision ${durableRevision}` : ''}; dependent interface access, exact mesh and exact surface-anchor evidence were invalidated.`);
+    } catch (error: unknown) {
+      setState('error');
+      setMessage(error instanceof Error ? error.message : String(error));
+    }
   }
 
   return (
@@ -226,14 +372,14 @@ export function DeclaredPlacementEditor({
             Apply declared placement
           </button>
           {existing ? (
-            <button type="button" onClick={removePlacement} aria-label={`Clear declared placement for ${resourceName}`} className="rounded-md border border-white/8 p-1.5 text-slate-600 hover:text-red-300">
+            <button type="button" onClick={() => void removePlacement()} aria-label={`Clear declared placement for ${resourceName}`} className="rounded-md border border-white/8 p-1.5 text-slate-600 hover:text-red-300">
               <Trash2 className="h-3 w-3" />
             </button>
           ) : null}
         </div>
         {existing ? <div className="mt-1.5 text-[9px] leading-4 text-violet-200/65">Placed in {existing.frameId}: T [{existing.translationMm.join(', ')}] mm · R [{existing.rotationDegXyz.join(', ')}]° · DECLARED.</div> : null}
         {message ? <div className={`mt-1.5 text-[9px] leading-4 ${state === 'error' ? 'text-red-300/80' : state === 'success' ? 'text-emerald-300/75' : 'text-slate-500'}`}>{message}</div> : null}
-        <div className="mt-1 text-[8px] leading-4 text-amber-100/45">Placement establishes a common coordinate frame only. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
+        <div className="mt-1 text-[8px] leading-4 text-amber-100/45">Placement establishes a common coordinate frame only. Project mode persists only the source-bound declared transform; derived AABB and exact evidence are recomputed. It is not measurement, collision proof, fit proof, or fabrication authority.</div>
       </div>
       {existing ? (
         <>
