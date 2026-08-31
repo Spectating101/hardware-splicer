@@ -25,6 +25,7 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+FIXED_STEP = STEP.replace("(10.,10.,10.)", "(12.,10.,10.)")
 
 
 def _hash(content: str = STEP) -> str:
@@ -82,12 +83,12 @@ def _stored_project(tmp_path: Path) -> tuple[ProjectStore, dict, dict]:
         metadata={"source": "test"},
     )
     descriptors: list[dict] = []
-    for filename in ("display.step", "board.step"):
+    for filename, content in (("display.step", STEP), ("board.step", FIXED_STEP)):
         result = ingest_engineering_source(
             EngineeringSourceIngestionRequest(
                 project_id=project_id,
                 filename=filename,
-                content_base64=base64.b64encode(STEP.encode("utf-8")).decode("ascii"),
+                content_base64=base64.b64encode(content.encode("utf-8")).decode("ascii"),
             ),
             project_root=tmp_path,
         )
@@ -178,6 +179,8 @@ def test_stored_mating_path_uses_shared_store_and_reverifies_both_registered_sou
     monkeypatch,
 ) -> None:
     store, moving, fixed = _stored_project(tmp_path)
+    assert moving["source_id"] != fixed["source_id"]
+    assert moving["content_hash"] != fixed["content_hash"]
     monkeypatch.setattr(brep_sweep, "_cadquery_available", lambda: False)
 
     response = TestClient(create_product_app(store)).post(
@@ -200,6 +203,7 @@ def test_stored_mating_path_uses_shared_store_and_reverifies_both_registered_sou
     assert report["metadata"]["moving_registered_source_hash_reverified"] is True
     assert report["metadata"]["fixed_registered_source_hash_reverified"] is True
     assert STEP not in response.text
+    assert FIXED_STEP not in response.text
 
 
 def test_stored_mating_path_rejects_tampered_registered_blob_before_kernel_discovery(
