@@ -27,7 +27,7 @@ jobs:
       - name: Apply validated anchor-intent delta
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = "b59ea22409294410c1ac386d01dc1bebb3fd37b2"
+          git diff --quiet b59ea22409294410c1ac386d01dc1bebb3fd37b2 HEAD -- . ':(exclude).github/workflows/integrate-anchor-intent-onto-pr.yml'
           git fetch origin feat/workbench-anchor-intent-persistence-v0
           git cherry-pick --no-commit \
             5058415352f00f34ec196f545dbf8e55c1171a09 \
@@ -44,24 +44,10 @@ jobs:
             66e94775429623d20377a0089061ae294e8e05e7 \
             552c377568864511ec6003440f3d30e24b6fad8e
 
-          # The green child fixture was deliberately rebased from the validated b59
-          # version and then extended for anchor-intent revision writes. Take exactly
-          # that final fixture instead of replaying the child branch's older baseline.
-          git show 4cc9610c523b2e0d97eb34fbdb0a7c4f87f98aa1:apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js > \
-            apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js
-
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('.github/workflows/machine-workbench-frontend.yml')
-          text = p.read_text()
-          anchor = '            e2e/machine-project-scene-persistence.spec.js \\\n'
-          addition = anchor + '            e2e/machine-project-anchor-intent-persistence.spec.js \\\n'
-          if 'e2e/machine-project-anchor-intent-persistence.spec.js' not in text:
-              if anchor not in text:
-                  raise SystemExit('scene-persistence workflow anchor not found')
-              text = text.replace(anchor, addition, 1)
-          p.write_text(text)
-          PY
+          git show 4cc9610c523b2e0d97eb34fbdb0a7c4f87f98aa1:apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js > apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js
+          git show 4cc9610c523b2e0d97eb34fbdb0a7c4f87f98aa1:.github/workflows/machine-workbench-frontend.yml > .github/workflows/machine-workbench-frontend.yml
+          sed -i '/Validation marker: repaired durable BREP/d' .github/workflows/machine-workbench-frontend.yml
+          sed -i '/feat\/workbench-anchor-intent-persistence-v0/d' .github/workflows/machine-workbench-frontend.yml
 
           git diff --check
           python -m py_compile \
@@ -71,7 +57,6 @@ jobs:
             src/hardware_splicer/product_api.py
           node --check apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-anchor-intent-persistence.spec.js
           node --check apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js
-
           test -f apps/circuit-ai/circuit-ai-frontend/components/workbench/workbench-anchor-intent-rehydrator.tsx
           test -f apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/'[projectId]'/workbench/anchor-intents/route.ts
           test -f apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/'[projectId]'/workbench/anchor-intents/clear/route.ts
