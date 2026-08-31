@@ -387,7 +387,6 @@ function MachinePart({ entity, candidateProjection }: { entity: WorkbenchEntity;
   const scale = projection?.sizeScale ?? [1, 1, 1];
   const [width, height, depth] = entity.spatial.size.map((value, index) => value * scale[index]) as [number, number, number];
   const position = explodedPosition(entity, exploded, projection);
-  const selectedEntity = deck001EntityMap.get(selectedEntityId);
   const focusedSelection = Boolean(selectedEntity && selectedEntity.kind !== 'machine');
   const alwaysLabel = phase === 'construct' && projection && ['held', 'gap'].includes(projection.disposition) && !focusedSelection;
 
