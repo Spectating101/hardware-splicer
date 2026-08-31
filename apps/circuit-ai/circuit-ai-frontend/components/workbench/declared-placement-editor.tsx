@@ -91,6 +91,16 @@ export function DeclaredPlacementEditor({
   }, [candidateId, resourceId, entityId]);
 
   useEffect(() => {
+    // Project rehydration may establish the declared placement after the editor first
+    // renders from its stored parser evidence. Synchronize that externally restored
+    // pose only while the editor is idle; active apply/clear operations keep their
+    // input state and backend status messages intact.
+    if (!existing || state !== 'idle') return;
+    setTranslation(existing.translationMm.map(String));
+    setRotation(existing.rotationDegXyz.map(String));
+  }, [existing, state]);
+
+  useEffect(() => {
     if (!existing) {
       clearAccessForEntity(candidateId, entityId);
       clearAnchorsForEntity(candidateId, entityId);
