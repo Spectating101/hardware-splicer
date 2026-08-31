@@ -64,6 +64,7 @@ def test_dense_brep_refinement_visual_evidence_is_kept_in_the_browser_gate() -> 
 
 def test_focused_scene_declutters_gap_annotations_without_erasing_gap_evidence() -> None:
     viewport = (WORKBENCH / "machine-assembly-viewport.tsx").read_text(encoding="utf-8")
+    assert viewport.count("const selectedEntity = deck001EntityMap.get(selectedEntityId);") == 2
     assert "alertProjection && focusedSelection ? 0.16" in viewport
     assert "['held', 'gap'].includes(projection.disposition) && !focusedSelection" in viewport
     assert 'data-testid="machine-part-status-label"' in viewport
