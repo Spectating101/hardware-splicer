@@ -1,0 +1,118 @@
+name: Repair Workbench Validation
+
+on:
+  push:
+    branches:
+      - feat/machine-workbench-v0-20260829
+    paths:
+      - .github/workflows/repair-workbench-validation.yml
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/machine-workbench-v0-20260829
+          fetch-depth: 0
+      - name: Repair validation contracts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          dock = Path('apps/circuit-ai/circuit-ai-frontend/components/workbench/constructor-dock.tsx')
+          text = dock.read_text()
+          needle = "px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em]"
+          assert text.count(needle) == 1, text.count(needle)
+          dock.write_text(text.replace(needle, "px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em]", 1))
+
+          spec = Path('apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js')
+          text = spec.read_text()
+
+          replacements = {
+              "  const storedMeshRequests = [];\n": "  const placementPersistenceRequests = [];\n  const storedMeshRequests = [];\n",
+              "    const expectedRevision = mainboard ? 1 : 4;": "    const expectedRevision = mainboard ? 1 : 5;",
+              "        revision: mainboard ? 2 : 5,": "        revision: mainboard ? 2 : 6,",
+              "    expect(body.expected_revision).toBe(mainboard ? 2 : 5);": "    expect(body.expected_revision).toBe(mainboard ? 2 : 6);",
+              "      body: JSON.stringify(parserResponse(sourceId, mainboard ? 3 : 6)),": "      body: JSON.stringify(parserResponse(sourceId, mainboard ? 3 : 7)),",
+              "    expect(body.expected_revision).toBe(mainboard ? 3 : 6);": "    expect(body.expected_revision).toBe(mainboard ? 3 : 7);",
+              "        revision: mainboard ? 4 : 7,": "        revision: mainboard ? 4 : 8,",
+              "  await expect(page.getByTestId('workbench-project-provenance')).toContainText(`Project ${PROJECT_ID} · revision 7 · 2 registered sources · 2 workbench bindings`);": "  await expect(page.getByTestId('workbench-project-provenance')).toContainText(`Project ${PROJECT_ID} · revision 8 · 2 registered sources · 2 workbench bindings`);",
+              "  expect(storedMeshRequests).toHaveLength(2);": "  expect(placementPersistenceRequests).toHaveLength(2);\n  expect(storedMeshRequests).toHaveLength(2);",
+          }
+          for old, new in replacements.items():
+              count = text.count(old)
+              assert count == 1, (old, count)
+              text = text.replace(old, new, 1)
+
+          marker = "  await page.route('**/api/proxy/engineering/mechanical/geometry/place', async (route) => {\n"
+          assert text.count(marker) == 1
+          placement_route = r'''  await page.route(`**/api/proxy/engineering/projects/${PROJECT_ID}/workbench/placements`, async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    placementPersistenceRequests.push(body);
+    const mainboard = body.resource_id === 'res-mainboard-donor';
+    expect(body.expected_revision).toBe(mainboard ? 4 : 8);
+    expect(body.candidate_id).toBe('balanced');
+    expect(body.entity_id).toBe(mainboard ? 'cmp-mainboard' : 'cmp-display');
+    expect(body.source_id).toBe(mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE);
+    expect(body.model_id).toBe(body.source_id);
+    expect(body.content_hash).toBe(mainboard ? HASH_A : HASH_B);
+    expect(body.placement_id).toBe(mainboard ? 'placement-balanced-res-mainboard-donor' : 'placement-balanced-res-display-controlled');
+    expect(body.target_frame).toBe('assembly');
+    expect(body.translation_mm).toEqual(mainboard ? [0, 0, 0] : [150, 0, 0]);
+    expect(body.rotation_deg_xyz).toEqual([0, 0, 0]);
+    expect(body.authority).toBe('declared');
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        registered: true,
+        project_id: PROJECT_ID,
+        revision: mainboard ? 5 : 9,
+        workbench_placement: {
+          schema_version: 'hardware_splicer.workbench_declared_placement.v1',
+          candidate_id: body.candidate_id,
+          resource_id: body.resource_id,
+          entity_id: body.entity_id,
+          source_id: body.source_id,
+          model_id: body.model_id,
+          content_hash: body.content_hash,
+          placement_id: body.placement_id,
+          target_frame: body.target_frame,
+          translation_mm: body.translation_mm,
+          rotation_deg_xyz: body.rotation_deg_xyz,
+          authority: 'declared',
+          source_binding_required: true,
+          registered_source_hash_reverified: true,
+          derived_geometry_persisted: false,
+          physical_authority_unchanged: true,
+          automatic_authorization: false,
+          fabrication_authorized: false,
+          power_on_authorized: false,
+          motion_authorized: false,
+          release_authorized: false,
+        },
+        registered_source_hash_reverified: true,
+        derived_geometry_persisted: false,
+        physical_authority_unchanged: true,
+      }),
+    });
+  });
+
+'''
+          text = text.replace(marker, placement_route + marker, 1)
+          spec.write_text(text)
+          PY
+      - name: Commit repair
+        run: |
+          git config user.name 'hardware-splicer-validation-bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add apps/circuit-ai/circuit-ai-frontend/components/workbench/constructor-dock.tsx \
+                  apps/circuit-ai/circuit-ai-frontend/e2e/machine-project-bound-brep-durability.spec.js
+          git diff --cached --check
+          git commit -m 'Repair durable workbench validation fixtures'
+          git push origin HEAD:feat/machine-workbench-v0-20260829
