@@ -19,6 +19,10 @@ import {
   type BrepSurfaceAnchorEvidence,
 } from '@/lib/workbench-brep-anchor-store';
 import { getSessionStepSource } from '@/lib/workbench-session-step-sources';
+import {
+  getRegisteredWorkbenchStepSource,
+  useWorkbenchProjectSourceStore,
+} from '@/lib/workbench-project-sources';
 
 const SCENE_UNITS_PER_MM = 0.025;
 const EMPTY_PLACEMENTS: Record<string, DeclaredPlacementEvidence> = {};
@@ -172,31 +176,63 @@ function ExactMesh({
   async function handleSurfacePick(event: ThreeEvent<PointerEvent>) {
     if (!pickArmed || !armedPick) return;
     event.stopPropagation();
-    const source = getSessionStepSource(candidateId, mesh.resourceId);
-    if (!source || source.modelId !== mesh.modelId || source.contentHash !== mesh.contentHash) {
-      setPickFeedback('error', 'Surface pick rejected: the original hash-bound STEP source is no longer available in this browser session.');
+
+    const sessionSource = getSessionStepSource(candidateId, mesh.resourceId);
+    const projectSourceState = useWorkbenchProjectSourceStore.getState();
+    const registeredSource = getRegisteredWorkbenchStepSource(projectSourceState, candidateId, mesh.resourceId);
+    const registeredReady = Boolean(
+      registeredSource
+      && projectSourceState.status === 'bound'
+      && projectSourceState.projectId === registeredSource.projectId
+      && registeredSource.entityId === mesh.entityId
+      && registeredSource.modelId === mesh.modelId
+      && registeredSource.contentHash === mesh.contentHash,
+    );
+    const sessionReady = Boolean(
+      sessionSource
+      && sessionSource.modelId === mesh.modelId
+      && sessionSource.contentHash === mesh.contentHash,
+    );
+    if (!registeredReady && !sessionReady) {
+      setPickFeedback('error', 'Surface pick rejected: no explicit registered-project source or matching session STEP is available for this exact mesh.');
       return;
     }
+    const sourceIdentity = registeredReady && registeredSource ? registeredSource : sessionSource;
+    if (!sourceIdentity) return;
 
     const localScenePoint = event.eventObject.worldToLocal(event.point.clone());
     const probePointMm = scenePointToCanonicalMm(localScenePoint);
     const anchorId = `anchor-${candidateId}-${mesh.entityId}-${armedPick.interfaceId}`;
-    setPickFeedback('loading', 'Snapping the 3D probe to the nearest exact OCCT face…');
+    setPickFeedback(
+      'loading',
+      registeredReady
+        ? 'Reopening the registered STEP blob, re-verifying its hash, and snapping the 3D probe to the nearest exact OCCT face…'
+        : 'Snapping the 3D probe to the nearest exact OCCT face…',
+    );
 
     try {
-      const response = await fetch('/api/proxy/engineering/mechanical/geometry/brep/anchor', {
+      const endpoint = registeredReady
+        ? '/api/proxy/engineering/mechanical/geometry/brep/anchor/stored'
+        : '/api/proxy/engineering/mechanical/geometry/brep/anchor';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          project_id: 'deck-001',
+          project_id: registeredReady && registeredSource ? registeredSource.projectId : 'deck-001',
           anchor_id: anchorId,
           interface_id: armedPick.interfaceId,
-          source: {
-            source_id: source.sourceId,
-            model_id: source.modelId,
-            content_hash: source.contentHash,
-            content: source.content,
-          },
+          source: registeredReady
+            ? {
+                source_id: sourceIdentity.sourceId,
+                model_id: sourceIdentity.modelId,
+                content_hash: sourceIdentity.contentHash,
+              }
+            : {
+                source_id: sourceIdentity.sourceId,
+                model_id: sourceIdentity.modelId,
+                content_hash: sourceIdentity.contentHash,
+                content: sessionSource?.content,
+              },
           placement: {
             placement_id: placement.placementId,
             object_id: placement.entityId,
@@ -212,7 +248,7 @@ function ExactMesh({
         cache: 'no-store',
       });
       const payload = record(await response.json());
-      if (!response.ok || payload.ok !== true) throw new Error(String(payload.error || `BREP anchor HTTP ${response.status}`));
+      if (!response.ok || payload.ok !== true) throw new Error(String(record(payload.detail).message || payload.error || `BREP anchor HTTP ${response.status}`));
       if (
         payload.raw_step_bytes_returned !== false
         || payload.authority !== 'declared'
@@ -221,6 +257,13 @@ function ExactMesh({
         || payload.fabrication_authorized !== false
       ) {
         throw new Error('HS BREP anchor response violated the declared/non-authoritative boundary.');
+      }
+      if (registeredReady && (
+        payload.registered_source_materialized !== true
+        || payload.registered_source_hash_reverified !== true
+        || payload.raw_registered_source_bytes_returned !== false
+      )) {
+        throw new Error('Stored BREP anchor response did not prove registered-blob materialization and hash re-verification.');
       }
       const report = record(payload.brep_surface_anchor);
       if (payload.exact_brep_surface_anchor_evaluated !== true || report.status !== 'ready') {
@@ -325,9 +368,6 @@ export function BrepRenderMeshOverlays() {
     [activeCandidateId, plannerSource, plannerProjection, placements],
   );
 
-  // Explode is a presentation transform, not declared engineering geometry. Rather
-  // than inventing a second transform for exact evidence, suppress it until the
-  // scene returns to the declared assembly pose.
   if (phase !== 'construct' || exploded) return null;
 
   return (
