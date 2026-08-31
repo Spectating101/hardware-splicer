@@ -225,11 +225,15 @@ function StatusShell({
 }) {
   const activeLens = useMachineWorkbenchStore((state) => state.activeLens);
   const phase = useMachineWorkbenchStore((state) => state.phase);
+  const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
+  const selectedEntity = deck001EntityMap.get(selectedEntityId);
+  const focusedSelection = Boolean(selectedEntity && selectedEntity.kind !== 'machine');
   const color = phase === 'construct' && projection
     ? PROJECTION_COLORS[projection.disposition]
     : semanticColor(entity, activeLens);
   const relevant = activeLens !== 'interfaces' || selected;
-  const opacity = selected ? 0.96 : relevant ? 0.4 : 0.13;
+  const alertProjection = phase === 'construct' && projection && ['held', 'gap'].includes(projection.disposition);
+  const opacity = selected ? 0.96 : alertProjection && focusedSelection ? 0.16 : relevant ? 0.4 : 0.13;
 
   return (
     <mesh scale={[1.025, 1.08, 1.025]}>
@@ -383,7 +387,9 @@ function MachinePart({ entity, candidateProjection }: { entity: WorkbenchEntity;
   const scale = projection?.sizeScale ?? [1, 1, 1];
   const [width, height, depth] = entity.spatial.size.map((value, index) => value * scale[index]) as [number, number, number];
   const position = explodedPosition(entity, exploded, projection);
-  const alwaysLabel = phase === 'construct' && projection && ['held', 'gap'].includes(projection.disposition);
+  const selectedEntity = deck001EntityMap.get(selectedEntityId);
+  const focusedSelection = Boolean(selectedEntity && selectedEntity.kind !== 'machine');
+  const alwaysLabel = phase === 'construct' && projection && ['held', 'gap'].includes(projection.disposition) && !focusedSelection;
 
   return (
     <group
@@ -396,7 +402,7 @@ function MachinePart({ entity, candidateProjection }: { entity: WorkbenchEntity;
       {entity.id !== 'cmp-enclosure' ? <StatusShell entity={entity} projection={projection} width={width} height={height} depth={depth} selected={emphasized} /> : null}
       {directlySelected || alwaysLabel ? (
         <Html center position={[0, Math.max(height / 2 + 0.46, 0.62), 0]} distanceFactor={9}>
-          <div className={`pointer-events-none whitespace-nowrap rounded-md border bg-slate-950/92 px-2.5 py-1.5 text-[10px] font-semibold shadow-2xl ${alwaysLabel ? 'border-amber-300/30 text-amber-100' : 'border-cyan-300/30 text-cyan-50'}`}>
+          <div data-testid="machine-part-status-label" data-projection-disposition={projection?.disposition ?? 'none'} className={`pointer-events-none whitespace-nowrap rounded-md border bg-slate-950/92 px-2.5 py-1.5 text-[10px] font-semibold shadow-2xl ${alwaysLabel ? 'border-amber-300/30 text-amber-100' : 'border-cyan-300/30 text-cyan-50'}`}>
             {phase === 'construct' && projection ? projection.resourceName : entity.name}
             <span className="ml-1 text-slate-500">·</span>
             <span className={`ml-1 uppercase ${alwaysLabel ? 'text-amber-300' : 'text-cyan-300'}`}>{phase === 'construct' && projection ? projection.label : entity.authority}</span>

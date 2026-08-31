@@ -481,6 +481,7 @@ test('adaptive exact BREP refinement renders bounded predicate brackets without 
   await expect(brackets.nth(1)).toContainText('contact → interference');
   await expect(refinement).toContainText('They do not prove a unique transition pose');
   expect(refinementRequests).toHaveLength(1);
+  await expect(page.locator('[data-testid="machine-part-status-label"][data-projection-disposition="gap"]')).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath('machine-brep-mating-path-refinement-dense.png') });
 
   // Any refinement-parameter edit invalidates the old bracket evidence immediately.
