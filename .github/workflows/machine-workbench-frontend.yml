@@ -65,6 +65,7 @@ jobs:
           done
           /tmp/hs-playwright/node_modules/.bin/playwright test \
             e2e/machine-workbench.spec.js \
+            e2e/machine-reuse-mission-convergence.spec.js \
             e2e/machine-constructor-live-planner.spec.js \
             e2e/machine-exact-brep-clearance.spec.js \
             e2e/machine-brep-surface-anchor.spec.js \
