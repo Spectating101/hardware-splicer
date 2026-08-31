@@ -559,7 +559,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     const body = JSON.parse(route.request().postData() || '{}');
     placementPersistenceRequests.push(body);
     const mainboard = body.resource_id === 'res-mainboard-donor';
-    expect(body.expected_revision).toBe(Mainboard ? 4 : 8);
+    expect(body.expected_revision).toBe(mainboard ? 4 : 8);
     expect(body.candidate_id).toBe('balanced');
     expect(body.entity_id).toBe(mainboard ? 'cmp-mainboard' : 'cmp-display');
     expect(body.source_id).toBe(mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE);
@@ -570,7 +570,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     expect(body.translation_mm).toEqual(mainboard ? [0, 0, 0] : [150, 0, 0]);
     expect(body.rotation_deg_xyz).toEqual([0, 0, 0]);
     expect(body.authority).toBe('declared');
-    await route.fulfill {
+    await route.fulfill({
       status: 201,
       contentType: 'application/json',
       body: JSON.stringify({
