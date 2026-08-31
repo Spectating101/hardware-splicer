@@ -321,7 +321,7 @@ export function ConstructorDock() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="text-[10px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
-                    <span className={`rounded border px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] ${registeredSource ? 'border-emerald-300/20 bg-emerald-300/[0.05] text-emerald-200' : 'border-white/8 bg-white/[0.02] text-slate-600'}`}>
+                    <span className={`rounded border px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ${registeredSource ? 'border-emerald-300/20 bg-emerald-300/[0.05] text-emerald-200' : 'border-white/8 bg-white/[0.02] text-slate-600'}`}>
                       {registeredSource ? 'registered source' : 'session source'}
                     </span>
                   </div>
