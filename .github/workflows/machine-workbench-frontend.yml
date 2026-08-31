@@ -1,4 +1,5 @@
 name: Machine Workbench Frontend
+# Validation marker: repaired durable BREP + anchor-intent persistence matrix.
 
 on:
   pull_request:
