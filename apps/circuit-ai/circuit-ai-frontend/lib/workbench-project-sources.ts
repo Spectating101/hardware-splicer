@@ -8,20 +8,19 @@ export type ProjectSourceDescriptor = {
   contentHash: string;
   originalFilename?: string;
   parserRoute?: string;
-  candidateId?: ConstructorCandidateId;
-  resourceId?: string;
-  entityId?: string;
-  modelId?: string;
 };
 
-export type RegisteredWorkbenchStepSource = {
+export type ProjectStepBindingDescriptor = {
   candidateId: ConstructorCandidateId;
   resourceId: string;
   entityId: string;
-  projectId: string;
   sourceId: string;
   modelId: string;
   contentHash: string;
+};
+
+export type RegisteredWorkbenchStepSource = ProjectStepBindingDescriptor & {
+  projectId: string;
   revision: number;
   sourceMaterialization: 'registered_project';
 };
@@ -34,9 +33,15 @@ type WorkbenchProjectSourceState = {
   status: WorkbenchProjectStatus;
   message: string;
   projectSources: ProjectSourceDescriptor[];
+  projectBindings: ProjectStepBindingDescriptor[];
   registeredByResource: Record<string, RegisteredWorkbenchStepSource>;
   beginProjectLoad: (projectId: string) => void;
-  bindProject: (projectId: string, revision: number, sources: ProjectSourceDescriptor[]) => void;
+  bindProject: (
+    projectId: string,
+    revision: number,
+    sources: ProjectSourceDescriptor[],
+    bindings: ProjectStepBindingDescriptor[],
+  ) => void;
   failProjectLoad: (projectId: string, message: string) => void;
   clearProject: () => void;
   setProjectRevision: (projectId: string, revision: number) => void;
@@ -48,27 +53,27 @@ function key(candidateId: ConstructorCandidateId, resourceId: string) {
   return `${candidateId}::${resourceId}`;
 }
 
+function sourceIdentity(sourceId: string, contentHash: string) {
+  return `${sourceId}::${contentHash}`;
+}
+
 function rehydratedBindings(
   projectId: string,
   revision: number,
   sources: ProjectSourceDescriptor[],
+  bindings: ProjectStepBindingDescriptor[],
 ) {
   const registered: Record<string, RegisteredWorkbenchStepSource> = {};
-  for (const source of sources) {
-    if (
-      source.parserRoute !== 'step_geometry'
-      || !source.candidateId
-      || !source.resourceId
-      || !source.entityId
-    ) continue;
-    registered[key(source.candidateId, source.resourceId)] = {
-      candidateId: source.candidateId,
-      resourceId: source.resourceId,
-      entityId: source.entityId,
+  const registeredStepSources = new Set(
+    sources
+      .filter((source) => source.parserRoute === 'step_geometry')
+      .map((source) => sourceIdentity(source.sourceId, source.contentHash)),
+  );
+  for (const binding of bindings) {
+    if (!registeredStepSources.has(sourceIdentity(binding.sourceId, binding.contentHash))) continue;
+    registered[key(binding.candidateId, binding.resourceId)] = {
+      ...binding,
       projectId,
-      sourceId: source.sourceId,
-      modelId: source.modelId || source.sourceId,
-      contentHash: source.contentHash,
       revision,
       sourceMaterialization: 'registered_project',
     };
@@ -76,7 +81,12 @@ function rehydratedBindings(
   return registered;
 }
 
-function projectMessage(projectId: string, revision: number, sources: ProjectSourceDescriptor[], bindingCount: number) {
+function projectMessage(
+  projectId: string,
+  revision: number,
+  sources: ProjectSourceDescriptor[],
+  bindingCount: number,
+) {
   return `Project ${projectId} · revision ${revision} · ${sources.length} registered source${sources.length === 1 ? '' : 's'} · ${bindingCount} workbench binding${bindingCount === 1 ? '' : 's'}`;
 }
 
@@ -86,6 +96,7 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
   status: 'unbound',
   message: 'Session-only workbench. Add ?project=<id> to bind durable project sources.',
   projectSources: [],
+  projectBindings: [],
   registeredByResource: {},
 
   beginProjectLoad: (projectId) => set({
@@ -94,17 +105,19 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
     status: 'loading',
     message: `Loading project ${projectId}…`,
     projectSources: [],
+    projectBindings: [],
     registeredByResource: {},
   }),
 
-  bindProject: (projectId, revision, sources) => {
-    const registeredByResource = rehydratedBindings(projectId, revision, sources);
+  bindProject: (projectId, revision, sources, bindings) => {
+    const registeredByResource = rehydratedBindings(projectId, revision, sources, bindings);
     set({
       projectId,
       revision,
       status: 'bound',
       message: projectMessage(projectId, revision, sources, Object.keys(registeredByResource).length),
       projectSources: sources,
+      projectBindings: bindings,
       registeredByResource,
     });
   },
@@ -115,6 +128,7 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
     status: 'error',
     message,
     projectSources: [],
+    projectBindings: [],
     registeredByResource: {},
   }),
 
@@ -124,6 +138,7 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
     status: 'unbound',
     message: 'Session-only workbench. Add ?project=<id> to bind durable project sources.',
     projectSources: [],
+    projectBindings: [],
     registeredByResource: {},
   }),
 
@@ -134,7 +149,7 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
         sourceKey,
         source.projectId === projectId ? { ...source, revision } : source,
       ]),
-    );
+    ) as Record<string, RegisteredWorkbenchStepSource>;
     return {
       revision,
       registeredByResource,
@@ -148,24 +163,34 @@ export const useWorkbenchProjectSourceStore = create<WorkbenchProjectSourceState
       sourceId: source.sourceId,
       contentHash: source.contentHash,
       parserRoute: 'step_geometry',
+    };
+    const sourceExists = state.projectSources.some(
+      (row) => row.sourceId === source.sourceId && row.contentHash === source.contentHash,
+    );
+    const projectSources = sourceExists ? state.projectSources : [...state.projectSources, sourceDescriptor];
+    const binding: ProjectStepBindingDescriptor = {
       candidateId: source.candidateId,
       resourceId: source.resourceId,
       entityId: source.entityId,
+      sourceId: source.sourceId,
       modelId: source.modelId,
+      contentHash: source.contentHash,
     };
-    const existingIndex = state.projectSources.findIndex(
-      (row) => row.sourceId === source.sourceId && row.contentHash === source.contentHash,
+    const bindingKey = key(source.candidateId, source.resourceId);
+    const existingBindingIndex = state.projectBindings.findIndex(
+      (row) => key(row.candidateId, row.resourceId) === bindingKey,
     );
-    const projectSources = existingIndex >= 0
-      ? state.projectSources.map((row, index) => index === existingIndex ? { ...row, ...sourceDescriptor } : row)
-      : [...state.projectSources, sourceDescriptor];
+    const projectBindings = existingBindingIndex >= 0
+      ? state.projectBindings.map((row, index) => index === existingBindingIndex ? binding : row)
+      : [...state.projectBindings, binding];
     const registeredByResource = {
       ...state.registeredByResource,
-      [key(source.candidateId, source.resourceId)]: source,
+      [bindingKey]: source,
     };
     return {
       revision: source.revision,
       projectSources,
+      projectBindings,
       registeredByResource,
       message: projectMessage(source.projectId, source.revision, projectSources, Object.keys(registeredByResource).length),
     };
