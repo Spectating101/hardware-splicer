@@ -31,6 +31,7 @@ from .stored_source_parser import read_registered_source_bytes
 
 WORKBENCH_STEP_BINDING_SCHEMA = "hardware_splicer.workbench_step_binding.v1"
 WORKBENCH_STEP_BINDINGS_FIELD = "machineWorkbenchStepBindings"
+WORKBENCH_PLACEMENTS_FIELD = "machineWorkbenchPlacements"
 
 
 class WorkbenchStepBindingApiModel(BaseModel):
@@ -134,6 +135,7 @@ def create_workbench_step_binding_router(
             "registered_source_hash_reverified_before_binding": True,
             "raw_registered_source_bytes_returned": False,
             "source_binding_only": True,
+            "source_rebinding_invalidates_dependent_declared_placement": True,
             "physical_authority_unchanged": True,
             "automatic_authorization": False,
         }
@@ -206,12 +208,20 @@ def create_workbench_step_binding_router(
                     "workbench_step_binding": binding,
                     "registered_source_hash_reverified": True,
                     "raw_registered_source_bytes_returned": False,
+                    "dependent_placement_invalidated": False,
                     "physical_authority_unchanged": True,
                 }
+
+            dependent_placement_invalidated = False
             if existing_index is None:
                 bindings.append(binding)
             else:
                 bindings[existing_index] = binding
+                placements = _rows(snapshot.get(WORKBENCH_PLACEMENTS_FIELD))
+                retained = [row for row in placements if _binding_key(row) != target_key]
+                dependent_placement_invalidated = len(retained) != len(placements)
+                if dependent_placement_invalidated:
+                    snapshot[WORKBENCH_PLACEMENTS_FIELD] = retained
             snapshot[WORKBENCH_STEP_BINDINGS_FIELD] = bindings
 
             saved = store.save(
@@ -229,6 +239,7 @@ def create_workbench_step_binding_router(
                     "registered_source_hash_reverified": True,
                     "raw_registered_source_bytes_returned": False,
                     "source_binding_only": True,
+                    "dependent_placement_invalidated": dependent_placement_invalidated,
                     "physical_authority_unchanged": True,
                     "automatic_authorization": False,
                 },
@@ -245,6 +256,7 @@ def create_workbench_step_binding_router(
             "workbench_step_binding": binding,
             "registered_source_hash_reverified": True,
             "raw_registered_source_bytes_returned": False,
+            "dependent_placement_invalidated": dependent_placement_invalidated,
             "physical_authority_unchanged": True,
         }
 
