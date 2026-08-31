@@ -54,7 +54,14 @@ type BrepAnchorState = {
 };
 
 export const useWorkbenchBrepAnchorStore = create<BrepAnchorState>((set, get) => ({
-  anchorsByCandidate: {},
+  // Exact anchors are intentionally absent after a project reload until OCCT is run
+  // again. Stable empty buckets prevent UI selectors from returning fresh fallback
+  // objects while that absence is being represented honestly.
+  anchorsByCandidate: {
+    balanced: {},
+    'max-reuse': {},
+    'low-risk': {},
+  },
   armedPick: null,
   pickStatus: 'idle',
   pickMessage: '',
