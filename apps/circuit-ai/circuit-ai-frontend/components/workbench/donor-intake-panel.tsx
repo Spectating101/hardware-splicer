@@ -16,6 +16,10 @@ function normalizeId(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'unknown';
 }
 
+function normalizeCapability(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
 function clampConfidence(value: unknown, fallback = 0.5) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(0, Math.min(1, number)) : fallback;
@@ -50,13 +54,14 @@ function provisionalResources(payload: unknown, sourceName: string): WorkbenchDo
     return components.slice(0, 12).map((component, index) => {
       const type = String(component.type || component.id || `observed-part-${index + 1}`);
       const declaredCapabilities = Array.isArray(component.capabilities)
-        ? component.capabilities.map(String).map((capability) => normalizeId(capability)).filter(Boolean)
+        ? component.capabilities.map(String).map(normalizeCapability).filter(Boolean)
         : [];
+      const capabilities = [...new Set([...declaredCapabilities, ...inferCapabilities(type)])];
       return {
         resourceId: `photo-${normalizeId(sourceName)}-${normalizeId(String(component.id || type))}-${index + 1}`,
         name: String(component.description || component.type || component.id || `Observed donor part ${index + 1}`),
         observedLabel: type,
-        capabilities: declaredCapabilities.length > 0 ? declaredCapabilities : inferCapabilities(type),
+        capabilities,
         confidence: overallConfidence,
         evidenceStatus: 'needs_evidence',
         sourceKind: 'photo_analysis',
@@ -149,7 +154,7 @@ export function DonorIntakePanel() {
           {resources.map((resource) => (
             <div key={resource.resourceId} className="rounded-lg border border-white/8 bg-black/10 p-3">
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="truncate text-[11px] font-medium text-white">{resource.name}</div>
                   <div className="mt-1 text-[9px] uppercase tracking-[0.12em] text-slate-600">{resource.capabilities.join(' · ')}</div>
                 </div>
