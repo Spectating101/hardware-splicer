@@ -438,6 +438,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
   let ingestCount = 0;
   let bindingCount = 0;
   const placementPersistenceRequests = [];
+  const anchorIntentRequests = [];
   const storedMeshRequests = [];
   const storedAnchorRequests = [];
   const storedRefinementRequests = [];
@@ -473,7 +474,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     const mainboard = multipart.includes('mainboard.step');
     const sourceId = mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE;
     const hash = mainboard ? HASH_A : HASH_B;
-    const expectedRevision = mainboard ? 1 : 5;
+    const expectedRevision = mainboard ? 1 : 6;
     expect(multipart).toContain('name="expected_revision"');
     expect(multipart).toContain(`\r\n\r\n${expectedRevision}\r\n`);
     expect(multipart).toContain('name="metadata_json"');
@@ -485,7 +486,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
       body: JSON.stringify({
         ok: true,
         project_id: PROJECT_ID,
-        revision: mainboard ? 2 : 6,
+        revision: mainboard ? 2 : 7,
         ingestion: {
           source_id: sourceId,
           content_hash: hash,
@@ -510,11 +511,11 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     const sourceId = decodeURIComponent(url.pathname.split('/sources/')[1].split('/parse')[0]);
     const body = JSON.parse(route.request().postData() || '{}');
     const mainboard = sourceId === MAINBOARD_SOURCE;
-    expect(body.expected_revision).toBe(mainboard ? 2 : 6);
+    expect(body.expected_revision).toBe(mainboard ? 2 : 7);
     await route.fulfill({
       status: 201,
       contentType: 'application/json',
-      body: JSON.stringify(parserResponse(sourceId, mainboard ? 3 : 7)),
+      body: JSON.stringify(parserResponse(sourceId, mainboard ? 3 : 8)),
     });
   });
 
@@ -522,7 +523,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     bindingCount += 1;
     const body = JSON.parse(route.request().postData() || '{}');
     const mainboard = body.resource_id === 'res-mainboard-donor';
-    expect(body.expected_revision).toBe(mainboard ? 3 : 7);
+    expect(body.expected_revision).toBe(mainboard ? 3 : 8);
     expect(body.candidate_id).toBe('balanced');
     expect(body.entity_id).toBe(mainboard ? 'cmp-mainboard' : 'cmp-display');
     expect(body.source_id).toBe(mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE);
@@ -535,7 +536,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
         ok: true,
         registered: true,
         project_id: PROJECT_ID,
-        revision: mainboard ? 4 : 8,
+        revision: mainboard ? 4 : 9,
         workbench_step_binding: {
           schema_version: 'hardware_splicer.workbench_step_binding.v1',
           candidate_id: body.candidate_id,
@@ -559,7 +560,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
     const body = JSON.parse(route.request().postData() || '{}');
     placementPersistenceRequests.push(body);
     const mainboard = body.resource_id === 'res-mainboard-donor';
-    expect(body.expected_revision).toBe(mainboard ? 4 : 8);
+    expect(body.expected_revision).toBe(mainboard ? 4 : 9);
     expect(body.candidate_id).toBe('balanced');
     expect(body.entity_id).toBe(mainboard ? 'cmp-mainboard' : 'cmp-display');
     expect(body.source_id).toBe(mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE);
@@ -577,7 +578,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
         ok: true,
         registered: true,
         project_id: PROJECT_ID,
-        revision: mainboard ? 5 : 9,
+        revision: mainboard ? 5 : 10,
         workbench_placement: {
           schema_version: 'hardware_splicer.workbench_declared_placement.v1',
           candidate_id: body.candidate_id,
@@ -603,6 +604,77 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
         },
         registered_source_hash_reverified: true,
         derived_geometry_persisted: false,
+        physical_authority_unchanged: true,
+      }),
+    });
+  });
+
+  await page.route(`**/api/proxy/engineering/projects/${PROJECT_ID}/workbench/anchor-intents`, async (route) => {
+    const body = JSON.parse(route.request().postData() || '{}');
+    anchorIntentRequests.push(body);
+    const mainboard = body.resource_id === 'res-mainboard-donor';
+    expect(body.expected_revision).toBe(mainboard ? 5 : 10);
+    expect(body.candidate_id).toBe('balanced');
+    expect(body.entity_id).toBe(mainboard ? 'cmp-mainboard' : 'cmp-display');
+    expect(body.interface_id).toBe('if-display');
+    expect(body.anchor_id).toBe(mainboard ? 'anchor-balanced-cmp-mainboard-if-display' : 'anchor-balanced-cmp-display-if-display');
+    expect(body.source_id).toBe(mainboard ? MAINBOARD_SOURCE : DISPLAY_SOURCE);
+    expect(body.model_id).toBe(body.source_id);
+    expect(body.content_hash).toBe(mainboard ? HASH_A : HASH_B);
+    expect(body.placement_id).toBe(mainboard ? 'placement-balanced-res-mainboard-donor' : 'placement-balanced-res-display-controlled');
+    expect(body.target_frame).toBe('assembly');
+    expect(body.translation_mm).toEqual(mainboard ? [0, 0, 0] : [150, 0, 0]);
+    expect(body.rotation_deg_xyz).toEqual([0, 0, 0]);
+    expect(body.max_snap_distance_mm).toBe(5);
+    expect(body.authority).toBe('declared');
+    expect(body).not.toHaveProperty('face_index');
+    expect(body).not.toHaveProperty('anchor_point_mm');
+    expect(body).not.toHaveProperty('outward_normal');
+    const intent = {
+      schema_version: 'hardware_splicer.workbench_brep_anchor_intent.v1',
+      candidate_id: body.candidate_id,
+      resource_id: body.resource_id,
+      entity_id: body.entity_id,
+      interface_id: body.interface_id,
+      anchor_id: body.anchor_id,
+      source_id: body.source_id,
+      model_id: body.model_id,
+      content_hash: body.content_hash,
+      placement_id: body.placement_id,
+      target_frame: body.target_frame,
+      translation_mm: body.translation_mm,
+      rotation_deg_xyz: body.rotation_deg_xyz,
+      probe_point_mm: body.probe_point_mm,
+      max_snap_distance_mm: body.max_snap_distance_mm,
+      authority: 'declared',
+      source_binding_required: true,
+      durable_placement_required: true,
+      registered_source_hash_reverified: true,
+      kernel_result_persisted: false,
+      face_identity_persisted: false,
+      anchor_point_persisted: false,
+      surface_normal_persisted: false,
+      requires_occt_resnap_on_reopen: true,
+      physical_authority_unchanged: true,
+      connector_mating_verified: false,
+      physical_measurement: false,
+      automatic_authorization: false,
+      fabrication_authorized: false,
+      power_on_authorized: false,
+      motion_authorized: false,
+      release_authorized: false,
+    };
+    await route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        registered: true,
+        project_id: PROJECT_ID,
+        revision: mainboard ? 6 : 11,
+        workbench_anchor_intent: intent,
+        registered_source_hash_reverified: true,
+        kernel_result_persisted: false,
         physical_authority_unchanged: true,
       }),
     });
@@ -680,7 +752,7 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
   const display = page.getByRole('button', { name: /Donor display \+ validated controller.*planner selected/i });
   await display.click();
   await page.getByLabel('Attach STEP geometry for Donor display + validated controller').setInputFiles({ name: 'display.step', mimeType: 'model/step', buffer: Buffer.from(DISPLAY_STEP) });
-  await expect(page.getByTestId('workbench-project-provenance')).toContainText(`Project ${PROJECT_ID} · revision 8 · 2 registered sources · 2 workbench bindings`);
+  await expect(page.getByTestId('workbench-project-provenance')).toContainText(`Project ${PROJECT_ID} · revision 9 · 2 registered sources · 2 workbench bindings`);
   await page.getByLabel('Placement translation X mm for Donor display + validated controller').fill('150');
   await page.getByLabel('Placement translation Y mm for Donor display + validated controller').fill('0');
   await page.getByLabel('Placement translation Z mm for Donor display + validated controller').fill('0');
@@ -701,6 +773,10 @@ test('project-bound workbench keeps exact BREP evidence on registered hash-rever
   expect(ingestCount).toBe(2);
   expect(bindingCount).toBe(2);
   expect(placementPersistenceRequests).toHaveLength(2);
+  expect(anchorIntentRequests).toHaveLength(2);
+  expect(anchorIntentRequests.every((body) => !Object.prototype.hasOwnProperty.call(body, 'face_index'))).toBe(true);
+  expect(anchorIntentRequests.every((body) => !Object.prototype.hasOwnProperty.call(body, 'anchor_point_mm'))).toBe(true);
+  expect(anchorIntentRequests.every((body) => !Object.prototype.hasOwnProperty.call(body, 'outward_normal'))).toBe(true);
   expect(storedMeshRequests).toHaveLength(2);
   expect(storedAnchorRequests).toHaveLength(2);
   expect(storedRefinementRequests).toHaveLength(1);
