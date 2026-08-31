@@ -31,8 +31,18 @@ type PlacementState = {
 };
 
 export const useWorkbenchPlacementStore = create<PlacementState>((set) => ({
-  placementsByCandidate: {},
-  geometryReportsByCandidate: {},
+  // Stable candidate buckets make reload/mount selectors safe even before a durable
+  // placement or parser report exists for the currently selected candidate.
+  placementsByCandidate: {
+    balanced: {},
+    'max-reuse': {},
+    'low-risk': {},
+  },
+  geometryReportsByCandidate: {
+    balanced: {},
+    'max-reuse': {},
+    'low-risk': {},
+  },
   setGeometryReport: (candidateId, resourceId, report) => set((state) => {
     const placements = { ...(state.placementsByCandidate[candidateId] ?? {}) };
     for (const [entityId, placement] of Object.entries(placements)) {
