@@ -11,7 +11,7 @@ from copy import deepcopy
 from typing import Any, Dict, Literal, Mapping
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, FiniteFloat
 
 from .mechanical_brep_mesh_api import (
     RegisteredMechanicalBrepMeshSource,
@@ -47,8 +47,8 @@ class RegisterWorkbenchPlacementRequest(WorkbenchPlacementApiModel):
     content_hash: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     placement_id: str = Field(min_length=1, max_length=240)
     target_frame: Literal["assembly"] = "assembly"
-    translation_mm: tuple[float, float, float]
-    rotation_deg_xyz: tuple[float, float, float]
+    translation_mm: tuple[FiniteFloat, FiniteFloat, FiniteFloat]
+    rotation_deg_xyz: tuple[FiniteFloat, FiniteFloat, FiniteFloat]
     authority: Literal["declared"] = "declared"
 
 
@@ -186,6 +186,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
             "project_snapshot_field": WORKBENCH_PLACEMENTS_FIELD,
             "registered_source_binding_required": True,
             "registered_source_hash_reverified_before_write": True,
+            "finite_transform_values_required": True,
             "declared_transform_only": True,
             "derived_aabb_persisted": False,
             "brep_mesh_persisted": False,
