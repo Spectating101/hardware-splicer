@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useMachineWorkbenchStore, type ConstructorCandidateId } from '@/lib/machine-workbench-store';
 
 const candidateIds = new Set<ConstructorCandidateId>(['balanced', 'max-reuse', 'low-risk']);
 
 export function WorkbenchStageBridge() {
-  const searchParams = useSearchParams();
   const setPhase = useMachineWorkbenchStore((state) => state.setPhase);
   const setConstructorDockTab = useMachineWorkbenchStore((state) => state.setConstructorDockTab);
   const setActiveCandidateId = useMachineWorkbenchStore((state) => state.setActiveCandidateId);
@@ -15,6 +13,7 @@ export function WorkbenchStageBridge() {
   const setActiveBottomTab = useMachineWorkbenchStore((state) => state.setActiveBottomTab);
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
     const candidate = searchParams.get('candidate') as ConstructorCandidateId | null;
     if (candidate && candidateIds.has(candidate)) setActiveCandidateId(candidate);
 
@@ -40,7 +39,7 @@ export function WorkbenchStageBridge() {
       setActiveView('assembly');
       setActiveBottomTab('verification');
     }
-  }, [searchParams, setActiveBottomTab, setActiveCandidateId, setActiveView, setConstructorDockTab, setPhase]);
+  }, [setActiveBottomTab, setActiveCandidateId, setActiveView, setConstructorDockTab, setPhase]);
 
   return null;
 }
