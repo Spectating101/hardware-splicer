@@ -13,7 +13,12 @@ import { useMachineWorkbenchStore, type MechanicalGeometryEvidence } from '@/lib
 import { useWorkbenchAccessStore } from '@/lib/workbench-access-store';
 import { useWorkbenchBrepAnchorStore } from '@/lib/workbench-brep-anchor-store';
 import { useWorkbenchPlacementStore } from '@/lib/workbench-placement-store';
-import { cacheSessionStepSource } from '@/lib/workbench-session-step-sources';
+import { cacheSessionStepSource, clearSessionStepSource } from '@/lib/workbench-session-step-sources';
+import {
+  getRegisteredWorkbenchStepSource,
+  useWorkbenchProjectSourceStore,
+} from '@/lib/workbench-project-sources';
+import { importWorkbenchStepSource } from '@/lib/workbench-step-source-import';
 import { DeclaredPlacementEditor } from '@/components/workbench/declared-placement-editor';
 
 function requirementTone(state: RequirementState) {
@@ -70,6 +75,10 @@ export function ConstructorDock() {
   const clearPlacement = useWorkbenchPlacementStore((state) => state.clearPlacement);
   const clearAccessForEntity = useWorkbenchAccessStore((state) => state.clearAccessForEntity);
   const clearAnchorsForEntity = useWorkbenchBrepAnchorStore((state) => state.clearAnchorsForEntity);
+  const projectSourceState = useWorkbenchProjectSourceStore();
+  const setProjectRevision = useWorkbenchProjectSourceStore((state) => state.setProjectRevision);
+  const setRegisteredSource = useWorkbenchProjectSourceStore((state) => state.setRegisteredSource);
+  const clearRegisteredSource = useWorkbenchProjectSourceStore((state) => state.clearRegisteredSource);
   const activeCandidate = constructorCandidateMap.get(activeCandidateId) ?? constructorCandidateMap.get('balanced');
   const livePlanner = plannerSource === 'live' && Boolean(plannerProjection);
   const liveSelected = new Set((plannerProjection?.selectedResourceIds ?? []).map(normalizeId));
@@ -78,6 +87,14 @@ export function ConstructorDock() {
     ? plannerProjection?.mechanicalGeometryByEntity?.[selectedResource.mappedEntityId]
     : undefined;
   const geometryForSelectedResource = selectedGeometry?.resourceId === selectedResource?.id ? selectedGeometry : undefined;
+  const registeredSource = selectedResource
+    ? getRegisteredWorkbenchStepSource(projectSourceState, activeCandidateId, selectedResource.id)
+    : null;
+  const projectBound = projectSourceState.status === 'bound'
+    && Boolean(projectSourceState.projectId)
+    && Number.isInteger(projectSourceState.revision)
+    && Number(projectSourceState.revision) >= 1;
+  const projectIntent = projectSourceState.status !== 'unbound';
 
   function inspectResource(resourceId: string, mappedEntityId?: string) {
     setSelectedResourceId(resourceId);
@@ -94,29 +111,32 @@ export function ConstructorDock() {
     event.target.value = '';
     if (!file || !selectedResource?.mappedEntityId) return;
 
+    if (projectIntent && !projectBound) {
+      setGeometryState('error');
+      setGeometryMessage(`Durable project binding is not ready: ${projectSourceState.message}`);
+      return;
+    }
+
     setGeometryState('loading');
-    setGeometryMessage(`Parsing ${file.name} with Hardware-Splicer…`);
+    setGeometryMessage(
+      projectBound
+        ? `Registering ${file.name}, then parsing the stored project blob with Hardware-Splicer…`
+        : `Parsing ${file.name} with Hardware-Splicer in this browser session…`,
+    );
     try {
-      const content = await file.text();
-      const response = await fetch('/api/proxy/engineering/mechanical/geometry/parse', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          project_id: 'deck-001',
-          sources: [{
-            source_id: file.name,
-            model_id: `${activeCandidateId}-${selectedResource.id}`,
-            content,
-          }],
-          mounts: [],
-        }),
-        cache: 'no-store',
+      const imported = await importWorkbenchStepSource({
+        file,
+        candidateId: activeCandidateId,
+        resourceId: selectedResource.id,
+        entityId: selectedResource.mappedEntityId,
+        projectBinding: projectBound
+          ? {
+              projectId: projectSourceState.projectId as string,
+              revision: projectSourceState.revision as number,
+            }
+          : null,
       });
-      const payload = record(await response.json());
-      if (!response.ok || payload.ok !== true) {
-        throw new Error(String(payload.error || `mechanical geometry HTTP ${response.status}`));
-      }
-      const geometry = record(payload.mechanical_geometry);
+      const geometry = imported.mechanicalGeometry;
       const models = Array.isArray(geometry.models) ? geometry.models : [];
       const model = record(models[0]);
       const boundingBox = record(model.bounding_box);
@@ -130,6 +150,13 @@ export function ConstructorDock() {
       const maximumMm = normalizeMillimeters(rawMaximum, units);
       if (!sizeMm || !minimumMm || !maximumMm) throw new Error(`STEP length units are ${units}; explicit millimetre/metre units are required before spatial scaling.`);
       if (sizeMm.some((value) => value <= 0)) throw new Error('STEP envelope has a zero-size axis; HS will not promote it to a 3D resource envelope.');
+      if (
+        String(model.source_id || '') !== imported.sourceId
+        || String(model.model_id || '') !== imported.modelId
+        || String(model.content_hash || '') !== imported.contentHash
+      ) {
+        throw new Error('Mechanical geometry identity disagrees with the imported STEP source transaction.');
+      }
 
       const unresolved = Array.isArray(model.unresolved)
         ? model.unresolved.map((row) => {
@@ -140,9 +167,9 @@ export function ConstructorDock() {
       const evidence: MechanicalGeometryEvidence = {
         entityId: selectedResource.mappedEntityId,
         resourceId: selectedResource.id,
-        sourceId: String(model.source_id || file.name),
-        modelId: String(model.model_id || `${activeCandidateId}-${selectedResource.id}`),
-        contentHash: String(model.content_hash || ''),
+        sourceId: imported.sourceId,
+        modelId: imported.modelId,
+        contentHash: imported.contentHash,
         authority: 'declared',
         units: 'mm',
         sizeMm,
@@ -154,7 +181,6 @@ export function ConstructorDock() {
         fullBrepCollision: false,
         fabricationAuthorized: false,
       };
-      if (!evidence.contentHash.startsWith('sha256:')) throw new Error('HS geometry response did not include the canonical STEP content hash.');
 
       const priorGeometry = geometryForSelectedResource;
       const sourceIdentityChanged = Boolean(
@@ -166,31 +192,48 @@ export function ConstructorDock() {
         ),
       );
       if (sourceIdentityChanged) {
-        // Placement AABBs, access envelopes, exact tessellation and surface anchors all
-        // derive from the imported source identity. A replacement source must not keep
-        // any of those results alive merely because the resource/entity id is stable.
         clearAccessForEntity(activeCandidateId, selectedResource.mappedEntityId);
         clearAnchorsForEntity(activeCandidateId, selectedResource.mappedEntityId);
         clearBrepRenderMeshEvidence(activeCandidateId, selectedResource.mappedEntityId);
         clearPlacement(activeCandidateId, selectedResource.mappedEntityId);
       }
 
-      cacheSessionStepSource({
-        candidateId: activeCandidateId,
-        resourceId: selectedResource.id,
-        entityId: selectedResource.mappedEntityId,
-        sourceId: evidence.sourceId,
-        modelId: evidence.modelId,
-        contentHash: evidence.contentHash,
-        content,
-      });
+      if (imported.durable) {
+        clearSessionStepSource(activeCandidateId, selectedResource.id);
+        if (imported.revision === null) throw new Error('Registered STEP import completed without a durable project revision.');
+        setProjectRevision(imported.projectId, imported.revision);
+        setRegisteredSource({
+          candidateId: activeCandidateId,
+          resourceId: selectedResource.id,
+          entityId: selectedResource.mappedEntityId,
+          projectId: imported.projectId,
+          sourceId: imported.sourceId,
+          modelId: imported.modelId,
+          contentHash: imported.contentHash,
+          revision: imported.revision,
+          sourceMaterialization: 'registered_project',
+        });
+      } else {
+        clearRegisteredSource(activeCandidateId, selectedResource.id);
+        if (imported.content === null) throw new Error('Session STEP import lost its bounded raw source cache.');
+        cacheSessionStepSource({
+          candidateId: activeCandidateId,
+          resourceId: selectedResource.id,
+          entityId: selectedResource.mappedEntityId,
+          sourceId: evidence.sourceId,
+          modelId: evidence.modelId,
+          contentHash: evidence.contentHash,
+          content: imported.content,
+        });
+      }
+
       setGeometryReport(activeCandidateId, selectedResource.id, geometry);
       setMechanicalGeometryEvidence(activeCandidateId, evidence);
       setSelectedEntityId(selectedResource.mappedEntityId);
       window.setTimeout(requestFrameSelection, 0);
       setGeometryState('success');
       setGeometryMessage(
-        `${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · ${evidence.pointCount} STEP points · declared envelope only.${sourceIdentityChanged ? ' Prior placement and dependent exact evidence were invalidated; re-place this source.' : ''}`,
+        `${sizeMm.map((value) => Math.round(value * 100) / 100).join(' × ')} mm · ${evidence.pointCount} STEP points · DECLARED envelope · ${imported.durable ? `registered project source at revision ${imported.revision}` : 'session-inline source'}.${sourceIdentityChanged ? ' Prior placement and dependent exact evidence were invalidated; re-place this source.' : ''}`,
       );
     } catch (error: unknown) {
       setGeometryState('error');
@@ -206,6 +249,9 @@ export function ConstructorDock() {
           <span title={plannerMessage} className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] ${livePlanner ? 'border-emerald-300/20 bg-emerald-300/8 text-emerald-200' : plannerSource === 'loading' ? 'border-sky-300/20 bg-sky-300/8 text-sky-200' : 'border-amber-300/15 bg-amber-300/[0.05] text-amber-200/75'}`}>
             <Activity className="h-2.5 w-2.5" /> {livePlanner ? 'live planner' : plannerSource}
           </span>
+        </div>
+        <div className={`mt-2 rounded-md border px-2 py-1.5 text-[8px] leading-4 ${projectSourceState.status === 'bound' ? 'border-emerald-300/15 bg-emerald-300/[0.035] text-emerald-200/70' : projectSourceState.status === 'error' ? 'border-red-300/15 bg-red-300/[0.035] text-red-200/70' : projectSourceState.status === 'loading' ? 'border-sky-300/15 bg-sky-300/[0.035] text-sky-200/70' : 'border-white/8 bg-white/[0.02] text-slate-600'}`} data-testid="workbench-project-provenance">
+          {projectSourceState.message}
         </div>
         <div className="mt-2 flex rounded-lg border border-white/10 bg-black/20 p-0.5">
           <button type="button" onClick={() => setTab('target')} className={`flex flex-1 items-center justify-center gap-2 rounded-md px-2 py-2 text-[10px] font-medium ${tab === 'target' ? 'bg-cyan-300/10 text-cyan-100' : 'text-slate-500 hover:text-white'}`}>
@@ -273,19 +319,24 @@ export function ConstructorDock() {
               <div className="flex items-start gap-2">
                 <Ruler className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-300" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-[10px] font-semibold text-slate-200">Spatial evidence · {selectedResource.name}</div>
+                    <span className={`rounded border px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.1em] ${registeredSource ? 'border-emerald-300/20 bg-emerald-300/[0.05] text-emerald-200' : 'border-white/8 bg-white/[0.02] text-slate-600'}`}>
+                      {registeredSource ? 'registered source' : 'session source'}
+                    </span>
+                  </div>
                   {geometryForSelectedResource ? (
                     <div className="mt-1 text-[9px] leading-4 text-emerald-200/75">
                       STEP envelope attached: {geometryForSelectedResource.sizeMm.join(' × ')} mm · {geometryForSelectedResource.pointCount} points · DECLARED
                     </div>
                   ) : (
-                    <div className="mt-1 text-[9px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope. You can then declare an assembly-frame placement; neither step establishes collision or build authority.</div>
+                    <div className="mt-1 text-[9px] leading-4 text-slate-500">Attach a text STEP/STP model. HS will use only its parsed point envelope. When a project is bound, the source is registered and reparsed from the server-side content-addressed blob before it becomes workbench evidence.</div>
                   )}
                   <div className="mt-2 flex items-center gap-2">
                     <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-cyan-300/15 bg-cyan-300/[0.04] px-2 py-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-cyan-200 hover:bg-cyan-300/[0.08]">
                       {geometryState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <FileUp className="h-3 w-3" />}
                       {geometryForSelectedResource ? 'Replace STEP' : 'Attach STEP'}
-                      <input type="file" accept=".step,.stp,model/step" className="sr-only" disabled={geometryState === 'loading'} onChange={importStepEnvelope} aria-label={`Attach STEP geometry for ${selectedResource.name}`} />
+                      <input type="file" accept=".step,.stp,model/step" className="sr-only" disabled={geometryState === 'loading' || (projectIntent && !projectBound)} onChange={importStepEnvelope} aria-label={`Attach STEP geometry for ${selectedResource.name}`} />
                     </label>
                     <span className="text-[8px] uppercase tracking-[0.1em] text-slate-600">point envelope · no BREP authority</span>
                   </div>
@@ -312,6 +363,7 @@ export function ConstructorDock() {
               const used = livePlanner ? liveSelected.has(normalizeId(resource.id)) : activeCandidate?.resourceIds.includes(resource.id);
               const geometry = resource.mappedEntityId ? plannerProjection?.mechanicalGeometryByEntity?.[resource.mappedEntityId] : undefined;
               const hasGeometry = geometry?.resourceId === resource.id;
+              const durable = Boolean(getRegisteredWorkbenchStepSource(projectSourceState, activeCandidateId, resource.id));
               return (
                 <button
                   key={resource.id}
@@ -325,7 +377,7 @@ export function ConstructorDock() {
                       <div className="flex items-center gap-2">
                         <span className="truncate text-[10px] font-medium text-slate-100">{resource.name}</span>
                         {used ? <span className="rounded bg-cyan-300/8 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-cyan-300">{livePlanner ? 'planner selected' : 'candidate'}</span> : null}
-                        {hasGeometry ? <span className="rounded bg-emerald-300/8 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-emerald-300">STEP envelope</span> : null}
+                        {hasGeometry ? <span className="rounded bg-emerald-300/8 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-emerald-300">{durable ? 'registered STEP' : 'STEP envelope'}</span> : null}
                       </div>
                       <div className="mt-1 flex items-center gap-2 text-[9px] uppercase tracking-[0.12em] text-slate-600">
                         <span>{resource.kind}</span><span>·</span><span className={decisionTone(resource.decision)}>{resource.decision}</span><span>·</span><span>{resource.costNtd ? `NT$${resource.costNtd.toLocaleString()}` : 'owned'}</span>
