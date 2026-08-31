@@ -126,7 +126,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_mechanical_brep_mesh_router(resolved_store))
     app.include_router(create_mechanical_brep_anchor_router(resolved_store))
     app.include_router(create_mechanical_brep_mating_router())
-    app.include_router(create_mechanical_brep_sweep_router())
+    app.include_router(create_mechanical_brep_sweep_router(resolved_store))
     _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))
