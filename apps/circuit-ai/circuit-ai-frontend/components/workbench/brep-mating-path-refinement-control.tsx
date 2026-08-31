@@ -8,6 +8,10 @@ import {
   type BrepSurfaceAnchorEvidence,
 } from '@/lib/workbench-brep-anchor-store';
 import { getSessionStepSource } from '@/lib/workbench-session-step-sources';
+import {
+  getRegisteredWorkbenchStepSource,
+  useWorkbenchProjectSourceStore,
+} from '@/lib/workbench-project-sources';
 
 const EMPTY_ANCHORS: Record<string, BrepSurfaceAnchorEvidence> = {};
 const MAX_REFINEMENT_TOTAL_POSE_BUDGET = 256;
@@ -55,6 +59,7 @@ export function BrepMatingPathRefinementControl({
 }) {
   const candidateAnchors = useWorkbenchBrepAnchorStore((state) => state.anchorsByCandidate[candidateId]);
   const anchors = candidateAnchors ?? EMPTY_ANCHORS;
+  const projectSourceState = useWorkbenchProjectSourceStore();
   const pairs = useMemo(() => {
     const rows = Object.values(anchors);
     const result: AnchorPair[] = [];
@@ -70,23 +75,43 @@ export function BrepMatingPathRefinementControl({
   }, [anchors, entityId]);
 
   const activePair = pairs[0] ?? null;
-  const movingSource = activePair
-    ? getSessionStepSource(candidateId, activePair.moving.resourceId)
+  const movingSessionSource = activePair ? getSessionStepSource(candidateId, activePair.moving.resourceId) : null;
+  const fixedSessionSource = activePair ? getSessionStepSource(candidateId, activePair.fixed.resourceId) : null;
+  const movingRegisteredSource = activePair
+    ? getRegisteredWorkbenchStepSource(projectSourceState, candidateId, activePair.moving.resourceId)
     : null;
-  const fixedSource = activePair
-    ? getSessionStepSource(candidateId, activePair.fixed.resourceId)
+  const fixedRegisteredSource = activePair
+    ? getRegisteredWorkbenchStepSource(projectSourceState, candidateId, activePair.fixed.resourceId)
     : null;
-  const sourceReady = Boolean(
+  const registeredReady = Boolean(
     activePair
-    && movingSource
-    && fixedSource
-    && movingSource.entityId === activePair.moving.entityId
-    && fixedSource.entityId === activePair.fixed.entityId
-    && movingSource.modelId === activePair.moving.modelId
-    && fixedSource.modelId === activePair.fixed.modelId
-    && movingSource.contentHash === activePair.moving.contentHash
-    && fixedSource.contentHash === activePair.fixed.contentHash,
+    && projectSourceState.status === 'bound'
+    && projectSourceState.projectId
+    && movingRegisteredSource
+    && fixedRegisteredSource
+    && movingRegisteredSource.projectId === projectSourceState.projectId
+    && fixedRegisteredSource.projectId === projectSourceState.projectId
+    && movingRegisteredSource.entityId === activePair.moving.entityId
+    && fixedRegisteredSource.entityId === activePair.fixed.entityId
+    && movingRegisteredSource.modelId === activePair.moving.modelId
+    && fixedRegisteredSource.modelId === activePair.fixed.modelId
+    && movingRegisteredSource.contentHash === activePair.moving.contentHash
+    && fixedRegisteredSource.contentHash === activePair.fixed.contentHash,
   );
+  const sessionReady = Boolean(
+    activePair
+    && movingSessionSource
+    && fixedSessionSource
+    && movingSessionSource.entityId === activePair.moving.entityId
+    && fixedSessionSource.entityId === activePair.fixed.entityId
+    && movingSessionSource.modelId === activePair.moving.modelId
+    && fixedSessionSource.modelId === activePair.fixed.modelId
+    && movingSessionSource.contentHash === activePair.moving.contentHash
+    && fixedSessionSource.contentHash === activePair.fixed.contentHash,
+  );
+  const sourceReady = registeredReady || sessionReady;
+  const movingSource = registeredReady ? movingRegisteredSource : movingSessionSource;
+  const fixedSource = registeredReady ? fixedRegisteredSource : fixedSessionSource;
 
   const [endTranslation, setEndTranslation] = useState(['', '', '']);
   const [sampleCount, setSampleCount] = useState('9');
@@ -142,7 +167,7 @@ export function BrepMatingPathRefinementControl({
   async function refineTransitions() {
     if (!activePair || !movingSource || !fixedSource || !sourceReady) {
       setState('error');
-      setMessage('Adaptive refinement needs both current hash-bound session STEP sources.');
+      setMessage('Adaptive refinement needs both anchors backed by either matching session STEP sources or matching registered project sources. Mixed/unbound provenance is refused.');
       return;
     }
 
@@ -193,27 +218,46 @@ export function BrepMatingPathRefinementControl({
 
     const requestFingerprint = currentFingerprint;
     setState('loading');
-    setMessage('Sampling the declared path, then adaptively narrowing exact BREP predicate changes…');
+    setMessage(
+      registeredReady
+        ? 'Reopening both registered STEP blobs, re-verifying both hashes, coarse-sampling the path, then adaptively narrowing exact BREP predicate changes…'
+        : 'Sampling the declared path, then adaptively narrowing exact BREP predicate changes…',
+    );
     setReport(null);
     try {
-      const response = await fetch('/api/proxy/engineering/mechanical/geometry/brep/mating-path/refine', {
+      const endpoint = registeredReady
+        ? '/api/proxy/engineering/mechanical/geometry/brep/mating-path/refine/stored'
+        : '/api/proxy/engineering/mechanical/geometry/brep/mating-path/refine';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          project_id: 'deck-001',
+          project_id: registeredReady && movingRegisteredSource ? movingRegisteredSource.projectId : 'deck-001',
           sweep_id: `mating-path-refine-${candidateId}-${activePair.moving.entityId}-${activePair.fixed.entityId}`,
-          moving_source: {
-            source_id: movingSource.sourceId,
-            model_id: movingSource.modelId,
-            content_hash: movingSource.contentHash,
-            content: movingSource.content,
-          },
-          fixed_source: {
-            source_id: fixedSource.sourceId,
-            model_id: fixedSource.modelId,
-            content_hash: fixedSource.contentHash,
-            content: fixedSource.content,
-          },
+          moving_source: registeredReady
+            ? {
+                source_id: movingSource.sourceId,
+                model_id: movingSource.modelId,
+                content_hash: movingSource.contentHash,
+              }
+            : {
+                source_id: movingSource.sourceId,
+                model_id: movingSource.modelId,
+                content_hash: movingSource.contentHash,
+                content: movingSessionSource?.content,
+              },
+          fixed_source: registeredReady
+            ? {
+                source_id: fixedSource.sourceId,
+                model_id: fixedSource.modelId,
+                content_hash: fixedSource.contentHash,
+              }
+            : {
+                source_id: fixedSource.sourceId,
+                model_id: fixedSource.modelId,
+                content_hash: fixedSource.contentHash,
+                content: fixedSessionSource?.content,
+              },
           moving_start_placement: {
             placement_id: activePair.moving.placementId,
             object_id: activePair.moving.entityId,
@@ -270,6 +314,15 @@ export function BrepMatingPathRefinementControl({
       ) {
         throw new Error('Transition refinement response crossed the bounded evidence/authority contract.');
       }
+      if (registeredReady && (
+        payload.registered_sources_materialized !== true
+        || payload.registered_source_hashes_reverified !== true
+        || payload.moving_registered_source_hash_reverified !== true
+        || payload.fixed_registered_source_hash_reverified !== true
+        || payload.raw_registered_source_bytes_returned !== false
+      )) {
+        throw new Error('Stored transition refinement response did not prove both registered blobs were independently hash re-verified.');
+      }
       if (
         refinement.moving_source_id !== movingSource.sourceId
         || refinement.fixed_source_id !== fixedSource.sourceId
@@ -302,8 +355,8 @@ export function BrepMatingPathRefinementControl({
       setState('success');
       setMessage(
         status === 'not_required'
-          ? 'The coarse exact samples contain no adjacent clearance/interference predicate change to refine.'
-          : `Refined ${refinedCount} predicate-change bracket${refinedCount === 1 ? '' : 's'} with ${extraPoses} additional exact BREP pose evaluations.`,
+          ? `The coarse exact samples contain no adjacent clearance/interference predicate change to refine.${registeredReady ? ' Both registered source hashes were reverified server-side.' : ''}`
+          : `Refined ${refinedCount} predicate-change bracket${refinedCount === 1 ? '' : 's'} with ${extraPoses} additional exact BREP pose evaluations.${registeredReady ? ' Both registered source hashes were reverified server-side.' : ''}`,
       );
     } catch (error: unknown) {
       if (requestFingerprint !== currentFingerprintRef.current) return;
@@ -330,8 +383,10 @@ export function BrepMatingPathRefinementControl({
       </div>
       {!sourceReady ? (
         <div className="mt-1.5 text-[9px] leading-4 text-amber-200/75">
-          Current session STEP bytes are not available for both hash-bound anchors. Re-import/re-anchor before refinement.
+          Both anchors must resolve through one provenance lane: two matching registered project STEP sources or two matching session STEP sources. Mixed/unbound sources are not refined.
         </div>
+      ) : registeredReady ? (
+        <div className="mt-1.5 text-[8px] leading-4 text-emerald-200/60">Registered-project refinement · both blobs are reopened and hash reverified server-side for each evaluation.</div>
       ) : null}
       <div className="mt-2 grid grid-cols-3 gap-1.5">
         {['X', 'Y', 'Z'].map((axis, index) => (
