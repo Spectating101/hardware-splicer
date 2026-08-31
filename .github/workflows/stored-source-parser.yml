@@ -10,6 +10,7 @@ on:
       - "src/hardware_splicer/project_engineering_plan_api.py"
       - "src/hardware_splicer/workbench_step_binding_api.py"
       - "src/hardware_splicer/workbench_placement_api.py"
+      - "src/hardware_splicer/workbench_anchor_intent_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_stored_source_parser.py"
       - "tests/test_stored_source_parser_hardening.py"
@@ -17,6 +18,7 @@ on:
       - "tests/test_project_parser_planning_bridge.py"
       - "tests/test_workbench_step_binding_api.py"
       - "tests/test_workbench_placement_api.py"
+      - "tests/test_workbench_anchor_intent_api.py"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/source-lab/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/parse/route.ts"
@@ -34,6 +36,7 @@ on:
       - "src/hardware_splicer/project_engineering_plan_api.py"
       - "src/hardware_splicer/workbench_step_binding_api.py"
       - "src/hardware_splicer/workbench_placement_api.py"
+      - "src/hardware_splicer/workbench_anchor_intent_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_stored_source_parser.py"
       - "tests/test_stored_source_parser_hardening.py"
@@ -41,6 +44,7 @@ on:
       - "tests/test_project_parser_planning_bridge.py"
       - "tests/test_workbench_step_binding_api.py"
       - "tests/test_workbench_placement_api.py"
+      - "tests/test_workbench_anchor_intent_api.py"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/source-lab/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/parse/route.ts"
@@ -81,6 +85,7 @@ jobs:
             src/hardware_splicer/project_engineering_plan_api.py \
             src/hardware_splicer/workbench_step_binding_api.py \
             src/hardware_splicer/workbench_placement_api.py \
+            src/hardware_splicer/workbench_anchor_intent_api.py \
             src/hardware_splicer/product_api.py
       - name: Run focused parser, role, and workbench binding tests
         run: |
@@ -91,7 +96,8 @@ jobs:
             tests/test_project_parser_planning_bridge.py \
             tests/test_project_engineering_plan_api.py \
             tests/test_workbench_step_binding_api.py \
-            tests/test_workbench_placement_api.py
+            tests/test_workbench_placement_api.py \
+            tests/test_workbench_anchor_intent_api.py
       - uses: actions/setup-node@v4
         if: ${{ !cancelled() }}
         with:
