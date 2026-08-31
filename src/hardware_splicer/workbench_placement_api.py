@@ -31,6 +31,9 @@ from .workbench_step_binding_api import WORKBENCH_STEP_BINDINGS_FIELD
 
 WORKBENCH_PLACEMENT_SCHEMA = "hardware_splicer.workbench_declared_placement.v1"
 WORKBENCH_PLACEMENTS_FIELD = "machineWorkbenchPlacements"
+# Keep this dependency field literal here to avoid a placement ↔ anchor-intent import
+# cycle. Anchor intents are children of a source-bound durable placement.
+_WORKBENCH_ANCHOR_INTENTS_FIELD = "machineWorkbenchAnchorIntents"
 
 
 class WorkbenchPlacementApiModel(BaseModel):
@@ -172,6 +175,15 @@ def _payload(request: RegisterWorkbenchPlacementRequest) -> Dict[str, Any]:
     }
 
 
+def _invalidate_anchor_intents(snapshot: Dict[str, Any], target_key: tuple[str, str]) -> int:
+    intents = _rows(snapshot.get(_WORKBENCH_ANCHOR_INTENTS_FIELD))
+    retained = [row for row in intents if _key(row) != target_key]
+    removed = len(intents) - len(retained)
+    if intents or _WORKBENCH_ANCHOR_INTENTS_FIELD in snapshot:
+        snapshot[_WORKBENCH_ANCHOR_INTENTS_FIELD] = retained
+    return removed
+
+
 def create_workbench_placement_router(project_store: ProjectStore | None = None) -> APIRouter:
     store = project_store or ProjectStore()
     router = APIRouter(tags=["machine-workbench", "engineering-source-provenance"])
@@ -191,6 +203,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
             "derived_aabb_persisted": False,
             "brep_mesh_persisted": False,
             "surface_anchor_persisted": False,
+            "anchor_intent_invalidated_on_pose_change": True,
             "physical_authority_unchanged": True,
             "automatic_authorization": False,
         }
@@ -227,8 +240,10 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
                     "workbench_placement": placement,
                     "registered_source_hash_reverified": True,
                     "derived_geometry_persisted": False,
+                    "anchor_intents_invalidated": 0,
                     "physical_authority_unchanged": True,
                 }
+            anchor_intents_invalidated = _invalidate_anchor_intents(snapshot, target_key)
             if existing_index is None:
                 placements.append(placement)
             else:
@@ -250,6 +265,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
                     "declared_transform_only": True,
                     "registered_source_hash_reverified": True,
                     "derived_geometry_persisted": False,
+                    "anchor_intents_invalidated": anchor_intents_invalidated,
                     "physical_authority_unchanged": True,
                     "automatic_authorization": False,
                 },
@@ -266,6 +282,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
             "workbench_placement": placement,
             "registered_source_hash_reverified": True,
             "derived_geometry_persisted": False,
+            "anchor_intents_invalidated": anchor_intents_invalidated,
             "physical_authority_unchanged": True,
         }
 
@@ -289,6 +306,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
                     "cleared": False,
                     "project_id": project_id,
                     "revision": current_revision,
+                    "anchor_intents_invalidated": 0,
                     "physical_authority_unchanged": True,
                 }
             if (
@@ -297,6 +315,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
             ):
                 raise ValueError("stale workbench placement clear does not match the current durable placement identity")
             snapshot[WORKBENCH_PLACEMENTS_FIELD] = [row for row in placements if _key(row) != target_key]
+            anchor_intents_invalidated = _invalidate_anchor_intents(snapshot, target_key)
             saved = store.save(
                 project_id,
                 snapshot,
@@ -307,6 +326,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
                     "candidate_id": request.candidate_id,
                     "resource_id": request.resource_id,
                     "entity_id": request.entity_id,
+                    "anchor_intents_invalidated": anchor_intents_invalidated,
                     "physical_authority_unchanged": True,
                     "automatic_authorization": False,
                 },
@@ -320,6 +340,7 @@ def create_workbench_placement_router(project_store: ProjectStore | None = None)
             "project_id": project_id,
             "revision": saved["revision"],
             "saved_at": saved["saved_at"],
+            "anchor_intents_invalidated": anchor_intents_invalidated,
             "physical_authority_unchanged": True,
         }
 
