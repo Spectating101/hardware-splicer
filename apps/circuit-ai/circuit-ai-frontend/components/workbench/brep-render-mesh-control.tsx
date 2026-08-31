@@ -233,7 +233,7 @@ export function BrepRenderMeshControl({
             : registeredReady
               ? 'Generate bounded triangle evidence from the registered server-side STEP blob. Raw STEP bytes do not return to the browser.'
               : sessionReady
-                ? 'Generate bounded triangle evidence for this exact session source + declared pose. Changing the pose invalidates this mesh.'
+                ? 'Generate bounded triangle evidence for this exact source + declared pose. Session source; changing the pose invalidates this mesh.'
                 : 'Attach a matching STEP source, or bind/import it through a durable project, before exact tessellation.'}
         </div>
         <button
