@@ -4,7 +4,7 @@ const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
 test.setTimeout(75_000);
 
-test('reuse mission turns donor evidence and strategy choices into canonical workbench state', async ({ page }, testInfo) => {
+test('reuse mission turns donor evidence, resolve actions, and strategy choices into canonical workbench state', async ({ page }, testInfo) => {
   const plannerPayloads = [];
 
   await page.route('**/api/proxy/analyze', async (route) => {
@@ -81,11 +81,24 @@ test('reuse mission turns donor evidence and strategy choices into canonical wor
   await expect(maxReuse).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('button', { name: 'Resolve 5 blocking gates' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Build package' })).toBeDisabled();
+  await expect(page.getByLabel('Practical evidence closures')).toContainText('Do the next useful observation, measurement or fit check.');
   await page.screenshot({ path: testInfo.outputPath('reuse-mission-overview.png') });
 
+  // A generic gate is now a concrete operator action focused on the exact donor resource.
+  await page.getByRole('button', { name: 'Resolve Confirm Observed donor cooling fan' }).click();
+  await expect(page).toHaveURL(/\/workbench\?stage=resolve&candidate=max-reuse&resource=photo-printer-donor-png-fan-assembly-1-1$/);
+  await expect(page.getByRole('heading', { name: 'Portable Linux workstation', level: 1 })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Resources', exact: true })).toBeVisible();
+  await expect(page.getByTestId('focused-donor-resource')).toContainText('Resolve · Observed donor cooling fan');
+  await expect(page.getByTestId('focused-donor-resource')).toContainText(/model\/label, condition, dimensions, connector identity/i);
+
+  // The same provisional resource survives back into ordinary inventory and real resource planning.
+  await page.goto(`${APP_URL}/workbench/mission`);
+  await expect(page.getByText('Observed donor cooling fan', { exact: true })).toBeVisible();
+  const maxReuseAgain = page.getByRole('button', { name: /Maximum reuse/ });
+  await maxReuseAgain.click();
   await page.getByRole('button', { name: 'Review available hardware' }).click();
   await expect(page).toHaveURL(/\/workbench\?stage=inventory&candidate=max-reuse$/);
-  await expect(page.getByRole('heading', { name: 'Portable Linux workstation', level: 1 })).toBeVisible();
   await expect(page.getByText(/Build blocked · 5 gates/)).toBeVisible();
   await expect(page.getByText('Unknown old lithium pack', { exact: true })).toBeVisible();
   await expect(page.getByTestId('workbench-donor-session')).toContainText('1 provisional donor resource');
@@ -106,6 +119,7 @@ test('reuse mission turns donor evidence and strategy choices into canonical wor
   const lowRisk = page.getByRole('button', { name: /Lowest integration risk/ });
   await lowRisk.click();
   await expect(lowRisk).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByLabel('Practical evidence closures')).toContainText('Measure the whole-machine power envelope');
   await page.getByRole('button', { name: 'Open engineering verification' }).click();
   await expect(page).toHaveURL(/\/workbench\?stage=verify&candidate=low-risk$/);
   await expect(page.getByRole('heading', { name: 'DECK-001', level: 1 })).toBeVisible();
