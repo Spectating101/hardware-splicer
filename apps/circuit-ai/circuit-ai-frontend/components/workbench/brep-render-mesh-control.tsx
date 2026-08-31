@@ -211,7 +211,7 @@ export function BrepRenderMeshControl({
       setBrepRenderMeshEvidence(candidateId, next);
       window.setTimeout(requestFrameSelection, 0);
       setState('success');
-      setMessage(`${vertexCount.toLocaleString()} vertices · ${triangleCount.toLocaleString()} triangles · placed ${placement.frameId} render evidence · ${registeredReady ? 'registered blob hash reverified' : 'session-inline hash bound'}.`);
+      setMessage(`${vertexCount.toLocaleString()} vertices · ${triangleCount.toLocaleString()} triangles · placed ${placement.frameId} render evidence. ${registeredReady ? 'registered blob hash reverified.' : 'session-inline hash bound.'}`);
     } catch (error: unknown) {
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
