@@ -164,13 +164,59 @@ export async function importWorkbenchStepSource({
   if (!Object.keys(geometry).length) {
     throw new Error('Stored STEP parser returned no mechanical geometry report.');
   }
+  const modelId = String(stepModel.model_id || sourceId);
+
+  // Source identity and workbench occurrence identity are separate. A content-addressed
+  // STEP blob may legitimately back multiple resource occurrences, so persist the
+  // candidate/resource/entity mapping in its own revisioned project collection.
+  const bindingResponse = await fetch(
+    `/api/proxy/engineering/projects/${encodeURIComponent(projectBinding.projectId)}/workbench/step-bindings`,
+    {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        expected_revision: parseRevision,
+        candidate_id: candidateId,
+        resource_id: resourceId,
+        entity_id: entityId,
+        source_id: sourceId,
+        model_id: modelId,
+        content_hash: contentHash,
+      }),
+      cache: 'no-store',
+    },
+  );
+  const bindingPayload = record(await bindingResponse.json());
+  if (!bindingResponse.ok || bindingPayload.ok !== true) {
+    throw new Error(errorMessage(bindingPayload, `workbench STEP binding HTTP ${bindingResponse.status}`));
+  }
+  const binding = record(bindingPayload.workbench_step_binding);
+  const bindingRevision = positiveRevision(bindingPayload.revision, 'Workbench STEP binding');
+  if (
+    binding.candidate_id !== candidateId
+    || binding.resource_id !== resourceId
+    || binding.entity_id !== entityId
+    || binding.source_id !== sourceId
+    || binding.model_id !== modelId
+    || canonicalHash(binding.content_hash) !== contentHash
+  ) {
+    throw new Error('Durable workbench occurrence binding disagrees with the registered STEP source transaction.');
+  }
+  if (
+    binding.source_binding_only !== true
+    || binding.physical_authority_unchanged !== true
+    || bindingPayload.registered_source_hash_reverified !== true
+    || bindingPayload.raw_registered_source_bytes_returned !== false
+  ) {
+    throw new Error('Durable workbench occurrence binding violated the source-only/no-raw-bytes authority boundary.');
+  }
 
   return {
     durable: true,
     projectId: projectBinding.projectId,
-    revision: parseRevision,
+    revision: bindingRevision,
     sourceId,
-    modelId: String(stepModel.model_id || sourceId),
+    modelId,
     contentHash,
     content: null,
     mechanicalGeometry: geometry,
@@ -198,12 +244,15 @@ export async function importWorkbenchStepFile(args: {
   projectId: string | null;
   projectRevision: number | null;
 }): Promise<WorkbenchStepImportResult> {
+  if (args.projectId && (!Number.isInteger(args.projectRevision) || Number(args.projectRevision) < 1)) {
+    throw new Error('Durable project binding has no valid revision; refusing session-inline fallback.');
+  }
   const imported = await importWorkbenchStepSource({
     file: args.file,
     candidateId: args.candidateId as ConstructorCandidateId,
     resourceId: args.resourceId,
     entityId: args.resourceId,
-    projectBinding: args.projectId && Number.isInteger(args.projectRevision) && Number(args.projectRevision) >= 1
+    projectBinding: args.projectId
       ? { projectId: args.projectId, revision: Number(args.projectRevision) }
       : null,
   });
