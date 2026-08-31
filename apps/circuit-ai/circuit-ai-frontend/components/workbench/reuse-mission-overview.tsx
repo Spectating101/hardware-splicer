@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
@@ -13,13 +13,15 @@ import {
   ShieldAlert,
   Target,
 } from 'lucide-react';
+import { ResolveActionPanel } from '@/components/workbench/resolve-action-panel';
 import {
   constructorCandidateMap,
   constructorCandidates,
   constructorResources,
   constructorTarget,
 } from '@/lib/workbench-constructor-demo';
-import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
+import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
+import { useWorkbenchDonorIntakeStore } from '@/lib/workbench-donor-intake-store';
 
 const steps = [
   { id: 'inventory', label: 'Inventory', icon: Boxes, detail: 'What hardware do we actually have?' },
@@ -32,18 +34,24 @@ const steps = [
 
 export function ReuseMissionOverview() {
   const router = useRouter();
-  const [selectedCandidateId, setSelectedCandidateId] = useState<ConstructorCandidateId>('balanced');
+  const selectedCandidateId = useMachineWorkbenchStore((state) => state.activeCandidateId);
+  const setSelectedCandidateId = useMachineWorkbenchStore((state) => state.setActiveCandidateId);
+  const donorResources = useWorkbenchDonorIntakeStore((state) => state.resources);
   const candidate = constructorCandidateMap.get(selectedCandidateId) ?? constructorCandidateMap.get('balanced');
 
   const inventory = useMemo(() => {
-    const salvaged = constructorResources.filter((resource) => resource.kind === 'salvaged' || resource.kind === 'owned').length;
+    const salvaged = constructorResources.filter((resource) => resource.kind === 'salvaged' || resource.kind === 'owned').length + donorResources.length;
     const procurable = constructorResources.filter((resource) => resource.kind === 'procurable').length;
     const designed = constructorResources.filter((resource) => resource.kind === 'designed').length;
-    return { salvaged, procurable, designed, total: constructorResources.length };
-  }, []);
+    return { salvaged, procurable, designed, total: constructorResources.length + donorResources.length };
+  }, [donorResources.length]);
 
-  function openWorkbench(stage: 'inventory' | 'goal' | 'candidates' | 'resolve' | 'verify') {
+  function openWorkbench(
+    stage: 'inventory' | 'goal' | 'candidates' | 'resolve' | 'verify',
+    resourceId?: string,
+  ) {
     const params = new URLSearchParams({ stage, candidate: selectedCandidateId });
+    if (resourceId) params.set('resource', resourceId);
     router.push(`/workbench?${params.toString()}`);
   }
 
@@ -182,6 +190,8 @@ export function ReuseMissionOverview() {
             </div>
           </aside>
         </section>
+
+        <ResolveActionPanel candidateId={selectedCandidateId} onOpenResource={(resourceId) => openWorkbench('resolve', resourceId)} />
       </div>
     </main>
   );
