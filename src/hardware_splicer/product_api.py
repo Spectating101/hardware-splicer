@@ -58,6 +58,7 @@ from .source_conflict_api import create_source_conflict_router
 from .source_storage_operations_api import create_source_storage_operations_router
 from .source_upload_session_api import create_source_upload_session_router
 from .stored_source_parser_api import create_stored_source_parser_router
+from .workbench_step_binding_api import create_workbench_step_binding_router
 
 
 def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> None:
@@ -112,6 +113,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
+    app.include_router(create_workbench_step_binding_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
