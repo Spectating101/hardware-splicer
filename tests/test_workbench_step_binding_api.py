@@ -11,6 +11,7 @@ from hardware_splicer.engineering_source_ingestion import (
 )
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
+from hardware_splicer.workbench_placement_api import WORKBENCH_PLACEMENTS_FIELD
 from hardware_splicer.workbench_step_binding_api import WORKBENCH_STEP_BINDINGS_FIELD
 
 
@@ -26,6 +27,7 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+STEP_REPLACEMENT = STEP.replace("Shared Fixture", "Replacement Fixture").replace("(10.0,8.0,6.0)", "(12.0,8.0,6.0)")
 
 
 def _registered_project(tmp_path: Path) -> tuple[ProjectStore, dict]:
@@ -86,6 +88,7 @@ def test_product_mounts_durable_workbench_step_binding_surface() -> None:
     assert body["registered_source_hash_reverified_before_binding"] is True
     assert body["raw_registered_source_bytes_returned"] is False
     assert body["source_binding_only"] is True
+    assert body["source_rebinding_invalidates_dependent_declared_placement"] is True
     assert body["physical_authority_unchanged"] is True
     assert body["automatic_authorization"] is False
 
@@ -173,3 +176,62 @@ def test_binding_rejects_ambiguous_entity_reuse_within_candidate(tmp_path: Path)
     assert detail["type"] == "invalid_workbench_step_binding"
     assert "already bound" in detail["message"]
     assert store.load("workbench-bindings")["revision"] == 3
+
+
+def test_source_rebinding_invalidates_dependent_durable_placement(tmp_path: Path) -> None:
+    store, source = _registered_project(tmp_path)
+    client = TestClient(create_product_app(store))
+    first = client.post(
+        "/v1/projects/workbench-bindings/workbench/step-bindings",
+        json=_binding(source, revision=2, resource_id="display", entity_id="cmp-display"),
+    )
+    assert first.status_code == 201, first.text
+    placement = client.post(
+        "/v1/projects/workbench-bindings/workbench/placements",
+        json={
+            "expected_revision": 3,
+            "candidate_id": "balanced",
+            "resource_id": "display",
+            "entity_id": "cmp-display",
+            "source_id": source["source_id"],
+            "model_id": source["source_id"],
+            "content_hash": source["content_hash"],
+            "placement_id": "placement-balanced-display",
+            "target_frame": "assembly",
+            "translation_mm": [20.0, 0.0, 0.0],
+            "rotation_deg_xyz": [0.0, 0.0, 0.0],
+            "authority": "declared",
+        },
+    )
+    assert placement.status_code == 201, placement.text
+    assert placement.json()["revision"] == 4
+
+    replacement_result = ingest_engineering_source(
+        EngineeringSourceIngestionRequest(
+            project_id="workbench-bindings",
+            filename="replacement.step",
+            content_base64=base64.b64encode(STEP_REPLACEMENT.encode("utf-8")).decode("ascii"),
+        ),
+        project_root=tmp_path,
+    )
+    replacement = replacement_result.source_descriptor
+    snapshot = store.load("workbench-bindings")["snapshot"]
+    snapshot["engineeringSources"] = [*snapshot["engineeringSources"], replacement]
+    store.save(
+        "workbench-bindings",
+        snapshot,
+        expected_revision=4,
+        metadata={"source": "register_replacement_step"},
+    )
+
+    rebound = client.post(
+        "/v1/projects/workbench-bindings/workbench/step-bindings",
+        json=_binding(replacement, revision=5, resource_id="display", entity_id="cmp-display"),
+    )
+    assert rebound.status_code == 201, rebound.text
+    body = rebound.json()
+    assert body["revision"] == 6
+    assert body["dependent_placement_invalidated"] is True
+    latest = store.load("workbench-bindings")["snapshot"]
+    assert latest[WORKBENCH_PLACEMENTS_FIELD] == []
+    assert latest[WORKBENCH_STEP_BINDINGS_FIELD][0]["content_hash"] == replacement["content_hash"]
