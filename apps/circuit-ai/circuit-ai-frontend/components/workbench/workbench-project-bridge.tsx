@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import type { ConstructorCandidateId } from '@/lib/machine-workbench-store';
 import {
   type ProjectSourceDescriptor,
   useWorkbenchProjectSourceStore,
@@ -8,6 +9,12 @@ import {
 
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function candidateId(value: unknown): ConstructorCandidateId | undefined {
+  return value === 'balanced' || value === 'max-reuse' || value === 'low-risk'
+    ? value
+    : undefined;
 }
 
 function projectSources(snapshot: Record<string, unknown>): ProjectSourceDescriptor[] {
@@ -18,11 +25,23 @@ function projectSources(snapshot: Record<string, unknown>): ProjectSourceDescrip
     const contentHash = typeof row.content_hash === 'string' ? row.content_hash : '';
     if (!sourceId || !/^sha256:[0-9a-f]{64}$/.test(contentHash)) return [];
     const metadata = record(row.metadata);
+    const workbenchCandidateId = candidateId(metadata.workbench_candidate_id);
+    const resourceId = typeof metadata.workbench_resource_id === 'string' && metadata.workbench_resource_id.trim()
+      ? metadata.workbench_resource_id.trim()
+      : undefined;
+    const entityId = typeof metadata.workbench_entity_id === 'string' && metadata.workbench_entity_id.trim()
+      ? metadata.workbench_entity_id.trim()
+      : undefined;
+    const parserRoute = typeof metadata.parser_route === 'string' ? metadata.parser_route : undefined;
     return [{
       sourceId,
       contentHash,
       originalFilename: typeof metadata.original_filename === 'string' ? metadata.original_filename : undefined,
-      parserRoute: typeof metadata.parser_route === 'string' ? metadata.parser_route : undefined,
+      parserRoute,
+      candidateId: workbenchCandidateId,
+      resourceId,
+      entityId,
+      modelId: parserRoute === 'step_geometry' ? sourceId : undefined,
     }];
   });
 }
