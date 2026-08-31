@@ -11,6 +11,10 @@ import {
 } from '@/lib/machine-workbench-store';
 import type { DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 import { getSessionStepSource } from '@/lib/workbench-session-step-sources';
+import {
+  getRegisteredWorkbenchStepSource,
+  useWorkbenchProjectSourceStore,
+} from '@/lib/workbench-project-sources';
 
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -47,16 +51,27 @@ export function BrepRenderMeshControl({
   const setBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.setBrepRenderMeshEvidence);
   const clearBrepRenderMeshEvidence = useMachineWorkbenchStore((state) => state.clearBrepRenderMeshEvidence);
   const requestFrameSelection = useMachineWorkbenchStore((state) => state.requestFrameSelection);
+  const projectSourceState = useWorkbenchProjectSourceStore();
   const [state, setState] = useState<'idle' | 'loading' | 'success' | 'unknown' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
-  const source = getSessionStepSource(candidateId, resourceId);
-  const sourceReady = Boolean(
-    source
-    && source.modelId === evidence.modelId
-    && source.contentHash === evidence.contentHash
-    && source.contentHash.startsWith('sha256:'),
+  const sessionSource = getSessionStepSource(candidateId, resourceId);
+  const registeredSource = getRegisteredWorkbenchStepSource(projectSourceState, candidateId, resourceId);
+  const registeredReady = Boolean(
+    registeredSource
+    && projectSourceState.status === 'bound'
+    && projectSourceState.projectId === registeredSource.projectId
+    && registeredSource.entityId === entityId
+    && registeredSource.modelId === evidence.modelId
+    && registeredSource.contentHash === evidence.contentHash,
   );
+  const sessionReady = Boolean(
+    sessionSource
+    && sessionSource.modelId === evidence.modelId
+    && sessionSource.contentHash === evidence.contentHash
+    && sessionSource.contentHash.startsWith('sha256:'),
+  );
+  const sourceReady = registeredReady || sessionReady;
   const meshCurrent = Boolean(
     meshEvidence
     && meshEvidence.resourceId === resourceId
@@ -69,27 +84,45 @@ export function BrepRenderMeshControl({
   );
 
   async function generateMesh() {
-    if (!source || !sourceReady) {
+    if (!sourceReady) {
       setState('unknown');
-      setMessage('Exact render mesh needs the original hash-bound STEP source in this browser session. Re-attach the source first.');
+      setMessage('Exact render mesh needs either the original hash-bound session STEP or an explicitly registered project source matching this geometry evidence.');
       return;
     }
 
+    const sourceIdentity = registeredReady && registeredSource
+      ? registeredSource
+      : sessionSource;
+    if (!sourceIdentity) return;
+
     clearBrepRenderMeshEvidence(candidateId, entityId);
     setState('loading');
-    setMessage('Tessellating the declared placed STEP solid in isolated CadQuery/OCCT…');
+    setMessage(
+      registeredReady
+        ? 'Reopening the registered STEP blob server-side, re-verifying its hash, then tessellating the declared pose in isolated CadQuery/OCCT…'
+        : 'Tessellating the declared placed session STEP solid in isolated CadQuery/OCCT…',
+    );
     try {
-      const response = await fetch('/api/proxy/engineering/mechanical/geometry/brep/mesh', {
+      const endpoint = registeredReady
+        ? '/api/proxy/engineering/mechanical/geometry/brep/mesh/stored'
+        : '/api/proxy/engineering/mechanical/geometry/brep/mesh';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          project_id: 'deck-001',
-          source: {
-            source_id: source.sourceId,
-            model_id: source.modelId,
-            content_hash: source.contentHash,
-            content: source.content,
-          },
+          project_id: registeredReady && registeredSource ? registeredSource.projectId : 'deck-001',
+          source: registeredReady
+            ? {
+                source_id: sourceIdentity.sourceId,
+                model_id: sourceIdentity.modelId,
+                content_hash: sourceIdentity.contentHash,
+              }
+            : {
+                source_id: sourceIdentity.sourceId,
+                model_id: sourceIdentity.modelId,
+                content_hash: sourceIdentity.contentHash,
+                content: sessionSource?.content,
+              },
           placement: {
             placement_id: placement.placementId,
             object_id: placement.entityId,
@@ -105,9 +138,16 @@ export function BrepRenderMeshControl({
         cache: 'no-store',
       });
       const payload = record(await response.json());
-      if (!response.ok || payload.ok !== true) throw new Error(String(payload.error || `BREP mesh HTTP ${response.status}`));
+      if (!response.ok || payload.ok !== true) throw new Error(String(record(payload.detail).message || payload.error || `BREP mesh HTTP ${response.status}`));
       if (payload.raw_step_bytes_returned !== false || payload.render_evidence_only !== true) {
         throw new Error('HS BREP mesh response violated the render-only/raw-source boundary.');
+      }
+      if (registeredReady && (
+        payload.registered_source_materialized !== true
+        || payload.registered_source_hash_reverified !== true
+        || payload.raw_registered_source_bytes_returned !== false
+      )) {
+        throw new Error('Stored BREP mesh response did not prove registered-blob materialization and hash re-verification.');
       }
       const report = record(payload.brep_mesh);
       if (payload.exact_brep_mesh_evaluated !== true || report.status !== 'ready') {
@@ -117,7 +157,7 @@ export function BrepRenderMeshControl({
         setMessage(`Exact mesh UNKNOWN · ${reason}`);
         return;
       }
-      if (report.content_hash !== source.contentHash || report.model_id !== source.modelId) {
+      if (report.content_hash !== sourceIdentity.contentHash || report.model_id !== sourceIdentity.modelId) {
         throw new Error('HS BREP mesh identity no longer matches the canonical STEP source.');
       }
       if (report.frame_id !== placement.frameId || report.placement_id !== placement.placementId) {
@@ -148,9 +188,9 @@ export function BrepRenderMeshControl({
       const next: BrepRenderMeshEvidence = {
         entityId,
         resourceId,
-        sourceId: source.sourceId,
-        modelId: source.modelId,
-        contentHash: source.contentHash,
+        sourceId: sourceIdentity.sourceId,
+        modelId: sourceIdentity.modelId,
+        contentHash: sourceIdentity.contentHash,
         frameId: placement.frameId,
         placementId: placement.placementId,
         translationMm: placement.translationMm,
@@ -171,7 +211,7 @@ export function BrepRenderMeshControl({
       setBrepRenderMeshEvidence(candidateId, next);
       window.setTimeout(requestFrameSelection, 0);
       setState('success');
-      setMessage(`${vertexCount.toLocaleString()} vertices · ${triangleCount.toLocaleString()} triangles · placed ${placement.frameId} render evidence.`);
+      setMessage(`${vertexCount.toLocaleString()} vertices · ${triangleCount.toLocaleString()} triangles · placed ${placement.frameId} render evidence · ${registeredReady ? 'registered blob hash reverified' : 'session-inline hash bound'}.`);
     } catch (error: unknown) {
       setState('error');
       setMessage(error instanceof Error ? error.message : String(error));
@@ -190,9 +230,11 @@ export function BrepRenderMeshControl({
         <div className="mt-1 text-[8px] leading-4 text-slate-500">
           {meshCurrent
             ? `${resourceName} is rendered from the hash-bound STEP solid at the current declared pose.`
-            : sourceReady
-              ? 'Generate bounded triangle evidence for this exact source + declared pose. Changing the pose invalidates this mesh.'
-              : 'Re-attach the original STEP source in this browser session before exact tessellation.'}
+            : registeredReady
+              ? 'Generate bounded triangle evidence from the registered server-side STEP blob. Raw STEP bytes do not return to the browser.'
+              : sessionReady
+                ? 'Generate bounded triangle evidence for this exact session source + declared pose. Changing the pose invalidates this mesh.'
+                : 'Attach a matching STEP source, or bind/import it through a durable project, before exact tessellation.'}
         </div>
         <button
           type="button"
