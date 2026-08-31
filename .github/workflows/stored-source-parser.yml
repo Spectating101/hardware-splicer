@@ -8,15 +8,27 @@ on:
       - "src/hardware_splicer/stored_source_parser_api.py"
       - "src/hardware_splicer/engineering_source_role_api.py"
       - "src/hardware_splicer/project_engineering_plan_api.py"
+      - "src/hardware_splicer/workbench_step_binding_api.py"
+      - "src/hardware_splicer/workbench_placement_api.py"
+      - "src/hardware_splicer/workbench_anchor_intent_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_stored_source_parser.py"
       - "tests/test_stored_source_parser_hardening.py"
       - "tests/test_engineering_source_role.py"
       - "tests/test_project_parser_planning_bridge.py"
+      - "tests/test_workbench_step_binding_api.py"
+      - "tests/test_workbench_placement_api.py"
+      - "tests/test_workbench_anchor_intent_api.py"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/source-lab/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/workbench/page.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/parse/route.ts"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/role/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/step-bindings/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/placements/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/anchor-intents/**"
+      - "apps/circuit-ai/circuit-ai-frontend/components/workbench/workbench-anchor-intent-rehydrator.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/workbench-brep-anchor-store.ts"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-stored-source-parser-workspace.cjs"
       - "docs/STORED_SOURCE_PARSER.md"
       - ".github/workflows/stored-source-parser.yml"
@@ -26,15 +38,27 @@ on:
       - "src/hardware_splicer/stored_source_parser_api.py"
       - "src/hardware_splicer/engineering_source_role_api.py"
       - "src/hardware_splicer/project_engineering_plan_api.py"
+      - "src/hardware_splicer/workbench_step_binding_api.py"
+      - "src/hardware_splicer/workbench_placement_api.py"
+      - "src/hardware_splicer/workbench_anchor_intent_api.py"
       - "src/hardware_splicer/product_api.py"
       - "tests/test_stored_source_parser.py"
       - "tests/test_stored_source_parser_hardening.py"
       - "tests/test_engineering_source_role.py"
       - "tests/test_project_parser_planning_bridge.py"
+      - "tests/test_workbench_step_binding_api.py"
+      - "tests/test_workbench_placement_api.py"
+      - "tests/test_workbench_anchor_intent_api.py"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/source-lab/**"
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/layout.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/app/workbench/page.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/parse/route.ts"
       - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/sources/**/role/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/step-bindings/route.ts"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/placements/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/engineering/projects/**/workbench/anchor-intents/**"
+      - "apps/circuit-ai/circuit-ai-frontend/components/workbench/workbench-anchor-intent-rehydrator.tsx"
+      - "apps/circuit-ai/circuit-ai-frontend/lib/workbench-brep-anchor-store.ts"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-stored-source-parser-workspace.cjs"
       - "docs/STORED_SOURCE_PARSER.md"
       - ".github/workflows/stored-source-parser.yml"
@@ -67,15 +91,21 @@ jobs:
             src/hardware_splicer/stored_source_parser_api.py \
             src/hardware_splicer/engineering_source_role_api.py \
             src/hardware_splicer/project_engineering_plan_api.py \
+            src/hardware_splicer/workbench_step_binding_api.py \
+            src/hardware_splicer/workbench_placement_api.py \
+            src/hardware_splicer/workbench_anchor_intent_api.py \
             src/hardware_splicer/product_api.py
-      - name: Run focused parser and role tests
+      - name: Run focused parser, role, and workbench binding tests
         run: |
           PYTHONPATH=src python -m pytest -q \
             tests/test_stored_source_parser.py \
             tests/test_stored_source_parser_hardening.py \
             tests/test_engineering_source_role.py \
             tests/test_project_parser_planning_bridge.py \
-            tests/test_project_engineering_plan_api.py
+            tests/test_project_engineering_plan_api.py \
+            tests/test_workbench_step_binding_api.py \
+            tests/test_workbench_placement_api.py \
+            tests/test_workbench_anchor_intent_api.py
       - uses: actions/setup-node@v4
         if: ${{ !cancelled() }}
         with:

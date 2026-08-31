@@ -31,8 +31,27 @@ def test_missing_optional_cadquery_does_not_fail_base_product_readiness() -> Non
         row for row in report["capabilities"] if row["id"] == "cadquery-isolated"
     )
     assert cadquery["required"] is False
+    assert cadquery["product_scope"] == [
+        "generated_mechanical_output",
+        "exact_step_brep_pair_interference",
+        "exact_step_brep_minimum_clearance",
+        "bounded_placed_step_tessellation",
+        "exact_step_brep_surface_anchor",
+        "exact_step_brep_anchor_mating_geometry",
+        "bounded_sampled_step_brep_mating_path",
+        "adaptive_step_brep_transition_refinement",
+    ]
+    assert "sampled mating-path clearance" in cadquery["authority_boundary"]
+    assert "adaptively refined predicate brackets" in cadquery["authority_boundary"]
+    assert "unique transition pose" in cadquery["authority_boundary"]
+    assert "continuous-path clearance" in cadquery["authority_boundary"]
+    assert "whole-assembly validity" in cadquery["authority_boundary"]
+    assert "connector mating" in cadquery["authority_boundary"]
+    assert "protocol/pin compatibility" in cadquery["authority_boundary"]
+    assert "fabrication" in cadquery["authority_boundary"]
     if cadquery["runtime"]["discovered"] is False:
         assert cadquery["readiness"] == "missing_optional"
+        assert "exact STEP/BREP geometry work" in cadquery["next_action"]
         assert "cadquery-isolated" not in report["required_missing"]
     assert report["policy"] == {
         "schema_version": "hardware_splicer.capability_policy.v1",

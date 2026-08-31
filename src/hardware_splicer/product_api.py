@@ -41,6 +41,10 @@ from .engineering_status_api import create_engineering_status_router
 from .machine_project_api import create_machine_project_router
 from .manufacturing_api import create_manufacturing_router
 from .mechanical_api import create_mechanical_router
+from .mechanical_brep_anchor_api import create_mechanical_brep_anchor_router
+from .mechanical_brep_mating_api import create_mechanical_brep_mating_router
+from .mechanical_brep_mesh_api import create_mechanical_brep_mesh_router
+from .mechanical_brep_sweep_api import create_mechanical_brep_sweep_router
 from .physical_evidence_api import create_physical_evidence_router
 from .physical_evidence_attested_api import create_physical_evidence_attested_router
 from .physical_evidence_hash_api import create_physical_evidence_hash_router
@@ -54,6 +58,9 @@ from .source_conflict_api import create_source_conflict_router
 from .source_storage_operations_api import create_source_storage_operations_router
 from .source_upload_session_api import create_source_upload_session_router
 from .stored_source_parser_api import create_stored_source_parser_router
+from .workbench_anchor_intent_api import create_workbench_anchor_intent_router
+from .workbench_placement_api import create_workbench_placement_router
+from .workbench_step_binding_api import create_workbench_step_binding_router
 
 
 def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> None:
@@ -108,6 +115,9 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
+    app.include_router(create_workbench_step_binding_router(resolved_store))
+    app.include_router(create_workbench_placement_router(resolved_store))
+    app.include_router(create_workbench_anchor_intent_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
@@ -118,7 +128,11 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_package_download_router(resolved_store))
     app.include_router(create_engineering_action_router())
     app.include_router(create_manufacturing_router())
-    app.include_router(create_mechanical_router())
+    app.include_router(create_mechanical_router(resolved_store))
+    app.include_router(create_mechanical_brep_mesh_router(resolved_store))
+    app.include_router(create_mechanical_brep_anchor_router(resolved_store))
+    app.include_router(create_mechanical_brep_mating_router())
+    app.include_router(create_mechanical_brep_sweep_router(resolved_store))
     _include_anchored_execution_surface(app, resolved_store)
     app.include_router(create_engineering_status_router())
     app.include_router(create_engineering_revision_router(resolved_store))

@@ -1,0 +1,92 @@
+name: Machine Workbench Frontend
+
+on:
+  pull_request:
+    paths:
+      - 'apps/circuit-ai/circuit-ai-frontend/**'
+      - '.github/workflows/machine-workbench-frontend.yml'
+  push:
+    branches:
+      - 'feat/machine-workbench-v0-20260829'
+    paths:
+      - 'apps/circuit-ai/circuit-ai-frontend/**'
+      - '.github/workflows/machine-workbench-frontend.yml'
+
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OUTSIDER_APP_URL: http://127.0.0.1:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+    defaults:
+      run:
+        working-directory: apps/circuit-ai/circuit-ai-frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/circuit-ai/circuit-ai-frontend/package-lock.json
+      - name: Install locked frontend and isolated browser harness
+        run: |
+          npm ci
+          rm -rf /tmp/hs-playwright
+          npm install --prefix /tmp/hs-playwright --no-save @playwright/test@1.55.0
+          /tmp/hs-playwright/node_modules/.bin/playwright install --with-deps chromium
+          mkdir -p node_modules/@playwright
+          ln -s /tmp/hs-playwright/node_modules/@playwright/test node_modules/@playwright/test
+          ln -s /tmp/hs-playwright/node_modules/playwright node_modules/playwright
+          ln -s /tmp/hs-playwright/node_modules/playwright-core node_modules/playwright-core
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
+      - name: Run machine constructor and workbench browser paths
+        run: |
+          set -euo pipefail
+          npm run start -- -H 127.0.0.1 -p 3000 > /tmp/machine-workbench-frontend.log 2>&1 &
+          FRONTEND_PID=$!
+          cleanup() {
+            kill "$FRONTEND_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:3000/workbench >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              cat /tmp/machine-workbench-frontend.log || true
+              exit 1
+            fi
+            sleep 2
+          done
+          /tmp/hs-playwright/node_modules/.bin/playwright test \
+            e2e/machine-workbench.spec.js \
+            e2e/machine-constructor-live-planner.spec.js \
+            e2e/machine-exact-brep-clearance.spec.js \
+            e2e/machine-brep-surface-anchor.spec.js \
+            e2e/machine-brep-anchor-mating.spec.js \
+            e2e/machine-brep-mating-path.spec.js \
+            e2e/machine-brep-mating-path-refinement.spec.js \
+            e2e/machine-project-bound-brep-durability.spec.js \
+            e2e/machine-project-scene-persistence.spec.js \
+            e2e/machine-project-anchor-intent-persistence.spec.js \
+            --browser=chromium \
+            --reporter=line \
+            --trace=retain-on-failure \
+            --workers=1
+      - name: Show service log on failure
+        if: failure()
+        run: cat /tmp/machine-workbench-frontend.log || true
+      - name: Upload machine workbench browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: machine-workbench-browser-evidence
+          path: |
+            apps/circuit-ai/circuit-ai-frontend/test-results
+            /tmp/machine-workbench-frontend.log
+          if-no-files-found: warn

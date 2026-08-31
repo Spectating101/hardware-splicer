@@ -6,7 +6,7 @@ import { BrainCircuit, ArrowRight, Waypoints } from 'lucide-react';
 
 export function ProjectStudioLauncher() {
   const pathname = usePathname();
-  if (pathname.startsWith('/engineering/visual')) return null;
+  if (pathname.startsWith('/engineering/visual') || pathname.startsWith('/workbench')) return null;
 
   const insideStudio = pathname.startsWith('/engineering/studio');
   const href = insideStudio ? '/engineering/visual' : '/engineering/studio';
