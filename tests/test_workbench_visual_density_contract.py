@@ -60,3 +60,18 @@ def test_dense_brep_refinement_visual_evidence_is_kept_in_the_browser_gate() -> 
     ).read_text(encoding="utf-8")
     assert spec.count("machine-brep-mating-path-refinement-dense.png") == 1
     assert "testInfo.outputPath" in spec
+
+
+def test_focused_scene_declutters_gap_annotations_without_erasing_gap_evidence() -> None:
+    viewport = (WORKBENCH / "machine-assembly-viewport.tsx").read_text(encoding="utf-8")
+    assert "alertProjection && focusedSelection ? 0.16" in viewport
+    assert "['held', 'gap'].includes(projection.disposition) && !focusedSelection" in viewport
+    assert 'data-testid="machine-part-status-label"' in viewport
+    assert 'data-projection-disposition={projection?.disposition ?? \'none\'}' in viewport
+
+    spec = (
+        ROOT
+        / "apps/circuit-ai/circuit-ai-frontend/e2e/machine-brep-mating-path-refinement.spec.js"
+    ).read_text(encoding="utf-8")
+    assert 'data-projection-disposition="gap"' in spec
+    assert "toHaveCount(0)" in spec
