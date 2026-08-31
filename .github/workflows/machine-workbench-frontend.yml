@@ -71,7 +71,7 @@ jobs:
             e2e/machine-brep-anchor-mating.spec.js \
             e2e/machine-brep-mating-path.spec.js \
             e2e/machine-brep-mating-path-refinement.spec.js \
-            e2e/machine-project-bound-brep-durability.spec.js \
+            e2e/machine-project-scene-persistence.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
