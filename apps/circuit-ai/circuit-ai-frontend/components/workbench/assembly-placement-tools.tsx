@@ -42,6 +42,10 @@ function normalizeDegrees(value: number) {
   return rounded(result);
 }
 
+function closeTuple(left: [number, number, number], right: [number, number, number], tolerance = 0.005) {
+  return left.every((value, index) => Math.abs(value - right[index]) <= tolerance);
+}
+
 function centerMm(evidence: MechanicalGeometryEvidence): [number, number, number] {
   return evidence.minimumMm.map(
     (value, index) => (value + evidence.maximumMm[index]) / 2,
@@ -166,14 +170,22 @@ function PoseGizmo({
   ] as [number, number, number], [evidence.sizeMm]);
 
   if (tool === 'select' || !effectiveDraft) return null;
+  const activeDraft = effectiveDraft;
 
-  const position = sceneCenterPosition(evidence, effectiveDraft.translationMm, effectiveDraft.rotationDegXyz);
-  const quaternion = sceneQuaternion(effectiveDraft.rotationDegXyz);
+  const position = sceneCenterPosition(evidence, activeDraft.translationMm, activeDraft.rotationDegXyz);
+  const quaternion = sceneQuaternion(activeDraft.rotationDegXyz);
 
   function captureObjectPose() {
     const group = groupRef.current;
     if (!group) return;
     const pose = canonicalPoseFromScene(evidence, group.position.clone(), group.quaternion.clone());
+    // TransformControls also emits objectChange when React applies an externally
+    // updated draft pose. Do not echo an identical pose back into Zustand: doing
+    // so changes updatedAt, re-renders the controlled object and creates a loop.
+    if (
+      closeTuple(pose.translationMm, activeDraft.translationMm)
+      && closeTuple(pose.rotationDegXyz, activeDraft.rotationDegXyz)
+    ) return;
     setDraft({ candidateId, entityId, resourceId, modelId, ...pose });
   }
 
