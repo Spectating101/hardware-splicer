@@ -2,12 +2,13 @@
 
 import {
   Activity,
-  GitBranch,
   History,
   Link2,
+  Ruler,
   SearchX,
   ShieldAlert,
 } from 'lucide-react';
+import { GeometryInterrogationPanel } from '@/components/workbench/geometry-interrogation-panel';
 import {
   deck001Constraints,
   deck001EntityMap,
@@ -22,7 +23,7 @@ const tabs: Array<{ id: WorkbenchBottomTab; label: string; icon: typeof Activity
   { id: 'evidence', label: 'Evidence', icon: Activity },
   { id: 'interfaces', label: 'Interfaces', icon: Link2 },
   { id: 'constraints', label: 'Constraints', icon: ShieldAlert },
-  { id: 'verification', label: 'Verification', icon: GitBranch },
+  { id: 'verification', label: 'Geometry', icon: Ruler },
   { id: 'history', label: 'History', icon: History },
 ];
 
@@ -75,7 +76,7 @@ export function WorkbenchBottomPanel() {
   const selectionLabel = selectedEntity?.name ?? selectedEntityId;
 
   return (
-    <section className="flex min-h-[190px] max-h-[290px] flex-col border-t border-white/10 bg-[#060d18]">
+    <section className={`flex min-h-[190px] flex-col border-t border-white/10 bg-[#060d18] ${activeBottomTab === 'verification' ? 'max-h-[390px]' : 'max-h-[290px]'}`}>
       <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 px-2 py-1.5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -155,17 +156,23 @@ export function WorkbenchBottomPanel() {
         ) : null}
 
         {activeBottomTab === 'verification' ? (
-          verificationRows.length ? (
-            <div className="grid gap-2 xl:grid-cols-2">
-              {verificationRows.map((row) => (
-                <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2.5 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
-                  <span className={`w-16 shrink-0 text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-slate-100">{row.title}</span>
-                  <span className="hidden text-[10px] text-slate-500 md:block">{row.method}</span>
-                </button>
-              ))}
-            </div>
-          ) : <EmptyState noun="verification records" selection={selectionLabel} />
+          <div className="space-y-3">
+            <GeometryInterrogationPanel />
+            {verificationRows.length ? (
+              <section>
+                <div className="mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-600">Fixture verification records</div>
+                <div className="grid gap-2 xl:grid-cols-2">
+                  {verificationRows.map((row) => (
+                    <button key={row.id} type="button" onClick={() => setSelectedEntityId(row.entityId)} className="flex w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2.5 text-left transition hover:border-cyan-300/15 hover:bg-white/[0.05]">
+                      <span className={`w-16 shrink-0 text-[9px] font-semibold uppercase tracking-[0.12em] ${stateClass(row.state)}`}>{row.state}</span>
+                      <span className="min-w-0 flex-1 truncate text-xs font-medium text-slate-100">{row.title}</span>
+                      <span className="hidden text-[10px] text-slate-500 md:block">{row.method}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
         ) : null}
 
         {activeBottomTab === 'history' ? (
