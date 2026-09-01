@@ -4,9 +4,10 @@ const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
 test.setTimeout(75_000);
 
-test('reuse mission turns donor evidence, resolve actions, operator facts, and strategy choices into canonical workbench state', async ({ page }, testInfo) => {
+test('reuse mission closes the loop from donor photo through operator facts and trusted bench capture', async ({ page }, testInfo) => {
   const plannerPayloads = [];
   const fieldAgentPayloads = [];
+  const measurementPayloads = [];
 
   await page.route('**/api/proxy/analyze', async (route) => {
     await route.fulfill({
@@ -88,6 +89,82 @@ test('reuse mission turns donor evidence, resolve actions, operator facts, and s
     });
   });
 
+  await page.route('**/api/proxy/hardware/measurement-session/progress', async (route) => {
+    const payload = route.request().postDataJSON();
+    measurementPayloads.push(payload);
+    const measurements = payload.bench_topology_capture?.measurements || [];
+    const closed = measurements.length;
+    const required = [
+      { kind: 'resistance', target: 'power to ground no-short', unit: 'ohm', notes: 'Unpowered resistance check between supply and ground.' },
+      { kind: 'continuity', target: 'connector ground to exposed ground', unit: '', notes: 'Confirm common ground reference.' },
+      { kind: 'voltage', target: 'input voltage and polarity', unit: 'V', notes: 'Measure supply rail voltage and polarity under current limit.' },
+      { kind: 'current', target: 'current draw under current-limited supply', unit: 'A', notes: 'Record first-power current at a safe current limit.' },
+      { kind: 'thermal', target: 'thermal behavior after first power', unit: 'C', notes: 'Record no abnormal heating after first power.' },
+    ];
+    const next = required[Math.min(closed, required.length - 1)];
+    const requiredMeasurements = required.map((row, index) => ({
+      requirement_id: `required_${index + 1}`,
+      ...row,
+      status: index < closed ? 'pass' : 'open',
+      submitted_measurement_id: index < closed ? measurements[index]?.measurement_id : null,
+    }));
+    const sessionStatus = closed > 0 ? 'measurement_in_progress' : 'waiting_for_measurements';
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        measurement_session_progress: {
+          mode: 'measurement_session_progress',
+          schema_version: 'measurement_session_progress.v1',
+          available: true,
+          status: sessionStatus,
+          progress: {
+            schema_version: 'measurement_session_progress_summary.v1',
+            required_count: required.length,
+            closed_count: closed,
+            open_count: Math.max(required.length - closed, 0),
+            failed_count: 0,
+            submitted_count: closed,
+            unmatched_submitted_count: 0,
+            progress_score: closed / required.length,
+            capture_verdict: closed > 0 ? 'measurement_capture_incomplete' : 'measurement_capture_required',
+            authority_packet_ready: false,
+            template_complete: false,
+          },
+          next_measurement: {
+            action_id: `record_${next.kind}`,
+            kind: next.kind,
+            target: next.target,
+            unit: next.unit,
+            prompt: next.notes,
+          },
+          required_measurements: requiredMeasurements,
+          submitted_measurements: measurements,
+          capture_integrity: {
+            schema_version: 'measurement_capture_integrity.v1',
+            verdict: closed > 0 ? 'measurement_capture_incomplete' : 'measurement_capture_required',
+            trusted_root_provenance: closed > 0,
+            missing_measurement_categories: closed > 0 ? ['continuity', 'voltage', 'current', 'thermal'] : ['resistance', 'continuity', 'voltage', 'current', 'thermal'],
+          },
+          authority_closure: {
+            schema_version: 'measurement_authority_closure.v1',
+            authority_after: {
+              current_authority_level: closed > 0 ? 'measured_partial' : 'visual_candidate',
+              can: { use_measured_pinout: false, claim_production_repair_release: false },
+            },
+          },
+          claim_boundary: 'Session progress does not authorize power, splice, or repair.',
+        },
+        metadata: {
+          status: sessionStatus,
+          open_count: Math.max(required.length - closed, 0),
+          authority_packet_ready: false,
+          next_action_id: `record_${next.kind}`,
+        },
+      }),
+    });
+  });
+
   await page.setViewportSize({ width: 1440, height: 960 });
   await page.goto(`${APP_URL}/workbench/mission`);
 
@@ -114,7 +191,6 @@ test('reuse mission turns donor evidence, resolve actions, operator facts, and s
   await expect(page.getByLabel('Practical evidence closures')).toContainText('Do the next useful observation, measurement or fit check.');
   await page.screenshot({ path: testInfo.outputPath('reuse-mission-overview.png') });
 
-  // A generic gate is now a concrete operator action focused on the exact donor resource.
   await page.getByRole('button', { name: 'Resolve Confirm Observed donor cooling fan' }).click();
   await expect(page).toHaveURL(/\/workbench\?stage=resolve&candidate=max-reuse&resource=photo-printer-donor-png-fan-assembly-1-1$/);
   await expect(page.getByRole('heading', { name: 'Portable Linux workstation', level: 1 })).toBeVisible();
@@ -123,7 +199,7 @@ test('reuse mission turns donor evidence, resolve actions, operator facts, and s
   await expect(page.getByTestId('workbench-donor-evidence')).toContainText('Donor evidence worksheet');
   await expect(page.getByTestId('field-agent-action')).toContainText('Capture measured topology or supply a versioned simulation netlist.');
 
-  // Operator facts are stored, but remain explicitly non-authoritative, then feed the field-agent context.
+  // Operator observations stay claims and feed field guidance, but not measurement authority.
   await page.getByLabel('Model / marking actually observed').fill('DF1208SL donor label');
   await page.getByLabel('Visible condition').selectOption('appears_usable');
   await page.getByLabel('Evidence URI / note source').fill('photo://printer-donor/fan-label');
@@ -145,7 +221,45 @@ test('reuse mission turns donor evidence, resolve actions, operator facts, and s
     && payload.operator_notes?.power_note === '12 V marking visible; current not yet measured'
   ))).toBeTruthy();
 
-  // The same provisional resource survives back into ordinary inventory and real resource planning.
+  // The backend's measurement-session template now drives the next trusted reading.
+  const bench = page.getByTestId('donor-bench-capture');
+  await expect(bench).toContainText('Trusted bench capture');
+  await expect(page.getByTestId('next-bench-measurement')).toContainText('power to ground no-short');
+  await bench.getByLabel('Operator ID').fill('bench-operator-1');
+  await bench.getByLabel('Evidence URI', { exact: true }).fill('bench://printer-donor/fan/no-short-001');
+  await bench.getByLabel('Instrument ID').fill('dmm-cal-01');
+  await bench.getByLabel('Instrument type').selectOption('calibrated_dmm');
+  await bench.getByLabel('Calibration').selectOption('valid');
+  await bench.getByLabel('Result status').selectOption('pass');
+  await bench.getByLabel('Value').fill('pass');
+  await bench.getByLabel('Measurement note').fill('Unpowered check, fan disconnected from donor supply.');
+  await bench.getByRole('button', { name: 'Add trusted reading' }).click();
+  await expect(page.getByTestId('bench-measurement-list')).toContainText('resistance · power to ground no-short');
+  await expect(bench).toContainText('1 closed · 4 open · measurement_in_progress');
+  await expect(page.getByTestId('next-bench-measurement')).toContainText('connector ground to exposed ground');
+  await expect(bench).toContainText('measurement_capture_incomplete');
+  await expect(bench).toContainText('measured_partial');
+
+  await expect.poll(() => measurementPayloads.length).toBeGreaterThanOrEqual(2);
+  expect(measurementPayloads.some((payload) => {
+    const capture = payload.bench_topology_capture;
+    const measurement = capture?.measurements?.[0];
+    return capture?.schema_version === 'bench_topology_capture.v1'
+      && capture?.operator_id === 'bench-operator-1'
+      && capture?.instruments?.some((instrument) => (
+        instrument.instrument_id === 'dmm-cal-01'
+        && instrument.instrument_type === 'calibrated_dmm'
+        && instrument.calibration_status === 'valid'
+      ))
+      && capture?.artifacts?.some((artifact) => artifact.uri === 'bench://printer-donor/fan/no-short-001')
+      && measurement?.kind === 'resistance'
+      && measurement?.target === 'power to ground no-short'
+      && measurement?.status === 'pass'
+      && measurement?.instrument_id === 'dmm-cal-01'
+      && measurement?.evidence_uri === 'bench://printer-donor/fan/no-short-001';
+  })).toBeTruthy();
+
+  // Provisional inventory and trusted bench capture survive navigation independently.
   await page.goto(`${APP_URL}/workbench/mission`);
   await expect(page.getByText('Observed donor cooling fan', { exact: true })).toBeVisible();
   const maxReuseAgain = page.getByRole('button', { name: /Maximum reuse/ });
@@ -167,11 +281,12 @@ test('reuse mission turns donor evidence, resolve actions, operator facts, and s
     ))
   ))).toBeTruthy();
 
-  // The worksheet persists when the exact donor is focused again.
   await page.goto(`${APP_URL}/workbench?stage=resolve&candidate=max-reuse&resource=photo-printer-donor-png-fan-assembly-1-1`);
   await expect(page.getByLabel('Model / marking actually observed')).toHaveValue('DF1208SL donor label');
   await expect(page.getByLabel('Visible condition')).toHaveValue('appears_usable');
   await expect(page.getByLabel('Power observation')).toHaveValue('12 V marking visible; current not yet measured');
+  await expect(page.getByTestId('bench-measurement-list')).toContainText('resistance · power to ground no-short');
+  await expect(page.getByTestId('next-bench-measurement')).toContainText('connector ground to exposed ground');
 
   await page.goto(`${APP_URL}/workbench/mission`);
   await expect(page.getByText('Observed donor cooling fan', { exact: true })).toBeVisible();
