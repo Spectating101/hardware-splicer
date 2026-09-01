@@ -77,7 +77,13 @@ export function AssemblyPlacementPrecisionPad() {
 
   return (
     <Html fullscreen style={{ pointerEvents: 'none' }}>
-      <div className="pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-white/10 bg-[#07101d]/94 p-2 shadow-2xl backdrop-blur" data-testid="assembly-placement-precision-pad">
+      <div
+        className="pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl border border-white/10 bg-[#07101d]/94 p-2 shadow-2xl backdrop-blur"
+        data-testid="assembly-placement-precision-pad"
+        onPointerDown={(event) => event.stopPropagation()}
+        onPointerUp={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex flex-wrap items-center justify-center gap-2">
           <div className="flex items-center gap-1.5 pr-1 text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-500">
             {tool === 'move' ? <Crosshair className="h-3 w-3" /> : <Rotate3D className="h-3 w-3" />}
