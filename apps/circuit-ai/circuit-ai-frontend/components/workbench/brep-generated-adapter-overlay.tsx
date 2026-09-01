@@ -21,15 +21,19 @@ export function BrepGeneratedAdapterOverlay() {
   const candidate = useWorkbenchBrepAdapterStore((state) => state.candidatesByArchitecture[activeCandidateId]);
   const anchors = useWorkbenchBrepAnchorStore((state) => state.anchorsByCandidate[activeCandidateId]);
   const placements = useWorkbenchPlacementStore((state) => state.placementsByCandidate[activeCandidateId]);
+  const firstAnchor = candidate ? anchors?.[candidate.firstAnchorId] : undefined;
+  const secondAnchor = candidate ? anchors?.[candidate.secondAnchorId] : undefined;
+  const firstPlacement = candidate ? placements?.[candidate.firstEntityId] : undefined;
+  const secondPlacement = candidate ? placements?.[candidate.secondEntityId] : undefined;
 
   const dependenciesCurrent = Boolean(
     candidate
-    && anchors?.[candidate.firstAnchorId]
-    && anchors?.[candidate.secondAnchorId]
-    && placements?.[candidate.firstEntityId]?.placementId === candidate.firstPlacementId
-    && placements?.[candidate.secondEntityId]?.placementId === candidate.secondPlacementId
-    && anchors[candidate.firstAnchorId].contentHash === candidate.firstContentHash
-    && anchors[candidate.secondAnchorId].contentHash === candidate.secondContentHash,
+    && firstAnchor
+    && secondAnchor
+    && firstPlacement?.placementId === candidate.firstPlacementId
+    && secondPlacement?.placementId === candidate.secondPlacementId
+    && firstAnchor.contentHash === candidate.firstContentHash
+    && secondAnchor.contentHash === candidate.secondContentHash,
   );
 
   const geometry = useMemo(() => {
