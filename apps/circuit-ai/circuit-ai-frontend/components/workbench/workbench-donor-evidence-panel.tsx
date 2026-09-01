@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { ClipboardCheck, Loader2, RefreshCw, Save, ShieldAlert, Wrench } from 'lucide-react';
+import { WorkbenchDonorBenchCapturePanel } from '@/components/workbench/workbench-donor-bench-capture-panel';
 import { constructorTarget } from '@/lib/workbench-constructor-demo';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchDonorIntakeStore, type WorkbenchDonorResource } from '@/lib/workbench-donor-intake-store';
@@ -229,6 +230,8 @@ export function WorkbenchDonorEvidencePanel() {
           </div>
         ) : null}
       </div>
+
+      <WorkbenchDonorBenchCapturePanel resource={activeResource} />
 
       <div className="mt-3 flex items-start gap-1.5 rounded-md border border-amber-300/10 bg-amber-300/[0.02] px-2 py-1.5 text-[8px] leading-4 text-amber-100/45">
         <ShieldAlert className="mt-0.5 h-3 w-3 shrink-0" /> Typed observations are not topology measurements and never authorize power, splice or production release by themselves.
