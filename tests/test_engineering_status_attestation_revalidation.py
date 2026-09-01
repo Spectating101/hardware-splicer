@@ -120,7 +120,8 @@ def _decision() -> AuthorizationDecision:
         reviewed_at="2026-08-04T02:30:00+00:00",
         evidence_ids=["rail-test"],
         reason="Attested bench evidence supports this scope.",
-        expires_at="2026-09-01T00:00:00+00:00",
+        # This fixture tests attestation revalidation, not wall-clock expiry.
+        expires_at="2027-09-01T00:00:00+00:00",
     )
 
 
