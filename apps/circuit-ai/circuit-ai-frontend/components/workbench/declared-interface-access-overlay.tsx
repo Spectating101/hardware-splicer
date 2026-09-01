@@ -4,7 +4,11 @@ import { Html, Line } from '@react-three/drei';
 import { deck001EntityMap, deck001Interfaces } from '@/lib/workbench-demo';
 import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore, type DeclaredAccessEvidence } from '@/lib/workbench-access-store';
+import { useWorkbenchPlacementDraftStore } from '@/lib/workbench-placement-draft-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { AssemblyPlacementPrecisionPad } from '@/components/workbench/assembly-placement-precision-pad';
+import { AssemblyPlacementTools } from '@/components/workbench/assembly-placement-tools';
+import { BrepGeneratedAdapterOverlay } from '@/components/workbench/brep-generated-adapter-overlay';
 import { BrepRenderMeshOverlays } from '@/components/workbench/brep-render-mesh-overlay';
 
 const SCENE_UNITS_PER_MM = 0.025;
@@ -111,20 +115,32 @@ export function DeclaredInterfaceAccessOverlays() {
   const selectedEntityId = useMachineWorkbenchStore((state) => state.selectedEntityId);
   const accessMap = useWorkbenchAccessStore((state) => state.accessByCandidate[activeCandidateId] ?? EMPTY_ACCESS_MAP);
   const placements = useWorkbenchPlacementStore((state) => state.placementsByCandidate[activeCandidateId] ?? EMPTY_PLACEMENT_MAP);
+  const editTool = useWorkbenchPlacementDraftStore((state) => state.tool);
+  const selectedDraft = useWorkbenchPlacementDraftStore(
+    (state) => state.draftsByCandidate[activeCandidateId]?.[selectedEntityId],
+  );
+  const editingPose = editTool !== 'select' && Boolean(selectedDraft);
 
   if (phase !== 'construct') return null;
 
   return (
     <>
-      <BrepRenderMeshOverlays />
-      {Object.values(accessMap).map((access) => (
-        <AccessEnvelope
-          key={access.accessId}
-          access={access}
-          placements={placements}
-          selected={selectedEntityId === access.entityId}
-        />
-      ))}
+      <AssemblyPlacementTools />
+      <AssemblyPlacementPrecisionPad />
+      {!editingPose ? (
+        <>
+          <BrepRenderMeshOverlays />
+          <BrepGeneratedAdapterOverlay />
+          {Object.values(accessMap).map((access) => (
+            <AccessEnvelope
+              key={access.accessId}
+              access={access}
+              placements={placements}
+              selected={selectedEntityId === access.entityId}
+            />
+          ))}
+        </>
+      ) : null}
     </>
   );
 }
