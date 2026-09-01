@@ -157,6 +157,15 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
     buffer: Buffer.from(mainboardStep),
   });
 
+  await page.getByRole('button', { name: 'Geometry', exact: true }).click();
+  const geometryPanel = page.getByTestId('geometry-interrogation-panel');
+  await expect(geometryPanel).toBeVisible();
+  await expect(geometryPanel).toContainText('Sovereign geometry interrogation');
+  await expect(geometryPanel).toContainText('210 × 130 × 18 mm');
+  await expect(geometryPanel).toContainText('Not committed');
+  await expect(geometryPanel).toContainText('No measurement / fabrication authority');
+  await expect(geometryPanel).toContainText('Commit a declared assembly pose');
+
   const toolbar = page.getByTestId('assembly-placement-toolbar');
   await expect(toolbar).toBeVisible();
   await expect(toolbar).toContainText('Assembly pose · Donor x86 mainboard');
@@ -178,6 +187,9 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
   expect(placementPayloads[0].placements[0].authority).toBe('declared');
   await expect(page.getByTestId('assembly-pose-readout')).toContainText('T [2, 0, 0] mm · R [0, 0, 0]°');
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [2, 0, 0] mm · R [0, 0, 0]° · DECLARED.');
+  await expect(geometryPanel).toContainText('T [2, 0, 0] mm · R [0, 0, 0]°');
+  await expect(geometryPanel).toContainText('Not current / not resolved');
+  await expect(geometryPanel).toContainText('Resolve the current source + pose through OCCT');
 
   await toolbar.getByRole('button', { name: 'Rotate', exact: true }).click();
   await expect(page.getByTestId('assembly-pose-draft-label')).toContainText('DECLARED POSE DRAFT · ROTATE');
@@ -188,6 +200,7 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
   await expect.poll(() => placementPayloads.length).toBe(2);
   expect(placementPayloads[1].placements[0].translation_mm).toEqual([2, 0, 0]);
   expect(placementPayloads[1].placements[0].rotation_deg_xyz).toEqual([0, 0, 90]);
+  await expect(geometryPanel).toContainText('T [2, 0, 0] mm · R [0, 0, 90]°');
 
   await toolbar.getByRole('button', { name: 'Move', exact: true }).click();
   await precision.getByLabel('Nudge move Y positive 1mm').click();
@@ -196,6 +209,7 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
   await expect.poll(() => placementPayloads.length).toBe(2);
   await expect(page.getByTestId('assembly-pose-readout')).toContainText('T [2, 0, 0] mm · R [0, 0, 90]°');
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [2, 0, 0] mm · R [0, 0, 90]° · DECLARED.');
+  await expect(geometryPanel).toContainText('T [2, 0, 0] mm · R [0, 0, 90]°');
 
   await page.screenshot({ path: testInfo.outputPath('assembly-pose-tools.png') });
 });
