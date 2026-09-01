@@ -129,10 +129,11 @@ export function WorkbenchDonorEvidencePanel() {
   }, [focused?.resourceId, stored?.recordedAt, evidenceHydrated]);
 
   if (!focused) return null;
+  const activeResource = focused;
 
   function saveWorksheet() {
     const record: WorkbenchDonorEvidence = {
-      resourceId: focused.resourceId,
+      resourceId: activeResource.resourceId,
       identityLabel: identityLabel.trim(),
       condition,
       dimensionsNote: dimensionsNote.trim(),
@@ -144,7 +145,7 @@ export function WorkbenchDonorEvidencePanel() {
       authority: 'operator_claim',
     };
     saveEvidence(record);
-    void refreshFieldAction(focused, record);
+    void refreshFieldAction(activeResource, record);
   }
 
   const procedure = asStrings(fieldAction.procedure);
@@ -157,7 +158,7 @@ export function WorkbenchDonorEvidencePanel() {
           <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.13em] text-cyan-200">
             <ClipboardCheck className="h-3.5 w-3.5" /> Donor evidence worksheet
           </div>
-          <div className="mt-1 text-[11px] font-semibold text-white">{focused.name}</div>
+          <div className="mt-1 text-[11px] font-semibold text-white">{activeResource.name}</div>
         </div>
         <span className="rounded border border-amber-300/20 bg-amber-300/[0.05] px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-amber-200">operator claim</span>
       </div>
@@ -203,10 +204,10 @@ export function WorkbenchDonorEvidencePanel() {
         <button type="button" onClick={saveWorksheet} className="inline-flex items-center gap-1.5 rounded-md border border-cyan-300/20 bg-cyan-300/[0.06] px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-cyan-100 hover:bg-cyan-300/[0.1]">
           <Save className="h-3 w-3" /> Save observation
         </button>
-        <button type="button" onClick={() => void refreshFieldAction(focused, stored)} disabled={actionState === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400 hover:bg-white/5 disabled:opacity-50">
+        <button type="button" onClick={() => void refreshFieldAction(activeResource, stored)} disabled={actionState === 'loading'} className="inline-flex items-center gap-1.5 rounded-md border border-white/10 px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.1em] text-slate-400 hover:bg-white/5 disabled:opacity-50">
           {actionState === 'loading' ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} Refresh next action
         </button>
-        {stored ? <button type="button" onClick={() => clearEvidence(focused.resourceId)} className="ml-auto text-[8px] uppercase tracking-[0.1em] text-slate-600 hover:text-red-300">clear</button> : null}
+        {stored ? <button type="button" onClick={() => clearEvidence(activeResource.resourceId)} className="ml-auto text-[8px] uppercase tracking-[0.1em] text-slate-600 hover:text-red-300">clear</button> : null}
       </div>
 
       <div className="mt-3 border-t border-white/8 pt-3">
