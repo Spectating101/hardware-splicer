@@ -18,6 +18,9 @@ on:
       - "src/hardware_splicer/mechanical_brep_sweep_api.py"
       - "src/hardware_splicer/mechanical_brep_transition_refinement.py"
       - "src/hardware_splicer/_cadquery_brep_transition_refinement_worker.py"
+      - "src/hardware_splicer/mechanical_brep_adapter.py"
+      - "src/hardware_splicer/_cadquery_brep_adapter_worker.py"
+      - "src/hardware_splicer/mechanical_brep_adapter_api.py"
       - "src/hardware_splicer/mechanical_placement.py"
       - "src/hardware_splicer/step_geometry.py"
       - "src/hardware_splicer/mechanical_api.py"
@@ -36,12 +39,14 @@ on:
       - "tests/test_mechanical_brep_sweep_api.py"
       - "tests/test_mechanical_brep_transition_refinement.py"
       - "tests/test_mechanical_brep_transition_refinement_api.py"
+      - "tests/test_mechanical_brep_adapter.py"
+      - "tests/test_mechanical_brep_adapter_api.py"
       - "pyproject.toml"
       - ".github/workflows/exact-brep-kernel.yml"
 
 jobs:
   cadquery-occt:
-    name: CadQuery OCCT interference, mesh, anchors, mating, sampled path, and adaptive refinement
+    name: CadQuery OCCT interference, mesh, anchors, mating, paths, refinement, and adapter synthesis
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -61,7 +66,7 @@ jobs:
           assert cq.__version__ == "2.8.0", cq.__version__
           print(f"CadQuery {cq.__version__} / OCCT specialist import OK")
           PY
-      - name: Run exact BREP contracts, real solid proof, sampled path, and adaptive transition refinement
+      - name: Run exact BREP contracts, real solid proof, sampled path, refinement, and adapter synthesis
         env:
           HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
         run: |
@@ -79,4 +84,6 @@ jobs:
             tests/test_mechanical_brep_sweep.py \
             tests/test_mechanical_brep_sweep_api.py \
             tests/test_mechanical_brep_transition_refinement.py \
-            tests/test_mechanical_brep_transition_refinement_api.py
+            tests/test_mechanical_brep_transition_refinement_api.py \
+            tests/test_mechanical_brep_adapter.py \
+            tests/test_mechanical_brep_adapter_api.py

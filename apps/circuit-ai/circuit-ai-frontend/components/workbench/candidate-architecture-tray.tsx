@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Activity, CircleDollarSign, GitCompareArrows, Recycle, Ruler, ShieldCheck } from 'lucide-react';
+import { BrepAdapterSynthesisControl } from '@/components/workbench/brep-adapter-synthesis-control';
 import { GeometryInterrogationPanel } from '@/components/workbench/geometry-interrogation-panel';
 import { constructorCandidates } from '@/lib/workbench-constructor-demo';
 import { useMachineWorkbenchStore, type ConstructorCandidateId } from '@/lib/machine-workbench-store';
@@ -68,8 +69,9 @@ export function CandidateArchitectureTray() {
       </div>
 
       {trayMode === 'geometry' ? (
-        <div className="max-h-[360px] overflow-auto" data-testid="construct-geometry-tray">
+        <div className="max-h-[520px] space-y-3 overflow-auto" data-testid="construct-geometry-tray">
           <GeometryInterrogationPanel />
+          <BrepAdapterSynthesisControl />
         </div>
       ) : (
         <div className="grid gap-2 lg:grid-cols-3">
