@@ -64,6 +64,7 @@ jobs:
             sleep 2
           done
           /tmp/hs-playwright/node_modules/.bin/playwright test \
+            e2e/machine-product-landing.spec.js \
             e2e/machine-workbench.spec.js \
             e2e/machine-reuse-mission-convergence.spec.js \
             e2e/machine-constructor-live-planner.spec.js \
@@ -71,6 +72,7 @@ jobs:
             e2e/machine-exact-brep-clearance.spec.js \
             e2e/machine-brep-surface-anchor.spec.js \
             e2e/machine-brep-anchor-mating.spec.js \
+            e2e/machine-brep-adapter-synthesis.spec.js \
             e2e/machine-brep-mating-path.spec.js \
             e2e/machine-brep-mating-path-refinement.spec.js \
             e2e/machine-project-bound-brep-durability.spec.js \
