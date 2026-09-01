@@ -1,164 +1,211 @@
-# Hardware-Splicer
+# Hardware Splicer
 
 [![Splice Agent v1](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml/badge.svg)](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Auditable agentic hardware engineering under bounded physical authority.**
+**Reuse-first physical systems synthesis under bounded engineering authority.**
+
+> **What can I build with what I already have?**
+
+Hardware Splicer starts from physical resources — owned parts, salvaged hardware, procurable components and designed parts — and helps turn them into defensible machine build candidates.
+
+The canonical product loop is:
+
+> **Inventory → Goal → Candidates → Resolve → Verify → Build**
+
+Underneath that product flow, the governing engineering invariant remains:
 
 > **AI proposes → deterministic systems constrain → bench evidence decides → human authorizes.**
 
-Hardware-Splicer lets a general-purpose AI agent perform bounded hardware-engineering work while deterministic constraints, provenance-bearing evidence, exact revision state and scoped human authority remain independently authoritative.
+Hardware Splicer is not presented as an LLM replacing a hardware engineer, and it is not attempting to clone every Fusion, Onshape, KiCad or Altium feature. It owns the subset of systems engineering, spatial reasoning, evidence and simple missing-hardware synthesis required to answer a different starting question: given the hardware that physically exists, what useful system can be built, what is missing, and what can actually be proven?
 
-It is **not** a claim that an LLM can safely replace a hardware engineer. The design goal is narrower and more defensible:
+## Evaluators / competitions / product reviewers
 
-> **When the AI is uncertain or wrong, that uncertainty should not silently acquire physical authority.**
+**Start here:** [`docs/gauntlet/HARDWARE_SPLICER_PRODUCT_RC.md`](docs/gauntlet/HARDWARE_SPLICER_PRODUCT_RC.md)
 
-## Evaluators / competitions / research reviewers
+For InnoServe 2026 packaging:
 
-**Start here:** [`docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md`](docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md)
+- [`docs/gauntlet/INNOSERVE_2026_ENTRY_RC.md`](docs/gauntlet/INNOSERVE_2026_ENTRY_RC.md)
 
-Then use:
+For the older controlled evidence / research package:
 
-- [`PROJECT_IDENTITY.md`](docs/external_assessment/PROJECT_IDENTITY.md) — bounded project identity;
-- [`CLAIMS_AND_NONCLAIMS.md`](docs/external_assessment/CLAIMS_AND_NONCLAIMS.md) — exact claim boundary;
-- [`EVIDENCE_LEDGER.md`](docs/external_assessment/EVIDENCE_LEDGER.md) — what evidence supports each claim;
-- [`MASTER_DECK_12_SLIDES.md`](docs/external_assessment/MASTER_DECK_12_SLIDES.md) — canonical external narrative;
-- [`SOLO_ROUTING_2026.md`](docs/external_assessment/SOLO_ROUTING_2026.md) — current solo-first submission routing;
-- [`demos/DEMO_3_MINUTES.md`](docs/external_assessment/demos/DEMO_3_MINUTES.md) — canonical short demonstration.
+- [`docs/external_assessment/`](docs/external_assessment/) remains available as supporting audit history and evidence discipline;
+- it is **not** the canonical product positioning for this reuse-first RC.
 
-## Current state
+## Current product state
 
-**SOFTWARE ARCHITECTURE FROZEN / EXTERNAL PROOF + SUBMISSION PACKAGING ACTIVE**
+The current convergence RC packages the previously separate engineering capabilities into one user journey.
 
-| Evidence layer | State |
-|---|---|
-| frozen software architecture | **PROVEN** |
-| deterministic adversarial cleanroom | **PROVEN** |
-| frozen ten-case unseen SPI corpus | **PROVEN AS CORPUS/PROTOCOL** |
-| canonical MCP gateway | **PROVEN** |
-| external-agent runner / trace audit | **PROVEN AS INFRASTRUCTURE** |
-| live external-model run on unchanged corpus | **PENDING** |
-| fresh revision-bound SPI physical correctness | **PENDING** |
-| independent human operator | **PENDING** |
-| production / industrial deployment readiness | **NOT CLAIMED** |
+### 1. Inventory
 
-The project is therefore **evidence-blocked, not feature-blocked**. Generic feature development should remain frozen unless a live, unseen, physical or independent-operator experiment exposes a concrete defect.
+- donor-photo observations can enter planning as provisional salvage resources;
+- owned / salvaged / procurable / designed resources share one resource strategy model;
+- registered project sources preserve content hashes and occurrence bindings;
+- uncertain identity remains uncertain rather than being silently promoted.
 
-## Architecture
+### 2. Goal
 
-```text
-General-purpose AI / agent
-          │
-          ▼
-       MCP / API
-          │
-          ▼
-┌─────────────────────────────────────────┐
-│            HARDWARE-SPLICER             │
-│                                         │
-│ project + exact revision state          │
-│ source/evidence provenance              │
-│ semantic engineering planning           │
-│ deterministic interface constraints     │
-│ engineering artifacts / package         │
-│ revision-bound physical evidence        │
-│ authorization ledger                    │
-└─────────────────────────────────────────┘
-          │
-          ▼
-      candidate / package
-          │
-      evidence gates
-          │
-          ▼
-     human authorization
-          │
-          ▼
-       physical world
-```
+The user can begin with a machine objective and constraints such as:
 
-### Model independence
+- maximize reuse;
+- cap additional spending;
+- reduce integration risk;
+- require specific capabilities;
+- preserve portability / service constraints.
 
-The current external-agent path exposes the canonical product backend through a four-tool MCP discovery/dispatch gateway rather than duplicating engineering logic in the adapter.
+### 3. Candidates
 
-At the current external-proof checkpoint, exact-head CI has exercised:
+Hardware Splicer compares multiple resource-aware architectures instead of returning one unqualified design answer. Candidate state can expose:
 
-- a real MCP stdio client;
-- a real MCP Streamable HTTP client;
-- canonical stateful project write → read → delete through MCP;
-- the installed canonical MCP entry point;
-- frozen ten-case external corpus inventory;
-- the non-golden external trace audit;
-- **193 canonical backend operations**;
-- `physical_authority_granted = false` at the MCP boundary.
+- capability coverage;
+- selected / rejected resources;
+- procurement gaps;
+- additional cost;
+- unresolved evidence gates;
+- strategy trade-offs.
 
-This proves the engineering surface and proof harness exist. It does **not** prove a live external model has passed the corpus.
+### 4. Resolve
 
-## Primary bounded application
+Generic blockers become concrete operator actions such as:
 
-The clean external application is **semiconductor test and validation support hardware**, including:
+- identify a donor revision;
+- photograph a label / connector;
+- upload a manual / CAD source;
+- measure a dimension;
+- record power / resistance / current evidence;
+- resolve exact spatial geometry.
 
-- adapter boards;
-- carrier boards;
-- validation fixtures;
-- lab/NPI support hardware;
-- related electromechanical preparation.
+### 5. Verify
 
-Hardware-Splicer is not presented as:
+Current sovereign engineering substrate includes:
 
-- chip design;
-- wafer-process automation;
-- autonomous production certification;
-- universal EDA replacement;
-- a system that treats model confidence as verification.
+- declared rigid assembly placement;
+- live 3D Select / Move / Rotate controls with deterministic precision nudges;
+- bounded STEP parsing with source identity and SHA-256 provenance;
+- project-bound registered STEP materialization and hash re-verification;
+- isolated CadQuery 2.8 / OCCT exact BREP rendering;
+- exact pair minimum-distance / intersection checks;
+- exact surface anchors;
+- anchor mating geometry;
+- bounded sampled mating / insertion paths;
+- adaptive transition refinement;
+- operator claims separated from calibrated bench measurement sessions;
+- explicit evidence / authority boundaries.
 
-## What makes the system different
+### 6. Build
 
-A generic AI assistant can propose an answer. Hardware-Splicer additionally preserves independent structures for:
+The system is converging toward a build package that groups:
 
-- exact or unresolved component identity;
+- reused resources;
+- purchased resources;
+- fabricated resources;
+- substitutions;
+- generated / imported CAD;
+- wiring / interface plan;
+- remaining measurements;
 - evidence provenance;
-- deterministic electrical/interface constraints;
-- exact project/revision/artifact state;
-- stale-evidence invalidation;
-- explicit real-vs-simulated physical evidence;
-- scoped human authorization;
-- replayable adversarial agent traces.
+- cost / procurement state;
+- unresolved risks and required human verification.
 
-The system therefore evaluates not only **whether the AI is right**, but also **what happens when it is wrong**.
+## Sovereign adapter synthesis v0
 
-## Adversarial external proof
+The bounded `bridge_block_v0` path is the first missing-hardware synthesis family.
 
-The frozen unseen SPI-flash corpus contains ten cases:
+Two distinct, common-frame, approximately opposed planar **exact BREP anchors** can define a generated bridge candidate. Hardware Splicer then:
 
-1. baseline;
-2. source reverse;
-3. source rotate;
-4. neutral labels;
-5. mission paraphrase;
-6. partial evidence;
-7. identity conflict;
-8. parser failure;
-9. analogy trap;
-10. stale revision.
+1. validates the two parent source hashes and declared poses;
+2. validates the exact anchor dependencies;
+3. generates a real CadQuery solid;
+4. exports real STEP;
+5. hashes the generated STEP;
+6. tessellates it for the workbench;
+7. checks exact OCCT minimum distance to both parents;
+8. checks exact intersection volume against both parents;
+9. returns PASS / REJECT / UNKNOWN without raising fabrication authority.
 
-The external-agent runner can preserve model requests/responses, MCP calls, case-scoped state and replay material while the trace audit checks for incomplete calls, foreign project scope, unsupported evidence identity and attempts to open physical authority.
+A geometry pass does **not** establish material, mounting, retention, tolerance, strength, manufacturability, electrical compatibility, fabrication or release authority.
 
-**The actual live provider run remains pending.** Frozen cases must not be rewritten after results are visible.
+## Canonical demonstration
 
-## Physical evidence and authority
+### Cyberdeck
 
-Software success is not physical success.
+The first physical reference build should start with resources such as:
 
-Real physical evidence must explicitly identify itself as real (`simulated: false`) and remain tied to the relevant project revision/artifact boundary. Missing or ambiguous simulation state is blocking. Authorization is an explicit human-scoped decision and does not automatically survive relevant revision or artifact changes.
+- donor display;
+- SBC / mini-PC / x86 board;
+- keyboard;
+- battery / power bank;
+- storage / hub;
+- cooling hardware;
+- donor enclosure / chassis parts;
+- miscellaneous fasteners and brackets.
 
-A prior golden-real bench path demonstrates that the evidence/authority machinery can consume explicitly real evidence. It does not close the fresh adversarial SPI physical proof chain.
+Mission example:
+
+> **Build a portable Linux cyberdeck using as much existing hardware as possible under a bounded additional budget.**
+
+The demo should show:
+
+**physical pile → inventory → candidate architectures → concrete blocker → exact geometry → generated adapter → build output.**
+
+The inspection rover is the broader mechatronics follow-up.
+
+## Competitive boundary
+
+Hardware Splicer does not need to beat specialist tools at every specialist task.
+
+- Fusion / Onshape can remain advanced mechanical authoring backends.
+- KiCad / Flux / Altium can remain ECAD backends.
+- SPICE / robotics / FEA tooling can remain specialist solvers.
+
+Hardware Splicer should be strong enough to finish ordinary resource-to-machine work itself and escalate specialist work when necessary.
+
+The product distinction is upstream of conventional CAD:
+
+> **“Here are the real parts I physically have. What can they become?”**
+
+rather than only:
+
+> “Design this already-specified component or assembly.”
+
+## Evidence ladder
+
+Do not collapse these evidence classes:
+
+1. AI / photo inference;
+2. operator claim / observation;
+3. document / source evidence;
+4. exact computational geometry;
+5. calibrated instrument measurement;
+6. controlled physical result;
+7. explicit human release authority.
+
+The system is intentionally allowed to return **UNKNOWN** when the evidence does not support a stronger claim.
+
+## Current nonclaims
+
+The current RC does **not** claim:
+
+- metrology-grade dimensions merely because STEP exists;
+- automatic semantic recognition of arbitrary connector pinouts;
+- universal electrical / protocol compatibility;
+- retention closure for generated adapters;
+- structural / stress / fatigue / thermal validation;
+- continuous whole-machine swept-volume proof;
+- cable / service ergonomics closure;
+- fabrication, power-on, motion or production release authority;
+- measured market adoption, time savings or waste diversion before external physical cases exist.
 
 ## Product surfaces
 
-Hardware-Splicer contains Web UI, HTTP API, MCP and CLI surfaces around the same engineering truth core.
+- Web product entry: `/`
+- Reuse mission: `/workbench/mission`
+- Engineering workbench: `/workbench`
+- HTTP API
+- MCP
+- CLI
 
-The repository also retains earlier Splice/Circuit/mechanical lineage and internal engineering documentation. Those materials are useful for development history but are **not the recommended evaluator entry point**.
+All are intended to sit around the same evidence / engineering truth core.
 
 ## Developer quick start
 
@@ -171,27 +218,26 @@ hs-doctor
 make splice-ui-serve
 ```
 
-For internal/developer navigation, see [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md) and the broader [`docs/`](docs/) tree.
+For internal developer navigation, see [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md) and the broader [`docs/`](docs/) tree.
 
-## Canonical generated artifacts
+## External proof backlog
 
-Representative durable outputs include:
+Software closure is not physical proof. The next important evidence work is:
 
-- `PROJECT_PACKAGE.json`;
-- KiCad carrier / DRC evidence;
-- `SPLICE_PLAN.json`;
-- `SPLICE_BENCH_SESSION.json`;
-- `COMPILE_CASEFILE.json` on failure;
-- revision-bound evidence and authorization records;
-- external-agent trace/replay artifacts when a live run is executed.
+1. build the canonical cyberdeck;
+2. fabricate at least one HS-generated adapter;
+3. record actual fit success / failure;
+4. record donor identity and measurement evidence;
+5. repeat the workflow on an inspection rover or unrelated build;
+6. persist successful and failed compatibility outcomes.
+
+That observed compatibility history — not the current UI or generator alone — is what can become a durable moat over time.
 
 ## Submission doctrine
 
 > **One evidence core → multiple external verdicts.**
 
-Competitions, papers, grants and partner reviews may receive different emphasis and formatting. They may not receive different truth states.
-
-See [`docs/external_assessment/`](docs/external_assessment/) for the controlled external package.
+Competition, research, partner and commercial material may change emphasis. They may not claim different truth states.
 
 ## License
 
