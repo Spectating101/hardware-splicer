@@ -27,6 +27,7 @@ DATA;
 ENDSEC;
 END-ISO-10303-21;
 """
+RIGHT_STEP = STEP.replace("PRODUCT('fixture','Fixture'", "PRODUCT('fixture-right','Fixture Right'")
 
 
 def _hash(content: str = STEP) -> str:
@@ -106,12 +107,12 @@ def _stored_project(tmp_path: Path) -> tuple[ProjectStore, dict, dict]:
         metadata={"source": "test"},
     )
     sources = []
-    for filename in ("left.step", "right.step"):
+    for filename, content in (("left.step", STEP), ("right.step", RIGHT_STEP)):
         result = ingest_engineering_source(
             EngineeringSourceIngestionRequest(
                 project_id=project_id,
                 filename=filename,
-                content_base64=base64.b64encode(STEP.encode("utf-8")).decode("ascii"),
+                content_base64=base64.b64encode(content.encode("utf-8")).decode("ascii"),
             ),
             project_root=tmp_path,
         )
@@ -181,6 +182,8 @@ def test_inline_adapter_rejects_changed_parent_bytes_before_kernel(monkeypatch) 
 
 def test_stored_adapter_reopens_both_registered_blobs_without_returning_parent_step(tmp_path: Path, monkeypatch) -> None:
     store, left, right = _stored_project(tmp_path)
+    assert left["source_id"] != right["source_id"]
+    assert left["content_hash"] != right["content_hash"]
     monkeypatch.setattr(brep_adapter, "_cadquery_available", lambda: False)
     request = {
         "project_id": "adapter-stored",
@@ -232,3 +235,4 @@ def test_stored_adapter_reopens_both_registered_blobs_without_returning_parent_s
     assert report["second_content_hash"] == right["content_hash"]
     assert report["metadata"]["source_materialization"] == "registered_blobs_hash_reverified_server_side"
     assert STEP not in response.text
+    assert RIGHT_STEP not in response.text
