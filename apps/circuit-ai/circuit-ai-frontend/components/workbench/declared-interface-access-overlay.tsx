@@ -8,6 +8,7 @@ import { useWorkbenchPlacementDraftStore } from '@/lib/workbench-placement-draft
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
 import { AssemblyPlacementPrecisionPad } from '@/components/workbench/assembly-placement-precision-pad';
 import { AssemblyPlacementTools } from '@/components/workbench/assembly-placement-tools';
+import { BrepGeneratedAdapterOverlay } from '@/components/workbench/brep-generated-adapter-overlay';
 import { BrepRenderMeshOverlays } from '@/components/workbench/brep-render-mesh-overlay';
 
 const SCENE_UNITS_PER_MM = 0.025;
@@ -129,6 +130,7 @@ export function DeclaredInterfaceAccessOverlays() {
       {!editingPose ? (
         <>
           <BrepRenderMeshOverlays />
+          <BrepGeneratedAdapterOverlay />
           {Object.values(accessMap).map((access) => (
             <AccessEnvelope
               key={access.accessId}
