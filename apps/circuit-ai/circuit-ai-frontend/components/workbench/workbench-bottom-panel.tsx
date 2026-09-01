@@ -23,7 +23,7 @@ const tabs: Array<{ id: WorkbenchBottomTab; label: string; icon: typeof Activity
   { id: 'evidence', label: 'Evidence', icon: Activity },
   { id: 'interfaces', label: 'Interfaces', icon: Link2 },
   { id: 'constraints', label: 'Constraints', icon: ShieldAlert },
-  { id: 'verification', label: 'Geometry', icon: Ruler },
+  { id: 'verification', label: 'Verification', icon: Ruler },
   { id: 'history', label: 'History', icon: History },
 ];
 
