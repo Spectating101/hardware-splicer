@@ -291,7 +291,13 @@ function PoseToolbar({
   } : null);
 
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-3 w-[min(760px,calc(100%-26px))] -translate-x-1/2 rounded-xl border border-violet-300/20 bg-[#07101d]/96 p-2 shadow-2xl backdrop-blur" data-testid="assembly-placement-toolbar">
+    <div
+      className="pointer-events-auto absolute left-1/2 top-16 z-30 w-[min(760px,calc(100%-26px))] -translate-x-1/2 rounded-xl border border-violet-300/20 bg-[#07101d]/96 p-2 shadow-2xl backdrop-blur"
+      data-testid="assembly-placement-toolbar"
+      onPointerDown={(event) => event.stopPropagation()}
+      onPointerUp={(event) => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <div className="min-w-0 pr-2">
           <div className="truncate text-[9px] font-semibold uppercase tracking-[0.13em] text-violet-200">Assembly pose · {resourceName}</div>
