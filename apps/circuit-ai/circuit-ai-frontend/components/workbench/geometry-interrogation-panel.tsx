@@ -118,18 +118,19 @@ export function GeometryInterrogationPanel() {
     );
   }
 
+  const selectedGeometry = geometry;
   const exactMeshCurrent = Boolean(
     exactMesh
     && placement
-    && exactMesh.resourceId === geometry.resourceId
-    && exactMesh.modelId === geometry.modelId
-    && exactMesh.contentHash === geometry.contentHash
+    && exactMesh.resourceId === selectedGeometry.resourceId
+    && exactMesh.modelId === selectedGeometry.modelId
+    && exactMesh.contentHash === selectedGeometry.contentHash
     && exactMesh.placementId === placement.placementId
     && sameTuple(exactMesh.translationMm, placement.translationMm)
     && sameTuple(exactMesh.rotationDegXyz, placement.rotationDegXyz),
   );
 
-  const unresolved = geometry.unresolved
+  const unresolved = selectedGeometry.unresolved
     .map((row) => row.reason || row.field)
     .filter((row): row is string => Boolean(row));
 
@@ -146,7 +147,7 @@ export function GeometryInterrogationPanel() {
   function openResourceControls() {
     setPhase('construct');
     setConstructorDockTab('resources');
-    setSelectedResourceId(geometry.resourceId);
+    setSelectedResourceId(selectedGeometry.resourceId);
   }
 
   return (
@@ -157,7 +158,7 @@ export function GeometryInterrogationPanel() {
             <Ruler className="h-3.5 w-3.5" /> Sovereign geometry interrogation
           </div>
           <div className="mt-1 truncate text-xs font-semibold text-white">{resourceName}</div>
-          <div className="mt-1 font-mono text-[9px] text-slate-500">{geometry.sourceId} · {geometry.modelId} · {geometry.contentHash.slice(0, 22)}…</div>
+          <div className="mt-1 font-mono text-[9px] text-slate-500">{selectedGeometry.sourceId} · {selectedGeometry.modelId} · {selectedGeometry.contentHash.slice(0, 22)}…</div>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <button type="button" onClick={requestFrameSelection} className="rounded-md border border-white/10 px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.09em] text-slate-300 hover:bg-white/5">Frame</button>
@@ -167,7 +168,7 @@ export function GeometryInterrogationPanel() {
       </div>
 
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        <Fact label="Source envelope" value={`${geometry.sizeMm.map((row) => rounded(row)).join(' × ')} mm`} state="warn" />
+        <Fact label="Source envelope" value={`${selectedGeometry.sizeMm.map((row) => rounded(row)).join(' × ')} mm`} state="warn" />
         <Fact label="Assembly pose" value={placement ? `T ${tuple(placement.translationMm)} mm · R ${tuple(placement.rotationDegXyz)}°` : 'Not committed'} state={placement ? 'good' : 'warn'} />
         <Fact label="Exact BREP mesh" value={exactMeshCurrent && exactMesh ? `${exactMesh.triangleCount.toLocaleString()} triangles · ${exactMesh.kernel}` : 'Not current / not resolved'} state={exactMeshCurrent ? 'good' : 'warn'} />
         <Fact label="Physical authority" value="No measurement / fabrication authority" state="warn" />
@@ -177,9 +178,9 @@ export function GeometryInterrogationPanel() {
         <section className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
           <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400"><Box className="h-3.5 w-3.5" /> Geometry facts</div>
           <div className="mt-2 space-y-1.5 text-[10px] leading-4">
-            <div className="flex justify-between gap-4"><span className="text-slate-600">STEP point envelope</span><span className="text-right text-amber-100/80">DECLARED · {geometry.pointCount} points</span></div>
-            <div className="flex justify-between gap-4"><span className="text-slate-600">Source min</span><span className="font-mono text-slate-300">{tuple(geometry.minimumMm)} mm</span></div>
-            <div className="flex justify-between gap-4"><span className="text-slate-600">Source max</span><span className="font-mono text-slate-300">{tuple(geometry.maximumMm)} mm</span></div>
+            <div className="flex justify-between gap-4"><span className="text-slate-600">STEP point envelope</span><span className="text-right text-amber-100/80">DECLARED · {selectedGeometry.pointCount} points</span></div>
+            <div className="flex justify-between gap-4"><span className="text-slate-600">Source min</span><span className="font-mono text-slate-300">{tuple(selectedGeometry.minimumMm)} mm</span></div>
+            <div className="flex justify-between gap-4"><span className="text-slate-600">Source max</span><span className="font-mono text-slate-300">{tuple(selectedGeometry.maximumMm)} mm</span></div>
             {placement ? <div className="flex justify-between gap-4"><span className="text-slate-600">Assembly AABB</span><span className="font-mono text-slate-300">{tuple(placement.minimumMm)} → {tuple(placement.maximumMm)}</span></div> : null}
             {exactMeshCurrent && exactMesh ? <div className="flex justify-between gap-4"><span className="text-slate-600">OCCT tessellation</span><span className="text-emerald-200/80">{exactMesh.vertexCount.toLocaleString()} vertices · tol {rounded(exactMesh.toleranceMm, 4)} mm</span></div> : null}
             <div className="flex justify-between gap-4"><span className="text-slate-600">Mass / CG</span><span className="text-slate-500">NOT VERIFIED</span></div>
