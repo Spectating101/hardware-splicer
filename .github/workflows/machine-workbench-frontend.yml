@@ -67,6 +67,7 @@ jobs:
             e2e/machine-workbench.spec.js \
             e2e/machine-reuse-mission-convergence.spec.js \
             e2e/machine-constructor-live-planner.spec.js \
+            e2e/machine-assembly-pose-tools.spec.js \
             e2e/machine-exact-brep-clearance.spec.js \
             e2e/machine-brep-surface-anchor.spec.js \
             e2e/machine-brep-anchor-mating.spec.js \
