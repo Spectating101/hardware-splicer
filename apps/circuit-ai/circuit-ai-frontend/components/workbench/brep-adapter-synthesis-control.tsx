@@ -38,14 +38,14 @@ function tuple3(value: unknown): [number, number, number] | null {
 
 function tupleRows(value: unknown): [number, number, number][] {
   if (!Array.isArray(value)) return [];
-  return value.map(tuple3).filter((row): row is [number, number, number] => Boolean(row));
+  return value.map(tuple3).filter((row): row is [number, number, number] => row !== null);
 }
 
 function triangleRows(value: unknown): [number, number, number][] {
   if (!Array.isArray(value)) return [];
   return value
     .map((row) => Array.isArray(row) && row.length === 3 ? row.map(Number) : null)
-    .filter((row): row is number[] => Boolean(row) && row.every(Number.isInteger))
+    .filter((row): row is number[] => row !== null && row.every(Number.isInteger))
     .map((row) => row as [number, number, number]);
 }
 
@@ -263,7 +263,7 @@ export function BrepAdapterSynthesisControl() {
       }
 
       const adapterId = `adapter-${activeCandidateId}-${firstAnchor.entityId}-${secondAnchor.entityId}`;
-      const sourcePayload = (anchor: BrepSurfaceAnchorEvidence, registered: typeof firstRegistered, session: typeof firstSession) => registeredMode && registered
+      const sourcePayload = (registered: typeof firstRegistered, session: typeof firstSession) => registeredMode && registered
         ? {
             source_id: registered.sourceId,
             model_id: registered.modelId,
@@ -279,12 +279,12 @@ export function BrepAdapterSynthesisControl() {
         project_id: registeredMode ? projectState.projectId : 'deck-001',
         adapter_id: adapterId,
         first: {
-          source: sourcePayload(firstAnchor, firstRegistered, firstSession),
+          source: sourcePayload(firstRegistered, firstSession),
           placement: placementPayload(firstPlacement),
           anchor: anchorPayload(firstAnchor),
         },
         second: {
-          source: sourcePayload(secondAnchor, secondRegistered, secondSession),
+          source: sourcePayload(secondRegistered, secondSession),
           placement: placementPayload(secondPlacement),
           anchor: anchorPayload(secondAnchor),
         },
