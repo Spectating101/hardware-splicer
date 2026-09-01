@@ -6,6 +6,7 @@ import { useMachineWorkbenchStore } from '@/lib/machine-workbench-store';
 import { useWorkbenchAccessStore, type DeclaredAccessEvidence } from '@/lib/workbench-access-store';
 import { useWorkbenchPlacementDraftStore } from '@/lib/workbench-placement-draft-store';
 import { useWorkbenchPlacementStore, type DeclaredPlacementEvidence } from '@/lib/workbench-placement-store';
+import { AssemblyPlacementPrecisionPad } from '@/components/workbench/assembly-placement-precision-pad';
 import { AssemblyPlacementTools } from '@/components/workbench/assembly-placement-tools';
 import { BrepRenderMeshOverlays } from '@/components/workbench/brep-render-mesh-overlay';
 
@@ -124,6 +125,7 @@ export function DeclaredInterfaceAccessOverlays() {
   return (
     <>
       <AssemblyPlacementTools />
+      <AssemblyPlacementPrecisionPad />
       {!editingPose ? (
         <>
           <BrepRenderMeshOverlays />
