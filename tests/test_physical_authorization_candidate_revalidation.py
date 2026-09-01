@@ -123,7 +123,8 @@ def _authorized_r1_plan() -> dict:
         reviewed_at="2026-08-04T02:30:00+00:00",
         evidence_ids=["rail-test"],
         reason="Candidate r1 is supported for current-limited bench power.",
-        expires_at="2026-09-01T00:00:00+00:00",
+        # This fixture tests candidate revalidation, not wall-clock expiry.
+        expires_at="2027-09-01T00:00:00+00:00",
     )
     entry = build_authorization_ledger_entry(
         entry_id="entry-r1",
