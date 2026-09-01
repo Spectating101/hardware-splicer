@@ -176,7 +176,7 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
   expect(placementPayloads[0].placements[0].translation_mm).toEqual([2, 0, 0]);
   expect(placementPayloads[0].placements[0].rotation_deg_xyz).toEqual([0, 0, 0]);
   expect(placementPayloads[0].placements[0].authority).toBe('declared');
-  await expect(toolbar).toContainText('Declared pose committed');
+  await expect(page.getByTestId('assembly-pose-readout')).toContainText('T [2, 0, 0] mm · R [0, 0, 0]°');
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [2, 0, 0] mm · R [0, 0, 0]° · DECLARED.');
 
   await toolbar.getByRole('button', { name: 'Rotate', exact: true }).click();
@@ -194,7 +194,7 @@ test('STEP-backed assembly pose tools edit canonical translation and rotation th
   await expect(page.getByTestId('assembly-pose-readout')).toContainText('T [2, 1, 0] mm');
   await toolbar.getByRole('button', { name: 'Revert' }).click();
   await expect.poll(() => placementPayloads.length).toBe(2);
-  await expect(toolbar).toContainText('Draft discarded; committed declared pose is unchanged.');
+  await expect(page.getByTestId('assembly-pose-readout')).toContainText('T [2, 0, 0] mm · R [0, 0, 90]°');
   await expect(page.getByTestId('declared-placement-editor')).toContainText('Placed in assembly: T [2, 0, 0] mm · R [0, 0, 90]° · DECLARED.');
 
   await page.screenshot({ path: testInfo.outputPath('assembly-pose-tools.png') });
