@@ -2,6 +2,8 @@
 
 **Purpose:** turn the existing Hardware-Splicer evidence core into low-marginal-work applications for research credits, research previews, compute access, speaking opportunities and later scientific-resource programs.
 
+**FIRE NOW copy:** [`FIRE_NOW_SUBMISSION_COPY_2026-09-05.md`](FIRE_NOW_SUBMISSION_COPY_2026-09-05.md) — use this first for the current AWS Community Day, OpenAI Researcher Access, and Anthropic External Researcher Access shots.
+
 **Release audit:** [`PACKAGING_AUDIT_2026-09-04.md`](PACKAGING_AUDIT_2026-09-04.md) — use this as the current cross-route/cross-repo packaging verdict and merge gate.
 
 This directory is **not** a new source of engineering truth. All factual claims must remain consistent with:
@@ -37,14 +39,15 @@ The aim here is therefore:
 
 ## Required reusable assets
 
-1. `CORE_RESEARCH_PROTOCOL.md` — canonical matched-condition experiment across OpenAI, Anthropic and later science/evaluation routes.
-2. `PACKAGING_AUDIT_2026-09-04.md` — current release-grade consistency/methodology/source audit.
-3. 100/250/500-word project descriptions from `../SUBMISSION_COPY_BANK.md`.
-4. architecture figure from the existing external package.
-5. exact claim/evidence references from `../EVIDENCE_LEDGER.md`.
-6. YZU affiliation evidence and institutional email where required.
-7. workload-derived API/compute budget; do not invent a large budget because a program allows one.
-8. clean project/repository/demo links.
+1. `FIRE_NOW_SUBMISSION_COPY_2026-09-05.md` — final paste-ready current shots.
+2. `CORE_RESEARCH_PROTOCOL.md` — canonical matched-condition experiment across OpenAI, Anthropic and later science/evaluation routes.
+3. `PACKAGING_AUDIT_2026-09-04.md` — current release-grade consistency/methodology/source audit.
+4. 100/250/500-word project descriptions from `../SUBMISSION_COPY_BANK.md`.
+5. architecture figure from the existing external package.
+6. exact claim/evidence references from `../EVIDENCE_LEDGER.md`.
+7. YZU affiliation evidence and institutional email where required.
+8. workload-derived API/compute budget; do not invent a large budget because a program allows one.
+9. clean project/repository/demo links.
 
 ## Canonical experimental default
 
@@ -87,8 +90,8 @@ Do not state that:
 ## Operational priority
 
 1. AWS Community Day Taiwan 2026 — immediate CFP.
-2. OpenAI Researcher Access — packet and default budget/run plan ready; live-form recon remains.
-3. Anthropic External Researcher Access — packet and default run plan ready; official Google Form recon remains.
+2. OpenAI Researcher Access — final paste-ready copy is in the FIRE NOW file; live-form recon remains.
+3. Anthropic External Researcher Access — final paste-ready safety/control copy is in the FIRE NOW file; official Google Form recon remains.
 4. Anthropic MHS preview — only after naming a concrete programmable hardware surface and resolving applicant class.
 5. NCHC — internal university route after sponsor/workload are real.
 6. AWS Cloud Credit for Research — only after written geographic eligibility confirmation.
@@ -96,4 +99,4 @@ Do not state that:
 
 ## Source verification date
 
-Program mechanics in this directory were re-checked against official sources on **2026-09-04**. Re-verify live forms, model catalogs, pricing and rules immediately before final submission because these can change.
+Program mechanics in this directory were re-checked against official sources on **2026-09-05** for the FIRE NOW routes. Re-verify live forms, model catalogs, pricing and rules immediately before final submission because these can change.
