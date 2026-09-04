@@ -25,35 +25,49 @@ The aim here is therefore:
 
 | Route | State | Applicant authority | Lead artifact | Main unresolved gate |
 |---|---|---|---|---|
-| OpenAI Researcher Access Program | **FIRE** | self / university-affiliated researcher | bounded agent-control evaluation | final API budget + form entry |
-| Anthropic External Researcher Access Program | **FIRE** | self / research team | AI-control/safe-tool-use variant | must remain genuinely AI-safety research |
-| Anthropic Model Hardware Standard research preview | **VERIFY → FIRE** | stakeholder / potentially lab-level | physical-agent evaluation harness | applicant-class fit + named programmable device |
-| AWS Community Day Taiwan 2026 CFP | **FIRE NOW** | self | technical talk | submit before 2026-09-07 |
-| NCHC University AI Compute | **FIRE / UNIVERSITY** | university | internal YZU compute brief | YZU institutional sponsor/window |
-| Anthropic AI for Science | **FIRE LATER** | individual researcher with institutional consent | scaled scientific experiment | stronger external proof + clean data-rights plan |
-| AWS Cloud Credit for Research | **VERIFY → FIRE** | graduate researcher | reproducible cloud benchmark | Taiwan/Greater-China eligibility clarification |
+| OpenAI Researcher Access Program | **FIRE NOW** | self / university-affiliated researcher | bounded agent-control evaluation | live application fields + current eligibility/pricing re-check |
+| Anthropic External Researcher Access Program | **FIRE NOW** | self / research team | AI-control/safe-tool-use variant | live application fields; keep scope genuinely AI-safety/control |
+| Anthropic Model Hardware Standard research preview | **FIRE AFTER GATE** | stakeholder / potentially lab-level | physical-agent evaluation harness | applicant-class fit + named programmable device |
+| AWS Community Day Taiwan 2026 CFP | **FIRE NOW** | self | technical talk | live Qualtrics transcription + submit before 2026-09-07 |
+| NCHC University AI Compute | **FIRE AFTER INSTITUTIONAL GATE** | university | internal YZU compute brief | YZU institutional sponsor/window + real local-model workload |
+| Anthropic AI for Science | **HOLD / FIRE LATER** | eligible researcher subject to current rules and institutional consent | scaled scientific experiment | stronger external proof + jurisdiction/rights/consent gates |
+| AWS Cloud Credit for Research | **HOLD / VERIFY GEOGRAPHY** | graduate researcher | reproducible cloud benchmark | Taiwan/“greater China region” eligibility confirmation |
 
 ## Required reusable assets
 
-1. `CORE_RESEARCH_PROTOCOL.md` — canonical experiment that can be adapted across OpenAI, Anthropic and later science/evaluation routes.
+1. `CORE_RESEARCH_PROTOCOL.md` — canonical matched-condition experiment across OpenAI, Anthropic and later science/evaluation routes.
 2. 100/250/500-word project descriptions from `../SUBMISSION_COPY_BANK.md`.
 3. architecture figure from the existing external package.
 4. exact claim/evidence references from `../EVIDENCE_LEDGER.md`.
 5. YZU affiliation evidence and institutional email where required.
-6. API/compute budget derived from the actual benchmark size; do not invent a large budget merely because a program allows one.
+6. workload-derived API/compute budget; do not invent a large budget because a program allows one.
 7. clean project/repository/demo links.
+
+## Canonical experimental default
+
+The research-credit packets now share a concrete default design:
+
+- one frozen ten-case corpus;
+- matched reference and Hardware-Splicer-constrained conditions;
+- consequential reference actions scored in dry-run/advisory mode rather than physically executed;
+- primary model: 200 scored runs (`10 × 2 × 10`);
+- secondary/sensitivity model: 100 scored runs (`10 × 2 × 5`);
+- 300 scored runs total plus a small unscored transport/token pilot;
+- frozen adjudication rubric and protocol revision before scored execution.
+
+Provider-specific current defaults are documented in the OpenAI and Anthropic packets and must be re-checked immediately before submission/execution.
 
 ## Submission rule
 
 Each route gets a different emphasis, but no route gets a different truth state.
 
-- **OpenAI:** experiment and responsible deployment.
+- **OpenAI:** controlled experiment and responsible deployment/risk mitigation.
 - **Anthropic ERAP:** agent control / oversight / safe consequential tool use.
-- **MHS:** physical capability, programmable device integration and useful safety-evaluation contribution.
-- **AWS Community Day:** teach reusable engineering lessons; do not sell the product.
-- **NCHC:** justify a real local-model/HPC workload to YZU.
-- **AI for Science:** scientific question, method, measurable outputs and clean data rights.
-- **AWS Research Credits:** finite cloud research project with architecture, milestones and reproducibility plan.
+- **MHS:** concrete programmable-device integration + physical-safety evaluation contribution.
+- **AWS Community Day:** teach reusable engineering lessons; do not force AWS-service claims.
+- **NCHC:** justify a real local/open-model HPC workload to YZU.
+- **AI for Science:** scientific question, method, measurable outputs, jurisdiction/consent and clean data rights.
+- **AWS Research Credits:** finite cloud research project only after program-specific Taiwan eligibility is confirmed.
 
 ## Claim boundary
 
@@ -64,18 +78,19 @@ Do not state that:
 - independent operator usability is established;
 - Hardware-Splicer implements Anthropic MHS;
 - any provider has endorsed, funded or selected the project before an actual receipt exists;
-- cloud/GPU resources are required unless the proposed workload genuinely uses them.
+- cloud/GPU resources are required unless the proposed workload genuinely uses them;
+- “any researcher may apply” overrides an official program's jurisdiction/export-control/consent rules.
 
 ## Operational priority
 
 1. AWS Community Day Taiwan 2026 — immediate CFP.
-2. OpenAI Researcher Access — bounded YZU study.
-3. Anthropic External Researcher Access — safety-specific variant of the same study.
-4. Anthropic MHS preview — after naming a concrete programmable hardware surface; route through a lab/PI if the form requires it.
-5. NCHC — internal university route.
-6. AWS Cloud Credit for Research — only after geographic eligibility is confirmed.
-7. Anthropic AI for Science — after the external-proof tranche materially strengthens the proposal.
+2. OpenAI Researcher Access — packet and default budget/run plan ready; live-form recon remains.
+3. Anthropic External Researcher Access — packet and default run plan ready; live-form recon remains.
+4. Anthropic MHS preview — only after naming a concrete programmable hardware surface and resolving applicant class.
+5. NCHC — internal university route after sponsor/workload are real.
+6. AWS Cloud Credit for Research — only after written geographic eligibility confirmation.
+7. Anthropic AI for Science — only after the external-proof tranche and current legal/consent gates materially strengthen the proposal.
 
 ## Source verification date
 
-Program mechanics in this directory were re-checked against official sources on **2026-09-04**. Re-verify live forms before final submission because field wording and program status can change.
+Program mechanics in this directory were re-checked against official sources on **2026-09-04**. Re-verify live forms, model catalogs, pricing and rules immediately before final submission because these can change.
