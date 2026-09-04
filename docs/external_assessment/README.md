@@ -33,9 +33,10 @@ For an evaluator, judge, reviewer, mentor or potential design partner, read in t
 6. [`MASTER_DECK_12_SLIDES.md`](MASTER_DECK_12_SLIDES.md) — reusable competition/pitch deck source.
 7. [`SUBMISSION_COPY_BANK.md`](SUBMISSION_COPY_BANK.md) — reusable abstracts, descriptions and form copy.
 8. [`SOLO_ROUTING_2026.md`](SOLO_ROUTING_2026.md) — opportunity routing with solo/faculty-signoff constraints.
-9. [`demos/`](demos/) — 30-second, 3-minute and 10-minute narratives plus hostile Q&A.
-10. [`proof/`](proof/) — artifact slots for software, live-model, physical and independent-operator proof.
-11. [`overlays/`](overlays/) — venue-specific emphasis without changing underlying truth.
+9. [`research_access/`](research_access/) — research-credit, research-preview, compute and technical-community conversion packets.
+10. [`demos/`](demos/) — 30-second, 3-minute and 10-minute narratives plus hostile Q&A.
+11. [`proof/`](proof/) — artifact slots for software, live-model, physical and independent-operator proof.
+12. [`overlays/`](overlays/) — venue-specific emphasis without changing underlying truth.
 
 ## Current phase
 
@@ -69,6 +70,18 @@ This supports a stronger research and product question:
 
 The live answer to that question is still pending; the infrastructure required to test it is present.
 
+## Research/resource conversion lane
+
+The package now includes a dedicated `research_access/` lane for opportunities whose value is not primarily competition placement, including:
+
+- provider research/API credits;
+- physical-agent research previews;
+- university compute access;
+- technical speaking/community receipts;
+- later high-value science/resource programs.
+
+The lane reuses the same canonical evidence core. It must not create venue-specific truth or claim provider endorsement before an actual external receipt exists.
+
 ## Canonical rule
 
 This directory is a presentation and evidence-routing layer. It is not a second source of engineering truth.
@@ -84,4 +97,4 @@ This directory is a presentation and evidence-routing layer. It is not a second 
 
 > **One evidence core → multiple external verdicts.**
 
-The goal is to make each additional competition, paper, grant, pilot or partner review cheap. We should adapt framing, word count, deck length and demonstration emphasis—not create a different project for each venue.
+The goal is to make each additional competition, paper, grant, pilot, research-access program or partner review cheap. We should adapt framing, word count, deck length and demonstration emphasis—not create a different project for each venue.
