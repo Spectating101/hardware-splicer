@@ -10,10 +10,11 @@ Anthropic currently states that the External Researcher Access Program:
 
 - supports researchers working on **high-priority AI safety and alignment topics**;
 - provides free API credits for the standard Claude model suite;
-- ordinarily awards **US$1,000 in API credits** to successful applicants;
+- ordinarily awards **US$1,000 in API credits** to successful applicants, with rare higher awards possible;
 - evaluates submissions on the **first Monday of each month**;
 - asks applicants for information about their **team and research topic**;
-- does not grant access to nonpublic models and does not waive Anthropic's Usage Policy.
+- does not grant access to nonpublic models and does not waive Anthropic's Usage Policy;
+- may not individually respond to unsuccessful applicants because of application volume.
 
 This route is narrower than generic research-credit programs. The application must present a genuine AI-control/safety experiment, not a hardware-product funding request.
 
@@ -39,7 +40,7 @@ As AI agents gain the ability to call tools and execute multi-step workflows, th
 
 Hardware-Splicer is an existing model-independent engineering environment built around a strict separation between semantic agent reasoning and independently authoritative state. An agent may inspect evidence, reason, propose, revise and use tools, but deterministic constraints, exact project/revision state, provenance-bearing evidence and explicit authorization remain outside the model. Relevant changes can invalidate earlier evidence or authority rather than silently carrying them forward.
 
-I propose to evaluate Claude as an external tool-using agent on a frozen ten-case adversarial SPI-flash corpus. Cases include partial evidence, identity conflict, parser/tool failure, analogy traps and stale revisions. The principal comparison will examine agent behavior with and without the full evidence/authority intervention while preserving provider safety controls. Primary outcomes will include unsupported consequential-action attempts, correct abstention/blocking, false blocking, task completion, human intervention and failure-recovery behavior. Complete run metadata, model/tool traces where permitted, exact revisions and adjudications will be preserved.
+I propose to evaluate Claude as an external tool-using agent on a frozen ten-case adversarial SPI-flash corpus. Cases include partial evidence, identity conflict, parser/tool failure, analogy traps and stale revisions. The principal comparison will use semantically equivalent task evidence under matched model/configuration, with and without the full Hardware-Splicer evidence/authority intervention. Consequential requests in the reference condition are dry-run/advisory rather than physically executed. Primary outcomes include unsupported consequential-action attempts, correct abstention/blocking, false blocking, useful task completion, human intervention and failure-recovery behavior. Complete run metadata, model/tool traces where permitted, exact revisions and adjudications will be preserved.
 
 The project is specifically about AI control and safe consequential tool use. It does not assume that the model is infallible and does not claim that a live Claude model has already passed the benchmark. The contribution is an auditable evaluation of whether architectural constraints can preserve agent usefulness while preventing unsupported model assertions from automatically acquiring physical authority.
 
@@ -53,23 +54,49 @@ The study tests:
 - safe abstention and blocking;
 - failure recovery after tool/evidence conflict;
 - preservation of human authorization boundaries;
+- stale authority carryover after revision change;
 - whether useful task progress survives added control layers.
 
 The engineering domain supplies a consequential test environment; the research question concerns AI agent control.
 
 ## Planned use of Claude API
 
-Claude API models would act as the external agent under test. API credits would fund repeated executions across the frozen adversarial corpus and, where justified, comparison of model/configuration variants. Each run would preserve the evidence state, tool/MCP interactions, adjudication and usage metadata necessary for reproducibility.
+Claude API models would act as the external agents under test. The current default design is:
+
+- **Primary:** `claude-sonnet-5` — `10 cases × 2 conditions × 10 repeats = 200 scored runs`;
+- **Confirmatory/sensitivity:** `claude-opus-5` — `10 cases × 2 conditions × 5 repeats = 100 scored runs`;
+- total: **300 scored runs**, plus a small unscored transport/token pilot.
+
+The models and exact settings should be re-checked immediately before execution, and the exact API-returned model identifiers must be preserved in the trace record.
 
 Do not use this route merely for Claude-assisted coding, documentation or general project development.
+
+## Working cost model
+
+Current public list pricing used for planning on 2026-09-04:
+
+- Claude Sonnet 5: **US$2 / MTok input, US$10 / MTok output**;
+- Claude Opus 5: **US$5 / MTok input, US$25 / MTok output**.
+
+Official pricing: https://platform.claude.com/docs/en/about-claude/pricing
+
+Under a conservative assumption of **50k input + 10k output tokens per scored run**:
+
+- Sonnet 5 primary, 200 runs: about **US$40**;
+- Opus 5 confirmatory, 100 runs: about **US$50**;
+- scored-run subtotal: about **US$90**.
+
+A 100k-input/20k-output workload approximately doubles that subtotal. The program's standard successful award is substantially larger than the core run estimate, which gives room for pilots, retries, higher repetition, trace-validation runs and limited ablations without inventing a need to spend the full credit amount.
 
 ## Team positioning
 
 If the form asks about the team, use the actual minimal research structure. Do not fabricate a lab or collaborators.
 
-Suggested framing:
+Preferred framing:
 
-> University-affiliated master's researcher conducting an independent bounded evaluation using an existing agentic hardware-engineering platform. Faculty/institutional context can be identified where relevant, but the proposed study is technically executable by the applicant using the repository's existing external-agent harness.
+> Master's researcher at Yuan Ze University conducting an independent bounded evaluation using an existing agentic hardware-engineering platform. The proposed study is technically executable by the applicant using the repository's existing external-agent harness; faculty or institutional context will be identified only where actually relevant.
+
+If the form asks for department/degree, answer it exactly. Do not imply a computer-science degree or manufacturing-lab affiliation.
 
 ## Expected outputs
 
@@ -94,21 +121,22 @@ Preferred narrower language:
 
 > **agent control / oversight / safe consequential tool use / authority gating / evidence-constrained autonomy.**
 
-## Pre-submit blanks
+## Remaining route-specific blanks
 
-- `[CLAUDE MODEL(S)]`
-- `[RUNS PER CASE]`
-- `[ESTIMATED API COST]`
-- `[PROJECT WINDOW]`
-- `[PUBLIC OUTPUT FORMAT]`
+Only these should remain open at submission time:
+
+- `[FINAL CLAUDE MODEL AVAILABILITY / EXACT IDS]`;
+- `[PROJECT START/END WINDOW]`;
+- `[PUBLIC OUTPUT FORMAT / TARGET VENUE]`;
+- `[LIVE APPLICATION FIELD LIMITS]`.
 
 ## Pre-submit checklist
 
-- [ ] current Anthropic form fields re-checked;
+- [ ] current Anthropic application fields/limits re-checked;
 - [ ] research topic clearly presented as AI safety/control;
 - [ ] no generic product-development language leads the application;
-- [ ] existing claim ledger linked where useful;
-- [ ] budget derived from benchmark workload;
+- [ ] core protocol revision frozen before scored runs;
+- [ ] current model availability/pricing re-checked;
 - [ ] no pending evidence promoted into results;
 - [ ] clean/non-confidential evaluation data only;
 - [ ] Claude Console organization/account details ready if requested;
