@@ -1,6 +1,6 @@
 # AWS Cloud Credit for Research — Hardware-Splicer Route Note
 
-**Route state:** VERIFY GEOGRAPHY → FIRE ONLY IF WORKLOAD IS REAL  
+**Route state:** HOLD / VERIFY GEOGRAPHY → FIRE ONLY IF WORKLOAD IS REAL  
 **Verified:** 2026-09-04  
 **Official program:** https://aws.amazon.com/government-education/research-and-technical-computing/cloud-credit-for-research/  
 **FAQ:** https://aws.amazon.com/government-education/research-and-technical-computing/cloud-credit-for-research/faqs/  
@@ -30,17 +30,21 @@ An official institution-issued email and an AWS account number are required.
 
 ### Geographic blocker
 
-The official global FAQ currently says AWS cannot process applications from the **“greater China region.”** The same AWS site also maintains a Taiwan-facing research/grants page. These facts do not resolve whether a Taiwan-based YZU applicant is accepted under this specific program.
+The official global FAQ currently says AWS cannot process applications from the **“greater China region.”** The public FAQ does not define whether Taiwan is included for this specific program.
 
-**Do not prepare/final-submit a full application until AWS confirms Taiwan eligibility for this program in writing.**
+**Do not prepare or submit a full application until AWS confirms in writing whether a Yuan Ze University graduate student located in Taiwan is eligible.**
 
-### Review-time discrepancy
+Do not infer the answer from unrelated Taiwan AWS programs or marketing pages.
 
-Current official AWS pages are inconsistent about typical review time: the main/FAQ material has stated longer review cycles while the application page can display a shorter range. Treat the live application page as operationally current, but do not base a time-critical project on a rapid decision.
+### Review timing
+
+The current official program page states that proposals are evaluated on a rolling basis and that typical review cycles are **90–120 days**, with expedited reviews unavailable.
+
+Plan around that longer official cycle. If the live application displays a different estimate, capture it as an operational note but do not make the research timeline depend on a fast award unless AWS confirms it.
 
 ## Portfolio-routing note
 
-Across the broader portfolio, **Research Drive is probably the stronger primary asset** for this route because AWS explicitly values repeatable/shareable research solutions and cloud research workflows.
+Across the broader portfolio, **Research Drive may be the stronger primary asset** for this route because AWS explicitly values repeatable/shareable research solutions and cloud research workflows.
 
 Hardware-Splicer should lead only if the proposed AWS workload is genuinely one of:
 
@@ -134,7 +138,7 @@ Do not automatically request US$5,000.
 
 The eligibility question should be narrow:
 
-> I am a graduate student enrolled at Yuan Ze University in Taiwan. The Cloud Credit for Research FAQ states that applications from the “greater China region” cannot currently be processed, while AWS also maintains Taiwan-specific research program pages. For this specific program, are applicants enrolled at accredited universities in Taiwan currently eligible to apply?
+> I am a graduate student enrolled at Yuan Ze University in Taiwan. The AWS Cloud Credit for Research FAQ states that applications from the “greater China region” cannot currently be processed. For this specific program, are applicants enrolled at accredited universities in Taiwan currently eligible to apply?
 
 Do not send project marketing in the eligibility email; get a yes/no jurisdiction answer first.
 
@@ -147,6 +151,7 @@ Do not send project marketing in the eligibility email; get a yes/no jurisdictio
 - [ ] exact AWS architecture selected;
 - [ ] service-level usage/budget calculated;
 - [ ] milestones and sharing plan fixed;
+- [ ] 90–120 day review timing fits the project plan;
 - [ ] cloud deployment is genuinely part of the research question/output;
 - [ ] no pending live/physical evidence overstated;
 - [ ] preserve application and decision receipts.
