@@ -9,12 +9,16 @@
 
 Anthropic announced on 2026-08-27 that its AI for Science program is expanding beyond its earlier biological-science focus. The current announcement states:
 
-- **any researcher is eligible to apply** for AI for Science credits;
+- **any researcher may apply**, subject to the official eligibility rules;
 - projects can apply for up to **US$50,000 in credits per project**;
 - researchers affiliated with a university or other institution must have the necessary institutional consents;
 - the program is intended for high-impact scientific projects, including ambitious compute-heavy work.
 
-The program's official rules impose material data/rights obligations. Re-read the live rules immediately before submission and obtain institutional consent where required. Do not place confidential professor-, partner-, or industry-owned data into this route without explicit authorization.
+The phrase “any researcher” is not an unconditional global eligibility guarantee. The official rules also impose age, sanctions/export-control and residency exclusions and require applicants to have all necessary rights to their application. Re-check the exact jurisdiction language immediately before submission rather than inferring eligibility from the announcement alone.
+
+The official rules also include material participation, publicity and data-use terms. Selected researchers may be asked to complete eligibility/compliance documentation, and the credits are provisioned to the organization/account identified in the application. Inputs/outputs remain governed by the applicable Anthropic account terms, while program-related interviews/surveys may be retained and analyzed under the rules.
+
+Do not place confidential professor-, partner-, or industry-owned data into this route without explicit authorization.
 
 ## Why this should not be fired yet
 
@@ -57,11 +61,11 @@ Before filing, add at least:
 
 ### Aim 1 — Agent behavior under adversarial evidence
 
-Compare reference and constrained agent conditions across the frozen corpus.
+Compare reference and constrained agent conditions across the frozen corpus using the canonical matched-condition protocol.
 
 ### Aim 2 — Physical promotion boundary
 
-Test when model-derived proposals are permitted to transition into revision-bound physical actions/measurements.
+Test when model-derived proposals are permitted to transition into revision-bound physical actions/measurements. The reference condition remains advisory/dry-run for consequential action; physical execution is limited to an explicitly bounded human-authorized protocol.
 
 ### Aim 3 — Recovery and human oversight
 
@@ -81,9 +85,9 @@ Claude should be part of the experiment itself:
 
 Do not justify US$50,000 as general coding/documentation assistance.
 
-## Data-rights / IP guardrail
+## Data-rights / IP / participation guardrail
 
-Use an intentionally clean evaluation corpus and physical evidence set that the project owner/institution has authority to submit under the program rules.
+Use an intentionally clean evaluation corpus and physical evidence set that the applicant/institution has authority to submit under the program rules.
 
 Do not casually include:
 
@@ -95,10 +99,13 @@ Do not casually include:
 
 Before submission:
 
-- review the then-current AI for Science rules;
+- review and archive the then-current AI for Science rules;
+- verify applicant residency/jurisdiction eligibility under the live rules;
 - obtain any YZU/faculty consent required;
-- identify what program-generated inputs/outputs/data Anthropic may use;
-- decide whether the planned corpus can legally and strategically be shared under those terms.
+- confirm which organization/account would receive credits;
+- review publicity/release obligations before accepting selection;
+- confirm how the applicable Anthropic account terms govern experimental inputs/outputs;
+- decide whether the planned corpus can legally and strategically be submitted/shared under those terms.
 
 ## Credit-budget template
 
@@ -134,7 +141,10 @@ Do not change state from FIRE LATER to FIRE until:
 - [ ] live-model evidence exists;
 - [ ] fresh physical evidence exists;
 - [ ] clean data/IP boundary is documented;
+- [ ] applicant jurisdiction/residency eligibility is re-verified under current rules;
 - [ ] institutional consent path is understood;
+- [ ] organization/account receiving credits is fixed;
+- [ ] publicity/participation terms are reviewed and acceptable;
 - [ ] scientific aims and expected outputs are fixed;
 - [ ] credit budget is derived from actual workload;
 - [ ] current official rules are re-read and archived;
