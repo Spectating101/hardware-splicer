@@ -2,6 +2,8 @@
 
 **Purpose:** turn the existing Hardware-Splicer evidence core into low-marginal-work applications for research credits, research previews, compute access, speaking opportunities and later scientific-resource programs.
 
+**Release audit:** [`PACKAGING_AUDIT_2026-09-04.md`](PACKAGING_AUDIT_2026-09-04.md) — use this as the current cross-route/cross-repo packaging verdict and merge gate.
+
 This directory is **not** a new source of engineering truth. All factual claims must remain consistent with:
 
 - `../CLAIMS_AND_NONCLAIMS.md`
@@ -25,8 +27,8 @@ The aim here is therefore:
 
 | Route | State | Applicant authority | Lead artifact | Main unresolved gate |
 |---|---|---|---|---|
-| OpenAI Researcher Access Program | **FIRE NOW** | self / university-affiliated researcher | bounded agent-control evaluation | live application fields + current eligibility/pricing re-check |
-| Anthropic External Researcher Access Program | **FIRE NOW** | self / research team | AI-control/safe-tool-use variant | live application fields; keep scope genuinely AI-safety/control |
+| OpenAI Researcher Access Program | **FIRE NOW** | self / university-affiliated researcher | bounded agent-control evaluation | live SurveyMonkey Apply fields + current eligibility/pricing re-check |
+| Anthropic External Researcher Access Program | **FIRE NOW** | self / research team | AI-control/safe-tool-use variant | live official Google Form fields; keep scope genuinely AI-safety/control |
 | Anthropic Model Hardware Standard research preview | **FIRE AFTER GATE** | stakeholder / potentially lab-level | physical-agent evaluation harness | applicant-class fit + named programmable device |
 | AWS Community Day Taiwan 2026 CFP | **FIRE NOW** | self | technical talk | live Qualtrics transcription + submit before 2026-09-07 |
 | NCHC University AI Compute | **FIRE AFTER INSTITUTIONAL GATE** | university | internal YZU compute brief | YZU institutional sponsor/window + real local-model workload |
@@ -36,12 +38,13 @@ The aim here is therefore:
 ## Required reusable assets
 
 1. `CORE_RESEARCH_PROTOCOL.md` — canonical matched-condition experiment across OpenAI, Anthropic and later science/evaluation routes.
-2. 100/250/500-word project descriptions from `../SUBMISSION_COPY_BANK.md`.
-3. architecture figure from the existing external package.
-4. exact claim/evidence references from `../EVIDENCE_LEDGER.md`.
-5. YZU affiliation evidence and institutional email where required.
-6. workload-derived API/compute budget; do not invent a large budget because a program allows one.
-7. clean project/repository/demo links.
+2. `PACKAGING_AUDIT_2026-09-04.md` — current release-grade consistency/methodology/source audit.
+3. 100/250/500-word project descriptions from `../SUBMISSION_COPY_BANK.md`.
+4. architecture figure from the existing external package.
+5. exact claim/evidence references from `../EVIDENCE_LEDGER.md`.
+6. YZU affiliation evidence and institutional email where required.
+7. workload-derived API/compute budget; do not invent a large budget because a program allows one.
+8. clean project/repository/demo links.
 
 ## Canonical experimental default
 
@@ -55,7 +58,7 @@ The research-credit packets now share a concrete default design:
 - 300 scored runs total plus a small unscored transport/token pilot;
 - frozen adjudication rubric and protocol revision before scored execution.
 
-Provider-specific current defaults are documented in the OpenAI and Anthropic packets and must be re-checked immediately before submission/execution.
+Provider-specific current defaults are documented in the OpenAI and Anthropic packets and must be re-checked immediately before submission/execution. Newly rolling frontier models do not silently replace the preregistered core; they enter only as separately labeled exploratory runs or a new protocol revision.
 
 ## Submission rule
 
@@ -85,7 +88,7 @@ Do not state that:
 
 1. AWS Community Day Taiwan 2026 — immediate CFP.
 2. OpenAI Researcher Access — packet and default budget/run plan ready; live-form recon remains.
-3. Anthropic External Researcher Access — packet and default run plan ready; live-form recon remains.
+3. Anthropic External Researcher Access — packet and default run plan ready; official Google Form recon remains.
 4. Anthropic MHS preview — only after naming a concrete programmable hardware surface and resolving applicant class.
 5. NCHC — internal university route after sponsor/workload are real.
 6. AWS Cloud Credit for Research — only after written geographic eligibility confirmation.
