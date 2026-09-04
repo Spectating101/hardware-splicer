@@ -49,9 +49,11 @@ Working experimental default is now fixed enough to apply:
 - 300 scored runs total plus a small transport/token pilot;
 - working credit request if an amount is requested: **US$300**, subject to current-pricing/pilot recalculation.
 
+OpenAI's model catalog is moving quickly; GPT-6 Astra began rolling out on 2026-09-04. Do not destabilize the preregistered core merely to chase a newly rolling model. If a materially newer public model is broadly available by execution time, add it only as a separately labeled exploratory tranche or start a new protocol revision.
+
 Remaining work:
 
-- [ ] inspect exact current application fields/limits;
+- [ ] inspect exact current SurveyMonkey Apply fields/limits;
 - [ ] re-check supported-country/API eligibility;
 - [ ] re-check current model availability/pricing;
 - [ ] choose start/end window consistent with award timing;
@@ -76,9 +78,11 @@ Working experimental default:
 - confirmatory `claude-opus-5`: 100 scored runs;
 - standard successful award is ordinarily US$1,000; current core run estimate is far below that, leaving headroom for pilots/retries/ablations.
 
+Anthropic's current help page directly links the program's Google Form. Claude Fable 5.1 is newer, but Anthropic's own API guidance still recommends Opus 5 for most demanding work and positions Fable 5.1 as an escalation. Keep Sonnet/Opus as the core; use Fable only as a separately declared exploratory tranche if cost, retention terms and pilot evidence justify it.
+
 Remaining work:
 
-- [ ] inspect the **current live application fields/limits**; do not assume a specific form provider;
+- [ ] inspect the current official Google Form fields/limits;
 - [ ] re-check current Claude model availability/pricing;
 - [ ] choose project window;
 - [ ] confirm Claude Console organization/account details if requested;
@@ -150,7 +154,7 @@ Only after written yes:
 - [ ] ensure institutional email and AWS account requirements are met;
 - [ ] submit.
 
-Do not spend a proposal-writing cycle before the geographic gate is resolved.
+The current official AWS page gives a typical **90–120 day** review cycle and says expedited review is unavailable. Do not spend a proposal-writing cycle before the geographic gate is resolved or build a time-critical project around rapid approval.
 
 ---
 
