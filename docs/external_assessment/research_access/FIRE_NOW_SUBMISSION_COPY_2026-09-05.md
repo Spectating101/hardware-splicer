@@ -1,19 +1,8 @@
-# FIRE NOW — Final Submission Copy (2026-09-07 voice audit)
+# FIRE NOW — Final Submission Copy (2026-09-07)
 
 This file is the **paste-ready firing layer** for the current high-value routes. It intentionally excludes HOLD/dependency routes.
 
 Canonical engineering truth remains in the existing evidence package. Nothing below upgrades pending live-model, fresh physical, or independent-operator evidence.
-
-## Submission voice rule
-
-The portal copy should read like a researcher describing work they actually built, not like an internal control document or a generic grant template.
-
-- Prefer concrete observations, examples, and verbs over stacked abstractions.
-- Use first person where it makes the work easier to understand.
-- Keep internal words such as `FIRE`, `bounded`, `authority gate`, `evidence-governed`, and `claim boundary` out of outward copy unless they are genuinely the clearest technical term.
-- Do not repeat the same conceptual slogan in the title, abstract, takeaways, and bio.
-- Preserve method detail and limitations, but do not turn every sentence into a disclaimer.
-- Never invent AWS integration, provider endorsement, completed model results, physical proof, collaborators, or institutional sponsorship.
 
 Applicant identity used where relevant:
 
@@ -23,7 +12,7 @@ Applicant identity used where relevant:
 - **Taiwan**
 - **ORCID:** 0009-0007-9339-9098
 - **Institutional email:** s1133958@mail.yzu.edu.tw
-- Plain positioning: **university-affiliated researcher and engineer building AI-assisted research and engineering systems**
+- Positioning: **university-affiliated researcher and engineer building AI-assisted research and engineering systems**
 
 ---
 
