@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from hardware_splicer.citation_engine_bridge import record_golden_real_report
 from hardware_splicer.golden_real_bench import load_golden_bench_capture, run_splice_golden_real
 from hardware_splicer.project_intake import load_project_intake
 
@@ -73,11 +74,19 @@ def main() -> int:
     if report.get("open_gates"):
         failures.append(f"open gates remain: {[row.get('gate_id') for row in report.get('open_gates') or []]}")
 
+    # Shadow-consume the neutral Citation Engine only after Hardware-Splicer has
+    # completed its own electrical/bench authority decision. The bridge does not
+    # decide pass/fail; it records why the existing result is defensible.
+    citation_engine_trace = record_golden_real_report(report)
+    if citation_engine_trace.get("status") == "error":
+        print(f"WARN: Citation Engine shadow trace failed: {citation_engine_trace.get('error')}")
+
     summary = {
         "schema_version": "hardware_splicer.splice_golden_real_verify.v2",
         "passed": not failures,
         "failures": failures,
         "report": report,
+        "citation_engine": citation_engine_trace,
         "golden_photo": str(GOLDEN_PHOTO),
         "golden_capture": str(GOLDEN_CAPTURE),
     }
@@ -95,6 +104,11 @@ def main() -> int:
     print(f"  matched_measurements={report.get('matched_measurement_count')}")
     print(f"  power_after_contract={report.get('bench_after_contract', {}).get('power_on_authorized')}")
     print(f"  power_after_measurements={report.get('bench_after', {}).get('power_on_authorized')}")
+    print(
+        "  citation_engine="
+        f"{citation_engine_trace.get('status')} "
+        f"receipt={citation_engine_trace.get('receiptRef')}"
+    )
     print(f"  report: {path}")
     for item in failures:
         print(f"  - {item}")
