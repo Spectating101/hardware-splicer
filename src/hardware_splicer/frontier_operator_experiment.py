@@ -1,11 +1,12 @@
 """Provider-neutral frontier-model experiment support for Hardware-Splicer.
 
 This module deliberately performs no network I/O. It constructs provider request
-templates, estimates text-token cost envelopes, validates explicit live-run policy,
+templates, estimates text-token cost envelopes, validates explicit paid-API policy,
 and normalizes provider MCP traces into the existing external truth-audit shape.
 
-Live execution belongs in a separate runner and must consume these guards rather
-than bypassing them.
+For the current experiment, GPT-6 Astra is intended to run through ChatGPT-authenticated
+Codex allowance. The OpenAI API template is compatibility/protocol staging only. Fable
+remains a dormant adapter with no planned live run.
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ class FrontierModelSpec:
     default_effort: str
     remote_mcp: bool
     image_input: bool
+    experiment_live_path: str
     notes: str = ""
 
 
@@ -45,7 +47,11 @@ MODEL_SPECS: dict[str, FrontierModelSpec] = {
         default_effort="low",
         remote_mcp=True,
         image_input=True,
-        notes="Frontier exploratory operator; keep outside the frozen preregistered core.",
+        experiment_live_path="codex_chatgpt_allowance",
+        notes=(
+            "Sole planned live frontier operator. Run through ChatGPT-authenticated "
+            "Codex; do not silently fall back to API billing."
+        ),
     ),
     "claude-fable-5": FrontierModelSpec(
         provider="anthropic",
@@ -55,7 +61,11 @@ MODEL_SPECS: dict[str, FrontierModelSpec] = {
         default_effort="low",
         remote_mcp=True,
         image_input=True,
-        notes="Frontier exploratory operator; adaptive thinking is provider-managed.",
+        experiment_live_path="disabled_no_budget",
+        notes=(
+            "Dormant compatibility adapter only. No planned live Anthropic run or "
+            "credential requirement."
+        ),
     ),
 }
 
@@ -73,11 +83,10 @@ def estimate_text_cost_usd(
     input_tokens: int,
     output_tokens: int,
 ) -> float:
-    """Conservative uncached text-token estimate for one provider request.
+    """Conservative uncached API text-token estimate for one provider request.
 
-    Tool-specific fees and any provider-side token growth from MCP tool results are
-    intentionally excluded, so callers must treat this as a planning envelope rather
-    than a guaranteed billing ceiling.
+    This estimate is a tripwire for accidental paid API use. It does not describe
+    ChatGPT/Codex allowance consumption.
     """
 
     if input_tokens < 0 or output_tokens < 0:
@@ -117,8 +126,11 @@ def validate_live_policy(
     confirmation: str | None,
     allow_multi_case: bool,
 ) -> dict[str, Any]:
-    """Fail closed before any caller is allowed to perform paid network I/O."""
+    """Fail closed before any caller is allowed to perform paid provider API I/O."""
 
+    spec = get_model_spec(model)
+    if spec.experiment_live_path == "disabled_no_budget":
+        raise ValueError(f"live execution is disabled for {model}: no experiment budget")
     if case_count < 1:
         raise ValueError("case_count must be positive")
     if max_usd is None or not math.isfinite(max_usd) or max_usd <= 0:
@@ -140,18 +152,19 @@ def validate_live_policy(
     )
     if estimated > max_usd:
         raise ValueError(
-            f"estimated text-token envelope ${estimated:.4f} exceeds max_usd ${max_usd:.4f}"
+            f"estimated API text-token envelope ${estimated:.4f} exceeds max_usd ${max_usd:.4f}"
         )
     return {
         "model": model,
         "case_count": case_count,
-        "estimated_text_token_envelope_usd": estimated,
+        "experiment_live_path": spec.experiment_live_path,
+        "estimated_api_text_token_envelope_usd": estimated,
         "max_usd": max_usd,
         "confirmation_matched": True,
         "multi_case_explicitly_allowed": case_count == 1 or allow_multi_case,
         "warning": (
-            "This is not a guaranteed billing ceiling: remote MCP/tool output and "
-            "tool-specific provider fees can add usage."
+            "This policy covers paid API execution only. The intended Astra experiment "
+            "uses ChatGPT-authenticated Codex allowance and must not auto-fallback here."
         ),
     }
 
@@ -273,7 +286,7 @@ def _anthropic_content_blocks(response: Mapping[str, Any]) -> list[Mapping[str, 
 def normalize_anthropic_mcp_response(
     response: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Normalize Anthropic MCP blocks into the existing trace-audit response shape."""
+    """Normalize dormant Anthropic MCP blocks into the existing trace-audit shape."""
 
     blocks = _anthropic_content_blocks(response)
     uses = {
@@ -336,14 +349,15 @@ def planning_manifest(
     if not case_list:
         raise ValueError("at least one case id is required")
     return {
-        "schema": "hardware_splicer.frontier_operator_plan.v1",
+        "schema": "hardware_splicer.frontier_operator_plan.v2",
         "provider": spec.provider,
         "model": spec.model,
+        "experiment_live_path": spec.experiment_live_path,
         "case_ids": case_list,
         "case_count": len(case_list),
         "estimated_input_tokens_per_case": estimated_input_tokens_per_case,
         "max_output_tokens_per_case": max_output_tokens_per_case,
-        "estimated_text_token_envelope_usd": estimate_experiment_cost_usd(
+        "estimated_api_text_token_envelope_usd": estimate_experiment_cost_usd(
             model=model,
             case_count=len(case_list),
             estimated_input_tokens_per_case=estimated_input_tokens_per_case,
