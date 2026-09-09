@@ -10,7 +10,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Any, Mapping, Sequence
 
 MIN_CODEX_VERSION = (0, 153, 0)
 ASTRA_MODEL = "gpt-6-astra"
@@ -41,6 +41,7 @@ class PreflightReport:
     codex_version_ok: bool
     auth_mode: str
     chatgpt_auth_ok: bool
+    astra_bundled_catalog_ok: bool
     api_key_env_present: tuple[str, ...]
     workspace: str
     hs_repo_root: str
@@ -56,6 +57,7 @@ class PreflightReport:
             self.codex_path is not None
             and self.codex_version_ok
             and self.chatgpt_auth_ok
+            and self.astra_bundled_catalog_ok
             and not self.api_key_env_present
             and self.workspace_isolated
             and self.mcp_command_found
@@ -65,7 +67,7 @@ class PreflightReport:
 
     def as_dict(self) -> dict[str, object]:
         return {
-            "schema": "hardware_splicer.codex_astra_preflight.v1",
+            "schema": "hardware_splicer.codex_astra_preflight.v2",
             "pass": self.pass_,
             "codex_path": self.codex_path,
             "codex_version": self.codex_version,
@@ -73,6 +75,8 @@ class PreflightReport:
             "codex_version_ok": self.codex_version_ok,
             "auth_mode": self.auth_mode,
             "chatgpt_auth_ok": self.chatgpt_auth_ok,
+            "astra_bundled_catalog_ok": self.astra_bundled_catalog_ok,
+            "bundled_catalog_refresh_performed": False,
             "api_key_env_present": list(self.api_key_env_present),
             "workspace": self.workspace,
             "hs_repo_root": self.hs_repo_root,
@@ -82,8 +86,9 @@ class PreflightReport:
             "inference_performed": self.inference_performed,
             "provider_network_probe_performed": self.provider_network_probe_performed,
             "claim_boundary": (
-                "Passing preflight proves only local client/auth/isolation/MCP prerequisites. "
-                "It does not prove Astra account rollout, model competence, engineering "
+                "Passing preflight proves only local client/auth/bundled-model/isolation/MCP "
+                "prerequisites. Bundled catalog presence does not prove account rollout or "
+                "model entitlement. It does not prove Astra competence, engineering "
                 "correctness, physical correctness, or physical authority."
             ),
         }
@@ -127,6 +132,24 @@ def classify_login_status(stdout: str, stderr: str = "") -> str:
     if "not logged in" in text.lower() or "not authenticated" in text.lower():
         return "not_authenticated"
     return "unknown"
+
+
+def bundled_catalog_has_model(text: str, model: str = ASTRA_MODEL) -> bool:
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError:
+        return False
+
+    def walk(node: Any) -> bool:
+        if isinstance(node, Mapping):
+            if node.get("slug") == model or node.get("id") == model or node.get("model") == model:
+                return True
+            return any(walk(child) for child in node.values())
+        if isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
+            return any(walk(child) for child in node)
+        return False
+
+    return walk(value)
 
 
 def _resolved(path: str | os.PathLike[str]) -> Path:
@@ -310,16 +333,26 @@ def run_zero_inference_preflight(
     version_ok = False
     auth_mode = "unavailable"
     chatgpt_ok = False
+    astra_bundled_ok = False
     if codex_path:
-        version_result = _run([codex_path, "--version"], env=build_launch_environment(source_env))
+        clean_env = build_launch_environment(source_env)
+        version_result = _run([codex_path, "--version"], env=clean_env)
         version_text = (version_result.stdout or version_result.stderr).strip() or None
         version_ok = version_result.returncode == 0 and version_is_supported(version_text or "")
         login_result = _run(
             [codex_path, "login", "status"],
-            env=build_launch_environment(source_env),
+            env=clean_env,
         )
         auth_mode = classify_login_status(login_result.stdout, login_result.stderr)
         chatgpt_ok = login_result.returncode == 0 and auth_mode == "chatgpt"
+        catalog_result = _run(
+            [codex_path, "debug", "models", "--bundled"],
+            env=clean_env,
+        )
+        astra_bundled_ok = (
+            catalog_result.returncode == 0
+            and bundled_catalog_has_model(catalog_result.stdout, ASTRA_MODEL)
+        )
 
     return PreflightReport(
         codex_path=codex_path,
@@ -327,6 +360,7 @@ def run_zero_inference_preflight(
         codex_version_ok=version_ok,
         auth_mode=auth_mode,
         chatgpt_auth_ok=chatgpt_ok,
+        astra_bundled_catalog_ok=astra_bundled_ok,
         api_key_env_present=forbidden,
         workspace=str(_resolved(workspace)),
         hs_repo_root=str(_resolved(hs_repo_root)),
