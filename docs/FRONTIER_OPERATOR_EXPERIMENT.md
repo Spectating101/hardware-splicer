@@ -2,39 +2,55 @@
 
 ## Purpose
 
-Prepare Hardware-Splicer to compare frontier multimodal/agent models without turning
+Prepare Hardware-Splicer to test a frontier multimodal/agent operator without turning
 model novelty into an automatic API bill or weakening HS's evidence hierarchy.
 
 This lane is **exploratory only**. The frozen external-proof core remains separate.
+
+## Resource boundary for this experiment
+
+The practical live target is now **GPT-6 Astra through ChatGPT-authenticated Codex**.
+The usable resource is the existing Work/Codex allowance, not a separate provider API
+budget.
+
+This distinction is mandatory:
+
+- signing in to Codex with ChatGPT consumes the plan's Work/Codex allowance;
+- running `gpt-6-astra` through an OpenAI API key uses separate API billing;
+- therefore the OpenAI Responses request template in this branch is compatibility and
+  protocol-staging code only, **not the intended live execution path**;
+- no script in this branch should silently convert a Codex experiment into an API call.
+
+Current OpenAI guidance also requires Codex CLI 0.153.0 or newer for Astra.
+
+### Fable status
+
+`claude-fable-5` remains only as a dormant, zero-network compatibility adapter and trace
+normalizer. There is **no planned live Fable run**, no Anthropic spending allocation, and
+no requirement to obtain Anthropic credentials. Keeping the adapter costs nothing and
+preserves the option to compare providers later if an external credit or research-access
+budget appears.
 
 ## Current provider targets
 
 Verified against provider documentation on 2026-09-10:
 
-| Provider | API model id | Text input | Text output | Remote MCP | Image input |
-|---|---|---:|---:|---|---|
-| OpenAI | `gpt-6-astra` | $10 / MTok | $50 / MTok | yes | yes |
-| Anthropic | `claude-fable-5` | $10 / MTok | $50 / MTok | yes | yes |
+| Provider | API model id | Experiment status | Remote MCP | Image input |
+|---|---|---|---|---|
+| OpenAI | `gpt-6-astra` | **live candidate via ChatGPT-authenticated Codex** | yes | yes |
+| Anthropic | `claude-fable-5` | **dormant adapter only; no live budget** | yes | yes |
 
 Provider references:
 
 - OpenAI Astra model page: https://developers.openai.com/api/docs/models/gpt-6-astra
-- OpenAI Astra model guidance: https://developers.openai.com/api/docs/guides/latest-model
+- OpenAI Work/Codex usage: https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex
+- OpenAI Codex plan sign-in: https://help.openai.com/en/articles/11369540/
 - Anthropic MCP connector: https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector
-- Anthropic Fable migration/model guidance: https://docs.anthropic.com/en/docs/about-claude/models/migrating-to-claude-4
 
 Do not infer future aliases from product naming. The current public Anthropic API target
-used here is `claude-fable-5`.
+used by the dormant adapter is `claude-fable-5`.
 
-### Data-retention boundary
-
-Do not send unpublished/private hardware evidence merely because the adapter exists.
-Anthropic currently documents the MCP connector as not eligible for ZDR, and current
-Fable guidance states a 30-day retention requirement for that model. Provider data
-handling must therefore be treated as a separate preflight gate before any real HS
-project state is exposed. Use synthetic/frozen public experiment state first.
-
-## Why this belongs above HS rather than inside its truth core
+## Why the model belongs above HS rather than inside its truth core
 
 The frontier model is an operator/reasoner. HS still owns:
 
@@ -53,108 +69,82 @@ evidence. A successful tool trace is not physical correctness.
 
 `src/hardware_splicer/frontier_operator_experiment.py` performs no network I/O. It owns:
 
-- current model/price metadata for the two exploratory targets;
-- conservative uncached text-token estimates;
-- explicit live-run policy validation;
+- provider request-shape metadata for the exploratory adapters;
+- conservative API text-token estimates, useful only as a warning for accidental API use;
+- explicit paid-API policy validation;
 - OpenAI Responses/MCP request templates;
-- Anthropic Messages/MCP request templates;
+- dormant Anthropic Messages/MCP request templates;
 - Anthropic MCP trace normalization into the existing HS audit shape.
 
 `scripts/plan_frontier_operator_experiment.py` also performs no network I/O and does not
 read provider credentials.
 
-Example cost planning only:
+The API cost planner is deliberately retained as a **tripwire**: if somebody later tries
+to run the API path, the branch can show that this would be separate billable usage.
+Those dollar estimates do not describe the user's Codex allowance.
 
-```bash
-python scripts/plan_frontier_operator_experiment.py --model gpt-6-astra
-python scripts/plan_frontier_operator_experiment.py --model claude-fable-5
-```
+## Intended Astra live path
 
-At the default planning envelope of 40k input + 8k maximum output tokens per case, either
-$10/$50 model is estimated at $0.80 per case or $8.00 across ten cases **before** any
-extra provider/tool charges or token growth from MCP results.
+A later Astra experiment should run from Codex while Codex is authenticated with the
+user's ChatGPT account and Astra is available in that Codex surface.
 
-That number is a planning envelope, **not a guaranteed provider billing ceiling**.
+Preflight requirements:
 
-## Live-run policy
+1. Codex CLI >= 0.153.0;
+2. authenticated using ChatGPT, not an API key;
+3. `gpt-6-astra` visible/usable in Codex;
+4. HS's canonical MCP server registered with Codex;
+5. only the four canonical HS gateway tools exposed for the experiment;
+6. one frozen case first;
+7. inspect Work/Codex usage after that case before expanding;
+8. no automatic fallback to Responses API if Codex/Astra is unavailable.
 
-Any future paid runner must call `validate_live_policy` before provider I/O and preserve
-all of these requirements:
+The intended first live comparison is therefore **current HS operator vs Astra-in-Codex**,
+not a three-provider benchmark.
 
-1. positive explicit `max_usd`;
-2. exact charge acknowledgement `I_ACCEPT_PROVIDER_CHARGES`;
-3. one live case by default;
-4. multi-case execution requires an additional explicit opt-in;
-5. the estimated text-token envelope must fit inside the declared budget;
-6. provider credentials are never persisted into proof artifacts;
-7. failures and partial runs remain evidence;
-8. provider retention/data-handling is explicitly accepted for the selected experiment state.
+## API live-run policy remains fail-closed
 
-The planner can validate and record an armed plan without spending anything:
+Any future paid API runner must call `validate_live_policy` before provider I/O and
+preserve the explicit budget/charge acknowledgement. That mechanism exists to prevent
+accidental API spend; it is not the preferred Astra path for this experiment.
 
-```bash
-python scripts/plan_frontier_operator_experiment.py \
-  --model gpt-6-astra \
-  --case-id spi-flash-adapter-baseline \
-  --arm-live \
-  --max-usd 1.00 \
-  --confirm-charges I_ACCEPT_PROVIDER_CHARGES
-```
+## Stage 1 — one frozen Astra case
 
-Even `--arm-live` performs no model request.
+Once the Codex path is ready, start with a single frozen SPI case. Compare against the
+existing HS baseline on:
 
-## Provider shape
+- completion;
+- hard-truth contract failures;
+- tool-path efficiency;
+- evidence identity;
+- authority discipline;
+- unresolved-state discipline;
+- equivalent-case trace structure where applicable.
 
-### OpenAI / Astra
-
-Use the Responses API, low reasoning effort initially, `store=false`, and the same four
-canonical HS MCP gateway tools. Do not silently replace the preregistered core model in
-an existing experiment; record Astra as a separate exploratory tranche.
-
-### Anthropic / Fable
-
-Use the Messages API MCP connector beta `mcp-client-2025-11-20`. Configure one MCP
-server and an allowlist-only `mcp_toolset`: all tools disabled by default, then explicitly
-enable only the four canonical HS gateway operations.
-
-Fable's current model guidance uses provider-managed adaptive thinking. Cost control
-therefore comes from low effort, bounded output, small case count, and experiment-level
-budget gates rather than a manual hidden-thinking token budget.
-
-## Stage 1 — same frozen engineering cases
-
-Run a small exploratory comparison only after the provider adapters and budget guards are
-fully green:
-
-- baseline current HS external operator;
-- Astra;
-- Fable.
-
-Compare completion, hard-truth contract failures, tool-path efficiency, evidence identity,
-authority discipline, unresolved-state discipline, and equivalent-case trace drift.
-
-Start with **one case per provider**. Expand only after inspecting actual billed usage.
+Do not immediately fire the ten-case corpus. Astra can consume the shared Codex allowance
+substantially faster than lower-cost models, so expansion should follow observed usage.
 
 ## Stage 2 — visual geometry loop
 
-The more interesting later experiment is not prettier rendering. It is whether a frontier
-multimodal operator can use render feedback to steer HS's exact engineering substrate:
+The more interesting later experiment is not prettier rendering. It is whether Astra can
+use render feedback to steer HS's exact engineering substrate:
 
 `candidate -> render -> visual inspection -> pose/anchor action -> synthesis -> exact BREP check -> render`
 
 The image can guide the model. It cannot upgrade geometry authority. Exact OCCT/CadQuery
 results remain independently authoritative.
 
-Candidate demonstration: the reuse-first cyberdeck workbench, where the model must resolve
-one real mechanical interface and drive bounded adapter synthesis while keeping material,
+Candidate demonstration: the reuse-first cyberdeck workbench, where Astra must resolve one
+real mechanical interface and drive bounded adapter synthesis while keeping material,
 retention, tolerance, fabrication and release claims unresolved unless separately proven.
 
 ## Current nonclaims
 
 This staging work does not prove:
 
-- Astra or Fable has successfully operated HS;
-- either model is better than the current operator;
+- Astra has successfully operated HS;
+- Astra is better than the current operator;
+- Fable has been or will be run;
 - live unseen competence;
 - visual-to-geometry correctness;
 - physical correctness;
