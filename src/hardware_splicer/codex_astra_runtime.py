@@ -18,6 +18,7 @@ from .codex_astra_preflight import (
 )
 
 CODEX_ALLOWANCE_CONFIRMATION = "I_ACCEPT_CODEX_ALLOWANCE_USAGE"
+LIVE_EXECUTION_CLAIM_FILE = "LIVE_EXECUTION_ATTEMPT.json"
 BLOCKED_PROVIDER_ENV = (
     "OPENAI_API_KEY",
     "ANTHROPIC_API_KEY",
@@ -222,6 +223,41 @@ def validate_execution_acknowledgement(
         )
 
 
+def claim_live_execution(context: RuntimeContext) -> Path:
+    """Atomically consume this prepared case's one live-attempt allowance.
+
+    The marker is deliberately never removed. A retry must prepare a fresh clean-room
+    workspace/observer pair, preventing accidental duplicate model usage after a timeout,
+    client failure, or pre-MCP failure that leaves the backend store empty.
+    """
+
+    claim_path = context.observer_dir / LIVE_EXECUTION_CLAIM_FILE
+    payload = {
+        "schema_version": "hardware_splicer.codex_astra_live_attempt.v1",
+        "case_id": context.case_id,
+        "experiment_project_id": context.experiment_project_id,
+        "single_use": True,
+        "api_fallback": False,
+        "physical_authority_granted": False,
+    }
+    encoded = (
+        json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    try:
+        fd = os.open(claim_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError as exc:
+        raise ValueError(
+            "this prepared Codex/Astra case already has a live execution attempt; "
+            "prepare a fresh workspace/observer pair before any retry"
+        ) from exc
+    try:
+        os.write(fd, encoded)
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    return claim_path
+
+
 def runtime_plan(
     context: RuntimeContext,
     *,
@@ -236,6 +272,9 @@ def runtime_plan(
         "workspace": str(context.workspace),
         "observer_dir": str(context.observer_dir),
         "backend_project_root": str(context.backend_project_root),
+        "live_execution_claim_file": str(
+            context.observer_dir / LIVE_EXECUTION_CLAIM_FILE
+        ),
         "argv": argv,
         "provider_credentials_present_in_parent_env": list(
             blocked_provider_env_names(source_env)
@@ -245,6 +284,7 @@ def runtime_plan(
         "model_filesystem_denies_observer_directory": True,
         "codex_writes_observer_artifacts": False,
         "single_case_only": True,
+        "one_live_attempt_per_prepared_case": True,
         "api_fallback": False,
         "execution_performed": False,
         "physical_authority_granted": False,
