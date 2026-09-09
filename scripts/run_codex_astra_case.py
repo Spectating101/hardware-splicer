@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from hardware_splicer.codex_astra_preflight import run_zero_inference_preflight
 from hardware_splicer.codex_astra_runtime import (
     CODEX_ALLOWANCE_CONFIRMATION,
     build_single_case_runtime_argv,
+    claim_live_execution,
     runtime_plan,
     sanitized_runtime_environment,
     validate_execution_acknowledgement,
@@ -88,7 +90,7 @@ def main() -> int:
         codex_command=preflight.codex_path,
         mcp_command=preflight.mcp_command,
     )
-    plan = runtime_plan(context, argv=argv, source_env=dict(__import__("os").environ))
+    plan = runtime_plan(context, argv=argv, source_env=dict(os.environ))
     plan["preflight"] = preflight.as_dict()
     plan["timeout_seconds"] = args.timeout_seconds
     plan["execute_requested"] = bool(args.execute)
@@ -98,6 +100,20 @@ def main() -> int:
         print(json.dumps(plan, indent=2, ensure_ascii=False, sort_keys=True))
         return 0
 
+    try:
+        attempt_path = claim_live_execution(context)
+    except ValueError as exc:
+        payload = {
+            "schema_version": "hardware_splicer.codex_astra_run_refusal.v1",
+            "reason": "live execution attempt already claimed",
+            "message": str(exc),
+            "execution_performed": False,
+            "api_fallback": False,
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True))
+        return 3
+
+    plan["live_execution_claim"] = str(attempt_path)
     runtime_plan_path = context.observer_dir / "CODEX_ASTRA_RUNTIME_PLAN.json"
     _write_json(runtime_plan_path, {**plan, "execution_performed": True})
     trace_path = context.observer_dir / "CODEX_ASTRA_TRACE.jsonl"
@@ -127,6 +143,7 @@ def main() -> int:
             "schema_version": "hardware_splicer.codex_astra_run_result.v1",
             "status": "timeout",
             "timeout_seconds": args.timeout_seconds,
+            "live_execution_claim": str(attempt_path),
             "trace_file": str(trace_path),
             "stderr_file": str(stderr_path),
             "api_fallback": False,
@@ -135,6 +152,20 @@ def main() -> int:
         _write_json(result_path, result)
         print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
         return 124
+    except OSError as exc:
+        result = {
+            "schema_version": "hardware_splicer.codex_astra_run_result.v1",
+            "status": "launch_error",
+            "error": f"{type(exc).__name__}: {exc}",
+            "live_execution_claim": str(attempt_path),
+            "trace_file": str(trace_path),
+            "stderr_file": str(stderr_path),
+            "api_fallback": False,
+            "physical_authority_granted": False,
+        }
+        _write_json(result_path, result)
+        print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
+        return 126
 
     audit: dict | None = None
     audit_error: str | None = None
@@ -164,6 +195,7 @@ def main() -> int:
             audit.get("codex_hard_truth_contract_pass") if audit else False
         ),
         "audit_error": audit_error,
+        "live_execution_claim": str(attempt_path),
         "trace_file": str(trace_path),
         "stderr_file": str(stderr_path),
         "audit_file": str(audit_path) if audit is not None else None,
@@ -171,6 +203,7 @@ def main() -> int:
         "api_fallback": False,
         "provider_credentials_forwarded_to_runtime": False,
         "single_case_only": True,
+        "one_live_attempt_per_prepared_case": True,
         "physical_authority_granted": False,
     }
     _write_json(result_path, result)
