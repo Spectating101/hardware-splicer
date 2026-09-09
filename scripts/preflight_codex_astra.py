@@ -7,6 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
+from hardware_splicer.codex_astra_case import frozen_case_instructions
 from hardware_splicer.codex_astra_preflight import (
     ASTRA_MODEL,
     build_codex_exec_argv,
@@ -21,6 +22,13 @@ def _write_json(path: Path, payload: object) -> None:
         json.dumps(payload, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _inject_frozen_developer_instructions(argv: list[str]) -> list[str]:
+    if not argv:
+        raise ValueError("Codex argv must not be empty")
+    override = "developer_instructions=" + json.dumps(frozen_case_instructions())
+    return [argv[0], "-c", override, *argv[1:]]
 
 
 def main() -> int:
@@ -56,6 +64,7 @@ def main() -> int:
     payload.update(
         {
             "model_target": ASTRA_MODEL,
+            "frozen_developer_instructions_applied_to_launch_plan": True,
             "live_execution_performed": False,
             "codex_allowance_consumed_by_this_script": False,
         }
@@ -81,6 +90,7 @@ def main() -> int:
             last_message_file=last_message_file,
             codex_command=args.codex_command,
         )
+        argv = _inject_frozen_developer_instructions(argv)
         payload["launch_plan"] = {
             "argv": argv,
             "shell_display": (
@@ -90,6 +100,7 @@ def main() -> int:
             "stdin_file": str(mission_file),
             "stdout_trace_file": str(trace_file),
             "last_message_file": str(last_message_file),
+            "developer_instructions_source": "frozen external MCP proof protocol",
             "requires_separate_manual_execution": True,
             "inference_performed": False,
         }
