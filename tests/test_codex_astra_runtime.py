@@ -137,7 +137,7 @@ def test_runtime_environment_strips_every_provider_key() -> None:
     assert not any("secret-" in value for value in clean.values())
 
 
-def test_runtime_argv_is_single_case_offline_and_observer_bound(tmp_path: Path) -> None:
+def test_runtime_argv_is_single_case_offline_and_observer_denied(tmp_path: Path) -> None:
     context, _ = _prepared_case(tmp_path)
     argv = build_single_case_runtime_argv(
         context,
@@ -149,6 +149,8 @@ def test_runtime_argv_is_single_case_offline_and_observer_bound(tmp_path: Path) 
     assert "developer_instructions=" in rendered
     assert "HARDWARE_SPLICER_PROJECT_ROOT" in rendered
     assert str(context.backend_project_root) in rendered
+    assert str(context.observer_dir) in rendered
+    assert '="deny"' in rendered
     assert "HARDWARE_SPLICER_OFFLINE_LLM" in rendered
     assert "HARDWARE_SPLICER_OFFLINE_VISION" in rendered
     assert "QWEN_DISABLED" in rendered
@@ -156,8 +158,7 @@ def test_runtime_argv_is_single_case_offline_and_observer_bound(tmp_path: Path) 
     assert "--ignore-rules" in argv
     assert "--ephemeral" in argv
     assert "--json" in argv
-    last = argv[argv.index("--output-last-message") + 1]
-    assert Path(last).parent == context.observer_dir
+    assert "--output-last-message" not in argv
     assert "OPENAI_API_KEY" not in rendered
     assert "ANTHROPIC_API_KEY" not in rendered
 
@@ -181,6 +182,8 @@ def test_runtime_plan_names_present_credentials_without_leaking_values(tmp_path:
     assert "super-secret-anthropic" not in rendered
     assert plan["provider_credentials_forwarded_to_runtime"] is False
     assert plan["internal_hs_provider_access_disabled"] is True
+    assert plan["model_filesystem_denies_observer_directory"] is True
+    assert plan["codex_writes_observer_artifacts"] is False
     assert plan["single_case_only"] is True
     assert plan["api_fallback"] is False
 
@@ -282,10 +285,7 @@ emit({
     path.chmod(0o755)
 
 
-def test_full_runner_executes_only_fake_codex_and_audits_trace(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_full_runner_refuses_parent_openai_api_key_before_fake_execution(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
@@ -367,3 +367,4 @@ def test_full_runner_fake_live_path_succeeds_with_clean_parent_env(tmp_path: Pat
     assert result["codex_usage"]["reasoning_output_tokens"] == 7
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
     assert (context.observer_dir / "CODEX_ASTRA_AUDIT.json").is_file()
+    assert not (context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt").exists()
