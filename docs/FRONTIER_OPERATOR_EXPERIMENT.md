@@ -83,6 +83,31 @@ The API cost planner is deliberately retained as a **tripwire**: if somebody lat
 to run the API path, the branch can show that this would be separate billable usage.
 Those dollar estimates do not describe the user's Codex allowance.
 
+## Codex clean-room preflight and observer
+
+The intended Codex path now has an additional fail-closed layer:
+
+- `src/hardware_splicer/codex_astra_preflight.py` validates client version, ChatGPT login
+  mode, absence of an API-key environment, workspace/repository separation, and the local
+  canonical MCP executable without invoking a model;
+- `scripts/preflight_codex_astra.py` emits the exact future launch plan but never executes
+  it;
+- the generated Codex session ignores normal user config/rules, disables web/shell
+  network, denies the HS repository to the model sandbox, requires the canonical HS MCP
+  server, and exposes only the four gateway tools;
+- `src/hardware_splicer/codex_exec_trace.py` normalizes current `codex exec --json` MCP
+  events into the existing `external_mcp_trace_audit.v2` shape;
+- any Codex command, file-change, web-search, collaboration-tool, foreign-MCP, unexpected
+  MCP-tool, unfinished MCP, failed-turn, error-item, or unknown future item type fails the
+  Codex clean-room contract;
+- `scripts/audit_codex_astra_trace.py` performs the combined audit offline after a run.
+
+The two verdicts are kept separate: `hard_truth_contract_pass` is the provider-neutral
+MCP contract from #90, while `codex_hard_truth_contract_pass` additionally requires the
+Codex clean-room contract. Only the latter can support an Astra-in-Codex clean-room run.
+
+See `docs/CODEX_ASTRA_CLEANROOM_RUNBOOK.md` for the exact staging and post-run sequence.
+
 ## Intended Astra live path
 
 A later Astra experiment should run from Codex while Codex is authenticated with the
@@ -93,11 +118,14 @@ Preflight requirements:
 1. Codex CLI >= 0.153.0;
 2. authenticated using ChatGPT, not an API key;
 3. `gpt-6-astra` visible/usable in Codex;
-4. HS's canonical MCP server registered with Codex;
-5. only the four canonical HS gateway tools exposed for the experiment;
-6. one frozen case first;
-7. inspect Work/Codex usage after that case before expanding;
-8. no automatic fallback to Responses API if Codex/Astra is unavailable.
+4. HS's canonical MCP server installed locally;
+5. model-visible workspace physically separated from the HS repository;
+6. normal Codex user config/rules ignored for the experiment;
+7. web and shell network disabled;
+8. only the four canonical HS gateway tools accepted by the observer;
+9. one frozen case first;
+10. inspect Work/Codex usage after that case before expanding;
+11. no automatic fallback to Responses API if Codex/Astra is unavailable.
 
 The intended first live comparison is therefore **current HS operator vs Astra-in-Codex**,
 not a three-provider benchmark.
@@ -115,11 +143,13 @@ existing HS baseline on:
 
 - completion;
 - hard-truth contract failures;
+- Codex clean-room integrity;
 - tool-path efficiency;
 - evidence identity;
 - authority discipline;
 - unresolved-state discipline;
-- equivalent-case trace structure where applicable.
+- equivalent-case trace structure where applicable;
+- actual Codex input/cached-input/output/reasoning-token usage.
 
 Do not immediately fire the ten-case corpus. Astra can consume the shared Codex allowance
 substantially faster than lower-cost models, so expansion should follow observed usage.
@@ -138,15 +168,21 @@ Candidate demonstration: the reuse-first cyberdeck workbench, where Astra must r
 real mechanical interface and drive bounded adapter synthesis while keeping material,
 retention, tolerance, fabrication and release claims unresolved unless separately proven.
 
+The geometry capability currently lives on the separate reuse-first Product RC line; the
+visual experiment should use a temporary integration of that line with the hardened proof
+line instead of duplicating RC geometry code here.
+
 ## Current nonclaims
 
 This staging work does not prove:
 
+- Astra is available on the user's current local Codex installation;
 - Astra has successfully operated HS;
 - Astra is better than the current operator;
 - Fable has been or will be run;
 - live unseen competence;
 - visual-to-geometry correctness;
+- final canonical project-state correctness;
 - physical correctness;
 - cost savings;
 - physical authority.
