@@ -241,10 +241,7 @@ def build_anthropic_request_template(
                 "type": "mcp_toolset",
                 "mcp_server_name": "hardware-splicer",
                 "default_config": {"enabled": False},
-                "configs": {
-                    name: {"enabled": True}
-                    for name in HS_MCP_TOOLS
-                },
+                "configs": {name: {"enabled": True} for name in HS_MCP_TOOLS},
             }
         ],
         "betas": ["mcp-client-2025-11-20"],
@@ -261,11 +258,7 @@ def build_provider_request_template(
     effort: str | None = None,
 ) -> dict[str, Any]:
     spec = get_model_spec(model)
-    builder = (
-        build_openai_request_template
-        if spec.provider == "openai"
-        else build_anthropic_request_template
-    )
+    builder = build_openai_request_template if spec.provider == "openai" else build_anthropic_request_template
     return builder(
         model=model,
         instructions=instructions,
@@ -283,9 +276,7 @@ def _anthropic_content_blocks(response: Mapping[str, Any]) -> list[Mapping[str, 
     return [row for row in content if isinstance(row, Mapping)]
 
 
-def normalize_anthropic_mcp_response(
-    response: Mapping[str, Any],
-) -> dict[str, Any]:
+def normalize_anthropic_mcp_response(response: Mapping[str, Any]) -> dict[str, Any]:
     """Normalize dormant Anthropic MCP blocks into the existing trace-audit shape."""
 
     blocks = _anthropic_content_blocks(response)
@@ -310,13 +301,7 @@ def normalize_anthropic_mcp_response(
                 "name": row.get("name"),
                 "arguments": row.get("input") if isinstance(row.get("input"), Mapping) else {},
                 "status": "failed" if is_error else "completed",
-                "error": (
-                    "missing MCP tool result"
-                    if result is None
-                    else result.get("content")
-                    if is_error
-                    else None
-                ),
+                "error": "missing MCP tool result" if result is None else result.get("content") if is_error else None,
                 "output": None if result is None else result.get("content"),
             }
         )
