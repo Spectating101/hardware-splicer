@@ -5,7 +5,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import sys
 from pathlib import Path
+
+# Direct execution from scripts/ would otherwise import legacy scripts/hardware_splicer.py
+# instead of the installed package. Keep this identical in spirit to the hardened proof runner.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
+    ],
+]
 
 from hardware_splicer.codex_astra_case import frozen_case_instructions
 from hardware_splicer.codex_astra_preflight import (
