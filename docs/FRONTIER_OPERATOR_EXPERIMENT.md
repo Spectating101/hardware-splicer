@@ -26,6 +26,14 @@ Provider references:
 Do not infer future aliases from product naming. The current public Anthropic API target
 used here is `claude-fable-5`.
 
+### Data-retention boundary
+
+Do not send unpublished/private hardware evidence merely because the adapter exists.
+Anthropic currently documents the MCP connector as not eligible for ZDR, and current
+Fable guidance states a 30-day retention requirement for that model. Provider data
+handling must therefore be treated as a separate preflight gate before any real HS
+project state is exposed. Use synthetic/frozen public experiment state first.
+
 ## Why this belongs above HS rather than inside its truth core
 
 The frontier model is an operator/reasoner. HS still owns:
@@ -79,7 +87,8 @@ all of these requirements:
 4. multi-case execution requires an additional explicit opt-in;
 5. the estimated text-token envelope must fit inside the declared budget;
 6. provider credentials are never persisted into proof artifacts;
-7. failures and partial runs remain evidence.
+7. failures and partial runs remain evidence;
+8. provider retention/data-handling is explicitly accepted for the selected experiment state.
 
 The planner can validate and record an armed plan without spending anything:
 
