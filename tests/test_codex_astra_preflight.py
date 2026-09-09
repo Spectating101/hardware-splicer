@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,20 @@ def test_login_status_distinguishes_chatgpt_from_api_key() -> None:
     assert preflight.classify_login_status("", "Logged in using API key") == "api_key"
     assert preflight.classify_login_status("", "Not logged in") == "not_authenticated"
     assert preflight.classify_login_status("", "something else") == "unknown"
+
+
+def test_bundled_catalog_detects_astra_without_loose_string_match() -> None:
+    catalog = {
+        "models": [
+            {"slug": "gpt-5.6-sol"},
+            {"slug": "gpt-6-astra", "display_name": "GPT-6 Astra"},
+        ]
+    }
+    assert preflight.bundled_catalog_has_model(json.dumps(catalog)) is True
+    assert preflight.bundled_catalog_has_model(
+        json.dumps({"notes": "the text gpt-6-astra appears here but is not a model row"})
+    ) is False
+    assert preflight.bundled_catalog_has_model("not-json") is False
 
 
 @pytest.mark.parametrize(
@@ -147,7 +162,10 @@ def test_launch_files_must_be_inside_cleanroom(tmp_path: Path) -> None:
         )
 
 
-def test_preflight_passes_only_chatgpt_path(tmp_path: Path, monkeypatch) -> None:
+def test_preflight_passes_only_chatgpt_path_with_bundled_astra(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     workspace = tmp_path / "cleanroom"
     repo = tmp_path / "hardware-splicer"
     workspace.mkdir()
@@ -161,6 +179,13 @@ def test_preflight_passes_only_chatgpt_path(tmp_path: Path, monkeypatch) -> None
             return preflight.CommandResult(tuple(argv), 0, "codex-cli 0.153.0\n", "")
         if argv[-2:] == ["login", "status"]:
             return preflight.CommandResult(tuple(argv), 0, "", "Logged in using ChatGPT\n")
+        if argv[-3:] == ["debug", "models", "--bundled"]:
+            return preflight.CommandResult(
+                tuple(argv),
+                0,
+                json.dumps({"models": [{"slug": "gpt-6-astra"}]}),
+                "",
+            )
         raise AssertionError(argv)
 
     monkeypatch.setattr(preflight, "resolve_executable", fake_resolve)
@@ -173,8 +198,37 @@ def test_preflight_passes_only_chatgpt_path(tmp_path: Path, monkeypatch) -> None
     )
     assert report.pass_ is True
     assert report.auth_mode == "chatgpt"
+    assert report.astra_bundled_catalog_ok is True
     assert report.inference_performed is False
     assert report.provider_network_probe_performed is False
+    assert report.as_dict()["bundled_catalog_refresh_performed"] is False
+
+
+def test_preflight_rejects_binary_without_bundled_astra(tmp_path: Path, monkeypatch) -> None:
+    workspace = tmp_path / "cleanroom"
+    repo = tmp_path / "hardware-splicer"
+    workspace.mkdir()
+    repo.mkdir()
+    monkeypatch.setattr(preflight, "resolve_executable", lambda command, env=None: f"/fake/{command}")
+
+    def fake_run(argv, *, env=None):
+        if argv[-1] == "--version":
+            return preflight.CommandResult(tuple(argv), 0, "codex-cli 0.153.0\n", "")
+        if argv[-2:] == ["login", "status"]:
+            return preflight.CommandResult(tuple(argv), 0, "", "Logged in using ChatGPT\n")
+        return preflight.CommandResult(
+            tuple(argv), 0, json.dumps({"models": [{"slug": "gpt-5.6-sol"}]}), ""
+        )
+
+    monkeypatch.setattr(preflight, "_run", fake_run)
+    report = preflight.run_zero_inference_preflight(
+        workspace=workspace,
+        hs_repo_root=repo,
+        env={"PATH": "/fake/bin"},
+    )
+    assert report.pass_ is False
+    assert report.chatgpt_auth_ok is True
+    assert report.astra_bundled_catalog_ok is False
 
 
 def test_preflight_rejects_api_key_auth_and_api_key_env(tmp_path: Path, monkeypatch) -> None:
@@ -188,7 +242,11 @@ def test_preflight_rejects_api_key_auth_and_api_key_env(tmp_path: Path, monkeypa
     def fake_run(argv, *, env=None):
         if argv[-1] == "--version":
             return preflight.CommandResult(tuple(argv), 0, "codex-cli 0.153.0\n", "")
-        return preflight.CommandResult(tuple(argv), 0, "", "Logged in using API key\n")
+        if argv[-2:] == ["login", "status"]:
+            return preflight.CommandResult(tuple(argv), 0, "", "Logged in using API key\n")
+        return preflight.CommandResult(
+            tuple(argv), 0, json.dumps({"models": [{"slug": "gpt-6-astra"}]}), ""
+        )
 
     monkeypatch.setattr(preflight, "_run", fake_run)
     report = preflight.run_zero_inference_preflight(
@@ -198,5 +256,6 @@ def test_preflight_rejects_api_key_auth_and_api_key_env(tmp_path: Path, monkeypa
     )
     assert report.pass_ is False
     assert report.auth_mode == "api_key"
+    assert report.astra_bundled_catalog_ok is True
     assert report.api_key_env_present == ("OPENAI_API_KEY",)
     assert "secret" not in str(report.as_dict())
