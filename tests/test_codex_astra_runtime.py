@@ -203,6 +203,9 @@ if args == ["--version"]:
 if args == ["login", "status"]:
     print("Logged in using ChatGPT", file=sys.stderr)
     raise SystemExit(0)
+if args == ["debug", "models", "--bundled"]:
+    print(json.dumps({"models": [{"slug": "gpt-6-astra"}]}))
+    raise SystemExit(0)
 if "exec" not in args:
     print("unexpected fake codex invocation", file=sys.stderr)
     raise SystemExit(77)
@@ -322,6 +325,7 @@ def test_full_runner_refuses_parent_openai_api_key_before_fake_execution(tmp_pat
     refusal = json.loads(completed.stdout)
     assert refusal["reason"] == "zero-inference preflight failed"
     assert refusal["preflight"]["api_key_env_present"] == ["OPENAI_API_KEY"]
+    assert refusal["preflight"]["astra_bundled_catalog_ok"] is True
     assert not (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").exists()
 
 
