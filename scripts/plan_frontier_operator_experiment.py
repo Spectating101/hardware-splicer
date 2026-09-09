@@ -5,6 +5,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import sys
+from pathlib import Path
+
+# Executing a file under scripts/ puts that directory first on sys.path. This repo has
+# a legacy scripts/hardware_splicer.py entrypoint that would otherwise shadow the
+# installed src/hardware_splicer package. Match the hardened external-proof runner.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
+    ],
+]
 
 from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
     build_unseen_spi_flash_cases,
