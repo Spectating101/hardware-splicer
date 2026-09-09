@@ -8,7 +8,7 @@ from typing import Any, Mapping, Sequence
 
 from .external_mcp_trace_audit import audit_response_trace
 
-CODEX_TRACE_SCHEMA = "hardware_splicer.codex_exec_trace.v1"
+CODEX_TRACE_SCHEMA = "hardware_splicer.codex_exec_trace.v2"
 DEFAULT_MCP_SERVER = "hardware-splicer-backend"
 HS_MCP_TOOLS = {
     "hs_backend_status",
@@ -231,6 +231,206 @@ def normalize_codex_jsonl(
     )
 
 
+def _decode_gateway_payload(
+    call: Mapping[str, Any],
+) -> tuple[dict[str, Any] | None, str | None]:
+    if call.get("name") != "hs_backend_call":
+        return None, "not a backend call"
+    if call.get("status") != "completed" or call.get("error") is not None:
+        return None, "MCP backend call did not complete successfully"
+    output = call.get("output")
+    if not isinstance(output, str):
+        return None, "Codex MCP result is not inspectable JSON text"
+    try:
+        wrapper = json.loads(output)
+    except json.JSONDecodeError:
+        return None, "Codex MCP result wrapper is not valid JSON"
+    if not isinstance(wrapper, Mapping):
+        return None, "Codex MCP result wrapper is not a JSON object"
+
+    structured = wrapper.get("structured_content")
+    if isinstance(structured, Mapping):
+        payload: Any = structured
+    else:
+        content = wrapper.get("content")
+        if not isinstance(content, Sequence) or isinstance(
+            content, (str, bytes, bytearray)
+        ):
+            return None, "Codex MCP result has no content blocks"
+        texts = [
+            row.get("text")
+            for row in content
+            if isinstance(row, Mapping)
+            and row.get("type") == "text"
+            and isinstance(row.get("text"), str)
+        ]
+        if len(texts) != 1:
+            return None, "HS MCP result must contain exactly one text payload"
+        try:
+            payload = json.loads(texts[0])
+        except json.JSONDecodeError:
+            return None, "HS MCP text payload is not valid JSON"
+    if not isinstance(payload, Mapping):
+        return None, "HS MCP payload is not a JSON object"
+    return dict(payload), None
+
+
+def _named_project_ids(value: Any) -> set[str]:
+    result: set[str] = set()
+
+    def walk(node: Any) -> None:
+        if isinstance(node, Mapping):
+            for key, child in node.items():
+                if str(key) == "project_id" and isinstance(child, str) and child.strip():
+                    result.add(child.strip())
+                walk(child)
+        elif isinstance(node, Sequence) and not isinstance(
+            node, (str, bytes, bytearray)
+        ):
+            for child in node:
+                walk(child)
+
+    walk(value)
+    return result
+
+
+def _response_body(payload: Mapping[str, Any]) -> Any:
+    if "body" in payload:
+        return payload.get("body")
+    body_text = payload.get("body_text")
+    if isinstance(body_text, str):
+        try:
+            return json.loads(body_text)
+        except json.JSONDecodeError:
+            return None
+    return None
+
+
+def audit_codex_backend_results(
+    normalized: Mapping[str, Any],
+    *,
+    expected_project_id: str,
+) -> dict[str, Any]:
+    calls = [
+        row
+        for row in normalized.get("output", [])
+        if isinstance(row, Mapping) and row.get("name") == "hs_backend_call"
+    ]
+    parsed_rows: list[dict[str, Any]] = []
+    invalid_rows: list[dict[str, Any]] = []
+    application_failures: list[dict[str, Any]] = []
+
+    for index, call in enumerate(calls):
+        payload, parse_error = _decode_gateway_payload(call)
+        arguments = call.get("arguments")
+        operation_id = (
+            arguments.get("operation_id") if isinstance(arguments, Mapping) else None
+        )
+        if payload is None:
+            invalid_rows.append(
+                {
+                    "backend_call_index": index,
+                    "operation_id": operation_id,
+                    "reason": parse_error,
+                }
+            )
+            continue
+
+        status_code = payload.get("status_code")
+        ok = payload.get("ok")
+        method = payload.get("method")
+        path = payload.get("path")
+        payload_operation_id = payload.get("operation_id")
+        envelope_valid = (
+            isinstance(ok, bool)
+            and isinstance(status_code, int)
+            and not isinstance(status_code, bool)
+            and 100 <= status_code <= 599
+            and isinstance(method, str)
+            and method in {"GET", "POST", "PUT", "PATCH", "DELETE"}
+            and isinstance(path, str)
+            and bool(path)
+            and isinstance(payload_operation_id, str)
+            and bool(payload_operation_id)
+            and payload_operation_id == operation_id
+            and ok == (200 <= status_code < 300)
+        )
+        if not envelope_valid:
+            invalid_rows.append(
+                {
+                    "backend_call_index": index,
+                    "operation_id": operation_id,
+                    "reason": "backend result is not a canonical dispatch envelope",
+                }
+            )
+            continue
+
+        row = {
+            "backend_call_index": index,
+            "operation_id": operation_id,
+            "method": method,
+            "path": path,
+            "ok": ok,
+            "status_code": status_code,
+            "argument_project_ids": sorted(_named_project_ids(arguments)),
+            "body_project_ids": sorted(_named_project_ids(_response_body(payload))),
+        }
+        parsed_rows.append(row)
+        if not ok:
+            application_failures.append(
+                {
+                    "backend_call_index": index,
+                    "operation_id": operation_id,
+                    "method": method,
+                    "status_code": status_code,
+                }
+            )
+
+    successful_mutations = [
+        row for row in parsed_rows if row["ok"] and row["method"] != "GET"
+    ]
+    successful_readbacks = [
+        row
+        for row in parsed_rows
+        if row["ok"]
+        and row["method"] == "GET"
+        and expected_project_id in row["argument_project_ids"]
+        and expected_project_id in row["body_project_ids"]
+    ]
+    last_mutation_index = (
+        max(row["backend_call_index"] for row in successful_mutations)
+        if successful_mutations
+        else -1
+    )
+    final_readbacks = [
+        row
+        for row in successful_readbacks
+        if row["backend_call_index"] > last_mutation_index
+    ]
+    final_readback = final_readbacks[-1] if final_readbacks else None
+    parse_pass = bool(calls) and not invalid_rows
+    final_readback_pass = final_readback is not None
+
+    return {
+        "schema_version": "hardware_splicer.codex_backend_result_audit.v1",
+        "backend_call_count": len(calls),
+        "backend_result_parse_pass": parse_pass,
+        "invalid_backend_results": invalid_rows,
+        "backend_application_failure_count": len(application_failures),
+        "backend_application_failures": application_failures,
+        "successful_mutation_count": len(successful_mutations),
+        "last_successful_mutation_index": (
+            last_mutation_index if successful_mutations else None
+        ),
+        "successful_project_readback_count": len(successful_readbacks),
+        "final_project_readback_pass": final_readback_pass,
+        "final_project_readback": final_readback,
+        "backend_result_contract_pass": bool(parse_pass and final_readback_pass),
+        "intermediate_application_failures_are_permitted": True,
+        "physical_authority_granted": False,
+    }
+
+
 def audit_codex_exec_trace(
     events: Sequence[Mapping[str, Any]],
     *,
@@ -250,14 +450,26 @@ def audit_codex_exec_trace(
         known_source_ids=known_source_ids,
     )
     codex = dict(normalized["codex_trace"])
+    backend = audit_codex_backend_results(
+        normalized,
+        expected_project_id=expected_project_id,
+    )
     audit["codex_trace_schema_version"] = codex["schema_version"]
     audit["codex_cleanroom_contract_pass"] = codex["cleanroom_contract_pass"]
     audit["codex_forbidden_non_mcp_items"] = codex["forbidden_non_mcp_items"]
     audit["codex_unknown_item_types"] = codex["unknown_item_types"]
     audit["codex_foreign_mcp_servers"] = codex["foreign_mcp_servers"]
     audit["codex_unexpected_mcp_tools"] = codex["unexpected_mcp_tools"]
+    audit["codex_backend_result_audit"] = backend
+    audit["backend_result_parse_pass"] = backend["backend_result_parse_pass"]
+    audit["backend_application_failure_count"] = backend[
+        "backend_application_failure_count"
+    ]
+    audit["final_project_readback_pass"] = backend["final_project_readback_pass"]
     audit["codex_hard_truth_contract_pass"] = bool(
-        audit.get("hard_truth_contract_pass") and codex["cleanroom_contract_pass"]
+        audit.get("hard_truth_contract_pass")
+        and codex["cleanroom_contract_pass"]
+        and backend["backend_result_contract_pass"]
     )
     audit["codex_usage"] = normalized.get("usage")
     audit["physical_authority_granted"] = False
