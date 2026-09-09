@@ -11,7 +11,6 @@ from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
     validate_unseen_spi_flash_corpus,
 )
 from hardware_splicer.frontier_operator_experiment import (
-    LIVE_CONFIRMATION,
     MODEL_SPECS,
     planning_manifest,
     validate_live_policy,
@@ -32,8 +31,8 @@ def _selected_case_ids(requested: list[str]) -> list[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Build a zero-network cost/transport plan for exploratory Astra or Fable "
-            "Hardware-Splicer runs. This command never contacts a model provider."
+            "Build a zero-network plan for the Astra/Codex experiment or dormant "
+            "provider-adapter inspection. This command never contacts a model provider."
         )
     )
     parser.add_argument("--model", choices=sorted(MODEL_SPECS), required=True)
@@ -44,8 +43,8 @@ def main() -> int:
         "--arm-live",
         action="store_true",
         help=(
-            "Validate the explicit live-run policy and record an armed plan. Still "
-            "performs no provider request."
+            "Validate the paid-API guard only. Still performs no provider request; "
+            "the intended Astra live path uses ChatGPT-authenticated Codex instead."
         ),
     )
     parser.add_argument("--max-usd", type=float)
