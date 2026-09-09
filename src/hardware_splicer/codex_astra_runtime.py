@@ -180,7 +180,8 @@ def build_single_case_runtime_argv(
         reasoning_effort="low",
         codex_command=codex_command,
     )
-    server = f"mcp_servers.{HS_MCP_SERVER_NAME}.env"
+    server_root = f"mcp_servers.{HS_MCP_SERVER_NAME}"
+    server_env = f"{server_root}.env"
     profile = "permissions.hs-astra-cleanroom.filesystem"
     injected = [
         _toml_override("developer_instructions", frozen_case_instructions()),
@@ -188,13 +189,14 @@ def build_single_case_runtime_argv(
             f'{profile}.{json.dumps(str(context.observer_dir))}',
             "deny",
         ),
+        _toml_override(f"{server_root}.cwd", str(context.observer_dir)),
         _toml_override(
-            f"{server}.HARDWARE_SPLICER_PROJECT_ROOT",
+            f"{server_env}.HARDWARE_SPLICER_PROJECT_ROOT",
             str(context.backend_project_root),
         ),
     ]
     injected.extend(
-        _toml_override(f"{server}.{name}", value)
+        _toml_override(f"{server_env}.{name}", value)
         for name, value in sorted(_MCP_OFFLINE_ENV.items())
     )
     expanded = [argv[0]]
@@ -272,6 +274,7 @@ def runtime_plan(
         "workspace": str(context.workspace),
         "observer_dir": str(context.observer_dir),
         "backend_project_root": str(context.backend_project_root),
+        "mcp_process_cwd": str(context.observer_dir),
         "live_execution_claim_file": str(
             context.observer_dir / LIVE_EXECUTION_CLAIM_FILE
         ),
