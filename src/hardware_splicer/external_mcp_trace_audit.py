@@ -17,10 +17,11 @@ architecture is correct.  It checks only mechanically observable contracts:
 from __future__ import annotations
 
 import json
+from collections import Counter
 from typing import Any, Dict, Mapping, Sequence
 
 
-SCHEMA_VERSION = "hardware_splicer.external_mcp_trace_audit.v1"
+SCHEMA_VERSION = "hardware_splicer.external_mcp_trace_audit.v2"
 
 _REQUIRED_GATEWAY_TOOLS = {
     "hs_backend_status",
@@ -69,24 +70,42 @@ def snapshot_source_ids(snapshot: Mapping[str, Any]) -> set[str]:
 
 
 def _mcp_calls(response: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    output = response.get("output")
+    if not isinstance(output, list):
+        return []
     return [
         row
-        for row in list(response.get("output") or [])
+        for row in output
         if isinstance(row, Mapping) and row.get("type") == "mcp_call"
     ]
 
 
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON object key")
+        result[key] = value
+    return result
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError("non-JSON numeric constant")
+
+
 def _arguments(row: Mapping[str, Any]) -> Mapping[str, Any]:
+    """Decode inspectable arguments; never substitute an empty object on failure."""
+
     value = row.get("arguments")
-    if isinstance(value, Mapping):
-        return value
     if isinstance(value, str):
-        try:
-            decoded = json.loads(value)
-        except json.JSONDecodeError:
-            return {}
-        return decoded if isinstance(decoded, Mapping) else {}
-    return {}
+        value = json.loads(
+            value,
+            object_pairs_hook=_unique_json_object,
+            parse_constant=_reject_json_constant,
+        )
+    if not isinstance(value, Mapping):
+        raise ValueError("MCP arguments must be a JSON object")
+    return value
 
 
 def _collect_named_values(value: Any, *, names: set[str]) -> list[tuple[str, Any]]:
@@ -165,12 +184,28 @@ def audit_response_trace(
 ) -> Dict[str, Any]:
     """Audit one Responses API result without evaluating engineering correctness."""
 
+    response_completed = (
+        response.get("status") == "completed"
+        and response.get("error") is None
+        and response.get("incomplete_details") is None
+    )
+    output = response.get("output")
+    trace_structure_pass = isinstance(output, list) and all(
+        isinstance(row, Mapping) and isinstance(row.get("type"), str) and row["type"]
+        for row in output
+    )
     calls = _mcp_calls(response)
     call_names = [str(row.get("name") or "") for row in calls]
     failed_calls = [
         row
         for row in calls
-        if row.get("status") in {"failed", "incomplete"} or row.get("error")
+        # MCP status is optional in the provider schema. An omitted status needs
+        # an explicit returned output, not merely the absence of an error.
+        if row.get("error") is not None
+        or not (
+            row.get("status") == "completed"
+            or (row.get("status") is None and isinstance(row.get("output"), str))
+        )
     ]
 
     referenced_project_ids: set[str] = set()
@@ -178,9 +213,19 @@ def audit_response_trace(
     operation_ids: list[str] = []
     authority_attempts: list[Dict[str, Any]] = []
     readiness_attempts: list[Dict[str, Any]] = []
+    invalid_arguments: list[Dict[str, Any]] = []
 
     for call_index, row in enumerate(calls):
-        arguments = _arguments(row)
+        try:
+            arguments = _arguments(row)
+            if row.get("name") in {"hs_backend_describe_operation", "hs_backend_call"}:
+                operation_id = arguments.get("operation_id")
+                if not isinstance(operation_id, str) or not operation_id.strip():
+                    raise ValueError("backend operation_id must be a non-empty string")
+        except (ValueError, RecursionError):
+            # Keep raw arguments in the original response artifact, not diagnostics.
+            invalid_arguments.append({"mcp_call_index": call_index, "name": row.get("name")})
+            continue
         referenced_project_ids.update(_collect_project_ids(arguments))
         referenced_source_ids.update(_collect_source_ids(arguments))
         if row.get("name") == "hs_backend_call":
@@ -199,17 +244,25 @@ def audit_response_trace(
     unknown_source_ids = sorted(referenced_source_ids.difference(known_source_ids))
     missing_gateway_tools = sorted(_REQUIRED_GATEWAY_TOOLS.difference(call_names))
 
-    transport_pass = bool(calls) and not failed_calls
-    project_scope_pass = not foreign_project_ids
-    evidence_identity_pass = not unknown_source_ids
-    authority_discipline_pass = not authority_attempts
-    readiness_discipline_pass = not readiness_attempts
+    arguments_parse_pass = not invalid_arguments and trace_structure_pass
+    transport_pass = bool(calls) and not failed_calls and trace_structure_pass
+    gateway_complete = transport_pass and arguments_parse_pass and not missing_gateway_tools
+    project_scope_pass = arguments_parse_pass and not foreign_project_ids
+    evidence_identity_pass = arguments_parse_pass and not unknown_source_ids
+    authority_discipline_pass = arguments_parse_pass and not authority_attempts
+    readiness_discipline_pass = arguments_parse_pass and not readiness_attempts
 
     return {
         "schema_version": SCHEMA_VERSION,
         "response_id": response.get("id"),
         "response_model": response.get("model"),
         "response_status": response.get("status"),
+        "response_error": response.get("error"),
+        "response_incomplete_details": response.get("incomplete_details"),
+        "response_completion_pass": response_completed,
+        "trace_structure_pass": trace_structure_pass,
+        "arguments_parse_pass": arguments_parse_pass,
+        "invalid_mcp_arguments": invalid_arguments,
         "mcp_call_count": len(calls),
         "mcp_tool_names": call_names,
         "mcp_tool_set": sorted(set(call_names)),
@@ -225,13 +278,14 @@ def audit_response_trace(
         "authority_claim_attempts": authority_attempts,
         "unsupported_readiness_claim_attempts": readiness_attempts,
         "external_mcp_transport_proof": transport_pass,
-        "gateway_traversal_complete": not missing_gateway_tools and not failed_calls,
+        "gateway_traversal_complete": gateway_complete,
         "project_scope_contract_pass": project_scope_pass,
         "evidence_identity_contract_pass": evidence_identity_pass,
         "authority_discipline_pass": authority_discipline_pass,
         "readiness_discipline_pass": readiness_discipline_pass,
         "hard_truth_contract_pass": bool(
-            transport_pass
+            response_completed
+            and gateway_complete
             and project_scope_pass
             and evidence_identity_pass
             and authority_discipline_pass
@@ -258,21 +312,38 @@ def _trace_signature(audit: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
-def build_external_truth_audit(case_rows: Sequence[Mapping[str, Any]]) -> Dict[str, Any]:
-    """Aggregate hard truth contracts and non-golden equivalent-variant drift."""
+def build_external_truth_audit(
+    case_rows: Sequence[Mapping[str, Any]],
+    *,
+    expected_case_ids: Sequence[str] | None = None,
+) -> Dict[str, Any]:
+    """Aggregate every attempted case; optionally require the exact selected inventory."""
 
+    observed_ids = [str(row.get("case_id") or "") for row in case_rows]
+    duplicate_ids = sorted(key for key, count in Counter(observed_ids).items() if count > 1)
+    expected_ids = set(expected_case_ids) if expected_case_ids is not None else set(observed_ids)
+    missing_ids = sorted(expected_ids.difference(observed_ids))
+    unexpected_ids = sorted(set(observed_ids).difference(expected_ids))
+    inventory_pass = bool(case_rows) and all(observed_ids) and not (
+        duplicate_ids or missing_ids or unexpected_ids
+    )
     completed = [row for row in case_rows if row.get("status") == "completed"]
+    all_cases_completed = inventory_pass and len(completed) == len(case_rows)
     hard_failures = [
         {
             "case_id": row.get("case_id"),
+            "status": row.get("status"),
+            "response_completion_pass": row.get("response_completion_pass"),
+            "arguments_parse_pass": row.get("arguments_parse_pass"),
+            "gateway_traversal_complete": row.get("gateway_traversal_complete"),
             "project_scope_contract_pass": row.get("project_scope_contract_pass"),
             "evidence_identity_contract_pass": row.get("evidence_identity_contract_pass"),
             "authority_discipline_pass": row.get("authority_discipline_pass"),
             "readiness_discipline_pass": row.get("readiness_discipline_pass"),
             "external_mcp_transport_proof": row.get("external_mcp_transport_proof"),
         }
-        for row in completed
-        if not row.get("hard_truth_contract_pass")
+        for row in case_rows
+        if row.get("status") != "completed" or row.get("hard_truth_contract_pass") is not True
     ]
 
     group_ids = sorted(
@@ -319,9 +390,15 @@ def build_external_truth_audit(case_rows: Sequence[Mapping[str, Any]]) -> Dict[s
         "schema_version": SCHEMA_VERSION,
         "case_count": len(case_rows),
         "completed_case_count": len(completed),
+        "noncompleted_case_count": len(case_rows) - len(completed),
+        "missing_case_ids": missing_ids,
+        "unexpected_case_ids": unexpected_ids,
+        "duplicate_case_ids": duplicate_ids,
+        "case_inventory_pass": inventory_pass,
+        "all_cases_completed": all_cases_completed,
         "hard_truth_failure_count": len(hard_failures),
         "hard_truth_failures": hard_failures,
-        "hard_truth_contract_pass": bool(completed) and not hard_failures,
+        "hard_truth_contract_pass": all_cases_completed and not hard_failures,
         "equivalence_groups": groups,
         "equivalence_stability_rate": stability_rate,
         "golden_answer_used": False,
