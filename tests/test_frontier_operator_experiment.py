@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+import os
+import subprocess
+import sys
+
 import pytest
 
 from hardware_splicer.frontier_operator_experiment import (
@@ -151,3 +156,52 @@ def test_manifest_is_explicitly_nonlive() -> None:
     assert manifest["network_io_performed"] is False
     assert manifest["physical_authority_granted"] is False
     assert manifest["estimated_text_token_envelope_usd"] == 1.6
+
+
+def _planner_env() -> dict[str, str]:
+    env = dict(os.environ)
+    env.pop("OPENAI_API_KEY", None)
+    env.pop("ANTHROPIC_API_KEY", None)
+    return env
+
+
+def test_planner_cli_needs_no_provider_credentials() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/plan_frontier_operator_experiment.py",
+            "--model",
+            "gpt-6-astra",
+            "--case-id",
+            "spi-flash-adapter-baseline",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=_planner_env(),
+    )
+    payload = json.loads(completed.stdout)
+    assert payload["case_count"] == 1
+    assert payload["provider_credentials_read"] is False
+    assert payload["network_io_performed"] is False
+    assert payload["live_execution_performed"] is False
+    assert payload["armed_for_live_runner"] is False
+
+
+def test_planner_cli_cannot_arm_without_budget_and_acknowledgement() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/plan_frontier_operator_experiment.py",
+            "--model",
+            "claude-fable-5",
+            "--case-id",
+            "spi-flash-adapter-baseline",
+            "--arm-live",
+        ],
+        capture_output=True,
+        text=True,
+        env=_planner_env(),
+    )
+    assert completed.returncode != 0
+    assert "max_usd" in completed.stderr or "max_usd" in completed.stdout
