@@ -13,19 +13,30 @@ from hardware_splicer.frontier_operator_experiment import (
     build_anthropic_request_template,
     build_openai_request_template,
     estimate_experiment_cost_usd,
+    get_model_spec,
     normalize_anthropic_mcp_response,
     planning_manifest,
     validate_live_policy,
 )
 
 
-def test_cost_envelope_for_full_frontier_corpus() -> None:
+def test_cost_envelope_for_full_frontier_corpus_is_api_tripwire() -> None:
     assert estimate_experiment_cost_usd(
         model="gpt-6-astra",
         case_count=10,
         estimated_input_tokens_per_case=40_000,
         max_output_tokens_per_case=8_000,
     ) == 8.0
+
+
+def test_astra_live_path_is_codex_allowance_not_api() -> None:
+    spec = get_model_spec("gpt-6-astra")
+    assert spec.experiment_live_path == "codex_chatgpt_allowance"
+
+
+def test_fable_is_dormant_no_budget_adapter() -> None:
+    spec = get_model_spec("claude-fable-5")
+    assert spec.experiment_live_path == "disabled_no_budget"
 
 
 def test_openai_request_is_bounded_and_nonpersistent() -> None:
@@ -71,10 +82,23 @@ def test_live_policy_requires_charge_confirmation() -> None:
         )
 
 
+def test_paid_api_policy_rejects_fable_live_execution() -> None:
+    with pytest.raises(ValueError, match="no experiment budget"):
+        validate_live_policy(
+            model="claude-fable-5",
+            case_count=1,
+            estimated_input_tokens_per_case=40_000,
+            max_output_tokens_per_case=8_000,
+            max_usd=1.0,
+            confirmation=LIVE_CONFIRMATION,
+            allow_multi_case=False,
+        )
+
+
 def test_live_policy_rejects_multi_case_by_default() -> None:
     with pytest.raises(ValueError, match="multi-case"):
         validate_live_policy(
-            model="claude-fable-5",
+            model="gpt-6-astra",
             case_count=2,
             estimated_input_tokens_per_case=40_000,
             max_output_tokens_per_case=8_000,
@@ -145,7 +169,7 @@ def test_max_tokens_response_is_incomplete() -> None:
     assert normalized["status"] == "incomplete"
 
 
-def test_manifest_is_explicitly_nonlive() -> None:
+def test_manifest_is_explicitly_nonlive_and_marks_fable_disabled() -> None:
     manifest = planning_manifest(
         model="claude-fable-5",
         case_ids=["a", "b"],
@@ -155,7 +179,8 @@ def test_manifest_is_explicitly_nonlive() -> None:
     assert manifest["planned_live_execution"] is False
     assert manifest["network_io_performed"] is False
     assert manifest["physical_authority_granted"] is False
-    assert manifest["estimated_text_token_envelope_usd"] == 1.6
+    assert manifest["experiment_live_path"] == "disabled_no_budget"
+    assert manifest["estimated_api_text_token_envelope_usd"] == 1.6
 
 
 def _planner_env() -> dict[str, str]:
@@ -188,13 +213,13 @@ def test_planner_cli_needs_no_provider_credentials() -> None:
     assert payload["armed_for_live_runner"] is False
 
 
-def test_planner_cli_cannot_arm_without_budget_and_acknowledgement() -> None:
+def test_planner_cli_cannot_arm_astra_without_budget_and_acknowledgement() -> None:
     completed = subprocess.run(
         [
             sys.executable,
             "scripts/plan_frontier_operator_experiment.py",
             "--model",
-            "claude-fable-5",
+            "gpt-6-astra",
             "--case-id",
             "spi-flash-adapter-baseline",
             "--arm-live",
@@ -205,3 +230,26 @@ def test_planner_cli_cannot_arm_without_budget_and_acknowledgement() -> None:
     )
     assert completed.returncode != 0
     assert "max_usd" in completed.stderr or "max_usd" in completed.stdout
+
+
+def test_planner_cli_refuses_fable_live_even_with_budget() -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "scripts/plan_frontier_operator_experiment.py",
+            "--model",
+            "claude-fable-5",
+            "--case-id",
+            "spi-flash-adapter-baseline",
+            "--arm-live",
+            "--max-usd",
+            "1.00",
+            "--confirm-charges",
+            LIVE_CONFIRMATION,
+        ],
+        capture_output=True,
+        text=True,
+        env=_planner_env(),
+    )
+    assert completed.returncode != 0
+    assert "no experiment budget" in completed.stderr or "no experiment budget" in completed.stdout
