@@ -31,19 +31,25 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Write one model-visible frozen mission to an empty clean-room workspace and "
-            "keep evaluator metadata in a separate observer directory. No model is called."
+            "keep evaluator/backend state in a separate observer directory. No model is called."
         )
     )
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--workspace", required=True)
     parser.add_argument("--observer-dir", required=True)
+    parser.add_argument("--hs-repo-root", required=True)
     parser.add_argument("--experiment-project-id")
     args = parser.parse_args()
 
     workspace = Path(args.workspace).expanduser().resolve()
     observer = Path(args.observer_dir).expanduser().resolve()
+    repo = Path(args.hs_repo_root).expanduser().resolve()
     if not paths_are_disjoint(workspace, observer):
         raise SystemExit("workspace and observer directory must be disjoint")
+    if not paths_are_disjoint(workspace, repo):
+        raise SystemExit("model-visible workspace and HS repository must be disjoint")
+    if not paths_are_disjoint(observer, repo):
+        raise SystemExit("observer directory and HS repository must be disjoint")
     _require_empty_directory(workspace, label="model-visible workspace")
     _require_empty_directory(observer, label="observer directory")
 
@@ -65,6 +71,10 @@ def main() -> int:
     )
     snapshot_path = observer / "CASE_SNAPSHOT.json"
     _write_json(snapshot_path, outer["snapshot"])
+
+    backend_store = observer / "BACKEND_STORE"
+    backend_store.mkdir()
+
     manifest = dict(outer)
     manifest.pop("snapshot", None)
     manifest.update(
@@ -74,17 +84,21 @@ def main() -> int:
             "observer_directory": str(observer),
             "snapshot_file": str(snapshot_path),
             "developer_instructions_file": str(instructions_path),
+            "backend_project_root": str(backend_store),
+            "backend_project_root_initially_empty": True,
+            "hs_repo_root": str(repo),
         }
     )
     manifest_path = observer / "CASE_MANIFEST.json"
     _write_json(manifest_path, manifest)
 
     summary = {
-        "schema_version": "hardware_splicer.codex_astra_case_prep.v1",
+        "schema_version": "hardware_splicer.codex_astra_case_prep.v2",
         "experiment_project_id": project_id,
         "mission_file": str(mission_path),
         "observer_manifest": str(manifest_path),
         "snapshot_file": str(snapshot_path),
+        "backend_project_root": str(backend_store),
         "workspace_contains_outer_evaluator_manifest": False,
         "provider_network_io_performed": False,
         "model_inference_performed": False,
