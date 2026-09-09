@@ -5,8 +5,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import sys
 import uuid
 from pathlib import Path
+
+# Direct execution from scripts/ would otherwise import legacy scripts/hardware_splicer.py.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT),
+    *[
+        entry
+        for entry in sys.path
+        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
+    ],
+]
 
 from hardware_splicer.codex_astra_case import build_codex_case_package
 from hardware_splicer.codex_astra_preflight import paths_are_disjoint
