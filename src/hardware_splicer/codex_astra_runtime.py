@@ -106,6 +106,8 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
         )
     if not backend_root.is_dir() or any(backend_root.iterdir()):
         raise ValueError("backend project root must exist and be empty before execution")
+    if backend_root.parent != observer:
+        raise ValueError("backend project root must live directly inside observer directory")
     if snapshot.parent != observer or instructions.parent != observer:
         raise ValueError("snapshot and developer instructions must remain observer-only")
 
@@ -178,8 +180,13 @@ def build_single_case_runtime_argv(
         codex_command=codex_command,
     )
     server = f"mcp_servers.{HS_MCP_SERVER_NAME}.env"
+    profile = "permissions.hs-astra-cleanroom.filesystem"
     injected = [
         _toml_override("developer_instructions", frozen_case_instructions()),
+        _toml_override(
+            f'{profile}.{json.dumps(str(context.observer_dir))}',
+            "deny",
+        ),
         _toml_override(
             f"{server}.HARDWARE_SPLICER_PROJECT_ROOT",
             str(context.backend_project_root),
@@ -193,8 +200,11 @@ def build_single_case_runtime_argv(
     for override in injected:
         expanded.extend(["-c", override])
     expanded.extend(argv[1:])
-    last_index = expanded.index("--output-last-message") + 1
-    expanded[last_index] = str(context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt")
+
+    # JSONL already contains the terminal agent message. Avoid asking Codex itself to
+    # write any observer artifact; the outer runner owns all trace/audit persistence.
+    last_index = expanded.index("--output-last-message")
+    del expanded[last_index : last_index + 2]
     return expanded
 
 
@@ -232,6 +242,8 @@ def runtime_plan(
         ),
         "provider_credentials_forwarded_to_runtime": False,
         "internal_hs_provider_access_disabled": True,
+        "model_filesystem_denies_observer_directory": True,
+        "codex_writes_observer_artifacts": False,
         "single_case_only": True,
         "api_fallback": False,
         "execution_performed": False,
