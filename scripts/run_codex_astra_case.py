@@ -10,17 +10,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Executing from scripts/ must not let legacy scripts/hardware_splicer.py shadow the
-# installed package. Keep the bootstrap equivalent to run_external_mcp_agent_proof.py.
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
     str(_REPO_ROOT),
-    *[
-        entry
-        for entry in sys.path
-        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
-    ],
+    *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
 ]
 
 from hardware_splicer.codex_astra_preflight import run_zero_inference_preflight
@@ -37,6 +31,12 @@ from hardware_splicer.codex_exec_trace import (
     audit_codex_exec_trace,
     normalize_codex_exec_events,
     parse_codex_jsonl,
+)
+from hardware_splicer.codex_final_report import (
+    attach_output_schema_arg,
+    audit_codex_final_report,
+    final_report_schema_sha256,
+    write_final_report_schema,
 )
 from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
@@ -101,15 +101,25 @@ def main() -> int:
 
     assert preflight.codex_path is not None
     assert preflight.mcp_command is not None
-    argv = build_single_case_runtime_argv(
-        context,
-        codex_command=preflight.codex_path,
-        mcp_command=preflight.mcp_command,
-    )
+    output_schema_path = context.observer_dir / "CODEX_ASTRA_FINAL_REPORT_SCHEMA.json"
+    try:
+        write_final_report_schema(output_schema_path)
+        argv = build_single_case_runtime_argv(
+            context,
+            codex_command=preflight.codex_path,
+            mcp_command=preflight.mcp_command,
+        )
+        argv = attach_output_schema_arg(argv, output_schema_path)
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"cannot prepare structured Astra output contract: {exc}") from exc
+
     plan = runtime_plan(context, argv=argv, source_env=dict(os.environ))
     plan["preflight"] = preflight.as_dict()
     plan["timeout_seconds"] = args.timeout_seconds
     plan["execute_requested"] = bool(args.execute)
+    plan["output_schema_file"] = str(output_schema_path)
+    plan["output_schema_sha256"] = final_report_schema_sha256()
+    plan["structured_final_report_required"] = True
 
     if not args.execute:
         plan["required_live_acknowledgement"] = CODEX_ALLOWANCE_CONFIRMATION
@@ -156,12 +166,13 @@ def main() -> int:
             )
     except subprocess.TimeoutExpired:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v2",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v3",
             "status": "timeout",
             "timeout_seconds": args.timeout_seconds,
             "live_execution_claim": str(attempt_path),
             "trace_file": str(trace_path),
             "stderr_file": str(stderr_path),
+            "output_schema_file": str(output_schema_path),
             "api_fallback": False,
             "physical_authority_granted": False,
         }
@@ -170,12 +181,13 @@ def main() -> int:
         return 124
     except OSError as exc:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v2",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v3",
             "status": "launch_error",
             "error": f"{type(exc).__name__}: {exc}",
             "live_execution_claim": str(attempt_path),
             "trace_file": str(trace_path),
             "stderr_file": str(stderr_path),
+            "output_schema_file": str(output_schema_path),
             "api_fallback": False,
             "physical_authority_granted": False,
         }
@@ -200,11 +212,19 @@ def main() -> int:
             expected_project_id=context.experiment_project_id,
             initial_snapshot=snapshot,
         )
+        final_report = audit_codex_final_report(
+            events,
+            expected_project_id=context.experiment_project_id,
+            expected_final_revision=mission_progress.get("final_project_revision"),
+        )
         audit["codex_mission_progress_audit"] = mission_progress
         audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+        audit["codex_final_report_audit"] = final_report
+        audit["codex_final_report_contract_pass"] = final_report["contract_pass"]
         audit["codex_evaluation_ready_pass"] = bool(
             audit.get("codex_hard_truth_contract_pass")
             and mission_progress["contract_pass"]
+            and final_report["contract_pass"]
         )
         _write_json(audit_path, audit)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
@@ -216,7 +236,7 @@ def main() -> int:
         and audit.get("codex_evaluation_ready_pass") is True
     )
     result = {
-        "schema_version": "hardware_splicer.codex_astra_run_result.v2",
+        "schema_version": "hardware_splicer.codex_astra_run_result.v3",
         "status": "passed" if passed else "failed",
         "codex_exit_code": completed.returncode,
         "codex_hard_truth_contract_pass": (
@@ -224,6 +244,9 @@ def main() -> int:
         ),
         "codex_mission_progress_contract_pass": (
             audit.get("codex_mission_progress_contract_pass") if audit else False
+        ),
+        "codex_final_report_contract_pass": (
+            audit.get("codex_final_report_contract_pass") if audit else False
         ),
         "codex_evaluation_ready_pass": (
             audit.get("codex_evaluation_ready_pass") if audit else False
@@ -233,6 +256,8 @@ def main() -> int:
         "trace_file": str(trace_path),
         "stderr_file": str(stderr_path),
         "audit_file": str(audit_path) if audit is not None else None,
+        "output_schema_file": str(output_schema_path),
+        "output_schema_sha256": final_report_schema_sha256(),
         "codex_usage": audit.get("codex_usage") if audit else None,
         "api_fallback": False,
         "provider_credentials_forwarded_to_runtime": False,
