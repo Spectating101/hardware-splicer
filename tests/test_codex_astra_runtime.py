@@ -8,9 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
-    build_unseen_spi_flash_cases,
-)
+from hardware_splicer.cleanroom_unseen_spi_flash_experiment import build_unseen_spi_flash_cases
 from hardware_splicer.codex_astra_case import build_codex_case_package
 from hardware_splicer.codex_astra_runtime import (
     BLOCKED_PROVIDER_ENV,
@@ -42,10 +40,7 @@ def _prepared_case(tmp_path: Path):
 
     case = list(build_unseen_spi_flash_cases())[0]
     project_id = "hs-astra-runtime-test"
-    package = build_codex_case_package(
-        case_id=case.case_id,
-        experiment_project_id=project_id,
-    )
+    package = build_codex_case_package(case_id=case.case_id, experiment_project_id=project_id)
     visible = package["model_visible"]
     outer = package["observer_only"]
     mission = workspace / "MISSION.txt"
@@ -226,6 +221,15 @@ for name in (
     if os.getenv(name):
         print(f"provider credential leaked: {name}", file=sys.stderr)
         raise SystemExit(78)
+if "--output-schema" not in args:
+    print("structured output schema missing", file=sys.stderr)
+    raise SystemExit(81)
+schema_path = args[args.index("--output-schema") + 1]
+with open(schema_path, "r", encoding="utf-8") as handle:
+    schema = json.load(handle)
+if schema.get("additionalProperties") is not False:
+    print("output schema is not strict", file=sys.stderr)
+    raise SystemExit(82)
 
 mission = sys.stdin.read()
 match = re.search(r"^experiment_project_id: (.+)$", mission, flags=re.MULTILINE)
@@ -239,6 +243,7 @@ if marker not in mission:
     raise SystemExit(80)
 initial_snapshot = json.loads(mission.split(marker, 1)[1])
 noop = os.getenv("FAKE_CODEX_NOOP") == "1"
+bad_report = os.getenv("FAKE_CODEX_BAD_REPORT") == "1"
 
 def emit(value):
     print(json.dumps(value, separators=(",", ":")), flush=True)
@@ -294,14 +299,7 @@ mcp(
         "save_project_snapshot",
         "PUT",
         f"/v1/projects/{project_id}/snapshot",
-        {
-            "ok": True,
-            "project": {
-                "project_id": project_id,
-                "revision": 1,
-                "snapshot": initial_snapshot,
-            },
-        },
+        {"ok": True, "project": {"project_id": project_id, "revision": 1, "snapshot": initial_snapshot}},
     ),
 )
 
@@ -323,31 +321,17 @@ else:
             "plan_project",
             "POST",
             f"/v1/projects/{project_id}/engineering/plan",
-            {
-                "ok": True,
-                "project_id": project_id,
-                "revision": 2,
-                "plan": {"schema_version": "fake-plan"},
-            },
+            {"ok": True, "project_id": project_id, "revision": 2, "plan": {"schema_version": "fake-plan"}},
         ),
     )
     final_snapshot = copy.deepcopy(initial_snapshot)
     final_snapshot.update({
         "currentStage": "guided_engineering_plan",
-        "engineeringPlan": {
-            "schema_version": "fake-plan",
-            "authority_effect": "none",
-        },
+        "engineeringPlan": {"schema_version": "fake-plan", "authority_effect": "none"},
         "orderedSteps": [
-            {
-                "step_id": "resolve-dut-package",
-                "kind": "identify_missing_evidence",
-                "status": "proposed",
-            }
+            {"step_id": "resolve-dut-package", "kind": "identify_missing_evidence", "status": "proposed"}
         ],
-        "missingInfo": [
-            "Verify the exact DUT package and pinout before fabrication."
-        ],
+        "missingInfo": ["Verify the exact DUT package and pinout before fabrication."],
     })
     final_revision = 2
 
@@ -367,16 +351,26 @@ mcp(
     "8",
     "hs_backend_call",
     {"operation_id": "get_project", "path_params": {"project_id": project_id}},
-    gateway(
-        "get_project",
-        "GET",
-        f"/v1/projects/{project_id}",
-        read_body,
-    ),
+    gateway("get_project", "GET", f"/v1/projects/{project_id}", read_body),
 )
+report = {
+    "schema_version": "hardware_splicer.astra_final_report.v1",
+    "experiment_project_id": project_id,
+    "final_project_revision": final_revision,
+    "result_status": "blocked" if noop else "bounded_pre_fabrication_result",
+    "remaining_blockers": ["Exact DUT package is not yet confirmed."],
+    "unresolved_facts": ["No physical measurement evidence is present."],
+    "fabrication_ready": True if bad_report else False,
+    "power_on_ready": False,
+    "physical_authority_granted": False,
+    "physical_correctness": "UNPROVEN",
+    "correct_engineering_architecture_asserted": False,
+    "evidence_boundary": "frozen_product_visible_only",
+    "claim_scope": "pre_fabrication_engineering_progress_only",
+}
 emit({
     "type": "item.completed",
-    "item": {"id": "9", "type": "agent_message", "text": "done"},
+    "item": {"id": "9", "type": "agent_message", "text": json.dumps(report, separators=(",", ":"))},
 })
 emit({
     "type": "turn.completed",
@@ -394,13 +388,7 @@ emit({
     path.chmod(0o755)
 
 
-def _fake_runner_command(
-    *,
-    script: Path,
-    manifest: Path,
-    fake_codex: Path,
-    fake_mcp: Path,
-) -> list[str]:
+def _fake_runner_command(*, script: Path, manifest: Path, fake_codex: Path, fake_mcp: Path) -> list[str]:
     return [
         sys.executable,
         str(script),
@@ -418,6 +406,13 @@ def _fake_runner_command(
     ]
 
 
+def _clean_env() -> dict[str, str]:
+    env = dict(os.environ)
+    for name in BLOCKED_PROVIDER_ENV:
+        env.pop(name, None)
+    return env
+
+
 def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
@@ -431,12 +426,7 @@ def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path
     env["ANTHROPIC_API_KEY"] = "must-not-reach-fake-codex"
     script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
     completed = subprocess.run(
-        _fake_runner_command(
-            script=script,
-            manifest=manifest,
-            fake_codex=fake_codex,
-            fake_mcp=fake_mcp,
-        ),
+        _fake_runner_command(script=script, manifest=manifest, fake_codex=fake_codex, fake_mcp=fake_mcp),
         capture_output=True,
         text=True,
         env=env,
@@ -450,66 +440,54 @@ def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path
     assert not (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").exists()
 
 
-def test_full_runner_fake_live_path_succeeds_with_mission_progress(tmp_path: Path) -> None:
+def test_full_runner_fake_live_path_succeeds_with_progress_and_structured_report(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
     _make_fake_codex(fake_codex)
     fake_mcp.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     fake_mcp.chmod(0o755)
-
-    env = dict(os.environ)
-    for name in BLOCKED_PROVIDER_ENV:
-        env.pop(name, None)
     script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
     completed = subprocess.run(
-        _fake_runner_command(
-            script=script,
-            manifest=manifest,
-            fake_codex=fake_codex,
-            fake_mcp=fake_mcp,
-        ),
+        _fake_runner_command(script=script, manifest=manifest, fake_codex=fake_codex, fake_mcp=fake_mcp),
         capture_output=True,
         text=True,
-        env=env,
+        env=_clean_env(),
         check=False,
     )
     assert completed.returncode == 0, completed.stderr + completed.stdout
     result = json.loads(completed.stdout)
+    assert result["schema_version"] == "hardware_splicer.codex_astra_run_result.v3"
     assert result["status"] == "passed"
     assert result["codex_hard_truth_contract_pass"] is True
     assert result["codex_mission_progress_contract_pass"] is True
+    assert result["codex_final_report_contract_pass"] is True
     assert result["codex_evaluation_ready_pass"] is True
     assert result["api_fallback"] is False
     assert result["provider_credentials_forwarded_to_runtime"] is False
     assert result["codex_usage"]["reasoning_output_tokens"] == 7
+    schema_path = context.observer_dir / "CODEX_ASTRA_FINAL_REPORT_SCHEMA.json"
+    assert schema_path.is_file()
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
     assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 2
     assert audit["codex_mission_progress_audit"]["changed_mission_surfaces"]
+    assert audit["codex_final_report_audit"]["report"]["final_project_revision"] == 2
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
     assert not (context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt").exists()
 
 
-def test_full_runner_rejects_noop_even_when_hard_truth_passes(tmp_path: Path) -> None:
+def test_full_runner_rejects_noop_even_with_valid_structured_report(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
     _make_fake_codex(fake_codex)
     fake_mcp.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     fake_mcp.chmod(0o755)
-
-    env = dict(os.environ)
-    for name in BLOCKED_PROVIDER_ENV:
-        env.pop(name, None)
+    env = _clean_env()
     env["FAKE_CODEX_NOOP"] = "1"
     script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
     completed = subprocess.run(
-        _fake_runner_command(
-            script=script,
-            manifest=manifest,
-            fake_codex=fake_codex,
-            fake_mcp=fake_mcp,
-        ),
+        _fake_runner_command(script=script, manifest=manifest, fake_codex=fake_codex, fake_mcp=fake_mcp),
         capture_output=True,
         text=True,
         env=env,
@@ -520,8 +498,34 @@ def test_full_runner_rejects_noop_even_when_hard_truth_passes(tmp_path: Path) ->
     assert result["status"] == "failed"
     assert result["codex_hard_truth_contract_pass"] is True
     assert result["codex_mission_progress_contract_pass"] is False
+    assert result["codex_final_report_contract_pass"] is True
     assert result["codex_evaluation_ready_pass"] is False
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
-    assert audit["codex_mission_progress_audit"]["checks"][
-        "substantive_project_operation_succeeded"
-    ] is False
+    assert audit["codex_mission_progress_audit"]["checks"]["state_producing_project_operation_succeeded"] is False
+
+
+def test_full_runner_rejects_overclaiming_final_report(tmp_path: Path) -> None:
+    context, manifest = _prepared_case(tmp_path)
+    fake_codex = tmp_path / "fake-codex"
+    fake_mcp = tmp_path / "fake-hs-backend-mcp"
+    _make_fake_codex(fake_codex)
+    fake_mcp.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_mcp.chmod(0o755)
+    env = _clean_env()
+    env["FAKE_CODEX_BAD_REPORT"] = "1"
+    script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
+    completed = subprocess.run(
+        _fake_runner_command(script=script, manifest=manifest, fake_codex=fake_codex, fake_mcp=fake_mcp),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert completed.returncode == 9, completed.stderr + completed.stdout
+    result = json.loads(completed.stdout)
+    assert result["codex_hard_truth_contract_pass"] is True
+    assert result["codex_mission_progress_contract_pass"] is True
+    assert result["codex_final_report_contract_pass"] is False
+    assert result["codex_evaluation_ready_pass"] is False
+    audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
+    assert audit["codex_final_report_audit"]["checks"]["fabrication_ready_false"] is False
