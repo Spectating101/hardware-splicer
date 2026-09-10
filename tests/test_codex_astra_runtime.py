@@ -353,13 +353,17 @@ mcp(
     {"operation_id": "get_project", "path_params": {"project_id": project_id}},
     gateway("get_project", "GET", f"/v1/projects/{project_id}", read_body),
 )
+blockers = list(final_snapshot.get("missingInfo") or final_snapshot.get("engineeringBlockers") or [])
+if not blockers:
+    print("fake final state has no canonical blockers", file=sys.stderr)
+    raise SystemExit(83)
 report = {
     "schema_version": "hardware_splicer.astra_final_report.v1",
     "experiment_project_id": project_id,
     "final_project_revision": final_revision,
     "result_status": "blocked" if noop else "bounded_pre_fabrication_result",
-    "remaining_blockers": ["Exact DUT package is not yet confirmed."],
-    "unresolved_facts": ["No physical measurement evidence is present."],
+    "remaining_blockers": [blockers[0]],
+    "unresolved_facts": [blockers[-1]],
     "fabrication_ready": True if bad_report else False,
     "power_on_ready": False,
     "physical_authority_granted": False,
@@ -471,6 +475,7 @@ def test_full_runner_fake_live_path_succeeds_with_progress_and_structured_report
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
     assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 2
     assert audit["codex_mission_progress_audit"]["changed_mission_surfaces"]
+    assert audit["codex_final_report_audit"]["checks"]["remaining_blockers_grounded"] is True
     assert audit["codex_final_report_audit"]["report"]["final_project_revision"] == 2
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
     assert not (context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt").exists()
