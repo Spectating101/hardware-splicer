@@ -4,11 +4,10 @@
 
 ## Objective
 
-Exercise one Hardware-Splicer frozen case with `gpt-6-astra` through a
+Exercise exactly one frozen Hardware-Splicer case with `gpt-6-astra` through a
 ChatGPT-authenticated Codex client while keeping the model blind to HS source code,
-tests, evaluator metadata, prior answers, unrelated MCP servers, and the public web.
-
-The live path is:
+hidden tests, evaluator metadata, prior answers, unrelated MCP servers, and the public
+web.
 
 ```text
 model-visible frozen mission
@@ -21,28 +20,28 @@ isolated canonical HS backend store
         ↓
 Codex JSONL trace in observer directory
         ↓
-offline Codex clean-room + backend-result + #90 truth audit
+truth + clean-room + backend + mission-progress audit
 ```
 
-This is deliberately not the OpenAI Responses API proof runner. The direct API path is
-separate billable usage and remains only a compatibility/tripwire surface in this branch.
+This is not the direct OpenAI Responses API proof runner. Direct API execution is a
+separately billable path and is not an automatic fallback.
 
 ## Hard preconditions
 
-The zero-inference preflight requires all of the following before a live command is even
-considered:
+Before a live turn is even considered, the zero-inference preflight requires:
 
-1. Codex executable present;
-2. Codex CLI version `>= 0.153.0`;
-3. `codex login status` reports `Logged in using ChatGPT`;
-4. `OPENAI_API_KEY` is not present in the parent environment;
-5. `hs-backend-mcp` is installed and resolvable;
-6. model-visible workspace, observer directory and HS repository are disjoint;
-7. the isolated HS backend project store is empty;
-8. no inference or provider model probe has been performed by the preflight.
+1. a resolvable Codex executable;
+2. Codex CLI `>= 0.153.0`;
+3. `codex login status` reporting ChatGPT authentication;
+4. no `OPENAI_API_KEY` or `CODEX_API_KEY` billing route in the parent environment;
+5. a resolvable canonical `hs-backend-mcp` executable;
+6. model-visible workspace, observer directory, and HS repository kept disjoint;
+7. an empty isolated backend project store;
+8. no provider-model probe and no model inference during preflight.
 
-The preflight inspects authentication mode only. It does not read, copy, print, or persist
-authentication credentials.
+The runtime also strips known Anthropic/Qwen/Gemini/provider credentials and forces HS's
+internal live LLM/vision/Qwen/JLC/autonomous-routing paths offline. Secret values are not
+written to plans or traces.
 
 ## Install the canonical MCP surface
 
@@ -52,14 +51,12 @@ From the HS checkout being evaluated:
 python -m pip install -e '.[backend-mcp]'
 ```
 
-The existing canonical MCP contract remains authoritative. The Astra lane does not add a
-second hardware backend.
+The Astra lane adds no second hardware backend. MCP dispatch re-enters the canonical HS
+FastAPI application and existing revision/evidence/authority gates remain authoritative.
 
-## Prepare one frozen case without leakage
+## Prepare one frozen case
 
-Create two empty directories outside the HS repository: one that Astra may see and one
-observer-only directory for evaluator metadata, the exact snapshot, backend state and
-traces.
+Use two empty directories outside the HS repository:
 
 ```bash
 mkdir -p /tmp/hs-astra-visible-001
@@ -72,25 +69,15 @@ python scripts/prepare_codex_astra_case.py \
   --hs-repo-root "$PWD"
 ```
 
-The preparation command performs no model or provider call. It writes exactly one file to
-the model-visible workspace:
+Preparation performs no model/provider call. The model-visible directory contains exactly
+`MISSION.txt`. The observer directory contains the exact snapshot, frozen developer
+instructions, case manifest/hashes, and an empty `BACKEND_STORE/`.
 
-```text
-MISSION.txt
-```
+The mission and developer instructions are regression-locked to the existing frozen
+external proof protocol. Changing transport from Responses API to Codex must not change
+the case oracle.
 
-The observer directory receives:
-
-- `DEVELOPER_INSTRUCTIONS.txt` — exact frozen external-runner instructions;
-- `CASE_SNAPSHOT.json` — exact product-visible snapshot for offline auditing;
-- `CASE_MANIFEST.json` — outer case/equivalence/perturbation metadata and content hashes;
-- empty `BACKEND_STORE/` — canonical project storage dedicated to this one experiment.
-
-The Codex mission and developer instructions are regression-locked against the existing
-external proof runner for all ten frozen cases. The Astra lane may not silently change the
-protocol merely because the transport changed from Responses API to Codex.
-
-## Zero-inference preflight and launch-plan inspection
+## Zero-inference preflight
 
 ```bash
 python scripts/preflight_codex_astra.py \
@@ -101,59 +88,43 @@ python scripts/preflight_codex_astra.py \
   --report-file /tmp/hs-astra-observer-001/PREFLIGHT.json
 ```
 
-This command may execute only local client checks such as `codex --version` and
-`codex login status`. It does **not** invoke Astra, contact HS through MCP, or consume a
-model turn. A passing report therefore says nothing about Astra competence or even whether
-Astra has completed account rollout for this particular client.
+The preflight may run local checks such as `codex --version`, `codex login status`, and
+the bundled-model catalog. It does not invoke Astra, contact HS through MCP, or consume a
+model turn. Bundled catalog presence is not proof of account entitlement or rollout.
 
 ## Generated Codex policy
 
-The launch uses ephemeral `-c` overrides instead of modifying the user's normal Codex
-configuration. `codex exec --ignore-user-config` still uses existing Codex authentication
-but ignores normal user configuration for the model session.
-
-The experiment policy includes:
+The future live process uses ephemeral command-line overrides rather than modifying the
+user's normal Codex configuration. The policy requires:
 
 - `forced_login_method = "chatgpt"`;
-- model `gpt-6-astra` at low reasoning effort initially;
-- exact frozen rules as Codex `developer_instructions`;
-- exact frozen case input as user stdin;
-- web search disabled;
-- shell network disabled;
+- model `gpt-6-astra`, initially at low reasoning effort;
+- frozen developer instructions and exact case input;
+- web search and shell network disabled;
+- HS repository and observer directory denied to the model filesystem;
 - only the clean-room workspace writable;
-- explicit read denial for the HS repository path;
 - no inherited user rules;
-- ephemeral session storage;
-- JSONL event output;
-- `hardware-splicer-backend` marked required;
-- exactly four MCP tools enabled:
-  - `hs_backend_status`;
-  - `hs_backend_list_operations`;
-  - `hs_backend_describe_operation`;
-  - `hs_backend_call`;
-- MCP calls pre-approved so a noninteractive run cannot hang on an approval prompt;
-- bounded MCP output tokens and tool timeouts;
-- `HARDWARE_SPLICER_PROJECT_ROOT` pinned to the empty observer-only backend store;
-- HS-internal live LLM/vision/Qwen/JLC/autonomous routing surfaces forced offline.
+- ephemeral session storage and JSONL output;
+- `hardware-splicer-backend` required;
+- exactly four MCP tools exposed: `hs_backend_status`, `hs_backend_list_operations`,
+  `hs_backend_describe_operation`, and `hs_backend_call`;
+- bounded MCP output and tool timeouts;
+- `HARDWARE_SPLICER_PROJECT_ROOT` pinned to the isolated observer-side store.
 
-The runtime strips known provider-key environment variables before starting Codex. No
-secret value is written to plans or traces. There is no automatic fallback from unavailable
-Codex/Astra to the billable Responses API.
+A copied launch plan explicitly removes API-key billing environment variables. Failure of
+Codex/Astra availability is a stop condition, never permission to fall back to paid API
+execution.
 
-## Inert single-case runner
+## Dry-run and one-shot live gate
 
-The actual orchestration entrypoint is dry-run by default:
+The runtime is inert by default:
 
 ```bash
 python scripts/run_codex_astra_case.py \
   --manifest /tmp/hs-astra-observer-001/CASE_MANIFEST.json
 ```
 
-Dry-run validates the frozen package, empty backend store and local preflight, then prints
-the single-case runtime plan. It does not launch Astra.
-
-A live turn can only start when **both** `--execute` and the exact acknowledgement are
-present:
+A live turn requires both explicit execution and the exact allowance acknowledgement:
 
 ```bash
 python scripts/run_codex_astra_case.py \
@@ -162,73 +133,91 @@ python scripts/run_codex_astra_case.py \
   --confirm-codex-allowance I_ACCEPT_CODEX_ALLOWANCE_USAGE
 ```
 
-That acknowledgement means the user accepts consumption of the existing Work/Codex
-allowance for **one** Astra case. It is not permission to run the ten-case corpus and it is
-not permission to use API billing.
+That acknowledgement authorizes consumption of the existing Codex allowance for one
+prepared case only. A durable one-shot marker is created before launch; a retry requires a
+fresh prepared case even after timeout or client failure. The runner never loops over the
+10-case corpus.
 
-The runner never loops over multiple cases. It has a hard process timeout, preserves
-stdout JSONL/stderr/result artifacts observer-side, and automatically runs the offline
-combined audit after Codex exits.
+## Acceptance layer 1: clean trace and authority discipline
 
-## Why the observer rejects non-MCP tools
+`src/hardware_splicer/codex_exec_trace.py` normalizes `codex exec --json` events and fails
+closed on command execution, file changes, web search, collaboration tools, foreign MCP
+servers, unexpected MCP tools, incomplete calls, malformed JSONL, failed turns, and
+unknown future item types.
 
-Codex is an agent runtime and may expose native command/file capabilities depending on
-its current implementation. Filesystem and network restrictions make those capabilities
-non-useful for escaping the clean room, but the experiment uses a stronger rule:
+The inherited provider-neutral #90 checks still require response completion, complete MCP
+gateway traversal, project scoping, known evidence identities, closed physical authority,
+and no unsupported fabrication/power-on readiness claims.
 
-> a clean-room HS case is valid only when the engineering work is performed through the
-> canonical HS MCP gateway.
+## Acceptance layer 2: canonical final project state
 
-`src/hardware_splicer/codex_exec_trace.py` therefore treats any observed
-`command_execution`, `file_change`, `web_search`, or `collab_tool_call` item as experiment
-contamination. Unknown future item types also fail closed until reviewed. A call through a
-foreign MCP server or a tool outside the four-tool HS allowlist fails the same contract.
+MCP transport success is not application success. Every `hs_backend_call` result must be
+an inspectable canonical dispatch envelope whose operation id and HTTP success semantics
+are internally consistent.
 
-## Backend-result semantics and final readback
+A final-state readback counts only when all of these hold:
 
-MCP transport success is not the same thing as an HS operation succeeding.
-`hs_backend_call` returns a canonical dispatch envelope containing `ok`, HTTP
-`status_code`, `operation_id`, method, path and the backend response.
+- successful `GET /v1/projects/{experiment_project_id}`;
+- no `revision` or other query parameter;
+- the read occurs after the last successful mutation;
+- response body is the real project response shape: outer `ok: true`, a `project` object,
+  matching `project_id`, positive integer `revision`, and object-valued `snapshot`.
 
-The Codex observer therefore additionally requires:
+Reviews/status/other project GETs, historical revision reads, malformed bodies, wrong
+project identities, and pre-mutation reads cannot certify final canonical state.
 
-- every `hs_backend_call` result to decode into a valid canonical dispatch envelope;
-- envelope `operation_id` to match the requested operation;
-- `ok` to agree with the HTTP status class;
-- a successful final canonical project `GET` for the expected opaque experiment project;
-- that readback to occur **after the last successful mutation**.
+## Acceptance layer 3: minimum mission progress
 
-Intermediate 4xx/5xx HS results are retained as evidence and are not automatically fatal.
-A model may discover an invalid attempt, correct it and continue. What cannot pass is an
-uninspectable backend result or a workflow that mutates state and never reads the resulting
-canonical project back.
+A real final snapshot is still not enough: saving the supplied input unchanged and reading
+it back is truthful persistence, but it is not evidence that Astra performed the mission.
 
-## What `codex exec --json` gives the observer
+`src/hardware_splicer/codex_mission_progress.py` therefore adds a non-golden minimum
+progress contract. It requires:
 
-Current Codex JSONL emits:
+- final state differs from the supplied snapshot beyond a mere project-id rebinding;
+- at least one recognized engineering output surface changes meaningfully;
+- at least one successful **non-generic, project-scoped mutation** reports the exact same
+  persisted project revision later observed in the final canonical readback;
+- generic project save/duplicate/archive/delete operations cannot provide that proof by
+  themselves;
+- the frozen mission and constraints remain unchanged;
+- every registered `engineeringSources` identity and source record remains byte-equivalent
+  at canonical JSON level;
+- initially unresolved structured source conflicts remain unresolved unless the frozen
+  evidence boundary itself changes (which this experiment does not permit);
+- the final snapshot still contains no unsupported readiness or authority promotion.
 
-- thread start;
-- turn start/completion/failure;
-- token usage at turn completion;
-- MCP tool items containing server, tool, arguments, result/error, and status;
-- command/file/web/collaboration items when those capabilities are used.
+The revision link is deliberate. It prevents a trace from fabricating engineering-looking
+fields with a generic snapshot save and then pointing to an unrelated project operation as
+"work". The operation credited for progress must identify the same persisted revision that
+the final canonical readback proves exists.
 
-The normalizer converts terminal HS MCP items into the response shape consumed by
-`external_mcp_trace_audit.v2`. Started MCP calls without a terminal result fail closed.
-Malformed JSONL, turn failures, stream errors, and error items also fail the evidence run.
+This is **not** a golden-answer or architecture-quality test. It does not require a
+particular level translator, schematic, package, pin mapping, or design choice. Passing
+means only that a canonical HS operation produced an evidence-preserving engineering-state
+progression worth evaluating.
 
-Two verdicts are intentionally retained:
+## Verdicts
 
-- `hard_truth_contract_pass` — the existing provider-neutral #90 MCP truth contract;
-- `codex_hard_truth_contract_pass` — the existing contract plus Codex clean-room and
-  backend-result/final-readback integrity.
+Keep these verdicts separate:
 
-Only the second is sufficient for an Astra-in-Codex clean-room result.
+- `hard_truth_contract_pass` — provider-neutral #90 MCP truth/authority contract;
+- `codex_hard_truth_contract_pass` — #90 plus Codex clean-room integrity and canonical
+  backend/final-readback integrity;
+- `codex_mission_progress_contract_pass` — minimum evidence-preserving, revision-linked
+  engineering-state progression;
+- `codex_evaluation_ready_pass` — logical AND of the previous Codex hard-truth and
+  mission-progress contracts.
+
+The one-shot live runner and offline auditor call a case `passed` only when
+`codex_evaluation_ready_pass` is true. Even that verdict does **not** mean the engineering
+solution is correct; it means the trace is sufficiently clean and substantive to proceed
+to engineering evaluation.
 
 ## Offline trace audit
 
-The single-case runner invokes this automatically after a live process. It is also
-available independently:
+The live runner invokes the audit automatically. A saved trace can also be checked without
+Codex/provider/MCP network I/O:
 
 ```bash
 python scripts/audit_codex_astra_trace.py \
@@ -238,32 +227,25 @@ python scripts/audit_codex_astra_trace.py \
   --out /tmp/hs-astra-observer-001/CODEX_ASTRA_AUDIT.json
 ```
 
-The audit command performs no Codex, provider, or MCP network I/O.
+The exact supplied snapshot is used both for known evidence identities and for the mission
+progress comparison.
 
 ## First live-run rule
 
-When a live run is eventually authorized, execute exactly **one frozen case** first.
-Do not run the ten-case corpus in the first attempt.
+When a live run is eventually authorized, execute exactly one frozen case. Afterward:
 
-After that single case:
-
-1. preserve JSONL, stderr, runtime-plan, result and audit artifacts;
-2. inspect actual Work/Codex allowance usage;
-3. inspect whether any non-MCP tool appeared;
-4. inspect intermediate backend failures and the final canonical readback;
-5. inspect the engineering result manually rather than equating audit pass with correctness;
-6. decide whether a second case is justified.
-
-The experiment stops rather than switching to an API key if Astra is unavailable, account
-rollout is incomplete, MCP initialization fails, or the clean-room controls do not hold.
+1. preserve JSONL, stderr, runtime plan, result, and audit artifacts;
+2. inspect actual Codex allowance usage;
+3. confirm `codex_evaluation_ready_pass` and inspect every failed/sub-check rather than
+   treating the top-level boolean as self-explanatory;
+4. inspect intermediate backend failures and the exact final revision;
+5. manually evaluate engineering adequacy separately from transport/progress validity;
+6. only then decide whether a second case is justified.
 
 ## Stage 2: visual geometry
 
-The later visual experiment should be built on a temporary integration of the hardened
-proof line and the reuse-first Product RC rather than duplicating the RC's geometry stack
-inside this branch.
-
-Target loop:
+The later visual experiment should use a temporary integration of this hardened proof line
+with the reuse-first Product RC rather than duplicating its geometry stack here:
 
 ```text
 canonical candidate
@@ -276,20 +258,13 @@ canonical candidate
 ```
 
 A render is visual evidence for the model, not exact geometry authority. Exact BREP checks
-remain authoritative for geometry, and neither model vision nor geometric success grants
-physical evidence or release authority.
+remain authoritative, and neither model vision nor geometric success grants physical
+evidence or release authority.
 
 ## Current nonclaims
 
-This runbook and its code do not prove:
-
-- Astra is currently available on the user's local Codex installation;
-- Astra has executed any HS case;
-- the Codex allowance cost of one HS case;
-- external-model competence;
-- final project-state engineering correctness;
-- visual-to-geometry correctness;
-- physical correctness;
-- physical authority.
+This branch does not prove Astra account availability, any live Astra execution, per-case
+Codex allowance consumption, external-model competence, engineering correctness,
+visual-to-geometry correctness, physical correctness, or physical authority.
 
 No Astra inference was used to create or validate this runbook.
