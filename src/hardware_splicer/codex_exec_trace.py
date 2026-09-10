@@ -306,6 +306,34 @@ def _response_body(payload: Mapping[str, Any]) -> Any:
     return None
 
 
+def _canonical_latest_project_readback(
+    row: Mapping[str, Any],
+    *,
+    expected_project_id: str,
+) -> tuple[bool, str | None]:
+    """Require the canonical latest-state project load, not a project-related GET."""
+
+    if not row.get("ok") or row.get("method") != "GET":
+        return False, "not a successful GET"
+    if row.get("path") != f"/v1/projects/{expected_project_id}":
+        return False, "not the canonical project-load path"
+
+    arguments = row.get("arguments")
+    if not isinstance(arguments, Mapping):
+        return False, "backend-call arguments are not an object"
+    path_params = arguments.get("path_params")
+    if not isinstance(path_params, Mapping) or path_params.get("project_id") != expected_project_id:
+        return False, "canonical load does not bind the expected project id"
+    query = arguments.get("query")
+    if query not in (None, {}):
+        if isinstance(query, Mapping) and "revision" in query:
+            return False, "historical revision readback cannot certify latest state"
+        return False, "canonical latest readback must not include query parameters"
+    if expected_project_id not in row.get("body_project_ids", []):
+        return False, "canonical load response does not confirm the expected project id"
+    return True, None
+
+
 def audit_codex_backend_results(
     normalized: Mapping[str, Any],
     *,
@@ -365,6 +393,7 @@ def audit_codex_backend_results(
             )
             continue
 
+        body = _response_body(payload)
         row = {
             "backend_call_index": index,
             "operation_id": operation_id,
@@ -372,8 +401,9 @@ def audit_codex_backend_results(
             "path": path,
             "ok": ok,
             "status_code": status_code,
+            "arguments": dict(arguments) if isinstance(arguments, Mapping) else arguments,
             "argument_project_ids": sorted(_named_project_ids(arguments)),
-            "body_project_ids": sorted(_named_project_ids(_response_body(payload))),
+            "body_project_ids": sorted(_named_project_ids(body)),
         }
         parsed_rows.append(row)
         if not ok:
@@ -389,30 +419,61 @@ def audit_codex_backend_results(
     successful_mutations = [
         row for row in parsed_rows if row["ok"] and row["method"] != "GET"
     ]
-    successful_readbacks = [
-        row
-        for row in parsed_rows
-        if row["ok"]
-        and row["method"] == "GET"
-        and expected_project_id in row["argument_project_ids"]
-        and expected_project_id in row["body_project_ids"]
-    ]
     last_mutation_index = (
         max(row["backend_call_index"] for row in successful_mutations)
         if successful_mutations
         else -1
     )
+
+    canonical_readbacks: list[dict[str, Any]] = []
+    rejected_readback_candidates: list[dict[str, Any]] = []
+    for row in parsed_rows:
+        if not row["ok"] or row["method"] != "GET":
+            continue
+        mentions_project = (
+            expected_project_id in row["argument_project_ids"]
+            or expected_project_id in row["body_project_ids"]
+        )
+        if not mentions_project:
+            continue
+        passed, reason = _canonical_latest_project_readback(
+            row,
+            expected_project_id=expected_project_id,
+        )
+        if passed:
+            canonical_readbacks.append(row)
+        else:
+            rejected_readback_candidates.append(
+                {
+                    "backend_call_index": row["backend_call_index"],
+                    "operation_id": row["operation_id"],
+                    "method": row["method"],
+                    "path": row["path"],
+                    "reason": reason,
+                }
+            )
+
     final_readbacks = [
         row
-        for row in successful_readbacks
+        for row in canonical_readbacks
         if row["backend_call_index"] > last_mutation_index
     ]
     final_readback = final_readbacks[-1] if final_readbacks else None
     parse_pass = bool(calls) and not invalid_rows
     final_readback_pass = final_readback is not None
 
+    summarized_final = None
+    if final_readback is not None:
+        summarized_final = {
+            "backend_call_index": final_readback["backend_call_index"],
+            "operation_id": final_readback["operation_id"],
+            "method": final_readback["method"],
+            "path": final_readback["path"],
+            "project_id": expected_project_id,
+        }
+
     return {
-        "schema_version": "hardware_splicer.codex_backend_result_audit.v1",
+        "schema_version": "hardware_splicer.codex_backend_result_audit.v2",
         "backend_call_count": len(calls),
         "backend_result_parse_pass": parse_pass,
         "invalid_backend_results": invalid_rows,
@@ -422,9 +483,16 @@ def audit_codex_backend_results(
         "last_successful_mutation_index": (
             last_mutation_index if successful_mutations else None
         ),
-        "successful_project_readback_count": len(successful_readbacks),
+        "successful_project_readback_count": len(canonical_readbacks),
+        "rejected_project_readback_candidates": rejected_readback_candidates,
         "final_project_readback_pass": final_readback_pass,
-        "final_project_readback": final_readback,
+        "final_project_readback": summarized_final,
+        "final_project_readback_contract": {
+            "method": "GET",
+            "path": f"/v1/projects/{expected_project_id}",
+            "historical_revision_allowed": False,
+            "requires_expected_project_id_in_response": True,
+        },
         "backend_result_contract_pass": bool(parse_pass and final_readback_pass),
         "intermediate_application_failures_are_permitted": True,
         "physical_authority_granted": False,
