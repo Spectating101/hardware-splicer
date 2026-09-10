@@ -15,7 +15,6 @@ from typing import Any, Mapping, Sequence
 SCHEMA_VERSION = "hardware_splicer.codex_progress_provenance_audit.v1"
 
 _NONCREDITABLE_SURFACES = {"engineeringPackages", "engineeringAiSessions"}
-_GENERIC_PROJECT_MUTATIONS = {"duplicate", "archive", "delete", "snapshot"}
 _RESPONSE_METADATA_KEYS = {
     "ok",
     "project_id",
@@ -295,9 +294,10 @@ def audit_codex_progress_provenance(
             continue
         if _is_generic_project_mutation(method, path, expected_project_id):
             continue
+        # Scope must be established by the request itself or the canonical project path.
+        # A response that merely echoes/asserts the experiment id cannot self-authenticate.
         scoped = (
             expected_project_id in set(row.get("argument_project_ids") or [])
-            or expected_project_id in set(row.get("body_project_ids") or [])
             or f"/projects/{expected_project_id}/" in path
         )
         if not scoped:
@@ -350,7 +350,7 @@ def audit_codex_progress_provenance(
         "physical_authority_granted": False,
         "claim_boundary": (
             "Pass proves only that at least one changed final engineering surface is an "
-            "exact structural value returned by a project-scoped, non-generic HS mutation "
+            "exact structural value returned by a request-scoped, non-generic HS mutation "
             "that reports the same persisted revision later read back canonically. It does "
             "not prove the returned engineering content is correct, complete, or physically valid."
         ),
