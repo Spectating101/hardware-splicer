@@ -310,28 +310,42 @@ def _canonical_latest_project_readback(
     row: Mapping[str, Any],
     *,
     expected_project_id: str,
-) -> tuple[bool, str | None]:
-    """Require the canonical latest-state project load, not a project-related GET."""
+) -> tuple[bool, str | None, dict[str, Any] | None]:
+    """Require the canonical latest-state project load and its real project envelope."""
 
     if not row.get("ok") or row.get("method") != "GET":
-        return False, "not a successful GET"
+        return False, "not a successful GET", None
     if row.get("path") != f"/v1/projects/{expected_project_id}":
-        return False, "not the canonical project-load path"
+        return False, "not the canonical project-load path", None
 
     arguments = row.get("arguments")
     if not isinstance(arguments, Mapping):
-        return False, "backend-call arguments are not an object"
+        return False, "backend-call arguments are not an object", None
     path_params = arguments.get("path_params")
     if not isinstance(path_params, Mapping) or path_params.get("project_id") != expected_project_id:
-        return False, "canonical load does not bind the expected project id"
+        return False, "canonical load does not bind the expected project id", None
     query = arguments.get("query")
     if query not in (None, {}):
         if isinstance(query, Mapping) and "revision" in query:
-            return False, "historical revision readback cannot certify latest state"
-        return False, "canonical latest readback must not include query parameters"
-    if expected_project_id not in row.get("body_project_ids", []):
-        return False, "canonical load response does not confirm the expected project id"
-    return True, None
+            return False, "historical revision readback cannot certify latest state", None
+        return False, "canonical latest readback must not include query parameters", None
+
+    body = row.get("response_body")
+    if not isinstance(body, Mapping):
+        return False, "canonical load response body is not a JSON object", None
+    if body.get("ok") is not True:
+        return False, "canonical load response does not report ok=true", None
+    project = body.get("project")
+    if not isinstance(project, Mapping):
+        return False, "canonical load response has no project envelope", None
+    if project.get("project_id") != expected_project_id:
+        return False, "project envelope does not match the expected project id", None
+    revision = project.get("revision")
+    if isinstance(revision, bool) or not isinstance(revision, int) or revision < 1:
+        return False, "project envelope revision must be a positive integer", None
+    if not isinstance(project.get("snapshot"), Mapping):
+        return False, "project envelope snapshot must be an object", None
+    return True, None, dict(project)
 
 
 def audit_codex_backend_results(
@@ -404,6 +418,7 @@ def audit_codex_backend_results(
             "arguments": dict(arguments) if isinstance(arguments, Mapping) else arguments,
             "argument_project_ids": sorted(_named_project_ids(arguments)),
             "body_project_ids": sorted(_named_project_ids(body)),
+            "response_body": body,
         }
         parsed_rows.append(row)
         if not ok:
@@ -436,12 +451,14 @@ def audit_codex_backend_results(
         )
         if not mentions_project:
             continue
-        passed, reason = _canonical_latest_project_readback(
+        passed, reason, project = _canonical_latest_project_readback(
             row,
             expected_project_id=expected_project_id,
         )
         if passed:
-            canonical_readbacks.append(row)
+            accepted = dict(row)
+            accepted["readback_revision"] = project["revision"] if project else None
+            canonical_readbacks.append(accepted)
         else:
             rejected_readback_candidates.append(
                 {
@@ -470,10 +487,11 @@ def audit_codex_backend_results(
             "method": final_readback["method"],
             "path": final_readback["path"],
             "project_id": expected_project_id,
+            "revision": final_readback["readback_revision"],
         }
 
     return {
-        "schema_version": "hardware_splicer.codex_backend_result_audit.v2",
+        "schema_version": "hardware_splicer.codex_backend_result_audit.v3",
         "backend_call_count": len(calls),
         "backend_result_parse_pass": parse_pass,
         "invalid_backend_results": invalid_rows,
@@ -491,7 +509,11 @@ def audit_codex_backend_results(
             "method": "GET",
             "path": f"/v1/projects/{expected_project_id}",
             "historical_revision_allowed": False,
-            "requires_expected_project_id_in_response": True,
+            "requires_response_ok": True,
+            "requires_project_envelope": True,
+            "requires_expected_project_id": True,
+            "requires_positive_revision": True,
+            "requires_snapshot_object": True,
         },
         "backend_result_contract_pass": bool(parse_pass and final_readback_pass),
         "intermediate_application_failures_are_permitted": True,
