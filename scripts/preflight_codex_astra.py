@@ -29,6 +29,7 @@ from hardware_splicer.codex_astra_preflight import (
     run_zero_inference_preflight,
     shell_quote_argv,
 )
+from hardware_splicer.codex_astra_runtime import BLOCKED_PROVIDER_ENV, blocked_provider_env_names
 
 
 def _write_json(path: Path, payload: object) -> None:
@@ -44,6 +45,16 @@ def _inject_frozen_developer_instructions(argv: list[str]) -> list[str]:
         raise ValueError("Codex argv must not be empty")
     override = "developer_instructions=" + json.dumps(frozen_case_instructions())
     return [argv[0], "-c", override, *argv[1:]]
+
+
+def _safe_shell_display(argv: list[str], mission_file: Path, trace_file: Path) -> str:
+    # `codex exec` can honor CODEX_API_KEY from its environment. The display must
+    # therefore be safe even when copied manually rather than executed by our runner.
+    unsets = " ".join(f"-u {name}" for name in BLOCKED_PROVIDER_ENV)
+    return (
+        f"env {unsets} {shell_quote_argv(argv)} < {shell_quote_argv([str(mission_file)])} "
+        f"> {shell_quote_argv([str(trace_file)])}"
+    )
 
 
 def main() -> int:
@@ -69,6 +80,7 @@ def main() -> int:
 
     workspace = Path(args.workspace).expanduser().resolve()
     workspace.mkdir(parents=True, exist_ok=True)
+    parent_credential_names = blocked_provider_env_names(dict(os.environ))
     report = run_zero_inference_preflight(
         workspace=workspace,
         hs_repo_root=args.hs_repo_root,
@@ -80,6 +92,8 @@ def main() -> int:
         {
             "model_target": ASTRA_MODEL,
             "frozen_developer_instructions_applied_to_launch_plan": True,
+            "parent_provider_credentials_present": list(parent_credential_names),
+            "launch_plan_unsets_provider_credentials": True,
             "live_execution_performed": False,
             "codex_allowance_consumed_by_this_script": False,
         }
@@ -108,10 +122,8 @@ def main() -> int:
         argv = _inject_frozen_developer_instructions(argv)
         payload["launch_plan"] = {
             "argv": argv,
-            "shell_display": (
-                f"{shell_quote_argv(argv)} < {shell_quote_argv([str(mission_file)])} "
-                f"> {shell_quote_argv([str(trace_file)])}"
-            ),
+            "environment_unsets": list(BLOCKED_PROVIDER_ENV),
+            "shell_display": _safe_shell_display(argv, mission_file, trace_file),
             "stdin_file": str(mission_file),
             "stdout_trace_file": str(trace_file),
             "last_message_file": str(last_message_file),
