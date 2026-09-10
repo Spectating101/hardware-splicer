@@ -35,8 +35,10 @@ from hardware_splicer.codex_astra_runtime import (
 )
 from hardware_splicer.codex_exec_trace import (
     audit_codex_exec_trace,
+    normalize_codex_exec_events,
     parse_codex_jsonl,
 )
+from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
 
 
@@ -154,7 +156,7 @@ def main() -> int:
             )
     except subprocess.TimeoutExpired:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v1",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v2",
             "status": "timeout",
             "timeout_seconds": args.timeout_seconds,
             "live_execution_claim": str(attempt_path),
@@ -168,7 +170,7 @@ def main() -> int:
         return 124
     except OSError as exc:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v1",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v2",
             "status": "launch_error",
             "error": f"{type(exc).__name__}: {exc}",
             "live_execution_claim": str(attempt_path),
@@ -192,6 +194,18 @@ def main() -> int:
             expected_project_id=context.experiment_project_id,
             known_source_ids=snapshot_source_ids(snapshot),
         )
+        normalized = normalize_codex_exec_events(events, model="gpt-6-astra")
+        mission_progress = audit_codex_mission_progress(
+            normalized,
+            expected_project_id=context.experiment_project_id,
+            initial_snapshot=snapshot,
+        )
+        audit["codex_mission_progress_audit"] = mission_progress
+        audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+        audit["codex_evaluation_ready_pass"] = bool(
+            audit.get("codex_hard_truth_contract_pass")
+            and mission_progress["contract_pass"]
+        )
         _write_json(audit_path, audit)
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         audit_error = f"{type(exc).__name__}: {exc}"
@@ -199,14 +213,20 @@ def main() -> int:
     passed = bool(
         completed.returncode == 0
         and audit is not None
-        and audit.get("codex_hard_truth_contract_pass") is True
+        and audit.get("codex_evaluation_ready_pass") is True
     )
     result = {
-        "schema_version": "hardware_splicer.codex_astra_run_result.v1",
+        "schema_version": "hardware_splicer.codex_astra_run_result.v2",
         "status": "passed" if passed else "failed",
         "codex_exit_code": completed.returncode,
         "codex_hard_truth_contract_pass": (
             audit.get("codex_hard_truth_contract_pass") if audit else False
+        ),
+        "codex_mission_progress_contract_pass": (
+            audit.get("codex_mission_progress_contract_pass") if audit else False
+        ),
+        "codex_evaluation_ready_pass": (
+            audit.get("codex_evaluation_ready_pass") if audit else False
         ),
         "audit_error": audit_error,
         "live_execution_claim": str(attempt_path),
@@ -218,6 +238,8 @@ def main() -> int:
         "provider_credentials_forwarded_to_runtime": False,
         "single_case_only": True,
         "one_live_attempt_per_prepared_case": True,
+        "correct_engineering_architecture_asserted": False,
+        "physical_correctness": "UNPROVEN",
         "physical_authority_granted": False,
     }
     _write_json(result_path, result)
