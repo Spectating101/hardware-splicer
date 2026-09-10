@@ -228,7 +228,7 @@ def _registered_source_map(snapshot: Mapping[str, Any]) -> tuple[dict[str, str],
 def _string_rows(value: Any) -> list[str]:
     if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
         return []
-    return [str(row).strip() for row in value if str(row).strip()]
+    return [row.strip() for row in value if isinstance(row, str) and row.strip()]
 
 
 def _initial_engineering_blockers(snapshot: Mapping[str, Any]) -> list[str]:
@@ -236,17 +236,15 @@ def _initial_engineering_blockers(snapshot: Mapping[str, Any]) -> list[str]:
 
 
 def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str]]:
-    """Return deterministic exact blocker strings that may be quoted by a final report.
-
-    The catalog intentionally mirrors canonical project blocker surfaces instead of trying
-    to infer blockers from arbitrary prose. It is observer-side evidence, not model truth.
-    """
+    """Return deterministic exact blocker strings visible in canonical project state."""
 
     rows: list[dict[str, str]] = []
     seen: set[tuple[str, str]] = set()
 
     def add(surface: str, message: Any) -> None:
-        text = str(message or "").strip()
+        if not isinstance(message, str):
+            return
+        text = message.strip()
         if not text:
             return
         key = (surface, text)
@@ -265,10 +263,7 @@ def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str
         if isinstance(blockers, Sequence) and not isinstance(blockers, (str, bytes, bytearray)):
             for item in blockers:
                 if isinstance(item, Mapping):
-                    add(
-                        "engineeringStatus.blockers",
-                        item.get("message") or item.get("reason") or item.get("title"),
-                    )
+                    add("engineeringStatus.blockers", item.get("message") or item.get("reason") or item.get("title"))
                 else:
                     add("engineeringStatus.blockers", item)
 
@@ -280,9 +275,8 @@ def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str
             if not isinstance(item, Mapping):
                 continue
             status_value = str(item.get("status") or "unresolved").lower()
-            if status_value not in {"unresolved", "blocking", "open", ""}:
-                continue
-            add(key, item.get("reason") or item.get("message") or item.get("title"))
+            if status_value in {"unresolved", "blocking", "open", ""}:
+                add(key, item.get("reason") or item.get("message") or item.get("title"))
 
     source_graph = snapshot.get("engineeringSourceGraph") or snapshot.get("engineering_source_graph")
     if isinstance(source_graph, Mapping):
@@ -293,10 +287,7 @@ def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str
                     continue
                 status_value = str(item.get("status") or "unresolved").lower()
                 if status_value in {"unresolved", "blocking", "open", ""}:
-                    add(
-                        "engineeringSourceGraph.conflicts",
-                        item.get("reason") or item.get("message") or item.get("title"),
-                    )
+                    add("engineeringSourceGraph.conflicts", item.get("reason") or item.get("message") or item.get("title"))
 
     sessions = snapshot.get("engineeringAiSessions")
     if isinstance(sessions, Sequence) and not isinstance(sessions, (str, bytes, bytearray)):
@@ -311,10 +302,7 @@ def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str
                     if not isinstance(turn, Mapping):
                         continue
                     for text in _string_rows(turn.get("blockers")):
-                        add(
-                            f"engineeringAiSessions[{session_index}].conversationTurns[{turn_index}].blockers",
-                            text,
-                        )
+                        add(f"engineeringAiSessions[{session_index}].conversationTurns[{turn_index}].blockers", text)
             actions = session.get("actions")
             if isinstance(actions, Sequence) and not isinstance(actions, (str, bytes, bytearray)):
                 for action_index, action in enumerate(actions):
@@ -450,7 +438,10 @@ def audit_codex_mission_progress(
     final_blockers = _initial_engineering_blockers(final_snapshot)
     initial_blockers_preserved = set(initial_blockers).issubset(set(final_blockers))
     blocker_catalog = canonical_blocker_catalog(final_snapshot)
-    blocker_strings = sorted({row["text"] for row in blocker_catalog})
+    # Only frozen blockers that survive unchanged are safe terminal-report anchors. Newly
+    # introduced blocker prose remains visible in the diagnostic catalog but cannot become
+    # self-authenticating evidence merely because the model persisted it.
+    blocker_strings = sorted(set(initial_blockers).intersection(final_blockers))
     mission_preserved = initial_snapshot.get("mission") is None or final_snapshot.get("mission") == initial_snapshot.get("mission")
     constraints_preserved = initial_snapshot.get("constraints") is None or _canonical_json(final_snapshot.get("constraints")) == _canonical_json(initial_snapshot.get("constraints"))
     truth_attempts = _truth_claim_attempts(final_snapshot)
@@ -493,6 +484,7 @@ def audit_codex_mission_progress(
         "initial_engineering_blockers": initial_blockers,
         "final_engineering_blockers": final_blockers,
         "canonical_blocker_catalog": blocker_catalog,
+        "grounded_blocker_source": "frozen_engineeringBlockers_preserved_in_final_state",
         "grounded_blocker_strings": blocker_strings,
         "initial_unresolved_conflicts": sorted(initial_conflicts),
         "final_unresolved_conflicts": sorted(final_conflicts),
@@ -505,7 +497,9 @@ def audit_codex_mission_progress(
             "snapshot changed on a recognized engineering-output surface, a successful non-generic "
             "project mutation reported the same persisted revision later read back, and the frozen "
             "mission, constraints, registered sources, explicit engineering blockers, structured "
-            "unresolved conflicts, and closed readiness/authority were preserved. It does not prove "
-            "that any architecture, component choice, pin mapping, or physical implementation is correct."
+            "unresolved conflicts, and closed readiness/authority were preserved. Terminal-report "
+            "blocker anchors are restricted to frozen blockers preserved unchanged into final state. "
+            "It does not prove that any architecture, component choice, pin mapping, or physical "
+            "implementation is correct."
         ),
     }
