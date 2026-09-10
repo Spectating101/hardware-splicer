@@ -1,9 +1,8 @@
 """Deterministic mission-progress audit for Codex/Astra Hardware-Splicer runs.
 
-This layer does not judge whether an engineering architecture is correct. It prevents
-transport-valid/no-op traces from being mistaken for meaningful experiment results by
-requiring a bounded, evidence-preserving project-state progression whose producing
-operation is linked to the final persisted revision.
+This does not grade engineering correctness. It prevents a transport-valid no-op from
+being mistaken for a meaningful experiment result by requiring evidence-preserving state
+progress whose producing operation is linked to the final persisted revision.
 """
 
 from __future__ import annotations
@@ -15,122 +14,69 @@ from typing import Any, Mapping, Sequence
 SCHEMA_VERSION = "hardware_splicer.codex_mission_progress_audit.v2"
 
 _MISSION_OUTPUT_SURFACES = (
-    "engineeringPlan",
-    "machineProject",
-    "engineeringSourceGraph",
-    "robotTopology",
-    "engineeringAnalysis",
-    "changeImpact",
-    "engineeringIdentityMap",
-    "verificationBridge",
-    "engineeringArtifactProjection",
-    "manufacturingProjection",
-    "manufacturingClosure",
-    "engineeringExecutionPlan",
-    "operatorGuide",
-    "orderedSteps",
-    "sourceAdapter",
-    "engineeringReadiness",
-    "engineeringStatus",
-    "missingInfo",
-    "rankedNextAction",
-    "engineeringPackages",
-    "engineeringAiSessions",
+    "engineeringPlan", "machineProject", "engineeringSourceGraph", "robotTopology",
+    "engineeringAnalysis", "changeImpact", "engineeringIdentityMap", "verificationBridge",
+    "engineeringArtifactProjection", "manufacturingProjection", "manufacturingClosure",
+    "engineeringExecutionPlan", "operatorGuide", "orderedSteps", "sourceAdapter",
+    "engineeringReadiness", "engineeringStatus", "missingInfo", "rankedNextAction",
+    "engineeringPackages", "engineeringAiSessions",
 )
-
 _CONFLICT_KEYS = (
-    "engineeringSourceConflicts",
-    "engineering_source_conflicts",
-    "declared_conflicts",
-    "source_conflicts",
+    "engineeringSourceConflicts", "engineering_source_conflicts",
+    "declared_conflicts", "source_conflicts",
 )
-
 _AUTHORITY_TRUE_KEYS = {
-    "fabrication_authorized",
-    "firmware_flash_authorized",
-    "flash_authorized",
-    "power_on_authorized",
-    "motion_authorized",
-    "operational_authorized",
-    "release_authorized",
-    "physical_authority_granted",
-    "fabricationAuthority",
-    "flashAuthority",
-    "powerAuthority",
-    "motionAuthority",
-    "releaseAuthority",
+    "fabrication_authorized", "firmware_flash_authorized", "flash_authorized",
+    "power_on_authorized", "motion_authorized", "operational_authorized",
+    "release_authorized", "physical_authority_granted", "fabricationAuthority",
+    "flashAuthority", "powerAuthority", "motionAuthority", "releaseAuthority",
 }
-
-_UNSUPPORTED_READINESS_TRUE_KEYS = {
-    "fabrication_ready",
-    "power_on_ready",
-}
+_UNSUPPORTED_READINESS_TRUE_KEYS = {"fabrication_ready", "power_on_ready"}
 
 
 def _canonical_json(value: Any) -> str:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        sort_keys=True,
-        separators=(",", ":"),
-        default=str,
-    )
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), default=str)
 
 
 def _sha256(value: Any) -> str:
-    if not isinstance(value, str):
-        value = _canonical_json(value)
-    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+    text = value if isinstance(value, str) else _canonical_json(value)
+    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _positive_revision(value: Any) -> int | None:
-    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+    return value if isinstance(value, int) and not isinstance(value, bool) and value >= 1 else None
+
+
+def _decode_gateway_payload(call: Mapping[str, Any]) -> dict[str, Any] | None:
+    if call.get("name") != "hs_backend_call" or call.get("status") != "completed" or call.get("error") is not None:
         return None
-    return value
-
-
-def _decode_gateway_payload(
-    call: Mapping[str, Any],
-) -> tuple[dict[str, Any] | None, str | None]:
-    if call.get("name") != "hs_backend_call":
-        return None, "not a backend call"
-    if call.get("status") != "completed" or call.get("error") is not None:
-        return None, "backend MCP call did not complete successfully"
     output = call.get("output")
     if not isinstance(output, str):
-        return None, "backend MCP output is not inspectable JSON text"
+        return None
     try:
         wrapper = json.loads(output)
     except json.JSONDecodeError:
-        return None, "backend MCP result wrapper is not valid JSON"
+        return None
     if not isinstance(wrapper, Mapping):
-        return None, "backend MCP result wrapper is not an object"
-
+        return None
     structured = wrapper.get("structured_content")
     if isinstance(structured, Mapping):
         payload: Any = structured
     else:
         content = wrapper.get("content")
-        if not isinstance(content, Sequence) or isinstance(
-            content, (str, bytes, bytearray)
-        ):
-            return None, "backend MCP result has no content blocks"
+        if not isinstance(content, Sequence) or isinstance(content, (str, bytes, bytearray)):
+            return None
         texts = [
-            row.get("text")
-            for row in content
-            if isinstance(row, Mapping)
-            and row.get("type") == "text"
-            and isinstance(row.get("text"), str)
+            row.get("text") for row in content
+            if isinstance(row, Mapping) and row.get("type") == "text" and isinstance(row.get("text"), str)
         ]
         if len(texts) != 1:
-            return None, "backend MCP result must contain exactly one text payload"
+            return None
         try:
             payload = json.loads(texts[0])
         except json.JSONDecodeError:
-            return None, "backend MCP text payload is not valid JSON"
-    if not isinstance(payload, Mapping):
-        return None, "backend MCP payload is not an object"
-    return dict(payload), None
+            return None
+    return dict(payload) if isinstance(payload, Mapping) else None
 
 
 def _response_body(payload: Mapping[str, Any]) -> Any:
@@ -147,21 +93,15 @@ def _response_body(payload: Mapping[str, Any]) -> Any:
 
 def _named_project_ids(value: Any) -> set[str]:
     result: set[str] = set()
-
     def walk(node: Any) -> None:
         if isinstance(node, Mapping):
             for key, child in node.items():
-                if str(key) in {"project_id", "projectId"} and isinstance(child, str):
-                    token = child.strip()
-                    if token:
-                        result.add(token)
+                if str(key) in {"project_id", "projectId"} and isinstance(child, str) and child.strip():
+                    result.add(child.strip())
                 walk(child)
-        elif isinstance(node, Sequence) and not isinstance(
-            node, (str, bytes, bytearray)
-        ):
+        elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
             for child in node:
                 walk(child)
-
     walk(value)
     return result
 
@@ -171,63 +111,46 @@ def _parsed_backend_rows(normalized: Mapping[str, Any]) -> list[dict[str, Any]]:
     for index, call in enumerate(normalized.get("output") or []):
         if not isinstance(call, Mapping) or call.get("name") != "hs_backend_call":
             continue
-        payload, _error = _decode_gateway_payload(call)
-        if payload is None:
-            continue
+        payload = _decode_gateway_payload(call)
         arguments = call.get("arguments")
-        if not isinstance(arguments, Mapping):
+        if payload is None or not isinstance(arguments, Mapping):
             continue
-        status_code = payload.get("status_code")
-        ok = payload.get("ok")
-        method = payload.get("method")
-        path = payload.get("path")
+        status_code, ok = payload.get("status_code"), payload.get("ok")
+        method, path = payload.get("method"), payload.get("path")
         operation_id = arguments.get("operation_id")
-        if (
-            not isinstance(ok, bool)
-            or isinstance(status_code, bool)
-            or not isinstance(status_code, int)
-            or not isinstance(method, str)
-            or not isinstance(path, str)
-            or not isinstance(operation_id, str)
-            or payload.get("operation_id") != operation_id
-            or ok != (200 <= status_code < 300)
-        ):
+        valid = (
+            isinstance(ok, bool)
+            and isinstance(status_code, int) and not isinstance(status_code, bool)
+            and isinstance(method, str) and isinstance(path, str)
+            and isinstance(operation_id, str) and payload.get("operation_id") == operation_id
+            and ok == (200 <= status_code < 300)
+        )
+        if not valid:
             continue
         body = _response_body(payload)
-        rows.append(
-            {
-                "backend_call_index": index,
-                "operation_id": operation_id,
-                "method": method,
-                "path": path,
-                "ok": ok,
-                "status_code": status_code,
-                "arguments": dict(arguments),
-                "response_body": body,
-                "argument_project_ids": sorted(_named_project_ids(arguments)),
-                "body_project_ids": sorted(_named_project_ids(body)),
-            }
-        )
+        rows.append({
+            "backend_call_index": index,
+            "operation_id": operation_id,
+            "method": method,
+            "path": path,
+            "ok": ok,
+            "status_code": status_code,
+            "arguments": dict(arguments),
+            "response_body": body,
+            "argument_project_ids": sorted(_named_project_ids(arguments)),
+            "body_project_ids": sorted(_named_project_ids(body)),
+        })
     return rows
 
 
-def _canonical_latest_project_envelope(
-    row: Mapping[str, Any],
-    *,
-    expected_project_id: str,
-) -> dict[str, Any] | None:
-    if not row.get("ok") or row.get("method") != "GET":
-        return None
-    if row.get("path") != f"/v1/projects/{expected_project_id}":
+def _canonical_latest_project_envelope(row: Mapping[str, Any], *, expected_project_id: str) -> dict[str, Any] | None:
+    if not row.get("ok") or row.get("method") != "GET" or row.get("path") != f"/v1/projects/{expected_project_id}":
         return None
     arguments = row.get("arguments")
     if not isinstance(arguments, Mapping):
         return None
     path_params = arguments.get("path_params")
-    if (
-        not isinstance(path_params, Mapping)
-        or path_params.get("project_id") != expected_project_id
-    ):
+    if not isinstance(path_params, Mapping) or path_params.get("project_id") != expected_project_id:
         return None
     if arguments.get("query") not in (None, {}):
         return None
@@ -237,29 +160,21 @@ def _canonical_latest_project_envelope(
     project = body.get("project")
     if not isinstance(project, Mapping) or project.get("project_id") != expected_project_id:
         return None
-    if _positive_revision(project.get("revision")) is None:
-        return None
-    if not isinstance(project.get("snapshot"), Mapping):
+    if _positive_revision(project.get("revision")) is None or not isinstance(project.get("snapshot"), Mapping):
         return None
     return dict(project)
 
 
 def _reported_project_revision(body: Any, *, expected_project_id: str) -> int | None:
-    """Return a mutation's persisted revision only when it is bound to this project."""
-
     if not isinstance(body, Mapping) or body.get("ok") is not True:
         return None
-
     if body.get("project_id") == expected_project_id:
         revision = _positive_revision(body.get("revision"))
         if revision is not None:
             return revision
-
     project = body.get("project")
     if isinstance(project, Mapping) and project.get("project_id") == expected_project_id:
-        revision = _positive_revision(project.get("revision"))
-        if revision is not None:
-            return revision
+        return _positive_revision(project.get("revision"))
     return None
 
 
@@ -275,31 +190,20 @@ def _meaningful(value: Any) -> bool:
         return False
     if isinstance(value, str):
         return bool(value.strip())
-    if isinstance(value, Mapping):
-        return bool(value)
-    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+    if isinstance(value, (Mapping, Sequence)) and not isinstance(value, (str, bytes, bytearray)):
         return bool(value)
     return bool(value)
 
 
-def _changed_mission_surfaces(
-    initial_snapshot: Mapping[str, Any],
-    final_snapshot: Mapping[str, Any],
-) -> list[str]:
-    changed: list[str] = []
-    for key in _MISSION_OUTPUT_SURFACES:
-        if key not in final_snapshot or not _meaningful(final_snapshot.get(key)):
-            continue
-        if _canonical_json(final_snapshot.get(key)) != _canonical_json(
-            initial_snapshot.get(key)
-        ):
-            changed.append(key)
-    return changed
+def _changed_mission_surfaces(initial: Mapping[str, Any], final: Mapping[str, Any]) -> list[str]:
+    return [
+        key for key in _MISSION_OUTPUT_SURFACES
+        if key in final and _meaningful(final.get(key))
+        and _canonical_json(final.get(key)) != _canonical_json(initial.get(key))
+    ]
 
 
-def _registered_source_map(
-    snapshot: Mapping[str, Any],
-) -> tuple[dict[str, str], list[str]]:
+def _registered_source_map(snapshot: Mapping[str, Any]) -> tuple[dict[str, str], list[str]]:
     rows = snapshot.get("engineeringSources")
     if rows is None:
         return {}, []
@@ -314,11 +218,10 @@ def _registered_source_map(
         source_id = str(row.get("source_id") or "").strip()
         if not source_id:
             errors.append(f"engineeringSources[{index}] has no source_id")
-            continue
-        if source_id in result:
+        elif source_id in result:
             errors.append(f"duplicate engineeringSources source_id: {source_id}")
-            continue
-        result[source_id] = _sha256(dict(row))
+        else:
+            result[source_id] = _sha256(dict(row))
     return result, errors
 
 
@@ -329,28 +232,21 @@ def _unresolved_conflict_tokens(snapshot: Mapping[str, Any]) -> set[str]:
         if not isinstance(rows, list):
             continue
         for row in rows:
-            if (
-                not isinstance(row, Mapping)
-                or str(row.get("status") or "").lower() != "unresolved"
-            ):
+            if not isinstance(row, Mapping) or str(row.get("status") or "").lower() != "unresolved":
                 continue
             conflict_id = str(row.get("conflict_id") or "").strip()
             if conflict_id:
-                result.add(f"id:{conflict_id}")
-                continue
-            identity = {
-                "field": row.get("field"),
-                "source_ids": sorted(
-                    str(value) for value in list(row.get("source_ids") or [])
-                ),
-            }
-            result.add("anon:" + _sha256(identity))
+                result.add("id:" + conflict_id)
+            else:
+                result.add("anon:" + _sha256({
+                    "field": row.get("field"),
+                    "source_ids": sorted(str(value) for value in list(row.get("source_ids") or [])),
+                }))
     return result
 
 
 def _truth_claim_attempts(value: Any) -> list[dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
-
     def walk(node: Any, path: str) -> None:
         if isinstance(node, Mapping):
             for raw_key, child in node.items():
@@ -367,40 +263,28 @@ def _truth_claim_attempts(value: Any) -> list[dict[str, Any]]:
                 elif key == "physical_authority_unchanged" and child is False:
                     attempts.append({"path": child_path, "value": False})
                 walk(child, child_path)
-        elif isinstance(node, Sequence) and not isinstance(
-            node, (str, bytes, bytearray)
-        ):
+        elif isinstance(node, Sequence) and not isinstance(node, (str, bytes, bytearray)):
             for index, child in enumerate(node):
                 walk(child, f"{path}[{index}]")
-
     walk(value, "")
     return attempts
 
 
 def _state_producing_project_mutations(
-    rows: Sequence[Mapping[str, Any]],
-    *,
-    expected_project_id: str,
-    final_revision: int | None,
+    rows: Sequence[Mapping[str, Any]], *, expected_project_id: str, final_revision: int | None
 ) -> list[dict[str, Any]]:
-    """Require a non-generic mutation that reports the exact final persisted revision."""
-
     persistence_or_lifecycle = {
         ("PUT", f"/v1/projects/{expected_project_id}/snapshot"),
         ("POST", f"/v1/projects/{expected_project_id}/duplicate"),
         ("PATCH", f"/v1/projects/{expected_project_id}/archive"),
         ("DELETE", f"/v1/projects/{expected_project_id}"),
     }
-    result: list[dict[str, Any]] = []
     if final_revision is None:
-        return result
-
+        return []
+    result: list[dict[str, Any]] = []
     for row in rows:
-        method = str(row.get("method") or "")
-        path = str(row.get("path") or "")
-        if not row.get("ok") or method == "GET":
-            continue
-        if (method, path) in persistence_or_lifecycle:
+        method, path = str(row.get("method") or ""), str(row.get("path") or "")
+        if not row.get("ok") or method == "GET" or (method, path) in persistence_or_lifecycle:
             continue
         scoped = (
             expected_project_id in set(row.get("argument_project_ids") or [])
@@ -409,114 +293,74 @@ def _state_producing_project_mutations(
         )
         if not scoped:
             continue
-        reported_revision = _reported_project_revision(
-            row.get("response_body"),
-            expected_project_id=expected_project_id,
-        )
+        reported_revision = _reported_project_revision(row.get("response_body"), expected_project_id=expected_project_id)
         if reported_revision != final_revision:
             continue
-        result.append(
-            {
-                "backend_call_index": row.get("backend_call_index"),
-                "operation_id": row.get("operation_id"),
-                "method": method,
-                "path": path,
-                "reported_project_revision": reported_revision,
-            }
-        )
+        result.append({
+            "backend_call_index": row.get("backend_call_index"),
+            "operation_id": row.get("operation_id"),
+            "method": method,
+            "path": path,
+            "reported_project_revision": reported_revision,
+        })
     return result
 
 
 def audit_codex_mission_progress(
-    normalized: Mapping[str, Any],
-    *,
-    expected_project_id: str,
-    initial_snapshot: Mapping[str, Any],
+    normalized: Mapping[str, Any], *, expected_project_id: str, initial_snapshot: Mapping[str, Any]
 ) -> dict[str, Any]:
     """Check minimum evidence-preserving mission progress without grading design quality."""
 
     rows = _parsed_backend_rows(normalized)
-    successful_mutations = [
-        row for row in rows if row.get("ok") and row.get("method") != "GET"
-    ]
-    last_mutation_index = (
-        max(int(row["backend_call_index"]) for row in successful_mutations)
-        if successful_mutations
-        else -1
-    )
+    mutations = [row for row in rows if row.get("ok") and row.get("method") != "GET"]
+    last_mutation_index = max((int(row["backend_call_index"]) for row in mutations), default=-1)
 
     final_project: dict[str, Any] | None = None
     final_readback_index: int | None = None
     for row in rows:
         if int(row["backend_call_index"]) <= last_mutation_index:
             continue
-        project = _canonical_latest_project_envelope(
-            row,
-            expected_project_id=expected_project_id,
-        )
+        project = _canonical_latest_project_envelope(row, expected_project_id=expected_project_id)
         if project is not None:
             final_project = project
             final_readback_index = int(row["backend_call_index"])
 
-    final_snapshot = (
-        dict(final_project.get("snapshot") or {})
-        if isinstance(final_project, Mapping)
-        else {}
-    )
-    final_revision = (
-        _positive_revision(final_project.get("revision"))
-        if isinstance(final_project, Mapping)
-        else None
-    )
-
+    final_snapshot = dict(final_project.get("snapshot") or {}) if final_project else {}
+    final_revision = _positive_revision(final_project.get("revision")) if final_project else None
     initial_sources, initial_source_errors = _registered_source_map(initial_snapshot)
     final_sources, final_source_errors = _registered_source_map(final_snapshot)
     source_ids_preserved = (
-        not initial_source_errors
-        and not final_source_errors
+        not initial_source_errors and not final_source_errors
         and set(final_sources) == set(initial_sources)
     )
-    source_records_preserved = (
-        source_ids_preserved
-        and all(final_sources.get(key) == value for key, value in initial_sources.items())
+    source_records_preserved = source_ids_preserved and all(
+        final_sources.get(key) == value for key, value in initial_sources.items()
     )
-
     initial_conflicts = _unresolved_conflict_tokens(initial_snapshot)
     final_conflicts = _unresolved_conflict_tokens(final_snapshot)
-    unresolved_conflicts_preserved = initial_conflicts.issubset(final_conflicts)
-
-    mission_preserved = (
-        initial_snapshot.get("mission") is None
-        or final_snapshot.get("mission") == initial_snapshot.get("mission")
-    )
-    constraints_preserved = (
-        initial_snapshot.get("constraints") is None
-        or _canonical_json(final_snapshot.get("constraints"))
-        == _canonical_json(initial_snapshot.get("constraints"))
-    )
-
+    mission_preserved = initial_snapshot.get("mission") is None or final_snapshot.get("mission") == initial_snapshot.get("mission")
+    constraints_preserved = initial_snapshot.get("constraints") is None or _canonical_json(final_snapshot.get("constraints")) == _canonical_json(initial_snapshot.get("constraints"))
     truth_attempts = _truth_claim_attempts(final_snapshot)
     changed_surfaces = _changed_mission_surfaces(initial_snapshot, final_snapshot)
-    state_changed = bool(final_project) and (
-        _canonical_json(_identity_normalized_snapshot(final_snapshot))
-        != _canonical_json(_identity_normalized_snapshot(initial_snapshot))
-    )
+    state_changed = bool(final_project) and _canonical_json(_identity_normalized_snapshot(final_snapshot)) != _canonical_json(_identity_normalized_snapshot(initial_snapshot))
     producing_mutations = _state_producing_project_mutations(
-        rows,
-        expected_project_id=expected_project_id,
-        final_revision=final_revision,
+        rows, expected_project_id=expected_project_id, final_revision=final_revision
     )
 
+    producing_pass = bool(producing_mutations)
     checks = {
         "final_canonical_readback_present": final_project is not None,
         "state_changed_beyond_project_identity": state_changed,
         "mission_output_surface_changed": bool(changed_surfaces),
-        "state_producing_project_operation_succeeded": bool(producing_mutations),
+        "state_producing_project_operation_succeeded": producing_pass,
+        # Early staging used this name. Keep it as an identical diagnostic alias so
+        # existing artifacts/tests remain readable while the stronger definition lands.
+        "substantive_project_operation_succeeded": producing_pass,
         "registered_source_ids_preserved": source_ids_preserved,
         "registered_source_records_preserved": source_records_preserved,
         "persisted_mission_preserved": mission_preserved,
         "persisted_constraints_preserved": constraints_preserved,
-        "initial_unresolved_conflicts_preserved": unresolved_conflicts_preserved,
+        "initial_unresolved_conflicts_preserved": initial_conflicts.issubset(final_conflicts),
         "unsupported_final_truth_claims_absent": not truth_attempts,
     }
     return {
@@ -529,7 +373,6 @@ def audit_codex_mission_progress(
         "final_readback_backend_call_index": final_readback_index,
         "changed_mission_surfaces": changed_surfaces,
         "state_producing_project_operations": producing_mutations,
-        # Compatibility alias retained for early staging artifacts; rows are now stricter.
         "substantive_project_operations": producing_mutations,
         "initial_registered_source_ids": sorted(initial_sources),
         "final_registered_source_ids": sorted(final_sources),
@@ -541,12 +384,11 @@ def audit_codex_mission_progress(
         "physical_correctness": "UNPROVEN",
         "physical_authority_granted": False,
         "claim_boundary": (
-            "Pass proves only minimum evidence-preserving mission progress: the final "
-            "canonical snapshot changed on a recognized engineering-output surface, and "
-            "a successful non-generic project mutation reported the same persisted revision "
-            "that was later read back, while the frozen mission, constraints, registered "
-            "source records, unresolved conflicts, and closed readiness/authority were "
-            "preserved. It does not prove that any architecture, component choice, pin "
-            "mapping, or physical implementation is correct."
+            "Pass proves only minimum evidence-preserving mission progress: the final canonical "
+            "snapshot changed on a recognized engineering-output surface, and a successful "
+            "non-generic project mutation reported the same persisted revision later read back, "
+            "while the frozen mission, constraints, registered source records, unresolved "
+            "conflicts, and closed readiness/authority were preserved. It does not prove that "
+            "any architecture, component choice, pin mapping, or physical implementation is correct."
         ),
     }
