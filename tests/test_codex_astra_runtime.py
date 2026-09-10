@@ -195,6 +195,7 @@ def test_runtime_plan_names_credentials_without_leaking_values(tmp_path: Path) -
 def _make_fake_codex(path: Path) -> None:
     path.write_text(
         r'''#!/usr/bin/env python3
+import copy
 import json
 import os
 import re
@@ -225,12 +226,19 @@ for name in (
     if os.getenv(name):
         print(f"provider credential leaked: {name}", file=sys.stderr)
         raise SystemExit(78)
+
 mission = sys.stdin.read()
 match = re.search(r"^experiment_project_id: (.+)$", mission, flags=re.MULTILINE)
 if not match:
     print("missing project id", file=sys.stderr)
     raise SystemExit(79)
 project_id = match.group(1).strip()
+marker = "product_visible_project_state:\n"
+if marker not in mission:
+    print("missing product-visible state", file=sys.stderr)
+    raise SystemExit(80)
+initial_snapshot = json.loads(mission.split(marker, 1)[1])
+noop = os.getenv("FAKE_CODEX_NOOP") == "1"
 
 def emit(value):
     print(json.dumps(value, separators=(",", ":")), flush=True)
@@ -253,40 +261,123 @@ def mcp(item_id, tool, arguments, payload_text="{}"):
         },
     })
 
+def gateway(operation_id, method, path, body):
+    return json.dumps({
+        "ok": True,
+        "status_code": 200,
+        "content_type": "application/json",
+        "byte_length": 2,
+        "sha256": "0" * 64,
+        "headers": {"content-type": "application/json"},
+        "body": body,
+        "operation_id": operation_id,
+        "method": method,
+        "path": path,
+    }, separators=(",", ":"))
+
 emit({"type": "thread.started", "thread_id": "fake-astra-thread"})
 emit({"type": "turn.started"})
 mcp("1", "hs_backend_status", {})
 mcp("2", "hs_backend_list_operations", {"text": "project"})
-mcp("3", "hs_backend_describe_operation", {"operation_id": "get_project"})
-payload = {
-    "ok": True,
-    "status_code": 200,
-    "content_type": "application/json",
-    "byte_length": 2,
-    "sha256": "0" * 64,
-    "headers": {"content-type": "application/json"},
-    "body": {
-        "ok": True,
-        "project": {
-            "schema_version": "hardware_splicer.project_snapshot.v1",
-            "project_id": project_id,
-            "revision": 1,
-            "saved_at": "2026-09-10T00:00:00+00:00",
-            "snapshot": {"mission": "fake-runtime"},
-            "metadata": {},
-        },
-    },
-    "operation_id": "get_project",
-    "method": "GET",
-    "path": f"/v1/projects/{project_id}",
+mcp("3", "hs_backend_describe_operation", {"operation_id": "save_project_snapshot"})
+
+save_args = {
+    "operation_id": "save_project_snapshot",
+    "path_params": {"project_id": project_id},
+    "json_body": {"snapshot": initial_snapshot, "expected_revision": 0},
 }
 mcp(
     "4",
     "hs_backend_call",
-    {"operation_id": "get_project", "path_params": {"project_id": project_id}},
-    json.dumps(payload, separators=(",", ":")),
+    save_args,
+    gateway(
+        "save_project_snapshot",
+        "PUT",
+        f"/v1/projects/{project_id}/snapshot",
+        {
+            "ok": True,
+            "project": {
+                "project_id": project_id,
+                "revision": 1,
+                "snapshot": initial_snapshot,
+            },
+        },
+    ),
 )
-emit({"type": "item.completed", "item": {"id": "5", "type": "agent_message", "text": "done"}})
+
+if noop:
+    final_snapshot = initial_snapshot
+    final_revision = 1
+else:
+    mcp("5", "hs_backend_describe_operation", {"operation_id": "plan_project"})
+    plan_args = {
+        "operation_id": "plan_project",
+        "path_params": {"project_id": project_id},
+        "json_body": {"expected_revision": 1, "intake": {}},
+    }
+    mcp(
+        "6",
+        "hs_backend_call",
+        plan_args,
+        gateway(
+            "plan_project",
+            "POST",
+            f"/v1/projects/{project_id}/engineering/plan",
+            {
+                "ok": True,
+                "project_id": project_id,
+                "revision": 2,
+                "plan": {"schema_version": "fake-plan"},
+            },
+        ),
+    )
+    final_snapshot = copy.deepcopy(initial_snapshot)
+    final_snapshot.update({
+        "currentStage": "guided_engineering_plan",
+        "engineeringPlan": {
+            "schema_version": "fake-plan",
+            "authority_effect": "none",
+        },
+        "orderedSteps": [
+            {
+                "step_id": "resolve-dut-package",
+                "kind": "identify_missing_evidence",
+                "status": "proposed",
+            }
+        ],
+        "missingInfo": [
+            "Verify the exact DUT package and pinout before fabrication."
+        ],
+    })
+    final_revision = 2
+
+mcp("7", "hs_backend_describe_operation", {"operation_id": "get_project"})
+read_body = {
+    "ok": True,
+    "project": {
+        "schema_version": "hardware_splicer.project_snapshot.v1",
+        "project_id": project_id,
+        "revision": final_revision,
+        "saved_at": "2026-09-11T00:00:00+00:00",
+        "snapshot": final_snapshot,
+        "metadata": {},
+    },
+}
+mcp(
+    "8",
+    "hs_backend_call",
+    {"operation_id": "get_project", "path_params": {"project_id": project_id}},
+    gateway(
+        "get_project",
+        "GET",
+        f"/v1/projects/{project_id}",
+        read_body,
+    ),
+)
+emit({
+    "type": "item.completed",
+    "item": {"id": "9", "type": "agent_message", "text": "done"},
+})
 emit({
     "type": "turn.completed",
     "usage": {
@@ -359,7 +450,7 @@ def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path
     assert not (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").exists()
 
 
-def test_full_runner_fake_live_path_succeeds_with_clean_parent_env(tmp_path: Path) -> None:
+def test_full_runner_fake_live_path_succeeds_with_mission_progress(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
@@ -387,10 +478,50 @@ def test_full_runner_fake_live_path_succeeds_with_clean_parent_env(tmp_path: Pat
     result = json.loads(completed.stdout)
     assert result["status"] == "passed"
     assert result["codex_hard_truth_contract_pass"] is True
+    assert result["codex_mission_progress_contract_pass"] is True
+    assert result["codex_evaluation_ready_pass"] is True
     assert result["api_fallback"] is False
     assert result["provider_credentials_forwarded_to_runtime"] is False
     assert result["codex_usage"]["reasoning_output_tokens"] == 7
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
-    assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 1
+    assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 2
+    assert audit["codex_mission_progress_audit"]["changed_mission_surfaces"]
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
     assert not (context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt").exists()
+
+
+def test_full_runner_rejects_noop_even_when_hard_truth_passes(tmp_path: Path) -> None:
+    context, manifest = _prepared_case(tmp_path)
+    fake_codex = tmp_path / "fake-codex"
+    fake_mcp = tmp_path / "fake-hs-backend-mcp"
+    _make_fake_codex(fake_codex)
+    fake_mcp.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_mcp.chmod(0o755)
+
+    env = dict(os.environ)
+    for name in BLOCKED_PROVIDER_ENV:
+        env.pop(name, None)
+    env["FAKE_CODEX_NOOP"] = "1"
+    script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
+    completed = subprocess.run(
+        _fake_runner_command(
+            script=script,
+            manifest=manifest,
+            fake_codex=fake_codex,
+            fake_mcp=fake_mcp,
+        ),
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert completed.returncode == 9, completed.stderr + completed.stdout
+    result = json.loads(completed.stdout)
+    assert result["status"] == "failed"
+    assert result["codex_hard_truth_contract_pass"] is True
+    assert result["codex_mission_progress_contract_pass"] is False
+    assert result["codex_evaluation_ready_pass"] is False
+    audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
+    assert audit["codex_mission_progress_audit"]["checks"][
+        "substantive_project_operation_succeeded"
+    ] is False
