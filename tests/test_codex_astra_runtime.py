@@ -307,6 +307,7 @@ if noop:
     final_snapshot = initial_snapshot
     final_revision = 1
 else:
+    plan_payload = {"schema_version": "fake-plan", "authority_effect": "none"}
     mcp("5", "hs_backend_describe_operation", {"operation_id": "plan_project"})
     plan_args = {
         "operation_id": "plan_project",
@@ -321,13 +322,13 @@ else:
             "plan_project",
             "POST",
             f"/v1/projects/{project_id}/engineering/plan",
-            {"ok": True, "project_id": project_id, "revision": 2, "plan": {"schema_version": "fake-plan"}},
+            {"ok": True, "project_id": project_id, "revision": 2, "plan": plan_payload},
         ),
     )
     final_snapshot = copy.deepcopy(initial_snapshot)
     final_snapshot.update({
         "currentStage": "guided_engineering_plan",
-        "engineeringPlan": {"schema_version": "fake-plan", "authority_effect": "none"},
+        "engineeringPlan": plan_payload,
         "orderedSteps": [
             {"step_id": "resolve-dut-package", "kind": "identify_missing_evidence", "status": "proposed"}
         ],
@@ -444,7 +445,7 @@ def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path
     assert not (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").exists()
 
 
-def test_full_runner_fake_live_path_succeeds_with_progress_and_structured_report(tmp_path: Path) -> None:
+def test_full_runner_fake_live_path_succeeds_with_provenance_and_structured_report(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
@@ -461,10 +462,11 @@ def test_full_runner_fake_live_path_succeeds_with_progress_and_structured_report
     )
     assert completed.returncode == 0, completed.stderr + completed.stdout
     result = json.loads(completed.stdout)
-    assert result["schema_version"] == "hardware_splicer.codex_astra_run_result.v3"
+    assert result["schema_version"] == "hardware_splicer.codex_astra_run_result.v4"
     assert result["status"] == "passed"
     assert result["codex_hard_truth_contract_pass"] is True
     assert result["codex_mission_progress_contract_pass"] is True
+    assert result["codex_progress_provenance_contract_pass"] is True
     assert result["codex_final_report_contract_pass"] is True
     assert result["codex_evaluation_ready_pass"] is True
     assert result["api_fallback"] is False
@@ -475,6 +477,8 @@ def test_full_runner_fake_live_path_succeeds_with_progress_and_structured_report
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
     assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 2
     assert audit["codex_mission_progress_audit"]["changed_mission_surfaces"]
+    links = audit["codex_progress_provenance_audit"]["operation_surface_links"]
+    assert any(row["final_surface"] == "engineeringPlan" for row in links)
     assert audit["codex_final_report_audit"]["checks"]["remaining_blockers_grounded"] is True
     assert audit["codex_final_report_audit"]["report"]["final_project_revision"] == 2
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
@@ -503,6 +507,7 @@ def test_full_runner_rejects_noop_even_with_valid_structured_report(tmp_path: Pa
     assert result["status"] == "failed"
     assert result["codex_hard_truth_contract_pass"] is True
     assert result["codex_mission_progress_contract_pass"] is False
+    assert result["codex_progress_provenance_contract_pass"] is False
     assert result["codex_final_report_contract_pass"] is True
     assert result["codex_evaluation_ready_pass"] is False
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
@@ -530,6 +535,7 @@ def test_full_runner_rejects_overclaiming_final_report(tmp_path: Path) -> None:
     result = json.loads(completed.stdout)
     assert result["codex_hard_truth_contract_pass"] is True
     assert result["codex_mission_progress_contract_pass"] is True
+    assert result["codex_progress_provenance_contract_pass"] is True
     assert result["codex_final_report_contract_pass"] is False
     assert result["codex_evaluation_ready_pass"] is False
     audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
