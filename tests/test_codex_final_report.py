@@ -15,14 +15,19 @@ from hardware_splicer.codex_final_report import (
 )
 
 
+BLOCKER_A = "The physical DUT's exact orderable package suffix and package-specific pinout are not verified."
+BLOCKER_B = "No physical power-on or programming evidence exists for this adapter revision."
+GROUNDED = [BLOCKER_A, BLOCKER_B]
+
+
 def _report(**overrides) -> dict:
     value = {
         "schema_version": SCHEMA_VERSION,
         "experiment_project_id": "exp-1",
         "final_project_revision": 2,
         "result_status": "bounded_pre_fabrication_result",
-        "remaining_blockers": ["Exact DUT package is not yet confirmed."],
-        "unresolved_facts": ["No physical measurement evidence is present."],
+        "remaining_blockers": [BLOCKER_A],
+        "unresolved_facts": [BLOCKER_B],
         "fabrication_ready": False,
         "power_on_ready": False,
         "physical_authority_granted": False,
@@ -61,11 +66,12 @@ def _events(report: object | None = None) -> list[dict]:
     ]
 
 
-def _audit(events: list[dict]) -> dict:
+def _audit(events: list[dict], *, grounded: list[str] | None = None) -> dict:
     return audit_codex_final_report(
         events,
         expected_project_id="exp-1",
         expected_final_revision=2,
+        grounded_blockers=GROUNDED if grounded is None else grounded,
     )
 
 
@@ -81,6 +87,7 @@ def test_final_report_schema_is_strict_and_closes_truth_claims() -> None:
     assert schema["properties"]["correct_engineering_architecture_asserted"]["enum"] == [False]
     assert schema["properties"]["remaining_blockers"]["minItems"] == 1
     assert schema["properties"]["unresolved_facts"]["minItems"] == 1
+    assert "do not paraphrase" in schema["properties"]["remaining_blockers"]["items"]["description"]
     assert final_report_schema_sha256().startswith("sha256:")
 
 
@@ -111,9 +118,13 @@ def test_output_schema_arg_rejects_duplicate_or_nonstdin_runner(tmp_path: Path) 
         attach_output_schema_arg(["codex", "exec", "hello"], schema)
 
 
-def test_valid_structured_final_report_passes() -> None:
+def test_valid_structured_final_report_passes_with_grounded_blockers() -> None:
     result = _audit(_events())
+    assert result["schema_version"] == "hardware_splicer.codex_final_report_audit.v2"
     assert result["contract_pass"] is True
+    assert result["checks"]["remaining_blockers_grounded"] is True
+    assert result["checks"]["unresolved_facts_grounded"] is True
+    assert result["grounded_blocker_count"] == 2
     assert result["report"]["final_project_revision"] == 2
     assert result["free_form_success_claim_accepted"] is False
     assert result["correct_engineering_architecture_asserted"] is False
@@ -141,6 +152,41 @@ def test_valid_structured_final_report_passes() -> None:
 def test_report_claim_or_identity_mismatch_fails(overrides: dict, check: str) -> None:
     result = _audit(_events(_report(**overrides)))
     assert result["checks"][check] is False
+    assert result["contract_pass"] is False
+
+
+def test_ungrounded_or_embellished_blocker_text_fails() -> None:
+    invented = _report(
+        remaining_blockers=["No blockers; ready to fabricate."],
+        unresolved_facts=[BLOCKER_B],
+    )
+    invented_result = _audit(_events(invented))
+    assert invented_result["checks"]["remaining_blockers_present"] is True
+    assert invented_result["checks"]["remaining_blockers_grounded"] is False
+    assert invented_result["contract_pass"] is False
+
+    embellished = _report(
+        remaining_blockers=[BLOCKER_A + " However this is safe to ignore."],
+        unresolved_facts=[BLOCKER_B],
+    )
+    embellished_result = _audit(_events(embellished))
+    assert embellished_result["checks"]["remaining_blockers_grounded"] is False
+    assert embellished_result["contract_pass"] is False
+
+
+def test_unresolved_fact_must_also_be_grounded() -> None:
+    result = _audit(
+        _events(_report(unresolved_facts=["A model-only inference with no state anchor."]))
+    )
+    assert result["checks"]["unresolved_facts_present"] is True
+    assert result["checks"]["unresolved_facts_grounded"] is False
+    assert result["contract_pass"] is False
+
+
+def test_empty_grounded_catalog_fails_closed() -> None:
+    result = _audit(_events(), grounded=[])
+    assert result["checks"]["canonical_blocker_catalog_present"] is False
+    assert result["checks"]["remaining_blockers_grounded"] is False
     assert result["contract_pass"] is False
 
 
@@ -188,6 +234,7 @@ def test_missing_expected_final_revision_fails_binding() -> None:
         _events(),
         expected_project_id="exp-1",
         expected_final_revision=None,
+        grounded_blockers=GROUNDED,
     )
     assert result["checks"]["revision_matches_canonical_readback"] is False
     assert result["contract_pass"] is False
