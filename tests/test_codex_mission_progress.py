@@ -68,7 +68,8 @@ def _save(snapshot: dict, *, revision: int = 1) -> dict:
     )
 
 
-def _plan(*, expected_revision: int = 1) -> dict:
+def _plan(*, expected_revision: int = 1, reported_revision: int | None = None) -> dict:
+    revision = reported_revision if reported_revision is not None else expected_revision + 1
     return _wrap_call(
         operation_id="plan_project",
         method="POST",
@@ -81,7 +82,7 @@ def _plan(*, expected_revision: int = 1) -> dict:
         body={
             "ok": True,
             "project_id": PROJECT_ID,
-            "revision": expected_revision + 1,
+            "revision": revision,
             "plan": {"schema_version": "synthetic-plan"},
         },
     )
@@ -135,10 +136,12 @@ def test_realistic_progression_passes_without_claiming_architecture_correctness(
     final = _progress_snapshot(initial)
     result = _audit(initial, _save(initial), _plan(), _read(final))
 
+    assert result["schema_version"] == "hardware_splicer.codex_mission_progress_audit.v2"
     assert result["contract_pass"] is True
     assert result["checks"]["state_changed_beyond_project_identity"] is True
     assert result["checks"]["mission_output_surface_changed"] is True
-    assert result["checks"]["substantive_project_operation_succeeded"] is True
+    assert result["checks"]["state_producing_project_operation_succeeded"] is True
+    assert result["state_producing_project_operations"][0]["reported_project_revision"] == 2
     assert result["checks"]["registered_source_records_preserved"] is True
     assert result["changed_mission_surfaces"] == [
         "engineeringPlan",
@@ -158,7 +161,7 @@ def test_noop_persist_and_readback_cannot_pass_as_mission_progress() -> None:
     assert result["checks"]["final_canonical_readback_present"] is True
     assert result["checks"]["state_changed_beyond_project_identity"] is False
     assert result["checks"]["mission_output_surface_changed"] is False
-    assert result["checks"]["substantive_project_operation_succeeded"] is False
+    assert result["checks"]["state_producing_project_operation_succeeded"] is False
 
 
 def test_project_identity_only_change_is_not_engineering_progress() -> None:
@@ -178,7 +181,25 @@ def test_fabricated_progress_fields_via_generic_snapshot_save_are_insufficient()
 
     assert result["checks"]["state_changed_beyond_project_identity"] is True
     assert result["checks"]["mission_output_surface_changed"] is True
-    assert result["checks"]["substantive_project_operation_succeeded"] is False
+    assert result["checks"]["state_producing_project_operation_succeeded"] is False
+    assert result["contract_pass"] is False
+
+
+def test_operation_must_report_the_revision_that_is_finally_read_back() -> None:
+    initial = spi_flash_adapter_snapshot()
+    final = _progress_snapshot(initial)
+    result = _audit(
+        initial,
+        _save(initial),
+        _plan(reported_revision=2),
+        _save(final, revision=3),
+        _read(final, revision=3),
+    )
+
+    assert result["checks"]["mission_output_surface_changed"] is True
+    assert result["final_project_revision"] == 3
+    assert result["checks"]["state_producing_project_operation_succeeded"] is False
+    assert result["state_producing_project_operations"] == []
     assert result["contract_pass"] is False
 
 
@@ -186,7 +207,7 @@ def test_substantive_operation_without_persisted_output_progress_is_insufficient
     initial = spi_flash_adapter_snapshot()
     result = _audit(initial, _save(initial), _plan(), _read(initial))
 
-    assert result["checks"]["substantive_project_operation_succeeded"] is True
+    assert result["checks"]["state_producing_project_operation_succeeded"] is True
     assert result["checks"]["mission_output_surface_changed"] is False
     assert result["contract_pass"] is False
 
@@ -279,7 +300,7 @@ def test_readback_before_last_mutation_does_not_substantiate_final_state() -> No
     final = _progress_snapshot(initial)
     result = _audit(initial, _save(initial), _read(final, revision=1), _plan())
 
-    assert result["checks"]["substantive_project_operation_succeeded"] is True
+    assert result["checks"]["state_producing_project_operation_succeeded"] is False
     assert result["checks"]["final_canonical_readback_present"] is False
     assert result["contract_pass"] is False
 
@@ -294,7 +315,7 @@ def test_unscoped_non_persistence_mutation_does_not_count_as_project_work() -> N
         arguments={"operation_id": "hash_payload", "json_body": {"text": "x"}},
         body={"ok": True, "sha256": "0" * 64},
     )
-    result = _audit(initial, _save(initial), unrelated, _read(final))
+    result = _audit(initial, _save(initial), unrelated, _read(final, revision=1))
 
-    assert result["checks"]["substantive_project_operation_succeeded"] is False
+    assert result["checks"]["state_producing_project_operation_succeeded"] is False
     assert result["contract_pass"] is False
