@@ -11,6 +11,7 @@ on:
       - "src/hardware_splicer/frontier_operator_experiment.py"
       - "src/hardware_splicer/codex_astra_*.py"
       - "src/hardware_splicer/codex_exec_trace.py"
+      - "src/hardware_splicer/codex_mission_progress.py"
       - "src/hardware_splicer/product_api.py"
       - "src/hardware_splicer/**/*_api.py"
       - "tests/test_mcp_backend_gateway.py"
@@ -20,6 +21,7 @@ on:
       - "tests/test_codex_astra_*.py"
       - "tests/test_codex_exec_trace.py"
       - "tests/test_codex_final_project_readback.py"
+      - "tests/test_codex_mission_progress.py"
       - "scripts/smoke_backend_mcp_stdio.py"
       - "scripts/smoke_backend_mcp_http.py"
       - "scripts/run_external_mcp_agent_proof.py"
@@ -69,7 +71,8 @@ jobs:
             tests/test_codex_astra_runtime.py \
             tests/test_codex_astra_one_shot.py \
             tests/test_codex_exec_trace.py \
-            tests/test_codex_final_project_readback.py
+            tests/test_codex_final_project_readback.py \
+            tests/test_codex_mission_progress.py
       - name: Exercise a real MCP stdio client session
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
       - name: Exercise a real MCP Streamable HTTP client session
