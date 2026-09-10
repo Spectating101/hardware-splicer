@@ -9,16 +9,11 @@ import os
 import sys
 from pathlib import Path
 
-# Direct execution from scripts/ would otherwise import legacy scripts/hardware_splicer.py.
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
     str(_REPO_ROOT),
-    *[
-        entry
-        for entry in sys.path
-        if Path(entry or os.curdir).resolve() != _SCRIPT_DIR
-    ],
+    *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
 ]
 
 from hardware_splicer.codex_exec_trace import (
@@ -26,6 +21,7 @@ from hardware_splicer.codex_exec_trace import (
     normalize_codex_exec_events,
     parse_codex_jsonl,
 )
+from hardware_splicer.codex_final_report import audit_codex_final_report
 from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
 
@@ -74,11 +70,19 @@ def main() -> int:
         expected_project_id=args.expected_project_id,
         initial_snapshot=snapshot,
     )
+    final_report = audit_codex_final_report(
+        events,
+        expected_project_id=args.expected_project_id,
+        expected_final_revision=mission_progress.get("final_project_revision"),
+    )
     audit["codex_mission_progress_audit"] = mission_progress
     audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+    audit["codex_final_report_audit"] = final_report
+    audit["codex_final_report_contract_pass"] = final_report["contract_pass"]
     audit["codex_evaluation_ready_pass"] = bool(
         audit.get("codex_hard_truth_contract_pass")
         and mission_progress["contract_pass"]
+        and final_report["contract_pass"]
     )
     audit.update(
         {
