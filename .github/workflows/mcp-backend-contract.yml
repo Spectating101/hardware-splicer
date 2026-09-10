@@ -19,6 +19,7 @@ on:
       - "tests/test_frontier_operator*.py"
       - "tests/test_codex_astra_*.py"
       - "tests/test_codex_exec_trace.py"
+      - "tests/test_codex_final_project_readback.py"
       - "scripts/smoke_backend_mcp_stdio.py"
       - "scripts/smoke_backend_mcp_http.py"
       - "scripts/run_external_mcp_agent_proof.py"
@@ -67,7 +68,8 @@ jobs:
             tests/test_codex_astra_case.py \
             tests/test_codex_astra_runtime.py \
             tests/test_codex_astra_one_shot.py \
-            tests/test_codex_exec_trace.py
+            tests/test_codex_exec_trace.py \
+            tests/test_codex_final_project_readback.py
       - name: Exercise a real MCP stdio client session
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
       - name: Exercise a real MCP Streamable HTTP client session
