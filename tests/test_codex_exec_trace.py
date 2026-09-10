@@ -11,6 +11,20 @@ from hardware_splicer.codex_exec_trace import (
 )
 
 
+def _project_body(project_id: str = "exp-1", revision: int = 1) -> dict:
+    return {
+        "ok": True,
+        "project": {
+            "schema_version": "hardware_splicer.project_snapshot.v1",
+            "project_id": project_id,
+            "revision": revision,
+            "saved_at": "2026-09-10T00:00:00+00:00",
+            "snapshot": {"mission": "synthetic"},
+            "metadata": {},
+        },
+    }
+
+
 def _gateway_payload(
     *,
     operation_id: str,
@@ -27,7 +41,7 @@ def _gateway_payload(
         "sha256": "0" * 64,
         "headers": {"content-type": "application/json"},
         "body": (
-            {"project_id": project_id}
+            _project_body(project_id)
             if ok and method == "GET"
             else {"detail": "blocked"}
         ),
@@ -77,11 +91,7 @@ def _valid_events() -> list[dict]:
         {"type": "turn.started"},
         _mcp("1", "hs_backend_status", {}),
         _mcp("2", "hs_backend_list_operations", {"text": "project"}),
-        _mcp(
-            "3",
-            "hs_backend_describe_operation",
-            {"operation_id": "get_project"},
-        ),
+        _mcp("3", "hs_backend_describe_operation", {"operation_id": "get_project"}),
         _mcp(
             "4",
             "hs_backend_call",
@@ -197,9 +207,7 @@ def test_started_mcp_without_terminal_result_fails_closed() -> None:
 
 def test_turn_failure_fails_response_completion() -> None:
     events = _valid_events()[:-1]
-    events.append(
-        {"type": "turn.failed", "error": {"message": "model unavailable"}}
-    )
+    events.append({"type": "turn.failed", "error": {"message": "model unavailable"}})
     normalized = normalize_codex_exec_events(events, model="gpt-6-astra")
     assert normalized["status"] == "failed"
     assert normalized["error"] == "model unavailable"
@@ -231,8 +239,7 @@ def test_unknown_item_type_fails_cleanroom_contract() -> None:
 
 
 def test_arguments_and_result_are_preserved() -> None:
-    events = _valid_events()
-    normalized = normalize_codex_exec_events(events, model="gpt-6-astra")
+    normalized = normalize_codex_exec_events(_valid_events(), model="gpt-6-astra")
     call = normalized["output"][-1]
     assert call["arguments"]["path_params"]["project_id"] == "exp-1"
     result = json.loads(call["output"])
@@ -242,21 +249,23 @@ def test_arguments_and_result_are_preserved() -> None:
 
 def test_intermediate_backend_failure_is_evidence_not_automatic_case_failure() -> None:
     events = _valid_events()
-    failed = _mcp(
-        "3b",
-        "hs_backend_call",
-        {
-            "operation_id": "update_project",
-            "path_params": {"project_id": "exp-1"},
-        },
-        gateway_payload=_gateway_payload(
-            operation_id="update_project",
-            method="PATCH",
-            ok=False,
-            status_code=422,
+    events.insert(
+        5,
+        _mcp(
+            "3b",
+            "hs_backend_call",
+            {
+                "operation_id": "update_project",
+                "path_params": {"project_id": "exp-1"},
+            },
+            gateway_payload=_gateway_payload(
+                operation_id="update_project",
+                method="PATCH",
+                ok=False,
+                status_code=422,
+            ),
         ),
     )
-    events.insert(5, failed)
     audit = _audit(events)
     assert audit["backend_application_failure_count"] == 1
     assert audit["backend_result_parse_pass"] is True
@@ -266,21 +275,23 @@ def test_intermediate_backend_failure_is_evidence_not_automatic_case_failure() -
 
 def test_successful_mutation_requires_later_project_readback() -> None:
     events = _valid_events()
-    mutation = _mcp(
-        "4b",
-        "hs_backend_call",
-        {
-            "operation_id": "update_project",
-            "path_params": {"project_id": "exp-1"},
-        },
-        gateway_payload=_gateway_payload(
-            operation_id="update_project",
-            method="PATCH",
-            ok=True,
-            status_code=200,
+    events.insert(
+        -2,
+        _mcp(
+            "4b",
+            "hs_backend_call",
+            {
+                "operation_id": "update_project",
+                "path_params": {"project_id": "exp-1"},
+            },
+            gateway_payload=_gateway_payload(
+                operation_id="update_project",
+                method="PATCH",
+                ok=True,
+                status_code=200,
+            ),
         ),
     )
-    events.insert(-2, mutation)
     audit = _audit(events)
     assert audit["backend_result_parse_pass"] is True
     assert audit["final_project_readback_pass"] is False
@@ -298,19 +309,13 @@ def test_successful_readback_after_mutation_passes() -> None:
             "path_params": {"project_id": "exp-1"},
         },
         gateway_payload=_gateway_payload(
-            operation_id="update_project",
-            method="PATCH",
-            ok=True,
-            status_code=200,
+            operation_id="update_project", method="PATCH", ok=True, status_code=200
         ),
     )
     readback = _mcp(
         "4b",
         "hs_backend_call",
-        {
-            "operation_id": "get_project",
-            "path_params": {"project_id": "exp-1"},
-        },
+        {"operation_id": "get_project", "path_params": {"project_id": "exp-1"}},
         gateway_payload=_gateway_payload(operation_id="get_project"),
     )
     events.insert(5, mutation)
@@ -334,13 +339,9 @@ def test_readback_of_wrong_project_fails_semantic_contract() -> None:
     events[5] = _mcp(
         "4",
         "hs_backend_call",
-        {
-            "operation_id": "get_project",
-            "path_params": {"project_id": "exp-1"},
-        },
+        {"operation_id": "get_project", "path_params": {"project_id": "exp-1"}},
         gateway_payload=_gateway_payload(
-            operation_id="get_project",
-            project_id="other-project",
+            operation_id="get_project", project_id="other-project"
         ),
     )
     audit = _audit(events)
