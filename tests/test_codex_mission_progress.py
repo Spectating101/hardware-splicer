@@ -7,7 +7,10 @@ from hardware_splicer.cleanroom_unseen_spi_flash_experiment import (
     build_unseen_spi_flash_cases,
     spi_flash_adapter_snapshot,
 )
-from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
+from hardware_splicer.codex_mission_progress import (
+    audit_codex_mission_progress,
+    canonical_blocker_catalog,
+)
 
 
 PROJECT_ID = "exp-1"
@@ -136,13 +139,16 @@ def test_realistic_progression_passes_without_claiming_architecture_correctness(
     final = _progress_snapshot(initial)
     result = _audit(initial, _save(initial), _plan(), _read(final))
 
-    assert result["schema_version"] == "hardware_splicer.codex_mission_progress_audit.v2"
+    assert result["schema_version"] == "hardware_splicer.codex_mission_progress_audit.v3"
     assert result["contract_pass"] is True
     assert result["checks"]["state_changed_beyond_project_identity"] is True
     assert result["checks"]["mission_output_surface_changed"] is True
     assert result["checks"]["state_producing_project_operation_succeeded"] is True
     assert result["state_producing_project_operations"][0]["reported_project_revision"] == 2
     assert result["checks"]["registered_source_records_preserved"] is True
+    assert result["checks"]["initial_engineering_blockers_preserved"] is True
+    assert result["checks"]["canonical_blocker_catalog_nonempty"] is True
+    assert set(initial["engineeringBlockers"]).issubset(result["grounded_blocker_strings"])
     assert result["changed_mission_surfaces"] == [
         "engineeringPlan",
         "orderedSteps",
@@ -151,6 +157,21 @@ def test_realistic_progression_passes_without_claiming_architecture_correctness(
     assert result["correct_engineering_architecture_asserted"] is False
     assert result["physical_correctness"] == "UNPROVEN"
     assert result["physical_authority_granted"] is False
+
+
+def test_blocker_catalog_uses_only_canonical_unresolved_surfaces() -> None:
+    snapshot = spi_flash_adapter_snapshot()
+    snapshot["missingInfo"] = ["Need exact pinout evidence."]
+    snapshot["engineeringStatus"] = {
+        "blockers": [{"blocker_id": "b1", "message": "Resolve supply implementation."}]
+    }
+    snapshot["engineeringAdvisories"].append("This advisory must not become a blocker.")
+    catalog = canonical_blocker_catalog(snapshot)
+    texts = {row["text"] for row in catalog}
+    assert "Need exact pinout evidence." in texts
+    assert "Resolve supply implementation." in texts
+    assert set(snapshot["engineeringBlockers"]).issubset(texts)
+    assert "This advisory must not become a blocker." not in texts
 
 
 def test_noop_persist_and_readback_cannot_pass_as_mission_progress() -> None:
@@ -245,6 +266,22 @@ def test_registered_source_addition_or_removal_blocks_progress_contract() -> Non
     added_result = _audit(initial, _save(initial), _plan(), _read(added))
     assert added_result["checks"]["registered_source_ids_preserved"] is False
     assert added_result["contract_pass"] is False
+
+
+def test_initial_engineering_blocker_delete_or_rewrite_blocks_progress() -> None:
+    initial = spi_flash_adapter_snapshot()
+
+    deleted = _progress_snapshot(initial)
+    deleted["engineeringBlockers"] = deleted["engineeringBlockers"][1:]
+    deleted_result = _audit(initial, _save(initial), _plan(), _read(deleted))
+    assert deleted_result["checks"]["initial_engineering_blockers_preserved"] is False
+    assert deleted_result["contract_pass"] is False
+
+    rewritten = _progress_snapshot(initial)
+    rewritten["engineeringBlockers"][0] = "Resolved by model reasoning."
+    rewritten_result = _audit(initial, _save(initial), _plan(), _read(rewritten))
+    assert rewritten_result["checks"]["initial_engineering_blockers_preserved"] is False
+    assert rewritten_result["contract_pass"] is False
 
 
 def test_unresolved_identity_conflict_must_remain_unresolved() -> None:
