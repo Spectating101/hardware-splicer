@@ -353,9 +353,9 @@ mcp(
     {"operation_id": "get_project", "path_params": {"project_id": project_id}},
     gateway("get_project", "GET", f"/v1/projects/{project_id}", read_body),
 )
-blockers = list(final_snapshot.get("missingInfo") or final_snapshot.get("engineeringBlockers") or [])
+blockers = list(final_snapshot.get("engineeringBlockers") or [])
 if not blockers:
-    print("fake final state has no canonical blockers", file=sys.stderr)
+    print("fake final state has no preserved frozen engineering blockers", file=sys.stderr)
     raise SystemExit(83)
 report = {
     "schema_version": "hardware_splicer.astra_final_report.v1",
