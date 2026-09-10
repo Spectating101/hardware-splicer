@@ -23,6 +23,7 @@ from hardware_splicer.codex_exec_trace import (
 )
 from hardware_splicer.codex_final_report import audit_codex_final_report
 from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
+from hardware_splicer.codex_progress_provenance import audit_codex_progress_provenance
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
 
 
@@ -47,7 +48,7 @@ def main() -> int:
         required=True,
         help=(
             "Exact product-visible frozen case snapshot used for evidence identity and "
-            "minimum mission-progress comparison."
+            "minimum mission-progress/provenance comparison."
         ),
     )
     parser.add_argument("--model", default="gpt-6-astra")
@@ -70,6 +71,12 @@ def main() -> int:
         expected_project_id=args.expected_project_id,
         initial_snapshot=snapshot,
     )
+    progress_provenance = audit_codex_progress_provenance(
+        normalized,
+        expected_project_id=args.expected_project_id,
+        initial_snapshot=snapshot,
+        mission_progress=mission_progress,
+    )
     final_report = audit_codex_final_report(
         events,
         expected_project_id=args.expected_project_id,
@@ -78,11 +85,16 @@ def main() -> int:
     )
     audit["codex_mission_progress_audit"] = mission_progress
     audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+    audit["codex_progress_provenance_audit"] = progress_provenance
+    audit["codex_progress_provenance_contract_pass"] = progress_provenance[
+        "contract_pass"
+    ]
     audit["codex_final_report_audit"] = final_report
     audit["codex_final_report_contract_pass"] = final_report["contract_pass"]
     audit["codex_evaluation_ready_pass"] = bool(
         audit.get("codex_hard_truth_contract_pass")
         and mission_progress["contract_pass"]
+        and progress_provenance["contract_pass"]
         and final_report["contract_pass"]
     )
     audit.update(
