@@ -39,6 +39,7 @@ from hardware_splicer.codex_final_report import (
     write_final_report_schema,
 )
 from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
+from hardware_splicer.codex_progress_provenance import audit_codex_progress_provenance
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
 
 
@@ -120,6 +121,7 @@ def main() -> int:
     plan["output_schema_file"] = str(output_schema_path)
     plan["output_schema_sha256"] = final_report_schema_sha256()
     plan["structured_final_report_required"] = True
+    plan["operation_to_state_provenance_required"] = True
 
     if not args.execute:
         plan["required_live_acknowledgement"] = CODEX_ALLOWANCE_CONFIRMATION
@@ -166,7 +168,7 @@ def main() -> int:
             )
     except subprocess.TimeoutExpired:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v3",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v4",
             "status": "timeout",
             "timeout_seconds": args.timeout_seconds,
             "live_execution_claim": str(attempt_path),
@@ -181,7 +183,7 @@ def main() -> int:
         return 124
     except OSError as exc:
         result = {
-            "schema_version": "hardware_splicer.codex_astra_run_result.v3",
+            "schema_version": "hardware_splicer.codex_astra_run_result.v4",
             "status": "launch_error",
             "error": f"{type(exc).__name__}: {exc}",
             "live_execution_claim": str(attempt_path),
@@ -212,6 +214,12 @@ def main() -> int:
             expected_project_id=context.experiment_project_id,
             initial_snapshot=snapshot,
         )
+        progress_provenance = audit_codex_progress_provenance(
+            normalized,
+            expected_project_id=context.experiment_project_id,
+            initial_snapshot=snapshot,
+            mission_progress=mission_progress,
+        )
         final_report = audit_codex_final_report(
             events,
             expected_project_id=context.experiment_project_id,
@@ -220,11 +228,16 @@ def main() -> int:
         )
         audit["codex_mission_progress_audit"] = mission_progress
         audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+        audit["codex_progress_provenance_audit"] = progress_provenance
+        audit["codex_progress_provenance_contract_pass"] = progress_provenance[
+            "contract_pass"
+        ]
         audit["codex_final_report_audit"] = final_report
         audit["codex_final_report_contract_pass"] = final_report["contract_pass"]
         audit["codex_evaluation_ready_pass"] = bool(
             audit.get("codex_hard_truth_contract_pass")
             and mission_progress["contract_pass"]
+            and progress_provenance["contract_pass"]
             and final_report["contract_pass"]
         )
         _write_json(audit_path, audit)
@@ -237,7 +250,7 @@ def main() -> int:
         and audit.get("codex_evaluation_ready_pass") is True
     )
     result = {
-        "schema_version": "hardware_splicer.codex_astra_run_result.v3",
+        "schema_version": "hardware_splicer.codex_astra_run_result.v4",
         "status": "passed" if passed else "failed",
         "codex_exit_code": completed.returncode,
         "codex_hard_truth_contract_pass": (
@@ -245,6 +258,9 @@ def main() -> int:
         ),
         "codex_mission_progress_contract_pass": (
             audit.get("codex_mission_progress_contract_pass") if audit else False
+        ),
+        "codex_progress_provenance_contract_pass": (
+            audit.get("codex_progress_provenance_contract_pass") if audit else False
         ),
         "codex_final_report_contract_pass": (
             audit.get("codex_final_report_contract_pass") if audit else False
