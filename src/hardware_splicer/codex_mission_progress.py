@@ -2,7 +2,8 @@
 
 This layer does not judge whether an engineering architecture is correct. It prevents
 transport-valid/no-op traces from being mistaken for meaningful experiment results by
-requiring a bounded, evidence-preserving project-state progression.
+requiring a bounded, evidence-preserving project-state progression whose producing
+operation is linked to the final persisted revision.
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ import hashlib
 import json
 from typing import Any, Mapping, Sequence
 
-SCHEMA_VERSION = "hardware_splicer.codex_mission_progress_audit.v1"
+SCHEMA_VERSION = "hardware_splicer.codex_mission_progress_audit.v2"
 
 _MISSION_OUTPUT_SURFACES = (
     "engineeringPlan",
@@ -33,6 +34,8 @@ _MISSION_OUTPUT_SURFACES = (
     "engineeringStatus",
     "missingInfo",
     "rankedNextAction",
+    "engineeringPackages",
+    "engineeringAiSessions",
 )
 
 _CONFLICT_KEYS = (
@@ -78,6 +81,12 @@ def _sha256(value: Any) -> str:
     if not isinstance(value, str):
         value = _canonical_json(value)
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _positive_revision(value: Any) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        return None
+    return value
 
 
 def _decode_gateway_payload(
@@ -228,13 +237,30 @@ def _canonical_latest_project_envelope(
     project = body.get("project")
     if not isinstance(project, Mapping) or project.get("project_id") != expected_project_id:
         return None
-    revision = project.get("revision")
-    if isinstance(revision, bool) or not isinstance(revision, int) or revision < 1:
+    if _positive_revision(project.get("revision")) is None:
         return None
-    snapshot = project.get("snapshot")
-    if not isinstance(snapshot, Mapping):
+    if not isinstance(project.get("snapshot"), Mapping):
         return None
     return dict(project)
+
+
+def _reported_project_revision(body: Any, *, expected_project_id: str) -> int | None:
+    """Return a mutation's persisted revision only when it is bound to this project."""
+
+    if not isinstance(body, Mapping) or body.get("ok") is not True:
+        return None
+
+    if body.get("project_id") == expected_project_id:
+        revision = _positive_revision(body.get("revision"))
+        if revision is not None:
+            return revision
+
+    project = body.get("project")
+    if isinstance(project, Mapping) and project.get("project_id") == expected_project_id:
+        revision = _positive_revision(project.get("revision"))
+        if revision is not None:
+            return revision
+    return None
 
 
 def _identity_normalized_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
@@ -351,11 +377,14 @@ def _truth_claim_attempts(value: Any) -> list[dict[str, Any]]:
     return attempts
 
 
-def _substantive_project_mutations(
+def _state_producing_project_mutations(
     rows: Sequence[Mapping[str, Any]],
     *,
     expected_project_id: str,
+    final_revision: int | None,
 ) -> list[dict[str, Any]]:
+    """Require a non-generic mutation that reports the exact final persisted revision."""
+
     persistence_or_lifecycle = {
         ("PUT", f"/v1/projects/{expected_project_id}/snapshot"),
         ("POST", f"/v1/projects/{expected_project_id}/duplicate"),
@@ -363,6 +392,9 @@ def _substantive_project_mutations(
         ("DELETE", f"/v1/projects/{expected_project_id}"),
     }
     result: list[dict[str, Any]] = []
+    if final_revision is None:
+        return result
+
     for row in rows:
         method = str(row.get("method") or "")
         path = str(row.get("path") or "")
@@ -377,12 +409,19 @@ def _substantive_project_mutations(
         )
         if not scoped:
             continue
+        reported_revision = _reported_project_revision(
+            row.get("response_body"),
+            expected_project_id=expected_project_id,
+        )
+        if reported_revision != final_revision:
+            continue
         result.append(
             {
                 "backend_call_index": row.get("backend_call_index"),
                 "operation_id": row.get("operation_id"),
                 "method": method,
                 "path": path,
+                "reported_project_revision": reported_revision,
             }
         )
     return result
@@ -424,6 +463,11 @@ def audit_codex_mission_progress(
         if isinstance(final_project, Mapping)
         else {}
     )
+    final_revision = (
+        _positive_revision(final_project.get("revision"))
+        if isinstance(final_project, Mapping)
+        else None
+    )
 
     initial_sources, initial_source_errors = _registered_source_map(initial_snapshot)
     final_sources, final_source_errors = _registered_source_map(final_snapshot)
@@ -457,16 +501,17 @@ def audit_codex_mission_progress(
         _canonical_json(_identity_normalized_snapshot(final_snapshot))
         != _canonical_json(_identity_normalized_snapshot(initial_snapshot))
     )
-    substantive = _substantive_project_mutations(
+    producing_mutations = _state_producing_project_mutations(
         rows,
         expected_project_id=expected_project_id,
+        final_revision=final_revision,
     )
 
     checks = {
         "final_canonical_readback_present": final_project is not None,
         "state_changed_beyond_project_identity": state_changed,
         "mission_output_surface_changed": bool(changed_surfaces),
-        "substantive_project_operation_succeeded": bool(substantive),
+        "state_producing_project_operation_succeeded": bool(producing_mutations),
         "registered_source_ids_preserved": source_ids_preserved,
         "registered_source_records_preserved": source_records_preserved,
         "persisted_mission_preserved": mission_preserved,
@@ -480,12 +525,12 @@ def audit_codex_mission_progress(
         "checks": checks,
         "initial_snapshot_sha256": _sha256(initial_snapshot),
         "final_snapshot_sha256": _sha256(final_snapshot) if final_project else None,
-        "final_project_revision": (
-            final_project.get("revision") if final_project is not None else None
-        ),
+        "final_project_revision": final_revision,
         "final_readback_backend_call_index": final_readback_index,
         "changed_mission_surfaces": changed_surfaces,
-        "substantive_project_operations": substantive,
+        "state_producing_project_operations": producing_mutations,
+        # Compatibility alias retained for early staging artifacts; rows are now stricter.
+        "substantive_project_operations": producing_mutations,
         "initial_registered_source_ids": sorted(initial_sources),
         "final_registered_source_ids": sorted(final_sources),
         "source_validation_errors": [*initial_source_errors, *final_source_errors],
@@ -497,10 +542,11 @@ def audit_codex_mission_progress(
         "physical_authority_granted": False,
         "claim_boundary": (
             "Pass proves only minimum evidence-preserving mission progress: the final "
-            "canonical snapshot changed on a recognized engineering-output surface after "
-            "at least one successful non-persistence project operation while preserving "
-            "the frozen mission, constraints, registered source records, unresolved "
-            "conflicts, and closed readiness/authority. It does not prove that any "
-            "architecture, component choice, pin mapping, or physical implementation is correct."
+            "canonical snapshot changed on a recognized engineering-output surface, and "
+            "a successful non-generic project mutation reported the same persisted revision "
+            "that was later read back, while the frozen mission, constraints, registered "
+            "source records, unresolved conflicts, and closed readiness/authority were "
+            "preserved. It does not prove that any architecture, component choice, pin "
+            "mapping, or physical implementation is correct."
         ),
     }
