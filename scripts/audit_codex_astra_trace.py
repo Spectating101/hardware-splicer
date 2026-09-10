@@ -23,8 +23,10 @@ sys.path[:] = [
 
 from hardware_splicer.codex_exec_trace import (
     audit_codex_exec_trace,
+    normalize_codex_exec_events,
     parse_codex_jsonl,
 )
+from hardware_splicer.codex_mission_progress import audit_codex_mission_progress
 from hardware_splicer.external_mcp_trace_audit import snapshot_source_ids
 
 
@@ -47,7 +49,10 @@ def main() -> int:
     parser.add_argument(
         "--snapshot-file",
         required=True,
-        help="Exact product-visible frozen case snapshot used for known source identities.",
+        help=(
+            "Exact product-visible frozen case snapshot used for evidence identity and "
+            "minimum mission-progress comparison."
+        ),
     )
     parser.add_argument("--model", default="gpt-6-astra")
     parser.add_argument("--out")
@@ -63,6 +68,18 @@ def main() -> int:
         expected_project_id=args.expected_project_id,
         known_source_ids=snapshot_source_ids(snapshot),
     )
+    normalized = normalize_codex_exec_events(events, model=args.model)
+    mission_progress = audit_codex_mission_progress(
+        normalized,
+        expected_project_id=args.expected_project_id,
+        initial_snapshot=snapshot,
+    )
+    audit["codex_mission_progress_audit"] = mission_progress
+    audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
+    audit["codex_evaluation_ready_pass"] = bool(
+        audit.get("codex_hard_truth_contract_pass")
+        and mission_progress["contract_pass"]
+    )
     audit.update(
         {
             "trace_file": str(trace_path),
@@ -70,6 +87,9 @@ def main() -> int:
             "offline_audit": True,
             "provider_network_io_performed": False,
             "mcp_network_io_performed": False,
+            "correct_engineering_architecture_asserted": False,
+            "physical_correctness": "UNPROVEN",
+            "physical_authority_granted": False,
         }
     )
     rendered = json.dumps(audit, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
@@ -78,7 +98,7 @@ def main() -> int:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(rendered, encoding="utf-8")
     print(rendered, end="")
-    return 0 if audit.get("codex_hard_truth_contract_pass") is True else 9
+    return 0 if audit.get("codex_evaluation_ready_pass") is True else 9
 
 
 if __name__ == "__main__":
