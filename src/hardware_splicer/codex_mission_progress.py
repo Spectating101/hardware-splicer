@@ -11,7 +11,7 @@ import hashlib
 import json
 from typing import Any, Mapping, Sequence
 
-SCHEMA_VERSION = "hardware_splicer.codex_mission_progress_audit.v2"
+SCHEMA_VERSION = "hardware_splicer.codex_mission_progress_audit.v3"
 
 _MISSION_OUTPUT_SURFACES = (
     "engineeringPlan", "machineProject", "engineeringSourceGraph", "robotTopology",
@@ -225,6 +225,114 @@ def _registered_source_map(snapshot: Mapping[str, Any]) -> tuple[dict[str, str],
     return result, errors
 
 
+def _string_rows(value: Any) -> list[str]:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes, bytearray)):
+        return []
+    return [str(row).strip() for row in value if str(row).strip()]
+
+
+def _initial_engineering_blockers(snapshot: Mapping[str, Any]) -> list[str]:
+    return _string_rows(snapshot.get("engineeringBlockers"))
+
+
+def canonical_blocker_catalog(snapshot: Mapping[str, Any]) -> list[dict[str, str]]:
+    """Return deterministic exact blocker strings that may be quoted by a final report.
+
+    The catalog intentionally mirrors canonical project blocker surfaces instead of trying
+    to infer blockers from arbitrary prose. It is observer-side evidence, not model truth.
+    """
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def add(surface: str, message: Any) -> None:
+        text = str(message or "").strip()
+        if not text:
+            return
+        key = (surface, text)
+        if key in seen:
+            return
+        seen.add(key)
+        rows.append({"surface": surface, "text": text})
+
+    for key in ("engineeringBlockers", "missingInfo", "missing_info", "blockers"):
+        for text in _string_rows(snapshot.get(key)):
+            add(key, text)
+
+    status = snapshot.get("engineeringStatus") or snapshot.get("engineering_status")
+    if isinstance(status, Mapping):
+        blockers = status.get("blockers")
+        if isinstance(blockers, Sequence) and not isinstance(blockers, (str, bytes, bytearray)):
+            for item in blockers:
+                if isinstance(item, Mapping):
+                    add(
+                        "engineeringStatus.blockers",
+                        item.get("message") or item.get("reason") or item.get("title"),
+                    )
+                else:
+                    add("engineeringStatus.blockers", item)
+
+    for key in ("engineeringSourceConflicts", "sourceConflicts", "declaredConflicts"):
+        conflicts = snapshot.get(key)
+        if not isinstance(conflicts, Sequence) or isinstance(conflicts, (str, bytes, bytearray)):
+            continue
+        for item in conflicts:
+            if not isinstance(item, Mapping):
+                continue
+            status_value = str(item.get("status") or "unresolved").lower()
+            if status_value not in {"unresolved", "blocking", "open", ""}:
+                continue
+            add(key, item.get("reason") or item.get("message") or item.get("title"))
+
+    source_graph = snapshot.get("engineeringSourceGraph") or snapshot.get("engineering_source_graph")
+    if isinstance(source_graph, Mapping):
+        conflicts = source_graph.get("conflicts")
+        if isinstance(conflicts, Sequence) and not isinstance(conflicts, (str, bytes, bytearray)):
+            for item in conflicts:
+                if not isinstance(item, Mapping):
+                    continue
+                status_value = str(item.get("status") or "unresolved").lower()
+                if status_value in {"unresolved", "blocking", "open", ""}:
+                    add(
+                        "engineeringSourceGraph.conflicts",
+                        item.get("reason") or item.get("message") or item.get("title"),
+                    )
+
+    sessions = snapshot.get("engineeringAiSessions")
+    if isinstance(sessions, Sequence) and not isinstance(sessions, (str, bytes, bytearray)):
+        for session_index, session in enumerate(sessions):
+            if not isinstance(session, Mapping):
+                continue
+            for text in _string_rows(session.get("open_questions")):
+                add(f"engineeringAiSessions[{session_index}].open_questions", text)
+            turns = session.get("conversationTurns")
+            if isinstance(turns, Sequence) and not isinstance(turns, (str, bytes, bytearray)):
+                for turn_index, turn in enumerate(turns):
+                    if not isinstance(turn, Mapping):
+                        continue
+                    for text in _string_rows(turn.get("blockers")):
+                        add(
+                            f"engineeringAiSessions[{session_index}].conversationTurns[{turn_index}].blockers",
+                            text,
+                        )
+            actions = session.get("actions")
+            if isinstance(actions, Sequence) and not isinstance(actions, (str, bytes, bytearray)):
+                for action_index, action in enumerate(actions):
+                    if not isinstance(action, Mapping):
+                        continue
+                    tool_result = action.get("tool_result")
+                    if not isinstance(tool_result, Mapping) or str(tool_result.get("status") or "") != "failed":
+                        continue
+                    error = tool_result.get("error") if isinstance(tool_result.get("error"), Mapping) else {}
+                    summary = tool_result.get("summary") if isinstance(tool_result.get("summary"), Mapping) else {}
+                    add(
+                        f"engineeringAiSessions[{session_index}].actions[{action_index}].tool_result",
+                        error.get("message") or summary.get("error") or "Software preview failed.",
+                    )
+
+    return rows
+
+
 def _unresolved_conflict_tokens(snapshot: Mapping[str, Any]) -> set[str]:
     result: set[str] = set()
     for key in _CONFLICT_KEYS:
@@ -338,6 +446,11 @@ def audit_codex_mission_progress(
     )
     initial_conflicts = _unresolved_conflict_tokens(initial_snapshot)
     final_conflicts = _unresolved_conflict_tokens(final_snapshot)
+    initial_blockers = _initial_engineering_blockers(initial_snapshot)
+    final_blockers = _initial_engineering_blockers(final_snapshot)
+    initial_blockers_preserved = set(initial_blockers).issubset(set(final_blockers))
+    blocker_catalog = canonical_blocker_catalog(final_snapshot)
+    blocker_strings = sorted({row["text"] for row in blocker_catalog})
     mission_preserved = initial_snapshot.get("mission") is None or final_snapshot.get("mission") == initial_snapshot.get("mission")
     constraints_preserved = initial_snapshot.get("constraints") is None or _canonical_json(final_snapshot.get("constraints")) == _canonical_json(initial_snapshot.get("constraints"))
     truth_attempts = _truth_claim_attempts(final_snapshot)
@@ -353,14 +466,14 @@ def audit_codex_mission_progress(
         "state_changed_beyond_project_identity": state_changed,
         "mission_output_surface_changed": bool(changed_surfaces),
         "state_producing_project_operation_succeeded": producing_pass,
-        # Early staging used this name. Keep it as an identical diagnostic alias so
-        # existing artifacts/tests remain readable while the stronger definition lands.
         "substantive_project_operation_succeeded": producing_pass,
         "registered_source_ids_preserved": source_ids_preserved,
         "registered_source_records_preserved": source_records_preserved,
         "persisted_mission_preserved": mission_preserved,
         "persisted_constraints_preserved": constraints_preserved,
+        "initial_engineering_blockers_preserved": initial_blockers_preserved,
         "initial_unresolved_conflicts_preserved": initial_conflicts.issubset(final_conflicts),
+        "canonical_blocker_catalog_nonempty": bool(blocker_strings),
         "unsupported_final_truth_claims_absent": not truth_attempts,
     }
     return {
@@ -377,6 +490,10 @@ def audit_codex_mission_progress(
         "initial_registered_source_ids": sorted(initial_sources),
         "final_registered_source_ids": sorted(final_sources),
         "source_validation_errors": [*initial_source_errors, *final_source_errors],
+        "initial_engineering_blockers": initial_blockers,
+        "final_engineering_blockers": final_blockers,
+        "canonical_blocker_catalog": blocker_catalog,
+        "grounded_blocker_strings": blocker_strings,
         "initial_unresolved_conflicts": sorted(initial_conflicts),
         "final_unresolved_conflicts": sorted(final_conflicts),
         "unsupported_final_truth_claims": truth_attempts,
@@ -385,10 +502,10 @@ def audit_codex_mission_progress(
         "physical_authority_granted": False,
         "claim_boundary": (
             "Pass proves only minimum evidence-preserving mission progress: the final canonical "
-            "snapshot changed on a recognized engineering-output surface, and a successful "
-            "non-generic project mutation reported the same persisted revision later read back, "
-            "while the frozen mission, constraints, registered source records, unresolved "
-            "conflicts, and closed readiness/authority were preserved. It does not prove that "
-            "any architecture, component choice, pin mapping, or physical implementation is correct."
+            "snapshot changed on a recognized engineering-output surface, a successful non-generic "
+            "project mutation reported the same persisted revision later read back, and the frozen "
+            "mission, constraints, registered sources, explicit engineering blockers, structured "
+            "unresolved conflicts, and closed readiness/authority were preserved. It does not prove "
+            "that any architecture, component choice, pin mapping, or physical implementation is correct."
         ),
     }
