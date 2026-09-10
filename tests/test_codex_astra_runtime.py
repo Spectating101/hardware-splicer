@@ -160,25 +160,29 @@ def test_runtime_argv_is_single_case_offline_and_observer_denied(tmp_path: Path)
     assert "--json" in argv
     assert "--output-last-message" not in argv
     assert "OPENAI_API_KEY" not in rendered
+    assert "CODEX_API_KEY" not in rendered
     assert "ANTHROPIC_API_KEY" not in rendered
 
 
-def test_runtime_plan_names_present_credentials_without_leaking_values(tmp_path: Path) -> None:
+def test_runtime_plan_names_credentials_without_leaking_values(tmp_path: Path) -> None:
     context, _ = _prepared_case(tmp_path)
     plan = runtime_plan(
         context,
         argv=["codex", "exec"],
         source_env={
             "OPENAI_API_KEY": "super-secret-openai",
+            "CODEX_API_KEY": "super-secret-codex",
             "ANTHROPIC_API_KEY": "super-secret-anthropic",
         },
     )
     assert plan["provider_credentials_present_in_parent_env"] == [
         "OPENAI_API_KEY",
+        "CODEX_API_KEY",
         "ANTHROPIC_API_KEY",
     ]
     rendered = json.dumps(plan)
     assert "super-secret-openai" not in rendered
+    assert "super-secret-codex" not in rendered
     assert "super-secret-anthropic" not in rendered
     assert plan["provider_credentials_forwarded_to_runtime"] is False
     assert plan["internal_hs_provider_access_disabled"] is True
@@ -211,6 +215,7 @@ if "exec" not in args:
     raise SystemExit(77)
 for name in (
     "OPENAI_API_KEY",
+    "CODEX_API_KEY",
     "ANTHROPIC_API_KEY",
     "DASHSCOPE_API_KEY",
     "QWEN_API_KEY",
@@ -260,7 +265,17 @@ payload = {
     "byte_length": 2,
     "sha256": "0" * 64,
     "headers": {"content-type": "application/json"},
-    "body": {"project_id": project_id},
+    "body": {
+        "ok": True,
+        "project": {
+            "schema_version": "hardware_splicer.project_snapshot.v1",
+            "project_id": project_id,
+            "revision": 1,
+            "saved_at": "2026-09-10T00:00:00+00:00",
+            "snapshot": {"mission": "fake-runtime"},
+            "metadata": {},
+        },
+    },
     "operation_id": "get_project",
     "method": "GET",
     "path": f"/v1/projects/{project_id}",
@@ -288,7 +303,31 @@ emit({
     path.chmod(0o755)
 
 
-def test_full_runner_refuses_parent_openai_api_key_before_fake_execution(tmp_path: Path) -> None:
+def _fake_runner_command(
+    *,
+    script: Path,
+    manifest: Path,
+    fake_codex: Path,
+    fake_mcp: Path,
+) -> list[str]:
+    return [
+        sys.executable,
+        str(script),
+        "--manifest",
+        str(manifest),
+        "--codex-command",
+        str(fake_codex),
+        "--mcp-command",
+        str(fake_mcp),
+        "--execute",
+        "--confirm-codex-allowance",
+        CODEX_ALLOWANCE_CONFIRMATION,
+        "--timeout-seconds",
+        "60",
+    ]
+
+
+def test_full_runner_refuses_parent_api_key_before_fake_execution(tmp_path: Path) -> None:
     context, manifest = _prepared_case(tmp_path)
     fake_codex = tmp_path / "fake-codex"
     fake_mcp = tmp_path / "fake-hs-backend-mcp"
@@ -301,21 +340,12 @@ def test_full_runner_refuses_parent_openai_api_key_before_fake_execution(tmp_pat
     env["ANTHROPIC_API_KEY"] = "must-not-reach-fake-codex"
     script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
     completed = subprocess.run(
-        [
-            sys.executable,
-            str(script),
-            "--manifest",
-            str(manifest),
-            "--codex-command",
-            str(fake_codex),
-            "--mcp-command",
-            str(fake_mcp),
-            "--execute",
-            "--confirm-codex-allowance",
-            CODEX_ALLOWANCE_CONFIRMATION,
-            "--timeout-seconds",
-            "60",
-        ],
+        _fake_runner_command(
+            script=script,
+            manifest=manifest,
+            fake_codex=fake_codex,
+            fake_mcp=fake_mcp,
+        ),
         capture_output=True,
         text=True,
         env=env,
@@ -342,21 +372,12 @@ def test_full_runner_fake_live_path_succeeds_with_clean_parent_env(tmp_path: Pat
         env.pop(name, None)
     script = Path(__file__).resolve().parents[1] / "scripts" / "run_codex_astra_case.py"
     completed = subprocess.run(
-        [
-            sys.executable,
-            str(script),
-            "--manifest",
-            str(manifest),
-            "--codex-command",
-            str(fake_codex),
-            "--mcp-command",
-            str(fake_mcp),
-            "--execute",
-            "--confirm-codex-allowance",
-            CODEX_ALLOWANCE_CONFIRMATION,
-            "--timeout-seconds",
-            "60",
-        ],
+        _fake_runner_command(
+            script=script,
+            manifest=manifest,
+            fake_codex=fake_codex,
+            fake_mcp=fake_mcp,
+        ),
         capture_output=True,
         text=True,
         env=env,
@@ -369,6 +390,7 @@ def test_full_runner_fake_live_path_succeeds_with_clean_parent_env(tmp_path: Pat
     assert result["api_fallback"] is False
     assert result["provider_credentials_forwarded_to_runtime"] is False
     assert result["codex_usage"]["reasoning_output_tokens"] == 7
+    audit = json.loads((context.observer_dir / "CODEX_ASTRA_AUDIT.json").read_text())
+    assert audit["codex_backend_result_audit"]["final_project_readback"]["revision"] == 1
     assert (context.observer_dir / "CODEX_ASTRA_TRACE.jsonl").is_file()
-    assert (context.observer_dir / "CODEX_ASTRA_AUDIT.json").is_file()
     assert not (context.observer_dir / "CODEX_ASTRA_LAST_MESSAGE.txt").exists()
