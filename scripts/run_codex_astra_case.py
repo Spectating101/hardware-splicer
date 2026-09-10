@@ -216,6 +216,7 @@ def main() -> int:
             events,
             expected_project_id=context.experiment_project_id,
             expected_final_revision=mission_progress.get("final_project_revision"),
+            grounded_blockers=mission_progress.get("grounded_blocker_strings") or [],
         )
         audit["codex_mission_progress_audit"] = mission_progress
         audit["codex_mission_progress_contract_pass"] = mission_progress["contract_pass"]
