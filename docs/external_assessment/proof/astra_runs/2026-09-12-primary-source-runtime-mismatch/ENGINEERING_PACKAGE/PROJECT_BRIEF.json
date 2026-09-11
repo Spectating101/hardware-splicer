@@ -1,0 +1,20 @@
+{
+  "action_count": 0,
+  "blocker_count": 0,
+  "candidate_count": 0,
+  "conversation_turn_count": 0,
+  "current_stage": null,
+  "latest_ai_session_id": null,
+  "mission": "Use the page-addressed claims from the hash-identified manufacturer documents to advance the SPI adapter architecture as far as the evidence permits. Preserve physical identity, implementation, timing, and bench uncertainty; do not claim fabrication or power-on readiness.",
+  "mode": null,
+  "name": "Primary-source-grounded SPI Flash Programming Adapter",
+  "parsed_source_count": 0,
+  "project_id": "hs-astra-primary-20260912-2",
+  "requirement_count": 0,
+  "schema_version": "hardware_splicer.engineering_package.v1",
+  "snapshot_sha256": "863333e98816f22f54cb3bff3430b6eb41a47620a48d1a51576a8b6fc4ac50d3",
+  "source_count": 5,
+  "source_revision": 1,
+  "source_saved_at": "2026-09-11T17:54:48.339625+00:00",
+  "tool_result_count": 0
+}

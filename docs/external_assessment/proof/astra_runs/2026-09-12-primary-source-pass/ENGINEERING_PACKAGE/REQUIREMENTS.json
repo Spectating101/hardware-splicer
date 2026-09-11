@@ -1,0 +1,53 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-1",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-2",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-3",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Selected TXU0304 orderable package, footprint, availability, and assembly constraints."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-4",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-5",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "requirement-6",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "status": "unresolved",
+      "text": "Schematic/ERC/PCB/DRC results and all physical measurements."
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}

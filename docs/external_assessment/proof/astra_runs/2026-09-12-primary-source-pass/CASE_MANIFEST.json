@@ -1,0 +1,39 @@
+{
+  "backend_project_root": "$OBSERVER_DIR/BACKEND_STORE",
+  "backend_project_root_initially_empty": true,
+  "case_id": "spi-flash-adapter-primary-sources-v1",
+  "case_metadata": {
+    "independent_human_signoff": false,
+    "raw_documents_captured": true,
+    "raw_documents_model_visible": false,
+    "scenario_family": "semiconductor_spi_flash_fixture"
+  },
+  "case_project_revision": 1,
+  "developer_instructions_file": "$OBSERVER_DIR/DEVELOPER_INSTRUCTIONS.txt",
+  "equivalence_group": null,
+  "experiment_project_id": "hs-astra-primary-20260912-3",
+  "hs_repo_root": "$HS_REPO_ROOT",
+  "input_sha256": "sha256:2e87c539f3b48293ca76f68198bc301be4a3587552a73ba18b5cd0919bfd3890",
+  "instructions_sha256": "sha256:765f4faed246b6a22a0f5e160dd3fd91c774f6ef78eedc0608f517cf7ebb2b7b",
+  "mission_file": "$MODEL_WORKSPACE/MISSION.txt",
+  "model_inference_performed": false,
+  "model_visible_workspace": "$MODEL_WORKSPACE",
+  "observer_directory": "$OBSERVER_DIR",
+  "outer_labels_visible_to_model": false,
+  "perturbation_kind": "primary_source_document_grounding",
+  "physical_authority_granted": false,
+  "primary_source_capture_manifest": "$OBSERVER_DIR/PRIMARY_SOURCES/CAPTURE_MANIFEST.json",
+  "primary_source_document_count": 3,
+  "primary_source_documents_model_visible": false,
+  "product_visible_source_ids": [
+    "src-controller",
+    "src-dut-datasheet",
+    "src-fixture",
+    "src-translator-dir-datasheet",
+    "src-translator-fixed-datasheet"
+  ],
+  "provider_network_io_performed": false,
+  "schema_version": "hardware_splicer.codex_astra_case_package.v1",
+  "snapshot_file": "$OBSERVER_DIR/CASE_SNAPSHOT.json",
+  "snapshot_sha256": "sha256:d150b2ffd6661c693bb692397d5dbb2d0098a0aba75b8f51b1a96b8312303996"
+}

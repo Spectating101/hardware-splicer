@@ -1,0 +1,397 @@
+{
+  "authority_effect": "none",
+  "engineering_plan": {},
+  "engineering_readiness": {
+    "evidence_complete": false,
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "power_on_ready": false
+  },
+  "engineering_status": "bounded_pre_fabrication_plan",
+  "machine_project": {},
+  "ordered_steps": [],
+  "physical_correctness": "UNPROVEN",
+  "pre_fabrication_next_actions": {
+    "actions": [
+      {
+        "acceptance": "Traceable physical identity and reviewed package pin mapping.",
+        "action_id": "identity",
+        "description": "Capture DUT marking and package; establish exact suffix and package-specific pin table before assigning pads.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "pages": [
+              5,
+              6,
+              7,
+              8
+            ],
+            "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+            "revision": "Revision G",
+            "section": "3 Package Types and Pin Configurations",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "pending_evidence"
+      },
+      {
+        "acceptance": "Host identity, voltage limits and timing evidence tied to actual equipment.",
+        "action_id": "host",
+        "description": "Identify programmer and obtain documented drive/input limits, supported modes and clock/timing behavior; later authorized measurements must verify under load.",
+        "status": "pending_evidence"
+      },
+      {
+        "acceptance": "Reviewed orderable BOM and package-to-symbol pad mapping.",
+        "action_id": "package",
+        "description": "Select TXU0304 orderable package and verify footprint, availability and assembly constraints.",
+        "status": "pending_design"
+      },
+      {
+        "acceptance": "Complete sourced worst-case DC and timing budget; no clock rate selected now.",
+        "action_id": "timing",
+        "description": "Budget VIH/VIL against opposing VOH/VOL in both directions over supply, temperature and load; calculate SCLK/MOSI/CS setup/hold and MISO round-trip timing including translator delay/skew, wiring and host sampling. Select clock only after margins are established.",
+        "status": "pending_design"
+      },
+      {
+        "acceptance": "Reviewed supply and OE design with defined disable states; no power authorization implied.",
+        "action_id": "supply",
+        "description": "Specify local 1.8 V regulation, tolerances, current budget, decoupling, protection and shared reference. Resolve OE bias/control and all power sequencing states, including either rail absent, before implementation.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "page": 59,
+            "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V.",
+            "revision": "Revision G",
+            "section": "9.2 Operating Ranges",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V.",
+            "revision": "Revision A",
+            "section": "7.3 Recommended Operating Conditions",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 4,
+            "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state.",
+            "revision": "Revision A",
+            "section": "Table 6-1 Pin Functions",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending_design"
+      },
+      {
+        "acceptance": "Reviewed design artifacts and separately acquired physical evidence; all physical results currently absent.",
+        "action_id": "design_review",
+        "description": "After identity and electrical closure, produce schematic/BOM/PCB and ERC/DRC; obtain independent human/EE adjudication signoff. Plan subsequent separately authorized bench validation with measured rails, sequencing and SPI waveforms.",
+        "status": "blocked_by_prior_actions"
+      }
+    ],
+    "architecture_candidates": [
+      {
+        "candidate_id": "direct",
+        "reason": "At verified VCC=1.8 V the any-pin maximum is 2.2 V; an actual 3.3 V host drive exceeds it by 1.1 V. Absolute maximum is not an operating target. Host drive and physical DUT identity remain unverified.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "page": 59,
+            "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V.",
+            "revision": "Revision G",
+            "section": "9.2 Operating Ranges",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "page": 59,
+            "paraphrase": "Voltage applied to any pin is limited to -0.6 V through VCC plus 0.4 V.",
+            "revision": "Revision G",
+            "section": "9.1 Absolute Maximum Ratings",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "content_hash": "sha256:3v3-spi-controller-declaration-v2",
+            "source_id": "src-controller"
+          }
+        ],
+        "status": "rejected_under_declared_supplies"
+      },
+      {
+        "candidate_id": "txu0304",
+        "mapping_status": "proposed logical mapping only; package pad numbers and physical routing unresolved",
+        "oe": "Design OE low as disabled intent. Bias, control voltage, power-off behavior and sequencing implementation unresolved.",
+        "proposed_logical_mapping": [
+          {
+            "dut": "CLK",
+            "host": "SCLK",
+            "path": [
+              "A1",
+              "B1Y"
+            ]
+          },
+          {
+            "dut": "/CS",
+            "host": "CS#",
+            "path": [
+              "A2",
+              "B2Y"
+            ]
+          },
+          {
+            "dut": "DI_IO0",
+            "host": "MOSI_IO0",
+            "path": [
+              "A3",
+              "B3Y"
+            ]
+          },
+          {
+            "dut": "DO_IO1",
+            "host": "MISO_IO1",
+            "path": [
+              "B4",
+              "A4Y"
+            ]
+          }
+        ],
+        "reason": "Three fixed A-to-B and one B-to-A channels match standard SPI directions. 3.3 V VCCA and 1.8 V VCCB targets are within documented supply ranges; this does not establish logic or timing margins.",
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "page": 9,
+            "paraphrase": "Standard SPI uses DI as the device input and DO as the device output, with CLK and chip select as device inputs.",
+            "revision": "Revision G",
+            "section": "4.2 Serial Data Input, Output and IOs",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 4,
+            "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output.",
+            "revision": "Revision A",
+            "section": "6 Pin Configuration and Functions",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V.",
+            "revision": "Revision A",
+            "section": "7.3 Recommended Operating Conditions",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 4,
+            "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state.",
+            "revision": "Revision A",
+            "section": "Table 6-1 Pin Functions",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 24,
+            "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation.",
+            "revision": "Revision A",
+            "section": "10 Application and Implementation",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "preferred_family_candidate",
+        "supply_targets": {
+          "VCCA": 3.3,
+          "VCCB": 1.8
+        }
+      },
+      {
+        "candidate_id": "single_sn74axc4t245",
+        "reason": "Two shared-direction pairs yield 4+0, 2+2 or 0+4 channel capacities, not 3+1. Both target rails fit the documented supply range but cannot fix this topology mismatch. This conclusion is limited to one device for the stated mapping.",
+        "source_refs": [
+          {
+            "claim_id": "axc-direction-grouping",
+            "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "pages": [
+              3,
+              4
+            ],
+            "paraphrase": "The four channels are split into two two-bit sections, each controlled by one shared direction input.",
+            "revision": "Revision B",
+            "section": "4 Pin Configuration and Functions",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range of 0.65 V through 3.6 V.",
+            "revision": "Revision B",
+            "section": "5.3 Recommended Operating Conditions",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "page": 20,
+            "paraphrase": "Each section's direction input selects A-to-B or B-to-A for that entire two-channel section.",
+            "revision": "Revision B",
+            "section": "7.4 Device Functional Modes",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "rejected_for_simultaneous_3_plus_1_mapping"
+      }
+    ],
+    "assessment": {
+      "authority_effect": "none",
+      "blockers": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements."
+      ],
+      "default_power_state": "off",
+      "evidence_boundary": "frozen_product_visible_only",
+      "fabrication_ready": false,
+      "independent_signoff": false,
+      "physical_correctness": "UNPROVEN",
+      "power_on_ready": false,
+      "source_limitations": [
+        "Raw manufacturer PDF bytes were captured and hash-identified outside the model-visible snapshot.",
+        "Page-addressed paraphrases remain declared document evidence, not physical evidence.",
+        "Independent human/EE signoff of the preregistered adjudication remains pending."
+      ],
+      "status": "bounded_pre_fabrication_result",
+      "summary": "Advance TXU0304 as preferred translator-family candidate for standard SPI only. Full machine implementation unsupported by unresolved identity, supply and timing evidence.",
+      "tool_observations": [
+        {
+          "operation": "load_project",
+          "result": "not_found; initialized only supplied product-visible state at revision 1",
+          "status_code": 404
+        }
+      ],
+      "unresolved_facts": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements."
+      ]
+    },
+    "authority_effect": "none",
+    "automatic_execution": false,
+    "correct_engineering_architecture_asserted": false,
+    "decisions": [
+      {
+        "decision": "Use symbolic TXU0304 topology as candidate; defer package pin assignment.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "pages": [
+              5,
+              6,
+              7,
+              8
+            ],
+            "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+            "revision": "Revision G",
+            "section": "3 Package Types and Pin Configurations",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 4,
+            "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output.",
+            "revision": "Revision A",
+            "section": "6 Pin Configuration and Functions",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      },
+      {
+        "decision": "Keep power off and preserve all readiness blockers; page 24 application example is not component validation.",
+        "source_refs": [
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 24,
+            "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation.",
+            "revision": "Revision A",
+            "section": "10 Application and Implementation",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "content_hash": "sha256:spi-adapter-fixture-readiness-v2",
+            "source_id": "src-fixture"
+          }
+        ]
+      }
+    ],
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false,
+    "project_id": "hs-astra-primary-20260912-3",
+    "quarantined_generated_plan": null,
+    "requirements": [
+      {
+        "requirement_id": "requirement-1",
+        "status": "unresolved",
+        "text": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout."
+      },
+      {
+        "requirement_id": "requirement-2",
+        "status": "unresolved",
+        "text": "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior."
+      },
+      {
+        "requirement_id": "requirement-3",
+        "status": "unresolved",
+        "text": "Selected TXU0304 orderable package, footprint, availability, and assembly constraints."
+      },
+      {
+        "requirement_id": "requirement-4",
+        "status": "unresolved",
+        "text": "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load."
+      },
+      {
+        "requirement_id": "requirement-5",
+        "status": "unresolved",
+        "text": "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior."
+      },
+      {
+        "requirement_id": "requirement-6",
+        "status": "unresolved",
+        "text": "Schematic/ERC/PCB/DRC results and all physical measurements."
+      }
+    ],
+    "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+    "source_ids": [
+      "src-controller",
+      "src-dut-datasheet",
+      "src-fixture",
+      "src-translator-dir-datasheet",
+      "src-translator-fixed-datasheet"
+    ],
+    "source_revision": 1
+  },
+  "schema_version": "hardware_splicer.engineering_package_state.v1"
+}

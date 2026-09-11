@@ -215,16 +215,24 @@ def publish_proof_bundle(
     manifest_bytes = _canonical_json(bundle)
     (destination / "PROOF_BUNDLE.json").write_bytes(manifest_bytes)
 
+    result = "passed" if all(bundle["contracts"].values()) else "failed"
+    outcome_summary = (
+        "The run demonstrated bounded MCP operation, revision-linked substantive project progress,\n"
+        "provenance, and a constrained terminal report."
+        if result == "passed"
+        else "The run did not satisfy every acceptance contract. Treat it as diagnostic evidence;\n"
+        "inspect `PROOF_BUNDLE.json` and `CODEX_ASTRA_AUDIT.json` for the failed boundary."
+    )
     readme = f"""# Codex/Astra proof bundle: {run_id}
 
 This directory is a sanitized publication of one live clean-room run. The original and
 published SHA-256 values are recorded in `PROOF_BUNDLE.json`; changed hashes are expected
 where absolute ephemeral paths were replaced with placeholders.
 
-The run demonstrated bounded MCP operation, revision-linked substantive project progress,
-provenance, and a constrained terminal report. It did **not** prove source truth,
+{outcome_summary} It did **not** prove source truth,
 engineering correctness, physical correctness, fabrication readiness, or physical authority.
 
+- result: `{result}`
 - repository commit: `{repository_commit}`
 - case: `{manifest.get('case_id')}`
 - physical correctness: `{audit.get('physical_correctness')}`
