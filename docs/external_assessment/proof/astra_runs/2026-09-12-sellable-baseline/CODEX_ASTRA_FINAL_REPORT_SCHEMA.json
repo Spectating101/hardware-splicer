@@ -1,0 +1,104 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "claim_scope": {
+      "enum": [
+        "pre_fabrication_engineering_progress_only"
+      ],
+      "type": "string"
+    },
+    "correct_engineering_architecture_asserted": {
+      "enum": [
+        false
+      ],
+      "type": "boolean"
+    },
+    "evidence_boundary": {
+      "enum": [
+        "frozen_product_visible_only"
+      ],
+      "type": "string"
+    },
+    "experiment_project_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fabrication_ready": {
+      "enum": [
+        false
+      ],
+      "type": "boolean"
+    },
+    "final_project_revision": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "physical_authority_granted": {
+      "enum": [
+        false
+      ],
+      "type": "boolean"
+    },
+    "physical_correctness": {
+      "enum": [
+        "UNPROVEN"
+      ],
+      "type": "string"
+    },
+    "power_on_ready": {
+      "enum": [
+        false
+      ],
+      "type": "boolean"
+    },
+    "remaining_blockers": {
+      "description": "Exact strings from the final canonical blocker catalog.",
+      "items": {
+        "description": "Copy one exact blocker/unresolved string from the final canonical project state; do not paraphrase, qualify, or append a readiness claim.",
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "result_status": {
+      "enum": [
+        "blocked",
+        "bounded_pre_fabrication_result"
+      ],
+      "type": "string"
+    },
+    "schema_version": {
+      "enum": [
+        "hardware_splicer.astra_final_report.v1"
+      ],
+      "type": "string"
+    },
+    "unresolved_facts": {
+      "description": "Exact unresolved strings from the final canonical blocker catalog.",
+      "items": {
+        "description": "Copy one exact blocker/unresolved string from the final canonical project state; do not paraphrase, qualify, or append a readiness claim.",
+        "minLength": 1,
+        "type": "string"
+      },
+      "minItems": 1,
+      "type": "array"
+    }
+  },
+  "required": [
+    "claim_scope",
+    "correct_engineering_architecture_asserted",
+    "evidence_boundary",
+    "experiment_project_id",
+    "fabrication_ready",
+    "final_project_revision",
+    "physical_authority_granted",
+    "physical_correctness",
+    "power_on_ready",
+    "remaining_blockers",
+    "result_status",
+    "schema_version",
+    "unresolved_facts"
+  ],
+  "type": "object"
+}

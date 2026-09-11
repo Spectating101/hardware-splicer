@@ -1,0 +1,30 @@
+{
+  "blockers": [
+    {
+      "kind": "project",
+      "message": "The physical DUT's exact orderable package suffix and package-specific pinout are not verified.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "The W25Q128JW product-page VCC range does not by itself establish absolute-maximum I/O tolerance.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "The level-translator channel direction/control mapping has not been verified for the chosen implementation.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "The local 1.8 V DUT supply implementation has not been selected and verified.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "No physical power-on or programming evidence exists for this adapter revision.",
+      "object_id": ""
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_blockers.v1"
+}

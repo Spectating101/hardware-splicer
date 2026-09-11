@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import sys
 import uuid
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
-    str(_REPO_ROOT),
+    str(_REPO_ROOT / "src"),
     *[
         entry
         for entry in sys.path
@@ -24,6 +25,10 @@ sys.path[:] = [
 
 from hardware_splicer.codex_astra_case import build_codex_case_package
 from hardware_splicer.codex_astra_preflight import paths_are_disjoint
+from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
+    CASE_ID as PRIMARY_SOURCE_CASE_ID,
+    verify_primary_source_directory,
+)
 
 
 def _require_empty_directory(path: Path, *, label: str) -> None:
@@ -53,6 +58,10 @@ def main() -> int:
     parser.add_argument("--observer-dir", required=True)
     parser.add_argument("--hs-repo-root", required=True)
     parser.add_argument("--experiment-project-id")
+    parser.add_argument(
+        "--primary-source-dir",
+        help="Required local hash-pinned PDF capture for the primary-source case.",
+    )
     args = parser.parse_args()
 
     workspace = Path(args.workspace).expanduser().resolve()
@@ -86,6 +95,21 @@ def main() -> int:
     snapshot_path = observer / "CASE_SNAPSHOT.json"
     _write_json(snapshot_path, outer["snapshot"])
 
+    primary_capture_manifest = None
+    if args.case_id == PRIMARY_SOURCE_CASE_ID:
+        if not args.primary_source_dir:
+            raise SystemExit("primary-source case requires --primary-source-dir")
+        capture_root = Path(args.primary_source_dir).expanduser().resolve()
+        capture = verify_primary_source_directory(capture_root)
+        if not capture.get("pass"):
+            raise SystemExit("primary-source document capture failed hash verification")
+        retained_root = observer / "PRIMARY_SOURCES"
+        retained_root.mkdir()
+        for row in capture["documents"]:
+            shutil.copyfile(capture_root / row["filename"], retained_root / row["filename"])
+        primary_capture_manifest = retained_root / "CAPTURE_MANIFEST.json"
+        _write_json(primary_capture_manifest, capture)
+
     backend_store = observer / "BACKEND_STORE"
     backend_store.mkdir()
 
@@ -103,6 +127,14 @@ def main() -> int:
             "hs_repo_root": str(repo),
         }
     )
+    if primary_capture_manifest is not None:
+        manifest.update(
+            {
+                "primary_source_capture_manifest": str(primary_capture_manifest),
+                "primary_source_document_count": 3,
+                "primary_source_documents_model_visible": False,
+            }
+        )
     manifest_path = observer / "CASE_MANIFEST.json"
     _write_json(manifest_path, manifest)
 

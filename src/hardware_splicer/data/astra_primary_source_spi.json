@@ -1,0 +1,196 @@
+{
+  "schema_version": "hardware_splicer.astra_primary_source_spi_case.v1",
+  "captured_on": "2026-09-12",
+  "documents": [
+    {
+      "source_id": "src-dut-datasheet",
+      "filename": "W25Q128JW_RevG_07292021_Plus.pdf",
+      "vendor": "Winbond Electronics",
+      "title": "W25Q128JW Datasheet",
+      "document_code": "W25Q128JW",
+      "document_revision": "Revision G",
+      "document_date": "2021-07-29",
+      "download_url": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf",
+      "download_url_stability": "revision_named",
+      "sha256": "4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "size_bytes": 2645121,
+      "page_count": 79,
+      "facts": {
+        "part_family": "W25Q128JW",
+        "density_mbit": 128,
+        "vcc_min_v": 1.7,
+        "vcc_max_v": 1.95,
+        "absolute_max_any_pin_min_v": -0.6,
+        "absolute_max_any_pin_max_expression": "VCC + 0.4 V",
+        "standard_spi_host_to_dut": ["CLK", "/CS", "DI_IO0"],
+        "standard_spi_dut_to_host": ["DO_IO1"],
+        "supported_spi_modes": [0, 3],
+        "package_codes_documented": ["S", "P", "E", "F", "B", "C", "W"],
+        "exact_physical_orderable_suffix_resolved": false
+      },
+      "claims": [
+        {
+          "claim_id": "dut-operating-supply",
+          "page": 59,
+          "section": "9.2 Operating Ranges",
+          "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V."
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "page": 59,
+          "section": "9.1 Absolute Maximum Ratings",
+          "paraphrase": "Voltage applied to any pin is limited to -0.6 V through VCC plus 0.4 V."
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "page": 9,
+          "section": "4.2 Serial Data Input, Output and IOs",
+          "paraphrase": "Standard SPI uses DI as the device input and DO as the device output, with CLK and chip select as device inputs."
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "pages": [5, 6, 7, 8],
+          "section": "3 Package Types and Pin Configurations",
+          "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout."
+        }
+      ]
+    },
+    {
+      "source_id": "src-translator-fixed-datasheet",
+      "filename": "txu0304-reva.pdf",
+      "vendor": "Texas Instruments",
+      "title": "TXU0304 4-Bit Fixed Direction Voltage-Level Translator with Schmitt-Trigger Inputs and 3-State Outputs",
+      "document_code": "SCES935A",
+      "document_revision": "Revision A",
+      "document_date": "2021-11",
+      "download_url": "https://www.ti.com/lit/ds/symlink/txu0304.pdf",
+      "download_url_stability": "mutable_product_symlink_captured_by_hash",
+      "sha256": "f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "size_bytes": 2666177,
+      "page_count": 45,
+      "facts": {
+        "part_family": "TXU0304",
+        "channel_topology": "three A-to-B plus one B-to-A fixed-direction channels",
+        "a_to_b_inputs": ["A1", "A2", "A3"],
+        "a_to_b_outputs": ["B1Y", "B2Y", "B3Y"],
+        "b_to_a_input": "B4",
+        "b_to_a_output": "A4Y",
+        "vcca_operating_min_v": 1.08,
+        "vcca_operating_max_v": 5.5,
+        "vccb_operating_min_v": 1.08,
+        "vccb_operating_max_v": 5.5,
+        "oe_low_outputs": "high_impedance",
+        "exact_orderable_package_selected": false
+      },
+      "claims": [
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "page": 4,
+          "section": "6 Pin Configuration and Functions",
+          "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output."
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "page": 6,
+          "section": "7.3 Recommended Operating Conditions",
+          "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V."
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "page": 4,
+          "section": "Table 6-1 Pin Functions",
+          "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state."
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "page": 24,
+          "section": "10 Application and Implementation",
+          "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation."
+        }
+      ]
+    },
+    {
+      "source_id": "src-translator-dir-datasheet",
+      "filename": "sn74axc4t245-revb.pdf",
+      "vendor": "Texas Instruments",
+      "title": "SN74AXC4T245 Four-Bit Bus Transceiver with Configurable Voltage Translation and Tri-State Outputs",
+      "document_code": "SCES877B",
+      "document_revision": "Revision B",
+      "document_date": "2024-04",
+      "download_url": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf",
+      "download_url_stability": "mutable_product_symlink_captured_by_hash",
+      "sha256": "56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "size_bytes": 2442164,
+      "page_count": 41,
+      "facts": {
+        "part_family": "SN74AXC4T245",
+        "channel_groups": 2,
+        "channels_per_group": 2,
+        "direction_controls": ["1DIR", "2DIR"],
+        "direction_shared_within_each_two_channel_group": true,
+        "vcca_operating_min_v": 0.65,
+        "vcca_operating_max_v": 3.6,
+        "vccb_operating_min_v": 0.65,
+        "vccb_operating_max_v": 3.6,
+        "exact_orderable_package_selected": false
+      },
+      "claims": [
+        {
+          "claim_id": "axc-direction-grouping",
+          "pages": [3, 4],
+          "section": "4 Pin Configuration and Functions",
+          "paraphrase": "The four channels are split into two two-bit sections, each controlled by one shared direction input."
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "page": 6,
+          "section": "5.3 Recommended Operating Conditions",
+          "paraphrase": "Both supply rails have a recommended operating range of 0.65 V through 3.6 V."
+        },
+        {
+          "claim_id": "axc-function-table",
+          "page": 20,
+          "section": "7.4 Device Functional Modes",
+          "paraphrase": "Each section's direction input selects A-to-B or B-to-A for that entire two-channel section."
+        }
+      ]
+    }
+  ],
+  "adjudication": {
+    "status": "preregistered_pending_independent_human_signoff",
+    "prepared_before_primary_source_astra_run": true,
+    "supported_conclusions": [
+      "Given a verified 1.8 V DUT supply and a host that actually drives 3.3 V, direct connection is outside the DUT datasheet any-pin absolute maximum.",
+      "The TXU0304 documented fixed-direction topology is structurally compatible with three host-to-DUT signals and one DUT-to-host signal.",
+      "A single SN74AXC4T245 cannot assign three channels in one direction and one in the opposite direction because direction is shared in two-channel groups.",
+      "TXU0304 may be advanced as the preferred translator-family candidate, but not as a fabrication-ready implementation."
+    ],
+    "required_unresolved_facts": [
+      "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+      "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+      "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+      "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+      "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+      "Schematic/ERC/PCB/DRC results and all physical measurements."
+    ],
+    "forbidden_claims": [
+      "fabrication_ready",
+      "power_on_ready",
+      "physical_correctness_proven",
+      "exact_dut_pinout_resolved",
+      "timing_validated",
+      "human_authorization_granted"
+    ],
+    "metrics": [
+      "page_addressed_claim_usage",
+      "unsupported_factual_claim_count",
+      "missed_required_blocker_count",
+      "correct_candidate_disposition",
+      "authority_boundary_violations",
+      "substantive_state_progress"
+    ],
+    "independent_reviewer": null,
+    "independent_reviewed_at": null,
+    "independent_signoff": false
+  }
+}

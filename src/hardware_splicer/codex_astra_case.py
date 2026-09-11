@@ -7,6 +7,10 @@ import json
 from typing import Any, Mapping
 
 from .cleanroom_replay import ReplayCase
+from .cleanroom_primary_source_spi_flash_experiment import (
+    build_primary_source_spi_flash_case,
+    validate_primary_source_spi_flash_case,
+)
 from .cleanroom_unseen_spi_flash_experiment import (
     build_unseen_spi_flash_cases,
     validate_unseen_spi_flash_corpus,
@@ -86,6 +90,14 @@ def _sha256(value: Any) -> str:
 
 
 def select_exact_case(case_id: str) -> ReplayCase:
+    primary = build_primary_source_spi_flash_case()
+    if case_id == primary.case_id:
+        validation = validate_primary_source_spi_flash_case()
+        if not validation.get("pass"):
+            raise ValueError(
+                "refusing Codex case packaging because primary-source case validation failed"
+            )
+        return primary
     validation = validate_unseen_spi_flash_corpus()
     if not validation.get("pass"):
         raise ValueError("refusing Codex case packaging because frozen corpus validation failed")

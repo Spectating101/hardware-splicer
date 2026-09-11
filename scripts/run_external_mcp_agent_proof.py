@@ -34,7 +34,7 @@ from urllib.parse import urlsplit, urlunsplit
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
-    str(_REPO_ROOT),
+    str(_REPO_ROOT / "src"),
     *[
         entry
         for entry in sys.path
