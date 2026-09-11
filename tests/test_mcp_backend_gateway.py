@@ -9,6 +9,7 @@ from hardware_splicer.mcp_backend_gateway import (
     describe_operation,
     dispatch_operation,
     operation_catalog,
+    task_operation_manifest,
 )
 from hardware_splicer.product_api import create_product_app
 
@@ -72,6 +73,24 @@ def test_backend_contract_is_authority_neutral_and_transport_complete():
     assert all(contract["request_transport"].values())
     assert contract["authority_contract"]["mcp_grants_physical_authority"] is False
     assert contract["authority_contract"]["adapter_bypasses_backend_gates"] is False
+
+
+def test_task_manifest_is_openapi_derived_bounded_and_authority_neutral():
+    app = create_product_app()
+
+    manifest = task_operation_manifest("bounded_pre_fabrication", app)
+
+    paths = {row["path"] for row in manifest["operations"]}
+    assert "/v1/projects/{project_id}/engineering/pre-fabrication-plan" in paths
+    assert "/v1/projects/{project_id}/engineering/assurance" in paths
+    assert len(paths) == len(manifest["workflow_operation_ids"])
+    assert manifest["authority_contract"]["projection_grants_physical_authority"] is False
+    assert manifest["authority_contract"]["backend_gates_bypassed"] is False
+
+
+def test_task_manifest_rejects_unknown_workflow():
+    with pytest.raises(ValueError, match="unknown task manifest"):
+        task_operation_manifest("make-everything", create_product_app())
 
 
 def test_gateway_can_invoke_safe_canonical_get_operation_in_process():

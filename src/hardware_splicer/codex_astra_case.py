@@ -8,7 +8,12 @@ from typing import Any, Mapping
 
 from .cleanroom_replay import ReplayCase
 from .cleanroom_primary_source_spi_flash_experiment import (
+    BLIND_CASE_ID,
+    IDENTITY_CONFLICT_CASE_ID,
+    build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
+    build_primary_source_spi_flash_blind_case,
+    validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
 )
 from .cleanroom_unseen_spi_flash_experiment import (
@@ -37,9 +42,38 @@ Required operating discipline:
 
 This is an independent experimental case. You are not told whether related variants exist."""
 
+BLIND_FROZEN_CASE_INSTRUCTIONS = """You are the external reasoning engine in a blinded, frozen Hardware-Splicer proof run.
+You do not have Hardware-Splicer source code, hidden tests, evaluator metadata, expected answers, or any outer-engineer analysis. Operate only through the Hardware-Splicer MCP tools and the product-visible state in this request.
+
+Required operating discipline:
+1. Start with hs_backend_status.
+2. Load hs_backend_task_manifest for bounded_pre_fabrication once. Use broad operation discovery only if the required canonical operation is absent from that manifest.
+3. Work only on the experiment_project_id given in this request. Never inspect, mutate, or delete unrelated projects.
+4. Treat only the supplied product-visible project state as evidence. Do not import web/repository/external evidence or invent evidence identities.
+5. Derive conclusions from the visible evidence rather than guessing an evaluator. Preserve distinct source and claim identities when they disagree.
+6. Preserve unresolved component identity, electrical limits, package/pinout, translator mapping, supply implementation, source conflicts, and physical evidence unless visible evidence resolves them.
+7. Never invent bench measurements, physical observations, fabrication readiness, power-on readiness, or human authorization.
+8. A model/tool conclusion is not physical evidence and grants no physical authority.
+9. Tool failures are evidence; do not hide them or silently rewrite the problem.
+10. If a full machine plan is unsupported or domain-incompatible, use the project-scoped bounded pre-fabrication-plan operation. Do not invent a machineProject merely to satisfy review.
+11. Produce the strongest defensible pre-fabrication state and dependency-aware next actions supported by the evidence.
+12. Use the assurance view to inspect source/claim dependencies and reference integrity before packaging.
+13. Before finishing, read back canonical state and explicitly summarize blockers, conflicts, and unresolved facts.
+14. Do not use repository/source-code operations or seek evaluator information even if a backend operation appears to allow it.
+
+This is an independent experimental case. You are not told the expected disposition or whether related variants exist."""
+
 
 def frozen_case_instructions() -> str:
     return FROZEN_CASE_INSTRUCTIONS
+
+
+def case_instructions(case_id: str) -> str:
+    return (
+        BLIND_FROZEN_CASE_INSTRUCTIONS
+        if case_id in {BLIND_CASE_ID, IDENTITY_CONFLICT_CASE_ID}
+        else FROZEN_CASE_INSTRUCTIONS
+    )
 
 
 def _persisted_mission(snapshot: Mapping[str, Any]) -> str:
@@ -98,6 +132,17 @@ def select_exact_case(case_id: str) -> ReplayCase:
                 "refusing Codex case packaging because primary-source case validation failed"
             )
         return primary
+    if case_id in {BLIND_CASE_ID, IDENTITY_CONFLICT_CASE_ID}:
+        validation = validate_blind_primary_source_cases()
+        if not validation.get("pass"):
+            raise ValueError(
+                "refusing Codex case packaging because blinded primary-source case validation failed"
+            )
+        return (
+            build_primary_source_spi_flash_blind_case()
+            if case_id == BLIND_CASE_ID
+            else build_primary_source_identity_conflict_case()
+        )
     validation = validate_unseen_spi_flash_corpus()
     if not validation.get("pass"):
         raise ValueError("refusing Codex case packaging because frozen corpus validation failed")
@@ -115,7 +160,7 @@ def build_codex_case_package(
     if not experiment_project_id.strip():
         raise ValueError("experiment_project_id must be non-empty")
     case = select_exact_case(case_id)
-    instructions = frozen_case_instructions()
+    instructions = case_instructions(case.case_id)
     input_text = build_case_input(case, experiment_project_id)
     snapshot = dict(case.snapshot)
     return {

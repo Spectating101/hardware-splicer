@@ -94,7 +94,7 @@ def test_cleanroom_overrides_are_fail_closed(tmp_path: Path, monkeypatch) -> Non
     )
     assert (
         'mcp_servers.hardware-splicer-backend.enabled_tools='
-        '["hs_backend_status","hs_backend_list_operations",'
+        '["hs_backend_status","hs_backend_task_manifest","hs_backend_list_operations",'
         '"hs_backend_describe_operation","hs_backend_call"]'
         in joined
     )

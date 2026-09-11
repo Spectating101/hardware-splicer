@@ -60,6 +60,7 @@ from hardware_splicer.external_mcp_trace_audit import (
 PROOF_SCHEMA_VERSION = "hardware_splicer.external_mcp_agent_proof.v3"
 _REQUIRED_MCP_TOOLS = [
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",

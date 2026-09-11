@@ -106,6 +106,7 @@ async def main_async() -> int:
                 names = {tool.name for tool in tools.tools}
                 expected = {
                     "hs_backend_status",
+                    "hs_backend_task_manifest",
                     "hs_backend_list_operations",
                     "hs_backend_describe_operation",
                     "hs_backend_call",

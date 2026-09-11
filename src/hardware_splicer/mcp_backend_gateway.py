@@ -24,6 +24,23 @@ from .product_api import create_product_app
 _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 _PATH_PARAM_RE = re.compile(r"\{([^{}]+)\}")
 _SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
+_TASK_OPERATION_PATHS = {
+    "bounded_pre_fabrication": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("PUT", "/v1/projects/{project_id}/snapshot"),
+        ("POST", "/v1/projects/{project_id}/engineering/pre-fabrication-plan"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering-packages"),
+    ),
+    "engineering_assurance": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance/review-packet"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/reviews"),
+    ),
+}
 
 
 def _app(app: FastAPI | None = None) -> FastAPI:
@@ -226,6 +243,46 @@ def filtered_operations(
                 continue
         result.append(row)
     return result
+
+
+def task_operation_manifest(
+    task: str, app: FastAPI | None = None
+) -> dict[str, Any]:
+    """Return one bounded workflow's exact operations and request schemas.
+
+    This is a context-efficiency projection of the canonical OpenAPI document, not a
+    parallel tool surface. Every listed operation still dispatches through the same ASGI
+    application and retains its normal revision/evidence/authority gates.
+    """
+
+    try:
+        wanted = _TASK_OPERATION_PATHS[task]
+    except KeyError as exc:
+        raise ValueError(
+            "unknown task manifest; expected one of: "
+            + ", ".join(sorted(_TASK_OPERATION_PATHS))
+        ) from exc
+    catalog = operation_catalog(app)
+    by_route = {(row["method"], row["path"]): row for row in catalog}
+    missing = [route for route in wanted if route not in by_route]
+    if missing:
+        raise ValueError(f"canonical task manifest routes are missing: {missing}")
+    rows = [by_route[route] for route in wanted]
+    return {
+        "schema_version": "hardware_splicer.backend_task_operation_manifest.v1",
+        "task": task,
+        "workflow_operation_ids": [row["operation_id"] for row in rows],
+        "operations": [describe_operation(row["operation_id"], app) for row in rows],
+        "fallback": (
+            "Use hs_backend_list_operations only when this task manifest does not contain "
+            "an operation required by the supplied evidence."
+        ),
+        "authority_contract": {
+            "projection_grants_physical_authority": False,
+            "backend_gates_bypassed": False,
+            "automatic_execution": False,
+        },
+    }
 
 
 def _render_path(template: str, path_params: Mapping[str, Any] | None) -> str:

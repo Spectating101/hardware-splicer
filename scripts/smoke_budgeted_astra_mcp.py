@@ -14,6 +14,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Running a script from ``scripts/`` would otherwise import the sibling
+# ``scripts/hardware_splicer.py`` instead of the package under ``src``.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT / "src"),
+    *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
+]
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -21,6 +30,18 @@ from hardware_splicer.codex_budgeted_mcp_proxy import (
     ASTRA_MAX_BACKEND_CALLS,
     ASTRA_MAX_MCP_TOOL_CALLS,
 )
+from hardware_splicer.mcp_backend_gateway import operation_catalog
+
+
+def _operation_id(method: str, path: str) -> str:
+    matches = [
+        row["operation_id"]
+        for row in operation_catalog()
+        if row["method"] == method and row["path"] == path
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(f"expected one canonical {method} {path} operation, got {matches!r}")
+    return str(matches[0])
 
 
 def _environment(project_root: Path) -> dict[str, str]:
@@ -89,6 +110,7 @@ async def _total_call_budget_smoke(project_root: Path) -> dict[str, object]:
             names = {tool.name for tool in tools.tools}
             expected = {
                 "hs_backend_status",
+                "hs_backend_task_manifest",
                 "hs_backend_list_operations",
                 "hs_backend_describe_operation",
                 "hs_backend_call",
@@ -122,17 +144,13 @@ async def _backend_call_budget_smoke(project_root: Path) -> dict[str, object]:
             if getattr(catalog, "isError", False) or getattr(catalog, "is_error", False):
                 raise AssertionError("operation discovery failed through governed MCP")
 
-            # We intentionally avoid parsing SDK-private structured-content internals here.
-            # The canonical capabilities route has a stable operation id in HS OpenAPI.
-            operation_id = "vision_capabilities_v1_vision_capabilities_get"
+            # Resolve from canonical OpenAPI rather than duplicating FastAPI's generated ID.
+            operation_id = _operation_id("GET", "/v1/vision/capabilities")
             described = await session.call_tool(
                 "hs_backend_describe_operation",
                 {"operation_id": operation_id},
             )
             if getattr(described, "isError", False) or getattr(described, "is_error", False):
-                # Fall back to the operation id used by FastAPI when no explicit id override
-                # exists. If HS changes this route, the smoke should fail visibly rather than
-                # weakening the governor.
                 raise AssertionError(
                     "canonical /v1/vision/capabilities operation id changed; update smoke from OpenAPI"
                 )

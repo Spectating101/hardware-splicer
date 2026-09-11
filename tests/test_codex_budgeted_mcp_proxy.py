@@ -37,9 +37,10 @@ def test_non_tool_protocol_messages_do_not_consume_budget() -> None:
 
 
 def test_exact_allowed_tool_surface_is_budgeted() -> None:
-    budget = ToolBudget(max_tool_calls=4, max_backend_calls=1)
+    budget = ToolBudget(max_tool_calls=5, max_backend_calls=1)
     names = [
         "hs_backend_status",
+        "hs_backend_task_manifest",
         "hs_backend_list_operations",
         "hs_backend_describe_operation",
         "hs_backend_call",
@@ -48,7 +49,7 @@ def test_exact_allowed_tool_surface_is_budgeted() -> None:
         action, denial = classify_client_line(_call(index, name), budget)
         assert action == "forward"
         assert denial is None
-    assert budget.tool_calls == 4
+    assert budget.tool_calls == 5
     assert budget.backend_calls == 1
 
 

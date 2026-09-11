@@ -26,7 +26,9 @@ sys.path[:] = [
 from hardware_splicer.codex_astra_case import build_codex_case_package
 from hardware_splicer.codex_astra_preflight import paths_are_disjoint
 from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
+    BLIND_CASE_ID as PRIMARY_SOURCE_BLIND_CASE_ID,
     CASE_ID as PRIMARY_SOURCE_CASE_ID,
+    IDENTITY_CONFLICT_CASE_ID as PRIMARY_SOURCE_IDENTITY_CONFLICT_CASE_ID,
     verify_primary_source_directory,
 )
 
@@ -96,7 +98,11 @@ def main() -> int:
     _write_json(snapshot_path, outer["snapshot"])
 
     primary_capture_manifest = None
-    if args.case_id == PRIMARY_SOURCE_CASE_ID:
+    if args.case_id in {
+        PRIMARY_SOURCE_CASE_ID,
+        PRIMARY_SOURCE_BLIND_CASE_ID,
+        PRIMARY_SOURCE_IDENTITY_CONFLICT_CASE_ID,
+    }:
         if not args.primary_source_dir:
             raise SystemExit("primary-source case requires --primary-source-dir")
         capture_root = Path(args.primary_source_dir).expanduser().resolve()

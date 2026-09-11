@@ -24,6 +24,7 @@ from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
+from .engineering_assurance_api import create_engineering_assurance_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_anchored_api import (
     _SAVE_PATH as ENGINEERING_EXECUTION_SAVE_PATH,
@@ -111,6 +112,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
+    app.include_router(create_engineering_assurance_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))

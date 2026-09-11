@@ -1,0 +1,319 @@
+{
+  "authority_effect": "none",
+  "automatic_authorization": false,
+  "blind_to_agent_conclusions": true,
+  "claims": [
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "dut-operating-supply",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "document_revision": "Revision G",
+      "evidence_locator": {
+        "page": 59,
+        "section": "9.2 Operating Ranges"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V.",
+      "predicate": "dut-operating-supply",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "dut-pin-absolute-maximum",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "document_revision": "Revision G",
+      "evidence_locator": {
+        "page": 59,
+        "section": "9.1 Absolute Maximum Ratings"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Voltage applied to any pin is limited to -0.6 V through VCC plus 0.4 V.",
+      "predicate": "dut-pin-absolute-maximum",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "dut-standard-spi-directions",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "document_revision": "Revision G",
+      "evidence_locator": {
+        "page": 9,
+        "section": "4.2 Serial Data Input, Output and IOs"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Standard SPI uses DI as the device input and DO as the device output, with CLK and chip select as device inputs.",
+      "predicate": "dut-standard-spi-directions",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "dut-package-dependent-pinout",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "document_revision": "Revision G",
+      "evidence_locator": {
+        "pages": [
+          5,
+          6,
+          7,
+          8
+        ],
+        "section": "3 Package Types and Pin Configurations"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+      "predicate": "dut-package-dependent-pinout",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "txu-fixed-direction-map",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "document_revision": "Revision A",
+      "evidence_locator": {
+        "page": 4,
+        "section": "6 Pin Configuration and Functions"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output.",
+      "predicate": "txu-fixed-direction-map",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/txu0304.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "txu-supply-range",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "document_revision": "Revision A",
+      "evidence_locator": {
+        "page": 6,
+        "section": "7.3 Recommended Operating Conditions"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V.",
+      "predicate": "txu-supply-range",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/txu0304.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "txu-output-disable",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "document_revision": "Revision A",
+      "evidence_locator": {
+        "page": 4,
+        "section": "Table 6-1 Pin Functions"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state.",
+      "predicate": "txu-output-disable",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/txu0304.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "txu-spi-example-not-component-spec",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "document_revision": "Revision A",
+      "evidence_locator": {
+        "page": 24,
+        "section": "10 Application and Implementation"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation.",
+      "predicate": "txu-spi-example-not-component-spec",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/txu0304.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "axc-direction-grouping",
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "document_revision": "Revision B",
+      "evidence_locator": {
+        "pages": [
+          3,
+          4
+        ],
+        "section": "4 Pin Configuration and Functions"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "The four channels are split into two two-bit sections, each controlled by one shared direction input.",
+      "predicate": "axc-direction-grouping",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "axc-supply-range",
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "document_revision": "Revision B",
+      "evidence_locator": {
+        "page": 6,
+        "section": "5.3 Recommended Operating Conditions"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Both supply rails have a recommended operating range of 0.65 V through 3.6 V.",
+      "predicate": "axc-supply-range",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claim_id": "axc-function-table",
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "document_revision": "Revision B",
+      "evidence_locator": {
+        "page": 20,
+        "section": "7.4 Device Functional Modes"
+      },
+      "extraction_method": "predeclared_page_addressed_paraphrase",
+      "paraphrase": "Each section's direction input selects A-to-B or B-to-A for that entire two-channel section.",
+      "predicate": "axc-function-table",
+      "review_response": {
+        "allowed_statuses": [
+          "SUPPORTED",
+          "PARTIAL",
+          "WRONG",
+          "AMBIGUOUS"
+        ],
+        "correction": null,
+        "notes": null,
+        "status": null
+      },
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "uri": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf"
+    }
+  ],
+  "instructions": "For each claim, inspect only the identified source bytes and locator. Mark SUPPORTED, PARTIAL, WRONG, or AMBIGUOUS; provide corrections without using downstream agent conclusions.",
+  "project_id": "hs-astra-primary-20260912-3",
+  "review_scope": "source transcription and locator support only",
+  "reviewed_at": null,
+  "reviewer": null,
+  "revision": 3,
+  "schema_version": "hardware_splicer.engineering_claim_review_packet.v1"
+}

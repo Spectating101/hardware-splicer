@@ -17,6 +17,7 @@ ASTRA_MODEL = "gpt-6-astra"
 HS_MCP_SERVER_NAME = "hardware-splicer-backend"
 HS_MCP_TOOLS = (
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",

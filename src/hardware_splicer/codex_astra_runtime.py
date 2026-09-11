@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from .codex_astra_case import build_codex_case_package, frozen_case_instructions
+from .codex_astra_case import build_codex_case_package, case_instructions
 from .codex_astra_preflight import (
     ASTRA_MODEL,
     HS_MCP_SERVER_NAME,
@@ -190,7 +190,7 @@ def build_single_case_runtime_argv(
     server_root = f"mcp_servers.{HS_MCP_SERVER_NAME}"
     server_env = f"{server_root}.env"
     injected = [
-        _toml_override("developer_instructions", frozen_case_instructions()),
+        _toml_override("developer_instructions", case_instructions(context.case_id)),
         _toml_override(f"{server_root}.cwd", str(context.observer_dir)),
         _toml_override(
             f"{server_env}.HARDWARE_SPLICER_PROJECT_ROOT",

@@ -221,14 +221,40 @@ def _claim_from_value(
 ) -> SourceClaim:
     if isinstance(value, Mapping):
         row = dict(value)
+        declared_claim_id = str(row.get("claim_id") or "").strip()
         subject_id = str(row.get("subject_id") or row.get("subject") or "machine")
-        predicate = str(row.get("predicate") or row.get("field") or row.get("name") or "claim")
-        claim_value = row.get("value", row.get("statement", row.get("claim")))
-        claim_id = str(row.get("claim_id") or _stable_id("claim", source_id, subject_id, predicate, claim_value))
+        predicate = str(
+            row.get("predicate")
+            or row.get("field")
+            or row.get("name")
+            or declared_claim_id
+            or "claim"
+        )
+        claim_value = row.get(
+            "value",
+            row.get("statement", row.get("claim", row.get("paraphrase"))),
+        )
+        claim_id = declared_claim_id or _stable_id(
+            "claim", source_id, subject_id, predicate, claim_value
+        )
         requested_authority = _authority(row.get("authority"), authority)
         bounded_authority = requested_authority if _authority_rank(requested_authority) <= _authority_rank(authority) else authority
         locator = dict(row.get("evidence_locator") or {})
-        for key in ("page", "line", "timestamp_start", "timestamp_end", "figure", "path"):
+        for key in (
+            "page",
+            "pages",
+            "section",
+            "table",
+            "figure",
+            "paragraph",
+            "line",
+            "path",
+            "sheet",
+            "cell",
+            "test_case",
+            "timestamp_start",
+            "timestamp_end",
+        ):
             if row.get(key) is not None:
                 locator[key] = row[key]
         return SourceClaim(

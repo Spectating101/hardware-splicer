@@ -14,6 +14,8 @@ from .cleanroom_replay import ReplayCase
 
 SCHEMA_VERSION = "hardware_splicer.cleanroom_primary_source_spi_flash_experiment.v1"
 CASE_ID = "spi-flash-adapter-primary-sources-v1"
+BLIND_CASE_ID = "spi-flash-adapter-primary-sources-blind-v2"
+IDENTITY_CONFLICT_CASE_ID = f"{BLIND_CASE_ID}:identity-conflict"
 
 
 def primary_source_case_definition() -> Dict[str, Any]:
@@ -182,6 +184,164 @@ def build_primary_source_spi_flash_case() -> ReplayCase:
             "independent_human_signoff": False,
         },
     )
+
+
+def primary_source_spi_flash_blind_snapshot() -> Dict[str, Any]:
+    """Return the same evidence case without observer adjudication or expected answers."""
+
+    snapshot = primary_source_spi_flash_snapshot()
+    snapshot.pop("engineeringSourceAdjudication", None)
+    snapshot["engineeringAdvisories"] = [
+        row
+        for row in snapshot.get("engineeringAdvisories") or []
+        if "Independent human/EE signoff" not in str(row)
+    ]
+    return snapshot
+
+
+def build_primary_source_spi_flash_blind_case() -> ReplayCase:
+    definition = primary_source_case_definition()
+    return ReplayCase(
+        case_id=BLIND_CASE_ID,
+        project_id="cleanroom-primary-source-spi-flash-blind",
+        project_revision=1,
+        snapshot=primary_source_spi_flash_blind_snapshot(),
+        equivalence_group=None,
+        perturbation_kind="primary_source_document_grounding_blind",
+        metadata={
+            "scenario_family": "semiconductor_spi_flash_fixture",
+            "raw_documents_captured": True,
+            "raw_documents_model_visible": False,
+            "expected_answers_model_visible": False,
+            "observer_adjudication": deepcopy(definition["adjudication"]),
+            "independent_human_signoff": False,
+        },
+    )
+
+
+def build_primary_source_identity_conflict_case() -> ReplayCase:
+    """Add opposing JW/JV identity claims without exposing the expected disposition."""
+
+    base = build_primary_source_spi_flash_blind_case()
+    snapshot = deepcopy(dict(base.snapshot))
+    sources = list(snapshot.get("engineeringSources") or [])
+    sources.extend(
+        [
+            {
+                "source_id": "src-current-dut-identity",
+                "source_type": "project_identity_declaration",
+                "content_hash": "sha256:e41cb896cffa2f3de065a5683168985e0a4aa448cbbd0baf73ac90d673a812bd",
+                "revision": "1",
+                "authority_ceiling": "declared",
+                "claims": [
+                    {
+                        "claim_id": "current-dut-identity-jw",
+                        "subject_id": "physical-dut",
+                        "predicate": "component_identity",
+                        "value": "W25Q128JW",
+                        "authority": "declared",
+                        "evidence_locator": {"field": "project target declaration"},
+                    }
+                ],
+                "metadata": {
+                    "label": "Current project DUT identity declaration",
+                    "limitations": [
+                        "The declaration does not establish the marking on the physical device."
+                    ],
+                },
+            },
+            {
+                "source_id": "src-procurement-note-jv",
+                "source_type": "procurement_note",
+                "content_hash": "sha256:58ccfe84cc33cdaf677a3d98ba925301bed34ea7671d09f21f93dd8e5b73bc7d",
+                "revision": "note-1",
+                "authority_ceiling": "proposed",
+                "claims": [
+                    {
+                        "claim_id": "procurement-note-dut-identity-jv",
+                        "subject_id": "physical-dut",
+                        "predicate": "component_identity",
+                        "value": "W25Q128JV",
+                        "authority": "proposed",
+                        "evidence_locator": {
+                            "field": "unverified procurement transcription"
+                        },
+                    }
+                ],
+                "metadata": {
+                    "label": "Unverified procurement transcription",
+                    "evidence_role": "advisory",
+                    "limitations": [
+                        "No physical marking photograph, order record, or manufacturer document is attached."
+                    ],
+                },
+            },
+        ]
+    )
+    snapshot["engineeringSources"] = sources
+    snapshot["mission"] = (
+        "Reassess the SPI adapter from the supplied evidence after a procurement identity "
+        "record was added. Preserve every evidence identity and advance the engineering "
+        "state only as far as the combined evidence permits."
+    )
+    return ReplayCase(
+        case_id=IDENTITY_CONFLICT_CASE_ID,
+        project_id="cleanroom-primary-source-spi-flash-identity-conflict",
+        project_revision=2,
+        snapshot=snapshot,
+        equivalence_group=None,
+        perturbation_kind="conflicting_component_identity_blind",
+        metadata={
+            **dict(base.metadata or {}),
+            "baseline_case_id": BLIND_CASE_ID,
+            "expected_equivalent": False,
+            "observer_conflict_adjudication": {
+                "required_source_ids_preserved": [
+                    "src-current-dut-identity",
+                    "src-procurement-note-jv",
+                ],
+                "required_conflict_subject": "physical-dut",
+                "required_conflict_predicate": "component_identity",
+                "forbidden_identity_substitution": "W25Q128JV treated as W25Q128JW",
+                "required_resolution_target": "physical DUT marking/package verification",
+                "physical_authority_must_remain_closed": True,
+            },
+        },
+    )
+
+
+def validate_blind_primary_source_cases() -> Dict[str, Any]:
+    baseline = build_primary_source_spi_flash_blind_case()
+    conflict = build_primary_source_identity_conflict_case()
+    baseline_text = json.dumps(baseline.snapshot, sort_keys=True)
+    conflict_text = json.dumps(conflict.snapshot, sort_keys=True)
+    conflict_graph_sources = {
+        str(row.get("source_id")): row
+        for row in conflict.snapshot.get("engineeringSources") or []
+    }
+    checks = {
+        "baseline_expected_answers_hidden": "supported_conclusions" not in baseline_text
+        and "forbidden_claims" not in baseline_text
+        and "engineeringSourceAdjudication" not in baseline.snapshot,
+        "conflict_expected_answers_hidden": "observer_conflict_adjudication"
+        not in conflict_text,
+        "opposing_identity_claims_visible": "W25Q128JW" in conflict_text
+        and "W25Q128JV" in conflict_text,
+        "procurement_note_lower_authority": conflict_graph_sources[
+            "src-procurement-note-jv"
+        ]["authority_ceiling"]
+        == "proposed",
+        "physical_authority_closed": not conflict.snapshot[
+            "engineering_readiness"
+        ].get("fabrication_ready")
+        and not conflict.snapshot["engineering_readiness"].get("power_on_ready"),
+    }
+    return {
+        "schema_version": "hardware_splicer.blind_primary_source_cases.v1",
+        "case_ids": [baseline.case_id, conflict.case_id],
+        "checks": checks,
+        "pass": all(checks.values()),
+    }
 
 
 def validate_primary_source_spi_flash_case() -> Dict[str, Any]:
