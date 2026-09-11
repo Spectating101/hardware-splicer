@@ -66,7 +66,7 @@ def test_golden_semiconductor_fixture_produces_blocked_verified_package(
     assert all(row["passed"] for row in report["checks"])
     assert all(value is False for value in report["physical_authority"].values())
     assert report["package"]["source_revision"] == 6
-    assert report["package"]["file_count"] == 15
+    assert report["package"]["file_count"] == 16
     assert report["package"]["path"] == package_path.name
 
     with zipfile.ZipFile(package_path) as archive:
@@ -82,6 +82,7 @@ def test_golden_semiconductor_fixture_produces_blocked_verified_package(
         )
 
     assert "ENGINEERING_PACKAGE/MANIFEST.json" in names
+    assert "ENGINEERING_PACKAGE/ENGINEERING_STATE.json" in names
     assert "ENGINEERING_PACKAGE/REPAIR_LINEAGE.json" in names
     assert "ENGINEERING_PACKAGE/CONVERSATION_BRIEFINGS.json" in names
     assert source_manifest["raw_source_bytes_included"] is False
