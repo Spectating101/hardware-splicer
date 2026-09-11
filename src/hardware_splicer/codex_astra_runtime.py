@@ -180,20 +180,25 @@ def build_single_case_runtime_argv(
         model=ASTRA_MODEL,
         reasoning_effort="low",
         codex_command=codex_command,
+        # Executing a launcher beneath a private temp directory requires traversal of
+        # its parent. The budgeted entrypoint creates a one-purpose 0700 directory that
+        # contains only this launcher, so granting that directory read access preserves
+        # the clean-room boundary while allowing Codex to start the required MCP server.
+        extra_read_paths=(Path(mcp_command).expanduser().resolve().parent,),
+        extra_denied_paths=(context.observer_dir,),
     )
     server_root = f"mcp_servers.{HS_MCP_SERVER_NAME}"
     server_env = f"{server_root}.env"
-    profile = "permissions.hs-astra-cleanroom.filesystem"
     injected = [
         _toml_override("developer_instructions", frozen_case_instructions()),
-        _toml_override(
-            f'{profile}.{json.dumps(str(context.observer_dir))}',
-            "deny",
-        ),
         _toml_override(f"{server_root}.cwd", str(context.observer_dir)),
         _toml_override(
             f"{server_env}.HARDWARE_SPLICER_PROJECT_ROOT",
             str(context.backend_project_root),
+        ),
+        _toml_override(
+            f"{server_env}.HARDWARE_SPLICER_REPO_ROOT",
+            str(context.hs_repo_root),
         ),
     ]
     injected.extend(

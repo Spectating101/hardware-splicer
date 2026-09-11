@@ -25,6 +25,7 @@ sys.path[:] = [
 from hardware_splicer.codex_astra_runtime import CODEX_ALLOWANCE_CONFIRMATION
 from hardware_splicer.codex_budgeted_entrypoint import (
     ASTRA_DEFAULT_TIMEOUT_SECONDS,
+    ASTRA_LAUNCHER_TEMP_ROOT,
     ASTRA_MAX_TIMEOUT_SECONDS,
     build_delegated_runner_argv,
     resolve_canonical_backend,
@@ -87,7 +88,17 @@ def main() -> int:
     if not runner_script.is_file():
         raise SystemExit(f"delegated one-shot runner is missing: {runner_script}")
 
-    with tempfile.TemporaryDirectory(prefix="hs-astra-budgeted-mcp-") as temp_dir:
+    # Codex permission profiles protect home/cache paths even when a leaf path is
+    # explicitly readable. A private randomized directory beneath /tmp is traversable
+    # by the clean-room sandbox and contains only the generated one-shot launcher.
+    with tempfile.TemporaryDirectory(
+        prefix="hs-astra-budgeted-mcp-",
+        dir=ASTRA_LAUNCHER_TEMP_ROOT,
+    ) as temp_dir:
+        # The Codex Linux sandbox needs directory traversal before it can apply the
+        # explicit read grant to the launcher. The directory contains no credentials
+        # and only one 0700 launcher, so traversal/listing does not expose secret state.
+        Path(temp_dir).chmod(0o755)
         launcher = write_budgeted_mcp_launcher(
             Path(temp_dir) / "hs-astra-budgeted-mcp",
             backend_command=backend,

@@ -152,6 +152,9 @@ def create_engineering_package_router(
                     "project_id": project_id,
                     "revision": current_revision,
                     "package": existing,
+                    "pre_fabrication_plan": deepcopy(
+                        snapshot.get("preFabricationPlan") or {}
+                    ),
                     "idempotent": True,
                     "authority_unchanged": True,
                 }
@@ -195,6 +198,9 @@ def create_engineering_package_router(
             "revision": saved["revision"],
             "saved_at": saved["saved_at"],
             "package": package,
+            "pre_fabrication_plan": deepcopy(
+                snapshot.get("preFabricationPlan") or {}
+            ),
             "idempotent": False,
             "authority_unchanged": True,
         }

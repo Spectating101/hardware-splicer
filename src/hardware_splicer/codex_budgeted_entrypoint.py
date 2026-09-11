@@ -19,6 +19,11 @@ from .codex_budgeted_mcp_proxy import (
 
 ASTRA_DEFAULT_TIMEOUT_SECONDS = 300
 ASTRA_MAX_TIMEOUT_SECONDS = 300
+ASTRA_LAUNCHER_TEMP_ROOT = Path("/tmp")
+_BUDGET_PROXY_MARKERS = (
+    "hardware_splicer.codex_budgeted_mcp_proxy",
+    "hs-astra-budgeted-mcp",
+)
 
 
 def clamp_timeout_seconds(value: int) -> int:
@@ -40,11 +45,36 @@ def resolve_canonical_backend(command: str = "hs-backend-mcp", env: Mapping[str,
         resolved = candidate.resolve(strict=False)
         if not resolved.is_file():
             raise FileNotFoundError(f"canonical HS MCP backend not found: {resolved}")
+        _reject_nested_budget_proxy(resolved)
         return str(resolved)
     found = shutil.which(command, path=source_env.get("PATH"))
     if not found:
         raise FileNotFoundError(f"canonical HS MCP backend not found on PATH: {command}")
-    return str(Path(found).resolve())
+    resolved = Path(found).resolve()
+    _reject_nested_budget_proxy(resolved)
+    return str(resolved)
+
+
+def _reject_nested_budget_proxy(command: Path) -> None:
+    """Reject a governor passed where the raw canonical backend is required.
+
+    The stdio relay is deliberately single-layer. Nesting two instances can leave both
+    relays waiting on each other's line-reader lifecycle and prevent MCP initialize from
+    completing. Generated launchers are small text files, so inspect only a bounded prefix;
+    opaque binaries remain eligible canonical backend commands.
+    """
+
+    try:
+        if command.stat().st_size > 65_536:
+            return
+        prefix = command.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return
+    if any(marker in prefix for marker in _BUDGET_PROXY_MARKERS):
+        raise ValueError(
+            "--backend-command must be the raw canonical hs-backend-mcp executable, "
+            "not an existing Astra budget proxy/launcher"
+        )
 
 
 def write_budgeted_mcp_launcher(
@@ -57,7 +87,10 @@ def write_budgeted_mcp_launcher(
 
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
-    python = str(Path(python_command or sys.executable).expanduser().resolve())
+    # Preserve a virtualenv's interpreter path. Resolving the `python` symlink to the
+    # system interpreter silently drops the environment that contains this package, and
+    # Codex intentionally does not forward PYTHONPATH to MCP children by default.
+    python = str(Path(python_command or sys.executable).expanduser().absolute())
     backend = str(Path(backend_command).expanduser().resolve())
     body = (
         "#!/bin/sh\n"

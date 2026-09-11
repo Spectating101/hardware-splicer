@@ -104,6 +104,11 @@ def _snapshot() -> dict:
                 "physical_authority_unchanged": True,
             }
         ],
+        "preFabricationPlan": {
+            "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+            "actions": [{"action": "Resolve the exact driver threshold."}],
+            "physical_correctness": "UNPROVEN",
+        },
         "fabrication_authorized": False,
         "firmware_flash_authorized": False,
         "power_on_authorized": False,
@@ -139,6 +144,7 @@ def test_package_api_creates_lists_downloads_and_replays(tmp_path: Path) -> None
     assert package["raw_source_bytes_included"] is False
     assert package["package_authority_effect"] == "none"
     assert body["authority_unchanged"] is True
+    assert body["pre_fabrication_plan"] == _snapshot()["preFabricationPlan"]
 
     latest = store.load("rover")
     assert latest["revision"] == 2
@@ -171,6 +177,7 @@ def test_package_api_creates_lists_downloads_and_replays(tmp_path: Path) -> None
     assert replay.json()["revision"] == 2
     assert replay.json()["idempotent"] is True
     assert replay.json()["package"]["package_id"] == package["package_id"]
+    assert replay.json()["pre_fabrication_plan"] == _snapshot()["preFabricationPlan"]
     assert store.load("rover")["revision"] == 2
 
 

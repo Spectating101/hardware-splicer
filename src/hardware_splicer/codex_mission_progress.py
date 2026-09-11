@@ -19,6 +19,7 @@ _MISSION_OUTPUT_SURFACES = (
     "engineeringArtifactProjection", "manufacturingProjection", "manufacturingClosure",
     "engineeringExecutionPlan", "operatorGuide", "orderedSteps", "sourceAdapter",
     "engineeringReadiness", "engineeringStatus", "missingInfo", "rankedNextAction",
+    "preFabricationPlan", "preFabricationActions", "preFabricationAssessment",
     "engineeringPackages", "engineeringAiSessions",
 )
 _CONFLICT_KEYS = (

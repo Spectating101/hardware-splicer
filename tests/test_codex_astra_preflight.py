@@ -78,9 +78,12 @@ def test_cleanroom_overrides_are_fail_closed(tmp_path: Path, monkeypatch) -> Non
     assert 'model="gpt-6-astra"' in joined
     assert 'approval_policy="never"' in joined
     assert 'web_search="disabled"' in joined
-    assert "features.web_search_request=false" in joined
+    assert "suppress_unstable_features_warning=true" in joined
+    assert "features.web_search_request" not in joined
+    assert "features.plugins=false" in joined
+    assert "features.skip_host_skill_discovery=true" in joined
     assert 'default_permissions="hs-astra-cleanroom"' in joined
-    assert 'permissions.hs-astra-cleanroom.filesystem.":minimal"="read"' in joined
+    assert 'permissions.hs-astra-cleanroom.filesystem={":minimal"="read"' in joined
     assert f'{str(workspace.resolve())}' in joined and '"write"' in joined
     assert f'{str(repo.resolve())}' in joined and '"deny"' in joined
     assert "permissions.hs-astra-cleanroom.network.enabled=false" in joined
@@ -96,6 +99,38 @@ def test_cleanroom_overrides_are_fail_closed(tmp_path: Path, monkeypatch) -> Non
         in joined
     )
     assert "mcp_servers.hardware-splicer-backend.tools.hs_backend_call.output_token_limit=8000" in joined
+
+
+def test_cleanroom_filesystem_rules_use_inline_table_for_dotted_paths(
+    tmp_path: Path,
+) -> None:
+    workspace = tmp_path / "clean.room"
+    repo = tmp_path / "hardware.splicer"
+    observer = tmp_path / "observer.state"
+    governor = tmp_path / "governor.bin"
+    workspace.mkdir()
+    repo.mkdir()
+    observer.mkdir()
+    governor.write_text("#!/bin/sh\n", encoding="utf-8")
+
+    overrides = preflight.build_cleanroom_overrides(
+        workspace=workspace,
+        hs_repo_root=repo,
+        mcp_command="/bin/false",
+        extra_read_paths=(governor,),
+        extra_denied_paths=(observer,),
+    )
+    filesystem = next(
+        item
+        for item in overrides
+        if item.startswith("permissions.hs-astra-cleanroom.filesystem=")
+    )
+
+    assert f'"{workspace.resolve()}"="write"' in filesystem
+    assert f'"{repo.resolve()}"="deny"' in filesystem
+    assert f'"{observer.resolve()}"="deny"' in filesystem
+    assert f'"{governor.resolve()}"="read"' in filesystem
+    assert ".filesystem.\"" not in filesystem
 
 
 def test_cleanroom_overrides_reject_repo_nested_workspace(tmp_path: Path) -> None:

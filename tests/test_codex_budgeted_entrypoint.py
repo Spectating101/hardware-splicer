@@ -12,10 +12,12 @@ import pytest
 from hardware_splicer.codex_astra_runtime import CODEX_ALLOWANCE_CONFIRMATION
 from hardware_splicer.codex_budgeted_entrypoint import (
     ASTRA_DEFAULT_TIMEOUT_SECONDS,
+    ASTRA_LAUNCHER_TEMP_ROOT,
     ASTRA_MAX_TIMEOUT_SECONDS,
     build_delegated_runner_argv,
     clamp_timeout_seconds,
     resource_guard_manifest,
+    resolve_canonical_backend,
     validate_launcher,
     write_budgeted_mcp_launcher,
     write_resource_guard_manifest,
@@ -28,6 +30,7 @@ from hardware_splicer.codex_budgeted_mcp_proxy import (
 
 
 def test_timeout_is_hard_capped_at_five_minutes() -> None:
+    assert ASTRA_LAUNCHER_TEMP_ROOT == Path("/tmp")
     assert ASTRA_DEFAULT_TIMEOUT_SECONDS == 300
     assert ASTRA_MAX_TIMEOUT_SECONDS == 300
     assert clamp_timeout_seconds(30) == 30
@@ -56,6 +59,41 @@ def test_budgeted_launcher_is_private_executable_and_wraps_only_proxy(tmp_path: 
     assert "--backend-command" in text
     assert str(backend.resolve()) in text
     assert text.startswith("#!/bin/sh\nset -eu\n")
+
+
+def test_budgeted_launcher_preserves_virtualenv_python_symlink(tmp_path: Path) -> None:
+    backend = tmp_path / "hs-backend-mcp"
+    backend.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    backend.chmod(0o700)
+    real_python = tmp_path / "python-real"
+    real_python.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    real_python.chmod(0o700)
+    venv_python = tmp_path / "venv-python"
+    venv_python.symlink_to(real_python)
+
+    launcher = write_budgeted_mcp_launcher(
+        tmp_path / "launcher",
+        backend_command=str(backend),
+        python_command=str(venv_python),
+    )
+
+    text = launcher.read_text(encoding="utf-8")
+    assert str(venv_python) in text
+    assert str(real_python) not in text
+
+
+def test_canonical_backend_rejects_an_already_budgeted_launcher(tmp_path: Path) -> None:
+    raw_backend = tmp_path / "hs-backend-mcp"
+    raw_backend.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    raw_backend.chmod(0o700)
+    launcher = write_budgeted_mcp_launcher(
+        tmp_path / "governed-mcp",
+        backend_command=str(raw_backend),
+        python_command=sys.executable,
+    )
+
+    with pytest.raises(ValueError, match="raw canonical hs-backend-mcp"):
+        resolve_canonical_backend(str(launcher))
 
 
 def test_delegated_runner_cannot_escape_governed_mcp_or_timeout(tmp_path: Path) -> None:
@@ -141,7 +179,7 @@ def test_budgeted_runner_dry_run_emits_only_resource_plan(tmp_path: Path) -> Non
     assert payload["api_fallback"] is False
     delegated = payload["delegated_argv"]
     launcher = delegated[delegated.index("--mcp-command") + 1]
-    assert "hs-astra-budgeted-mcp-" in launcher
+    assert launcher.startswith("/tmp/hs-astra-budgeted-mcp-")
     assert str(backend.resolve()) not in delegated
     assert (observer / "CODEX_ASTRA_RESOURCE_GUARD.json").is_file()
 
