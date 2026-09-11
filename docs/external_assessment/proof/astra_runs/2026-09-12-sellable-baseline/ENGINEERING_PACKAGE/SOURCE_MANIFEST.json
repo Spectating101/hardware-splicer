@@ -1,0 +1,140 @@
+{
+  "parsed_sources": [],
+  "raw_source_bytes_included": false,
+  "registered_sources": [
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:c63e3b9ce5500266eada2dcc6d4712ab9157babb95fe8f24ce94396b67503919",
+      "metadata": {
+        "captured_on": "2026-08-13",
+        "facts": {
+          "host_input_signals": [
+            "MISO_IO1"
+          ],
+          "host_logic_voltage_v": 3.3,
+          "host_output_signals": [
+            "SCLK",
+            "CS#",
+            "MOSI_IO0"
+          ],
+          "target_dut_family_declared": "W25Q128JW",
+          "transport": "SPI"
+        },
+        "label": "3.3 V SPI programmer interface"
+      },
+      "revision": "1",
+      "source_id": "src-controller",
+      "source_type": "fixture_interface_declaration"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:a26e13f25edc0eebbfd5e661b1dda4e62c3220d04957b6350d0ffbbaef9a771b",
+      "metadata": {
+        "captured_on": "2026-08-13",
+        "facts": {
+          "density_mbit": 128,
+          "exact_orderable_suffix_resolved": false,
+          "frequency_mhz": 133,
+          "interface": "Dual/Quad SPI",
+          "io_absolute_max_verified": false,
+          "package_options": [
+            "SOP8 208mil",
+            "SOP16 300mil",
+            "WSON8 6x5mm"
+          ],
+          "part_family": "W25Q128JW",
+          "vcc_max_v": 1.95,
+          "vcc_min_v": 1.7,
+          "vendor": "Winbond"
+        },
+        "label": "Winbond W25Q128JW product record",
+        "limitations": [
+          "Product page does not resolve the exact orderable package suffix for the physical DUT.",
+          "Do not infer absolute-maximum I/O tolerance from VCC range alone."
+        ],
+        "source_locator": "https://www.winbond.com.tw/hq/product/code-storage-flash-memory/serial-nor-flash/?__locale=en&partNo=W25Q128JW"
+      },
+      "revision": "current-2026-08-13",
+      "source_id": "src-dut",
+      "source_type": "manufacturer_product_page_fact_snapshot"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:549e24f76f186ddd53fd550d167b9f2e0aaa9885f8c5de79b23d43451b385a1a",
+      "metadata": {
+        "captured_on": "2026-08-13",
+        "facts": {
+          "application_examples_include": "SPI",
+          "channels": 4,
+          "oe_low_outputs": "high_impedance",
+          "part_family": "TXU0304",
+          "port_operating_range_v": [
+            1.1,
+            5.5
+          ],
+          "translation": "dual-supply noninverting fixed direction",
+          "vendor": "Texas Instruments"
+        },
+        "label": "TI TXU0304 translator record",
+        "limitations": [
+          "Fixed channel directions still require an explicit signal-direction mapping."
+        ],
+        "source_locator": "https://www.ti.com/product/TXU0304"
+      },
+      "revision": "current-2026-08-13",
+      "source_id": "src-translator-fixed",
+      "source_type": "manufacturer_product_page_fact_snapshot"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:63d8325cd458648c8a075c50ac192f9ed7ed590d0de934be146668042b53db4e",
+      "metadata": {
+        "captured_on": "2026-08-13",
+        "facts": {
+          "application_examples_include": "SPI",
+          "channels": 4,
+          "input_range_v": [
+            0.65,
+            3.6
+          ],
+          "output_range_v": [
+            0.65,
+            3.6
+          ],
+          "part_family": "SN74AXC4T245",
+          "translation": "dual-supply direction-controlled bus transceiver",
+          "vendor": "Texas Instruments"
+        },
+        "label": "TI SN74AXC4T245 translator record",
+        "limitations": [
+          "Direction-control behavior must be explicitly designed; product presence is not a wiring decision."
+        ],
+        "source_locator": "https://www.ti.com/product/SN74AXC4T245"
+      },
+      "revision": "current-2026-08-13",
+      "source_id": "src-translator-dir",
+      "source_type": "manufacturer_product_page_fact_snapshot"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:bc7bd57a91bfd2781814c03a58271011d838647d49f0cf88c3d0fa117493cdfa",
+      "metadata": {
+        "captured_on": "2026-08-13",
+        "facts": {
+          "default_power_state": "off",
+          "dut_pinout_verified": false,
+          "dut_supply_implementation_verified": false,
+          "dut_supply_target_v": 1.8,
+          "exact_dut_package_verified": false,
+          "physical_bench_evidence_present": false,
+          "translator_channel_direction_mapping_verified": false
+        },
+        "label": "Adapter bring-up constraints"
+      },
+      "revision": "1",
+      "source_id": "src-fixture",
+      "source_type": "fixture_readiness_declaration"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_sources.v1"
+}
