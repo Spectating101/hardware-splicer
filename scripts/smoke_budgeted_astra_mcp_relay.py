@@ -14,6 +14,16 @@ import sys
 import tempfile
 from pathlib import Path
 
+# Running a script from ``scripts/`` puts that directory first on ``sys.path``.  This
+# repository also contains ``scripts/hardware_splicer.py``, which would otherwise shadow
+# the installed ``hardware_splicer`` package and make this smoke test the wrong module.
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+sys.path[:] = [
+    str(_REPO_ROOT),
+    *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
+]
+
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
