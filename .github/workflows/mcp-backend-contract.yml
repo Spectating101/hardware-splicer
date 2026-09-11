@@ -8,15 +8,34 @@ on:
       - "src/hardware_splicer/backend_mcp_server.py"
       - "src/hardware_splicer/mcp_backend_gateway.py"
       - "src/hardware_splicer/external_mcp_trace_audit.py"
+      - "src/hardware_splicer/frontier_operator_experiment.py"
+      - "src/hardware_splicer/codex_astra_*.py"
+      - "src/hardware_splicer/codex_exec_trace.py"
+      - "src/hardware_splicer/codex_mission_progress.py"
+      - "src/hardware_splicer/codex_final_report.py"
       - "src/hardware_splicer/product_api.py"
       - "src/hardware_splicer/**/*_api.py"
       - "tests/test_mcp_backend_gateway.py"
       - "tests/test_external_mcp_trace_audit.py"
       - "tests/test_external_mcp_agent_proof_runner.py"
+      - "tests/test_frontier_operator*.py"
+      - "tests/test_codex_astra_*.py"
+      - "tests/test_codex_exec_trace.py"
+      - "tests/test_codex_final_project_readback.py"
+      - "tests/test_codex_mission_progress.py"
+      - "tests/test_codex_final_report.py"
       - "scripts/smoke_backend_mcp_stdio.py"
       - "scripts/smoke_backend_mcp_http.py"
       - "scripts/run_external_mcp_agent_proof.py"
+      - "scripts/plan_frontier_operator_experiment.py"
+      - "scripts/preflight_codex_astra.py"
+      - "scripts/prepare_codex_astra_case.py"
+      - "scripts/run_codex_astra_case.py"
+      - "scripts/audit_codex_astra_trace.py"
       - "docs/EXTERNAL_MCP_AGENT_PROOF.md"
+      - "docs/EXTERNAL_MCP_PROOF_ACCEPTANCE.md"
+      - "docs/FRONTIER_OPERATOR_EXPERIMENT.md"
+      - "docs/CODEX_ASTRA_CLEANROOM_RUNBOOK.md"
       - ".github/workflows/mcp-backend-contract.yml"
   workflow_dispatch:
 
@@ -41,8 +60,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e '.[dev,backend-mcp]'
-      - name: Verify OpenAPI-to-MCP coverage and external truth audit
-        run: pytest -q tests/test_mcp_backend_gateway.py tests/test_external_mcp_trace_audit.py tests/test_external_mcp_agent_proof_runner.py
+      - name: Verify OpenAPI, external truth, and Codex/Astra operator contracts
+        run: |
+          pytest -q \
+            tests/test_mcp_backend_gateway.py \
+            tests/test_external_mcp_trace_audit.py \
+            tests/test_external_mcp_agent_proof_runner.py \
+            tests/test_frontier_operator_experiment.py \
+            tests/test_frontier_operator_script_entrypoints.py \
+            tests/test_codex_astra_preflight.py \
+            tests/test_codex_astra_case.py \
+            tests/test_codex_astra_runtime.py \
+            tests/test_codex_astra_one_shot.py \
+            tests/test_codex_exec_trace.py \
+            tests/test_codex_final_project_readback.py \
+            tests/test_codex_mission_progress.py \
+            tests/test_codex_final_report.py
       - name: Exercise a real MCP stdio client session
         run: timeout --signal=TERM --kill-after=5s 60s python scripts/smoke_backend_mcp_stdio.py
       - name: Exercise a real MCP Streamable HTTP client session
@@ -63,6 +96,13 @@ jobs:
           assert len({case.case_id for case in cases}) == 10
           print({"frozen_external_case_count": len(cases), "corpus_validation": "pass"})
           PY
+      - name: Verify zero-inference frontier script entrypoints
+        run: |
+          python scripts/plan_frontier_operator_experiment.py --help >/dev/null
+          python scripts/preflight_codex_astra.py --help >/dev/null
+          python scripts/prepare_codex_astra_case.py --help >/dev/null
+          python scripts/run_codex_astra_case.py --help >/dev/null
+          python scripts/audit_codex_astra_trace.py --help >/dev/null
       - name: Verify installed canonical MCP entrypoint
         run: |
           command -v hs-backend-mcp

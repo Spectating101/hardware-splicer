@@ -1,0 +1,66 @@
+name: Astra Resource Guard
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/codex_budgeted_mcp_proxy.py"
+      - "src/hardware_splicer/codex_budgeted_entrypoint.py"
+      - "scripts/run_budgeted_codex_astra_case.py"
+      - "scripts/run_codex_astra_case.py"
+      - "tests/test_codex_budgeted_mcp_proxy.py"
+      - "tests/test_codex_budgeted_entrypoint.py"
+      - "docs/CODEX_ASTRA_CLEANROOM_RUNBOOK.md"
+      - ".github/workflows/astra-resource-guard.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: astra-resource-guard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  resource-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install package and tests
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+      - name: Verify hard resource governor
+        run: |
+          pytest -q \
+            tests/test_codex_budgeted_mcp_proxy.py \
+            tests/test_codex_budgeted_entrypoint.py
+      - name: Verify budgeted front door is inert by default
+        run: |
+          python scripts/run_budgeted_codex_astra_case.py --help >/dev/null
+          python - <<'PY'
+          from hardware_splicer.codex_budgeted_entrypoint import (
+              ASTRA_DEFAULT_TIMEOUT_SECONDS,
+              ASTRA_MAX_TIMEOUT_SECONDS,
+              resource_guard_manifest,
+          )
+          from hardware_splicer.codex_budgeted_mcp_proxy import (
+              ASTRA_MAX_BACKEND_CALLS,
+              ASTRA_MAX_MCP_TOOL_CALLS,
+              ASTRA_MAX_REQUEST_BYTES,
+          )
+
+          guard = resource_guard_manifest(timeout_seconds=ASTRA_DEFAULT_TIMEOUT_SECONDS)
+          assert ASTRA_DEFAULT_TIMEOUT_SECONDS == 300
+          assert ASTRA_MAX_TIMEOUT_SECONDS == 300
+          assert ASTRA_MAX_MCP_TOOL_CALLS == 20
+          assert ASTRA_MAX_BACKEND_CALLS == 8
+          assert ASTRA_MAX_REQUEST_BYTES == 262_144
+          assert guard["exact_allowance_cost_guaranteed"] is False
+          assert guard["api_fallback"] is False
+          print(guard)
+          PY
