@@ -12,6 +12,7 @@ CODEX_TRACE_SCHEMA = "hardware_splicer.codex_exec_trace.v2"
 DEFAULT_MCP_SERVER = "hardware-splicer-backend"
 HS_MCP_TOOLS = {
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",

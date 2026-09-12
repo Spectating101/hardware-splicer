@@ -18,13 +18,16 @@ from pathlib import Path
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
-    str(_REPO_ROOT),
+    str(_REPO_ROOT / "src"),
     *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
 ]
 
-from hardware_splicer.codex_astra_runtime import CODEX_ALLOWANCE_CONFIRMATION
-from hardware_splicer.codex_budgeted_entrypoint import (
+from hardware_splicer.codex_astra_runtime import (  # noqa: E402
+    CODEX_ALLOWANCE_CONFIRMATION,
+)
+from hardware_splicer.codex_budgeted_entrypoint import (  # noqa: E402
     ASTRA_DEFAULT_TIMEOUT_SECONDS,
+    ASTRA_LAUNCHER_TEMP_ROOT,
     ASTRA_MAX_TIMEOUT_SECONDS,
     build_delegated_runner_argv,
     resolve_canonical_backend,
@@ -47,6 +50,13 @@ def _observer_dir(manifest_path: Path) -> Path:
     if observer != manifest_path.parent:
         raise ValueError("observer directory must be the manifest parent")
     return observer
+
+
+def _case_id(manifest_path: Path) -> str:
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("case manifest must be a JSON object")
+    return str(payload.get("case_id") or "").strip()
 
 
 def main() -> int:
@@ -75,22 +85,42 @@ def main() -> int:
         raise SystemExit(f"case manifest does not exist: {manifest_path}")
     try:
         observer = _observer_dir(manifest_path)
+        case_id = _case_id(manifest_path)
         backend = resolve_canonical_backend(args.backend_command)
-        guard = resource_guard_manifest(timeout_seconds=args.timeout_seconds)
+        guard = resource_guard_manifest(
+            timeout_seconds=args.timeout_seconds,
+            case_id=case_id,
+        )
     except (OSError, TypeError, ValueError) as exc:
         raise SystemExit(str(exc)) from exc
 
     guard_path = observer / "CODEX_ASTRA_RESOURCE_GUARD.json"
-    write_resource_guard_manifest(guard_path, timeout_seconds=args.timeout_seconds)
+    write_resource_guard_manifest(
+        guard_path,
+        timeout_seconds=args.timeout_seconds,
+        case_id=case_id,
+    )
 
     runner_script = _SCRIPT_DIR / "run_codex_astra_case.py"
     if not runner_script.is_file():
         raise SystemExit(f"delegated one-shot runner is missing: {runner_script}")
 
-    with tempfile.TemporaryDirectory(prefix="hs-astra-budgeted-mcp-") as temp_dir:
+    # Codex permission profiles protect home/cache paths even when a leaf path is
+    # explicitly readable. A private randomized directory beneath /tmp is traversable
+    # by the clean-room sandbox and contains only the generated one-shot launcher.
+    with tempfile.TemporaryDirectory(
+        prefix="hs-astra-budgeted-mcp-",
+        dir=ASTRA_LAUNCHER_TEMP_ROOT,
+    ) as temp_dir:
+        # The Codex Linux sandbox needs directory traversal before it can apply the
+        # explicit read grant to the launcher. The directory contains no credentials
+        # and only one 0700 launcher, so traversal/listing does not expose secret state.
+        Path(temp_dir).chmod(0o755)
         launcher = write_budgeted_mcp_launcher(
             Path(temp_dir) / "hs-astra-budgeted-mcp",
             backend_command=backend,
+            max_tool_calls=int(guard["mcp_tool_calls_hard_max"]),
+            max_backend_calls=int(guard["backend_calls_hard_max"]),
         )
         if not validate_launcher(launcher):
             raise SystemExit("budgeted MCP launcher failed executable validation")

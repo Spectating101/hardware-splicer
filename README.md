@@ -7,6 +7,11 @@
 
 > **AI proposes → deterministic systems constrain → bench evidence decides → human authorizes.**
 
+Bounded Astra projects can now cross into the audited bench workflow through a
+revision/hash-bound [project physical-validation packet](docs/PROJECT_PHYSICAL_VALIDATION.md).
+Real captures persist into the same canonical project history; simulated or public-web
+captures, stale candidates, and out-of-order powered tests fail closed.
+
 Hardware-Splicer lets a general-purpose AI agent perform bounded hardware-engineering work while deterministic constraints, provenance-bearing evidence, exact revision state and scoped human authority remain independently authoritative.
 
 It is **not** a claim that an LLM can safely replace a hardware engineer. The design goal is narrower and more defensible:

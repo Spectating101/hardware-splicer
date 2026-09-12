@@ -1,0 +1,16 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "decision-hold",
+      "description": "Do not select a final translator, assign physical DUT pins, or release fabrication/power-on. No direct 3.3 V DUT I/O connection is justified by the supplied evidence.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture",
+        "src-dut"
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

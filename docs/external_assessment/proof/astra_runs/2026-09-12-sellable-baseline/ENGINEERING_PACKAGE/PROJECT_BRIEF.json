@@ -1,0 +1,20 @@
+{
+  "action_count": 6,
+  "blocker_count": 5,
+  "candidate_count": 2,
+  "conversation_turn_count": 0,
+  "current_stage": null,
+  "latest_ai_session_id": null,
+  "mission": "Prepare the next defensible pre-fabrication engineering actions for an SPI programming/validation adapter between the declared 3.3 V host and the candidate flash DUT. Preserve unresolved identity/electrical evidence and do not claim fabrication or power-on readiness.",
+  "mode": null,
+  "name": "SPI Flash Programming Adapter",
+  "parsed_source_count": 0,
+  "project_id": "hs-astra-sellable-20260912-4",
+  "requirement_count": 3,
+  "schema_version": "hardware_splicer.engineering_package.v1",
+  "snapshot_sha256": "8f39f428f018d2605913cc3a260a3da7371f2d7c70babb62f15ef960791ff280",
+  "source_count": 5,
+  "source_revision": 2,
+  "source_saved_at": "2026-09-11T17:09:19.100516+00:00",
+  "tool_result_count": 0
+}

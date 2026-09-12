@@ -21,9 +21,11 @@ from .capability_api import create_capability_router
 from .capability_reuse_api import create_capability_reuse_router
 from .circuit_json_api import create_circuit_json_router
 from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
+from .document_evidence_api import create_document_evidence_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
+from .engineering_assurance_api import create_engineering_assurance_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_anchored_api import (
     _SAVE_PATH as ENGINEERING_EXECUTION_SAVE_PATH,
@@ -48,6 +50,8 @@ from .physical_evidence_persistence_api import create_physical_evidence_persiste
 from .project_api import create_project_router
 from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
+from .project_pre_fabrication_plan_api import create_project_pre_fabrication_plan_router
+from .project_physical_validation_api import create_project_physical_validation_router
 from .project_store import ProjectStore
 from .semantic_circuit_api import create_semantic_circuit_router
 from .source_conflict_api import create_source_conflict_router
@@ -107,8 +111,12 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_upload_session_router(resolved_store))
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
+    app.include_router(create_document_evidence_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
+    app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
+    app.include_router(create_project_physical_validation_router(resolved_store))
+    app.include_router(create_engineering_assurance_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))

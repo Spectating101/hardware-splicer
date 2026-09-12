@@ -1,0 +1,119 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "direct-connection",
+      "candidate_kind": "direct_wiring",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "none",
+      "rationale": "Declared 3.3 V host drive exceeds DUT VCC+0.4 V absolute maximum at target 1.8 V (2.2 V); absolute maximum is not a valid operating target. Level translation required.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "single-axc4t245",
+      "candidate_kind": "single_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "SN74AXC4T245",
+      "rationale": "With A at host 3.3 V and B at DUT 1.8 V, two shared two-bit DIR sections permit 4/0, 2/2, or 0/4 directions, not required 3/1. Supplies are in range but do not fix topology. Rejection is for this single-device topology.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "txu0304-family",
+      "candidate_kind": "single_fixed_direction_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "TXU0304",
+      "proposed_logical_mapping": [
+        {
+          "direction": "host_to_dut",
+          "dut": "CLK",
+          "host": "SCLK",
+          "rationale": "A1 -> B1Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "/CS",
+          "host": "CS#",
+          "rationale": "A2 -> B2Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "DI",
+          "host": "MOSI_IO0",
+          "rationale": "A3 -> B3Y; DI is IO0 in other modes"
+        },
+        {
+          "direction": "dut_to_host",
+          "dut": "DO",
+          "host": "MISO_IO1",
+          "rationale": "B4 -> A4Y; DO is IO1 in other modes"
+        }
+      ],
+      "rationale": "Three A-to-B channels and one B-to-A channel fit fixture-declared standard SPI directions. Proposed VCCA=3.3 V, VCCB=1.8 V both within recommended table range. Family-level choice only; exact orderable part and all implementation remain unresolved.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "preferred_family_candidate"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

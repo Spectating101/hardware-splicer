@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "ACTION_TRACE.json",
+      "sha256": "cb8159823e2c68798695fd9c3d2354045ec5e44aad5f9af458ca545278a75952",
+      "size_bytes": 7753
+    },
+    {
+      "path": "ARCHITECTURE_CANDIDATES.json",
+      "sha256": "dd4382ddfdf6dc15bcf1be32837c63fdfc654c9139bc10114107a7c91b4f71e2",
+      "size_bytes": 4329
+    },
+    {
+      "path": "ARTIFACT_REFERENCES.json",
+      "sha256": "064b15435ab0974e8b2d0f967711049abbfe46fc00b37690ba6490eadea3c11a",
+      "size_bytes": 10976
+    },
+    {
+      "path": "AUTHORITY_STATE.json",
+      "sha256": "296453872fe2ecd179596900660c2be6b39a9577cda796a8f0e0eedc6498db9c",
+      "size_bytes": 476
+    },
+    {
+      "path": "BLOCKERS.json",
+      "sha256": "6922a25744ee2f2a5b60980d8b2fa809a7fb6ddef28df5088222bf647ece7b4d",
+      "size_bytes": 1104
+    },
+    {
+      "path": "CONVERSATION_BRIEFINGS.json",
+      "sha256": "186b009843b0073de3be64ea250a41af7eabc74938b53723b42d1f1b02d75386",
+      "size_bytes": 137
+    },
+    {
+      "path": "DECISIONS.json",
+      "sha256": "e9ed7993f37ef0d04a15b02d0eca92e4bb8c5e575497f776f3e11a8523438e62",
+      "size_bytes": 925
+    },
+    {
+      "path": "ENGINEERING_STATE.json",
+      "sha256": "addf9054ba667b1babb771611d432c336391bdf065b0cade3711bb920c5ef6cd",
+      "size_bytes": 12369
+    },
+    {
+      "path": "PROJECT_BRIEF.json",
+      "sha256": "b278f08a556da0a8411276b78b22528fc6c8ba36715d65d2e128fff452ea7c41",
+      "size_bytes": 919
+    },
+    {
+      "path": "README.md",
+      "sha256": "93e554d77ade5d95afa9fdd84035494d8f60504f9cf29cb0ce4f7b1ca95829eb",
+      "size_bytes": 1207
+    },
+    {
+      "path": "REPAIR_LINEAGE.json",
+      "sha256": "b80ac9b850fda5e31263f4e2cd46533de7baa7c3094b43fc9f82dd95aea6f225",
+      "size_bytes": 91
+    },
+    {
+      "path": "REQUIREMENTS.json",
+      "sha256": "052f730e9612e88e3db09f997a7e3235d16111c80482b37c53102781d46259f4",
+      "size_bytes": 2734
+    },
+    {
+      "path": "SOURCE_CONFLICTS.json",
+      "sha256": "d76dc4817b2709f34985a956bb2a82c8ae1ba2f7a53c65f8f473cb93c80506f4",
+      "size_bytes": 102
+    },
+    {
+      "path": "SOURCE_MANIFEST.json",
+      "sha256": "569e9310bfaededb1d6f9bc9d87a63b5446aa26d3611498a4080ea0ffdc05b43",
+      "size_bytes": 10685
+    },
+    {
+      "path": "TOOL_RESULTS.json",
+      "sha256": "06eaea1467e65bb9f8c7b118a295dabf5ebae923a52ce96e1bc3ad4075d064d4",
+      "size_bytes": 135
+    }
+  ],
+  "manifest_self_hash_excluded": true,
+  "package_authority_effect": "none",
+  "package_id": "engineering-package-r00000003-015191c7a77b03d0",
+  "project_id": "hs-astra-blind-baseline-20260913-2",
+  "raw_source_bytes_included": false,
+  "schema_version": "hardware_splicer.engineering_package_manifest.v1",
+  "snapshot_sha256": "015191c7a77b03d0f13509ef4f53a6a65a44a824b5865d3851c7d8eed24f744a",
+  "source_revision": 3,
+  "source_saved_at": "2026-09-12T16:27:16.087927+00:00"
+}

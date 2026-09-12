@@ -1,0 +1,116 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "direct-3v3",
+      "candidate_kind": "direct_connection",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "none",
+      "rationale": "At nominal VCC=1.8 V, absolute pin maximum is 2.2 V; even at VCC=1.95 V it is 2.35 V. Declared 3.3 V host drive exceeds both. Absolute maxima are not operating targets. 3.3 V DUT supply also exceeds 1.95 V.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "txu0304",
+      "candidate_kind": "fixed_direction_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "TXU0304",
+      "proposed_logical_mapping": [
+        {
+          "direction": "host_to_dut",
+          "dut": "CLK",
+          "host": "SCLK",
+          "translator_path": "A1 -> B1Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "/CS",
+          "host": "CS#",
+          "translator_path": "A2 -> B2Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "DI_IO0",
+          "host": "MOSI_IO0",
+          "translator_path": "A3 -> B3Y"
+        },
+        {
+          "direction": "dut_to_host",
+          "dut": "DO_IO1",
+          "host": "MISO_IO1",
+          "translator_path": "B4 -> A4Y"
+        }
+      ],
+      "proposed_supplies": {
+        "DUT_VCC": 1.8,
+        "VCCA": 3.3,
+        "VCCB": 1.8
+      },
+      "rationale": "Both nominal rails fall within declared translator ranges; fixed 3+1 topology matches standard SPI. Logical signal mapping only, no package pin numbers. Application example is not component specification or validation.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "preferred_family_candidate"
+    },
+    {
+      "candidate_id": "single-axc4t245",
+      "candidate_kind": "single_group_direction_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "SN74AXC4T245",
+      "rationale": "Rails are in range, but each two-channel group shares direction: available static partitions are 4+0, 2+2, or 0+4, not required 3+1. Rejection applies to single-device all-four-signal mapping, not all possible multi-device alternatives.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

@@ -20,7 +20,7 @@ from pathlib import Path
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _SCRIPT_DIR.parent
 sys.path[:] = [
-    str(_REPO_ROOT),
+    str(_REPO_ROOT / "src"),
     *[entry for entry in sys.path if Path(entry or os.curdir).resolve() != _SCRIPT_DIR],
 ]
 
@@ -106,6 +106,7 @@ async def main_async() -> int:
                 names = {tool.name for tool in tools.tools}
                 expected = {
                     "hs_backend_status",
+                    "hs_backend_task_manifest",
                     "hs_backend_list_operations",
                     "hs_backend_describe_operation",
                     "hs_backend_call",

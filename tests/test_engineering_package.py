@@ -261,6 +261,7 @@ def test_engineering_package_is_reproducible_and_manifest_verified(tmp_path: Pat
         "ENGINEERING_PACKAGE/TOOL_RESULTS.json",
         "ENGINEERING_PACKAGE/REPAIR_LINEAGE.json",
         "ENGINEERING_PACKAGE/CONVERSATION_BRIEFINGS.json",
+        "ENGINEERING_PACKAGE/ENGINEERING_STATE.json",
         "ENGINEERING_PACKAGE/AUTHORITY_STATE.json",
         "ENGINEERING_PACKAGE/MANIFEST.json",
         "ENGINEERING_PACKAGE/README.md",
@@ -305,3 +306,80 @@ def test_engineering_package_omits_raw_content_and_preserves_trace(tmp_path: Pat
     assert any(row["kind"] == "tool_failure" for row in blockers)
     assert authority["project_authority"]["power_on_authorized"] is False
     assert authority["package_authorizes_physical_action"] is False
+
+
+def test_engineering_package_exports_canonical_state_without_ai_session(
+    tmp_path: Path,
+) -> None:
+    snapshot = {
+        "projectId": "spi-adapter",
+        "mission": "Prepare a bounded SPI adapter.",
+        "machineProject": {
+            "project_id": "spi-adapter",
+            "name": "SPI adapter",
+            "purpose": "Translate a 3.3 V host SPI interface to a 1.8 V DUT.",
+            "requirements": [
+                {
+                    "requirement_id": "req-logic-level",
+                    "statement": "Prove logic-level compatibility with margin.",
+                    "authority": "declared",
+                }
+            ],
+        },
+        "engineeringPlan": {"schema_version": "hardware_splicer.guided_engineering_plan.v1"},
+        "engineeringStatus": {"overall_status": "blocked", "blockers": []},
+        "engineeringReadiness": {"status": "blocked"},
+        "preFabricationPlan": {
+            "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+            "requirements": [
+                {
+                    "id": "req-exact-dut",
+                    "statement": "Resolve the exact DUT identity.",
+                    "source_ids": [],
+                }
+            ],
+            "architecture_candidates": [
+                {"id": "candidate-fixed-direction", "status": "unresolved"}
+            ],
+            "decisions": [
+                {"id": "decision-translator", "status": "deferred_pending_evidence"}
+            ],
+            "actions": [
+                {
+                    "action": "Resolve the exact DUT identity.",
+                    "status": "blocked_pending_evidence",
+                    "source_ids": [],
+                }
+            ],
+        },
+        "orderedSteps": [
+            {
+                "step_id": "guide-05-electrical",
+                "title": "Verify the electrical interface",
+                "instructions": ["Calculate input and output voltage margins."],
+                "status": "planned",
+            }
+        ],
+        "engineeringBlockers": ["The DUT package pinout is unresolved."],
+        "fabrication_authorized": False,
+        "power_on_authorized": False,
+    }
+    store = ProjectStore(tmp_path / "projects")
+    record = build_engineering_package(store, "spi-adapter", 2, snapshot)
+    entries = _zip_entries(store.root / "spi-adapter" / record["project_relative_zip"])
+
+    requirements = json.loads(entries["ENGINEERING_PACKAGE/REQUIREMENTS.json"])["requirements"]
+    candidates = json.loads(entries["ENGINEERING_PACKAGE/ARCHITECTURE_CANDIDATES.json"])["candidates"]
+    actions = json.loads(entries["ENGINEERING_PACKAGE/ACTION_TRACE.json"])["actions"]
+    blockers = json.loads(entries["ENGINEERING_PACKAGE/BLOCKERS.json"])["blockers"]
+    state = json.loads(entries["ENGINEERING_PACKAGE/ENGINEERING_STATE.json"])
+
+    assert requirements[0]["requirement_id"] == "req-logic-level"
+    assert {row.get("id") for row in requirements} >= {"req-exact-dut"}
+    assert candidates[0]["id"] == "candidate-fixed-direction"
+    assert actions[0]["action_type"] == "pre_fabrication_next_action"
+    assert actions[1]["action_id"] == "guide-05-electrical"
+    assert blockers[0]["message"] == "The DUT package pinout is unresolved."
+    assert state["machine_project"]["project_id"] == "spi-adapter"
+    assert state["pre_fabrication_next_actions"]["decisions"][0]["id"] == "decision-translator"
+    assert state["physical_correctness"] == "UNPROVEN"

@@ -21,11 +21,18 @@ from pathlib import Path
 from typing import Any, Mapping, TextIO
 
 ASTRA_MAX_MCP_TOOL_CALLS = 20
-ASTRA_MAX_BACKEND_CALLS = 8
+# The blinded conflict workflow needs twelve canonical calls when the clean-room
+# store starts empty, one bounded plan request requires repair, and evidence-delta
+# is inspected before packaging and final readback. This remains below the
+# independent total MCP-call ceiling.
+ASTRA_MAX_BACKEND_CALLS = 12
+ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS = 40
+ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS = 36
 ASTRA_MAX_REQUEST_BYTES = 262_144
 
 _ALLOWED_TOOLS = {
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",
@@ -287,14 +294,41 @@ def main() -> int:
         description="Relay canonical HS MCP stdio with a hard one-case tool-call budget."
     )
     parser.add_argument("--backend-command", default="hs-backend-mcp")
+    parser.add_argument(
+        "--max-tool-calls",
+        type=int,
+        default=ASTRA_MAX_MCP_TOOL_CALLS,
+    )
+    parser.add_argument(
+        "--max-backend-calls",
+        type=int,
+        default=ASTRA_MAX_BACKEND_CALLS,
+    )
     parser.add_argument("backend_arg", nargs="*")
     args = parser.parse_args()
+    if args.max_tool_calls < 1 or args.max_tool_calls > ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS:
+        raise SystemExit(
+            "--max-tool-calls must be between 1 and "
+            f"{ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS}"
+        )
+    if (
+        args.max_backend_calls < 1
+        or args.max_backend_calls > ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS
+        or args.max_backend_calls > args.max_tool_calls
+    ):
+        raise SystemExit(
+            "--max-backend-calls must be positive, no greater than --max-tool-calls, "
+            f"and no greater than {ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS}"
+        )
     backend = Path(args.backend_command).expanduser()
     command = str(backend.resolve()) if backend.is_absolute() else args.backend_command
     return run_proxy(
         backend_command=command,
         backend_args=list(args.backend_arg),
-        budget=ToolBudget(),
+        budget=ToolBudget(
+            max_tool_calls=args.max_tool_calls,
+            max_backend_calls=args.max_backend_calls,
+        ),
     )
 
 

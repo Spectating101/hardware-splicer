@@ -9,6 +9,11 @@ python scripts/run_budgeted_codex_astra_case.py \
   --manifest /path/to/observer/CASE_MANIFEST.json
 ```
 
+If `--backend-command` is supplied, it must name the raw canonical
+`hs-backend-mcp` executable. Never pass an existing budget proxy or governed launcher;
+this entrypoint creates the one and only governor layer itself and rejects nested
+governors before any model execution.
+
 Dry-run is the default. A live turn still requires the exact existing allowance acknowledgement:
 
 ```bash
@@ -36,6 +41,13 @@ limits that bound the amount of agent looping we permit before the experiment is
   MCP child and fails the session closed;
 - no direct API fallback is permitted.
 
+The one-shot MCP launcher is created in a randomized mode-`0755` traversal directory
+beneath `/tmp`, which contains only a mode-`0700` launcher and no credentials. Codex's
+Linux sandbox needs parent-directory traversal before it can apply the explicit read
+grant to the launcher. Codex also protects home/cache paths from local command execution
+even when a leaf file is listed in a permission profile, so the launcher must not be
+emitted beneath a user cache directory.
+
 Protocol initialization, notifications, and tool-list discovery do not consume the tool
 budget because they are transport setup rather than agent engineering work.
 
@@ -57,6 +69,11 @@ canonical Hardware-Splicer FastAPI / ProjectStore
 The governor does not duplicate any Hardware-Splicer operation, project truth, evidence
 rule, or physical-authority decision. It only decides whether another MCP request is
 allowed to reach the canonical child process.
+
+The launcher preserves the invoking virtual environment's `python` path instead of
+resolving its interpreter symlink to the system Python. This keeps the installed governor
+package available even when Codex strips ambient Python import-path variables from the
+MCP child environment.
 
 ## What the limits do and do not prove
 

@@ -244,6 +244,61 @@ def test_registered_source_record_rewrite_blocks_progress_contract() -> None:
     assert result["contract_pass"] is False
 
 
+def test_append_only_server_shaped_document_claim_preserves_source_record() -> None:
+    initial = spi_flash_adapter_snapshot()
+    final = _progress_snapshot(initial)
+    source = final["engineeringSources"][0]
+    source["claims"] = [
+        {
+            "claim_id": "document-proposal-1",
+            "source_id": source["source_id"],
+            "subject_id": "dut",
+            "predicate": "supply_range",
+            "value": "1.7 V to 1.95 V",
+            "authority": "proposed",
+            "evidence_locator": {"page": 60},
+            "metadata": {
+                "claim_origin": "model_proposed_from_hash_bound_document_text",
+                "independent_review_state": "unreviewed",
+                "automatic_authorization": False,
+            },
+        }
+    ]
+    source["metadata"]["document_claim_extraction"] = {
+        "machine_proposed_claim_count": 1
+    }
+    result = _audit(initial, _save(initial), _plan(), _read(final))
+
+    assert result["checks"]["registered_source_records_preserved"] is True
+    assert result["contract_pass"] is True
+
+
+def test_document_claim_authority_upgrade_blocks_source_preservation() -> None:
+    initial = spi_flash_adapter_snapshot()
+    final = _progress_snapshot(initial)
+    source = final["engineeringSources"][0]
+    source["claims"] = [
+        {
+            "claim_id": "document-proposal-1",
+            "source_id": source["source_id"],
+            "subject_id": "dut",
+            "predicate": "supply_range",
+            "value": "1.7 V to 1.95 V",
+            "authority": "declared",
+            "evidence_locator": {"page": 60},
+            "metadata": {
+                "claim_origin": "model_proposed_from_hash_bound_document_text",
+                "independent_review_state": "unreviewed",
+                "automatic_authorization": False,
+            },
+        }
+    ]
+    result = _audit(initial, _save(initial), _plan(), _read(final))
+
+    assert result["checks"]["registered_source_records_preserved"] is False
+    assert result["contract_pass"] is False
+
+
 def test_registered_source_addition_or_removal_blocks_progress_contract() -> None:
     initial = spi_flash_adapter_snapshot()
 

@@ -74,6 +74,37 @@ def test_safe_trace_passes_non_golden_truth_contracts() -> None:
     assert audit["physical_authority_granted"] is False
 
 
+def test_task_manifest_is_a_complete_compact_discovery_route() -> None:
+    response = _safe_response()
+    response["output"][1:3] = [
+        _call("hs_backend_task_manifest", {"task": "bounded_pre_fabrication"})
+    ]
+
+    audit = audit_response_trace(
+        response,
+        expected_project_id="proof-01",
+        known_source_ids={"src-a"},
+    )
+
+    assert audit["missing_required_gateway_calls"] == []
+    assert audit["gateway_traversal_complete"] is True
+    assert audit["hard_truth_contract_pass"] is True
+
+
+def test_partial_legacy_discovery_without_task_manifest_is_not_complete() -> None:
+    response = _safe_response()
+    response["output"] = [response["output"][0], response["output"][1], response["output"][-1]]
+
+    audit = audit_response_trace(
+        response,
+        expected_project_id="proof-01",
+        known_source_ids={"src-a"},
+    )
+
+    assert audit["missing_required_gateway_calls"] == ["hs_backend_describe_operation"]
+    assert audit["gateway_traversal_complete"] is False
+
+
 def test_trace_flags_foreign_project_invented_evidence_and_authority_attempt() -> None:
     response = _safe_response(project_id="foreign-project", source_id="invented-source")
     response["output"][-1]["arguments"]["json_body"].update(

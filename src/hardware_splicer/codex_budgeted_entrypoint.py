@@ -9,16 +9,29 @@ import shutil
 import stat
 import sys
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Mapping
 
 from .codex_budgeted_mcp_proxy import (
     ASTRA_MAX_BACKEND_CALLS,
     ASTRA_MAX_MCP_TOOL_CALLS,
     ASTRA_MAX_REQUEST_BYTES,
+    ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS,
+    ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS,
+)
+from .cleanroom_primary_source_spi_flash_experiment import (
+    RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID,
+    RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
 )
 
 ASTRA_DEFAULT_TIMEOUT_SECONDS = 300
 ASTRA_MAX_TIMEOUT_SECONDS = 300
+ASTRA_LAUNCHER_TEMP_ROOT = Path("/tmp")
+_BUDGET_PROXY_MARKERS = (
+    "hardware_splicer.codex_budgeted_mcp_proxy",
+    "hs-astra-budgeted-mcp",
+)
 
 
 def clamp_timeout_seconds(value: int) -> int:
@@ -40,11 +53,36 @@ def resolve_canonical_backend(command: str = "hs-backend-mcp", env: Mapping[str,
         resolved = candidate.resolve(strict=False)
         if not resolved.is_file():
             raise FileNotFoundError(f"canonical HS MCP backend not found: {resolved}")
+        _reject_nested_budget_proxy(resolved)
         return str(resolved)
     found = shutil.which(command, path=source_env.get("PATH"))
     if not found:
         raise FileNotFoundError(f"canonical HS MCP backend not found on PATH: {command}")
-    return str(Path(found).resolve())
+    resolved = Path(found).resolve()
+    _reject_nested_budget_proxy(resolved)
+    return str(resolved)
+
+
+def _reject_nested_budget_proxy(command: Path) -> None:
+    """Reject a governor passed where the raw canonical backend is required.
+
+    The stdio relay is deliberately single-layer. Nesting two instances can leave both
+    relays waiting on each other's line-reader lifecycle and prevent MCP initialize from
+    completing. Generated launchers are small text files, so inspect only a bounded prefix;
+    opaque binaries remain eligible canonical backend commands.
+    """
+
+    try:
+        if command.stat().st_size > 65_536:
+            return
+        prefix = command.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return
+    if any(marker in prefix for marker in _BUDGET_PROXY_MARKERS):
+        raise ValueError(
+            "--backend-command must be the raw canonical hs-backend-mcp executable, "
+            "not an existing Astra budget proxy/launcher"
+        )
 
 
 def write_budgeted_mcp_launcher(
@@ -52,12 +90,17 @@ def write_budgeted_mcp_launcher(
     *,
     backend_command: str,
     python_command: str | None = None,
+    max_tool_calls: int = ASTRA_MAX_MCP_TOOL_CALLS,
+    max_backend_calls: int = ASTRA_MAX_BACKEND_CALLS,
 ) -> Path:
     """Write an executable shim that can only start the budgeted MCP proxy."""
 
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
-    python = str(Path(python_command or sys.executable).expanduser().resolve())
+    # Preserve a virtualenv's interpreter path. Resolving the `python` symlink to the
+    # system interpreter silently drops the environment that contains this package, and
+    # Codex intentionally does not forward PYTHONPATH to MCP children by default.
+    python = str(Path(python_command or sys.executable).expanduser().absolute())
     backend = str(Path(backend_command).expanduser().resolve())
     body = (
         "#!/bin/sh\n"
@@ -66,6 +109,10 @@ def write_budgeted_mcp_launcher(
         + shlex.quote(python)
         + " -m hardware_splicer.codex_budgeted_mcp_proxy --backend-command "
         + shlex.quote(backend)
+        + " --max-tool-calls "
+        + str(max_tool_calls)
+        + " --max-backend-calls "
+        + str(max_backend_calls)
         + ' "$@"\n'
     )
     target.write_text(body, encoding="utf-8")
@@ -111,13 +158,32 @@ def build_delegated_runner_argv(
     return argv
 
 
-def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
+def resource_guard_manifest(
+    *, timeout_seconds: int, case_id: str | None = None
+) -> dict[str, object]:
+    raw_document_case = case_id in {
+        RAW_DOCUMENT_CASE_ID,
+        RAW_DOCUMENT_V2_CASE_ID,
+        RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
+    }
+    tool_limit = (
+        ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS
+        if raw_document_case
+        else ASTRA_MAX_MCP_TOOL_CALLS
+    )
+    backend_limit = (
+        ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS
+        if raw_document_case
+        else ASTRA_MAX_BACKEND_CALLS
+    )
     return {
-        "schema_version": "hardware_splicer.codex_astra_resource_guard.v1",
+        "schema_version": "hardware_splicer.codex_astra_resource_guard.v5",
+        "case_profile": "raw_document" if raw_document_case else "standard",
         "timeout_seconds": clamp_timeout_seconds(timeout_seconds),
         "timeout_hard_max_seconds": ASTRA_MAX_TIMEOUT_SECONDS,
-        "mcp_tool_calls_hard_max": ASTRA_MAX_MCP_TOOL_CALLS,
-        "backend_calls_hard_max": ASTRA_MAX_BACKEND_CALLS,
+        "mcp_tool_calls_hard_max": tool_limit,
+        "backend_calls_hard_max": backend_limit,
         "mcp_request_bytes_hard_max": ASTRA_MAX_REQUEST_BYTES,
         "api_fallback": False,
         "exact_allowance_cost_guaranteed": False,
@@ -129,11 +195,23 @@ def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
     }
 
 
-def write_resource_guard_manifest(path: str | os.PathLike[str], *, timeout_seconds: int) -> Path:
+def write_resource_guard_manifest(
+    path: str | os.PathLike[str],
+    *,
+    timeout_seconds: int,
+    case_id: str | None = None,
+) -> Path:
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps(resource_guard_manifest(timeout_seconds=timeout_seconds), indent=2, sort_keys=True)
+        json.dumps(
+            resource_guard_manifest(
+                timeout_seconds=timeout_seconds,
+                case_id=case_id,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
         + "\n",
         encoding="utf-8",
     )

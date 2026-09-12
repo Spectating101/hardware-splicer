@@ -1,0 +1,134 @@
+{
+  "artifacts": [
+    {
+      "original_sha256": "sha256:bbaffdc66e0aae6976e135d689cda7cc3ac53bd0d53a36502734ecd2ceb015ab",
+      "original_size_bytes": 4763,
+      "path": "CASE_MANIFEST.json",
+      "published_sha256": "sha256:f5299a29ac4817a79272027de55d9a54bf469eb68090328c4ba4f09b0404bab1",
+      "published_size_bytes": 4515,
+      "sanitized": true
+    },
+    {
+      "original_sha256": "sha256:e853dbf41bcaaad6ae476f3dc6268f10f453666616496847f4857e52579d3bef",
+      "original_size_bytes": 13789,
+      "path": "CASE_SNAPSHOT.json",
+      "published_sha256": "sha256:e853dbf41bcaaad6ae476f3dc6268f10f453666616496847f4857e52579d3bef",
+      "published_size_bytes": 13789,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:eb39048718cb1185e9eebd455f0537792895cde5c11eb8000d7be6e970541590",
+      "original_size_bytes": 15756,
+      "path": "CODEX_ASTRA_AUDIT.json",
+      "published_sha256": "sha256:eb39048718cb1185e9eebd455f0537792895cde5c11eb8000d7be6e970541590",
+      "published_size_bytes": 15756,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:0ca1d128f43268129b7d7157b5fedef4954e230d7b81d126a73df1d933ac7aa2",
+      "original_size_bytes": 2457,
+      "path": "CODEX_ASTRA_FINAL_REPORT_SCHEMA.json",
+      "published_sha256": "sha256:0ca1d128f43268129b7d7157b5fedef4954e230d7b81d126a73df1d933ac7aa2",
+      "published_size_bytes": 2457,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:3bd4734082c4beefae8f9f12029c61dba890c39f8419320d48c5ae4835f21b15",
+      "original_size_bytes": 531,
+      "path": "CODEX_ASTRA_RESOURCE_GUARD.json",
+      "published_sha256": "sha256:3bd4734082c4beefae8f9f12029c61dba890c39f8419320d48c5ae4835f21b15",
+      "published_size_bytes": 531,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:f721550b86815ce35b445d21402b424cba33a117dc1736dd1c305c730d88facf",
+      "original_size_bytes": 9973,
+      "path": "CODEX_ASTRA_RUNTIME_PLAN.json",
+      "published_sha256": "sha256:2b127650b0e48390564d824d942be02a57626131240cf7c89f779987ecad9e16",
+      "published_size_bytes": 9389,
+      "sanitized": true
+    },
+    {
+      "original_sha256": "sha256:b51dfdcb36e509cc2cd9d44a399fc4d7cb897bdc4f804434514fc679205e79b4",
+      "original_size_bytes": 1424,
+      "path": "CODEX_ASTRA_RUN_RESULT.json",
+      "published_sha256": "sha256:f4639e099fb3f1fb8ca64d4f932755933abd580ac5e906eb2743ac81306ee8a5",
+      "published_size_bytes": 1254,
+      "sanitized": true
+    },
+    {
+      "original_sha256": "sha256:50908026b16da3a5d87988e1c2a4db52ad3688b749a98768e3bc64b0de0e29c9",
+      "original_size_bytes": 448229,
+      "path": "CODEX_ASTRA_TRACE.jsonl",
+      "published_sha256": "sha256:2536897ac8772b23c7c52a28e180542e8788539906a91f7a87463d1efc3f5548",
+      "published_size_bytes": 448229,
+      "sanitized": true
+    },
+    {
+      "original_sha256": "sha256:8f24c3319757d4171d6755d875e4b884c855755c8b48f010f6ffe02f6eb5f96c",
+      "original_size_bytes": 2353,
+      "path": "DEVELOPER_INSTRUCTIONS.txt",
+      "published_sha256": "sha256:8f24c3319757d4171d6755d875e4b884c855755c8b48f010f6ffe02f6eb5f96c",
+      "published_size_bytes": 2353,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:700af95229f46cf535f58c3c046bfc1aed5d8d76f2200215668e8c6dc5fcee7a",
+      "original_size_bytes": 1472,
+      "path": "IDENTITY_CONFLICT_ADJUDICATION.json",
+      "published_sha256": "sha256:700af95229f46cf535f58c3c046bfc1aed5d8d76f2200215668e8c6dc5fcee7a",
+      "published_size_bytes": 1472,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:55a426b7f9847a8634a5a5dc2b668edc6af790849a6491e2d21c80b6cdd08e2f",
+      "original_size_bytes": 311,
+      "path": "LIVE_EXECUTION_ATTEMPT.json",
+      "published_sha256": "sha256:55a426b7f9847a8634a5a5dc2b668edc6af790849a6491e2d21c80b6cdd08e2f",
+      "published_size_bytes": 311,
+      "sanitized": false
+    },
+    {
+      "original_sha256": "sha256:fbbf5e737c213d73ab5cfe7c3ed4d6135da25097acb167dd9cb18399bdbf99da",
+      "original_size_bytes": 1413,
+      "path": "PRIMARY_SOURCES/CAPTURE_MANIFEST.json",
+      "published_sha256": "sha256:fbbf5e737c213d73ab5cfe7c3ed4d6135da25097acb167dd9cb18399bdbf99da",
+      "published_size_bytes": 1413,
+      "sanitized": false
+    }
+  ],
+  "case_id": "spi-flash-adapter-primary-sources-blind-v2:identity-conflict",
+  "contracts": {
+    "codex_final_report_contract_pass": false,
+    "codex_hard_truth_contract_pass": false,
+    "codex_mission_progress_contract_pass": false,
+    "codex_progress_provenance_contract_pass": false
+  },
+  "engineering_package_present": false,
+  "experiment_project_id": "hs-astra-blind-v5-identity-conflict-20260913-1",
+  "failed_mcp_call_count": 3,
+  "mcp_call_count": 14,
+  "nonclaims": {
+    "live_unseen_competence": "UNADJUDICATED",
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "source_truth_independently_validated": false
+  },
+  "path_placeholders": [
+    "$HS_REPO_ROOT",
+    "$MODEL_WORKSPACE",
+    "$OBSERVER_DIR",
+    "$OBSERVER_DIR/BACKEND_STORE"
+  ],
+  "repository_commit": "3c00c0935c91d34b4acfb0ebad39648235c4414b",
+  "result": "failed",
+  "run_id": "2026-09-13-blind-v5-conflict-guard-fail",
+  "schema_version": "hardware_splicer.codex_astra_public_proof_bundle.v1",
+  "usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 518400,
+    "input_tokens": 584694,
+    "output_tokens": 5739,
+    "reasoning_output_tokens": 73
+  }
+}

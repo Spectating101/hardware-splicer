@@ -37,9 +37,10 @@ def test_non_tool_protocol_messages_do_not_consume_budget() -> None:
 
 
 def test_exact_allowed_tool_surface_is_budgeted() -> None:
-    budget = ToolBudget(max_tool_calls=4, max_backend_calls=1)
+    budget = ToolBudget(max_tool_calls=5, max_backend_calls=1)
     names = [
         "hs_backend_status",
+        "hs_backend_task_manifest",
         "hs_backend_list_operations",
         "hs_backend_describe_operation",
         "hs_backend_call",
@@ -48,7 +49,7 @@ def test_exact_allowed_tool_surface_is_budgeted() -> None:
         action, denial = classify_client_line(_call(index, name), budget)
         assert action == "forward"
         assert denial is None
-    assert budget.tool_calls == 4
+    assert budget.tool_calls == 5
     assert budget.backend_calls == 1
 
 
@@ -121,5 +122,33 @@ def test_oversized_message_fails_before_json_or_budget_processing() -> None:
 
 def test_experiment_limits_are_deliberately_small() -> None:
     assert ASTRA_MAX_MCP_TOOL_CALLS == 20
-    assert ASTRA_MAX_BACKEND_CALLS == 8
+    assert ASTRA_MAX_BACKEND_CALLS == 12
     assert ASTRA_MAX_REQUEST_BYTES == 262_144
+
+
+def test_blinded_conflict_delta_workflow_fits_but_thirteenth_backend_call_is_denied() -> None:
+    budget = ToolBudget()
+    workflow_steps = (
+        "initial_read",
+        "bootstrap_save",
+        "assurance_read",
+        "rejected_plan_attempt",
+        "repaired_plan_save",
+        "assurance_reread",
+        "evidence_delta",
+        "canonical_read",
+        "refinement_save",
+        "final_assurance_read",
+        "package_export",
+        "final_readback",
+    )
+    for request_id, _step in enumerate(workflow_steps, start=1):
+        action, denial = classify_client_line(_call(request_id, "hs_backend_call"), budget)
+        assert action == "forward"
+        assert denial is None
+
+    action, denial = classify_client_line(_call(13, "hs_backend_call"), budget)
+    assert action == "deny"
+    assert denial["error"]["code"] == -32098
+    assert denial["error"]["data"]["backend_calls_used"] == 12
+    assert denial["error"]["data"]["backend_calls_limit"] == 12

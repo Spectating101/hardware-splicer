@@ -1,0 +1,57 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision": "Use symbolic TXU0304 topology as candidate; defer package pin assignment.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+          "pages": [
+            5,
+            6,
+            7,
+            8
+          ],
+          "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+          "revision": "Revision G",
+          "section": "3 Package Types and Pin Configurations",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+          "page": 4,
+          "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output.",
+          "revision": "Revision A",
+          "section": "6 Pin Configuration and Functions",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ]
+    },
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision": "Keep power off and preserve all readiness blockers; page 24 application example is not component validation.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+          "page": 24,
+          "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation.",
+          "revision": "Revision A",
+          "section": "10 Application and Implementation",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "content_hash": "sha256:spi-adapter-fixture-readiness-v2",
+          "source_id": "src-fixture"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

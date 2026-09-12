@@ -24,6 +24,91 @@ from .product_api import create_product_app
 _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 _PATH_PARAM_RE = re.compile(r"\{([^{}]+)\}")
 _SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
+_TASK_OPERATION_PATHS = {
+    "bounded_pre_fabrication": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("PUT", "/v1/projects/{project_id}/snapshot"),
+        ("POST", "/v1/projects/{project_id}/engineering/pre-fabrication-plan"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering-packages"),
+    ),
+    "engineering_assurance": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance/review-packet"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/reviews"),
+    ),
+    "physical_validation": (
+        ("GET", "/v1/projects/{project_id}"),
+        (
+            "GET",
+            "/v1/projects/{project_id}/engineering/physical-validation/packet",
+        ),
+        ("POST", "/v1/engineering/physical-evidence/envelopes/build-attested"),
+        (
+            "POST",
+            "/v1/projects/{project_id}/engineering/physical-validation/evidence",
+        ),
+    ),
+    "document_grounded_pre_fabrication": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("PUT", "/v1/projects/{project_id}/snapshot"),
+        ("GET", "/v1/projects/{project_id}/sources/{source_id}/document"),
+        (
+            "GET",
+            "/v1/projects/{project_id}/sources/{source_id}/document/search",
+        ),
+        (
+            "GET",
+            "/v1/projects/{project_id}/sources/{source_id}/document/pages/{page_number}",
+        ),
+        (
+            "POST",
+            "/v1/projects/{project_id}/sources/{source_id}/document/claims",
+        ),
+        ("POST", "/v1/projects/{project_id}/engineering/pre-fabrication-plan"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering-packages"),
+    ),
+}
+
+_BOUNDED_PRE_FABRICATION_RECORD_CONTRACT = {
+    "assessment": {
+        "required_fields": ["blockers", "independent_signoff", "physical_correctness"],
+        "constraints": {
+            "independent_signoff": False,
+            "physical_correctness": "UNPROVEN",
+        },
+    },
+    "architecture_candidates": {
+        "identity_fields": ["candidate_id", "candidate_kind", "component_family"],
+        "disposition_field": "status",
+        "disposition_values": [
+            "rejected",
+            "held",
+            "alternative_candidate",
+            "preferred_family_candidate",
+        ],
+        "logical_mapping_field": "proposed_logical_mapping",
+        "logical_mapping_row_fields": ["host", "dut", "direction"],
+    },
+    "source_references": {
+        "field": "source_refs",
+        "required_identity_fields": ["source_id", "claim_id"],
+        "locator_resolution": (
+            "page/pages/section and content_hash are inherited from the canonical claim record; "
+            "if repeated in a plan reference they must match exactly"
+        ),
+    },
+    "workflow": {
+        "empty_store_bootstrap": "PUT the supplied snapshot after an initial not_found read",
+        "final_canonical_readback_required": True,
+        "package_export_grants_authority": False,
+    },
+}
 
 
 def _app(app: FastAPI | None = None) -> FastAPI:
@@ -225,6 +310,52 @@ def filtered_operations(
             if text_norm not in haystack:
                 continue
         result.append(row)
+    return result
+
+
+def task_operation_manifest(
+    task: str, app: FastAPI | None = None
+) -> dict[str, Any]:
+    """Return one bounded workflow's exact operations and request schemas.
+
+    This is a context-efficiency projection of the canonical OpenAPI document, not a
+    parallel tool surface. Every listed operation still dispatches through the same ASGI
+    application and retains its normal revision/evidence/authority gates.
+    """
+
+    try:
+        wanted = _TASK_OPERATION_PATHS[task]
+    except KeyError as exc:
+        raise ValueError(
+            "unknown task manifest; expected one of: "
+            + ", ".join(sorted(_TASK_OPERATION_PATHS))
+        ) from exc
+    catalog = operation_catalog(app)
+    by_route = {(row["method"], row["path"]): row for row in catalog}
+    missing = [route for route in wanted if route not in by_route]
+    if missing:
+        raise ValueError(f"canonical task manifest routes are missing: {missing}")
+    rows = [by_route[route] for route in wanted]
+    result = {
+        "schema_version": "hardware_splicer.backend_task_operation_manifest.v2",
+        "task": task,
+        "workflow_operation_ids": [row["operation_id"] for row in rows],
+        "operations": [describe_operation(row["operation_id"], app) for row in rows],
+        "fallback": (
+            "Use hs_backend_list_operations only when this task manifest does not contain "
+            "an operation required by the supplied evidence."
+        ),
+        "authority_contract": {
+            "projection_grants_physical_authority": False,
+            "backend_gates_bypassed": False,
+            "automatic_execution": False,
+        },
+    }
+    if task in {
+        "bounded_pre_fabrication",
+        "document_grounded_pre_fabrication",
+    }:
+        result["canonical_record_contract"] = _BOUNDED_PRE_FABRICATION_RECORD_CONTRACT
     return result
 
 

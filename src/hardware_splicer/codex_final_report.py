@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 SCHEMA_VERSION = "hardware_splicer.astra_final_report.v1"
-AUDIT_SCHEMA_VERSION = "hardware_splicer.codex_final_report_audit.v2"
+AUDIT_SCHEMA_VERSION = "hardware_splicer.codex_final_report_audit.v4"
 
 _RESULT_STATUSES = {"bounded_pre_fabrication_result", "blocked"}
 _EVIDENCE_BOUNDARY = "frozen_product_visible_only"
@@ -177,15 +177,14 @@ def audit_codex_final_report(
     }
     messages = _completed_agent_messages(events)
     last_mcp_index = _last_completed_mcp_event_index(events)
-    exactly_one_message = len(messages) == 1
-    message_index = messages[0][0] if exactly_one_message else None
-    item = messages[0][1] if exactly_one_message else {}
+    message_index = messages[-1][0] if messages else None
+    item = messages[-1][1] if messages else {}
     text = item.get("text") if isinstance(item, Mapping) else None
 
     report: dict[str, Any] | None = None
     parse_error: str | None = None
-    if not exactly_one_message:
-        parse_error = f"expected exactly one completed agent_message, observed {len(messages)}"
+    if not messages:
+        parse_error = "expected a completed terminal agent_message"
     elif not isinstance(text, str):
         parse_error = "completed agent_message text is not a string"
     else:
@@ -211,7 +210,7 @@ def audit_codex_final_report(
     remaining = report.get("remaining_blockers") if report else None
     unresolved = report.get("unresolved_facts") if report else None
     checks = {
-        "exactly_one_completed_agent_message": exactly_one_message,
+        "terminal_agent_message_present": bool(messages),
         "agent_message_after_last_mcp_call": bool(
             message_index is not None and message_index > last_mcp_index >= 0
         ),
@@ -291,6 +290,8 @@ def audit_codex_final_report(
         "checks": checks,
         "parse_error": parse_error,
         "agent_message_count": len(messages),
+        "pre_terminal_agent_message_count": max(0, len(messages) - 1),
+        "terminal_agent_message_count": 1 if messages else 0,
         "agent_message_event_index": message_index,
         "last_completed_mcp_event_index": last_mcp_index,
         "expected_project_id": expected_project_id,

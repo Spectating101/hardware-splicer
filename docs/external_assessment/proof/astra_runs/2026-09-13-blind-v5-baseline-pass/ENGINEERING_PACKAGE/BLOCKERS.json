@@ -1,0 +1,35 @@
+{
+  "blockers": [
+    {
+      "kind": "project",
+      "message": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+      "object_id": ""
+    },
+    {
+      "kind": "project",
+      "message": "Schematic/ERC/PCB/DRC results and all physical measurements.",
+      "object_id": ""
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_blockers.v1"
+}

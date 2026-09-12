@@ -1,0 +1,200 @@
+{
+  "actions": [
+    {
+      "action_id": "identity",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Traceable physical identity and reviewed package pin mapping.",
+        "action_id": "identity",
+        "description": "Capture DUT marking and package; establish exact suffix and package-specific pin table before assigning pads.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "pages": [
+              5,
+              6,
+              7,
+              8
+            ],
+            "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+            "revision": "Revision G",
+            "section": "3 Package Types and Pin Configurations",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "pending_evidence"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Capture DUT marking and package; establish exact suffix and package-specific pin table before assigning pads.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending_evidence",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "host",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Host identity, voltage limits and timing evidence tied to actual equipment.",
+        "action_id": "host",
+        "description": "Identify programmer and obtain documented drive/input limits, supported modes and clock/timing behavior; later authorized measurements must verify under load.",
+        "status": "pending_evidence"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Identify programmer and obtain documented drive/input limits, supported modes and clock/timing behavior; later authorized measurements must verify under load.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending_evidence",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "package",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Reviewed orderable BOM and package-to-symbol pad mapping.",
+        "action_id": "package",
+        "description": "Select TXU0304 orderable package and verify footprint, availability and assembly constraints.",
+        "status": "pending_design"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Select TXU0304 orderable package and verify footprint, availability and assembly constraints.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending_design",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "timing",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Complete sourced worst-case DC and timing budget; no clock rate selected now.",
+        "action_id": "timing",
+        "description": "Budget VIH/VIL against opposing VOH/VOL in both directions over supply, temperature and load; calculate SCLK/MOSI/CS setup/hold and MISO round-trip timing including translator delay/skew, wiring and host sampling. Select clock only after margins are established.",
+        "status": "pending_design"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Budget VIH/VIL against opposing VOH/VOL in both directions over supply, temperature and load; calculate SCLK/MOSI/CS setup/hold and MISO round-trip timing including translator delay/skew, wiring and host sampling. Select clock only after margins are established.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending_design",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "supply",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Reviewed supply and OE design with defined disable states; no power authorization implied.",
+        "action_id": "supply",
+        "description": "Specify local 1.8 V regulation, tolerances, current budget, decoupling, protection and shared reference. Resolve OE bias/control and all power sequencing states, including either rail absent, before implementation.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "page": 59,
+            "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V.",
+            "revision": "Revision G",
+            "section": "9.2 Operating Ranges",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V.",
+            "revision": "Revision A",
+            "section": "7.3 Recommended Operating Conditions",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "page": 4,
+            "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state.",
+            "revision": "Revision A",
+            "section": "Table 6-1 Pin Functions",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending_design"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Specify local 1.8 V regulation, tolerances, current budget, decoupling, protection and shared reference. Resolve OE bias/control and all power sequencing states, including either rail absent, before implementation.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending_design",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "design_review",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance": "Reviewed design artifacts and separately acquired physical evidence; all physical results currently absent.",
+        "action_id": "design_review",
+        "description": "After identity and electrical closure, produce schematic/BOM/PCB and ERC/DRC; obtain independent human/EE adjudication signoff. Plan subsequent separately authorized bench validation with measured rails, sequencing and SPI waveforms.",
+        "status": "blocked_by_prior_actions"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "After identity and electrical closure, produce schematic/BOM/PCB and ERC/DRC; obtain independent human/EE adjudication signoff. Plan subsequent separately authorized bench validation with measured rails, sequencing and SPI waveforms.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "blocked_by_prior_actions",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_actions.v1"
+}

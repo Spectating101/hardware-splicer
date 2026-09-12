@@ -91,16 +91,16 @@ def test_process_relays_twenty_tool_calls_then_hard_disconnects(tmp_path: Path) 
         _cleanup(process)
 
 
-def test_process_relays_eight_backend_calls_then_hard_disconnects(tmp_path: Path) -> None:
+def test_process_relays_twelve_backend_calls_then_hard_disconnects(tmp_path: Path) -> None:
     process = _start_proxy(tmp_path)
     try:
-        for request_id in range(1, 9):
+        for request_id in range(1, 13):
             response = _call(process, request_id, "hs_backend_call")
             assert response["result"]["forwarded_tool"] == "hs_backend_call"
-        denial = _call(process, 9, "hs_backend_call")
+        denial = _call(process, 13, "hs_backend_call")
         assert denial["error"]["code"] == -32098
-        assert denial["error"]["data"]["backend_calls_used"] == 8
-        assert denial["error"]["data"]["backend_calls_limit"] == 8
+        assert denial["error"]["data"]["backend_calls_used"] == 12
+        assert denial["error"]["data"]["backend_calls_limit"] == 12
         assert process.wait(timeout=3) == 87
     finally:
         _cleanup(process)

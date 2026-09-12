@@ -120,7 +120,7 @@ def test_output_schema_arg_rejects_duplicate_or_nonstdin_runner(tmp_path: Path) 
 
 def test_valid_structured_final_report_passes_with_grounded_blockers() -> None:
     result = _audit(_events())
-    assert result["schema_version"] == "hardware_splicer.codex_final_report_audit.v2"
+    assert result["schema_version"] == "hardware_splicer.codex_final_report_audit.v4"
     assert result["contract_pass"] is True
     assert result["checks"]["remaining_blockers_grounded"] is True
     assert result["checks"]["unresolved_facts_grounded"] is True
@@ -206,18 +206,40 @@ def test_free_form_message_is_not_accepted() -> None:
     assert result["contract_pass"] is False
 
 
-def test_multiple_agent_messages_fail_closed() -> None:
+def test_non_json_message_after_structured_report_fails_closed() -> None:
     events = _events()
     events.insert(
-        3,
+        4,
         {
             "type": "item.completed",
-            "item": {"id": "extra", "type": "agent_message", "text": json.dumps(_report())},
+            "item": {"id": "extra", "type": "agent_message", "text": "Ready."},
         },
     )
     result = _audit(events)
-    assert result["checks"]["exactly_one_completed_agent_message"] is False
+    assert result["checks"]["report_json_object"] is False
     assert result["contract_pass"] is False
+
+
+def test_progress_messages_before_later_mcp_calls_do_not_hide_terminal_report() -> None:
+    events = _events()
+    events.insert(
+        2,
+        {
+            "type": "item.completed",
+            "item": {
+                "id": "progress",
+                "type": "agent_message",
+                "text": "Checking the canonical project state.",
+            },
+        },
+    )
+
+    result = _audit(events)
+
+    assert result["contract_pass"] is True
+    assert result["agent_message_count"] == 2
+    assert result["pre_terminal_agent_message_count"] == 1
+    assert result["terminal_agent_message_count"] == 1
 
 
 def test_agent_report_must_follow_last_mcp_call() -> None:

@@ -146,7 +146,20 @@ def test_runtime_argv_is_single_case_offline_and_observer_denied(tmp_path: Path)
     assert str(context.backend_project_root) in rendered
     assert str(context.observer_dir) in rendered
     assert '="deny"' in rendered
+    filesystem_overrides = [
+        argv[index + 1]
+        for index, item in enumerate(argv[:-1])
+        if item == "-c"
+        and argv[index + 1].startswith(
+            "permissions.hs-astra-cleanroom.filesystem="
+        )
+    ]
+    assert len(filesystem_overrides) == 1
+    assert '"/fake"="read"' in filesystem_overrides[0]
+    assert '"/fake/hs-backend-mcp"="read"' not in filesystem_overrides[0]
     assert "HARDWARE_SPLICER_OFFLINE_LLM" in rendered
+    assert "HARDWARE_SPLICER_REPO_ROOT" in rendered
+    assert str(context.hs_repo_root) in rendered
     assert "HARDWARE_SPLICER_OFFLINE_VISION" in rendered
     assert "QWEN_DISABLED" in rendered
     assert "--ignore-user-config" in argv

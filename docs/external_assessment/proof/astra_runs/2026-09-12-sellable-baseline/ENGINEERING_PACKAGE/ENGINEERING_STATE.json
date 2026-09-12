@@ -1,0 +1,193 @@
+{
+  "authority_effect": "none",
+  "engineering_plan": {},
+  "engineering_readiness": {
+    "evidence_complete": false,
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "power_on_ready": false
+  },
+  "engineering_status": "bounded_pre_fabrication_plan",
+  "machine_project": {},
+  "ordered_steps": [],
+  "physical_correctness": "UNPROVEN",
+  "pre_fabrication_next_actions": {
+    "actions": [
+      {
+        "acceptance_criteria": "Exact physical DUT orderable identity and pinout supported by reviewed evidence.",
+        "action_id": "action-identity",
+        "description": "Request traceable physical marking/orderable-suffix and package evidence; match package-specific manufacturer pinout and orientation. Produce an identity-to-pinout review record; no identity is resolved in this run.",
+        "source_ids": [
+          "src-dut",
+          "src-fixture"
+        ],
+        "status": "pending_evidence"
+      },
+      {
+        "acceptance_criteria": "All host/translator/DUT voltage and timing interfaces supported across intended operating conditions.",
+        "action_id": "action-limits",
+        "description": "Request exact-device recommended and absolute-maximum I/O limits, input thresholds, output levels, unpowered behavior and SPI timing. Build a worst-case interface compatibility matrix; do not treat 133 MHz product-page frequency as adapter operating capability.",
+        "source_ids": [
+          "src-dut",
+          "src-controller"
+        ],
+        "status": "pending_evidence"
+      },
+      {
+        "acceptance_criteria": "Reviewed implementation supports three forward paths and one simultaneous reverse path with safe disabled states.",
+        "action_id": "action-mapping",
+        "description": "Produce a per-signal translator channel/pin/port/control table for SCLK, CS#, MOSI_IO0 and MISO_IO1. Verify control grouping, OE/DIR states, startup/shutdown and partial-power behavior using implementation-specific evidence; compare candidates before selection.",
+        "source_ids": [
+          "src-controller",
+          "src-translator-fixed",
+          "src-translator-dir"
+        ],
+        "status": "pending_evidence"
+      },
+      {
+        "acceptance_criteria": "Reviewed supply design meets verified DUT limits under intended conditions.",
+        "action_id": "action-supply",
+        "description": "Select and document a proposed local 1.8 V supply with input source, current budget, regulation tolerance, transient behavior, decoupling, enable/default-off and backfeed controls. Values and component identity remain unselected.",
+        "source_ids": [
+          "src-fixture",
+          "src-dut"
+        ],
+        "status": "pending_design"
+      },
+      {
+        "acceptance_criteria": "Evidence-linked review and deterministic checks have no unresolved implementation blockers; separate physical authorization still required.",
+        "action_id": "action-schematic-review",
+        "depends_on": [
+          "action-identity",
+          "action-limits",
+          "action-mapping",
+          "action-supply"
+        ],
+        "description": "After preceding evidence gates, draft schematic/BOM/package mapping and review unused DUT control-pin biasing, grounding, connector orientation, contention, power sequencing and timing. Run deterministic electrical and revision checks on the actual implementation.",
+        "source_ids": [
+          "src-fixture",
+          "src-dut",
+          "src-controller"
+        ],
+        "status": "blocked"
+      },
+      {
+        "acceptance_criteria": "Reviewable protocol with no fabricated measurements and no execution authority granted.",
+        "action_id": "action-validation-protocol",
+        "description": "Prepare a future separately authorized validation protocol with unpowered continuity/orientation checks, isolated supply checks, verified-limit-based stop criteria, controlled enable sequencing and non-destructive identification/read checks before any separately authorized erase/program operation. Record results against the actual adapter revision only when performed.",
+        "source_ids": [
+          "src-fixture"
+        ],
+        "status": "planning_only"
+      }
+    ],
+    "architecture_candidates": [
+      {
+        "candidate_id": "candidate-fixed",
+        "description": "Evaluate TXU0304 dual-supply fixed-direction translation at host 3.3 V and DUT nominal 1.8 V. Both nominal rails lie within the supplied port range. Verify actual channel directions support three forward and one reverse paths, port assignment, package pins, OE reference and power sequencing. Supplied OE-low high-impedance fact supports considering disabled startup; implementation remains unverified.",
+        "source_ids": [
+          "src-translator-fixed",
+          "src-controller"
+        ],
+        "status": "conditional_unverified"
+      },
+      {
+        "candidate_id": "candidate-controlled",
+        "description": "Evaluate SN74AXC4T245 only after verifying direction-control grouping and whether the chosen implementation supports simultaneous three forward and one reverse SPI paths. Both nominal rails lie within supplied ranges, but this alone does not establish compatibility or a wiring decision.",
+        "source_ids": [
+          "src-translator-dir",
+          "src-controller"
+        ],
+        "status": "conditional_unverified"
+      }
+    ],
+    "assessment": {
+      "authority_effect": "none",
+      "blockers": [
+        "The physical DUT's exact orderable package suffix and package-specific pinout are not verified.",
+        "The W25Q128JW product-page VCC range does not by itself establish absolute-maximum I/O tolerance.",
+        "The level-translator channel direction/control mapping has not been verified for the chosen implementation.",
+        "The local 1.8 V DUT supply implementation has not been selected and verified.",
+        "No physical power-on or programming evidence exists for this adapter revision."
+      ],
+      "evidence_boundary": "frozen_product_visible_only",
+      "fabrication_ready": false,
+      "full_machine_plan_supported": false,
+      "physical_correctness": "UNPROVEN",
+      "power_on_ready": false,
+      "reason": "The supplied evidence describes an SPI adapter with unresolved component identity, pinout, electrical limits and supply implementation; it does not support a complete machine implementation.",
+      "scope": "pre_fabrication_engineering_progress_only",
+      "source_ids": [
+        "src-controller",
+        "src-dut",
+        "src-translator-fixed",
+        "src-translator-dir",
+        "src-fixture"
+      ],
+      "tool_observations": [
+        "Initial canonical project lookup returned HTTP 404 not_found; supplied product-visible state was then initialized at revision 1."
+      ],
+      "unresolved_facts": [
+        "The physical DUT's exact orderable package suffix and package-specific pinout are not verified.",
+        "The W25Q128JW product-page VCC range does not by itself establish absolute-maximum I/O tolerance.",
+        "The level-translator channel direction/control mapping has not been verified for the chosen implementation.",
+        "The local 1.8 V DUT supply implementation has not been selected and verified.",
+        "No physical power-on or programming evidence exists for this adapter revision."
+      ]
+    },
+    "authority_effect": "none",
+    "automatic_execution": false,
+    "correct_engineering_architecture_asserted": false,
+    "decisions": [
+      {
+        "decision_id": "decision-hold",
+        "description": "Do not select a final translator, assign physical DUT pins, or release fabrication/power-on. No direct 3.3 V DUT I/O connection is justified by the supplied evidence.",
+        "source_ids": [
+          "src-fixture",
+          "src-dut"
+        ]
+      }
+    ],
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false,
+    "project_id": "hs-astra-sellable-20260912-4",
+    "quarantined_generated_plan": null,
+    "requirements": [
+      {
+        "description": "Provide SCLK, CS# and MOSI_IO0 host-to-DUT paths and MISO_IO1 DUT-to-host path. This is a logical direction requirement, not a verified translator pin map.",
+        "requirement_id": "req-spi",
+        "source_ids": [
+          "src-controller"
+        ]
+      },
+      {
+        "description": "Evaluate a local nominal 1.8 V DUT supply against the declared 1.7–1.95 V VCC range, including tolerance, load and transients. Keep default power off. VCC range does not establish I/O tolerance.",
+        "requirement_id": "req-power",
+        "source_ids": [
+          "src-dut",
+          "src-fixture"
+        ]
+      },
+      {
+        "description": "Require exact physical DUT identity, package-specific pinout and electrical-limit evidence before implementation approval; preserve absence of physical evidence.",
+        "requirement_id": "req-evidence",
+        "source_ids": [
+          "src-dut",
+          "src-fixture"
+        ]
+      }
+    ],
+    "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+    "source_ids": [
+      "src-controller",
+      "src-dut",
+      "src-fixture",
+      "src-translator-dir",
+      "src-translator-fixed"
+    ],
+    "source_revision": 1
+  },
+  "schema_version": "hardware_splicer.engineering_package_state.v1"
+}

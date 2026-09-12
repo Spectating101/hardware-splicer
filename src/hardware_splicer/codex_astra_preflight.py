@@ -17,6 +17,7 @@ ASTRA_MODEL = "gpt-6-astra"
 HS_MCP_SERVER_NAME = "hardware-splicer-backend"
 HS_MCP_TOOLS = (
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",
@@ -203,6 +204,18 @@ def _override(key: str, value: object) -> str:
         encoded = str(value)
     elif isinstance(value, str):
         encoded = _toml_string(value)
+    elif isinstance(value, Mapping):
+        encoded_items: list[str] = []
+        for item_key, item_value in value.items():
+            if not isinstance(item_value, str):
+                raise TypeError(
+                    f"unsupported override map value for {key}: "
+                    f"{type(item_value).__name__}"
+                )
+            encoded_items.append(
+                f"{_toml_string(str(item_key))}={_toml_string(item_value)}"
+            )
+        encoded = "{" + ",".join(encoded_items) + "}"
     elif isinstance(value, Sequence):
         encoded = "[" + ",".join(_toml_string(str(item)) for item in value) + "]"
     else:
@@ -218,6 +231,8 @@ def build_cleanroom_overrides(
     mcp_args: Sequence[str] = (),
     model: str = ASTRA_MODEL,
     reasoning_effort: str = "low",
+    extra_read_paths: Sequence[str | os.PathLike[str]] = (),
+    extra_denied_paths: Sequence[str | os.PathLike[str]] = (),
 ) -> list[str]:
     work = str(_resolved(workspace))
     repo = str(_resolved(hs_repo_root))
@@ -226,17 +241,26 @@ def build_cleanroom_overrides(
     resolved_mcp = resolve_executable(mcp_command) or str(_resolved(mcp_command))
     profile = "hs-astra-cleanroom"
     server = f"mcp_servers.{HS_MCP_SERVER_NAME}"
+    filesystem_rules = {
+        ":minimal": "read",
+        work: "write",
+        **{str(_resolved(path)): "read" for path in extra_read_paths},
+        repo: "deny",
+        **{str(_resolved(path)): "deny" for path in extra_denied_paths},
+    }
     overrides = [
         _override("forced_login_method", "chatgpt"),
         _override("model", model),
         _override("model_reasoning_effort", reasoning_effort),
         _override("approval_policy", "never"),
         _override("web_search", "disabled"),
-        _override("features.web_search_request", False),
+        _override("suppress_unstable_features_warning", True),
+        _override("features.plugins", False),
+        _override("features.skip_host_skill_discovery", True),
+        _override("project_doc_max_bytes", 0),
+        _override("project_doc_fallback_filenames", []),
         _override("default_permissions", profile),
-        _override(f'permissions.{profile}.filesystem.":minimal"', "read"),
-        _override(f'permissions.{profile}.filesystem.{_toml_string(work)}', "write"),
-        _override(f'permissions.{profile}.filesystem.{_toml_string(repo)}', "deny"),
+        _override(f"permissions.{profile}.filesystem", filesystem_rules),
         _override(f"permissions.{profile}.network.enabled", False),
         _override(f"{server}.command", resolved_mcp),
         _override(f"{server}.args", list(mcp_args)),
@@ -248,7 +272,11 @@ def build_cleanroom_overrides(
         _override(f"{server}.tool_timeout_sec", 60),
     ]
     for tool in HS_MCP_TOOLS:
-        limit = 8_000 if tool == "hs_backend_call" else 4_000
+        limit = (
+            8_000
+            if tool in {"hs_backend_call", "hs_backend_task_manifest"}
+            else 4_000
+        )
         overrides.append(_override(f"{server}.tools.{tool}.approval_mode", "approve"))
         overrides.append(_override(f"{server}.tools.{tool}.output_token_limit", limit))
     return overrides
@@ -266,6 +294,8 @@ def build_codex_exec_argv(
     model: str = ASTRA_MODEL,
     reasoning_effort: str = "low",
     codex_command: str = "codex",
+    extra_read_paths: Sequence[str | os.PathLike[str]] = (),
+    extra_denied_paths: Sequence[str | os.PathLike[str]] = (),
 ) -> list[str]:
     work = str(_resolved(workspace))
     prompt = _resolved(prompt_file)
@@ -284,6 +314,8 @@ def build_codex_exec_argv(
         mcp_args=mcp_args,
         model=model,
         reasoning_effort=reasoning_effort,
+        extra_read_paths=extra_read_paths,
+        extra_denied_paths=extra_denied_paths,
     )
     argv = [codex_command]
     for item in overrides:

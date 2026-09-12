@@ -8,7 +8,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
-from .codex_astra_case import build_codex_case_package, frozen_case_instructions
+from .codex_astra_case import build_codex_case_package, case_instructions
+from .cleanroom_primary_source_spi_flash_experiment import (
+    RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID,
+    RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
+)
 from .codex_astra_preflight import (
     ASTRA_MODEL,
     HS_MCP_SERVER_NAME,
@@ -16,6 +22,8 @@ from .codex_astra_preflight import (
     build_launch_environment,
     paths_are_disjoint,
 )
+from .project_store import ProjectStore
+from .stored_source_parser import read_registered_source_bytes
 
 CODEX_ALLOWANCE_CONFIRMATION = "I_ACCEPT_CODEX_ALLOWANCE_USAGE"
 LIVE_EXECUTION_CLAIM_FILE = "LIVE_EXECUTION_ATTEMPT.json"
@@ -106,8 +114,8 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
         raise ValueError(
             "model-visible workspace must contain exactly MISSION.txt before execution"
         )
-    if not backend_root.is_dir() or any(backend_root.iterdir()):
-        raise ValueError("backend project root must exist and be empty before execution")
+    if not backend_root.is_dir():
+        raise ValueError("backend project root must exist before execution")
     if backend_root.parent != observer:
         raise ValueError("backend project root must live directly inside observer directory")
     if snapshot.parent != observer or instructions.parent != observer:
@@ -119,6 +127,52 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
     )
     expected_visible = expected["model_visible"]
     expected_outer = expected["observer_only"]
+    if case_id in {
+        RAW_DOCUMENT_CASE_ID,
+        RAW_DOCUMENT_V2_CASE_ID,
+        RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
+    }:
+        if manifest.get("backend_project_root_initially_empty") is not False:
+            raise ValueError("raw-document case requires a declared preseeded backend")
+        if manifest.get("backend_preseeded_project_id") != project_id:
+            raise ValueError("raw-document preseeded project id does not match")
+        seeded = ProjectStore(backend_root).load(project_id)
+        if seeded.get("revision") != 1 or manifest.get(
+            "backend_preseeded_revision"
+        ) != 1:
+            raise ValueError("raw-document backend must be preseeded at revision 1")
+        if seeded.get("snapshot") != expected_outer["snapshot"]:
+            raise ValueError("raw-document preseeded snapshot no longer matches")
+        root_entries = sorted(path.name for path in backend_root.iterdir())
+        if root_entries != [project_id]:
+            raise ValueError(
+                "raw-document backend may contain only the experiment project"
+            )
+        document_sources = [
+            row
+            for row in seeded["snapshot"].get("engineeringSources") or []
+            if isinstance(row, Mapping)
+            and row.get("metadata", {}).get(
+                "document_content_model_visible_via_hs"
+            )
+            is True
+        ]
+        if len(document_sources) != 3:
+            raise ValueError("raw-document backend requires exactly three documents")
+        for source in document_sources:
+            read_registered_source_bytes(
+                project_id,
+                source,
+                project_root=backend_root,
+            )
+    else:
+        if manifest.get("backend_project_root_initially_empty") is not True:
+            raise ValueError("non-document backend must be declared initially empty")
+        if any(backend_root.iterdir()):
+            raise ValueError(
+                "backend project root must be empty before execution"
+            )
     if mission.read_text(encoding="utf-8") != expected_visible["mission_text"]:
         raise ValueError("MISSION.txt no longer matches the frozen case protocol")
     if instructions.read_text(encoding="utf-8") != expected_visible["developer_instructions"]:
@@ -180,20 +234,25 @@ def build_single_case_runtime_argv(
         model=ASTRA_MODEL,
         reasoning_effort="low",
         codex_command=codex_command,
+        # Executing a launcher beneath a private temp directory requires traversal of
+        # its parent. The budgeted entrypoint creates a one-purpose 0700 directory that
+        # contains only this launcher, so granting that directory read access preserves
+        # the clean-room boundary while allowing Codex to start the required MCP server.
+        extra_read_paths=(Path(mcp_command).expanduser().resolve().parent,),
+        extra_denied_paths=(context.observer_dir,),
     )
     server_root = f"mcp_servers.{HS_MCP_SERVER_NAME}"
     server_env = f"{server_root}.env"
-    profile = "permissions.hs-astra-cleanroom.filesystem"
     injected = [
-        _toml_override("developer_instructions", frozen_case_instructions()),
-        _toml_override(
-            f'{profile}.{json.dumps(str(context.observer_dir))}',
-            "deny",
-        ),
+        _toml_override("developer_instructions", case_instructions(context.case_id)),
         _toml_override(f"{server_root}.cwd", str(context.observer_dir)),
         _toml_override(
             f"{server_env}.HARDWARE_SPLICER_PROJECT_ROOT",
             str(context.backend_project_root),
+        ),
+        _toml_override(
+            f"{server_env}.HARDWARE_SPLICER_REPO_ROOT",
+            str(context.hs_repo_root),
         ),
     ]
     injected.extend(
@@ -285,6 +344,7 @@ def runtime_plan(
         ),
         "provider_credentials_forwarded_to_runtime": False,
         "internal_hs_provider_access_disabled": True,
+        "host_instruction_discovery_disabled": True,
         "model_filesystem_denies_observer_directory": True,
         "codex_writes_observer_artifacts": False,
         "single_case_only": True,

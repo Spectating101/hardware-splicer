@@ -1,0 +1,125 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "direct-3v3",
+      "candidate_kind": "direct_connection",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "none",
+      "rationale": "Declared 3.3 V host drive exceeds VCC+0.4 V: 2.2 V at the 1.8 V target and at most 2.35 V across the stated DUT operating range. Absolute maxima are stress limits, not valid logic operating targets. Direct 3.3 V supply also exceeds 1.95 V.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "txu0304-standard-spi",
+      "candidate_kind": "fixed_direction_translation",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "TXU0304",
+      "pin_numbers_assigned": false,
+      "proposed_logical_mapping": [
+        {
+          "direction": "host_to_dut",
+          "dut": "CLK",
+          "host": "SCLK",
+          "translator_input": "A1",
+          "translator_output": "B1Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "/CS",
+          "host": "CS#",
+          "translator_input": "A2",
+          "translator_output": "B2Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "DI_IO0",
+          "host": "MOSI_IO0",
+          "translator_input": "A3",
+          "translator_output": "B3Y"
+        },
+        {
+          "direction": "dut_to_host",
+          "dut": "DO_IO1",
+          "host": "MISO_IO1",
+          "translator_input": "B4",
+          "translator_output": "A4Y"
+        }
+      ],
+      "proposed_supplies": {
+        "VCCA": 3.3,
+        "VCCB": 1.8,
+        "authority": "declared_targets_only"
+      },
+      "rationale": "Three A-to-B channels and one B-to-A channel match standard SPI. Both proposed rails lie within stated supply ranges; this alone does not establish logic or timing compatibility.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "preferred_family_candidate"
+    },
+    {
+      "candidate_id": "single-axc4t245",
+      "candidate_kind": "single_grouped_direction_translation",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "SN74AXC4T245",
+      "rationale": "Two shared-direction two-channel groups allow 4+0, 2+2, or 0+4 directions, not simultaneous 3+1 across four signals. Supply ranges include targets but do not cure topology mismatch. Rejection is scoped to one device implementing all four channels; additional devices would require a separate design.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        }
+      ],
+      "status": "rejected"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

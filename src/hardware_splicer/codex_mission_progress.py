@@ -19,6 +19,7 @@ _MISSION_OUTPUT_SURFACES = (
     "engineeringArtifactProjection", "manufacturingProjection", "manufacturingClosure",
     "engineeringExecutionPlan", "operatorGuide", "orderedSteps", "sourceAdapter",
     "engineeringReadiness", "engineeringStatus", "missingInfo", "rankedNextAction",
+    "preFabricationPlan", "preFabricationActions", "preFabricationAssessment",
     "engineeringPackages", "engineeringAiSessions",
 )
 _CONFLICT_KEYS = (
@@ -203,13 +204,15 @@ def _changed_mission_surfaces(initial: Mapping[str, Any], final: Mapping[str, An
     ]
 
 
-def _registered_source_map(snapshot: Mapping[str, Any]) -> tuple[dict[str, str], list[str]]:
+def _registered_source_map(
+    snapshot: Mapping[str, Any],
+) -> tuple[dict[str, dict[str, Any]], list[str]]:
     rows = snapshot.get("engineeringSources")
     if rows is None:
         return {}, []
     if not isinstance(rows, list):
         return {}, ["engineeringSources is not a list"]
-    result: dict[str, str] = {}
+    result: dict[str, dict[str, Any]] = {}
     errors: list[str] = []
     for index, row in enumerate(rows):
         if not isinstance(row, Mapping):
@@ -221,8 +224,55 @@ def _registered_source_map(snapshot: Mapping[str, Any]) -> tuple[dict[str, str],
         elif source_id in result:
             errors.append(f"duplicate engineeringSources source_id: {source_id}")
         else:
-            result[source_id] = _sha256(dict(row))
+            result[source_id] = dict(row)
     return result, errors
+
+
+def _source_record_preserved(
+    initial: Mapping[str, Any],
+    final: Mapping[str, Any],
+) -> bool:
+    """Permit only server-shaped append-only document claim proposals."""
+
+    initial_row = dict(initial)
+    final_row = dict(final)
+    initial_claims = {
+        str(row.get("claim_id") or ""): dict(row)
+        for row in initial_row.pop("claims", []) or []
+        if isinstance(row, Mapping) and str(row.get("claim_id") or "")
+    }
+    final_claims = {
+        str(row.get("claim_id") or ""): dict(row)
+        for row in final_row.pop("claims", []) or []
+        if isinstance(row, Mapping) and str(row.get("claim_id") or "")
+    }
+    if not set(initial_claims).issubset(final_claims):
+        return False
+    if any(
+        _canonical_json(final_claims[claim_id]) != _canonical_json(claim)
+        for claim_id, claim in initial_claims.items()
+    ):
+        return False
+    for claim_id in set(final_claims).difference(initial_claims):
+        claim = final_claims[claim_id]
+        metadata = claim.get("metadata")
+        if (
+            claim.get("source_id") != final_row.get("source_id")
+            or claim.get("authority") != "proposed"
+            or not isinstance(metadata, Mapping)
+            or metadata.get("claim_origin")
+            != "model_proposed_from_hash_bound_document_text"
+            or metadata.get("independent_review_state") != "unreviewed"
+            or metadata.get("automatic_authorization") is not False
+        ):
+            return False
+
+    initial_metadata = dict(initial_row.get("metadata") or {})
+    final_metadata = dict(final_row.get("metadata") or {})
+    final_metadata.pop("document_claim_extraction", None)
+    initial_row["metadata"] = initial_metadata
+    final_row["metadata"] = final_metadata
+    return _canonical_json(initial_row) == _canonical_json(final_row)
 
 
 def _string_rows(value: Any) -> list[str]:
@@ -430,7 +480,8 @@ def audit_codex_mission_progress(
         and set(final_sources) == set(initial_sources)
     )
     source_records_preserved = source_ids_preserved and all(
-        final_sources.get(key) == value for key, value in initial_sources.items()
+        _source_record_preserved(value, final_sources[key])
+        for key, value in initial_sources.items()
     )
     initial_conflicts = _unresolved_conflict_tokens(initial_snapshot)
     final_conflicts = _unresolved_conflict_tokens(final_snapshot)

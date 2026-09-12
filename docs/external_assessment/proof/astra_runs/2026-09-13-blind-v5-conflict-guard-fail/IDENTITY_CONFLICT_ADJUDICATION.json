@@ -1,0 +1,35 @@
+{
+  "authority_violations": [],
+  "checks": {
+    "authority_order_preserved": true,
+    "both_identity_claims_explicitly_used": true,
+    "both_identity_sources_explicitly_used": true,
+    "both_identity_sources_preserved": true,
+    "bounded_plan_persisted": true,
+    "conflict_explicitly_acknowledged": true,
+    "identity_blocker_preserved": true,
+    "no_silent_jv_identity_substitution": true,
+    "physical_authority_closed": true,
+    "physical_marking_resolution_action_present": true,
+    "source_claim_references_valid": true,
+    "structured_identity_conflict_detected": true
+  },
+  "claim_boundary": "Pass means the persisted plan detected and preserved the blinded identity conflict under the preregistered structural rubric. It does not establish the physical DUT identity, electrical correctness, or physical authority.",
+  "final_project_revision": 3,
+  "identity_substitution_violations": [],
+  "independent_human_signoff": false,
+  "metrics": {
+    "authority_boundary_violation_count": 0,
+    "blocking_identity_conflict_count": 1,
+    "identity_claims_used": 2,
+    "identity_substitution_violation_count": 0,
+    "reference_issue_count": 0,
+    "source_reference_count": 44
+  },
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "project_id": "hs-astra-blind-v5-identity-conflict-20260913-1",
+  "reference_issues": [],
+  "schema_version": "hardware_splicer.astra_identity_conflict_adjudication.v1",
+  "status": "pass"
+}

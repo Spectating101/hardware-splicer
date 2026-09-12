@@ -101,6 +101,7 @@ user's normal Codex configuration. The policy requires:
 - model `gpt-6-astra`, initially at low reasoning effort;
 - frozen developer instructions and exact case input;
 - web search and shell network disabled;
+- plugins and host skill discovery disabled for the MCP-only proof lane;
 - HS repository and observer directory denied to the model filesystem;
 - only the clean-room workspace writable;
 - no inherited user rules;
@@ -206,8 +207,10 @@ interpret free-form language, the live runner supplies
 `src/hardware_splicer/codex_final_report.py`'s strict schema to Codex through
 `--output-schema` and audits the resulting `agent_message` independently.
 
-A valid terminal report must be exactly one completed `agent_message` after the final MCP
-call and must be a JSON object with no extra keys. It is bound to the canonical state by:
+The final completed `agent_message` is the terminal report and must follow the final MCP
+call. Earlier progress messages are retained in the trace but are never parsed as the
+terminal report. The terminal message must be a JSON object with no extra keys. It is bound
+to the canonical state by:
 
 - exact `experiment_project_id`;
 - `final_project_revision` equal to the canonical final readback revision;
