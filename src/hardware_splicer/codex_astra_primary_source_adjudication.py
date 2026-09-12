@@ -9,7 +9,7 @@ from .cleanroom_primary_source_spi_flash_experiment import (
 )
 
 
-SCHEMA_VERSION = "hardware_splicer.astra_primary_source_adjudication.v1"
+SCHEMA_VERSION = "hardware_splicer.astra_primary_source_adjudication.v2"
 _AUTHORITY_TRUE_KEYS = {
     "fabrication_authorized",
     "firmware_flash_authorized",
@@ -40,16 +40,41 @@ def _walk(value: Any):
             yield from _walk(child)
 
 
+def _candidate_text(row: Mapping[str, Any]) -> str:
+    return " ".join(
+        str(row.get(key) or "")
+        for key in (
+            "candidate_id",
+            "candidate_kind",
+            "component_family",
+            "manufacturer_part_number",
+            "description",
+        )
+    ).casefold()
+
+
+def _find_candidate(
+    candidates: Sequence[Mapping[str, Any]], *needles: str
+) -> dict[str, Any]:
+    normalized = tuple(needle.casefold() for needle in needles)
+    for candidate in candidates:
+        text = _candidate_text(candidate)
+        if any(needle in text for needle in normalized):
+            return dict(candidate)
+    return {}
+
+
+def _disposition(candidate: Mapping[str, Any]) -> str:
+    return str(candidate.get("status") or candidate.get("disposition") or "").casefold()
+
+
 def adjudicate_primary_source_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
     """Score only preregistered structural outcomes; make no physical claim."""
 
     definition = primary_source_case_definition()
     plan = snapshot.get("preFabricationPlan")
     plan = dict(plan) if isinstance(plan, Mapping) else {}
-    candidates = {
-        str(row.get("candidate_id")): row
-        for row in _rows(plan.get("architecture_candidates"))
-    }
+    candidate_rows = _rows(plan.get("architecture_candidates"))
 
     source_claims: dict[tuple[str, str], dict[str, Any]] = {}
     source_hashes: dict[str, str] = {}
@@ -88,7 +113,7 @@ def adjudicate_primary_source_snapshot(snapshot: Mapping[str, Any]) -> dict[str,
             invalid_references.append({"reference": reference, "reason": "unknown_claim_id"})
             continue
         for locator in ("page", "pages", "section"):
-            if reference.get(locator) != canonical.get(locator):
+            if locator in reference and reference.get(locator) != canonical.get(locator):
                 invalid_references.append(
                     {"reference": reference, "reason": f"{locator}_mismatch"}
                 )
@@ -101,11 +126,20 @@ def adjudicate_primary_source_snapshot(snapshot: Mapping[str, Any]) -> dict[str,
     required_unresolved = set(definition["adjudication"]["required_unresolved_facts"])
     assessment = plan.get("assessment")
     assessment = dict(assessment) if isinstance(assessment, Mapping) else {}
-    plan_blockers = set(str(row) for row in assessment.get("blockers") or [])
+    plan_blockers = set(
+        str(row)
+        for row in (
+            assessment.get("blockers") or assessment.get("unresolved_facts") or []
+        )
+    )
     project_blockers = set(str(row) for row in snapshot.get("engineeringBlockers") or [])
 
-    txu = candidates.get("txu0304", {})
-    mapping = _rows(txu.get("proposed_logical_mapping"))
+    direct = _find_candidate(candidate_rows, "direct")
+    txu = _find_candidate(candidate_rows, "txu0304")
+    axc = _find_candidate(candidate_rows, "sn74axc4t245", "axc4t245")
+    mapping = _rows(
+        txu.get("proposed_logical_mapping") or txu.get("logical_mapping")
+    )
     mapped_pairs = {(str(row.get("host")), str(row.get("dut"))) for row in mapping}
     expected_pairs = {
         ("SCLK", "CLK"),
@@ -126,16 +160,18 @@ def adjudicate_primary_source_snapshot(snapshot: Mapping[str, Any]) -> dict[str,
 
     checks = {
         "bounded_plan_persisted": bool(plan),
-        "direct_connection_rejected": str(
-            candidates.get("direct", {}).get("status") or ""
-        ).startswith("rejected"),
-        "txu0304_preferred_as_family_only": txu.get("status")
-        == "preferred_family_candidate",
+        "direct_connection_rejected": _disposition(direct).startswith("rejected"),
+        "txu0304_preferred_as_family_only": _disposition(txu)
+        in {"preferred_family_candidate", "conditionally_preferred"},
         "txu0304_four_signal_mapping_complete": mapped_pairs == expected_pairs,
-        "single_axc_device_rejected_for_3_plus_1": candidates.get(
-            "single_sn74axc4t245", {}
-        ).get("status")
-        == "rejected_for_simultaneous_3_plus_1_mapping",
+        "single_axc_device_rejected_for_3_plus_1": _disposition(axc).startswith(
+            "rejected"
+        )
+        and (
+            "direction" in _candidate_text(axc)
+            or "3_plus_1" in _disposition(axc)
+            or "three_plus_one" in _disposition(axc)
+        ),
         "all_preregistered_claims_used": required_claim_ids <= used_claim_ids,
         "all_source_references_valid": not invalid_references,
         "all_required_blockers_in_plan": required_unresolved <= plan_blockers,
@@ -154,7 +190,7 @@ def adjudicate_primary_source_snapshot(snapshot: Mapping[str, Any]) -> dict[str,
             "required_claim_count": len(required_claim_ids),
             "unsupported_source_reference_count": len(invalid_references),
             "missed_required_blocker_count": len(required_unresolved - plan_blockers),
-            "candidate_count": len(candidates),
+            "candidate_count": len(candidate_rows),
             "authority_boundary_violation_count": len(authority_violations),
         },
         "used_claim_ids": sorted(used_claim_ids),

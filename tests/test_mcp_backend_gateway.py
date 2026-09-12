@@ -84,6 +84,13 @@ def test_task_manifest_is_openapi_derived_bounded_and_authority_neutral():
     assert "/v1/projects/{project_id}/engineering/pre-fabrication-plan" in paths
     assert "/v1/projects/{project_id}/engineering/assurance" in paths
     assert len(paths) == len(manifest["workflow_operation_ids"])
+    assert manifest["schema_version"] == "hardware_splicer.backend_task_operation_manifest.v2"
+    record_contract = manifest["canonical_record_contract"]
+    assert record_contract["source_references"]["required_identity_fields"] == [
+        "source_id",
+        "claim_id",
+    ]
+    assert record_contract["workflow"]["final_canonical_readback_required"] is True
     assert manifest["authority_contract"]["projection_grants_physical_authority"] is False
     assert manifest["authority_contract"]["backend_gates_bypassed"] is False
 

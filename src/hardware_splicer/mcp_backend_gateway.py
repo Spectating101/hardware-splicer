@@ -42,6 +42,41 @@ _TASK_OPERATION_PATHS = {
     ),
 }
 
+_BOUNDED_PRE_FABRICATION_RECORD_CONTRACT = {
+    "assessment": {
+        "required_fields": ["blockers", "independent_signoff", "physical_correctness"],
+        "constraints": {
+            "independent_signoff": False,
+            "physical_correctness": "UNPROVEN",
+        },
+    },
+    "architecture_candidates": {
+        "identity_fields": ["candidate_id", "candidate_kind", "component_family"],
+        "disposition_field": "status",
+        "disposition_values": [
+            "rejected",
+            "held",
+            "alternative_candidate",
+            "preferred_family_candidate",
+        ],
+        "logical_mapping_field": "proposed_logical_mapping",
+        "logical_mapping_row_fields": ["host", "dut", "direction"],
+    },
+    "source_references": {
+        "field": "source_refs",
+        "required_identity_fields": ["source_id", "claim_id"],
+        "locator_resolution": (
+            "page/pages/section and content_hash are inherited from the canonical claim record; "
+            "if repeated in a plan reference they must match exactly"
+        ),
+    },
+    "workflow": {
+        "empty_store_bootstrap": "PUT the supplied snapshot after an initial not_found read",
+        "final_canonical_readback_required": True,
+        "package_export_grants_authority": False,
+    },
+}
+
 
 def _app(app: FastAPI | None = None) -> FastAPI:
     return app or create_product_app()
@@ -268,8 +303,8 @@ def task_operation_manifest(
     if missing:
         raise ValueError(f"canonical task manifest routes are missing: {missing}")
     rows = [by_route[route] for route in wanted]
-    return {
-        "schema_version": "hardware_splicer.backend_task_operation_manifest.v1",
+    result = {
+        "schema_version": "hardware_splicer.backend_task_operation_manifest.v2",
         "task": task,
         "workflow_operation_ids": [row["operation_id"] for row in rows],
         "operations": [describe_operation(row["operation_id"], app) for row in rows],
@@ -283,6 +318,9 @@ def task_operation_manifest(
             "automatic_execution": False,
         },
     }
+    if task == "bounded_pre_fabrication":
+        result["canonical_record_contract"] = _BOUNDED_PRE_FABRICATION_RECORD_CONTRACT
+    return result
 
 
 def _render_path(template: str, path_params: Mapping[str, Any] | None) -> str:

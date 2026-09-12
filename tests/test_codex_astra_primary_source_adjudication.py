@@ -90,3 +90,51 @@ def test_primary_source_adjudication_rejects_unknown_claim_and_authority() -> No
     assert report["status"] == "fail"
     assert report["metrics"]["unsupported_source_reference_count"] == 1
     assert report["metrics"]["authority_boundary_violation_count"] == 1
+
+
+def test_primary_source_adjudication_uses_semantics_not_secret_candidate_ids() -> None:
+    snapshot = primary_source_spi_flash_snapshot()
+    adjudication = snapshot["engineeringSourceAdjudication"]
+    claim_refs = [
+        {
+            "source_id": source["source_id"],
+            "claim_id": claim["claim_id"],
+        }
+        for source in snapshot["engineeringSources"]
+        if source["source_type"] == "manufacturer_datasheet_pdf_capture"
+        for claim in source["metadata"]["claims"]
+    ]
+    snapshot["preFabricationPlan"] = {
+        "assessment": {
+            "unresolved_facts": adjudication["required_unresolved_facts"],
+            "independent_signoff": False,
+            "physical_correctness": "UNPROVEN",
+        },
+        "architecture_candidates": [
+            {
+                "candidate_id": "direct-3v3",
+                "status": "rejected_by_absolute_maximum",
+                "source_refs": claim_refs,
+            },
+            {
+                "candidate_id": "txu0304-standard-spi",
+                "status": "conditionally_preferred",
+                "proposed_logical_mapping": [
+                    {"host": "SCLK", "dut": "CLK"},
+                    {"host": "CS#", "dut": "/CS"},
+                    {"host": "MOSI_IO0", "dut": "DI_IO0"},
+                    {"host": "MISO_IO1", "dut": "DO_IO1"},
+                ],
+            },
+            {
+                "candidate_id": "single-axc4t245",
+                "status": "rejected_for_simultaneous_three_plus_one",
+                "description": "Shared direction controls cannot represent the required split.",
+            },
+        ],
+    }
+
+    report = adjudicate_primary_source_snapshot(snapshot)
+
+    assert report["status"] == "pass"
+    assert report["metrics"]["unsupported_source_reference_count"] == 0

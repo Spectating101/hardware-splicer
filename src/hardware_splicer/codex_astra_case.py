@@ -47,7 +47,7 @@ You do not have Hardware-Splicer source code, hidden tests, evaluator metadata, 
 
 Required operating discipline:
 1. Start with hs_backend_status.
-2. Load hs_backend_task_manifest for bounded_pre_fabrication once. Use broad operation discovery only if the required canonical operation is absent from that manifest.
+2. Load hs_backend_task_manifest for bounded_pre_fabrication once. Follow its canonical_record_contract exactly as a serialization contract; it defines fields, not the engineering answer. Use broad operation discovery only if the required canonical operation is absent from that manifest.
 3. Work only on the experiment_project_id given in this request. Never inspect, mutate, or delete unrelated projects.
 4. Treat only the supplied product-visible project state as evidence. Do not import web/repository/external evidence or invent evidence identities.
 5. Derive conclusions from the visible evidence rather than guessing an evaluator. Preserve distinct source and claim identities when they disagree.
