@@ -51,6 +51,7 @@ from .project_api import create_project_router
 from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
 from .project_pre_fabrication_plan_api import create_project_pre_fabrication_plan_router
+from .project_physical_validation_api import create_project_physical_validation_router
 from .project_store import ProjectStore
 from .semantic_circuit_api import create_semantic_circuit_router
 from .source_conflict_api import create_source_conflict_router
@@ -114,6 +115,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
+    app.include_router(create_project_physical_validation_router(resolved_store))
     app.include_router(create_engineering_assurance_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))

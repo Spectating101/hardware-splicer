@@ -40,6 +40,18 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
         ("POST", "/v1/projects/{project_id}/engineering/assurance/reviews"),
     ),
+    "physical_validation": (
+        ("GET", "/v1/projects/{project_id}"),
+        (
+            "GET",
+            "/v1/projects/{project_id}/engineering/physical-validation/packet",
+        ),
+        ("POST", "/v1/engineering/physical-evidence/envelopes/build-attested"),
+        (
+            "POST",
+            "/v1/projects/{project_id}/engineering/physical-validation/evidence",
+        ),
+    ),
     "document_grounded_pre_fabrication": (
         ("GET", "/v1/projects/{project_id}"),
         ("PUT", "/v1/projects/{project_id}/snapshot"),
