@@ -30,6 +30,7 @@ from hardware_splicer.codex_budgeted_mcp_proxy import (
 )
 from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID,
 )
 
 
@@ -157,6 +158,11 @@ def test_raw_document_guard_is_larger_but_still_hard_bounded() -> None:
     assert guard["mcp_tool_calls_hard_max"] == ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS == 40
     assert guard["backend_calls_hard_max"] == ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS == 36
     assert guard["timeout_hard_max_seconds"] == 300
+
+    assert resource_guard_manifest(
+        timeout_seconds=300,
+        case_id=RAW_DOCUMENT_V2_CASE_ID,
+    )["case_profile"] == "raw_document"
 
 
 def test_budgeted_runner_dry_run_emits_only_resource_plan(tmp_path: Path) -> None:

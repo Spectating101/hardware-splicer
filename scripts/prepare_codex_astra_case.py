@@ -30,6 +30,7 @@ from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (  # 
     CASE_ID as PRIMARY_SOURCE_CASE_ID,
     IDENTITY_CONFLICT_CASE_ID as PRIMARY_SOURCE_IDENTITY_CONFLICT_CASE_ID,
     RAW_DOCUMENT_CASE_ID as PRIMARY_SOURCE_RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID as PRIMARY_SOURCE_RAW_DOCUMENT_V2_CASE_ID,
     primary_source_case_definition,
     verify_primary_source_directory,
 )
@@ -106,6 +107,7 @@ def main() -> int:
         PRIMARY_SOURCE_BLIND_CASE_ID,
         PRIMARY_SOURCE_IDENTITY_CONFLICT_CASE_ID,
         PRIMARY_SOURCE_RAW_DOCUMENT_CASE_ID,
+        PRIMARY_SOURCE_RAW_DOCUMENT_V2_CASE_ID,
     }:
         if not args.primary_source_dir:
             raise SystemExit("primary-source case requires --primary-source-dir")
@@ -123,7 +125,11 @@ def main() -> int:
     backend_store = observer / "BACKEND_STORE"
     backend_store.mkdir()
     backend_initially_empty = True
-    if args.case_id == PRIMARY_SOURCE_RAW_DOCUMENT_CASE_ID:
+    raw_document_case_ids = {
+        PRIMARY_SOURCE_RAW_DOCUMENT_CASE_ID,
+        PRIMARY_SOURCE_RAW_DOCUMENT_V2_CASE_ID,
+    }
+    if args.case_id in raw_document_case_ids:
         snapshot_sources = {
             str(row.get("source_id") or ""): row
             for row in outer["snapshot"].get("engineeringSources") or []
@@ -175,7 +181,7 @@ def main() -> int:
                 "primary_source_documents_model_visible": False,
             }
         )
-    if args.case_id == PRIMARY_SOURCE_RAW_DOCUMENT_CASE_ID:
+    if args.case_id in raw_document_case_ids:
         manifest.update(
             {
                 "backend_preseeded_project_id": project_id,

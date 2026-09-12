@@ -11,10 +11,12 @@ from .cleanroom_primary_source_spi_flash_experiment import (
     BLIND_CASE_ID,
     IDENTITY_CONFLICT_CASE_ID,
     RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
     build_primary_source_spi_flash_raw_document_case,
+    build_primary_source_spi_flash_raw_document_v2_case,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
     validate_raw_document_primary_source_case,
@@ -87,12 +89,26 @@ Required operating discipline:
 
 This is an independent experimental case. You are not told the expected extracted values or engineering disposition."""
 
+RAW_DOCUMENT_V2_FROZEN_CASE_INSTRUCTIONS = RAW_DOCUMENT_FROZEN_CASE_INSTRUCTIONS.replace(
+    "12. Before finishing, read back canonical state and explicitly summarize blockers, extraction limitations, and unresolved facts.",
+    "12. Before finishing, read back canonical state. In the terminal report, remaining_blockers and unresolved_facts must contain only exact strings copied from the initial engineeringBlockers catalog; do not paraphrase or add new blocker strings there.",
+).replace(
+    "\n\nThis is an independent experimental case.",
+    """
+15. In proposed_logical_mapping rows, host and dut contain only bare project signal names (for example, SCLK and CLK). Put translator pins or route notation in rationale, never in those two fields.
+16. Candidate status is semantic: use rejected when document-derived topology establishes that a candidate cannot realize the required signal-direction split; use held only when evidence is insufficient to decide.
+
+This is an independent experimental case.""",
+)
+
 
 def frozen_case_instructions() -> str:
     return FROZEN_CASE_INSTRUCTIONS
 
 
 def case_instructions(case_id: str) -> str:
+    if case_id == RAW_DOCUMENT_V2_CASE_ID:
+        return RAW_DOCUMENT_V2_FROZEN_CASE_INSTRUCTIONS
     if case_id == RAW_DOCUMENT_CASE_ID:
         return RAW_DOCUMENT_FROZEN_CASE_INSTRUCTIONS
     return (
@@ -169,13 +185,17 @@ def select_exact_case(case_id: str) -> ReplayCase:
             if case_id == BLIND_CASE_ID
             else build_primary_source_identity_conflict_case()
         )
-    if case_id == RAW_DOCUMENT_CASE_ID:
-        validation = validate_raw_document_primary_source_case()
+    if case_id in {RAW_DOCUMENT_CASE_ID, RAW_DOCUMENT_V2_CASE_ID}:
+        validation = validate_raw_document_primary_source_case(case_id=case_id)
         if not validation.get("pass"):
             raise ValueError(
                 "refusing Codex case packaging because raw-document case validation failed"
             )
-        return build_primary_source_spi_flash_raw_document_case()
+        return (
+            build_primary_source_spi_flash_raw_document_case()
+            if case_id == RAW_DOCUMENT_CASE_ID
+            else build_primary_source_spi_flash_raw_document_v2_case()
+        )
     validation = validate_unseen_spi_flash_corpus()
     if not validation.get("pass"):
         raise ValueError("refusing Codex case packaging because frozen corpus validation failed")

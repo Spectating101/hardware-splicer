@@ -7,10 +7,12 @@ from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
     CASE_ID,
     IDENTITY_CONFLICT_CASE_ID,
     RAW_DOCUMENT_CASE_ID,
+    RAW_DOCUMENT_V2_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
     build_primary_source_spi_flash_raw_document_case,
+    build_primary_source_spi_flash_raw_document_v2_case,
     primary_source_case_definition,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
@@ -143,3 +145,35 @@ def test_raw_document_model_input_hides_expected_values_and_rubric() -> None:
     assert "observer_adjudication" not in mission
     assert "observer_adjudication" in observer["case_metadata"]
     assert observer["outer_labels_visible_to_model"] is False
+
+
+def test_raw_document_v2_clarifies_serialization_without_exposing_answers() -> None:
+    case = build_primary_source_spi_flash_raw_document_v2_case()
+    package = build_codex_case_package(
+        case_id=RAW_DOCUMENT_V2_CASE_ID,
+        experiment_project_id="raw-document-v2-test",
+    )
+    mission = package["model_visible"]["mission_text"]
+    instructions = package["model_visible"]["developer_instructions"]
+    definition = primary_source_case_definition()
+
+    assert case.case_id == RAW_DOCUMENT_V2_CASE_ID
+    assert validate_raw_document_primary_source_case(
+        case_id=RAW_DOCUMENT_V2_CASE_ID
+    )["pass"] is True
+    assert select_exact_case(RAW_DOCUMENT_V2_CASE_ID).case_id == RAW_DOCUMENT_V2_CASE_ID
+    assert "only bare project signal names" in instructions
+    assert "use rejected" in instructions
+    assert "exact strings copied from the initial engineeringBlockers" in instructions
+    assert "supported_conclusions" not in mission
+    assert "forbidden_claims" not in mission
+    assert all(
+        claim["paraphrase"] not in mission
+        for document in definition["documents"]
+        for claim in document["claims"]
+    )
+    assert {
+        "Independent review of all model-proposed document claims.",
+        "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+        "Frozen hashes prove capture identity, not authenticity, currentness, or physical identity.",
+    }.issubset(set(case.snapshot["engineeringBlockers"]))
