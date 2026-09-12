@@ -146,7 +146,7 @@ def build_delegated_runner_argv(
 
 def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
     return {
-        "schema_version": "hardware_splicer.codex_astra_resource_guard.v3",
+        "schema_version": "hardware_splicer.codex_astra_resource_guard.v4",
         "timeout_seconds": clamp_timeout_seconds(timeout_seconds),
         "timeout_hard_max_seconds": ASTRA_MAX_TIMEOUT_SECONDS,
         "mcp_tool_calls_hard_max": ASTRA_MAX_MCP_TOOL_CALLS,

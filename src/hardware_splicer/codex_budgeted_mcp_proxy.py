@@ -21,10 +21,11 @@ from pathlib import Path
 from typing import Any, Mapping, TextIO
 
 ASTRA_MAX_MCP_TOOL_CALLS = 20
-# The blinded conflict workflow needs eleven canonical calls when the clean-room
-# store starts empty and one bounded plan request requires repair. This still sits
-# below the independent total MCP-call ceiling.
-ASTRA_MAX_BACKEND_CALLS = 11
+# The blinded conflict workflow needs twelve canonical calls when the clean-room
+# store starts empty, one bounded plan request requires repair, and evidence-delta
+# is inspected before packaging and final readback. This remains below the
+# independent total MCP-call ceiling.
+ASTRA_MAX_BACKEND_CALLS = 12
 ASTRA_MAX_REQUEST_BYTES = 262_144
 
 _ALLOWED_TOOLS = {

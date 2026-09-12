@@ -122,11 +122,11 @@ def test_oversized_message_fails_before_json_or_budget_processing() -> None:
 
 def test_experiment_limits_are_deliberately_small() -> None:
     assert ASTRA_MAX_MCP_TOOL_CALLS == 20
-    assert ASTRA_MAX_BACKEND_CALLS == 11
+    assert ASTRA_MAX_BACKEND_CALLS == 12
     assert ASTRA_MAX_REQUEST_BYTES == 262_144
 
 
-def test_blinded_conflict_repair_workflow_fits_but_twelfth_backend_call_is_denied() -> None:
+def test_blinded_conflict_delta_workflow_fits_but_thirteenth_backend_call_is_denied() -> None:
     budget = ToolBudget()
     workflow_steps = (
         "initial_read",
@@ -135,6 +135,7 @@ def test_blinded_conflict_repair_workflow_fits_but_twelfth_backend_call_is_denie
         "rejected_plan_attempt",
         "repaired_plan_save",
         "assurance_reread",
+        "evidence_delta",
         "canonical_read",
         "refinement_save",
         "final_assurance_read",
@@ -146,8 +147,8 @@ def test_blinded_conflict_repair_workflow_fits_but_twelfth_backend_call_is_denie
         assert action == "forward"
         assert denial is None
 
-    action, denial = classify_client_line(_call(12, "hs_backend_call"), budget)
+    action, denial = classify_client_line(_call(13, "hs_backend_call"), budget)
     assert action == "deny"
     assert denial["error"]["code"] == -32098
-    assert denial["error"]["data"]["backend_calls_used"] == 11
-    assert denial["error"]["data"]["backend_calls_limit"] == 11
+    assert denial["error"]["data"]["backend_calls_used"] == 12
+    assert denial["error"]["data"]["backend_calls_limit"] == 12
