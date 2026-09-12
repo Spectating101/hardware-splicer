@@ -25,6 +25,11 @@ from hardware_splicer.codex_budgeted_mcp_proxy import (
     ASTRA_MAX_BACKEND_CALLS,
     ASTRA_MAX_MCP_TOOL_CALLS,
     ASTRA_MAX_REQUEST_BYTES,
+    ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS,
+    ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS,
+)
+from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
+    RAW_DOCUMENT_CASE_ID,
 )
 
 
@@ -140,6 +145,18 @@ def test_resource_guard_manifest_names_bounded_exposure_not_exact_cost(tmp_path:
 
     path = write_resource_guard_manifest(tmp_path / "guard.json", timeout_seconds=300)
     assert json.loads(path.read_text(encoding="utf-8")) == guard
+
+
+def test_raw_document_guard_is_larger_but_still_hard_bounded() -> None:
+    guard = resource_guard_manifest(
+        timeout_seconds=300,
+        case_id=RAW_DOCUMENT_CASE_ID,
+    )
+
+    assert guard["case_profile"] == "raw_document"
+    assert guard["mcp_tool_calls_hard_max"] == ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS == 40
+    assert guard["backend_calls_hard_max"] == ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS == 36
+    assert guard["timeout_hard_max_seconds"] == 300
 
 
 def test_budgeted_runner_dry_run_emits_only_resource_plan(tmp_path: Path) -> None:

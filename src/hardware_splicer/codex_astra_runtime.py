@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .codex_astra_case import build_codex_case_package, case_instructions
+from .cleanroom_primary_source_spi_flash_experiment import RAW_DOCUMENT_CASE_ID
 from .codex_astra_preflight import (
     ASTRA_MODEL,
     HS_MCP_SERVER_NAME,
@@ -16,6 +17,8 @@ from .codex_astra_preflight import (
     build_launch_environment,
     paths_are_disjoint,
 )
+from .project_store import ProjectStore
+from .stored_source_parser import read_registered_source_bytes
 
 CODEX_ALLOWANCE_CONFIRMATION = "I_ACCEPT_CODEX_ALLOWANCE_USAGE"
 LIVE_EXECUTION_CLAIM_FILE = "LIVE_EXECUTION_ATTEMPT.json"
@@ -106,8 +109,8 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
         raise ValueError(
             "model-visible workspace must contain exactly MISSION.txt before execution"
         )
-    if not backend_root.is_dir() or any(backend_root.iterdir()):
-        raise ValueError("backend project root must exist and be empty before execution")
+    if not backend_root.is_dir():
+        raise ValueError("backend project root must exist before execution")
     if backend_root.parent != observer:
         raise ValueError("backend project root must live directly inside observer directory")
     if snapshot.parent != observer or instructions.parent != observer:
@@ -119,6 +122,47 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
     )
     expected_visible = expected["model_visible"]
     expected_outer = expected["observer_only"]
+    if case_id == RAW_DOCUMENT_CASE_ID:
+        if manifest.get("backend_project_root_initially_empty") is not False:
+            raise ValueError("raw-document case requires a declared preseeded backend")
+        if manifest.get("backend_preseeded_project_id") != project_id:
+            raise ValueError("raw-document preseeded project id does not match")
+        seeded = ProjectStore(backend_root).load(project_id)
+        if seeded.get("revision") != 1 or manifest.get(
+            "backend_preseeded_revision"
+        ) != 1:
+            raise ValueError("raw-document backend must be preseeded at revision 1")
+        if seeded.get("snapshot") != expected_outer["snapshot"]:
+            raise ValueError("raw-document preseeded snapshot no longer matches")
+        root_entries = sorted(path.name for path in backend_root.iterdir())
+        if root_entries != [project_id]:
+            raise ValueError(
+                "raw-document backend may contain only the experiment project"
+            )
+        document_sources = [
+            row
+            for row in seeded["snapshot"].get("engineeringSources") or []
+            if isinstance(row, Mapping)
+            and row.get("metadata", {}).get(
+                "document_content_model_visible_via_hs"
+            )
+            is True
+        ]
+        if len(document_sources) != 3:
+            raise ValueError("raw-document backend requires exactly three documents")
+        for source in document_sources:
+            read_registered_source_bytes(
+                project_id,
+                source,
+                project_root=backend_root,
+            )
+    else:
+        if manifest.get("backend_project_root_initially_empty") is not True:
+            raise ValueError("non-document backend must be declared initially empty")
+        if any(backend_root.iterdir()):
+            raise ValueError(
+                "backend project root must be empty before execution"
+            )
     if mission.read_text(encoding="utf-8") != expected_visible["mission_text"]:
         raise ValueError("MISSION.txt no longer matches the frozen case protocol")
     if instructions.read_text(encoding="utf-8") != expected_visible["developer_instructions"]:

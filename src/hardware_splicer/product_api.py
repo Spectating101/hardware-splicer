@@ -21,6 +21,7 @@ from .capability_api import create_capability_router
 from .capability_reuse_api import create_capability_reuse_router
 from .circuit_json_api import create_circuit_json_router
 from .dual_agent_cleanroom_api import create_dual_agent_cleanroom_router
+from .document_evidence_api import create_document_evidence_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
@@ -109,6 +110,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_upload_session_router(resolved_store))
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
+    app.include_router(create_document_evidence_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))

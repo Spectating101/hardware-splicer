@@ -10,11 +10,14 @@ from .cleanroom_replay import ReplayCase
 from .cleanroom_primary_source_spi_flash_experiment import (
     BLIND_CASE_ID,
     IDENTITY_CONFLICT_CASE_ID,
+    RAW_DOCUMENT_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
+    build_primary_source_spi_flash_raw_document_case,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
+    validate_raw_document_primary_source_case,
 )
 from .cleanroom_unseen_spi_flash_experiment import (
     build_unseen_spi_flash_cases,
@@ -63,12 +66,35 @@ Required operating discipline:
 
 This is an independent experimental case. You are not told the expected disposition or whether related variants exist."""
 
+RAW_DOCUMENT_FROZEN_CASE_INSTRUCTIONS = """You are the external reasoning engine in a blinded, frozen Hardware-Splicer raw-document proof run.
+You do not have Hardware-Splicer source code, hidden tests, evaluator metadata, expected values, curated document claims, or outer-engineer analysis. Operate only through the Hardware-Splicer MCP tools and the product-visible state in this request.
+
+Required operating discipline:
+1. Start with hs_backend_status.
+2. Load hs_backend_task_manifest for document_grounded_pre_fabrication once. Follow its canonical schemas and record contract exactly. Use broad operation discovery only if a required operation is absent.
+3. Work only on the experiment_project_id given in this request. The project is already present at revision 1; load it rather than replacing its initial snapshot.
+4. Treat only the canonical project state and hash-bound document content returned by Hardware-Splicer as evidence. Do not import web, repository, or external evidence.
+5. The documentExtractionTargets are questions, not facts. For every target, inspect/search the specified source, read the relevant exact page, and register a proposed claim using the supplied claim_id and source_id. supporting_text must quote text actually returned for that page.
+6. Machine-extracted text may lose layout. Preserve ambiguity where tables, diagrams, symbols, footnotes, or page extraction do not support a confident interpretation. Never claim that text extraction proves visual-layout fidelity.
+7. Model-proposed document claims remain proposed and unreviewed. Do not upgrade them to declared, observed, measured, verified, or authorized authority.
+8. Preserve unresolved component identity, package/pinout, programmer behavior, supply implementation, timing/load/protection design, and physical evidence unless visible evidence resolves them.
+9. Never invent bench measurements, physical observations, fabrication readiness, power-on readiness, or human authorization. A model/tool conclusion grants no physical authority.
+10. Use the project-scoped bounded pre-fabrication-plan operation for derived engineering work. Reference only claims that were successfully registered into canonical state.
+11. Use the assurance view to inspect reference integrity, then create the deterministic engineering package.
+12. Before finishing, read back canonical state and explicitly summarize blockers, extraction limitations, and unresolved facts.
+13. Tool failures are evidence; do not hide them or silently rewrite the problem.
+14. Do not use repository/source-code operations or seek evaluator information even if a backend operation appears to allow it.
+
+This is an independent experimental case. You are not told the expected extracted values or engineering disposition."""
+
 
 def frozen_case_instructions() -> str:
     return FROZEN_CASE_INSTRUCTIONS
 
 
 def case_instructions(case_id: str) -> str:
+    if case_id == RAW_DOCUMENT_CASE_ID:
+        return RAW_DOCUMENT_FROZEN_CASE_INSTRUCTIONS
     return (
         BLIND_FROZEN_CASE_INSTRUCTIONS
         if case_id in {BLIND_CASE_ID, IDENTITY_CONFLICT_CASE_ID}
@@ -143,6 +169,13 @@ def select_exact_case(case_id: str) -> ReplayCase:
             if case_id == BLIND_CASE_ID
             else build_primary_source_identity_conflict_case()
         )
+    if case_id == RAW_DOCUMENT_CASE_ID:
+        validation = validate_raw_document_primary_source_case()
+        if not validation.get("pass"):
+            raise ValueError(
+                "refusing Codex case packaging because raw-document case validation failed"
+            )
+        return build_primary_source_spi_flash_raw_document_case()
     validation = validate_unseen_spi_flash_corpus()
     if not validation.get("pass"):
         raise ValueError("refusing Codex case packaging because frozen corpus validation failed")

@@ -15,7 +15,10 @@ from .codex_budgeted_mcp_proxy import (
     ASTRA_MAX_BACKEND_CALLS,
     ASTRA_MAX_MCP_TOOL_CALLS,
     ASTRA_MAX_REQUEST_BYTES,
+    ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS,
+    ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS,
 )
+from .cleanroom_primary_source_spi_flash_experiment import RAW_DOCUMENT_CASE_ID
 
 ASTRA_DEFAULT_TIMEOUT_SECONDS = 300
 ASTRA_MAX_TIMEOUT_SECONDS = 300
@@ -82,6 +85,8 @@ def write_budgeted_mcp_launcher(
     *,
     backend_command: str,
     python_command: str | None = None,
+    max_tool_calls: int = ASTRA_MAX_MCP_TOOL_CALLS,
+    max_backend_calls: int = ASTRA_MAX_BACKEND_CALLS,
 ) -> Path:
     """Write an executable shim that can only start the budgeted MCP proxy."""
 
@@ -99,6 +104,10 @@ def write_budgeted_mcp_launcher(
         + shlex.quote(python)
         + " -m hardware_splicer.codex_budgeted_mcp_proxy --backend-command "
         + shlex.quote(backend)
+        + " --max-tool-calls "
+        + str(max_tool_calls)
+        + " --max-backend-calls "
+        + str(max_backend_calls)
         + ' "$@"\n'
     )
     target.write_text(body, encoding="utf-8")
@@ -144,13 +153,27 @@ def build_delegated_runner_argv(
     return argv
 
 
-def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
+def resource_guard_manifest(
+    *, timeout_seconds: int, case_id: str | None = None
+) -> dict[str, object]:
+    raw_document_case = case_id == RAW_DOCUMENT_CASE_ID
+    tool_limit = (
+        ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS
+        if raw_document_case
+        else ASTRA_MAX_MCP_TOOL_CALLS
+    )
+    backend_limit = (
+        ASTRA_RAW_DOCUMENT_MAX_BACKEND_CALLS
+        if raw_document_case
+        else ASTRA_MAX_BACKEND_CALLS
+    )
     return {
-        "schema_version": "hardware_splicer.codex_astra_resource_guard.v4",
+        "schema_version": "hardware_splicer.codex_astra_resource_guard.v5",
+        "case_profile": "raw_document" if raw_document_case else "standard",
         "timeout_seconds": clamp_timeout_seconds(timeout_seconds),
         "timeout_hard_max_seconds": ASTRA_MAX_TIMEOUT_SECONDS,
-        "mcp_tool_calls_hard_max": ASTRA_MAX_MCP_TOOL_CALLS,
-        "backend_calls_hard_max": ASTRA_MAX_BACKEND_CALLS,
+        "mcp_tool_calls_hard_max": tool_limit,
+        "backend_calls_hard_max": backend_limit,
         "mcp_request_bytes_hard_max": ASTRA_MAX_REQUEST_BYTES,
         "api_fallback": False,
         "exact_allowance_cost_guaranteed": False,
@@ -162,11 +185,23 @@ def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
     }
 
 
-def write_resource_guard_manifest(path: str | os.PathLike[str], *, timeout_seconds: int) -> Path:
+def write_resource_guard_manifest(
+    path: str | os.PathLike[str],
+    *,
+    timeout_seconds: int,
+    case_id: str | None = None,
+) -> Path:
     target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps(resource_guard_manifest(timeout_seconds=timeout_seconds), indent=2, sort_keys=True)
+        json.dumps(
+            resource_guard_manifest(
+                timeout_seconds=timeout_seconds,
+                case_id=case_id,
+            ),
+            indent=2,
+            sort_keys=True,
+        )
         + "\n",
         encoding="utf-8",
     )

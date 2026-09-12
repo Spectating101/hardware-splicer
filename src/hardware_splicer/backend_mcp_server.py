@@ -184,7 +184,11 @@ async def hs_backend_list_operations(
 
 @mcp.tool(structured_output=False)
 async def hs_backend_task_manifest(
-    task: Literal["bounded_pre_fabrication", "engineering_assurance"],
+    task: Literal[
+        "bounded_pre_fabrication",
+        "document_grounded_pre_fabrication",
+        "engineering_assurance",
+    ],
 ) -> str:
     """Return one task-scoped canonical workflow contract in a single discovery call.
 

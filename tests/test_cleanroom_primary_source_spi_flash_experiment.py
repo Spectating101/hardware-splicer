@@ -6,12 +6,15 @@ from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
     BLIND_CASE_ID,
     CASE_ID,
     IDENTITY_CONFLICT_CASE_ID,
+    RAW_DOCUMENT_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
+    build_primary_source_spi_flash_raw_document_case,
     primary_source_case_definition,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
+    validate_raw_document_primary_source_case,
 )
 from hardware_splicer.codex_astra_case import build_codex_case_package, select_exact_case
 
@@ -102,4 +105,41 @@ def test_blinded_model_input_excludes_observer_metadata() -> None:
     assert "supported_conclusions" not in mission
     assert "forbidden_claims" not in mission
     assert "observer_conflict_adjudication" in observer["case_metadata"]
+    assert observer["outer_labels_visible_to_model"] is False
+
+
+def test_raw_document_case_exposes_questions_and_hashes_not_curated_answers() -> None:
+    case = build_primary_source_spi_flash_raw_document_case()
+    snapshot_text = json.dumps(case.snapshot, sort_keys=True)
+    definition = primary_source_case_definition()
+
+    assert case.case_id == RAW_DOCUMENT_CASE_ID
+    assert len(case.snapshot["documentExtractionTargets"]) == 11
+    assert all(
+        not source.get("claims") and not source.get("metadata", {}).get("claims")
+        for source in case.snapshot["engineeringSources"]
+        if source.get("source_type") == "manufacturer_datasheet_pdf_capture"
+    )
+    assert all(
+        claim["paraphrase"] not in snapshot_text
+        for document in definition["documents"]
+        for claim in document["claims"]
+    )
+    assert validate_raw_document_primary_source_case()["pass"] is True
+    assert select_exact_case(RAW_DOCUMENT_CASE_ID).case_id == RAW_DOCUMENT_CASE_ID
+
+
+def test_raw_document_model_input_hides_expected_values_and_rubric() -> None:
+    package = build_codex_case_package(
+        case_id=RAW_DOCUMENT_CASE_ID,
+        experiment_project_id="raw-document-test",
+    )
+    mission = package["model_visible"]["mission_text"]
+    observer = package["observer_only"]
+
+    assert "supported_conclusions" not in mission
+    assert "forbidden_claims" not in mission
+    assert "predeclared_page_addressed_paraphrase" not in mission
+    assert "observer_adjudication" not in mission
+    assert "observer_adjudication" in observer["case_metadata"]
     assert observer["outer_labels_visible_to_model"] is False

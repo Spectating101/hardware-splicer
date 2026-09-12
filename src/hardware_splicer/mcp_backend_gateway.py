@@ -40,6 +40,27 @@ _TASK_OPERATION_PATHS = {
         ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
         ("POST", "/v1/projects/{project_id}/engineering/assurance/reviews"),
     ),
+    "document_grounded_pre_fabrication": (
+        ("GET", "/v1/projects/{project_id}"),
+        ("PUT", "/v1/projects/{project_id}/snapshot"),
+        ("GET", "/v1/projects/{project_id}/sources/{source_id}/document"),
+        (
+            "GET",
+            "/v1/projects/{project_id}/sources/{source_id}/document/search",
+        ),
+        (
+            "GET",
+            "/v1/projects/{project_id}/sources/{source_id}/document/pages/{page_number}",
+        ),
+        (
+            "POST",
+            "/v1/projects/{project_id}/sources/{source_id}/document/claims",
+        ),
+        ("POST", "/v1/projects/{project_id}/engineering/pre-fabrication-plan"),
+        ("GET", "/v1/projects/{project_id}/engineering/assurance"),
+        ("POST", "/v1/projects/{project_id}/engineering/assurance/evidence-delta"),
+        ("POST", "/v1/projects/{project_id}/engineering-packages"),
+    ),
 }
 
 _BOUNDED_PRE_FABRICATION_RECORD_CONTRACT = {
@@ -318,7 +339,10 @@ def task_operation_manifest(
             "automatic_execution": False,
         },
     }
-    if task == "bounded_pre_fabrication":
+    if task in {
+        "bounded_pre_fabrication",
+        "document_grounded_pre_fabrication",
+    }:
         result["canonical_record_contract"] = _BOUNDED_PRE_FABRICATION_RECORD_CONTRACT
     return result
 

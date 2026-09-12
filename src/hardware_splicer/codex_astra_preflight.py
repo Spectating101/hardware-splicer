@@ -270,7 +270,11 @@ def build_cleanroom_overrides(
         _override(f"{server}.tool_timeout_sec", 60),
     ]
     for tool in HS_MCP_TOOLS:
-        limit = 8_000 if tool == "hs_backend_call" else 4_000
+        limit = (
+            8_000
+            if tool in {"hs_backend_call", "hs_backend_task_manifest"}
+            else 4_000
+        )
         overrides.append(_override(f"{server}.tools.{tool}.approval_mode", "approve"))
         overrides.append(_override(f"{server}.tools.{tool}.output_token_limit", limit))
     return overrides

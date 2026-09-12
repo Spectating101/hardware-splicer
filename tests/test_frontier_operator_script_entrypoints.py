@@ -13,6 +13,7 @@ SCRIPTS = (
     "audit_codex_astra_trace.py",
     "prepare_codex_astra_case.py",
     "run_codex_astra_case.py",
+    "adjudicate_astra_raw_document_run.py",
 )
 
 
