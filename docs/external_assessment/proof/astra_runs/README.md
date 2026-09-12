@@ -51,3 +51,13 @@ The conflict result is therefore `2/2` for persisted conflict reasoning but `0/2
 evaluation-ready contract under the tested resource guards. The post-calibration v7 guard is
 twelve backend calls; no v7 live result is claimed. See `2026-09-13-BLINDED-RUN-REPORT.md` for
 the exact interpretation and nonclaims.
+
+## 2026-09-13 raw-document sequence
+
+`2026-09-13-raw-document-v1` is the first run in which Astra received no curated facts,
+claim paraphrases, page numbers, expected values, or expected conclusions. It searched and
+read three hash-bound manufacturer PDFs only through Hardware Splicer's document-evidence
+surface. All eleven hidden claim checks and the hard-truth, mission-progress, and provenance
+contracts passed. The overall run remains failed because one candidate disposition, one
+mapping serialization rule, and the terminal blocker-grounding contract did not pass. See
+`../2026-09-13-RAW-DOCUMENT-V1-RESULT.md` for the bounded interpretation and nonclaims.

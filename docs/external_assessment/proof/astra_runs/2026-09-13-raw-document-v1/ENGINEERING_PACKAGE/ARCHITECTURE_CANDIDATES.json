@@ -1,0 +1,116 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "direct-3v3",
+      "candidate_kind": "direct_connection",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "none",
+      "rationale": "Declared 3.3 V drive exceeds proposed DUT VCC+0.4 V pin limit at 1.8 V (2.2 V). Absolute maximum is not a valid operating target.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "txu0304-standard-spi",
+      "candidate_kind": "fixed_direction_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "TXU0304",
+      "proposed_logical_mapping": [
+        {
+          "direction": "host_to_dut",
+          "dut": "B1Y -> CLK",
+          "host": "SCLK -> A1"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "B2Y -> /CS",
+          "host": "CS# -> A2"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "B3Y -> DI(IO0)",
+          "host": "MOSI_IO0 -> A3"
+        },
+        {
+          "direction": "dut_to_host",
+          "dut": "B4 <- DO(IO1)",
+          "host": "MISO_IO1 <- A4Y"
+        }
+      ],
+      "proposed_rails": {
+        "VCCA": 3.3,
+        "VCCB": 1.8,
+        "authority": "fixture targets only"
+      },
+      "rationale": "Three forward and one reverse channel match declared standard-SPI directions; both declared rail targets fall inside extracted recommended range. Preference is logical only, subject to independent review and all blockers.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "preferred_family_candidate"
+    },
+    {
+      "candidate_id": "axc-uniform-port-allocation",
+      "candidate_kind": "grouped_direction_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "SN74AXC4T245",
+      "rationale": "With all host signals on A and all DUT signals on B, two shared 2-bit sections cannot provide simultaneous 3-forward/1-reverse mapping. Supply range alone does not solve grouping. Split devices or mixed-port arrangements require separate electrical/control review; no blanket family impossibility asserted.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        }
+      ],
+      "status": "held"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}
