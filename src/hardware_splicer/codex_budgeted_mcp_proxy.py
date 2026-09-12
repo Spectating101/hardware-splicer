@@ -21,7 +21,10 @@ from pathlib import Path
 from typing import Any, Mapping, TextIO
 
 ASTRA_MAX_MCP_TOOL_CALLS = 20
-ASTRA_MAX_BACKEND_CALLS = 8
+# The blinded pre-fabrication workflow needs nine canonical calls when the
+# clean-room store starts empty: initial read, bootstrap save, plan save,
+# assurance/read/refinement/assurance, package export, and final readback.
+ASTRA_MAX_BACKEND_CALLS = 9
 ASTRA_MAX_REQUEST_BYTES = 262_144
 
 _ALLOWED_TOOLS = {

@@ -122,5 +122,30 @@ def test_oversized_message_fails_before_json_or_budget_processing() -> None:
 
 def test_experiment_limits_are_deliberately_small() -> None:
     assert ASTRA_MAX_MCP_TOOL_CALLS == 20
-    assert ASTRA_MAX_BACKEND_CALLS == 8
+    assert ASTRA_MAX_BACKEND_CALLS == 9
     assert ASTRA_MAX_REQUEST_BYTES == 262_144
+
+
+def test_blinded_pre_fabrication_workflow_fits_but_tenth_backend_call_is_denied() -> None:
+    budget = ToolBudget()
+    workflow_steps = (
+        "initial_read",
+        "bootstrap_save",
+        "plan_save",
+        "assurance_read",
+        "canonical_read",
+        "refinement_save",
+        "assurance_reread",
+        "package_export",
+        "final_readback",
+    )
+    for request_id, _step in enumerate(workflow_steps, start=1):
+        action, denial = classify_client_line(_call(request_id, "hs_backend_call"), budget)
+        assert action == "forward"
+        assert denial is None
+
+    action, denial = classify_client_line(_call(10, "hs_backend_call"), budget)
+    assert action == "deny"
+    assert denial["error"]["code"] == -32098
+    assert denial["error"]["data"]["backend_calls_used"] == 9
+    assert denial["error"]["data"]["backend_calls_limit"] == 9

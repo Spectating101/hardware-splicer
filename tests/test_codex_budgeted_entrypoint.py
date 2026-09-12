@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import os
 import stat
 import subprocess
 import sys
@@ -133,7 +132,7 @@ def test_resource_guard_manifest_names_bounded_exposure_not_exact_cost(tmp_path:
     assert guard["timeout_seconds"] == 300
     assert guard["timeout_hard_max_seconds"] == 300
     assert guard["mcp_tool_calls_hard_max"] == ASTRA_MAX_MCP_TOOL_CALLS == 20
-    assert guard["backend_calls_hard_max"] == ASTRA_MAX_BACKEND_CALLS == 8
+    assert guard["backend_calls_hard_max"] == ASTRA_MAX_BACKEND_CALLS == 9
     assert guard["mcp_request_bytes_hard_max"] == ASTRA_MAX_REQUEST_BYTES == 262_144
     assert guard["api_fallback"] is False
     assert guard["exact_allowance_cost_guaranteed"] is False
@@ -174,7 +173,7 @@ def test_budgeted_runner_dry_run_emits_only_resource_plan(tmp_path: Path) -> Non
     payload = json.loads(completed.stdout)
     assert payload["execution_performed"] is False
     assert payload["resource_guard"]["mcp_tool_calls_hard_max"] == 20
-    assert payload["resource_guard"]["backend_calls_hard_max"] == 8
+    assert payload["resource_guard"]["backend_calls_hard_max"] == 9
     assert payload["resource_guard"]["timeout_seconds"] == 300
     assert payload["api_fallback"] is False
     delegated = payload["delegated_argv"]

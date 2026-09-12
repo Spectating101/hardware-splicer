@@ -9,7 +9,7 @@ import shutil
 import stat
 import sys
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Mapping
 
 from .codex_budgeted_mcp_proxy import (
     ASTRA_MAX_BACKEND_CALLS,
@@ -146,7 +146,7 @@ def build_delegated_runner_argv(
 
 def resource_guard_manifest(*, timeout_seconds: int) -> dict[str, object]:
     return {
-        "schema_version": "hardware_splicer.codex_astra_resource_guard.v1",
+        "schema_version": "hardware_splicer.codex_astra_resource_guard.v2",
         "timeout_seconds": clamp_timeout_seconds(timeout_seconds),
         "timeout_hard_max_seconds": ASTRA_MAX_TIMEOUT_SECONDS,
         "mcp_tool_calls_hard_max": ASTRA_MAX_MCP_TOOL_CALLS,
