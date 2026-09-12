@@ -1,6 +1,8 @@
 # Raw-document Astra v4 experiment
 
-Status: preregistered implementation; no v4 live result exists at this revision.
+Status: complete. The pre-run protocol is frozen at
+`astra-raw-document-v4-prerun-20260913`; the passing result is published in
+`external_assessment/proof/2026-09-13-RAW-DOCUMENT-V4-PASS.md`.
 
 ## Research question
 

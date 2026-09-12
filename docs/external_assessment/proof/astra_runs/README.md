@@ -74,3 +74,10 @@ the preregistered datasheet signal-alias policy. It still failed the combined ex
 because the Codex process attempted one shell command to read host-global instruction files;
 the sandbox denied it, but the frozen no-shell clean-room contract correctly rejected the
 attempt. See `../2026-09-13-RAW-DOCUMENT-V3-RESULT.md`.
+
+`2026-09-13-raw-document-v4-pass` is the first complete raw-document pass. The
+model-visible task and raw evaluator were unchanged from v3; the runner disabled
+host-global `AGENTS.md` discovery. All four generic contracts and all eleven
+raw-document checks passed in one attempt, with zero failed MCP calls, zero reference
+issues, and no physical-authority promotion. See
+`../2026-09-13-RAW-DOCUMENT-V4-PASS.md`.

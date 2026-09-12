@@ -1,0 +1,182 @@
+{
+  "artifacts": [
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:3v3-spi-controller-declaration-v2",
+      "kind": "registered_source",
+      "metadata": {
+        "facts": {
+          "exact_programmer_identity_resolved": false,
+          "host_input_signals": [
+            "MISO_IO1"
+          ],
+          "host_logic_voltage_v": 3.3,
+          "host_output_signals": [
+            "SCLK",
+            "CS#",
+            "MOSI_IO0"
+          ],
+          "maximum_spi_clock_verified": false
+        },
+        "label": "Unresolved 3.3 V SPI programmer declaration",
+        "limitations": [
+          "No programmer datasheet or measurement capture is attached."
+        ]
+      },
+      "raw_bytes_included": false,
+      "source_id": "src-controller",
+      "source_type": "fixture_interface_declaration",
+      "storage": {}
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "kind": "registered_source",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/4d/4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 4,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "W25Q128JW",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2021-07-29",
+        "document_revision": "Revision G",
+        "independent_review_required": true,
+        "label": "W25Q128JW Datasheet",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "revision_named",
+        "media_type": "application/pdf",
+        "original_filename": "W25Q128JW_RevG_07292021_Plus.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 79,
+        "raw_document_sha256": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+        "raw_document_size_bytes": 2645121,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf",
+        "vendor": "Winbond Electronics"
+      },
+      "raw_bytes_included": false,
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "storage": {}
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "kind": "registered_source",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/f6/f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 4,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "SCES935A",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2021-11",
+        "document_revision": "Revision A",
+        "independent_review_required": true,
+        "label": "TXU0304 4-Bit Fixed Direction Voltage-Level Translator with Schmitt-Trigger Inputs and 3-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "media_type": "application/pdf",
+        "original_filename": "txu0304-reva.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 45,
+        "raw_document_sha256": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+        "raw_document_size_bytes": 2666177,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.ti.com/lit/ds/symlink/txu0304.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "raw_bytes_included": false,
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "storage": {}
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "kind": "registered_source",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/56/56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 3,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "SCES877B",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2024-04",
+        "document_revision": "Revision B",
+        "independent_review_required": true,
+        "label": "SN74AXC4T245 Four-Bit Bus Transceiver with Configurable Voltage Translation and Tri-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "media_type": "application/pdf",
+        "original_filename": "sn74axc4t245-revb.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 41,
+        "raw_document_sha256": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+        "raw_document_size_bytes": 2442164,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "raw_bytes_included": false,
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture",
+      "storage": {}
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:spi-adapter-fixture-readiness-v2",
+      "kind": "registered_source",
+      "metadata": {
+        "facts": {
+          "default_power_state": "off",
+          "dut_supply_implementation_verified": false,
+          "exact_dut_package_verified": false,
+          "physical_bench_evidence_present": false,
+          "physical_dut_marking_captured": false
+        },
+        "label": "Adapter bring-up boundary"
+      },
+      "raw_bytes_included": false,
+      "source_id": "src-fixture",
+      "source_type": "fixture_readiness_declaration",
+      "storage": {}
+    }
+  ],
+  "referenced_artifact_bytes_included": false,
+  "schema_version": "hardware_splicer.engineering_package_artifacts.v1"
+}
