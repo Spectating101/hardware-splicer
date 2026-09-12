@@ -78,6 +78,9 @@ def sanitize_text(value: str, replacements: list[tuple[str, str]]) -> str:
     result = re.sub(r"/tmp/hs-astra-budgeted-mcp-[^/\s\"']+", "$MCP_LAUNCHER_DIR", result)
     result = re.sub(r"/tmp/hs-astra-check\.[^/\s\"']+", "$CODEX_CAPTURE_DIR", result)
     result = re.sub(r"/tmp/hs-astra-[^/\s\"']+", "$EPHEMERAL_ASTRA_DIR", result)
+    result = re.sub(
+        r"/(?:home|Users)/[^/\s\"']+/\.codex", "$CODEX_HOME", result
+    )
     for pattern in _SECRET_PATTERNS:
         result = pattern.sub("[REDACTED_SECRET]", result)
     return result

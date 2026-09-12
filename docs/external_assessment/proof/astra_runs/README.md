@@ -68,3 +68,9 @@ experiment because the raw adjudicator required normalized DUT strings `DI_IO0` 
 `DO_IO1`, while Astra used the datasheet-native aliases `DI` and `DO`. All eleven hidden
 document claims otherwise passed every adjudication check. See
 `../2026-09-13-RAW-DOCUMENT-V2-RESULT.md`.
+
+`2026-09-13-raw-document-v3` passed every raw-document adjudication check, including
+the preregistered datasheet signal-alias policy. It still failed the combined experiment
+because the Codex process attempted one shell command to read host-global instruction files;
+the sandbox denied it, but the frozen no-shell clean-room contract correctly rejected the
+attempt. See `../2026-09-13-RAW-DOCUMENT-V3-RESULT.md`.

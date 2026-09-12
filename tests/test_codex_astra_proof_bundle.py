@@ -51,7 +51,14 @@ def test_publish_proof_bundle_redacts_paths_and_accounts_for_original_hashes(
     _write_json(observer / "CODEX_ASTRA_RUN_RESULT.json", {"result": "passed"})
     _write_json(observer / "CODEX_ASTRA_RUNTIME_PLAN.json", {"repo": str(repo)})
     (observer / "CODEX_ASTRA_TRACE.jsonl").write_text(
-        json.dumps({"token": "gho_" + "not-a-real-token", "path": str(workspace)}) + "\n",
+        json.dumps(
+            {
+                "token": "gho_" + "not-a-real-token",
+                "path": str(workspace),
+                "global_instruction": "/home/example/.codex/AGENTS.md",
+            }
+        )
+        + "\n",
         encoding="utf-8",
     )
     (observer / "DEVELOPER_INSTRUCTIONS.txt").write_text(
@@ -77,6 +84,8 @@ def test_publish_proof_bundle_redacts_paths_and_accounts_for_original_hashes(
     assert str(workspace) not in published
     assert str(repo) not in published
     assert "gho_" + "not-a-real-token" not in published
+    assert "/home/example/.codex" not in published
+    assert "$CODEX_HOME/AGENTS.md" in published
     assert "$OBSERVER_DIR" in published
     assert result["nonclaims"]["physical_correctness"] == "UNPROVEN"
     assert any(row["sanitized"] for row in result["artifacts"])

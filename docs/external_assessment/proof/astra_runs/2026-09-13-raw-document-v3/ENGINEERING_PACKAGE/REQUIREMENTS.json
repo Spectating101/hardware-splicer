@@ -1,0 +1,69 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "standard-spi-only",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "text": "Restrict candidate to standard SPI with three host outputs and one host input; Dual/Quad operation requires a new direction architecture."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "physical-pinout",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "text": "Resolve exact physical marking, suffix and package before assigning any physical DUT pins or translator footprint."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "supply-and-disable",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "text": "Design local 1.8 V supply and OE default-low control; retain default power off. Resolve current budget, sequencing, decoupling, protection and disabled-state behavior."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "timing",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "text": "Complete threshold, output-drive, propagation-delay, setup/hold and load budget at actual rails and measured programmer behavior; do not infer SPI clock capability from application example."
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}
