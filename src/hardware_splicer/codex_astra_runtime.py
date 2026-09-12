@@ -12,6 +12,7 @@ from .codex_astra_case import build_codex_case_package, case_instructions
 from .cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
+    RAW_DOCUMENT_V3_CASE_ID,
 )
 from .codex_astra_preflight import (
     ASTRA_MODEL,
@@ -125,7 +126,11 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
     )
     expected_visible = expected["model_visible"]
     expected_outer = expected["observer_only"]
-    if case_id in {RAW_DOCUMENT_CASE_ID, RAW_DOCUMENT_V2_CASE_ID}:
+    if case_id in {
+        RAW_DOCUMENT_CASE_ID,
+        RAW_DOCUMENT_V2_CASE_ID,
+        RAW_DOCUMENT_V3_CASE_ID,
+    }:
         if manifest.get("backend_project_root_initially_empty") is not False:
             raise ValueError("raw-document case requires a declared preseeded backend")
         if manifest.get("backend_preseeded_project_id") != project_id:

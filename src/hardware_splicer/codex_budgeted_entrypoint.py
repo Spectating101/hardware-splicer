@@ -21,6 +21,7 @@ from .codex_budgeted_mcp_proxy import (
 from .cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
+    RAW_DOCUMENT_V3_CASE_ID,
 )
 
 ASTRA_DEFAULT_TIMEOUT_SECONDS = 300
@@ -159,7 +160,11 @@ def build_delegated_runner_argv(
 def resource_guard_manifest(
     *, timeout_seconds: int, case_id: str | None = None
 ) -> dict[str, object]:
-    raw_document_case = case_id in {RAW_DOCUMENT_CASE_ID, RAW_DOCUMENT_V2_CASE_ID}
+    raw_document_case = case_id in {
+        RAW_DOCUMENT_CASE_ID,
+        RAW_DOCUMENT_V2_CASE_ID,
+        RAW_DOCUMENT_V3_CASE_ID,
+    }
     tool_limit = (
         ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS
         if raw_document_case

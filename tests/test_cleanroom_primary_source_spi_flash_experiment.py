@@ -8,11 +8,13 @@ from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
     IDENTITY_CONFLICT_CASE_ID,
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
+    RAW_DOCUMENT_V3_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
     build_primary_source_spi_flash_raw_document_case,
     build_primary_source_spi_flash_raw_document_v2_case,
+    build_primary_source_spi_flash_raw_document_v3_case,
     primary_source_case_definition,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
@@ -177,3 +179,25 @@ def test_raw_document_v2_clarifies_serialization_without_exposing_answers() -> N
         "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
         "Frozen hashes prove capture identity, not authenticity, currentness, or physical identity.",
     }.issubset(set(case.snapshot["engineeringBlockers"]))
+
+
+def test_raw_document_v3_changes_only_observer_alias_policy() -> None:
+    v2 = build_primary_source_spi_flash_raw_document_v2_case()
+    v3 = build_primary_source_spi_flash_raw_document_v3_case()
+
+    assert v3.case_id == RAW_DOCUMENT_V3_CASE_ID
+    assert v3.snapshot == v2.snapshot
+    assert v3.metadata["mapping_alias_policy"] == "datasheet_function_aliases_v1"
+    v2_visible = build_codex_case_package(
+        case_id=RAW_DOCUMENT_V2_CASE_ID,
+        experiment_project_id="same-visible-project",
+    )["model_visible"]
+    v3_visible = build_codex_case_package(
+        case_id=RAW_DOCUMENT_V3_CASE_ID,
+        experiment_project_id="same-visible-project",
+    )["model_visible"]
+    assert v3_visible == v2_visible
+    assert validate_raw_document_primary_source_case(
+        case_id=RAW_DOCUMENT_V3_CASE_ID
+    )["pass"] is True
+    assert select_exact_case(RAW_DOCUMENT_V3_CASE_ID).case_id == RAW_DOCUMENT_V3_CASE_ID

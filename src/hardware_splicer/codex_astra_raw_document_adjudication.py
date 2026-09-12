@@ -20,6 +20,19 @@ from .engineering_assurance import build_engineering_assurance
 
 
 SCHEMA_VERSION = "hardware_splicer.astra_raw_document_adjudication.v1"
+EXACT_MAPPING_POLICY = "exact_v1"
+DATASHEET_FUNCTION_ALIAS_POLICY = "datasheet_function_aliases_v1"
+
+_DUT_SIGNAL_ALIASES = {
+    "CLK": "CLK",
+    "/CS": "/CS",
+    "DI": "DI_IO0",
+    "DI(IO0)": "DI_IO0",
+    "DI_IO0": "DI_IO0",
+    "DO": "DO_IO1",
+    "DO(IO1)": "DO_IO1",
+    "DO_IO1": "DO_IO1",
+}
 
 _SEMANTIC_GROUPS: dict[str, tuple[tuple[str, ...], ...]] = {
     "dut-operating-supply": (("1.7",), ("1.95",)),
@@ -150,6 +163,23 @@ def _disposition(candidate: Mapping[str, Any]) -> str:
     return str(candidate.get("status") or candidate.get("disposition") or "").casefold()
 
 
+def _mapped_signal_pairs(
+    mapping: Sequence[Mapping[str, Any]], *, alias_policy: str
+) -> set[tuple[str, str]]:
+    if alias_policy not in {EXACT_MAPPING_POLICY, DATASHEET_FUNCTION_ALIAS_POLICY}:
+        raise ValueError(f"unknown mapping alias policy: {alias_policy!r}")
+    pairs = {
+        (str(row.get("host")), str(row.get("dut")))
+        for row in mapping
+    }
+    if alias_policy == EXACT_MAPPING_POLICY:
+        return pairs
+    return {
+        (host, _DUT_SIGNAL_ALIASES.get(dut.replace(" ", "").upper(), dut))
+        for host, dut in pairs
+    }
+
+
 def _semantic_claim_pass(
     claim: Mapping[str, Any], groups: Sequence[Sequence[str]]
 ) -> bool:
@@ -168,6 +198,7 @@ def adjudicate_raw_document_snapshot(
     *,
     project_id: str,
     project_root: str | Path,
+    mapping_alias_policy: str = EXACT_MAPPING_POLICY,
 ) -> dict[str, Any]:
     """Verify document extraction anchors and the resulting bounded design state."""
 
@@ -267,7 +298,7 @@ def adjudicate_raw_document_snapshot(
     txu = _find_candidate(candidates, "txu0304")
     axc = _find_candidate(candidates, "sn74axc4t245", "axc4t245")
     mapping = _rows(txu.get("proposed_logical_mapping") or txu.get("logical_mapping"))
-    mapped_pairs = {(str(row.get("host")), str(row.get("dut"))) for row in mapping}
+    mapped_pairs = _mapped_signal_pairs(mapping, alias_policy=mapping_alias_policy)
     expected_pairs = {
         ("SCLK", "CLK"),
         ("CS#", "/CS"),
@@ -319,6 +350,7 @@ def adjudicate_raw_document_snapshot(
     }
     return {
         "schema_version": SCHEMA_VERSION,
+        "mapping_alias_policy": mapping_alias_policy,
         "status": "pass" if all(checks.values()) else "fail",
         "checks": checks,
         "claim_checks": claim_checks,

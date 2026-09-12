@@ -18,6 +18,7 @@ BLIND_CASE_ID = "spi-flash-adapter-primary-sources-blind-v2"
 IDENTITY_CONFLICT_CASE_ID = f"{BLIND_CASE_ID}:identity-conflict"
 RAW_DOCUMENT_CASE_ID = "spi-flash-adapter-raw-documents-blind-v1"
 RAW_DOCUMENT_V2_CASE_ID = "spi-flash-adapter-raw-documents-blind-v2"
+RAW_DOCUMENT_V3_CASE_ID = "spi-flash-adapter-raw-documents-blind-v3"
 
 _RAW_DOCUMENT_ASSURANCE_BLOCKERS = (
     "Independent review of all model-proposed document claims.",
@@ -451,6 +452,33 @@ def build_primary_source_spi_flash_raw_document_v2_case() -> ReplayCase:
     )
 
 
+def primary_source_spi_flash_raw_document_v3_snapshot() -> Dict[str, Any]:
+    return deepcopy(primary_source_spi_flash_raw_document_v2_snapshot())
+
+
+def build_primary_source_spi_flash_raw_document_v3_case() -> ReplayCase:
+    definition = primary_source_case_definition()
+    return ReplayCase(
+        case_id=RAW_DOCUMENT_V3_CASE_ID,
+        project_id="cleanroom-primary-source-spi-flash-raw-document-v3",
+        project_revision=1,
+        snapshot=primary_source_spi_flash_raw_document_v3_snapshot(),
+        equivalence_group=None,
+        perturbation_kind="raw_document_model_extraction_blind_v3",
+        metadata={
+            "scenario_family": "semiconductor_spi_flash_fixture",
+            "raw_documents_captured": True,
+            "document_content_model_visible_via_hs": True,
+            "curated_document_claims_model_visible": False,
+            "expected_answers_model_visible": False,
+            "observer_adjudication": deepcopy(definition["adjudication"]),
+            "independent_human_signoff": False,
+            "serialization_contract_clarified": True,
+            "mapping_alias_policy": "datasheet_function_aliases_v1",
+        },
+    )
+
+
 def validate_raw_document_primary_source_case(
     *, case_id: str = RAW_DOCUMENT_CASE_ID
 ) -> Dict[str, Any]:
@@ -458,6 +486,8 @@ def validate_raw_document_primary_source_case(
         case = build_primary_source_spi_flash_raw_document_case()
     elif case_id == RAW_DOCUMENT_V2_CASE_ID:
         case = build_primary_source_spi_flash_raw_document_v2_case()
+    elif case_id == RAW_DOCUMENT_V3_CASE_ID:
+        case = build_primary_source_spi_flash_raw_document_v3_case()
     else:
         raise ValueError(f"unknown raw-document case_id: {case_id!r}")
     snapshot = dict(case.snapshot)
@@ -506,7 +536,8 @@ def validate_raw_document_primary_source_case(
             "engineering_readiness"
         ].get("fabrication_ready")
         and not snapshot["engineering_readiness"].get("power_on_ready"),
-        "v2_assurance_blockers_predeclared": case_id != RAW_DOCUMENT_V2_CASE_ID
+        "v2_assurance_blockers_predeclared": case_id
+        not in {RAW_DOCUMENT_V2_CASE_ID, RAW_DOCUMENT_V3_CASE_ID}
         or set(_RAW_DOCUMENT_ASSURANCE_BLOCKERS).issubset(
             set(snapshot.get("engineeringBlockers") or [])
         ),

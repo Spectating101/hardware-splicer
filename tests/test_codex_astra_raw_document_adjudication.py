@@ -172,3 +172,28 @@ def test_raw_document_adjudication_rejects_wrong_page_and_authority(
     }
     assert ("dut-operating-supply", "authority_proposed") in issues
     assert ("dut-operating-supply", "expected_pdf_page") in issues
+
+
+def test_v3_mapping_policy_accepts_datasheet_function_aliases(monkeypatch) -> None:
+    snapshot = _passing_fixture(monkeypatch)
+    txu = snapshot["preFabricationPlan"]["architecture_candidates"][1]
+    txu["proposed_logical_mapping"][2]["dut"] = "DI"
+    txu["proposed_logical_mapping"][3]["dut"] = "DO"
+
+    strict = raw_adjudication.adjudicate_raw_document_snapshot(
+        snapshot,
+        project_id="raw-doc-test",
+        project_root="/unused",
+    )
+    normalized = raw_adjudication.adjudicate_raw_document_snapshot(
+        snapshot,
+        project_id="raw-doc-test",
+        project_root="/unused",
+        mapping_alias_policy=raw_adjudication.DATASHEET_FUNCTION_ALIAS_POLICY,
+    )
+
+    assert strict["checks"]["txu0304_four_signal_mapping_complete"] is False
+    assert strict["status"] == "fail"
+    assert normalized["checks"]["txu0304_four_signal_mapping_complete"] is True
+    assert normalized["mapping_alias_policy"] == "datasheet_function_aliases_v1"
+    assert normalized["status"] == "pass"

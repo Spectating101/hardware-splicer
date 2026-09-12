@@ -21,7 +21,12 @@ sys.path[:] = [
 ]
 
 from hardware_splicer.codex_astra_raw_document_adjudication import (  # noqa: E402
+    DATASHEET_FUNCTION_ALIAS_POLICY,
+    EXACT_MAPPING_POLICY,
     adjudicate_raw_document_snapshot,
+)
+from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (  # noqa: E402
+    RAW_DOCUMENT_V3_CASE_ID,
 )
 
 
@@ -48,6 +53,11 @@ def main() -> int:
         envelope["snapshot"],
         project_id=project_id,
         project_root=backend_root,
+        mapping_alias_policy=(
+            DATASHEET_FUNCTION_ALIAS_POLICY
+            if manifest.get("case_id") == RAW_DOCUMENT_V3_CASE_ID
+            else EXACT_MAPPING_POLICY
+        ),
     )
     report["project_id"] = project_id
     report["final_project_revision"] = revision
