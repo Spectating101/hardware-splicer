@@ -191,22 +191,37 @@ def publish_proof_bundle(
         )
 
     audit = json.loads((observer / "CODEX_ASTRA_AUDIT.json").read_text(encoding="utf-8"))
+    contracts = {
+        key: audit.get(key)
+        for key in (
+            "codex_hard_truth_contract_pass",
+            "codex_mission_progress_contract_pass",
+            "codex_progress_provenance_contract_pass",
+            "codex_final_report_contract_pass",
+        )
+    }
+    adjudications = {}
+    for name in OPTIONAL_ROOT_FILES:
+        path = observer / name
+        if not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        adjudications[name] = payload.get("status")
+    overall_pass = (
+        run_status == "passed"
+        and all(contracts.values())
+        and all(status in {"pass", "passed"} for status in adjudications.values())
+    )
     bundle = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
         "repository_commit": repository_commit,
         "case_id": manifest.get("case_id"),
         "experiment_project_id": manifest.get("experiment_project_id"),
-        "result": run_result.get("status"),
-        "contracts": {
-            key: audit.get(key)
-            for key in (
-                "codex_hard_truth_contract_pass",
-                "codex_mission_progress_contract_pass",
-                "codex_progress_provenance_contract_pass",
-                "codex_final_report_contract_pass",
-            )
-        },
+        "result": "passed" if overall_pass else "failed",
+        "runtime_result": run_status,
+        "contracts": contracts,
+        "adjudications": adjudications,
         "usage": audit.get("codex_usage"),
         "mcp_call_count": audit.get("mcp_call_count"),
         "failed_mcp_call_count": audit.get("failed_mcp_call_count"),
@@ -223,7 +238,7 @@ def publish_proof_bundle(
     manifest_bytes = _canonical_json(bundle)
     (destination / "PROOF_BUNDLE.json").write_bytes(manifest_bytes)
 
-    result = "passed" if all(bundle["contracts"].values()) else "failed"
+    result = bundle["result"]
     outcome_summary = (
         "The run demonstrated bounded MCP operation, revision-linked substantive project progress,\n"
         "provenance, and a constrained terminal report."

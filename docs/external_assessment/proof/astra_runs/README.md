@@ -61,3 +61,10 @@ surface. All eleven hidden claim checks and the hard-truth, mission-progress, an
 contracts passed. The overall run remains failed because one candidate disposition, one
 mapping serialization rule, and the terminal blocker-grounding contract did not pass. See
 `../2026-09-13-RAW-DOCUMENT-V1-RESULT.md` for the bounded interpretation and nonclaims.
+
+`2026-09-13-raw-document-v2` passed all four generic contracts and corrected v1's
+candidate-disposition and terminal-grounding failures. It still failed the combined
+experiment because the raw adjudicator required normalized DUT strings `DI_IO0` and
+`DO_IO1`, while Astra used the datasheet-native aliases `DI` and `DO`. All eleven hidden
+document claims otherwise passed every adjudication check. See
+`../2026-09-13-RAW-DOCUMENT-V2-RESULT.md`.

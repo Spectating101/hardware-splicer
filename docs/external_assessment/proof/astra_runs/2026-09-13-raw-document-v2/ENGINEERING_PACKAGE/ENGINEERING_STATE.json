@@ -1,0 +1,610 @@
+{
+  "authority_effect": "none",
+  "engineering_plan": {},
+  "engineering_readiness": {
+    "evidence_complete": false,
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "power_on_ready": false
+  },
+  "engineering_status": "bounded_pre_fabrication_plan",
+  "machine_project": {},
+  "ordered_steps": [],
+  "physical_correctness": "UNPROVEN",
+  "pre_fabrication_next_actions": {
+    "actions": [
+      {
+        "action_id": "resolve-1",
+        "description": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-2",
+        "description": "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-3",
+        "description": "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-4",
+        "description": "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-5",
+        "description": "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-6",
+        "description": "Schematic/ERC/PCB/DRC results and all physical measurements.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-7",
+        "description": "Independent review of all model-proposed document claims.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-8",
+        "description": "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      {
+        "action_id": "resolve-9",
+        "description": "Frozen hashes prove capture identity, not authenticity, currentness, or physical identity.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "pending"
+      }
+    ],
+    "architecture_candidates": [
+      {
+        "candidate_id": "direct-wiring",
+        "candidate_kind": "direct_connection",
+        "component_family": "none",
+        "rationale": "At declared DUT VCC 1.8 V, proposed steady pin absolute maximum is 2.2 V. Declared 3.3 V host outputs exceed it; direct connection is rejected.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "rejected"
+      },
+      {
+        "candidate_id": "single-axc",
+        "candidate_kind": "single_translator",
+        "component_family": "SN74AXC4T245",
+        "rationale": "One device has two direction-controlled two-bit sections. With uniform A host and B DUT domains it supports 4:0, 2:2 or 0:4, not simultaneous required 3:1 standard SPI. Both declared rails are in range; rail compatibility cannot resolve topology.",
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          }
+        ],
+        "status": "rejected"
+      },
+      {
+        "candidate_id": "txu-family",
+        "candidate_kind": "single_translator",
+        "component_family": "TXU0304",
+        "proposed_logical_mapping": [
+          {
+            "direction": "host_to_dut",
+            "dut": "CLK",
+            "host": "SCLK",
+            "rationale": "A1 to B1Y"
+          },
+          {
+            "direction": "host_to_dut",
+            "dut": "/CS",
+            "host": "CS#",
+            "rationale": "A2 to B2Y"
+          },
+          {
+            "direction": "host_to_dut",
+            "dut": "DI",
+            "host": "MOSI_IO0",
+            "rationale": "A3 to B3Y"
+          },
+          {
+            "direction": "dut_to_host",
+            "dut": "DO",
+            "host": "MISO_IO1",
+            "rationale": "B4 to A4Y"
+          }
+        ],
+        "rationale": "Proposed fixed 3:1 direction map fits fixture-declared host directions for standard SPI. Propose VCCA=3.3 V host and VCCB=1.8 V DUT with shared ground; both rails fall within recommended range. No package pins or implementation approved.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "preferred_family_candidate"
+      }
+    ],
+    "assessment": {
+      "authority_effect": "none",
+      "blockers": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements.",
+        "Independent review of all model-proposed document claims.",
+        "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+        "Frozen hashes prove capture identity, not authenticity, currentness, or physical identity."
+      ],
+      "evidence_complete": false,
+      "fabrication_ready": false,
+      "independent_signoff": false,
+      "physical_correctness": "UNPROVEN",
+      "power_on_ready": false,
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        }
+      ],
+      "summary": "All eleven extraction targets registered as proposed and unreviewed. Conditional standard-SPI family architecture only; fixture voltages are declarations, not measurements.",
+      "unresolved_facts": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements.",
+        "Independent review of all model-proposed document claims.",
+        "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+        "Frozen hashes prove capture identity, not authenticity, currentness, or physical identity."
+      ]
+    },
+    "authority_effect": "none",
+    "automatic_execution": false,
+    "correct_engineering_architecture_asserted": false,
+    "decisions": [
+      {
+        "decision_id": "bounded-family-selection",
+        "description": "Prefer TXU0304 family conditionally. Application example is not a component specification; maximum example data rate is not a verified programmer clock or timing budget.",
+        "source_refs": [
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      }
+    ],
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false,
+    "project_id": "hs-astra-rawdoc-v2-20260913-1",
+    "quarantined_generated_plan": null,
+    "requirements": [
+      {
+        "description": "Limit proposal to standard SPI, three host outputs and one return; dual/quad operation requires a separate architecture.",
+        "requirement_id": "standard-spi",
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          }
+        ]
+      },
+      {
+        "description": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "requirement_id": "identity",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          }
+        ]
+      },
+      {
+        "description": "Design OE default low and preserve power off until supply, sequencing, protection and enable behavior are reviewed. No component values or circuit verified.",
+        "requirement_id": "disable",
+        "source_refs": [
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      }
+    ],
+    "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+    "source_ids": [
+      "src-dut-datasheet",
+      "src-translator-dir-datasheet",
+      "src-translator-fixed-datasheet"
+    ],
+    "source_revision": 4
+  },
+  "schema_version": "hardware_splicer.engineering_package_state.v1"
+}

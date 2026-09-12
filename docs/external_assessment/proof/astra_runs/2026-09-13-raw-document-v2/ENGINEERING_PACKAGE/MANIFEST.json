@@ -1,0 +1,88 @@
+{
+  "files": [
+    {
+      "path": "ACTION_TRACE.json",
+      "sha256": "39bd79a33d66da7f70ac2588be8c0aa2a4c952b7e4c679ef9f266c8788eb57b1",
+      "size_bytes": 17210
+    },
+    {
+      "path": "ARCHITECTURE_CANDIDATES.json",
+      "sha256": "00533cbbcf9f2087b626c635aafababb0916abf2306d5bcb9da46489997788ee",
+      "size_bytes": 3892
+    },
+    {
+      "path": "ARTIFACT_REFERENCES.json",
+      "sha256": "c77822506dbdb489d92834fd89926ea8ff565697a8ae89894e437468c95cb035",
+      "size_bytes": 8304
+    },
+    {
+      "path": "AUTHORITY_STATE.json",
+      "sha256": "296453872fe2ecd179596900660c2be6b39a9577cda796a8f0e0eedc6498db9c",
+      "size_bytes": 476
+    },
+    {
+      "path": "BLOCKERS.json",
+      "sha256": "bb53f6f8cc3ba09ee581365f696fb4d876b1137671f58184425aa9e4eb046a30",
+      "size_bytes": 1576
+    },
+    {
+      "path": "CONVERSATION_BRIEFINGS.json",
+      "sha256": "186b009843b0073de3be64ea250a41af7eabc74938b53723b42d1f1b02d75386",
+      "size_bytes": 137
+    },
+    {
+      "path": "DECISIONS.json",
+      "sha256": "8c9a245030f511fd90ead6e9aafe271c33c253e84bec6bd3e66bdf780c9fa7ce",
+      "size_bytes": 783
+    },
+    {
+      "path": "ENGINEERING_STATE.json",
+      "sha256": "ff16d074c5791709b65879a498e6cbff03b3de97e49f9fdbb29c1c7006c48a7a",
+      "size_bytes": 21045
+    },
+    {
+      "path": "PROJECT_BRIEF.json",
+      "sha256": "66b05b43ae9fcdfa006361cbf432a8aad9a4074a6ab7181133cf3067a541c7be",
+      "size_bytes": 1046
+    },
+    {
+      "path": "README.md",
+      "sha256": "c6d2f2f25eb6f2be3ae88953ffebac93d36cd44c42255d9aea63fd71b430287f",
+      "size_bytes": 1202
+    },
+    {
+      "path": "REPAIR_LINEAGE.json",
+      "sha256": "b80ac9b850fda5e31263f4e2cd46533de7baa7c3094b43fc9f82dd95aea6f225",
+      "size_bytes": 91
+    },
+    {
+      "path": "REQUIREMENTS.json",
+      "sha256": "898909dc971890359d450bbe23bd4a69e107ab7110f1dd0131717f2bb4c69977",
+      "size_bytes": 1553
+    },
+    {
+      "path": "SOURCE_CONFLICTS.json",
+      "sha256": "d76dc4817b2709f34985a956bb2a82c8ae1ba2f7a53c65f8f473cb93c80506f4",
+      "size_bytes": 102
+    },
+    {
+      "path": "SOURCE_MANIFEST.json",
+      "sha256": "37293339340761a8308f6da8e0fabba3f655c57b90793ae86b376030a544c837",
+      "size_bytes": 26550
+    },
+    {
+      "path": "TOOL_RESULTS.json",
+      "sha256": "06eaea1467e65bb9f8c7b118a295dabf5ebae923a52ce96e1bc3ad4075d064d4",
+      "size_bytes": 135
+    }
+  ],
+  "manifest_self_hash_excluded": true,
+  "package_authority_effect": "none",
+  "package_id": "engineering-package-r00000005-d7e3dd24410ba267",
+  "project_id": "hs-astra-rawdoc-v2-20260913-1",
+  "raw_source_bytes_included": false,
+  "schema_version": "hardware_splicer.engineering_package_manifest.v1",
+  "snapshot_sha256": "d7e3dd24410ba2671470970c20cf00177dd9c76c8437b7b48faf35ec98b591c0",
+  "source_revision": 5,
+  "source_saved_at": "2026-09-12T18:19:53.985612+00:00"
+}

@@ -169,3 +169,53 @@ def test_failed_bundle_can_publish_without_engineering_package(tmp_path: Path) -
     )
 
     assert result["engineering_package_present"] is False
+
+
+def test_failed_optional_adjudication_controls_published_result(tmp_path: Path) -> None:
+    observer = tmp_path / "observer"
+    observer.mkdir()
+    _write_json(observer / "CASE_MANIFEST.json", {"case_id": "case-adjudicated"})
+    for name in (
+        "CASE_SNAPSHOT.json",
+        "CODEX_ASTRA_FINAL_REPORT_SCHEMA.json",
+        "CODEX_ASTRA_RESOURCE_GUARD.json",
+        "CODEX_ASTRA_RUNTIME_PLAN.json",
+        "LIVE_EXECUTION_ATTEMPT.json",
+    ):
+        _write_json(observer / name, {})
+    (observer / "CODEX_ASTRA_TRACE.jsonl").write_text("", encoding="utf-8")
+    (observer / "DEVELOPER_INSTRUCTIONS.txt").write_text("test", encoding="utf-8")
+    _write_json(
+        observer / "CODEX_ASTRA_AUDIT.json",
+        {
+            "codex_hard_truth_contract_pass": True,
+            "codex_mission_progress_contract_pass": True,
+            "codex_progress_provenance_contract_pass": True,
+            "codex_final_report_contract_pass": True,
+            "physical_correctness": "UNPROVEN",
+            "physical_authority_granted": False,
+        },
+    )
+    _write_json(observer / "CODEX_ASTRA_RUN_RESULT.json", {"status": "passed"})
+    _write_json(observer / "RAW_DOCUMENT_ADJUDICATION.json", {"status": "fail"})
+    _write_json(
+        observer
+        / "BACKEND_STORE"
+        / "project-adjudicated"
+        / "engineering_packages"
+        / "pkg"
+        / "MANIFEST.json",
+        {},
+    )
+
+    result = publish_proof_bundle(
+        observer=observer,
+        destination=tmp_path / "published",
+        run_id="run-adjudicated",
+        repository_commit="abc123",
+    )
+
+    assert result["runtime_result"] == "passed"
+    assert result["adjudications"] == {"RAW_DOCUMENT_ADJUDICATION.json": "fail"}
+    assert result["result"] == "failed"
+    assert "- result: `failed`" in (tmp_path / "published" / "README.md").read_text()
