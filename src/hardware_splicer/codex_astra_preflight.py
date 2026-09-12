@@ -257,6 +257,8 @@ def build_cleanroom_overrides(
         _override("suppress_unstable_features_warning", True),
         _override("features.plugins", False),
         _override("features.skip_host_skill_discovery", True),
+        _override("project_doc_max_bytes", 0),
+        _override("project_doc_fallback_filenames", []),
         _override("default_permissions", profile),
         _override(f"permissions.{profile}.filesystem", filesystem_rules),
         _override(f"permissions.{profile}.network.enabled", False),

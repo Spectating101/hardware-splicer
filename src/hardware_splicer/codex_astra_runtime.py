@@ -13,6 +13,7 @@ from .cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
     RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
 )
 from .codex_astra_preflight import (
     ASTRA_MODEL,
@@ -130,6 +131,7 @@ def validate_runtime_manifest(manifest_path: str | os.PathLike[str]) -> RuntimeC
         RAW_DOCUMENT_CASE_ID,
         RAW_DOCUMENT_V2_CASE_ID,
         RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
     }:
         if manifest.get("backend_project_root_initially_empty") is not False:
             raise ValueError("raw-document case requires a declared preseeded backend")
@@ -342,6 +344,7 @@ def runtime_plan(
         ),
         "provider_credentials_forwarded_to_runtime": False,
         "internal_hs_provider_access_disabled": True,
+        "host_instruction_discovery_disabled": True,
         "model_filesystem_denies_observer_directory": True,
         "codex_writes_observer_artifacts": False,
         "single_case_only": True,

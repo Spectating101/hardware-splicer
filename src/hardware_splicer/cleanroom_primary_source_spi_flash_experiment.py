@@ -19,6 +19,7 @@ IDENTITY_CONFLICT_CASE_ID = f"{BLIND_CASE_ID}:identity-conflict"
 RAW_DOCUMENT_CASE_ID = "spi-flash-adapter-raw-documents-blind-v1"
 RAW_DOCUMENT_V2_CASE_ID = "spi-flash-adapter-raw-documents-blind-v2"
 RAW_DOCUMENT_V3_CASE_ID = "spi-flash-adapter-raw-documents-blind-v3"
+RAW_DOCUMENT_V4_CASE_ID = "spi-flash-adapter-raw-documents-blind-v4"
 
 _RAW_DOCUMENT_ASSURANCE_BLOCKERS = (
     "Independent review of all model-proposed document claims.",
@@ -479,6 +480,21 @@ def build_primary_source_spi_flash_raw_document_v3_case() -> ReplayCase:
     )
 
 
+def build_primary_source_spi_flash_raw_document_v4_case() -> ReplayCase:
+    case = build_primary_source_spi_flash_raw_document_v3_case()
+    metadata = dict(case.metadata or {})
+    metadata["host_instruction_discovery_disabled"] = True
+    return ReplayCase(
+        case_id=RAW_DOCUMENT_V4_CASE_ID,
+        project_id="cleanroom-primary-source-spi-flash-raw-document-v4",
+        project_revision=case.project_revision,
+        snapshot=deepcopy(dict(case.snapshot)),
+        equivalence_group=case.equivalence_group,
+        perturbation_kind="raw_document_model_extraction_blind_v4",
+        metadata=metadata,
+    )
+
+
 def validate_raw_document_primary_source_case(
     *, case_id: str = RAW_DOCUMENT_CASE_ID
 ) -> Dict[str, Any]:
@@ -488,6 +504,8 @@ def validate_raw_document_primary_source_case(
         case = build_primary_source_spi_flash_raw_document_v2_case()
     elif case_id == RAW_DOCUMENT_V3_CASE_ID:
         case = build_primary_source_spi_flash_raw_document_v3_case()
+    elif case_id == RAW_DOCUMENT_V4_CASE_ID:
+        case = build_primary_source_spi_flash_raw_document_v4_case()
     else:
         raise ValueError(f"unknown raw-document case_id: {case_id!r}")
     snapshot = dict(case.snapshot)
@@ -537,7 +555,11 @@ def validate_raw_document_primary_source_case(
         ].get("fabrication_ready")
         and not snapshot["engineering_readiness"].get("power_on_ready"),
         "v2_assurance_blockers_predeclared": case_id
-        not in {RAW_DOCUMENT_V2_CASE_ID, RAW_DOCUMENT_V3_CASE_ID}
+        not in {
+            RAW_DOCUMENT_V2_CASE_ID,
+            RAW_DOCUMENT_V3_CASE_ID,
+            RAW_DOCUMENT_V4_CASE_ID,
+        }
         or set(_RAW_DOCUMENT_ASSURANCE_BLOCKERS).issubset(
             set(snapshot.get("engineeringBlockers") or [])
         ),

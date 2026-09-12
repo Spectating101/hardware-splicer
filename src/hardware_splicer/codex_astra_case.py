@@ -13,12 +13,14 @@ from .cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
     RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
     build_primary_source_spi_flash_raw_document_case,
     build_primary_source_spi_flash_raw_document_v2_case,
     build_primary_source_spi_flash_raw_document_v3_case,
+    build_primary_source_spi_flash_raw_document_v4_case,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
     validate_raw_document_primary_source_case,
@@ -109,7 +111,11 @@ def frozen_case_instructions() -> str:
 
 
 def case_instructions(case_id: str) -> str:
-    if case_id in {RAW_DOCUMENT_V2_CASE_ID, RAW_DOCUMENT_V3_CASE_ID}:
+    if case_id in {
+        RAW_DOCUMENT_V2_CASE_ID,
+        RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
+    }:
         return RAW_DOCUMENT_V2_FROZEN_CASE_INSTRUCTIONS
     if case_id == RAW_DOCUMENT_CASE_ID:
         return RAW_DOCUMENT_FROZEN_CASE_INSTRUCTIONS
@@ -191,6 +197,7 @@ def select_exact_case(case_id: str) -> ReplayCase:
         RAW_DOCUMENT_CASE_ID,
         RAW_DOCUMENT_V2_CASE_ID,
         RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
     }:
         validation = validate_raw_document_primary_source_case(case_id=case_id)
         if not validation.get("pass"):
@@ -201,7 +208,9 @@ def select_exact_case(case_id: str) -> ReplayCase:
             return build_primary_source_spi_flash_raw_document_case()
         if case_id == RAW_DOCUMENT_V2_CASE_ID:
             return build_primary_source_spi_flash_raw_document_v2_case()
-        return build_primary_source_spi_flash_raw_document_v3_case()
+        if case_id == RAW_DOCUMENT_V3_CASE_ID:
+            return build_primary_source_spi_flash_raw_document_v3_case()
+        return build_primary_source_spi_flash_raw_document_v4_case()
     validation = validate_unseen_spi_flash_corpus()
     if not validation.get("pass"):
         raise ValueError("refusing Codex case packaging because frozen corpus validation failed")

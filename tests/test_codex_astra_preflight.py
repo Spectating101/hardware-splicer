@@ -82,6 +82,8 @@ def test_cleanroom_overrides_are_fail_closed(tmp_path: Path, monkeypatch) -> Non
     assert "features.web_search_request" not in joined
     assert "features.plugins=false" in joined
     assert "features.skip_host_skill_discovery=true" in joined
+    assert "project_doc_max_bytes=0" in joined
+    assert "project_doc_fallback_filenames=[]" in joined
     assert 'default_permissions="hs-astra-cleanroom"' in joined
     assert 'permissions.hs-astra-cleanroom.filesystem={":minimal"="read"' in joined
     assert f'{str(workspace.resolve())}' in joined and '"write"' in joined

@@ -27,6 +27,7 @@ from hardware_splicer.codex_astra_raw_document_adjudication import (  # noqa: E4
 )
 from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (  # noqa: E402
     RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
 )
 
 
@@ -55,7 +56,8 @@ def main() -> int:
         project_root=backend_root,
         mapping_alias_policy=(
             DATASHEET_FUNCTION_ALIAS_POLICY
-            if manifest.get("case_id") == RAW_DOCUMENT_V3_CASE_ID
+            if manifest.get("case_id")
+            in {RAW_DOCUMENT_V3_CASE_ID, RAW_DOCUMENT_V4_CASE_ID}
             else EXACT_MAPPING_POLICY
         ),
     )

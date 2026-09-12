@@ -9,12 +9,14 @@ from hardware_splicer.cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
     RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
     build_primary_source_identity_conflict_case,
     build_primary_source_spi_flash_case,
     build_primary_source_spi_flash_blind_case,
     build_primary_source_spi_flash_raw_document_case,
     build_primary_source_spi_flash_raw_document_v2_case,
     build_primary_source_spi_flash_raw_document_v3_case,
+    build_primary_source_spi_flash_raw_document_v4_case,
     primary_source_case_definition,
     validate_blind_primary_source_cases,
     validate_primary_source_spi_flash_case,
@@ -201,3 +203,25 @@ def test_raw_document_v3_changes_only_observer_alias_policy() -> None:
         case_id=RAW_DOCUMENT_V3_CASE_ID
     )["pass"] is True
     assert select_exact_case(RAW_DOCUMENT_V3_CASE_ID).case_id == RAW_DOCUMENT_V3_CASE_ID
+
+
+def test_raw_document_v4_keeps_v3_model_visible_case_unchanged() -> None:
+    v3 = build_primary_source_spi_flash_raw_document_v3_case()
+    v4 = build_primary_source_spi_flash_raw_document_v4_case()
+
+    assert v4.case_id == RAW_DOCUMENT_V4_CASE_ID
+    assert v4.snapshot == v3.snapshot
+    assert v4.metadata["host_instruction_discovery_disabled"] is True
+    v3_visible = build_codex_case_package(
+        case_id=RAW_DOCUMENT_V3_CASE_ID,
+        experiment_project_id="same-visible-project",
+    )["model_visible"]
+    v4_visible = build_codex_case_package(
+        case_id=RAW_DOCUMENT_V4_CASE_ID,
+        experiment_project_id="same-visible-project",
+    )["model_visible"]
+    assert v4_visible == v3_visible
+    assert validate_raw_document_primary_source_case(
+        case_id=RAW_DOCUMENT_V4_CASE_ID
+    )["pass"] is True
+    assert select_exact_case(RAW_DOCUMENT_V4_CASE_ID).case_id == RAW_DOCUMENT_V4_CASE_ID

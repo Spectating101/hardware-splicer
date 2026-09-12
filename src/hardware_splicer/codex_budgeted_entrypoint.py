@@ -22,6 +22,7 @@ from .cleanroom_primary_source_spi_flash_experiment import (
     RAW_DOCUMENT_CASE_ID,
     RAW_DOCUMENT_V2_CASE_ID,
     RAW_DOCUMENT_V3_CASE_ID,
+    RAW_DOCUMENT_V4_CASE_ID,
 )
 
 ASTRA_DEFAULT_TIMEOUT_SECONDS = 300
@@ -164,6 +165,7 @@ def resource_guard_manifest(
         RAW_DOCUMENT_CASE_ID,
         RAW_DOCUMENT_V2_CASE_ID,
         RAW_DOCUMENT_V3_CASE_ID,
+        RAW_DOCUMENT_V4_CASE_ID,
     }
     tool_limit = (
         ASTRA_RAW_DOCUMENT_MAX_MCP_TOOL_CALLS
