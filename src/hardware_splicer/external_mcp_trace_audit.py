@@ -21,14 +21,17 @@ from collections import Counter
 from typing import Any, Dict, Mapping, Sequence
 
 
-SCHEMA_VERSION = "hardware_splicer.external_mcp_trace_audit.v2"
+SCHEMA_VERSION = "hardware_splicer.external_mcp_trace_audit.v3"
 
-_REQUIRED_GATEWAY_TOOLS = {
+_REQUIRED_GATEWAY_BASE_TOOLS = {
     "hs_backend_status",
-    "hs_backend_list_operations",
-    "hs_backend_describe_operation",
     "hs_backend_call",
 }
+_LEGACY_DISCOVERY_TOOLS = {
+    "hs_backend_list_operations",
+    "hs_backend_describe_operation",
+}
+_TASK_MANIFEST_TOOL = "hs_backend_task_manifest"
 
 _SOURCE_COLLECTION_KEYS = (
     "engineeringSources",
@@ -242,7 +245,11 @@ def audit_response_trace(
 
     foreign_project_ids = sorted(referenced_project_ids.difference({expected_project_id}))
     unknown_source_ids = sorted(referenced_source_ids.difference(known_source_ids))
-    missing_gateway_tools = sorted(_REQUIRED_GATEWAY_TOOLS.difference(call_names))
+    call_name_set = set(call_names)
+    missing_gateway_tools = set(_REQUIRED_GATEWAY_BASE_TOOLS.difference(call_name_set))
+    if _TASK_MANIFEST_TOOL not in call_name_set:
+        missing_gateway_tools.update(_LEGACY_DISCOVERY_TOOLS.difference(call_name_set))
+    missing_gateway_tools = sorted(missing_gateway_tools)
 
     arguments_parse_pass = not invalid_arguments and trace_structure_pass
     transport_pass = bool(calls) and not failed_calls and trace_structure_pass
