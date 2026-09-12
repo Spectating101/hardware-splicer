@@ -1,0 +1,305 @@
+{
+  "authority_effect": "none",
+  "engineering_plan": {},
+  "engineering_readiness": {
+    "evidence_complete": false,
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "power_on_ready": false
+  },
+  "engineering_status": "bounded_pre_fabrication_plan",
+  "machine_project": {},
+  "ordered_steps": [],
+  "physical_correctness": "UNPROVEN",
+  "pre_fabrication_next_actions": {
+    "actions": [
+      {
+        "action": "Capture physical DUT marking/package and traceable order; reconcile JW/JV with matching manufacturer documentation, retaining original claims.",
+        "action_id": "identity",
+        "depends_on": [],
+        "source_refs": [
+          {
+            "claim_id": "current-dut-identity-jw",
+            "source_id": "src-current-dut-identity"
+          },
+          {
+            "claim_id": "procurement-note-dut-identity-jv",
+            "source_id": "src-procurement-note-jv"
+          }
+        ]
+      },
+      {
+        "action": "Obtain programmer identity, electrical specifications, supported clock and timing; define later authorized under-load checks.",
+        "action_id": "host",
+        "depends_on": [],
+        "source_ids": [
+          "src-controller"
+        ]
+      },
+      {
+        "action": "After identity resolution select translator orderable package, availability, footprint and assembly constraints; verify package pinout and logical channel assignment including DUT auxiliary pins.",
+        "action_id": "mapping",
+        "depends_on": [
+          "identity"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      },
+      {
+        "action": "Close VIH/VIL/VOH/VOL and load-dependent delay/timing budgets in both directions; choose supported clock.",
+        "action_id": "budget",
+        "depends_on": [
+          "identity",
+          "host",
+          "mapping"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      },
+      {
+        "action": "Design applicable DUT supply, current budget, protection, decoupling, sequencing and fail-safe OE; 1.8 V remains conditional target.",
+        "action_id": "supply",
+        "depends_on": [
+          "identity",
+          "mapping"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      },
+      {
+        "action": "Prepare schematic/PCB and complete ERC/DRC and independent review after budgets and supply design. Define separately authorized bench validation; no physical evidence or authorization currently exists.",
+        "action_id": "verification",
+        "depends_on": [
+          "budget",
+          "supply"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      }
+    ],
+    "architecture_candidates": [
+      {
+        "candidate_id": "direct",
+        "candidate_kind": "direct_connection",
+        "component_family": "W25Q128JW",
+        "description": "3.3 V direct drive exceeds JW pin maximum at declared 1.8 V target; rejection applies to JW branch.",
+        "source_refs": [
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "rejected"
+      },
+      {
+        "candidate_id": "txu",
+        "candidate_kind": "level_translator",
+        "component_family": "TXU0304",
+        "description": "Conditional JW standard SPI family candidate only. A=host declared 3.3 V, B=DUT target 1.8 V fit translator ranges. Physical application held for identity, package, threshold/timing and supply verification.",
+        "proposed_logical_mapping": [
+          {
+            "direction": "host_to_dut",
+            "dut": "CLK",
+            "host": "SCLK",
+            "translator_path": "A1 -> B1Y"
+          },
+          {
+            "direction": "host_to_dut",
+            "dut": "/CS",
+            "host": "CS#",
+            "translator_path": "A2 -> B2Y"
+          },
+          {
+            "direction": "host_to_dut",
+            "dut": "DI_IO0",
+            "host": "MOSI_IO0",
+            "translator_path": "A3 -> B3Y"
+          },
+          {
+            "direction": "dut_to_host",
+            "dut": "DO_IO1",
+            "host": "MISO_IO1",
+            "translator_path": "B4 -> A4Y"
+          }
+        ],
+        "source_refs": [
+          {
+            "claim_id": "current-dut-identity-jw",
+            "source_id": "src-current-dut-identity"
+          },
+          {
+            "claim_id": "procurement-note-dut-identity-jv",
+            "source_id": "src-procurement-note-jv"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "preferred_family_candidate"
+      },
+      {
+        "candidate_id": "axc",
+        "candidate_kind": "level_translator",
+        "component_family": "SN74AXC4T245",
+        "description": "Single device with common host/DUT side orientation cannot supply simultaneous 3-forward/1-reverse channels because direction is shared per two-channel group. Supply range includes 3.3/1.8 V but does not resolve topology. Other arrangements unassessed.",
+        "source_refs": [
+          {
+            "claim_id": "axc-direction-grouping",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "source_id": "src-translator-dir-datasheet"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "rejected"
+      }
+    ],
+    "assessment": {
+      "blockers": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements.",
+        "Physical DUT identity conflict: current-dut-identity-jw declares W25Q128JW; procurement-note-dut-identity-jv proposes W25Q128JV without physical corroboration.",
+        "Final translator channel-to-package-pin mapping and applicability to the identified physical DUT."
+      ],
+      "independent_signoff": false,
+      "physical_correctness": "UNPROVEN",
+      "summary": "Conditional JW document analysis only; physical identity unresolved. JV specifications absent. Power remains off.",
+      "tool_failures": [
+        "Initial GET: 404 not_found; bootstrapped supplied snapshot.",
+        "First plan POST: 422 invalid_pre_fabrication_plan, actions[0] requires action, title, or description; corrected serialization."
+      ]
+    },
+    "authority_effect": "none",
+    "automatic_execution": false,
+    "correct_engineering_architecture_asserted": false,
+    "decisions": [
+      {
+        "decision_id": "identity",
+        "description": "Preserve both identity claims and authority ceilings. Proposed advisory JV transcription neither supersedes declared JW nor establishes physical identity. No selection.",
+        "source_refs": [
+          {
+            "claim_id": "current-dut-identity-jw",
+            "source_id": "src-current-dut-identity"
+          },
+          {
+            "claim_id": "procurement-note-dut-identity-jv",
+            "source_id": "src-procurement-note-jv"
+          }
+        ]
+      },
+      {
+        "decision_id": "supply",
+        "description": "Conditional on JW identity: 1.8 V is within 1.7–1.95 V; at 1.8 V VCC the pin absolute maximum is 2.2 V, below declared 3.3 V host drive. Absolute maximum does not establish logic compatibility. No JV limits inferred.",
+        "source_refs": [
+          {
+            "claim_id": "current-dut-identity-jw",
+            "source_id": "src-current-dut-identity"
+          },
+          {
+            "claim_id": "procurement-note-dut-identity-jv",
+            "source_id": "src-procurement-note-jv"
+          },
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          }
+        ]
+      }
+    ],
+    "fabrication_ready": false,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false,
+    "project_id": "hs-astra-blind-v6-identity-conflict-20260913-1",
+    "quarantined_generated_plan": null,
+    "requirements": [
+      {
+        "description": "Keep power off; no full machine plan supported. OE low disables translator outputs, but fail-safe implementation and sequencing remain unresolved. Application example is not component specification or design validation.",
+        "requirement_id": "boundary",
+        "source_refs": [
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ]
+      }
+    ],
+    "schema_version": "hardware_splicer.pre_fabrication_plan.v1",
+    "source_ids": [
+      "src-controller",
+      "src-current-dut-identity",
+      "src-dut-datasheet",
+      "src-procurement-note-jv",
+      "src-translator-dir-datasheet",
+      "src-translator-fixed-datasheet"
+    ],
+    "source_revision": 1
+  },
+  "schema_version": "hardware_splicer.engineering_package_state.v1"
+}

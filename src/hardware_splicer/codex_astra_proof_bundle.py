@@ -120,10 +120,12 @@ def _sanitize_file(path: Path, replacements: list[tuple[str, str]]) -> bytes:
 def _engineering_package_files(observer: Path) -> list[Path]:
     package_root = observer / "BACKEND_STORE"
     packages = sorted(package_root.glob("*/engineering_packages/*/MANIFEST.json"))
-    if len(packages) != 1:
+    if len(packages) > 1:
         raise ValueError(
-            "observer must contain exactly one expanded engineering package manifest"
+            "observer may contain at most one expanded engineering package manifest"
         )
+    if not packages:
+        return []
     return sorted(packages[0].parent.glob("*"))
 
 
@@ -156,7 +158,13 @@ def publish_proof_bundle(
     if missing:
         raise FileNotFoundError("missing observer artifacts: " + ", ".join(missing))
 
+    run_result = json.loads(
+        (observer / "CODEX_ASTRA_RUN_RESULT.json").read_text(encoding="utf-8")
+    )
     package_files = [path for path in _engineering_package_files(observer) if path.is_file()]
+    run_status = run_result.get("status") or run_result.get("result")
+    if run_status == "passed" and not package_files:
+        raise ValueError("passing observer must contain one expanded engineering package")
     artifact_rows: list[dict[str, Any]] = []
     for source in [*sources, *package_files]:
         if source in package_files:
@@ -182,9 +190,6 @@ def publish_proof_bundle(
         )
 
     audit = json.loads((observer / "CODEX_ASTRA_AUDIT.json").read_text(encoding="utf-8"))
-    run_result = json.loads(
-        (observer / "CODEX_ASTRA_RUN_RESULT.json").read_text(encoding="utf-8")
-    )
     bundle = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
@@ -204,6 +209,7 @@ def publish_proof_bundle(
         "usage": audit.get("codex_usage"),
         "mcp_call_count": audit.get("mcp_call_count"),
         "failed_mcp_call_count": audit.get("failed_mcp_call_count"),
+        "engineering_package_present": bool(package_files),
         "nonclaims": {
             "physical_correctness": audit.get("physical_correctness"),
             "physical_authority_granted": audit.get("physical_authority_granted"),
@@ -236,6 +242,7 @@ engineering correctness, physical correctness, fabrication readiness, or physica
 - result: `{result}`
 - repository commit: `{repository_commit}`
 - case: `{manifest.get('case_id')}`
+- engineering package present: `{bool(package_files)}`
 - physical correctness: `{audit.get('physical_correctness')}`
 - physical authority granted: `{audit.get('physical_authority_granted')}`
 - unseen competence adjudication: `{audit.get('live_unseen_competence')}`

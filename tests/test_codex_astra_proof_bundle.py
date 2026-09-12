@@ -132,3 +132,40 @@ def test_failed_bundle_readme_does_not_claim_success(tmp_path: Path) -> None:
     assert "- result: `failed`" in readme
     assert "did not satisfy every acceptance contract" in readme
     assert "The run demonstrated" not in readme
+
+
+def test_failed_bundle_can_publish_without_engineering_package(tmp_path: Path) -> None:
+    observer = tmp_path / "observer"
+    observer.mkdir()
+    _write_json(observer / "CASE_MANIFEST.json", {"case_id": "case-failed"})
+    for name in (
+        "CASE_SNAPSHOT.json",
+        "CODEX_ASTRA_FINAL_REPORT_SCHEMA.json",
+        "CODEX_ASTRA_RESOURCE_GUARD.json",
+        "CODEX_ASTRA_RUNTIME_PLAN.json",
+        "LIVE_EXECUTION_ATTEMPT.json",
+    ):
+        _write_json(observer / name, {})
+    (observer / "CODEX_ASTRA_TRACE.jsonl").write_text("", encoding="utf-8")
+    (observer / "DEVELOPER_INSTRUCTIONS.txt").write_text("test", encoding="utf-8")
+    _write_json(
+        observer / "CODEX_ASTRA_AUDIT.json",
+        {
+            "codex_hard_truth_contract_pass": False,
+            "codex_mission_progress_contract_pass": False,
+            "codex_progress_provenance_contract_pass": False,
+            "codex_final_report_contract_pass": False,
+            "physical_correctness": "UNPROVEN",
+            "physical_authority_granted": False,
+        },
+    )
+    _write_json(observer / "CODEX_ASTRA_RUN_RESULT.json", {"status": "failed"})
+
+    result = publish_proof_bundle(
+        observer=observer,
+        destination=tmp_path / "published",
+        run_id="run-failed-no-package",
+        repository_commit="abc123",
+    )
+
+    assert result["engineering_package_present"] is False

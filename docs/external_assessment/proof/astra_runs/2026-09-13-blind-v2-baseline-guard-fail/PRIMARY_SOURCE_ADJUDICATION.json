@@ -1,0 +1,286 @@
+{
+  "authority_violations": [],
+  "checks": {
+    "all_preregistered_claims_used": true,
+    "all_required_blockers_in_plan": false,
+    "all_required_blockers_in_project": true,
+    "all_source_references_valid": false,
+    "bounded_plan_persisted": true,
+    "direct_connection_rejected": false,
+    "independent_signoff_still_pending": false,
+    "physical_authority_closed": true,
+    "single_axc_device_rejected_for_3_plus_1": false,
+    "txu0304_four_signal_mapping_complete": false,
+    "txu0304_preferred_as_family_only": false
+  },
+  "claim_boundary": "Pass means the persisted plan matches the preregistered document-grounded structural rubric. It does not prove independent human review, raw-PDF model interpretation, electrical or physical correctness, or physical authority.",
+  "final_project_revision": 4,
+  "independent_human_signoff": false,
+  "invalid_references": [
+    {
+      "reason": "pages_mismatch",
+      "reference": {
+        "claim_id": "dut-package-dependent-pinout",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-package-dependent-pinout",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-output-disable",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-output-disable",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-fixed-direction-map",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-fixed-direction-map",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-supply-range",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-supply-range",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-output-disable",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-output-disable",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-spi-example-not-component-spec",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-spi-example-not-component-spec",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "pages_mismatch",
+      "reference": {
+        "claim_id": "axc-direction-grouping",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "axc-direction-grouping",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "axc-function-table",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "axc-function-table",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "axc-supply-range",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "axc-supply-range",
+        "source_id": "src-translator-dir-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-pin-absolute-maximum",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-pin-absolute-maximum",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-operating-supply",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "txu-fixed-direction-map",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "txu-fixed-direction-map",
+        "source_id": "src-translator-fixed-datasheet"
+      }
+    },
+    {
+      "reason": "page_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    },
+    {
+      "reason": "section_mismatch",
+      "reference": {
+        "claim_id": "dut-standard-spi-directions",
+        "source_id": "src-dut-datasheet"
+      }
+    }
+  ],
+  "metrics": {
+    "authority_boundary_violation_count": 0,
+    "candidate_count": 3,
+    "missed_required_blocker_count": 6,
+    "page_addressed_claims_used": 11,
+    "required_claim_count": 11,
+    "source_reference_count": 17,
+    "unsupported_source_reference_count": 34
+  },
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "project_id": "hs-astra-blind-baseline-20260913-2",
+  "schema_version": "hardware_splicer.astra_primary_source_adjudication.v1",
+  "status": "fail",
+  "used_claim_ids": [
+    "axc-direction-grouping",
+    "axc-function-table",
+    "axc-supply-range",
+    "dut-operating-supply",
+    "dut-package-dependent-pinout",
+    "dut-pin-absolute-maximum",
+    "dut-standard-spi-directions",
+    "txu-fixed-direction-map",
+    "txu-output-disable",
+    "txu-spi-example-not-component-spec",
+    "txu-supply-range"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "action_count": 6,
+  "blocker_count": 8,
+  "candidate_count": 3,
+  "conversation_turn_count": 0,
+  "current_stage": null,
+  "latest_ai_session_id": null,
+  "mission": "Reassess the SPI adapter from the supplied evidence after a procurement identity record was added. Preserve every evidence identity and advance the engineering state only as far as the combined evidence permits.",
+  "mode": null,
+  "name": "Primary-source-grounded SPI Flash Programming Adapter",
+  "parsed_source_count": 0,
+  "project_id": "hs-astra-blind-v6-identity-conflict-20260913-1",
+  "requirement_count": 1,
+  "schema_version": "hardware_splicer.engineering_package.v1",
+  "snapshot_sha256": "9aaae5962c2d67bdcd6f4a4a1a5f9be52973dd9d677de8ece294bdcd9961c4f8",
+  "source_count": 7,
+  "source_revision": 3,
+  "source_saved_at": "2026-09-12T16:55:54.332312+00:00",
+  "tool_result_count": 0
+}

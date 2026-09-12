@@ -23,3 +23,31 @@ authority.
 
 The failed attempt is retained because it demonstrates that persuasive model reasoning alone
 does not earn credit when the claimed engineering state was not persisted.
+
+## 2026-09-13 blinded sequence
+
+The 2026-09-13 sequence removed the observer adjudication and expected conclusions from the
+model-visible snapshot. It also exposed a neutral canonical record contract through the task
+manifest so the model could serialize an independently derived answer without guessing hidden
+candidate IDs or duplicated locator fields.
+
+1. `2026-09-13-blind-v2-baseline-timeout` — timed out after the empty-store read; no
+   engineering package was created.
+2. `2026-09-13-blind-v2-baseline-guard-fail` — substantive state and a package were created,
+   but the eight-call backend limit denied final readback. The original exact-label
+   adjudicator also exposed an answer-shaped serialization assumption.
+3. `2026-09-13-blind-v4-baseline-audit-calibration` — the document adjudication passed, but
+   the generic audit still required the superseded list-and-describe discovery route instead
+   of accepting the compact task manifest.
+4. `2026-09-13-blind-v5-baseline-pass` — clean blinded baseline pass: all four generic
+   contracts and all eleven document-grounded checks passed.
+5. `2026-09-13-blind-v5-conflict-guard-fail` — all twelve conflict-specific checks passed,
+   but the nine-call backend guard denied package export and final readback.
+6. `2026-09-13-blind-v6-conflict-guard-fail` — all twelve conflict-specific checks passed
+   again and package export succeeded, but evidence-delta use made final readback call twelve;
+   the eleven-call guard denied it.
+
+The conflict result is therefore `2/2` for persisted conflict reasoning but `0/2` for the full
+evaluation-ready contract under the tested resource guards. The post-calibration v7 guard is
+twelve backend calls; no v7 live result is claimed. See `2026-09-13-BLINDED-RUN-REPORT.md` for
+the exact interpretation and nonclaims.

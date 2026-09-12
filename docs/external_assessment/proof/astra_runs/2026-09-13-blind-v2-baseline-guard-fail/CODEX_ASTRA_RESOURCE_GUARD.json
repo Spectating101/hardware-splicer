@@ -1,0 +1,11 @@
+{
+  "api_fallback": false,
+  "backend_calls_hard_max": 8,
+  "claim_boundary": "These limits bound wall-clock and MCP-loop exposure for one prepared case. They do not guarantee an exact Codex allowance or token cost because model reasoning and provider accounting remain external.",
+  "exact_allowance_cost_guaranteed": false,
+  "mcp_request_bytes_hard_max": 262144,
+  "mcp_tool_calls_hard_max": 20,
+  "schema_version": "hardware_splicer.codex_astra_resource_guard.v1",
+  "timeout_hard_max_seconds": 300,
+  "timeout_seconds": 300
+}

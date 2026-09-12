@@ -1,0 +1,115 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "direct",
+      "candidate_kind": "direct_connection",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "W25Q128JW",
+      "description": "3.3 V direct drive exceeds JW pin maximum at declared 1.8 V target; rejection applies to JW branch.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    },
+    {
+      "candidate_id": "txu",
+      "candidate_kind": "level_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "TXU0304",
+      "description": "Conditional JW standard SPI family candidate only. A=host declared 3.3 V, B=DUT target 1.8 V fit translator ranges. Physical application held for identity, package, threshold/timing and supply verification.",
+      "proposed_logical_mapping": [
+        {
+          "direction": "host_to_dut",
+          "dut": "CLK",
+          "host": "SCLK",
+          "translator_path": "A1 -> B1Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "/CS",
+          "host": "CS#",
+          "translator_path": "A2 -> B2Y"
+        },
+        {
+          "direction": "host_to_dut",
+          "dut": "DI_IO0",
+          "host": "MOSI_IO0",
+          "translator_path": "A3 -> B3Y"
+        },
+        {
+          "direction": "dut_to_host",
+          "dut": "DO_IO1",
+          "host": "MISO_IO1",
+          "translator_path": "B4 -> A4Y"
+        }
+      ],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "current-dut-identity-jw",
+          "source_id": "src-current-dut-identity"
+        },
+        {
+          "claim_id": "procurement-note-dut-identity-jv",
+          "source_id": "src-procurement-note-jv"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "preferred_family_candidate"
+    },
+    {
+      "candidate_id": "axc",
+      "candidate_kind": "level_translator",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "component_family": "SN74AXC4T245",
+      "description": "Single device with common host/DUT side orientation cannot supply simultaneous 3-forward/1-reverse channels because direction is shared per two-channel group. Supply range includes 3.3/1.8 V but does not resolve topology. Other arrangements unassessed.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

@@ -1,0 +1,220 @@
+{
+  "actions": [
+    {
+      "action_id": "identify-dut",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "identify-dut",
+        "depends_on": [],
+        "description": "Obtain physical marking/package/orderable identity and match package-specific pinout; resolve auxiliary pin requirements before assigning footprints.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Obtain physical marking/package/orderable identity and match package-specific pinout; resolve auxiliary pin requirements before assigning footprints.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "identify-host",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "identify-host",
+        "depends_on": [],
+        "description": "Resolve exact programmer and obtain voltage-under-load and timing evidence; no clock limit can currently be assigned.",
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Resolve exact programmer and obtain voltage-under-load and timing evidence; no clock limit can currently be assigned.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "select-translator",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "select-translator",
+        "depends_on": [],
+        "description": "Select exact TXU0304 package, footprint, availability and assembly constraints; verify logical mapping against its pin table.",
+        "source_refs": [
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Select exact TXU0304 package, footprint, availability and assembly constraints; verify logical mapping against its pin table.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "design-supply",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "design-supply",
+        "depends_on": [
+          "identify-dut",
+          "identify-host",
+          "select-translator"
+        ],
+        "description": "Specify local 1.8 V rail with tolerance/transients in DUT operating range, current budget, decoupling, protection, ground return and sequencing. Design OE default low and verify disabled/unpowered behavior and DUT safe biasing.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Specify local 1.8 V rail with tolerance/transients in DUT operating range, current budget, decoupling, protection, ground return and sequencing. Design OE default low and verify disabled/unpowered behavior and DUT safe biasing.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "close-electrical-timing",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "close-electrical-timing",
+        "depends_on": [
+          "identify-dut",
+          "identify-host",
+          "select-translator",
+          "design-supply"
+        ],
+        "description": "Obtain complete VIH/VIL/VOH/VOL limits at actual supplies/load and budget outbound CLK/data/CS and return MISO delays, skew, setup/hold, interconnect and host sampling. Choose SPI mode and clock only after margins are demonstrated.",
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Obtain complete VIH/VIL/VOH/VOL limits at actual supplies/load and budget outbound CLK/data/CS and return MISO delays, skew, setup/hold, interconnect and host sampling. Choose SPI mode and clock only after margins are demonstrated.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "schematic-layout-review",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "schematic-layout-review",
+        "depends_on": [
+          "close-electrical-timing",
+          "design-supply"
+        ],
+        "description": "Create schematic and PCB using resolved packages and supply; complete ERC/DRC and review mapping, auxiliary pins, OE and sequencing.",
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Create schematic and PCB using resolved packages and supply; complete ERC/DRC and review mapping, auxiliary pins, OE and sequencing.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "future-physical-validation",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "future-physical-validation",
+        "depends_on": [
+          "schematic-layout-review"
+        ],
+        "description": "Prepare separately authorized validation with power initially off: identity/continuity review followed, only after applicable gates, by rail, OE, levels-under-load and timing measurements. Record actual evidence; this plan authorizes no fabrication or power-on.",
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Prepare separately authorized validation with power initially off: identity/continuity review followed, only after applicable gates, by rail, OE, levels-under-load and timing measurements. Record actual evidence; this plan authorizes no fabrication or power-on.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_actions.v1"
+}

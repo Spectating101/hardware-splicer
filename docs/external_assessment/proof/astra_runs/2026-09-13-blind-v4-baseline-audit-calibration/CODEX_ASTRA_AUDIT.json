@@ -1,0 +1,396 @@
+{
+  "arguments_parse_pass": true,
+  "authority_claim_attempts": [],
+  "authority_discipline_pass": true,
+  "backend_application_failure_count": 1,
+  "backend_operation_id_set": [
+    "create_package_v1_projects__project_id__engineering_packages_post",
+    "get_assurance_v1_projects__project_id__engineering_assurance_get",
+    "load_project_v1_projects__project_id__get",
+    "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+    "save_project_snapshot_v1_projects__project_id__snapshot_put"
+  ],
+  "backend_operation_ids": [
+    "load_project_v1_projects__project_id__get",
+    "save_project_snapshot_v1_projects__project_id__snapshot_put",
+    "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+    "get_assurance_v1_projects__project_id__engineering_assurance_get",
+    "create_package_v1_projects__project_id__engineering_packages_post",
+    "load_project_v1_projects__project_id__get"
+  ],
+  "backend_result_parse_pass": true,
+  "codex_backend_result_audit": {
+    "backend_application_failure_count": 1,
+    "backend_application_failures": [
+      {
+        "backend_call_index": 0,
+        "method": "GET",
+        "operation_id": "load_project_v1_projects__project_id__get",
+        "status_code": 404
+      }
+    ],
+    "backend_call_count": 6,
+    "backend_result_contract_pass": true,
+    "backend_result_parse_pass": true,
+    "final_project_readback": {
+      "backend_call_index": 5,
+      "method": "GET",
+      "operation_id": "load_project_v1_projects__project_id__get",
+      "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1",
+      "project_id": "hs-astra-blind-v4-baseline-20260913-1",
+      "revision": 3
+    },
+    "final_project_readback_contract": {
+      "historical_revision_allowed": false,
+      "method": "GET",
+      "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1",
+      "requires_expected_project_id": true,
+      "requires_positive_revision": true,
+      "requires_project_envelope": true,
+      "requires_response_ok": true,
+      "requires_snapshot_object": true
+    },
+    "final_project_readback_pass": true,
+    "intermediate_application_failures_are_permitted": true,
+    "invalid_backend_results": [],
+    "last_successful_mutation_index": 4,
+    "physical_authority_granted": false,
+    "rejected_project_readback_candidates": [
+      {
+        "backend_call_index": 3,
+        "method": "GET",
+        "operation_id": "get_assurance_v1_projects__project_id__engineering_assurance_get",
+        "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1/engineering/assurance",
+        "reason": "not the canonical project-load path"
+      }
+    ],
+    "schema_version": "hardware_splicer.codex_backend_result_audit.v3",
+    "successful_mutation_count": 3,
+    "successful_project_readback_count": 1
+  },
+  "codex_cleanroom_contract_pass": true,
+  "codex_evaluation_ready_pass": false,
+  "codex_final_report_audit": {
+    "agent_message_count": 3,
+    "agent_message_event_index": 20,
+    "checks": {
+      "agent_message_after_last_mcp_call": true,
+      "canonical_blocker_catalog_present": true,
+      "claim_scope_exact": true,
+      "correct_architecture_not_asserted": true,
+      "evidence_boundary_exact": true,
+      "fabrication_ready_false": true,
+      "physical_authority_false": true,
+      "physical_correctness_unproven": true,
+      "power_on_ready_false": true,
+      "project_id_matches_canonical_readback": true,
+      "remaining_blockers_grounded": true,
+      "remaining_blockers_present": true,
+      "report_json_object": true,
+      "report_keys_exact": true,
+      "result_status_bounded": true,
+      "revision_matches_canonical_readback": true,
+      "schema_version_exact": true,
+      "terminal_agent_message_present": true,
+      "unresolved_facts_grounded": true,
+      "unresolved_facts_present": true
+    },
+    "claim_boundary": "Pass proves only that the terminal model report is machine-structured, bound to the canonical project/revision, quotes blocker/unresolved strings exactly from the final canonical blocker catalog, and keeps readiness/authority/correctness claims closed. It does not prove that the selected blockers are complete or that the engineering result is correct.",
+    "contract_pass": true,
+    "correct_engineering_architecture_asserted": false,
+    "expected_final_revision": 3,
+    "expected_project_id": "hs-astra-blind-v4-baseline-20260913-1",
+    "free_form_success_claim_accepted": false,
+    "grounded_blocker_count": 6,
+    "grounded_blocker_sha256": [
+      "sha256:0cf6840d2633d6f2c74c3505bd7c586f483093071848ac95d57f8a5d42828fe7",
+      "sha256:6da29f0d10ecbef3cc81fc13d74c2a231ea3fcbb5d7009a35ebe947cbbdc1c4e",
+      "sha256:d3cc9f73590838a1d21aa2c77fc8c4164fcc439e81cb7bf09664e0acebe6559a",
+      "sha256:7dee2207135de2b6a18ef62d0dc77c9fe87baff4feccf5fbdb87e30f45a4c574",
+      "sha256:a1fbc6e695699a52406cf0c236e5a43264b46142ae29068d12afbfacbde9a967",
+      "sha256:e8e508043561d7c59d8df145c5291325af22fd6461ec7337eef04c1105bc5c62"
+    ],
+    "last_completed_mcp_event_index": 19,
+    "output_schema_sha256": "sha256:e5085732165f2f5594c4a7cd2c4872b931f162d22420ae0d02444948d2440bec",
+    "parse_error": null,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "pre_terminal_agent_message_count": 2,
+    "report": {
+      "claim_scope": "pre_fabrication_engineering_progress_only",
+      "correct_engineering_architecture_asserted": false,
+      "evidence_boundary": "frozen_product_visible_only",
+      "experiment_project_id": "hs-astra-blind-v4-baseline-20260913-1",
+      "fabrication_ready": false,
+      "final_project_revision": 3,
+      "physical_authority_granted": false,
+      "physical_correctness": "UNPROVEN",
+      "power_on_ready": false,
+      "remaining_blockers": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements."
+      ],
+      "result_status": "bounded_pre_fabrication_result",
+      "schema_version": "hardware_splicer.astra_final_report.v1",
+      "unresolved_facts": [
+        "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+        "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+        "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+        "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+        "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+        "Schematic/ERC/PCB/DRC results and all physical measurements."
+      ]
+    },
+    "schema_version": "hardware_splicer.codex_final_report_audit.v4",
+    "terminal_agent_message_count": 1
+  },
+  "codex_final_report_contract_pass": true,
+  "codex_forbidden_non_mcp_items": [],
+  "codex_foreign_mcp_servers": [],
+  "codex_hard_truth_contract_pass": false,
+  "codex_mission_progress_audit": {
+    "canonical_blocker_catalog": [
+      {
+        "surface": "engineeringBlockers",
+        "text": "Exact physical DUT marking, package, orderable suffix, and package-specific pinout."
+      },
+      {
+        "surface": "engineeringBlockers",
+        "text": "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior."
+      },
+      {
+        "surface": "engineeringBlockers",
+        "text": "Selected TXU0304 orderable package, footprint, availability, and assembly constraints."
+      },
+      {
+        "surface": "engineeringBlockers",
+        "text": "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load."
+      },
+      {
+        "surface": "engineeringBlockers",
+        "text": "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior."
+      },
+      {
+        "surface": "engineeringBlockers",
+        "text": "Schematic/ERC/PCB/DRC results and all physical measurements."
+      }
+    ],
+    "changed_mission_surfaces": [
+      "preFabricationPlan",
+      "engineeringPackages"
+    ],
+    "checks": {
+      "canonical_blocker_catalog_nonempty": true,
+      "final_canonical_readback_present": true,
+      "initial_engineering_blockers_preserved": true,
+      "initial_unresolved_conflicts_preserved": true,
+      "mission_output_surface_changed": true,
+      "persisted_constraints_preserved": true,
+      "persisted_mission_preserved": true,
+      "registered_source_ids_preserved": true,
+      "registered_source_records_preserved": true,
+      "state_changed_beyond_project_identity": true,
+      "state_producing_project_operation_succeeded": true,
+      "substantive_project_operation_succeeded": true,
+      "unsupported_final_truth_claims_absent": true
+    },
+    "claim_boundary": "Pass proves only minimum evidence-preserving mission progress: the final canonical snapshot changed on a recognized engineering-output surface, a successful non-generic project mutation reported the same persisted revision later read back, and the frozen mission, constraints, registered sources, explicit engineering blockers, structured unresolved conflicts, and closed readiness/authority were preserved. Terminal-report blocker anchors are restricted to frozen blockers preserved unchanged into final state. It does not prove that any architecture, component choice, pin mapping, or physical implementation is correct.",
+    "contract_pass": true,
+    "correct_engineering_architecture_asserted": false,
+    "final_engineering_blockers": [
+      "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+      "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+      "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+      "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+      "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+      "Schematic/ERC/PCB/DRC results and all physical measurements."
+    ],
+    "final_project_revision": 3,
+    "final_readback_backend_call_index": 7,
+    "final_registered_source_ids": [
+      "src-controller",
+      "src-dut-datasheet",
+      "src-fixture",
+      "src-translator-dir-datasheet",
+      "src-translator-fixed-datasheet"
+    ],
+    "final_snapshot_sha256": "sha256:5d1bcdd0274eaacdaee59e446b86682a194b9bbbe68b42b4c654cb1604d2aa6c",
+    "final_unresolved_conflicts": [],
+    "grounded_blocker_source": "frozen_engineeringBlockers_preserved_in_final_state",
+    "grounded_blocker_strings": [
+      "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+      "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+      "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+      "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+      "Schematic/ERC/PCB/DRC results and all physical measurements.",
+      "Selected TXU0304 orderable package, footprint, availability, and assembly constraints."
+    ],
+    "initial_engineering_blockers": [
+      "Exact physical DUT marking, package, orderable suffix, and package-specific pinout.",
+      "Exact programmer identity, voltage levels under load, supported clock rate, and timing behavior.",
+      "Selected TXU0304 orderable package, footprint, availability, and assembly constraints.",
+      "Complete VIH/VIL/VOH/VOL and propagation-delay timing budget at the selected supplies and load.",
+      "Local 1.8 V supply implementation, current budget, sequencing, decoupling, protection, and OE behavior.",
+      "Schematic/ERC/PCB/DRC results and all physical measurements."
+    ],
+    "initial_registered_source_ids": [
+      "src-controller",
+      "src-dut-datasheet",
+      "src-fixture",
+      "src-translator-dir-datasheet",
+      "src-translator-fixed-datasheet"
+    ],
+    "initial_snapshot_sha256": "sha256:08f7739ca568eb27790c4fdb11b12ae88cec2553e502c24386e80db747278196",
+    "initial_unresolved_conflicts": [],
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "schema_version": "hardware_splicer.codex_mission_progress_audit.v3",
+    "source_validation_errors": [],
+    "state_producing_project_operations": [
+      {
+        "backend_call_index": 6,
+        "method": "POST",
+        "operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+        "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1/engineering-packages",
+        "reported_project_revision": 3
+      }
+    ],
+    "substantive_project_operations": [
+      {
+        "backend_call_index": 6,
+        "method": "POST",
+        "operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+        "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1/engineering-packages",
+        "reported_project_revision": 3
+      }
+    ],
+    "unsupported_final_truth_claims": []
+  },
+  "codex_mission_progress_contract_pass": true,
+  "codex_progress_provenance_audit": {
+    "checks": {
+      "creditable_changed_engineering_surface_present": true,
+      "final_revision_available": true,
+      "mission_progress_contract_pass": true,
+      "operation_payload_matches_changed_final_surface": true,
+      "revision_linked_project_mutation_present": true
+    },
+    "claim_boundary": "Pass proves only that at least one changed final engineering surface is an exact structural value returned by a request-scoped, non-generic HS mutation that reports the same persisted revision later read back canonically. It does not prove the returned engineering content is correct, complete, or physically valid.",
+    "contract_pass": true,
+    "correct_engineering_architecture_asserted": false,
+    "creditable_changed_surfaces": [
+      "preFabricationPlan"
+    ],
+    "final_project_revision": 3,
+    "noncreditable_surfaces": [
+      "engineeringAiSessions",
+      "engineeringPackages"
+    ],
+    "operation_surface_links": [
+      {
+        "backend_call_index": 6,
+        "final_surface": "preFabricationPlan",
+        "method": "POST",
+        "operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+        "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1/engineering-packages",
+        "payload_sha256": "sha256:b7c4dce90daa202d33f2cd14e8c5e6f39d76372777a9acb0f4a000ca6626a35a",
+        "reported_project_revision": 3,
+        "response_payload_path": "$.pre_fabrication_plan"
+      }
+    ],
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "revision_linked_candidates": [
+      {
+        "backend_call_index": 6,
+        "method": "POST",
+        "operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+        "path": "/v1/projects/hs-astra-blind-v4-baseline-20260913-1/engineering-packages",
+        "reported_project_revision": 3
+      }
+    ],
+    "schema_version": "hardware_splicer.codex_progress_provenance_audit.v1"
+  },
+  "codex_progress_provenance_contract_pass": true,
+  "codex_trace_schema_version": "hardware_splicer.codex_exec_trace.v2",
+  "codex_unexpected_mcp_tools": [],
+  "codex_unknown_item_types": [],
+  "codex_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 256640,
+    "input_tokens": 306931,
+    "output_tokens": 4481,
+    "reasoning_output_tokens": 20
+  },
+  "evidence_identity_contract_pass": true,
+  "external_mcp_transport_proof": true,
+  "failed_mcp_call_count": 0,
+  "final_project_readback_pass": true,
+  "foreign_project_ids": [],
+  "gateway_traversal_complete": false,
+  "hard_truth_contract_pass": false,
+  "invalid_mcp_arguments": [],
+  "known_source_ids": [
+    "src-controller",
+    "src-dut-datasheet",
+    "src-fixture",
+    "src-translator-dir-datasheet",
+    "src-translator-fixed-datasheet"
+  ],
+  "live_unseen_competence": "UNADJUDICATED",
+  "mcp_call_count": 8,
+  "mcp_tool_names": [
+    "hs_backend_status",
+    "hs_backend_task_manifest",
+    "hs_backend_call",
+    "hs_backend_call",
+    "hs_backend_call",
+    "hs_backend_call",
+    "hs_backend_call",
+    "hs_backend_call"
+  ],
+  "mcp_tool_set": [
+    "hs_backend_call",
+    "hs_backend_status",
+    "hs_backend_task_manifest"
+  ],
+  "missing_required_gateway_calls": [
+    "hs_backend_describe_operation",
+    "hs_backend_list_operations"
+  ],
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "project_scope_contract_pass": true,
+  "readiness_discipline_pass": true,
+  "referenced_project_ids": [
+    "hs-astra-blind-v4-baseline-20260913-1"
+  ],
+  "referenced_source_ids": [
+    "src-controller",
+    "src-dut-datasheet",
+    "src-fixture",
+    "src-translator-dir-datasheet",
+    "src-translator-fixed-datasheet"
+  ],
+  "response_completion_pass": true,
+  "response_error": null,
+  "response_id": "01a0967b-8be6-7e30-976c-51ff2b816115",
+  "response_incomplete_details": null,
+  "response_model": "gpt-6-astra",
+  "response_status": "completed",
+  "schema_version": "hardware_splicer.external_mcp_trace_audit.v2",
+  "trace_structure_pass": true,
+  "unknown_source_ids": [],
+  "unsupported_readiness_claim_attempts": [],
+  "usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 256640,
+    "input_tokens": 306931,
+    "output_tokens": 4481,
+    "reasoning_output_tokens": 20
+  }
+}
