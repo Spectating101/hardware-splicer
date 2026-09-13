@@ -9,7 +9,7 @@ from .spi_timing_budget import evaluate_spi_timing_budget
 from .spi_virtual_target import build_grounded_virtual_spi_target
 from .spi_virtual_verification import apply_spi_fault, verify_spi_virtual_candidate
 
-SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v3"
+SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v4"
 _CAPTURE_SCHEMA_VERSION = "hardware_splicer.vendor_model_capture.v1"
 
 _REQUIRED_MODEL_IDS = {
@@ -30,13 +30,22 @@ def _capture_map(captures: Iterable[Mapping[str, Any]] | None) -> dict[str, Mapp
     return rows
 
 
-def _capture_acceptable(capture: Mapping[str, Any] | None) -> bool:
+def _capture_acceptable(
+    capture: Mapping[str, Any] | None,
+    *,
+    expected_model_kind: str,
+) -> bool:
     if not isinstance(capture, Mapping):
         return False
     digest = str(capture.get("sha256") or "")
     size = capture.get("size_bytes")
+    recognized_count = capture.get("recognized_expected_model_file_count")
     return (
         capture.get("schema_version") == _CAPTURE_SCHEMA_VERSION
+        and capture.get("expected_model_kind") == expected_model_kind
+        and isinstance(recognized_count, int)
+        and not isinstance(recognized_count, bool)
+        and recognized_count > 0
         and str(capture.get("capture_status") or "") == "captured_hashed_unreviewed"
         and digest.startswith("sha256:")
         and len(digest) == 71
@@ -59,7 +68,7 @@ def build_spi_virtual_model_campaign(
     This planner never substitutes synthetic simulator output for missing manufacturer-model
     bytes. Static verification, spec timing/power budgets, and adversarial checks can run
     immediately; IBIS/Verilog execution remains blocked until every required model has an HS
-    capture manifest.
+    capture manifest with a recognized model file of the expected kind.
     """
 
     target = build_grounded_virtual_spi_target()
@@ -71,15 +80,19 @@ def build_spi_virtual_model_campaign(
     model_rows: dict[str, Any] = {}
     for model in target["vendor_model_registry"]["models"]:
         model_id = model["model_id"]
+        expected_kind = str(model["model_kind"])
         captured = capture_by_id.get(model_id)
-        accepted = _capture_acceptable(captured)
+        accepted = _capture_acceptable(captured, expected_model_kind=expected_kind)
         model_rows[model_id] = {
             "required": model_id in _REQUIRED_MODEL_IDS,
-            "model_kind": model["model_kind"],
+            "model_kind": expected_kind,
             "component": model["component"],
             "accepted_capture": accepted,
             "capture_sha256": captured.get("sha256") if accepted else None,
             "capture_size_bytes": captured.get("size_bytes") if accepted else None,
+            "recognized_expected_model_file_count": (
+                captured.get("recognized_expected_model_file_count") if accepted else 0
+            ),
             "landing_url": model["landing_url"],
             "download_url": model.get("download_url"),
         }
@@ -189,7 +202,7 @@ def build_spi_virtual_model_campaign(
         "physical_authority_granted": False,
         "authority_effect": "none",
         "nonclaims": [
-            "No IBIS or Verilog execution is claimed until immutable vendor-model bytes are captured.",
+            "No IBIS or Verilog execution is claimed until immutable vendor-model bytes are captured and semantically recognized.",
             "Spec-level residual timing margin is not a validated timing path.",
             "Regulator capacity without a worst-case DUT load is not a validated rail budget.",
             "A ready campaign is not a passing simulation campaign.",
