@@ -31,6 +31,7 @@ def _base_result(*, model_id: str, model_kind: str, member_path: str) -> dict[st
         "model_id": model_id,
         "model_kind": model_kind,
         "member_path": member_path,
+        "member_sha256": None,
         "validation_pass": None,
         "modeled_evidence_only": True,
         "measured_evidence_present": False,
@@ -130,6 +131,7 @@ def validate_ibis_model_bytes(
     if not bound:
         result.update({"status": "rejected_capture_binding", "binding_error": reason})
         return result
+    result["member_sha256"] = _sha256(model_bytes)
 
     executable = shutil.which(parser_executable)
     if not executable:
@@ -211,6 +213,7 @@ def validate_verilog_model_bytes(
     if not bound:
         result.update({"status": "rejected_capture_binding", "binding_error": reason})
         return result
+    result["member_sha256"] = _sha256(model_bytes)
 
     unsafe_includes = _unsafe_verilog_includes(model_bytes)
     if unsafe_includes:
