@@ -131,7 +131,8 @@ def evaluate_spi_timing_budget(inputs: Mapping[str, Any] | None = None) -> dict[
         unresolved.append("clock_skew_bound_ns")
     if not bool(interconnect.get("signal_integrity_model_pass")):
         unresolved.append("signal_integrity_model_pass")
-    if interconnect.get("load_bound") in {None, ""}:
+    load_bound = interconnect.get("load_bound")
+    if load_bound is None or load_bound == "":
         unresolved.append("load_bound")
 
     catalog_max_hz = _number(dut.get("catalog_str_max_hz"))
