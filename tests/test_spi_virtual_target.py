@@ -10,10 +10,12 @@ def _finding(result: dict, check_id: str) -> dict:
     return next(row for row in result["findings"] if row["check_id"] == check_id)
 
 
-def _capture(model_id: str, byte: str) -> dict:
+def _capture(model_id: str, byte: str, kind: str) -> dict:
     return {
         "schema_version": "hardware_splicer.vendor_model_capture.v1",
         "model_id": model_id,
+        "expected_model_kind": kind,
+        "recognized_expected_model_file_count": 1,
         "capture_status": "captured_hashed_unreviewed",
         "sha256": "sha256:" + byte * 64,
         "size_bytes": 123,
@@ -82,6 +84,9 @@ def test_campaign_fails_closed_until_vendor_model_bytes_are_captured() -> None:
     assert campaign["spec_timing_budget"]["status"] == "blocked_incomplete_timing_model"
     assert campaign["timing_known_terms_safe"] is True
     assert campaign["timing_fully_closed"] is False
+    assert campaign["spec_power_budget"]["status"] == "blocked_incomplete_power_model"
+    assert campaign["power_known_terms_safe"] is True
+    assert campaign["power_fully_closed"] is False
     assert campaign["fault_detection_ready"] is True
     assert campaign["execution_ready"] is False
     assert campaign["simulation_results"] == []
@@ -109,11 +114,20 @@ def test_fake_capture_without_hs_manifest_cannot_unlock_campaign() -> None:
     assert campaign["execution_ready"] is False
 
 
+def test_wrong_semantic_model_kind_cannot_unlock_campaign() -> None:
+    captures = [_capture("txu0304-ibis-scem787", "1", "Verilog")]
+
+    campaign = build_spi_virtual_model_campaign(captures)
+
+    assert campaign["model_captures"]["txu0304-ibis-scem787"]["accepted_capture"] is False
+    assert "txu0304-ibis-scem787" in campaign["missing_required_model_ids"]
+
+
 def test_three_complete_hs_capture_manifests_only_unlock_model_execution_readiness() -> None:
     captures = [
-        _capture("txu0304-ibis-scem787", "1"),
-        _capture("w25q128jwsiq-ibis-da03-aag072", "2"),
-        _capture("w25q128jw-q-verilog-da02-aag072", "3"),
+        _capture("txu0304-ibis-scem787", "1", "IBIS"),
+        _capture("w25q128jwsiq-ibis-da03-aag072", "2", "IBIS"),
+        _capture("w25q128jw-q-verilog-da02-aag072", "3", "Verilog"),
     ]
 
     campaign = build_spi_virtual_model_campaign(captures)
@@ -124,5 +138,6 @@ def test_three_complete_hs_capture_manifests_only_unlock_model_execution_readine
     assert campaign["execution_ready"] is True
     assert campaign["simulation_results"] == []
     assert campaign["timing_fully_closed"] is False
+    assert campaign["power_fully_closed"] is False
     assert campaign["physical_correctness"] == "UNPROVEN"
     assert campaign["physical_authority_granted"] is False
