@@ -18,8 +18,10 @@ def _zip_bytes(files: dict[str, bytes]) -> bytes:
     return stream.getvalue()
 
 
-def test_capture_manifest_hashes_outer_zip_and_members_without_authority_promotion() -> None:
-    payload = _zip_bytes({"model.ibs": b"[IBIS Ver] 4.2\n", "readme.txt": b"fixture"})
+def test_capture_manifest_hashes_and_recognizes_ibis_without_authority_promotion() -> None:
+    payload = _zip_bytes(
+        {"model.ibs": b"[IBIS Ver] 4.2\n[Component] TXU0304\n", "readme.txt": b"fixture"}
+    )
 
     manifest = inspect_vendor_model_bytes(
         payload,
@@ -27,10 +29,14 @@ def test_capture_manifest_hashes_outer_zip_and_members_without_authority_promoti
         source_url="https://www.ti.com/lit/zip/SCEM787",
         expected_hosts=["www.ti.com"],
         filename="SCEM787.ZIP",
+        expected_model_kind="IBIS",
         content_type="application/zip",
     )
 
     assert manifest["capture_status"] == "captured_hashed_unreviewed"
+    assert manifest["expected_model_kind"] == "IBIS"
+    assert manifest["recognized_expected_model_file_count"] == 1
+    assert manifest["recognized_model_files"][0]["model_kind"] == "IBIS"
     assert manifest["sha256"].startswith("sha256:")
     assert manifest["archive_type"] == "zip"
     assert {row["path"] for row in manifest["archive_members"]} == {"model.ibs", "readme.txt"}
@@ -41,6 +47,36 @@ def test_capture_manifest_hashes_outer_zip_and_members_without_authority_promoti
     assert manifest["authority_effect"] == "none"
 
 
+def test_capture_recognizes_verilog_module() -> None:
+    payload = _zip_bytes({"w25q128jw.v": b"module W25Q128JW(input CSn); endmodule\n"})
+
+    manifest = inspect_vendor_model_bytes(
+        payload,
+        model_id="w25q128jw-q-verilog-da02-aag072",
+        source_url="https://www.winbond.com/download/model.zip",
+        expected_hosts=["www.winbond.com"],
+        filename="model.zip",
+        expected_model_kind="Verilog",
+    )
+
+    assert manifest["recognized_expected_model_file_count"] == 1
+    assert manifest["recognized_model_files"][0]["model_kind"] == "Verilog"
+
+
+def test_capture_rejects_wrong_archive_even_when_hashable() -> None:
+    payload = _zip_bytes({"readme.txt": b"not a model"})
+
+    with pytest.raises(VendorModelCaptureError, match="no recognized IBIS"):
+        inspect_vendor_model_bytes(
+            payload,
+            model_id="txu0304-ibis-scem787",
+            source_url="https://www.ti.com/lit/zip/SCEM787",
+            expected_hosts=["www.ti.com"],
+            filename="SCEM787.ZIP",
+            expected_model_kind="IBIS",
+        )
+
+
 def test_capture_rejects_html_download_interstitial() -> None:
     with pytest.raises(VendorModelCaptureError, match="HTML"):
         inspect_vendor_model_bytes(
@@ -49,6 +85,7 @@ def test_capture_rejects_html_download_interstitial() -> None:
             source_url="https://www.winbond.com/download/model",
             expected_hosts=["www.winbond.com"],
             filename="model.zip",
+            expected_model_kind="IBIS",
             content_type="text/html",
         )
 
@@ -61,7 +98,7 @@ def test_capture_rejects_wrong_or_insecure_vendor_host() -> None:
 
 
 def test_capture_rejects_unsafe_zip_member_path() -> None:
-    payload = _zip_bytes({"../escape.ibs": b"bad"})
+    payload = _zip_bytes({"../escape.ibs": b"[IBIS Ver] 4.2\n[Component] X\n"})
 
     with pytest.raises(VendorModelCaptureError, match="unsafe ZIP member path"):
         inspect_vendor_model_bytes(
@@ -70,16 +107,18 @@ def test_capture_rejects_unsafe_zip_member_path() -> None:
             source_url="https://www.ti.com/lit/zip/SCEM787",
             expected_hosts=["www.ti.com"],
             filename="SCEM787.ZIP",
+            expected_model_kind="IBIS",
         )
 
 
 def test_expected_sha256_mismatch_fails_closed() -> None:
     with pytest.raises(VendorModelCaptureError, match="SHA-256"):
         inspect_vendor_model_bytes(
-            b"[IBIS Ver] 4.2\n",
+            b"[IBIS Ver] 4.2\n[Component] X\n",
             model_id="fixture",
             source_url="https://www.ti.com/model.ibs",
             expected_hosts=["www.ti.com"],
             filename="model.ibs",
+            expected_model_kind="IBIS",
             expected_sha256="sha256:" + "0" * 64,
         )
