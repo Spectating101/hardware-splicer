@@ -7,10 +7,12 @@ physical authority.
 
 from __future__ import annotations
 
+import hashlib
 import math
-from typing import Any, Mapping
+from copy import deepcopy
+from typing import Any, Iterable, Mapping
 
-SCHEMA_VERSION = "hardware_splicer.spi_model_execution_audit.v1"
+SCHEMA_VERSION = "hardware_splicer.spi_model_execution_audit.v2"
 RESULT_SCHEMA_VERSION = "hardware_splicer.spi_model_execution_result.v1"
 
 _REQUIRED_CHECKS: dict[str, set[str]] = {
@@ -47,6 +49,10 @@ _REQUIRED_CHECKS: dict[str, set[str]] = {
 }
 
 
+def _sha256_bytes(payload: bytes) -> str:
+    return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+
 def _valid_sha256(value: Any) -> bool:
     text = str(value or "")
     if not text.startswith("sha256:") or len(text) != 71:
@@ -66,6 +72,46 @@ def _finite_number(value: Any) -> bool:
 
 def required_checks_for_execution(execution_id: str) -> set[str]:
     return set(_REQUIRED_CHECKS.get(str(execution_id), set()))
+
+
+def seal_spi_model_execution_result(
+    campaign: Mapping[str, Any],
+    *,
+    execution_id: str,
+    engine_name: str,
+    engine_version: str,
+    exit_code: int,
+    raw_output: bytes,
+    model_hashes: Mapping[str, str],
+    checks: Iterable[Mapping[str, Any]],
+    metrics: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build the HS-owned result envelope around one engine execution.
+
+    The wrapper computes raw-output identity and hard-codes the authority boundary. Engines may
+    supply check data and metrics, but they cannot choose readiness or physical-authority fields.
+    """
+
+    if not isinstance(raw_output, (bytes, bytearray)):
+        raise TypeError("raw_output must be bytes")
+    return {
+        "schema_version": RESULT_SCHEMA_VERSION,
+        "execution_id": str(execution_id),
+        "target_candidate_id": campaign.get("target_candidate_id"),
+        "engine": {"name": str(engine_name), "version": str(engine_version)},
+        "exit_code": int(exit_code),
+        "raw_output_sha256": _sha256_bytes(bytes(raw_output)),
+        "model_hashes": dict(model_hashes),
+        "checks": [deepcopy(dict(row)) for row in checks],
+        "metrics": deepcopy(dict(metrics or {})),
+        "modeled_evidence_only": True,
+        "measured_evidence_present": False,
+        "physical_correctness": "UNPROVEN",
+        "fabrication_ready": False,
+        "power_on_ready": False,
+        "physical_authority_granted": False,
+        "authority_effect": "none",
+    }
 
 
 def audit_spi_model_execution_result(
@@ -138,12 +184,29 @@ def audit_spi_model_execution_result(
         for check_id in required_checks
         if check_id in check_rows and check_rows[check_id].get("status") != "pass"
     )
+    reported_failed_checks = sorted(
+        check_id for check_id, row in check_rows.items() if row.get("status") == "fail"
+    )
+    missing_required_evidence = sorted(
+        check_id
+        for check_id in required_checks
+        if check_id in check_rows
+        and (
+            not isinstance(check_rows[check_id].get("evidence"), Mapping)
+            or not bool(check_rows[check_id].get("evidence"))
+        )
+    )
+
     checks["machine_readable_checks"] = not malformed_rows and bool(rows)
     checks["required_checks_present"] = execution_known and not missing_checks
     checks["required_checks_pass"] = execution_known and not missing_checks and not failed_required_checks
+    checks["required_check_evidence"] = execution_known and not missing_checks and not missing_required_evidence
+    checks["no_reported_failures"] = not reported_failed_checks
     details["malformed_check_rows"] = malformed_rows
     details["missing_required_checks"] = missing_checks
     details["failed_required_checks"] = failed_required_checks
+    details["reported_failed_checks"] = reported_failed_checks
+    details["missing_required_evidence"] = missing_required_evidence
 
     numeric_metrics = result.get("metrics") if isinstance(result.get("metrics"), Mapping) else {}
     nonfinite_metrics = sorted(
