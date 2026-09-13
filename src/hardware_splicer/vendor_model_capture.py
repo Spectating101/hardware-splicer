@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import re
 import zipfile
 from pathlib import PurePosixPath
 from typing import Any, Iterable
@@ -13,6 +14,7 @@ from urllib.request import Request, urlopen
 
 SCHEMA_VERSION = "hardware_splicer.vendor_model_capture.v1"
 _DEFAULT_MAX_BYTES = 32 * 1024 * 1024
+_SUPPORTED_MODEL_KINDS = {"IBIS", "Verilog"}
 
 
 class VendorModelCaptureError(ValueError):
@@ -41,6 +43,24 @@ def _looks_like_html(payload: bytes) -> bool:
     return prefix.startswith(b"<!doctype html") or prefix.startswith(b"<html") or b"<html" in prefix[:512]
 
 
+def _detect_model_kind(filename: str, payload: bytes) -> str | None:
+    """Recognize bounded textual IBIS/Verilog identities without executing model code."""
+
+    suffix = PurePosixPath(filename.lower()).suffix
+    sample = payload[:2 * 1024 * 1024].decode("latin-1", errors="ignore")
+    lowered = sample.lower()
+
+    if suffix in {".ibs", ".ibis"} and "[ibis ver]" in lowered and (
+        "[component]" in lowered or "[model]" in lowered
+    ):
+        return "IBIS"
+
+    if suffix in {".v", ".sv"} and re.search(r"(?m)^\s*module\s+[A-Za-z_][A-Za-z0-9_$]*", sample):
+        return "Verilog"
+
+    return None
+
+
 def _zip_inventory(payload: bytes) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     with zipfile.ZipFile(io.BytesIO(payload)) as archive:
@@ -51,13 +71,14 @@ def _zip_inventory(payload: bytes) -> list[dict[str, Any]]:
                 raise VendorModelCaptureError(f"unsafe ZIP member path: {name}")
             if info.flag_bits & 0x1:
                 raise VendorModelCaptureError(f"encrypted ZIP member is not accepted: {name}")
-            member = archive.read(info)
+            member = b"" if info.is_dir() else archive.read(info)
             rows.append(
                 {
                     "path": name,
                     "size_bytes": len(member),
                     "sha256": _sha256(member),
                     "is_directory": info.is_dir(),
+                    "detected_model_kind": None if info.is_dir() else _detect_model_kind(name, member),
                 }
             )
     return rows
@@ -70,12 +91,15 @@ def inspect_vendor_model_bytes(
     source_url: str,
     expected_hosts: Iterable[str],
     filename: str,
+    expected_model_kind: str,
     content_type: str | None = None,
     expected_sha256: str | None = None,
     max_bytes: int = _DEFAULT_MAX_BYTES,
 ) -> dict[str, Any]:
     """Create a deterministic capture manifest from already acquired model bytes."""
 
+    if expected_model_kind not in _SUPPORTED_MODEL_KINDS:
+        raise VendorModelCaptureError(f"unsupported expected model kind: {expected_model_kind}")
     validate_vendor_url(source_url, expected_hosts)
     if not isinstance(payload, (bytes, bytearray)) or not payload:
         raise VendorModelCaptureError("vendor model payload is empty")
@@ -94,9 +118,30 @@ def inspect_vendor_model_bytes(
     if is_zip and not members:
         raise VendorModelCaptureError("vendor model ZIP contains no members")
 
+    if is_zip:
+        recognized = [
+            {"path": row["path"], "model_kind": row["detected_model_kind"], "sha256": row["sha256"]}
+            for row in members
+            if row.get("detected_model_kind")
+        ]
+    else:
+        direct_kind = _detect_model_kind(filename, data)
+        recognized = (
+            [{"path": filename, "model_kind": direct_kind, "sha256": digest}]
+            if direct_kind
+            else []
+        )
+
+    expected_files = [row for row in recognized if row["model_kind"] == expected_model_kind]
+    if not expected_files:
+        raise VendorModelCaptureError(
+            f"captured payload contains no recognized {expected_model_kind} model file"
+        )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "model_id": str(model_id),
+        "expected_model_kind": expected_model_kind,
         "source_url": str(source_url),
         "filename": str(filename),
         "content_type": content_type,
@@ -104,6 +149,8 @@ def inspect_vendor_model_bytes(
         "sha256": digest,
         "archive_type": "zip" if is_zip else "none",
         "archive_members": members,
+        "recognized_model_files": recognized,
+        "recognized_expected_model_file_count": len(expected_files),
         "capture_status": "captured_hashed_unreviewed",
         "modeled_evidence_only": True,
         "measured_evidence_present": False,
@@ -119,6 +166,7 @@ def capture_vendor_model_url(
     url: str,
     expected_hosts: Iterable[str],
     filename: str,
+    expected_model_kind: str,
     expected_sha256: str | None = None,
     max_bytes: int = _DEFAULT_MAX_BYTES,
     timeout_s: float = 30.0,
@@ -126,7 +174,7 @@ def capture_vendor_model_url(
     """Fetch one explicit official-model URL and return bytes plus an immutable manifest.
 
     No redirect is trusted implicitly: the final response URL must remain on the same expected
-    host allowlist.  This function is never needed by unit tests and performs no background work.
+    host allowlist. This function performs no background work and never executes captured code.
     """
 
     validate_vendor_url(url, expected_hosts)
@@ -152,6 +200,7 @@ def capture_vendor_model_url(
         source_url=final_url,
         expected_hosts=expected_hosts,
         filename=filename,
+        expected_model_kind=expected_model_kind,
         content_type=content_type,
         expected_sha256=expected_sha256,
         max_bytes=max_bytes,
