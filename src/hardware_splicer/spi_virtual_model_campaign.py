@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping
 
+from .spi_power_budget import evaluate_spi_power_budget
 from .spi_timing_budget import evaluate_spi_timing_budget
 from .spi_virtual_target import build_grounded_virtual_spi_target
 from .spi_virtual_verification import apply_spi_fault, verify_spi_virtual_candidate
 
-SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v2"
+SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v3"
 _CAPTURE_SCHEMA_VERSION = "hardware_splicer.vendor_model_capture.v1"
 
 _REQUIRED_MODEL_IDS = {
@@ -56,13 +57,15 @@ def build_spi_virtual_model_campaign(
     """Build one reproducible campaign plan and readiness decision.
 
     This planner never substitutes synthetic simulator output for missing manufacturer-model
-    bytes. Static verification, spec timing, and adversarial checks can run immediately;
-    IBIS/Verilog execution remains blocked until every required model has an HS capture manifest.
+    bytes. Static verification, spec timing/power budgets, and adversarial checks can run
+    immediately; IBIS/Verilog execution remains blocked until every required model has an HS
+    capture manifest.
     """
 
     target = build_grounded_virtual_spi_target()
     static_result = verify_spi_virtual_candidate(target)
     timing_budget = evaluate_spi_timing_budget()
+    power_budget = evaluate_spi_power_budget()
     capture_by_id = _capture_map(captures)
 
     model_rows: dict[str, Any] = {}
@@ -137,11 +140,13 @@ def build_spi_virtual_model_campaign(
     model_capture_ready = not missing_models
     static_has_no_failures = static_result["counts"]["fail"] == 0
     timing_known_terms_safe = not str(timing_budget["status"]).startswith("failed")
+    power_known_terms_safe = not str(power_budget["status"]).startswith("failed")
     fault_detection_ready = all(row["detected"] for row in adversarial_cases.values())
     execution_ready = (
         model_capture_ready
         and static_has_no_failures
         and timing_known_terms_safe
+        and power_known_terms_safe
         and fault_detection_ready
     )
 
@@ -168,6 +173,9 @@ def build_spi_virtual_model_campaign(
         "spec_timing_budget": timing_budget,
         "timing_known_terms_safe": timing_known_terms_safe,
         "timing_fully_closed": timing_budget["status"] == "passed_modeled_timing",
+        "spec_power_budget": power_budget,
+        "power_known_terms_safe": power_known_terms_safe,
+        "power_fully_closed": power_budget["status"] == "passed_modeled_power_budget",
         "adversarial_fault_detection": adversarial_cases,
         "fault_detection_ready": fault_detection_ready,
         "planned_executions": planned_executions,
@@ -183,6 +191,7 @@ def build_spi_virtual_model_campaign(
         "nonclaims": [
             "No IBIS or Verilog execution is claimed until immutable vendor-model bytes are captured.",
             "Spec-level residual timing margin is not a validated timing path.",
+            "Regulator capacity without a worst-case DUT load is not a validated rail budget.",
             "A ready campaign is not a passing simulation campaign.",
             "A passing simulation campaign is not measured physical evidence.",
         ],
