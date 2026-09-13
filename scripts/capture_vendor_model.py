@@ -16,6 +16,7 @@ def main() -> int:
     parser.add_argument("--url", required=True)
     parser.add_argument("--expected-host", action="append", required=True)
     parser.add_argument("--filename", required=True)
+    parser.add_argument("--expected-kind", required=True, choices=["IBIS", "Verilog"])
     parser.add_argument("--expected-sha256")
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--max-bytes", type=int, default=32 * 1024 * 1024)
@@ -26,6 +27,7 @@ def main() -> int:
         url=args.url,
         expected_hosts=args.expected_host,
         filename=args.filename,
+        expected_model_kind=args.expected_kind,
         expected_sha256=args.expected_sha256,
         max_bytes=args.max_bytes,
     )
@@ -36,7 +38,20 @@ def main() -> int:
     bytes_path.write_bytes(payload)
     manifest_path.write_text(manifest_json(manifest), encoding="utf-8")
 
-    print(json.dumps({"bytes_path": str(bytes_path), "manifest_path": str(manifest_path), "sha256": manifest["sha256"]}, indent=2))
+    print(
+        json.dumps(
+            {
+                "bytes_path": str(bytes_path),
+                "manifest_path": str(manifest_path),
+                "sha256": manifest["sha256"],
+                "expected_model_kind": manifest["expected_model_kind"],
+                "recognized_expected_model_file_count": manifest[
+                    "recognized_expected_model_file_count"
+                ],
+            },
+            indent=2,
+        )
+    )
     return 0
 
 
