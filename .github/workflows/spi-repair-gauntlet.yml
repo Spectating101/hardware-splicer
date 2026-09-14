@@ -5,6 +5,7 @@ on:
     paths:
       - "src/hardware_splicer/spi_repair_gauntlet.py"
       - "scripts/run_spi_repair_gauntlet.py"
+      - "scripts/audit_spi_repair_gauntlet.py"
       - "tests/test_spi_repair_gauntlet.py"
       - "docs/SPI_REPAIR_GAUNTLET.md"
       - ".github/workflows/spi-repair-gauntlet.yml"
@@ -34,6 +35,14 @@ jobs:
         run: |
           python scripts/run_spi_repair_gauntlet.py \
             --out-dir artifacts/spi_repair_gauntlet_v1
+      - name: Independently audit final packet sizes and gold separation
+        run: |
+          python scripts/audit_spi_repair_gauntlet.py \
+            --actor-packets artifacts/spi_repair_gauntlet_v1/actor_packets.json \
+            --private-gold artifacts/spi_repair_gauntlet_v1/private_gold_manifest.json \
+            --scripted-control artifacts/spi_repair_gauntlet_v1/scripted_control_report.json \
+            --summary artifacts/spi_repair_gauntlet_v1/summary.json \
+            --out artifacts/spi_repair_gauntlet_v1/artifact_audit.json
       - name: Upload frozen gauntlet
         uses: actions/upload-artifact@v4
         with:
