@@ -1,9 +1,13 @@
 """Fail-closed execution boundary for captured SPI vendor models.
 
-This runner closes the gap between immutable capture manifests and the existing model-result
-audit contract.  It materializes only hash-bound model members into a private temporary
-workspace, exposes those paths to one explicitly allowlisted subprocess, captures the raw
-process output, seals the engine report, and immediately audits the result.
+This runner closes the gap between immutable capture manifests and the model-result audit
+contract. It materializes only hash-bound model members into a private temporary workspace,
+exposes those paths to one explicitly allowlisted subprocess, captures the raw process output,
+seals the engine report, and immediately audits the result.
+
+Readiness is evaluated for the requested preregistered execution rather than requiring the
+entire five-case campaign to be ready. Full campaign credit remains the responsibility of the
+campaign adjudicator.
 
 It does *not* claim network isolation, simulator correctness, measured evidence, physical
 correctness, fabrication readiness, power-on readiness, or physical authority.
@@ -25,7 +29,7 @@ from .spi_model_execution_contract import (
     seal_spi_model_execution_result,
 )
 
-SCHEMA_VERSION = "hardware_splicer.spi_bound_engine_run.v1"
+SCHEMA_VERSION = "hardware_splicer.spi_bound_engine_run.v2"
 ENGINE_REPORT_SCHEMA_VERSION = "hardware_splicer.spi_engine_report.v1"
 _DEFAULT_TIMEOUT_S = 60
 _MAX_TIMEOUT_S = 300
@@ -49,6 +53,17 @@ def _planned_execution(campaign: Mapping[str, Any], execution_id: str) -> Mappin
         if isinstance(row, Mapping) and row.get("execution_id") == execution_id:
             return row
     raise BoundEngineRunError(f"execution is not preregistered: {execution_id}")
+
+
+def _execution_ready(campaign: Mapping[str, Any], planned: Mapping[str, Any]) -> bool:
+    explicit = planned.get("execution_ready")
+    if explicit is not None:
+        return explicit is True
+    # Compatibility with the original all-or-nothing campaign schema.
+    return (
+        campaign.get("status") == "ready_for_model_execution"
+        and campaign.get("execution_ready") is True
+    )
 
 
 def _parse_engine_report(stdout: bytes, *, execution_id: str) -> Mapping[str, Any]:
@@ -92,14 +107,18 @@ def run_bound_spi_model_engine(
     ``member_path`` (the recognized model member to materialize).
 
     The subprocess receives model paths only through ``HS_MODEL_<MODEL_ID>`` environment
-    variables plus ``HS_EXECUTION_ID`` and ``HS_EXECUTION_CONDITIONS_JSON``.  The subprocess
+    variables plus ``HS_EXECUTION_ID`` and ``HS_EXECUTION_CONDITIONS_JSON``. The subprocess
     must emit exactly one JSON report on stdout using ``ENGINE_REPORT_SCHEMA_VERSION``.
     """
 
-    if campaign.get("status") != "ready_for_model_execution" or campaign.get("execution_ready") is not True:
-        raise BoundEngineRunError("campaign is not ready for model execution")
-
     planned = _planned_execution(campaign, execution_id)
+    if not _execution_ready(campaign, planned):
+        missing = planned.get("missing_required_model_ids", [])
+        raise BoundEngineRunError(
+            "execution is not ready for model execution"
+            + (f": missing={sorted(str(item) for item in missing)}" if missing else "")
+        )
+
     required_models = {str(model_id) for model_id in planned.get("required_models", [])}
     supplied_models = {str(model_id) for model_id in model_inputs}
     if not required_models or supplied_models != required_models:
@@ -153,7 +172,7 @@ def run_bound_spi_model_engine(
                 raise BoundEngineRunError(f"capture manifest model id mismatch: {model_id}")
             expected_outer_hash = campaign_models.get(model_id, {}).get("capture_sha256") if isinstance(campaign_models.get(model_id), Mapping) else None
             if manifest.get("sha256") != expected_outer_hash:
-                raise BoundEngineRunError(f"capture manifest does not match ready campaign: {model_id}")
+                raise BoundEngineRunError(f"capture manifest does not match ready execution: {model_id}")
 
             member, materialization = extract_bound_model_member(
                 bytes(outer_payload), manifest, member_path=str(member_path or "")
@@ -220,6 +239,8 @@ def run_bound_spi_model_engine(
         "status": audit["status"],
         "execution_id": execution_id,
         "target_candidate_id": campaign.get("target_candidate_id"),
+        "campaign_status": campaign.get("status"),
+        "execution_ready": True,
         "engine": {"name": engine_name, "version": engine_version, "executable": executable},
         "process_exit_code": int(completed.returncode),
         "stdout_size_bytes": len(stdout),
