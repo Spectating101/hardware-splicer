@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "src/hardware_splicer/spi_derived_virtual_lab.py"
+      - "src/hardware_splicer/spi_derived_lab_source_manifest.py"
       - "scripts/run_spi_derived_virtual_lab.py"
       - "scripts/run_spi_reference_verilog.py"
       - "examples/derived_virtual_lab/**"
@@ -41,7 +42,8 @@ jobs:
           mkdir -p artifacts/derived_virtual_lab
           python scripts/run_spi_derived_virtual_lab.py \
             --report-out artifacts/derived_virtual_lab/report.json \
-            --corpus-out artifacts/derived_virtual_lab/corpus.json
+            --corpus-out artifacts/derived_virtual_lab/corpus.json \
+            --source-manifest-out artifacts/derived_virtual_lab/source_manifest.json
       - name: Cross-check read-only SPI oracle with Icarus Verilog
         run: |
           python scripts/run_spi_reference_verilog.py \
