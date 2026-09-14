@@ -17,6 +17,10 @@ The source packet reproduces the published project boundary exactly:
 Its SHA-256 is recorded in `PREPARATION_SUMMARY.json`.  The expanded JSON, test plan,
 and return template are retained beside it for review and diffing.
 
+`DESIGN_BUILD_TEST_RFQ.md` closes the practical handoff gap: it asks an engineering-capable
+provider to quote exact component selection, design, prototype assembly, and execution of the
+physical packet.  It is prepared text only and has not been transmitted.
+
 The packet is ready for provider capability review and quotation, but it is not ready for
 fabrication.  The candidate still lacks the exact schematic, fabrication archive, BOM,
 pick-and-place file, assembly drawing, and test firmware.  Producing those artifacts requires
