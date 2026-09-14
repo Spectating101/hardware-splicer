@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/spi-ti-vendor-model-capture.yml"
+      - "docs/SPI_TI_VENDOR_MODEL_CAPTURE.md"
       - "scripts/capture_vendor_model.py"
       - "scripts/audit_spi_vendor_model_capabilities.py"
       - "src/hardware_splicer/vendor_model_capture.py"
