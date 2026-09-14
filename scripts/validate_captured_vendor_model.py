@@ -5,7 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from hardware_splicer.captured_model_materialization import extract_bound_model_member
 from hardware_splicer.vendor_model_validation import (
