@@ -1,0 +1,43 @@
+name: SPI Repair Gauntlet
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/spi_repair_gauntlet.py"
+      - "scripts/run_spi_repair_gauntlet.py"
+      - "tests/test_spi_repair_gauntlet.py"
+      - "docs/SPI_REPAIR_GAUNTLET.md"
+      - ".github/workflows/spi-repair-gauntlet.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: spi-repair-gauntlet-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  repair-gauntlet:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Hardware Splicer and tests
+        run: python -m pip install -e '.[dev]'
+      - name: Run repair-gauntlet tests
+        run: pytest -q tests/test_spi_repair_gauntlet.py
+      - name: Freeze actor packets and scripted control
+        run: |
+          python scripts/run_spi_repair_gauntlet.py \
+            --out-dir artifacts/spi_repair_gauntlet_v1
+      - name: Upload frozen gauntlet
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-repair-gauntlet-v1
+          path: artifacts/spi_repair_gauntlet_v1/
+          if-no-files-found: error
+          retention-days: 30
