@@ -1,8 +1,9 @@
 """Audit contract for vendor-model-backed SPI simulation executions.
 
-The contract deliberately does not run IBIS or Verilog itself. It defines what a future engine
-must prove to earn *modeled* verification credit and prevents engine output from promoting
-physical authority.
+The contract deliberately does not run IBIS or Verilog itself. It defines what an engine must
+prove to earn *modeled* verification credit and prevents engine output from promoting physical
+authority. Readiness is evaluated for the specific preregistered execution, so a valid TXU-only
+case can run without pretending the complete Winbond-dependent campaign is ready.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import math
 from copy import deepcopy
 from typing import Any, Iterable, Mapping
 
-SCHEMA_VERSION = "hardware_splicer.spi_model_execution_audit.v2"
+SCHEMA_VERSION = "hardware_splicer.spi_model_execution_audit.v3"
 RESULT_SCHEMA_VERSION = "hardware_splicer.spi_model_execution_result.v1"
 
 _REQUIRED_CHECKS: dict[str, set[str]] = {
@@ -86,11 +87,7 @@ def seal_spi_model_execution_result(
     checks: Iterable[Mapping[str, Any]],
     metrics: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Build the HS-owned result envelope around one engine execution.
-
-    The wrapper computes raw-output identity and hard-codes the authority boundary. Engines may
-    supply check data and metrics, but they cannot choose readiness or physical-authority fields.
-    """
+    """Build the HS-owned result envelope around one engine execution."""
 
     if not isinstance(raw_output, (bytes, bytearray)):
         raise TypeError("raw_output must be bytes")
@@ -118,15 +115,10 @@ def audit_spi_model_execution_result(
     campaign: Mapping[str, Any],
     result: Mapping[str, Any],
 ) -> dict[str, Any]:
-    """Audit one engine result against a ready campaign and frozen execution contract."""
+    """Audit one engine result against its preregistered execution contract."""
 
     checks: dict[str, bool] = {}
     details: dict[str, Any] = {}
-
-    campaign_ready = campaign.get("status") == "ready_for_model_execution" and campaign.get(
-        "execution_ready"
-    ) is True
-    checks["campaign_ready"] = campaign_ready
 
     schema_ok = result.get("schema_version") == RESULT_SCHEMA_VERSION
     checks["result_schema"] = schema_ok
@@ -143,6 +135,23 @@ def audit_spi_model_execution_result(
     execution_known = execution_id in planned and execution_id in _REQUIRED_CHECKS
     checks["execution_binding"] = execution_known
 
+    planned_row = planned.get(execution_id, {}) if execution_known else {}
+    explicit_execution_ready = planned_row.get("execution_ready")
+    if explicit_execution_ready is None:
+        # Backward-compatible fallback for v4 campaigns where readiness was all-or-nothing.
+        execution_ready = (
+            campaign.get("status") == "ready_for_model_execution"
+            and campaign.get("execution_ready") is True
+        )
+    else:
+        execution_ready = explicit_execution_ready is True
+    checks["campaign_ready"] = execution_ready
+    details["campaign_status"] = campaign.get("status")
+    details["execution_ready"] = execution_ready
+    details["execution_missing_required_model_ids"] = list(
+        planned_row.get("missing_required_model_ids", [])
+    ) if isinstance(planned_row, Mapping) else []
+
     engine = result.get("engine") if isinstance(result.get("engine"), Mapping) else {}
     checks["engine_identity"] = bool(str(engine.get("name") or "").strip()) and bool(
         str(engine.get("version") or "").strip()
@@ -151,12 +160,16 @@ def audit_spi_model_execution_result(
     checks["successful_process_exit"] = result.get("exit_code") == 0
     checks["raw_output_identity"] = _valid_sha256(result.get("raw_output_sha256"))
 
-    required_models = set(planned.get(execution_id, {}).get("required_models", [])) if execution_known else set()
+    required_models = set(planned_row.get("required_models", [])) if execution_known else set()
     supplied_hashes = result.get("model_hashes") if isinstance(result.get("model_hashes"), Mapping) else {}
     campaign_models = campaign.get("model_captures") if isinstance(campaign.get("model_captures"), Mapping) else {}
     model_binding_errors: list[str] = []
     for model_id in sorted(required_models):
-        expected = campaign_models.get(model_id, {}).get("capture_sha256") if isinstance(campaign_models.get(model_id), Mapping) else None
+        expected = (
+            campaign_models.get(model_id, {}).get("capture_sha256")
+            if isinstance(campaign_models.get(model_id), Mapping)
+            else None
+        )
         actual = supplied_hashes.get(model_id)
         if not _valid_sha256(expected) or actual != expected:
             model_binding_errors.append(model_id)
@@ -229,7 +242,7 @@ def audit_spi_model_execution_result(
     checks["authority_boundary"] = authority_safe
 
     audit_pass = all(checks.values())
-    if not campaign_ready:
+    if not execution_ready:
         status = "rejected_campaign_not_ready"
     elif not audit_pass:
         status = "rejected_contract"
