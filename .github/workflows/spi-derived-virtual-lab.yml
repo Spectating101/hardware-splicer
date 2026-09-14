@@ -5,6 +5,8 @@ on:
     paths:
       - "src/hardware_splicer/spi_derived_virtual_lab.py"
       - "scripts/run_spi_derived_virtual_lab.py"
+      - "scripts/run_spi_reference_verilog.py"
+      - "examples/derived_virtual_lab/**"
       - "tests/test_spi_derived_virtual_lab.py"
       - "docs/SPI_DERIVED_VIRTUAL_LAB.md"
       - ".github/workflows/spi-derived-virtual-lab.yml"
@@ -20,7 +22,7 @@ permissions:
 jobs:
   derived-virtual-lab:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -28,6 +30,10 @@ jobs:
           python-version: "3.12"
       - name: Install Hardware Splicer and tests
         run: python -m pip install -e '.[dev]'
+      - name: Install Icarus Verilog reference simulator
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends iverilog
       - name: Run focused Derived Virtual Lab tests
         run: pytest -q tests/test_spi_derived_virtual_lab.py
       - name: Execute frozen 512-case benchmark
@@ -36,6 +42,10 @@ jobs:
           python scripts/run_spi_derived_virtual_lab.py \
             --report-out artifacts/derived_virtual_lab/report.json \
             --corpus-out artifacts/derived_virtual_lab/corpus.json
+      - name: Cross-check read-only SPI oracle with Icarus Verilog
+        run: |
+          python scripts/run_spi_reference_verilog.py \
+            --report-out artifacts/derived_virtual_lab/verilog_reference_report.json
       - name: Upload deterministic experiment outputs
         uses: actions/upload-artifact@v4
         with:
