@@ -1,0 +1,51 @@
+{
+  "schema_version": "hardware_splicer.vendor_model_capture_receipt.v1",
+  "receipt_id": "txu0304-scem787-20260914",
+  "observed_date": "2026-09-14",
+  "publisher": "Texas Instruments",
+  "model_id": "txu0304-ibis-scem787",
+  "model_kind": "IBIS",
+  "official_source_url": "https://www.ti.com/lit/zip/SCEM787",
+  "filename": "SCEM787.ZIP",
+  "outer_size_bytes": 58240,
+  "outer_sha256": "sha256:1b7b33ae0ce9452eb69ed6ccea4d05f558fef83023d7bc6637b8e9342eb4b4d0",
+  "recognized_model_members": [
+    {
+      "path": "TXU0304.ibs",
+      "model_kind": "IBIS",
+      "size_bytes": 308012,
+      "sha256": "sha256:189defbd3a8b3a8405eef3128bf539c13a9341aed4793d97746d33b2ab56145a"
+    }
+  ],
+  "observed_component_names": [
+    "TXU0304BQA",
+    "TXU0304DTR",
+    "TXU0304PW",
+    "TXU0304RUT"
+  ],
+  "observed_model_types": [
+    "Input",
+    "Output"
+  ],
+  "observed_model_count": 10,
+  "three_state_model_present": false,
+  "textual_power_state_markers": [],
+  "signal_integrity_structure_present": true,
+  "eligible_for_later_signal_integrity_execution": true,
+  "rail_absent_isolation_claim_supported": false,
+  "capture_status": "captured_hashed_unreviewed",
+  "raw_vendor_bytes_published": false,
+  "raw_vendor_bytes_committed": false,
+  "modeled_evidence_only": true,
+  "measured_evidence_present": false,
+  "physical_correctness": "UNPROVEN",
+  "fabrication_ready": false,
+  "power_on_ready": false,
+  "physical_authority_granted": false,
+  "authority_effect": "none",
+  "nonclaims": [
+    "This receipt records byte identity and bounded structural observations; it does not redistribute the vendor model.",
+    "The captured IBIS model is not, by itself, an executable proof of the TXU0304 VCC-disconnect/OE isolation transition.",
+    "A manufacturer-model result is modeled evidence, not measured physical evidence."
+  ]
+}
