@@ -1,0 +1,81 @@
+name: SPI Derived Virtual Lab
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-derived-virtual-lab.yml"
+      - "docs/SPI_DERIVED_VIRTUAL_LAB.md"
+      - "examples/spi_virtual_lab/**"
+      - "scripts/run_spi_derived_virtual_lab.py"
+      - "src/hardware_splicer/spi_behavioral_oracle.py"
+      - "src/hardware_splicer/spi_derived_surrogate.py"
+      - "src/hardware_splicer/spi_derived_verilog_runner.py"
+      - "src/hardware_splicer/spi_surrogate_calibration.py"
+      - "src/hardware_splicer/spi_surrogate_repair_benchmark.py"
+      - "src/hardware_splicer/spi_surrogate_sensitivity.py"
+      - "src/hardware_splicer/spi_virtual_lab_benchmark.py"
+      - "src/hardware_splicer/spi_virtual_lab_report.py"
+      - "tests/test_spi_derived_virtual_lab.py"
+      - "tests/test_spi_derived_virtual_lab_extended.py"
+      - "tests/test_spi_surrogate_calibration.py"
+      - "tests/test_spi_virtual_lab_report.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  derived-virtual-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test/runtime dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+      - name: Run focused derived-lab tests
+        run: |
+          pytest -q \
+            tests/test_spi_derived_virtual_lab.py \
+            tests/test_spi_derived_virtual_lab_extended.py \
+            tests/test_spi_surrogate_calibration.py \
+            tests/test_spi_virtual_lab_report.py
+      - name: Execute the real Icarus-backed derived oracle
+        run: |
+          python scripts/run_spi_derived_virtual_lab.py --run-verilog > /tmp/spi-derived-virtual-lab.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path('/tmp/spi-derived-virtual-lab.json').read_text())
+          aggregate = report['aggregate_report']
+          verilog = report['derived_verilog']
+
+          assert aggregate['controls_pass'] is True
+          assert aggregate['summary']['benchmark_case_count'] == 576
+          assert aggregate['summary']['repair_fault_count'] == 6
+          assert aggregate['summary']['sensitivity_case_count'] == 1920
+          assert aggregate['summary']['jedec_hex'] == 'EF6018'
+          assert aggregate['eligible_for_vendor_model_campaign_credit'] is False
+          assert aggregate['physical_correctness'] == 'UNPROVEN'
+          assert aggregate['physical_authority_granted'] is False
+
+          assert verilog['status'] == 'passed_derived_oracle'
+          assert verilog['oracle_expected_jedec_hex'] == 'EF6018'
+          assert verilog['eligible_for_vendor_model_campaign_credit'] is False
+          assert verilog['physical_correctness'] == 'UNPROVEN'
+          assert verilog['physical_authority_granted'] is False
+          PY
+      - name: Upload bounded experiment report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-derived-virtual-lab-report
+          path: /tmp/spi-derived-virtual-lab.json
+          if-no-files-found: error
