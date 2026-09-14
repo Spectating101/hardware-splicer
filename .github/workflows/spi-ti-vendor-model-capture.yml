@@ -1,0 +1,110 @@
+name: SPI TI Vendor Model Capture
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-ti-vendor-model-capture.yml"
+      - "scripts/capture_vendor_model.py"
+      - "scripts/audit_spi_vendor_model_capabilities.py"
+      - "src/hardware_splicer/vendor_model_capture.py"
+      - "src/hardware_splicer/spi_vendor_model_capability_audit.py"
+      - "src/hardware_splicer/spi_virtual_model_campaign.py"
+      - "src/hardware_splicer/spi_virtual_target.py"
+      - "tests/test_spi_vendor_model_capability_audit.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-ti-ibis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Verify fail-closed capability audit
+        run: pytest -q tests/test_spi_vendor_model_capability_audit.py
+      - name: Capture official TI TXU0304 IBIS bytes
+        run: |
+          rm -rf /tmp/hs-ti-model
+          python scripts/capture_vendor_model.py \
+            --model-id txu0304-ibis-scem787 \
+            --url https://www.ti.com/lit/zip/SCEM787 \
+            --expected-host www.ti.com \
+            --filename SCEM787.ZIP \
+            --expected-kind IBIS \
+            --out-dir /tmp/hs-ti-model \
+            > /tmp/hs-ti-capture-summary.json
+      - name: Audit model claim capabilities
+        run: |
+          python scripts/audit_spi_vendor_model_capabilities.py \
+            --archive /tmp/hs-ti-model/SCEM787.ZIP \
+            --capture-manifest /tmp/hs-ti-model/txu0304-ibis-scem787.capture.json \
+            --out /tmp/hs-ti-model/txu0304-ibis-scem787.capability.json \
+            > /tmp/hs-ti-capability-summary.json
+      - name: Adjudicate partial campaign readiness without model-result credit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from hardware_splicer.spi_virtual_model_campaign import build_spi_virtual_model_campaign
+
+          root = Path('/tmp/hs-ti-model')
+          manifest = json.loads((root / 'txu0304-ibis-scem787.capture.json').read_text())
+          capability = json.loads((root / 'txu0304-ibis-scem787.capability.json').read_text())
+          campaign = build_spi_virtual_model_campaign([manifest])
+
+          assert campaign['status'] == 'partial_model_execution_ready'
+          assert campaign['model_captures']['txu0304-ibis-scem787']['accepted_capture'] is True
+          assert campaign['ready_execution_ids'] == ['ibis-dut-rail-absent']
+          assert campaign['execution_ready'] is False
+          assert campaign['simulation_results'] == []
+          assert capability['eligible_for_later_signal_integrity_execution'] is True
+          assert capability['rail_absent_isolation_claim_supported'] is False
+          assert capability['physical_correctness'] == 'UNPROVEN'
+          assert capability['physical_authority_granted'] is False
+
+          (root / 'PARTIAL_CAMPAIGN.json').write_text(
+              json.dumps(campaign, indent=2, sort_keys=True) + '\n'
+          )
+          verdict = {
+              'schema_version': 'hardware_splicer.spi_ti_capture_adjudication.v1',
+              'status': 'captured_vendor_model_no_execution_credit',
+              'capture_sha256': manifest['sha256'],
+              'partial_campaign_status': campaign['status'],
+              'input_ready_execution_ids': campaign['ready_execution_ids'],
+              'executed_model_result_count': 0,
+              'rail_absent_isolation_claim_supported_by_ibis_audit': False,
+              'reason': (
+                  'The TI IBIS bytes are real and hash-bound, but the capability audit does not '
+                  'treat standard IBIS data as executable proof of the VCC-disconnect/OE transition.'
+              ),
+              'modeled_evidence_only': True,
+              'measured_evidence_present': False,
+              'physical_correctness': 'UNPROVEN',
+              'physical_authority_granted': False,
+              'authority_effect': 'none',
+          }
+          (root / 'CAPTURE_ADJUDICATION.json').write_text(
+              json.dumps(verdict, indent=2, sort_keys=True) + '\n'
+          )
+          PY
+      - name: Remove vendor bytes before artifact publication
+        run: |
+          rm -f /tmp/hs-ti-model/SCEM787.ZIP
+          test ! -e /tmp/hs-ti-model/SCEM787.ZIP
+      - name: Upload metadata-only capture evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-ti-txu0304-model-capture-metadata
+          path: |
+            /tmp/hs-ti-model/txu0304-ibis-scem787.capture.json
+            /tmp/hs-ti-model/txu0304-ibis-scem787.capability.json
+            /tmp/hs-ti-model/PARTIAL_CAMPAIGN.json
+            /tmp/hs-ti-model/CAPTURE_ADJUDICATION.json
+          if-no-files-found: error
