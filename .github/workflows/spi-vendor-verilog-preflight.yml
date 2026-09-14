@@ -1,0 +1,107 @@
+name: SPI Vendor Verilog Preflight Control
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-vendor-verilog-preflight.yml"
+      - "scripts/audit_spi_winbond_verilog.py"
+      - "scripts/preflight_spi_winbond_verilog.py"
+      - "src/hardware_splicer/spi_winbond_verilog_capability.py"
+      - "src/hardware_splicer/spi_vendor_verilog_preflight.py"
+      - "tests/test_spi_winbond_verilog_capability.py"
+      - "tests/test_spi_vendor_verilog_preflight.py"
+      - "docs/SPI_VENDOR_VERILOG_EXECUTION.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight-control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+          iverilog -V
+      - name: Install focused test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run focused capability and preflight tests
+        run: |
+          pytest -q \
+            tests/test_spi_winbond_verilog_capability.py \
+            tests/test_spi_vendor_verilog_preflight.py
+      - name: Run real Icarus control through capture and preflight contracts
+        run: |
+          python - <<'PY'
+          import io
+          import json
+          import zipfile
+          from pathlib import Path
+
+          from hardware_splicer.spi_vendor_verilog_preflight import preflight_winbond_verilog_model
+          from hardware_splicer.vendor_model_capture import inspect_vendor_model_bytes
+
+          source = r'''`timescale 1ns/1ps
+          module hs_vendor_verilog_preflight_control(
+              input wire CSn,
+              input wire CLK,
+              input wire DI,
+              output reg DO
+          );
+          localparam [7:0] CMD_JEDEC = 8'h9F;
+          localparam [23:0] JEDEC_ID = 24'hEF6018;
+          reg [7:0] command_shift;
+          always @(posedge CLK) begin
+              if (!CSn) begin
+                  command_shift <= {command_shift[6:0], DI};
+                  case (command_shift)
+                      CMD_JEDEC: DO <= JEDEC_ID[23];
+                      default: DO <= 1'b0;
+                  endcase
+              end
+          end
+          endmodule
+          '''
+          buffer = io.BytesIO()
+          with zipfile.ZipFile(buffer, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+              archive.writestr('control/hs_vendor_verilog_preflight_control.v', source)
+          payload = buffer.getvalue()
+          manifest = inspect_vendor_model_bytes(
+              payload,
+              model_id='w25q128jw-q-verilog-da02-aag072',
+              source_url=(
+                  'https://www.winbond.com/hq/support/documentation/downloadV2022.jsp?'
+                  '__locale=en&xmlPath=/support/resources/.content/item/DA02-AAG072.html&level=2'
+              ),
+              expected_hosts=['www.winbond.com'],
+              filename='DEVELOPMENT-CONTROL-NOT-WINBOND.zip',
+              expected_model_kind='Verilog',
+              content_type='application/zip',
+          )
+          result = preflight_winbond_verilog_model(payload, manifest)
+          assert result['status'] == 'eligible_for_bound_jedec_testbench'
+          assert result['compile_pass'] is True
+          assert result['jedec_id_read_9f_supported'] is True
+          assert result['execution_credit_granted'] is False
+          assert result['physical_correctness'] == 'UNPROVEN'
+          result['evidence_class'] = 'development_control_only'
+          result['vendor_bytes_present'] = False
+          result['eligible_for_vendor_model_campaign_credit'] = False
+          Path('/tmp/spi-vendor-verilog-preflight-control.json').write_text(
+              json.dumps(result, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          PY
+      - name: Upload development-control report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-vendor-verilog-preflight-control
+          path: /tmp/spi-vendor-verilog-preflight-control.json
+          if-no-files-found: error
