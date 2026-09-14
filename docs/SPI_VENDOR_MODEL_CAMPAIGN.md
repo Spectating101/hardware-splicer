@@ -40,7 +40,7 @@ The complete first campaign requires three captured artifacts:
 
 An official landing page is **not** a captured model. `remote_available_not_captured` therefore earns no modeled execution credit.
 
-TI exposes a stable public model locator at `https://www.ti.com/lit/zip/SCEM787`. Winbond publicly lists the two target artifacts as ZIP-format model resources, but the selected download pages can require a signed-in/session-mediated flow. HS therefore supports both direct network capture and explicit local-file import.
+TI exposes a stable public model locator at `https://www.ti.com/lit/zip/SCEM787`. Winbond publicly lists both target resources as ZIP-format model artifacts, but the selected download page can return `login_required`. HS therefore supports both direct network capture and explicit local-file import; a vendor session requirement is an acquisition boundary, not a reason to weaken the model-evidence contract.
 
 ## Capture contracts
 
