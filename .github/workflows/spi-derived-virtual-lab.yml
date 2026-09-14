@@ -6,6 +6,8 @@ on:
       - "src/hardware_splicer/spi_derived_virtual_lab.py"
       - "src/hardware_splicer/spi_derived_lab_source_manifest.py"
       - "scripts/run_spi_derived_virtual_lab.py"
+      - "scripts/run_spi_derived_virtual_lab_results.py"
+      - "scripts/audit_spi_derived_virtual_lab.py"
       - "scripts/run_spi_reference_verilog.py"
       - "examples/derived_virtual_lab/**"
       - "tests/test_spi_derived_virtual_lab.py"
@@ -44,6 +46,17 @@ jobs:
             --report-out artifacts/derived_virtual_lab/report.json \
             --corpus-out artifacts/derived_virtual_lab/corpus.json \
             --source-manifest-out artifacts/derived_virtual_lab/source_manifest.json
+      - name: Export all per-case evaluator results
+        run: |
+          python scripts/run_spi_derived_virtual_lab_results.py \
+            --out artifacts/derived_virtual_lab/results.json
+      - name: Independently audit gold labels and evaluator outputs
+        run: |
+          python scripts/audit_spi_derived_virtual_lab.py \
+            --corpus artifacts/derived_virtual_lab/corpus.json \
+            --results artifacts/derived_virtual_lab/results.json \
+            --benchmark-report artifacts/derived_virtual_lab/report.json \
+            --out artifacts/derived_virtual_lab/independent_audit.json
       - name: Cross-check read-only SPI oracle with Icarus Verilog
         run: |
           python scripts/run_spi_reference_verilog.py \
