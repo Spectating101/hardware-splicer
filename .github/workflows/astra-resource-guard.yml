@@ -58,7 +58,7 @@ jobs:
           assert ASTRA_DEFAULT_TIMEOUT_SECONDS == 300
           assert ASTRA_MAX_TIMEOUT_SECONDS == 300
           assert ASTRA_MAX_MCP_TOOL_CALLS == 20
-          assert ASTRA_MAX_BACKEND_CALLS == 8
+          assert ASTRA_MAX_BACKEND_CALLS == 12
           assert ASTRA_MAX_REQUEST_BYTES == 262_144
           assert guard["exact_allowance_cost_guaranteed"] is False
           assert guard["api_fallback"] is False
