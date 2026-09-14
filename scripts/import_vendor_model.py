@@ -10,7 +10,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from hardware_splicer.spi_virtual_target import build_vendor_model_registry
 from hardware_splicer.vendor_model_capture import capture_vendor_model_file
