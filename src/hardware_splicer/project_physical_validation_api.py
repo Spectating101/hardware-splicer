@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 from copy import deepcopy
 from datetime import datetime
 from typing import Any, Dict, Mapping
@@ -23,6 +25,11 @@ from .project_physical_validation import (
     build_project_physical_validation_packet,
     physical_assessment_plan,
     validate_packet_evidence,
+)
+from .remote_physical_validation import (
+    REMOTE_PHYSICAL_HANDOFF_SCHEMA,
+    audit_remote_physical_return,
+    build_remote_physical_handoff,
 )
 from .project_store import (
     CorruptProject,
@@ -46,6 +53,41 @@ class ProjectPhysicalEvidenceRequest(PhysicalValidationApiModel):
     requested_operations: list[PhysicalOperation] = Field(default_factory=list)
     scope_id: str | None = None
     as_of: datetime | None = None
+
+
+class RemotePhysicalProviderRequest(PhysicalValidationApiModel):
+    provider_id: str = Field(min_length=1, max_length=160)
+    provider_name: str = Field(min_length=1, max_length=240)
+    engagement_mode: str = Field(min_length=1, max_length=80)
+    service_url: str = Field(default="", max_length=2048)
+    capabilities_requested: list[str] = Field(default_factory=list, max_length=64)
+
+
+class RemoteManufacturingArtifactRequest(PhysicalValidationApiModel):
+    role: str = Field(min_length=1, max_length=120)
+    artifact_id: str = Field(min_length=1, max_length=240)
+    content_hash: str = Field(min_length=1, max_length=80)
+    filename: str = Field(default="", max_length=512)
+
+
+class ProjectRemotePhysicalHandoffRequest(PhysicalValidationApiModel):
+    expected_revision: int = Field(ge=1)
+    provider: RemotePhysicalProviderRequest
+    manufacturing_artifacts: list[RemoteManufacturingArtifactRequest] = Field(
+        default_factory=list, max_length=128
+    )
+
+
+class RemoteRawPayloadRequest(PhysicalValidationApiModel):
+    path: str = Field(min_length=1, max_length=1024)
+    content_base64: str = Field(min_length=1, max_length=32_000_000)
+
+
+class ProjectRemotePhysicalReturnAuditRequest(PhysicalValidationApiModel):
+    expected_revision: int = Field(ge=1)
+    handoff: Dict[str, Any]
+    returned_manifest: Dict[str, Any]
+    raw_files: list[RemoteRawPayloadRequest] = Field(min_length=1, max_length=128)
 
 
 def _error(exc: Exception) -> HTTPException:
@@ -101,6 +143,108 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
             "physical_validation_packet": packet,
             "physical_correctness": "UNPROVEN",
             "physical_authority_granted": False,
+        }
+
+    @router.post(
+        "/v1/projects/{project_id}/engineering/physical-validation/remote-handoff",
+        summary="Prepare a non-authorizing remote laboratory or PCBA test handoff",
+    )
+    def prepare_remote_handoff(
+        project_id: str, request: ProjectRemotePhysicalHandoffRequest
+    ) -> Dict[str, Any]:
+        try:
+            envelope = project_store.load_latest_with_recovery(project_id)
+            current_revision = int(envelope["revision"])
+            if current_revision != request.expected_revision:
+                raise RevisionConflict(
+                    f"project {project_id!r} is at revision {current_revision}, "
+                    f"expected {request.expected_revision}"
+                )
+            packet = build_project_physical_validation_packet(
+                envelope["snapshot"],
+                project_id=project_id,
+                revision=current_revision,
+            )
+            handoff = build_remote_physical_handoff(
+                packet,
+                provider=request.provider.model_dump(mode="json"),
+                manufacturing_artifacts=[
+                    value.model_dump(mode="json")
+                    for value in request.manufacturing_artifacts
+                ],
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {
+            "ok": True,
+            "project_id": project_id,
+            "revision": current_revision,
+            "remote_physical_handoff": handoff,
+            "physical_correctness": "UNPROVEN",
+            "physical_authority_granted": False,
+            "automatic_authorization": False,
+        }
+
+    @router.post(
+        "/v1/projects/{project_id}/engineering/physical-validation/remote-return/audit",
+        summary="Audit a remote physical return and its exact raw bytes before evidence import",
+    )
+    def audit_remote_return(
+        project_id: str, request: ProjectRemotePhysicalReturnAuditRequest
+    ) -> Dict[str, Any]:
+        try:
+            envelope = project_store.load_latest_with_recovery(project_id)
+            current_revision = int(envelope["revision"])
+            if current_revision != request.expected_revision:
+                raise RevisionConflict(
+                    f"project {project_id!r} is at revision {current_revision}, "
+                    f"expected {request.expected_revision}"
+                )
+            if request.handoff.get("schema_version") != REMOTE_PHYSICAL_HANDOFF_SCHEMA:
+                raise ValueError("remote handoff schema mismatch")
+            packet = build_project_physical_validation_packet(
+                envelope["snapshot"],
+                project_id=project_id,
+                revision=current_revision,
+            )
+            expected_handoff = build_remote_physical_handoff(
+                packet,
+                provider=dict(request.handoff.get("provider") or {}),
+                manufacturing_artifacts=list(
+                    request.handoff.get("manufacturing_artifacts") or []
+                ),
+            )
+            if request.handoff != expected_handoff:
+                raise RevisionConflict(
+                    "remote handoff is stale, altered, or belongs to another candidate"
+                )
+            raw_payloads: dict[str, bytes] = {}
+            for value in request.raw_files:
+                if value.path in raw_payloads:
+                    raise ValueError(f"raw payload path is duplicated: {value.path}")
+                try:
+                    raw_payloads[value.path] = base64.b64decode(
+                        value.content_base64, validate=True
+                    )
+                except (binascii.Error, ValueError) as exc:
+                    raise ValueError(
+                        f"raw payload {value.path!r} is not valid base64"
+                    ) from exc
+            audit = audit_remote_physical_return(
+                expected_handoff,
+                request.returned_manifest,
+                raw_payloads=raw_payloads,
+            )
+        except Exception as exc:
+            raise _error(exc) from exc
+        return {
+            "ok": audit["audit_pass"],
+            "project_id": project_id,
+            "revision": current_revision,
+            "remote_return_audit": audit,
+            "physical_correctness": "UNPROVEN",
+            "physical_authority_granted": False,
+            "automatic_authorization": False,
         }
 
     @router.post(

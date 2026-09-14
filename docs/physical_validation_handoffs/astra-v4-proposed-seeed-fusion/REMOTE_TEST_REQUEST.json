@@ -1,0 +1,283 @@
+{
+  "candidate_revision": "hs-astra-rawdoc-v4-20260913-1@b7c724e0561d4ec8",
+  "candidate_snapshot_hash": "sha256:b7c724e0561d4ec8ab21b7ad4e869256c5cca2f80416d1f07bd020164c152272",
+  "evidence_import": {
+    "existing_submission_route": "/v1/projects/hs-astra-rawdoc-v4-20260913-1/engineering/physical-validation/evidence",
+    "next_schema": "hardware_splicer.physical_evidence_envelope.v1",
+    "return_audit_is_physical_evidence": false,
+    "server_attestation_still_required": true
+  },
+  "gate_requests": [
+    {
+      "gate_id": "identify-dut",
+      "instrument_and_calibration_identity_required": false,
+      "kind": "inspection",
+      "phase": 0,
+      "prerequisite_gate_ids": [],
+      "procedure_id": "hs.spi.identify-dut.v1",
+      "required_measured_fields": [
+        "observed_top_marking",
+        "observed_package",
+        "observed_pin_count",
+        "observed_dimensions_mm"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "image/*"
+      ],
+      "requires_authorized_operation": null,
+      "safety": "Unpowered inspection only.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Record the exact physical DUT identity"
+    },
+    {
+      "gate_id": "identify-programmer",
+      "instrument_and_calibration_identity_required": false,
+      "kind": "inspection",
+      "phase": 0,
+      "prerequisite_gate_ids": [],
+      "procedure_id": "hs.spi.identify-programmer.v1",
+      "required_measured_fields": [
+        "manufacturer",
+        "model",
+        "serial_or_asset_id",
+        "interface_connector"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "image/*"
+      ],
+      "requires_authorized_operation": null,
+      "safety": "Do not connect the DUT or enable target power.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Record the exact programmer and interface identity"
+    },
+    {
+      "gate_id": "identify-adapter-artifact",
+      "instrument_and_calibration_identity_required": false,
+      "kind": "inspection",
+      "phase": 0,
+      "prerequisite_gate_ids": [],
+      "procedure_id": "hs.spi.identify-adapter-artifact.v1",
+      "required_measured_fields": [
+        "assembly_id",
+        "assembly_revision",
+        "translator_orderable_mpn",
+        "translator_package",
+        "schematic_hash",
+        "pcb_or_wiring_hash"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "image/*",
+        "application/*"
+      ],
+      "requires_authorized_operation": null,
+      "safety": "Unpowered inspection only; no identity may be inferred from family name.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Bind the assembled adapter and translator to immutable identities"
+    },
+    {
+      "gate_id": "cold-continuity-and-isolation",
+      "instrument_and_calibration_identity_required": true,
+      "kind": "electrical_measurement",
+      "phase": 1,
+      "prerequisite_gate_ids": [
+        "identify-dut",
+        "identify-programmer",
+        "identify-adapter-artifact"
+      ],
+      "procedure_id": "hs.spi.cold-continuity-isolation.v1",
+      "required_measured_fields": [
+        "net_by_net_results",
+        "ground_continuity_ohm",
+        "vcc_1v8_to_ground_ohm",
+        "vcc_3v3_to_ground_ohm",
+        "domain_isolation_results"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "text/csv",
+        "application/json"
+      ],
+      "requires_authorized_operation": null,
+      "safety": "All sources disconnected; discharge rails before resistance measurements.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Verify pin mapping, ground continuity, shorts, and domain isolation"
+    },
+    {
+      "gate_id": "current-limited-power-up",
+      "instrument_and_calibration_identity_required": true,
+      "kind": "electrical_measurement",
+      "phase": 2,
+      "prerequisite_gate_ids": [
+        "cold-continuity-and-isolation"
+      ],
+      "procedure_id": "hs.spi.current-limited-power-up.v1",
+      "required_measured_fields": [
+        "supply_current_limit_a",
+        "dut_vcc_min_v",
+        "dut_vcc_max_v",
+        "startup_peak_current_a",
+        "steady_state_current_a",
+        "power_off_backfeed_current_a"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "text/csv",
+        "application/json"
+      ],
+      "requires_authorized_operation": "bench_power",
+      "safety": "Requires an applicable human BENCH_POWER authorization before energizing.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Measure startup and steady-state rails under a current limit"
+    },
+    {
+      "gate_id": "logic-level-and-timing-capture",
+      "instrument_and_calibration_identity_required": true,
+      "kind": "electrical_measurement",
+      "phase": 3,
+      "prerequisite_gate_ids": [
+        "current-limited-power-up"
+      ],
+      "procedure_id": "hs.spi.logic-level-timing.v1",
+      "required_measured_fields": [
+        "spi_clock_hz",
+        "host_side_levels_v",
+        "dut_side_levels_v",
+        "rise_fall_times_s",
+        "propagation_delays_s",
+        "overshoot_undershoot_v"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "text/csv",
+        "application/octet-stream"
+      ],
+      "requires_authorized_operation": "bench_power",
+      "safety": "Begin at the lowest supported clock; stop on rail, current, or thermal excursion.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Capture both voltage domains and timing at the selected load and clock"
+    },
+    {
+      "gate_id": "read-only-jedec-identity",
+      "instrument_and_calibration_identity_required": true,
+      "kind": "load_test",
+      "phase": 4,
+      "prerequisite_gate_ids": [
+        "logic-level-and-timing-capture"
+      ],
+      "procedure_id": "hs.spi.read-only-jedec-id.v1",
+      "required_measured_fields": [
+        "command_hex",
+        "response_hex_by_trial",
+        "trial_count",
+        "clock_hz"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "text/csv",
+        "application/octet-stream"
+      ],
+      "requires_authorized_operation": "bench_power",
+      "safety": "Only read-only identity command 0x9F; WREN, program, erase, and status writes are forbidden.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Repeat a read-only JEDEC identity transaction"
+    },
+    {
+      "gate_id": "thermal-dwell",
+      "instrument_and_calibration_identity_required": true,
+      "kind": "thermal_test",
+      "phase": 4,
+      "prerequisite_gate_ids": [
+        "current-limited-power-up"
+      ],
+      "procedure_id": "hs.spi.thermal-dwell.v1",
+      "required_measured_fields": [
+        "ambient_c",
+        "dwell_s",
+        "translator_max_c",
+        "regulator_max_c",
+        "dut_max_c"
+      ],
+      "required_original_raw_file_count_min": 1,
+      "required_raw_media": [
+        "image/*",
+        "text/csv"
+      ],
+      "requires_authorized_operation": "bench_power",
+      "safety": "Stop immediately on unexpected heating or current-limit activation.",
+      "summary_pass_without_raw_files_accepted": false,
+      "title": "Measure translator, regulator, and DUT temperature over a bounded dwell"
+    }
+  ],
+  "handoff_id": "remote-physical-handoff-987035a2e27e074b",
+  "manufacturing_artifacts": [],
+  "policy": {
+    "authority_effect": "none",
+    "automatic_authorization": false,
+    "personal_contact_data_in_bundle": false,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "provider_summary_is_not_evidence": true,
+    "raw_vendor_model_bytes_in_bundle": false,
+    "simulated_evidence_accepted": false
+  },
+  "project_artifact_hashes": {
+    "canonical-project-snapshot": "sha256:b7c724e0561d4ec8ab21b7ad4e869256c5cca2f80416d1f07bd020164c152272"
+  },
+  "project_id": "hs-astra-rawdoc-v4-20260913-1",
+  "provider": {
+    "capabilities_requested": [
+      "custom_test_fixture_review",
+      "electrical_performance_test",
+      "original_raw_measurement_export",
+      "pcba_functional_test"
+    ],
+    "endorsement_asserted": false,
+    "engagement_mode": "pcba_production_and_test",
+    "provider_id": "proposed-seeed-fusion",
+    "provider_name": "Seeed Fusion PCBA",
+    "selection_status": "proposed_not_engaged",
+    "service_url": "https://www.seeedstudio.com/prototype-pcb-assembly.html"
+  },
+  "provider_return_requirements": {
+    "calibration_record_per_instrument": true,
+    "editable_summary_only_accepted": false,
+    "instrument_identity_per_instrumented_gate": true,
+    "measured_values_and_acceptance_criteria": true,
+    "named_direct_observer_per_executed_gate": true,
+    "original_raw_files_with_sha256_and_size": true,
+    "physical_authorization_from_provider_accepted": false,
+    "physical_site_identity": true,
+    "provider_attestation": true,
+    "provider_work_order_identity": true,
+    "test_article_serial_and_revision": true
+  },
+  "release_readiness": {
+    "fabrication_release_ready": false,
+    "missing_production_artifact_roles": [
+      "assembly_drawing",
+      "bom",
+      "fabrication_archive",
+      "pick_and_place",
+      "schematic",
+      "test_firmware"
+    ],
+    "production_artifact_set_complete": false,
+    "ready_for_provider_capability_review": true,
+    "ready_for_provider_quote": true,
+    "reason": "Human fabrication authorization is required even after all production artifacts exist.",
+    "required_production_artifact_roles": [
+      "assembly_drawing",
+      "bom",
+      "fabrication_archive",
+      "pick_and_place",
+      "schematic",
+      "test_firmware"
+    ]
+  },
+  "schema_version": "hardware_splicer.remote_physical_handoff.v1",
+  "source_physical_packet_id": "physical-validation-fdd10770454d7a84",
+  "source_physical_packet_sha256": "sha256:4579891f130f42e53f30ea82035f5e1b3856361944d887073d71fc8486447384"
+}

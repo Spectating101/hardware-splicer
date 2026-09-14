@@ -46,6 +46,14 @@ _TASK_OPERATION_PATHS = {
             "GET",
             "/v1/projects/{project_id}/engineering/physical-validation/packet",
         ),
+        (
+            "POST",
+            "/v1/projects/{project_id}/engineering/physical-validation/remote-handoff",
+        ),
+        (
+            "POST",
+            "/v1/projects/{project_id}/engineering/physical-validation/remote-return/audit",
+        ),
         ("POST", "/v1/engineering/physical-evidence/envelopes/build-attested"),
         (
             "POST",

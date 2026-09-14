@@ -1,0 +1,56 @@
+name: SPI Remote Physical Validation Handoff
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-remote-physical-validation.yml"
+      - "docs/SPI_REMOTE_PHYSICAL_VALIDATION.md"
+      - "docs/physical_validation_handoffs/**"
+      - "scripts/prepare_spi_remote_physical_handoff.py"
+      - "src/hardware_splicer/project_physical_validation.py"
+      - "src/hardware_splicer/remote_physical_validation.py"
+      - "tests/test_project_physical_validation.py"
+      - "tests/test_remote_physical_validation.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  remote-handoff-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run physical packet and remote-return contract tests
+        run: |
+          pytest -q \
+            tests/test_project_physical_validation.py \
+            tests/test_remote_physical_validation.py
+      - name: Reproduce the published Astra v4 handoff
+        run: |
+          rm -rf /tmp/hs-remote-handoff-replay
+          python scripts/prepare_spi_remote_physical_handoff.py \
+            --physical-packet docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/SOURCE_PHYSICAL_VALIDATION_PACKET.json \
+            --out-dir /tmp/hs-remote-handoff-replay \
+            --provider-id proposed-seeed-fusion \
+            --provider-name "Seeed Fusion PCBA" \
+            --engagement-mode pcba_production_and_test \
+            --service-url "https://www.seeedstudio.com/prototype-pcb-assembly.html"
+          cmp \
+            docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/REMOTE_TEST_REQUEST.json \
+            /tmp/hs-remote-handoff-replay/REMOTE_TEST_REQUEST.json
+          cmp \
+            docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/EVIDENCE_RETURN_MANIFEST.template.json \
+            /tmp/hs-remote-handoff-replay/EVIDENCE_RETURN_MANIFEST.template.json
+          cmp \
+            docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/REMOTE_TEST_PLAN.md \
+            /tmp/hs-remote-handoff-replay/REMOTE_TEST_PLAN.md
+          cmp \
+            docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/REMOTE_PHYSICAL_HANDOFF.zip \
+            /tmp/hs-remote-handoff-replay/REMOTE_PHYSICAL_HANDOFF.zip

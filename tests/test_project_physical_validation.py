@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 
 from fastapi.testclient import TestClient
 
@@ -10,6 +11,9 @@ from hardware_splicer.project_physical_validation import (
     project_candidate_boundary,
 )
 from hardware_splicer.project_store import ProjectStore
+from hardware_splicer.remote_physical_validation import (
+    build_remote_physical_return_template,
+)
 
 
 KEY = "p" * 48
@@ -265,10 +269,134 @@ def test_product_and_mcp_manifest_expose_physical_validation() -> None:
     paths = set(app.openapi()["paths"])
 
     assert "/v1/projects/{project_id}/engineering/physical-validation/packet" in paths
+    assert "/v1/projects/{project_id}/engineering/physical-validation/remote-handoff" in paths
+    assert (
+        "/v1/projects/{project_id}/engineering/physical-validation/remote-return/audit"
+        in paths
+    )
     assert "/v1/projects/{project_id}/engineering/physical-validation/evidence" in paths
 
     from hardware_splicer.mcp_backend_gateway import task_operation_manifest
 
     manifest = task_operation_manifest("physical_validation", app)
     assert manifest["authority_contract"]["projection_grants_physical_authority"] is False
-    assert len(manifest["workflow_operation_ids"]) == 4
+    assert len(manifest["workflow_operation_ids"]) == 6
+
+
+def test_remote_handoff_and_raw_return_audit_are_canonical_api_operations(tmp_path) -> None:
+    store = ProjectStore(tmp_path / "projects")
+    store.save("adapter", _snapshot(), expected_revision=0)
+    client = TestClient(create_product_app(store))
+    prepared = client.post(
+        "/v1/projects/adapter/engineering/physical-validation/remote-handoff",
+        json={
+            "expected_revision": 1,
+            "provider": {
+                "provider_id": "lab-01",
+                "provider_name": "Remote Lab",
+                "engagement_mode": "testing_only",
+                "capabilities_requested": ["raw_exports"],
+            },
+        },
+    )
+    assert prepared.status_code == 200, prepared.text
+    handoff = prepared.json()["remote_physical_handoff"]
+    assert handoff["policy"]["authority_effect"] == "none"
+    assert store.load("adapter")["revision"] == 1
+
+    raw = b"direct-camera-capture"
+    returned = build_remote_physical_return_template(handoff)
+    returned["provider"].update(
+        {"work_order_id": "WO-1", "physical_site_id": "SITE-1"}
+    )
+    returned["test_article"].update(
+        {
+            "assembly_id": "A-1",
+            "assembly_revision": "A",
+            "serial_numbers": ["SN-1"],
+        }
+    )
+    returned["provider_attestation"].update(
+        {
+            "signed_by": "operator-1",
+            "role": "test engineer",
+            "signed_at": CAPTURED_AT,
+        }
+    )
+    gate = next(
+        value for value in returned["gate_results"] if value["gate_id"] == "identify-dut"
+    )
+    gate.update(
+        {
+            "status": "pass",
+            "captured_at": CAPTURED_AT,
+            "operator_id": "operator-1",
+            "direct_operator_observation": True,
+            "measured_values": {
+                "observed_top_marking": "W25Q128JW",
+                "observed_package": "SOP-8",
+                "observed_pin_count": 8,
+                "observed_dimensions_mm": {"length": 5.3, "width": 7.9},
+            },
+            "acceptance_criteria": {"matches_work_order": True},
+            "raw_files": [
+                {
+                    "path": "raw/dut.jpg",
+                    "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
+                    "size_bytes": len(raw),
+                    "media_type": "image/jpeg",
+                }
+            ],
+        }
+    )
+    audited = client.post(
+        "/v1/projects/adapter/engineering/physical-validation/remote-return/audit",
+        json={
+            "expected_revision": 1,
+            "handoff": handoff,
+            "returned_manifest": returned,
+            "raw_files": [
+                {
+                    "path": "raw/dut.jpg",
+                    "content_base64": base64.b64encode(raw).decode("ascii"),
+                }
+            ],
+        },
+    )
+    assert audited.status_code == 200, audited.text
+    audit = audited.json()["remote_return_audit"]
+    assert audit["status"] == "eligible_for_physical_evidence_import"
+    assert audit["return_audit_is_physical_evidence"] is False
+    assert audited.json()["physical_authority_granted"] is False
+    assert store.load("adapter")["revision"] == 1
+
+
+def test_remote_return_audit_rejects_altered_handoff_against_canonical_project(tmp_path) -> None:
+    store = ProjectStore(tmp_path / "projects")
+    store.save("adapter", _snapshot(), expected_revision=0)
+    client = TestClient(create_product_app(store))
+    handoff = client.post(
+        "/v1/projects/adapter/engineering/physical-validation/remote-handoff",
+        json={
+            "expected_revision": 1,
+            "provider": {
+                "provider_id": "lab-01",
+                "provider_name": "Remote Lab",
+                "engagement_mode": "remote_lab",
+            },
+        },
+    ).json()["remote_physical_handoff"]
+    handoff["candidate_snapshot_hash"] = "sha256:" + "0" * 64
+
+    response = client.post(
+        "/v1/projects/adapter/engineering/physical-validation/remote-return/audit",
+        json={
+            "expected_revision": 1,
+            "handoff": handoff,
+            "returned_manifest": {},
+            "raw_files": [{"path": "raw/x", "content_base64": "eA=="}],
+        },
+    )
+
+    assert response.status_code == 409
+    assert "stale, altered" in response.json()["detail"]["message"]
