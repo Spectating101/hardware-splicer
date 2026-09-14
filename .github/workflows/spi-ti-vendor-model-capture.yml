@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/spi-ti-vendor-model-capture.yml"
       - "docs/SPI_TI_VENDOR_MODEL_CAPTURE.md"
+      - "docs/external_assessment/proof/vendor_models/**"
       - "scripts/capture_vendor_model.py"
       - "scripts/audit_spi_vendor_model_capabilities.py"
       - "src/hardware_splicer/vendor_model_capture.py"
@@ -65,18 +66,38 @@ jobs:
           root = Path('/tmp/hs-ti-model')
           manifest = json.loads((root / 'txu0304-ibis-scem787.capture.json').read_text())
           capability = json.loads((root / 'txu0304-ibis-scem787.capability.json').read_text())
+          receipt = json.loads(Path(
+              'docs/external_assessment/proof/vendor_models/2026-09-14-txu0304/TXU0304_CAPTURE_RECEIPT.json'
+          ).read_text())
           campaign = build_spi_virtual_model_campaign([manifest])
           gated = apply_spi_model_capability_gate(campaign, [capability])
 
-          assert manifest['sha256'] == 'sha256:1b7b33ae0ce9452eb69ed6ccea4d05f558fef83023d7bc6637b8e9342eb4b4d0'
+          assert manifest['sha256'] == receipt['outer_sha256']
+          assert manifest['size_bytes'] == receipt['outer_size_bytes']
+          assert manifest['model_id'] == receipt['model_id']
+          assert manifest['expected_model_kind'] == receipt['model_kind']
+          recognized = {row['path']: row for row in manifest['archive_members']}
+          for row in receipt['recognized_model_members']:
+              actual = recognized[row['path']]
+              assert actual['size_bytes'] == row['size_bytes']
+              assert actual['sha256'] == row['sha256']
+              assert actual['detected_model_kind'] == row['model_kind']
+
+          assert sorted(capability['component_names']) == sorted(receipt['observed_component_names'])
+          assert sorted(capability['model_types']) == sorted(receipt['observed_model_types'])
+          assert capability['model_count'] == receipt['observed_model_count']
+          assert capability['three_state_model_present'] is receipt['three_state_model_present']
+          assert capability['textual_power_state_markers'] == receipt['textual_power_state_markers']
+          assert capability['signal_integrity_structure_present'] is receipt['signal_integrity_structure_present']
+          assert capability['eligible_for_later_signal_integrity_execution'] is receipt['eligible_for_later_signal_integrity_execution']
+          assert capability['rail_absent_isolation_claim_supported'] is receipt['rail_absent_isolation_claim_supported']
+
           assert campaign['status'] == 'partial_model_execution_ready'
           assert campaign['model_captures']['txu0304-ibis-scem787']['accepted_capture'] is True
           assert campaign['ready_execution_ids'] == ['ibis-dut-rail-absent']
           assert campaign['execution_ready'] is False
           assert campaign['simulation_results'] == []
 
-          assert capability['eligible_for_later_signal_integrity_execution'] is True
-          assert capability['rail_absent_isolation_claim_supported'] is False
           assert gated['status'] == 'captured_models_no_semantically_executable_case'
           assert gated['ready_execution_ids'] == []
           assert gated['model_execution_result_count'] == 0
@@ -93,6 +114,8 @@ jobs:
               'schema_version': 'hardware_splicer.spi_ti_capture_adjudication.v2',
               'status': 'captured_vendor_model_no_execution_credit',
               'capture_sha256': manifest['sha256'],
+              'receipt_id': receipt['receipt_id'],
+              'receipt_binding_pass': True,
               'partial_campaign_status': campaign['status'],
               'input_ready_execution_ids': campaign['ready_execution_ids'],
               'capability_gated_status': gated['status'],
@@ -100,7 +123,7 @@ jobs:
               'executed_model_result_count': 0,
               'rail_absent_isolation_claim_supported_by_ibis_audit': False,
               'reason': (
-                  'The TI IBIS bytes are real and hash-bound and contain signal-integrity '
+                  'The pinned TI IBIS bytes are real and hash-bound and contain signal-integrity '
                   'structures, but the model does not execute the VCC-disconnect/OE transition '
                   'required by the rail-absent isolation contract.'
               ),
