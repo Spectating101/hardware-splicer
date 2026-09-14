@@ -1,0 +1,45 @@
+name: SPI Derived Virtual Lab
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/spi_derived_virtual_lab.py"
+      - "scripts/run_spi_derived_virtual_lab.py"
+      - "tests/test_spi_derived_virtual_lab.py"
+      - "docs/SPI_DERIVED_VIRTUAL_LAB.md"
+      - ".github/workflows/spi-derived-virtual-lab.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: spi-derived-virtual-lab-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  derived-virtual-lab:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Hardware Splicer and tests
+        run: python -m pip install -e '.[dev]'
+      - name: Run focused Derived Virtual Lab tests
+        run: pytest -q tests/test_spi_derived_virtual_lab.py
+      - name: Execute frozen 512-case benchmark
+        run: |
+          mkdir -p artifacts/derived_virtual_lab
+          python scripts/run_spi_derived_virtual_lab.py \
+            --report-out artifacts/derived_virtual_lab/report.json \
+            --corpus-out artifacts/derived_virtual_lab/corpus.json
+      - name: Upload deterministic experiment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-derived-virtual-lab-v1
+          path: artifacts/derived_virtual_lab/
+          if-no-files-found: error
+          retention-days: 30
