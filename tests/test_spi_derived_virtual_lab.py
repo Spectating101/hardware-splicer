@@ -7,6 +7,8 @@ from hardware_splicer.spi_derived_virtual_lab import (
     run_derived_virtual_lab_benchmark,
     run_readonly_spi_protocol_oracle,
 )
+from hardware_splicer.spi_power_budget import build_grounded_spi_power_inputs
+from hardware_splicer.spi_timing_budget import build_grounded_spi_timing_inputs
 
 
 def _nominal(profile: str):
@@ -17,6 +19,17 @@ def _nominal(profile: str):
         dut_vcc_v=1.8,
         ordinal=1,
     )
+
+
+def test_surrogate_parameters_remain_aligned_to_source_bound_budget_inputs() -> None:
+    case = _nominal("clean")
+    timing = build_grounded_spi_timing_inputs()
+    power = build_grounded_spi_power_inputs()
+
+    assert case["txu_forward_delay_ns"] == timing["txu0304"]["a_to_b_tpd_max_ns"]
+    assert case["txu_reverse_delay_ns"] == timing["txu0304"]["b_to_a_tpd_max_ns"]
+    assert case["dut_clock_to_output_ns"] == timing["w25q128jw"]["clock_low_to_output_valid_max_ns"]
+    assert case["regulator_capacity_a"] == power["regulator"]["rated_output_current_ma"] / 1000.0
 
 
 def test_frozen_corpus_contains_512_unique_cases_and_every_profile() -> None:
