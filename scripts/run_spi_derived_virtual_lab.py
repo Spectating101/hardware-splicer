@@ -13,6 +13,9 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
+from hardware_splicer.spi_derived_lab_source_manifest import (  # noqa: E402
+    build_derived_lab_source_manifest,
+)
 from hardware_splicer.spi_derived_virtual_lab import (  # noqa: E402
     generate_derived_surrogate_corpus,
     run_derived_virtual_lab_benchmark,
@@ -23,6 +26,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--report-out", type=Path, help="Optional path for the benchmark JSON report.")
     parser.add_argument("--corpus-out", type=Path, help="Optional path for the frozen 512-case corpus JSON.")
+    parser.add_argument("--source-manifest-out", type=Path, help="Optional path for the canonical-input source manifest.")
     args = parser.parse_args()
 
     report = run_derived_virtual_lab_benchmark()
@@ -36,6 +40,12 @@ def main() -> int:
         args.corpus_out.parent.mkdir(parents=True, exist_ok=True)
         args.corpus_out.write_text(
             json.dumps(generate_derived_surrogate_corpus(), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    if args.source_manifest_out:
+        args.source_manifest_out.parent.mkdir(parents=True, exist_ok=True)
+        args.source_manifest_out.write_text(
+            json.dumps(build_derived_lab_source_manifest(), indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
