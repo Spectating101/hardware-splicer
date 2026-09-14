@@ -7,7 +7,7 @@ import io
 import json
 import re
 import zipfile
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any, Iterable
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
@@ -160,6 +160,53 @@ def inspect_vendor_model_bytes(
     }
 
 
+def capture_vendor_model_file(
+    *,
+    path: str | Path,
+    model_id: str,
+    source_url: str,
+    expected_hosts: Iterable[str],
+    expected_model_kind: str,
+    filename: str | None = None,
+    expected_sha256: str | None = None,
+    max_bytes: int = _DEFAULT_MAX_BYTES,
+) -> tuple[bytes, dict[str, Any]]:
+    """Import a foreground vendor model file acquired through a browser or vendor session.
+
+    The local path is deliberately not persisted in the manifest.  HS validates the official
+    source locator/host, byte ceiling, model semantics, outer hash, and archive-member hashes in
+    exactly the same way as a network capture.  This is the supported path for vendor portals
+    that require login, acceptance, cookies, or other session-mediated downloads.
+    """
+
+    local_path = Path(path).expanduser()
+    if not local_path.is_file():
+        raise VendorModelCaptureError("vendor model local file does not exist or is not a file")
+    size = local_path.stat().st_size
+    if size <= 0:
+        raise VendorModelCaptureError("vendor model local file is empty")
+    if size > int(max_bytes):
+        raise VendorModelCaptureError("vendor model local file exceeds capture byte ceiling")
+    with local_path.open("rb") as handle:
+        payload = handle.read(int(max_bytes) + 1)
+    if len(payload) > int(max_bytes):
+        raise VendorModelCaptureError("vendor model local file exceeds capture byte ceiling")
+
+    manifest = inspect_vendor_model_bytes(
+        payload,
+        model_id=model_id,
+        source_url=source_url,
+        expected_hosts=expected_hosts,
+        filename=filename or local_path.name,
+        expected_model_kind=expected_model_kind,
+        expected_sha256=expected_sha256,
+        max_bytes=max_bytes,
+    )
+    manifest["acquisition_method"] = "local_file_import"
+    manifest["local_input_filename"] = local_path.name
+    return payload, manifest
+
+
 def capture_vendor_model_url(
     *,
     model_id: str,
@@ -206,6 +253,7 @@ def capture_vendor_model_url(
         max_bytes=max_bytes,
     )
     manifest["requested_url"] = url
+    manifest["acquisition_method"] = "network_fetch"
     return payload, manifest
 
 
