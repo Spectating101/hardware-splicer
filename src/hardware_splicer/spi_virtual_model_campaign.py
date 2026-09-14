@@ -9,7 +9,7 @@ from .spi_timing_budget import evaluate_spi_timing_budget
 from .spi_virtual_target import build_grounded_virtual_spi_target
 from .spi_virtual_verification import apply_spi_fault, verify_spi_virtual_candidate
 
-SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v4"
+SCHEMA_VERSION = "hardware_splicer.spi_virtual_model_campaign.v5"
 _CAPTURE_SCHEMA_VERSION = "hardware_splicer.vendor_model_capture.v1"
 
 _REQUIRED_MODEL_IDS = {
@@ -65,10 +65,12 @@ def build_spi_virtual_model_campaign(
 ) -> dict[str, Any]:
     """Build one reproducible campaign plan and readiness decision.
 
-    This planner never substitutes synthetic simulator output for missing manufacturer-model
-    bytes. Static verification, spec timing/power budgets, and adversarial checks can run
-    immediately; IBIS/Verilog execution remains blocked until every required model has an HS
-    capture manifest with a recognized model file of the expected kind.
+    Static verification, spec timing/power budgets, and adversarial checks can run immediately.
+    Model executions are admitted *per preregistered case*: an execution may run when its own
+    required model captures are present and the shared deterministic preconditions are safe.
+    Missing Winbond bytes therefore cannot manufacture a full campaign pass, but they also do
+    not prevent a TXU-only isolation case from earning modeled credit once the TXU capture is
+    valid. Full campaign readiness still requires every preregistered model and execution.
     """
 
     target = build_grounded_virtual_spi_target()
@@ -112,7 +114,7 @@ def build_spi_virtual_model_campaign(
             "detected": result["verification_status"] == "failed",
         }
 
-    planned_executions = [
+    planned_executions: list[dict[str, Any]] = [
         {
             "execution_id": "ibis-nominal-3v3-to-1v8",
             "engine_class": "IBIS signal-integrity",
@@ -150,22 +152,58 @@ def build_spi_virtual_model_campaign(
         },
     ]
 
-    model_capture_ready = not missing_models
     static_has_no_failures = static_result["counts"]["fail"] == 0
     timing_known_terms_safe = not str(timing_budget["status"]).startswith("failed")
     power_known_terms_safe = not str(power_budget["status"]).startswith("failed")
     fault_detection_ready = all(row["detected"] for row in adversarial_cases.values())
-    execution_ready = (
-        model_capture_ready
-        and static_has_no_failures
+    shared_preconditions_ready = (
+        static_has_no_failures
         and timing_known_terms_safe
         and power_known_terms_safe
         and fault_detection_ready
     )
 
-    if execution_ready:
+    execution_readiness: dict[str, Any] = {}
+    enriched_executions: list[dict[str, Any]] = []
+    for execution in planned_executions:
+        required_models = list(execution["required_models"])
+        missing_for_execution = sorted(
+            model_id
+            for model_id in required_models
+            if not model_rows.get(model_id, {}).get("accepted_capture")
+        )
+        execution_ready = shared_preconditions_ready and not missing_for_execution
+        enriched = {
+            **execution,
+            "model_capture_ready": not missing_for_execution,
+            "missing_required_model_ids": missing_for_execution,
+            "execution_ready": execution_ready,
+        }
+        enriched_executions.append(enriched)
+        execution_readiness[execution["execution_id"]] = {
+            "execution_ready": execution_ready,
+            "model_capture_ready": not missing_for_execution,
+            "missing_required_model_ids": missing_for_execution,
+            "shared_preconditions_ready": shared_preconditions_ready,
+        }
+
+    ready_execution_ids = sorted(
+        execution_id
+        for execution_id, row in execution_readiness.items()
+        if row["execution_ready"]
+    )
+    blocked_execution_ids = sorted(set(execution_readiness) - set(ready_execution_ids))
+    model_capture_ready = not missing_models
+    full_execution_ready = bool(enriched_executions) and len(ready_execution_ids) == len(
+        enriched_executions
+    )
+    any_execution_ready = bool(ready_execution_ids)
+
+    if full_execution_ready:
         status = "ready_for_model_execution"
-    elif missing_models:
+    elif any_execution_ready:
+        status = "partial_model_execution_ready"
+    elif shared_preconditions_ready and missing_models:
         status = "model_capture_required"
     else:
         status = "blocked"
@@ -191,8 +229,13 @@ def build_spi_virtual_model_campaign(
         "power_fully_closed": power_budget["status"] == "passed_modeled_power_budget",
         "adversarial_fault_detection": adversarial_cases,
         "fault_detection_ready": fault_detection_ready,
-        "planned_executions": planned_executions,
-        "execution_ready": execution_ready,
+        "shared_preconditions_ready": shared_preconditions_ready,
+        "planned_executions": enriched_executions,
+        "execution_readiness": execution_readiness,
+        "ready_execution_ids": ready_execution_ids,
+        "blocked_execution_ids": blocked_execution_ids,
+        "any_execution_ready": any_execution_ready,
+        "execution_ready": full_execution_ready,
         "simulation_results": [],
         "model_inference_used": False,
         "measured_evidence_present": False,
@@ -202,10 +245,11 @@ def build_spi_virtual_model_campaign(
         "physical_authority_granted": False,
         "authority_effect": "none",
         "nonclaims": [
-            "No IBIS or Verilog execution is claimed until immutable vendor-model bytes are captured and semantically recognized.",
+            "Execution readiness is case-specific; partial readiness is not full campaign readiness.",
+            "No execution receives model-backed credit without immutable required model captures.",
             "Spec-level residual timing margin is not a validated timing path.",
             "Regulator capacity without a worst-case DUT load is not a validated rail budget.",
-            "A ready campaign is not a passing simulation campaign.",
-            "A passing simulation campaign is not measured physical evidence.",
+            "A ready execution is not a passing simulation execution.",
+            "A passed modeled campaign is not measured physical evidence.",
         ],
     }
