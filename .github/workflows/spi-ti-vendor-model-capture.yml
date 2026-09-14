@@ -35,7 +35,7 @@ jobs:
           pytest -q \
             tests/test_spi_vendor_model_capability_audit.py \
             tests/test_spi_model_capability_gate.py
-      - name: Capture official TI TXU0304 IBIS bytes
+      - name: Capture pinned official TI TXU0304 IBIS bytes
         run: |
           rm -rf /tmp/hs-ti-model
           python scripts/capture_vendor_model.py \
@@ -44,6 +44,7 @@ jobs:
             --expected-host www.ti.com \
             --filename SCEM787.ZIP \
             --expected-kind IBIS \
+            --expected-sha256 sha256:1b7b33ae0ce9452eb69ed6ccea4d05f558fef83023d7bc6637b8e9342eb4b4d0 \
             --out-dir /tmp/hs-ti-model \
             > /tmp/hs-ti-capture-summary.json
       - name: Audit model claim capabilities
@@ -67,15 +68,13 @@ jobs:
           campaign = build_spi_virtual_model_campaign([manifest])
           gated = apply_spi_model_capability_gate(campaign, [capability])
 
-          # PR #93's planner says the exact model input exists for the isolation case.
+          assert manifest['sha256'] == 'sha256:1b7b33ae0ce9452eb69ed6ccea4d05f558fef83023d7bc6637b8e9342eb4b4d0'
           assert campaign['status'] == 'partial_model_execution_ready'
           assert campaign['model_captures']['txu0304-ibis-scem787']['accepted_capture'] is True
           assert campaign['ready_execution_ids'] == ['ibis-dut-rail-absent']
           assert campaign['execution_ready'] is False
           assert campaign['simulation_results'] == []
 
-          # Real-byte semantic audit is stricter: this ordinary Input/Output IBIS file does
-          # not execute the VCC-disconnect/OE transition required for isolation credit.
           assert capability['eligible_for_later_signal_integrity_execution'] is True
           assert capability['rail_absent_isolation_claim_supported'] is False
           assert gated['status'] == 'captured_models_no_semantically_executable_case'
@@ -94,7 +93,7 @@ jobs:
               'schema_version': 'hardware_splicer.spi_ti_capture_adjudication.v2',
               'status': 'captured_vendor_model_no_execution_credit',
               'capture_sha256': manifest['sha256'],
-              'input_campaign_status': campaign['status'],
+              'partial_campaign_status': campaign['status'],
               'input_ready_execution_ids': campaign['ready_execution_ids'],
               'capability_gated_status': gated['status'],
               'capability_ready_execution_ids': gated['ready_execution_ids'],
