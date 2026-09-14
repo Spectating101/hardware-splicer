@@ -39,6 +39,8 @@ from .project_store import (
     RevisionConflict,
 )
 
+_MAX_REMOTE_RETURN_RAW_BYTES = 64 * 1024 * 1024
+
 
 class PhysicalValidationApiModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -219,6 +221,7 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                     "remote handoff is stale, altered, or belongs to another candidate"
                 )
             raw_payloads: dict[str, bytes] = {}
+            total_raw_bytes = 0
             for value in request.raw_files:
                 if value.path in raw_payloads:
                     raise ValueError(f"raw payload path is duplicated: {value.path}")
@@ -230,6 +233,11 @@ def create_project_physical_validation_router(project_store: ProjectStore) -> AP
                     raise ValueError(
                         f"raw payload {value.path!r} is not valid base64"
                     ) from exc
+                total_raw_bytes += len(raw_payloads[value.path])
+                if total_raw_bytes > _MAX_REMOTE_RETURN_RAW_BYTES:
+                    raise ValueError(
+                        "remote return raw payloads exceed the 64 MiB request limit"
+                    )
             audit = audit_remote_physical_return(
                 expected_handoff,
                 request.returned_manifest,
