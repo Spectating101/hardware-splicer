@@ -5,7 +5,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
+
+# ``python scripts/<tool>.py`` puts scripts/ first on sys.path, where the legacy
+# scripts/hardware_splicer.py would shadow the real package. Bind these documented
+# operator entrypoints to this checkout's source tree before importing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from hardware_splicer.vendor_model_capture import capture_vendor_model_url, manifest_json
 
