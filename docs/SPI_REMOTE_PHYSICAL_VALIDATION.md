@@ -114,3 +114,11 @@ does not yet contain a released schematic, PCB, BOM, placement set, or test firm
 remote lane therefore makes the project quote-ready, not fabrication-ready.  Completing those
 production artifacts is the next engineering tranche before any service should manufacture or
 energize a board.
+
+That historical family-level state is preserved in PR #99. The later exact reference design
+adds a separate campaign bridge rather than rewriting the old candidate identity. Build it from
+`hardware/reference_designs/spi_flash_adapter_v1/build_remote_fct_campaign.py`. Its outer
+archive includes and byte-verifies the actual six required production roles, while the embedded
+remote-handoff metadata still has no authority effect. The MCU-less adapter's historical
+`test_firmware` role is fulfilled by explicitly identified bounded **host test software**; the
+package does not imply firmware is installed on the board.

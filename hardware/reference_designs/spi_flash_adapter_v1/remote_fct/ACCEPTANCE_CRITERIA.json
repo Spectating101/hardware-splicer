@@ -1,0 +1,58 @@
+{
+  "schema_version": "hardware_splicer.spi_remote_fct_acceptance.v1",
+  "campaign_id": "spi-flash-adapter-v1-remote-fct-r1",
+  "design_revision": "0.2-modeled",
+  "assembly": {
+    "required_fitted": ["U1", "U2", "U3", "R2", "R3", "R5", "R6", "R7", "C1", "C2", "C3", "C4", "C5", "C6"],
+    "required_initial_dnp": ["R1", "R4"],
+    "jp1_header_fitted": true,
+    "jp1_shunt_initially_fitted": false,
+    "substitutions_require_new_review": true
+  },
+  "cold": {
+    "all_sources_disconnected": true,
+    "ground_continuity_max_ohm": 1.0,
+    "hard_short_to_ground_forbidden": ["3V3", "1V8", "DUT_1V8", "HOST_3V3"],
+    "oe_pulldown_and_cs_pullups_must_match_netlist": true
+  },
+  "power": {
+    "phase_1_input": "R1 pad 2 / TP2 (3V3), with R1, R4 and JP1 open",
+    "phase_1_current_limit_ma": 10,
+    "phase_2_current_limit_ma": 50,
+    "accepted_3v3_range_v": [3.2, 3.4],
+    "accepted_1v8_range_v": [1.75, 1.85],
+    "current_limit_activation_allowed": false,
+    "dut_vcc_above_1v7_before_enable_min_us": 20,
+    "power_cycle_dut_vcc_max_v": 0.8,
+    "power_cycle_low_min_us": 100
+  },
+  "spi": {
+    "mode": 0,
+    "initial_characterization_clock_hz": 1000000,
+    "maximum_campaign_clock_hz": 5000000,
+    "only_command_hex": "9f",
+    "expected_response_hex": "ef6018",
+    "minimum_trials_at_5mhz": 10,
+    "write_program_erase_status_write_reset_forbidden": true,
+    "both_voltage_domains_require_raw_waveform_capture": true
+  },
+  "thermal": {
+    "dwell_s": 60,
+    "procedural_stop_temperature_rise_c": 10.0,
+    "note": "The 10 C rise is a conservative campaign stop threshold, not a component rating or certification limit."
+  },
+  "return": {
+    "summary_only_accepted": false,
+    "original_raw_files_required": true,
+    "instrument_and_calibration_identity_required": true,
+    "direct_operator_identity_required": true,
+    "failed_trials_must_be_returned": true
+  },
+  "authority": {
+    "fabrication_release_ready": false,
+    "power_on_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "automatic_authorization": false,
+    "human_authorization_required": true
+  }
+}

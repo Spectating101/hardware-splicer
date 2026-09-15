@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
+import contextlib
 import hashlib
 import json
 import math
@@ -119,17 +121,25 @@ def validate_ground_reference(board: pcbnew.BOARD, manifest: dict) -> dict:
     return {"ground_zones": len(zones), "ground_stitching_vias": len(vias), "filled_ground_area_mm2": areas, "nearest_ground_via_mm": escapes, "signal_routing_layers": ["F.Cu"]}
 
 
-def main() -> None:
+def main(*, report_dir: Path | None = None) -> None:
     manifest = json.loads(MANIFEST.read_text())
     require(manifest["authority"] == AUTHORITY, "design authority boundary changed unexpectedly")
     require(not (HERE / "spi_flash_adapter_v1.kicad_dru").exists(), "additional custom DRC rules must be explicitly bound before use")
     validate_rules(json.loads((HERE / RECEIPT_INPUTS["project_rules"]).read_text()))
     validate_timing(manifest)
     board = pcbnew.LoadBoard(str(BOARD))
-    with tempfile.TemporaryDirectory(prefix="hs-spi-verify-") as temporary:
-        erc_report = Path(temporary) / "erc.json"
-        drc_report = Path(temporary) / "drc.json"
-        netlist = Path(temporary) / "netlist.xml"
+    report_context = (
+        contextlib.nullcontext(str(report_dir))
+        if report_dir is not None
+        else tempfile.TemporaryDirectory(prefix="hs-spi-verify-")
+    )
+    if report_dir is not None:
+        report_dir.mkdir(parents=True, exist_ok=True)
+    with report_context as temporary:
+        report_root = Path(temporary)
+        erc_report = report_root / "erc.json"
+        drc_report = report_root / "drc.json"
+        netlist = report_root / "netlist.xml"
         command("kicad-cli", "sch", "export", "netlist", str(SCHEMATIC), "--format", "kicadxml", "-o", str(netlist))
         root = ET.parse(netlist).getroot()
         pin_nets = validate_topology(root)
@@ -137,8 +147,10 @@ def main() -> None:
             validate_bom(root, list(csv.DictReader(source)))
         validate_board_parity(board, root, pin_nets)
         erc_stdout = command("kicad-cli", "sch", "erc", str(SCHEMATIC), "-o", str(erc_report), "--format", "json", "--severity-all", "--exit-code-violations", allowed_returncodes=(0, 5))
+        (report_root / "erc.stdout.txt").write_text(erc_stdout, encoding="utf-8")
         validate_erc(json.loads(erc_report.read_text()), erc_stdout)
         drc_stdout = command("kicad-cli", "pcb", "drc", str(BOARD), "-o", str(drc_report), "--format", "json", "--severity-all", "--schematic-parity", "--exit-code-violations", allowed_returncodes=(0, 5))
+        (report_root / "drc.stdout.txt").write_text(drc_stdout, encoding="utf-8")
         advisories = validate_drc(json.loads(drc_report.read_text()), drc_stdout, compatible_library_footprints(board))
     ground = validate_ground_reference(board, manifest)
     footprints = list(board.GetFootprints())
@@ -170,6 +182,12 @@ def main() -> None:
 
 if __name__ == "__main__":
     try:
-        main()
+        parser = argparse.ArgumentParser(description=__doc__)
+        parser.add_argument(
+            "--report-dir",
+            type=Path,
+            help="retain native ERC/DRC/netlist reports and command stdout",
+        )
+        main(report_dir=parser.parse_args().report_dir)
     except (ValueError, KeyError, TypeError, ET.ParseError) as exc:
         raise SystemExit(f"verification failed: {exc}") from exc

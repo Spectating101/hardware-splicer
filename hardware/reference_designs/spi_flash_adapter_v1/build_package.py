@@ -53,6 +53,14 @@ def normalize_generated_timestamps(root: Path) -> None:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
+        if path.suffix.casefold() == ".pdf":
+            payload = re.sub(
+                rb"/CreationDate \(D:\d{14}\)",
+                b"/CreationDate (D:20260915000000)",
+                path.read_bytes(),
+            )
+            path.write_bytes(payload)
+            continue
         text = path.read_text()
         for pattern, replacement in replacements:
             text = re.sub(pattern, replacement, text)
@@ -88,6 +96,16 @@ def main() -> None:
             "--black-and-white",
             "-o",
             str(review),
+        )
+        run(
+            "kicad-cli",
+            "sch",
+            "export",
+            "pdf",
+            str(SCHEMATIC),
+            "--black-and-white",
+            "-o",
+            str(review / "spi_flash_adapter_v1-schematic.pdf"),
         )
         run(
             "kicad-cli",
@@ -146,6 +164,21 @@ def main() -> None:
             "--mode-single",
             "-o",
             str(review / "spi_flash_adapter_v1-top.svg"),
+        )
+        run(
+            "kicad-cli",
+            "pcb",
+            "export",
+            "pdf",
+            str(BOARD),
+            "--layers",
+            "F.Fab,F.Silkscreen,Edge.Cuts",
+            "--black-and-white",
+            "--sketch-pads-on-fab-layers",
+            "--crossout-DNP-footprints-on-fab-layers",
+            "--mode-single",
+            "-o",
+            str(review / "spi_flash_adapter_v1-front-assembly.pdf"),
         )
         normalize_generated_timestamps(manufacturing)
         normalize_generated_timestamps(review)

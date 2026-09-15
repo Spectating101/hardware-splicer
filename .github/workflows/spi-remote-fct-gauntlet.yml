@@ -1,0 +1,56 @@
+name: SPI Remote FCT Gauntlet Package
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-remote-fct-gauntlet.yml"
+      - "hardware/reference_designs/spi_flash_adapter_v1/**"
+      - "scripts/run_spi_read_only_jedec_id.py"
+      - "src/hardware_splicer/spi_remote_fct.py"
+      - "src/hardware_splicer/project_physical_validation.py"
+      - "src/hardware_splicer/remote_physical_validation.py"
+      - "tests/test_spi_remote_fct.py"
+      - "tests/test_spi_remote_fct_campaign.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  remote-fct-campaign:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Hardware Splicer and KiCad 9
+        run: |
+          python -m pip install -e '.[dev]'
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          case "$(kicad-cli --version)" in
+            9.*) ;;
+            *) echo "KiCad 9.x is required" >&2; exit 1 ;;
+          esac
+      - name: Verify guarded host runner
+        run: pytest -q tests/test_spi_remote_fct.py
+      - name: Build and adversarially audit deterministic campaign
+        working-directory: hardware/reference_designs/spi_flash_adapter_v1
+        run: |
+          python build_remote_fct_campaign.py --output /tmp/spi-remote-fct-a.zip
+          python build_remote_fct_campaign.py --output /tmp/spi-remote-fct-b.zip
+          cmp /tmp/spi-remote-fct-a.zip /tmp/spi-remote-fct-b.zip
+          sha256sum /tmp/spi-remote-fct-a.zip
+      - name: Run archive tamper and authority tests
+        run: pytest -q tests/test_spi_remote_fct_campaign.py
+      - name: Upload non-authorizing campaign package
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-flash-adapter-v1-remote-fct-gauntlet
+          path: /tmp/spi-remote-fct-a.zip
+          if-no-files-found: error

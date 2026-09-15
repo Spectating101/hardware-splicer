@@ -173,3 +173,19 @@ from being connected together through R1.
    through the existing Hardware Splicer bench evidence contract.
 
 Until that sequence is reviewed and completed, physical correctness remains `UNPROVEN`.
+
+## Remote FCT and Gauntlet campaign
+
+For execution by a PCBA functional-test service or remote laboratory, build the deterministic
+campaign projection:
+
+```bash
+python3 build_remote_fct_campaign.py \
+  --output out/spi-flash-adapter-v1-remote-fct.zip
+```
+
+The outer archive contains the actual byte-bound fabrication, assembly, BOM, placement,
+schematic and bounded host-test artifacts—not only metadata references—plus native KiCad
+reports, the historical Astra source packet, an implementation-specific physical packet,
+provider return template and `PACKAGED_NOT_PHYSICAL` Gauntlet state. Contact data and vendor
+credentials are excluded. A successful build does not authorize fabrication or power.

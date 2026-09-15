@@ -5,10 +5,13 @@ import json
 import zipfile
 from io import BytesIO
 
+import pytest
+
 from hardware_splicer.project_physical_validation import (
     build_project_physical_validation_packet,
 )
 from hardware_splicer.remote_physical_validation import (
+    RemotePhysicalValidationError,
     audit_remote_physical_return,
     build_remote_physical_handoff,
     build_remote_physical_handoff_archive,
@@ -81,6 +84,27 @@ def test_handoff_archive_is_byte_deterministic_and_manifested() -> None:
             payload = archive.read("REMOTE_PHYSICAL_HANDOFF/" + row["path"])
             assert "sha256:" + hashlib.sha256(payload).hexdigest() == row["sha256"]
             assert len(payload) == row["size_bytes"]
+
+
+def test_handoff_rejects_unsafe_manufacturing_artifact_path() -> None:
+    with pytest.raises(RemotePhysicalValidationError, match="filename is unsafe"):
+        build_remote_physical_handoff(
+            _physical_packet(),
+            provider={
+                "provider_id": "contract-lab",
+                "provider_name": "Contract Lab",
+                "engagement_mode": "pcba_production_and_test",
+            },
+            manufacturing_artifacts=[
+                {
+                    "role": "schematic",
+                    "artifact_id": "schematic-1",
+                    "content_hash": "sha256:" + "0" * 64,
+                    "filename": "../schematic.pdf",
+                    "size_bytes": 1,
+                }
+            ],
+        )
 
 
 def _completed_identity_return(handoff: dict, payload: bytes) -> dict:

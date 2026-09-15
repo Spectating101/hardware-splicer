@@ -113,14 +113,29 @@ def _normalize_artifacts(
                 f"manufacturing artifact role is duplicated: {role}"
             )
         roles.add(role)
-        normalized.append(
-            {
-                "role": role,
-                "artifact_id": artifact_id,
-                "content_hash": content_hash,
-                "filename": str(row.get("filename") or ""),
-            }
-        )
+        filename = str(row.get("filename") or "")
+        if filename and _safe_relative_path(filename) is None:
+            raise RemotePhysicalValidationError(
+                f"manufacturing artifact filename is unsafe: {filename}"
+            )
+        size_bytes = row.get("size_bytes")
+        if size_bytes is not None and (
+            not isinstance(size_bytes, int)
+            or isinstance(size_bytes, bool)
+            or size_bytes < 0
+        ):
+            raise RemotePhysicalValidationError(
+                "manufacturing artifact size_bytes must be a non-negative integer"
+            )
+        normalized_row: dict[str, Any] = {
+            "role": role,
+            "artifact_id": artifact_id,
+            "content_hash": content_hash,
+            "filename": filename,
+        }
+        if size_bytes is not None:
+            normalized_row["size_bytes"] = size_bytes
+        normalized.append(normalized_row)
     return sorted(normalized, key=lambda row: (row["role"], row["artifact_id"]))
 
 

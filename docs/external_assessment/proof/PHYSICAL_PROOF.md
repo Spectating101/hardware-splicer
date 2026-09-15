@@ -4,6 +4,10 @@
 
 A software workflow, simulated capture or CI job name is not physical proof.
 
+The exact SPI reference implementation now has a deterministic remote-FCT preparation path;
+see [`SPI_REMOTE_FCT_CAMPAIGN.md`](SPI_REMOTE_FCT_CAMPAIGN.md). That package closes the
+manufacturing/test handoff gap but intentionally leaves this physical-proof status pending.
+
 ## Required setup
 
 - fresh checkout from the chosen frozen/proof revision;
