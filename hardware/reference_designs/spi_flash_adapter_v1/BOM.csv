@@ -1,10 +1,11 @@
-References,Quantity,Value,Manufacturer,Manufacturer Part Number,Footprint,Purpose
-J1,1,HOST_SPI_1x06,Samtec,TSW-106-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,3.3 V host SPI interface
-U1,1,TXU0304PWR,Texas Instruments,TXU0304PWR,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,3+1 fixed-direction SPI level translation
-U2,1,W25Q128JWSIQ,Winbond Electronics,W25Q128JWSIQ,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,1.8 V 128-Mbit SPI NOR target
-U3,1,TLV75518PDBVR,Texas Instruments,TLV75518PDBVR,Package_TO_SOT_SMD:SOT-23-5,3.3 V to 1.8 V regulation
-R1 R4,2,0R,Yageo,RC0603JR-070RL,Resistor_SMD:R_0603_1608Metric,Removable power and current-measurement links
-R2 R3,2,10k,Yageo,RC0603FR-0710KL,Resistor_SMD:R_0603_1608Metric,IO2 and IO3 defined-high bias
-C1 C6,2,1uF 10V X7R,Murata,GRM188R71A105KA61D,Capacitor_SMD:C_0603_1608Metric,Input and DUT-domain bulk bypass
-C2,1,4.7uF 6.3V X5R,Murata,GRM188R60J475KE19D,Capacitor_SMD:C_0603_1608Metric,LDO output bypass
-C3 C4 C5,3,100nF 16V X7R,Murata,GRM188R71C104KA01D,Capacitor_SMD:C_0603_1608Metric,Local high-frequency bypass
+References,Quantity,Value,Manufacturer,Manufacturer Part Number,Footprint,Initial Assembly,Purpose
+J1,1,HOST_SPI_1x06,Samtec,TSW-106-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,FIT,3.3 V host SPI interface
+JP1,1,ENABLE_AFTER_RAIL_CHECK,Samtec,TSW-102-07-T-S,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,FIT,Enable header only; NO SHUNT fitted or supplied
+U1,1,TXU0304PWR,Texas Instruments,TXU0304PWR,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,FIT,3+1 fixed-direction SPI level translation
+U2,1,W25Q128JWSIQ,Winbond Electronics,W25Q128JWSIQ,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,FIT,1.8 V 128-Mbit SPI NOR target
+U3,1,TLV75518PDBVR,Texas Instruments,TLV75518PDBVR,Package_TO_SOT_SMD:SOT-23-5,FIT,3.3 V to 1.8 V regulation
+R1 R4,2,0R,Yageo,RC0603JR-070RL,Resistor_SMD:R_0603_1608Metric,DNP,Supply loose for reviewed bring-up; initially open rail links
+R2 R3 R5 R6 R7,5,10k,Yageo,RC0603FR-0710KL,Resistor_SMD:R_0603_1608Metric,FIT,IO2/IO3 and CS pull-ups; OE default-disable pull-down
+C1 C6,2,1uF 10V X7R,Murata,GRM188R71A105KA61D,Capacitor_SMD:C_0603_1608Metric,FIT,Input and DUT-domain bulk bypass
+C2,1,4.7uF 6.3V X5R,Murata,GRM188R60J475KE19D,Capacitor_SMD:C_0603_1608Metric,FIT,LDO output bypass
+C3 C4 C5,3,100nF 16V X7R,Murata,GRM188R71C104KA01D,Capacitor_SMD:C_0603_1608Metric,FIT,Local high-frequency bypass

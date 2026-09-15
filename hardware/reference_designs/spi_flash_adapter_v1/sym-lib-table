@@ -1,5 +1,6 @@
 (sym_lib_table
   (version 7)
+  (lib (name "HardwareSplicer")(type "KiCad")(uri "${KIPRJMOD}/HardwareSplicer.kicad_sym")(options "")(descr "Manufacturer-specific reference-design symbols"))
   (lib (name "Connector")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Connector.kicad_sym")(options "")(descr ""))
   (lib (name "Connector_Generic")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Connector_Generic.kicad_sym")(options "")(descr ""))
   (lib (name "Device")(type "KiCad")(uri "${KICAD9_SYMBOL_DIR}/Device.kicad_sym")(options "")(descr ""))

@@ -1,12 +1,13 @@
 {
   "schema_version": "hardware_splicer.reference_design.v1",
   "design_id": "spi-flash-adapter-v1",
-  "revision": "0.1-modeled",
+  "revision": "0.2-modeled",
   "result_status": "bounded_pre_fabrication_result",
   "target": {
     "host_supply_v": 3.3,
     "dut_supply_nominal_v": 1.8,
     "initial_spi_clock_hz": 5000000,
+    "initial_spi_mode": 0,
     "first_transaction": "read-only JEDEC ID command 0x9F",
     "expected_jedec_id": "EF6018"
   },
@@ -53,11 +54,13 @@
     "conservative_flash_allocation_ma": 20.0,
     "translator_static_max_ma": 0.008,
     "two_pullup_low_state_allocation_ma": 0.36,
-    "allocated_steady_state_ma": 20.368,
-    "capacity_margin_ma": 479.632,
+    "dut_cs_pullup_low_state_allocation_ma": 0.18,
+    "oe_pulldown_enabled_allocation_ma": 0.18,
+    "allocated_steady_state_ma": 20.728,
+    "component_rating_minus_allocated_terms_ma": 479.272,
     "selected_input_capacitance_uf": 1.0,
     "selected_output_capacitance_uf": 4.7,
-    "status": "known_capacity_terms_pass_physical_behavior_unproven"
+    "status": "partial_static_allocation_only_dynamic_host_and_thermal_limits_unproven"
   },
   "timing_budget": {
     "clock_period_ns": 200.0,
@@ -66,14 +69,31 @@
     "translator_b_to_a_max_ns": 15.0,
     "flash_clock_low_to_output_valid_max_ns": 6.0,
     "known_forward_residual_ns": 81.0,
-    "known_read_return_residual_ns": 79.0,
+    "known_read_return_residual_ns": 60.0,
+    "read_return_equation": "half_period - outward_clock_translator - flash_clock_to_output - return_translator",
     "status": "blocked_incomplete_host_load_and_interconnect_model"
   },
   "bringup_controls": {
     "R1": "removable host power/current insertion link",
     "R4": "removable DUT_1V8 isolation/current insertion link",
-    "testpoints": 15,
+    "R5": "10k HOST_CS_N to HOST_3V3 upstream of R1; high default when host domain is powered",
+    "R6": "10k DUT_CS_N to DUT_1V8; CS follows DUT rail while translator disabled",
+    "R7": "10k TRANSLATOR_OE to GND; default disabled",
+    "JP1": "normally open enable header; bridge only after rail acceptance and host CS high",
+    "initial_dnp_references": ["R1", "R4"],
+    "enable_shunt_initially_fitted": false,
+    "min_vcc_to_cs_low_us": 20,
+    "power_cycle_vcc_max_v": 0.8,
+    "power_cycle_min_low_us": 100,
+    "testpoints": 18,
     "mounting_holes": 4
+  },
+  "layout_contract": {
+    "ground_reference_layers": ["F.Cu", "B.Cu"],
+    "signal_routing_layers": ["F.Cu"],
+    "local_ground_escape_max_mm": 2.0,
+    "minimum_ground_stitching_vias": 20,
+    "signal_integrity_status": "physical_waveforms_and_stackup_unproven"
   },
   "acceptance": {
     "kicad_erc_required": true,

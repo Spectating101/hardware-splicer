@@ -14,19 +14,20 @@ import tempfile
 import zipfile
 from pathlib import Path
 
+from design_checks import RECEIPT_INPUTS
+
 
 HERE = Path(__file__).resolve().parent
 SCHEMATIC = HERE / "spi_flash_adapter_v1.kicad_sch"
 BOARD = HERE / "spi_flash_adapter_v1.kicad_pcb"
 COPY_FILES = (
     "README.md",
-    "BOM.csv",
-    "design_manifest.json",
     "verification.json",
-    "spi_flash_adapter_v1.kicad_sch",
-    "spi_flash_adapter_v1.kicad_pcb",
-    "spi_flash_adapter_v1.kicad_pro",
-    "sym-lib-table",
+    *RECEIPT_INPUTS.values(),
+    "generate_schematic.py",
+    "generate_pcb.py",
+    "route_pcb.py",
+    "build_package.py",
 )
 FIXED_ZIP_TIME = (2026, 9, 15, 0, 0, 0)
 
@@ -95,7 +96,7 @@ def main() -> None:
             "gerbers",
             str(BOARD),
             "--layers",
-            "F.Cu,B.Cu,F.Mask,B.Mask,F.Silkscreen,Edge.Cuts",
+            "F.Cu,B.Cu,F.Mask,B.Mask,F.Paste,B.Paste,F.Silkscreen,Edge.Cuts",
             "--precision",
             "6",
             "-o",

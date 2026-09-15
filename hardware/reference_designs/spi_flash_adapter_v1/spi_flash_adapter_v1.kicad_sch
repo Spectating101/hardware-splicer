@@ -2,12 +2,12 @@
 	(version 20250114)
 	(generator "eeschema")
 	(generator_version "9.0")
-	(uuid "67419f6f-d0b9-420c-b686-0e67855ba8a6")
+	(uuid "e89f4604-d827-4cea-a2ff-4e370130edb6")
 	(paper "A4")
 	(title_block
 		(title "3.3 V host to 1.8 V W25Q128JW SPI adapter")
 		(date "2026-09-15")
-		(rev "0.1 MODELED")
+		(rev "0.2 MODELED")
 		(company "Hardware Splicer")
 		(comment 1 "Read-only JEDEC 0x9F first-use target; 5 MHz initial clock.")
 		(comment 2 "No fabrication, power-on, or physical correctness authority is granted.")
@@ -272,46 +272,29 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Logic_LevelTranslator:TXB0104PW"
-			(exclude_from_sim no)
+		(symbol "HardwareSplicer:TXU0304PW"
+			(pin_names
+				(offset 1.016)
+			)
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "U"
-				(at -6.35 16.51 0)
+				(at -7.62 19.05 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "TXB0104PW"
-				(at 3.81 16.51 0)
+			(property "Value" "TXU0304PW"
+				(at 0 19.05 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
-					(justify left)
 				)
 			)
 			(property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
-				(at 0 -19.05 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.ti.com/lit/ds/symlink/txb0104.pdf"
-				(at 2.794 2.413 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "4-Bit Bidirectional Voltage-Level Translator, Auto Direction Sensing and ±15-kV ESD Protection, 1.2 - 3.6V APort, 1.65 - 5.5V BPort, TSSOP-14"
 				(at 0 0 0)
 				(effects
 					(font
@@ -320,7 +303,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "Level-Shifter CMOS-TTL-Translation"
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/txu0304.pdf"
 				(at 0 0 0)
 				(effects
 					(font
@@ -329,7 +312,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "TSSOP*14*5mm*P0.65mm*"
+			(property "Description" "TXU0304 PW: three A-to-B and one B-to-A channels; OE referenced to either supply. SCES935A section 6."
 				(at 0 0 0)
 				(effects
 					(font
@@ -338,330 +321,31 @@
 					(hide yes)
 				)
 			)
-			(symbol "TXB0104PW_0_1"
+			(symbol "TXU0304PW_0_1"
 				(rectangle
 					(start -7.62 15.24)
 					(end 7.62 -15.24)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
 						(type background)
 					)
 				)
-				(rectangle
-					(start -7.62 -15.24)
-					(end -7.62 -12.7)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.286 7.493) (xy -2.286 8.509) (xy -0.508 8.509)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.286 2.413) (xy -2.286 3.429) (xy -0.508 3.429)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.286 -2.667) (xy -2.286 -1.651) (xy -0.508 -1.651)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.286 -7.747) (xy -2.286 -6.731) (xy -0.508 -6.731)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 6.477) (xy -2.286 6.477) (xy -2.286 7.493) (xy -4.318 7.493)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 6.477) (xy 1.27 7.493) (xy 1.27 5.461) (xy -0.508 6.477)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 1.397) (xy -2.286 1.397) (xy -2.286 2.413) (xy -4.064 2.413)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 1.397) (xy 1.27 2.413) (xy 1.27 0.381) (xy -0.508 1.397)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 -3.683) (xy -2.286 -3.683) (xy -2.286 -2.667) (xy -4.064 -2.667)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 -3.683) (xy 1.27 -2.667) (xy 1.27 -4.699) (xy -0.508 -3.683)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 -8.763) (xy -2.286 -8.763) (xy -2.286 -7.747) (xy -4.064 -7.747)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.508 -8.763) (xy 1.27 -7.747) (xy 1.27 -9.779) (xy -0.508 -8.763)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 8.509) (xy -0.508 7.493) (xy -0.508 9.525) (xy 1.27 8.509)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 8.509) (xy 3.048 8.509) (xy 3.048 7.493) (xy 4.318 7.493)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 3.429) (xy -0.508 2.413) (xy -0.508 4.445) (xy 1.27 3.429)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 3.429) (xy 3.048 3.429) (xy 3.048 2.413) (xy 4.318 2.413)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.651) (xy -0.508 -2.667) (xy -0.508 -0.635) (xy 1.27 -1.651)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -1.651) (xy 3.048 -1.651) (xy 3.048 -2.667) (xy 4.318 -2.667)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -6.731) (xy -0.508 -7.747) (xy -0.508 -5.715) (xy 1.27 -6.731)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -6.731) (xy 3.048 -6.731) (xy 3.048 -7.747) (xy 4.318 -7.747)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.048 7.493) (xy 3.048 6.477) (xy 1.27 6.477)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.048 2.413) (xy 3.048 1.397) (xy 1.27 1.397)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.048 -2.667) (xy 3.048 -3.683) (xy 1.27 -3.683)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.048 -7.747) (xy 3.048 -8.763) (xy 1.27 -8.763)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
 			)
-			(symbol "TXB0104PW_1_1"
-				(pin input line
-					(at -10.16 12.7 0)
+			(symbol "TXU0304PW_1_1"
+				(pin power_in line
+					(at -2.54 17.78 270)
 					(length 2.54)
-					(name "OE"
+					(name "VCCA"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "8"
+					(number "1"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -669,7 +353,7 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin input line
 					(at -10.16 7.62 0)
 					(length 2.54)
 					(name "A1"
@@ -687,7 +371,7 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin input line
 					(at -10.16 2.54 0)
 					(length 2.54)
 					(name "A2"
@@ -705,7 +389,7 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin input line
 					(at -10.16 -2.54 0)
 					(length 2.54)
 					(name "A3"
@@ -723,10 +407,10 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin tri_state line
 					(at -10.16 -7.62 0)
 					(length 2.54)
-					(name "A4"
+					(name "A4Y"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -761,24 +445,6 @@
 					)
 				)
 				(pin power_in line
-					(at -2.54 17.78 270)
-					(length 2.54)
-					(name "VCCA"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
 					(at 0 -17.78 90)
 					(length 2.54)
 					(name "GND"
@@ -796,17 +462,17 @@
 						)
 					)
 				)
-				(pin power_in line
-					(at 2.54 17.78 270)
+				(pin input line
+					(at -10.16 -12.7 0)
 					(length 2.54)
-					(name "VCCB"
+					(name "OE"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "14"
+					(number "8"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -833,61 +499,7 @@
 						)
 					)
 				)
-				(pin bidirectional line
-					(at 10.16 7.62 180)
-					(length 2.54)
-					(name "B1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "13"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 2.54 180)
-					(length 2.54)
-					(name "B2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "12"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 -2.54 180)
-					(length 2.54)
-					(name "B3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "11"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
+				(pin input line
 					(at 10.16 -7.62 180)
 					(length 2.54)
 					(name "B4"
@@ -905,20 +517,96 @@
 						)
 					)
 				)
+				(pin tri_state line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "B3Y"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "B2Y"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 10.16 7.62 180)
+					(length 2.54)
+					(name "B1Y"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 2.54 17.78 270)
+					(length 2.54)
+					(name "VCCB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 			)
-			(embedded_fonts no)
 		)
-		(symbol "Memory_Flash:W25Q128JVS"
+		(symbol "HardwareSplicer:W25Q128JWS"
+			(pin_names
+				(offset 1.016)
+			)
+			(in_bom yes)
+			(on_board yes)
 			(property "Reference" "U"
-				(at -6.35 11.43 0)
+				(at -5.08 11.43 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "W25Q128JVS"
-				(at 7.62 11.43 0)
+			(property "Value" "W25Q128JWS"
+				(at 0 11.43 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -926,33 +614,6 @@
 				)
 			)
 			(property "Footprint" "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
-				(at 0 22.86 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "https://www.winbond.com/resource-files/w25q128jv_dtr%20revc%2003272018%20plus.pdf"
-				(at 0 25.4 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "128Mbit / 16MiB Serial Flash Memory, Standard/Dual/Quad SPI, 2.7-3.6V, SOIC-8"
-				(at 0 27.94 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "flash memory SPI QPI DTR"
 				(at 0 0 0)
 				(effects
 					(font
@@ -961,7 +622,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "*SOIC*5.3x5.3mm*P1.27mm*"
+			(property "Datasheet" "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf"
 				(at 0 0 0)
 				(effects
 					(font
@@ -970,15 +631,21 @@
 					(hide yes)
 				)
 			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(symbol "W25Q128JVS_0_1"
+			(property "Description" "W25Q128JW 1.8V SPI NOR, SOIC-8 208mil; Rev G section 3.2; IQ has QE fixed high."
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "W25Q128JWS_0_1"
 				(rectangle
-					(start -7.62 10.16)
-					(end 10.16 -10.16)
+					(start -7.62 8.89)
+					(end 7.62 -8.89)
 					(stroke
-						(width 0.254)
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -986,9 +653,9 @@
 					)
 				)
 			)
-			(symbol "W25Q128JVS_1_1"
+			(symbol "W25Q128JWS_1_1"
 				(pin input line
-					(at -10.16 7.62 0)
+					(at -10.16 5.08 0)
 					(length 2.54)
 					(name "~{CS}"
 						(effects
@@ -1005,8 +672,80 @@
 						)
 					)
 				)
+				(pin bidirectional line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "DO/IO1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "~{WP}/IO2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -11.43 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 10.16 5.08 180)
+					(length 2.54)
+					(name "DI/IO0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
 				(pin input line
-					(at -10.16 5.08 0)
+					(at -10.16 0 0)
 					(length 2.54)
 					(name "CLK"
 						(effects
@@ -1024,63 +763,9 @@
 					)
 				)
 				(pin bidirectional line
-					(at -10.16 2.54 0)
+					(at 10.16 -5.08 180)
 					(length 2.54)
-					(name "DI/IO_{0}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -10.16 0 0)
-					(length 2.54)
-					(name "DO/IO_{1}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -10.16 -2.54 0)
-					(length 2.54)
-					(name "~{WP}/IO_{2}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -10.16 -5.08 0)
-					(length 2.54)
-					(name "~{HOLD}/~{RESET}/IO_{3}"
+					(name "~{HOLD}/IO3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1096,7 +781,7 @@
 					)
 				)
 				(pin power_in line
-					(at 0 12.7 270)
+					(at 0 11.43 270)
 					(length 2.54)
 					(name "VCC"
 						(effects
@@ -1113,26 +798,7 @@
 						)
 					)
 				)
-				(pin power_in line
-					(at 0 -12.7 90)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
 			)
-			(embedded_fonts no)
 		)
 		(symbol "Regulator_Linear:TLV75518PDBV"
 			(property "Reference" "U"
@@ -1419,6 +1085,148 @@
 					(at 0 -3.81 90)
 					(length 1.27)
 					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x02_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 1.27 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1793,7 +1601,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "4a13465f-63f3-43b5-8743-f0830c0313de")
+		(uuid "b5d5c85a-d95c-4484-b78f-e4b6b54fdda0")
 		(property "Reference" "J1"
 			(at 35.56 102.87 0.0000)
 			(effects
@@ -1840,26 +1648,26 @@
 			)
 		)
 		(pin "1"
-			(uuid "4263de1b-e792-4529-88bd-af29a1081018")
+			(uuid "03dea001-c747-4de5-9aa3-45468220a5ca")
 		)
 		(pin "2"
-			(uuid "ed01eed0-a65c-4fcc-8117-0e63d84291c6")
+			(uuid "e7731d7c-abf9-4c44-bc0b-c9615be364c5")
 		)
 		(pin "3"
-			(uuid "c6773818-2e74-4f23-9847-2118342759ff")
+			(uuid "8fc625f2-09f8-4469-bc24-5a87795f9a15")
 		)
 		(pin "4"
-			(uuid "bd99f257-97ef-4089-b947-01a613c5abdf")
+			(uuid "821c87e1-a8e1-428b-bfed-2dd76905407e")
 		)
 		(pin "5"
-			(uuid "f2ffc2f5-34c4-4ef9-8e60-36052787a263")
+			(uuid "f9260767-74fd-415c-8aee-b47067cf9ab4")
 		)
 		(pin "6"
-			(uuid "3a8977ce-86fa-4148-a938-20212efa8faf")
+			(uuid "c03dc01e-99e7-4fe8-a3d4-818459ec5787")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "J1")
 					(unit 1)
 				)
@@ -1867,7 +1675,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Logic_LevelTranslator:TXB0104PW")
+		(lib_id "HardwareSplicer:TXU0304PW")
 		(at 105.41 95.25 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -1875,9 +1683,9 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "e7903c6d-5834-4810-b5c1-851f3a405128")
+		(uuid "7e272ad8-21c3-43f2-9c57-c27614fcbb47")
 		(property "Reference" "U1"
-			(at 99.06 111.76 0.0000)
+			(at 97.79 114.3 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1886,7 +1694,7 @@
 			)
 		)
 		(property "Value" "TXU0304PWR"
-			(at 109.22 111.76 0.0000)
+			(at 105.41 114.3 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1896,7 +1704,7 @@
 			)
 		)
 		(property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
-			(at 105.41 76.2 0.0000)
+			(at 105.41 95.25 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1922,60 +1730,51 @@
 				(hide yes)
 			)
 		)
-		(property "Symbol_Basis" "TXB0104PW pin-compatible graphics; see design note"
-			(at 107.95 100.3299 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "8"
-			(uuid "26e9f07d-9863-4b5a-9c43-6b509a0642a6")
+		(pin "1"
+			(uuid "b8da503b-6019-48dc-9b78-bd2256d35495")
 		)
 		(pin "2"
-			(uuid "26fa05b7-2afb-424f-8efd-328e59e45ec5")
+			(uuid "eb2a68ad-0a14-4bd8-aa20-264b570f3eed")
 		)
 		(pin "3"
-			(uuid "8b531ef0-dec0-4cdb-badb-6fd8a5669686")
+			(uuid "066446c5-f622-45b7-9f0f-84fe7701cf87")
 		)
 		(pin "4"
-			(uuid "30214db6-bc5d-4cea-b05e-a1df76ee8987")
+			(uuid "f19deb0e-5bdb-4f38-93dd-f0e41fd58e34")
 		)
 		(pin "5"
-			(uuid "5d12875c-cd1a-4af8-90e7-9b737b443c08")
+			(uuid "59bee116-eaa6-41a1-ad11-808ebf42284b")
 		)
 		(pin "6"
-			(uuid "55f0ef42-1916-4a04-9f6e-5bffa26b1db8")
-		)
-		(pin "1"
-			(uuid "84564320-6db8-46bb-86a5-badb2585164f")
+			(uuid "b5f4e4c5-5809-4a6f-9e0b-e2c02b7cf38c")
 		)
 		(pin "7"
-			(uuid "351b3bad-5969-4331-80cb-b646a941d4ea")
+			(uuid "7d2a1fd9-f091-4df9-85e7-e512ea75908f")
 		)
-		(pin "14"
-			(uuid "05d3a54f-a702-4b10-a89e-18a5fbd93984")
+		(pin "8"
+			(uuid "11a14aa2-ddff-47a8-97ef-18cfc8304579")
 		)
 		(pin "9"
-			(uuid "329adaa7-5423-4778-a5b2-683d8cf35916")
-		)
-		(pin "13"
-			(uuid "e3c52627-ddbd-460c-8490-123aa69cfe63")
-		)
-		(pin "12"
-			(uuid "2cec22b7-b7d3-495a-a6b9-54541339d314")
-		)
-		(pin "11"
-			(uuid "5c406e62-1228-4aee-a348-844c7c6d1167")
+			(uuid "ae7afe39-6ef7-4a9a-b1b8-d891a335232b")
 		)
 		(pin "10"
-			(uuid "7ab99aef-81c5-4ff0-96b0-467e89e81a16")
+			(uuid "efc53f2c-8729-4e03-8dc7-93608c6e8c9b")
+		)
+		(pin "11"
+			(uuid "63a79d61-24bb-4ee8-bda6-aa2e1fb81af9")
+		)
+		(pin "12"
+			(uuid "6259a4d0-2744-4245-a57f-17633faf4e75")
+		)
+		(pin "13"
+			(uuid "2401efbf-2c94-4f62-b8a1-8bbc00fcc13f")
+		)
+		(pin "14"
+			(uuid "ca472fbf-2544-41e4-ba7e-c6e1cf2d376c")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "U1")
 					(unit 1)
 				)
@@ -1983,7 +1782,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Memory_Flash:W25Q128JVS")
+		(lib_id "HardwareSplicer:W25Q128JWS")
 		(at 160.02 95.25 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -1991,9 +1790,9 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "3bd4e4d3-fa1f-4874-afd7-ada6e22a3ee2")
+		(uuid "e5da10db-4bcb-405e-af23-c9cf17868667")
 		(property "Reference" "U2"
-			(at 153.67 106.68 0.0000)
+			(at 154.94 106.68 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2002,7 +1801,7 @@
 			)
 		)
 		(property "Value" "W25Q128JWSIQ"
-			(at 167.64 106.68 0.0000)
+			(at 160.02 106.68 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2012,7 +1811,7 @@
 			)
 		)
 		(property "Footprint" "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
-			(at 160.02 118.11 0.0000)
+			(at 160.02 95.25 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2039,32 +1838,32 @@
 			)
 		)
 		(pin "1"
-			(uuid "5b9444fe-2af8-4b1e-b587-52201b9b8f1f")
-		)
-		(pin "6"
-			(uuid "e825265a-40a1-44ac-8a0f-9b68cff976a8")
-		)
-		(pin "5"
-			(uuid "de33dcaa-6cbf-4f30-983b-e34b4c5765e0")
+			(uuid "47a76b38-41ce-46c7-99c6-319386a000dd")
 		)
 		(pin "2"
-			(uuid "7c9514bb-88f1-48ea-a087-f96cd4df2517")
+			(uuid "4d34d134-8eff-42be-a47e-75b33f1d87ae")
 		)
 		(pin "3"
-			(uuid "4d8092a6-38f5-43b7-8b3b-50a6f9c840da")
-		)
-		(pin "7"
-			(uuid "f0ef9315-0af8-43df-b37a-8f419d427f04")
-		)
-		(pin "8"
-			(uuid "eb099f12-b93f-469c-b679-74f6f4afd187")
+			(uuid "23fc4eef-c233-4b46-a6ee-f27f1469746c")
 		)
 		(pin "4"
-			(uuid "404ac3a4-fe90-4ee2-b367-c71e295ae58e")
+			(uuid "38fc2ee7-940c-4e52-987b-1833e28ddfdd")
+		)
+		(pin "5"
+			(uuid "5c6ea060-12d9-4628-8119-8aa874ba8f28")
+		)
+		(pin "6"
+			(uuid "fe81dd41-7149-457f-92f8-05945a535afb")
+		)
+		(pin "7"
+			(uuid "e18939b8-4130-4b78-b0f6-f594b4d6b08a")
+		)
+		(pin "8"
+			(uuid "706859a7-24a7-41d0-8421-2c0d88cbcb0d")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "U2")
 					(unit 1)
 				)
@@ -2080,7 +1879,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "eaf0201f-b89e-4a13-aad2-583ed9943bfa")
+		(uuid "857c03f7-d4d4-4053-8865-d18e37062044")
 		(property "Reference" "U3"
 			(at 71.12 50.165 0.0000)
 			(effects
@@ -2128,23 +1927,23 @@
 			)
 		)
 		(pin "1"
-			(uuid "021a9832-cf1d-48bd-946e-0c339d569f65")
+			(uuid "076e857f-caf5-4344-b358-17e211b121f5")
 		)
 		(pin "3"
-			(uuid "3f1536a0-40d7-4059-aa29-3477822bf688")
+			(uuid "fdb5f816-d009-4a80-9abe-4fbdfeb9e4f9")
 		)
 		(pin "2"
-			(uuid "fbe7231f-0a31-4f27-8de9-98fe2c8bd40d")
+			(uuid "fdccd1aa-82ee-4857-b9e5-aef3b324fda1")
 		)
 		(pin "4"
-			(uuid "2f9f204b-a647-4997-9d92-e31306fb1af4")
+			(uuid "ab216195-1b57-49c1-9fb5-ae4a056112c9")
 		)
 		(pin "5"
-			(uuid "18f76d8d-f3f8-4c7e-870c-1190dbd35f72")
+			(uuid "91324f9c-1632-4282-aa18-3a5a7fe60ee6")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "U3")
 					(unit 1)
 				)
@@ -2158,9 +1957,9 @@
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced no)
-		(uuid "1accb8d6-341b-4671-81e9-ae60a16f027b")
+		(uuid "d26e3840-9536-4b27-9356-9fdd6c271b8b")
 		(property "Reference" "R1"
 			(at 50.292 44.45 90)
 			(effects
@@ -2216,14 +2015,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "948bb5ce-dccc-41cc-a0a0-b2c7aeda377d")
+			(uuid "5a9ef28b-ea62-41e1-b264-f56c271a2422")
 		)
 		(pin "2"
-			(uuid "fcf42548-a1a4-401d-a9d2-ffa3665855b9")
+			(uuid "579e6d8d-917a-4a73-9074-a52289b7b6dd")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "R1")
 					(unit 1)
 				)
@@ -2239,7 +2038,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "6c074374-1344-427f-9b2f-7c6e67904629")
+		(uuid "b7db2b3d-a7bd-4166-951c-4a75126f75bc")
 		(property "Reference" "R2"
 			(at 187.452 82.55 90)
 			(effects
@@ -2295,14 +2094,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "96b42c31-a7ae-487d-a4c9-0a41bc5a9886")
+			(uuid "a36543eb-ee5c-4a48-a099-19da8a0e70d6")
 		)
 		(pin "2"
-			(uuid "9caed4ca-8aa0-4345-832f-c24d9acbcba4")
+			(uuid "2850928c-5156-4eb8-afe3-e2c455df23f7")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "R2")
 					(unit 1)
 				)
@@ -2318,7 +2117,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "da42cfb9-c6a8-4eaf-9d42-e0f1ac41ac4b")
+		(uuid "a1376bf2-02ac-4c23-bcb6-88f0b5478ade")
 		(property "Reference" "R3"
 			(at 201.422 82.55 90)
 			(effects
@@ -2374,14 +2173,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "736bde91-f86d-4c0b-bf67-1b37f7d2c6dc")
+			(uuid "23129d6e-c0c2-4376-86d8-07e55160ba69")
 		)
 		(pin "2"
-			(uuid "998d4916-fa06-48af-808a-9bf31fa001e1")
+			(uuid "2493f8a2-6f5a-4b27-842b-894c2ad5e076")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "R3")
 					(unit 1)
 				)
@@ -2395,9 +2194,9 @@
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(dnp no)
+		(dnp yes)
 		(fields_autoplaced no)
-		(uuid "4a840eb8-31ba-490f-bb54-a0daf7970727")
+		(uuid "4d04c14b-9236-498d-99b4-69a06571066d")
 		(property "Reference" "R4"
 			(at 126.492 44.45 90)
 			(effects
@@ -2453,15 +2252,331 @@
 			)
 		)
 		(pin "1"
-			(uuid "78827b23-6073-460b-a799-9242e50ab9da")
+			(uuid "5e130251-e30b-4cf1-bb7e-b73d93bc1341")
 		)
 		(pin "2"
-			(uuid "73d715ee-be88-41a9-b992-30974f6e03c9")
+			(uuid "89c7654c-cb9c-4cc9-bfaf-2ec8be0c0d7a")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 144.78 144.78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "9120023d-b92d-4a54-9852-7612183ac8b9")
+		(property "Reference" "R5"
+			(at 146.812 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 144.78 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 143.002 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 147.32 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "RC0603FR-0710KL"
+			(at 147.32 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "host CS high when host is high impedance"
+			(at 147.32 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8aebe4b7-d23e-4f29-b5cc-f3add09e8f57")
+		)
+		(pin "2"
+			(uuid "6c484d62-cb85-4a56-809c-2c6ad62c9f93")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "R5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 175.26 144.78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "158e245a-bc85-4f36-878f-cd916913d827")
+		(property "Reference" "R6"
+			(at 177.292 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 175.26 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 173.482 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 177.8 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "RC0603FR-0710KL"
+			(at 177.8 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "DUT CS tracks DUT rail while translator disabled"
+			(at 177.8 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3dc6b7b3-dbb4-4449-b71b-d9c19f22d6fd")
+		)
+		(pin "2"
+			(uuid "c4412d10-e5a2-46cd-b3d4-bea09c6359bf")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "R6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 204.47 144.78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "ea4198ec-c354-4fb0-a40d-459e381b2b02")
+		(property "Reference" "R7"
+			(at 206.502 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 204.47 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 202.692 144.78 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Yageo"
+			(at 207.01 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "RC0603FR-0710KL"
+			(at 207.01 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "OE default low; JP1 must be deliberately bridged"
+			(at 207.01 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8bfd953c-bbb1-463a-95f3-0b345d2d682b")
+		)
+		(pin "2"
+			(uuid "bcf92fc1-6ecc-447a-abc4-6bdec87bc12f")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "R7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 229.87 144.78 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "744872ce-8f90-4deb-adc5-a3d5ede63d12")
+		(property "Reference" "JP1"
+			(at 229.87 147.32 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "ENABLE_AFTER_RAIL_CHECK"
+			(at 229.87 139.7 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 229.87 144.78 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Samtec"
+			(at 232.41 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "TSW-102-07-T-S"
+			(at 232.41 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "normally open enable header; no shunt fitted"
+			(at 232.41 149.8599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a023aa72-e68b-4d6a-853f-02745a8f5a15")
+		)
+		(pin "2"
+			(uuid "ac18b582-93f2-4570-8c1a-91341042a5fb")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "JP1")
 					(unit 1)
 				)
 			)
@@ -2476,7 +2591,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "7ea559cf-d319-4da8-944a-bea81e26ca97")
+		(uuid "af5bf1b6-d5d9-4426-bc51-0c625e6165bf")
 		(property "Reference" "C1"
 			(at 55.245 62.23 0.0000)
 			(effects
@@ -2532,14 +2647,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "8dbfe02a-f911-4e18-ad7f-d28f95270a89")
+			(uuid "052ca269-eab8-4c4e-884b-aef0536ec6e0")
 		)
 		(pin "2"
-			(uuid "956ec506-3484-4922-847a-e3cc873e9837")
+			(uuid "2f8130b6-fd10-4a7b-ba24-35a89cb0abef")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C1")
 					(unit 1)
 				)
@@ -2548,16 +2663,16 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 91.44 59.69 0)
+		(at 91.44 57.15 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "fb0e06b1-8381-4520-a6cc-ddc8b320639d")
+		(uuid "8c764397-5aeb-4a3f-9504-b612421f6d70")
 		(property "Reference" "C2"
-			(at 92.075 62.23 0.0000)
+			(at 92.075 59.69 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2566,7 +2681,7 @@
 			)
 		)
 		(property "Value" "4.7uF 6.3V X5R"
-			(at 92.075 57.15 0.0000)
+			(at 92.075 54.61 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2575,7 +2690,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 92.4052 55.88 0.0000)
+			(at 92.4052 53.34 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2584,7 +2699,7 @@
 			)
 		)
 		(property "Manufacturer" "Murata"
-			(at 93.98 64.7699 0)
+			(at 93.98 62.2299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2593,7 +2708,7 @@
 			)
 		)
 		(property "MPN" "GRM188R60J475KE19D"
-			(at 93.98 64.7699 0)
+			(at 93.98 62.2299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2602,7 +2717,7 @@
 			)
 		)
 		(property "Purpose" "LDO output bypass"
-			(at 93.98 64.7699 0)
+			(at 93.98 62.2299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2611,14 +2726,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "c366227e-98b5-4a8f-ac6c-8c1834c777db")
+			(uuid "c568765d-ecf8-4150-8334-67bfd5c5ad1e")
 		)
 		(pin "2"
-			(uuid "4aea37da-6d8c-46a0-b756-25e14316aa08")
+			(uuid "2d4ffcbf-46c7-4aed-b1bb-6b19d6d4c589")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C2")
 					(unit 1)
 				)
@@ -2627,16 +2742,16 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 90.17 119.38 0)
+		(at 69.85 119.38 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "39f7a0bd-41a7-45a1-b0c3-dd0cd656cbd2")
+		(uuid "73ad9d61-5cd3-4fb9-8b72-213e88183841")
 		(property "Reference" "C3"
-			(at 90.805 121.92 0.0000)
+			(at 70.485 121.92 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2645,7 +2760,7 @@
 			)
 		)
 		(property "Value" "100nF 16V X7R"
-			(at 90.805 116.84 0.0000)
+			(at 70.485 116.84 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2654,7 +2769,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 91.1352 115.57 0.0000)
+			(at 70.8152 115.57 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2663,7 +2778,7 @@
 			)
 		)
 		(property "Manufacturer" "Murata"
-			(at 92.71 124.4599 0)
+			(at 72.39 124.4599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2672,7 +2787,7 @@
 			)
 		)
 		(property "MPN" "GRM188R71C104KA01D"
-			(at 92.71 124.4599 0)
+			(at 72.39 124.4599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2681,7 +2796,7 @@
 			)
 		)
 		(property "Purpose" "TXU0304 VCCA bypass"
-			(at 92.71 124.4599 0)
+			(at 72.39 124.4599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2690,14 +2805,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a4e66f08-dc5c-478a-b0b4-c2998532c195")
+			(uuid "b05e13bc-07b4-401e-b1e8-c47023ba4f8d")
 		)
 		(pin "2"
-			(uuid "e2c1a0f1-0719-4ced-b284-58c60ca3efd7")
+			(uuid "ae2366df-c8df-4057-9f91-7211f3150b42")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C3")
 					(unit 1)
 				)
@@ -2713,7 +2828,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "2bd47eba-7014-47ae-b73f-8c005d6838ae")
+		(uuid "fd18a18f-172a-41ba-a0d4-6840ea6d85aa")
 		(property "Reference" "C4"
 			(at 120.015 121.92 0.0000)
 			(effects
@@ -2769,14 +2884,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "a1ebd9e0-208d-49a5-a0f2-ecf8241d9d5b")
+			(uuid "a67fe3e8-08b2-449c-8a6c-4fccd93a549f")
 		)
 		(pin "2"
-			(uuid "6e575cc2-39ff-4e82-925e-451723a9625d")
+			(uuid "d91dccdf-04cf-4f3a-a1fc-8cca9495e5b7")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C4")
 					(unit 1)
 				)
@@ -2792,7 +2907,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "55d8ca9f-c6f3-4f8b-88d3-17c553b164d4")
+		(uuid "1c7e4ba3-9a45-4c0e-bc8a-174c7f20a25a")
 		(property "Reference" "C5"
 			(at 175.895 121.92 0.0000)
 			(effects
@@ -2848,14 +2963,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "2891a692-22e8-40d6-b4d4-5e3bcac8acd3")
+			(uuid "72b8d722-e04b-450d-b0be-0648d20f09f0")
 		)
 		(pin "2"
-			(uuid "8f1cd138-65cd-4803-b908-a5abc013f484")
+			(uuid "e171cc07-ef0a-4584-b880-70b561ef57bb")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C5")
 					(unit 1)
 				)
@@ -2871,7 +2986,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "dd389348-2d5c-4048-9724-db2841630b5f")
+		(uuid "8fdf1a0a-3279-47ae-ab1d-b89b978a7fa4")
 		(property "Reference" "C6"
 			(at 196.215 121.92 0.0000)
 			(effects
@@ -2927,14 +3042,14 @@
 			)
 		)
 		(pin "1"
-			(uuid "e3bf08e0-97d7-4495-82c6-f1c04aeae7a1")
+			(uuid "ee5a577b-d959-47c0-b4f3-6e45e63a5c6e")
 		)
 		(pin "2"
-			(uuid "5fe5c635-d43e-40aa-8a65-77310b04484b")
+			(uuid "40bcbb29-70e9-41f7-b34d-3907f9269bfb")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "C6")
 					(unit 1)
 				)
@@ -2943,16 +3058,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 25.4 144.78 0)
+		(at 25.4 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "167e91b7-95af-4486-804e-640ab039d41f")
+		(uuid "866cfa26-d858-4d2b-9952-79f7c7770667")
 		(property "Reference" "TP1"
-			(at 25.4 151.638 0.0000)
+			(at 25.4 138.938 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2961,16 +3076,17 @@
 			)
 		)
 		(property "Value" "HOST_3V3"
-			(at 25.4 149.86 0.0000)
+			(at 25.4 137.16 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 30.48 144.78 0.0000)
+			(at 30.48 132.08 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2979,7 +3095,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 27.94 149.8599 0)
+			(at 27.94 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2988,7 +3104,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 27.94 149.8599 0)
+			(at 27.94 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2997,11 +3113,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "2249db29-c02f-4a4c-9615-4f369bf36751")
+			(uuid "ca4a090e-cea6-440c-a5c1-9ebdce50d6d9")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP1")
 					(unit 1)
 				)
@@ -3010,16 +3126,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 64.77 144.78 0)
+		(at 64.77 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "f66404c9-4cd3-4ce0-a458-05d44e894d6f")
+		(uuid "a1dd91f4-aefe-4fd1-9c54-b2b9d309edb4")
 		(property "Reference" "TP2"
-			(at 64.77 151.638 0.0000)
+			(at 64.77 138.938 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3028,16 +3144,17 @@
 			)
 		)
 		(property "Value" "3V3"
-			(at 64.77 149.86 0.0000)
+			(at 64.77 137.16 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 69.85 144.78 0.0000)
+			(at 69.85 132.08 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3046,7 +3163,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 67.31 149.8599 0)
+			(at 67.31 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3055,7 +3172,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 67.31 149.8599 0)
+			(at 67.31 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3064,11 +3181,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "fe465255-d199-4c49-85fd-877009623358")
+			(uuid "dcbe420d-3e00-4693-8bb2-3dc53edadd01")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP2")
 					(unit 1)
 				)
@@ -3077,16 +3194,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 105.41 144.78 0)
+		(at 105.41 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "ae892981-62c1-4909-979c-53e9a6021804")
+		(uuid "5e6c6a91-7ef5-41ab-bd24-ac801bd7c447")
 		(property "Reference" "TP3"
-			(at 105.41 151.638 0.0000)
+			(at 105.41 138.938 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3095,16 +3212,17 @@
 			)
 		)
 		(property "Value" "1V8"
-			(at 105.41 149.86 0.0000)
+			(at 105.41 137.16 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 110.49 144.78 0.0000)
+			(at 110.49 132.08 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3113,7 +3231,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 107.95 149.8599 0)
+			(at 107.95 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3122,7 +3240,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 107.95 149.8599 0)
+			(at 107.95 137.1599 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3131,11 +3249,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "ce4874fe-5091-4d5a-aa9f-6871cb1f1d90")
+			(uuid "73c2f94f-9720-4774-9c17-65f87dee845a")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP3")
 					(unit 1)
 				)
@@ -3144,16 +3262,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 25.4 157.48 0)
+		(at 25.4 143.51 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "8fb0bae4-24a7-4d0a-905b-a05dba67f139")
+		(uuid "a04b55a9-2435-44fe-bffc-c2ad78993c25")
 		(property "Reference" "TP4"
-			(at 25.4 164.338 0.0000)
+			(at 25.4 150.368 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3162,16 +3280,17 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 25.4 162.56 0.0000)
+			(at 25.4 148.59 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 30.48 157.48 0.0000)
+			(at 30.48 143.51 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3180,7 +3299,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 27.94 162.5599 0)
+			(at 27.94 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3189,7 +3308,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 27.94 162.5599 0)
+			(at 27.94 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3198,11 +3317,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "7757df31-f5e8-40b1-b232-c414a4a214fe")
+			(uuid "1a6d2f3b-b19f-4ff1-9e78-78eb788b9da4")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP4")
 					(unit 1)
 				)
@@ -3211,16 +3330,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 64.77 157.48 0)
+		(at 64.77 143.51 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "36859823-92df-47bc-bfec-4d5deb0c03c0")
+		(uuid "5e03b68f-fe5b-4754-bef1-67bad9db5658")
 		(property "Reference" "TP5"
-			(at 64.77 164.338 0.0000)
+			(at 64.77 150.368 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3229,16 +3348,17 @@
 			)
 		)
 		(property "Value" "HOST_SCLK"
-			(at 64.77 162.56 0.0000)
+			(at 64.77 148.59 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 69.85 157.48 0.0000)
+			(at 69.85 143.51 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3247,7 +3367,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 67.31 162.5599 0)
+			(at 67.31 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3256,7 +3376,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 67.31 162.5599 0)
+			(at 67.31 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3265,11 +3385,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "fe6fabb2-53a7-4eab-9869-f75a09c68946")
+			(uuid "1017cc96-d631-4e50-9fb9-576f2beaf9bf")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP5")
 					(unit 1)
 				)
@@ -3278,16 +3398,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 105.41 157.48 0)
+		(at 105.41 143.51 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "1f217329-cfa9-4404-a6d5-7bdb23b814a2")
+		(uuid "288da722-1b80-4980-b973-00fe27ce95ce")
 		(property "Reference" "TP6"
-			(at 105.41 164.338 0.0000)
+			(at 105.41 150.368 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3296,16 +3416,17 @@
 			)
 		)
 		(property "Value" "DUT_SCLK"
-			(at 105.41 162.56 0.0000)
+			(at 105.41 148.59 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 110.49 157.48 0.0000)
+			(at 110.49 143.51 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3314,7 +3435,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 107.95 162.5599 0)
+			(at 107.95 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3323,7 +3444,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 107.95 162.5599 0)
+			(at 107.95 148.5899 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3332,11 +3453,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "1c5b2686-84fb-42c8-b4a0-ce7f5d271b53")
+			(uuid "2878fac0-91d4-4825-a1d8-8cf3df91b780")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP6")
 					(unit 1)
 				)
@@ -3345,16 +3466,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 25.4 168.91 0)
+		(at 25.4 153.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "1c5da5c4-1d86-42fb-bac6-e23d05ef2662")
+		(uuid "28bb40cf-4869-44cb-bd91-6a6776d2e639")
 		(property "Reference" "TP7"
-			(at 25.4 175.768 0.0000)
+			(at 25.4 160.528 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3363,16 +3484,17 @@
 			)
 		)
 		(property "Value" "HOST_MOSI"
-			(at 25.4 173.99 0.0000)
+			(at 25.4 158.75 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 30.48 168.91 0.0000)
+			(at 30.48 153.67 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3381,7 +3503,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 27.94 173.9899 0)
+			(at 27.94 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3390,7 +3512,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 27.94 173.9899 0)
+			(at 27.94 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3399,11 +3521,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "3ecd8520-089a-4dd5-a948-24e8da332d87")
+			(uuid "8e7c51b7-79af-401f-bc8e-b704e8c5cf2c")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP7")
 					(unit 1)
 				)
@@ -3412,16 +3534,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 64.77 168.91 0)
+		(at 64.77 153.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "3b25006e-0629-4ccc-87a6-ab5d05f61051")
+		(uuid "68e37c9c-2004-42ab-b24c-a63b3c0c5c5d")
 		(property "Reference" "TP8"
-			(at 64.77 175.768 0.0000)
+			(at 64.77 160.528 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3430,16 +3552,17 @@
 			)
 		)
 		(property "Value" "DUT_MOSI"
-			(at 64.77 173.99 0.0000)
+			(at 64.77 158.75 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 69.85 168.91 0.0000)
+			(at 69.85 153.67 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3448,7 +3571,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 67.31 173.9899 0)
+			(at 67.31 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3457,7 +3580,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 67.31 173.9899 0)
+			(at 67.31 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3466,11 +3589,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "811bc9ce-5175-4883-b7eb-316c835defaf")
+			(uuid "c9adb6b6-f5e8-4e29-b2f2-673e769ac40b")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP8")
 					(unit 1)
 				)
@@ -3479,16 +3602,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 105.41 168.91 0)
+		(at 105.41 153.67 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "f1ccad94-3e8d-44a8-8dc3-e5ca7403a1ed")
+		(uuid "1579405f-35b8-4042-85c7-5776da801980")
 		(property "Reference" "TP9"
-			(at 105.41 175.768 0.0000)
+			(at 105.41 160.528 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3497,16 +3620,17 @@
 			)
 		)
 		(property "Value" "HOST_CS_N"
-			(at 105.41 173.99 0.0000)
+			(at 105.41 158.75 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 110.49 168.91 0.0000)
+			(at 110.49 153.67 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3515,7 +3639,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 107.95 173.9899 0)
+			(at 107.95 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3524,7 +3648,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 107.95 173.9899 0)
+			(at 107.95 158.7499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3533,11 +3657,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "6391411e-60b0-481b-825f-74d2027c096b")
+			(uuid "c52bd5f9-fb6f-4c27-986f-1aab56f56f2d")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP9")
 					(unit 1)
 				)
@@ -3546,16 +3670,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 25.4 181.61 0)
+		(at 25.4 165.1 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "df6a19d2-a45b-41e8-9fac-468117287be0")
+		(uuid "c416e540-c379-4b3e-8a64-4037b7a6a560")
 		(property "Reference" "TP10"
-			(at 25.4 188.468 0.0000)
+			(at 25.4 171.958 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3564,16 +3688,17 @@
 			)
 		)
 		(property "Value" "DUT_CS_N"
-			(at 25.4 186.69 0.0000)
+			(at 25.4 170.18 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 30.48 181.61 0.0000)
+			(at 30.48 165.1 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3582,7 +3707,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 27.94 186.6899 0)
+			(at 27.94 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3591,7 +3716,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 27.94 186.6899 0)
+			(at 27.94 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3600,11 +3725,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "a5ccaae6-70f4-421b-94d8-02e077a45d4f")
+			(uuid "b0827e98-1200-429f-b12f-9a3a8c94264a")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP10")
 					(unit 1)
 				)
@@ -3613,16 +3738,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 64.77 181.61 0)
+		(at 64.77 165.1 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "8ae3dea5-6680-41cc-ad08-0f49f3cffb99")
+		(uuid "af7ef9e7-fc61-4e60-8df6-c5f42de1aadb")
 		(property "Reference" "TP11"
-			(at 64.77 188.468 0.0000)
+			(at 64.77 171.958 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3631,16 +3756,17 @@
 			)
 		)
 		(property "Value" "HOST_MISO"
-			(at 64.77 186.69 0.0000)
+			(at 64.77 170.18 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 69.85 181.61 0.0000)
+			(at 69.85 165.1 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3649,7 +3775,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 67.31 186.6899 0)
+			(at 67.31 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3658,7 +3784,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 67.31 186.6899 0)
+			(at 67.31 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3667,11 +3793,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "3963c333-80fc-46ce-92b1-49d9f305084b")
+			(uuid "8ed29060-b732-41f5-b13a-444180287ee8")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP11")
 					(unit 1)
 				)
@@ -3680,16 +3806,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 105.41 181.61 0)
+		(at 105.41 165.1 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "1c420210-5282-4adc-a228-0a469e94bb68")
+		(uuid "a362a882-fe51-4b07-b322-96876962042a")
 		(property "Reference" "TP12"
-			(at 105.41 188.468 0.0000)
+			(at 105.41 171.958 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3698,16 +3824,17 @@
 			)
 		)
 		(property "Value" "DUT_MISO"
-			(at 105.41 186.69 0.0000)
+			(at 105.41 170.18 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 110.49 181.61 0.0000)
+			(at 110.49 165.1 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3716,7 +3843,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 107.95 186.6899 0)
+			(at 107.95 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3725,7 +3852,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 107.95 186.6899 0)
+			(at 107.95 170.1799 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3734,11 +3861,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "f0cf8a79-85d5-4049-940e-c8ce3a7823b3")
+			(uuid "c6e846ae-e04f-4dc2-9b63-22663cb70bca")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP12")
 					(unit 1)
 				)
@@ -3747,16 +3874,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 25.4 193.04 0)
+		(at 25.4 176.53 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "822bbd8f-69bf-4135-8713-65851778e062")
+		(uuid "3f4a2210-c6e8-498e-bd3d-33910d1c3fe7")
 		(property "Reference" "TP13"
-			(at 25.4 199.898 0.0000)
+			(at 25.4 183.388 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3765,16 +3892,17 @@
 			)
 		)
 		(property "Value" "DUT_IO2_WP_N"
-			(at 25.4 198.12 0.0000)
+			(at 25.4 181.61 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 30.48 193.04 0.0000)
+			(at 30.48 176.53 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3783,7 +3911,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 27.94 198.1199 0)
+			(at 27.94 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3792,7 +3920,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 27.94 198.1199 0)
+			(at 27.94 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3801,11 +3929,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "1a592862-c9a9-4dd5-8dda-e257658fc253")
+			(uuid "18150729-606f-4e54-a5fd-159133836875")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP13")
 					(unit 1)
 				)
@@ -3814,16 +3942,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 64.77 193.04 0)
+		(at 64.77 176.53 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "a31cdd29-97ce-4198-8615-4b8f25fd8524")
+		(uuid "424e11ac-d763-4e76-a8b8-833439104aaa")
 		(property "Reference" "TP14"
-			(at 64.77 199.898 0.0000)
+			(at 64.77 183.388 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3832,16 +3960,17 @@
 			)
 		)
 		(property "Value" "DUT_IO3_HOLD_N"
-			(at 64.77 198.12 0.0000)
+			(at 64.77 181.61 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 69.85 193.04 0.0000)
+			(at 69.85 176.53 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3850,7 +3979,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 67.31 198.1199 0)
+			(at 67.31 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3859,7 +3988,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 67.31 198.1199 0)
+			(at 67.31 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3868,11 +3997,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "7d0b2f35-c4f8-4e9b-9d86-2c950705214a")
+			(uuid "78cc513c-838a-4d3f-9867-59b46d14e7c0")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP14")
 					(unit 1)
 				)
@@ -3881,16 +4010,16 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 105.41 193.04 0)
+		(at 105.41 176.53 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "f0f06a04-2e71-4ddc-91d2-50bf93dda2c1")
+		(uuid "2e712655-e69c-4296-a724-13f39652339c")
 		(property "Reference" "TP15"
-			(at 105.41 199.898 0.0000)
+			(at 105.41 183.388 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3899,16 +4028,17 @@
 			)
 		)
 		(property "Value" "DUT_1V8"
-			(at 105.41 198.12 0.0000)
+			(at 105.41 181.61 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
+				(hide yes)
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
-			(at 110.49 193.04 0.0000)
+			(at 110.49 176.53 0.0000)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3917,7 +4047,7 @@
 			)
 		)
 		(property "DNP" "yes"
-			(at 107.95 198.1199 0)
+			(at 107.95 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3926,7 +4056,7 @@
 			)
 		)
 		(property "Purpose" "bare copper measurement pad; exclude from BOM"
-			(at 107.95 198.1199 0)
+			(at 107.95 181.6099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3935,12 +4065,216 @@
 			)
 		)
 		(pin "1"
-			(uuid "ed4c4674-9978-47a6-a4ce-b1e9d5f6f22e")
+			(uuid "c0809f40-0d7f-45f2-95b3-48a844c434ee")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "TP15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 25.4 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "bc14f61c-ff25-4ac9-9272-21de82fe0e33")
+		(property "Reference" "TP16"
+			(at 25.4 193.548 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TRANSLATOR_OE"
+			(at 25.4 191.77 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+			(at 30.48 186.69 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DNP" "yes"
+			(at 27.94 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "bare copper measurement pad; exclude from BOM"
+			(at 27.94 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b90a2148-8890-4027-9bd0-19ed3e4516b7")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "TP16")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 64.77 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "046b5844-be09-4586-b60a-9c99d6921db5")
+		(property "Reference" "TP17"
+			(at 64.77 193.548 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 64.77 191.77 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+			(at 69.85 186.69 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DNP" "yes"
+			(at 67.31 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "bare copper measurement pad; exclude from BOM"
+			(at 67.31 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "66cd6ed2-9207-44d7-9913-b9bc4e6c0b9d")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "TP17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 105.41 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced no)
+		(uuid "41d7e970-28f0-484e-bd5c-590b015933bf")
+		(property "Reference" "TP18"
+			(at 105.41 193.548 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 105.41 191.77 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+			(at 110.49 186.69 0.0000)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DNP" "yes"
+			(at 107.95 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Purpose" "bare copper measurement pad; exclude from BOM"
+			(at 107.95 191.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "35b7d565-965b-4553-937f-11282becbedc")
+		)
+		(instances
+			(project "SPI Flash Adapter Reference Design v1"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
+					(reference "TP18")
 					(unit 1)
 				)
 			)
@@ -3955,7 +4289,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "fdff0395-97f5-43df-a1fb-ed7b311b949f")
+		(uuid "216011bc-1323-4701-9051-f4001b15eefb")
 		(property "Reference" "#FLG01"
 			(at 35.56 46.355 0.0000)
 			(effects
@@ -3975,11 +4309,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "c65c08e7-c4f8-4693-8d11-f3705af2b721")
+			(uuid "464df40a-469e-4f3f-a3ab-3950cfe56137")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "#FLG01")
 					(unit 1)
 				)
@@ -3995,7 +4329,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "7ac99d77-c52b-4fc2-bd45-a37d40f6f9d5")
+		(uuid "bd9bba1a-9846-491c-9f0a-1379d0e74ab3")
 		(property "Reference" "#FLG02"
 			(at 35.56 61.595 0.0000)
 			(effects
@@ -4015,11 +4349,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "f9444d01-128d-43f0-8023-f18a5268e4a6")
+			(uuid "a4207302-7fcc-4aef-9bc4-1bcdc6bf7fc8")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "#FLG02")
 					(unit 1)
 				)
@@ -4035,7 +4369,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "3c14a73f-2716-4b97-a9d7-443605f3288b")
+		(uuid "e1c09474-204d-4574-93b0-5a78e095bd87")
 		(property "Reference" "#FLG03"
 			(at 54.61 46.355 0.0000)
 			(effects
@@ -4055,11 +4389,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "70e332bb-702c-4576-84c3-f671acd0bbdc")
+			(uuid "4a13c0d9-7aad-4f08-a390-abf40bd35b59")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "#FLG03")
 					(unit 1)
 				)
@@ -4075,7 +4409,7 @@
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced no)
-		(uuid "6865ca2c-7a84-4d2f-953a-b2cdb1aa8db6")
+		(uuid "1aca3722-d5db-4143-b430-0113cf495a60")
 		(property "Reference" "#FLG04"
 			(at 74.93 61.595 0.0000)
 			(effects
@@ -4095,11 +4429,11 @@
 			)
 		)
 		(pin "1"
-			(uuid "c52ce684-e6d1-4d62-b2fd-0e4cf1c4d8ec")
+			(uuid "50375d23-44a7-4b2d-9726-a8d611390d39")
 		)
 		(instances
 			(project "SPI Flash Adapter Reference Design v1"
-				(path "/67419f6f-d0b9-420c-b686-0e67855ba8a6"
+				(path "/e89f4604-d827-4cea-a2ff-4e370130edb6"
 					(reference "#FLG04")
 					(unit 1)
 				)
@@ -4114,7 +4448,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "e7cf7aba-738f-4aff-bcf9-000cdff9fd11")
+		(uuid "56c7e1f9-ded6-43f5-8417-8d308fb4226b")
 	)
 	(wire
 		(pts
@@ -4124,7 +4458,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "cf747639-50b6-4af0-a428-1f01ecb4a0b6")
+		(uuid "0b5c1285-2b69-47bf-90aa-44425aa1ef44")
 	)
 	(wire
 		(pts
@@ -4134,7 +4468,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "be66dda2-bbb7-47a8-bd7c-98f5d99fd789")
+		(uuid "7f9f0883-3914-4dee-a4b5-23e988376f8c")
 	)
 	(wire
 		(pts
@@ -4144,7 +4478,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b40afc1d-d8b0-4511-af1a-e709e506d642")
+		(uuid "a4bcac7e-8822-4074-8886-8811cdad2d12")
 	)
 	(wire
 		(pts
@@ -4154,7 +4488,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "52212c0f-791a-48fe-8cec-243686c98b2d")
+		(uuid "f130cdfe-1a56-4184-956a-1f1e5ffd7088")
 	)
 	(wire
 		(pts
@@ -4164,7 +4498,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "048ffe8e-f509-40da-9397-5a6010600192")
+		(uuid "003b20bd-0309-4dce-b276-af508f76a5ae")
 	)
 	(wire
 		(pts
@@ -4174,7 +4508,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "5ed150c1-a738-4387-9ff0-c8b07eff7a49")
+		(uuid "e7314875-4915-43e3-a6ee-3f52d1f259d8")
 	)
 	(wire
 		(pts
@@ -4184,7 +4518,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f92bbe6e-398e-4ffc-bd01-ceee4ab69a1a")
+		(uuid "159593ed-8efd-4d3d-a8bb-d5953adbf1f3")
 	)
 	(wire
 		(pts
@@ -4194,7 +4528,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d70c47ca-c5a3-4fdc-b36b-4bca98d7de1e")
+		(uuid "2ba57854-5ecb-45ab-8f8c-f3a5fd86ff31")
 	)
 	(wire
 		(pts
@@ -4204,7 +4538,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "8d98eec9-c5ac-41d4-93e8-57cacf373086")
+		(uuid "ab9a4631-bed8-4676-886b-01036ff5df35")
 	)
 	(wire
 		(pts
@@ -4214,7 +4548,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "326f4f4a-e28e-45f0-a983-1b9ceb9dc63a")
+		(uuid "2db9a955-8e07-4659-a05b-933ec193be08")
 	)
 	(wire
 		(pts
@@ -4224,7 +4558,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "c97c6781-bece-4770-9b52-31b8422d24b2")
+		(uuid "20a6574b-fe36-4d84-bbc4-55ca5cd17c01")
 	)
 	(wire
 		(pts
@@ -4234,7 +4568,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7b5e3fc2-f92c-44d7-b1dc-ef7153a0ad27")
+		(uuid "4c22948c-6965-4603-9159-8688d0d8196c")
 	)
 	(wire
 		(pts
@@ -4244,27 +4578,27 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bf31883a-7aef-4060-a6c4-faf4d36bb457")
+		(uuid "68acb5d1-1869-4173-8992-e8a53e4d0323")
 	)
 	(wire
 		(pts
-			(xy 95.25 82.55) (xy 95.25 80.01)
+			(xy 95.25 107.95) (xy 95.25 110.49)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "afe7cb60-dc45-481b-b865-e960b8111c4f")
+		(uuid "fc388ef9-4ec0-4b76-9129-f1f45085d840")
 	)
 	(wire
 		(pts
-			(xy 95.25 80.01) (xy 90.17 80.01)
+			(xy 95.25 110.49) (xy 90.17 110.49)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "fbc540d5-b9a3-4241-a708-8c49f66c3d3f")
+		(uuid "d096b376-e2d4-49a6-9d48-56176ae2291c")
 	)
 	(wire
 		(pts
@@ -4274,7 +4608,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7b788c2f-87d0-45dd-a9cb-38ec65d021ed")
+		(uuid "e7304591-cfac-48bc-98d4-c81fda4ba116")
 	)
 	(wire
 		(pts
@@ -4284,7 +4618,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a91b037f-0cdb-4550-93a7-cb4730af1413")
+		(uuid "316b250b-e888-4a42-b77c-cf4860eb1d6b")
 	)
 	(wire
 		(pts
@@ -4294,7 +4628,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "fed5f539-4a17-4858-953a-074c57a11e21")
+		(uuid "75819ccb-27e0-445f-a6c9-b3b0fb0aadc6")
 	)
 	(wire
 		(pts
@@ -4304,7 +4638,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "da4ff395-23b3-4f4e-82a1-ea667b85c23f")
+		(uuid "aacc518d-5957-4248-8a83-a00266e93443")
 	)
 	(wire
 		(pts
@@ -4314,7 +4648,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "99e28758-1525-4c79-a163-078e127f2671")
+		(uuid "8895df39-89fc-4c2a-99fe-f3067eaec8e7")
 	)
 	(wire
 		(pts
@@ -4324,67 +4658,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "132d25ac-b294-46b6-b8da-e4f4a6a49378")
-	)
-	(wire
-		(pts
-			(xy 149.86 87.63) (xy 144.78 87.63)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a7ec708b-bd3b-4127-9380-188a554e6e0b")
-	)
-	(wire
-		(pts
-			(xy 149.86 95.25) (xy 144.78 95.25)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ad40ab36-4c72-4f51-ac54-19c90a101535")
-	)
-	(wire
-		(pts
-			(xy 149.86 97.79) (xy 144.78 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c6a92414-c104-44ef-8831-645295569646")
-	)
-	(wire
-		(pts
-			(xy 160.02 107.95) (xy 160.02 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "37d3caf1-46c7-47bf-aa0d-890e1f71246c")
-	)
-	(wire
-		(pts
-			(xy 160.02 110.49) (xy 165.1 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "cade5912-17a1-4411-9a47-06d123d915f9")
-	)
-	(wire
-		(pts
-			(xy 149.86 92.71) (xy 144.78 92.71)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7e9b6a54-6314-439b-bf4d-6d2590b22f9f")
+		(uuid "ebefa305-ac83-498b-b5b7-1ca0fc2af301")
 	)
 	(wire
 		(pts
@@ -4394,37 +4668,97 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3358cd47-e2e3-4404-8dd3-2b4584b550b5")
+		(uuid "9d37ae41-0211-407c-8c51-d9692a13aec9")
 	)
 	(wire
 		(pts
-			(xy 149.86 100.33) (xy 144.78 100.33)
+			(xy 170.18 92.71) (xy 175.26 92.71)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "6feb7437-d1fe-4903-8a6c-afd919e899f1")
+		(uuid "df55dd2e-554a-48fe-bda2-664dd6c433b2")
 	)
 	(wire
 		(pts
-			(xy 160.02 82.55) (xy 160.02 80.01)
+			(xy 170.18 97.79) (xy 175.26 97.79)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "802675c2-3aff-444a-bc53-7384d471474f")
+		(uuid "4854a503-5d24-47ce-8de1-fe6958fdef04")
 	)
 	(wire
 		(pts
-			(xy 160.02 80.01) (xy 165.1 80.01)
+			(xy 160.02 106.68) (xy 160.02 109.22)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5b9a9430-3ef6-471b-a09b-0c213b1700db")
+		(uuid "9e06fa6b-f06f-477b-93c6-5cb1e3e47dd0")
+	)
+	(wire
+		(pts
+			(xy 160.02 109.22) (xy 165.1 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5d6caf72-9e05-4204-927b-98fbff1ffe28")
+	)
+	(wire
+		(pts
+			(xy 170.18 90.17) (xy 175.26 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "77f0127d-d016-4504-bb19-fde98e4568d0")
+	)
+	(wire
+		(pts
+			(xy 149.86 95.25) (xy 144.78 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c8cd6231-65f9-4de9-bd2d-3d68e9d6fd47")
+	)
+	(wire
+		(pts
+			(xy 170.18 100.33) (xy 175.26 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "821e1b26-1d8e-4a69-ae1a-594bc73aafe2")
+	)
+	(wire
+		(pts
+			(xy 160.02 83.82) (xy 160.02 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "32ee021e-a736-473e-bb3b-7b16f63f00af")
+	)
+	(wire
+		(pts
+			(xy 160.02 81.28) (xy 165.1 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e632a27-c242-439d-a6ba-0fa80c3e0746")
 	)
 	(wire
 		(pts
@@ -4434,7 +4768,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "f542d2a8-d06c-4659-b6d4-4a2cd3974f78")
+		(uuid "b10d5557-9380-4b93-89f1-5f478f5c0b77")
 	)
 	(wire
 		(pts
@@ -4444,7 +4778,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "4d51d245-324a-43f6-adcc-dbc26999277f")
+		(uuid "33399728-7130-4d60-8e3b-b4f551888dd9")
 	)
 	(wire
 		(pts
@@ -4454,7 +4788,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b7ced48d-91c6-4fa4-8a89-b31b1296202a")
+		(uuid "be2bf58a-ab7b-4226-941f-83d206657e42")
 	)
 	(wire
 		(pts
@@ -4464,7 +4798,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3c27cdbe-fdb0-4fce-bca7-d85667d38456")
+		(uuid "c25b689b-0eb8-41a1-a815-419437d6654c")
 	)
 	(wire
 		(pts
@@ -4474,7 +4808,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "b3faae31-6855-4fa7-a6eb-ead0898d505c")
+		(uuid "79326526-d6a8-4065-b374-81d72e149030")
 	)
 	(wire
 		(pts
@@ -4484,7 +4818,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "bf6d8e4c-81d1-4b0b-bf3f-3437ade8fd54")
+		(uuid "3f9e73b7-95e4-434a-9898-d5f073d8fb76")
 	)
 	(wire
 		(pts
@@ -4494,7 +4828,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7df3a407-1b5b-4af2-8fb5-5dbccdf3e076")
+		(uuid "c28d0b25-42b0-44fc-9ed9-cb4a3d313ea8")
 	)
 	(wire
 		(pts
@@ -4504,7 +4838,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "63f8a803-d442-40bd-8fdd-79b7ef82f0a3")
+		(uuid "63838964-1632-444b-94e1-29dafd999a79")
 	)
 	(wire
 		(pts
@@ -4514,7 +4848,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "2e2c8a21-be47-49b6-8145-4f8ac54e5ea2")
+		(uuid "c247350e-2b5b-42dd-aaa0-a790db075b90")
 	)
 	(wire
 		(pts
@@ -4524,7 +4858,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "a1bbe9b5-245a-459c-8fa7-6edb4dc81baa")
+		(uuid "f4240a76-5c5b-49d3-b099-2600dd6479ce")
 	)
 	(wire
 		(pts
@@ -4534,7 +4868,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "22161515-92a2-4a33-9ba8-0afe30505cba")
+		(uuid "99eea645-3d53-4001-9f8c-d0c50e7de1c8")
 	)
 	(wire
 		(pts
@@ -4544,7 +4878,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "69ca462f-a205-42be-be0a-fb97c4f840f2")
+		(uuid "352c6497-c64f-43a1-9fcb-be3e1c814b1b")
 	)
 	(wire
 		(pts
@@ -4554,7 +4888,87 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "4075b47e-44c6-4112-adc4-26948dfcb996")
+		(uuid "80932605-7563-4771-9fa4-0bcb4e872c11")
+	)
+	(wire
+		(pts
+			(xy 144.78 140.97) (xy 144.78 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0136a04-9454-4cab-9f39-e42d68451cc1")
+	)
+	(wire
+		(pts
+			(xy 144.78 148.59) (xy 144.78 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5c3d4eb-caf2-4757-9570-22da3cb6d7b8")
+	)
+	(wire
+		(pts
+			(xy 175.26 140.97) (xy 175.26 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "84e89e31-697f-4aa5-b1df-909bfe2f221c")
+	)
+	(wire
+		(pts
+			(xy 175.26 148.59) (xy 175.26 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0de83126-1045-4daa-963e-193194dab088")
+	)
+	(wire
+		(pts
+			(xy 204.47 140.97) (xy 204.47 135.89)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44a4ca91-a492-4229-90df-cbd8552f6048")
+	)
+	(wire
+		(pts
+			(xy 204.47 148.59) (xy 204.47 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3a4ff6a0-38a6-45e1-94cc-6fb5f6736e2e")
+	)
+	(wire
+		(pts
+			(xy 224.79 144.78) (xy 219.71 144.78)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "95e9d6fb-ce98-4b39-980e-54ca127bec7f")
+	)
+	(wire
+		(pts
+			(xy 224.79 147.32) (xy 219.71 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2c29e839-f4d7-44f1-81b9-889fd0e0b20c")
 	)
 	(wire
 		(pts
@@ -4564,7 +4978,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d3eb1930-6155-4ff4-aece-2fb92a097e2a")
+		(uuid "585dc13c-026b-40e8-bc0c-82fd8fbf89d3")
 	)
 	(wire
 		(pts
@@ -4574,47 +4988,47 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "1f0e48d5-c9fa-4081-a393-068dfcf969c8")
+		(uuid "5c1f5880-a05a-45d8-b432-b53b41dc321f")
 	)
 	(wire
 		(pts
-			(xy 91.44 55.88) (xy 91.44 50.8)
+			(xy 91.44 53.34) (xy 91.44 48.26)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "de223bd9-ba1b-4cfa-8abf-d58ecccce54a")
+		(uuid "f3325fb6-3afd-4078-834d-8dd51c4464b3")
 	)
 	(wire
 		(pts
-			(xy 91.44 63.5) (xy 91.44 68.58)
+			(xy 91.44 60.96) (xy 91.44 66.04)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "7dfd4717-e915-4471-a93f-34def80b0458")
+		(uuid "45d21a2e-a584-4497-bcc9-59593e77788a")
 	)
 	(wire
 		(pts
-			(xy 90.17 115.57) (xy 90.17 110.49)
+			(xy 69.85 115.57) (xy 69.85 110.49)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5d685b9a-58b3-4f80-b7bf-4b60ef448373")
+		(uuid "b41aec7e-6fb6-41cf-a703-5184cec05340")
 	)
 	(wire
 		(pts
-			(xy 90.17 123.19) (xy 90.17 128.27)
+			(xy 69.85 123.19) (xy 69.85 128.27)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "1f9f0c3a-3abf-4ed6-b823-820104365f2d")
+		(uuid "f06448e4-b8f0-4899-b1ba-8ab437ee390c")
 	)
 	(wire
 		(pts
@@ -4624,7 +5038,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "99208c50-a4bf-4303-a31d-19a1d68db636")
+		(uuid "63a8b9e9-391f-4bcc-a55a-0ba7b0955f44")
 	)
 	(wire
 		(pts
@@ -4634,7 +5048,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "6575669a-d7d9-4dec-be8a-b9e54f88812f")
+		(uuid "69b36f26-fe73-4316-b660-86caa322b97b")
 	)
 	(wire
 		(pts
@@ -4644,7 +5058,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "3360ee06-67dd-409a-9612-fa01f93d5532")
+		(uuid "3d5e3d7d-aafd-48a0-8802-7c247b5e005c")
 	)
 	(wire
 		(pts
@@ -4654,7 +5068,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "2973158f-4256-4ddd-beed-8b3e160902f4")
+		(uuid "9424cbd3-8bf8-4e40-8101-f02aad260bec")
 	)
 	(wire
 		(pts
@@ -4664,7 +5078,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "00666165-b892-40c2-94e5-421f4bc3661f")
+		(uuid "b88826a8-ec22-4221-9608-ce2e4827caae")
 	)
 	(wire
 		(pts
@@ -4674,157 +5088,187 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "14194e6e-5721-44a2-a041-510615bd46e6")
+		(uuid "c8fc796b-0e97-4dd9-94c5-64c8d9ac9c5e")
 	)
 	(wire
 		(pts
-			(xy 25.4 144.78) (xy 30.48 144.78)
+			(xy 25.4 132.08) (xy 30.48 132.08)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "f7213968-aece-481e-8d19-c6cca523a5cf")
+		(uuid "2244998a-717d-46a2-8457-f0bd6bf6bd24")
 	)
 	(wire
 		(pts
-			(xy 64.77 144.78) (xy 69.85 144.78)
+			(xy 64.77 132.08) (xy 69.85 132.08)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "62bf903e-93bc-4ebe-bdb7-075ed8c19ab9")
+		(uuid "43345c09-348d-4f6e-84e3-34dc7b64d44b")
 	)
 	(wire
 		(pts
-			(xy 105.41 144.78) (xy 110.49 144.78)
+			(xy 105.41 132.08) (xy 110.49 132.08)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "6afa77db-2b7c-4c40-b0e2-fa3b0bda9dcf")
+		(uuid "da40c2be-bfc7-4a5c-80f6-25359913eacd")
 	)
 	(wire
 		(pts
-			(xy 25.4 157.48) (xy 30.48 157.48)
+			(xy 25.4 143.51) (xy 30.48 143.51)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "690a9dbf-9286-47ad-b856-47c5b40543d5")
+		(uuid "7aeb49bf-160c-4651-b184-e537b9ff3669")
 	)
 	(wire
 		(pts
-			(xy 64.77 157.48) (xy 69.85 157.48)
+			(xy 64.77 143.51) (xy 69.85 143.51)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2511872d-6bff-4ab3-9d1d-3fdfb28d4008")
+		(uuid "b881e44e-edc4-4b23-ae9d-9f3bd50c3bc4")
 	)
 	(wire
 		(pts
-			(xy 105.41 157.48) (xy 110.49 157.48)
+			(xy 105.41 143.51) (xy 110.49 143.51)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "694d91ee-7636-4215-b898-694af5965908")
+		(uuid "40fab206-88a8-40bf-829c-d84725542c47")
 	)
 	(wire
 		(pts
-			(xy 25.4 168.91) (xy 30.48 168.91)
+			(xy 25.4 153.67) (xy 30.48 153.67)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "721da387-4e56-4f5d-b1ea-2c8876cce53a")
+		(uuid "8c677e63-98a3-49ca-ae59-39d251be3b47")
 	)
 	(wire
 		(pts
-			(xy 64.77 168.91) (xy 69.85 168.91)
+			(xy 64.77 153.67) (xy 69.85 153.67)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2954e344-b11f-4c1e-8ef9-47cdd7c1b68e")
+		(uuid "04457270-1d85-4838-9865-596a45e4e360")
 	)
 	(wire
 		(pts
-			(xy 105.41 168.91) (xy 110.49 168.91)
+			(xy 105.41 153.67) (xy 110.49 153.67)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "03630a1f-c53f-4fef-9d78-d4b002395b81")
+		(uuid "f971e3ae-ba66-47e8-83f3-f2a25a4c0ca6")
 	)
 	(wire
 		(pts
-			(xy 25.4 181.61) (xy 30.48 181.61)
+			(xy 25.4 165.1) (xy 30.48 165.1)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "a635d4b1-1327-4d8c-b4a7-8c6b504c2906")
+		(uuid "e4d1e0d6-2293-4865-a085-47cca85d61da")
 	)
 	(wire
 		(pts
-			(xy 64.77 181.61) (xy 69.85 181.61)
+			(xy 64.77 165.1) (xy 69.85 165.1)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "902d1d37-c466-45ab-9ef3-e757acc6f724")
+		(uuid "82d4e095-1037-4a40-897c-995058029b23")
 	)
 	(wire
 		(pts
-			(xy 105.41 181.61) (xy 110.49 181.61)
+			(xy 105.41 165.1) (xy 110.49 165.1)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "97d2039f-b143-4ca9-94b1-3359c6e4539d")
+		(uuid "a16fe36d-d523-4b3a-95f9-c1f55b3d1593")
 	)
 	(wire
 		(pts
-			(xy 25.4 193.04) (xy 30.48 193.04)
+			(xy 25.4 176.53) (xy 30.48 176.53)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e0dd19fd-d727-4783-81d8-ba62a739b870")
+		(uuid "e6f3367d-6142-4a1d-abcb-cdeb9996f323")
 	)
 	(wire
 		(pts
-			(xy 64.77 193.04) (xy 69.85 193.04)
+			(xy 64.77 176.53) (xy 69.85 176.53)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "abfec879-adba-4bf7-94d3-dbc0b1dc7864")
+		(uuid "ea95bf2d-735e-43a5-b41d-c9a3c1136652")
 	)
 	(wire
 		(pts
-			(xy 105.41 193.04) (xy 110.49 193.04)
+			(xy 105.41 176.53) (xy 110.49 176.53)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "0fd0c80b-ac6e-4571-968b-d113ba5d2e2a")
+		(uuid "d1400a44-25f7-4727-af44-662489d78297")
+	)
+	(wire
+		(pts
+			(xy 25.4 186.69) (xy 30.48 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ab0ff16-db57-4bb5-bd5c-5d90c16af85f")
+	)
+	(wire
+		(pts
+			(xy 64.77 186.69) (xy 69.85 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "42f2b8ff-7cb5-4023-ada3-f430a4f6781a")
+	)
+	(wire
+		(pts
+			(xy 105.41 186.69) (xy 110.49 186.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5521e118-8ae0-4874-8d24-077251cfd3a0")
 	)
 	(wire
 		(pts
@@ -4834,7 +5278,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "d23f2ec5-0720-400d-8700-2ffcd647fcfe")
+		(uuid "735cb3b6-cf75-440f-a570-d96a21124217")
 	)
 	(wire
 		(pts
@@ -4844,7 +5288,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "e54e271e-8078-40ce-8a14-6709529c8ea0")
+		(uuid "4f8e9934-2258-4f72-b34d-29316ccb4574")
 	)
 	(wire
 		(pts
@@ -4854,7 +5298,7 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "216f0f44-d403-41f7-afd6-a6d52f4dde39")
+		(uuid "3807baa1-247d-42d3-af40-4a44d20d3283")
 	)
 	(wire
 		(pts
@@ -4864,117 +5308,117 @@
 			(width 0)
 			(type default)
 		)
-		(uuid "7aba5b17-d752-4d5c-9a7d-2878d23b81f1")
+		(uuid "449754e7-4728-4720-afcf-e9eada91af38")
 	)
 	(label "HOST_3V3"
-		(at 25.4 90.17 180)
+		(at 25.4 90.17 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "b92a6c82-17a6-4d71-8240-0533ab909ba6")
+		(uuid "21c6d8b8-1b4e-4d42-b8c6-443533fa7537")
 	)
 	(label "GND"
-		(at 25.4 92.71 180)
+		(at 25.4 92.71 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "24141631-bde2-498c-bfb7-72db92522027")
+		(uuid "f7887ab4-dedb-4d8c-bc43-97f8f083d965")
 	)
 	(label "HOST_SCLK"
-		(at 25.4 95.25 180)
+		(at 25.4 95.25 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "2712653f-d6dd-4095-b26d-26ba5120fe04")
+		(uuid "4c56f44e-9ab8-4cd8-aa41-981932433012")
 	)
 	(label "HOST_MOSI"
-		(at 25.4 97.79 180)
+		(at 25.4 97.79 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "bc8080ef-42ee-49ef-9a44-a649cca7d06c")
+		(uuid "2403286d-d46c-4a61-a092-16b57fc3b2c9")
 	)
 	(label "HOST_CS_N"
-		(at 25.4 100.33 180)
+		(at 25.4 100.33 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "1257239d-491d-4a3f-b55c-e2ff0bef9624")
+		(uuid "11902a73-72ec-484c-b294-006da8d4d52a")
 	)
 	(label "HOST_MISO"
-		(at 30.48 107.95 270)
+		(at 30.48 107.95 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "a8fcfc4c-2a9a-4571-aa3c-390d6195a410")
+		(uuid "9cb2a64d-3881-4262-9cb6-25e4bacb1115")
 	)
 	(label "3V3"
-		(at 97.79 74.93 180)
+		(at 97.79 74.93 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "956a2da0-7c0e-449b-acd5-756f7c8567b7")
+		(uuid "e9f28048-af54-477a-954c-30cc8b0af84c")
 	)
 	(label "HOST_SCLK"
-		(at 90.17 87.63 180)
+		(at 90.17 87.63 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "122a7ca0-d1e6-43fc-8e91-06330994f370")
+		(uuid "c1e4dcf6-a885-4747-a842-dc3927af9a51")
 	)
 	(label "HOST_MOSI"
-		(at 90.17 92.71 180)
+		(at 90.17 92.71 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "096c98f7-f5a7-44e4-8338-6e45e386c758")
+		(uuid "a123aec4-8867-4763-baa6-86047bcfd356")
 	)
 	(label "HOST_CS_N"
-		(at 90.17 97.79 180)
+		(at 90.17 97.79 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "848f6029-2074-49f7-a814-7d54b8b820c9")
+		(uuid "6ef2323e-81db-4823-98c0-5b66065ecfd9")
 	)
 	(label "HOST_MISO"
-		(at 90.17 102.87 180)
+		(at 90.17 102.87 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "27ad9e8c-81b9-4033-b3cf-67b6ed45965f")
+		(uuid "c1b2e05b-918a-4fce-b521-5fce660cc5e9")
 	)
 	(label "GND"
 		(at 110.49 115.57 0)
@@ -4984,17 +5428,17 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d5b00d05-375c-4fbb-8992-886641b1f907")
+		(uuid "84a421e9-bb83-4f86-8824-c188dc5f2fad")
 	)
-	(label "DUT_1V8"
-		(at 90.17 80.01 180)
+	(label "TRANSLATOR_OE"
+		(at 90.17 110.49 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "8583ec6b-753a-4ee5-bccc-7587f39081f2")
+		(uuid "e971deff-2ca0-4fef-92a3-bdadbf8e9ace")
 	)
 	(label "DUT_MISO"
 		(at 120.65 102.87 0)
@@ -5004,7 +5448,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "4056e7d9-320b-480f-85d4-c2541e804cf6")
+		(uuid "d3f3fd03-72d8-4fbd-ad4a-0f43dd074e21")
 	)
 	(label "DUT_CS_N"
 		(at 120.65 97.79 0)
@@ -5014,7 +5458,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "77b49935-e2b4-445d-9e9e-3bc3e3293b1b")
+		(uuid "1433f8ea-408e-490e-b2b0-b83b956c3eb3")
 	)
 	(label "DUT_MOSI"
 		(at 120.65 92.71 0)
@@ -5024,7 +5468,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "681a9b3d-f780-40b0-9724-06346b265c1b")
+		(uuid "57de8415-a836-4fae-8c76-c5924afb027b")
 	)
 	(label "DUT_SCLK"
 		(at 120.65 87.63 0)
@@ -5034,7 +5478,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "9579c7b5-37b0-4e78-b1aa-fd3ab4fd6031")
+		(uuid "16ca312b-7b26-4a8d-a3cd-86c8ee4b4009")
 	)
 	(label "DUT_1V8"
 		(at 113.03 74.93 0)
@@ -5044,97 +5488,97 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b3dcb990-35c6-4184-8a22-59530b192538")
+		(uuid "84e28609-7a03-4530-95bc-2dd555fa8271")
 	)
 	(label "DUT_CS_N"
-		(at 144.78 87.63 180)
+		(at 144.78 90.17 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "aa92651f-f94d-4c6f-887e-aaa28759a584")
+		(uuid "975b6f2d-ba83-4a82-87e4-cb66350ba53d")
 	)
 	(label "DUT_MISO"
-		(at 144.78 95.25 180)
+		(at 175.26 92.71 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "453da570-f42d-45f8-b9ca-7d75e0efda64")
+		(uuid "6a0fa65f-ae15-43dd-b6df-a9278adf316e")
 	)
 	(label "DUT_IO2_WP_N"
-		(at 144.78 97.79 180)
+		(at 175.26 97.79 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "718dec34-b9a3-439b-8d0c-8dcebbe30332")
+		(uuid "2b1a458d-9793-44a9-bd8c-76cdd76b6576")
 	)
 	(label "GND"
-		(at 165.1 110.49 0)
+		(at 165.1 109.22 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "e023eaec-2c41-4e69-9e58-dce1d05dbdb6")
+		(uuid "ec29029a-d3cd-4981-a617-10038a7186c3")
 	)
 	(label "DUT_MOSI"
-		(at 144.78 92.71 180)
+		(at 175.26 90.17 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "a832b866-4a4f-424d-90af-4a830356319c")
+		(uuid "4e8eecbb-9199-4eef-967e-f3d4a518a3c0")
 	)
 	(label "DUT_SCLK"
-		(at 144.78 90.17 180)
+		(at 144.78 95.25 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "f24c94b3-6744-44ae-a22a-cc2645e62809")
+		(uuid "7c2e7fc0-01a6-4bf1-b6d2-4ef730a48fc3")
 	)
 	(label "DUT_IO3_HOLD_N"
-		(at 144.78 100.33 180)
+		(at 175.26 100.33 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "2f3639f1-7d2e-4b55-8718-145d531618c6")
+		(uuid "77d2cfab-34d8-45a8-8ead-de99226d8776")
 	)
 	(label "DUT_1V8"
-		(at 165.1 80.01 0)
+		(at 165.1 81.28 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "7f5b0355-9742-481a-ae84-24a0d96af1d2")
+		(uuid "04866f2b-79ae-4043-a9f3-f1d0e71212e2")
 	)
 	(label "3V3"
-		(at 62.23 41.91 180)
+		(at 62.23 41.91 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "49b30096-522e-4338-aab2-b4be659acb8e")
+		(uuid "df1340d0-a8eb-4ec3-b2c9-dffd7d1ebeb9")
 	)
 	(label "GND"
 		(at 80.01 54.61 0)
@@ -5144,17 +5588,17 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0d1cef96-a223-4799-bae7-752f1924341d")
+		(uuid "9ab4d313-d805-428c-bf0f-ed0734331222")
 	)
 	(label "3V3"
-		(at 62.23 44.45 180)
+		(at 62.23 44.45 0)
 		(effects
 			(font
 				(size 1 1)
 			)
-			(justify left bottom)
+			(justify right bottom)
 		)
-		(uuid "3ba611fb-b8e2-47a9-aa81-2898b2e0f1e7")
+		(uuid "9ad4eb3f-03fe-40ed-8136-777f45586040")
 	)
 	(label "1V8"
 		(at 87.63 41.91 0)
@@ -5164,357 +5608,467 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "a1f51e26-6865-4be1-b26c-67a2f1249cb6")
+		(uuid "9b97f46f-62d4-49c2-a5fd-9b9b73af7fd4")
 	)
 	(label "HOST_3V3"
-		(at 48.26 35.56 90)
+		(at 48.26 35.56 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "a8382b36-907b-47d6-b7c9-d439435be5b9")
+		(uuid "7728e2e1-919c-4c8d-8617-9f9f6b3a8d70")
 	)
 	(label "3V3"
-		(at 48.26 53.34 270)
+		(at 48.26 53.34 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "f4c13b47-c398-420c-9384-3efc554f7150")
+		(uuid "64600be5-34e9-4963-9f7d-22798c1db5a7")
 	)
 	(label "DUT_IO2_WP_N"
-		(at 185.42 73.66 90)
+		(at 185.42 73.66 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "1a035822-1b17-4ab4-a47e-7a59d00e1089")
+		(uuid "c6efe6be-f1b8-4027-801e-23f43aa5cb71")
 	)
 	(label "DUT_1V8"
-		(at 185.42 91.44 270)
+		(at 185.42 91.44 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "e6729d1a-30d5-4b47-9032-1773e85e260b")
+		(uuid "2a58c552-d46d-46da-b737-4bb2d18e6aa1")
 	)
 	(label "DUT_IO3_HOLD_N"
-		(at 199.39 73.66 90)
+		(at 199.39 73.66 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "e1a6b937-a513-48b5-873e-6a22ce00b98f")
+		(uuid "ed01a244-3c78-4ab4-99b1-55eaf8636074")
 	)
 	(label "DUT_1V8"
-		(at 199.39 91.44 270)
+		(at 199.39 91.44 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "1904cd70-36c6-412d-a76c-d57dba4d467a")
+		(uuid "53c6528d-7975-4fc3-87c1-96c267e3b80c")
 	)
 	(label "1V8"
-		(at 124.46 35.56 90)
+		(at 124.46 35.56 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "29e964ad-4384-4fb7-96c9-80c91f3a7c60")
+		(uuid "cde7daf2-1f23-4b3b-a817-bb44fa45e031")
 	)
 	(label "DUT_1V8"
-		(at 124.46 53.34 270)
+		(at 124.46 53.34 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "12d50b8c-9043-4837-b2bb-6930774dfe00")
-	)
-	(label "3V3"
-		(at 54.61 50.8 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "8974a5fc-16df-4baa-af28-f6ec825e23ff")
-	)
-	(label "GND"
-		(at 54.61 68.58 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "daadfd70-2e12-44bd-987a-bd6d49a96913")
-	)
-	(label "1V8"
-		(at 91.44 50.8 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "94fd2500-e9fc-4535-b18f-87a62d483e82")
-	)
-	(label "GND"
-		(at 91.44 68.58 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "7f35ab1b-3215-42b1-bdf8-a1c85842e157")
-	)
-	(label "3V3"
-		(at 90.17 110.49 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "82b3a7b8-1c0c-497d-9bff-febba73c0930")
-	)
-	(label "GND"
-		(at 90.17 128.27 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "5d4059ba-4548-4750-8cba-ff87b6e72055")
-	)
-	(label "DUT_1V8"
-		(at 119.38 110.49 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "78df381b-242b-41c9-9404-7b3770a01d27")
-	)
-	(label "GND"
-		(at 119.38 128.27 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "1e4cf42f-f6bb-4f7a-a1d8-b57c3e884686")
-	)
-	(label "DUT_1V8"
-		(at 175.26 110.49 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "9bd05fd4-6a67-4630-a5db-f83b7bd02a7d")
-	)
-	(label "GND"
-		(at 175.26 128.27 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "c0c0d299-65f9-41f4-b274-72aab28a3bd3")
-	)
-	(label "DUT_1V8"
-		(at 195.58 110.49 90)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "0672120c-32e9-45f3-bb47-12b3cdfa86ba")
-	)
-	(label "GND"
-		(at 195.58 128.27 270)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "a7db82c0-4e21-4e1b-be8e-aa1b7024d855")
-	)
-	(label "HOST_3V3"
-		(at 30.48 144.78 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "bb4c7f1a-e9e0-47d1-86d3-151737b448d4")
-	)
-	(label "3V3"
-		(at 69.85 144.78 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "45be0214-0e72-4583-ad44-f0e2cd485f49")
-	)
-	(label "1V8"
-		(at 110.49 144.78 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "b5794ecc-c51f-4086-a91d-3468154ecbc6")
-	)
-	(label "GND"
-		(at 30.48 157.48 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "cd5455a6-801a-4ee3-95a8-185797837f69")
-	)
-	(label "HOST_SCLK"
-		(at 69.85 157.48 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "d3763a24-5efe-45af-94e9-d04cd0d2ded1")
-	)
-	(label "DUT_SCLK"
-		(at 110.49 157.48 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "1fd37bb5-678f-4424-9451-18a2055ce226")
-	)
-	(label "HOST_MOSI"
-		(at 30.48 168.91 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "a39e5420-b768-435e-94da-85d149ae22ce")
-	)
-	(label "DUT_MOSI"
-		(at 69.85 168.91 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "00f056fa-2d8c-473a-8e78-987dc52398f9")
+		(uuid "6d42a067-f4f7-43a4-b120-f584ab26e567")
 	)
 	(label "HOST_CS_N"
-		(at 110.49 168.91 0)
+		(at 144.78 135.89 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "f9ae2932-795e-4473-971c-5ac2f8a10229")
+		(uuid "ede9a4e3-5047-4a69-8cbe-6f068ef72274")
+	)
+	(label "HOST_3V3"
+		(at 144.78 153.67 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "27f669fa-23eb-49e0-9d70-379e984a1242")
 	)
 	(label "DUT_CS_N"
-		(at 30.48 181.61 0)
+		(at 175.26 135.89 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "f72e9a84-469d-41a2-be35-188f96fb7180")
-	)
-	(label "HOST_MISO"
-		(at 69.85 181.61 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "47093d55-97a5-4d42-a930-0bc129e677f2")
-	)
-	(label "DUT_MISO"
-		(at 110.49 181.61 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "192b163e-d36e-40fc-b9a7-aa2da734d2e2")
-	)
-	(label "DUT_IO2_WP_N"
-		(at 30.48 193.04 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "b5950bb8-dcf1-4d2f-a1af-bdea948df3e3")
-	)
-	(label "DUT_IO3_HOLD_N"
-		(at 69.85 193.04 0)
-		(effects
-			(font
-				(size 1 1)
-			)
-			(justify left bottom)
-		)
-		(uuid "e1c40bda-7ba0-45ba-9e0b-54965fb7da83")
+		(uuid "71ecaba0-6573-44fb-9f32-c3e532558e4d")
 	)
 	(label "DUT_1V8"
-		(at 110.49 193.04 0)
+		(at 175.26 153.67 0)
 		(effects
 			(font
 				(size 1 1)
 			)
 			(justify left bottom)
 		)
-		(uuid "86a736d1-f536-44bd-9e71-d4e617924d59")
+		(uuid "10cb776e-a967-4fdc-bba3-226b507272ec")
+	)
+	(label "TRANSLATOR_OE"
+		(at 204.47 135.89 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "b983e3ed-e4bf-4b7e-a00f-96b2dbe64e58")
+	)
+	(label "GND"
+		(at 204.47 153.67 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "e97c5f0b-15e1-433a-a20a-c8f104c7aaa1")
+	)
+	(label "DUT_1V8"
+		(at 219.71 144.78 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right bottom)
+		)
+		(uuid "7870b971-916e-448c-8c21-c6aa49f8a6f2")
+	)
+	(label "TRANSLATOR_OE"
+		(at 219.71 147.32 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify right bottom)
+		)
+		(uuid "504bf2bf-55c8-4f4c-b5bd-f01c9c544799")
+	)
+	(label "3V3"
+		(at 54.61 50.8 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "1d6fa13f-67bb-44ce-8dd5-11a713082ef1")
+	)
+	(label "GND"
+		(at 54.61 68.58 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "af35b7fc-fbb0-41c6-923c-fd87f0962993")
+	)
+	(label "1V8"
+		(at 91.44 48.26 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "c5a40331-1cae-455f-9bb6-9c6509c3c8fd")
+	)
+	(label "GND"
+		(at 91.44 66.04 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "f62ed53e-b96e-431a-adfe-cc5f800c2111")
+	)
+	(label "3V3"
+		(at 69.85 110.49 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "ca833f9c-d923-4681-b21d-657042766331")
+	)
+	(label "GND"
+		(at 69.85 128.27 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "436c1ffb-4cba-4da0-accb-e6922e6b48df")
+	)
+	(label "DUT_1V8"
+		(at 119.38 110.49 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "ac645cfe-8028-4520-a069-4f6137d26cee")
+	)
+	(label "GND"
+		(at 119.38 128.27 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "5ebf40ea-e21e-4531-ae6e-a56d89de4064")
+	)
+	(label "DUT_1V8"
+		(at 175.26 110.49 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "22da0542-f82c-43c2-9e24-7b525559338d")
+	)
+	(label "GND"
+		(at 175.26 128.27 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "76db76b1-8bab-4bad-82cc-95c50ac5861f")
+	)
+	(label "DUT_1V8"
+		(at 195.58 110.49 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "86d0f214-0b67-402e-8741-0d0b7fb12406")
+	)
+	(label "GND"
+		(at 195.58 128.27 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "07904982-9198-47c8-b2de-8d9080a1833e")
+	)
+	(label "HOST_3V3"
+		(at 30.48 132.08 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "b4cda29a-73eb-4b32-94e7-b9f819c1155f")
+	)
+	(label "3V3"
+		(at 69.85 132.08 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "76b62b7c-6e3a-4180-a70b-e794290eeedd")
+	)
+	(label "1V8"
+		(at 110.49 132.08 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "93023574-3d38-4e73-aaa7-da14f21ac09a")
+	)
+	(label "GND"
+		(at 30.48 143.51 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "9a9c5a12-ec00-44e6-81c1-8e9cf6a5ffe6")
+	)
+	(label "HOST_SCLK"
+		(at 69.85 143.51 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "897dd773-1e7b-40f0-bf85-508d0006879e")
+	)
+	(label "DUT_SCLK"
+		(at 110.49 143.51 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "c560307b-096c-4a4c-97ea-86dd8c2f70e2")
+	)
+	(label "HOST_MOSI"
+		(at 30.48 153.67 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "3346caee-71c4-4250-8a87-f9ea7829017e")
+	)
+	(label "DUT_MOSI"
+		(at 69.85 153.67 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "a12c8ab3-a75c-43a1-bd8a-fb10cde83944")
+	)
+	(label "HOST_CS_N"
+		(at 110.49 153.67 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "d18fa2a0-076e-4ebf-ba24-d4c687b618b6")
+	)
+	(label "DUT_CS_N"
+		(at 30.48 165.1 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "e4cba410-71ea-458b-97df-7dbf3448c04a")
+	)
+	(label "HOST_MISO"
+		(at 69.85 165.1 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "05e4656e-4c7d-452e-8a66-2572348e5c34")
+	)
+	(label "DUT_MISO"
+		(at 110.49 165.1 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "fd4b9e2c-8b2b-4310-b873-c953f985a6c6")
+	)
+	(label "DUT_IO2_WP_N"
+		(at 30.48 176.53 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "befe611e-1d60-47f6-b772-343273cec43c")
+	)
+	(label "DUT_IO3_HOLD_N"
+		(at 69.85 176.53 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "ab0756c9-80d2-45bc-8c28-dbde49ccacea")
+	)
+	(label "DUT_1V8"
+		(at 110.49 176.53 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "27474dd6-dab0-4572-a061-a6fa878fb17c")
+	)
+	(label "TRANSLATOR_OE"
+		(at 30.48 186.69 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "5da0f441-8e87-43d0-b534-006a1e5e57ed")
+	)
+	(label "GND"
+		(at 69.85 186.69 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "460c98b3-395d-4af9-93b6-9c1f28391a5b")
+	)
+	(label "GND"
+		(at 110.49 186.69 0)
+		(effects
+			(font
+				(size 1 1)
+			)
+			(justify left bottom)
+		)
+		(uuid "e01d6318-3900-4c06-bf23-88f7ab210193")
 	)
 	(label "HOST_3V3"
 		(at 40.64 44.45 0)
@@ -5524,7 +6078,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "aeb26031-1acb-4ed5-9bb0-cf751360045d")
+		(uuid "ae356709-db9e-40f4-b742-0045e0abf173")
 	)
 	(label "GND"
 		(at 40.64 59.69 0)
@@ -5534,7 +6088,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "eb6dfcc2-b99f-4914-a2f6-a1a285b377d7")
+		(uuid "6f7e38ad-113f-4dc0-bbac-d7bb04f52414")
 	)
 	(label "3V3"
 		(at 59.69 44.45 0)
@@ -5544,7 +6098,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "3b9a62d2-efda-4c25-8329-4c8399df4979")
+		(uuid "3ea00997-b07f-405e-8f36-95deb799bb57")
 	)
 	(label "DUT_1V8"
 		(at 80.01 59.69 0)
@@ -5554,50 +6108,50 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "7b8ba0d6-a18b-45f0-83ea-dca41fa978cb")
+		(uuid "c8654331-5db6-4f8e-9a0a-4e6a5f8da911")
 	)
 	(no_connect
 		(at 97.79 107.95)
-		(uuid "042f9b61-8e62-4683-987e-6f26b9e518de")
+		(uuid "f2ef5f02-40c7-4ee9-8c7a-389ca428c81c")
 	)
 	(no_connect
 		(at 113.03 107.95)
-		(uuid "82584c76-88f0-4819-b1c7-edfadcb3e8fb")
+		(uuid "b9f7ccb0-98cf-41ac-9644-3188e8003104")
 	)
 	(no_connect
 		(at 80.01 44.45)
-		(uuid "98c38b2e-50a7-4ca5-8b9d-ecf84eca7ffc")
+		(uuid "79547e48-2139-4377-9983-f9cd8c269c60")
 	)
-	(text "U1 SYMBOL BASIS: TXB0104PW graphics are used only because TI documents pinout compatibility.\nThe fitted device is TXU0304PWR. Directional truth is: pins 2/3/4 A inputs ->\npins 13/12/11 B outputs; pin 10 B input -> pin 5 A output. Pins 6/9 are NC."
+	(text "U1 is TXU0304PWR; the project symbol encodes the actual fixed directions.\nPins 2/3/4 A inputs -> pins 13/12/11 B outputs; pin 10 B input -> pin 5 A output.\nOE pin 8 accepts either supply domain; R7 holds it low until JP1 is bridged."
 		(exclude_from_sim no)
-		(at 78 70 0.0000)
+		(at 105 70 0.0000)
 		(effects
 			(font
 				(size 1.1 1.1)
 				(bold yes)
 			)
 		)
-		(uuid "9fe9083a-271e-49a9-90a4-f24b4da86e44")
+		(uuid "c0acfd86-c254-41f6-bc7a-50f25ee8d4f6")
 	)
-	(text "POWER/SEQUENCING: U3 is TLV75518PDBVR. R1 is the host-power link; R4 isolates DUT_1V8.\nU3 EN is tied to 3V3. U1 OE is tied to DUT_1V8, so translation enables with that rail.\nBench use remains gated by current-limited power authorization and cold checks."
+	(text "POWER/SEQUENCING: U3 is TLV75518PDBVR. R1 is the host-power link; R4 isolates DUT_1V8.\nJP1 MUST BE OPEN at power-up/down. R5/R6 bias CS to its own domain rail.\nEnable only after DUT VCC >= 1.7 V for >=20 us, rail checks, and host CS=high.\nOpen JP1 with CS high before power-down; change R1/R4 only with power off."
 		(exclude_from_sim no)
-		(at 45 25 0.0000)
+		(at 105 25 0.0000)
 		(effects
 			(font
 				(size 1.1 1.1)
 			)
 		)
-		(uuid "8eab672f-7fe2-4df8-bdb4-094cb36d18e4")
+		(uuid "d0064302-c0fc-446b-be0a-cd26eb7d4773")
 	)
-	(text "FLASH MODE: W25Q128JWSIQ is SOIC-8 208 mil. IO2 and IO3 are biased high by 10k.\nThe first powered transaction is read-only JEDEC ID 0x9F; writes/erase are forbidden."
+	(text "FLASH: W25Q128JWSIQ SOIC-8 208 mil. IQ has QE fixed high; IO2/IO3 bias\nis not hardware write protection. First transaction: read-only 0x9F at 5 MHz.\nUse SPI mode 0; no writes/erase. Physical correctness remains UNPROVEN."
 		(exclude_from_sim no)
-		(at 172 68 0.0000)
+		(at 220 68 0.0000)
 		(effects
 			(font
 				(size 1.1 1.1)
 			)
 		)
-		(uuid "c89f68f5-68d8-4884-8437-652d5efb0ae5")
+		(uuid "fad53b0f-4f43-45d8-9b76-bb642dca5780")
 	)
 	(sheet_instances
 		(path "/"

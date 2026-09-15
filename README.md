@@ -14,9 +14,10 @@ captures, stale candidates, and out-of-order powered tests fail closed.
 
 The frozen SPI case now also has a complete, independently checkable
 [KiCad reference design](hardware/reference_designs/spi_flash_adapter_v1/README.md): exact BOM,
-schematic, routed two-layer PCB, 15 testpoints, removable rail-isolation links, Gerber package,
-and a clean ERC/DRC/schematic-parity receipt. It remains deliberately pre-fabrication and
-physically unproven.
+manufacturer-specific symbols, routed two-layer PCB, 18 testpoints, default-disabled translator,
+independent chip-select biasing, removable rail-isolation links, continuous ground reference,
+Gerber package, and a clean ERC/DRC/schematic-parity receipt. It remains deliberately
+pre-fabrication and physically unproven.
 
 Hardware-Splicer lets a general-purpose AI agent perform bounded hardware-engineering work while deterministic constraints, provenance-bearing evidence, exact revision state and scoped human authority remain independently authoritative.
 

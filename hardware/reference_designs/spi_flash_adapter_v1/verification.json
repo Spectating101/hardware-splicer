@@ -1,13 +1,19 @@
 {
   "advisories": {
     "library_revision_mismatch_warnings": 0,
-    "policy": "Only KiCad lib_footprint_mismatch warnings are advisory. The PCB embeds the routed footprint geometry; all other DRC classes fail closed."
+    "policy": "Only footprint-library warnings with independently matching pad stacks are advisory; unknown schemas, severities and count disagreements fail closed.",
+    "reviewed_nonpad_library_differences": []
   },
   "artifact_sha256": {
-    "bom": "e725362a9d96886e0232ac60af89163831df7dc7fde52403fac1a1f1fc8dbfde",
-    "design_manifest": "299b9f3c9554b78c8f5646d96c1674e7b0489a94e87eb313485a7701ce9b8a1b",
-    "pcb": "2824b4333c6215a40fac989be5989e7a6c39e30695448118802fc0aa7c78e064",
-    "schematic": "c3c3b9f99d03eef055be1a72024c98f72233874f5a1aa29d39ff1ec637834588"
+    "bom": "a3043de521aae29f03a4b195da6b448f799f676f617bd37d7f38e9c0dfaaef71",
+    "design_manifest": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
+    "electrical_contract": "b62b62f9e9c34b620a440555934b764e4c3ecee994c8c95d63881dd201aad12c",
+    "pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+    "project_rules": "0eb65723c01e3f41d0de831091968da861ebf61f01f0f1c8c82dcfd81fcad36f",
+    "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "symbol_library": "5da7075c6cbbad3ec371cf9583b03224a94bb274d968959eaf2d9a633d6f1a47",
+    "symbol_library_table": "a6342889d662299506eebfbe8f77c92ba3485a1a2e8f004dcb62251cb4167977",
+    "verifier": "b1f38d58eeb90ea3e1c1057d8a6389c806169686f7a9077c0921b617f7c1620e"
   },
   "authority": {
     "fabrication_ready": false,
@@ -18,34 +24,54 @@
     "power_on_ready": false
   },
   "board_inventory": {
-    "copper_tracks_and_vias": 211,
-    "footprints_total": 33,
+    "copper_tracks_and_vias": 175,
+    "filled_ground_area_mm2": {
+      "B.Cu": 4291.606,
+      "F.Cu": 3354.461
+    },
+    "footprints_total": 40,
+    "ground_stitching_vias": 20,
+    "ground_zones": 2,
     "mounting_holes": 4,
-    "testpoints": 15
+    "nearest_ground_via_mm": {
+      "C1.2": 1.25,
+      "C2.2": 1.25,
+      "C3.2": 1.25,
+      "C4.2": 1.25,
+      "C5.2": 1.225,
+      "C6.2": 1.225,
+      "U1.7": 1.5375,
+      "U2.4": 1.5125,
+      "U3.2": 1.0625
+    },
+    "signal_routing_layers": [
+      "F.Cu"
+    ],
+    "testpoints": 18
   },
   "checks": {
+    "assembly_variant_issues": 0,
+    "board_identity_issues": 0,
+    "bom_parity_issues": 0,
     "drc_actionable_violations": 0,
     "erc_errors": 0,
     "erc_warnings": 0,
     "footprint_errors": 0,
+    "ground_reference_issues": 0,
+    "required_topology_issues": 0,
     "schematic_parity_issues": 0,
     "unconnected_pads": 0
   },
   "design_id": "spi-flash-adapter-v1",
-  "diagnostic_stdout": {
-    "drc_actionable_clean": true,
-    "erc_clean": true,
-    "footprint_library_revision_match": true
-  },
   "nonclaims": [
-    "ERC and DRC establish internal CAD consistency, not physical correctness.",
-    "The routing engine's completion report is not accepted without KiCad DRC and parity checks.",
+    "CAD/electrical-intent checks do not establish physical correctness.",
+    "Ground fill and nearby vias are geometric checks, not impedance or waveform measurements.",
+    "Host loading, power transitions and current/thermal performance still require physical evidence.",
     "This receipt does not authorize fabrication or power-on."
   ],
   "result": "pass",
-  "schema_version": "hardware_splicer.reference_design_verification.v1",
+  "schema_version": "hardware_splicer.reference_design_verification.v2",
   "toolchain": {
-    "freerouting_linux_x64_archive_sha256": "3ad5a956ab474b12f331d24195feadac90e8344b8e013c6a4ab26e203ce51519",
     "kicad_cli": "9.0.2",
     "pcbnew": "9.0.2",
     "router": "Freerouting v2.4.1; routing output accepted only after KiCad checks"
