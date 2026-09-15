@@ -28,13 +28,19 @@ def sha256(path: Path) -> str:
 
 
 def command(*args: str) -> str:
-    return subprocess.run(
+    result = subprocess.run(
         list(args),
-        check=True,
+        check=False,
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-    ).stdout
+    )
+    if result.returncode:
+        rendered = " ".join(args)
+        raise SystemExit(
+            f"command failed with exit {result.returncode}: {rendered}\n{result.stdout}"
+        )
+    return result.stdout
 
 
 def main() -> None:
