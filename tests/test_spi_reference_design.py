@@ -96,6 +96,11 @@ def test_drc_rejects_unparsed_summary_violation() -> None:
         CHECKS.validate_drc(clean_drc(), CLEAN_DRC_STDOUT.replace("0 violations", "1 violations"), set())
 
 
+def test_kicad_first_run_notice_can_prefix_summary() -> None:
+    stdout = "footprint-library first-run notice. Found 0 violations\n"
+    assert CHECKS.reported_count(stdout, "violations") == 0
+
+
 @pytest.mark.parametrize("violation", ["clearance", "new_unknown_violation", "lib_footprint_mismatch"])
 def test_drc_never_blanket_waives_violation_classes(violation: str) -> None:
     report = clean_drc()

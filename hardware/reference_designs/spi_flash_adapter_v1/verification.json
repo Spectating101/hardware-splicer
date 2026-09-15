@@ -7,7 +7,7 @@
   "artifact_sha256": {
     "bom": "a3043de521aae29f03a4b195da6b448f799f676f617bd37d7f38e9c0dfaaef71",
     "design_manifest": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
-    "electrical_contract": "cd593fd9e99b53dd4866799220323efd985076aa7182b5345764ea5fb7e42bf2",
+    "electrical_contract": "6b93387dc7afeded96c515abe7519dbec9c5956eeb2d200493aadb1663800622",
     "pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
     "project_rules": "0eb65723c01e3f41d0de831091968da861ebf61f01f0f1c8c82dcfd81fcad36f",
     "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",

@@ -65,7 +65,14 @@ def report_entries(value: object, label: str) -> list[dict]:
 
 
 def reported_count(stdout: str, category: str) -> int:
-    counts = re.findall(rf"^Found (\d+) {re.escape(category)}$", stdout, re.MULTILINE)
+    # KiCad 9.0.9 can concatenate its first-run footprint-table notice and the
+    # first summary on one line.  Anchor the complete summary at line end while
+    # permitting that diagnostic prefix; exactly one count is still required.
+    counts = re.findall(
+        rf"Found (\d+) {re.escape(category)}\r?$",
+        stdout,
+        re.MULTILINE,
+    )
     require(
         len(counts) == 1,
         f"missing/ambiguous KiCad {category} summary in stdout {stdout!r}",
