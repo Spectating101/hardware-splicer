@@ -1,0 +1,48 @@
+{
+  "artifact_sha256": {
+    "bom": "e725362a9d96886e0232ac60af89163831df7dc7fde52403fac1a1f1fc8dbfde",
+    "design_manifest": "299b9f3c9554b78c8f5646d96c1674e7b0489a94e87eb313485a7701ce9b8a1b",
+    "pcb": "2824b4333c6215a40fac989be5989e7a6c39e30695448118802fc0aa7c78e064",
+    "schematic": "c3c3b9f99d03eef055be1a72024c98f72233874f5a1aa29d39ff1ec637834588"
+  },
+  "authority": {
+    "fabrication_ready": false,
+    "human_ee_review_complete": false,
+    "modeled_evidence_only": true,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false
+  },
+  "board_inventory": {
+    "copper_tracks_and_vias": 211,
+    "footprints_total": 33,
+    "mounting_holes": 4,
+    "testpoints": 15
+  },
+  "checks": {
+    "drc_violations": 0,
+    "erc_errors": 0,
+    "erc_warnings": 0,
+    "footprint_errors": 0,
+    "schematic_parity_issues": 0,
+    "unconnected_pads": 0
+  },
+  "design_id": "spi-flash-adapter-v1",
+  "diagnostic_stdout": {
+    "drc_clean": true,
+    "erc_clean": true
+  },
+  "nonclaims": [
+    "ERC and DRC establish internal CAD consistency, not physical correctness.",
+    "The routing engine's completion report is not accepted without KiCad DRC and parity checks.",
+    "This receipt does not authorize fabrication or power-on."
+  ],
+  "result": "pass",
+  "schema_version": "hardware_splicer.reference_design_verification.v1",
+  "toolchain": {
+    "freerouting_linux_x64_archive_sha256": "3ad5a956ab474b12f331d24195feadac90e8344b8e013c6a4ab26e203ce51519",
+    "kicad_cli": "9.0.2",
+    "pcbnew": "9.0.2",
+    "router": "Freerouting v2.4.1; routing output accepted only after KiCad checks"
+  }
+}

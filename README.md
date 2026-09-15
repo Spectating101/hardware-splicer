@@ -12,6 +12,12 @@ revision/hash-bound [project physical-validation packet](docs/PROJECT_PHYSICAL_V
 Real captures persist into the same canonical project history; simulated or public-web
 captures, stale candidates, and out-of-order powered tests fail closed.
 
+The frozen SPI case now also has a complete, independently checkable
+[KiCad reference design](hardware/reference_designs/spi_flash_adapter_v1/README.md): exact BOM,
+schematic, routed two-layer PCB, 15 testpoints, removable rail-isolation links, Gerber package,
+and a clean ERC/DRC/schematic-parity receipt. It remains deliberately pre-fabrication and
+physically unproven.
+
 Hardware-Splicer lets a general-purpose AI agent perform bounded hardware-engineering work while deterministic constraints, provenance-bearing evidence, exact revision state and scoped human authority remain independently authoritative.
 
 It is **not** a claim that an LLM can safely replace a hardware engineer. The design goal is narrower and more defensible:
@@ -33,7 +39,7 @@ Then use:
 
 ## Current state
 
-**SOFTWARE ARCHITECTURE FROZEN / EXTERNAL PROOF + SUBMISSION PACKAGING ACTIVE**
+**SOFTWARE ARCHITECTURE FROZEN / EXTERNAL PROOF + PHYSICAL REFERENCE DESIGN ACTIVE**
 
 | Evidence layer | State |
 |---|---|
@@ -42,12 +48,16 @@ Then use:
 | frozen ten-case unseen SPI corpus | **PROVEN AS CORPUS/PROTOCOL** |
 | canonical MCP gateway | **PROVEN** |
 | external-agent runner / trace audit | **PROVEN AS INFRASTRUCTURE** |
-| live external-model run on unchanged corpus | **PENDING** |
+| live external-model bounded engineering run | **PROVEN AS EXISTENCE DEMONSTRATION** |
+| hash-bound primary-source Astra run | **PROVEN AS ONE PREREGISTERED RUN** |
+| SPI KiCad schematic/PCB internal consistency | **PROVEN: ERC/DRC/PARITY CLEAN** |
 | fresh revision-bound SPI physical correctness | **PENDING** |
 | independent human operator | **PENDING** |
 | production / industrial deployment readiness | **NOT CLAIMED** |
 
-The project is therefore **evidence-blocked, not feature-blocked**. Generic feature development should remain frozen unless a live, unseen, physical or independent-operator experiment exposes a concrete defect.
+The project is now **physical-evidence-blocked, not CAD- or agent-feature-blocked**. The SPI
+reference design closes the missing schematic/PCB/package layer without claiming that software
+checks replace independent review, fabrication inspection, or bench measurement.
 
 ## Architecture
 
@@ -97,7 +107,9 @@ At the current external-proof checkpoint, exact-head CI has exercised:
 - **193 canonical backend operations**;
 - `physical_authority_granted = false` at the MCP boundary.
 
-This proves the engineering surface and proof harness exist. It does **not** prove a live external model has passed the corpus.
+This proves the engineering surface and proof harness exist. Separate durable Astra evidence now
+also establishes successful bounded operation on the primary-source SPI case; it does not establish
+distributional reliability across the entire frozen corpus.
 
 ## Primary bounded application
 
@@ -149,7 +161,8 @@ The frozen unseen SPI-flash corpus contains ten cases:
 
 The external-agent runner can preserve model requests/responses, MCP calls, case-scoped state and replay material while the trace audit checks for incomplete calls, foreign project scope, unsupported evidence identity and attempts to open physical authority.
 
-**The actual live provider run remains pending.** Frozen cases must not be rewritten after results are visible.
+The published live provider result is an existence demonstration, not a completed reliability
+matrix. Frozen cases and historical result bundles must not be rewritten after results are visible.
 
 ## Physical evidence and authority
 
