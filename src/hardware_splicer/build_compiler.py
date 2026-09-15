@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -251,7 +252,14 @@ def _export_gerber_if_possible(kicad_path: Path, out_dir: Path) -> str | None:
 
 
 def ensure_circuit_import_path() -> None:
-    circuit_root = ROOT / "apps" / "circuit-ai"
+    explicit_root = os.environ.get("HARDWARE_SPLICER_REPO_ROOT", "").strip()
+    repo_root = Path(explicit_root).expanduser().resolve() if explicit_root else ROOT
+    circuit_root = repo_root / "apps" / "circuit-ai"
+    if not (circuit_root / "src").is_dir():
+        raise RuntimeError(
+            "Circuit-AI compatibility package is unavailable; set "
+            "HARDWARE_SPLICER_REPO_ROOT to a Hardware-Splicer checkout"
+        )
     import sys
 
     circuit_src = str(circuit_root)

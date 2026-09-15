@@ -1,0 +1,60 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "supply-envelope",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "statement": "Design and verify DUT supply remains 1.7–1.95 V, including tolerance, ripple, transient and load effects. Maintain all pins within specified operating limits; -0.6 V to VCC+0.4 V is only the supplied absolute-maximum envelope."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "physical-pinout",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "statement": "Resolve marking, suffix and package before assigning DUT pins or footprint; select exact translator orderable package and validate its pinout."
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "requirement_id": "electrical-timing",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "statement": "Obtain guaranteed VIH/VIL/VOH/VOL, output loading and delay limits at selected rails and conditions. Budget host-to-DUT clock/data/CS and DUT-to-host return delay, skew, setup/hold and programmer sampling for a justified SPI clock. No clock rate is approved."
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}

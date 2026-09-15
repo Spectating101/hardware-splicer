@@ -1,0 +1,20 @@
+{
+  "action_count": 9,
+  "blocker_count": 9,
+  "candidate_count": 3,
+  "conversation_turn_count": 0,
+  "current_stage": null,
+  "latest_ai_session_id": null,
+  "mission": "Inspect the frozen manufacturer documents through the Hardware-Splicer document-evidence operations, register page-anchored proposed claims for every extraction target, and advance the SPI adapter architecture only as far as those extracted claims and fixture declarations permit. Preserve physical identity, implementation, timing, and bench uncertainty; do not claim fabrication or power-on readiness.",
+  "mode": null,
+  "name": "Raw-document-grounded SPI Flash Programming Adapter v2",
+  "parsed_source_count": 0,
+  "project_id": "hs-astra-rawdoc-v3-20260913-1",
+  "requirement_count": 4,
+  "schema_version": "hardware_splicer.engineering_package.v1",
+  "snapshot_sha256": "74e814cd3421b8c77fd8686ebaea3c8c7c00ba6a9a6ec986b759a31dfa6eb09a",
+  "source_count": 5,
+  "source_revision": 5,
+  "source_saved_at": "2026-09-12T18:30:55.426777+00:00",
+  "tool_result_count": 0
+}

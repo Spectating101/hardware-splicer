@@ -1,0 +1,22 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "bounded-family-selection",
+      "description": "Prefer TXU0304 family conditionally. Application example is not a component specification; maximum example data rate is not a verified programmer clock or timing budget.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

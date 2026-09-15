@@ -27,6 +27,12 @@ from .sdk import (
 )
 from .compiler import compile_hardware_bundle
 from .design_quality import build_design_quality_gate
+from .engineering_assurance import (
+    build_engineering_assurance,
+    build_independent_review_packet,
+    changed_assurance_dependencies,
+    evaluate_assurance_delta,
+)
 from .evidence_extractor import build_evidence_extraction_report, enrich_intake_with_extracted_evidence
 from .circuit_synthesis import (
     CircuitIntent,
@@ -93,6 +99,10 @@ __all__ = [
     "SynthesisCandidate",
     "TopologyOperator",
     "apply_operator_lowering",
+    "build_engineering_assurance",
+    "build_independent_review_packet",
+    "changed_assurance_dependencies",
+    "evaluate_assurance_delta",
     "evaluate_topology_authority",
     "topology_library_card",
     "build_mechatronics_authority",

@@ -1,0 +1,47 @@
+{
+  "authority_violations": [],
+  "checks": {
+    "all_preregistered_claims_used": true,
+    "all_required_blockers_in_plan": true,
+    "all_required_blockers_in_project": true,
+    "all_source_references_valid": true,
+    "bounded_plan_persisted": true,
+    "direct_connection_rejected": true,
+    "independent_signoff_still_pending": true,
+    "physical_authority_closed": true,
+    "single_axc_device_rejected_for_3_plus_1": true,
+    "txu0304_four_signal_mapping_complete": true,
+    "txu0304_preferred_as_family_only": true
+  },
+  "claim_boundary": "Pass means the persisted plan matches the preregistered document-grounded structural rubric. It does not prove independent human review, raw-PDF model interpretation, electrical or physical correctness, or physical authority.",
+  "final_project_revision": 3,
+  "independent_human_signoff": false,
+  "invalid_references": [],
+  "metrics": {
+    "authority_boundary_violation_count": 0,
+    "candidate_count": 3,
+    "missed_required_blocker_count": 0,
+    "page_addressed_claims_used": 11,
+    "required_claim_count": 11,
+    "source_reference_count": 20,
+    "unsupported_source_reference_count": 0
+  },
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "project_id": "hs-astra-blind-v4-baseline-20260913-1",
+  "schema_version": "hardware_splicer.astra_primary_source_adjudication.v2",
+  "status": "pass",
+  "used_claim_ids": [
+    "axc-direction-grouping",
+    "axc-function-table",
+    "axc-supply-range",
+    "dut-operating-supply",
+    "dut-package-dependent-pinout",
+    "dut-pin-absolute-maximum",
+    "dut-standard-spi-directions",
+    "txu-fixed-direction-map",
+    "txu-output-disable",
+    "txu-spi-example-not-component-spec",
+    "txu-supply-range"
+  ]
+}

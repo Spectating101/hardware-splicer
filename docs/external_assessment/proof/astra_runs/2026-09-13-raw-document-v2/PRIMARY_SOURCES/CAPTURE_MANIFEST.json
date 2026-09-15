@@ -1,0 +1,49 @@
+{
+  "authority_effect": "none",
+  "captured_on": "2026-09-12",
+  "document_count": 3,
+  "documents": [
+    {
+      "checks": {
+        "is_pdf": true,
+        "sha256_matches": true,
+        "size_matches": true
+      },
+      "expected_page_count": 79,
+      "filename": "W25Q128JW_RevG_07292021_Plus.pdf",
+      "pass": true,
+      "sha256": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "size_bytes": 2645121,
+      "source_id": "src-dut-datasheet"
+    },
+    {
+      "checks": {
+        "is_pdf": true,
+        "sha256_matches": true,
+        "size_matches": true
+      },
+      "expected_page_count": 45,
+      "filename": "txu0304-reva.pdf",
+      "pass": true,
+      "sha256": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "size_bytes": 2666177,
+      "source_id": "src-translator-fixed-datasheet"
+    },
+    {
+      "checks": {
+        "is_pdf": true,
+        "sha256_matches": true,
+        "size_matches": true
+      },
+      "expected_page_count": 41,
+      "filename": "sn74axc4t245-revb.pdf",
+      "pass": true,
+      "sha256": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "size_bytes": 2442164,
+      "source_id": "src-translator-dir-datasheet"
+    }
+  ],
+  "pass": true,
+  "raw_documents_model_visible": false,
+  "schema_version": "hardware_splicer.primary_source_capture_verification.v1"
+}

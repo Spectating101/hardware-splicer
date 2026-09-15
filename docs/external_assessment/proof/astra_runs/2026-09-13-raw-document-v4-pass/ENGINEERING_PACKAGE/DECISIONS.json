@@ -1,0 +1,59 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "bounded-selection",
+      "description": "Advance TXU0304 family for standard SPI only. No dual/quad support or maximum clock rate established. Application example is not component specification or validation.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        }
+      ],
+      "status": "proposed"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

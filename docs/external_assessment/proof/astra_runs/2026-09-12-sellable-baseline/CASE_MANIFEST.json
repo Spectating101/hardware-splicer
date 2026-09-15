@@ -1,0 +1,36 @@
+{
+  "backend_project_root": "$OBSERVER_DIR/BACKEND_STORE",
+  "backend_project_root_initially_empty": true,
+  "case_id": "spi-flash-adapter-baseline",
+  "case_metadata": {
+    "equivalence_asserted_by": "outer_engineer",
+    "fresh_unseen_case": true,
+    "golden_architecture_encoded": false,
+    "scenario_family": "spi_flash_programming_adapter"
+  },
+  "case_project_revision": 1,
+  "developer_instructions_file": "$OBSERVER_DIR/DEVELOPER_INSTRUCTIONS.txt",
+  "equivalence_group": "spi-flash-evidence-equivalent",
+  "experiment_project_id": "hs-astra-sellable-20260912-4",
+  "hs_repo_root": "$HS_REPO_ROOT",
+  "input_sha256": "sha256:b99876093394e21f873d10654f01f5cddf788c856aeb5e8e78fa629bb6abc983",
+  "instructions_sha256": "sha256:765f4faed246b6a22a0f5e160dd3fd91c774f6ef78eedc0608f517cf7ebb2b7b",
+  "mission_file": "$MODEL_WORKSPACE/MISSION.txt",
+  "model_inference_performed": false,
+  "model_visible_workspace": "$MODEL_WORKSPACE",
+  "observer_directory": "$OBSERVER_DIR",
+  "outer_labels_visible_to_model": false,
+  "perturbation_kind": "baseline",
+  "physical_authority_granted": false,
+  "product_visible_source_ids": [
+    "src-controller",
+    "src-dut",
+    "src-fixture",
+    "src-translator-dir",
+    "src-translator-fixed"
+  ],
+  "provider_network_io_performed": false,
+  "schema_version": "hardware_splicer.codex_astra_case_package.v1",
+  "snapshot_file": "$OBSERVER_DIR/CASE_SNAPSHOT.json",
+  "snapshot_sha256": "sha256:a17f0097cf20c58b9d259f57b56f71010199aa22a7b52a030e58af8ae9b946d8"
+}

@@ -1,0 +1,11 @@
+{
+  "api_fallback": false,
+  "live_execution_claim": "$OBSERVER_DIR/LIVE_EXECUTION_ATTEMPT.json",
+  "output_schema_file": "$OBSERVER_DIR/CODEX_ASTRA_FINAL_REPORT_SCHEMA.json",
+  "physical_authority_granted": false,
+  "schema_version": "hardware_splicer.codex_astra_run_result.v4",
+  "status": "timeout",
+  "stderr_file": "$OBSERVER_DIR/CODEX_ASTRA_STDERR.log",
+  "timeout_seconds": 300,
+  "trace_file": "$OBSERVER_DIR/CODEX_ASTRA_TRACE.jsonl"
+}

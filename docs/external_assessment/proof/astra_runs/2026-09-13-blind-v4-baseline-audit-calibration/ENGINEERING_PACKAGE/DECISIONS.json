@@ -1,0 +1,35 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "bounded-architecture",
+      "description": "Advance TXU0304 only as a family candidate; preserve default power off and all six supplied blockers.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        }
+      ]
+    },
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "oe-boundary",
+      "description": "Plan OE low for disabled outputs; implement and verify bias, reference domain, sequencing, and unpowered behavior before any enable. High impedance does not establish safe DUT input states.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

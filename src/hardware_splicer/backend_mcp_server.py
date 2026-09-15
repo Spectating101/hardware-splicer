@@ -37,13 +37,15 @@ from .mcp_backend_gateway import (
     describe_operation,
     dispatch_operation,
     filtered_operations,
+    task_operation_manifest,
 )
 from .product_api import create_product_app
 
 mcp = MCPServer(
     "hardware-splicer-canonical-backend",
     instructions=(
-        "Use hs_backend_status first. Discover operations with hs_backend_list_operations, "
+        "Use hs_backend_status first. Prefer hs_backend_task_manifest for matching bounded "
+        "workflows; otherwise discover operations with hs_backend_list_operations, "
         "inspect unfamiliar request contracts with hs_backend_describe_operation, then invoke "
         "only canonical operations with hs_backend_call. MCP does not grant physical authority; "
         "all revision, evidence, deterministic-verification and human-authorization gates remain "
@@ -178,6 +180,24 @@ async def hs_backend_list_operations(
             "operations": rows[offset : offset + limit],
         }
     )
+
+
+@mcp.tool(structured_output=False)
+async def hs_backend_task_manifest(
+    task: Literal[
+        "bounded_pre_fabrication",
+        "document_grounded_pre_fabrication",
+        "engineering_assurance",
+    ],
+) -> str:
+    """Return one task-scoped canonical workflow contract in a single discovery call.
+
+    Prefer this over repeated broad list/describe calls when the task matches. The manifest
+    is generated from the live product OpenAPI document and does not bypass backend gates or
+    grant physical authority.
+    """
+
+    return _render(task_operation_manifest(task, _product_app))
 
 
 @mcp.tool(structured_output=False)

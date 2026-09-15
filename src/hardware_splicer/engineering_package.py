@@ -124,7 +124,30 @@ def _source_rows(snapshot: Mapping[str, Any]) -> tuple[list[Dict[str, Any]], lis
     return registered, parsed
 
 
-def _requirements(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
+def _pre_fabrication_plan(snapshot: Mapping[str, Any]) -> Dict[str, Any]:
+    canonical = snapshot.get("preFabricationPlan")
+    if isinstance(canonical, Mapping):
+        return dict(canonical)
+    legacy = snapshot.get("preFabricationNextActions")
+    if isinstance(legacy, Mapping):
+        return dict(legacy)
+    actions = snapshot.get("preFabricationActions")
+    if isinstance(actions, Sequence) and not isinstance(actions, (str, bytes, bytearray)):
+        return {
+            "schema_version": "hardware_splicer.pre_fabrication_plan.compatibility.v1",
+            "assessment": _mapping(snapshot.get("preFabricationAssessment")),
+            "actions": _rows(actions),
+            "requirements": [],
+            "architecture_candidates": [],
+            "decisions": [],
+        }
+    return {}
+
+
+def _requirements(
+    snapshot: Mapping[str, Any],
+    sessions: Iterable[Mapping[str, Any]],
+) -> list[Dict[str, Any]]:
     result: list[Dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for session in sessions:
@@ -142,10 +165,45 @@ def _requirements(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]
                     **_clean(row),
                 }
             )
+    machine_project = _mapping(
+        snapshot.get("machineProject") or snapshot.get("machine_project")
+    )
+    for row in _rows(machine_project.get("requirements")):
+        requirement_id = str(row.get("requirement_id") or row.get("id") or "")
+        key = ("canonical_machine_project", requirement_id or _sha256(_canonical_json_bytes(row)))
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "canonical_machine_project",
+                "canonical_surface": "machineProject.requirements",
+                **_clean(row),
+            }
+        )
+    bounded_plan = _pre_fabrication_plan(snapshot)
+    for row in _rows(bounded_plan.get("requirements")):
+        requirement_id = str(row.get("requirement_id") or row.get("id") or "")
+        key = ("bounded_pre_fabrication_plan", requirement_id or _sha256(_canonical_json_bytes(row)))
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "bounded_pre_fabrication_plan",
+                "canonical_surface": "preFabricationPlan.requirements",
+                **_clean(row),
+            }
+        )
     return result
 
 
-def _candidates(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
+def _candidates(
+    snapshot: Mapping[str, Any],
+    sessions: Iterable[Mapping[str, Any]],
+) -> list[Dict[str, Any]]:
     result: list[Dict[str, Any]] = []
     for session in sessions:
         session_id = str(session.get("session_id") or "")
@@ -157,10 +215,41 @@ def _candidates(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
                     **_clean(row),
                 }
             )
+    bounded_plan = _pre_fabrication_plan(snapshot)
+    for row in _rows(bounded_plan.get("architecture_candidates"), limit=256):
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "bounded_pre_fabrication_plan",
+                "canonical_surface": "preFabricationPlan.architecture_candidates",
+                **_clean(row),
+            }
+        )
+    if not result:
+        machine_project = _mapping(
+            snapshot.get("machineProject") or snapshot.get("machine_project")
+        )
+        if machine_project:
+            result.append(
+                {
+                    "session_id": "",
+                    "session_kind": "canonical_machine_project",
+                    "canonical_surface": "machineProject",
+                    "id": str(machine_project.get("project_id") or "canonical-project"),
+                    "title": str(machine_project.get("name") or "Canonical machine project"),
+                    "summary": str(machine_project.get("purpose") or ""),
+                    "candidate_kind": "persisted_canonical_state",
+                    "authority": str(machine_project.get("authority") or "proposed"),
+                    "machine_project": _clean(machine_project),
+                }
+            )
     return result
 
 
-def _actions(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
+def _actions(
+    snapshot: Mapping[str, Any],
+    sessions: Iterable[Mapping[str, Any]],
+) -> list[Dict[str, Any]]:
     result: list[Dict[str, Any]] = []
     for session in sessions:
         session_id = str(session.get("session_id") or "")
@@ -187,6 +276,68 @@ def _actions(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
                     "authority_effect": str(action.get("authority_effect") or "none"),
                 }
             )
+    next_actions = _pre_fabrication_plan(snapshot)
+    for index, action in enumerate(_rows(next_actions.get("actions"), limit=4096), start=1):
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "bounded_pre_fabrication_plan",
+                "canonical_surface": "preFabricationNextActions.actions",
+                "action_id": str(
+                    action.get("action_id")
+                    or action.get("id")
+                    or f"pre-fabrication-{index:02d}"
+                ),
+                "action_type": "pre_fabrication_next_action",
+                "title": str(
+                    action.get("title")
+                    or action.get("action")
+                    or action.get("id")
+                    or ""
+                ),
+                "rationale": str(
+                    action.get("rationale")
+                    or action.get("required_evidence")
+                    or action.get("description")
+                    or action.get("action")
+                    or ""
+                ),
+                "status": str(action.get("status") or "planned"),
+                "project_revision": action.get("project_revision"),
+                "source_ids": _strings(action.get("source_ids"), limit=64),
+                "origin_turn_id": action.get("origin_turn_id"),
+                "inputs": _clean(action),
+                "decision": {},
+                "tool_result_status": None,
+                "tool_artifact": {},
+                "repair_sessions": [],
+                "automatic_execution": False,
+                "authority_effect": "none",
+            }
+        )
+    for index, step in enumerate(_rows(snapshot.get("orderedSteps"), limit=4096), start=1):
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "canonical_engineering_plan",
+                "canonical_surface": "orderedSteps",
+                "action_id": str(step.get("step_id") or f"engineering-step-{index:02d}"),
+                "action_type": "guided_engineering_step",
+                "title": str(step.get("title") or ""),
+                "rationale": " ".join(_strings(step.get("instructions"), limit=64)),
+                "status": str(step.get("status") or "planned"),
+                "project_revision": step.get("project_revision"),
+                "source_ids": _strings(step.get("source_ids"), limit=64),
+                "origin_turn_id": None,
+                "inputs": _clean(step),
+                "decision": {},
+                "tool_result_status": None,
+                "tool_artifact": {},
+                "repair_sessions": [],
+                "automatic_execution": False,
+                "authority_effect": "none",
+            }
+        )
     return result
 
 
@@ -217,7 +368,10 @@ def _tool_results(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]
     return result
 
 
-def _decisions(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
+def _decisions(
+    snapshot: Mapping[str, Any],
+    sessions: Iterable[Mapping[str, Any]],
+) -> list[Dict[str, Any]]:
     result: list[Dict[str, Any]] = []
     for session in sessions:
         for action in _rows(session.get("actions"), limit=4096):
@@ -233,6 +387,16 @@ def _decisions(sessions: Iterable[Mapping[str, Any]]) -> list[Dict[str, Any]]:
                     "decision": _clean(decision),
                 }
             )
+    bounded_plan = _pre_fabrication_plan(snapshot)
+    for row in _rows(bounded_plan.get("decisions"), limit=256):
+        result.append(
+            {
+                "session_id": "",
+                "session_kind": "bounded_pre_fabrication_plan",
+                "canonical_surface": "preFabricationPlan.decisions",
+                **_clean(row),
+            }
+        )
     return result
 
 
@@ -321,7 +485,12 @@ def _blockers(
         seen.add(key)
         result.append({"kind": kind, "object_id": object_id, "message": text})
 
-    for key in ("missingInfo", "missing_info", "blockers"):
+    for key in (
+        "missingInfo",
+        "missing_info",
+        "blockers",
+        "engineeringBlockers",
+    ):
         for message in _strings(snapshot.get(key), limit=2048):
             add("project", message)
     status = _mapping(snapshot.get("engineeringStatus") or snapshot.get("engineering_status"))
@@ -339,6 +508,13 @@ def _blockers(
             turn_id = str(turn.get("turn_id") or "")
             for message in _strings(turn.get("blockers"), limit=512):
                 add("conversation", message, object_id=turn_id)
+    next_actions = _pre_fabrication_plan(snapshot)
+    for failure in _rows(next_actions.get("tool_failures"), limit=512):
+        add(
+            "planning_tool_failure",
+            failure.get("message") or failure.get("error"),
+            object_id=str(failure.get("operation") or ""),
+        )
     for result_row in tool_results:
         if str(result_row.get("status") or "") != "failed":
             continue
@@ -447,11 +623,11 @@ def package_payloads(
     )
     sessions = _session_rows(snapshot)
     registered_sources, parsed_sources = _source_rows(snapshot)
-    requirements = _requirements(sessions)
-    candidates = _candidates(sessions)
-    actions = _actions(sessions)
+    requirements = _requirements(snapshot, sessions)
+    candidates = _candidates(snapshot, sessions)
+    actions = _actions(snapshot, sessions)
     tool_results = _tool_results(sessions)
-    decisions = _decisions(sessions)
+    decisions = _decisions(snapshot, sessions)
     repairs = _repairs(sessions)
     turns = _conversation_turns(sessions)
     blockers = _blockers(snapshot, sessions, tool_results)
@@ -525,6 +701,27 @@ def package_payloads(
         "BLOCKERS.json": {
             "schema_version": "hardware_splicer.engineering_package_blockers.v1",
             "blockers": blockers,
+        },
+        "ENGINEERING_STATE.json": {
+            "schema_version": "hardware_splicer.engineering_package_state.v1",
+            "machine_project": _clean(
+                snapshot.get("machineProject") or snapshot.get("machine_project") or {}
+            ),
+            "engineering_plan": _clean(
+                snapshot.get("engineeringPlan") or snapshot.get("engineering_plan") or {}
+            ),
+            "engineering_status": _clean(
+                snapshot.get("engineeringStatus") or snapshot.get("engineering_status") or {}
+            ),
+            "engineering_readiness": _clean(
+                snapshot.get("engineeringReadiness") or snapshot.get("engineering_readiness") or {}
+            ),
+            "ordered_steps": _clean(snapshot.get("orderedSteps") or []),
+            "pre_fabrication_next_actions": _clean(
+                _pre_fabrication_plan(snapshot)
+            ),
+            "authority_effect": "none",
+            "physical_correctness": "UNPROVEN",
         },
         "AUTHORITY_STATE.json": _authority_state(snapshot),
         "ARTIFACT_REFERENCES.json": {

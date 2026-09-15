@@ -1,0 +1,400 @@
+{
+  "authority_effect": "none",
+  "calls": [
+    {
+      "argument_bytes": 2,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 480,
+      "result_bytes": 2182,
+      "result_text_characters": 1917,
+      "sequence": 1,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_status"
+    },
+    {
+      "argument_bytes": 30,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 5700,
+      "result_bytes": 25305,
+      "result_text_characters": 22799,
+      "sequence": 2,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 60,
+      "backend_operation_id": "load_project_v1_projects__project_id__get",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 642,
+      "result_bytes": 2968,
+      "result_text_characters": 2565,
+      "sequence": 3,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 107,
+      "backend_operation_id": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 1150,
+      "result_bytes": 5202,
+      "result_text_characters": 4597,
+      "sequence": 4,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 84,
+      "backend_operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 737,
+      "result_bytes": 3373,
+      "result_text_characters": 2946,
+      "sequence": 5,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 78,
+      "backend_operation_id": "create_project_review_v1_projects__project_id__reviews_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 880,
+      "result_bytes": 4027,
+      "result_text_characters": 3517,
+      "sequence": 6,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 119,
+      "backend_operation_id": "load_project_v1_projects__project_id__get",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 130,
+      "result_bytes": 646,
+      "result_text_characters": 518,
+      "sequence": 7,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 39,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 306,
+      "result_bytes": 1422,
+      "result_text_characters": 1224,
+      "sequence": 8,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 47,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 114,
+      "result_bytes": 574,
+      "result_text_characters": 455,
+      "sequence": 9,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 78,
+      "backend_operation_id": "save_project_snapshot_v1_projects__project_id__snapshot_put",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 807,
+      "result_bytes": 3698,
+      "result_text_characters": 3227,
+      "sequence": 10,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 11075,
+      "backend_operation_id": "save_project_snapshot_v1_projects__project_id__snapshot_put",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4240,
+      "result_bytes": 18167,
+      "result_text_characters": 16960,
+      "sequence": 11,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 32,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4528,
+      "result_bytes": 20128,
+      "result_text_characters": 18111,
+      "sequence": 12,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 13301,
+      "backend_operation_id": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4992,
+      "result_bytes": 21396,
+      "result_text_characters": 19968,
+      "sequence": 13,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 179,
+      "backend_operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 5078,
+      "result_bytes": 21787,
+      "result_text_characters": 20309,
+      "sequence": 14,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 64,
+      "backend_operation_id": "engineering_status_v1_engineering_status_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 885,
+      "result_bytes": 4045,
+      "result_text_characters": 3538,
+      "sequence": 15,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 119,
+      "backend_operation_id": "load_project_v1_projects__project_id__get",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 9774,
+      "result_bytes": 41703,
+      "result_text_characters": 39093,
+      "sequence": 16,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    }
+  ],
+  "discovery_call_count": 10,
+  "duplicate_call_groups": [
+    {
+      "avoidable_repeat_count": 1,
+      "backend_operation_id": "load_project_v1_projects__project_id__get",
+      "count": 2,
+      "tool": "hs_backend_call"
+    }
+  ],
+  "largest_mcp_results": [
+    {
+      "argument_bytes": 119,
+      "backend_operation_id": "load_project_v1_projects__project_id__get",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 9774,
+      "result_bytes": 41703,
+      "result_text_characters": 39093,
+      "sequence": 16,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 30,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 5700,
+      "result_bytes": 25305,
+      "result_text_characters": 22799,
+      "sequence": 2,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 179,
+      "backend_operation_id": "create_package_v1_projects__project_id__engineering_packages_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 5078,
+      "result_bytes": 21787,
+      "result_text_characters": 20309,
+      "sequence": 14,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 13301,
+      "backend_operation_id": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4992,
+      "result_bytes": 21396,
+      "result_text_characters": 19968,
+      "sequence": 13,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 32,
+      "backend_operation_id": null,
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4528,
+      "result_bytes": 20128,
+      "result_text_characters": 18111,
+      "sequence": 12,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_list_operations"
+    },
+    {
+      "argument_bytes": 11075,
+      "backend_operation_id": "save_project_snapshot_v1_projects__project_id__snapshot_put",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 4240,
+      "result_bytes": 18167,
+      "result_text_characters": 16960,
+      "sequence": 11,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_call"
+    },
+    {
+      "argument_bytes": 107,
+      "backend_operation_id": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 1150,
+      "result_bytes": 5202,
+      "result_text_characters": 4597,
+      "sequence": 4,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 64,
+      "backend_operation_id": "engineering_status_v1_engineering_status_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 885,
+      "result_bytes": 4045,
+      "result_text_characters": 3538,
+      "sequence": 15,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 78,
+      "backend_operation_id": "create_project_review_v1_projects__project_id__reviews_post",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 880,
+      "result_bytes": 4027,
+      "result_text_characters": 3517,
+      "sequence": 6,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    },
+    {
+      "argument_bytes": 78,
+      "backend_operation_id": "save_project_snapshot_v1_projects__project_id__snapshot_put",
+      "error_present": false,
+      "estimated_result_tokens_characters_div_4": 807,
+      "result_bytes": 3698,
+      "result_text_characters": 3227,
+      "sequence": 10,
+      "server": "hardware-splicer-backend",
+      "status": "completed",
+      "tool": "hs_backend_describe_operation"
+    }
+  ],
+  "material_totals": {
+    "estimated_raw_mcp_result_tokens_characters_div_4": 40436,
+    "mcp_result_bytes": 176623,
+    "mcp_result_text_characters": 161744,
+    "static_artifact_bytes": 16480
+  },
+  "mcp_call_count": 16,
+  "measurement_boundary": {
+    "exact_per_turn_token_attribution_available": false,
+    "material_estimates_are_not_provider_token_counts": true,
+    "reported_usage_is_provider_authoritative": true,
+    "token_estimate_method": "ceil(result text characters / 4)"
+  },
+  "model_inference_performed": false,
+  "recommendations": [
+    {
+      "action": "cache one filtered operation catalog per run and reuse it",
+      "evidence": {
+        "hs_backend_list_operations_calls": 4
+      },
+      "finding": "operation catalog discovery was repeated",
+      "priority": 1
+    },
+    {
+      "action": "offer a compact task-scoped operation manifest with request/response field summaries",
+      "evidence": {
+        "discovery_call_count": 10,
+        "result_bytes": 70742
+      },
+      "finding": "operation discovery contributes retained tool transcript material",
+      "priority": 2
+    },
+    {
+      "action": "add a bounded assurance/task projection instead of returning the full project surface",
+      "evidence": {
+        "backend_operation_id": "load_project_v1_projects__project_id__get",
+        "result_bytes": 41703,
+        "tool": "hs_backend_call"
+      },
+      "finding": "at least one tool response is large enough to dominate retained transcript context",
+      "priority": 3
+    },
+    {
+      "action": "require an offline profile comparison before the next paid live run",
+      "evidence": {
+        "reported_input_tokens": 414976,
+        "target_input_tokens": 200000
+      },
+      "finding": "reported input exceeds the experiment target",
+      "priority": 4
+    }
+  ],
+  "reported_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 349696,
+    "input_tokens": 414976,
+    "output_tokens": 4788,
+    "reasoning_output_tokens": 52
+  },
+  "schema_version": "hardware_splicer.codex_astra_context_profile.v1",
+  "static_artifacts": [
+    {
+      "artifact": "CASE_SNAPSHOT.json",
+      "size_bytes": 14221
+    },
+    {
+      "artifact": "DEVELOPER_INSTRUCTIONS.txt",
+      "size_bytes": 2259
+    }
+  ],
+  "status": "profiled",
+  "target_input_tokens": 200000
+}

@@ -186,6 +186,39 @@ def test_project_plan_rejects_stale_revision_before_planning(
     assert store.load("rover-r1")["revision"] == 1
 
 
+def test_project_plan_lifts_mission_and_binds_canonical_machine_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    store = ProjectStore(tmp_path)
+    _seed(store)
+    captured: Dict[str, Any] = {}
+
+    def fake_planner(intake, **kwargs):
+        captured["intake"] = dict(intake)
+        return _plan("placeholder-machine")
+
+    monkeypatch.setattr(project_plan_api, "plan_guided_engineering_project", fake_planner)
+    app = FastAPI()
+    app.include_router(create_project_engineering_plan_router(store))
+    client = TestClient(app)
+
+    response = client.post(
+        "/v1/projects/rover-r1/engineering/plan",
+        json={
+            "expected_revision": 1,
+            "intake": {"mission": "Design a bounded SPI adapter."},
+        },
+    )
+
+    assert response.status_code == 200
+    assert captured["intake"]["goal"] == "Design a bounded SPI adapter."
+    assert captured["intake"]["project_name"] == "Rover R1"
+    assert captured["intake"]["projectId"] == "rover-r1"
+    snapshot = store.load("rover-r1", revision=2)["snapshot"]
+    assert snapshot["machineProject"]["project_id"] == "rover-r1"
+
+
 def test_canonical_product_app_mounts_project_plan_route(tmp_path: Path) -> None:
     app = create_product_app(ProjectStore(tmp_path))
     assert "/v1/projects/{project_id}/engineering/plan" in app.openapi()["paths"]

@@ -1,0 +1,275 @@
+{
+  "parsed_sources": [],
+  "raw_source_bytes_included": false,
+  "registered_sources": [
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:3v3-spi-controller-declaration-v2",
+      "metadata": {
+        "facts": {
+          "exact_programmer_identity_resolved": false,
+          "host_input_signals": [
+            "MISO_IO1"
+          ],
+          "host_logic_voltage_v": 3.3,
+          "host_output_signals": [
+            "SCLK",
+            "CS#",
+            "MOSI_IO0"
+          ],
+          "maximum_spi_clock_verified": false
+        },
+        "label": "Unresolved 3.3 V SPI programmer declaration",
+        "limitations": [
+          "No programmer datasheet or measurement capture is attached."
+        ]
+      },
+      "revision": "2",
+      "source_id": "src-controller",
+      "source_type": "fixture_interface_declaration"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "metadata": {
+        "captured_on": "2026-09-12",
+        "claim_extraction": "predeclared_page_addressed_paraphrase",
+        "claims": [
+          {
+            "claim_id": "dut-operating-supply",
+            "page": 59,
+            "paraphrase": "The specified operating supply range is 1.7 V through 1.95 V.",
+            "section": "9.2 Operating Ranges"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "page": 59,
+            "paraphrase": "Voltage applied to any pin is limited to -0.6 V through VCC plus 0.4 V.",
+            "section": "9.1 Absolute Maximum Ratings"
+          },
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "page": 9,
+            "paraphrase": "Standard SPI uses DI as the device input and DO as the device output, with CLK and chip select as device inputs.",
+            "section": "4.2 Serial Data Input, Output and IOs"
+          },
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "pages": [
+              5,
+              6,
+              7,
+              8
+            ],
+            "paraphrase": "The datasheet documents multiple package-specific pin configurations; a family name alone does not select one pinout.",
+            "section": "3 Package Types and Pin Configurations"
+          }
+        ],
+        "document_code": "W25Q128JW",
+        "document_date": "2021-07-29",
+        "document_revision": "Revision G",
+        "facts": {
+          "absolute_max_any_pin_max_expression": "VCC + 0.4 V",
+          "absolute_max_any_pin_min_v": -0.6,
+          "density_mbit": 128,
+          "exact_physical_orderable_suffix_resolved": false,
+          "package_codes_documented": [
+            "S",
+            "P",
+            "E",
+            "F",
+            "B",
+            "C",
+            "W"
+          ],
+          "part_family": "W25Q128JW",
+          "standard_spi_dut_to_host": [
+            "DO_IO1"
+          ],
+          "standard_spi_host_to_dut": [
+            "CLK",
+            "/CS",
+            "DI_IO0"
+          ],
+          "supported_spi_modes": [
+            0,
+            3
+          ],
+          "vcc_max_v": 1.95,
+          "vcc_min_v": 1.7
+        },
+        "label": "W25Q128JW Datasheet",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "The model sees page-addressed adjudicated paraphrases, not raw PDF bytes."
+        ],
+        "locator_stability": "revision_named",
+        "raw_bytes_model_visible": false,
+        "raw_document_page_count": 79,
+        "raw_document_sha256": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+        "raw_document_size_bytes": 2645121,
+        "source_locator": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf",
+        "vendor": "Winbond Electronics"
+      },
+      "revision": "Revision G",
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "metadata": {
+        "captured_on": "2026-09-12",
+        "claim_extraction": "predeclared_page_addressed_paraphrase",
+        "claims": [
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "page": 4,
+            "paraphrase": "The pin table defines three A-side inputs driving B-side outputs and one B-side input driving an A-side output.",
+            "section": "6 Pin Configuration and Functions"
+          },
+          {
+            "claim_id": "txu-supply-range",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range beginning at 1.08 V and extending to 5.5 V.",
+            "section": "7.3 Recommended Operating Conditions"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "page": 4,
+            "paraphrase": "Driving output enable low places all translator outputs in their high-impedance state.",
+            "section": "Table 6-1 Pin Functions"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "page": 24,
+            "paraphrase": "TI shows an SPI mapping, while explicitly treating application information as outside the component specification and requiring design validation.",
+            "section": "10 Application and Implementation"
+          }
+        ],
+        "document_code": "SCES935A",
+        "document_date": "2021-11",
+        "document_revision": "Revision A",
+        "facts": {
+          "a_to_b_inputs": [
+            "A1",
+            "A2",
+            "A3"
+          ],
+          "a_to_b_outputs": [
+            "B1Y",
+            "B2Y",
+            "B3Y"
+          ],
+          "b_to_a_input": "B4",
+          "b_to_a_output": "A4Y",
+          "channel_topology": "three A-to-B plus one B-to-A fixed-direction channels",
+          "exact_orderable_package_selected": false,
+          "oe_low_outputs": "high_impedance",
+          "part_family": "TXU0304",
+          "vcca_operating_max_v": 5.5,
+          "vcca_operating_min_v": 1.08,
+          "vccb_operating_max_v": 5.5,
+          "vccb_operating_min_v": 1.08
+        },
+        "label": "TXU0304 4-Bit Fixed Direction Voltage-Level Translator with Schmitt-Trigger Inputs and 3-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "The model sees page-addressed adjudicated paraphrases, not raw PDF bytes."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "raw_bytes_model_visible": false,
+        "raw_document_page_count": 45,
+        "raw_document_sha256": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+        "raw_document_size_bytes": 2666177,
+        "source_locator": "https://www.ti.com/lit/ds/symlink/txu0304.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "revision": "Revision A",
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "metadata": {
+        "captured_on": "2026-09-12",
+        "claim_extraction": "predeclared_page_addressed_paraphrase",
+        "claims": [
+          {
+            "claim_id": "axc-direction-grouping",
+            "pages": [
+              3,
+              4
+            ],
+            "paraphrase": "The four channels are split into two two-bit sections, each controlled by one shared direction input.",
+            "section": "4 Pin Configuration and Functions"
+          },
+          {
+            "claim_id": "axc-supply-range",
+            "page": 6,
+            "paraphrase": "Both supply rails have a recommended operating range of 0.65 V through 3.6 V.",
+            "section": "5.3 Recommended Operating Conditions"
+          },
+          {
+            "claim_id": "axc-function-table",
+            "page": 20,
+            "paraphrase": "Each section's direction input selects A-to-B or B-to-A for that entire two-channel section.",
+            "section": "7.4 Device Functional Modes"
+          }
+        ],
+        "document_code": "SCES877B",
+        "document_date": "2024-04",
+        "document_revision": "Revision B",
+        "facts": {
+          "channel_groups": 2,
+          "channels_per_group": 2,
+          "direction_controls": [
+            "1DIR",
+            "2DIR"
+          ],
+          "direction_shared_within_each_two_channel_group": true,
+          "exact_orderable_package_selected": false,
+          "part_family": "SN74AXC4T245",
+          "vcca_operating_max_v": 3.6,
+          "vcca_operating_min_v": 0.65,
+          "vccb_operating_max_v": 3.6,
+          "vccb_operating_min_v": 0.65
+        },
+        "label": "SN74AXC4T245 Four-Bit Bus Transceiver with Configurable Voltage Translation and Tri-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "The model sees page-addressed adjudicated paraphrases, not raw PDF bytes."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "raw_bytes_model_visible": false,
+        "raw_document_page_count": 41,
+        "raw_document_sha256": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+        "raw_document_size_bytes": 2442164,
+        "source_locator": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "revision": "Revision B",
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:spi-adapter-fixture-readiness-v2",
+      "metadata": {
+        "facts": {
+          "default_power_state": "off",
+          "dut_supply_implementation_verified": false,
+          "exact_dut_package_verified": false,
+          "physical_bench_evidence_present": false,
+          "physical_dut_marking_captured": false
+        },
+        "label": "Adapter bring-up boundary"
+      },
+      "revision": "2",
+      "source_id": "src-fixture",
+      "source_type": "fixture_readiness_declaration"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_sources.v1"
+}

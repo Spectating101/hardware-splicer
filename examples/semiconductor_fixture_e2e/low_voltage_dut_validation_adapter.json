@@ -174,7 +174,7 @@
       "run_compose"
     ],
     "conversation_action_type": "prepare_verification",
-    "package_file_count": 15,
+    "package_file_count": 16,
     "source_revision_for_package": 6,
     "all_physical_authority_false": true
   }

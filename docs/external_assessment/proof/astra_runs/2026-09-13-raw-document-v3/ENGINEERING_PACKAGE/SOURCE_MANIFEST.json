@@ -1,0 +1,468 @@
+{
+  "parsed_sources": [],
+  "raw_source_bytes_included": false,
+  "registered_sources": [
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:3v3-spi-controller-declaration-v2",
+      "metadata": {
+        "facts": {
+          "exact_programmer_identity_resolved": false,
+          "host_input_signals": [
+            "MISO_IO1"
+          ],
+          "host_logic_voltage_v": 3.3,
+          "host_output_signals": [
+            "SCLK",
+            "CS#",
+            "MOSI_IO0"
+          ],
+          "maximum_spi_clock_verified": false
+        },
+        "label": "Unresolved 3.3 V SPI programmer declaration",
+        "limitations": [
+          "No programmer datasheet or measurement capture is attached."
+        ]
+      },
+      "revision": "2",
+      "source_id": "src-controller",
+      "source_type": "fixture_interface_declaration"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claims": [
+        {
+          "authority": "proposed",
+          "claim_id": "dut-operating-supply",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 60,
+            "page_text_sha256": "sha256:cf924f0a4af3a3b97f5498f0d05c6dfd71cda39d7dc07d650cc4506df2d7078e",
+            "source_content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "supporting_text_sha256": "sha256:209c8dd23ea9b71fdf290c2dce26dc29f47a0d6225ed571e77e051a4204adb4c"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "9.2 Operating Ranges PARAMETER SYMBOL CONDITIONS SPEC UNIT MIN MAX Supply Voltage(1) VCC FR = 133MHz, fR = 50MHz(<85℃) 1.7 1.95 V FR = 104MHz, fR = 50MHz (<105℃) Ambient Temperature, Operating TA Industrial –40 +85 °C Industrial Plus –40 +105 Note: 1. VCC voltage during Read can operate across the min and max range but should not exceed ±10% of the programming (erase/write) voltage."
+          },
+          "predicate": "operating_supply_range",
+          "source_id": "src-dut-datasheet",
+          "subject_id": "W25Q128JW",
+          "units": null,
+          "value": {
+            "max": 1.95,
+            "min": 1.7,
+            "qualification": "Read voltage must remain within ±10% of programming voltage; timing/temperature conditions require review.",
+            "units": "V"
+          }
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "dut-pin-absolute-maximum",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 60,
+            "page_text_sha256": "sha256:cf924f0a4af3a3b97f5498f0d05c6dfd71cda39d7dc07d650cc4506df2d7078e",
+            "source_content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "supporting_text_sha256": "sha256:6d46232fffb129bcc54abfc17e6908ea04acb9fad8ef8a6a07e4ab353021fbf7"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "Voltage Applied to Any Pin VIO Relative to Ground –0.6 to VCC+0.4 V Transient Voltage on any Pin VIOT <20nS Transient Relative to Ground –2.0V to VCC+2.0V V"
+          },
+          "predicate": "absolute_maximum_pin_voltage",
+          "source_id": "src-dut-datasheet",
+          "subject_id": "W25Q128JW",
+          "units": null,
+          "value": "Relative to ground: −0.6 V to VCC+0.4 V; stress rating, not operating allowance. Separate <20 ns transient rating is not a DC allowance."
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "dut-standard-spi-directions",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 10,
+            "page_text_sha256": "sha256:888787585719ad11609223d60b29772bc1d7ea09e80c76a7056045fe8349706e",
+            "source_content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "supporting_text_sha256": "sha256:38cad32be15febe66d2a39fa1bfdd6feba1d25b32e8930362ec8bfa348ceb59b"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "The 25Q128JW supports standard SPI, Dual SPI and Quad SPI operation. Standard SPI instructions use the unidirectional DI (input) pin to serially write instructions, addresses or data to the device on the rising edge of the Serial Clock (CLK) input pin. Standard SPI also uses the unidirectional DO (output) to read data or status from the device on the falling edge of CLK."
+          },
+          "predicate": "standard_spi_directions",
+          "source_id": "src-dut-datasheet",
+          "subject_id": "W25Q128JW",
+          "units": null,
+          "value": "DI/IO0 is unidirectional input, sampled on rising CLK; DO/IO1 unidirectional output on falling CLK. Dual/Quad direction behavior differs."
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "dut-package-dependent-pinout",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 7,
+            "page_text_sha256": "sha256:7bd2dd435de61b2c503c5b8d228617d78afe5726fc08ab6fb62322e280e79a33",
+            "source_content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+            "supporting_text_sha256": "sha256:aa9b4694639be0e56f7ce0df4a1c98f96e2b77cca24318a6a0801ee42a3c3288"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "3.4 Pin Configuration SOIC 300-mil Figure 1c. W25Q128JW Pin Assignments, 16-pin SOIC 300-mil (Package Code F) 3.5 Pin Description SOIC 300-mil PIN NO. PIN NAME I/O FUNCTION 1 /HOLD (IO3) I/O Hold Input (Data Input Output 3)(2) 2 VCC Power Supply 3 /RESET I Reset Input(3) 4 N/C No Connect 5 N/C No Connect 6 N/C No Connect 7 /CS I Chip Select Input 8 DO (IO1) I/O Data Output (Data Input Output 1)(1) 9 /WP (IO2) I/O Write Protect Input (Data Input Output 2)(2) 10 GND Ground 11 N/C No Connect 12 N/C No Connect 13 N/C No Connect 14 N/C No Connect 15 DI (IO0) I/O Data Input (Data Input Output 0)(1) 16 CLK I Serial Clock Input"
+          },
+          "predicate": "package_dependent_pinout",
+          "source_id": "src-dut-datasheet",
+          "subject_id": "W25Q128JW",
+          "units": null,
+          "value": "The family has package-specific pinouts. This page defines 16-pin SOIC 300-mil package F with /CS at 7 and CLK at 16; it does not identify the physical DUT. Extracted diagrams do not establish visual fidelity."
+        }
+      ],
+      "content_hash": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/4d/4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 4,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "W25Q128JW",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2021-07-29",
+        "document_revision": "Revision G",
+        "independent_review_required": true,
+        "label": "W25Q128JW Datasheet",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "revision_named",
+        "media_type": "application/pdf",
+        "original_filename": "W25Q128JW_RevG_07292021_Plus.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 79,
+        "raw_document_sha256": "sha256:4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+        "raw_document_size_bytes": 2645121,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.winbond.com/resource-files/W25Q128JW_RevG_07292021%20Plus.pdf",
+        "vendor": "Winbond Electronics"
+      },
+      "revision": "Revision G",
+      "source_id": "src-dut-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claims": [
+        {
+          "authority": "proposed",
+          "claim_id": "txu-fixed-direction-map",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 4,
+            "page_text_sha256": "sha256:4c3aac2a107f95652b90c41609717662d407d8dd2f35b6b4f20024f9c3ea9ee8",
+            "source_content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "supporting_text_sha256": "sha256:8a34f4c78247fdb5895986d4f04912b112273162f7c2ef93b9439bc75d0a6e1f"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "A1 2 2 I Input A1. Referenced to VCCA. A2 3 3 I Input A2. Referenced to VCCA. A3 4 4 I Input A3. Referenced to VCCA. A4Y 5 5 O Output A4. Referenced to VCCA. B1Y 13 10 O Output B1. Referenced to VCCB. B2Y 12 9 O Output B2. Referenced to VCCB. B3Y 11 8 O Output B3. Referenced to VCCB. B4 10 7 I Input B4. Referenced to VCCB."
+          },
+          "predicate": "fixed_channel_directions",
+          "source_id": "src-translator-fixed-datasheet",
+          "subject_id": "TXU0304",
+          "units": null,
+          "value": {
+            "forward": [
+              "A1 to B1Y",
+              "A2 to B2Y",
+              "A3 to B3Y"
+            ],
+            "qualification": "Logical channel interpretation of extracted pin table; package pin numbers need independent review.",
+            "reverse": [
+              "B4 to A4Y"
+            ]
+          }
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "txu-supply-range",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 6,
+            "page_text_sha256": "sha256:760ab8e05ee16b50a2d5a0384d4f18a4db0157f707c363193966309c05a2c0a9",
+            "source_content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "supporting_text_sha256": "sha256:868f675760d7fbe946a3535e3498e3493d66d3072e4f59e04ae8c6b2cf101b49"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "7.3 Recommended Operating Conditions over operating free-air temperature range (unless otherwise noted) (1) (2) (3) MIN MAX UNIT VCCA Supply voltage A 1.08 5.5 V VCCB Supply voltage B 1.08 5.5 V"
+          },
+          "predicate": "recommended_supply_range",
+          "source_id": "src-translator-fixed-datasheet",
+          "subject_id": "TXU0304",
+          "units": null,
+          "value": {
+            "VCCA": {
+              "max": 5.5,
+              "min": 1.08
+            },
+            "VCCB": {
+              "max": 5.5,
+              "min": 1.08
+            },
+            "qualification": "Recommended operating table differs from rounded 1.1 V pin-table description.",
+            "units": "V"
+          }
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "txu-output-disable",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 4,
+            "page_text_sha256": "sha256:4c3aac2a107f95652b90c41609717662d407d8dd2f35b6b4f20024f9c3ea9ee8",
+            "source_content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "supporting_text_sha256": "sha256:71d2f25ed24b04f69d302eb1887ea678fcc05b49b2522d1054747dfc3038521b"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "OE 8 12 I Output Enable. Pull to GND to place all outputs in high-impedance mode. Pull to VCCA or VCCB to enable all outputs."
+          },
+          "predicate": "output_disable_condition",
+          "source_id": "src-translator-fixed-datasheet",
+          "subject_id": "TXU0304",
+          "units": null,
+          "value": "Pull OE to GND to place all outputs in high impedance; pull to VCCA or VCCB to enable. Actual default-off circuit and sequencing remain unresolved."
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "txu-spi-example-not-component-spec",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 24,
+            "page_text_sha256": "sha256:e2e1e26c698fc999ca8159727cd7743d1d67d8c3bb7cd4c54bd5f54821b7eac8",
+            "source_content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+            "supporting_text_sha256": "sha256:7d4d9c0b7c8f97ba4e8a1e4302e6176ca9847af1bbb0e0308e5ee92a74e08909"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "Information in the following applications sections is not part of the TI component specification, and TI does not warrant its accuracy or completeness. TI’s customers are responsible for determining suitability of components for their purposes, as well as validating and testing their design implementation to confirm system functionality."
+          },
+          "predicate": "application_example_authority_boundary",
+          "source_id": "src-translator-fixed-datasheet",
+          "subject_id": "TXU0304",
+          "units": null,
+          "value": "SPI application section is not TI component specification; TI does not warrant accuracy or completeness. Customer must determine suitability and validate/test implementation; no selected-condition timing proof follows."
+        }
+      ],
+      "content_hash": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/f6/f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 4,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "SCES935A",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2021-11",
+        "document_revision": "Revision A",
+        "independent_review_required": true,
+        "label": "TXU0304 4-Bit Fixed Direction Voltage-Level Translator with Schmitt-Trigger Inputs and 3-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "media_type": "application/pdf",
+        "original_filename": "txu0304-reva.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 45,
+        "raw_document_sha256": "sha256:f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+        "raw_document_size_bytes": 2666177,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.ti.com/lit/ds/symlink/txu0304.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "revision": "Revision A",
+      "source_id": "src-translator-fixed-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "claims": [
+        {
+          "authority": "proposed",
+          "claim_id": "axc-direction-grouping",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 4,
+            "page_text_sha256": "sha256:514386577abb56d2bdf41960cba832246fbfd9a3b0f79a6dda6c12e735745aba",
+            "source_content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "supporting_text_sha256": "sha256:63b8061786d906dea44681431db35894c74157c8beb15a7062ff06c89a09d868"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "1A1 4 6 4 I/O Input/output 1A1. Referenced to VCCA. 1A2 5 7 5 I/O Input/output 1A2. Referenced to VCCA. 1B1 13 15 13 I/O Input/output 1B1. Referenced to VCCB. 1B2 12 14 12 I/O Input/output 1B2. Referenced to VCCB. 1DIR 2 4 2 I Direction-control input for ‘1’ ports. 1 OE 15 1 15 I Tri-state output-mode enable. Pull OE high to place ‘1’ outputs in tri-state mode. Referenced to VCCA. 2A1 6 8 6 I/O Input/output 2A1. Referenced to VCCA. 2A2 7 9 7 I/O Input/output 2A2. Referenced to VCCA. 2B1 11 13 11 I/O Input/output 2B1. Referenced to VCCB. 2B2 10 12 10 I/O Input/output 2B2. Referenced to VCCB. 2DIR 3 5 3 I Direction-control input for ‘2’ ports. 2 OE 14 16 14 I Tri-state output-mode enable. Pull OE high to place ‘2’ outputs in tri-state mode. Referenced to VCCA."
+          },
+          "predicate": "direction_control_groups",
+          "source_id": "src-translator-dir-datasheet",
+          "subject_id": "SN74AXC4T245",
+          "units": null,
+          "value": "1DIR controls two channels 1A1/1B1 and 1A2/1B2; 2DIR controls two channels 2A1/2B1 and 2A2/2B2. Each section also has an OE; direction is per pair, not per channel."
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "axc-supply-range",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 6,
+            "page_text_sha256": "sha256:d29467fa2ea93ef97aba122bb2f2dc85e3e45f8ed6d0cd2d4c85d6d8b9920f94",
+            "source_content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "supporting_text_sha256": "sha256:55d3e6c8848d14ac8e2eaaab4d093b7aee0305cebd8ca534ca7dd79607803535"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "5.3 Recommended Operating Conditions over operating free-air temperature range (unless otherwise noted)(1) 2 MIN MAX UNIT VCCA Supply voltage A 0.65 3.6 V VCCB Supply voltage B 0.65 3.6 V"
+          },
+          "predicate": "recommended_supply_range",
+          "source_id": "src-translator-dir-datasheet",
+          "subject_id": "SN74AXC4T245",
+          "units": null,
+          "value": {
+            "VCCA": {
+              "max": 3.6,
+              "min": 0.65
+            },
+            "VCCB": {
+              "max": 3.6,
+              "min": 0.65
+            },
+            "units": "V"
+          }
+        },
+        {
+          "authority": "proposed",
+          "claim_id": "axc-function-table",
+          "confidence": null,
+          "evidence_locator": {
+            "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+            "page": 20,
+            "page_text_sha256": "sha256:d05705e0cd5c672523fc46b51c1c8da8afe041f4963fb4ac11c631484fb8ef9a",
+            "source_content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+            "supporting_text_sha256": "sha256:0b21a6fe51a72d16971a62f81250e0cfca0310f72dd54d0c3f3bfe5fb911f0f6"
+          },
+          "metadata": {
+            "automatic_authorization": false,
+            "claim_origin": "model_proposed_from_hash_bound_document_text",
+            "independent_review_state": "unreviewed",
+            "supporting_text": "7.4 Device Functional Modes Table 7-1. Function Table (Each 2-Bit Section) CONTROL INPUTS(1) PORT STATUS OPERATION OE DIR A PORT B PORT L L Output (Enabled) Input (Hi-Z) B data to A bus L H Input (Hi-Z) Output (Enabled) A data to B bus H X Input (Hi-Z) Input (Hi-Z) Isolation"
+          },
+          "predicate": "per_section_function_table",
+          "source_id": "src-translator-dir-datasheet",
+          "subject_id": "SN74AXC4T245",
+          "units": null,
+          "value": "Each 2-bit section: OE=L DIR=L sends B to A; OE=L DIR=H sends A to B; OE=H DIR=X isolates both ports. Text extraction does not prove rendered overbar/layout fidelity."
+        }
+      ],
+      "content_hash": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+      "metadata": {
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/56/56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+        "captured_on": "2026-09-12",
+        "claim_extraction": "model_proposed_from_hash_bound_document_text",
+        "document_claim_extraction": {
+          "automatic_authorization": false,
+          "extraction_implementation": "hardware_splicer.document_evidence.pypdf.v1",
+          "independent_review_required": true,
+          "machine_proposed_claim_count": 3,
+          "schema_version": "hardware_splicer.document_claim_proposal.v1"
+        },
+        "document_code": "SCES877B",
+        "document_content_model_visible_via_hs": true,
+        "document_date": "2024-04",
+        "document_revision": "Revision B",
+        "independent_review_required": true,
+        "label": "SN74AXC4T245 Four-Bit Bus Transceiver with Configurable Voltage Translation and Tri-State Outputs",
+        "limitations": [
+          "The byte hash proves capture identity, not manufacturer authenticity, currentness, or physical-device identity.",
+          "Machine-extracted PDF text can omit, reorder, or misread visually encoded content.",
+          "Model-proposed claims remain unreviewed and below declared authority until separately adjudicated."
+        ],
+        "locator_stability": "mutable_product_symlink_captured_by_hash",
+        "media_type": "application/pdf",
+        "original_filename": "sn74axc4t245-revb.pdf",
+        "parser_disposition": "inventory_only",
+        "raw_document_page_count": 41,
+        "raw_document_sha256": "sha256:56d2fab11d8986f4eaf72c3f613d6d1d696188d6c41f1a5de6f7af1562270441",
+        "raw_document_size_bytes": 2442164,
+        "source_kind": "pdf_document",
+        "source_locator": "https://www.ti.com/lit/ds/symlink/sn74axc4t245.pdf",
+        "vendor": "Texas Instruments"
+      },
+      "revision": "Revision B",
+      "source_id": "src-translator-dir-datasheet",
+      "source_type": "manufacturer_datasheet_pdf_capture"
+    },
+    {
+      "authority_ceiling": "declared",
+      "content_hash": "sha256:spi-adapter-fixture-readiness-v2",
+      "metadata": {
+        "facts": {
+          "default_power_state": "off",
+          "dut_supply_implementation_verified": false,
+          "exact_dut_package_verified": false,
+          "physical_bench_evidence_present": false,
+          "physical_dut_marking_captured": false
+        },
+        "label": "Adapter bring-up boundary"
+      },
+      "revision": "2",
+      "source_id": "src-fixture",
+      "source_type": "fixture_readiness_declaration"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_sources.v1"
+}

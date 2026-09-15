@@ -1,0 +1,115 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "txu0304-standard-spi",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "claim_ids": [
+        "dut-standard-spi-directions",
+        "txu-fixed-direction-map",
+        "txu-supply-range",
+        "dut-operating-supply",
+        "txu-output-disable",
+        "txu-spi-example-not-component-spec"
+      ],
+      "description": "A domain 3.3 V host, B domain local 1.8 V DUT; both target rails lie inside translator declared operating ranges. Logical mapping: SCLK -> A1 -> B1Y -> CLK; CS# -> A2 -> B2Y -> /CS; MOSI_IO0 -> A3 -> B3Y -> DI_IO0; DO_IO1 -> B4 -> A4Y -> MISO_IO1. These are signal names, not package pin numbers. Shared reference ground is a design requirement. OE low is the intended disabled state; implementation and all power-state behavior remain unresolved. Standard SPI only; no dual/quad compatibility inferred.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-controller",
+        "src-dut-datasheet",
+        "src-translator-fixed-datasheet"
+      ],
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-supply-range",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "conditionally_preferred"
+    },
+    {
+      "candidate_id": "single-axc4t245",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "claim_ids": [
+        "axc-direction-grouping",
+        "axc-function-table",
+        "axc-supply-range",
+        "dut-standard-spi-directions"
+      ],
+      "description": "Rails are range-compatible, but two shared-direction two-channel groups cannot simultaneously provide three forward and one reverse channels. A 2+2 allocation lacks a third forward channel; 4+0 lacks return. Additional devices could be reconsidered but are not specified.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-translator-dir-datasheet",
+        "src-controller",
+        "src-dut-datasheet"
+      ],
+      "source_refs": [
+        {
+          "claim_id": "axc-direction-grouping",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-function-table",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "axc-supply-range",
+          "source_id": "src-translator-dir-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected_for_simultaneous_three_plus_one"
+    },
+    {
+      "candidate_id": "direct-3v3",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "claim_ids": [
+        "dut-pin-absolute-maximum",
+        "dut-operating-supply"
+      ],
+      "description": "At declared 1.8 V VCC, pin absolute maximum is 2.2 V; declared 3.3 V host drive exceeds it by 1.1 V. Across operating VCC the upper absolute limit is 2.1–2.35 V. Absolute maximum is not a valid operating logic target. Direct 3.3 V DUT supply also exceeds 1.95 V operating maximum.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-controller",
+        "src-dut-datasheet"
+      ],
+      "source_refs": [
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        }
+      ],
+      "status": "rejected"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

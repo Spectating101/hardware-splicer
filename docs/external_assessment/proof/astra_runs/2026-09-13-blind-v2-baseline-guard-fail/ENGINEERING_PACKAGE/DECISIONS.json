@@ -1,0 +1,31 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "claim_ids": [
+        "txu-fixed-direction-map",
+        "dut-standard-spi-directions"
+      ],
+      "decision": "Advance TXU0304 as conditional architecture, without asserting complete electrical or physical suitability.",
+      "decision_id": "logical-topology-only",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-translator-fixed-datasheet",
+        "src-dut-datasheet",
+        "src-controller"
+      ],
+      "source_refs": [
+        {
+          "claim_id": "txu-fixed-direction-map",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

@@ -1,0 +1,27 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "description": "Design local 1.8 V rail, common reference, sequencing, decoupling, protection and deterministic OE-low default. Resolve /CS, /WP, /HOLD and package-specific reset behavior before schematic completion. Keep power off.",
+      "requirement_id": "disable-and-supply",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "dut-standard-spi-directions",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-package-dependent-pinout",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ],
+      "status": "unresolved"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}

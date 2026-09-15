@@ -1,0 +1,57 @@
+name: SPI KiCad Reference Design
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/spi-kicad-reference-design.yml"
+      - "hardware/reference_designs/spi_flash_adapter_v1/**"
+      - "tests/test_spi_reference_design.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-reference-design:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install focused test dependencies
+        # The repository-level pytest configuration imports Hardware Splicer
+        # from tests/conftest.py even for this focused artifact contract.  Use
+        # the declared project dependencies so CI exercises the same import
+        # surface as every other test lane.
+        run: python -m pip install -e ".[dev]"
+      - name: Install KiCad 9
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --install-recommends -y kicad
+          case "$(kicad-cli --version)" in
+            9.*) ;;
+            *) echo "KiCad 9.x is required" >&2; exit 1 ;;
+          esac
+      - name: Check immutable artifact contracts
+        run: pytest -q tests/test_spi_reference_design.py
+      - name: Run KiCad ERC DRC and schematic parity
+        working-directory: hardware/reference_designs/spi_flash_adapter_v1
+        run: /usr/bin/python3 verify_design.py
+      - name: Prove package reproducibility
+        working-directory: hardware/reference_designs/spi_flash_adapter_v1
+        run: |
+          /usr/bin/python3 build_package.py --output /tmp/spi-reference-a.zip
+          /usr/bin/python3 build_package.py --output /tmp/spi-reference-b.zip
+          cmp /tmp/spi-reference-a.zip /tmp/spi-reference-b.zip
+          sha256sum /tmp/spi-reference-a.zip
+      - name: Upload bounded review package
+        uses: actions/upload-artifact@v4
+        with:
+          name: spi-flash-adapter-v1-review-package
+          path: /tmp/spi-reference-a.zip
+          if-no-files-found: error

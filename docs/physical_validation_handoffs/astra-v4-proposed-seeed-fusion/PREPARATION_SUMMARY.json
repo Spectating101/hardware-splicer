@@ -1,0 +1,13 @@
+{
+  "archive": "docs/physical_validation_handoffs/astra-v4-proposed-seeed-fusion/REMOTE_PHYSICAL_HANDOFF.zip",
+  "archive_sha256": "sha256:3f3d9920a4a7691abd3ce33a11b7b877bb1f838878e17ba270717f3a3be5e964",
+  "archive_size_bytes": 17797,
+  "authority_effect": "none",
+  "fabrication_release_ready": false,
+  "handoff_id": "remote-physical-handoff-987035a2e27e074b",
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "production_artifact_set_complete": false,
+  "ready_for_provider_quote": true,
+  "schema_version": "hardware_splicer.remote_physical_handoff_preparation.v1"
+}

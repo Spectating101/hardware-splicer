@@ -1,0 +1,22 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "description": "Keep power off; no full machine plan supported. OE low disables translator outputs, but fail-safe implementation and sequencing remain unresolved. Application example is not component specification or design validation.",
+      "requirement_id": "boundary",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "txu-output-disable",
+          "source_id": "src-translator-fixed-datasheet"
+        },
+        {
+          "claim_id": "txu-spi-example-not-component-spec",
+          "source_id": "src-translator-fixed-datasheet"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}

@@ -1,0 +1,8 @@
+{
+  "api_fallback": false,
+  "case_id": "spi-flash-adapter-raw-documents-blind-v1",
+  "experiment_project_id": "hs-astra-rawdoc-v1-20260913-1",
+  "physical_authority_granted": false,
+  "schema_version": "hardware_splicer.codex_astra_live_attempt.v1",
+  "single_use": true
+}

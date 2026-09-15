@@ -1,0 +1,121 @@
+{
+  "schema_version": "hardware_splicer.reference_design.v1",
+  "design_id": "spi-flash-adapter-v1",
+  "revision": "0.2-modeled",
+  "result_status": "bounded_pre_fabrication_result",
+  "target": {
+    "host_supply_v": 3.3,
+    "dut_supply_nominal_v": 1.8,
+    "initial_spi_clock_hz": 5000000,
+    "initial_spi_mode": 0,
+    "first_transaction": "read-only JEDEC ID command 0x9F",
+    "expected_jedec_id": "EF6018"
+  },
+  "selected_components": {
+    "translator": "TXU0304PWR",
+    "flash": "W25Q128JWSIQ",
+    "regulator": "TLV75518PDBVR"
+  },
+  "source_documents": [
+    {
+      "publisher": "Winbond Electronics",
+      "document": "W25Q128JW Revision G",
+      "sha256": "4d065361637dcc10554a6384516e9e98cc000c986b03be874d4b5670b70e275e",
+      "size_bytes": 2645121,
+      "authority": "frozen_manufacturer_document"
+    },
+    {
+      "publisher": "Texas Instruments",
+      "document": "TXU0304 SCES935A Revision A",
+      "sha256": "f6f6178296b8d497d3706ea7766633b62f799cfe830659a2dcfd09c79bfa71dc",
+      "size_bytes": 2666177,
+      "authority": "frozen_manufacturer_document"
+    },
+    {
+      "publisher": "Texas Instruments",
+      "document": "TLV755P SBVS320D Revision D",
+      "sha256": "7eb7bc6935bf6c1d247b2fce62c9e5a49a474fd94359ddc390a4baf0ac1f5293",
+      "size_bytes": 3072349,
+      "authority": "frozen_manufacturer_document"
+    }
+  ],
+  "electrical_mapping": {
+    "host_to_dut": {
+      "HOST_SCLK": "TXU0304 A1 to B1Y to W25Q128JW CLK",
+      "HOST_MOSI": "TXU0304 A2 to B2Y to W25Q128JW DI/IO0",
+      "HOST_CS_N": "TXU0304 A3 to B3Y to W25Q128JW CS#"
+    },
+    "dut_to_host": {
+      "DUT_MISO": "W25Q128JW DO/IO1 to TXU0304 B4 to A4Y"
+    }
+  },
+  "power_budget": {
+    "regulator_capacity_ma": 500.0,
+    "conservative_flash_allocation_ma": 20.0,
+    "translator_static_max_ma": 0.008,
+    "two_pullup_low_state_allocation_ma": 0.36,
+    "dut_cs_pullup_low_state_allocation_ma": 0.18,
+    "oe_pulldown_enabled_allocation_ma": 0.18,
+    "allocated_steady_state_ma": 20.728,
+    "component_rating_minus_allocated_terms_ma": 479.272,
+    "selected_input_capacitance_uf": 1.0,
+    "selected_output_capacitance_uf": 4.7,
+    "status": "partial_static_allocation_only_dynamic_host_and_thermal_limits_unproven"
+  },
+  "timing_budget": {
+    "clock_period_ns": 200.0,
+    "half_period_ns": 100.0,
+    "translator_a_to_b_max_ns": 19.0,
+    "translator_b_to_a_max_ns": 15.0,
+    "flash_clock_low_to_output_valid_max_ns": 6.0,
+    "known_forward_residual_ns": 81.0,
+    "known_read_return_residual_ns": 60.0,
+    "read_return_equation": "half_period - outward_clock_translator - flash_clock_to_output - return_translator",
+    "status": "blocked_incomplete_host_load_and_interconnect_model"
+  },
+  "bringup_controls": {
+    "R1": "removable host power/current insertion link",
+    "R4": "removable DUT_1V8 isolation/current insertion link",
+    "R5": "10k HOST_CS_N to HOST_3V3 upstream of R1; high default when host domain is powered",
+    "R6": "10k DUT_CS_N to DUT_1V8; CS follows DUT rail while translator disabled",
+    "R7": "10k TRANSLATOR_OE to GND; default disabled",
+    "JP1": "normally open enable header; bridge only after rail acceptance and host CS high",
+    "initial_dnp_references": ["R1", "R4"],
+    "enable_shunt_initially_fitted": false,
+    "min_vcc_to_cs_low_us": 20,
+    "power_cycle_vcc_max_v": 0.8,
+    "power_cycle_min_low_us": 100,
+    "testpoints": 18,
+    "mounting_holes": 4
+  },
+  "layout_contract": {
+    "ground_reference_layers": ["F.Cu", "B.Cu"],
+    "signal_routing_layers": ["F.Cu"],
+    "local_ground_escape_max_mm": 2.0,
+    "minimum_ground_stitching_vias": 20,
+    "signal_integrity_status": "physical_waveforms_and_stackup_unproven"
+  },
+  "acceptance": {
+    "kicad_erc_required": true,
+    "kicad_drc_required": true,
+    "schematic_pcb_parity_required": true,
+    "unconnected_pads_allowed": 0,
+    "physical_measurements_required_for_power_authority": true
+  },
+  "authority": {
+    "modeled_evidence_only": true,
+    "human_ee_review_complete": false,
+    "fabrication_ready": false,
+    "power_on_ready": false,
+    "physical_correctness": "UNPROVEN",
+    "physical_authority_granted": false
+  },
+  "remaining_blockers": [
+    "independent EE schematic and layout review",
+    "exact host/programmer voltage, edge-rate, setup, and sampling characterization",
+    "manufacturer-model or equivalent signal-integrity execution for the routed interconnect",
+    "fabricator stackup and assembly capability review",
+    "cold continuity and resistance checks on an assembled revision-bound board",
+    "current-limited rail measurements followed by a read-only 0x9F bench transaction"
+  ]
+}

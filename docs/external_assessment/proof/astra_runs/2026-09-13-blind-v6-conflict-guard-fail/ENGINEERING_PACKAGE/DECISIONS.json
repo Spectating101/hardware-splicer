@@ -1,0 +1,47 @@
+{
+  "decisions": [
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "identity",
+      "description": "Preserve both identity claims and authority ceilings. Proposed advisory JV transcription neither supersedes declared JW nor establishes physical identity. No selection.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "current-dut-identity-jw",
+          "source_id": "src-current-dut-identity"
+        },
+        {
+          "claim_id": "procurement-note-dut-identity-jv",
+          "source_id": "src-procurement-note-jv"
+        }
+      ]
+    },
+    {
+      "canonical_surface": "preFabricationPlan.decisions",
+      "decision_id": "supply",
+      "description": "Conditional on JW identity: 1.8 V is within 1.7–1.95 V; at 1.8 V VCC the pin absolute maximum is 2.2 V, below declared 3.3 V host drive. Absolute maximum does not establish logic compatibility. No JV limits inferred.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_refs": [
+        {
+          "claim_id": "current-dut-identity-jw",
+          "source_id": "src-current-dut-identity"
+        },
+        {
+          "claim_id": "procurement-note-dut-identity-jv",
+          "source_id": "src-procurement-note-jv"
+        },
+        {
+          "claim_id": "dut-operating-supply",
+          "source_id": "src-dut-datasheet"
+        },
+        {
+          "claim_id": "dut-pin-absolute-maximum",
+          "source_id": "src-dut-datasheet"
+        }
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_decisions.v1"
+}

@@ -1,0 +1,201 @@
+{
+  "actions": [
+    {
+      "action_id": "identify-parts",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "identify-parts",
+        "claim_ids": [
+          "dut-package-dependent-pinout"
+        ],
+        "depends_on": [],
+        "description": "Obtain physical DUT marking/package/suffix evidence, select matching package pinout, and identify programmer and TXU0304 orderable package/footprint/availability.",
+        "source_ids": [
+          "src-dut-datasheet",
+          "src-controller",
+          "src-translator-fixed-datasheet",
+          "src-fixture"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          }
+        ]
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Obtain physical DUT marking/package/suffix evidence, select matching package pinout, and identify programmer and TXU0304 orderable package/footprint/availability.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-dut-datasheet",
+        "src-controller",
+        "src-translator-fixed-datasheet",
+        "src-fixture"
+      ],
+      "status": "planned",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "electrical-budget",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "electrical-budget",
+        "depends_on": [
+          "identify-parts"
+        ],
+        "description": "Obtain declared limits for every interface; check VIH/VIL against loaded VOH/VOL, supply tolerance, load and temperature; compute forward clock/data skew and return-path propagation plus DUT clock-to-output and host setup/hold across modes 0/3. Set no clock rate until margins are demonstrated.",
+        "source_ids": [
+          "src-controller",
+          "src-dut-datasheet",
+          "src-translator-fixed-datasheet"
+        ],
+        "source_refs": []
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Obtain declared limits for every interface; check VIH/VIL against loaded VOH/VOL, supply tolerance, load and temperature; compute forward clock/data skew and return-path propagation plus DUT clock-to-output and host setup/hold across modes 0/3. Set no clock rate until margins are demonstrated.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-controller",
+        "src-dut-datasheet",
+        "src-translator-fixed-datasheet"
+      ],
+      "status": "planned",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "supply-and-disable",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "supply-and-disable",
+        "claim_ids": [
+          "txu-output-disable",
+          "dut-operating-supply"
+        ],
+        "depends_on": [
+          "identify-parts"
+        ],
+        "description": "Specify local 1.8 V regulator, input source, tolerance/transients/current budget, decoupling and protection; validate OE bias/control, partial-power/back-power behavior, sequencing, and all unused DUT pins using selected component specifications. Keep default power off.",
+        "source_ids": [
+          "src-fixture",
+          "src-translator-fixed-datasheet",
+          "src-dut-datasheet"
+        ],
+        "source_refs": [
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          }
+        ]
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Specify local 1.8 V regulator, input source, tolerance/transients/current budget, decoupling and protection; validate OE bias/control, partial-power/back-power behavior, sequencing, and all unused DUT pins using selected component specifications. Keep default power off.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture",
+        "src-translator-fixed-datasheet",
+        "src-dut-datasheet"
+      ],
+      "status": "planned",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "design-verification",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "design-verification",
+        "depends_on": [
+          "electrical-budget",
+          "supply-and-disable"
+        ],
+        "description": "Produce package-specific schematic and layout, review mapping and power states, and obtain ERC/DRC and independent design review. No fabrication authorization is conveyed.",
+        "source_ids": [
+          "src-fixture"
+        ],
+        "source_refs": []
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Produce package-specific schematic and layout, review mapping and power states, and obtain ERC/DRC and independent design review. No fabrication authorization is conveyed.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture"
+      ],
+      "status": "planned",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "future-bench-evidence",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "future-bench-evidence",
+        "depends_on": [
+          "design-verification"
+        ],
+        "description": "After separate applicable authorization, obtain physical identity, continuity, rail-under-load, OE/sequencing and signal/timing measurements. Record results with provenance; no measurements or power authorization exist in this plan.",
+        "source_ids": [
+          "src-fixture",
+          "src-controller"
+        ],
+        "source_refs": []
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "After separate applicable authorization, obtain physical identity, continuity, rail-under-load, OE/sequencing and signal/timing measurements. Record results with provenance; no measurements or power authorization exist in this plan.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture",
+        "src-controller"
+      ],
+      "status": "planned",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_actions.v1"
+}

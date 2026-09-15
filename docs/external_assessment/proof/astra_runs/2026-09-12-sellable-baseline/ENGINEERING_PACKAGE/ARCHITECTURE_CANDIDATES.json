@@ -1,0 +1,29 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "candidate-fixed",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "description": "Evaluate TXU0304 dual-supply fixed-direction translation at host 3.3 V and DUT nominal 1.8 V. Both nominal rails lie within the supplied port range. Verify actual channel directions support three forward and one reverse paths, port assignment, package pins, OE reference and power sequencing. Supplied OE-low high-impedance fact supports considering disabled startup; implementation remains unverified.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-translator-fixed",
+        "src-controller"
+      ],
+      "status": "conditional_unverified"
+    },
+    {
+      "candidate_id": "candidate-controlled",
+      "canonical_surface": "preFabricationPlan.architecture_candidates",
+      "description": "Evaluate SN74AXC4T245 only after verifying direction-control grouping and whether the chosen implementation supports simultaneous three forward and one reverse SPI paths. Both nominal rails lie within supplied ranges, but this alone does not establish compatibility or a wiring decision.",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-translator-dir",
+        "src-controller"
+      ],
+      "status": "conditional_unverified"
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_candidates.v1"
+}

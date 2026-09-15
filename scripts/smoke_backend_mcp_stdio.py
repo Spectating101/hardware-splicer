@@ -14,6 +14,7 @@ from mcp.client.stdio import stdio_client
 
 _REQUIRED_TOOLS = {
     "hs_backend_status",
+    "hs_backend_task_manifest",
     "hs_backend_list_operations",
     "hs_backend_describe_operation",
     "hs_backend_call",
@@ -64,6 +65,18 @@ async def run() -> None:
             authority = status.get("authority_contract") or {}
             if authority.get("mcp_grants_physical_authority") is not False:
                 raise AssertionError("MCP backend must remain authority-neutral")
+
+            task_manifest = _json_text(
+                await client.call_tool(
+                    "hs_backend_task_manifest", {"task": "bounded_pre_fabrication"}
+                )
+            )
+            if task_manifest.get("task") != "bounded_pre_fabrication":
+                raise AssertionError(f"unexpected task manifest: {task_manifest}")
+            if task_manifest.get("authority_contract", {}).get(
+                "projection_grants_physical_authority"
+            ) is not False:
+                raise AssertionError("task manifest must remain authority-neutral")
 
             # Read-only discovery/description/invocation path.
             discovered = _json_text(
@@ -167,7 +180,8 @@ async def run() -> None:
                         "negotiated_protocol_version": str(client.protocol_version),
                         "mcp_tool_discovery": "pass",
                         "canonical_operation_count": status["operation_count"],
-                        "operation_discovery": "pass",
+        "operation_discovery": "pass",
+        "task_operation_manifest": "pass",
                         "operation_description": "pass",
                         "canonical_read_invocation": "pass",
                         "canonical_stateful_write_read_delete": "pass",

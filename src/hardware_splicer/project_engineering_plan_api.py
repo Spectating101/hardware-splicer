@@ -208,8 +208,26 @@ def create_project_engineering_plan_router(
                 materialized_sources,
                 parsed_sources,
             )
+            planning_intake = deepcopy(request.intake)
+            mission = str(
+                planning_intake.get("mission")
+                or existing_snapshot.get("mission")
+                or ""
+            ).strip()
+            if mission and not any(
+                str(planning_intake.get(key) or "").strip()
+                for key in ("goal", "intent", "brief")
+            ):
+                planning_intake["goal"] = mission
+            if not str(planning_intake.get("project_name") or "").strip():
+                planning_intake["project_name"] = str(
+                    existing_snapshot.get("projectName")
+                    or existing_snapshot.get("name")
+                    or project_id
+                )
+            planning_intake.setdefault("projectId", project_id)
             plan = plan_guided_engineering_project(
-                request.intake,
+                planning_intake,
                 engineering_sources=planning_sources,
                 declared_conflicts=request.declared_conflicts,
                 baseline_project=request.baseline_project,
@@ -218,6 +236,9 @@ def create_project_engineering_plan_router(
             planned_snapshot = existing_snapshot
             planned_snapshot.update(engineering_snapshot(plan))
             planned_snapshot["projectId"] = project_id
+            machine_project = planned_snapshot.get("machineProject")
+            if isinstance(machine_project, dict):
+                machine_project["project_id"] = project_id
             planned_snapshot["engineeringSources"] = persistent_combined_sources
             planned_snapshot["engineeringParsedSources"] = parsed_sources
             planned_snapshot["engineeringSourceUploads"] = _rows(

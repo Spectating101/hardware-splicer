@@ -1,0 +1,79 @@
+{
+  "advisories": {
+    "library_revision_mismatch_warnings": 0,
+    "policy": "Only footprint-library warnings with independently matching pad stacks are advisory; unknown schemas, severities and count disagreements fail closed.",
+    "reviewed_nonpad_library_differences": []
+  },
+  "artifact_sha256": {
+    "bom": "a3043de521aae29f03a4b195da6b448f799f676f617bd37d7f38e9c0dfaaef71",
+    "design_manifest": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
+    "electrical_contract": "6b93387dc7afeded96c515abe7519dbec9c5956eeb2d200493aadb1663800622",
+    "pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+    "project_rules": "0eb65723c01e3f41d0de831091968da861ebf61f01f0f1c8c82dcfd81fcad36f",
+    "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "symbol_library": "5da7075c6cbbad3ec371cf9583b03224a94bb274d968959eaf2d9a633d6f1a47",
+    "symbol_library_table": "a6342889d662299506eebfbe8f77c92ba3485a1a2e8f004dcb62251cb4167977",
+    "verifier": "9f89c37333f36549bda7c4fcf3713359001cc3dee7b37e0a81b4c3415c716ae5"
+  },
+  "authority": {
+    "fabrication_ready": false,
+    "human_ee_review_complete": false,
+    "modeled_evidence_only": true,
+    "physical_authority_granted": false,
+    "physical_correctness": "UNPROVEN",
+    "power_on_ready": false
+  },
+  "board_inventory": {
+    "copper_tracks_and_vias": 175,
+    "filled_ground_area_mm2": {
+      "B.Cu": 4291.606,
+      "F.Cu": 3354.461
+    },
+    "footprints_total": 40,
+    "ground_stitching_vias": 20,
+    "ground_zones": 2,
+    "mounting_holes": 4,
+    "nearest_ground_via_mm": {
+      "C1.2": 1.25,
+      "C2.2": 1.25,
+      "C3.2": 1.25,
+      "C4.2": 1.25,
+      "C5.2": 1.225,
+      "C6.2": 1.225,
+      "U1.7": 1.5375,
+      "U2.4": 1.5125,
+      "U3.2": 1.0625
+    },
+    "signal_routing_layers": [
+      "F.Cu"
+    ],
+    "testpoints": 18
+  },
+  "checks": {
+    "assembly_variant_issues": 0,
+    "board_identity_issues": 0,
+    "bom_parity_issues": 0,
+    "drc_actionable_violations": 0,
+    "erc_errors": 0,
+    "erc_warnings": 0,
+    "footprint_errors": 0,
+    "ground_reference_issues": 0,
+    "required_topology_issues": 0,
+    "schematic_parity_issues": 0,
+    "unconnected_pads": 0
+  },
+  "design_id": "spi-flash-adapter-v1",
+  "nonclaims": [
+    "CAD/electrical-intent checks do not establish physical correctness.",
+    "Ground fill and nearby vias are geometric checks, not impedance or waveform measurements.",
+    "Host loading, power transitions and current/thermal performance still require physical evidence.",
+    "This receipt does not authorize fabrication or power-on."
+  ],
+  "result": "pass",
+  "schema_version": "hardware_splicer.reference_design_verification.v2",
+  "toolchain": {
+    "kicad_cli": "9.0.2",
+    "pcbnew": "9.0.2",
+    "router": "Freerouting v2.4.1; routing output accepted only after KiCad checks"
+  }
+}

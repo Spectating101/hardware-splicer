@@ -62,11 +62,12 @@ def test_golden_rover_jarvis_e2e_produces_verified_package(tmp_path: Path) -> No
     assert all(value is False for value in report["physical_authority"].values())
     assert report["package"]["path"] == package_path.name
     assert report["package"]["source_revision"] == 6
-    assert report["package"]["file_count"] == 15
+    assert report["package"]["file_count"] == 16
 
     with zipfile.ZipFile(package_path) as archive:
         names = set(archive.namelist())
     assert "ENGINEERING_PACKAGE/MANIFEST.json" in names
+    assert "ENGINEERING_PACKAGE/ENGINEERING_STATE.json" in names
     assert "ENGINEERING_PACKAGE/ACTION_TRACE.json" in names
     assert "ENGINEERING_PACKAGE/REPAIR_LINEAGE.json" in names
     assert "ENGINEERING_PACKAGE/CONVERSATION_BRIEFINGS.json" in names

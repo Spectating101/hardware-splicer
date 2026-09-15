@@ -1,0 +1,201 @@
+{
+  "actions": [
+    {
+      "action_id": "resolve-identities",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "resolve-identities",
+        "depends_on": [],
+        "description": "Capture actual DUT marking, package and suffix; reconcile to package-specific manufacturer pinout. Identify exact programmer and obtain its guaranteed interface and timing specifications. Select exact TXU0304 orderable package, footprint, availability and assembly constraints.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-fixed-direction-map",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Capture actual DUT marking, package and suffix; reconcile to package-specific manufacturer pinout. Identify exact programmer and obtain its guaranteed interface and timing specifications. Select exact TXU0304 orderable package, footprint, availability and assembly constraints.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "close-budgets",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "close-budgets",
+        "depends_on": [
+          "resolve-identities"
+        ],
+        "description": "Complete worst-case logic-level, load and SPI timing budgets from additional traceable evidence; choose SPI mode and maximum clock only when supported.",
+        "source_refs": [
+          {
+            "claim_id": "dut-standard-spi-directions",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Complete worst-case logic-level, load and SPI timing budgets from additional traceable evidence; choose SPI mode and maximum clock only when supported.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "design-supply-controls",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "design-supply-controls",
+        "depends_on": [
+          "resolve-identities"
+        ],
+        "description": "Specify local 1.8 V regulator implementation, current and tolerance budget, decoupling, sequencing, protection, common return and OE bias/control. Resolve unused DUT pins and inactive CS behavior from exact device documentation; review partial-power/backfeed behavior.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Specify local 1.8 V regulator implementation, current and tolerance budget, decoupling, sequencing, protection, common return and OE bias/control. Resolve unused DUT pins and inactive CS behavior from exact device documentation; review partial-power/backfeed behavior.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "design-review",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "design-review",
+        "depends_on": [
+          "close-budgets",
+          "design-supply-controls"
+        ],
+        "description": "Produce schematic and package-verified footprints, run ERC, then PCB/DRC and independent design review. Preserve unresolved findings and physical authority gates.",
+        "source_refs": [
+          {
+            "claim_id": "dut-package-dependent-pinout",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Produce schematic and package-verified footprints, run ERC, then PCB/DRC and independent design review. Preserve unresolved findings and physical authority gates.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "prepare-bench-validation",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "action_id": "prepare-bench-validation",
+        "depends_on": [
+          "design-review"
+        ],
+        "description": "Prepare a separately authorized bench validation procedure for identity/continuity, supply/load/transients, OE/sequencing, logic margins and SPI timing. Record actual measurements with traceability when authorized; this plan performs no fabrication or power-on and supplies no bench evidence.",
+        "source_refs": [
+          {
+            "claim_id": "dut-operating-supply",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "dut-pin-absolute-maximum",
+            "source_id": "src-dut-datasheet"
+          },
+          {
+            "claim_id": "txu-output-disable",
+            "source_id": "src-translator-fixed-datasheet"
+          },
+          {
+            "claim_id": "txu-spi-example-not-component-spec",
+            "source_id": "src-translator-fixed-datasheet"
+          }
+        ],
+        "status": "pending"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Prepare a separately authorized bench validation procedure for identity/continuity, supply/load/transients, OE/sequencing, logic margins and SPI timing. Record actual measurements with traceability when authorized; this plan performs no fabrication or power-on and supplies no bench evidence.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [],
+      "status": "pending",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_actions.v1"
+}

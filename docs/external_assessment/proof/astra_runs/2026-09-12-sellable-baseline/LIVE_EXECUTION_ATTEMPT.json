@@ -1,0 +1,8 @@
+{
+  "api_fallback": false,
+  "case_id": "spi-flash-adapter-baseline",
+  "experiment_project_id": "hs-astra-sellable-20260912-4",
+  "physical_authority_granted": false,
+  "schema_version": "hardware_splicer.codex_astra_live_attempt.v1",
+  "single_use": true
+}

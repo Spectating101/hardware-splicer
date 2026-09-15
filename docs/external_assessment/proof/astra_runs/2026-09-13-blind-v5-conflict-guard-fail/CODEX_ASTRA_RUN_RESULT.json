@@ -1,0 +1,31 @@
+{
+  "api_fallback": false,
+  "audit_error": null,
+  "audit_file": "$OBSERVER_DIR/CODEX_ASTRA_AUDIT.json",
+  "codex_evaluation_ready_pass": false,
+  "codex_exit_code": 0,
+  "codex_final_report_contract_pass": false,
+  "codex_hard_truth_contract_pass": false,
+  "codex_mission_progress_contract_pass": false,
+  "codex_progress_provenance_contract_pass": false,
+  "codex_usage": {
+    "cache_write_input_tokens": 0,
+    "cached_input_tokens": 518400,
+    "input_tokens": 584694,
+    "output_tokens": 5739,
+    "reasoning_output_tokens": 73
+  },
+  "correct_engineering_architecture_asserted": false,
+  "live_execution_claim": "$OBSERVER_DIR/LIVE_EXECUTION_ATTEMPT.json",
+  "one_live_attempt_per_prepared_case": true,
+  "output_schema_file": "$OBSERVER_DIR/CODEX_ASTRA_FINAL_REPORT_SCHEMA.json",
+  "output_schema_sha256": "sha256:e5085732165f2f5594c4a7cd2c4872b931f162d22420ae0d02444948d2440bec",
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "provider_credentials_forwarded_to_runtime": false,
+  "schema_version": "hardware_splicer.codex_astra_run_result.v4",
+  "single_case_only": true,
+  "status": "failed",
+  "stderr_file": "$OBSERVER_DIR/CODEX_ASTRA_STDERR.log",
+  "trace_file": "$OBSERVER_DIR/CODEX_ASTRA_TRACE.jsonl"
+}

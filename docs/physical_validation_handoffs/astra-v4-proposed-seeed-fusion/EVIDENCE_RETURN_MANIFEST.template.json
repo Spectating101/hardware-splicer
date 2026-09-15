@@ -1,0 +1,192 @@
+{
+  "authority_effect": "none",
+  "automatic_authorization": false,
+  "calibrations": [],
+  "candidate_revision": "hs-astra-rawdoc-v4-20260913-1@b7c724e0561d4ec8",
+  "candidate_snapshot_hash": "sha256:b7c724e0561d4ec8ab21b7ad4e869256c5cca2f80416d1f07bd020164c152272",
+  "gate_results": [
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "identify-dut",
+      "instrument_ids": [],
+      "measured_values": {
+        "observed_dimensions_mm": null,
+        "observed_package": null,
+        "observed_pin_count": null,
+        "observed_top_marking": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.identify-dut.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "identify-programmer",
+      "instrument_ids": [],
+      "measured_values": {
+        "interface_connector": null,
+        "manufacturer": null,
+        "model": null,
+        "serial_or_asset_id": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.identify-programmer.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "identify-adapter-artifact",
+      "instrument_ids": [],
+      "measured_values": {
+        "assembly_id": null,
+        "assembly_revision": null,
+        "pcb_or_wiring_hash": null,
+        "schematic_hash": null,
+        "translator_orderable_mpn": null,
+        "translator_package": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.identify-adapter-artifact.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "cold-continuity-and-isolation",
+      "instrument_ids": [],
+      "measured_values": {
+        "domain_isolation_results": null,
+        "ground_continuity_ohm": null,
+        "net_by_net_results": null,
+        "vcc_1v8_to_ground_ohm": null,
+        "vcc_3v3_to_ground_ohm": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.cold-continuity-isolation.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "current-limited-power-up",
+      "instrument_ids": [],
+      "measured_values": {
+        "dut_vcc_max_v": null,
+        "dut_vcc_min_v": null,
+        "power_off_backfeed_current_a": null,
+        "startup_peak_current_a": null,
+        "steady_state_current_a": null,
+        "supply_current_limit_a": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.current-limited-power-up.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "logic-level-and-timing-capture",
+      "instrument_ids": [],
+      "measured_values": {
+        "dut_side_levels_v": null,
+        "host_side_levels_v": null,
+        "overshoot_undershoot_v": null,
+        "propagation_delays_s": null,
+        "rise_fall_times_s": null,
+        "spi_clock_hz": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.logic-level-timing.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "read-only-jedec-identity",
+      "instrument_ids": [],
+      "measured_values": {
+        "clock_hz": null,
+        "command_hex": null,
+        "response_hex_by_trial": null,
+        "trial_count": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.read-only-jedec-id.v1",
+      "raw_files": [],
+      "status": "not_run"
+    },
+    {
+      "acceptance_criteria": {},
+      "calibration_ids": [],
+      "captured_at": null,
+      "direct_operator_observation": false,
+      "failure_reason": null,
+      "gate_id": "thermal-dwell",
+      "instrument_ids": [],
+      "measured_values": {
+        "ambient_c": null,
+        "dut_max_c": null,
+        "dwell_s": null,
+        "regulator_max_c": null,
+        "translator_max_c": null
+      },
+      "operator_id": null,
+      "procedure_id": "hs.spi.thermal-dwell.v1",
+      "raw_files": [],
+      "status": "not_run"
+    }
+  ],
+  "handoff_id": "remote-physical-handoff-987035a2e27e074b",
+  "physical_authority_granted": false,
+  "physical_correctness": "UNPROVEN",
+  "provider": {
+    "physical_site_id": null,
+    "provider_id": "proposed-seeed-fusion",
+    "provider_name": "Seeed Fusion PCBA",
+    "work_order_id": null
+  },
+  "provider_attestation": {
+    "role": null,
+    "signed_at": null,
+    "signed_by": null,
+    "statement": "The identified operators directly observed the reported tests on the identified physical test article."
+  },
+  "schema_version": "hardware_splicer.remote_physical_return.v1",
+  "source_physical_packet_id": "physical-validation-fdd10770454d7a84",
+  "test_article": {
+    "assembly_id": null,
+    "assembly_revision": null,
+    "manufacturing_artifacts": [],
+    "serial_numbers": []
+  }
+}

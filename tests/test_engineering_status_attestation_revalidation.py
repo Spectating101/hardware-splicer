@@ -3,6 +3,9 @@ from __future__ import annotations
 import base64
 import copy
 import json
+from datetime import datetime
+
+import pytest
 
 from hardware_splicer.audited_physical_evidence_plan_update import (
     apply_audited_physical_evidence_to_plan,
@@ -21,6 +24,9 @@ from hardware_splicer.physical_evidence_ledger import (
     build_authorization_ledger_entry,
     build_physical_evidence_envelope,
 )
+
+
+pytestmark = pytest.mark.usefixtures("authorization_clock")
 
 
 KEY = "v" * 48
@@ -217,3 +223,42 @@ def test_rotated_verification_key_preserves_valid_status(monkeypatch) -> None:
     assert status.metadata["physical_scope_authorized"] is True
     assert status.metadata["server_attestation_valid"] is True
     assert status.metadata["authorized_operations"] == ["bench_power"]
+
+
+@pytest.mark.parametrize(
+    ("as_of", "authorized"),
+    [
+        ("2026-08-31T23:59:59.999999+00:00", True),
+        # Preserve the existing inclusive expiry instant; do not change policy.
+        ("2026-09-01T00:00:00+00:00", True),
+        ("2026-09-01T00:00:00.000001+00:00", False),
+        ("2026-09-09T00:00:00+00:00", False),
+    ],
+    ids=["before-expiry", "at-expiry", "after-expiry", "reported-failure-date"],
+)
+def test_attested_status_rechecks_expiry_with_cached_success(
+    monkeypatch, authorization_clock, as_of, authorized
+) -> None:
+    plan = _strict_plan(monkeypatch)
+    assert build_engineering_status(plan).metadata["physical_scope_authorized"] is True
+    assert plan["audited_physical_evidence"]["applicable"] is True
+    assert plan["scoped_release_assessment"]["allowed"] is True
+    ledger = plan["audited_physical_evidence"]["ledger_entries"]
+    assert ledger[0]["decision"]["expires_at"] == "2026-09-01T00:00:00+00:00"
+
+    # Move time only. Reuse the exact retained evidence, revision and hashes.
+    authorization_clock(datetime.fromisoformat(as_of))
+    status = build_engineering_status(plan)
+
+    assert status.metadata["physical_authorization_revalidated"] is True
+    assert status.metadata["physical_scope_authorized"] is authorized
+    assert status.metadata["authorized_operations"] == (["bench_power"] if authorized else [])
+    # A valid signature is not an exemption from authorization expiry.
+    assert status.metadata["server_attestation_required"] is True
+    assert status.metadata["server_attestation_valid"] is True
+    if not authorized:
+        assert status.overall_status == "blocked"
+        assert status.blockers
+    # The caller still holds cached success; it must never be the authority.
+    assert plan["audited_physical_evidence"]["applicable"] is True
+    assert plan["scoped_release_assessment"]["allowed"] is True

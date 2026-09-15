@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import sys
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ from hardware_splicer.build_compiler import (
     CATALOG_BUILD_IDS,
     apply_board_outline_to_machine,
     compile_catalog_build,
+    ensure_circuit_import_path,
     resolve_build_id,
 )
 from hardware_splicer.design_quality import build_design_quality_gate
@@ -18,6 +20,31 @@ from hardware_splicer.production_release_metrics import build_production_release
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPILE_SCRIPT = ROOT / "scripts" / "compile_build_graph.cjs"
+
+
+def test_circuit_import_path_honors_explicit_repo_root(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path / "installed-runtime-checkout"
+    circuit_root = repo / "apps" / "circuit-ai"
+    (circuit_root / "src").mkdir(parents=True)
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(repo))
+    monkeypatch.setattr(sys, "path", list(sys.path))
+
+    ensure_circuit_import_path()
+
+    assert sys.path[0] == str(circuit_root)
+
+
+def test_circuit_import_path_fails_with_actionable_error(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path / "missing"))
+
+    with pytest.raises(RuntimeError, match="HARDWARE_SPLICER_REPO_ROOT"):
+        ensure_circuit_import_path()
 
 
 @pytest.mark.parametrize("build_id", CATALOG_BUILD_IDS)

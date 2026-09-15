@@ -1,0 +1,205 @@
+{
+  "actions": [
+    {
+      "action_id": "action-identity",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "Exact physical DUT orderable identity and pinout supported by reviewed evidence.",
+        "action_id": "action-identity",
+        "description": "Request traceable physical marking/orderable-suffix and package evidence; match package-specific manufacturer pinout and orientation. Produce an identity-to-pinout review record; no identity is resolved in this run.",
+        "source_ids": [
+          "src-dut",
+          "src-fixture"
+        ],
+        "status": "pending_evidence"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Request traceable physical marking/orderable-suffix and package evidence; match package-specific manufacturer pinout and orientation. Produce an identity-to-pinout review record; no identity is resolved in this run.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-dut",
+        "src-fixture"
+      ],
+      "status": "pending_evidence",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "action-limits",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "All host/translator/DUT voltage and timing interfaces supported across intended operating conditions.",
+        "action_id": "action-limits",
+        "description": "Request exact-device recommended and absolute-maximum I/O limits, input thresholds, output levels, unpowered behavior and SPI timing. Build a worst-case interface compatibility matrix; do not treat 133 MHz product-page frequency as adapter operating capability.",
+        "source_ids": [
+          "src-dut",
+          "src-controller"
+        ],
+        "status": "pending_evidence"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Request exact-device recommended and absolute-maximum I/O limits, input thresholds, output levels, unpowered behavior and SPI timing. Build a worst-case interface compatibility matrix; do not treat 133 MHz product-page frequency as adapter operating capability.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-dut",
+        "src-controller"
+      ],
+      "status": "pending_evidence",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "action-mapping",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "Reviewed implementation supports three forward paths and one simultaneous reverse path with safe disabled states.",
+        "action_id": "action-mapping",
+        "description": "Produce a per-signal translator channel/pin/port/control table for SCLK, CS#, MOSI_IO0 and MISO_IO1. Verify control grouping, OE/DIR states, startup/shutdown and partial-power behavior using implementation-specific evidence; compare candidates before selection.",
+        "source_ids": [
+          "src-controller",
+          "src-translator-fixed",
+          "src-translator-dir"
+        ],
+        "status": "pending_evidence"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Produce a per-signal translator channel/pin/port/control table for SCLK, CS#, MOSI_IO0 and MISO_IO1. Verify control grouping, OE/DIR states, startup/shutdown and partial-power behavior using implementation-specific evidence; compare candidates before selection.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-controller",
+        "src-translator-fixed",
+        "src-translator-dir"
+      ],
+      "status": "pending_evidence",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "action-supply",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "Reviewed supply design meets verified DUT limits under intended conditions.",
+        "action_id": "action-supply",
+        "description": "Select and document a proposed local 1.8 V supply with input source, current budget, regulation tolerance, transient behavior, decoupling, enable/default-off and backfeed controls. Values and component identity remain unselected.",
+        "source_ids": [
+          "src-fixture",
+          "src-dut"
+        ],
+        "status": "pending_design"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Select and document a proposed local 1.8 V supply with input source, current budget, regulation tolerance, transient behavior, decoupling, enable/default-off and backfeed controls. Values and component identity remain unselected.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture",
+        "src-dut"
+      ],
+      "status": "pending_design",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "action-schematic-review",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "Evidence-linked review and deterministic checks have no unresolved implementation blockers; separate physical authorization still required.",
+        "action_id": "action-schematic-review",
+        "depends_on": [
+          "action-identity",
+          "action-limits",
+          "action-mapping",
+          "action-supply"
+        ],
+        "description": "After preceding evidence gates, draft schematic/BOM/package mapping and review unused DUT control-pin biasing, grounding, connector orientation, contention, power sequencing and timing. Run deterministic electrical and revision checks on the actual implementation.",
+        "source_ids": [
+          "src-fixture",
+          "src-dut",
+          "src-controller"
+        ],
+        "status": "blocked"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "After preceding evidence gates, draft schematic/BOM/package mapping and review unused DUT control-pin biasing, grounding, connector orientation, contention, power sequencing and timing. Run deterministic electrical and revision checks on the actual implementation.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture",
+        "src-dut",
+        "src-controller"
+      ],
+      "status": "blocked",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    },
+    {
+      "action_id": "action-validation-protocol",
+      "action_type": "pre_fabrication_next_action",
+      "authority_effect": "none",
+      "automatic_execution": false,
+      "canonical_surface": "preFabricationNextActions.actions",
+      "decision": {},
+      "inputs": {
+        "acceptance_criteria": "Reviewable protocol with no fabricated measurements and no execution authority granted.",
+        "action_id": "action-validation-protocol",
+        "description": "Prepare a future separately authorized validation protocol with unpowered continuity/orientation checks, isolated supply checks, verified-limit-based stop criteria, controlled enable sequencing and non-destructive identification/read checks before any separately authorized erase/program operation. Record results against the actual adapter revision only when performed.",
+        "source_ids": [
+          "src-fixture"
+        ],
+        "status": "planning_only"
+      },
+      "origin_turn_id": null,
+      "project_revision": null,
+      "rationale": "Prepare a future separately authorized validation protocol with unpowered continuity/orientation checks, isolated supply checks, verified-limit-based stop criteria, controlled enable sequencing and non-destructive identification/read checks before any separately authorized erase/program operation. Record results against the actual adapter revision only when performed.",
+      "repair_sessions": [],
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-fixture"
+      ],
+      "status": "planning_only",
+      "title": "",
+      "tool_artifact": {},
+      "tool_result_status": null
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_actions.v1"
+}

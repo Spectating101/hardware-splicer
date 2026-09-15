@@ -1,0 +1,37 @@
+{
+  "requirements": [
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "description": "Provide SCLK, CS# and MOSI_IO0 host-to-DUT paths and MISO_IO1 DUT-to-host path. This is a logical direction requirement, not a verified translator pin map.",
+      "requirement_id": "req-spi",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-controller"
+      ]
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "description": "Evaluate a local nominal 1.8 V DUT supply against the declared 1.7–1.95 V VCC range, including tolerance, load and transients. Keep default power off. VCC range does not establish I/O tolerance.",
+      "requirement_id": "req-power",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-dut",
+        "src-fixture"
+      ]
+    },
+    {
+      "canonical_surface": "preFabricationPlan.requirements",
+      "description": "Require exact physical DUT identity, package-specific pinout and electrical-limit evidence before implementation approval; preserve absence of physical evidence.",
+      "requirement_id": "req-evidence",
+      "session_id": "",
+      "session_kind": "bounded_pre_fabrication_plan",
+      "source_ids": [
+        "src-dut",
+        "src-fixture"
+      ]
+    }
+  ],
+  "schema_version": "hardware_splicer.engineering_package_requirements.v1"
+}

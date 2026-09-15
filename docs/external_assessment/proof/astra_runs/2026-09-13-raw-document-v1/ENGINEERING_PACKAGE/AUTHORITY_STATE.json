@@ -1,0 +1,15 @@
+{
+  "package_authorizes_physical_action": false,
+  "package_creation_authority_effect": "none",
+  "package_is_software_evidence": true,
+  "project_authority": {
+    "fabrication_authorized": null,
+    "firmware_flash_authorized": null,
+    "flash_authorized": null,
+    "motion_authorized": null,
+    "operational_authorized": null,
+    "power_on_authorized": null,
+    "release_authorized": null
+  },
+  "schema_version": "hardware_splicer.engineering_package_authority.v1"
+}
