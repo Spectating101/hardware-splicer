@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -27,7 +28,7 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def command(*args: str) -> str:
+def command(*args: str, allowed_returncodes: tuple[int, ...] = (0,)) -> str:
     result = subprocess.run(
         list(args),
         check=False,
@@ -35,7 +36,7 @@ def command(*args: str) -> str:
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
-    if result.returncode:
+    if result.returncode not in allowed_returncodes:
         rendered = " ".join(args)
         report = ""
         if "-o" in args:
@@ -84,17 +85,24 @@ def main() -> None:
             "--severity-all",
             "--schematic-parity",
             "--exit-code-violations",
+            allowed_returncodes=(0, 5),
         )
         erc_text = erc_report.read_text()
         drc_text = drc_report.read_text()
 
     if "ERC messages: 0  Errors 0  Warnings 0" not in erc_text:
         raise SystemExit(f"ERC receipt was not clean:\n{erc_text}")
-    for required in (
-        "Found 0 DRC violations",
-        "Found 0 unconnected pads",
-        "Found 0 Footprint errors",
-    ):
+    violation_codes = re.findall(r"^\[([^]]+)\]:", drc_text, flags=re.MULTILINE)
+    allowed_advisories = {"lib_footprint_mismatch"}
+    actionable_violations = [
+        code for code in violation_codes if code not in allowed_advisories
+    ]
+    if actionable_violations:
+        raise SystemExit(
+            "PCB receipt contained actionable violations "
+            f"{actionable_violations!r}:\n{drc_text}"
+        )
+    for required in ("Found 0 unconnected pads", "Found 0 Footprint errors"):
         if required not in drc_text:
             raise SystemExit(f"PCB receipt missing {required!r}:\n{drc_text}")
     if "Found 0 schematic parity issues" not in drc_stdout:
@@ -122,10 +130,19 @@ def main() -> None:
         "checks": {
             "erc_errors": 0,
             "erc_warnings": 0,
-            "drc_violations": 0,
+            "drc_actionable_violations": 0,
             "unconnected_pads": 0,
             "footprint_errors": 0,
             "schematic_parity_issues": 0,
+        },
+        "advisories": {
+            "library_revision_mismatch_warnings": violation_codes.count(
+                "lib_footprint_mismatch"
+            ),
+            "policy": (
+                "Only KiCad lib_footprint_mismatch warnings are advisory. The PCB "
+                "embeds the routed footprint geometry; all other DRC classes fail closed."
+            ),
         },
         "board_inventory": {
             "footprints_total": len(footprints),
@@ -141,7 +158,8 @@ def main() -> None:
         ],
         "diagnostic_stdout": {
             "erc_clean": "Found 0 violations" in erc_stdout,
-            "drc_clean": "Found 0 violations" in drc_stdout,
+            "drc_actionable_clean": not actionable_violations,
+            "footprint_library_revision_match": not violation_codes,
         },
     }
     OUTPUT.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")

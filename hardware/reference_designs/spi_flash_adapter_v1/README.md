@@ -53,13 +53,19 @@ python3 verify_design.py
 The verifier fails closed unless all of the following are zero:
 
 - schematic ERC errors and warnings;
-- PCB DRC violations;
+- actionable PCB DRC violations;
 - unconnected PCB pads;
 - PCB footprint errors;
 - schematic-to-PCB parity issues.
 
 `verification.json` binds those results to hashes of the canonical schematic, routed PCB,
 BOM, and design manifest. KiCad 9.0.2 produced the checked-in receipt.
+
+KiCad's `lib_footprint_mismatch` warning is recorded separately as an advisory because it
+compares the board's embedded footprint geometry with the particular global library revision
+installed on the checking machine. The same board can therefore be clean on 9.0.2 and report
+library-revision drift on 9.0.9. That one warning class cannot hide copper, clearance,
+connectivity, footprint, or schematic-parity failures; every other DRC class remains fatal.
 
 ## Regeneration
 

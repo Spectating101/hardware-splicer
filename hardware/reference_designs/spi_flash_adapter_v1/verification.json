@@ -1,4 +1,8 @@
 {
+  "advisories": {
+    "library_revision_mismatch_warnings": 0,
+    "policy": "Only KiCad lib_footprint_mismatch warnings are advisory. The PCB embeds the routed footprint geometry; all other DRC classes fail closed."
+  },
   "artifact_sha256": {
     "bom": "e725362a9d96886e0232ac60af89163831df7dc7fde52403fac1a1f1fc8dbfde",
     "design_manifest": "299b9f3c9554b78c8f5646d96c1674e7b0489a94e87eb313485a7701ce9b8a1b",
@@ -20,7 +24,7 @@
     "testpoints": 15
   },
   "checks": {
-    "drc_violations": 0,
+    "drc_actionable_violations": 0,
     "erc_errors": 0,
     "erc_warnings": 0,
     "footprint_errors": 0,
@@ -29,8 +33,9 @@
   },
   "design_id": "spi-flash-adapter-v1",
   "diagnostic_stdout": {
-    "drc_clean": true,
-    "erc_clean": true
+    "drc_actionable_clean": true,
+    "erc_clean": true,
+    "footprint_library_revision_match": true
   },
   "nonclaims": [
     "ERC and DRC establish internal CAD consistency, not physical correctness.",
