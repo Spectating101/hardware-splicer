@@ -37,8 +37,14 @@ def command(*args: str) -> str:
     )
     if result.returncode:
         rendered = " ".join(args)
+        report = ""
+        if "-o" in args:
+            report_path = Path(args[args.index("-o") + 1])
+            if report_path.is_file():
+                report = f"\n--- report: {report_path.name} ---\n{report_path.read_text()}"
         raise SystemExit(
-            f"command failed with exit {result.returncode}: {rendered}\n{result.stdout}"
+            f"command failed with exit {result.returncode}: {rendered}\n"
+            f"{result.stdout}{report}"
         )
     return result.stdout
 
