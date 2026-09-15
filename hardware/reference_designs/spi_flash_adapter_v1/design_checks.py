@@ -66,7 +66,10 @@ def report_entries(value: object, label: str) -> list[dict]:
 
 def reported_count(stdout: str, category: str) -> int:
     counts = re.findall(rf"^Found (\d+) {re.escape(category)}$", stdout, re.MULTILINE)
-    require(len(counts) == 1, f"missing/ambiguous KiCad {category} summary")
+    require(
+        len(counts) == 1,
+        f"missing/ambiguous KiCad {category} summary in stdout {stdout!r}",
+    )
     return int(counts[0])
 
 
