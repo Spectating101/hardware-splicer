@@ -41,7 +41,7 @@
     {
       "path": "CITATION.cff",
       "source": "docs/product/CITATION.cff.draft",
-      "state": "WAITING_IDENTITY_AND_LICENSE_REVIEW"
+      "state": "WAITING_IDENTITY_PROJECTION_CHECK_AND_LICENSE_REVIEW"
     },
     {
       "path": "LICENSES/",
@@ -71,7 +71,7 @@
     }
   ],
   "human_gates": [
-    "creator_identity_and_optional_orcid",
+    "creator_identity_and_orcid_projection_check",
     "hardware_license_scope",
     "documentation_license_scope",
     "third_party_exclusion_review",

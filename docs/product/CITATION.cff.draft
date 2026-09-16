@@ -5,6 +5,7 @@ type: software
 authors:
   - family-names: Ongko
     given-names: Christopher
+    orcid: "https://orcid.org/0009-0007-9339-9098"
 version: "2026.09.1"
 date-released: 2026-09-16
 repository-code: "https://github.com/Spectating101/hardware-splicer"
@@ -24,5 +25,5 @@ abstract: >-
   engineering. The 2026.09.1 artifact freezes a reproducible SPI flash adapter
   design, deterministic verification receipts, manufacturing and functional-test
   handoff, and explicit evidence/authority boundaries at PACKAGED_NOT_PHYSICAL.
-# Draft only. Add an approved license identifier, ORCID if desired, and a real DOI
+# Draft only. Add an approved license identifier and a real DOI
 # only after the corresponding human and external publication gates are complete.

@@ -57,7 +57,7 @@ The product package now answers, on its first screen:
 
 - repository-wide third-party concentrations are identified;
 - vendor datasheet PDFs are excluded from the proposed initial archive;
-- citation metadata is drafted without inventing an ORCID, DOI, OSHWA UID, or license decision;
+- citation metadata uses the canonical applicant-profile ORCID and does not invent a DOI, OSHWA UID, or license decision;
 - hardware and documentation license choices remain explicit human gates.
 
 ## Reconciled inconsistencies
@@ -79,7 +79,7 @@ The package consistently separates green CI, deterministic CAD checks, model/sim
 
 ## Remaining internal-review decisions
 
-1. Confirm the public creator name and whether to add an ORCID.
+1. Verify the projected creator name and canonical ORCID.
 2. Approve hardware and documentation license scopes.
 3. Confirm the public affiliation/occupation wording used for external routes.
 4. Decide whether Nuremberg physical attendance is feasible before Embedded World submission.

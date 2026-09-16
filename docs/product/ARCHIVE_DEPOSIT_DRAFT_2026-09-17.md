@@ -8,7 +8,7 @@
 **Version:** 2026.09.1  
 **Resource type:** Software / open hardware engineering artifact  
 **Publication date:** use the actual deposit publication date  
-**Creator:** Christopher Ongko — confirm public citation form and ORCID before publication  
+**Creator:** Christopher Ongko — ORCID `0009-0007-9339-9098` from the canonical applicant profile  
 **Repository:** https://github.com/Spectating101/hardware-splicer  
 **Frozen source:** `f892facd67c5124e2362860ebc999625afedc5d5`  
 **Release tag:** `gauntlet-spi-flash-adapter-v1-20260916`
@@ -52,7 +52,7 @@ Hardware Splicer is an evidence-gated workbench for agent-assisted hardware engi
 
 ## DOI workflow
 
-1. Approve creator identity, optional ORCID, licenses, and include/exclude manifest.
+1. Verify the canonical creator/ORCID projection, approve licenses, and approve the include/exclude manifest.
 2. Create a draft deposit without publishing.
 3. Upload the exact payload and compare Zenodo-reported checksums.
 4. Review the rendered record and claim boundary.
