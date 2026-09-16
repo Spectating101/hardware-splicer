@@ -1,5 +1,10 @@
 # Hardware-Splicer — External Assessment Package
 
+> **Current entry point:** [`../product/README.md`](../product/README.md). This directory
+> preserves the deeper Q3 evidence/submission lineage. Its historical branch and proof
+> checkpoints must not be mistaken for the current frozen product authority at
+> `f892facd67c5124e2362860ebc999625afedc5d5`.
+
 **Package status:** submission-preparation layer on top of a frozen software architecture and active external-proof tranche  
 **Submission-package branch:** `agent/submission-package-2026q3`  
 **Current package base:** `bb313f283fc25ad75ea1ce0dd384ebb36d0d6911` (PR #70 head when this package was opened)  

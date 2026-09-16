@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software or engineering artifact, please cite it using this metadata."
+title: "Hardware Splicer: Evidence-Gated Agentic Hardware Engineering"
+type: software
+authors:
+  - family-names: Ongko
+    given-names: Christopher
+version: "2026.09.1"
+date-released: 2026-09-16
+repository-code: "https://github.com/Spectating101/hardware-splicer"
+url: "https://github.com/Spectating101/hardware-splicer/releases/tag/gauntlet-spi-flash-adapter-v1-20260916"
+identifiers:
+  - type: other
+    value: "f892facd67c5124e2362860ebc999625afedc5d5"
+    description: "Frozen source commit"
+keywords:
+  - agentic hardware engineering
+  - open hardware
+  - hardware verification
+  - evidence provenance
+  - KiCad
+abstract: >-
+  Hardware Splicer is an evidence-gated workbench for agent-assisted hardware
+  engineering. The 2026.09.1 artifact freezes a reproducible SPI flash adapter
+  design, deterministic verification receipts, manufacturing and functional-test
+  handoff, and explicit evidence/authority boundaries at PACKAGED_NOT_PHYSICAL.
+# Draft only. Add an approved license identifier, ORCID if desired, and a real DOI
+# only after the corresponding human and external publication gates are complete.

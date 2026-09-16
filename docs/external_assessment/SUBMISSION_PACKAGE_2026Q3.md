@@ -1,5 +1,10 @@
 # Hardware-Splicer — 2026 Q3 Submission Package
 
+> **Historical assessment package:** use [`../product/README.md`](../product/README.md)
+> as the current external front door. This document preserves the Q3 submission narrative
+> and older proof checkpoints; current release identity and physical state are controlled by
+> the frozen `f892facd...` product package.
+
 This is the clean external boundary for competitions, papers, grants, mentors, judges and prospective design partners.
 
 **Do not ask an evaluator to reconstruct Hardware-Splicer from historical PRs, old release notes or internal engineering diaries.** This page is the front door.

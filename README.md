@@ -27,7 +27,16 @@ It is **not** a claim that an LLM can safely replace a hardware engineer. The de
 
 ## Evaluators / competitions / research reviewers
 
-**Start here:** [`docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md`](docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md)
+**Current product front door:** [`docs/product/README.md`](docs/product/README.md)
+
+The current product package is bound to frozen release commit
+`f892facd67c5124e2362860ebc999625afedc5d5`, tag
+`gauntlet-spi-flash-adapter-v1-20260916`, and the explicit
+`PACKAGED_NOT_PHYSICAL` boundary.
+
+The older Q3 assessment directory remains the deeper evidence and historical submission layer:
+
+[`docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md`](docs/external_assessment/SUBMISSION_PACKAGE_2026Q3.md)
 
 Then use:
 

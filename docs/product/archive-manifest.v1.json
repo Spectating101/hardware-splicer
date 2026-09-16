@@ -1,0 +1,85 @@
+{
+  "schema": "hardware_splicer.archive_manifest.v1",
+  "state": "DRAFT_NOT_PUBLISHED",
+  "prepared_at": "2026-09-17",
+  "frozen_source": {
+    "repository": "https://github.com/Spectating101/hardware-splicer",
+    "commit": "f892facd67c5124e2362860ebc999625afedc5d5",
+    "tag": "gauntlet-spi-flash-adapter-v1-20260916"
+  },
+  "primary_payload": {
+    "name": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
+    "url": "https://github.com/Spectating101/hardware-splicer/releases/download/gauntlet-spi-flash-adapter-v1-20260916/spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
+    "sha256": "6d4c76feaeebdab1223ed6c4be21d63835212baea731aea9d3933f2525be1edd",
+    "outer_member_count": 24,
+    "integrity_tested": true,
+    "deterministic_rebuild_matched": true
+  },
+  "publication_candidates": [
+    {
+      "path": "spi-flash-adapter-v1-remote-fct-main-f892fac.zip",
+      "state": "READY"
+    },
+    {
+      "path": "SHA256SUMS.txt",
+      "state": "READY_FROM_GITHUB_RELEASE"
+    },
+    {
+      "path": "PACKAGE_HANDOFF.md",
+      "state": "READY_FROM_GITHUB_RELEASE"
+    },
+    {
+      "path": "PRODUCT_README.md",
+      "source": "docs/product/README.md",
+      "state": "READY_FOR_INTERNAL_REVIEW"
+    },
+    {
+      "path": "CLAIMS_AND_NONCLAIMS.json",
+      "source": "docs/product/claims-and-nonclaims.v1.json",
+      "state": "READY_FOR_INTERNAL_REVIEW"
+    },
+    {
+      "path": "CITATION.cff",
+      "source": "docs/product/CITATION.cff.draft",
+      "state": "WAITING_IDENTITY_AND_LICENSE_REVIEW"
+    },
+    {
+      "path": "LICENSES/",
+      "state": "WAITING_SCOPE_DECISION"
+    }
+  ],
+  "excluded": [
+    {
+      "pattern": "apps/circuit-ai/data/datasheets/**",
+      "reason": "third-party manufacturer PDFs; redistribution not cleared"
+    },
+    {
+      "pattern": "**/raw-provider-or-vendor-model-bytes/**",
+      "reason": "terms and redistribution status require individual review"
+    },
+    {
+      "pattern": "releases/**",
+      "reason": "unrelated historical archives are outside the bounded SPI deposit"
+    },
+    {
+      "pattern": "out/provider-handoff/**",
+      "reason": "ignored local quotation/reviewer outputs are not canonical release evidence"
+    },
+    {
+      "pattern": "**/*secret*|**/*credential*|**/*account*",
+      "reason": "no secrets, credentials, account data, payment data, or private contact information may enter the archive"
+    }
+  ],
+  "human_gates": [
+    "creator_identity_and_optional_orcid",
+    "hardware_license_scope",
+    "documentation_license_scope",
+    "third_party_exclusion_review",
+    "final_archive_publication"
+  ],
+  "external_identifiers": {
+    "doi": null,
+    "swhid": null,
+    "oshwa_uid": null
+  }
+}
