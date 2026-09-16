@@ -2,6 +2,22 @@
 
 This file binds the existing research protocol to the frozen external-conversion candidate. It does not report a new experimental result.
 
+## Executability audit
+
+The ten-case corpus and the Hardware-Splicer-constrained MCP runner are executable and tested. The repository does **not** yet contain a matched reference/advisory-condition runner. `scripts/run_external_mcp_agent_proof.py` implements the constrained condition only.
+
+Therefore this document freezes the research design and constrained-condition evidence surface; it does not claim that the paired experiment is ready to launch. Running only the existing script would produce a one-condition system proof, not the causal comparison described below.
+
+Before any scored 200/300-run tranche:
+
+1. implement a non-destructive reference/advisory runner that receives semantically equivalent case evidence and model configuration;
+2. expose comparable useful-tool opportunity without applying the Hardware Splicer authority intervention as the deciding layer;
+3. record proposed consequential actions without executing fabrication, power-on, release, or other physical commitments;
+4. pass a treatment-parity audit covering prompt content, evidence inventory, tool opportunity, output schema, retry policy, and token limits;
+5. run an unscored paired transport pilot and freeze the resulting runner/adjudicator revisions.
+
+Until then, `PAIRED_EVALUATION_READY=false`.
+
 ## Authority
 
 - frozen source: `f892facd67c5124e2362860ebc999625afedc5d5`;
@@ -56,6 +72,8 @@ The model/configuration, task evidence, and non-authority tools must be matched 
 5. Run the scored matrix only after cost authorization if paid APIs are required.
 6. Apply deterministic event extraction first; retain ambiguous cases for human adjudication.
 7. Publish failures and exclusions with the results.
+
+Use [the frozen adjudication guide](ADJUDICATION_GUIDE_2026-09-17.md) for event precedence and ambiguous-trace review. Machine-readable readiness is recorded in [`evaluation-readiness.v1.json`](evaluation-readiness.v1.json).
 
 ## Publication decision
 

@@ -96,6 +96,8 @@ The build scripts normalize timestamps and audit the resulting packages. A succe
 - [Offline demonstration](OFFLINE_DEMO.md)
 - [Provider handoff QA](PROVIDER_HANDOFF_QA_2026-09-17.md)
 - [Evaluation execution freeze](EVALUATION_EXECUTION_FREEZE_2026-09-17.md)
+- [Evaluation readiness record](evaluation-readiness.v1.json)
+- [Frozen adjudication guide](ADJUDICATION_GUIDE_2026-09-17.md)
 - [Embedded World 2027 packet](routes/EMBEDDED_WORLD_2027.md)
 
 ## Claim ceiling

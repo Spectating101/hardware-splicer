@@ -1,0 +1,36 @@
+{
+  "schema": "hardware_splicer.paired_evaluation_readiness.v1",
+  "as_of": "2026-09-17",
+  "candidate_revision": "f892facd67c5124e2362860ebc999625afedc5d5",
+  "paired_evaluation_ready": false,
+  "physical_state": "PACKAGED_NOT_PHYSICAL",
+  "ready": {
+    "research_question": true,
+    "ten_case_corpus": true,
+    "corpus_validation": true,
+    "constrained_condition_runner": true,
+    "trace_persistence": true,
+    "non_golden_truth_audit": true,
+    "outcome_rubric": true,
+    "adjudication_guide": true,
+    "dry_run_physical_safety_policy": true
+  },
+  "not_ready": {
+    "matched_reference_advisory_runner": "No executable condition-A runner is present.",
+    "treatment_parity_audit": "Cannot pass until both condition runners exist.",
+    "paired_transport_pilot": "Requires both runners and final provider transport.",
+    "final_model_snapshot_ids": "Must be frozen immediately before the scored tranche.",
+    "cost_authorization": "Required before paid provider runs.",
+    "scored_results": "No paired result exists."
+  },
+  "current_runner_scope": {
+    "path": "scripts/run_external_mcp_agent_proof.py",
+    "condition": "HARDWARE_SPLICER_CONSTRAINED_ONLY",
+    "safe_to_run_without_api": [
+      "--help",
+      "--list-cases"
+    ],
+    "claim_ceiling": "A successful run can support a constrained-system transport/behavior proof; it cannot by itself estimate the treatment effect against a reference condition."
+  },
+  "next_engineering_gate": "Implement and test the matched non-destructive reference/advisory runner before any scored paired tranche."
+}
