@@ -55,6 +55,7 @@ from hardware_splicer.external_mcp_trace_audit import (
     build_external_truth_audit,
     snapshot_source_ids,
 )
+from hardware_splicer.paired_evaluation import matched_case_input
 
 
 PROOF_SCHEMA_VERSION = "hardware_splicer.external_mcp_agent_proof.v3"
@@ -168,15 +169,7 @@ This is an independent experimental case. You are not told whether related varia
 def _case_input(case: ReplayCase, project_id: str) -> str:
     # Deliberately exclude case_id, equivalence_group, perturbation_kind, metadata,
     # and project_revision labels: those are outer-evaluator information.
-    snapshot = dict(case.snapshot)
-    mission = _persisted_mission(snapshot)
-    return (
-        "Execute this Hardware-Splicer engineering mission through MCP.\n\n"
-        f"experiment_project_id: {project_id}\n"
-        f"mission: {mission}\n"
-        "product_visible_project_state:\n"
-        + json.dumps(snapshot, indent=2, ensure_ascii=False, sort_keys=True)
-    )
+    return matched_case_input(case, project_id)
 
 
 def _write_json(path: Path, payload: Any) -> None:

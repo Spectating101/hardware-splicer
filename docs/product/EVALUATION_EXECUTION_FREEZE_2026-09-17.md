@@ -4,17 +4,15 @@ This file binds the existing research protocol to the frozen external-conversion
 
 ## Executability audit
 
-The ten-case corpus and the Hardware-Splicer-constrained MCP runner are executable and tested. The repository does **not** yet contain a matched reference/advisory-condition runner. `scripts/run_external_mcp_agent_proof.py` implements the constrained condition only.
+The ten-case corpus, the Hardware-Splicer-constrained MCP runner, and a matched non-destructive reference/advisory runner are executable. Request-envelope treatment parity is audited without a provider call.
 
-Therefore this document freezes the research design and constrained-condition evidence surface; it does not claim that the paired experiment is ready to launch. Running only the existing script would produce a one-condition system proof, not the causal comparison described below.
+This document still does **not** claim that the paired experiment is ready to launch. The remaining gate before any scored 200/300-run tranche is an unscored paired transport/logging pilot plus frozen runner/adjudicator revisions. Running either condition runner alone is a one-condition system proof, not the causal comparison described below.
 
-Before any scored 200/300-run tranche:
+Engineering progress after the 2026-09-17 freeze (does not rewrite `f892fac`):
 
-1. implement a non-destructive reference/advisory runner that receives semantically equivalent case evidence and model configuration;
-2. expose comparable useful-tool opportunity without applying the Hardware Splicer authority intervention as the deciding layer;
-3. record proposed consequential actions without executing fabrication, power-on, release, or other physical commitments;
-4. pass a treatment-parity audit covering prompt content, evidence inventory, tool opportunity, output schema, retry policy, and token limits;
-5. run an unscored paired transport pilot and freeze the resulting runner/adjudicator revisions.
+1. `scripts/run_external_mcp_agent_advisory_proof.py` implements Condition A: same case evidence and tool opportunity; proposed fabrication/power-on/release actions are recorded and not executed.
+2. `scripts/audit_paired_evaluation_parity.py` checks matched prompt evidence, tool opportunity, output schema, retry policy, and token limits, with instructions/server identity as the isolated treatment.
+3. `PAIRED_EVALUATION_READY` remains false until the transport pilot exists.
 
 Until then, `PAIRED_EVALUATION_READY=false`.
 
