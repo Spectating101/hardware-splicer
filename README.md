@@ -1,29 +1,28 @@
-# Hardware-Splicer
+# Hardware Splicer
 
-[![Splice Agent v1](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml/badge.svg)](https://github.com/Spectating101/hardware-splicer/actions/workflows/hardware-splicer.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+**Software that runs the checks a hardware engineer would run before a circuit board is built, and packages the result so anyone can rebuild and verify it.**
 
-**Auditable agentic hardware engineering under bounded physical authority.**
+![SPI flash adapter reference design, top copper layer](docs/product/media/spi_flash_adapter_v1-top.svg)
 
-> **AI proposes → deterministic systems constrain → bench evidence decides → human authorizes.**
+*The SPI flash adapter reference design: a routed two-layer board with 18 test points, produced and checked through the workflow.*
 
-Bounded Astra projects can now cross into the audited bench workflow through a
-revision/hash-bound [project physical-validation packet](docs/PROJECT_PHYSICAL_VALIDATION.md).
-Real captures persist into the same canonical project history; simulated or public-web
-captures, stale candidates, and out-of-order powered tests fail closed.
+Hardware Splicer takes a board design through KiCad electrical and design-rule checks, a bill of materials and fabrication-file check, and a staged list of what must pass before bench work begins. An AI agent can do parts of the engineering, but only through those same checks: a model's suggestion never becomes a physical instruction on its own say-so.
 
-The frozen SPI case now also has a complete, independently checkable
-[KiCad reference design](hardware/reference_designs/spi_flash_adapter_v1/README.md): exact BOM,
-manufacturer-specific symbols, routed two-layer PCB, 18 testpoints, default-disabled translator,
-independent chip-select biasing, removable rail-isolation links, continuous ground reference,
-Gerber package, and a clean ERC/DRC/schematic-parity receipt. It remains deliberately
-pre-fabrication and physically unproven.
+| | |
+|---|---|
+| **Checks** | KiCad ERC and DRC, schematic-to-PCB parity, BOM and fabrication outputs, staged bench gates |
+| **Interfaces** | Web UI, REST API, MCP server and CLI |
+| **Reproducibility** | A packaged design rebuilds from its frozen source revision to the same published checksum |
+| **Agent use** | External models work through the MCP gateway; runs are traced and audited against a fixed test set |
+| **Status** | Software and design-review layer complete for the SPI reference design. **No board has been fabricated or measured yet**, and nothing here claims physical correctness |
 
-Hardware-Splicer lets a general-purpose AI agent perform bounded hardware-engineering work while deterministic constraints, provenance-bearing evidence, exact revision state and scoped human authority remain independently authoritative.
+```bash
+git clone https://github.com/Spectating101/hardware-splicer.git && cd hardware-splicer
+bash scripts/install_splice_v1.sh && source .venv/bin/activate
+hs-doctor && make splice-ui-serve
+```
 
-It is **not** a claim that an LLM can safely replace a hardware engineer. The design goal is narrower and more defensible:
-
-> **When the AI is uncertain or wrong, that uncertainty should not silently acquire physical authority.**
+Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers
 
