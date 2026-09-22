@@ -41,10 +41,9 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByText('dut-datasheet-r1', { exact: true })).toBeVisible();
   await expect(page.getByText('fixture-controller-manual-r1', { exact: true })).toBeVisible();
 
-  await expect(page.getByText('FAB', { exact: true })).toBeVisible();
-  await expect(page.getByText('POWER', { exact: true })).toBeVisible();
-  await expect(page.getByText('RELEASE', { exact: true })).toBeVisible();
-  await expect(page.getByText('CLOSED', { exact: true })).toHaveCount(3);
+  await expect(page.getByText(/FAB\s*CLOSED/)).toBeVisible();
+  await expect(page.getByText(/POWER\s*CLOSED/)).toBeVisible();
+  await expect(page.getByText(/RELEASE\s*CLOSED/)).toBeVisible();
 
   await expect(page.getByRole('link', { name: /Compare/ })).toHaveAttribute('href', /mode=decide/);
   await expect(page.getByRole('link', { name: /Bring-up/ })).toHaveAttribute('href', /mode=bringup/);
