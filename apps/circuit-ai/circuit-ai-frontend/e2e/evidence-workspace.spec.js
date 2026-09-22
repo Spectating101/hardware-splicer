@@ -21,11 +21,14 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByRole('button', { name: 'Schematic', exact: true })).toBeVisible();
   await expect(page.locator('kicanvas-embed')).toHaveCount(1);
 
-  await expect(page.getByText('USB fixture controller', { exact: true })).toBeVisible();
-  await expect(page.getByText('Unresolved translation', { exact: true })).toBeVisible();
-  await expect(page.getByText('32-pin DUT socket', { exact: true })).toBeVisible();
+  const controllerObject = page.getByRole('button', { name: /USB fixture controller/ });
+  const translationObject = page.getByRole('button', { name: /Unresolved translation/ });
+  const socketObject = page.getByRole('button', { name: /32-pin DUT socket/ });
+  await expect(controllerObject).toBeVisible();
+  await expect(translationObject).toBeVisible();
+  await expect(socketObject).toBeVisible();
 
-  await page.getByText('Unresolved translation', { exact: true }).click();
+  await translationObject.click();
   await expect(page.getByRole('heading', { name: 'Unresolved translation' })).toBeVisible();
   await expect(page).toHaveURL(/object=level-translation/);
 
