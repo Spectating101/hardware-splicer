@@ -17,7 +17,7 @@ test('verification keeps deterministic results on the artifact and physical auth
   await expect(page.locator('kicanvas-embed')).toHaveCount(1);
 
   await page.getByRole('button', { name: /Unresolved engineering blockers/ }).click();
-  await expect(page.getByText(/remain blocked/)).toBeVisible();
+  await expect(page.getByText(/remain blocked/).last()).toBeVisible();
   await expect(page.getByText(/blocks downstream confidence/)).toBeVisible();
 
   await expect(page.getByText(/FAB\s*CLOSED/)).toBeVisible();
