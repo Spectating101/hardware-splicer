@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "snapshot": "2026-09-23",
+  "project": "hardware-splicer",
+  "portfolio_role": "flagship_selectively_active",
+  "identity": {
+    "category": "evidence_and_release_assurance_for_ai_assisted_hardware",
+    "north_star": "Bind one exact hardware artifact and revision through engineering evidence, deterministic verification, physical evidence, and explicit human authority without conflating those evidence classes.",
+    "native_lane": [
+      "physical-agent safety and consequential authority",
+      "hardware engineering evidence and revision-bound validation",
+      "EDA-adjacent verification and release assurance",
+      "physical bring-up and measurement provenance",
+      "MHS and programmable-device evaluation",
+      "embodied robotics electronics research-engineering evidence"
+    ],
+    "not_trying_to_be": [
+      "universal browser EDA suite",
+      "autonomous PCB generator",
+      "generic MCP or device-control framework",
+      "replacement for KiCad Altium Cadence or Flux"
+    ]
+  },
+  "priority_stack": [
+    {
+      "priority": "P0",
+      "lane": "physical_proof",
+      "tracking": "Spectating101/hardware-splicer#105",
+      "execution_pr": "Spectating101/hardware-splicer#106",
+      "state": "ACTIVE",
+      "goal": "Complete one revision-bound physical evidence chain from independent review through evidence closure."
+    },
+    {
+      "priority": "P1",
+      "lane": "competitive_frontend_closure",
+      "tracking": "Spectating101/hardware-splicer#104",
+      "state": "CLOSURE_CANDIDATE",
+      "goal": "Reach competitive artifact-first usability without reopening evidence or authority semantics."
+    },
+    {
+      "priority": "P1",
+      "lane": "external_conversion",
+      "tracking": "Spectating101/gauntlet-blowback#60",
+      "state": "ACTIVE",
+      "goal": "Use HS where hardware physical-agent release-assurance or consequential-authority fit is intrinsic."
+    }
+  ],
+  "surface_state": {
+    "evidence_authority_core": {
+      "state": "FROZEN_BY_DEFAULT",
+      "reopen_requires": "exact_artifact_evaluator_or_physical_defect"
+    },
+    "spi_physical_proof": {
+      "state": "ACTIVE",
+      "priority": "P0"
+    },
+    "competitive_frontend": {
+      "state": "CLOSURE_CANDIDATE",
+      "priority": "P1",
+      "reopen_requires_any": [
+        "rendered usability deficiency",
+        "user or evaluator workflow failure",
+        "source-bound native competitor gap"
+      ]
+    },
+    "route_specific_integrations": {
+      "state": "ALLOWED",
+      "guard": "must be HS-native source-bound and useful to a real workflow or route"
+    },
+    "generic_feature_expansion": {
+      "state": "OFF_BY_DEFAULT"
+    },
+    "competitor_driven_improvement": {
+      "state": "ALLOWED_AND_EXPECTED",
+      "guard": "gap must be native and evidence-backed"
+    },
+    "gauntlet_conversion": {
+      "state": "ACTIVE"
+    }
+  },
+  "competitive_feedback": {
+    "producer": "Spectating101/refinery#24",
+    "consumer": "Spectating101/gauntlet-blowback#60",
+    "policy": "competition_is_input_to_improvement_not_automatic_scope_reduction",
+    "response_classes": {
+      "presentation": "IMPROVE_HS_SHELL",
+      "workflow": "IMPROVE_HS_WORKFLOW_IF_CURRENT_SEMANTICS_SUPPORT_IT",
+      "integration": "INTEGRATE_NOT_REBUILD",
+      "truth_model": "REQUIRE_EXACT_HS_DEFECT_BEFORE_CORE_INVESTIGATION"
+    },
+    "automatic_core_change_authorized": false,
+    "automatic_physical_authority_authorized": false
+  },
+  "route_posture": {
+    "hs_primary_or_conditional": [
+      "spi_external_physical_fct_proof",
+      "anthropic_mhs_research_preview",
+      "anthropic_external_researcher_access",
+      "date_2027_lbr_after_substantive_evidence",
+      "innoserve_industrial_ai_if_low_marginal_work",
+      "anthropic_ai_for_science_after_evidence_and_eligibility"
+    ],
+    "portfolio_reallocation_allowed": true,
+    "route_reallocation_reduces_hs_capability": false,
+    "reclaimable_when_future_fit_changes": true
+  },
+  "useful_progress_requires_any": [
+    "closes a physical or evidence gap",
+    "materially improves an HS-native workflow versus credible competitors",
+    "unlocks or strengthens a real external route",
+    "responds to a concrete user evaluator provider or physical-artifact problem",
+    "adds interoperability without duplicating a source tool",
+    "adds real empirical evidence to the paper or project"
+  ],
+  "repricing_events": {
+    "positive": [
+      "complete revision-bound SPI physical evidence chain",
+      "external design or evaluator board processed end to end",
+      "meaningful MHS or external-research engagement",
+      "paper acceptance or serious reviewer interest",
+      "pilot or design partner asks to use the evidence release layer"
+    ],
+    "negative_requires_evidence": [
+      "repeated external non-interest after serious conversion attempts",
+      "failure to demonstrate useful physical assurance",
+      "direct subsumption of the exact HS-native evidence-authority function"
+    ],
+    "competitor_count_alone_is_negative_evidence": false,
+    "temporary_pessimism_changes_program_scope": false
+  },
+  "near_term_sequence": [
+    "close competitive frontend PR 104",
+    "land physical-proof contract PR 106",
+    "execute issue 105 through provider review and explicit fabrication decision",
+    "preserve success or failure against exact board and revision",
+    "update paper only after new evidence exists",
+    "fire strongest HS-native Gauntlet routes",
+    "reassess investment from physical and external outcomes"
+  ],
+  "authority_guards": {
+    "competitor_signal_can_authorize_fabrication": false,
+    "provider_quote_can_authorize_fabrication": false,
+    "software_check_can_authorize_power_on": false,
+    "model_result_can_authorize_release": false,
+    "physical_evidence_requires_explicit_real_state": true
+  }
+}
