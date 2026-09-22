@@ -46,7 +46,7 @@ test('bring-up defaults to the PCB and keeps measurements distinct from authorit
   await expect(pcbTab).toHaveClass(/border-stone-900/);
   const pcbViewer = page.locator('kicanvas-embed');
   await expect(pcbViewer).toHaveCount(1);
-  await expect(pcbViewer).toHaveAttribute('zoom', 'objects');
+  await expect(pcbViewer).toHaveAttribute('data-board-fit', 'applied');
 
   await expect(page.getByText(/Power-on blocked/)).toBeVisible();
   await expect(page.getByText(/No physical measurement record is attached/)).toBeVisible();
