@@ -9,9 +9,9 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByText('Rev 6', { exact: true })).toBeVisible();
 
   await expect(page.getByText('Design', { exact: true })).toBeVisible();
-  await expect(page.getByText('Fabrication', { exact: true })).toBeVisible();
+  const fabricationChip = page.getByText('Fabrication', { exact: true }).locator('..');
+  await expect(fabricationChip).toContainText('Blocked');
   await expect(page.getByText('Power-on', { exact: true })).toBeVisible();
-  await expect(page.getByText('Blocked', { exact: true }).first()).toBeVisible();
 
   await expect(page.getByRole('button', { name: /Project/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /Findings/ })).toBeVisible();
