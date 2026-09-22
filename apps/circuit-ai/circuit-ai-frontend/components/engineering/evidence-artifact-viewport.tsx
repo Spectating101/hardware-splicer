@@ -7,8 +7,9 @@ type JsonRecord = Record<string, unknown>;
 export type EvidenceBuildFile = { name?: string; relative?: string; kind?: string };
 type BuildFilesResponse = { ok?: boolean; files?: EvidenceBuildFile[] };
 type BuildContentResponse = { ok?: boolean; content?: string };
-
 type PreferredArtifactKind = 'schematic' | 'pcb';
+type KiCanvasBoardViewer = { zoom_to_board?: () => void; draw?: () => void };
+type KiCanvasBoardApp = HTMLElement & { viewer?: KiCanvasBoardViewer };
 
 function record(value: unknown): JsonRecord {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -92,6 +93,41 @@ function useKiCanvasScript() {
   }, [ready]);
 
   return { ready, failed };
+}
+
+function focusKiCanvasBoard(embed: HTMLElement) {
+  let cancelled = false;
+  let attempts = 0;
+  let frame = 0;
+
+  const tryFocus = () => {
+    if (cancelled) return;
+    attempts += 1;
+    try {
+      const boardApp = embed.shadowRoot?.querySelector('kc-board-app') as KiCanvasBoardApp | null;
+      const viewer = boardApp?.viewer;
+      if (viewer?.zoom_to_board) {
+        viewer.zoom_to_board();
+        viewer.draw?.();
+        embed.setAttribute('data-board-fit', 'applied');
+        return;
+      }
+    } catch {
+      // KiCanvas may have rendered kc-board-app before its viewer is initialized.
+    }
+
+    if (attempts < 180) {
+      frame = window.requestAnimationFrame(tryFocus);
+    } else {
+      embed.setAttribute('data-board-fit', 'unavailable');
+    }
+  };
+
+  frame = window.requestAnimationFrame(tryFocus);
+  return () => {
+    cancelled = true;
+    window.cancelAnimationFrame(frame);
+  };
 }
 
 export function EvidenceArtifactViewport({
@@ -191,13 +227,18 @@ export function EvidenceArtifactViewport({
     const embed = document.createElement('kicanvas-embed');
     embed.setAttribute('controls', 'basic');
     embed.setAttribute('controlslist', 'nodownload nooverlay');
-    // A board drawn inside its worksheet is otherwise tiny in a full-height bring-up view.
-    // KiCanvas' object-fit mode keeps the physical artifact itself as the visual subject.
-    if (activeKind === 'pcb') embed.setAttribute('zoom', 'objects');
     const source = document.createElement('kicanvas-source');
     source.textContent = content;
     embed.appendChild(source);
     host.appendChild(embed);
+
+    if (activeKind === 'pcb') {
+      // The vendored KiCanvas declares an embed `zoom` attribute but does not currently
+      // forward it into kc-board-app. Its BoardViewer does expose zoom_to_board(), which
+      // fits the camera to Edge.Cuts. Use that real viewer API after initialization.
+      embed.setAttribute('zoom', 'objects');
+      return focusKiCanvasBoard(embed);
+    }
   }, [activeKind, content, ready]);
 
   const visibleFiles = files.filter((file) => file.kind === 'schematic' || file.kind === 'pcb');
