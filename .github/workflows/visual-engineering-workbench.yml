@@ -5,11 +5,15 @@ on:
   push:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/evidence/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/hardware-splicer/build-files/**"
+      - "apps/circuit-ai/circuit-ai-frontend/public/kicanvas/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
@@ -18,11 +22,15 @@ on:
   pull_request:
     paths:
       - "apps/circuit-ai/circuit-ai-frontend/app/engineering/visual/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/engineering/evidence/**"
+      - "apps/circuit-ai/circuit-ai-frontend/app/api/proxy/hardware-splicer/build-files/**"
+      - "apps/circuit-ai/circuit-ai-frontend/public/kicanvas/**"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/canonical-system-canvas.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/engineering/workbench-mode-panels.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/components/project-studio-launcher.tsx"
       - "apps/circuit-ai/circuit-ai-frontend/lib/engineering-visual-adapters.ts"
       - "apps/circuit-ai/circuit-ai-frontend/e2e/visual-engineering-workbench.spec.js"
+      - "apps/circuit-ai/circuit-ai-frontend/e2e/evidence-workspace.spec.js"
       - "apps/circuit-ai/circuit-ai-frontend/scripts/test-visual-engineering-workbench.cjs"
       - "scripts/mock_canonical_project_studio_backend.py"
       - "scripts/mock_outsider_jarvis_backend.py"
@@ -78,7 +86,7 @@ jobs:
           node scripts/test-visual-engineering-workbench.cjs
           npm run typecheck
           npm run build
-      - name: Run visual workbench browser path
+      - name: Run visual and project-review browser paths
         run: |
           set -euo pipefail
           python scripts/mock_canonical_project_studio_backend.py > /tmp/visual-workbench-backend.log 2>&1 &
@@ -93,7 +101,8 @@ jobs:
           trap cleanup EXIT
           for attempt in $(seq 1 60); do
             if curl --fail --silent http://127.0.0.1:8090/healthz >/dev/null \
-              && curl --fail --silent http://127.0.0.1:3000/engineering/visual >/dev/null; then
+              && curl --fail --silent http://127.0.0.1:3000/engineering/visual >/dev/null \
+              && curl --fail --silent http://127.0.0.1:3000/engineering/evidence >/dev/null; then
               break
             fi
             if [ "$attempt" -eq 60 ]; then
@@ -104,7 +113,9 @@ jobs:
             sleep 2
           done
           pushd apps/circuit-ai/circuit-ai-frontend >/dev/null
-          /tmp/hs-playwright/node_modules/.bin/playwright test e2e/visual-engineering-workbench.spec.js \
+          /tmp/hs-playwright/node_modules/.bin/playwright test \
+            e2e/visual-engineering-workbench.spec.js \
+            e2e/evidence-workspace.spec.js \
             --browser=chromium \
             --reporter=line \
             --trace=retain-on-failure \
