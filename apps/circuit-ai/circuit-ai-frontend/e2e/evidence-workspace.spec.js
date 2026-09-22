@@ -18,6 +18,9 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByRole('button', { name: /Findings/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: /History/ })).toBeVisible();
 
+  await expect(page.getByRole('button', { name: 'Schematic', exact: true })).toBeVisible();
+  await expect(page.locator('kicanvas-embed')).toHaveCount(1);
+
   await expect(page.getByText('USB fixture controller', { exact: true })).toBeVisible();
   await expect(page.getByText('Unresolved translation', { exact: true })).toBeVisible();
   await expect(page.getByText('32-pin DUT socket', { exact: true })).toBeVisible();
