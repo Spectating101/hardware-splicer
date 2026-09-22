@@ -210,7 +210,7 @@ export default function EvidenceBringupPage() {
                 </button>
               ))}
             </div>
-            <div className="mt-4 border-t border-stone-200 px-2 pt-4 text-[10px] leading-4 text-stone-400">Unlike generic HIL dashboards, test execution does not automatically change physical authority.</div>
+            <div className="mt-4 border-t border-stone-200 px-2 pt-4 text-[10px] leading-4 text-stone-400">Measurements update evidence state; authority changes only through the explicit review boundary.</div>
           </aside>
 
           <section className="min-w-0 bg-white">
