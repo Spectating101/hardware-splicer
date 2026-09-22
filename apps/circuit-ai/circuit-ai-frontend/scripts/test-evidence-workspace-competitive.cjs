@@ -38,10 +38,15 @@ for (const label of ['Review', 'Compare', 'Verify', 'Bring-up']) requireText('wo
 requireText('workspace nav', files.nav, 'Deep inspect');
 
 // HS-specific differentiation must remain visible above generic EDA/review parity.
-for (const [name, source] of Object.entries({ review: files.review, verify: files.verify, bringup: files.bringup })) {
-  requireText(name, source, 'Fabrication');
-  requireText(name, source, 'Power');
-}
+// Do not force long prose labels where the compact professional UI intentionally uses FAB / POWER / RELEASE.
+requireText('review', files.review, "statusChip('Fabrication'");
+requireText('review', files.review, "statusChip('Power-on'");
+requireText('verify', files.verify, 'FAB<br />');
+requireText('verify', files.verify, 'POWER<br />');
+requireText('verify', files.verify, 'RELEASE<br />');
+requireText('bringup', files.bringup, 'Fabrication');
+requireText('bringup', files.bringup, 'Power-on');
+requireText('bringup', files.bringup, 'RELEASE<br />');
 requireText('compare', files.compare, 'No automatic merge');
 requireText('compare', files.compare, 'review evidence, not merge authority');
 requireText('bringup', files.bringup, 'test execution does not automatically change physical authority');
