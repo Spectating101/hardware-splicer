@@ -2,7 +2,8 @@ const { test, expect } = require('@playwright/test');
 
 const APP_URL = process.env.OUTSIDER_APP_URL || 'http://127.0.0.1:3000';
 
-test('project review keeps artifact, findings, evidence, and authority in one read-only workspace', async ({ page }) => {
+test('project review keeps artifact, findings, evidence, and authority in one read-only workspace', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
   await page.goto(`${APP_URL}/engineering/evidence`);
 
   await expect(page.getByText('Hardware Splicer', { exact: true }).first()).toBeVisible();
@@ -14,7 +15,7 @@ test('project review keeps artifact, findings, evidence, and authority in one re
   await expect(page.getByText('Power-on', { exact: true })).toBeVisible();
 
   await expect(page.getByRole('button', { name: /Project/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /Findings/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Findings/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: /History/ })).toBeVisible();
 
   await expect(page.getByText('USB fixture controller', { exact: true })).toBeVisible();
@@ -27,6 +28,8 @@ test('project review keeps artifact, findings, evidence, and authority in one re
 
   await page.getByRole('button', { name: /Findings/ }).last().click();
   await expect(page.getByText(/1.8 V DUT interface is not protected from 3.3 V controller/)).toBeVisible();
+
+  await page.screenshot({ path: testInfo.outputPath('evidence-workspace.png'), fullPage: true });
 
   await page.getByRole('button', { name: /Evidence/ }).click();
   await expect(page.getByText('dut-datasheet-r1', { exact: true })).toBeVisible();
