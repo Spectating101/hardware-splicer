@@ -8,6 +8,8 @@ export type EvidenceBuildFile = { name?: string; relative?: string; kind?: strin
 type BuildFilesResponse = { ok?: boolean; files?: EvidenceBuildFile[] };
 type BuildContentResponse = { ok?: boolean; content?: string };
 
+type PreferredArtifactKind = 'schematic' | 'pcb';
+
 function record(value: unknown): JsonRecord {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
     ? value as JsonRecord
@@ -96,10 +98,12 @@ export function EvidenceArtifactViewport({
   buildDir,
   overlayFinding = '',
   compact = false,
+  preferredKind = 'schematic',
 }: {
   buildDir: string;
   overlayFinding?: string;
   compact?: boolean;
+  preferredKind?: PreferredArtifactKind;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const { ready, failed: viewerFailed } = useKiCanvasScript();
@@ -134,8 +138,8 @@ export function EvidenceArtifactViewport({
         if (cancelled) return;
         const nextFiles = payload.files || [];
         setFiles(nextFiles);
-        const preferred = nextFiles.find((file) => file.kind === 'schematic')
-          || nextFiles.find((file) => file.kind === 'pcb')
+        const preferred = nextFiles.find((file) => file.kind === preferredKind)
+          || nextFiles.find((file) => file.kind === (preferredKind === 'schematic' ? 'pcb' : 'schematic'))
           || nextFiles[0];
         setActiveRelative(preferred?.relative || '');
       })
@@ -146,7 +150,7 @@ export function EvidenceArtifactViewport({
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [buildDir]);
+  }, [buildDir, preferredKind]);
 
   useEffect(() => {
     if (!buildDir || !activeRelative) {
