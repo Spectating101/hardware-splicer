@@ -19,6 +19,8 @@ test('verification keeps deterministic results on the artifact and physical auth
   await page.getByRole('button', { name: /Unresolved engineering blockers/ }).click();
   await expect(page.getByText(/remain blocked/).last()).toBeVisible();
   await expect(page.getByText(/blocks downstream confidence/)).toBeVisible();
+  await expect(page.getByText('dut-datasheet-r1', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('fixture-controller-manual-r1', { exact: true })).toHaveCount(1);
 
   await expect(page.getByText(/FAB\s*CLOSED/)).toBeVisible();
   await expect(page.getByText(/POWER\s*CLOSED/)).toBeVisible();
